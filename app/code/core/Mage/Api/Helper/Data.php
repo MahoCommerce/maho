@@ -10,6 +10,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+/**
+ * @deprecated since 26.5 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_API_WSI = 'api/config/compliance_wsi';

@@ -277,6 +277,60 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Api/Buttons.php
 
 		-
+			rawMessage: '''
+				Call to method getOrphanedResourcesCollection() of deprecated class Mage_Api_Model_Resource_Rules:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Api/OrphanedResource/Grid.php
+
+		-
+			rawMessage: '''
+				Call to method setResourceIdAsIdFieldName() of deprecated class Mage_Api_Model_Resource_Rules:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Api/OrphanedResource/Grid.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Api_Model_Resource_Rules:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Api/OrphanedResource/Grid.php
+
+		-
+			rawMessage: '''
+				Call to method getRoleUsers() of deprecated class Mage_Api_Model_Roles:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Api/Role/Grid/User.php
+
+		-
+			rawMessage: '''
+				Call to method getUsersCollection() of deprecated class Mage_Api_Model_Roles:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Api/Role/Grid/User.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @method for getCollection() references deprecated class Mage_Api_Model_Resource_Roles_User_Collection:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: methodTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Api/Role/Grid/User.php
+
+		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Api_Roles::getAddNewUrl() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -293,6 +347,33 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Api/Tab/Roleinfo.php
+
+		-
+			rawMessage: '''
+				Call to method getByRoles() of deprecated class Mage_Api_Model_Resource_Rules_Collection:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Api/Tab/Rolesedit.php
+
+		-
+			rawMessage: '''
+				Call to method getResourcesList() of deprecated class Mage_Api_Model_Roles:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Api/Tab/Rolesedit.php
+
+		-
+			rawMessage: '''
+				Call to method getResourcesTree() of deprecated class Mage_Api_Model_Roles:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Api/Tab/Rolesedit.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Api_Tab_Rolesedit::_getNodeJson() has no return type specified.'
@@ -343,6 +424,15 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Api/Tab/Rolesedit.php
 
 		-
+			rawMessage: '''
+				Call to method getCollection() of deprecated class Mage_Api_Model_User:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Api/Tab/Rolesusers.php
+
+		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Api_Tab_Rolesusers::_getGridHtml() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -359,6 +449,33 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Api/Tab/Userroles.php
+
+		-
+			rawMessage: '''
+				Call to method getUsersCollection() of deprecated class Mage_Api_Model_Roles:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Api/Tab/Userroles.php
+
+		-
+			rawMessage: '''
+				Call to method setRolesFilter() of deprecated class Mage_Api_Model_Resource_Role_Collection:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Api/User/Edit/Tab/Roles.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @method for getCollection() references deprecated class Mage_Api_Model_Resource_Role_Collection:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: methodTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/Block/Api/User/Edit/Tab/Roles.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Cache_Grid::decorateStatus() has parameter $column with no type specified.'
@@ -4957,6 +5074,60 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Model/Url.php
 
 		-
+			rawMessage: '''
+				Call to method deleteOrphanedResources() of deprecated class Mage_Api_Model_Resource_Rules:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Api/OrphanedResourceController.php
+
+		-
+			rawMessage: '''
+				Call to method add() of deprecated class Mage_Api_Model_User:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Api/RoleController.php
+
+		-
+			rawMessage: '''
+				Call to method deleteFromRole() of deprecated class Mage_Api_Model_User:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Api/RoleController.php
+
+		-
+			rawMessage: '''
+				Call to method getResourcesList() of deprecated class Mage_Api_Model_Roles:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Api/RoleController.php
+
+		-
+			rawMessage: '''
+				Call to method roleUserExists() of deprecated class Mage_Api_Model_User:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Api/RoleController.php
+
+		-
+			rawMessage: '''
+				Call to method saveRel() of deprecated class Mage_Api_Model_Rules:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Api/RoleController.php
+
+		-
 			rawMessage: 'Method Mage_Adminhtml_Api_RoleController::_addUserToRole() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -4999,15 +5170,63 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Api/RoleController.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Api_UserController::_initAction() has no return type specified.'
-			identifier: missingType.return
+			rawMessage: '''
+				Call to method delete() of deprecated class Mage_Api_Model_User:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Api/UserController.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Api_Model_User::setRoleUserId() expects int, string given.'
-			identifier: argument.type
+			rawMessage: '''
+				Call to method getId() of deprecated class Mage_Api_Model_User:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Adminhtml/controllers/Api/UserController.php
+
+		-
+			rawMessage: '''
+				Call to method getName() of deprecated class Mage_Api_Model_User:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Api/UserController.php
+
+		-
+			rawMessage: '''
+				Call to method save() of deprecated class Mage_Api_Model_User:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Api/UserController.php
+
+		-
+			rawMessage: '''
+				Call to method saveRelations() of deprecated class Mage_Api_Model_User:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
 			count: 2
+			path: app/code/core/Mage/Adminhtml/controllers/Api/UserController.php
+
+		-
+			rawMessage: '''
+				Call to method validate() of deprecated class Mage_Api_Model_User:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Api/UserController.php
+
+		-
+			rawMessage: 'Method Mage_Adminhtml_Api_UserController::_initAction() has no return type specified.'
+			identifier: missingType.return
+			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Api/UserController.php
 
 		-
@@ -5722,6 +5941,12 @@ parameters:
 			path: app/code/core/Mage/Api/Model/Resource/Acl.php
 
 		-
+			rawMessage: 'Call to an undefined method Mage_Api_Model_Resource_Acl_Role::setCreated().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Api/Model/Resource/Acl/Role.php
+
+		-
 			rawMessage: 'Method Mage_Api_Model_Resource_Acl_Role::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -5776,13 +6001,25 @@ parameters:
 			path: app/code/core/Mage/Api/Model/Resource/User.php
 
 		-
-			rawMessage: 'Call to an undefined method Mage_Api_Model_Resource_Roles::update().'
+			rawMessage: 'Call to an undefined method Mage_Core_Model_Resource_Db_Abstract::getRoleUsers().'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Api/Model/Roles.php
 
 		-
-			rawMessage: 'Call to an undefined method Mage_Api_Model_Resource_Rules::update().'
+			rawMessage: 'Call to an undefined method Mage_Core_Model_Resource_Db_Abstract::update().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Api/Model/Roles.php
+
+		-
+			rawMessage: 'Call to an undefined method Mage_Core_Model_Resource_Db_Abstract::saveRel().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Api/Model/Rules.php
+
+		-
+			rawMessage: 'Call to an undefined method Mage_Core_Model_Resource_Db_Abstract::update().'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Api/Model/Rules.php
@@ -5908,13 +6145,13 @@ parameters:
 			path: app/code/core/Mage/Api/Model/Server/Wsi/Handler.php
 
 		-
-			rawMessage: 'Parameter #1 $user of method Mage_Api_Model_User::hasAssigned2Role() expects int|Mage_Core_Model_Abstract, string given.'
-			identifier: argument.type
+			rawMessage: 'Call to an undefined method Mage_Core_Model_Resource_Db_Abstract::recordLogin().'
+			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Api/Model/Session.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Api_Model_User::setReloadAclFlag() expects int, string given.'
+			rawMessage: 'Parameter #1 $user of method Mage_Api_Model_User::hasAssigned2Role() expects int|Mage_Core_Model_Abstract, string given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Api/Model/Session.php
@@ -5930,6 +6167,36 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Api/Model/Session.php
+
+		-
+			rawMessage: 'Call to an undefined method Mage_Core_Model_Resource_Db_Abstract::cleanOldSessions().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Api/Model/User.php
+
+		-
+			rawMessage: 'Call to an undefined method Mage_Core_Model_Resource_Db_Abstract::clearBySessId().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Api/Model/User.php
+
+		-
+			rawMessage: 'Call to an undefined method Mage_Core_Model_Resource_Db_Abstract::hasAssigned2Role().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Api/Model/User.php
+
+		-
+			rawMessage: 'Call to an undefined method Mage_Core_Model_Resource_Db_Abstract::loadBySessId().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Api/Model/User.php
+
+		-
+			rawMessage: 'Call to an undefined method Mage_Core_Model_Resource_Db_Abstract::loadByUsername().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Api/Model/User.php
 
 		-
 			rawMessage: Invalid array key type array.
@@ -5980,18 +6247,6 @@ parameters:
 			path: app/code/core/Mage/Api2/Helper/Data.php
 
 		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Global_Role::setCreatedAt() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Acl/Global/Role.php
-
-		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Global_Role::setUpdatedAt() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Acl/Global/Role.php
-
-		-
 			rawMessage: Variable $operationName might not be defined.
 			identifier: variable.undefined
 			count: 2
@@ -6022,12 +6277,6 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Multicall.php
 
 		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Filter_Attribute::setAllowedAttributes() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Observer.php
-
-		-
 			rawMessage: 'Method Mage_Api2_Model_Observer::saveAdminToRoleRelation() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -6046,7 +6295,49 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Request/Interpreter/Xml.php
 
 		-
+			rawMessage: 'Call to an undefined method Mage_Api2_Model_Resource::_create().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Api2/Model/Resource.php
+
+		-
+			rawMessage: 'Call to an undefined method Mage_Api2_Model_Resource::_delete().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Api2/Model/Resource.php
+
+		-
+			rawMessage: 'Call to an undefined method Mage_Api2_Model_Resource::_multiCreate().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Api2/Model/Resource.php
+
+		-
 			rawMessage: 'Call to an undefined method Mage_Api2_Model_Resource::_multiDelete().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Api2/Model/Resource.php
+
+		-
+			rawMessage: 'Call to an undefined method Mage_Api2_Model_Resource::_multiUpdate().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Api2/Model/Resource.php
+
+		-
+			rawMessage: 'Call to an undefined method Mage_Api2_Model_Resource::_retrieve().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Api2/Model/Resource.php
+
+		-
+			rawMessage: 'Call to an undefined method Mage_Api2_Model_Resource::_retrieveCollection().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Api2/Model/Resource.php
+
+		-
+			rawMessage: 'Call to an undefined method Mage_Api2_Model_Resource::_update().'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Api2/Model/Resource.php
@@ -6054,12 +6345,6 @@ parameters:
 		-
 			rawMessage: 'Call to an undefined method Maho\Data\Collection\Db::addAttributeToFilter().'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Resource.php
-
-		-
-			rawMessage: 'Method Mage_Api2_Model_Resource::_create() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Api2/Model/Resource.php
 
@@ -6076,26 +6361,8 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Resource.php
 
 		-
-			rawMessage: 'Method Mage_Api2_Model_Resource::_multiCreate() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Resource.php
-
-		-
-			rawMessage: 'Method Mage_Api2_Model_Resource::_multiUpdate() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Resource.php
-
-		-
 			rawMessage: 'Method Mage_Api2_Model_Resource::_render() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Resource.php
-
-		-
-			rawMessage: 'Method Mage_Api2_Model_Resource::_update() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Api2/Model/Resource.php
 
@@ -6208,34 +6475,31 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Server.php
 
 		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Filter_Attribute::setAllowedAttributes() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
+			rawMessage: 'Cannot call method addFilterByUserType() on Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
+			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/AttributeController.php
 
 		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Filter_Attribute::setOperation() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/AttributeController.php
-
-		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Filter_Attribute::setResourceId() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 2
-			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/AttributeController.php
-
-		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Filter_Attribute::setUserType() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 2
-			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/AttributeController.php
-
-		-
-			rawMessage: 'Method Mage_Api2_Model_Acl_Global_Role::setRoleName() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
+			rawMessage: 'Call to an undefined method Mage_Core_Model_Resource_Db_Abstract::getRoleUsers().'
+			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/RoleController.php
+
+		-
+			rawMessage: 'Cannot call method addFilterByRoleId() on Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Api2/controllers/Adminhtml/Api2/RoleController.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Api2_Model_Resource_Setup:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Api2/sql/api2_setup/install-1.0.0.0.php
 
 		-
 			rawMessage: 'Method Mage_Authorizenet_Helper_Data::updateOrderEditIncrements() has no return type specified.'
@@ -6910,6 +7174,123 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Api/Resource.php
 
 		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Catalog/Model/Api/Resource.php
+
+		-
+			rawMessage: '''
+				Call to method _getSession() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Catalog/Model/Api/Resource.php
+
+		-
+			rawMessage: '''
+				Call to method getApiName() of deprecated class Mage_Api_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api/Resource.php
+
+		-
+			rawMessage: '''
+				Class Mage_Catalog_Model_Api_Resource extends deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api/Resource.php
+
+		-
+			rawMessage: '''
+				Call to method getAvailableAttributesFromConfig() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product.php
+
+		-
+			rawMessage: '''
+				Call to method getEntityOnlyAttributes() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product.php
+
+		-
+			rawMessage: '''
+				Call to method getExcludedAttributes() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product.php
+
+		-
+			rawMessage: '''
+				Call to method getIncludedAttributes() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product.php
+
+		-
+			rawMessage: '''
+				Class Mage_Catalog_Model_Api2_Product extends deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product.php
+
+		-
+			rawMessage: '''
+				Fetching class constant USER_TYPE of deprecated class Mage_Api2_Model_Auth_User_Admin:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product.php
+
+		-
+			rawMessage: '''
+				Class Mage_Catalog_Model_Api2_Product_Category extends deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 4
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_NOT_FOUND of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest.php
+
+		-
 			rawMessage: 'Method Mage_Catalog_Model_Api2_Product_Category_Rest::_create() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -6928,6 +7309,303 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest.php
 
 		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 8
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method _error() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method assemble() of deprecated class Mage_Api2_Model_Route_Chain:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method chain() of deprecated class Mage_Api2_Model_Route_Base:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getApiType() of deprecated class Mage_Api2_Model_Request:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getConfig() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getErrors() of deprecated class Mage_Api2_Model_Resource_Validator:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getRequest() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getResourceType() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getRouteWithEntityTypeAction() of deprecated class Mage_Api2_Model_Config:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method isValidData() of deprecated class Mage_Api2_Model_Resource_Validator_Fields:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_BAD_REQUEST of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 4
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_INTERNAL_ERROR of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Api2_Model_Resource_Validator_Fields:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Api2_Model_Route_ApiType:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Category/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Class Mage_Catalog_Model_Api2_Product_Image extends deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 6
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getRequest() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_BAD_REQUEST of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 12
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method _error() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method assemble() of deprecated class Mage_Api2_Model_Route_Chain:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method chain() of deprecated class Mage_Api2_Model_Route_Base:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getApiType() of deprecated class Mage_Api2_Model_Request:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getConfig() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getErrors() of deprecated class Mage_Api2_Model_Resource_Validator:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getRequest() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 5
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getResourceType() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getRouteWithEntityTypeAction() of deprecated class Mage_Api2_Model_Config:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getSessionId() of deprecated class Mage_Api_Model_Session:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_BAD_REQUEST of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_INTERNAL_ERROR of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 5
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_NOT_FOUND of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
+
+		-
 			rawMessage: 'Method Mage_Catalog_Model_Api2_Product_Image_Rest_Admin_V1::_delete() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -6938,6 +7616,159 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Api2_Model_Route_ApiType:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method _addError() of deprecated class Mage_Api2_Model_Resource_Validator:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Validator/Image.php
+
+		-
+			rawMessage: '''
+				Call to method getErrors() of deprecated class Mage_Api2_Model_Resource_Validator:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Validator/Image.php
+
+		-
+			rawMessage: '''
+				Class Mage_Catalog_Model_Api2_Product_Image_Validator_Image extends deprecated class Mage_Api2_Model_Resource_Validator:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Validator/Image.php
+
+		-
+			rawMessage: '''
+				Call to method _applyCollectionModifiers() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 7
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _getStore() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 7
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getActionType() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getAllowedAttributes() of deprecated class Mage_Api2_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getApiUser() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getEntityOnlyAttributes() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getRequest() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getType() of deprecated class Mage_Api2_Model_Auth_User_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getUserType() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_BAD_REQUEST of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant OPERATION_ATTRIBUTE_READ of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant USER_TYPE of deprecated class Mage_Api2_Model_Auth_User_Admin:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest.php
 
 		-
 			rawMessage: If condition is always false.
@@ -6994,6 +7825,114 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest.php
 
 		-
+			rawMessage: '''
+				Call to method _applyCollectionModifiers() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 11
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method _error() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method _getLocation() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method _getStore() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method _multicall() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getErrors() of deprecated class Mage_Api2_Model_Resource_Validator:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getUserType() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_BAD_REQUEST of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 4
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_INTERNAL_ERROR of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_METHOD_NOT_ALLOWED of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Fetching class constant OPERATION_ATTRIBUTE_READ of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Admin/V1.php
+
+		-
 			rawMessage: 'Method Mage_Catalog_Model_Api2_Product_Rest_Admin_V1::_delete() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -7030,6 +7969,42 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Admin/V1.php
 
 		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getApiUser() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getUserId() of deprecated class Mage_Api2_Model_Auth_User_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_INTERNAL_ERROR of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest/Customer/V1.php
+
+		-
 			rawMessage: 'Call to an undefined method Mage_Core_Model_Abstract::toOptionArray().'
 			identifier: method.notFound
 			count: 1
@@ -7038,6 +8013,78 @@ parameters:
 		-
 			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Attribute_Backend_Abstract::formatDate().'
 			identifier: method.notFound
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Validator/Product.php
+
+		-
+			rawMessage: '''
+				Call to method __construct() of deprecated class Mage_Api2_Exception:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Validator/Product.php
+
+		-
+			rawMessage: '''
+				Call to method _addError() of deprecated class Mage_Api2_Model_Resource_Validator:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 23
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Validator/Product.php
+
+		-
+			rawMessage: '''
+				Call to method getErrors() of deprecated class Mage_Api2_Model_Resource_Validator:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Validator/Product.php
+
+		-
+			rawMessage: '''
+				Catching deprecated class Mage_Api2_Exception:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: catch.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Validator/Product.php
+
+		-
+			rawMessage: '''
+				Class Mage_Catalog_Model_Api2_Product_Validator_Product extends deprecated class Mage_Api2_Model_Resource_Validator:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Validator/Product.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_BAD_REQUEST of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 6
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Validator/Product.php
+
+		-
+			rawMessage: '''
+				Fetching class constant OPERATION_UPDATE of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Validator/Product.php
+
+		-
+			rawMessage: '''
+				Instantiation of deprecated class Mage_Api2_Exception:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: new.deprecatedClass
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Api2/Product/Validator/Product.php
 
@@ -7120,6 +8167,195 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Api2/Product/Validator/Product.php
 
 		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website.php
+
+		-
+			rawMessage: '''
+				Class Mage_Catalog_Model_Api2_Product_Website extends deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_NOT_FOUND of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 10
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _error() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _errorMessage() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 4
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _successMessage() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method assemble() of deprecated class Mage_Api2_Model_Route_Chain:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method chain() of deprecated class Mage_Api2_Model_Route_Base:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getApiType() of deprecated class Mage_Api2_Model_Request:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getConfig() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getErrors() of deprecated class Mage_Api2_Model_Resource_Validator:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getRequest() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 7
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getResourceType() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getRouteWithEntityTypeAction() of deprecated class Mage_Api2_Model_Config:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Catching deprecated class Mage_Api2_Exception:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: catch.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_BAD_REQUEST of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 4
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_INTERNAL_ERROR of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_OK of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant RESOURCE_INTERNAL_ERROR of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant RESOURCE_UPDATED_SUCCESSFUL of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
 			rawMessage: 'Method Mage_Catalog_Model_Api2_Product_Website_Rest::_delete() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -7142,6 +8378,42 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Api2_Model_Route_ApiType:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _addError() of deprecated class Mage_Api2_Model_Resource_Validator:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 10
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Validator/Admin/Website.php
+
+		-
+			rawMessage: '''
+				Call to method getErrors() of deprecated class Mage_Api2_Model_Resource_Validator:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Validator/Admin/Website.php
+
+		-
+			rawMessage: '''
+				Class Mage_Catalog_Model_Api2_Product_Website_Validator_Admin_Website extends deprecated class Mage_Api2_Model_Resource_Validator:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Api2/Product/Website/Validator/Admin/Website.php
 
 		-
 			rawMessage: 'Call to an undefined method Maho\DataObject::formatUrlKey().'
@@ -7336,10 +8608,37 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Category.php
 
 		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 18
+			path: app/code/core/Mage/Catalog/Model/Category/Api.php
+
+		-
 			rawMessage: 'Cannot call method getRootCategoryId() on int|string.'
 			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Category/Api.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Catalog/Model/Category/Api/V2.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category/Attribute/Api.php
 
 		-
 			rawMessage: '''
@@ -7987,6 +9286,24 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Action.php
 
 		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 10
+			path: app/code/core/Mage/Catalog/Model/Product/Api.php
+
+		-
+			rawMessage: '''
+				Call to method parseFilters() of deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Api.php
+
+		-
 			rawMessage: 'Method Mage_Catalog_Model_Product_Api::_checkProductAttributeSet() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8017,6 +9334,24 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Api.php
 
 		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 8
+			path: app/code/core/Mage/Catalog/Model/Product/Api/V2.php
+
+		-
+			rawMessage: '''
+				Catching deprecated class Mage_Api_Exception:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: catch.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Api/V2.php
+
+		-
 			rawMessage: 'Method Mage_Catalog_Model_Product_Api_V2::_prepareDataForSave() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8035,10 +9370,64 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Api/V2.php
 
 		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 15
+			path: app/code/core/Mage/Catalog/Model/Product/Attribute/Api.php
+
+		-
 			rawMessage: 'Method Mage_Catalog_Model_Product_Attribute_Api::_prepareDataForSave() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Attribute/Api.php
+
+		-
+			rawMessage: '''
+				Call to method toArray() of deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Catalog/Model/Product/Attribute/Api/V2.php
+
+		-
+			rawMessage: '''
+				Call to method v2AssociativeArrayUnpacker() of deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Product/Attribute/Api/V2.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 15
+			path: app/code/core/Mage/Catalog/Model/Product/Attribute/Media/Api.php
+
+		-
+			rawMessage: '''
+				Call to method _getSession() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Attribute/Media/Api.php
+
+		-
+			rawMessage: '''
+				Call to method getSessionId() of deprecated class Mage_Api_Model_Session:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Attribute/Media/Api.php
 
 		-
 			rawMessage: 'Cannot call method getBackend() on bool|Mage_Catalog_Model_Resource_Attribute.'
@@ -8053,10 +9442,46 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Attribute/Media/Api/V2.php
 
 		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 23
+			path: app/code/core/Mage/Catalog/Model/Product/Attribute/Set/Api.php
+
+		-
+			rawMessage: '''
+				Class Mage_Catalog_Model_Product_Attribute_Set_Api extends deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Attribute/Set/Api.php
+
+		-
 			rawMessage: 'Parameter #1 $skeletonId of method Mage_Eav_Model_Entity_Attribute_Set::initFromSkeleton() expects int, string given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Attribute/Set/Api.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 6
+			path: app/code/core/Mage/Catalog/Model/Product/Attribute/Tierprice/Api.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Product/Attribute/Tierprice/Api/V2.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Compare_Item::clean() invoked with 1 parameter, 0 required.'
@@ -8221,6 +9646,33 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Link.php
 
 		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 5
+			path: app/code/core/Mage/Catalog/Model/Product/Link/Api.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Product/Link/Api/V2.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 10
+			path: app/code/core/Mage/Catalog/Model/Product/Option/Api.php
+
+		-
 			rawMessage: 'Method Mage_Catalog_Model_Product_Option_Api::_prepareAdditionalFields() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8231,6 +9683,24 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Option/Api.php
+
+		-
+			rawMessage: '''
+				Call to method toArray() of deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Product/Option/Api/V2.php
+
+		-
+			rawMessage: '''
+				Call to method wsiArrayPacker() of deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Option/Api/V2.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Catalog_Model_Product_Option_Type_Default::copyQuoteToOrder().'
@@ -8287,6 +9757,15 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Option/Value.php
 
 		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 12
+			path: app/code/core/Mage/Catalog/Model/Product/Option/Value/Api.php
+
+		-
 			rawMessage: 'Parameter #1 $optionId of method Mage_Catalog_Model_Product_Option_Value_Api::_prepareOption() expects string, int|null given.'
 			identifier: argument.type
 			count: 1
@@ -8297,6 +9776,24 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Option/Value/Api.php
+
+		-
+			rawMessage: '''
+				Call to method toArray() of deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Product/Option/Value/Api/V2.php
+
+		-
+			rawMessage: '''
+				Call to method wsiArrayPacker() of deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Product/Option/Value/Api/V2.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Collection_Abstract::getStoreId().'
@@ -8345,6 +9842,15 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Product/Type/Abstract.php
+
+		-
+			rawMessage: '''
+				Class Mage_Catalog_Model_Product_Type_Api extends deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Product/Type/Api.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Product_Type_Configurable::getProductByAttributes() should return Mage_Catalog_Model_Product|null but returns Maho\DataObject.'
@@ -9373,6 +10879,141 @@ parameters:
 			path: app/code/core/Mage/CatalogInventory/Block/Adminhtml/Form/Field/Minsaleqty.php
 
 		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item.php
+
+		-
+			rawMessage: '''
+				Class Mage_CatalogInventory_Model_Api2_Stock_Item extends deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item.php
+
+		-
+			rawMessage: '''
+				Call to method _applyCollectionModifiers() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 4
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _error() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _errorMessage() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 4
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _successMessage() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getErrors() of deprecated class Mage_Api2_Model_Resource_Validator:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getRequest() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method isValidData() of deprecated class Mage_Api2_Model_Resource_Validator_Fields:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Rest.php
+
+		-
+			rawMessage: '''
+				Catching deprecated class Mage_Api2_Exception:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: catch.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_BAD_REQUEST of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_INTERNAL_ERROR of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_OK of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant RESOURCE_INTERNAL_ERROR of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Rest.php
+
+		-
 			rawMessage: 'Method Mage_CatalogInventory_Model_Api2_Stock_Item_Rest::_multiUpdate() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -9383,6 +11024,42 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _addError() of deprecated class Mage_Api2_Model_Resource_Validator:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Validator/Item.php
+
+		-
+			rawMessage: '''
+				Call to method getErrors() of deprecated class Mage_Api2_Model_Resource_Validator:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Validator/Item.php
+
+		-
+			rawMessage: '''
+				Call to method isValidData() of deprecated class Mage_Api2_Model_Resource_Validator_Fields:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Validator/Item.php
+
+		-
+			rawMessage: '''
+				Class Mage_CatalogInventory_Model_Api2_Stock_Item_Validator_Item extends deprecated class Mage_Api2_Model_Resource_Validator_Fields:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/CatalogInventory/Model/Api2/Stock/Item/Validator/Item.php
 
 		-
 			rawMessage: 'Method Mage_CatalogInventory_Model_Indexer_Stock::_processEvent() has no return type specified.'
@@ -9575,6 +11252,24 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogInventory/Model/Stock/Item.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/CatalogInventory/Model/Stock/Item/Api.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/CatalogInventory/Model/Stock/Item/Api/V2.php
 
 		-
 			rawMessage: '''
@@ -10165,6 +11860,51 @@ parameters:
 			path: app/code/core/Mage/Checkout/Helper/Url.php
 
 		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Checkout/Model/Api/Resource.php
+
+		-
+			rawMessage: '''
+				Call to method _getSession() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Checkout/Model/Api/Resource.php
+
+		-
+			rawMessage: '''
+				Catching deprecated class Mage_Api_Exception:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: catch.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Checkout/Model/Api/Resource.php
+
+		-
+			rawMessage: '''
+				Class Mage_Checkout_Model_Api_Resource extends deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Checkout/Model/Api/Resource.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Checkout/Model/Api/Resource/Customer.php
+
+		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerId() expects int, null given.'
 			identifier: argument.type
 			count: 1
@@ -10207,10 +11947,28 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Cart.php
 
 		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 4
+			path: app/code/core/Mage/Checkout/Model/Cart/Api.php
+
+		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsActive() expects int, false given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Cart/Api.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Checkout/Model/Cart/Coupon/Api.php
 
 		-
 			rawMessage: Negated boolean expression is always false.
@@ -10223,6 +11981,15 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Cart/Coupon/Api.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 7
+			path: app/code/core/Mage/Checkout/Model/Cart/Customer/Api.php
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Customer_Model_Customer::setMode() expects bool, string given.'
@@ -10255,10 +12022,37 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Cart/Customer/Api/V2.php
 
 		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 5
+			path: app/code/core/Mage/Checkout/Model/Cart/Payment/Api.php
+
+		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Cart/Payment/Api.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 15
+			path: app/code/core/Mage/Checkout/Model/Cart/Product/Api.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 5
+			path: app/code/core/Mage/Checkout/Model/Cart/Shipping/Api.php
 
 		-
 			rawMessage: 'Method Mage_Checkout_Model_Observer::loadCustomerQuote() has no return type specified.'
@@ -11371,6 +13165,15 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Logger.php
 
 		-
+			rawMessage: '''
+				Class Mage_Core_Model_Maho_Api extends deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Core/Model/Maho/Api.php
+
+		-
 			rawMessage: Property Mage_Core_Model_Message_Abstract::$_class has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -11705,6 +13508,24 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Core/Model/Store.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Core/Model/Store/Api.php
+
+		-
+			rawMessage: '''
+				Class Mage_Core_Model_Store_Api extends deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Core/Model/Store/Api.php
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Store_Group::_loadStores() has no return type specified.'
@@ -12127,6 +13948,15 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Address/Abstract.php
 
 		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 10
+			path: app/code/core/Mage/Customer/Model/Address/Api.php
+
+		-
 			rawMessage: 'Parameter #1 $entity of method Mage_Customer_Model_Api_Resource::getAllowedAttributes() expects Mage_Eav_Model_Entity_Abstract, Mage_Customer_Model_Address given.'
 			identifier: argument.type
 			count: 4
@@ -12137,6 +13967,15 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Address/Api.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 9
+			path: app/code/core/Mage/Customer/Model/Address/Api/V2.php
 
 		-
 			rawMessage: Cannot access property $is_default_billing on array.
@@ -12163,10 +14002,181 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Api/Resource.php
 
 		-
+			rawMessage: '''
+				Class Mage_Customer_Model_Api_Resource extends deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api/Resource.php
+
+		-
+			rawMessage: '''
+				Call to method getEavAttributes() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer.php
+
+		-
+			rawMessage: '''
+				Call to method getUserType() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer.php
+
+		-
+			rawMessage: '''
+				Class Mage_Customer_Model_Api2_Customer extends deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer.php
+
+		-
+			rawMessage: '''
+				Fetching class constant USER_TYPE of deprecated class Mage_Api2_Model_Auth_User_Admin:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer.php
+
+		-
 			rawMessage: 'Call to an undefined method Mage_Customer_Model_Api2_Customer_Address::_getDefaultAddressesInfo().'
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address.php
+
+		-
+			rawMessage: '''
+				Call to method getEavAttributes() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address.php
+
+		-
+			rawMessage: '''
+				Call to method getUserType() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address.php
+
+		-
+			rawMessage: '''
+				Class Mage_Customer_Model_Api2_Customer_Address extends deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address.php
+
+		-
+			rawMessage: '''
+				Fetching class constant USER_TYPE of deprecated class Mage_Api2_Model_Auth_User_Admin:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address.php
+
+		-
+			rawMessage: '''
+				Call to method _applyCollectionModifiers() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 7
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _error() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 4
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _getLocation() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getErrors() of deprecated class Mage_Api2_Model_Resource_Validator_Eav:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getRequest() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 5
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method isValidData() of deprecated class Mage_Api2_Model_Resource_Validator_Eav:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_BAD_REQUEST of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_INTERNAL_ERROR of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address/Rest.php
 
 		-
 			rawMessage: 'Method Mage_Customer_Model_Api2_Customer_Address_Rest::_delete() has no return type specified.'
@@ -12181,16 +14191,268 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address/Rest.php
 
 		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getApiUser() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getUserId() of deprecated class Mage_Api2_Model_Auth_User_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Call to method _addError() of deprecated class Mage_Api2_Model_Resource_Validator:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 4
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address/Validator.php
+
+		-
+			rawMessage: '''
+				Call to method filter() of deprecated class Mage_Api2_Model_Resource_Validator_Eav:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address/Validator.php
+
+		-
+			rawMessage: '''
+				Class Mage_Customer_Model_Api2_Customer_Address_Validator extends deprecated class Mage_Api2_Model_Resource_Validator_Eav:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Address/Validator.php
+
+		-
+			rawMessage: '''
+				Call to method _applyCollectionModifiers() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 5
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _error() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 4
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _getLocation() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method filter() of deprecated class Mage_Api2_Model_Resource_Validator_Eav:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getAvailableAttributes() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getErrors() of deprecated class Mage_Api2_Model_Resource_Validator_Eav:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getRequest() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getUserType() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method isValidData() of deprecated class Mage_Api2_Model_Resource_Validator_Eav:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_BAD_REQUEST of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_INTERNAL_ERROR of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest.php
+
+		-
+			rawMessage: '''
+				Fetching class constant OPERATION_ATTRIBUTE_READ of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest.php
+
+		-
 			rawMessage: 'Method Mage_Customer_Model_Api2_Customer_Rest::_update() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest.php
 
 		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Api2_Model_Resource_Validator_Eav:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getRequest() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_INTERNAL_ERROR of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest/Admin/V1.php
+
+		-
 			rawMessage: 'Method Mage_Customer_Model_Api2_Customer_Rest_Admin_V1::_delete() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getApiUser() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getRequest() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getUserId() of deprecated class Mage_Api2_Model_Auth_User_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Fetching class constant HTTP_FORBIDDEN of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Api2/Customer/Rest/Customer/V1.php
 
 		-
 			rawMessage: 'Method Mage_Customer_Model_Api2_Customer_Rest_Customer_V1::_multiUpdate() has no return type specified.'
@@ -12433,6 +14695,33 @@ parameters:
 			path: app/code/core/Mage/Customer/Model/Customer.php
 
 		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 6
+			path: app/code/core/Mage/Customer/Model/Customer/Api.php
+
+		-
+			rawMessage: '''
+				Call to method parseFilters() of deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Customer/Api.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Customer/Api.php
+
+		-
 			rawMessage: 'Parameter #1 $entity of method Mage_Customer_Model_Api_Resource::getAllowedAttributes() expects Mage_Eav_Model_Entity_Abstract, Mage_Customer_Model_Customer given.'
 			identifier: argument.type
 			count: 3
@@ -12455,6 +14744,15 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Group.php
+
+		-
+			rawMessage: '''
+				Class Mage_Customer_Model_Group_Api extends deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Customer/Model/Group/Api.php
 
 		-
 			rawMessage: 'Method Mage_Customer_Model_Observer::actionUpgradeCustomerPassword() has no return type specified.'
@@ -13825,6 +16123,15 @@ parameters:
 			path: app/code/core/Mage/Directory/Model/Country.php
 
 		-
+			rawMessage: '''
+				Class Mage_Directory_Model_Country_Api extends deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Directory/Model/Country/Api.php
+
+		-
 			rawMessage: 'Method Mage_Directory_Model_Currency_Filter::setRate() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -13841,6 +16148,24 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Directory/Model/Observer.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Directory/Model/Region/Api.php
+
+		-
+			rawMessage: '''
+				Class Mage_Directory_Model_Region_Api extends deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Directory/Model/Region/Api.php
 
 		-
 			rawMessage: 'Method Mage_Directory_Model_Resource_Country::_construct() has no return type specified.'
@@ -13913,6 +16238,15 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: app/code/core/Mage/Downloadable/Helper/Download.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 9
+			path: app/code/core/Mage/Downloadable/Model/Link/Api.php
 
 		-
 			rawMessage: 'Method Mage_Downloadable_Model_Link_Api_Uploader::_setUploadFile() has no return type specified.'
@@ -14645,6 +16979,15 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/GiftMessage/Block/Message/Inline.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 5
+			path: app/code/core/Mage/GiftMessage/Model/Api.php
 
 		-
 			rawMessage: 'Return type (stdClass) of method Mage_GiftMessage_Model_Api_V2::_setGiftMessage() should be compatible with return type (array) of method Mage_GiftMessage_Model_Api::_setGiftMessage()'
@@ -18007,10 +20350,334 @@ parameters:
 			path: app/code/core/Mage/Sales/Helper/Guest.php
 
 		-
+			rawMessage: '''
+				Class Mage_Sales_Model_Api_Resource extends deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api/Resource.php
+
+		-
+			rawMessage: '''
+				Call to method _applyCollectionModifiers() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order.php
+
+		-
+			rawMessage: '''
+				Call to method _getSubModel() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Sales/Model/Api2/Order.php
+
+		-
+			rawMessage: '''
+				Call to method _isSubCallAllowed() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Sales/Model/Api2/Order.php
+
+		-
+			rawMessage: '''
+				Call to method getAllowedAttributes() of deprecated class Mage_Api2_Model_Acl_Filter:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 8
+			path: app/code/core/Mage/Sales/Model/Api2/Order.php
+
+		-
+			rawMessage: '''
+				Call to method getFilter() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 8
+			path: app/code/core/Mage/Sales/Model/Api2/Order.php
+
+		-
+			rawMessage: '''
+				Call to method out() of deprecated class Mage_Api2_Model_Acl_Filter:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Sales/Model/Api2/Order.php
+
+		-
+			rawMessage: '''
+				Class Mage_Sales_Model_Api2_Order extends deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order.php
+
+		-
+			rawMessage: '''
+				Class Mage_Sales_Model_Api2_Order_Address extends deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Address.php
+
+		-
+			rawMessage: '''
+				Call to method _applyCollectionModifiers() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Address/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Address/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getRequest() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Address/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getApiUser() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Address/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getUserId() of deprecated class Mage_Api2_Model_Auth_User_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Address/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Class Mage_Sales_Model_Api2_Order_Comment extends deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Comment.php
+
+		-
+			rawMessage: '''
+				Call to method _applyCollectionModifiers() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Comment/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Comment/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getForcedAttributes() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Comment/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getRequest() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Comment/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Comment/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method _getLocation() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Comment/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getRequest() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Comment/Rest/Admin/V1.php
+
+		-
 			rawMessage: 'Parameter #2 $code of method Mage_Api2_Model_Resource::_critical() expects int|null, string given.'
 			identifier: argument.type
 			count: 2
 			path: app/code/core/Mage/Sales/Model/Api2/Order/Comment/Rest/Admin/V1.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Comment/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getApiUser() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Comment/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getUserId() of deprecated class Mage_Api2_Model_Auth_User_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Comment/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Class Mage_Sales_Model_Api2_Order_Item extends deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Item.php
+
+		-
+			rawMessage: '''
+				Call to method _applyCollectionModifiers() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Item/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Item/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getRequest() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Item/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Item/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getApiUser() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Item/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getUserId() of deprecated class Mage_Api2_Model_Auth_User_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Item/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getRequest() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Rest.php
+
+		-
+			rawMessage: '''
+				Call to method getApiUser() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Rest/Customer/V1.php
+
+		-
+			rawMessage: '''
+				Call to method getUserId() of deprecated class Mage_Api2_Model_Auth_User_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Sales/Model/Api2/Order/Rest/Customer/V1.php
 
 		-
 			rawMessage: 'Method Mage_Sales_Model_Billing_Agreement::_saveOrderRelations() has no return type specified.'
@@ -18151,6 +20818,33 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Order.php
 
 		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 8
+			path: app/code/core/Mage/Sales/Model/Order/Api.php
+
+		-
+			rawMessage: '''
+				Call to method parseFilters() of deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Order/Api.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Order/Api.php
+
+		-
 			rawMessage: 'Method Mage_Sales_Model_Order_Config::_getStates() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -18197,6 +20891,33 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Order/Creditmemo.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 9
+			path: app/code/core/Mage/Sales/Model/Order/Creditmemo/Api.php
+
+		-
+			rawMessage: '''
+				Call to method parseFilters() of deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Order/Creditmemo/Api.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Order/Creditmemo/Api.php
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order_Creditmemo::setPaymentRefundDisallowed() expects float, true given.'
@@ -18271,6 +20992,33 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Order/Invoice.php
 
 		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 19
+			path: app/code/core/Mage/Sales/Model/Order/Invoice/Api.php
+
+		-
+			rawMessage: '''
+				Call to method parseFilters() of deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Order/Invoice/Api.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Order/Invoice/Api.php
+
+		-
 			rawMessage: 'Parameter #1 $incrementId of method Mage_Sales_Model_Order_Invoice::loadByIncrementId() expects string, int given.'
 			identifier: argument.type
 			count: 1
@@ -18281,6 +21029,15 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Order/Invoice/Api.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Sales/Model/Order/Invoice/Api/V2.php
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order_Invoice::setEmailSent() expects int, true given.'
@@ -18439,6 +21196,24 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Order/Shipment/Api.php
 
 		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 18
+			path: app/code/core/Mage/Sales/Model/Order/Shipment/Api.php
+
+		-
+			rawMessage: '''
+				Call to method parseFilters() of deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Order/Shipment/Api.php
+
+		-
 			rawMessage: 'Parameter #1 $object of method Mage_Sales_Model_Order_Shipment_Api::_getCarriers() expects Mage_Eav_Model_Entity_Abstract, Mage_Sales_Model_Order given.'
 			identifier: argument.type
 			count: 1
@@ -18455,6 +21230,15 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: app/code/core/Mage/Sales/Model/Order/Shipment/Api.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 4
+			path: app/code/core/Mage/Sales/Model/Order/Shipment/Api/V2.php
 
 		-
 			rawMessage: 'Parameter #1 $object of method Mage_Sales_Model_Order_Shipment_Api::_getCarriers() expects Mage_Eav_Model_Entity_Abstract, Mage_Sales_Model_Order given.'
@@ -19652,6 +22436,33 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Tag/Block/Product/Result.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 12
+			path: app/code/core/Mage/Tag/Model/Api.php
+
+		-
+			rawMessage: '''
+				Call to method toArray() of deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Tag/Model/Api/V2.php
+
+		-
+			rawMessage: '''
+				Call to method wsiArrayPacker() of deprecated class Mage_Api_Helper_Data:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Tag/Model/Api/V2.php
 
 		-
 			rawMessage: Access to an undefined property Mage_Tag_Model_Entity_Customer_Collection::$_read.
@@ -20854,6 +23665,84 @@ parameters:
 			path: app/code/core/Mage/Wishlist/controllers/SharedController.php
 
 		-
+			rawMessage: '''
+				Call to method _applyCollectionModifiers() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Maho/Blog/Model/Api2/Post.php
+
+		-
+			rawMessage: '''
+				Call to method _critical() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 4
+			path: app/code/core/Maho/Blog/Model/Api2/Post.php
+
+		-
+			rawMessage: '''
+				Call to method _getLocation() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Maho/Blog/Model/Api2/Post.php
+
+		-
+			rawMessage: '''
+				Call to method getRequest() of deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Maho/Blog/Model/Api2/Post.php
+
+		-
+			rawMessage: '''
+				Class Maho_Blog_Model_Api2_Post extends deprecated class Mage_Api2_Model_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Maho/Blog/Model/Api2/Post.php
+
+		-
+			rawMessage: '''
+				Call to method _fault() of deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 11
+			path: app/code/core/Maho/Blog/Model/Post/Api.php
+
+		-
+			rawMessage: '''
+				Class Maho_Blog_Model_Post_Api extends deprecated class Mage_Api_Model_Resource_Abstract:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: class.extendsDeprecatedClass
+			count: 1
+			path: app/code/core/Maho/Blog/Model/Post/Api.php
+
+		-
+			rawMessage: '''
+				Fetching deprecated class constant DEPRECATED_METHODS of class Maho_Paypal_Model_Config:
+				Legacy PayPal methods - use new Maho_Paypal methods instead
+			'''
+			identifier: classConstant.deprecated
+			count: 1
+			path: app/code/core/Maho/Paypal/Model/Config.php
+
+		-
+			rawMessage: Property Maho_Paypal_Model_Method_AdvancedCheckout::$_canSaveCc has no type specified.
+			identifier: missingType.property
+			count: 1
+			path: app/code/core/Maho/Paypal/Model/Method/AdvancedCheckout.php
+
+		-
 			rawMessage: 'Call to an undefined method Mage_Core_Block_Abstract::_getUsers().'
 			identifier: method.notFound
 			count: 1
@@ -20876,6 +23765,114 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/design/adminhtml/default/default/template/api/userroles.phtml
+
+		-
+			rawMessage: '''
+				Call to method getBackButtonHtml() of deprecated class Mage_Api2_Block_Adminhtml_Attribute_Buttons:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/api2/attribute/buttons.phtml
+
+		-
+			rawMessage: '''
+				Call to method getCaption() of deprecated class Mage_Api2_Block_Adminhtml_Attribute_Buttons:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/api2/attribute/buttons.phtml
+
+		-
+			rawMessage: '''
+				Call to method getResetButtonHtml() of deprecated class Mage_Api2_Block_Adminhtml_Attribute_Buttons:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/api2/attribute/buttons.phtml
+
+		-
+			rawMessage: '''
+				Call to method getSaveButtonHtml() of deprecated class Mage_Api2_Block_Adminhtml_Attribute_Buttons:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/api2/attribute/buttons.phtml
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Api2_Block_Adminhtml_Attribute_Buttons:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/api2/attribute/buttons.phtml
+
+		-
+			rawMessage: '''
+				Call to method getEverythingAllowed() of deprecated class Mage_Api2_Block_Adminhtml_Attribute_Tab_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/api2/attribute/resource.phtml
+
+		-
+			rawMessage: '''
+				Call to method getResTreeJson() of deprecated class Mage_Api2_Block_Adminhtml_Attribute_Tab_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/api2/attribute/resource.phtml
+
+		-
+			rawMessage: '''
+				Call to method hasEntityOnlyAttributes() of deprecated class Mage_Api2_Block_Adminhtml_Attribute_Tab_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/api2/attribute/resource.phtml
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Api2_Block_Adminhtml_Attribute_Tab_Resource:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/api2/attribute/resource.phtml
+
+		-
+			rawMessage: '''
+				Call to method getUsers() of deprecated class Mage_Api2_Block_Adminhtml_Roles_Tab_Users:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/api2/role/users_grid_js.phtml
+
+		-
+			rawMessage: '''
+				Call to method isHidden() of deprecated class Mage_Api2_Block_Adminhtml_Roles_Tab_Users:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/api2/role/users_grid_js.phtml
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Api2_Block_Adminhtml_Roles_Tab_Users:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/api2/role/users_grid_js.phtml
 
 		-
 			rawMessage: 'Parameter #2 $store of method Mage_Core_Helper_Data::currencyByStore() expects int|Mage_Core_Model_Store|null, true given.'
@@ -20942,6 +23939,33 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/design/adminhtml/default/default/template/permissions/role_users_grid_js.phtml
+
+		-
+			rawMessage: '''
+				Call to method getEverythingAllowed() of deprecated class Mage_Api2_Block_Adminhtml_Roles_Tab_Resources:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/permissions/rolesedit.phtml
+
+		-
+			rawMessage: '''
+				Call to method getResTreeJson() of deprecated class Mage_Api2_Block_Adminhtml_Roles_Tab_Resources:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/permissions/rolesedit.phtml
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Api2_Block_Adminhtml_Roles_Tab_Resources:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/design/adminhtml/default/default/template/permissions/rolesedit.phtml
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Core_Block_Abstract::_getSelectedRoles().'
@@ -23500,13 +26524,82 @@ parameters:
 			path: lib/Maho/Simplexml/Element.php
 
 		-
-			message: '#Fetching deprecated class constant DEPRECATED_METHODS of class Maho_Paypal_Model_Config#'
-			identifier: classConstant.deprecated
+			rawMessage: '''
+				Call to method deleteOrphanedResources() of deprecated class Mage_Api_Model_Resource_Rules:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
 			count: 1
-			path: app/code/core/Maho/Paypal/Model/Config.php
+			path: lib/MahoCLI/Commands/HealthCheck.php
 
 		-
-			message: '#Property Maho_Paypal_Model_Method_AdvancedCheckout::\$_canSaveCc has no type specified#'
-			identifier: missingType.property
+			rawMessage: '''
+				Call to method getOrphanedResourcesCollection() of deprecated class Mage_Api_Model_Resource_Rules:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
 			count: 1
-			path: app/code/core/Maho/Paypal/Model/Method/AdvancedCheckout.php
+			path: lib/MahoCLI/Commands/HealthCheck.php
+
+		-
+			rawMessage: '''
+				Parameter $rulesResource of method MahoCLI\Commands\HealthCheck::checkOrphanedResources() has typehint with deprecated class Mage_Api_Model_Resource_Rules:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: parameter.deprecatedClass
+			count: 1
+			path: lib/MahoCLI/Commands/HealthCheck.php
+
+		-
+			rawMessage: '''
+				Call to method getAdapterCodeByAlias() of deprecated class Mage_Api_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: public/api.php
+
+		-
+			rawMessage: '''
+				Call to method getApiTypes() of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: staticMethod.deprecatedClass
+			count: 1
+			path: public/api.php
+
+		-
+			rawMessage: '''
+				Call to method initialize() of deprecated class Mage_Api_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: public/api.php
+
+		-
+			rawMessage: '''
+				Call to method run() of deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: public/api.php
+
+		-
+			rawMessage: '''
+				Call to method run() of deprecated class Mage_Api_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: public/api.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Api2_Model_Server:
+				since 26.5 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: public/api.php

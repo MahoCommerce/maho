@@ -12,4 +12,7 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.5 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_Model_Acl_Role_User extends Mage_Api_Model_Acl_Role_Generic {}
