@@ -675,15 +675,19 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     {
         // Special handling for HTML5 native input formats
         if ($format === 'html5' && is_string($date)) {
+            // Parse date in store timezone so midnight/time values are correct for the store
+            $storeTimezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
+            $storeTz = new DateTimeZone($storeTimezone);
+
             if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $date)) {
                 // datetime-local format - validate the datetime
-                $dateTime = DateTime::createFromFormat(self::HTML5_DATETIME_FORMAT, substr($date, 0, 16));
+                $dateTime = DateTime::createFromFormat(self::HTML5_DATETIME_FORMAT, substr($date, 0, 16), $storeTz);
                 if ($dateTime === false || $dateTime->format(self::HTML5_DATETIME_FORMAT) !== substr($date, 0, 16)) {
                     return null;
                 }
             } elseif (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
                 // date format - validate the date
-                $dateTime = DateTime::createFromFormat(self::DATE_FORMAT, $date);
+                $dateTime = DateTime::createFromFormat(self::DATE_FORMAT, $date, $storeTz);
                 if ($dateTime === false || $dateTime->format(self::DATE_FORMAT) !== $date) {
                     return null;
                 }
@@ -693,10 +697,6 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
             } else {
                 return null;
             }
-
-            // Set to store timezone first
-            $storeTimezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
-            $dateTime->setTimezone(new DateTimeZone($storeTimezone));
 
             // Convert to UTC
             $dateTime->setTimezone(new DateTimeZone(self::DEFAULT_TIMEZONE));
