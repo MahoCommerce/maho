@@ -213,18 +213,6 @@ describe('Locale::formatDateForDb()', function () {
         $this->locale = Mage::app()->getLocale();
     });
 
-    it('returns current datetime for true input', function () {
-        $result = $this->locale->formatDateForDb(true);
-
-        expect($result)->toMatch('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/');
-    });
-
-    it('returns current date without time for true input', function () {
-        $result = $this->locale->formatDateForDb(true, withTime: false);
-
-        expect($result)->toMatch('/^\d{4}-\d{2}-\d{2}$/');
-    });
-
     it('returns null for null input', function () {
         expect($this->locale->formatDateForDb(null))->toBeNull();
     });

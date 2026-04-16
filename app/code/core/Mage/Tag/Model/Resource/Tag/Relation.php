@@ -173,7 +173,7 @@ class Mage_Tag_Model_Resource_Tag_Relation extends Mage_Core_Model_Resource_Db_A
                     'store_id'      => $model->getStoreId(),
                     'product_id'    => $value,
                     'customer_id'   => $model->getCustomerId(),
-                    'created_at'    => Mage::app()->getLocale()->formatDateForDb(time()),
+                    'created_at'    => Mage::app()->getLocale()->formatDateForDb('now'),
                 ];
             }
             $write->insertMultiple($this->getMainTable(), $insertData);

@@ -818,17 +818,13 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      * as UTC via gmdate(). Callers should ensure the input is already in the desired timezone
      * (typically UTC for strings/ints, or the correct timezone for DateTime objects).
      *
-     * @param int|string|DateTime|DateTimeImmutable|bool|null $date Date input (true = current time)
+     * @param int|string|DateTime|DateTimeImmutable|null $date Date input
      * @param bool $withTime Whether to include time component
      * @return string|null Formatted date string or null if input is empty
      */
-    public function formatDateForDb(int|string|DateTime|DateTimeImmutable|bool|null $date, bool $withTime = true): ?string
+    public function formatDateForDb(int|string|DateTime|DateTimeImmutable|null $date, bool $withTime = true): ?string
     {
         $format = $withTime ? self::DATETIME_FORMAT : self::DATE_FORMAT;
-
-        if ($date === true) {
-            return gmdate($format);
-        }
 
         if ($date instanceof DateTimeInterface) {
             return $date->format($format);

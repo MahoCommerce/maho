@@ -347,7 +347,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
             ->setProductId($productId)
             ->setCustomerId($customerId)
             ->setActive(Mage_Tag_Model_Tag_Relation::STATUS_ACTIVE)
-            ->setCreatedAt(Mage::app()->getLocale()->formatDateForDb(time()));
+            ->setCreatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
 
         $result = '';
         $relationModelSaveNeed = false;

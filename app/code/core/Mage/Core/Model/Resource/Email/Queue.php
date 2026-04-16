@@ -43,7 +43,7 @@ class Mage_Core_Model_Resource_Email_Queue extends Mage_Core_Model_Resource_Db_A
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if ($object->isObjectNew()) {
-            $object->setCreatedAt(Mage::app()->getLocale()->formatDateForDb(true));
+            $object->setCreatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         }
         $object->setMessageBodyHash(md5($object->getMessageBody()));
         $object->setMessageParameters(Mage::helper('core')->jsonEncode($object->getMessageParameters()));

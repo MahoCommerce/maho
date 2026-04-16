@@ -205,29 +205,12 @@ describe('formatDateForDb() input handling', function () {
         $this->locale = Mage::app()->getLocale();
     });
 
-    it('returns current UTC datetime for true', function () {
-        $before = gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT);
-        $result = $this->locale->formatDateForDb(true);
-        $after = gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT);
-
-        expect($result >= $before && $result <= $after)->toBeTrue();
-    });
-
-    it('returns current UTC date (no time) for true with withTime=false', function () {
-        $result = $this->locale->formatDateForDb(true, withTime: false);
-        expect($result)->toBe(gmdate(Mage_Core_Model_Locale::DATE_FORMAT));
-    });
-
     it('returns null for null', function () {
         expect($this->locale->formatDateForDb(null))->toBeNull();
     });
 
     it('returns null for empty string', function () {
         expect($this->locale->formatDateForDb(''))->toBeNull();
-    });
-
-    it('returns null for false', function () {
-        expect($this->locale->formatDateForDb(false))->toBeNull();
     });
 
     it('handles integer 0 (epoch) — does not return null', function () {

@@ -112,16 +112,19 @@ abstract class Mage_Core_Model_Resource_Abstract
     /**
      * Format date to internal format
      *
-     * @deprecated since 26.5 Use Mage::app()->getLocale()->formatDateForDb() instead
+     * @deprecated since 26.5 Use Mage::app()->getLocale()->formatDateForDb() or now() instead
      * @see Mage_Core_Model_Locale::formatDateForDb()
      *
      * @param int|string|DateTime|bool|null $date
-     * @param bool $includeTime
+     * @param bool $withTime
      * @return string|null
      */
-    public function formatDate($date, $includeTime = true)
+    public function formatDate($date, $withTime = true)
     {
-        return Mage::app()->getLocale()->formatDateForDb($date, $includeTime);
+        if ($date === true) {
+            return Mage::app()->getLocale()->formatDateForDb('now', $withTime);
+        }
+        return Mage::app()->getLocale()->formatDateForDb($date, $withTime);
     }
 
     /**
