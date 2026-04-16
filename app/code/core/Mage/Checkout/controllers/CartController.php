@@ -966,7 +966,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         if (!$this->_validateFormKey()) {
             $this->getResponse()->setBodyJson([
                 'success' => 0,
-                'error' => $this->__('Invalid form key'),
+                'error' => $this->__('Invalid form key. Please refresh the page.'),
             ]);
             return;
         }
@@ -1001,7 +1001,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         if (!$this->_validateFormKey()) {
             $this->getResponse()->setBodyJson([
                 'success' => 0,
-                'error' => $this->__('Invalid form key'),
+                'error' => $this->__('Invalid form key. Please refresh the page.'),
             ]);
             return;
         }
