@@ -847,7 +847,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
 
         if ($rulePrice === false) {
             $rulePrice = Mage::getResourceModel('catalogrule/rule')
-                ->getRulePrice(Mage::app()->getLocale()->utcToStore($store), $wId, $gId, $productId);
+                ->getRulePrice(Mage::app()->getLocale()->utcToStore($store, 'now')->getTimestamp(), $wId, $gId, $productId);
         }
 
         if ($rulePrice !== null && $rulePrice !== false) {
