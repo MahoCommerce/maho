@@ -419,8 +419,8 @@ describe('DB round-trip: CMS page date fields', function () {
                     ->where('page_id = ?', $pageId),
             );
 
-            // Column is TYPE_DATE, so DB stores date-only
-            expect($raw)->toBe('2025-08-15');
+            // MySQL stores date-only (TYPE_DATE), SQLite stores full datetime
+            expect($raw)->toMatch('/^2025-08-15( 00:00:00)?$/');
         } finally {
             $page->delete();
         }
