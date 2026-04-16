@@ -814,8 +814,9 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      * Format any date input to database format string.
      *
      * Does not perform timezone conversion. DateTime/DateTimeImmutable inputs are formatted
-     * in their current timezone; string and int inputs are formatted as UTC via gmdate().
-     * Callers should ensure the input is already in the desired timezone (typically UTC).
+     * in their current timezone; string inputs are parsed as UTC; int inputs are formatted
+     * as UTC via gmdate(). Callers should ensure the input is already in the desired timezone
+     * (typically UTC for strings/ints, or the correct timezone for DateTime objects).
      *
      * @param int|string|DateTime|DateTimeImmutable|bool|null $date Date input (true = current time)
      * @param bool $withTime Whether to include time component

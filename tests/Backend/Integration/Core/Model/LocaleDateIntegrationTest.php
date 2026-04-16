@@ -257,7 +257,7 @@ describe('formatDateForDb() input handling', function () {
         expect($this->locale->formatDateForDb($dt))->toBe('2025-06-15 14:30:00');
     });
 
-    it('formats string date via strtotime + gmdate', function () {
+    it('formats string date as UTC', function () {
         $result = $this->locale->formatDateForDb('2025-06-15 14:30:00');
         expect($result)->toBe('2025-06-15 14:30:00');
     });
@@ -677,5 +677,136 @@ describe('isStoreDateInInterval() with store timezone', function () {
 
             expect($locale->isStoreDateInInterval(null, $from, $to))->toBeTrue();
         });
+    });
+});
+
+// ===========================================================================
+// Catalog rule price lookup uses store-local date, not UTC
+// ===========================================================================
+describe('Catalog rule getRulePrice() uses store-local date', function () {
+    it('finds a same-day rule just after local midnight in a UTC+13 store', function () {
+        // Scenario: it's 2025-01-16 00:30 NZDT (UTC+13), which is 2025-01-15 11:30 UTC.
+        // A catalog rule keyed to rule_date = '2025-01-16' must be found because the
+        // store's local date is Jan 16, even though UTC is still Jan 15.
+        $store = Mage::app()->getStore();
+        $websiteId = (int) $store->getWebsiteId();
+        $customerGroupId = Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
+
+        // Create a minimal product so FK constraints are satisfied
+        $product = Mage::getModel('catalog/product');
+        $product->setTypeId('simple')
+            ->setAttributeSetId((int) $product->getDefaultAttributeSetId())
+            ->setSku('timezone_rule_test_' . uniqid())
+            ->setName('Timezone Rule Test')
+            ->setPrice(100)
+            ->setStatus(1)
+            ->setVisibility(1)
+            ->setWebsiteIds([$websiteId])
+            ->save();
+        $productId = (int) $product->getId();
+        $ruleDate = '2025-01-16';
+        $rulePrice = 42.99;
+
+        $resource = Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $table = $resource->getTableName('catalogrule/rule_product_price');
+
+        // Insert a rule price row for the store-local date
+        $write->insert($table, [
+            'rule_date'          => $ruleDate,
+            'website_id'         => $websiteId,
+            'customer_group_id'  => $customerGroupId,
+            'product_id'         => $productId,
+            'rule_price'         => $rulePrice,
+            'latest_start_date'  => $ruleDate,
+            'earliest_end_date'  => $ruleDate,
+        ]);
+
+        try {
+            withStoreTimezone('Pacific/Auckland', function () use (
+                $websiteId,
+                $customerGroupId,
+                $productId,
+                $rulePrice,
+            ) {
+                // Simulate "just after midnight" in Auckland on 2025-01-16:
+                // 2025-01-16 00:30 NZDT = 2025-01-15 11:30 UTC
+                $utcTime = '2025-01-15 11:30:00';
+                $storeDateTime = Mage::app()->getLocale()->utcToStore(null, $utcTime);
+
+                // Sanity: confirm the store-local date is Jan 16
+                expect($storeDateTime->format(Mage_Core_Model_Locale::DATE_FORMAT))
+                    ->toBe('2025-01-16');
+
+                // The bug: passing getTimestamp() would go through gmdate() and look up
+                // '2025-01-15' (UTC date), missing the rule. Passing the DateTime object
+                // makes formatDateForDb() use the DateTime's own timezone → '2025-01-16'.
+                $result = Mage::getResourceModel('catalogrule/rule')
+                    ->getRulePrice($storeDateTime, $websiteId, $customerGroupId, $productId);
+
+                expect((float) $result)->toBe($rulePrice);
+            });
+        } finally {
+            $write->delete($table, [
+                'rule_date = ?'         => $ruleDate,
+                'website_id = ?'        => $websiteId,
+                'customer_group_id = ?' => $customerGroupId,
+                'product_id = ?'        => $productId,
+            ]);
+            $product->delete();
+        }
+    });
+
+    it('does NOT find a rule when UTC date differs and timestamp were used', function () {
+        // Proves the inverse: looking up by UTC date (Jan 15) should NOT find a
+        // rule keyed to the store-local date (Jan 16)
+        $store = Mage::app()->getStore();
+        $websiteId = (int) $store->getWebsiteId();
+        $customerGroupId = Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
+
+        // Create a minimal product so FK constraints are satisfied
+        $product = Mage::getModel('catalog/product');
+        $product->setTypeId('simple')
+            ->setAttributeSetId((int) $product->getDefaultAttributeSetId())
+            ->setSku('timezone_rule_neg_test_' . uniqid())
+            ->setName('Timezone Rule Neg Test')
+            ->setPrice(100)
+            ->setStatus(1)
+            ->setVisibility(1)
+            ->setWebsiteIds([$websiteId])
+            ->save();
+        $productId = (int) $product->getId();
+        $ruleDate = '2025-01-16';
+
+        $resource = Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $table = $resource->getTableName('catalogrule/rule_product_price');
+
+        $write->insert($table, [
+            'rule_date'          => $ruleDate,
+            'website_id'         => $websiteId,
+            'customer_group_id'  => $customerGroupId,
+            'product_id'         => $productId,
+            'rule_price'         => 42.99,
+            'latest_start_date'  => $ruleDate,
+            'earliest_end_date'  => $ruleDate,
+        ]);
+
+        try {
+            // Query with the UTC date string — should NOT match the Jan 16 rule
+            $utcDate = '2025-01-15';
+            $result = Mage::getResourceModel('catalogrule/rule')
+                ->getRulePrice($utcDate, $websiteId, $customerGroupId, $productId);
+
+            expect($result)->toBeFalse();
+        } finally {
+            $write->delete($table, [
+                'rule_date = ?'         => $ruleDate,
+                'website_id = ?'        => $websiteId,
+                'customer_group_id = ?' => $customerGroupId,
+                'product_id = ?'        => $productId,
+            ]);
+            $product->delete();
+        }
     });
 });
