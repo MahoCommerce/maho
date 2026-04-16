@@ -1121,7 +1121,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         $wId = Mage::app()->getWebsite()->getId();
         $gId = Mage::getSingleton('customer/session')->getCustomerGroupId();
 
-        $storeDate = Mage::app()->getLocale()->utcToStore($this->getStoreId(), 'now')->getTimestamp();
+        $storeDate = Mage::app()->getLocale()->utcToStore($this->getStoreId());
         $conditions  = 'price_rule.product_id = e.entity_id AND ';
         $conditions .= "price_rule.rule_date = '" . Mage::app()->getLocale()->formatDateForDb($storeDate, withTime: false) . "' AND ";
         $conditions .= $this->getConnection()->quoteInto('price_rule.website_id = ? AND', $wId);
