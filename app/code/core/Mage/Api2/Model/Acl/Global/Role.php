@@ -63,9 +63,9 @@ class Mage_Api2_Model_Acl_Global_Role extends Mage_Core_Model_Abstract
     protected function _beforeSave()
     {
         if ($this->isObjectNew() && $this->getCreatedAt() === null) {
-            $this->setCreatedAt(Mage::app()->getLocale()->now());
+            $this->setCreatedAt(Mage::app()->getLocale()->nowUtc());
         } else {
-            $this->setUpdatedAt(Mage::app()->getLocale()->now());
+            $this->setUpdatedAt(Mage::app()->getLocale()->nowUtc());
         }
 
         //check and protect guest role

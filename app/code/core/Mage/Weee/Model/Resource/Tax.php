@@ -69,7 +69,7 @@ class Mage_Weee_Model_Resource_Tax extends Mage_Core_Model_Resource_Db_Abstract
      */
     protected function _updateDiscountPercents($productCondition = null)
     {
-        $now     = strtotime(Mage::app()->getLocale()->now());
+        $now     = strtotime(Mage::app()->getLocale()->nowUtc());
         $adapter = $this->_getWriteAdapter();
 
         $select  = $this->_getReadAdapter()->select();

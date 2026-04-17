@@ -166,28 +166,28 @@ describe('utcToStore ↔ storeToUtc round-trip', function () {
 });
 
 // ===========================================================================
-// now() / today() — always UTC regardless of PHP default timezone
+// nowUtc() / todayUtc() — always UTC regardless of PHP default timezone
 // ===========================================================================
-describe('now() and today() are always UTC', function () {
-    it('now() matches gmdate output', function () {
+describe('nowUtc() and todayUtc() are always UTC', function () {
+    it('nowUtc() matches gmdate output', function () {
         $before = gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT);
-        $result = Mage::app()->getLocale()->now();
+        $result = Mage::app()->getLocale()->nowUtc();
         $after = gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT);
 
         // Result must be between before and after (inclusive)
         expect($result >= $before && $result <= $after)->toBeTrue();
     });
 
-    it('today() matches gmdate output', function () {
+    it('todayUtc() matches gmdate output', function () {
         $expected = gmdate(Mage_Core_Model_Locale::DATE_FORMAT);
-        expect(Mage::app()->getLocale()->today())->toBe($expected);
+        expect(Mage::app()->getLocale()->todayUtc())->toBe($expected);
     });
 
-    it('now() is unaffected by date_default_timezone_set', function () {
+    it('nowUtc() is unaffected by date_default_timezone_set', function () {
         $originalTz = date_default_timezone_get();
         try {
             date_default_timezone_set('Pacific/Auckland'); // UTC+12/+13
-            $result = Mage::app()->getLocale()->now();
+            $result = Mage::app()->getLocale()->nowUtc();
             $expected = gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT);
 
             expect($result)->toBe($expected);

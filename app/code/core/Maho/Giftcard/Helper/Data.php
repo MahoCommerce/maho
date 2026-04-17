@@ -361,7 +361,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
                 ->send();
 
             // Mark email as sent on giftcard
-            $giftcard->setEmailSentAt(Mage::app()->getLocale()->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+            $giftcard->setEmailSentAt(Mage::app()->getLocale()->nowUtc());
             $giftcard->save();
 
             return true;

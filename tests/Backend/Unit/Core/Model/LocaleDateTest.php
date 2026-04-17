@@ -256,15 +256,15 @@ describe('Locale::formatDateForDb()', function () {
     });
 });
 
-describe('Locale::now() and today() as instance methods', function () {
-    it('now() returns current datetime string', function () {
-        $result = Mage::app()->getLocale()->now();
+describe('Locale::nowUtc() and todayUtc() as instance methods', function () {
+    it('nowUtc() returns current datetime string', function () {
+        $result = Mage::app()->getLocale()->nowUtc();
 
         expect($result)->toMatch('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/');
     });
 
-    it('today() returns current date string', function () {
-        $result = Mage::app()->getLocale()->today();
+    it('todayUtc() returns current date string', function () {
+        $result = Mage::app()->getLocale()->todayUtc();
 
         expect($result)->toMatch('/^\d{4}-\d{2}-\d{2}$/');
     });

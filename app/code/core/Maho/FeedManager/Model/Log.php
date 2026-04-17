@@ -104,13 +104,13 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
             $errors[] = [
                 'sku' => $message,
                 'message' => $detail,
-                'time' => Mage::app()->getLocale()->now(),
+                'time' => Mage::app()->getLocale()->nowUtc(),
             ];
         } else {
             // Called with just message
             $errors[] = [
                 'message' => $message,
-                'time' => Mage::app()->getLocale()->now(),
+                'time' => Mage::app()->getLocale()->nowUtc(),
             ];
         }
         $this->setErrorsArray($errors);
@@ -255,7 +255,7 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
     public function recordUploadSuccess(int $destinationId, string $message = 'Upload successful'): self
     {
         $this->setUploadStatus(self::UPLOAD_STATUS_SUCCESS)
-            ->setUploadedAt(Mage::app()->getLocale()->now())
+            ->setUploadedAt(Mage::app()->getLocale()->nowUtc())
             ->setUploadMessage($message)
             ->setDestinationId($destinationId)
             ->save();
@@ -268,7 +268,7 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
     public function recordUploadFailure(int $destinationId, string $message): self
     {
         $this->setUploadStatus(self::UPLOAD_STATUS_FAILED)
-            ->setUploadedAt(Mage::app()->getLocale()->now())
+            ->setUploadedAt(Mage::app()->getLocale()->nowUtc())
             ->setUploadMessage($message)
             ->setDestinationId($destinationId)
             ->save();

@@ -46,7 +46,7 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         // Set timestamps in UTC
-        $now = Mage::app()->getLocale()->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+        $now = Mage::app()->getLocale()->nowUtc();
         if (!$object->getId()) {
             $object->setCreatedAt($now);
         }

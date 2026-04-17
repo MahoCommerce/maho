@@ -118,8 +118,8 @@ class Maho_Giftcard_Model_Observer
             'purchase_order_id' => $order->getId(),
             'purchase_order_item_id' => $item->getId(),
             'expires_at' => $helper->calculateExpirationDate(),
-            'created_at' => Mage::app()->getLocale()->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
-            'updated_at' => Mage::app()->getLocale()->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+            'created_at' => Mage::app()->getLocale()->nowUtc(),
+            'updated_at' => Mage::app()->getLocale()->nowUtc(),
         ]);
 
         $giftcard->save();
@@ -134,7 +134,7 @@ class Maho_Giftcard_Model_Observer
             'balance_after' => $baseAmount,
             'order_id' => $order->getId(),
             'comment' => "Created from order #{$order->getIncrementId()}",
-            'created_at' => Mage::app()->getLocale()->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+            'created_at' => Mage::app()->getLocale()->nowUtc(),
         ]);
         $history->save();
 
@@ -466,7 +466,7 @@ class Maho_Giftcard_Model_Observer
             // Prepare update data
             $updateData = [
                 'balance' => $newBalance,
-                'updated_at' => Mage::app()->getLocale()->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                'updated_at' => Mage::app()->getLocale()->nowUtc(),
             ];
 
             // Update status if fully used
@@ -491,7 +491,7 @@ class Maho_Giftcard_Model_Observer
                 'balance_after' => $newBalance,
                 'order_id' => $order->getId(),
                 'comment' => "Used in order #{$order->getIncrementId()}",
-                'created_at' => Mage::app()->getLocale()->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                'created_at' => Mage::app()->getLocale()->nowUtc(),
             ]);
         }
     }
@@ -604,7 +604,7 @@ class Maho_Giftcard_Model_Observer
             $updateData = [
                 'balance' => $newBalance,
                 'status' => $newStatus,
-                'updated_at' => Mage::app()->getLocale()->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                'updated_at' => Mage::app()->getLocale()->nowUtc(),
             ];
 
             // Only update expires_at if we're extending it
@@ -628,7 +628,7 @@ class Maho_Giftcard_Model_Observer
                 'balance_after' => $newBalance,
                 'order_id' => $order->getId(),
                 'comment' => $historyComment,
-                'created_at' => Mage::app()->getLocale()->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                'created_at' => Mage::app()->getLocale()->nowUtc(),
             ]);
         }
     }
@@ -731,7 +731,7 @@ class Maho_Giftcard_Model_Observer
             $updateData = [
                 'balance' => $newBalance,
                 'status' => $newStatus,
-                'updated_at' => Mage::app()->getLocale()->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                'updated_at' => Mage::app()->getLocale()->nowUtc(),
             ];
 
             // Only update expires_at if we're extending it
@@ -755,7 +755,7 @@ class Maho_Giftcard_Model_Observer
                 'balance_after' => $newBalance,
                 'order_id' => $order->getId(),
                 'comment' => $historyComment,
-                'created_at' => Mage::app()->getLocale()->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                'created_at' => Mage::app()->getLocale()->nowUtc(),
             ]);
         }
     }

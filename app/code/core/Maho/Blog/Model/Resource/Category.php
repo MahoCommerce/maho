@@ -179,12 +179,12 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
     #[\Override]
     public function save(\Maho\DataObject $object)
     {
-        $locale = Mage::app()->getLocale();
+        $now = Mage::app()->getLocale()->nowUtc();
 
         if (!$object->getId()) {
-            $object->setCreatedAt($locale->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+            $object->setCreatedAt($now);
         }
-        $object->setUpdatedAt($locale->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+        $object->setUpdatedAt($now);
 
         parent::save($object);
 

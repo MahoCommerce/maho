@@ -77,7 +77,7 @@ describe('Sale Category Integration', function () {
                 $specialFromDate = $product->getSpecialFromDate();
                 $specialToDate = $product->getSpecialToDate();
 
-                $now = Mage::app()->getLocale()->now();
+                $now = Mage::app()->getLocale()->nowUtc();
                 $isSpecialPriceActive = true;
 
                 if ($specialFromDate && $specialFromDate > $now) {

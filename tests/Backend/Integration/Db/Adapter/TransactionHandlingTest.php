@@ -66,8 +66,8 @@ describe('Nested Transaction Handling', function () {
             'firstname' => 'Test',
             'lastname' => 'Nested',
             'email' => 'nested@test.com',
-            'created' => Mage::app()->getLocale()->now(),
-            'modified' => Mage::app()->getLocale()->now(),
+            'created' => Mage::app()->getLocale()->nowUtc(),
+            'modified' => Mage::app()->getLocale()->nowUtc(),
             'is_active' => 1,
         ]);
 
@@ -97,8 +97,8 @@ describe('Nested Transaction Handling', function () {
             'firstname' => 'Test',
             'lastname' => 'Rollback',
             'email' => 'rollback@test.com',
-            'created' => Mage::app()->getLocale()->now(),
-            'modified' => Mage::app()->getLocale()->now(),
+            'created' => Mage::app()->getLocale()->nowUtc(),
+            'modified' => Mage::app()->getLocale()->nowUtc(),
             'is_active' => 1,
         ]);
 

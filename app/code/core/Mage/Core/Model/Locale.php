@@ -533,8 +533,6 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
 
 
     /**
-     * Use dateMutable() or dateImmutable() instead of this one.
-     *
      * @deprecated since 26.5 Use utcToStore() or storeToUtc() instead
      * @see utcToStore()
      * @see storeToUtc()
@@ -728,27 +726,39 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     }
 
     /**
-     * Get current UTC date and time in standard format.
+     * Current UTC datetime as a 'Y-m-d H:i:s' string, suitable for DB columns.
      *
-     * Uses gmdate() internally, so the result is always UTC
-     * regardless of the PHP default timezone setting.
+     * The "Utc" suffix is intentional: the whole codebase stores timestamps in UTC, and the method
+     * name makes that invariant visible at every call site — no need to check the docblock to know
+     * which timezone the returned string is in. Uses gmdate() internally, so the result is UTC
+     * regardless of PHP's default timezone.
      *
-     * @return string Current UTC datetime as 'Y-m-d H:i:s'
+     * If you need "now" in the store's timezone (for computation or display), call
+     * $locale->utcToStore() with no arguments — it returns a DateTime you can format however you want.
+     * Do NOT format this method's return value as if it were store-local; it isn't.
+     *
+     * No companion nowInStoreTimezone() / nowStore() method exists, and that's deliberate:
+     *   - A store-local datetime string in a DB column is ambiguous (same string, different instants
+     *     across stores) and would violate the "DB is always UTC" invariant this API relies on.
+     *   - For computation or display you want a DateTime object, not a string, so you can do
+     *     arithmetic or pass it to a locale-aware formatter — utcToStore() already returns that.
+     * A nowStore() string method would invite exactly the bug class the UTC-only DB convention is
+     * meant to prevent, so the API forces you to reach for utcToStore() instead.
      */
-    public static function now(): string
+    public static function nowUtc(): string
     {
         return gmdate(self::DATETIME_FORMAT);
     }
 
     /**
-     * Get current UTC date in standard format (without time).
+     * Current UTC date (no time) as a 'Y-m-d' string, suitable for date-only DB columns.
      *
-     * Uses gmdate() internally, so the result is always UTC
-     * regardless of the PHP default timezone setting.
-     *
-     * @return string Current UTC date as 'Y-m-d'
+     * Same rationale as nowUtc() — the "Utc" suffix encodes the timezone at the call site, and
+     * the deliberate absence of a todayInStoreTimezone() / todayStore() counterpart prevents
+     * store-local date strings from creeping into DB columns. For "today" in the store's timezone,
+     * use $locale->utcToStore()->format('Y-m-d').
      */
-    public static function today(): string
+    public static function todayUtc(): string
     {
         return gmdate(self::DATE_FORMAT);
     }

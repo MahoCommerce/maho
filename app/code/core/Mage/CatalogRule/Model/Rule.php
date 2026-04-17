@@ -184,7 +184,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     public function getNow()
     {
         if (!$this->_now) {
-            return Mage::app()->getLocale()->now();
+            return Mage::app()->getLocale()->nowUtc();
         }
         return $this->_now;
     }

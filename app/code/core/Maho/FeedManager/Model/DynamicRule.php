@@ -286,7 +286,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
     {
         parent::_beforeSave();
 
-        $now = Mage::app()->getLocale()->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+        $now = Mage::app()->getLocale()->nowUtc();
         if (!$this->getCreatedAt()) {
             $this->setCreatedAt($now);
         }

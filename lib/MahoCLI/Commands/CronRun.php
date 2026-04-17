@@ -99,7 +99,7 @@ class CronRun extends BaseMahoCommand
 
             $schedule
                 ->setStatus(Mage_Cron_Model_Schedule::STATUS_RUNNING)
-                ->setExecutedAt(\Mage::app()->getLocale()->now())
+                ->setExecutedAt(\Mage::app()->getLocale()->nowUtc())
                 ->save();
         } else {
             $schedule = Mage::getModel('cron/schedule');
@@ -112,7 +112,7 @@ class CronRun extends BaseMahoCommand
         } catch (\Exception $e) {
             if ($hasPersistentSchedule) {
                 $schedule
-                    ->setFinishedAt(\Mage::app()->getLocale()->now())
+                    ->setFinishedAt(\Mage::app()->getLocale()->nowUtc())
                     ->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
                     ->setMessages($e->__toString())
                     ->save();
@@ -125,7 +125,7 @@ class CronRun extends BaseMahoCommand
         if ($hasPersistentSchedule) {
             $schedule
                 ->setStatus(Mage_Cron_Model_Schedule::STATUS_SUCCESS)
-                ->setFinishedAt(\Mage::app()->getLocale()->now())
+                ->setFinishedAt(\Mage::app()->getLocale()->nowUtc())
                 ->save();
         }
 

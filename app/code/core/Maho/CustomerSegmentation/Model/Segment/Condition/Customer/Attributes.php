@@ -170,7 +170,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
 
     protected function buildDaysSinceCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $field, string $operator, mixed $value): string
     {
-        $currentDate = Mage::app()->getLocale()->now();
+        $currentDate = Mage::app()->getLocale()->nowUtc();
         $dateDiff = $adapter->getDateDiffSql("'{$currentDate}'", $field);
         return $this->buildSqlCondition($adapter, (string) $dateDiff, $operator, $value);
     }
@@ -197,7 +197,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
 
     protected function getBirthdayDiffSql(\Maho\Db\Adapter\AdapterInterface $adapter): string
     {
-        $currentDate = Mage::app()->getLocale()->now();
+        $currentDate = Mage::app()->getLocale()->nowUtc();
 
         // Use the adapter's platform-specific implementation for anniversary calculation
         // This handles MySQL vs PostgreSQL differences and leap year edge cases

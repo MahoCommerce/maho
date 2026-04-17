@@ -27,7 +27,7 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function hasVisiblePosts(): bool
     {
-        $today = Mage::app()->getLocale()->today();
+        $today = Mage::app()->getLocale()->todayUtc();
         $collection = Mage::getResourceModel('blog/post_collection')
             ->addStoreFilter(Mage::app()->getStore())
             ->addFieldToFilter('is_active', 1);

@@ -75,7 +75,7 @@ class Maho_Blog_Block_Category_View extends Mage_Core_Block_Template
                 )->distinct();
             }
 
-            $today = Mage::app()->getLocale()->today();
+            $today = Mage::app()->getLocale()->todayUtc();
             $this->_posts->getSelect()->where(
                 'publish_date IS NULL OR publish_date <= ?',
                 $today,
