@@ -91,40 +91,6 @@
                 <offline>Offline Payment Methods</offline>
             </groups>
         </payment>
-        <events>
-            <sales_order_save_before>
-                <observers>
-                    <payment_sales_order_save_before>
-                        <class>payment/observer</class>
-                        <method>salesOrderBeforeSave</method>
-                    </payment_sales_order_save_before>
-                </observers>
-            </sales_order_save_before>
-            <sales_order_payment_save_before>
-                <observers>
-                    <payment_before_save>
-                        <class>payment/observer</class>
-                        <method>beforeOrderPaymentSave</method>
-                    </payment_before_save>
-                </observers>
-            </sales_order_payment_save_before>
-            <sales_order_status_unassign_before>
-                <observers>
-                    <payment_order_status_unassign_before>
-                        <class>payment/observer</class>
-                        <method>beforeSalesOrderStatusUnassign</method>
-                    </payment_order_status_unassign_before>
-                </observers>
-            </sales_order_status_unassign_before>
-            <encryption_key_regenerated>
-                <observers>
-                    <payment_encryption_key_regenerated>
-                        <class>payment/observer</class>
-                        <method>encryptionKeyRegenerated</method>
-                    </payment_encryption_key_regenerated>
-                </observers>
-            </encryption_key_regenerated>
-        </events>
     </global>
     <frontend>
         <translate>
@@ -136,16 +102,6 @@
                 </Mage_Payment>
             </modules>
         </translate>
-        <events>
-            <catalog_product_type_prepare_full_options>
-                <observers>
-                    <payment_recurring_profile_prepare_options>
-                        <class>payment/observer</class>
-                        <method>prepareProductRecurringProfileOptions</method>
-                    </payment_recurring_profile_prepare_options>
-                </observers>
-            </catalog_product_type_prepare_full_options>
-        </events>
         <layout>
             <updates>
                 <payment module="Mage_Payment">

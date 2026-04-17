@@ -120,7 +120,7 @@ class Mage_Eav_Model_Attribute_Data_Multiline extends Mage_Eav_Model_Attribute_D
         $values = array_map([$this, '_applyOutputFilter'], $values);
         $output = match ($format) {
             Mage_Eav_Model_Attribute_Data::OUTPUT_FORMAT_ARRAY => $values,
-            Mage_Eav_Model_Attribute_Data::OUTPUT_FORMAT_HTML => implode('<br />', $values),
+            Mage_Eav_Model_Attribute_Data::OUTPUT_FORMAT_HTML => implode('<br>', $values),
             Mage_Eav_Model_Attribute_Data::OUTPUT_FORMAT_ONELINE => implode(' ', $values),
             default => implode("\n", $values),
         };

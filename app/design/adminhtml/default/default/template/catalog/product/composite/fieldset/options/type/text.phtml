@@ -19,7 +19,7 @@ $option = $this->getOption();
 <dd>
     <div class="input-box">
     <?php if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_FIELD): ?>
-        <input type="text" id="options_<?= $option->getId() ?>_text" class="input-text<?= $option->getIsRequired() ? ' required-entry' : '' ?> <?= $option->getMaxCharacters() ? ' validate-length maximum-length-' . $option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $option->getId() ?>]" value="<?= $this->escapeHtml($this->getDefaultValue()) ?>" price="<?= $this->getCurrencyPrice($option->getPrice(true)) ?>" />
+        <input type="text" id="options_<?= $option->getId() ?>_text" class="input-text<?= $option->getIsRequired() ? ' required-entry' : '' ?> <?= $option->getMaxCharacters() ? ' validate-length maximum-length-' . $option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $option->getId() ?>]" value="<?= $this->escapeHtml($this->getDefaultValue()) ?>" price="<?= $this->getCurrencyPrice($option->getPrice(true)) ?>">
     <?php elseif ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_AREA): ?>
         <textarea id="options_<?= $option->getId() ?>_text" class="<?= $option->getIsRequired() ? ' required-entry' : '' ?> <?= $option->getMaxCharacters() ? ' validate-length maximum-length-' . $option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $option->getId() ?>]" rows="5" cols="25" price="<?= $this->getCurrencyPrice($option->getPrice(true)) ?>"><?= $this->escapeHtml($this->getDefaultValue()) ?></textarea>
     <?php endif ?>

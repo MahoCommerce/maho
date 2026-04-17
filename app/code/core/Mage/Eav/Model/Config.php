@@ -55,7 +55,7 @@ class Mage_Eav_Model_Config
 
     /**
      * Attribute set relation information. Structure:
-     * <br/>
+     * <br>
      * [
      *  int attribute_id => [
      *      int set_id => [

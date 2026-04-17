@@ -25,7 +25,16 @@ class Maho_Paypal_Model_Webhook_Handler_CaptureCompleted extends Maho_Paypal_Mod
             return;
         }
 
+        // Skip if this capture was already registered during order placement
+        $existing = Mage::getModel('sales/order_payment_transaction');
+        $existing->load($captureId, 'txn_id');
+        if ($existing->getId()) {
+            $this->_log("CaptureCompleted: capture {$captureId} already registered for order {$order->getIncrementId()}, skipping");
+            return;
+        }
+
         $payment = $order->getPayment();
+
         $payment->setAdditionalInformation('paypal_capture_id', $captureId);
         $payment->setTransactionId($captureId);
         $payment->setIsTransactionClosed(true);

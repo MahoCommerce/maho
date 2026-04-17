@@ -16,6 +16,7 @@ class Mage_Eav_Model_Observer
      * @return void
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[Maho\Config\Observer('controller_action_predispatch')]
     public function onControllerActionPredispatch($event)
     {
         /** @var Mage_Core_Controller_Varien_Action $controllerAction */
@@ -27,6 +28,7 @@ class Mage_Eav_Model_Observer
         }
     }
 
+    #[Maho\Config\CronJob('eav_clean_orphaned_records', schedule: '0 0 * * *')]
     public function cleanOrphanedRecords()
     {
         $resource = Mage::getSingleton('core/resource');

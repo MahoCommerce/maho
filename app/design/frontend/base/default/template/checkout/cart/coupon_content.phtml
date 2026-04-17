@@ -31,7 +31,7 @@ $hasAppliedCodes = !empty($couponCode) || !empty($giftcardCodes);
             id="maho-promo-code"
             name="promo_code"
             value=""
-            placeholder="<?= $giftcardEnabled ? $this->__('Discount code or gift card') : $this->__('Enter discount code') ?>" />
+            placeholder="<?= $giftcardEnabled ? $this->__('Discount code or gift card') : $this->__('Enter discount code') ?>">
         <button type="button" id="maho-promo-apply" title="<?= $this->quoteEscape($this->__('Apply')) ?>" class="button2 btn-apply"><?= $this->__('Apply') ?></button>
     </div>
     <div id="maho-promo-message" class="promo-message"></div>

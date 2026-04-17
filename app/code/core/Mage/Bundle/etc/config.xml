@@ -138,16 +138,6 @@
                 <bundle>bundle/sales_order_pdf_items_creditmemo</bundle>
             </creditmemo>
         </pdf>
-        <events>
-            <catalogindex_plain_reindex_after>
-                <observers>
-                    <bundle>
-                        <class>bundle/observer</class>
-                        <method>catalogIndexPlainReindexAfter</method>
-                    </bundle>
-                </observers>
-            </catalogindex_plain_reindex_after>
-        </events>
     </global>
     <frontend>
         <translate>
@@ -174,40 +164,6 @@
                 </attributes>
             </collection>
         </product>
-        <events>
-            <catalog_product_upsell>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>appendUpsellProducts</method>
-                    </bundle_observer>
-                </observers>
-            </catalog_product_upsell>
-            <sales_convert_quote_item_to_order_item>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>appendBundleSelectionData</method>
-                    </bundle_observer>
-                </observers>
-            </sales_convert_quote_item_to_order_item>
-            <catalog_product_collection_load_after>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>loadProductOptions</method>
-                    </bundle_observer>
-                </observers>
-            </catalog_product_collection_load_after>
-            <product_option_renderer_init>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>initOptionRenderer</method>
-                    </bundle_observer>
-                </observers>
-            </product_option_renderer_init>
-        </events>
     </frontend>
     <admin>
         <fieldsets>
@@ -260,47 +216,5 @@
                 </create>
             </order>
         </sales>
-        <events>
-            <catalog_product_prepare_save>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>prepareProductSave</method>
-                    </bundle_observer>
-                </observers>
-            </catalog_product_prepare_save>
-            <sales_convert_quote_item_to_order_item>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>appendBundleSelectionData</method>
-                    </bundle_observer>
-                </observers>
-            </sales_convert_quote_item_to_order_item>
-            <catalog_model_product_duplicate>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>duplicateProduct</method>
-                    </bundle_observer>
-                </observers>
-            </catalog_model_product_duplicate>
-            <catalog_product_edit_action>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>setAttributeTabBlock</method>
-                    </bundle_observer>
-                </observers>
-            </catalog_product_edit_action>
-            <catalog_product_new_action>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>setAttributeTabBlock</method>
-                    </bundle_observer>
-                </observers>
-            </catalog_product_new_action>
-        </events>
     </adminhtml>
 </config>

@@ -437,32 +437,6 @@
                 </catalog_category_product>
             </indexer>
         </index>
-        <events>
-            <log_log_clean_after>
-                <observers>
-                    <catalog_product_compare_item>
-                        <class>catalog/observer</class>
-                        <method>catalogProductCompareClean</method>
-                    </catalog_product_compare_item>
-                </observers>
-            </log_log_clean_after>
-            <page_block_html_topmenu_gethtml_before>
-                <observers>
-                    <catalog_add_topmenu_items>
-                        <class>catalog/observer</class>
-                        <method>addCatalogToTopmenuItems</method>
-                    </catalog_add_topmenu_items>
-                </observers>
-            </page_block_html_topmenu_gethtml_before>
-            <catalog_entity_attribute_save_before>
-                <observers>
-                    <catalog_check_reserved_attribute_codes>
-                        <class>catalog/observer</class>
-                        <method>checkReservedAttributeCodes</method>
-                    </catalog_check_reserved_attribute_codes>
-                </observers>
-            </catalog_entity_attribute_save_before>
-        </events>
         <catalog>
             <product>
                 <type>
@@ -649,40 +623,6 @@
                 </Mage_Catalog>
             </modules>
         </translate>
-        <events>
-            <cms_wysiwyg_images_static_urls_allowed>
-                <observers>
-                    <catalog_wysiwyg>
-                        <class>catalog/observer</class>
-                        <method>catalogCheckIsUsingStaticUrlsAllowed</method>
-                    </catalog_wysiwyg>
-                </observers>
-            </cms_wysiwyg_images_static_urls_allowed>
-            <admin_system_config_changed_section_catalog>
-                <observers>
-                    <mage_catalog>
-                        <class>core/observer</class>
-                        <method>cleanCacheByTags</method>
-                    </mage_catalog>
-                </observers>
-            </admin_system_config_changed_section_catalog>
-            <adminhtml_product_attribute_types>
-                <observers>
-                    <catalog>
-                        <class>catalog/observer</class>
-                        <method>addFileAttributeType</method>
-                    </catalog>
-                </observers>
-            </adminhtml_product_attribute_types>
-            <adminhtml_catalog_product_edit_element_types>
-                <observers>
-                    <catalog>
-                        <class>catalog/observer</class>
-                        <method>addFileElementType</method>
-                    </catalog>
-                </observers>
-            </adminhtml_catalog_product_edit_element_types>
-        </events>
     </adminhtml>
     <frontend>
         <routers>
@@ -697,35 +637,6 @@
         <default>
             <router>catalog</router>
         </default>
-        <events>
-            <customer_login>
-                <observers>
-                    <catalog>
-                        <type>model</type>
-                        <class>catalog/product_compare_item</class>
-                        <method>bindCustomerLogin</method>
-                    </catalog>
-                </observers>
-            </customer_login>
-            <customer_logout>
-                <observers>
-                    <catalog>
-                        <type>model</type>
-                        <class>catalog/product_compare_item</class>
-                        <method>bindCustomerLogout</method>
-                    </catalog>
-                </observers>
-            </customer_logout>
-            <sales_convert_quote_item_to_order_item>
-                <observers>
-                    <catalog>
-                        <type>model</type>
-                        <class>catalog/product_option_observer</class>
-                        <method>copyQuoteFilesToOrderFiles</method>
-                    </catalog>
-                </observers>
-            </sales_convert_quote_item_to_order_item>
-        </events>
         <translate>
             <modules>
                 <Mage_Catalog>
@@ -857,16 +768,4 @@
             </msrp>
         </sales>
     </default>
-    <crontab>
-        <jobs>
-            <catalog_product_index_price_reindex_all>
-                <schedule>
-                    <cron_expr>0 2 * * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>catalog/observer::reindexProductPrices</model>
-                </run>
-            </catalog_product_index_price_reindex_all>
-        </jobs>
-    </crontab>
 </config>

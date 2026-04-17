@@ -40,8 +40,8 @@
     </div>
     <fieldset id="<?= $this->getHtmlId() ?>">
         <legend><?= Mage::helper('catalog')->__('Super product attributes configuration') ?></legend>
-        <input type="hidden" id="<?= $this->getHtmlId() ?>_save_links" name="configurable_products_data" value=""/>
-        <input type="hidden" id="<?= $this->getHtmlId() ?>_save_attributes" name="configurable_attributes_data" />
+        <input type="hidden" id="<?= $this->getHtmlId() ?>_save_links" name="configurable_products_data" value="">
+        <input type="hidden" id="<?= $this->getHtmlId() ?>_save_attributes" name="configurable_attributes_data">
 
         <ul class="messages">
             <li class="notice-msg">
@@ -59,7 +59,7 @@
     </div>
     <div class="values-container right">
         <label for="__id___label" class="bold"><?= Mage::helper('catalog')->__('Attribute Name:') ?></label>
-        <input id="__id___label" type="text" <?php if ($this->isAttributesConfigurationReadonly()): ?> disabled="disabled" <?php endif ?> class="input-text attribute-label required-entry template no-display" value="{{label}}" readonly="label" />
+        <input id="__id___label" type="text" <?php if ($this->isAttributesConfigurationReadonly()): ?> disabled="disabled" <?php endif ?> class="input-text attribute-label required-entry template no-display" value="{{label}}" readonly="label">
         <input id="__id___label_use_default" type="checkbox" value="1" " checked="use_default" class="attribute-use-default-label">
         <label for="__id___label_use_default"><?= Mage::helper('catalog')->__('Use default') ?> ('{{store_label}}')</label>
         <ul class="attribute-values">
@@ -74,7 +74,7 @@
 <div class="attribute-values-container-main">
     <div class="attribute-values-container left">
     <?= Mage::helper('catalog')->__('Price:') ?>
-    <input id="__id___pricing" type="text" <?php if ($this->isAttributesPricesReadonly() || $this->getCanEditPrice() === false): ?> disabled="disabled" <?php endif ?> class="input-text attribute-price validate-number template no-display" value="{{pricing_value}}"/>
+    <input id="__id___pricing" type="text" <?php if ($this->isAttributesPricesReadonly() || $this->getCanEditPrice() === false): ?> disabled="disabled" <?php endif ?> class="input-text attribute-price validate-number template no-display" value="{{pricing_value}}">
 </div>
 <div class="attribute-values-container left">
     &nbsp;<select class="attribute-price-type" id="__id___price_type" <?php if ($this->isAttributesPricesReadonly() || $this->getCanEditPrice() === false): ?> disabled="disabled" <?php endif ?>>
@@ -90,10 +90,10 @@
 <?php else: ?>
 <div class="attribute-values-container-main">
     <div class="attribute-values-container left">
-    <input id="__id___pricing" type="hidden"  class="attribute-price template no-display" value="0" />
+    <input id="__id___pricing" type="hidden"  class="attribute-price template no-display" value="0">
 </div>
 <div class="attribute-values-container left">
-    <input type="hidden" class="attribute-price-type" id="__id___price_type" value="0" />
+    <input type="hidden" class="attribute-price-type" id="__id___price_type" value="0">
 </div>
 <?php if ($this->getShowUseDefaultPrice()) : ?>
 <div class="attribute-values-container no-display">
@@ -107,7 +107,7 @@
     <?php if ($this->getCanReadPrice() !== false) : ?>
         <div class="attribute-values-container left v-middle">
             &nbsp;<?= Mage::helper('catalog')->__('Price:') ?>
-            <input type="text" class="input-text attribute-price validate-number"<?php if ($this->getCanEditPrice() === false) : ?> disabled="disabled" <?php endif ?>/>
+            <input type="text" class="input-text attribute-price validate-number"<?php if ($this->getCanEditPrice() === false) : ?> disabled="disabled" <?php endif ?>>
         </div>
         <div class="attribute-values-container left v-middle">
             &nbsp;<select class="attribute-price-type"<?php if ($this->getCanEditPrice() === false) : ?> disabled="disabled" <?php endif ?>>
@@ -116,15 +116,15 @@
             </select>
         </div>
     <?php else: ?>
-        <input type="hidden" class="attribute-price" />
-        <input type="hidden" class="attribute-price-type" />
+        <input type="hidden" class="attribute-price">
+        <input type="hidden" class="attribute-price-type">
     <?php endif ?>
 </div>
 <div class="template no-display" id="<?= $this->getHtmlId() ?>_simple_pricing_view">
     &nbsp;<?= Mage::helper('catalog')->__('Price') ?> <strong>'{{value}}'</strong>
 </div>
 <?= $this->getGridHtml() ?>
-<script type="text/javascript">
+<script>
 var superProduct = new Product.Configurable(<?= $this->getAttributesJson() ?>,<?= $this->getLinksJson() ?>,'<?= $this->getHtmlId() ?>_',<?= $this->getGridJsObject() ?>, <?= ( $this->isReadonly() ? 'true' : 'false') ?>);
 superProduct.createEmptyUrl = '<?= $this->getNewEmptyProductUrl() ?>';
 superProduct.createNormalUrl = '<?= $this->getNewProductUrl() ?>';
@@ -137,4 +137,4 @@ Validation.add(
 )
 </script>
 
-<div><input type="hidden" name="affect_configurable_product_attributes" value="1" /></div>
+<div><input type="hidden" name="affect_configurable_product_attributes" value="1"></div>

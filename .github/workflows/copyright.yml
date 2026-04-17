@@ -44,11 +44,6 @@ jobs:
           .phpcs.xml
           .php-cs-fixer.php
           .rector.php
-          .phpstorm.meta.php/blocks.meta.php
-          .phpstorm.meta.php/helpers.meta.php
-          .phpstorm.meta.php/models.meta.php
-          .phpstorm.meta.php/registry.meta.php
-          .phpstorm.meta.php/resource_models.meta.php
           "
 
           # Build regex pattern with valid years

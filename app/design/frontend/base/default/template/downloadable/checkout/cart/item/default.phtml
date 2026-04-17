@@ -22,7 +22,7 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
 <td class="product-cart-image"><a href="<?= $this->getProductUrl() ?>" class="product-image"
        title="<?= $this->escapeHtml($this->getProductName()) ?>"><img
             src="<?= $this->getProductThumbnail()->resize(180) ?>"
-            alt="<?= $this->escapeHtml($this->getProductName()) ?>"/></a>
+            alt="<?= $this->escapeHtml($this->getProductName()) ?>"></a>
 </td>
 <td class="product-cart-info">
     <h2 class="product-name"><a
@@ -72,7 +72,7 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
             <?php $helpLinkId = 'cart-msrp-help-' . $_item->getId(); ?>
             <a id="<?= $helpLinkId ?>" href="#"
                class="map-help-link"><?= $this->__("What's this?") ?></a>
-            <script type="text/javascript">
+            <script>
                 Catalog.Map.addHelpLink('<?= $helpLinkId ?>', "<?= $this->jsQuoteEscape($this->__("What's this?")) ?>");
             </script>
         </span>
@@ -183,7 +183,7 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
 <td class="product-cart-actions" data-rwd-label="<?= $this->__('Qty') ?>">
     <input type="text" pattern="\d*(\.\d+)?" name="cart[<?= $_item->getId() ?>][qty]" value="<?= $this->getQty() ?>"
            data-cart-item-id="<?= $this->jsQuoteEscape($_item->getSku()) ?>"
-           size="4" title="<?= $this->quoteEscape($this->__('Qty')) ?>" class="input-text qty" maxlength="12" />
+           size="4" title="<?= $this->quoteEscape($this->__('Qty')) ?>" class="input-text qty" maxlength="12">
 
     <button type="submit" data-cart-item-update name="update_cart_action" value="update_qty" title="<?= $this->quoteEscape($this->__('Update')) ?>" class="button btn-update"><?= $this->__('Update') ?>
     </button>

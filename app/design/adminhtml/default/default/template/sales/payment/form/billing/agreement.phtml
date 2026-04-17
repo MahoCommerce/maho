@@ -14,7 +14,7 @@
 <ul class="form-list" id="payment_form_<?= $_code ?>" style="display:none;">
     <li>
         <div class="input-box">
-            <label for="<?= $_code ?>_ba_agreement_id"><?= $this->__('Billing Agreement') ?> <span class="required">*</span></label><br/>
+            <label for="<?= $_code ?>_ba_agreement_id"><?= $this->__('Billing Agreement') ?> <span class="required">*</span></label><br>
             <select id="<?= $_code ?>_ba_agreement_id" name="payment[<?= $this->getTransportName() ?>]" class="required-entry">
                 <option value=""><?= $this->__('-- Please Select Billing Agreement--') ?></option>
             <?php foreach ($this->getBillingAgreements() as $id => $referenceId): ?>

@@ -68,14 +68,14 @@ class Radios extends AbstractElement
             if ($option['value'] == $selected) {
                 $html .= ' checked="checked"';
             }
-            $html .= ' />';
+            $html .= '>';
             $html .= '<label class="inline" for="' . $this->getHtmlId() . $option['value'] . '">' . $option['label'] . '</label>';
         } elseif ($option instanceof \Maho\DataObject) {
             $html .= 'id="' . $this->getHtmlId() . $option->getValue() . '"' . $option->serialize(['label', 'title', 'value', 'class', 'style']);
             if (in_array($option->getValue(), $selected)) {
                 $html .= ' checked="checked"';
             }
-            $html .= ' />';
+            $html .= '>';
             $html .= '<label class="inline" for="' . $this->getHtmlId() . $option->getValue() . '">' . $option->getLabel() . '</label>';
         }
         $html .= $this->getSeparator() . "\n";

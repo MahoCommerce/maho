@@ -14,7 +14,7 @@
 <?php $_product = $this->getProduct() ?>
 
 <?php if ($_product->isSaleable()): ?>
-    <script type="text/javascript">
+    <script>
         var skipTierPricePercentUpdate = true;
         var bundle = new Product.Bundle(<?= $this->getJsonConfig() ?>);
         var taxCalcMethod = "<?= Mage::helper('tax')->getConfig()->getAlgorithm($_product->getStore()) ?>";

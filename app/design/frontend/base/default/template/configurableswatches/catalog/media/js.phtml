@@ -12,7 +12,7 @@
 /** @var Mage_ConfigurableSwatches_Block_Catalog_Media_Js_Abstract $this */
 ?>
 
-<script type="text/javascript">
+<script>
     ConfigurableMediaImages.init('<?= $this->getImageType() ?>');
     <?php foreach ($this->getProductImageFallbacks() as $imageFallback): ?>
     ConfigurableMediaImages.setImageFallback(<?= $imageFallback['product']->getId() ?>, JSON.parse('<?= $imageFallback['image_fallback'] ?>'));

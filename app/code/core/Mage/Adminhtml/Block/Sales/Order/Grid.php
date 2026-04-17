@@ -23,6 +23,7 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
         $this->setUseAjax(true);
         $this->setDefaultSort('created_at');
         $this->setSaveParametersInSession(true);
+        $this->_enableEntityNavigation = true;
     }
 
     /**

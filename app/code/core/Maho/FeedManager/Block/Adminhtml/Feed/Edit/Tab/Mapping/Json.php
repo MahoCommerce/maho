@@ -79,7 +79,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
         </div>
 
 
-        <script type="text/javascript">
+        <script>
         var JsonBuilder = {
             structure: ' . Mage::helper('core')->jsonEncode($structureData) . ',
             sourceTypes: ' . Mage::helper('core')->jsonEncode($sourceTypes) . ',

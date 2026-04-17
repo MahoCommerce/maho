@@ -81,7 +81,7 @@
 /** @var Mage_Adminhtml_Block_Widget_Grid $parent */
 $parent = $this->getParentBlock();
 if (!$parent->canDisplayContainer()): ?>
-<script type="text/javascript">
+<script>
     <?= $this->getJsObjectName() ?>.setGridIds('<?= $this->getGridIdsJson() ?>');
 </script>
 <?php endif ?>

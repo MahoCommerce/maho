@@ -25,24 +25,24 @@
                 <form method="post" action="<?= $this->getPostActionUrl() ?>" id="loginForm">
                     <?= $this->getBlockHtml('formkey') ?>
                     <fieldset>
-                        <input name="form_key" type="hidden" value="<?= $this->getFormKey() ?>" />
+                        <input name="form_key" type="hidden" value="<?= $this->getFormKey() ?>">
                         <h2><?= $this->__('Log in to Admin Panel') ?></h2>
                         <p class="description"><?= $this->__('Log in to use <strong>%s</strong>', $this->getConsumer()->getName()) ?></p>
-                        <div class="input-box input-left"><label for="username"><?= $this->__('User Name:') ?></label><br/>
-                            <input type="text" id="username" name="login[username]" value="" class="required-entry input-text" /></div>
-                        <div class="input-box input-right"><label for="login"><?= $this->__('Password:') ?></label><br />
+                        <div class="input-box input-left"><label for="username"><?= $this->__('User Name:') ?></label><br>
+                            <input type="text" id="username" name="login[username]" value="" class="required-entry input-text"></div>
+                        <div class="input-box input-right"><label for="login"><?= $this->__('Password:') ?></label><br>
                             <!-- This is a dummy hidden field to trick firefox from auto filling the password -->
-                            <input type="password" class="input-text no-display" name="dummy" id="dummy" />
-                            <input type="password" id="login" name="login[password]" class="required-entry input-text" value="" autocomplete="new-password"/></div>
+                            <input type="password" class="input-text no-display" name="dummy" id="dummy">
+                            <input type="password" id="login" name="login[password]" class="required-entry input-text" value="" autocomplete="new-password"></div>
                         <div class="clear"></div>
                         <div class="form-buttons">
                             <button type="submit" class="form-button" title="<?= $this->quoteEscape($this->__('Login')) ?>" ><?= $this->__('Login') ?></button>
                             <button onclick="document.location.href='<?= $this->getRejectUrl() ?>'; return false;" title="<?= $this->quoteEscape($this->__('Reject')) ?>"><?= $this->__('Reject') ?></button>
                         </div>
-                        <input type="hidden" name="oauth_token" value="<?= $this->escapeHtml($this->getToken()) ?>"/>
+                        <input type="hidden" name="oauth_token" value="<?= $this->escapeHtml($this->getToken()) ?>">
                     </fieldset>
                 </form>
-                <script type="text/javascript">
+                <script>
                 //<![CDATA[
                      var loginForm = new varienForm('loginForm');
                 //]]>

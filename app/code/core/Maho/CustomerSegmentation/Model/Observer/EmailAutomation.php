@@ -28,6 +28,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
      * Handle segment refresh completion
      * Triggered after segment customer membership is updated
      */
+    #[Maho\Config\Observer('customer_segment_refresh_after')]
     public function onSegmentRefreshAfter(\Maho\Event\Observer $observer): void
     {
         /** @var Maho_CustomerSegmentation_Model_Segment $segment */
@@ -188,6 +189,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
      * Handle newsletter subscription changes
      * Stop email sequences when customer unsubscribes
      */
+    #[Maho\Config\Observer('newsletter_subscriber_save_after')]
     public function onNewsletterSubscriberSaveAfter(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Newsletter_Model_Subscriber $subscriber */
@@ -229,6 +231,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
      * Handle customer deletion
      * Clean up sequence progress when customer is deleted
      */
+    #[Maho\Config\Observer('customer_delete_after')]
     public function onCustomerDeleteAfter(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Customer_Model_Customer $customer */
@@ -266,6 +269,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
      * Process ready email sequences (called by cron)
      * This processes scheduled emails that are ready to send
      */
+    #[Maho\Config\Observer('customer_segmentation_process_scheduled_emails')]
     public function processScheduledEmails(\Maho\Event\Observer $observer): void
     {
         $startTime = microtime(true);

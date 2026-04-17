@@ -50,11 +50,11 @@
     </div>
     <h3><?= $this->__('Items Invoiced') ?></h3>
     <table class="data-table" id="my-invoice-table-<?= $_invoice->getId() ?>">
-        <col />
-        <col width="1" />
-        <col width="1" />
-        <col width="1" />
-        <col width="1" />
+        <col>
+        <col width="1">
+        <col width="1">
+        <col width="1">
+        <col width="1">
         <thead>
             <tr>
                 <th><?= $this->__('Product Name') ?></th>
@@ -77,4 +77,4 @@
         <?php endforeach ?>
     </table>
 <?php endforeach ?>
-<script type="text/javascript">window.print();</script>
+<script>window.print();</script>

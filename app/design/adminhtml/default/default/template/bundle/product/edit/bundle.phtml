@@ -11,7 +11,7 @@
 
 /** @var Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle $this */
 ?>
-<script type="text/javascript">
+<script>
 if(typeof Bundle=='undefined') {
     Bundle = {};
 }
@@ -47,7 +47,7 @@ if(typeof Bundle=='undefined') {
     </div>
 </div>
 
-<script type="text/javascript">
+<script>
 // re-bind form elements onchange
 varienWindowOnload();
 <?php if ($this->isReadonly()):?>
@@ -69,4 +69,4 @@ Validation.add('validate-greater-zero-based-on-option', '<?= $this->jsQuoteEscap
 });
 </script>
 
-<div><input type="hidden" name="affect_bundle_product_selections" value="1" /></div>
+<div><input type="hidden" name="affect_bundle_product_selections" value="1"></div>

@@ -18,6 +18,7 @@ class Mage_Payment_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
+    #[Maho\Config\Observer('sales_order_save_before')]
     public function salesOrderBeforeSave($observer)
     {
         /** @var Mage_Sales_Model_Order $order */
@@ -50,6 +51,7 @@ class Mage_Payment_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('catalog_product_type_prepare_full_options', area: 'frontend')]
     public function prepareProductRecurringProfileOptions($observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -93,6 +95,7 @@ class Mage_Payment_Model_Observer
     /**
      * Sets current instructions for bank transfer account
      */
+    #[Maho\Config\Observer('sales_order_payment_save_before')]
     public function beforeOrderPaymentSave(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order_Payment $payment */
@@ -112,6 +115,7 @@ class Mage_Payment_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Observer('sales_order_status_unassign_before')]
     public function beforeSalesOrderStatusUnassign($observer)
     {
         $state = $observer->getEvent()->getState();
@@ -159,6 +163,7 @@ class Mage_Payment_Model_Observer
         }
     }
 
+    #[Maho\Config\Observer('encryption_key_regenerated')]
     public function encryptionKeyRegenerated(\Maho\Event\Observer $observer): void
     {
         /** @var \Symfony\Component\Console\Output\OutputInterface $output */

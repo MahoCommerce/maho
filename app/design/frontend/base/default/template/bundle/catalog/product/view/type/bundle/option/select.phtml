@@ -27,7 +27,7 @@ $tierPriceHtml = '';
         <?php if ($selections[0]->getSelectionCanChangeQty()): ?>
             <?php $tierPriceHtml = $this->getTierPriceHtml($selections[0]); ?>
         <?php endif ?>
-        <input type="hidden" name="bundle_option[<?= $option->getId() ?>]" value="<?= $selections[0]->getSelectionId() ?>"/>
+        <input type="hidden" name="bundle_option[<?= $option->getId() ?>]" value="<?= $selections[0]->getSelectionId() ?>">
     <?php else: ?>
         <select onchange="bundle.changeSelection(this)" id="bundle-option-<?= $option->getId() ?>" name="bundle_option[<?= $option->getId() ?>]" class="bundle-option-<?= $option->getId() ?><?= $option->getRequired() ? ' required-entry' : '' ?> bundle-option-select change-container-classname">
             <option value=""><?= $this->__('Choose a selection...') ?></option>
@@ -46,6 +46,6 @@ $tierPriceHtml = '';
     <span id="bundle-option-<?= $option->getId() ?>-tier-prices"> <?= $tierPriceHtml ?></span>
     <span class="qty-holder">
         <label for="bundle-option-<?= $option->getId() ?>-qty-input"><?= $this->__('Qty:') ?>&nbsp;</label>
-        <input onkeyup="bundle.changeOptionQty(this, event)" onblur="bundle.changeOptionQty(this, event)"<?= !$canChangeQty ? ' disabled="disabled"' : '' ?> id="bundle-option-<?= $option->getId() ?>-qty-input" class="input-text qty<?= !$canChangeQty ? ' qty-disabled' : '' ?>" type="text" pattern="\d*(\.\d+)?" name="bundle_option_qty[<?= $option->getId() ?>]" value="<?= $defaultQty ?>"/>
+        <input onkeyup="bundle.changeOptionQty(this, event)" onblur="bundle.changeOptionQty(this, event)"<?= !$canChangeQty ? ' disabled="disabled"' : '' ?> id="bundle-option-<?= $option->getId() ?>-qty-input" class="input-text qty<?= !$canChangeQty ? ' qty-disabled' : '' ?>" type="text" pattern="\d*(\.\d+)?" name="bundle_option_qty[<?= $option->getId() ?>]" value="<?= $defaultQty ?>">
     </span>
 </dd>

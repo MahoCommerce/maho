@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </select>
                 </td>
                 <td>
-                    <input class="input-text validate-greater-than-zero" name="container_girth" />
+                    <input class="input-text validate-greater-than-zero" name="container_girth">
                 </td>
                 <td>
                     <select name="container_girth_dimension_units" class="options-units-dimensions measures">
@@ -125,25 +125,25 @@ document.addEventListener('DOMContentLoaded', () => {
             <?php endif ?>
             <?php if ($this->displayCustomsValue() && count($contentTypes) === 0): ?>
                 <td>
-                    <input class="customs-value input-text validate-zero-or-greater" name="package_customs_value" />
+                    <input class="customs-value input-text validate-zero-or-greater" name="package_customs_value">
                     <span class="customs-value-currency">[<?= $this->getCustomValueCurrencyCode() ?>]</span>
                 </td>
             <?php endif ?>
                 <td>
-                    <input class="options-weight input-text required-entry validate-greater-than-zero" name="container_weight" />
+                    <input class="options-weight input-text required-entry validate-greater-than-zero" name="container_weight">
                     <select name="container_weight_units" class="options-units-weight measures">
                         <option value="<?= Mage_Core_Model_Locale::WEIGHT_POUND ?>" selected><?= Mage::helper('sales')->__('lb') ?></option>
                         <option value="<?= Mage_Core_Model_Locale::WEIGHT_KILOGRAM ?>" ><?= Mage::helper('sales')->__('kg') ?></option>
                     </select>
                 </td>
                 <td>
-                    <input class="options-dimension input-text validate-greater-than-zero" name="container_length" />
+                    <input class="options-dimension input-text validate-greater-than-zero" name="container_length">
                 </td>
                 <td>
-                    <input class="options-dimension input-text validate-greater-than-zero" name="container_width" />
+                    <input class="options-dimension input-text validate-greater-than-zero" name="container_width">
                 </td>
                 <td>
-                    <input class="options-dimension input-text validate-greater-than-zero" name="container_height" />
+                    <input class="options-dimension input-text validate-greater-than-zero" name="container_height">
                 </td>
                 <td>
                     <select name="container_dimension_units" class="options-units-dimensions measures">
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <tbody>
             <?php if ($this->displayCustomsValue()): ?>
                 <td>
-                    <input class="customs-value input-text validate-zero-or-greater" name="package_customs_value" />
+                    <input class="customs-value input-text validate-zero-or-greater" name="package_customs_value">
                     <span class="customs-value-currency">[<?= $this->getCustomValueCurrencyCode() ?>]</span>
                 </td>
             <?php endif ?>
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </select>
                 </td>
                 <td>
-                    <input name="content_type_other" class="input-text options-content-type disabled" disabled />
+                    <input name="content_type_other" class="input-text options-content-type disabled" disabled>
                 </td>
             </tbody>
         </table>

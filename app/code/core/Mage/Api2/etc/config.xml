@@ -66,24 +66,6 @@
                 </setup>
             </api2_setup>
         </resources>
-        <events>
-            <admin_user_save_after>
-                <observers>
-                    <api2>
-                        <class>api2/observer</class>
-                        <method>saveAdminToRoleRelation</method>
-                    </api2>
-                </observers>
-            </admin_user_save_after>
-            <api_user_authenticated>
-                <observers>
-                    <api2_upgrade_key>
-                        <class>api2/observer</class>
-                        <method>upgradeApiKey</method>
-                    </api2_upgrade_key>
-                </observers>
-            </api_user_authenticated>
-        </events>
         <api2>
             <auth_adapters>
                 <oauth module="api2" translate="label">
@@ -190,15 +172,5 @@
                 </api2>
             </updates>
         </layout>
-        <events>
-            <catalog_entity_attribute_save_after>
-                <observers>
-                    <api2>
-                        <class>api2/observer</class>
-                        <method>catalogAttributeSaveAfter</method>
-                    </api2>
-                </observers>
-            </catalog_entity_attribute_save_after>
-        </events>
     </adminhtml>
 </config>

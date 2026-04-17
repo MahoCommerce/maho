@@ -22,14 +22,14 @@ $selections = $option->getSelections();
     <div class="input-box">
     <?php if (count($selections) == 1 && $option->getRequired()): ?>
         <?= $this->getSelectionQtyTitlePrice($selections[0]) ?>
-        <input type="hidden" name="bundle_option[<?= $option->getId() ?>]" value="<?= $selections[0]->getSelectionId() ?>"/>
+        <input type="hidden" name="bundle_option[<?= $option->getId() ?>]" value="<?= $selections[0]->getSelectionId() ?>">
     <?php else: ?>
         <ul class="options-list">
         <?php foreach($selections as $selection): ?>
             <li>
                 <?php $checked = $this->_isSelected($selection) ? ' checked="checked"' : '' ?>
                 <?php $disabled = !$selection->isSaleable() ? ' disabled="disabled"' : '' ?>
-                <input type="checkbox" class="change-container-classname checkbox bundle-option-<?= $option->getId() ?><?= $option->getRequired() ? ' validate-one-required-by-name' : '' ?>" id="bundle-option-<?= $option->getId() ?>-<?= $selection->getSelectionId() ?>" name="bundle_option[<?= $option->getId() ?>][]"<?= $checked ?><?= $disabled ?> value="<?= $selection->getSelectionId() ?>" onclick="bundle.changeSelection(this)"/>
+                <input type="checkbox" class="change-container-classname checkbox bundle-option-<?= $option->getId() ?><?= $option->getRequired() ? ' validate-one-required-by-name' : '' ?>" id="bundle-option-<?= $option->getId() ?>-<?= $selection->getSelectionId() ?>" name="bundle_option[<?= $option->getId() ?>][]"<?= $checked ?><?= $disabled ?> value="<?= $selection->getSelectionId() ?>" onclick="bundle.changeSelection(this)">
                 <span class="label"><label for="bundle-option-<?= $option->getId() ?>-<?= $selection->getSelectionId() ?>"><?= $this->getSelectionQtyTitlePrice($selection) ?></label></span>
             <?php if ($option->getRequired()): ?>
                 <?= $this->setValidationContainer("bundle-option-{$option->getId()}-{$selection->getSelectionId()}", "bundle-option-{$option->getId()}-container") ?>

@@ -22,7 +22,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'translations:missing',
+    name: 'dev:translations:missing',
     description: 'Display used translations strings that are missing from csv files',
 )]
 class TranslationsMissing extends BaseMahoCommand

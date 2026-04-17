@@ -57,24 +57,6 @@
         </layout>
     </adminhtml>
     <frontend>
-        <events>
-            <sales_order_save_after>
-                <observers>
-                    <notifystock>
-                        <class>rss/observer</class>
-                        <method>salesOrderItemSaveAfterNotifyStock</method>
-                    </notifystock>
-                </observers>
-            </sales_order_save_after>
-            <sales_order_save_after>
-                <observers>
-                    <ordernew>
-                        <class>rss/observer</class>
-                        <method>salesOrderItemSaveAfterOrderNew</method>
-                    </ordernew>
-                </observers>
-            </sales_order_save_after>
-        </events>
         <translate>
             <modules>
                 <Mage_Rss>

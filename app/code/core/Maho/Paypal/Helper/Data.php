@@ -129,12 +129,6 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
         // Ensure correct checkout method for sessionless contexts (webhooks)
         if ($quote->getCustomerId() && !$quote->getData('checkout_method')) {
             $quote->setData('checkout_method', Mage_Checkout_Model_Type_Onepage::METHOD_CUSTOMER);
-            // Load and attach the customer so _prepareCustomerQuote() doesn't
-            // overwrite the quote's customer with an empty session object
-            $customer = Mage::getModel('customer/customer')->load($quote->getCustomerId());
-            if ($customer->getId()) {
-                $quote->setCustomer($customer);
-            }
         }
 
         $quote->collectTotals();
@@ -159,6 +153,42 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
 
         $quote->setIsActive(0);
         $quote->save();
+
+        // Register capture on the order immediately so payment data is complete
+        // before any external system (e.g. dispatch) pulls it, instead of
+        // relying on the CaptureCompleted webhook which may arrive seconds later.
+        if ($intent === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE) {
+            $capture = $paymentsData['captures'][0] ?? [];
+            $captureId = $capture['id'] ?? '';
+            $captureAmount = (float) ($capture['amount']['value'] ?? 0);
+
+            if ($captureId && $captureAmount) {
+                try {
+                    $order = Mage::getModel('sales/order')->load($quote->getId(), 'quote_id');
+                    if ($order->getId()) {
+                        $orderPayment = $order->getPayment();
+                        $orderPayment->setAdditionalInformation('paypal_capture_id', $captureId);
+                        $orderPayment->setTransactionId($captureId);
+                        $orderPayment->setIsTransactionClosed(true);
+                        $orderPayment->registerCaptureNotification($captureAmount);
+
+                        $invoice = $orderPayment->getCreatedInvoice();
+                        $transactionSave = Mage::getModel('core/resource_transaction')
+                            ->addObject($order);
+                        if ($invoice) {
+                            $transactionSave->addObject($invoice);
+                        }
+                        $transactionSave->save();
+                    }
+                } catch (\Throwable $e) {
+                    Mage::log(
+                        sprintf('Inline capture registration failed for PayPal order %s: %s', $paypalResult['id'], $e->getMessage()),
+                        Mage::LOG_ERROR,
+                        'paypal.log',
+                    );
+                }
+            }
+        }
     }
 
     public function saveVaultToken(array $paypalResult, Mage_Sales_Model_Quote $quote): void

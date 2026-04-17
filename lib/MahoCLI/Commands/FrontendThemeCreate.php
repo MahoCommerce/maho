@@ -21,7 +21,7 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'frontend:theme:create',
+    name: 'dev:frontend:theme:create',
     description: 'Create a new frontend theme with proper scaffolding',
 )]
 class FrontendThemeCreate extends BaseMahoCommand

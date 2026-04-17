@@ -18,7 +18,7 @@ $numColumns = count($this->getColumns());
 <div class="grid np">
 <table cellspacing="0" style="border:0;" id="<?= $this->getId() ?>_table">
     <?php foreach ($this->getColumns() as $_column): ?>
-    <col <?= $_column->getHtmlProperty() ?> />
+    <col <?= $_column->getHtmlProperty() ?>>
     <?php endforeach ?>
     <?php if ($this->getHeadersVisibility() || $this->getFilterVisibility()): ?>
         <thead>
@@ -49,7 +49,7 @@ $numColumns = count($this->getColumns());
 </table>
 </div>
 <?php if($this->canDisplayContainer()): ?>
-<script type="text/javascript">
+<script>
 //<![CDATA[
     <?= $this->getJsObjectName() ?> = new varienGrid('<?= $this->getId() ?>', '<?= $this->getGridUrl() ?>', '<?= $this->getVarNamePage() ?>', '<?= $this->getVarNameSort() ?>', '<?= $this->getVarNameDir() ?>', '<?= $this->getVarNameFilter() ?>');
     <?= $this->getJsObjectName() ?>.useAjax = '<?= $this->getUseAjax() ?>';

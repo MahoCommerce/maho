@@ -406,7 +406,7 @@
                         <prefix_options translate="label comment">
                             <label>Prefix Dropdown Options</label>
                             <sort_order>30</sort_order>
-                            <comment><![CDATA[Semicolon (;) separated values.<br/>Put semicolon in the beginning for empty first option.<br/>Leave empty for open text field.]]></comment>
+                            <comment><![CDATA[Semicolon (;) separated values.<br>Put semicolon in the beginning for empty first option.<br>Leave empty for open text field.]]></comment>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -435,7 +435,7 @@
                         <suffix_options translate="label comment">
                             <label>Suffix Dropdown Options</label>
                             <sort_order>60</sort_order>
-                            <comment><![CDATA[Semicolon (;) separated values.<br/>Put semicolon in the beginning for empty first option.<br/>Leave empty for open text field.]]></comment>
+                            <comment><![CDATA[Semicolon (;) separated values.<br>Put semicolon in the beginning for empty first option.<br>Leave empty for open text field.]]></comment>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>

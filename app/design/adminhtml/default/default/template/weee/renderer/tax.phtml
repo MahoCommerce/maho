@@ -20,11 +20,11 @@
     <td colspan="10" class="grid weee">
     <table cellspacing="0" class="data border" id="<?= $_htmlId ?>_table">
         <?php if ($_multiWebsite): ?>
-        <col width="135" />
+        <col width="135">
         <?php endif ?>
-        <col width="140" />
-        <col />
-        <col width="1" />
+        <col width="140">
+        <col>
+        <col width="1">
         <thead>
             <tr class="headings">
                 <th <?php if (!$_multiWebsite): ?>style="display:none"<?php endif ?>><?= Mage::helper('sales')->__('Website') ?></th>
@@ -46,16 +46,16 @@
                     <option value="<?= $_country['value'] ?>"><?= htmlspecialchars($_country['label']) ?></option>
                     <?php endforeach ?>
                 </select>
-                <br />
+                <br>
                 <select disabled="no-template" class="<?= $_htmlClass ?> state" name="<?= $_htmlName ?>[__index__][state]" id="#{prefix}_weee_tax_row___index___state">
                     <option value="0">*</option>
                 </select>
                 </td>
                 <td>
-                    <input disabled="no-template" class="<?= $_htmlClass ?> required-entry validate-greater-than-zero" type="text" name="<?= $_htmlName ?>[__index__][price]" value="'#{price}'" />
+                    <input disabled="no-template" class="<?= $_htmlClass ?> required-entry validate-greater-than-zero" type="text" name="<?= $_htmlName ?>[__index__][price]" value="'#{price}'">
                 </td>
                 <td class="last">
-                    <input type="hidden" name="<?= $_htmlName ?>[__index__][delete]" class="delete" disabled="no-template" value=""  id="#{prefix}_weee_tax_row___index___delete" />
+                    <input type="hidden" name="<?= $_htmlName ?>[__index__][delete]" class="delete" disabled="no-template" value=""  id="#{prefix}_weee_tax_row___index___delete">
                     <button title="Delete WEEE Tax" class="scalable delete icon-btn delete-product-option" onclick="weeeTaxControl.deleteItem('<?= $_htmlId ?>', event);return false"><span>Delete</span></button>
                 </td>
             </tr>
@@ -70,7 +70,7 @@
         </tbody>
     </table>
 
-<script type="text/javascript">
+<script>
     window.itemsCount = window.itemsCount ?? 0;
 
     const weeeTaxControl = {

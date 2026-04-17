@@ -15,7 +15,7 @@
 <?php foreach ($items as $item): ?>
     <li id="<?= $item['id'] ?>" url="<?= $item['url'] ?>">
         <div style="float:right; color:red; font-weight:bold;">[<?= $item['type'] ?>]</div>
-        <strong><?= $this->escapeHtml($item['name']) ?></strong><br/>
+        <strong><?= $this->escapeHtml($item['name']) ?></strong><br>
         <span class="informal"><?= $this->escapeHtml($item['description']) ?></span>
     </li>
 <?php endforeach ?>

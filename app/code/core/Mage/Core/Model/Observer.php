@@ -15,6 +15,7 @@ class Mage_Core_Model_Observer
     /**
      * Cron job method to clean old cache resources
      */
+    #[Maho\Config\CronJob('core_clean_cache', configPath: 'system/cache/flush_cron_expr')]
     public function cleanCache(Mage_Cron_Model_Schedule $schedule)
     {
         Mage::app()->getCache()->prune();
@@ -26,6 +27,8 @@ class Mage_Core_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('clean_cache_by_tags', area: 'adminhtml')]
+    #[Maho\Config\Observer('admin_system_config_changed_section_catalog', area: 'adminhtml')]
     public function cleanCacheByTags(\Maho\Event\Observer $observer)
     {
         /** @var array $tags */
@@ -42,6 +45,7 @@ class Mage_Core_Model_Observer
     /**
      * Clean up old minified CSS/JS files (cron job)
      */
+    #[Maho\Config\CronJob('core_minify_cleanup', schedule: '0 4 * * *')]
     public function cleanOldMinifiedFiles(Mage_Cron_Model_Schedule $schedule): void
     {
         Mage::helper('core/minify')->cleanupOldVersions();
@@ -53,6 +57,8 @@ class Mage_Core_Model_Observer
      * @throws Exception
      * @return Mage_Core_Model_Observer
      */
+    #[Maho\Config\Observer('model_save_before')]
+    #[Maho\Config\Observer('model_delete_before')]
     public function secureVarProcessing(\Maho\Event\Observer $observer)
     {
         if (Mage::registry('varProcessing')) {

@@ -17,11 +17,11 @@
     <h2 class="sub-title"><?= $this->__('Invoice #') ?><?= $_invoice->getIncrementId() ?> <span class="separator">|</span> <a href="<?= $this->getPrintInvoiceUrl($_invoice) ?>" onclick="this.target='_blank'" class="link-print"><?= $this->__('Print Invoice') ?></a></h2>
     <h3 class="table-caption"><?= $this->__('Items Invoiced') ?></h3>
     <table class="data-table linearize-table" id="my-invoice-table-<?= $_invoice->getId() ?>">
-        <col />
-        <col width="1" />
-        <col width="1" />
-        <col width="1" />
-        <col width="1" />
+        <col>
+        <col width="1">
+        <col width="1">
+        <col width="1">
+        <col width="1">
         <thead>
         <tr>
             <th><?= $this->__('Product Name') ?></th>

@@ -32,7 +32,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Template extends 
             $html = '<p class="nm"><small>' . Mage::helper('widget')->__('Please Select Block Reference First') . '</small></p>';
         } elseif (count($this->getWidgetTemplates()) == 1) {
             $widgetTemplate = current($this->getWidgetTemplates());
-            $html = '<input type="hidden" name="template" value="' . $widgetTemplate['value'] . '" />';
+            $html = '<input type="hidden" name="template" value="' . $widgetTemplate['value'] . '">';
             $html .= $widgetTemplate['label'];
         } else {
             $html = $this->getLayout()->createBlock('core/html_select')

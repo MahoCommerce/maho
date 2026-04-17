@@ -15,6 +15,7 @@ class Mage_GoogleAnalytics_Model_Observer
     /**
      * Add order information into GA block to render on checkout success pages
      */
+    #[Maho\Config\Observer('checkout_onepage_controller_success_action', area: 'frontend')]
     public function setGoogleAnalyticsOnOrderSuccessPageView(\Maho\Event\Observer $observer)
     {
         $orderIds = $observer->getEvent()->getOrderIds();
@@ -30,6 +31,8 @@ class Mage_GoogleAnalytics_Model_Observer
     /**
      * Process items added or removed from cart for GA4 block to render event on cart view
      */
+    #[Maho\Config\Observer('sales_quote_item_save_after', area: 'frontend')]
+    #[Maho\Config\Observer('sales_quote_item_delete_after', area: 'frontend')]
     public function processItemsAddedOrRemovedFromCart(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Sales_Model_Quote_Item $item */

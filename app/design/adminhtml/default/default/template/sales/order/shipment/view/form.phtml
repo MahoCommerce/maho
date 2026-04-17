@@ -36,7 +36,7 @@
             <div>
                 <?php if($this->getShipment()->getTracksCollection()->count()): ?>
                 <a href="#" id="linkId" onclick="popWin('<?= $this->helper('shipping')->getTrackingPopupUrlBySalesModel($this->getShipment()) ?>','trackshipment','width=800,height=600,resizable=yes,scrollbars=yes')" title="<?= $this->quoteEscape($this->__('Track this shipment')) ?>"><?= $this->__('Track this shipment') ?></a>
-                <br/>
+                <br>
                 <?php endif ?>
                 <strong><?= $this->escapeHtml($_order->getShippingDescription()) ?></strong>
                 <?= $this->helper('sales')->__('Total Shipping Charges') ?>:

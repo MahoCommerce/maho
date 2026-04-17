@@ -34,6 +34,7 @@ class Maho_FeedManager_Model_Cron
      *
      * Called by cron every hour (configurable in config.xml)
      */
+    #[Maho\Config\CronJob('feedmanager_generate_scheduled', schedule: '0 * * * *')]
     public function generateScheduledFeeds(): void
     {
         if (!Mage::helper('feedmanager')->isEnabled()) {
@@ -269,6 +270,7 @@ class Maho_FeedManager_Model_Cron
      *
      * Called by cron daily at 3:30 AM (configurable in config.xml)
      */
+    #[Maho\Config\CronJob('feedmanager_cleanup_logs', schedule: '30 3 * * *')]
     public function cleanupOldLogs(): void
     {
         $retentionDays = (int) Mage::getStoreConfig('feedmanager/general/log_retention_days');

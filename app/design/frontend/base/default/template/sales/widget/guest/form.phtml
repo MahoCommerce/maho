@@ -33,25 +33,25 @@
                        <li>
                            <label for="oar_order_id" class="required"><?= Mage::helper('sales')->__('Order ID') ?> </label>
                            <div class="input-box">
-                               <input type="text" class="input-text required-entry" id="oar_order_id" name="oar_order_id"  autocomplete="off" />
+                               <input type="text" class="input-text required-entry" id="oar_order_id" name="oar_order_id"  autocomplete="off">
                            </div>
                        </li>
                        <li>
                            <label for="oar_billing_lastname" class="required"><?= Mage::helper('sales')->__('Billing Last Name') ?> </label>
                            <div class="input-box">
-                               <input type="text" class="input-text required-entry" id="oar_billing_lastname" name="oar_billing_lastname" autocomplete="off" />
+                               <input type="text" class="input-text required-entry" id="oar_billing_lastname" name="oar_billing_lastname" autocomplete="off">
                            </div>
                        </li>
                        <li id="oar-email">
                            <label for="oar_email" class="required"><?= Mage::helper('sales')->__('Email Address') ?> </label>
                            <div class="input-box">
-                               <input type="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" class="input-text validate-email required-entry" id="oar_email" name="oar_email" />
+                               <input type="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" class="input-text validate-email required-entry" id="oar_email" name="oar_email">
                            </div>
                        </li>
                        <li id="oar-zip" style="display:none;">
                            <label for="oar_zip" class="required"><?= Mage::helper('sales')->__('Billing ZIP Code') ?> </label>
                            <div class="input-box">
-                               <input type="text" class="input-text required-entry" id="oar_zip" name="oar_zip" />
+                               <input type="text" class="input-text required-entry" id="oar_zip" name="oar_zip">
                            </div>
                        </li>
                    </ul>
@@ -62,7 +62,7 @@
             </div>
         </div>
     </div>
-    <script type="text/javascript">
+    <script>
         if (document.getElementById('quick_search_type_id').value === 'zip') {
             document.getElementById('oar-zip').style.display = 'block';
             document.getElementById('oar-email').style.display = 'none';

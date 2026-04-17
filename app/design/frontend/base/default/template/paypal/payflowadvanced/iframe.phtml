@@ -16,7 +16,7 @@
 </div>
 <iframe id="payflow-advanced-iframe" style="display:none;" scrolling="no" frameborder="0"
         src="<?= $this->getFrameActionUrl() ?>" height="610" width="100%"></iframe>
-<script type="text/javascript">
+<script>
     const headers = document.querySelectorAll('#' + document.getElementById(checkout.accordion.container.getAttribute('id')) + ' .section');
     headers.forEach(header => {
         header.classList.remove('allow');

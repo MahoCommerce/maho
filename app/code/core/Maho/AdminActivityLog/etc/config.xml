@@ -51,16 +51,6 @@
                 </setup>
             </adminactivitylog_setup>
         </resources>
-        <events>
-            <encryption_key_regenerated>
-                <observers>
-                    <adminactivitylog_recrypt_data>
-                        <class>adminactivitylog/observer</class>
-                        <method>encryptionKeyRegenerated</method>
-                    </adminactivitylog_recrypt_data>
-                </observers>
-            </encryption_key_regenerated>
-        </events>
     </global>
     <admin>
         <routers>
@@ -74,80 +64,6 @@
         </routers>
     </admin>
     <adminhtml>
-        <events>
-            <admin_user_authenticate_after>
-                <observers>
-                    <adminactivitylog_login_success>
-                        <class>adminactivitylog/observer</class>
-                        <method>logAdminLogin</method>
-                    </adminactivitylog_login_success>
-                </observers>
-            </admin_user_authenticate_after>
-            <admin_session_user_logout>
-                <observers>
-                    <adminactivitylog_logout>
-                        <class>adminactivitylog/observer</class>
-                        <method>logAdminLogout</method>
-                    </adminactivitylog_logout>
-                </observers>
-            </admin_session_user_logout>
-            <admin_session_user_login_failed>
-                <observers>
-                    <adminactivitylog_login_failed>
-                        <class>adminactivitylog/observer</class>
-                        <method>logAdminLoginFailed</method>
-                    </adminactivitylog_login_failed>
-                </observers>
-            </admin_session_user_login_failed>
-            <model_save_before>
-                <observers>
-                    <adminactivitylog_save_before>
-                        <class>adminactivitylog/observer</class>
-                        <method>logAdminActivityBefore</method>
-                    </adminactivitylog_save_before>
-                </observers>
-            </model_save_before>
-            <model_save_after>
-                <observers>
-                    <adminactivitylog_save_after>
-                        <class>adminactivitylog/observer</class>
-                        <method>logAdminActivityAfter</method>
-                    </adminactivitylog_save_after>
-                </observers>
-            </model_save_after>
-            <model_delete_before>
-                <observers>
-                    <adminactivitylog_delete_before>
-                        <class>adminactivitylog/observer</class>
-                        <method>logAdminActivityBefore</method>
-                    </adminactivitylog_delete_before>
-                </observers>
-            </model_delete_before>
-            <model_delete_after>
-                <observers>
-                    <adminactivitylog_delete_after>
-                        <class>adminactivitylog/observer</class>
-                        <method>logAdminDelete</method>
-                    </adminactivitylog_delete_after>
-                </observers>
-            </model_delete_after>
-            <controller_action_predispatch_adminhtml>
-                <observers>
-                    <adminactivitylog_page_visit>
-                        <class>adminactivitylog/observer</class>
-                        <method>logPageVisit</method>
-                    </adminactivitylog_page_visit>
-                </observers>
-            </controller_action_predispatch_adminhtml>
-            <controller_action_postdispatch_adminhtml>
-                <observers>
-                    <adminactivitylog_mass_action>
-                        <class>adminactivitylog/observer</class>
-                        <method>logMassAction</method>
-                    </adminactivitylog_mass_action>
-                </observers>
-            </controller_action_postdispatch_adminhtml>
-        </events>
         <layout>
             <updates>
                 <adminactivitylog>
@@ -156,18 +72,6 @@
             </updates>
         </layout>
     </adminhtml>
-    <crontab>
-        <jobs>
-            <adminactivitylog_clean_old_logs>
-                <schedule>
-                    <cron_expr>0 2 * * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>adminactivitylog/observer::cleanOldLogs</model>
-                </run>
-            </adminactivitylog_clean_old_logs>
-        </jobs>
-    </crontab>
     <default>
         <admin>
             <adminactivitylog>

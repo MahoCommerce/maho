@@ -67,7 +67,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
      */
     public function getScript($script)
     {
-        return '<script type="text/javascript">' . $script . '</script>' . "\n";
+        return '<script>' . $script . '</script>' . "\n";
     }
 
     /**
@@ -78,7 +78,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
      */
     public function includeScript($file)
     {
-        return '<script type="text/javascript" src="' . $this->getJsUrl($file) . '"></script>' . "\n";
+        return '<script src="' . $this->getJsUrl($file) . '"></script>' . "\n";
     }
 
     /**
@@ -89,7 +89,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
      */
     public function includeSkinScript($file)
     {
-        return '<script type="text/javascript" src="' . $this->getJsSkinUrl($file) . '"></script>';
+        return '<script src="' . $this->getJsSkinUrl($file) . '"></script>';
     }
 
     /**

@@ -16,7 +16,7 @@
 <table>
 <?php foreach ($products as $product): ?>
     <tr>
-        <td><a href="<?= $product->getProductUrl() ?>" title="<?= $this->escapeHtml($product->getName()) ?>"><img src="<?= $this->helper('catalog/image')->init($product, 'thumbnail')->resize(75, 75) ?>" srcset="<?= $this->helper('catalog/image')->init($product, 'thumbnail')->resize(150, 150) ?> 2x" border="0" align="left" height="75" width="75" alt="<?= $this->escapeHtml($product->getName()) ?>" /></a></td>
+        <td><a href="<?= $product->getProductUrl() ?>" title="<?= $this->escapeHtml($product->getName()) ?>"><img src="<?= $this->helper('catalog/image')->init($product, 'thumbnail')->resize(75, 75) ?>" srcset="<?= $this->helper('catalog/image')->init($product, 'thumbnail')->resize(150, 150) ?> 2x" border="0" align="left" height="75" width="75" alt="<?= $this->escapeHtml($product->getName()) ?>"></a></td>
         <td>
             <p><a href="<?= $product->getProductUrl() ?>"><strong><?= $this->escapeHtml($product->getName()) ?></strong></a></p>
             <?php $shortDescription = $this->_getFilteredProductShortDescription($product) ?>
@@ -24,7 +24,7 @@
                 <p><small><?= $shortDescription ?></small></p>
             <?php endif ?>
             <p><?php if ($product->getPrice() != $product->getFinalPrice()): ?>
-                <?= $this->__('Regular Price:') ?> <strong style="text-decoration:line-through;"><?= Mage::helper('core')->currency($product->getPrice()) ?></strong><br />
+                <?= $this->__('Regular Price:') ?> <strong style="text-decoration:line-through;"><?= Mage::helper('core')->currency($product->getPrice()) ?></strong><br>
                 <strong><?= $this->__('Special price:') ?> <span style="color:#FF0000;"><?= Mage::helper('core')->currency($product->getFinalPrice()) ?></span></strong>
             <?php else: ?>
                 <strong><?= $this->__('Price:') ?></strong> <?= Mage::helper('core')->currency($product->getPrice()) ?>

@@ -21,7 +21,7 @@
             <img src="<?= $this->helper('catalog/image')->init($this->getProductData(), 'small_image')->resize(450, 450) ?>"
                  srcset="<?= $this->helper('catalog/image')->init($this->getProductData(), 'small_image')->resize(900, 900) ?> 2x"
                  alt="<?= $this->escapeHtml($this->getProductData()->getName()) ?>"
-                 class="product-image" />
+                 class="product-image">
         </a>
         <?php if( $this->getRating() && $this->getRating()->getSize()): ?>
              <p class="label"><?= $this->__('Average Customer Rating') ?>:</p>

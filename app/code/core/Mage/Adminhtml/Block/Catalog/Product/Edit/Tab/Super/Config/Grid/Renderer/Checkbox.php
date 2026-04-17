@@ -21,7 +21,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid_Renderer_C
     public function render(\Maho\DataObject $row)
     {
         $result = parent::render($row);
-        return $result . '<input type="hidden" class="value-json" value="' . htmlspecialchars($this->getAttributesJson($row)) . '" />';
+        return $result . '<input type="hidden" class="value-json" value="' . htmlspecialchars($this->getAttributesJson($row)) . '">';
     }
 
     public function getAttributesJson(\Maho\DataObject $row)

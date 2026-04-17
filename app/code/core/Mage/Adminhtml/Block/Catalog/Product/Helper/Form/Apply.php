@@ -28,7 +28,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Apply extends \Maho\Data\
         $html = '<select onchange="toggleApplyVisibility(this)"' . $elementAttributeHtml . '>'
               . '<option value="0">' . $this->getModeLabels('all') . '</option>'
               . '<option value="1" ' . ($this->getValue() == null ? '' : 'selected') . '>' . $this->getModeLabels('custom') . '</option>'
-              . '</select><br /><br />';
+              . '</select><br><br>';
 
         $html .= parent::getElementHtml();
         return $html;

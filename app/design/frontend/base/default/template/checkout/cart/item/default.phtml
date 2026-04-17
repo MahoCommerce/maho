@@ -27,7 +27,7 @@ $_weeeAmount = $_item->getWeeeTaxAppliedAmount();
         <?php if ($this->hasProductUrl()):?>
             <a href="<?= $this->getProductUrl() ?>" title="<?= $this->escapeHtml($this->getProductName()) ?>" class="product-image">
         <?php endif ?>
-            <img src="<?= $this->getProductThumbnail()->resize(180) ?>" alt="<?= $this->escapeHtml($this->getProductName()) ?>" />
+            <img src="<?= $this->getProductThumbnail()->resize(180) ?>" alt="<?= $this->escapeHtml($this->getProductName()) ?>">
         <?php if ($this->hasProductUrl()):?>
             </a>
         <?php endif ?>
@@ -84,7 +84,7 @@ $_weeeAmount = $_item->getWeeeTaxAppliedAmount();
                 <?php $helpLinkId = 'cart-msrp-help-' . $_item->getId(); ?>
                 <a id="<?= $helpLinkId ?>" href="#" class="map-help-link"><?= $this->__("What's this?") ?></a>
 
-                <script type="text/javascript">
+                <script>
                     Catalog.Map.addHelpLink('<?= $helpLinkId ?>', "<?= $this->jsQuoteEscape($this->__("What's this?")) ?>");
                 </script>
 
@@ -129,7 +129,7 @@ $_weeeAmount = $_item->getWeeeTaxAppliedAmount();
     <td class="product-cart-actions" data-rwd-label="<?= $this->__('Qty') ?>">
         <input type="text" pattern="\d*(\.\d+)?" name="cart[<?= $_item->getId() ?>][qty]" value="<?= $this->getQty() ?>" size="4"
                data-cart-item-id="<?= $this->jsQuoteEscape($_item->getSku()) ?>"
-               title="<?= $this->quoteEscape($this->__('Qty')) ?>" class="input-text qty" maxlength="12" />
+               title="<?= $this->quoteEscape($this->__('Qty')) ?>" class="input-text qty" maxlength="12">
 
         <button type="submit" name="update_cart_action" data-cart-item-update value="update_qty" title="<?= $this->quoteEscape($this->__('Update')) ?>" class="button btn-update"><?= $this->__('Update') ?>
         </button>

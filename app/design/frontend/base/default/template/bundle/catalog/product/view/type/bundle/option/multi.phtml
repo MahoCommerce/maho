@@ -22,7 +22,7 @@ $selections = $option->getSelections();
     <div class="input-box">
     <?php if (count($selections) == 1 && $option->getRequired()): ?>
         <?= $this->getSelectionQtyTitlePrice($selections[0]) ?>
-        <input type="hidden" name="bundle_option[<?= $option->getId() ?>]" value="<?= $selections[0]->getSelectionId() ?>"/>
+        <input type="hidden" name="bundle_option[<?= $option->getId() ?>]" value="<?= $selections[0]->getSelectionId() ?>">
     <?php else: ?>
         <select onchange="bundle.changeSelection(this)" multiple="multiple" size="5" id="bundle-option-<?= $option->getId() ?>" name="bundle_option[<?= $option->getId() ?>][]" class="bundle-option-<?= $option->getId() ?><?= $option->getRequired() ? ' required-entry' : '' ?> bundle-option-select multiselect change-container-classname">
         <?php if (!$option->getRequired()): ?>

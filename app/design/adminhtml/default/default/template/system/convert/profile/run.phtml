@@ -11,7 +11,7 @@
 
 /** @var Mage_Adminhtml_Block_System_Convert_Profile_Edit_Tab_Run $this */
 ?>
-<script type="text/javascript">
+<script>
 function runProfile(popup)
 {
     var url = "<?= $this->getUrl('*/*/run', ['id' => $this->getProfileId()]) ?>";
@@ -66,8 +66,8 @@ function getTransferType()
             <?php endforeach ?>
         <?php endif ?>
     </select>
-    <br />&nbsp;
+    <br>&nbsp;
 </div>
 
-<?= $this->getRunButtonHtml() ?><br />
+<?= $this->getRunButtonHtml() ?><br>
 <iframe id="run_iframe" frameborder="0" style="display:none; width:100%; height:400px;"></iframe>

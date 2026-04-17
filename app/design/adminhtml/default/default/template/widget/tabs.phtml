@@ -29,7 +29,7 @@
     </li>
 <?php endforeach ?>
 </ul>
-<script type="text/javascript">
+<script>
     <?= $this->getJsObjectName() ?> = new varienTabs('<?= $this->getId() ?>', '<?= $this->getDestElementId() ?>', '<?= $this->getActiveTabId() ?>', <?= $this->getAllShadowTabs() ?>);
 </script>
 <?php endif ?>

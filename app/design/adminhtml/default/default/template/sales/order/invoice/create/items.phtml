@@ -14,14 +14,14 @@
 <div class="grid np">
   <div class="hor-scroll">
     <table cellspacing="0" class="data order-tables">
-        <col />
-        <col width="1" />
-        <col width="1" />
-        <col width="1" />
-        <col width="1" />
-        <col width="1" />
-        <col width="1" />
-        <col width="1" />
+        <col>
+        <col width="1">
+        <col width="1">
+        <col width="1">
+        <col width="1">
+        <col width="1">
+        <col width="1">
+        <col width="1">
         <thead>
             <tr class="headings">
                 <th><?= Mage::helper('sales')->__('Product') ?></th>
@@ -54,7 +54,7 @@
     </table>
   </div>
 </div>
-<br />
+<br>
 <div class="clear"></div>
 <?= $this->getChildHtml('order_totalbar') ?>
 <div class="clear"></div>
@@ -83,7 +83,7 @@
               <p>
               <!--
                   <label for="invoice_do_capture" class="normal"><?= Mage::helper('sales')->__('Capture Amount') ?></label>
-                  <input type="checkbox" name="invoice[do_capture]" id="invoice_do_capture" value="1" checked/>
+                  <input type="checkbox" name="invoice[do_capture]" id="invoice_do_capture" value="1" checked>
               -->
                   <label for="invoice_do_capture" class="normal"><?= Mage::helper('sales')->__('Amount') ?></label>
                   <select name="invoice[capture_case]">
@@ -93,18 +93,18 @@
                   </select>
               </p>
             <?php elseif ($this->isGatewayUsed()):?>
-                <input type="hidden" name="invoice[capture_case]" value="offline"/>
+                <input type="hidden" name="invoice[capture_case]" value="offline">
                 <p><?= Mage::helper('sales')->__('Invoice will be created without communication with payment gateway.') ?></p>
             <?php endif ?>
           <?php endif ?>
           <p>
               <label class="normal" for="notify_customer"><?= Mage::helper('sales')->__('Append Comments') ?></label>
-              <input id="notify_customer" name="invoice[comment_customer_notify]" value="1" type="checkbox" />
+              <input id="notify_customer" name="invoice[comment_customer_notify]" value="1" type="checkbox">
           </p>
           <?php if ($this->canSendInvoiceEmail()): ?>
           <p>
               <label class="normal" for="send_email"><?= Mage::helper('sales')->__('Email Copy of Invoice') ?></label>
-              <input id="send_email" name="invoice[send_email]" value="1" type="checkbox" />
+              <input id="send_email" name="invoice[send_email]" value="1" type="checkbox">
           </p>
           <?php endif ?>
           <div class="a-right">
@@ -133,7 +133,7 @@
     </tbody>
 </table>
 
-<script type="text/javascript">
+<script>
 const submitButtons = document.querySelectorAll('.submit-button');
 const updateButtons = document.querySelectorAll('.update-button');
 const enableSubmitButtons = <?= (int) !$this->getDisableSubmitButton() ?>;

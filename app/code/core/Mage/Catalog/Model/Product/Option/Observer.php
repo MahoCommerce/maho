@@ -17,6 +17,7 @@ class Mage_Catalog_Model_Product_Option_Observer
      * @param \Maho\DataObject $observer
      * @return $this
      */
+    #[Maho\Config\Observer('sales_convert_quote_item_to_order_item', area: 'frontend')]
     public function copyQuoteFilesToOrderFiles($observer)
     {
         /** @var Mage_Sales_Model_Quote_Item $quoteItem */

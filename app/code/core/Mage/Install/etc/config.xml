@@ -102,32 +102,6 @@
                 </main>
             </updates>
         </layout>
-        <events>
-            <controller_action_predispatch>
-                <observers>
-                    <checkConnection>
-                        <class>core/resource</class>
-                        <method>checkDbConnection</method>
-                    </checkConnection>
-                </observers>
-            </controller_action_predispatch>
-            <mage_run_exception>
-                <observers>
-                    <install_failure>
-                        <class>install/observer</class>
-                        <method>installFailure</method>
-                    </install_failure>
-                </observers>
-            </mage_run_exception>
-            <core_locale_set_locale>
-                <observers>
-                    <bind_locale>
-                        <class>install/observer</class>
-                        <method>bindLocale</method>
-                    </bind_locale>
-                </observers>
-            </core_locale_set_locale>
-        </events>
         <translate>
             <modules>
                 <Mage_Install>

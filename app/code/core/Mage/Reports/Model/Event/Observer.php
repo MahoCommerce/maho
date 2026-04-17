@@ -63,6 +63,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('customer_login', area: 'frontend')]
     public function customerLogin(\Maho\Event\Observer $observer)
     {
         if (!Mage::getSingleton('customer/session')->isLoggedIn() || !$this->_enabledReports) {
@@ -89,6 +90,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('customer_logout', area: 'frontend')]
     public function customerLogout(\Maho\Event\Observer $observer)
     {
         if ($this->_enabledReports) {
@@ -108,6 +110,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_controller_product_view', area: 'frontend')]
     public function catalogProductView(\Maho\Event\Observer $observer)
     {
         if (!$this->_enabledReports || !Mage::helper('reports')->isRecentlyViewedEnabled()) {
@@ -131,6 +134,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_product_compare_remove_product', area: 'frontend')]
     public function catalogProductCompareRemoveProduct(\Maho\Event\Observer $observer)
     {
         if ($this->_enabledReports) {
@@ -147,6 +151,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_product_compare_item_collection_clear', area: 'frontend')]
     public function catalogProductCompareClear(\Maho\Event\Observer $observer)
     {
         if ($this->_enabledReports) {
@@ -163,6 +168,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_product_compare_add_product', area: 'frontend')]
     public function catalogProductCompareAddProduct(\Maho\Event\Observer $observer)
     {
         if (!$this->_enabledReports || !Mage::helper('reports')->isProductCompareEnabled()) {
@@ -184,6 +190,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('sales_quote_item_save_before', area: 'frontend')]
     public function checkoutCartAddProduct(\Maho\Event\Observer $observer)
     {
         if ($this->_enabledReports) {
@@ -203,6 +210,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('wishlist_add_product', area: 'frontend')]
     public function wishlistAddProduct(\Maho\Event\Observer $observer)
     {
         if (!$this->_enabledReports) {
@@ -220,6 +228,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('wishlist_share', area: 'frontend')]
     public function wishlistShare(\Maho\Event\Observer $observer)
     {
         if (!$this->_enabledReports) {
@@ -239,6 +248,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('log_log_clean_after')]
     public function eventClean(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Reports_Model_Event $event */

@@ -39,7 +39,6 @@ jobs:
           base_sha: ${{ steps.last-successful-commit.outputs.sha }}
           files: |
             **/*.{php,phtml}
-            !.phpstorm.meta.php/*
 
       - name: Setup PHP
         if: ${{ steps.changed-files.outputs.any_changed == 'true' }}

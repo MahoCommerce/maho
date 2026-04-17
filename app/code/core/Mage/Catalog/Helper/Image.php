@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
+class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \Stringable
 {
     public const XML_NODE_PRODUCT_BASE_IMAGE_WIDTH = 'catalog/product_image/base_width';
     public const XML_NODE_PRODUCT_SMALL_IMAGE_WIDTH = 'catalog/product_image/small_width';
@@ -349,11 +349,9 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
 
     /**
      * Return Image URL
-     *
-     * @return string
      */
     #[\Override]
-    public function __toString()
+    public function __toString(): string
     {
         if ($this->getImageFile() && str_ends_with($this->getImageFile(), '.svg')) {
             return $this->getImageFile();

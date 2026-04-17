@@ -309,7 +309,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
         $checkbox = '<input type="checkbox" id="' . $this->getFieldId() . '_' . $id . '_' .
             $selectIdHtml . $name . '_use_default" class="product-option-scope-checkbox" name="' .
             $this->getFieldName() . '[' . $id . ']' . $selectNameHtml . '[scope][' . $name . ']" value="1" ' .
-            $checkedHtml . '/>';
+            $checkedHtml . '>';
         $checkbox .= '<label class="normal" for="' . $this->getFieldId() . '_' . $id . '_' .
             $selectIdHtml . $name . '_use_default">' . $this->__('Use Default Value') . '</label>';
         return $checkbox;

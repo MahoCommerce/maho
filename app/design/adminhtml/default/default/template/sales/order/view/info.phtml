@@ -167,7 +167,7 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
 <?php endif ?>
 
 <?php if ($_order->getCustomerIsGuest()): ?>
-<script type="text/javascript">
+<script>
 function updateGuestEmail() {
     const currentEmail = <?= Mage::helper('core')->jsonEncode($_order->getCustomerEmail()) ?>;
     const newEmail = prompt('<?= $this->__('Enter new email address:') ?>', currentEmail);

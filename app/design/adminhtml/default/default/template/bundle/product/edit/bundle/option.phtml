@@ -11,7 +11,7 @@
 
 /** @var Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option $this */
 ?>
-<script type="text/javascript">
+<script>
 function createOptionTemplate(data) {
     const typeSelectHtml = `<?= $this->getTypeSelectHtml() ?>`.replace(/\{\{index\}\}/g, data.index);
     const requireSelectHtml = `<?= $this->getRequireSelectHtml() ?>`.replace(/\{\{index\}\}/g, data.index);
@@ -61,7 +61,7 @@ function createOptionTemplate(data) {
 
 <?= $this->getSelectionHtml() ?>
 
-<script type="text/javascript">
+<script>
 function changeInputType(oldObject, oType) {
     const newObject = document.createElement('input');
     newObject.type = oType;

@@ -35,7 +35,7 @@
             <?php if($this->helper('wishlist')->isRssAllow()): ?>
             <li class="control">
                 <div class="input-box">
-                    <input type="checkbox" name="rss_url" id="rss_url" value="1" title="<?= $this->quoteEscape($this->__('Check this checkbox if you want to add a link to an rss feed to your wishlist.')) ?>" class="checkbox" />
+                    <input type="checkbox" name="rss_url" id="rss_url" value="1" title="<?= $this->quoteEscape($this->__('Check this checkbox if you want to add a link to an rss feed to your wishlist.')) ?>" class="checkbox">
                 </div>
                 <label for="rss_url"><?= $this->__('Check this checkbox if you want to add a link to an rss feed to your wishlist.') ?></label>
             </li>
@@ -49,7 +49,7 @@
         <button type="submit" title="<?= $this->quoteEscape($this->__('Share Wishlist')) ?>" class="button"><?= $this->__('Share Wishlist') ?></button>
     </div>
 </form>
-<script type="text/javascript">
+<script>
     Validation.add('validate-emails',
         '<?= $this->jsQuoteEscape($this->__('Please enter a valid email addresses, separated by commas. For example johndoe@domain.com, johnsmith@domain.com.')) ?>',
         function (v) {

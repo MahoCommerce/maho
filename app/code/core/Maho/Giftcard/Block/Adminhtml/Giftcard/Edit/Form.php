@@ -129,7 +129,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
                 'title'    => Mage::helper('giftcard')->__('Current Balance'),
                 'required' => true,
                 'class'    => 'validate-number',
-                'note'     => $currencyNote . '<br/>' . Mage::helper('giftcard')->__('Edit this to manually adjust the balance. Use "Admin Comment" to explain the adjustment.'),
+                'note'     => $currencyNote . '<br>' . Mage::helper('giftcard')->__('Edit this to manually adjust the balance. Use "Admin Comment" to explain the adjustment.'),
             ]);
         }
 
@@ -255,7 +255,7 @@ HTML;
             $qrUrl = $helper->getQrCodeDataUrl($model->getCode(), 200);
             $html .= '<div style="text-align: center;">';
             $html .= '<div style="margin-bottom: 5px;"><strong>QR Code (Scannable)</strong></div>';
-            $html .= '<img src="' . htmlspecialchars($qrUrl) . '" alt="QR Code" style="border: 1px solid #ccc; padding: 5px; background: white;" />';
+            $html .= '<img src="' . htmlspecialchars($qrUrl) . '" alt="QR Code" style="border: 1px solid #ccc; padding: 5px; background: white;">';
             $html .= '<div style="margin-top: 5px; font-family: monospace;">' . htmlspecialchars($model->getCode()) . '</div>';
             $html .= '</div>';
         }
@@ -264,7 +264,7 @@ HTML;
             $barcodeUrl = $helper->getBarcodeDataUrl($model->getCode());
             $html .= '<div style="text-align: center;">';
             $html .= '<div style="margin-bottom: 5px;"><strong>Barcode (Code128)</strong></div>';
-            $html .= '<img src="' . htmlspecialchars($barcodeUrl) . '" alt="Barcode" style="border: 1px solid #ccc; padding: 5px; background: white; max-width: 300px;" />';
+            $html .= '<img src="' . htmlspecialchars($barcodeUrl) . '" alt="Barcode" style="border: 1px solid #ccc; padding: 5px; background: white; max-width: 300px;">';
             $html .= '<div style="margin-top: 5px; font-family: monospace;">' . htmlspecialchars($model->getCode()) . '</div>';
             $html .= '</div>';
         }

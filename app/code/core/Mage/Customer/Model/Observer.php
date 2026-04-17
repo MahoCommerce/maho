@@ -74,6 +74,7 @@ class Mage_Customer_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('controller_action_layout_load_before', area: 'frontend')]
     public function beforeLoadLayout($observer)
     {
         $loggedIn = Mage::getSingleton('customer/session')->isLoggedIn();
@@ -87,6 +88,7 @@ class Mage_Customer_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('customer_address_save_before')]
     public function beforeAddressSave($observer)
     {
         if (Mage::registry(self::VIV_CURRENTLY_SAVED_ADDRESS)) {
@@ -116,6 +118,7 @@ class Mage_Customer_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('customer_address_save_after')]
     public function afterAddressSave($observer)
     {
         /** @var Mage_Customer_Model_Address $customerAddress */
@@ -186,6 +189,7 @@ class Mage_Customer_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('sales_model_service_quote_submit_after', area: 'frontend')]
     public function quoteSubmitAfter($observer)
     {
         /** @var Mage_Customer_Model_Customer $customer */
@@ -208,6 +212,7 @@ class Mage_Customer_Model_Observer
     /**
      * Clear customer flow password table
      */
+    #[Maho\Config\CronJob('customer_flowpassword', schedule: '0 0 1 * *')]
     public function deleteCustomerFlowPassword()
     {
         $resource   = Mage::getSingleton('core/resource');
@@ -221,6 +226,7 @@ class Mage_Customer_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('customer_customer_authenticated')]
     public function actionUpgradeCustomerPassword($observer)
     {
         $password = $observer->getEvent()->getPassword();
@@ -248,6 +254,7 @@ class Mage_Customer_Model_Observer
     /**
      * Set the customer's or guest's session time based on config
      */
+    #[Maho\Config\Observer('session_before_renew_cookie')]
     public function setCookieLifetime(\Maho\Event\Observer $observer)
     {
         if ($observer->getSessionName() === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {

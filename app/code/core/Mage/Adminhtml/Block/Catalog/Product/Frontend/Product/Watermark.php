@@ -70,9 +70,9 @@ class Mage_Adminhtml_Block_Catalog_Product_Frontend_Product_Watermark extends Ma
         $html .= '<legend>' . $element->getLegend() . '</legend>';
 
         // field label column
-        $html .= '<table cellspacing="0"><colgroup class="label" /><colgroup class="value" />';
+        $html .= '<table cellspacing="0"><colgroup class="label"><colgroup class="value">';
         if (!$default) {
-            $html .= '<colgroup class="use-default" />';
+            $html .= '<colgroup class="use-default">';
         }
         $html .= '<tbody>';
 

@@ -150,47 +150,11 @@
                 </totals>
             </quote>
         </sales>
-        <events>
-            <encryption_key_regenerated>
-                <observers>
-                    <payment>
-                        <class>checkout/observer</class>
-                        <method>encryptionKeyRegenerated</method>
-                    </payment>
-                </observers>
-            </encryption_key_regenerated>
-        </events>
     </global>
     <frontend>
         <secure_url>
             <checkout_onepage>/checkout/onepage</checkout_onepage>
         </secure_url>
-        <events>
-            <customer_login>
-                <observers>
-                    <loadCustomerQuote>
-                        <class>checkout/observer</class>
-                        <method>loadCustomerQuote</method>
-                    </loadCustomerQuote>
-                </observers>
-            </customer_login>
-            <customer_logout>
-                <observers>
-                    <unsetAll>
-                        <class>checkout/observer</class>
-                        <method>unsetAll</method>
-                    </unsetAll>
-                </observers>
-            </customer_logout>
-            <sales_quote_save_after>
-                <observers>
-                    <set_checkout_quote_id>
-                        <class>checkout/observer</class>
-                        <method>salesQuoteSaveAfter</method>
-                    </set_checkout_quote_id>
-                </observers>
-            </sales_quote_save_after>
-        </events>
         <routers>
             <checkout>
                 <use>standard</use>

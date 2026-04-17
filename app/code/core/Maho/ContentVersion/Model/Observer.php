@@ -19,16 +19,19 @@ class Maho_ContentVersion_Model_Observer
      */
     public const REGISTRY_EDITOR = 'contentversion_editor';
 
+    #[Maho\Config\Observer('cms_page_save_before')]
     public function beforeCmsPageSave(Maho\Event\Observer $observer): void
     {
         $this->createVersionFromEvent($observer, 'cms_page');
     }
 
+    #[Maho\Config\Observer('cms_block_save_before')]
     public function beforeCmsBlockSave(Maho\Event\Observer $observer): void
     {
         $this->createVersionFromEvent($observer, 'cms_block');
     }
 
+    #[Maho\Config\Observer('blog_post_save_before')]
     public function beforeBlogPostSave(Maho\Event\Observer $observer): void
     {
         $this->createVersionFromEvent($observer, 'blog_post');
