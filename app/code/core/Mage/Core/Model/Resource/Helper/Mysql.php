@@ -261,7 +261,7 @@ class Mage_Core_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_Hel
                         $preparedColumns[strtoupper($col)] = [$correlationName, $col, null];
                     }
                 } else {
-                    $columnKey = is_null($alias) ? $column : $alias;
+                    $columnKey = $alias ?? $column;
                     $preparedColumns[strtoupper($columnKey)] = [$correlationName, $column, $alias];
                 }
             }

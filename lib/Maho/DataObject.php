@@ -613,7 +613,7 @@ class DataObject implements ArrayAccess, JsonSerializable
         } else {
             preg_match_all('/\{\{([a-z0-9_]+)\}\}/is', $format, $matches);
             foreach ($matches[1] as $var) {
-                $replace = is_null($this->getData($var)) ? '' : $this->getData($var);
+                $replace = $this->getData($var) ?? '';
                 $format = str_replace('{{' . $var . '}}', $replace, $format);
             }
             $str = $format;

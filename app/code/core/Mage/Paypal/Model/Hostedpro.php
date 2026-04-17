@@ -237,7 +237,7 @@ class Mage_Paypal_Model_Hostedpro extends Mage_Paypal_Model_Direct
         $store = Mage::app()->getStore($storeId);
         return Mage::getUrl($path, [
             '_store'   => $store,
-            '_secure'  => is_null($secure) ? Mage::app()->isCurrentlySecure() : $secure,
+            '_secure'  => $secure ?? Mage::app()->isCurrentlySecure(),
         ]);
     }
 }
