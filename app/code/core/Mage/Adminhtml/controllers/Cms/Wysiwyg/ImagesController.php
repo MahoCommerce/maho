@@ -276,7 +276,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             // Construct URL
             $mediaUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA);
             $relativePath = str_replace($helper->getStorageRoot(), '', $filePath);
-            $imageUrl = $mediaUrl . 'wysiwyg' . str_replace(DS, '/', $relativePath);
+            $imageUrl = $mediaUrl . 'wysiwyg/' . ltrim(str_replace(DS, '/', $relativePath), '/');
 
             $this->getResponse()->setBodyJson([
                 'success' => true,
