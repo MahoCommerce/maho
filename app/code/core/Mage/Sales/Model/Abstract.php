@@ -45,7 +45,7 @@ abstract class Mage_Sales_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Get object created at date affected current active store timezone
      *
-     * @return DateTime
+     * @return DateTimeImmutable
      */
     public function getCreatedAtDate()
     {
@@ -55,7 +55,7 @@ abstract class Mage_Sales_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Get object created at date affected with object store timezone
      *
-     * @return DateTime
+     * @return DateTimeImmutable
      */
     public function getCreatedAtStoreDate()
     {

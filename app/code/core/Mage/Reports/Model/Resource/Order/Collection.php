@@ -295,7 +295,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      */
     public function getDateRange($range, $customStart, $customEnd, $returnObjects = false)
     {
-        $baseDate = DateTimeImmutable::createFromMutable(Mage::app()->getLocale()->utcToStore());
+        $baseDate = Mage::app()->getLocale()->utcToStore();
         $dateStart = DateTime::createFromImmutable($baseDate);
         $dateStart->setTime(0, 0, 0);
         $dateEnd = DateTime::createFromImmutable($baseDate);

@@ -779,8 +779,8 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     /**
      * Convert a UTC date to the store's configured timezone.
      *
-     * Always returns a DateTime object with the store's timezone set.
-     * Use PHP's DateTime::format() for machine-readable output (e.g. $result->format('Y-m-d')).
+     * Always returns a DateTimeImmutable object with the store's timezone set.
+     * Use PHP's DateTimeImmutable::format() for machine-readable output (e.g. $result->format('Y-m-d')).
      * For locale-aware display formatting, use Mage::helper('core')->formatDate() instead.
      *
      * Note: if $date is a DateTime/DateTimeImmutable, its existing timezone is preserved as the
@@ -790,19 +790,18 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      * @param null|string|bool|int|Mage_Core_Model_Store $store Store (null = current store)
      * @param string|int|DateTime|DateTimeImmutable|null $date Date in UTC (null or 'now' = current time)
      */
-    public function utcToStore(mixed $store = null, string|int|DateTime|DateTimeImmutable|null $date = null): DateTime
+    public function utcToStore(mixed $store = null, string|int|DateTime|DateTimeImmutable|null $date = null): DateTimeImmutable
     {
         $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE) ?: self::DEFAULT_TIMEZONE;
-        $dateTime = $this->parseDate($date, new DateTimeZone(self::DEFAULT_TIMEZONE));
-        $dateTime->setTimezone(new DateTimeZone($timezone));
-        return $dateTime;
+        return $this->parseDate($date, new DateTimeZone(self::DEFAULT_TIMEZONE))
+            ->setTimezone(new DateTimeZone($timezone));
     }
 
     /**
      * Convert a store-timezone date to UTC.
      *
-     * Always returns a DateTime object with UTC timezone set.
-     * Use PHP's DateTime::format() for machine-readable output (e.g. $result->format('Y-m-d H:i:s')).
+     * Always returns a DateTimeImmutable object with UTC timezone set.
+     * Use PHP's DateTimeImmutable::format() for machine-readable output (e.g. $result->format('Y-m-d H:i:s')).
      * For locale-aware display formatting, use Mage::helper('core')->formatDate() instead.
      *
      * Note: if $date is a DateTime/DateTimeImmutable, its existing timezone is preserved as the
@@ -812,12 +811,11 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      * @param null|string|bool|int|Mage_Core_Model_Store $store Store (null = current store)
      * @param string|int|DateTime|DateTimeImmutable|null $date Date in store timezone (null or 'now' = current time)
      */
-    public function storeToUtc(mixed $store = null, string|int|DateTime|DateTimeImmutable|null $date = null): DateTime
+    public function storeToUtc(mixed $store = null, string|int|DateTime|DateTimeImmutable|null $date = null): DateTimeImmutable
     {
         $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE) ?: self::DEFAULT_TIMEZONE;
-        $dateTime = $this->parseDate($date, new DateTimeZone($timezone));
-        $dateTime->setTimezone(new DateTimeZone(self::DEFAULT_TIMEZONE));
-        return $dateTime;
+        return $this->parseDate($date, new DateTimeZone($timezone))
+            ->setTimezone(new DateTimeZone(self::DEFAULT_TIMEZONE));
     }
 
     /**
@@ -855,25 +853,23 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     }
 
     /**
-     * Parse various date input types into a mutable DateTime in the given timezone.
+     * Parse various date input types into a DateTimeImmutable in the given timezone.
      */
-    private function parseDate(string|int|DateTime|DateTimeImmutable|null $date, DateTimeZone $timezone): DateTime
+    private function parseDate(string|int|DateTime|DateTimeImmutable|null $date, DateTimeZone $timezone): DateTimeImmutable
     {
-        if ($date instanceof DateTime) {
-            return clone $date;
+        if ($date instanceof DateTimeImmutable) {
+            return $date;
         }
 
-        if ($date instanceof DateTimeImmutable) {
-            return DateTime::createFromInterface($date);
+        if ($date instanceof DateTime) {
+            return DateTimeImmutable::createFromMutable($date);
         }
 
         if (is_int($date) || (is_string($date) && is_numeric($date))) {
-            $dateTime = new DateTime('@' . $date);
-            $dateTime->setTimezone($timezone);
-            return $dateTime;
+            return (new DateTimeImmutable('@' . $date))->setTimezone($timezone);
         }
 
-        return new DateTime($date ?: 'now', $timezone);
+        return new DateTimeImmutable($date ?: 'now', $timezone);
     }
 
     /**

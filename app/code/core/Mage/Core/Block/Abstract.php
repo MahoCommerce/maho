@@ -1103,7 +1103,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
     /**
      * Retrieve formatting date
      *
-     * @param string|int|DateTime|null $date
+     * @param string|int|DateTimeInterface|null $date
      * @param string $format
      * @param bool $withTime
      * @return string
@@ -1118,7 +1118,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
     /**
      * Retrieve formatting timezone date
      *
-     * @param string|int|DateTime|null $date
+     * @param string|int|DateTimeInterface|null $date
      */
     public function formatTimezoneDate(
         $date = null,

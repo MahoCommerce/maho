@@ -128,22 +128,22 @@ describe('Locale::utcToStore()', function () {
         $this->locale = Mage::app()->getLocale();
     });
 
-    it('returns DateTime for null input', function () {
+    it('returns DateTimeImmutable for null input', function () {
         $result = $this->locale->utcToStore(null);
 
-        expect($result)->toBeInstanceOf(DateTime::class);
+        expect($result)->toBeInstanceOf(DateTimeImmutable::class);
     });
 
-    it('returns DateTime for "now" input', function () {
+    it('returns DateTimeImmutable for "now" input', function () {
         $result = $this->locale->utcToStore(null, 'now');
 
-        expect($result)->toBeInstanceOf(DateTime::class);
+        expect($result)->toBeInstanceOf(DateTimeImmutable::class);
     });
 
     it('converts UTC string to store timezone', function () {
         $result = $this->locale->utcToStore(null, '2025-06-15 12:00:00');
 
-        expect($result)->toBeInstanceOf(DateTime::class);
+        expect($result)->toBeInstanceOf(DateTimeImmutable::class);
         expect($result->format('Y-m-d'))->toBe('2025-06-15');
     });
 
@@ -151,14 +151,14 @@ describe('Locale::utcToStore()', function () {
         $timestamp = mktime(12, 0, 0, 6, 15, 2025);
         $result = $this->locale->utcToStore(null, $timestamp);
 
-        expect($result)->toBeInstanceOf(DateTime::class);
+        expect($result)->toBeInstanceOf(DateTimeImmutable::class);
     });
 
     it('handles DateTime input', function () {
         $input = new DateTime('2025-06-15 12:00:00', new DateTimeZone('UTC'));
         $result = $this->locale->utcToStore(null, $input);
 
-        expect($result)->toBeInstanceOf(DateTime::class);
+        expect($result)->toBeInstanceOf(DateTimeImmutable::class);
         expect($result->format('Y-m-d'))->toBe('2025-06-15');
     });
 
@@ -166,7 +166,7 @@ describe('Locale::utcToStore()', function () {
         $input = new DateTimeImmutable('2025-06-15 12:00:00', new DateTimeZone('UTC'));
         $result = $this->locale->utcToStore(null, $input);
 
-        expect($result)->toBeInstanceOf(DateTime::class);
+        expect($result)->toBeInstanceOf(DateTimeImmutable::class);
         expect($result->format('Y-m-d'))->toBe('2025-06-15');
     });
 
@@ -185,17 +185,17 @@ describe('Locale::storeToUtc()', function () {
         $this->locale = Mage::app()->getLocale();
     });
 
-    it('returns DateTime for null input', function () {
+    it('returns DateTimeImmutable for null input', function () {
         $result = $this->locale->storeToUtc(null);
 
-        expect($result)->toBeInstanceOf(DateTime::class);
+        expect($result)->toBeInstanceOf(DateTimeImmutable::class);
         expect($result->getTimezone()->getName())->toBe('UTC');
     });
 
     it('converts store timezone string to UTC', function () {
         $result = $this->locale->storeToUtc(null, '2025-06-15 12:00:00');
 
-        expect($result)->toBeInstanceOf(DateTime::class);
+        expect($result)->toBeInstanceOf(DateTimeImmutable::class);
         expect($result->getTimezone()->getName())->toBe('UTC');
     });
 

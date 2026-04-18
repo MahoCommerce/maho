@@ -492,7 +492,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
      * Retrieve date in UTC timezone
      *
      * @param string|null $date
-     * @return DateTime|null
+     * @return DateTimeImmutable|null
      */
     protected function _dateToUtc($date)
     {

@@ -306,7 +306,7 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
      * Convert the start datetime (if set) to proper locale/timezone and return
      *
      * @param bool $asString
-     * @return DateTime|string
+     * @return DateTimeImmutable|string
      */
     public function exportStartDatetime($asString = true)
     {

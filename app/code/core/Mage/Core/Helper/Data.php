@@ -144,7 +144,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      * Produces locale-aware output (e.g. "April 16, 2026" in en_US, "16 avril 2026" in fr_FR).
      * For machine-readable formats, use DateTime::format() directly instead.
      *
-     * @param   string|int|DateTime|null   $date If empty, return current datetime.
+     * @param   string|int|DateTimeInterface|null   $date If empty, return current datetime.
      * @param   string                      $format   See Mage_Core_Model_Locale::FORMAT_TYPE_* constants
      * @param   bool                        $withTime Whether to include time
      * @return  string
@@ -160,11 +160,11 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      * Produces locale-aware output (e.g. "April 16, 2026" in en_US, "16 avril 2026" in fr_FR).
      * For machine-readable formats, use DateTime::format() directly instead.
      *
-     * @param   string|int|DateTime|null   $date The date to format. Can be:
+     * @param   string|int|DateTimeInterface|null   $date The date to format. Can be:
      *                                            - null: Uses current time
      *                                            - int: Unix timestamp (assumes UTC)
      *                                            - string: Date string (e.g., "2025-08-01 09:24:18")
-     *                                            - DateTime: Existing DateTime object
+     *                                            - DateTimeInterface: Existing DateTime/DateTimeImmutable object
      * @param   string                      $format Display format constant:
      *                                            - FORMAT_TYPE_SHORT: Brief format (e.g., "8/1/25")
      *                                            - FORMAT_TYPE_MEDIUM: Standard format (e.g., "Aug 1, 2025")
@@ -179,7 +179,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      * @return  string                      Formatted date string according to locale settings
      */
     public function formatTimezoneDate(
-        string|int|DateTime|null $date = null,
+        string|int|DateTimeInterface|null $date = null,
         string $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT,
         bool $withTime = false,
         bool $useTimezone = true,
@@ -197,7 +197,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
             $date = $useTimezone
                 ? $locale->utcToStore(null, $date)
                 : new DateTime('@' . $date);
-        } elseif (!$date instanceof DateTime) {
+        } elseif (!$date instanceof DateTimeInterface) {
             if (($time = strtotime($date)) !== false) {
                 $date = $useTimezone
                     ? $locale->utcToStore(null, $time)

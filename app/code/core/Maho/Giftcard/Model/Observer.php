@@ -591,9 +591,9 @@ class Maho_Giftcard_Model_Observer
 
             // Extend expiration if needed
             if ($needsExtension && $extensionDays > 0) {
-                $newExpiration = Mage::app()->getLocale()->storeToUtc();
-                $newExpiration->modify("+{$extensionDays} days");
-                $newExpiresAt = $newExpiration->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+                $newExpiresAt = Mage::app()->getLocale()->storeToUtc()
+                    ->modify("+{$extensionDays} days")
+                    ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 $historyComment .= " (expiration extended to {$extensionDays} days from now)";
             } elseif ($isExpired && $extensionDays === 0) {
                 // If extension is 0 and card is expired, keep it expired but still add balance
@@ -718,9 +718,9 @@ class Maho_Giftcard_Model_Observer
 
             // Extend expiration if needed
             if ($needsExtension && $extensionDays > 0) {
-                $newExpiration = Mage::app()->getLocale()->storeToUtc();
-                $newExpiration->modify("+{$extensionDays} days");
-                $newExpiresAt = $newExpiration->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+                $newExpiresAt = Mage::app()->getLocale()->storeToUtc()
+                    ->modify("+{$extensionDays} days")
+                    ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 $historyComment .= " (expiration extended to {$extensionDays} days from now)";
             } elseif ($isExpired && $extensionDays === 0) {
                 // If extension is 0 and card is expired, keep it expired but still add balance

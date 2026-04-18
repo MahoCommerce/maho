@@ -176,7 +176,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_History extends Mage_Adminhtml_B
      *
      * @param string $label
      * @param bool $notified
-     * @param DateTime $created
+     * @param DateTimeInterface $created
      * @param string $comment
      * @return array
      */

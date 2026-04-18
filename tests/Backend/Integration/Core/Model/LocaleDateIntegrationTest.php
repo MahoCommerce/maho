@@ -330,7 +330,7 @@ describe('parseDate input handling via utcToStore', function () {
             $input = new DateTimeImmutable('2025-06-15 12:00:00', new DateTimeZone('UTC'));
             $result = $this->locale->utcToStore(null, $input);
 
-            expect($result)->toBeInstanceOf(DateTime::class);
+            expect($result)->toBeInstanceOf(DateTimeImmutable::class);
             expect($result->format('Y-m-d H:i:s'))->toBe('2025-06-15 12:00:00');
         });
     });
