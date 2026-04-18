@@ -141,14 +141,6 @@ class RouteCollectionBuilder
     }
 
     /**
-     * Kept for backward compatibility with the pre-dumper static API.
-     */
-    public static function getAdminFrontNameStatic(): string
-    {
-        return self::getAdminFrontName();
-    }
-
-    /**
      * Instantiate the compiled URL matcher. The compiled data is loaded once
      * per process and shared across requests via opcache.
      *

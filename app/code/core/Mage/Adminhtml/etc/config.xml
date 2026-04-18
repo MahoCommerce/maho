@@ -169,11 +169,6 @@
     <websites>
         <admin>
             <web>
-                <routers>
-                    <frontend>
-                        <disabled>true</disabled>
-                    </frontend>
-                </routers>
                 <default>
                     <no_route>admin/index/noRoute</no_route>
                 </default>
