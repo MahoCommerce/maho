@@ -31,6 +31,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/index')]
     public function indexAction()
     {
         if ($this->getRequest()->isAjax()) {
@@ -60,6 +61,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/popup')]
     public function popupAction(): void
     {
         $storeId = (int) $this->getRequest()->getParam('store');
@@ -82,6 +84,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/treeJson')]
     public function treeJsonAction(): void
     {
         try {
@@ -94,6 +97,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         }
     }
 
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/contents')]
     public function contentsAction(): void
     {
         try {
@@ -105,6 +109,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         }
     }
 
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/newFolder')]
     public function newFolderAction(): void
     {
         try {
@@ -118,6 +123,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         }
     }
 
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/deleteFolder')]
     public function deleteFolderAction(): void
     {
         try {
@@ -132,6 +138,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Delete file from media storage
      */
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/deleteFiles')]
     public function deleteFilesAction(): void
     {
         try {
@@ -161,6 +168,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Files upload processing
      */
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/upload')]
     public function uploadAction(): void
     {
         try {
@@ -176,6 +184,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Fire when select image
      */
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/onInsert')]
     public function onInsertAction(): void
     {
         $helper = Mage::helper('cms/wysiwyg_images');
@@ -196,6 +205,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Generate image thumbnail on the fly
      */
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/thumbnail')]
     public function thumbnailAction(): void
     {
         try {
@@ -231,6 +241,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Get image URL for editing
      */
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/getImageUrl')]
     public function getImageUrlAction(): void
     {
         try {
@@ -283,6 +294,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Save edited image from image editor
      */
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/editImage')]
     public function editImageAction(): void
     {
         try {

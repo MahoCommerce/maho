@@ -21,6 +21,7 @@ class Mage_Downloadable_Adminhtml_Downloadable_FileController extends Mage_Admin
     /**
      * Upload file controller action
      */
+    #[Maho\Config\Route('/admin/downloadable_file/upload')]
     public function uploadAction(): void
     {
         $type = $this->getRequest()->getParam('type');

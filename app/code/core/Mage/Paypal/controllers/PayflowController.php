@@ -14,6 +14,7 @@ class Mage_Paypal_PayflowController extends Mage_Core_Controller_Front_Action
     /**
      * When a customer cancel payment from payflow gateway.
      */
+    #[Maho\Config\Route('/paypal/payflow/cancelPayment')]
     public function cancelPaymentAction(): void
     {
         $gotoSection = $this->_cancelPayment();
@@ -26,6 +27,7 @@ class Mage_Paypal_PayflowController extends Mage_Core_Controller_Front_Action
     /**
      * When a customer return to website from payflow gateway.
      */
+    #[Maho\Config\Route('/paypal/payflow/returnUrl')]
     public function returnUrlAction(): void
     {
         $redirectBlock = $this->_getIframeBlock()
@@ -62,6 +64,7 @@ class Mage_Paypal_PayflowController extends Mage_Core_Controller_Front_Action
     /**
      * Submit transaction to Payflow getaway into iframe
      */
+    #[Maho\Config\Route('/paypal/payflow/form')]
     public function formAction(): void
     {
         $this->getResponse()->setHeader('P3P', 'CP="CAO PSA OUR"');
@@ -72,6 +75,7 @@ class Mage_Paypal_PayflowController extends Mage_Core_Controller_Front_Action
     /**
      * Get response from PayPal by silent post method
      */
+    #[Maho\Config\Route('/paypal/payflow/silentPost', methods: ['POST'])]
     public function silentPostAction(): void
     {
         $data = $this->getRequest()->getPost();

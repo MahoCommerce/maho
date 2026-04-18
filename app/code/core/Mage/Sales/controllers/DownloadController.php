@@ -60,6 +60,7 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
     /**
      * Profile custom options download action
      */
+    #[Maho\Config\Route('/sales/download/downloadProfileCustomOption', name: 'sales.download.downloadprofilecustomoption', methods: ['GET'])]
     public function downloadProfileCustomOptionAction(): void
     {
         $recurringProfile = Mage::getModel('sales/recurring_profile')->load($this->getRequest()->getParam('id'));
@@ -103,6 +104,7 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
     /**
      * Custom options download action
      */
+    #[Maho\Config\Route('/sales/download/downloadCustomOption', name: 'sales.download.downloadcustomoption', methods: ['GET'])]
     public function downloadCustomOptionAction(): void
     {
         $quoteItemOptionId = $this->getRequest()->getParam('id');

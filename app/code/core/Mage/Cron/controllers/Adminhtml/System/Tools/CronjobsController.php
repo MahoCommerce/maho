@@ -19,6 +19,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         return parent::preDispatch();
     }
 
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/index')]
     public function indexAction(): void
     {
         $this->loadLayout();
@@ -39,6 +40,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/grid')]
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -47,6 +49,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         );
     }
 
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/clearHistory')]
     public function clearHistoryAction(): void
     {
         try {
@@ -70,6 +73,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         $this->_redirect('*/*/index');
     }
 
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/history')]
     public function historyAction(): void
     {
         $jobCode = $this->getRequest()->getParam('job_code');
@@ -115,6 +119,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         $this->getResponse()->setBodyJson(['records' => $records]);
     }
 
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/run')]
     public function runAction(): void
     {
         $jobCode = $this->getRequest()->getParam('job_code');
@@ -196,6 +201,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         exit;
     }
 
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/runStatus')]
     public function runStatusAction(): void
     {
         $scheduleId = (int) $this->getRequest()->getParam('schedule_id');
@@ -236,6 +242,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         $this->getResponse()->setBodyJson($data);
     }
 
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/toggle')]
     public function toggleAction(): void
     {
         $jobCode = $this->getRequest()->getParam('job_code');
@@ -267,6 +274,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         $this->_redirect('*/*/index');
     }
 
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/massDisable')]
     public function massDisableAction(): void
     {
         $jobCodes = $this->getRequest()->getParam('job_codes');
@@ -290,6 +298,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         $this->_redirect('*/*/index');
     }
 
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/massEnable')]
     public function massEnableAction(): void
     {
         $jobCodes = $this->getRequest()->getParam('job_codes');

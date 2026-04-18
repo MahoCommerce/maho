@@ -493,21 +493,6 @@ class Mage_Core_Controller_Request_Http
                 $pathInfo = $requestUri;
             }
 
-            if ($this->_canBeStoreCodeInUrl()) {
-                $pathParts = explode('/', ltrim($pathInfo, '/'), 2);
-                $storeCode = $pathParts[0];
-
-                if (!$this->isDirectAccessFrontendName($storeCode)) {
-                    $stores = Mage::app()->getStores(true, true);
-                    if ($storeCode !== '' && isset($stores[$storeCode])) {
-                        Mage::app()->setCurrentStore($storeCode);
-                        $pathInfo = '/' . ($pathParts[1] ?? '');
-                    } elseif ($storeCode !== '') {
-                        $this->setActionName('noRoute');
-                    }
-                }
-            }
-
             $this->_originalPathInfo = (string) $pathInfo;
             $this->_requestString = $pathInfo . ($pos !== false ? substr($requestUri, $pos) : '');
         }
@@ -800,11 +785,7 @@ class Mage_Core_Controller_Request_Http
     public function setRouteName(string $route): self
     {
         $this->_route = $route;
-        $router = Mage::app()->getFrontController()->getRouterByRoute($route);
-        if (!$router) {
-            return $this;
-        }
-        $module = $router->getFrontNameByRoute($route);
+        $module = \Maho\Routing\RouteCollectionBuilder::getFrontNameByRoute($route);
         if ($module) {
             $this->setModuleName($module);
         }
@@ -844,8 +825,7 @@ class Mage_Core_Controller_Request_Http
         if ($this->_requestedRouteName === null) {
             if ($this->_rewritedPathInfo !== null && isset($this->_rewritedPathInfo[0])) {
                 $fronName = $this->_rewritedPathInfo[0];
-                $router = Mage::app()->getFrontController()->getRouterByFrontName($fronName);
-                $this->_requestedRouteName = $router->getRouteByFrontName($fronName);
+                $this->_requestedRouteName = \Maho\Routing\RouteCollectionBuilder::getRouteByFrontName($fronName);
             } else {
                 // no rewritten path found, use default route name
                 return $this->getRouteName();

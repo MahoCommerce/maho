@@ -11,6 +11,7 @@
 
 class Mage_Shipping_TrackingController extends Mage_Core_Controller_Front_Action
 {
+    #[Maho\Config\Route('/shipping/tracking/ajax', name: 'shipping.tracking.ajax')]
     public function ajaxAction(): void
     {
         if ($order = $this->_initOrder()) {
@@ -38,6 +39,7 @@ class Mage_Shipping_TrackingController extends Mage_Core_Controller_Front_Action
      * Popup action
      * Shows tracking info if it's present, otherwise redirects to 404
      */
+    #[Maho\Config\Route('/shipping/tracking/popup', name: 'shipping.tracking.popup', methods: ['GET'])]
     public function popupAction(): void
     {
         $shippingInfoModel = Mage::getModel('shipping/info')->loadByHash($this->getRequest()->getParam('hash'));

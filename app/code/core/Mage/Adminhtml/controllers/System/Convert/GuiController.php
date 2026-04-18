@@ -22,6 +22,7 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
      * Profiles list action
      */
     #[\Override]
+    #[Maho\Config\Route('/admin/system_convert_gui/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -56,6 +57,7 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
     }
 
     #[\Override]
+    #[Maho\Config\Route('/admin/system_convert_gui/grid')]
     public function gridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/system_convert_gui_grid')->toHtml());
@@ -65,6 +67,7 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
      * Profile edit action
      */
     #[\Override]
+    #[Maho\Config\Route('/admin/system_convert_gui/edit')]
     public function editAction(): void
     {
         $this->_initProfile();
@@ -95,18 +98,21 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/system_convert_gui/upload')]
     public function uploadAction(): void
     {
         $this->_initProfile();
         $profile = Mage::registry('current_convert_profile');
     }
 
+    #[Maho\Config\Route('/admin/system_convert_gui/uploadPost')]
     public function uploadPostAction(): void
     {
         $this->_initProfile();
         $profile = Mage::registry('current_convert_profile');
     }
 
+    #[Maho\Config\Route('/admin/system_convert_gui/download')]
     public function downloadAction(): void
     {
         $filename = $this->getRequest()->getParam('filename');

@@ -21,6 +21,7 @@ class Mage_CurrencySymbol_Adminhtml_System_CurrencysymbolController extends Mage
     /**
      * Show Currency Symbols Management dialog
      */
+    #[Maho\Config\Route('/admin/system_currencysymbol/index')]
     public function indexAction(): void
     {
         // set active menu and breadcrumbs
@@ -43,6 +44,7 @@ class Mage_CurrencySymbol_Adminhtml_System_CurrencysymbolController extends Mage
     /**
      * Save custom Currency symbol
      */
+    #[Maho\Config\Route('/admin/system_currencysymbol/save')]
     public function saveAction(): void
     {
         $symbolsDataArray = $this->getRequest()->getParam('custom_currency_symbol');
@@ -67,6 +69,7 @@ class Mage_CurrencySymbol_Adminhtml_System_CurrencysymbolController extends Mage
     /**
      * Resets custom Currency symbol for all store views, websites and default value
      */
+    #[Maho\Config\Route('/admin/system_currencysymbol/reset')]
     public function resetAction(): void
     {
         Mage::getModel('currencysymbol/system_currencysymbol')->resetValues();

@@ -15,6 +15,7 @@ class Mage_Adminhtml_JsonController extends Mage_Adminhtml_Controller_Action
     /**
      * Return JSON-encoded array of country regions
      */
+    #[Maho\Config\Route('/admin/json/countryRegion')]
     public function countryRegionAction(): void
     {
         $arrRes = [];

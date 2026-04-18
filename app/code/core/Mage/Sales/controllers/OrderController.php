@@ -37,6 +37,7 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
     /**
      * Customer order history
      */
+    #[Maho\Config\Route('/sales/order/history', name: 'sales.order.history', methods: ['GET'])]
     public function historyAction(): void
     {
         $this->loadLayout();
@@ -53,6 +54,7 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
     /**
      * Associate guest orders with current customer
      */
+    #[Maho\Config\Route('/sales/order/associateGuestOrders', name: 'sales.order.associateguestorders', methods: ['POST'])]
     public function associateGuestOrdersAction(): void
     {
         $session = Mage::getSingleton('customer/session');

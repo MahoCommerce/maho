@@ -31,6 +31,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         return parent::preDispatch();
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_review/index')]
     public function indexAction()
     {
         $this->_title($this->__('Catalog'))
@@ -51,6 +52,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_review/pending')]
     public function pendingAction()
     {
         $this->_title($this->__('Catalog'))
@@ -73,6 +75,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_review/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -93,6 +96,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_review/new')]
     public function newAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -110,6 +114,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_review/save')]
     public function saveAction()
     {
         if (($data = $this->getRequest()->getPost()) && ($reviewId = $this->getRequest()->getParam('id'))) {
@@ -157,6 +162,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_review/delete')]
     public function deleteAction(): void
     {
         $reviewId   = $this->getRequest()->getParam('id', false);
@@ -183,6 +189,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->_redirect('*/*/edit/', ['id' => $reviewId]);
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_review/massDelete')]
     public function massDeleteAction(): void
     {
         $reviewsIds = $this->getRequest()->getParam('reviews');
@@ -209,6 +216,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->_redirect('*/*/' . $this->getRequest()->getParam('ret', 'index'));
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_review/massUpdateStatus')]
     public function massUpdateStatusAction(): void
     {
         $reviewsIds = $this->getRequest()->getParam('reviews');
@@ -239,6 +247,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->_redirect('*/*/' . $this->getRequest()->getParam('ret', 'index'));
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_review/massVisibleIn')]
     public function massVisibleInAction(): void
     {
         $reviewsIds = $this->getRequest()->getParam('reviews');
@@ -269,16 +278,19 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->_redirect('*/*/pending');
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_review/productGrid')]
     public function productGridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/review_product_grid')->toHtml());
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_review/reviewGrid')]
     public function reviewGridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/review_grid')->toHtml());
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_review/jsonProductInfo')]
     public function jsonProductInfoAction(): void
     {
         $response = new \Maho\DataObject();
@@ -296,6 +308,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->getResponse()->setBodyJson($response);
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_review/post')]
     public function postAction(): void
     {
         $productId  = $this->getRequest()->getParam('product_id', false);
@@ -348,6 +361,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->getResponse()->setRedirect($this->getUrl('*/*/'));
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_review/ratingItems')]
     public function ratingItemsAction(): void
     {
         $this->getResponse()->setBody(

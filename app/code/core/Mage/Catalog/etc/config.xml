@@ -625,15 +625,6 @@
         </translate>
     </adminhtml>
     <frontend>
-        <routers>
-            <catalog>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Catalog</module>
-                    <frontName>catalog</frontName>
-                </args>
-            </catalog>
-        </routers>
         <default>
             <router>catalog</router>
         </default>

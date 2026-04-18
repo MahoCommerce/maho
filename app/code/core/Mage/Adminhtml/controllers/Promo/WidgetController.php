@@ -21,6 +21,7 @@ class Mage_Adminhtml_Promo_WidgetController extends Mage_Adminhtml_Controller_Ac
     /**
      * Prepare block for chooser
      */
+    #[Maho\Config\Route('/admin/promo_widget/chooser')]
     public function chooserAction(): void
     {
         $request = $this->getRequest();
@@ -57,6 +58,7 @@ class Mage_Adminhtml_Promo_WidgetController extends Mage_Adminhtml_Controller_Ac
     /**
      * Get tree node (Ajax version)
      */
+    #[Maho\Config\Route('/admin/promo_widget/categoriesJson')]
     public function categoriesJsonAction(): void
     {
         try {

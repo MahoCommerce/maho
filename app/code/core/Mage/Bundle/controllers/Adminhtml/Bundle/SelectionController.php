@@ -27,6 +27,7 @@ class Mage_Bundle_Adminhtml_Bundle_SelectionController extends Mage_Adminhtml_Co
     /**
      * @return Mage_Core_Controller_Response_Http
      */
+    #[Maho\Config\Route('/admin/bundle_selection/search')]
     public function searchAction()
     {
         return $this->getResponse()->setBody(
@@ -41,6 +42,7 @@ class Mage_Bundle_Adminhtml_Bundle_SelectionController extends Mage_Adminhtml_Co
     /**
      * @return Mage_Core_Controller_Response_Http
      */
+    #[Maho\Config\Route('/admin/bundle_selection/grid')]
     public function gridAction()
     {
         return $this->getResponse()->setBody(

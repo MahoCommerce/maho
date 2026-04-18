@@ -385,7 +385,8 @@ class Mage_Core_Model_Url extends \Maho\DataObject
          * Add availability support urls without store code
          */
         if ($this->getType() == Mage_Core_Model_Store::URL_TYPE_LINK
-            && Mage::app()->getRequest()->isDirectAccessFrontendName($this->getRouteFrontName())
+            && ($routeFrontName = $this->getRouteFrontName()) !== null
+            && Mage::app()->getRequest()->isDirectAccessFrontendName($routeFrontName)
         ) {
             $this->setType(Mage_Core_Model_Store::URL_TYPE_DIRECT_LINK);
         }
@@ -534,9 +535,7 @@ class Mage_Core_Model_Url extends \Maho\DataObject
     {
         if (!$this->hasData('route_front_name')) {
             $routeName = $this->getRouteName();
-            $route = Mage::app()->getFrontController()->getRouterByRoute($routeName);
-            $frontName = $route->getFrontNameByRoute($routeName);
-
+            $frontName = \Maho\Routing\RouteCollectionBuilder::getFrontNameByRoute($routeName ?? '') ?? $routeName;
             $this->setRouteFrontName($frontName);
         }
 
@@ -750,7 +749,89 @@ class Mage_Core_Model_Url extends \Maho\DataObject
             $this->setRouteParams($routeParams, false);
         }
 
+        // Try Symfony named route URL generation (skip for rewrite/current-based URLs)
+        if (empty($routeParams['_use_rewrite']) && empty($routeParams['_current'])) {
+            $symfonyPath = $this->_generateSymfonyRoutePath();
+            if ($symfonyPath !== null) {
+                return $this->getBaseUrl() . $symfonyPath;
+            }
+        }
+
         return $this->getBaseUrl() . $this->getRoutePath($routeParams);
+    }
+
+    /**
+     * Try to generate a URL path using the opcached CompiledUrlGenerator.
+     *
+     * Path variables are substituted by Symfony. Extras are appended manually:
+     * admin URLs use key/value path segments (captured at match time by `{_catchall}`),
+     * frontend URLs use query parameters.
+     *
+     * @return string|null The route path (without leading slash, with trailing slash), or null to fall back to legacy
+     */
+    protected function _generateSymfonyRoutePath(): ?string
+    {
+        $frontName = $this->getRouteFrontName();
+        $controller = $this->getControllerName() ?: $this->getDefaultControllerName();
+        $action = $this->getActionName() ?: $this->getDefaultActionName();
+
+        if (!$frontName) {
+            return null;
+        }
+
+        $routeInfo = \Maho\Routing\RouteCollectionBuilder::resolveRoute($frontName, $controller, $action);
+        if ($routeInfo === null) {
+            return null;
+        }
+
+        $routeParams = $this->getRouteParams() ?? [];
+        $pathVariables = $routeInfo['pathVariables'];
+        $area = $routeInfo['area'] ?? 'frontend';
+
+        // Admin routes carry {_adminFrontName} as a compile-time placeholder so the
+        // runtime admin frontName (use_custom_admin_path) is substituted per request.
+        if ($area === 'adminhtml') {
+            $routeParams['_adminFrontName'] = \Maho\Routing\RouteCollectionBuilder::getAdminFrontName();
+        }
+
+        $pathParams = [];
+        foreach ($pathVariables as $var) {
+            if ($var === '_catchall') {
+                continue; // optional; defaulted at compile time
+            }
+            if (!isset($routeParams[$var]) || $routeParams[$var] === '') {
+                return null;
+            }
+            $pathParams[$var] = $routeParams[$var];
+        }
+
+        // Empty context so the generator returns a path relative to the docroot.
+        // The caller prepends the proper base URL via $this->getBaseUrl().
+        try {
+            $generated = \Maho\Routing\RouteCollectionBuilder::createGenerator(new \Symfony\Component\Routing\RequestContext())
+                ->generate($routeInfo['name'], $pathParams);
+        } catch (\Symfony\Component\Routing\Exception\ExceptionInterface) {
+            return null;
+        }
+
+        $path = ltrim($generated, '/');
+        $extras = array_diff_key($routeParams, array_flip($pathVariables));
+        foreach ($extras as $key => $value) {
+            if ($value === null || $value === false || $value === '' || !is_scalar($value)) {
+                continue;
+            }
+            if ($area === 'adminhtml') {
+                $path .= '/' . $key . '/' . $value;
+            } else {
+                $this->setQueryParam($key, $value);
+            }
+        }
+
+        if ($path !== '' && !str_ends_with($path, '/')) {
+            $path .= '/';
+        }
+
+        return $path;
     }
 
     /**

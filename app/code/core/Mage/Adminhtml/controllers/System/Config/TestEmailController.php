@@ -28,6 +28,7 @@ class Mage_Adminhtml_System_Config_TestEmailController extends Mage_Adminhtml_Co
     /**
      * Send test email action
      */
+    #[Maho\Config\Route('/admin/system_config_testemail/send')]
     public function sendAction(): void
     {
         $recipient = $this->getRequest()->getParam('recipient');

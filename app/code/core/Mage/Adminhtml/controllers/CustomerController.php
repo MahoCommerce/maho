@@ -53,6 +53,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Customers list action
      */
+    #[Maho\Config\Route('/admin/customer/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Customers'))->_title($this->__('Manage Customers'));
@@ -84,6 +85,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/customer/grid')]
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -93,6 +95,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Customer edit action
      */
+    #[Maho\Config\Route('/admin/customer/edit')]
     public function editAction(): void
     {
         $this->_initCustomer();
@@ -155,6 +158,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Create new customer action
      */
+    #[Maho\Config\Route('/admin/customer/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -163,6 +167,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Delete customer action
      */
+    #[Maho\Config\Route('/admin/customer/delete')]
     public function deleteAction(): void
     {
         $this->_initCustomer();
@@ -182,6 +187,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Save customer action
      */
+    #[Maho\Config\Route('/admin/customer/save')]
     public function saveAction(): void
     {
         $data = $this->getRequest()->getPost();
@@ -401,6 +407,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Export customer grid to CSV format
      */
+    #[Maho\Config\Route('/admin/customer/exportCsv')]
     public function exportCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/customer_grid');
@@ -410,6 +417,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Export customer grid to XML format
      */
+    #[Maho\Config\Route('/admin/customer/exportXml')]
     public function exportXmlAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/customer_grid');
@@ -419,6 +427,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Customer orders grid
      */
+    #[Maho\Config\Route('/admin/customer/orders')]
     public function ordersAction(): void
     {
         $this->_initCustomer();
@@ -429,6 +438,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Customer last orders grid for ajax
      */
+    #[Maho\Config\Route('/admin/customer/lastOrders')]
     public function lastOrdersAction(): void
     {
         $this->_initCustomer();
@@ -439,6 +449,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Customer newsletter grid
      */
+    #[Maho\Config\Route('/admin/customer/newsletter')]
     public function newsletterAction(): void
     {
         $this->_initCustomer();
@@ -450,6 +461,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/customer/wishlist')]
     public function wishlistAction(): void
     {
         $this->_initCustomer();
@@ -475,6 +487,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Customer last view wishlist for ajax
      */
+    #[Maho\Config\Route('/admin/customer/viewWishlist')]
     public function viewWishlistAction(): void
     {
         $this->_initCustomer();
@@ -485,6 +498,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * [Handle and then] get a cart grid contents
      */
+    #[Maho\Config\Route('/admin/customer/cart')]
     public function cartAction(): void
     {
         $this->_initCustomer();
@@ -511,6 +525,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Get shopping cart to view only
      */
+    #[Maho\Config\Route('/admin/customer/viewCart')]
     public function viewCartAction(): void
     {
         $this->_initCustomer();
@@ -524,6 +539,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Get shopping carts from all websites for specified client
      */
+    #[Maho\Config\Route('/admin/customer/carts')]
     public function cartsAction(): void
     {
         $this->_initCustomer();
@@ -534,6 +550,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Get customer's product reviews list
      */
+    #[Maho\Config\Route('/admin/customer/productReviews')]
     public function productReviewsAction(): void
     {
         $this->_initCustomer();
@@ -548,6 +565,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     /**
      * Get customer's tags list
      */
+    #[Maho\Config\Route('/admin/customer/productTags')]
     public function productTagsAction(): void
     {
         $this->_initCustomer();
@@ -559,6 +577,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/customer/tagGrid')]
     public function tagGridAction(): void
     {
         $this->_initCustomer();
@@ -569,6 +588,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/customer/validate')]
     public function validateAction(): void
     {
         $response       = new \Maho\DataObject();
@@ -653,6 +673,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->getResponse()->setBody($response->toJson());
     }
 
+    #[Maho\Config\Route('/admin/customer/massSubscribe')]
     public function massSubscribeAction(): void
     {
         $customersIds = $this->getRequest()->getParam('customer');
@@ -675,6 +696,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/index');
     }
 
+    #[Maho\Config\Route('/admin/customer/massUnsubscribe')]
     public function massUnsubscribeAction(): void
     {
         $customersIds = $this->getRequest()->getParam('customer');
@@ -698,6 +720,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/index');
     }
 
+    #[Maho\Config\Route('/admin/customer/massDelete')]
     public function massDeleteAction(): void
     {
         $customersIds = $this->getRequest()->getParam('customer');
@@ -722,6 +745,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/index');
     }
 
+    #[Maho\Config\Route('/admin/customer/massAssignGroup')]
     public function massAssignGroupAction(): void
     {
         $customersIds = $this->getRequest()->getParam('customer');
@@ -745,6 +769,7 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/index');
     }
 
+    #[Maho\Config\Route('/admin/customer/viewfile')]
     public function viewfileAction(): void
     {
         $plain  = false;

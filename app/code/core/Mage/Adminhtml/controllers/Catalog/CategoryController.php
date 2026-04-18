@@ -59,6 +59,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Catalog categories index action
      */
+    #[Maho\Config\Route('/admin/catalog_category/index')]
     public function indexAction(): void
     {
         $storeId = (int) $this->getRequest()->getParam('store');
@@ -73,6 +74,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Add new category form
      */
+    #[Maho\Config\Route('/admin/catalog_category/add')]
     public function addAction(): void
     {
         $this->_forward('edit');
@@ -81,6 +83,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Edit category page
      */
+    #[Maho\Config\Route('/admin/catalog_category/edit')]
     public function editAction(): void
     {
         $storeId = (int) $this->getRequest()->getParam('store');
@@ -160,6 +163,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * WYSIWYG editor action for ajax request
      */
+    #[Maho\Config\Route('/admin/catalog_category/wysiwyg')]
     public function wysiwygAction(): void
     {
         $elementId = $this->getRequest()->getParam('element_id', md5(microtime()));
@@ -178,6 +182,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Get tree node (Ajax version)
      */
+    #[Maho\Config\Route('/admin/catalog_category/categoriesJson')]
     public function categoriesJsonAction(): void
     {
         $recursionLevel = $this->getRequest()->getParam('expand_all') ? 0 : null;
@@ -199,6 +204,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Category save
      */
+    #[Maho\Config\Route('/admin/catalog_category/save')]
     public function saveAction(): void
     {
         try {
@@ -250,7 +256,6 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
             if ($category->getId() && isset($data['general']['url_key_create_redirect'])) {
                 $category->setData('save_rewrites_history', (bool) $data['general']['url_key_create_redirect']);
             }
-
 
             if (isset($data['category_products']) && !$category->getProductsReadonly()) {
                 $products = Mage::helper('core/string')->parseQueryStr($data['category_products']);
@@ -327,6 +332,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Move category action (AJAX)
      */
+    #[Maho\Config\Route('/admin/catalog_category/move')]
     public function moveAction(): void
     {
         try {
@@ -366,6 +372,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Delete category action
      */
+    #[Maho\Config\Route('/admin/catalog_category/delete')]
     public function deleteAction(): void
     {
         try {
@@ -420,6 +427,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
      * Grid Action
      * Display list of products related to current category
      */
+    #[Maho\Config\Route('/admin/catalog_category/grid')]
     public function gridAction(): void
     {
         $this->_initCategory(true);
@@ -432,6 +440,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
      * Tree Action
      * Retrieve category tree
      */
+    #[Maho\Config\Route('/admin/catalog_category/tree')]
     public function treeAction(): void
     {
         $storeId = (int) $this->getRequest()->getParam('store');
@@ -455,6 +464,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Build response for refresh input element 'path' in form (AJAX)
      */
+    #[Maho\Config\Route('/admin/catalog_category/refreshPath')]
     public function refreshPathAction(): void
     {
         try {
@@ -482,6 +492,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Generate condition HTML for dynamic category rules
      */
+    #[Maho\Config\Route('/admin/catalog_category/newConditionHtml')]
     public function newConditionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -512,6 +523,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
     /**
      * Process dynamic category rules
      */
+    #[Maho\Config\Route('/admin/catalog_category/processDynamic')]
     public function processDynamicAction(): void
     {
         $categoryId = (int) $this->getRequest()->getParam('id');

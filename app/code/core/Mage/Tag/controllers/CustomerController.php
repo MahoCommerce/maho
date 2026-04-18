@@ -41,6 +41,7 @@ class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
         return false;
     }
 
+    #[Maho\Config\Route('/tag/customer', name: 'tag.customer.index', methods: ['GET'])]
     public function indexAction(): void
     {
         if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
@@ -66,6 +67,7 @@ class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/tag/customer/view/{tagId}', name: 'tag.customer.view', methods: ['GET'], requirements: ['tagId' => '\d+'])]
     public function viewAction(): void
     {
         if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
@@ -92,6 +94,7 @@ class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
         }
     }
 
+    #[Maho\Config\Route('/tag/customer/remove/{tagId}', name: 'tag.customer.remove', methods: ['POST'], requirements: ['tagId' => '\d+'])]
     public function removeAction(): void
     {
         if (!Mage::getSingleton('customer/session')->isLoggedIn()) {

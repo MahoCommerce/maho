@@ -21,6 +21,7 @@ class Mage_Widget_Adminhtml_WidgetController extends Mage_Adminhtml_Controller_A
     /**
      * Wysiwyg widget plugin main page
      */
+    #[Maho\Config\Route('/admin/widget/index')]
     public function indexAction(): void
     {
         // save extra params for widgets insertion form
@@ -36,6 +37,7 @@ class Mage_Widget_Adminhtml_WidgetController extends Mage_Adminhtml_Controller_A
     /**
      * Ajax responder for loading plugin options form
      */
+    #[Maho\Config\Route('/admin/widget/loadOptions')]
     public function loadOptionsAction(): void
     {
         try {
@@ -61,6 +63,7 @@ class Mage_Widget_Adminhtml_WidgetController extends Mage_Adminhtml_Controller_A
     /**
      * Format widget pseudo-code for inserting into wysiwyg editor
      */
+    #[Maho\Config\Route('/admin/widget/buildWidget')]
     public function buildWidgetAction(): void
     {
         $type = $this->getRequest()->getPost('widget_type');

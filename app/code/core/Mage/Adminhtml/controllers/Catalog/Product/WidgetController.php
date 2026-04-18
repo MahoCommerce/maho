@@ -23,6 +23,7 @@ class Mage_Adminhtml_Catalog_Product_WidgetController extends Mage_Adminhtml_Con
      *
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product_widget/chooser')]
     public function chooserAction(): void
     {
         $uniqId = $this->getRequest()->getParam('uniq_id');

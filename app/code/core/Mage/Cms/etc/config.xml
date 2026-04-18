@@ -17,15 +17,6 @@
         </Mage_Cms>
     </modules>
     <frontend>
-        <routers>
-            <cms>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Cms</module>
-                    <frontName>cms</frontName>
-                </args>
-            </cms>
-        </routers>
         <translate>
             <modules>
                 <Mage_Cms>

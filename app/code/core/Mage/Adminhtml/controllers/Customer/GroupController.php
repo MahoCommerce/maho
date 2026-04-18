@@ -44,6 +44,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
     /**
      * Customer groups list.
      */
+    #[Maho\Config\Route('/admin/customer_group/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Customers'))->_title($this->__('Customer Groups'));
@@ -58,6 +59,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
     /**
      * Edit or create customer group.
      */
+    #[Maho\Config\Route('/admin/customer_group/new')]
     public function newAction(): void
     {
         $this->_initGroup();
@@ -86,6 +88,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
     /**
      * Edit customer group action. Forward to new action.
      */
+    #[Maho\Config\Route('/admin/customer_group/edit')]
     public function editAction(): void
     {
         $this->_forward('new');
@@ -94,6 +97,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
     /**
      * Create or save customer group.
      */
+    #[Maho\Config\Route('/admin/customer_group/save')]
     public function saveAction(): void
     {
         $customerGroup = Mage::getModel('customer/group');
@@ -130,6 +134,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
     /**
      * Delete customer group action
      */
+    #[Maho\Config\Route('/admin/customer_group/delete')]
     public function deleteAction(): void
     {
         $customerGroup = Mage::getModel('customer/group');

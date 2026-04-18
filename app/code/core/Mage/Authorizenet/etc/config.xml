@@ -57,15 +57,6 @@
                 </Mage_Authorizenet>
             </modules>
         </translate>
-         <routers>
-            <authorizenet>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Authorizenet</module>
-                    <frontName>authorizenet</frontName>
-                </args>
-            </authorizenet>
-        </routers>
         <layout>
             <updates>
                 <authorizenet>
@@ -74,16 +65,4 @@
             </updates>
         </layout>
     </frontend>
-
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <Mage_Authorizenet before="Mage_Adminhtml">Mage_Authorizenet_Adminhtml</Mage_Authorizenet>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
 </config>

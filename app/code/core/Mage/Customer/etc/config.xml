@@ -441,15 +441,6 @@
         <secure_url>
             <customer>/customer/</customer>
         </secure_url>
-        <routers>
-            <customer>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Customer</module>
-                    <frontName>customer</frontName>
-                </args>
-            </customer>
-        </routers>
         <translate>
             <modules>
                 <Mage_Customer>

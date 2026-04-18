@@ -73,6 +73,7 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
     /**
      * Download sample action
      */
+    #[Maho\Config\Route('/downloadable/download/sample/{sample_id}', name: 'downloadable.download.sample', methods: ['GET'], requirements: ['sample_id' => '\d+'])]
     public function sampleAction()
     {
         $sampleId = $this->getRequest()->getParam('sample_id', 0);
@@ -107,6 +108,7 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
     /**
      * Download link's sample action
      */
+    #[Maho\Config\Route('/downloadable/download/linkSample/{link_id}', name: 'downloadable.download.linksample', methods: ['GET'], requirements: ['link_id' => '\d+'])]
     public function linkSampleAction()
     {
         $linkId = $this->getRequest()->getParam('link_id', 0);
@@ -143,6 +145,7 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
      *
      * @return Mage_Core_Controller_Varien_Action|void
      */
+    #[Maho\Config\Route('/downloadable/download/link/{id}', name: 'downloadable.download.link', methods: ['GET'])]
     public function linkAction()
     {
         $id = $this->getRequest()->getParam('id', 0);

@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @copyright  Copyright (c) 2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
 class Mage_Adminhtml_Permissions_OrphanedResourceController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -33,6 +34,7 @@ class Mage_Adminhtml_Permissions_OrphanedResourceController extends Mage_Adminht
     /**
      * Index action
      */
+    #[Maho\Config\Route('/admin/permissions_orphanedresource/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -49,6 +51,7 @@ class Mage_Adminhtml_Permissions_OrphanedResourceController extends Mage_Adminht
     /**
      * Mass delete action
      */
+    #[Maho\Config\Route('/admin/permissions_orphanedresource/massDelete')]
     public function massDeleteAction(): void
     {
         $resourceIds = $this->getRequest()->getParam('resource_id');

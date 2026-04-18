@@ -46,6 +46,7 @@ class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Contro
     /**
      * Index action.
      */
+    #[Maho\Config\Route('/admin/import/index')]
     public function indexAction(): void
     {
         $maxUploadSize = Mage::helper('importexport')->getMaxUploadSize();
@@ -62,6 +63,7 @@ class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Contro
     /**
      * Start import process action.
      */
+    #[Maho\Config\Route('/admin/import/start')]
     public function startAction(): void
     {
         $data = $this->getRequest()->getPost();
@@ -94,6 +96,7 @@ class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Contro
     /**
      * Validate uploaded files action.
      */
+    #[Maho\Config\Route('/admin/import/validate')]
     public function validateAction(): void
     {
         $data = $this->getRequest()->getPost();

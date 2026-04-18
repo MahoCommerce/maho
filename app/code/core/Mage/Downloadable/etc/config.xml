@@ -198,15 +198,6 @@
         </layout>
     </adminhtml>
     <frontend>
-        <routers>
-            <downloadable>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Downloadable</module>
-                    <frontName>downloadable</frontName>
-                </args>
-            </downloadable>
-        </routers>
         <secure_url>
             <downloadable>/downloadable/customer/</downloadable>
             <downloadable_download>/downloadable/download/</downloadable_download>
@@ -278,15 +269,6 @@
                 </manage_stock>
             </catalog_product_dataflow>
         </fieldsets>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <Mage_Downloadable before="Mage_Adminhtml">Mage_Downloadable_Adminhtml</Mage_Downloadable>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
     </admin>
     <default>
         <catalog>

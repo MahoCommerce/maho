@@ -12,6 +12,7 @@
 
 class Mage_CatalogSearch_AjaxController extends Mage_Core_Controller_Front_Action
 {
+    #[Maho\Config\Route('/catalogsearch/ajax/suggest', name: 'catalogsearch.ajax.suggest', methods: ['GET'])]
     public function suggestAction(): void
     {
         if (!$this->getRequest()->getParam('q', false)) {

@@ -18,6 +18,7 @@ class Mage_Bundle_Adminhtml_Bundle_Product_EditController extends Mage_Adminhtml
         $this->setUsedModuleName('Mage_Bundle');
     }
 
+    #[Maho\Config\Route('/admin/bundle_product_edit/form')]
     public function formAction(): void
     {
         $product = $this->_initProduct();

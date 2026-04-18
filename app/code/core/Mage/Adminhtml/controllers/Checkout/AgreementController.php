@@ -30,6 +30,7 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
         return parent::preDispatch();
     }
 
+    #[Maho\Config\Route('/admin/checkout_agreement/index')]
     public function indexAction()
     {
         $this->_title($this->__('Sales'))->_title($this->__('Terms and Conditions'));
@@ -40,11 +41,13 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/checkout_agreement/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
+    #[Maho\Config\Route('/admin/checkout_agreement/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('Sales'))->_title($this->__('Terms and Conditions'));
@@ -78,6 +81,7 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
             ->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/checkout_agreement/save')]
     public function saveAction(): void
     {
         if ($postData = $this->getRequest()->getPost()) {
@@ -102,6 +106,7 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
         }
     }
 
+    #[Maho\Config\Route('/admin/checkout_agreement/delete')]
     public function deleteAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');

@@ -16,6 +16,7 @@
  *
  * @TODO: implement ACL restrictions
  */
+
 class Mage_Adminhtml_Sales_Recurring_ProfileController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -29,6 +30,7 @@ class Mage_Adminhtml_Sales_Recurring_ProfileController extends Mage_Adminhtml_Co
      *
      * @return $this
      */
+    #[Maho\Config\Route('/admin/sales_recurring_profile/index')]
     public function indexAction()
     {
         $this->_title(Mage::helper('sales')->__('Sales'))->_title(Mage::helper('sales')->__('Recurring Profiles'))
@@ -41,6 +43,7 @@ class Mage_Adminhtml_Sales_Recurring_ProfileController extends Mage_Adminhtml_Co
     /**
      * View recurring profile detales
      */
+    #[Maho\Config\Route('/admin/sales_recurring_profile/view')]
     public function viewAction(): void
     {
         try {
@@ -63,6 +66,7 @@ class Mage_Adminhtml_Sales_Recurring_ProfileController extends Mage_Adminhtml_Co
     /**
      * Profiles ajax grid
      */
+    #[Maho\Config\Route('/admin/sales_recurring_profile/grid')]
     public function gridAction(): void
     {
         try {
@@ -79,6 +83,7 @@ class Mage_Adminhtml_Sales_Recurring_ProfileController extends Mage_Adminhtml_Co
     /**
      * Profile orders ajax grid
      */
+    #[Maho\Config\Route('/admin/sales_recurring_profile/orders')]
     public function ordersAction(): void
     {
         try {
@@ -93,6 +98,7 @@ class Mage_Adminhtml_Sales_Recurring_ProfileController extends Mage_Adminhtml_Co
     /**
      * Profile state updater action
      */
+    #[Maho\Config\Route('/admin/sales_recurring_profile/updateState')]
     public function updateStateAction(): void
     {
         $profile = null;
@@ -127,6 +133,7 @@ class Mage_Adminhtml_Sales_Recurring_ProfileController extends Mage_Adminhtml_Co
     /**
      * Profile information updater action
      */
+    #[Maho\Config\Route('/admin/sales_recurring_profile/updateProfile')]
     public function updateProfileAction(): void
     {
         $profile = null;
@@ -155,6 +162,7 @@ class Mage_Adminhtml_Sales_Recurring_ProfileController extends Mage_Adminhtml_Co
     /**
      * Cutomer billing agreements ajax action
      */
+    #[Maho\Config\Route('/admin/sales_recurring_profile/customerGrid')]
     public function customerGridAction(): void
     {
         $this->_initCustomer();

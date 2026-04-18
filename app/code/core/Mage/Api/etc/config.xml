@@ -75,15 +75,6 @@
         </request>
     </global>
     <frontend>
-        <routers>
-            <api>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Api</module>
-                    <frontName>api</frontName>
-                </args>
-            </api>
-        </routers>
         <translate>
             <modules>
                 <Mage_Api>

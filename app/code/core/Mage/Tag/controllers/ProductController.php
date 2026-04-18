@@ -11,6 +11,7 @@
 
 class Mage_Tag_ProductController extends Mage_Core_Controller_Front_Action
 {
+    #[Maho\Config\Route('/tag/product/list/{tagId}', name: 'tag.product.list', methods: ['GET'], requirements: ['tagId' => '\d+'])]
     public function listAction(): void
     {
         $tagId = $this->getRequest()->getParam('tagId');

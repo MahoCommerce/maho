@@ -21,6 +21,7 @@ class Mage_Install_IndexController extends Mage_Install_Controller_Action
         parent::preDispatch();
     }
 
+    #[Maho\Config\Route('/install')]
     public function indexAction(): void
     {
         $this->_forward('license', 'wizard', 'install');

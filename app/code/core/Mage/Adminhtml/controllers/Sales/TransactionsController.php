@@ -40,6 +40,7 @@ class Mage_Adminhtml_Sales_TransactionsController extends Mage_Adminhtml_Control
         return $txn;
     }
 
+    #[Maho\Config\Route('/admin/sales_transactions/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -53,6 +54,7 @@ class Mage_Adminhtml_Sales_TransactionsController extends Mage_Adminhtml_Control
     /**
      * Ajax grid action
      */
+    #[Maho\Config\Route('/admin/sales_transactions/grid')]
     public function gridAction(): void
     {
         $this->loadLayout(false);
@@ -62,6 +64,7 @@ class Mage_Adminhtml_Sales_TransactionsController extends Mage_Adminhtml_Control
     /**
      * View Transaction Details action
      */
+    #[Maho\Config\Route('/admin/sales_transactions/view')]
     public function viewAction(): void
     {
         $txn = $this->_initTransaction();
@@ -80,6 +83,7 @@ class Mage_Adminhtml_Sales_TransactionsController extends Mage_Adminhtml_Control
     /**
      * Fetch transaction details action
      */
+    #[Maho\Config\Route('/admin/sales_transactions/fetch')]
     public function fetchAction(): void
     {
         $txn = $this->_initTransaction();

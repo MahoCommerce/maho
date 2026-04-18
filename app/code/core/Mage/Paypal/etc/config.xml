@@ -90,15 +90,6 @@
             <paypal_standard>/paypal/standard</paypal_standard>
             <paypal_ipn>/paypal/ipn</paypal_ipn>
         </secure_url>
-        <routers>
-            <paypal>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Paypal</module>
-                    <frontName>paypal</frontName>
-                </args>
-            </paypal>
-        </routers>
         <translate>
             <modules>
                 <Mage_Paypal>
@@ -267,15 +258,4 @@
             </hosted_pro>
         </payment>
     </default>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <Mage_Paypal before="Mage_Adminhtml">Mage_Paypal_Adminhtml</Mage_Paypal>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
 </config>

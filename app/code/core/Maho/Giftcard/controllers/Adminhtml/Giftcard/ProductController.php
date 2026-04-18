@@ -18,6 +18,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
     /**
      * Create gift card product(s) action
      */
+    #[Maho\Config\Route('/admin/giftcard_product/create')]
     public function createAction(): void
     {
         $this->loadLayout();
@@ -29,6 +30,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
     /**
      * Save gift card product(s)
      */
+    #[Maho\Config\Route('/admin/giftcard_product/save')]
     public function saveAction(): void
     {
         try {

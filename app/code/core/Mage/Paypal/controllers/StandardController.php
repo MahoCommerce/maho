@@ -50,6 +50,7 @@ class Mage_Paypal_StandardController extends Mage_Core_Controller_Front_Action
     /**
      * When a customer chooses Paypal on Checkout/Payment page
      */
+    #[Maho\Config\Route('/paypal/standard/redirect')]
     public function redirectAction(): void
     {
         $session = Mage::getSingleton('checkout/session');
@@ -62,6 +63,7 @@ class Mage_Paypal_StandardController extends Mage_Core_Controller_Front_Action
     /**
      * When a customer cancel payment from paypal.
      */
+    #[Maho\Config\Route('/paypal/standard/cancel')]
     public function cancelAction(): void
     {
         $session = Mage::getSingleton('checkout/session');
@@ -82,6 +84,7 @@ class Mage_Paypal_StandardController extends Mage_Core_Controller_Front_Action
      * variables.  However, you don't want to "process" the order until you
      * get validation from the IPN.
      */
+    #[Maho\Config\Route('/paypal/standard/success')]
     public function successAction(): void
     {
         $session = Mage::getSingleton('checkout/session');

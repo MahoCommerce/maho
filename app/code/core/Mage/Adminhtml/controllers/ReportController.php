@@ -12,6 +12,7 @@
 
 class Mage_Adminhtml_ReportController extends Mage_Adminhtml_Controller_Action
 {
+    #[Maho\Config\Route('/admin/report/_init')]
     public function _initAction()
     {
         $this->loadLayout()
@@ -19,6 +20,7 @@ class Mage_Adminhtml_ReportController extends Mage_Adminhtml_Controller_Action
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/report/search')]
     public function searchAction(): void
     {
         $this->_title($this->__('Reports'))->_title($this->__('Search Terms'));
@@ -35,6 +37,7 @@ class Mage_Adminhtml_ReportController extends Mage_Adminhtml_Controller_Action
     /**
      * Export search report grid to CSV format
      */
+    #[Maho\Config\Route('/admin/report/exportSearchCsv')]
     public function exportSearchCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_search_grid');
@@ -44,6 +47,7 @@ class Mage_Adminhtml_ReportController extends Mage_Adminhtml_Controller_Action
     /**
      * Export search report to Excel XML format
      */
+    #[Maho\Config\Route('/admin/report/exportSearchExcel')]
     public function exportSearchExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_search_grid');

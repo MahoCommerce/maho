@@ -60,6 +60,7 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
     /**
      * Index action
      */
+    #[Maho\Config\Route('/admin/sitemap/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))->_title($this->__('Google Sitemaps'));
@@ -72,6 +73,7 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
     /**
      * Create new sitemap
      */
+    #[Maho\Config\Route('/admin/sitemap/new')]
     public function newAction(): void
     {
         // the same form is used to create and edit
@@ -81,6 +83,7 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
     /**
      * Edit sitemap
      */
+    #[Maho\Config\Route('/admin/sitemap/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('Catalog'))->_title($this->__('Google Sitemaps'));
@@ -125,6 +128,7 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
     /**
      * Save action
      */
+    #[Maho\Config\Route('/admin/sitemap/save')]
     public function saveAction(): void
     {
         // check if data sent
@@ -198,6 +202,7 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
     /**
      * Delete action
      */
+    #[Maho\Config\Route('/admin/sitemap/delete')]
     public function deleteAction(): void
     {
         // check if we know what should be deleted
@@ -241,6 +246,7 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
     /**
      * Generate sitemap
      */
+    #[Maho\Config\Route('/admin/sitemap/generate')]
     public function generateAction(): void
     {
         // init and load sitemap model

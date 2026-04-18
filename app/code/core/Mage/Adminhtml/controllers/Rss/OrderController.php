@@ -19,6 +19,7 @@ class Mage_Adminhtml_Rss_OrderController extends Mage_Adminhtml_Controller_Rss_A
      */
     public const ADMIN_RESOURCE = 'sales/order/actions/view';
 
+    #[Maho\Config\Route('/admin/rss_order/new')]
     public function newAction(): void
     {
         if ($this->checkFeedEnable('order/new')) {

@@ -15,6 +15,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Billing agreements
      */
+    #[Maho\Config\Route('/admin/sales_billing_agreement/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -28,6 +29,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Ajax action for billing agreements
      */
+    #[Maho\Config\Route('/admin/sales_billing_agreement/grid')]
     public function gridAction(): void
     {
         $this->loadLayout(false)
@@ -37,6 +39,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * View billing agreement action
      */
+    #[Maho\Config\Route('/admin/sales_billing_agreement/view')]
     public function viewAction(): void
     {
         $agreementModel = $this->_initBillingAgreement();
@@ -58,6 +61,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Related orders ajax action
      */
+    #[Maho\Config\Route('/admin/sales_billing_agreement/ordersGrid')]
     public function ordersGridAction(): void
     {
         $this->_initBillingAgreement();
@@ -68,6 +72,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Cutomer billing agreements ajax action
      */
+    #[Maho\Config\Route('/admin/sales_billing_agreement/customerGrid')]
     public function customerGridAction(): void
     {
         $this->_initCustomer();
@@ -78,6 +83,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Cancel billing agreement action
      */
+    #[Maho\Config\Route('/admin/sales_billing_agreement/cancel')]
     public function cancelAction()
     {
         $agreementModel = $this->_initBillingAgreement();
@@ -102,6 +108,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Delete billing agreement action
      */
+    #[Maho\Config\Route('/admin/sales_billing_agreement/delete')]
     public function deleteAction(): void
     {
         $agreementModel = $this->_initBillingAgreement();

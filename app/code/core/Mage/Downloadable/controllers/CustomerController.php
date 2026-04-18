@@ -36,6 +36,7 @@ class Mage_Downloadable_CustomerController extends Mage_Core_Controller_Front_Ac
     /**
      * Display downloadable links bought by customer
      */
+    #[Maho\Config\Route('/downloadable/customer/products', name: 'downloadable.customer.products', methods: ['GET'])]
     public function productsAction(): void
     {
         $this->loadLayout();

@@ -14,6 +14,7 @@ class Mage_Adminhtml_Sales_ShipmentController extends Mage_Adminhtml_Controller_
     /**
      * Export shipment grid to CSV format
      */
+    #[Maho\Config\Route('/admin/sales_shipment/exportCsv')]
     public function exportCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/sales_shipment_grid');
@@ -23,6 +24,7 @@ class Mage_Adminhtml_Sales_ShipmentController extends Mage_Adminhtml_Controller_
     /**
      * Export shipment grid to Excel XML format
      */
+    #[Maho\Config\Route('/admin/sales_shipment/exportExcel')]
     public function exportExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/sales_shipment_grid');

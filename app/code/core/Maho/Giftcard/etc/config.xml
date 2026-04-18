@@ -169,28 +169,7 @@
         </giftcard>
     </default>
 
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <giftcard before="Mage_Adminhtml">Maho_Giftcard_Adminhtml</giftcard>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
-
     <frontend>
-        <routers>
-            <giftcard>
-                <use>standard</use>
-                <args>
-                    <module>Maho_Giftcard</module>
-                    <frontName>giftcard</frontName>
-                </args>
-            </giftcard>
-        </routers>
         <layout>
             <updates>
                 <giftcard>

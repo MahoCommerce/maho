@@ -41,6 +41,7 @@ class Mage_Customer_VatController extends Mage_Core_Controller_Front_Action
      * - cached: bool
      * - format_only: bool
      */
+    #[Maho\Config\Route('/customer/vat/validate', name: 'customer.vat.validate', methods: ['POST'])]
     public function validateAction(): void
     {
         $result = [

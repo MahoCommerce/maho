@@ -93,15 +93,6 @@
                 </Mage_Shipping>
             </modules>
         </translate>
-        <routers>
-            <shipping>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Shipping</module>
-                    <frontName>shipping</frontName>
-                </args>
-            </shipping>
-        </routers>
         <layout>
             <updates>
                 <shipping>

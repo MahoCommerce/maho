@@ -14,6 +14,7 @@ class Mage_Paypal_HostedproController extends Mage_Core_Controller_Front_Action
     /**
      * When a customer return to website from gateway.
      */
+    #[Maho\Config\Route('/paypal/hostedpro/return')]
     public function returnAction(): void
     {
         $session = $this->_getCheckout();
@@ -26,6 +27,7 @@ class Mage_Paypal_HostedproController extends Mage_Core_Controller_Front_Action
     /**
      * When a customer cancel payment from gateway.
      */
+    #[Maho\Config\Route('/paypal/hostedpro/cancel')]
     public function cancelAction(): void
     {
         $gotoSection = $this->_cancelPayment();

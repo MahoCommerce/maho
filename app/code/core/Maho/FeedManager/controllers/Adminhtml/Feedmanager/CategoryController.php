@@ -33,6 +33,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_category/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -43,11 +44,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_category/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_category/edit')]
     public function editAction(): void
     {
         $platform = $this->getRequest()->getParam('platform', '');
@@ -78,6 +81,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
     /**
      * Get categories tree as JSON for AJAX
      */
+    #[Maho\Config\Route('/admin/feedmanager_category/categoriesJson')]
     public function categoriesJsonAction(): void
     {
         $platform = $this->getRequest()->getParam('platform', 'google');
@@ -113,6 +117,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
     /**
      * Save category mapping
      */
+    #[Maho\Config\Route('/admin/feedmanager_category/save')]
     public function saveAction(): void
     {
         $mappingsJson = $this->getRequest()->getParam('mappings');
@@ -165,6 +170,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
     /**
      * Search platform taxonomy
      */
+    #[Maho\Config\Route('/admin/feedmanager_category/searchTaxonomy')]
     public function searchTaxonomyAction(): void
     {
         $platform = $this->getRequest()->getParam('platform', 'google');
@@ -188,6 +194,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
     /**
      * Auto-map categories based on name matching
      */
+    #[Maho\Config\Route('/admin/feedmanager_category/autoMap')]
     public function autoMapAction(): void
     {
         $platform = $this->getRequest()->getParam('platform', 'google');

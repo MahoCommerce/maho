@@ -32,6 +32,7 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
     /**
      * Display cache management form
      */
+    #[Maho\Config\Route('/admin/system_cache/index')]
     public function indexAction(): void
     {
         /** @var Mage_Adminhtml_Block_System_Cache_Edit $block */
@@ -45,6 +46,7 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
     /**
      * Seva cache settings
      */
+    #[Maho\Config\Route('/admin/system_cache/save')]
     public function saveAction(): void
     {
         /**
@@ -238,6 +240,7 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
         $this->_redirect('*/*');
     }
 
+    #[Maho\Config\Route('/admin/system_cache/refreshCatalogRewrites')]
     public function refreshCatalogRewritesAction(): void
     {
         try {
@@ -254,6 +257,7 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
         $this->_redirect('*/*');
     }
 
+    #[Maho\Config\Route('/admin/system_cache/clearImagesCache')]
     public function clearImagesCacheAction(): void
     {
         try {
@@ -270,6 +274,7 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
         $this->_redirect('*/*');
     }
 
+    #[Maho\Config\Route('/admin/system_cache/refreshLayeredNavigation')]
     public function refreshLayeredNavigationAction(): void
     {
         try {

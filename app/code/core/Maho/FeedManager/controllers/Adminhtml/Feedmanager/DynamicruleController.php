@@ -32,6 +32,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -42,11 +43,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/edit')]
     public function editAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -83,6 +86,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/save')]
     public function saveAction(): void
     {
         $data = $this->getRequest()->getPost();
@@ -231,6 +235,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
     /**
      * Get initial conditions HTML for a new case (AJAX)
      */
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/caseConditionsHtml')]
     public function caseConditionsHtmlAction(): void
     {
         $caseIndex = max(0, (int) $this->getRequest()->getParam('case_index', 0));
@@ -261,6 +266,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
     /**
      * New condition HTML for AJAX (standard Maho rules engine)
      */
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/newConditionHtml')]
     public function newConditionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -297,6 +303,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
         $this->getResponse()->setBody($html);
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/delete')]
     public function deleteAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -328,6 +335,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/massStatus')]
     public function massStatusAction(): void
     {
         $ruleIds = $this->getRequest()->getParam('rule_ids');
@@ -357,6 +365,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/massDelete')]
     public function massDeleteAction(): void
     {
         $ruleIds = $this->getRequest()->getParam('rule_ids');
@@ -405,6 +414,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
     /**
      * Get available product attributes for AJAX request
      */
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/getAttributes')]
     public function getAttributesAction(): void
     {
         $attributes = [];

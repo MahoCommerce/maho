@@ -155,15 +155,6 @@
         <secure_url>
             <checkout_onepage>/checkout/onepage</checkout_onepage>
         </secure_url>
-        <routers>
-            <checkout>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Checkout</module>
-                    <frontName>checkout</frontName>
-                </args>
-            </checkout>
-        </routers>
         <translate>
             <modules>
                 <Mage_Checkout>

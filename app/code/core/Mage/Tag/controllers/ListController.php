@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 class Mage_Tag_ListController extends Mage_Core_Controller_Front_Action
 {
+    #[Maho\Config\Route('/tag/list', name: 'tag.list.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->loadLayout();

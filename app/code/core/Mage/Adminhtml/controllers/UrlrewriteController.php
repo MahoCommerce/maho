@@ -56,6 +56,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Show urlrewrites index page
      */
+    #[Maho\Config\Route('/admin/urlrewrite/index')]
     public function indexAction(): void
     {
         $this->_initRegistry();
@@ -70,6 +71,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Show urlrewrite edit/create page
      */
+    #[Maho\Config\Route('/admin/urlrewrite/edit')]
     public function editAction(): void
     {
         $this->_initRegistry();
@@ -85,6 +87,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Ajax products grid action
      */
+    #[Maho\Config\Route('/admin/urlrewrite/productGrid')]
     public function productGridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/urlrewrite_product_grid')->toHtml());
@@ -93,6 +96,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Ajax categories tree loader action
      */
+    #[Maho\Config\Route('/admin/urlrewrite/categoriesJson')]
     public function categoriesJsonAction(): void
     {
         $this->getResponse()->setBodyJson(
@@ -104,6 +108,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Urlrewrite save action
      */
+    #[Maho\Config\Route('/admin/urlrewrite/save')]
     public function saveAction(): void
     {
         $this->_initRegistry();
@@ -187,6 +192,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Urlrewrite delete action
      */
+    #[Maho\Config\Route('/admin/urlrewrite/delete')]
     public function deleteAction(): void
     {
         $this->_initRegistry();
@@ -210,6 +216,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Urlrewrite mass delete action
      */
+    #[Maho\Config\Route('/admin/urlrewrite/massDelete')]
     public function massDeleteAction(): void
     {
         $ids = $this->getRequest()->getParam('url_rewrite');

@@ -20,6 +20,7 @@ class Mage_Paygate_Adminhtml_Paygate_Authorizenet_PaymentController extends Mage
     /**
      * Cancel active partail authorizations
      */
+    #[Maho\Config\Route('/admin/paygate_authorizenet_payment/cancel')]
     public function cancelAction(): void
     {
         $result['success'] = false;

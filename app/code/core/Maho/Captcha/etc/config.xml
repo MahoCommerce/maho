@@ -28,15 +28,6 @@
         </helpers>
     </global>
     <frontend>
-        <routers>
-            <captcha>
-                <use>standard</use>
-                <args>
-                    <module>Maho_Captcha</module>
-                    <frontName>captcha</frontName>
-                </args>
-            </captcha>
-        </routers>
         <layout>
             <updates>
                 <captcha>

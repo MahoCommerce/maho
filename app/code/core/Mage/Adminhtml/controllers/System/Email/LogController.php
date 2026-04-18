@@ -21,6 +21,7 @@ class Mage_Adminhtml_System_Email_LogController extends Mage_Adminhtml_Controlle
         return parent::preDispatch();
     }
 
+    #[Maho\Config\Route('/admin/system_email_log/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -40,12 +41,14 @@ class Mage_Adminhtml_System_Email_LogController extends Mage_Adminhtml_Controlle
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/system_email_log/grid')]
     public function gridAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/system_email_log/view')]
     public function viewAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -83,6 +86,7 @@ class Mage_Adminhtml_System_Email_LogController extends Mage_Adminhtml_Controlle
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/system_email_log/massDelete')]
     public function massDeleteAction(): void
     {
         $logIds = $this->getRequest()->getPost('log_ids');
@@ -116,12 +120,14 @@ class Mage_Adminhtml_System_Email_LogController extends Mage_Adminhtml_Controlle
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/system_email_log/exportCsv')]
     public function exportCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('core/adminhtml_email_log_grid');
         $this->_prepareDownloadResponse(...$grid->getCsvFile('email_log.csv', -1));
     }
 
+    #[Maho\Config\Route('/admin/system_email_log/exportXml')]
     public function exportXmlAction(): void
     {
         $grid = $this->getLayout()->createBlock('core/adminhtml_email_log_grid');

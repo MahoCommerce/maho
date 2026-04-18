@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 class Mage_Checkout_IndexController extends Mage_Core_Controller_Front_Action
 {
+    #[Maho\Config\Route('/checkout', name: 'checkout.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->_redirect('checkout/onepage', ['_secure' => true]);

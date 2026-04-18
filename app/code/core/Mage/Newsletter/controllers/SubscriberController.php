@@ -15,6 +15,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
     /**
      * New subscription action
      */
+    #[Maho\Config\Route('/newsletter/subscriber/new', name: 'newsletter.subscriber.new', methods: ['POST'])]
     public function newAction(): void
     {
         if (!$this->_validateFormKey()) {
@@ -64,6 +65,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
     /**
      * Subscription confirm action
      */
+    #[Maho\Config\Route('/newsletter/subscriber/confirm', name: 'newsletter.subscriber.confirm', methods: ['GET'])]
     public function confirmAction(): void
     {
         $id    = (int) $this->getRequest()->getParam('id');
@@ -93,6 +95,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
     /**
      * Unsubscribe newsletter
      */
+    #[Maho\Config\Route('/newsletter/subscriber/unsubscribe', name: 'newsletter.subscriber.unsubscribe', methods: ['GET'])]
     public function unsubscribeAction(): void
     {
         $id    = (int) $this->getRequest()->getParam('id');

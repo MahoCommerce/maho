@@ -72,6 +72,7 @@ class Mage_Adminhtml_Customer_Wishlist_Product_Composite_WishlistController exte
      *
      * @return $this
      */
+    #[Maho\Config\Route('/admin/customer_wishlist_product_composite_wishlist/configure')]
     public function configureAction()
     {
         try {
@@ -106,6 +107,7 @@ class Mage_Adminhtml_Customer_Wishlist_Product_Composite_WishlistController exte
      *
      * @return false
      */
+    #[Maho\Config\Route('/admin/customer_wishlist_product_composite_wishlist/update')]
     public function updateAction()
     {
         try {

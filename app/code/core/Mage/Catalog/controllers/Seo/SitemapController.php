@@ -31,6 +31,7 @@ class Mage_Catalog_Seo_SitemapController extends Mage_Core_Controller_Front_Acti
     /**
      * Display categories listing
      */
+    #[Maho\Config\Route('/catalog/seo_sitemap/category', name: 'catalog.seo.sitemap.category', methods: ['GET'])]
     public function categoryAction(): void
     {
         $update = $this->getLayout()->getUpdate();
@@ -47,6 +48,7 @@ class Mage_Catalog_Seo_SitemapController extends Mage_Core_Controller_Front_Acti
     /**
      * Display products listing
      */
+    #[Maho\Config\Route('/catalog/seo_sitemap/product', name: 'catalog.seo.sitemap.product', methods: ['GET'])]
     public function productAction(): void
     {
         $this->loadLayout();

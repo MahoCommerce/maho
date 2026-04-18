@@ -59,6 +59,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     /**
      * Index action.
      */
+    #[Maho\Config\Route('/admin/oauth_authorize/index')]
     public function indexAction(): void
     {
         $this->_initForm();
@@ -70,6 +71,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     /**
      * Index action with a simple design
      */
+    #[Maho\Config\Route('/admin/oauth_authorize/simple')]
     public function simpleAction(): void
     {
         $this->_initForm(true);
@@ -243,6 +245,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     /**
      * Confirm token authorization action
      */
+    #[Maho\Config\Route('/admin/oauth_authorize/confirm')]
     public function confirmAction(): void
     {
         $this->_initConfirmPage();
@@ -251,6 +254,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     /**
      * Confirm token authorization simple page
      */
+    #[Maho\Config\Route('/admin/oauth_authorize/confirmSimple')]
     public function confirmSimpleAction(): void
     {
         $this->_initConfirmPage();
@@ -259,6 +263,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     /**
      * Reject token authorization action
      */
+    #[Maho\Config\Route('/admin/oauth_authorize/reject')]
     public function rejectAction(): void
     {
         $this->_initRejectPage();
@@ -267,6 +272,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     /**
      * Reject token authorization simple page
      */
+    #[Maho\Config\Route('/admin/oauth_authorize/rejectSimple')]
     public function rejectSimpleAction(): void
     {
         $this->_initRejectPage();

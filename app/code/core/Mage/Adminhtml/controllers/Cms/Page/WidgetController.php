@@ -20,6 +20,7 @@ class Mage_Adminhtml_Cms_Page_WidgetController extends Mage_Adminhtml_Controller
     /**
      * Chooser Source action
      */
+    #[Maho\Config\Route('/admin/cms_page_widget/chooser')]
     public function chooserAction(): void
     {
         $uniqId = $this->getRequest()->getParam('uniq_id');

@@ -284,7 +284,7 @@ class Maho_AdminActivityLog_Model_Observer
     protected function _getRelativeAdminUrl(): string
     {
         $currentUrl = Mage::helper('core/url')->getCurrentUrl();
-        $adminFrontName = (string) Mage::getConfig()->getNode('admin/routers/adminhtml/args/frontName');
+        $adminFrontName = (string) Mage::getConfig()->getNode(Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_ROUTER_FRONTNAME);
 
         // Find the position of the admin front name in the URL
         $pos = strpos($currentUrl, "/{$adminFrontName}/");

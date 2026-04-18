@@ -20,6 +20,7 @@ class Mage_Adminhtml_Tax_Class_ProductController extends Mage_Adminhtml_Controll
     /**
      * view grid
      */
+    #[Maho\Config\Route('/admin/tax_class_product/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -37,6 +38,7 @@ class Mage_Adminhtml_Tax_Class_ProductController extends Mage_Adminhtml_Controll
     /**
      * new class action
      */
+    #[Maho\Config\Route('/admin/tax_class_product/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -45,6 +47,7 @@ class Mage_Adminhtml_Tax_Class_ProductController extends Mage_Adminhtml_Controll
     /**
      * edit class action
      */
+    #[Maho\Config\Route('/admin/tax_class_product/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -89,6 +92,7 @@ class Mage_Adminhtml_Tax_Class_ProductController extends Mage_Adminhtml_Controll
     /**
      * delete class action
      */
+    #[Maho\Config\Route('/admin/tax_class_product/delete')]
     public function deleteAction(): void
     {
         $classId    = $this->getRequest()->getParam('id');

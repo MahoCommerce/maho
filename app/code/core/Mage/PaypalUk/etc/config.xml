@@ -53,15 +53,6 @@
         <secure_url>
             <paypaluk_express>/paypaluk/express</paypaluk_express>
         </secure_url>
-        <routers>
-            <paypaluk>
-                <use>standard</use>
-                <args>
-                    <module>Mage_PaypalUk</module>
-                    <frontName>payflow</frontName>
-                </args>
-            </paypaluk>
-        </routers>
         <translate>
             <modules>
                 <Mage_PaypalUk>

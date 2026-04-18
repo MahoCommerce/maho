@@ -11,6 +11,7 @@
 
 class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
 {
+    #[Maho\Config\Route('/blog', methods: ['GET'])]
     public function indexAction(): void
     {
         if (!Mage::helper('blog')->isEnabled()) {
@@ -25,6 +26,7 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/blog/index/category', methods: ['GET'])]
     public function categoryAction(): void
     {
         $helper = Mage::helper('blog');
@@ -57,6 +59,7 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/blog/index/view', methods: ['GET'])]
     public function viewAction(): void
     {
         if (!Mage::helper('blog')->isEnabled()) {

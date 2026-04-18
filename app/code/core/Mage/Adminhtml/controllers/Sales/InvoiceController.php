@@ -14,6 +14,7 @@ class Mage_Adminhtml_Sales_InvoiceController extends Mage_Adminhtml_Controller_S
     /**
      * Export invoice grid to CSV format
      */
+    #[Maho\Config\Route('/admin/sales_invoice/exportCsv')]
     public function exportCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/sales_invoice_grid');
@@ -23,6 +24,7 @@ class Mage_Adminhtml_Sales_InvoiceController extends Mage_Adminhtml_Controller_S
     /**
      * Export invoice grid to Excel XML format
      */
+    #[Maho\Config\Route('/admin/sales_invoice/exportExcel')]
     public function exportExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/sales_invoice_grid');

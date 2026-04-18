@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 class Mage_Catalog_IndexController extends Mage_Core_Controller_Front_Action
 {
+    #[Maho\Config\Route('/catalog', name: 'catalog.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->_redirect('/');

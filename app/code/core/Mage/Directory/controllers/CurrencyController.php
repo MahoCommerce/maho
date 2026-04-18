@@ -11,6 +11,7 @@
 
 class Mage_Directory_CurrencyController extends Mage_Core_Controller_Front_Action
 {
+    #[Maho\Config\Route('/directory/currency/switch', name: 'directory.currency.switch')]
     public function switchAction(): void
     {
         if ($curency = (string) $this->getRequest()->getParam('currency')) {

@@ -18,6 +18,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
     /**
      * Print gift card as PDF
      */
+    #[Maho\Config\Route('/admin/giftcard_print/pdf')]
     public function pdfAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -47,6 +48,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
     /**
      * Print multiple gift cards as PDF
      */
+    #[Maho\Config\Route('/admin/giftcard_print/massPdf')]
     public function massPdfAction(): void
     {
         $giftcardIds = $this->getRequest()->getParam('giftcard');
@@ -87,6 +89,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
     /**
      * Email gift card to recipient
      */
+    #[Maho\Config\Route('/admin/giftcard_print/email')]
     public function emailAction(): void
     {
         $id = $this->getRequest()->getParam('id');

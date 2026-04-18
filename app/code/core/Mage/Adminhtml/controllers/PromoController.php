@@ -17,6 +17,7 @@ class Mage_Adminhtml_PromoController extends Mage_Adminhtml_Controller_Action
      */
     public const ADMIN_RESOURCE = 'promo';
 
+    #[Maho\Config\Route('/admin/promo/index')]
     public function indexAction(): void
     {
         $this->loadLayout();

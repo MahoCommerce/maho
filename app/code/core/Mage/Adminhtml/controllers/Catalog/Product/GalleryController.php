@@ -18,6 +18,7 @@ class Mage_Adminhtml_Catalog_Product_GalleryController extends Mage_Adminhtml_Co
      */
     public const ADMIN_RESOURCE = 'catalog/products';
 
+    #[Maho\Config\Route('/admin/catalog_product_gallery/upload')]
     public function uploadAction(): void
     {
         try {

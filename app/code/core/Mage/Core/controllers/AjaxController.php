@@ -15,6 +15,7 @@ class Mage_Core_AjaxController extends Mage_Core_Controller_Front_Action
     /**
      * Ajax action for inline translation
      */
+    #[Maho\Config\Route('/core/ajax/translate', name: 'core.ajax.translate', methods: ['POST'])]
     public function translateAction(): void
     {
         $translation = $this->getRequest()->getPost('translate');
