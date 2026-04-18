@@ -95,7 +95,7 @@ class Maho_Blog_Block_Autocomplete extends Mage_Core_Block_Template
             $collection->addFieldToFilter('is_active', 1);
 
             // Only show published posts (current date >= publish_date or publish_date is null)
-            $now = Mage_Core_Model_Locale::now();
+            $now = Mage::app()->getLocale()->nowUtc();
             $collection->getSelect()->where('publish_date IS NULL OR publish_date <= ?', $now);
 
             // Apply store filter

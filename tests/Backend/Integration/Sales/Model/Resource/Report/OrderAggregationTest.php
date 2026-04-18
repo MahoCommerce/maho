@@ -47,8 +47,8 @@ describe('Order Report Aggregation Integration', function () {
             'discount_amount' => 0,
             'base_to_global_rate' => 1,
             'base_to_order_rate' => 1,
-            'created_at' => Mage_Core_Model_Locale::now(),
-            'updated_at' => Mage_Core_Model_Locale::now(),
+            'created_at' => Mage::app()->getLocale()->nowUtc(),
+            'updated_at' => Mage::app()->getLocale()->nowUtc(),
             'is_virtual' => 0,
             'shipping_description' => 'Flat Rate - Fixed',
         ];
@@ -69,8 +69,8 @@ describe('Order Report Aggregation Integration', function () {
             'base_price' => 90,
             'row_total' => 90,
             'base_row_total' => 90,
-            'created_at' => Mage_Core_Model_Locale::now(),
-            'updated_at' => Mage_Core_Model_Locale::now(),
+            'created_at' => Mage::app()->getLocale()->nowUtc(),
+            'updated_at' => Mage::app()->getLocale()->nowUtc(),
         ];
 
         $this->adapter->insert($orderItemTable, $orderItemData);

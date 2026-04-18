@@ -964,7 +964,11 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     public function ajaxDeleteAction(): void
     {
         if (!$this->_validateFormKey()) {
-            Mage::throwException('Invalid form key');
+            $this->getResponse()->setBodyJson([
+                'success' => 0,
+                'error' => $this->__('Invalid form key. Please refresh the page.'),
+            ]);
+            return;
         }
         $id = (int) $this->getRequest()->getParam('id');
         $result = [];
@@ -995,7 +999,11 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     public function ajaxUpdateAction(): void
     {
         if (!$this->_validateFormKey()) {
-            Mage::throwException('Invalid form key');
+            $this->getResponse()->setBodyJson([
+                'success' => 0,
+                'error' => $this->__('Invalid form key. Please refresh the page.'),
+            ]);
+            return;
         }
         $id = (int) $this->getRequest()->getParam('id');
         $qty = $this->getRequest()->getParam('qty');

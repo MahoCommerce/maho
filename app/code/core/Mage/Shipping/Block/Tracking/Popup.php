@@ -54,8 +54,7 @@ class Mage_Shipping_Block_Tracking_Popup extends Mage_Core_Block_Template
     {
         $locale = Mage::app()->getLocale();
         $format = $locale->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM);
-        return $locale->date(strtotime($date), 'U', null, false)
-            ->format($format);
+        return (new DateTime('@' . strtotime($date)))->format($format);
     }
 
     /**
@@ -74,8 +73,7 @@ class Mage_Shipping_Block_Tracking_Popup extends Mage_Core_Block_Template
         $locale = Mage::app()->getLocale();
 
         $format = $locale->getTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-        return $locale->date(strtotime($time), 'U', null, false)
-            ->format($format);
+        return (new DateTime('@' . strtotime($time)))->format($format);
     }
 
     /**

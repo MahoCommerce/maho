@@ -95,6 +95,9 @@ class Mage_Cron_Model_Observer
 
             try {
                 if (isset($compiledJobs[$jobCode])) {
+                    if (!empty($compiledJobs[$jobCode]['module']) && !Mage::helper('core')->isModuleEnabled($compiledJobs[$jobCode]['module'])) {
+                        continue;
+                    }
                     $this->_processCompiledJob($schedule, $compiledJobs[$jobCode]);
                     continue;
                 }
@@ -146,6 +149,9 @@ class Mage_Cron_Model_Observer
                 continue;
             }
             if (!$cronHelper->isJobEnabled($jobCode)) {
+                continue;
+            }
+            if (!empty($jobDef['module']) && !Mage::helper('core')->isModuleEnabled($jobDef['module'])) {
                 continue;
             }
             $schedule = $this->_getAlwaysJobSchedule($jobCode);
@@ -449,6 +455,9 @@ class Mage_Cron_Model_Observer
 
         foreach (Maho::getCompiledAttributes()['crontab'] ?? [] as $jobCode => $jobDef) {
             if (!$cronHelper->isJobEnabled($jobCode)) {
+                continue;
+            }
+            if (!empty($jobDef['module']) && !Mage::helper('core')->isModuleEnabled($jobDef['module'])) {
                 continue;
             }
 

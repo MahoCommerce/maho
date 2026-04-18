@@ -20,7 +20,7 @@ class Mage_Core_Helper_UnserializeArray extends Mage_Core_Helper_Abstract
      */
     public function unserialize($str)
     {
-        $str = is_null($str) ? '' : $str;
+        $str ??= '';
 
         if (json_validate($str)) {
             return Mage::helper('core')->jsonDecode($str);

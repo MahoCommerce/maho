@@ -69,7 +69,7 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
          */
         foreach (['custom_theme_from', 'custom_theme_to'] as $field) {
             $value = $object->getData($field) ?: null;
-            $object->setData($field, $this->formatDate($value));
+            $object->setData($field, Mage::app()->getLocale()->formatDateForDb($value));
         }
 
         if (empty($object->getData('identifier'))) {

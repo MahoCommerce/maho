@@ -176,7 +176,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
         // Check expiration (expires_at is stored in UTC)
         if ($this->getExpiresAt()) {
-            $now = Mage::app()->getLocale()->utcDate(null, null, true);
+            $now = Mage::app()->getLocale()->storeToUtc();
             $expires = new DateTime($this->getExpiresAt(), new DateTimeZone('UTC'));
 
             if ($now > $expires) {
@@ -350,7 +350,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             'order_id' => $orderId,
             'comment' => $comment,
             'admin_user_id' => $adminUserId,
-            'created_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+            'created_at' => Mage::app()->getLocale()->nowUtc(),
         ]);
         $history->save();
     }

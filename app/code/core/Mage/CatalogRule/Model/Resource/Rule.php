@@ -358,8 +358,8 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     {
         $write = $this->_getWriteAdapter();
         $conds = [];
-        $cond = $write->quoteInto('rule_date between ?', $this->formatDate($fromDate));
-        $cond = $write->quoteInto($cond . ' and ?', $this->formatDate($toDate));
+        $cond = $write->quoteInto('rule_date between ?', Mage::app()->getLocale()->formatDateForDb($fromDate));
+        $cond = $write->quoteInto($cond . ' and ?', Mage::app()->getLocale()->formatDateForDb($toDate));
         $conds[] = $cond;
         if (!is_null($productId)) {
             $conds[] = $write->quoteInto('product_id=?', $productId);
@@ -397,7 +397,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     {
         $write = $this->_getWriteAdapter();
         $conds = [];
-        $conds[] = $write->quoteInto('rule_date<?', $this->formatDate($date));
+        $conds[] = $write->quoteInto('rule_date<?', Mage::app()->getLocale()->formatDateForDb($date));
         if (!is_null($productId)) {
             $conds[] = $write->quoteInto('product_id=?', $productId);
         }
@@ -591,9 +591,9 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
         try {
             foreach ($arrData as $key => $data) {
                 $productIds['product_id'] = $data['product_id'];
-                $arrData[$key]['rule_date'] = $this->formatDate($data['rule_date'], false);
-                $arrData[$key]['latest_start_date'] = $this->formatDate($data['latest_start_date'], false);
-                $arrData[$key]['earliest_end_date'] = $this->formatDate($data['earliest_end_date'], false);
+                $arrData[$key]['rule_date'] = Mage::app()->getLocale()->formatDateForDb($data['rule_date'], withTime: false);
+                $arrData[$key]['latest_start_date'] = Mage::app()->getLocale()->formatDateForDb($data['latest_start_date'], withTime: false);
+                $arrData[$key]['earliest_end_date'] = Mage::app()->getLocale()->formatDateForDb($data['earliest_end_date'], withTime: false);
             }
             $adapter->insertOnDuplicate($this->getTable('catalogrule/affected_product'), array_unique($productIds));
             $adapter->insertOnDuplicate($this->getTable('catalogrule/rule_product_price'), $arrData);
@@ -610,7 +610,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      * Get catalog rules product price for specific date, website and
      * customer group
      *
-     * @param int|string $date
+     * @param int|string|DateTimeInterface $date
      * @param int $wId
      * @param int $gId
      * @param int $pId
@@ -627,7 +627,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      * Retrieve product prices by catalog rule for specific date, website and customer group
      * Collect data with  product Id => price pairs
      *
-     * @param int|string $date
+     * @param int|string|DateTimeInterface $date
      * @param int $websiteId
      * @param int $customerGroupId
      * @param array $productIds
@@ -639,7 +639,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
         $adapter = $this->_getReadAdapter();
         $select  = $adapter->select()
             ->from($this->getTable('catalogrule/rule_product_price'), ['product_id', 'rule_price'])
-            ->where('rule_date = ?', $this->formatDate($date, false))
+            ->where('rule_date = ?', Mage::app()->getLocale()->formatDateForDb($date, withTime: false))
             ->where('website_id = ?', $websiteId)
             ->where('customer_group_id = ?', $customerGroupId)
             ->where('product_id IN(?)', $productIds);
@@ -649,7 +649,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     /**
      * Get active rule data based on few filters
      *
-     * @param int|string $date
+     * @param int|string|DateTimeInterface $date
      * @param int $websiteId
      * @param int $customerGroupId
      * @param int $productId
@@ -658,7 +658,9 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     public function getRulesFromProduct($date, $websiteId, $customerGroupId, $productId)
     {
         $adapter = $this->_getReadAdapter();
-        if (is_string($date)) {
+        if ($date instanceof DateTime) {
+            $date = $date->getTimestamp();
+        } elseif (is_string($date)) {
             $date = strtotime($date);
         }
         $select = $adapter->select()
@@ -676,7 +678,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     /**
      * Retrieve product price data for all customer groups
      *
-     * @param int|string $date
+     * @param int|string|DateTimeInterface $date
      * @param int $wId
      * @param int $pId
      *
@@ -687,7 +689,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
         $read = $this->_getReadAdapter();
         $select = $read->select()
             ->from($this->getTable('catalogrule/rule_product_price'), '*')
-            ->where('rule_date=?', $this->formatDate($date, false))
+            ->where('rule_date=?', Mage::app()->getLocale()->formatDateForDb($date, withTime: false))
             ->where('website_id=?', $wId)
             ->where('product_id=?', $pId);
 

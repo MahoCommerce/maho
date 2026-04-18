@@ -1364,6 +1364,9 @@ class Mage_Core_Model_App
                 }
 
                 foreach (Maho::getCompiledAttributes()['observers'][$area][$eventName] ?? [] as $entry) {
+                    if (!empty($entry['module']) && !Mage::helper('core')->isModuleEnabled($entry['module'])) {
+                        continue;
+                    }
                     $observers[$entry['name']] = [
                         'type'   => $entry['type'],
                         'model'  => $entry['alias'],

@@ -97,7 +97,7 @@ class Mage_CatalogRule_Model_Observer
     {
         /** @var Mage_Sales_Model_Quote $quote */
         $quote = $observer->getQuote();
-        $date = Mage::app()->getLocale()->storeDate($quote->getStoreId());
+        $date = Mage::app()->getLocale()->utcToStore($quote->getStoreId())->format(Mage_Core_Model_Locale::DATE_FORMAT);
         $wId = $quote->getStore()->getWebsiteId();
         $gId = $quote->getCustomerGroupId();
 
@@ -139,7 +139,7 @@ class Mage_CatalogRule_Model_Observer
         if ($observer->hasDate()) {
             $date = $observer->getEvent()->getDate();
         } else {
-            $date = Mage::app()->getLocale()->storeDate($storeId);
+            $date = Mage::app()->getLocale()->utcToStore($storeId)->format(Mage_Core_Model_Locale::DATE_FORMAT);
         }
 
         if ($observer->hasWebsiteId()) {
@@ -183,7 +183,7 @@ class Mage_CatalogRule_Model_Observer
         /** @var Mage_Catalog_Model_Product $product */
         $product = $observer->getEvent()->getProduct();
         $storeId = $product->getStoreId();
-        $date = Mage::app()->getLocale()->storeDate($storeId);
+        $date = Mage::app()->getLocale()->utcToStore($storeId)->format(Mage_Core_Model_Locale::DATE_FORMAT);
         $key = false;
 
         if ($ruleData = Mage::registry('rule_data')) {
@@ -413,7 +413,7 @@ class Mage_CatalogRule_Model_Observer
         if ($observer->getEvent()->hasDate()) {
             $date = $observer->getEvent()->getDate();
         } else {
-            $date = Mage::app()->getLocale()->storeDate($store);
+            $date = Mage::app()->getLocale()->utcToStore($store)->format(Mage_Core_Model_Locale::DATE_FORMAT);
         }
 
         $productIds = [];

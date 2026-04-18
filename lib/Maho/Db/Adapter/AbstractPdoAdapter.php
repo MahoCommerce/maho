@@ -1080,7 +1080,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     // =========================================================================
 
     #[\Override]
-    public function formatDate(int|string|\DateTime $date, bool $includeTime = true): Expr
+    public function formatDate(int|string|\DateTime $date, bool $withTime = true): Expr
     {
         $dateObj = $date;
         if (!($date instanceof \DateTime)) {
@@ -1091,7 +1091,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             }
         }
 
-        $format = $includeTime ? self::DATETIME_FORMAT : self::DATE_FORMAT;
+        $format = $withTime ? self::DATETIME_FORMAT : self::DATE_FORMAT;
         return new Expr($this->quote($dateObj->format($format)));
     }
 

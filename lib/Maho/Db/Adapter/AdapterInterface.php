@@ -507,7 +507,7 @@ interface AdapterInterface
     /**
      * Format Date to internal database date format
      */
-    public function formatDate(int|string|\DateTime $date, bool $includeTime = true): \Maho\Db\Expr;
+    public function formatDate(int|string|\DateTime $date, bool $withTime = true): \Maho\Db\Expr;
 
     /**
      * Run additional environment before setup

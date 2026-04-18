@@ -527,7 +527,7 @@ $connection->createTable($table);
  * Seed default system rules
  */
 $dynamicRuleTable = $installer->getTable('feedmanager/dynamic_rule');
-$now = Mage_Core_Model_Locale::now();
+$now = Mage::app()->getLocale()->nowUtc();
 
 $defaultRules = [
     [
