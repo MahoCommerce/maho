@@ -19,18 +19,18 @@ use Mage_Core_Controller_Response_Http;
 /**
  * Dispatches controllers from Symfony UrlMatcher results.
  *
- * Handles attribute routes compiled from #[Route] attributes: resolves the
- * controller class (respecting third-party module chain overrides), then
- * dispatches the action. Unmatched requests fall back to the legacy router loop.
+ * Route/controller resolution uses the compiled reverse-lookup maps, so each
+ * dispatch is an O(1) hash lookup plus a `class_exists` check. The only scan
+ * that remains is the admin module override chain, which is unavoidable for
+ * third-party admin extensions without `#[Route]` attributes.
  */
 class ControllerDispatcher
 {
     /**
      * Dispatch an internally-forwarded request.
      *
-     * Called when another router (CMS, Default, URL Rewrite) has set module/controller/action
-     * on the request but hasn't dispatched it. First tries the reverse lookup map from
-     * compiled #[Route] attributes, then falls back to direct class resolution.
+     * Called when another router (CMS, URL rewrite, _forward()) has set
+     * module/controller/action on the request but hasn't dispatched it.
      */
     public function dispatchForward(
         Mage_Core_Controller_Request_Http $request,
@@ -44,16 +44,13 @@ class ControllerDispatcher
             return false;
         }
 
-        $action = $actionName; // bare name without 'Action' suffix — hasAction/dispatch expect this
-        $controllerClass = $this->resolveControllerClassByFrontName($moduleName, $controllerName);
-
+        $controllerClass = $this->resolveControllerClass($moduleName, $controllerName);
         if (!$controllerClass || !class_exists($controllerClass)) {
             return false;
         }
 
         $controllerInstance = Mage::getControllerInstance($controllerClass, $request, $response);
-
-        if (!$controllerInstance->hasAction($action)) {
+        if (!$controllerInstance->hasAction($actionName)) {
             return false;
         }
 
@@ -62,7 +59,7 @@ class ControllerDispatcher
             $request->setRouteName($moduleName);
         }
         $request->setDispatched(true);
-        $controllerInstance->dispatch($action);
+        $controllerInstance->dispatch($actionName);
 
         return true;
     }
@@ -70,9 +67,9 @@ class ControllerDispatcher
     /**
      * Parse and dispatch a legacy internal path (frontName/controller/action/key/value).
      *
-     * These paths come from URL rewrites which store target paths in legacy format
-     * (e.g. "catalog/category/view/id/14"). Parses the path into module/controller/action
-     * and key/value params, then dispatches via the reverse lookup map.
+     * Used as a fallback when the Symfony matcher misses — catches URL rewrites
+     * whose targets are stored in legacy format (e.g. "catalog/category/view/id/14")
+     * and third-party modules without `#[Route]` attributes.
      */
     public function dispatchLegacyPath(
         Mage_Core_Controller_Request_Http $request,
@@ -88,7 +85,11 @@ class ControllerDispatcher
         $controllerName = $parts[1] ?? 'index';
         $actionName = $parts[2] ?? 'index';
 
-        // Parse remaining segments as key/value params
+        $controllerClass = $this->resolveControllerClass($frontName, $controllerName);
+        if (!$controllerClass || !class_exists($controllerClass)) {
+            return false;
+        }
+
         for ($i = 3, $l = count($parts); $i < $l; $i += 2) {
             $request->setParam($parts[$i], isset($parts[$i + 1]) ? urldecode($parts[$i + 1]) : '');
         }
@@ -101,47 +102,23 @@ class ControllerDispatcher
     }
 
     /**
-     * Resolve a controller class from frontName + controllerName.
-     *
-     * First checks compiled #[Route] attributes, then falls back to the admin
-     * module chain for third-party admin extensions without #[Route] attributes.
+     * Resolve a controller class from frontName + controllerName via the compiled
+     * controllerLookup map, with admin module chain as fallback.
      */
-    protected function resolveControllerClassByFrontName(string $frontName, string $controllerName): ?string
+    protected function resolveControllerClass(string $frontName, string $controllerName): ?string
     {
-        $compiled = \Maho::getCompiledAttributes();
-        $routes = $compiled['routes'] ?? [];
-        $adminFrontName = RouteCollectionBuilder::getAdminFrontNameStatic();
-
-        foreach ($routes as $routeData) {
-            $path = $routeData['path'] ?? '';
-            $area = $routeData['area'] ?? 'frontend';
-
-            if ($area === 'adminhtml') {
-                if (strtolower($frontName) !== strtolower($adminFrontName)) {
-                    continue;
-                }
-            } else {
-                $segments = explode('/', ltrim($path, '/'));
-                $routeFrontName = strtolower($segments[0] ?? '');
-                if ($routeFrontName !== strtolower($frontName)) {
-                    continue;
-                }
-            }
-
-            $module = $routeData['module'] ?? '';
-            if ($module) {
-                $className = $module . '_' . uc_words($controllerName) . 'Controller';
-                if (class_exists($className)) {
-                    return $className;
-                }
+        $module = RouteCollectionBuilder::resolveControllerModule($frontName, $controllerName);
+        if ($module !== null) {
+            $className = $module . '_' . uc_words($controllerName) . 'Controller';
+            if (class_exists($className)) {
+                return $className;
             }
         }
 
-        // Fall back to admin module chain for third-party admin extensions
-        $adminFrontName = RouteCollectionBuilder::getAdminFrontNameStatic();
-        if (strtolower($frontName) === strtolower($adminFrontName)) {
-            foreach ($this->buildAdminModuleChain() as $module) {
-                $className = $module . '_' . uc_words($controllerName) . 'Controller';
+        // Fall back to admin module chain for third-party admin extensions without #[Route]
+        if (strtolower($frontName) === strtolower(RouteCollectionBuilder::getAdminFrontName())) {
+            foreach ($this->buildAdminModuleChain() as $chainModule) {
+                $className = $chainModule . '_' . uc_words($controllerName) . 'Controller';
                 if (class_exists($className)) {
                     return $className;
                 }
@@ -155,29 +132,8 @@ class ControllerDispatcher
      * Dispatch a matched Symfony route.
      *
      * @param array<string, mixed> $params Route parameters from UrlMatcher::match()
-     * @return bool True if dispatched, false if no matching controller found
      */
     public function dispatch(
-        array $params,
-        Mage_Core_Controller_Request_Http $request,
-        Mage_Core_Controller_Response_Http $response,
-    ): bool {
-        $type = $params['_maho_type'] ?? '';
-
-        return match ($type) {
-            'attribute' => $this->dispatchAttribute($params, $request, $response),
-            default => false,
-        };
-    }
-
-    /**
-     * Dispatch an attribute-routed controller.
-     *
-     * Walks the XML module chain (before/after ordering) so that controller
-     * overrides from third-party modules are respected. The compiled class is
-     * used as the default, but any module registered before it takes priority.
-     */
-    protected function dispatchAttribute(
         array $params,
         Mage_Core_Controller_Request_Http $request,
         Mage_Core_Controller_Response_Http $response,
@@ -192,9 +148,19 @@ class ControllerDispatcher
             return false;
         }
 
-        $controllerClass = $this->resolveControllerClass($module, $controllerName, $area) ?? $defaultClass;
+        // Admin area: verify the matched frontName matches the runtime admin frontName.
+        // Without this, a request like /notadmin/... would match admin routes with any
+        // segment for `{_adminFrontName}` and dispatch as admin — rejecting at this point
+        // simply falls through to the noroute handler.
+        if ($area === 'adminhtml') {
+            $matchedAdminFrontName = $params['_adminFrontName'] ?? '';
+            if (strtolower($matchedAdminFrontName) !== strtolower(RouteCollectionBuilder::getAdminFrontName())) {
+                return false;
+            }
+        }
 
-        // Strip 'Action' suffix — hasAction() and dispatch() expect bare name (e.g. 'index', not 'indexAction')
+        $controllerClass = $this->resolveAttributeControllerClass($module, $controllerName, $area) ?? $defaultClass;
+
         $actionName = preg_replace('/Action$/', '', $action);
 
         if (!class_exists($controllerClass)) {
@@ -202,26 +168,27 @@ class ControllerDispatcher
         }
 
         $controllerInstance = Mage::getControllerInstance($controllerClass, $request, $response);
-
         if (!$controllerInstance->hasAction($actionName)) {
             return false;
         }
 
         $this->setRequestParams($params, $request);
 
-        // Parse admin catch-all key/value params (e.g. /id/5/store/1)
         if ($area === 'adminhtml' && !empty($params['_catchall'])) {
             $this->parseUrlParams($params['_catchall'], $request);
         }
 
-        if ($area === 'adminhtml') {
-            $this->setAdminRequestNames($controllerName, $actionName, $module, $request);
-        } elseif ($area === 'install') {
-            $this->setInstallRequestNames($controllerName, $actionName, $module, $request);
-        } else {
-            $frontName = $params['_maho_front_name'] ?? '';
-            $this->setFrontendRequestNames($frontName, $controllerName, $actionName, $module, $request);
-        }
+        match ($area) {
+            'adminhtml' => $this->setAdminRequestNames($controllerName, $actionName, $module, $request),
+            'install' => $this->setInstallRequestNames($controllerName, $actionName, $module, $request),
+            default => $this->setFrontendRequestNames(
+                $params['_maho_front_name'] ?? '',
+                $controllerName,
+                $actionName,
+                $module,
+                $request,
+            ),
+        };
 
         $request->setDispatched(true);
         $controllerInstance->dispatch($actionName);
@@ -231,14 +198,12 @@ class ControllerDispatcher
 
     /**
      * Walk the admin module chain to find a controller override.
-     *
-     * Only admin has an XML-based module override chain (before/after ordering).
-     * Frontend controllers use #[Route] attributes directly.
+     * Only admin has XML-based before/after override chains; frontend uses #[Route] directly.
      */
-    protected function resolveControllerClass(
+    protected function resolveAttributeControllerClass(
         string $module,
         string $controllerName,
-        string $area = 'frontend',
+        string $area,
     ): ?string {
         if (!$module || !$controllerName || $area !== 'adminhtml') {
             return null;
@@ -289,9 +254,6 @@ class ControllerDispatcher
         return $modules;
     }
 
-    /**
-     * Parse URL path params (key/value pairs after module/controller/action).
-     */
     protected function parseUrlParams(string $paramsString, Mage_Core_Controller_Request_Http $request): void
     {
         if ($paramsString === '') {
@@ -304,9 +266,6 @@ class ControllerDispatcher
         }
     }
 
-    /**
-     * Set route parameters on the request, excluding internal Maho/Symfony keys.
-     */
     protected function setRequestParams(array $params, Mage_Core_Controller_Request_Http $request): void
     {
         foreach ($params as $key => $value) {
@@ -316,33 +275,19 @@ class ControllerDispatcher
         }
     }
 
-    /**
-     * Set request names for admin attribute routes.
-     *
-     * Admin controllers all share the 'adminhtml' route name and the configured
-     * admin frontName as the module name. The controller name and module come
-     * from the compiled route metadata.
-     */
     protected function setAdminRequestNames(
         string $controllerName,
         string $actionName,
         string $controllerModule,
         Mage_Core_Controller_Request_Http $request,
     ): void {
-        $adminFrontName = RouteCollectionBuilder::getAdminFrontNameStatic();
-
-        $request->setModuleName($adminFrontName ?: 'admin');
+        $request->setModuleName(RouteCollectionBuilder::getAdminFrontName() ?: 'admin');
         $request->setControllerName($controllerName);
         $request->setActionName($actionName);
         $request->setRouteName('adminhtml');
         $request->setControllerModule($controllerModule);
     }
 
-    /**
-     * Set request names for install attribute routes.
-     *
-     * Install controllers use 'install' as both the frontName and route name.
-     */
     protected function setInstallRequestNames(
         string $controllerName,
         string $actionName,
@@ -357,11 +302,9 @@ class ControllerDispatcher
     }
 
     /**
-     * Set request names for frontend attribute routes.
-     *
-     * Uses the frontName extracted from the #[Route] path (e.g. '/payflow/express/start' → 'payflow')
-     * rather than deriving from the class name, because modules like PaypalUk have a frontName
-     * ('payflow') that differs from their module key ('paypaluk').
+     * Frontend routes set module/route name from the #[Route] path's first segment
+     * rather than the class name, because modules like PaypalUk have a frontName
+     * ('payflow') distinct from their module key ('paypaluk').
      */
     protected function setFrontendRequestNames(
         string $frontName,

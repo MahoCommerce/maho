@@ -14,146 +14,98 @@ namespace Maho\Routing;
 
 use Mage;
 use Mage_Adminhtml_Helper_Data;
-use Symfony\Component\Routing\Generator\UrlGenerator;
+use Symfony\Component\Routing\Generator\CompiledUrlGenerator;
+use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
 use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\Routing\RouteCollection;
 
 /**
- * Assembles the Symfony RouteCollection from compiled #[Route] attributes.
+ * Accessor for routing data compiled at `composer dump-autoload`.
  *
- * Routes are compiled at `composer dump-autoload` and loaded at runtime.
- * Unmatched requests fall back to the legacy router loop (CMS, Blog, Default routers).
+ * Four compiled artifacts live under `vendor/composer/`:
+ *   - `maho_attributes.php`      — raw attribute data + reverse lookups
+ *   - `maho_url_matcher.php`     — CompiledUrlMatcher data (opcached)
+ *   - `maho_url_generator.php`   — CompiledUrlGenerator data (opcached)
+ *
+ * Admin routes are compiled with `{_adminFrontName}` as a placeholder because the runtime
+ * admin frontName is configurable via `use_custom_admin_path`. Reverse-lookup maps key admin
+ * routes by the sentinel `__admin__`; the runtime translates the incoming frontName to this
+ * sentinel. See `AttributeCompiler::ADMIN_SENTINEL`.
  */
 class RouteCollectionBuilder
 {
-    protected const REGISTRY_KEY = '_maho_route_collection';
+    public const ADMIN_SENTINEL = '__admin__';
+    public const INSTALL_SENTINEL = '__install__';
 
-    /**
-     * Build or retrieve the cached RouteCollection for the current request.
-     */
-    public function build(): RouteCollection
-    {
-        $cached = Mage::registry(self::REGISTRY_KEY);
-        if ($cached instanceof RouteCollection) {
-            return $cached;
-        }
+    private static ?string $adminFrontName = null;
 
-        $collection = new RouteCollection();
+    /** @var array<string, mixed>|null */
+    private static ?array $compiledMatcher = null;
 
-        $this->loadAttributeRoutes($collection);
-
-        Mage::register(self::REGISTRY_KEY, $collection);
-
-        return $collection;
-    }
-
-    /**
-     * Load routes from compiled #[Route] attributes.
-     *
-     * Attribute routes are specific (exact paths) and take priority over
-     * XML catch-all routes. These will be populated once the composer plugin
-     * compiler is updated and controllers are migrated (Phase 3).
-     */
-    protected function loadAttributeRoutes(RouteCollection $collection): void
-    {
-        $compiled = \Maho::getCompiledAttributes();
-        $routes = $compiled['routes'] ?? [];
-        $adminFrontName = $this->getAdminFrontName();
-
-        foreach ($routes as $name => $routeData) {
-            $path = $routeData['path'];
-
-            $area = $routeData['area'] ?? 'frontend';
-            $defaults = $routeData['defaults'] ?? [];
-            $requirements = $routeData['requirements'] ?? [];
-
-            // Admin routes are compiled with '/admin/' prefix — replace with actual admin frontName
-            if ($area === 'adminhtml' && $adminFrontName !== 'admin') {
-                $path = preg_replace('#^/admin(/|$)#', '/' . $adminFrontName . '$1', $path);
-            }
-
-            // Admin routes: auto-append catch-all for key/value URL params (e.g. /id/5/store/1)
-            if ($area === 'adminhtml' && !str_contains($path, '{_catchall}')) {
-                $path = rtrim($path, '/') . '/{_catchall}';
-                $defaults['_catchall'] = '';
-                $requirements['_catchall'] = '.*';
-            }
-
-            // Extract frontName from the first path segment (e.g. '/payflow/express/start' → 'payflow')
-            $pathSegments = explode('/', ltrim($routeData['path'], '/'));
-            $frontName = $pathSegments[0] ?? '';
-
-            $route = new \Symfony\Component\Routing\Route(
-                $path,
-                array_merge($defaults, [
-                    '_maho_type' => 'attribute',
-                    '_maho_controller' => $routeData['class'],
-                    '_maho_action' => $routeData['action'],
-                    '_maho_area' => $area,
-                    '_maho_module' => $routeData['module'] ?? '',
-                    '_maho_controller_name' => $routeData['controllerName'] ?? '',
-                    '_maho_front_name' => $frontName,
-                ]),
-                $requirements,
-            );
-
-            if (!empty($routeData['methods'])) {
-                $route->setMethods($routeData['methods']);
-            }
-
-            $collection->add($name, $route);
-        }
-    }
+    /** @var array<string, mixed>|null */
+    private static ?array $compiledGenerator = null;
 
     /**
      * Resolve route metadata for URL generation from frontName/controller/action.
-     *
-     * Scans compiled attributes directly — O(n) but only called during URL generation.
      *
      * @return array{name: string, path: string, pathVariables: string[], area: string}|null
      */
     public static function resolveRoute(string $frontName, string $controllerName, string $actionName): ?array
     {
         $compiled = \Maho::getCompiledAttributes();
-        $adminFrontName = self::getAdminFrontNameStatic();
-
-        foreach ($compiled['routes'] ?? [] as $name => $routeData) {
-            $area = $routeData['area'] ?? 'frontend';
-            $path = $routeData['path'];
-
-            if ($area === 'adminhtml') {
-                $routeFrontName = $adminFrontName;
-                if ($adminFrontName !== 'admin') {
-                    $path = preg_replace('#^/admin(/|$)#', '/' . $adminFrontName . '$1', $path);
-                }
-            } else {
-                $segments = explode('/', ltrim($path, '/'));
-                $routeFrontName = $segments[0] ?? '';
-            }
-
-            if (
-                strtolower($routeFrontName) !== strtolower($frontName) ||
-                strtolower($routeData['controllerName'] ?? 'index') !== strtolower($controllerName) ||
-                strtolower(preg_replace('/Action$/', '', $routeData['action'] ?? 'indexAction')) !== strtolower($actionName)
-            ) {
-                continue;
-            }
-
-            preg_match_all('/\{(\w+)\}/', $path, $matches);
-            return ['name' => $name, 'path' => $path, 'pathVariables' => $matches[1], 'area' => $area];
+        $lookupKey = self::normalizeFrontName($frontName) . '/' . $controllerName . '/' . strtolower($actionName);
+        $routeName = $compiled['reverseLookup'][$lookupKey] ?? null;
+        if ($routeName === null) {
+            return null;
         }
 
-        return null;
+        $route = $compiled['routes'][$routeName] ?? null;
+        if ($route === null) {
+            return null;
+        }
+
+        return [
+            'name' => $routeName,
+            'path' => $route['path'],
+            'pathVariables' => $route['pathVariables'],
+            'area' => $route['area'],
+        ];
+    }
+
+    /**
+     * Resolve a controller class from frontName + controllerName.
+     *
+     * @return string|null The module class prefix (e.g. 'Mage_Customer') or null if not found
+     */
+    public static function resolveControllerModule(string $frontName, string $controllerName): ?string
+    {
+        $compiled = \Maho::getCompiledAttributes();
+        $key = self::normalizeFrontName($frontName) . '/' . $controllerName;
+        return $compiled['controllerLookup'][$key] ?? null;
+    }
+
+    /**
+     * Translate a URL frontName to its reverse-lookup key (sentinel for admin/install, identity otherwise).
+     */
+    public static function normalizeFrontName(string $frontName): string
+    {
+        $lower = strtolower($frontName);
+        if ($lower === strtolower(self::getAdminFrontName())) {
+            return self::ADMIN_SENTINEL;
+        }
+        if ($lower === 'install') {
+            return self::INSTALL_SENTINEL;
+        }
+        return $lower;
     }
 
     /**
      * Convert a route name to its URL frontName.
-     * Only 'adminhtml' differs from its frontName; all other routes use routeName as frontName.
+     * Only 'adminhtml' differs from its route name; all others are identity.
      */
     public static function getFrontNameByRoute(string $routeName): ?string
     {
         if ($routeName === 'adminhtml') {
-            return self::getAdminFrontNameStatic();
+            return self::getAdminFrontName();
         }
         return null;
     }
@@ -164,52 +116,60 @@ class RouteCollectionBuilder
      */
     public static function getRouteByFrontName(string $frontName): ?string
     {
-        if ($frontName === self::getAdminFrontNameStatic()) {
+        if ($frontName === self::getAdminFrontName()) {
             return 'adminhtml';
         }
         return null;
     }
 
-    protected function getAdminFrontName(): string
+    public static function getAdminFrontName(): string
     {
-        return self::getAdminFrontNameStatic();
-    }
+        if (self::$adminFrontName !== null) {
+            return self::$adminFrontName;
+        }
 
-    public static function getAdminFrontNameStatic(): string
-    {
         if ((string) Mage::getConfig()->getNode(Mage_Adminhtml_Helper_Data::XML_PATH_USE_CUSTOM_ADMIN_PATH)) {
             $customUrl = (string) Mage::getConfig()->getNode(Mage_Adminhtml_Helper_Data::XML_PATH_CUSTOM_ADMIN_PATH);
             if ($customUrl !== '') {
-                return $customUrl;
+                return self::$adminFrontName = $customUrl;
             }
         }
 
-        return (string) Mage::getConfig()->getNode(
+        return self::$adminFrontName = (string) Mage::getConfig()->getNode(
             Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_ROUTER_FRONTNAME,
         );
     }
 
     /**
-     * Generate a URL for a named route.
-     *
-     * @return string|null The generated path, or null if the route doesn't exist
+     * Kept for backward compatibility with the pre-dumper static API.
      */
-    public static function generateUrl(string $name, array $params = []): ?string
+    public static function getAdminFrontNameStatic(): string
     {
-        try {
-            $collection = (new self())->build();
-            $context = new RequestContext();
-            $request = Mage::app()->getRequest();
-            if (method_exists($request, 'getSymfonyRequest')) {
-                $context->fromRequest($request->getSymfonyRequest());
-            }
-            $generator = new UrlGenerator($collection, $context);
-            return $generator->generate($name, $params);
-        } catch (\Symfony\Component\Routing\Exception\ExceptionInterface) {
-            return null;
-        } catch (\Throwable $e) {
-            Mage::logException($e);
-            return null;
+        return self::getAdminFrontName();
+    }
+
+    /**
+     * Instantiate the compiled URL matcher. The compiled data is loaded once
+     * per process and shared across requests via opcache.
+     */
+    public static function createMatcher(RequestContext $context): CompiledUrlMatcher
+    {
+        if (self::$compiledMatcher === null) {
+            $file = \Maho::getBasePath() . '/vendor/composer/maho_url_matcher.php';
+            self::$compiledMatcher = file_exists($file) ? (require $file) : [false, [], [], [], null];
         }
+        return new CompiledUrlMatcher(self::$compiledMatcher, $context);
+    }
+
+    /**
+     * Instantiate the compiled URL generator.
+     */
+    public static function createGenerator(RequestContext $context): CompiledUrlGenerator
+    {
+        if (self::$compiledGenerator === null) {
+            $file = \Maho::getBasePath() . '/vendor/composer/maho_url_generator.php';
+            self::$compiledGenerator = file_exists($file) ? (require $file) : [];
+        }
+        return new CompiledUrlGenerator(self::$compiledGenerator, $context);
     }
 }

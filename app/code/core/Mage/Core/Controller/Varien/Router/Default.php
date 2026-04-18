@@ -46,15 +46,10 @@ class Mage_Core_Controller_Varien_Router_Default extends Mage_Core_Controller_Va
     }
 
     /**
-     * Try to match using Symfony's UrlMatcher against compiled #[Route] attributes.
-     *
-     * Strategy 1 — Forward dispatch: module/controller/action already set by another router
-     *   (CMS, URL rewrite, _forward()); resolve via reverse lookup and dispatch.
-     *
-     * Strategy 2 — URL matching: match path against compiled #[Route] attributes.
-     *
-     * Strategy 3 — Legacy path: parse path as frontName/controller/action/key/value
-     *   (used by DB URL rewrites stored in legacy format).
+     * Try to match using the opcached CompiledUrlMatcher, falling back in order:
+     *  1. Forward dispatch when another router has already set module/controller/action
+     *  2. Compiled matcher (dumped at composer dump-autoload)
+     *  3. Legacy path parsing (URL rewrites stored as frontName/controller/action/key/value)
      */
     protected function _matchSymfony(Mage_Core_Controller_Request_Http $request): bool
     {
@@ -67,10 +62,9 @@ class Mage_Core_Controller_Varien_Router_Default extends Mage_Core_Controller_Va
                 return $dispatcher->dispatchForward($request, Mage::app()->getResponse());
             }
 
-            $collection = (new \Maho\Routing\RouteCollectionBuilder())->build();
             $context = new \Symfony\Component\Routing\RequestContext();
             $context->fromRequest($request->getSymfonyRequest());
-            $matcher = new \Symfony\Component\Routing\Matcher\UrlMatcher($collection, $context);
+            $matcher = \Maho\Routing\RouteCollectionBuilder::createMatcher($context);
 
             $pathInfo = $request->getPathInfo();
             $normalizedPath = (strlen($pathInfo) > 1) ? rtrim($pathInfo, '/') : $pathInfo;

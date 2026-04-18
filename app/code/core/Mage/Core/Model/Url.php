@@ -761,10 +761,11 @@ class Mage_Core_Model_Url extends \Maho\DataObject
     }
 
     /**
-     * Try to generate a URL path using Symfony named routes.
+     * Try to generate a URL path using the opcached CompiledUrlGenerator.
      *
-     * Resolves the current route/controller/action to a Symfony route name,
-     * substitutes path variables, and moves extra params to query string.
+     * Path variables are substituted by Symfony. Extras are appended manually:
+     * admin URLs use key/value path segments (captured at match time by `{_catchall}`),
+     * frontend URLs use query parameters.
      *
      * @return string|null The route path (without leading slash, with trailing slash), or null to fall back to legacy
      */
@@ -785,28 +786,36 @@ class Mage_Core_Model_Url extends \Maho\DataObject
 
         $routeParams = $this->getRouteParams() ?? [];
         $pathVariables = $routeInfo['pathVariables'];
+        $area = $routeInfo['area'] ?? 'frontend';
 
-        // Check all required path variables are present
+        // Admin routes carry {_adminFrontName} as a compile-time placeholder so the
+        // runtime admin frontName (use_custom_admin_path) is substituted per request.
+        if ($area === 'adminhtml') {
+            $routeParams['_adminFrontName'] = \Maho\Routing\RouteCollectionBuilder::getAdminFrontName();
+        }
+
         $pathParams = [];
         foreach ($pathVariables as $var) {
+            if ($var === '_catchall') {
+                continue; // optional; defaulted at compile time
+            }
             if (!isset($routeParams[$var]) || $routeParams[$var] === '') {
                 return null;
             }
             $pathParams[$var] = $routeParams[$var];
         }
 
-        // Build path by substituting path variables
-        $path = $routeInfo['path'];
-        foreach ($pathParams as $var => $value) {
-            $path = str_replace('{' . $var . '}', (string) $value, $path);
+        // Empty context so the generator returns a path relative to the docroot.
+        // The caller prepends the proper base URL via $this->getBaseUrl().
+        try {
+            $generated = \Maho\Routing\RouteCollectionBuilder::createGenerator(new \Symfony\Component\Routing\RequestContext())
+                ->generate($routeInfo['name'], $pathParams);
+        } catch (\Symfony\Component\Routing\Exception\ExceptionInterface) {
+            return null;
         }
-        $path = ltrim($path, '/');
 
-        // Extra params (not path variables): admin routes use key/value path segments
-        // (captured by {_catchall}), other routes use query params
+        $path = ltrim($generated, '/');
         $extras = array_diff_key($routeParams, array_flip($pathVariables));
-        $area = $routeInfo['area'] ?? 'frontend';
-
         foreach ($extras as $key => $value) {
             if ($value === null || $value === false || $value === '' || !is_scalar($value)) {
                 continue;
@@ -818,7 +827,6 @@ class Mage_Core_Model_Url extends \Maho\DataObject
             }
         }
 
-        $path = ltrim($path, '/');
         if ($path !== '' && !str_ends_with($path, '/')) {
             $path .= '/';
         }
