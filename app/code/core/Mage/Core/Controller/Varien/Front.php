@@ -31,6 +31,12 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
     public const XML_STORE_ROUTERS_PATH = 'web/routers';
 
     /**
+     * Maximum number of router match iterations before bailing out.
+     * Guards against infinite _forward() loops between controllers.
+     */
+    public const MAX_MATCH_ITERATIONS = 100;
+
+    /**
      * @param array|string $key
      * @param string|null $value
      * @return $this
@@ -178,7 +184,7 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
     {
         \Maho\Profiler::start('mage::dispatch::routers_match');
         $i = 0;
-        while (!$request->isDispatched() && $i++ < 100) {
+        while (!$request->isDispatched() && $i++ < self::MAX_MATCH_ITERATIONS) {
             foreach ($this->_routers as $router) {
                 /** @var Mage_Core_Controller_Varien_Router_Abstract $router */
                 if ($router->match($request)) {
@@ -187,8 +193,8 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
             }
         }
         \Maho\Profiler::stop('mage::dispatch::routers_match');
-        if ($i > 100) {
-            Mage::throwException('Front controller reached 100 router match iterations');
+        if ($i > self::MAX_MATCH_ITERATIONS) {
+            Mage::throwException(sprintf('Front controller reached %d router match iterations', self::MAX_MATCH_ITERATIONS));
         }
     }
 

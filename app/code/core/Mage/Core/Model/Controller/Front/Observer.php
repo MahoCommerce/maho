@@ -24,25 +24,21 @@ class Mage_Core_Model_Controller_Front_Observer
         $request = $front->getRequest();
         $response = $front->getResponse();
 
-        $this->checkBaseUrl($request, $response);
-        if ($response->isRedirect()) {
-            return;
+        $steps = [
+            $this->checkBaseUrl(...),
+            $this->checkTrailingSlash(...),
+            $this->resolveStore(...),
+            $this->rewriteDb(...),
+            $this->rewriteConfig(...),
+            $this->enforceHttps(...),
+        ];
+
+        foreach ($steps as $step) {
+            $step($request, $response);
+            if ($response->isRedirect()) {
+                return;
+            }
         }
-
-        $this->checkTrailingSlash($request, $response);
-        if ($response->isRedirect()) {
-            return;
-        }
-
-        $this->resolveStore($request);
-
-        $this->rewriteDb($request, $response);
-        if ($response->isRedirect()) {
-            return;
-        }
-
-        $this->rewriteConfig($request);
-        $this->enforceHttps($request, $response);
     }
 
     private function checkBaseUrl(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void
@@ -102,7 +98,7 @@ class Mage_Core_Model_Controller_Front_Observer
         }
     }
 
-    private function resolveStore(Mage_Core_Controller_Request_Http $request): void
+    private function resolveStore(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void
     {
         if (!Mage::isInstalled()) {
             return;
@@ -216,7 +212,7 @@ class Mage_Core_Model_Controller_Front_Observer
             return;
         }
 
-        $queryString = $this->getQueryString();
+        $queryString = $this->getQueryString($request);
         if ($queryString) {
             $targetUrl .= '?' . $queryString;
         }
@@ -236,7 +232,7 @@ class Mage_Core_Model_Controller_Front_Observer
         $altSlash = $origSlash ? '' : '/';
 
         $requestCases = [];
-        $queryString = $this->getQueryString();
+        $queryString = $this->getQueryString($request);
         if ($queryString) {
             $requestCases[] = $requestPath . $origSlash . '?' . $queryString;
             $requestCases[] = $requestPath . $altSlash . '?' . $queryString;
@@ -246,24 +242,26 @@ class Mage_Core_Model_Controller_Front_Observer
         return $requestCases;
     }
 
-    private function getQueryString(): string|false
+    private function getQueryString(Mage_Core_Controller_Request_Http $request): string|false
     {
-        if (!empty($_SERVER['QUERY_STRING'])) {
-            $queryParams = [];
-            parse_str($_SERVER['QUERY_STRING'], $queryParams);
-            $hasChanges = false;
-            foreach (array_keys($queryParams) as $key) {
-                if (str_starts_with($key, '___')) {
-                    unset($queryParams[$key]);
-                    $hasChanges = true;
-                }
-            }
-            if ($hasChanges) {
-                return http_build_query($queryParams);
-            }
-            return $_SERVER['QUERY_STRING'];
+        $queryString = (string) $request->getServer('QUERY_STRING', '');
+        if ($queryString === '') {
+            return false;
         }
-        return false;
+
+        $queryParams = [];
+        parse_str($queryString, $queryParams);
+        $hasChanges = false;
+        foreach (array_keys($queryParams) as $key) {
+            if (str_starts_with((string) $key, '___')) {
+                unset($queryParams[$key]);
+                $hasChanges = true;
+            }
+        }
+        if ($hasChanges) {
+            return http_build_query($queryParams);
+        }
+        return $queryString;
     }
 
     private function setStoreCodeCookie(string $storeCode): void
@@ -280,7 +278,7 @@ class Mage_Core_Model_Controller_Front_Observer
     // Config rewrite
     // -------------------------------------------------------------------------
 
-    private function rewriteConfig(Mage_Core_Controller_Request_Http $request): void
+    private function rewriteConfig(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void
     {
         $config = Mage::getConfig()->getNode('global/rewrite');
         if (!$config) {

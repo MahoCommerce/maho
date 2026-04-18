@@ -52,7 +52,7 @@ class RouteCollectionBuilder
     public static function resolveRoute(string $frontName, string $controllerName, string $actionName): ?array
     {
         $compiled = \Maho::getCompiledAttributes();
-        $lookupKey = self::normalizeFrontName($frontName) . '/' . $controllerName . '/' . strtolower($actionName);
+        $lookupKey = self::normalizeFrontName($frontName) . '/' . strtolower($controllerName) . '/' . strtolower($actionName);
         $routeName = $compiled['reverseLookup'][$lookupKey] ?? null;
         if ($routeName === null) {
             return null;
@@ -79,7 +79,7 @@ class RouteCollectionBuilder
     public static function resolveControllerModule(string $frontName, string $controllerName): ?string
     {
         $compiled = \Maho::getCompiledAttributes();
-        $key = self::normalizeFrontName($frontName) . '/' . $controllerName;
+        $key = self::normalizeFrontName($frontName) . '/' . strtolower($controllerName);
         return $compiled['controllerLookup'][$key] ?? null;
     }
 
@@ -151,25 +151,42 @@ class RouteCollectionBuilder
     /**
      * Instantiate the compiled URL matcher. The compiled data is loaded once
      * per process and shared across requests via opcache.
+     *
+     * @throws \RuntimeException if the compiled matcher file is missing — run `composer dump-autoload`.
      */
     public static function createMatcher(RequestContext $context): CompiledUrlMatcher
     {
         if (self::$compiledMatcher === null) {
-            $file = \Maho::getBasePath() . '/vendor/composer/maho_url_matcher.php';
-            self::$compiledMatcher = file_exists($file) ? (require $file) : [false, [], [], [], null];
+            self::$compiledMatcher = self::loadCompiledFile('maho_url_matcher.php');
         }
         return new CompiledUrlMatcher(self::$compiledMatcher, $context);
     }
 
     /**
      * Instantiate the compiled URL generator.
+     *
+     * @throws \RuntimeException if the compiled generator file is missing — run `composer dump-autoload`.
      */
     public static function createGenerator(RequestContext $context): CompiledUrlGenerator
     {
         if (self::$compiledGenerator === null) {
-            $file = \Maho::getBasePath() . '/vendor/composer/maho_url_generator.php';
-            self::$compiledGenerator = file_exists($file) ? (require $file) : [];
+            self::$compiledGenerator = self::loadCompiledFile('maho_url_generator.php');
         }
         return new CompiledUrlGenerator(self::$compiledGenerator, $context);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function loadCompiledFile(string $filename): array
+    {
+        $file = \Maho::getBasePath() . '/vendor/composer/' . $filename;
+        if (!file_exists($file)) {
+            throw new \RuntimeException(sprintf(
+                'Compiled routing file "%s" is missing. Run `composer dump-autoload` to regenerate it.',
+                $file,
+            ));
+        }
+        return require $file;
     }
 }
