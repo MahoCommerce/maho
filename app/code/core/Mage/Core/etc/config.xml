@@ -159,9 +159,6 @@
         <url_rewrite>
             <model>core/url_rewrite</model>
         </url_rewrite>
-        <request_rewrite>
-            <model>core/url_rewrite_request</model>
-        </request_rewrite>
     </global>
     <frontend>
         <translate>
