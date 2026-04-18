@@ -52,7 +52,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
 
         $time = time();
         // touch last_update
-        $this->_getFlag()->setLastUpdate($this->formatDate($time));
+        $this->_getFlag()->setLastUpdate(Mage::app()->getLocale()->formatDateForDb($time));
 
         $this->_getFlag()->save();
 
@@ -317,11 +317,11 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
     protected function _checkDates(&$from, &$to)
     {
         if ($from !== null) {
-            $from = $this->formatDate($from);
+            $from = Mage::app()->getLocale()->formatDateForDb($from);
         }
 
         if ($to !== null) {
-            $to = $this->formatDate($to);
+            $to = Mage::app()->getLocale()->formatDateForDb($to);
         }
 
         return $this;
@@ -351,7 +351,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
         }
 
         $periods = $this->_getTZOffsetTransitions(
-            Mage::app()->getLocale()->storeDate($store)->format('T'),
+            Mage::app()->getLocale()->utcToStore($store)->format('T'),
             $from,
             $to,
         );
@@ -485,14 +485,14 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
      */
     protected function _getStoreTimezoneUtcOffset($store = null)
     {
-        return Mage::app()->getLocale()->storeDate($store)->format('P');
+        return Mage::app()->getLocale()->utcToStore($store)->format('P');
     }
 
     /**
      * Retrieve date in UTC timezone
      *
      * @param string|null $date
-     * @return DateTime|null
+     * @return DateTimeImmutable|null
      */
     protected function _dateToUtc($date)
     {
@@ -500,6 +500,6 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
             return null;
         }
 
-        return Mage::app()->getLocale()->utcDate(0, $date, true);
+        return Mage::app()->getLocale()->storeToUtc(0, $date);
     }
 }

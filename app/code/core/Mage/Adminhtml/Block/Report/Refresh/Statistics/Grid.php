@@ -46,7 +46,7 @@ class Mage_Adminhtml_Block_Report_Refresh_Statistics_Grid extends Mage_Adminhtml
                 $dateObj = new DateTime($lastUpdate);
             }
 
-            return Mage::app()->getLocale()->storeDate(0, $dateObj, true);
+            return Mage::app()->getLocale()->utcToStore(0, $dateObj)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
         } catch (Exception $e) {
             // Graceful degradation - return raw value
             return $lastUpdate;

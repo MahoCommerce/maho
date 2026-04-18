@@ -277,7 +277,7 @@ class Maho_Blog_Model_Observer
 
     protected function getBlogPostsForSitemap(int $storeId): array
     {
-        $today = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATE_FORMAT);
+        $today = Mage::app()->getLocale()->todayUtc();
 
         /** @var Maho_Blog_Model_Resource_Post_Collection $collection */
         $collection = Mage::getResourceModel('blog/post_collection')

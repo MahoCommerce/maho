@@ -171,8 +171,10 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
             try {
                 // Use the same format that was used to write the data (locale-specific short date format)
                 $shortDateFormat = $this->getLocale()->getDateFormat('short');
-                $from = $this->getLocale()->date($this->getFilter('report_from'), $shortDateFormat, null, false);
-                $to   = $this->getLocale()->date($this->getFilter('report_to'), $shortDateFormat, null, false);
+                $fromValue = $this->getFilter('report_from');
+                $from = DateTime::createFromFormat($shortDateFormat, $fromValue) ?: new DateTime($fromValue);
+                $toValue = $this->getFilter('report_to');
+                $to = DateTime::createFromFormat($shortDateFormat, $toValue) ?: new DateTime($toValue);
 
                 $collection->setInterval($from, $to);
             } catch (Exception $e) {

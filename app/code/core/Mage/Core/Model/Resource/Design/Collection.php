@@ -44,9 +44,9 @@ class Mage_Core_Model_Resource_Design_Collection extends Mage_Core_Model_Resourc
     public function addDateFilter($date = null)
     {
         if (is_null($date)) {
-            $date = $this->formatDate(Mage::getSingleton('core/date')->gmtDate());
+            $date = Mage::app()->getLocale()->formatDateForDb(Mage::getSingleton('core/date')->gmtDate());
         } else {
-            $date = $this->formatDate($date);
+            $date = Mage::app()->getLocale()->formatDateForDb($date);
         }
 
         $this->addFieldToFilter('date_from', ['lteq' => $date]);

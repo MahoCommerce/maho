@@ -52,14 +52,14 @@ abstract class Mage_Reports_Model_Resource_Product_Index_Abstract extends Mage_C
                 $data  = [
                     'visitor_id'    => $object->getVisitorId(),
                     'store_id'      => $object->getStoreId(),
-                    'added_at'      => Mage_Core_Model_Locale::now(),
+                    'added_at'      => Mage::app()->getLocale()->nowUtc(),
                 ];
             } else {
                 $where = ['index_id = ?' => $row['index_id']];
                 $data  = [
                     'customer_id'   => $object->getCustomerId(),
                     'store_id'      => $object->getStoreId(),
-                    'added_at'      => Mage_Core_Model_Locale::now(),
+                    'added_at'      => Mage::app()->getLocale()->nowUtc(),
                 ];
             }
 

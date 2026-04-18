@@ -40,11 +40,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date extends Mage_Adminht
         if ($data = $row->getData($this->getColumn()->getIndex())) {
             try {
                 if ($this->getColumn()->getGmtoffset()) {
-                    $dateObj = Mage::app()->getLocale()
-                        ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT);
+                    $dateObj = Mage::app()->getLocale()->utcToStore(null, $data);
                 } else {
-                    $dateObj = Mage::app()->getLocale()
-                        ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT, null, false);
+                    $dateObj = new DateTime($data);
                 }
 
                 return $this->_getFormatter()->format($dateObj);
@@ -52,11 +50,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Date extends Mage_Adminht
                 // Fallback to simple format
                 try {
                     if ($this->getColumn()->getTimezone()) {
-                        $dateObj = Mage::app()->getLocale()
-                            ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT);
+                        $dateObj = Mage::app()->getLocale()->utcToStore(null, $data);
                     } else {
-                        $dateObj = Mage::app()->getLocale()
-                            ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT, null, false);
+                        $dateObj = new DateTime($data);
                     }
                     return $dateObj->format('M j, Y');
                 } catch (Exception $e2) {

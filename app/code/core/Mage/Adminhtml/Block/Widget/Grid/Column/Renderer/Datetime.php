@@ -44,15 +44,15 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Datetime extends Mage_Adm
                 $useTimezone = $this->getColumn()->getUseTimezone() ?? true;
                 $locale = $this->getColumn()->getLocale() ?? null;
 
-                $dateObj = Mage::app()->getLocale()
-                    ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT, $locale, $useTimezone);
+                $dateObj = $useTimezone
+                    ? Mage::app()->getLocale()->utcToStore(null, $data)
+                    : new DateTime($data);
 
                 return $this->_getFormatter($locale)->format($dateObj);
             } catch (Exception $e) {
                 // Fallback to simple format
                 try {
-                    $dateObj = Mage::app()->getLocale()
-                        ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT);
+                    $dateObj = Mage::app()->getLocale()->utcToStore(null, $data);
                     return $dateObj->format('M j, Y, g:i:s A');
                 } catch (Exception $e2) {
                     return $data;

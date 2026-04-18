@@ -118,8 +118,8 @@ class Maho_Giftcard_Model_Observer
             'purchase_order_id' => $order->getId(),
             'purchase_order_item_id' => $item->getId(),
             'expires_at' => $helper->calculateExpirationDate(),
-            'created_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
-            'updated_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+            'created_at' => Mage::app()->getLocale()->nowUtc(),
+            'updated_at' => Mage::app()->getLocale()->nowUtc(),
         ]);
 
         $giftcard->save();
@@ -134,7 +134,7 @@ class Maho_Giftcard_Model_Observer
             'balance_after' => $baseAmount,
             'order_id' => $order->getId(),
             'comment' => "Created from order #{$order->getIncrementId()}",
-            'created_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+            'created_at' => Mage::app()->getLocale()->nowUtc(),
         ]);
         $history->save();
 
@@ -466,7 +466,7 @@ class Maho_Giftcard_Model_Observer
             // Prepare update data
             $updateData = [
                 'balance' => $newBalance,
-                'updated_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                'updated_at' => Mage::app()->getLocale()->nowUtc(),
             ];
 
             // Update status if fully used
@@ -491,7 +491,7 @@ class Maho_Giftcard_Model_Observer
                 'balance_after' => $newBalance,
                 'order_id' => $order->getId(),
                 'comment' => "Used in order #{$order->getIncrementId()}",
-                'created_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                'created_at' => Mage::app()->getLocale()->nowUtc(),
             ]);
         }
     }
@@ -576,7 +576,7 @@ class Maho_Giftcard_Model_Observer
             $needsExtension = false;
 
             if ($currentExpiresAt && $extensionDays > 0) {
-                $now = Mage::app()->getLocale()->utcDate(null, null, true);
+                $now = Mage::app()->getLocale()->storeToUtc();
                 $expiresAt = new DateTime($currentExpiresAt, new DateTimeZone('UTC'));
 
                 // Calculate the minimum acceptable expiration (now + extension days)
@@ -591,9 +591,9 @@ class Maho_Giftcard_Model_Observer
 
             // Extend expiration if needed
             if ($needsExtension && $extensionDays > 0) {
-                $newExpiration = Mage::app()->getLocale()->utcDate(null, null, true);
-                $newExpiration->modify("+{$extensionDays} days");
-                $newExpiresAt = $newExpiration->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+                $newExpiresAt = Mage::app()->getLocale()->storeToUtc()
+                    ->modify("+{$extensionDays} days")
+                    ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 $historyComment .= " (expiration extended to {$extensionDays} days from now)";
             } elseif ($isExpired && $extensionDays === 0) {
                 // If extension is 0 and card is expired, keep it expired but still add balance
@@ -604,7 +604,7 @@ class Maho_Giftcard_Model_Observer
             $updateData = [
                 'balance' => $newBalance,
                 'status' => $newStatus,
-                'updated_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                'updated_at' => Mage::app()->getLocale()->nowUtc(),
             ];
 
             // Only update expires_at if we're extending it
@@ -628,7 +628,7 @@ class Maho_Giftcard_Model_Observer
                 'balance_after' => $newBalance,
                 'order_id' => $order->getId(),
                 'comment' => $historyComment,
-                'created_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                'created_at' => Mage::app()->getLocale()->nowUtc(),
             ]);
         }
     }
@@ -703,7 +703,7 @@ class Maho_Giftcard_Model_Observer
             $needsExtension = false;
 
             if ($currentExpiresAt && $extensionDays > 0) {
-                $now = Mage::app()->getLocale()->utcDate(null, null, true);
+                $now = Mage::app()->getLocale()->storeToUtc();
                 $expiresAt = new DateTime($currentExpiresAt, new DateTimeZone('UTC'));
 
                 // Calculate the minimum acceptable expiration (now + extension days)
@@ -718,9 +718,9 @@ class Maho_Giftcard_Model_Observer
 
             // Extend expiration if needed
             if ($needsExtension && $extensionDays > 0) {
-                $newExpiration = Mage::app()->getLocale()->utcDate(null, null, true);
-                $newExpiration->modify("+{$extensionDays} days");
-                $newExpiresAt = $newExpiration->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+                $newExpiresAt = Mage::app()->getLocale()->storeToUtc()
+                    ->modify("+{$extensionDays} days")
+                    ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 $historyComment .= " (expiration extended to {$extensionDays} days from now)";
             } elseif ($isExpired && $extensionDays === 0) {
                 // If extension is 0 and card is expired, keep it expired but still add balance
@@ -731,7 +731,7 @@ class Maho_Giftcard_Model_Observer
             $updateData = [
                 'balance' => $newBalance,
                 'status' => $newStatus,
-                'updated_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                'updated_at' => Mage::app()->getLocale()->nowUtc(),
             ];
 
             // Only update expires_at if we're extending it
@@ -755,7 +755,7 @@ class Maho_Giftcard_Model_Observer
                 'balance_after' => $newBalance,
                 'order_id' => $order->getId(),
                 'comment' => $historyComment,
-                'created_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                'created_at' => Mage::app()->getLocale()->nowUtc(),
             ]);
         }
     }

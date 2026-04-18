@@ -176,12 +176,10 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
             $option = $this->getOption();
             if ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE) {
                 $format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM);
-                $result = Mage::app()->getLocale()->dateMutable($optionValue, DateTime::ATOM, null, false)
-                    ->format($format);
+                $result = (new DateTime($optionValue))->format($format);
             } elseif ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
                 $format = Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-                $result = Mage::app()->getLocale()
-                    ->date($optionValue, Mage_Core_Model_Locale::DATETIME_FORMAT, null, false)->format($format);
+                $result = (new DateTime($optionValue))->format($format);
             } elseif ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME) {
                 $date = new DateTime($optionValue);
                 $result = $date->format('H:i');
