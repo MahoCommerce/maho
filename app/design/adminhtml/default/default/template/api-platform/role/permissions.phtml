@@ -1,0 +1,168 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Maho_ApiPlatform
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Edit_Tab_Permissions $this */
+
+$publicResources = $this->getPublicReadResources();
+$customerResources = $this->getCustomerResources();
+?>
+
+<style>
+    .api-access-section {
+        margin: 0 0 15px;
+        border: 1px solid #d6d6d6;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    .api-access-section .section-head {
+        padding: 10px 15px;
+        font-weight: 600;
+        font-size: 13px;
+        border-bottom: 1px solid #d6d6d6;
+    }
+    .api-access-section .section-body {
+        padding: 12px 15px;
+    }
+    .section-head-public { background: #e8f5e9; color: #2e7d32; }
+    .section-head-customer { background: #e3f2fd; color: #1565c0; }
+    .section-head-service { background: #fff3e0; color: #e65100; }
+    .api-resource-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 8px 0 4px;
+    }
+    .api-resource-tag {
+        display: inline-block;
+        padding: 3px 10px;
+        background: #f5f5f5;
+        border: 1px solid #e0e0e0;
+        border-radius: 3px;
+        font-size: 12px;
+    }
+    .api-customer-list {
+        margin: 8px 0 4px;
+        padding: 0;
+        list-style: none;
+    }
+    .api-customer-list li {
+        padding: 4px 0;
+        font-size: 12px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .api-customer-list li:last-child { border-bottom: none; }
+    .api-customer-list strong {
+        display: inline-block;
+        min-width: 90px;
+    }
+    .api-section-note {
+        color: #666;
+        font-size: 11px;
+        margin-top: 6px;
+    }
+    .api-service-controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 10px;
+    }
+</style>
+
+<!-- Section 1: Public Storefront (informational) -->
+<div class="api-access-section">
+    <div class="section-head section-head-public">
+        <?= $this->__('Public Storefront Access') ?>
+    </div>
+    <div class="section-body">
+        <p style="margin:0 0 6px; font-size:12px; color:#555;">
+            <?= $this->__('These resources are publicly readable without authentication. Any visitor or app can access this data via GET requests.') ?>
+        </p>
+        <div class="api-resource-list">
+            <?php foreach ($publicResources as $label): ?>
+                <span class="api-resource-tag"><?= $this->escapeHtml($label) ?></span>
+            <?php endforeach; ?>
+        </div>
+        <p class="api-section-note"><?= $this->__('No permissions needed — these are read-only public endpoints.') ?></p>
+    </div>
+</div>
+
+<!-- Section 2: Customer Operations (informational) -->
+<div class="api-access-section">
+    <div class="section-head section-head-customer">
+        <?= $this->__('Customer Session Operations') ?>
+    </div>
+    <div class="section-body">
+        <p style="margin:0 0 6px; font-size:12px; color:#555;">
+            <?= $this->__('These operations use customer JWT tokens obtained when a customer logs in. They are scoped to the logged-in customer\'s own data and cannot be granted to service accounts.') ?>
+        </p>
+        <ul class="api-customer-list">
+            <?php foreach ($customerResources as $resourceId => $description): ?>
+                <li>
+                    <strong><?= $this->escapeHtml(ucfirst($resourceId)) ?></strong>
+                    <span style="color:#666;">&mdash; <?= $this->escapeHtml($description) ?></span>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+        <p class="api-section-note"><?= $this->__('Authenticated via customer login (email + password). Each customer can only access their own data.') ?></p>
+    </div>
+</div>
+
+<!-- Section 3: Service Account Permissions (configurable) -->
+<div class="api-access-section">
+    <div class="section-head section-head-service">
+        <?= $this->__('Service Account Permissions') ?>
+    </div>
+    <div class="section-body">
+        <p style="margin:0 0 8px; font-size:12px; color:#555;">
+            <?= $this->__('These permissions control what API users (service accounts) can do. Grant only the operations each integration needs.') ?>
+        </p>
+        <input type="hidden" name="permissions_tree" id="role_permissions" value="" />
+        <div class="api-service-controls">
+            <label for="permissions_all"><?= $this->__('Resource Access') ?></label>
+            <select id="permissions_all" name="permissions_access" class="select">
+                <option value="0"><?= $this->__('Custom') ?></option>
+                <option value="1"><?= $this->__('All') ?></option>
+            </select>
+        </div>
+        <div id="permissions_container">
+            <div id="permissions-tree" class="hor-scroll"></div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    const permissionsValueEl = document.getElementById('role_permissions');
+    const accessSelectEl = document.getElementById('permissions_all');
+    const containerEl = document.getElementById('permissions_container');
+
+    const tree = new MahoTree('permissions-tree', {
+        showRootNode: false,
+        selectable: {
+            mode: 'nested',
+            onSelect: updateValue,
+        },
+    });
+    tree.setRootNode(<?= $this->getServiceTreeJson() ?>);
+    tree.expandAll();
+
+    function updateValue() {
+        if (accessSelectEl.value === '1') {
+            permissionsValueEl.value = 'all';
+        } else {
+            permissionsValueEl.value = tree.getChecked().map((obj) => obj.id).join(',');
+        }
+    }
+
+    accessSelectEl.addEventListener('change', (event) => {
+        containerEl.classList.toggle('no-display', event.target.value === '1');
+        updateValue();
+    });
+    accessSelectEl.value = '<?= (int)$this->getEverythingAllowed() ?>';
+    accessSelectEl.dispatchEvent(new Event('change'));
+</script>

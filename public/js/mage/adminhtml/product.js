@@ -166,6 +166,7 @@ Product.Gallery = class {
         this.images[index].removed = (this.getFileElement(file, 'cell-remove input').checked ? 1 : 0);
         this.images[index].disabled = (this.getFileElement(file, 'cell-disable input').checked ? 1 : 0);
         this.getElement('save').value = JSON.stringify(this.images);
+        this.updateState(file);
         this.container.setHasChanges();
     }
     loadImage(file) {
@@ -212,6 +213,10 @@ Product.Gallery = class {
                 this.getFileElement(file, 'cell-' + pair[0] + ' input').checked = true;
             }
         }.bind(this));
+        this.updateState(file);
+    }
+    updateState(file) {
+        // deprecated
     }
     getFileElement(file, element) {
         var selector = '#' + this.prepareId(file) + ' .' + element;
@@ -907,19 +912,13 @@ showNoticeMessage() {
 
 var onInitDisableFieldsList = [];
 
-function toggleFieldEditMode(toggleIdentifier, fieldContainer) {
-    const el = (toggleIdentifier instanceof HTMLElement) ? toggleIdentifier : document.getElementById(toggleIdentifier);
+function toogleFieldEditMode(toogleIdentifier, fieldContainer) {
+    var el = (toogleIdentifier instanceof HTMLElement) ? toogleIdentifier : document.getElementById(toogleIdentifier);
     if (el && el.checked) {
         enableFieldEditMode(fieldContainer);
     } else {
         disableFieldEditMode(fieldContainer);
     }
-}
-
-/** @deprecated since 26.3 Use toggleFieldEditMode instead */
-function toogleFieldEditMode(toogleIdentifier, fieldContainer) {
-    console.warn('toogleFieldEditMode is deprecated, use toggleFieldEditMode instead');
-    toggleFieldEditMode(toogleIdentifier, fieldContainer);
 }
 
 function disableFieldEditMode(fieldContainer) {

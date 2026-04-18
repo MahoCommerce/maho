@@ -15,11 +15,11 @@ declare(strict_types=1);
  *
  * This class manages stateful batch processing across multiple HTTP requests.
  * State is persisted to a JSON file between requests. Uses the shared output
- * engine from ProductProcessorTrait for all format handling.
+ * engine from ProductWriterTrait for all format handling.
  */
 class Maho_FeedManager_Model_Generator_Batch
 {
-    use Maho_FeedManager_Model_Generator_ProductProcessorTrait;
+    use Maho_FeedManager_Model_Generator_ProductWriterTrait;
 
     public const STATUS_INITIALIZING = 'initializing';
     public const STATUS_PROCESSING = 'processing';

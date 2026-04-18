@@ -15,6 +15,7 @@ class Mage_Core_Model_App_Area
     public const AREA_GLOBAL   = 'global';
     public const AREA_FRONTEND = 'frontend';
     public const AREA_ADMINHTML = 'adminhtml';
+    public const AREA_API      = 'api';
 
     public const PART_CONFIG   = 'config';
     public const PART_EVENTS   = 'events';

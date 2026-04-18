@@ -11,15 +11,15 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Giftcard Observer Instantiation', function () {
-    test('observer can be instantiated', function () {
+describe('Giftcard Observer Instantiation', function (): void {
+    test('observer can be instantiated', function (): void {
         $observer = Mage::getModel('giftcard/observer');
         expect($observer)->toBeInstanceOf(Maho_Giftcard_Model_Observer::class);
     });
 });
 
-describe('Observer: Set Giftcard Price on Quote Item', function () {
-    test('sets custom price on quote item from buy request', function () {
+describe('Observer: Set Giftcard Price on Quote Item', function (): void {
+    test('sets custom price on quote item from buy request', function (): void {
         $observer = Mage::getModel('giftcard/observer');
 
         // Create a quote first
@@ -71,7 +71,7 @@ describe('Observer: Set Giftcard Price on Quote Item', function () {
         expect((float) $quoteItem->getOriginalCustomPrice())->toBe(75.00);
     });
 
-    test('does not modify non-giftcard products', function () {
+    test('does not modify non-giftcard products', function (): void {
         $observer = Mage::getModel('giftcard/observer');
 
         // Create a quote first
@@ -102,8 +102,8 @@ describe('Observer: Set Giftcard Price on Quote Item', function () {
     });
 });
 
-describe('Integration: Quote → Order → Admin Totals with Gift Card', function () {
-    beforeEach(function () {
+describe('Integration: Quote → Order → Admin Totals with Gift Card', function (): void {
+    beforeEach(function (): void {
         $this->helper = Mage::helper('giftcard');
 
         // Find an existing simple product from sample data
@@ -119,7 +119,7 @@ describe('Integration: Quote → Order → Admin Totals with Gift Card', functio
         }
     });
 
-    test('full flow: quote → collectTotals → order with gift card → admin totals block', function () {
+    test('full flow: quote → collectTotals → order with gift card → admin totals block', function (): void {
         $productPrice = (float) $this->product->getPrice();
 
         // Create a gift card with $100 balance
@@ -256,7 +256,7 @@ describe('Integration: Quote → Order → Admin Totals with Gift Card', functio
         expect($giftcardPos)->toBeLessThan($grandTotalPos);
     });
 
-    test('gift card covering full amount results in zero grand total', function () {
+    test('gift card covering full amount results in zero grand total', function (): void {
         $productPrice = (float) $this->product->getPrice();
 
         // Create a gift card with balance larger than order total
@@ -316,7 +316,7 @@ describe('Integration: Quote → Order → Admin Totals with Gift Card', functio
         expect($giftcardOnAddress)->toBeLessThanOrEqual($productPrice + 50); // product + shipping
     });
 
-    test('order without gift card has no giftcard total in admin block', function () {
+    test('order without gift card has no giftcard total in admin block', function (): void {
         // Create quote without gift card
         $quote = Mage::getModel('sales/quote');
         $quote->setStoreId(1);
@@ -373,7 +373,7 @@ describe('Integration: Quote → Order → Admin Totals with Gift Card', functio
         expect($totalsBlock->getTotal('giftcard'))->toBeFalsy();
     });
 
-    test('multiple gift cards on one order show combined amount and both codes', function () {
+    test('multiple gift cards on one order show combined amount and both codes', function (): void {
         // Create two gift cards
         $giftcard1 = Mage::getModel('giftcard/giftcard');
         $giftcard1->setCode($this->helper->generateCode());
@@ -467,7 +467,7 @@ describe('Integration: Quote → Order → Admin Totals with Gift Card', functio
         expect($total->getLabel())->toContain($giftcard2->getCode());
     });
 
-    test('applyGiftcardToOrder handles null address gracefully', function () {
+    test('applyGiftcardToOrder handles null address gracefully', function (): void {
         $observer = Mage::getModel('giftcard/observer');
 
         $order = Mage::getModel('sales/order');
@@ -486,8 +486,8 @@ describe('Integration: Quote → Order → Admin Totals with Gift Card', functio
     });
 });
 
-describe('Observer: Catalog Product Save Before', function () {
-    test('preserves gift card attributes on product save', function () {
+describe('Observer: Catalog Product Save Before', function (): void {
+    test('preserves gift card attributes on product save', function (): void {
         $observer = Mage::getModel('giftcard/observer');
 
         $product = Mage::getModel('catalog/product');
@@ -510,7 +510,7 @@ describe('Observer: Catalog Product Save Before', function () {
         expect($product->getData('giftcard_amounts'))->toBe('25,50,100');
     });
 
-    test('skips non-giftcard products', function () {
+    test('skips non-giftcard products', function (): void {
         $observer = Mage::getModel('giftcard/observer');
 
         $product = Mage::getModel('catalog/product');
@@ -530,13 +530,13 @@ describe('Observer: Catalog Product Save Before', function () {
     });
 });
 
-describe('Observer: Gift Card Creation on Invoice Paid', function () {
-    beforeEach(function () {
+describe('Observer: Gift Card Creation on Invoice Paid', function (): void {
+    beforeEach(function (): void {
         $this->helper = Mage::helper('giftcard');
         $this->observer = Mage::getModel('giftcard/observer');
     });
 
-    test('creates gift card when invoice is paid', function () {
+    test('creates gift card when invoice is paid', function (): void {
         // Create an order with all required fields
         $order = Mage::getModel('sales/order');
         $order->setIncrementId('TEST-' . time());
@@ -603,7 +603,7 @@ describe('Observer: Gift Card Creation on Invoice Paid', function () {
         expect($history->getSize())->toBeGreaterThanOrEqual(1);
     });
 
-    test('does not create gift card for unpaid invoice', function () {
+    test('does not create gift card for unpaid invoice', function (): void {
         $order = Mage::getModel('sales/order');
         $order->setIncrementId('TEST-UNPAID-' . time());
         $order->setStoreId(1);
@@ -648,7 +648,7 @@ describe('Observer: Gift Card Creation on Invoice Paid', function () {
         expect($collection->getSize())->toBe(0);
     });
 
-    test('creates multiple gift cards for quantity > 1', function () {
+    test('creates multiple gift cards for quantity > 1', function (): void {
         $order = Mage::getModel('sales/order');
         $order->setIncrementId('TEST-MULTI-' . time());
         $order->setStoreId(1);
@@ -706,8 +706,8 @@ describe('Observer: Gift Card Creation on Invoice Paid', function () {
     });
 });
 
-describe('Observer: Admin Order Gift Card Processing', function () {
-    beforeEach(function () {
+describe('Observer: Admin Order Gift Card Processing', function (): void {
+    beforeEach(function (): void {
         $this->helper = Mage::helper('giftcard');
         $this->observer = Mage::getModel('giftcard/observer');
 
@@ -721,7 +721,7 @@ describe('Observer: Admin Order Gift Card Processing', function () {
         $this->giftcard->save();
     });
 
-    test('applies gift card in admin order create', function () {
+    test('applies gift card in admin order create', function (): void {
         // Create quote
         $quote = Mage::getModel('sales/quote');
         $quote->setStoreId(1);
@@ -757,14 +757,14 @@ describe('Observer: Admin Order Gift Card Processing', function () {
         expect($appliedCodes)->toHaveKey($this->giftcard->getCode());
     });
 
-    test('rejects invalid gift card code', function () {
+    test('rejects invalid gift card code', function (): void {
         // Try to apply non-existent code
         $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode('INVALID-CODE-12345');
 
         expect($giftcard->getId())->toBeNull();
     });
 
-    test('rejects gift card from different website', function () {
+    test('rejects gift card from different website', function (): void {
         // Card is for website 1
         $quote = Mage::getModel('sales/quote');
         $quote->setStoreId(1);
@@ -792,8 +792,8 @@ describe('Observer: Admin Order Gift Card Processing', function () {
     });
 });
 
-describe('Observer: Refund Gift Card on Order Cancel', function () {
-    test('refunds gift card balance when order is canceled', function () {
+describe('Observer: Refund Gift Card on Order Cancel', function (): void {
+    test('refunds gift card balance when order is canceled', function (): void {
         // Create a gift card with initial balance
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode('CANCEL-TEST-' . uniqid());
@@ -858,7 +858,7 @@ describe('Observer: Refund Gift Card on Order Cancel', function () {
         expect($history->getComment())->toContain('canceled order');
     });
 
-    test('refunds multiple gift cards proportionally on cancel', function () {
+    test('refunds multiple gift cards proportionally on cancel', function (): void {
         // Create two gift cards
         $giftcard1 = Mage::getModel('giftcard/giftcard');
         $giftcard1->setCode('CANCEL-MULTI-1-' . uniqid());
@@ -926,7 +926,7 @@ describe('Observer: Refund Gift Card on Order Cancel', function () {
         expect($giftcard2->getBalance())->toBe(75.00);
     });
 
-    test('does nothing when order has no gift card amount', function () {
+    test('does nothing when order has no gift card amount', function (): void {
         // Create order without gift card
         $order = Mage::getModel('sales/order');
         $order->setIncrementId('CANCEL-NOGC-' . uniqid());
@@ -945,7 +945,7 @@ describe('Observer: Refund Gift Card on Order Cancel', function () {
         expect(true)->toBeTrue();
     });
 
-    test('extends expiration on refund when configured', function () {
+    test('extends expiration on refund when configured', function (): void {
         // Create an expiring gift card
         $expiresAt = new DateTime('now', new DateTimeZone('UTC'));
         $expiresAt->modify('+5 days'); // Expires soon

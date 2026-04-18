@@ -27,6 +27,26 @@
             </captcha>
         </helpers>
     </global>
+    <api>
+        <events>
+            <api_verify_captcha>
+                <observers>
+                    <captcha>
+                        <class>captcha/observer</class>
+                        <method>verifyApi</method>
+                    </captcha>
+                </observers>
+            </api_verify_captcha>
+            <api_captcha_config>
+                <observers>
+                    <captcha>
+                        <class>captcha/observer</class>
+                        <method>getCaptchaConfig</method>
+                    </captcha>
+                </observers>
+            </api_captcha_config>
+        </events>
+    </api>
     <frontend>
         <routers>
             <captcha>

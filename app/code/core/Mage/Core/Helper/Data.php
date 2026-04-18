@@ -862,41 +862,85 @@ XML;
     }
 
     /**
-     * Returns true if the rate limit of the current client is exceeded
-     * @param bool $setErrorMessage Adds a predefined error message to the 'core/session' object
-     * @return bool is rate limit exceeded
+     * Returns true if the rate limit is exceeded.
+     *
+     * When called without $key/$maxAttempts/$windowSeconds, uses IP-based limiting
+     * with the store config (system/rate_limit/*) — preserving original behavior.
+     *
+     * When called with explicit parameters, performs sliding-window rate limiting
+     * on the given key (ignores the system/rate_limit/active config flag).
      */
-    public function isRateLimitExceeded(bool $setErrorMessage = true, bool $recordRateLimitHit = true): bool
-    {
-        $active = Mage::getStoreConfigFlag('system/rate_limit/active');
-        if ($active && $remoteAddr = Mage::helper('core/http')->getRemoteAddr()) {
-            $cacheTag = 'rate_limit_' . $remoteAddr;
-            if (Mage::app()->testCache($cacheTag)) {
-                if ($setErrorMessage) {
-                    $errorMessage = $this->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.');
-                    Mage::getSingleton('core/session')->addError($errorMessage);
-                }
-                return true;
-            }
+    public function isRateLimitExceeded(
+        bool $setErrorMessage = true,
+        bool $recordRateLimitHit = true,
+        ?string $key = null,
+        int $maxAttempts = 1,
+        ?int $windowSeconds = null,
+    ): bool {
+        $explicit = $key !== null;
 
-            if ($recordRateLimitHit) {
-                $this->recordRateLimitHit();
+        if (!$explicit) {
+            if (!Mage::getStoreConfigFlag('system/rate_limit/active')) {
+                return false;
             }
+            $remoteAddr = Mage::helper('core/http')->getRemoteAddr();
+            if (!$remoteAddr) {
+                return false;
+            }
+            $key = $remoteAddr;
+        }
+
+        $windowSeconds ??= (int) Mage::getStoreConfig('system/rate_limit/timeframe');
+        $cacheKey = 'rate_limit_' . md5($key);
+        $cache = Mage::app()->getCache();
+        $now = time();
+
+        $data = $cache->load($cacheKey);
+        $attempts = $data ? (json_decode($data, true) ?? []) : [];
+        $attempts = array_values(array_filter($attempts, fn(int $ts) => $ts > $now - $windowSeconds));
+
+        if (count($attempts) >= $maxAttempts) {
+            if ($setErrorMessage) {
+                $errorMessage = $this->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.');
+                Mage::getSingleton('core/session')->addError($errorMessage);
+            }
+            return true;
+        }
+
+        if ($recordRateLimitHit) {
+            $this->recordRateLimitHit($key, $windowSeconds);
         }
 
         return false;
     }
 
     /**
-     * Save the client rate limit hit to the cache
+     * Record a rate limit hit for the given key (or current IP if null).
      */
-    public function recordRateLimitHit(): void
+    public function recordRateLimitHit(?string $key = null, ?int $windowSeconds = null): void
     {
-        $active = Mage::getStoreConfigFlag('system/rate_limit/active');
-        if ($active && $remoteAddr = Mage::helper('core/http')->getRemoteAddr()) {
-            $cacheTag = 'rate_limit_' . $remoteAddr;
-            Mage::app()->saveCache(1, $cacheTag, ['brute_force'], Mage::getStoreConfig('system/rate_limit/timeframe'));
+        if ($key === null) {
+            if (!Mage::getStoreConfigFlag('system/rate_limit/active')) {
+                return;
+            }
+            $remoteAddr = Mage::helper('core/http')->getRemoteAddr();
+            if (!$remoteAddr) {
+                return;
+            }
+            $key = $remoteAddr;
         }
+
+        $windowSeconds ??= (int) Mage::getStoreConfig('system/rate_limit/timeframe');
+        $cacheKey = 'rate_limit_' . md5($key);
+        $cache = Mage::app()->getCache();
+        $now = time();
+
+        $data = $cache->load($cacheKey);
+        $attempts = $data ? (json_decode($data, true) ?? []) : [];
+        $attempts = array_values(array_filter($attempts, fn(int $ts) => $ts > $now - $windowSeconds));
+        $attempts[] = $now;
+
+        $cache->save(json_encode($attempts), $cacheKey, ['rate_limit'], $windowSeconds);
     }
 
     /**

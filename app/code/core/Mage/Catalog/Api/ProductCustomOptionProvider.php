@@ -1,0 +1,157 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_Catalog
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+declare(strict_types=1);
+
+namespace Mage\Catalog\Api;
+
+use ApiPlatform\Metadata\Operation;
+use Mage;
+use Mage_Catalog_Model_Product;
+use Mage_Catalog_Model_Product_Option;
+use Maho\ApiPlatform\Trait\ProductLoaderTrait;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
+final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
+{
+    use ProductLoaderTrait;
+
+    #[\Override]
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|ProductCustomOption|Response
+    {
+        $operationName = $operation->getName();
+
+        if ($operationName === 'download_option_file') {
+            return $this->downloadOptionFile($uriVariables);
+        }
+
+        $productId = (int) ($uriVariables['productId'] ?? 0);
+        $product = $this->loadProduct($productId);
+
+        // Single option for PUT/DELETE
+        if (isset($uriVariables['optionId'])) {
+            return $this->getOption($product, (int) $uriVariables['optionId']);
+        }
+
+        return $this->getAllOptions($product);
+    }
+
+    private function downloadOptionFile(array $uriVariables): Response
+    {
+        $optionId = (int) ($uriVariables['optionId'] ?? 0);
+        $key = (string) ($uriVariables['key'] ?? '');
+
+        $option = Mage::getModel('sales/quote_item_option')->load($optionId);
+        if (!$option->getId()) {
+            throw new NotFoundHttpException('File not found');
+        }
+
+        $value = Mage::helper('core/unserializeArray')->unserialize($option->getValue());
+        if (!isset($value['secret_key']) || !hash_equals($value['secret_key'], $key)) {
+            throw new HttpException(403, 'Invalid key');
+        }
+
+        $filePath = null;
+        foreach (['order_path', 'quote_path'] as $pathKey) {
+            if (!empty($value[$pathKey])) {
+                $fullPath = Mage::getBaseDir() . $value[$pathKey];
+                if (is_file($fullPath) && is_readable($fullPath)) {
+                    $filePath = $fullPath;
+                    break;
+                }
+            }
+        }
+
+        if (!$filePath) {
+            throw new NotFoundHttpException('File not found on disk');
+        }
+
+        $mimeType = $value['type'] ?? 'application/octet-stream';
+        $fileName = $value['title'] ?? basename($filePath);
+
+        return new Response(
+            file_get_contents($filePath),
+            Response::HTTP_OK,
+            [
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'attachment; filename="' . addslashes($fileName) . '"',
+                'Content-Length' => (string) filesize($filePath),
+                'Cache-Control' => 'private, max-age=3600',
+            ],
+        );
+    }
+
+    /**
+     * @return ProductCustomOption[]
+     */
+    public function getAllOptions(Mage_Catalog_Model_Product $product): array
+    {
+        $options = $product->getProductOptionsCollection();
+        $result = [];
+
+        foreach ($options as $option) {
+            $result[] = $this->mapOption($option);
+        }
+
+        return $result;
+    }
+
+    private function getOption(Mage_Catalog_Model_Product $product, int $optionId): ProductCustomOption
+    {
+        /** @var Mage_Catalog_Model_Product_Option $option */
+        $option = Mage::getModel('catalog/product_option')->load($optionId);
+
+        if (!$option->getId() || (int) $option->getProductId() !== (int) $product->getId()) {
+            throw new NotFoundHttpException('Option not found');
+        }
+
+        return $this->mapOption($option);
+    }
+
+    private function mapOption(Mage_Catalog_Model_Product_Option $option): ProductCustomOption
+    {
+        $dto = new ProductCustomOption();
+        $dto->id = (int) $option->getId();
+        $dto->title = (string) $option->getTitle();
+        $dto->type = (string) $option->getType();
+        $dto->required = (bool) $option->getIsRequire();
+        $dto->sortOrder = (int) $option->getSortOrder();
+
+        $type = $option->getType();
+        $selectTypes = ['drop_down', 'radio', 'checkbox', 'multiple'];
+
+        if (in_array($type, $selectTypes)) {
+            $values = [];
+            $optionValues = $option->getValuesCollection();
+            foreach ($optionValues as $value) {
+                $values[] = [
+                    'id' => (int) $value->getId(),
+                    'title' => (string) $value->getTitle(),
+                    'price' => (float) $value->getPrice(),
+                    'priceType' => (string) ($value->getPriceType() ?: 'fixed'),
+                    'sku' => $value->getSku(),
+                    'sortOrder' => (int) $value->getSortOrder(),
+                ];
+            }
+            $dto->values = $values;
+        } else {
+            $dto->price = $option->getPrice() !== null ? (float) $option->getPrice() : null;
+            $dto->priceType = (string) ($option->getPriceType() ?: 'fixed');
+            $dto->sku = $option->getSku();
+            $dto->maxCharacters = $option->getMaxCharacters() ? (int) $option->getMaxCharacters() : null;
+            $dto->fileExtensions = $option->getFileExtension() ?: null;
+        }
+
+        return $dto;
+    }
+}

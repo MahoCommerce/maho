@@ -36,6 +36,39 @@ class Maho_Captcha_Model_Observer
         $this->failedVerification($controller, $isAjax);
     }
 
+    public function verifyApi(\Maho\Event\Observer $observer): void
+    {
+        $helper = Mage::helper('captcha');
+        if (!$helper->isEnabled()) {
+            return;
+        }
+
+        $data = $observer->getEvent()->getData('data');
+        $token = $data['captchaToken'] ?? $data['maho_captcha'] ?? '';
+
+        /** @var \Maho\DataObject $result */
+        $result = $observer->getEvent()->getResult();
+
+        if (!$helper->verify((string) $token)) {
+            $result->setVerified(false);
+            $result->setError(Mage::helper('captcha')->__('Incorrect CAPTCHA.'));
+        }
+    }
+
+    public function getCaptchaConfig(\Maho\Event\Observer $observer): void
+    {
+        $helper = Mage::helper('captcha');
+        if (!$helper->isEnabled()) {
+            return;
+        }
+
+        /** @var \Maho\DataObject $config */
+        $config = $observer->getEvent()->getConfig();
+        $config->setEnabled(true);
+        $config->setProvider('altcha');
+        $config->setChallengeUrl($helper->getChallengeUrl());
+    }
+
     #[Maho\Config\Observer('admin_user_authenticate_before', area: 'adminhtml')]
     #[Maho\Config\Observer('controller_action_predispatch_adminhtml_index_forgotpassword', area: 'adminhtml')]
     public function verifyAdmin(\Maho\Event\Observer $observer): void
