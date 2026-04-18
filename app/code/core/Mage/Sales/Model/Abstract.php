@@ -45,29 +45,23 @@ abstract class Mage_Sales_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Get object created at date affected current active store timezone
      *
-     * @return DateTime
+     * @return DateTimeImmutable
      */
     public function getCreatedAtDate()
     {
-        return Mage::app()->getLocale()->dateMutable(
-            strtotime($this->getCreatedAt()),
-            null,
-            null,
-            true,
-        );
+        return Mage::app()->getLocale()->utcToStore(null, strtotime($this->getCreatedAt()));
     }
 
     /**
      * Get object created at date affected with object store timezone
      *
-     * @return DateTime
+     * @return DateTimeImmutable
      */
     public function getCreatedAtStoreDate()
     {
-        return Mage::app()->getLocale()->storeDate(
+        return Mage::app()->getLocale()->utcToStore(
             $this->getStore(),
-            strtotime($this->getCreatedAt()),
-            true,
+            $this->getCreatedAt(),
         );
     }
 }

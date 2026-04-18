@@ -372,14 +372,11 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
             }
 
             if ($format !== null) {
-                $this->setValue(
-                    Mage::app()->getLocale()->dateMutable(
-                        $this->getData('value'),
-                        $format,
-                        null,
-                        false,
-                    )->format($format),
-                );
+                $parsed = DateTime::createFromFormat($format, $this->getData('value'));
+                if ($parsed === false) {
+                    $parsed = new DateTime($this->getData('value'));
+                }
+                $this->setValue($parsed->format($format));
                 $this->setIsValueParsed(true);
             }
         }

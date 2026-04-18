@@ -311,7 +311,7 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
     {
         if (is_string($newResetPasswordLinkToken) && !empty($newResetPasswordLinkToken)) {
             $customer->setRpToken($newResetPasswordLinkToken);
-            $currentDate = Mage_Core_Model_Locale::now();
+            $currentDate = Mage::app()->getLocale()->nowUtc();
             $customer->setRpTokenCreatedAt($currentDate);
             $this->saveAttribute($customer, 'rp_token');
             $this->saveAttribute($customer, 'rp_token_created_at');

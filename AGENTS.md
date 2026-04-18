@@ -176,16 +176,50 @@ Mage::helper('core')->isValidDate($value);
 ```
 
 ### Date Handling (Native PHP DateTime)
-- **Database storage**: Always UTC in `'Y-m-d H:i:s'` format
-- **Display**: `storeDate()` converts UTC → HTML5 format
-- **Processing**: `utcDate()` converts HTML5 → UTC for database
+
+**Mental model:**
+- DB columns always store UTC as `'Y-m-d H:i:s'`. Never store store-local strings — they're ambiguous across stores.
+- Convert **on the way in** (`storeToUtc` user input → UTC for DB) and **on the way out** (`utcToStore` DB value → store TZ for display/computation).
+- Separate concerns by destination: `formatDateForDb()` is the single entry point for DB-bound strings (including `'now'` for current time). `nowUtc()` / `todayUtc()` are for non-DB UTC strings (logs, CSV exports, API payloads). The output happens to match, but the call-site intent is different — keep them separate.
+- Method names encode the timezone — `nowUtc()` returns UTC, `utcToStore()` returns store-local. You should be able to tell which TZ a value is in by reading the call site alone.
+
+**API:**
 
 ```php
-$html = Mage::app()->getLocale()->storeDate(null, $dbDate, false, 'html5');
-$utc = Mage::app()->getLocale()->utcDate(null, $inputDate, false, 'html5');
-Mage_Core_Model_Locale::now();    // 'Y-m-d H:i:s'
-Mage_Core_Model_Locale::today();  // 'Y-m-d'
+$locale = Mage::app()->getLocale();
+
+// DB-bound strings — use formatDateForDb() for anything headed to a DB column
+$locale->formatDateForDb('now');                               // 'Y-m-d H:i:s' (UTC) — current time for DB
+$locale->formatDateForDb('now', withTime: false);              // 'Y-m-d' (UTC) — current date for DB
+$locale->formatDateForDb($date);                               // normalize arbitrary input to 'Y-m-d H:i:s'
+$locale->formatDateForDb($date, withTime: false);              // normalize arbitrary input to 'Y-m-d'
+
+// Non-DB UTC strings — logs, CSV exports, API payloads, etc.
+$locale->nowUtc();                                             // 'Y-m-d H:i:s' (UTC)
+$locale->todayUtc();                                           // 'Y-m-d' (UTC)
+
+// "Now" in store timezone — for computation/display. Use utcToStore() with no args.
+$locale->utcToStore();                                         // DateTimeImmutable in store TZ
+$locale->utcToStore()->format('Y-m-d');                        // today in store TZ
+
+// Convert a known date between timezones — always returns DateTimeImmutable
+$dt = $locale->utcToStore($store, $utcInput);                  // DateTimeImmutable in store TZ
+$dt = $locale->storeToUtc($store, $storeInput);                // DateTimeImmutable in UTC
+
+// Caller formats the result explicitly — no magic strings
+$dt->format(Mage_Core_Model_Locale::DATETIME_FORMAT);          // 'Y-m-d H:i:s'
+$dt->format(Mage_Core_Model_Locale::DATE_FORMAT);              // 'Y-m-d'
+$dt->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT);    // 'Y-m-d\TH:i'
 ```
+
+**Common pitfalls:**
+- Don't use `nowUtc()` for DB inserts/updates — use `formatDateForDb('now')`. Same output, but the call site announces its DB-binding intent, and keeps `formatDateForDb` as the single choke point for DB-bound date formatting.
+- Don't pass `nowUtc()` to a store-local field — it's UTC, not store time. If you need store-local now, use `$locale->utcToStore()` and format from the DateTimeImmutable.
+- `utcToStore()` / `storeToUtc()` return `DateTimeImmutable` — mutators like `->setTime()` and `->modify()` return a new instance, so either chain directly (`utcToStore()->setTime(0,0,0)->format(...)`) or reassign (`$d = $d->modify('-1 day')`).
+- Don't rely on PHP's default timezone — Maho forces it to UTC at bootstrap, but pass DateTime objects with explicit TZ (or just strings/ints) rather than bare `new DateTime('...')` when precision matters.
+- For locale-aware display formatting (e.g. "April 16, 2026" in en_US, "16 avril 2026" in fr_FR), use `Mage::helper('core')->formatDate()`, not `DateTimeImmutable::format()`.
+
+**Why there's no `nowInStoreTimezone()` / `nowStore()`:** deliberate. A store-local *string* has no TZ tag, so storing one in the DB breaks the "DB is always UTC" invariant and produces different instants in multi-store setups. For computation or display you want a `DateTimeImmutable` anyway — `utcToStore()` with no args returns exactly that. If you catch yourself wanting a store-local now-as-string, step back: you probably want either `formatDateForDb('now')` (for the DB), `nowUtc()` (for logs/CSV/API), or `utcToStore()->format(...)` (for display).
 
 ### Filtering & Locale
 ```php

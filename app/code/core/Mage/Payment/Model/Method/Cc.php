@@ -193,7 +193,7 @@ class Mage_Payment_Model_Method_Cc extends Mage_Payment_Model_Method_Abstract
      */
     protected function _validateExpDate($expYear, $expMonth)
     {
-        $date = Mage::app()->getLocale()->dateImmutable();
+        $date = Mage::app()->getLocale()->utcToStore();
         if (!$expYear || !$expMonth || ((int) $date->format('Y') > $expYear)
             || ((int) $date->format('Y') == $expYear && (int) $date->format('n') > $expMonth)
         ) {

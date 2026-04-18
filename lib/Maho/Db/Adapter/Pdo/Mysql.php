@@ -2708,10 +2708,10 @@ class Mysql extends AbstractPdoAdapter
      * Format Date to internal database date format
      */
     #[\Override]
-    public function formatDate(int|string|\DateTime $date, bool $includeTime = true): \Maho\Db\Expr
+    public function formatDate(int|string|\DateTime $date, bool $withTime = true): \Maho\Db\Expr
     {
         if ($date instanceof \DateTime) {
-            $format = $includeTime ? \Mage_Core_Model_Locale::DATETIME_FORMAT : \Mage_Core_Model_Locale::DATE_FORMAT;
+            $format = $withTime ? \Mage_Core_Model_Locale::DATETIME_FORMAT : \Mage_Core_Model_Locale::DATE_FORMAT;
             $date = $date->format($format);
         } elseif (empty($date)) {
             return new \Maho\Db\Expr('NULL');
@@ -2719,7 +2719,7 @@ class Mysql extends AbstractPdoAdapter
             if (!is_numeric($date)) {
                 $date = strtotime($date);
             }
-            $format = $includeTime ? \Mage_Core_Model_Locale::DATETIME_FORMAT : \Mage_Core_Model_Locale::DATE_FORMAT;
+            $format = $withTime ? \Mage_Core_Model_Locale::DATETIME_FORMAT : \Mage_Core_Model_Locale::DATE_FORMAT;
             $date = date($format, $date);
         }
 

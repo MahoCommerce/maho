@@ -91,7 +91,7 @@ class Maho_FeedManager_Model_Cron
 
         foreach ($hungLogs as $log) {
             $log->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED)
-                ->setCompletedAt(Mage_Core_Model_Locale::now())
+                ->setCompletedAt(Mage::app()->getLocale()->nowUtc())
                 ->addError('Feed generation timed out (exceeded ' . self::HUNG_FEED_TIMEOUT_MINUTES . ' minutes)')
                 ->save();
 
@@ -132,7 +132,7 @@ class Maho_FeedManager_Model_Cron
 
         if ($startedAt < $hungThreshold) {
             $runningLog->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED)
-                ->setCompletedAt(Mage_Core_Model_Locale::now())
+                ->setCompletedAt(Mage::app()->getLocale()->nowUtc())
                 ->addError('Manually reset - feed was stuck')
                 ->save();
             return true;
@@ -236,7 +236,7 @@ class Maho_FeedManager_Model_Cron
 
             $success = $uploader->upload($filePath, $remoteName);
 
-            $destination->setLastUploadAt(Mage_Core_Model_Locale::now())
+            $destination->setLastUploadAt(Mage::app()->getLocale()->nowUtc())
                 ->setLastUploadStatus($success ? 'success' : 'failed')
                 ->save();
 

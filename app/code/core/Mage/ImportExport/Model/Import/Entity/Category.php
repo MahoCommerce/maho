@@ -250,7 +250,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                         if (isset($this->_categoryIds[$categoryIdInt])) {
                             $entityRowsUp[] = [
                                 'entity_id' => $categoryIdInt,
-                                'updated_at' => Mage_Core_Model_Locale::now(),
+                                'updated_at' => Mage::app()->getLocale()->nowUtc(),
                             ];
 
                             // Update parent if provided
@@ -269,7 +269,7 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
 
                                 $entityRowsUp[] = [
                                     'entity_id' => $categoryIdInt,
-                                    'updated_at' => Mage_Core_Model_Locale::now(),
+                                    'updated_at' => Mage::app()->getLocale()->nowUtc(),
                                 ];
 
                                 // Update parent if provided
@@ -292,8 +292,8 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                                     'position' => $this->_getNextPosition($parentId),
                                     'level' => $this->_getCategoryLevel($parentId) + 1,
                                     'children_count' => 0,
-                                    'created_at' => Mage_Core_Model_Locale::now(),
-                                    'updated_at' => Mage_Core_Model_Locale::now(),
+                                    'created_at' => Mage::app()->getLocale()->nowUtc(),
+                                    'updated_at' => Mage::app()->getLocale()->nowUtc(),
                                 ];
 
                                 // Store row data to collect attributes after insertion
@@ -319,8 +319,8 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                             'position' => $this->_getNextPosition($parentId),
                             'level' => $this->_getCategoryLevel($parentId) + 1,
                             'children_count' => 0,
-                            'created_at' => Mage_Core_Model_Locale::now(),
-                            'updated_at' => Mage_Core_Model_Locale::now(),
+                            'created_at' => Mage::app()->getLocale()->nowUtc(),
+                            'updated_at' => Mage::app()->getLocale()->nowUtc(),
                         ];
 
                         // Store row data to collect attributes after insertion

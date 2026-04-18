@@ -893,7 +893,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                         'entity_id'        => $productId,
                         'has_options'      => 0,
                         'required_options' => 0,
-                        'updated_at'       => Mage_Core_Model_Locale::now(),
+                        'updated_at'       => Mage::app()->getLocale()->nowUtc(),
                     ];
                 }
 
@@ -1369,7 +1369,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
 
                 if (self::SCOPE_DEFAULT == $rowScope) {
                     $rowSku = $rowData[self::COL_SKU];
-                    $now = Mage_Core_Model_Locale::now();
+                    $now = Mage::app()->getLocale()->nowUtc();
 
                     // 1. Entity phase
                     if (isset($this->_oldSku[$rowSku])) { // existing row
@@ -1895,9 +1895,9 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                 unset($row);
                 if ($helper->isQty($this->_newSku[$rowData[self::COL_SKU]]['type_id'])) {
                     if ($stockItem->verifyNotification()) {
-                        $stockItem->setLowStockDate(Mage::app()->getLocale()
-                            ->date(null, null, null, false)
-                            ->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+                        $stockItem->setLowStockDate(
+                            (new DateTime())->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                        );
                     }
                     $stockItem->setStockStatusChangedAutomatically((int) !$stockItem->verifyStock());
                 } else {

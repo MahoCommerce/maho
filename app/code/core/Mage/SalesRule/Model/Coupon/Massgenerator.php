@@ -132,7 +132,7 @@ class Mage_SalesRule_Model_Coupon_Massgenerator extends Mage_Core_Model_Abstract
             $this->setLength($length);
         }
 
-        $now = $this->getResource()->formatDate(
+        $now = Mage::app()->getLocale()->formatDateForDb(
             Mage::getSingleton('core/date')->gmtTimestamp(),
         );
 

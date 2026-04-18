@@ -75,9 +75,9 @@ class Mage_Core_Model_Resource_Email_Template extends Mage_Core_Model_Resource_D
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if ($object->isObjectNew()) {
-            $object->setCreatedAt($this->formatDate(true));
+            $object->setCreatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         }
-        $object->setModifiedAt($this->formatDate(true));
+        $object->setModifiedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         $object->setTemplateType((int) $object->getTemplateType());
 
         return parent::_beforeSave($object);

@@ -184,7 +184,7 @@ class Mage_Api_Model_Session extends Mage_Core_Model_Session_Abstract
         if (!$user->getId()) {
             return true;
         }
-        $timeout = strtotime(Mage_Core_Model_Locale::now()) - strtotime($user->getLogdate());
+        $timeout = strtotime(Mage::app()->getLocale()->nowUtc()) - strtotime($user->getLogdate());
         return $timeout > Mage::getStoreConfig('api/config/session_timeout');
     }
 

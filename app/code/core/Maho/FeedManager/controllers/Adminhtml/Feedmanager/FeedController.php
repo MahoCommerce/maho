@@ -728,7 +728,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 
         foreach ($collection as $log) {
             $log->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED)
-                ->setCompletedAt(Mage_Core_Model_Locale::now())
+                ->setCompletedAt(Mage::app()->getLocale()->nowUtc())
                 ->addError('Cancelled - new generation started')
                 ->save();
         }
@@ -1283,7 +1283,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $success = $uploader->upload($filePath, $remoteName);
 
             // Update destination last upload info
-            $destination->setLastUploadAt(Mage_Core_Model_Locale::now())
+            $destination->setLastUploadAt(Mage::app()->getLocale()->nowUtc())
                 ->setLastUploadStatus($success ? 'success' : 'failed')
                 ->save();
 
