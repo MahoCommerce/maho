@@ -48,8 +48,9 @@ class Mage_Core_Controller_Varien_Router_Default extends Mage_Core_Controller_Va
     /**
      * Try to match using the opcached CompiledUrlMatcher, falling back in order:
      *  1. Forward dispatch when another router has already set module/controller/action
-     *  2. Compiled matcher (dumped at composer dump-autoload)
-     *  3. Legacy path parsing (URL rewrites stored as frontName/controller/action/key/value)
+     *  2. Legacy XML routers (BC shim for frontend/routers config from unmigrated modules)
+     *  3. Compiled matcher (dumped at composer dump-autoload)
+     *  4. Legacy path parsing (URL rewrites stored as frontName/controller/action/key/value)
      */
     protected function _matchSymfony(Mage_Core_Controller_Request_Http $request): bool
     {
@@ -60,6 +61,10 @@ class Mage_Core_Controller_Varien_Router_Default extends Mage_Core_Controller_Va
         try {
             if ($request->getModuleName() && $request->getControllerName() && $request->getActionName()) {
                 return $dispatcher->dispatchForward($request, Mage::app()->getResponse());
+            }
+
+            if ($this->_matchLegacyXmlRoute($request, $dispatcher)) {
+                return true;
             }
 
             $context = new \Symfony\Component\Routing\RequestContext();
@@ -79,6 +84,34 @@ class Mage_Core_Controller_Varien_Router_Default extends Mage_Core_Controller_Va
         } finally {
             \Maho\Profiler::stop('mage::dispatch::symfony_match');
         }
+    }
+
+    /**
+     * BC shim: modules declaring `<frontend><routers><code><args><frontName>` in
+     * config.xml (M1/OpenMage standard-router pattern) match *before* the Symfony
+     * matcher, preserving their original "first declared wins" precedence even when
+     * their frontName collides with a Maho core route.
+     */
+    protected function _matchLegacyXmlRoute(
+        Mage_Core_Controller_Request_Http $request,
+        \Maho\Routing\ControllerDispatcher $dispatcher,
+    ): bool {
+        $legacyMap = \Maho\Routing\RouteCollectionBuilder::getLegacyFrontNames();
+        if (!$legacyMap) {
+            return false;
+        }
+
+        $pathInfo = trim((string) $request->getPathInfo(), '/');
+        if ($pathInfo === '') {
+            return false;
+        }
+
+        $frontName = strtolower(explode('/', $pathInfo, 2)[0]);
+        if (!isset($legacyMap[$frontName])) {
+            return false;
+        }
+
+        return $dispatcher->dispatchLegacyPath($request, Mage::app()->getResponse());
     }
 
     protected function _getNoRouteConfig(): string

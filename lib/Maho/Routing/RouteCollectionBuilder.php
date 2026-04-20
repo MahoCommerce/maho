@@ -44,6 +44,9 @@ class RouteCollectionBuilder
     /** @var array<string, mixed>|null */
     private static ?array $compiledGenerator = null;
 
+    /** @var array<string, string>|null frontName (lowercased) → module class prefix */
+    private static ?array $legacyFrontNames = null;
+
     /**
      * Resolve route metadata for URL generation from frontName/controller/action.
      *
@@ -74,13 +77,65 @@ class RouteCollectionBuilder
     /**
      * Resolve a controller class from frontName + controllerName.
      *
+     * Legacy `<frontend><routers>` XML declarations (BC shim) take precedence
+     * over the compiled attribute lookup, so a legacy module shadowing a core
+     * frontName (M1 semantics) still wins. If the legacy module can't satisfy
+     * the request (no such controller class), the dispatcher falls through to
+     * the Symfony matcher via the normal miss path.
+     *
      * @return string|null The module class prefix (e.g. 'Mage_Customer') or null if not found
      */
     public static function resolveControllerModule(string $frontName, string $controllerName): ?string
     {
+        $legacyModule = self::getLegacyFrontNames()[strtolower($frontName)] ?? null;
+        if ($legacyModule !== null) {
+            return $legacyModule;
+        }
+
         $compiled = \Maho::getCompiledAttributes();
         $key = self::normalizeFrontName($frontName) . '/' . strtolower($controllerName);
         return $compiled['controllerLookup'][$key] ?? null;
+    }
+
+    /**
+     * Legacy M1/OpenMage BC: discover frontName → module mappings declared in
+     * `<frontend><routers><code><args><frontName>` config.xml blocks, for
+     * modules that haven't been migrated to `#[Maho\Config\Route]` attributes.
+     *
+     * @return array<string, string> lowercase frontName → module class prefix
+     */
+    public static function getLegacyFrontNames(): array
+    {
+        if (self::$legacyFrontNames !== null) {
+            return self::$legacyFrontNames;
+        }
+
+        $map = [];
+        $routersNode = Mage::getConfig()->getNode('frontend/routers');
+        if ($routersNode) {
+            foreach ($routersNode->children() as $router) {
+                $frontName = trim((string) ($router->args->frontName ?? ''));
+                $module = trim((string) ($router->args->module ?? ''));
+                if ($frontName === '' || $module === '') {
+                    continue;
+                }
+                $key = strtolower($frontName);
+                if (isset($map[$key])) {
+                    continue;
+                }
+                $map[$key] = $module;
+                Mage::log(
+                    sprintf(
+                        'Legacy XML routing: frontName "%s" → %s. Add #[Maho\\Config\\Route] attributes to migrate.',
+                        $frontName,
+                        $module,
+                    ),
+                    Mage::LOG_NOTICE,
+                );
+            }
+        }
+
+        return self::$legacyFrontNames = $map;
     }
 
     /**
