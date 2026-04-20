@@ -104,6 +104,28 @@ public function runJob(Mage_Cron_Model_Schedule $schedule) {}
 - Prefer global area (default, omit `area:`) unless the observer must be restricted to a specific area
 - Do **not** define observers or cron jobs in `config.xml`
 
+### Routing (#[Route] attributes)
+Routes are defined via the `#[Maho\Config\Route]` attribute (`lib/Maho/Config/Route.php`) on controller action methods — **not** in `<frontend><routers>` XML. The attribute is repeatable: stack multiple attributes on the same method for multiple paths or method lists. Run `composer dump-autoload` after any change; routes compile to `vendor/composer/maho_url_matcher.php`, `maho_url_generator.php`, and `maho_attributes.php`.
+
+Parameters:
+- `path` (required): URL pattern, e.g. `/catalog/product/view/{id}`
+- `name`: route name for URL generation — auto-derived from `class::method` if omitted
+- `methods`: HTTP method allow-list (e.g. `['GET', 'POST']`); empty = any
+- `defaults`: default parameter values
+- `requirements`: regex constraints per param (e.g. `['id' => '\d+']`)
+- `area`: `frontend` | `adminhtml` | `install` — auto-detected from the controller base class, override only when needed
+
+Area auto-detection walks the class hierarchy: descendants of `Mage_Adminhtml_Controller_Action` or `Maho\Controller\AdminAction` → `adminhtml`; `Mage_Install_Controller_Action` or `Maho\Controller\InstallAction` → `install`; everything else → `frontend`.
+
+Admin routes: **do not** prefix `path` with the admin frontName. The compiler auto-prepends `{_adminFrontName}` so the runtime value (including `use_custom_admin_path`) resolves per request. Write `#[Route('/catalog/product/edit/{id}')]` on an admin controller, not `/admin/catalog/...`.
+
+```php
+#[Maho\Config\Route('/catalog/product/view/{id}', name: 'catalog.product.view', methods: ['GET'], requirements: ['id' => '\d+'])]
+public function viewAction() { ... }
+```
+
+- Back-compat: modules still declaring `<frontend><routers>` in `config.xml` keep working via a legacy-XML match path that runs **before** the Symfony matcher, preserving M1's "first declared wins" precedence. A single `LOG_NOTICE` is emitted once per process listing legacy frontNames, encouraging migration.
+
 ## Development Guidelines
 
 ### Critical Rules — Removed Components

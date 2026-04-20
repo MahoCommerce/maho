@@ -31,10 +31,10 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
     public const XML_STORE_ROUTERS_PATH = 'web/routers';
 
     /**
-     * Maximum number of router match iterations before bailing out.
+     * Maximum number of forward iterations before bailing out.
      * Guards against infinite _forward() loops between controllers.
      */
-    public const MAX_MATCH_ITERATIONS = 100;
+    public const MAX_FORWARD_ITERATIONS = 100;
 
     /**
      * @param array|string $key
@@ -165,7 +165,7 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
         Mage::dispatchEvent('controller_front_dispatch_before', ['front' => $this]);
 
         if (!$response->isRedirect()) {
-            $this->_matchRoutes($request);
+            $this->_runDispatchLoop($request);
         }
 
         // This event gives possibility to launch something before sending output (allow cookie setting)
@@ -178,13 +178,14 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
     }
 
     /**
-     * Execute the router match loop.
+     * Execute the dispatch loop, re-dispatching after each _forward() call
+     * until the request is marked dispatched (or the iteration cap is hit).
      */
-    protected function _matchRoutes(Mage_Core_Controller_Request_Http $request): void
+    protected function _runDispatchLoop(Mage_Core_Controller_Request_Http $request): void
     {
         \Maho\Profiler::start('mage::dispatch::routers_match');
         $i = 0;
-        while (!$request->isDispatched() && $i++ < self::MAX_MATCH_ITERATIONS) {
+        while (!$request->isDispatched() && $i++ < self::MAX_FORWARD_ITERATIONS) {
             foreach ($this->_routers as $router) {
                 /** @var Mage_Core_Controller_Varien_Router_Abstract $router */
                 if ($router->match($request)) {
@@ -193,8 +194,8 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
             }
         }
         \Maho\Profiler::stop('mage::dispatch::routers_match');
-        if ($i > self::MAX_MATCH_ITERATIONS) {
-            Mage::throwException(sprintf('Front controller reached %d router match iterations', self::MAX_MATCH_ITERATIONS));
+        if ($i > self::MAX_FORWARD_ITERATIONS) {
+            Mage::throwException(sprintf('Front controller reached %d forward iterations — infinite _forward() loop?', self::MAX_FORWARD_ITERATIONS));
         }
     }
 

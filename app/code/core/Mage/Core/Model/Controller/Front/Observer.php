@@ -280,6 +280,10 @@ class Mage_Core_Model_Controller_Front_Observer
 
     private function rewriteConfig(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void
     {
+        if (!Mage::isInstalled() || Mage::app()->getStore()->isAdmin()) {
+            return;
+        }
+
         $config = Mage::getConfig()->getNode('global/rewrite');
         if (!$config) {
             return;

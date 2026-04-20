@@ -111,6 +111,7 @@ class RouteCollectionBuilder
         }
 
         $map = [];
+        $pairs = [];
         $routersNode = Mage::getConfig()->getNode('frontend/routers');
         if ($routersNode) {
             foreach ($routersNode->children() as $router) {
@@ -124,15 +125,19 @@ class RouteCollectionBuilder
                     continue;
                 }
                 $map[$key] = $module;
-                Mage::log(
-                    sprintf(
-                        'Legacy XML routing: frontName "%s" → %s. Add #[Maho\\Config\\Route] attributes to migrate.',
-                        $frontName,
-                        $module,
-                    ),
-                    Mage::LOG_NOTICE,
-                );
+                $pairs[] = $frontName . '→' . $module;
             }
+        }
+
+        if ($map !== []) {
+            Mage::log(
+                sprintf(
+                    'Legacy XML routing active for %d frontName(s): %s. Add #[Maho\\Config\\Route] attributes to migrate.',
+                    count($map),
+                    implode(', ', $pairs),
+                ),
+                Mage::LOG_NOTICE,
+            );
         }
 
         return self::$legacyFrontNames = $map;
@@ -159,10 +164,11 @@ class RouteCollectionBuilder
      */
     public static function getFrontNameByRoute(string $routeName): ?string
     {
-        if ($routeName === 'adminhtml') {
-            return self::getAdminFrontName();
-        }
-        return null;
+        return match ($routeName) {
+            'adminhtml' => self::getAdminFrontName(),
+            'install' => 'install',
+            default => null,
+        };
     }
 
     /**
@@ -193,6 +199,21 @@ class RouteCollectionBuilder
         return self::$adminFrontName = (string) Mage::getConfig()->getNode(
             Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_ROUTER_FRONTNAME,
         );
+    }
+
+    /**
+     * Reset all process-static caches.
+     *
+     * Needed for long-running workers (RoadRunner/FrankenPHP/swoole) where a
+     * single PHP process serves many requests, and for test isolation where
+     * otherwise these caches can serve stale data across requests or tests.
+     */
+    public static function resetCache(): void
+    {
+        self::$adminFrontName = null;
+        self::$legacyFrontNames = null;
+        self::$compiledMatcher = null;
+        self::$compiledGenerator = null;
     }
 
     /**

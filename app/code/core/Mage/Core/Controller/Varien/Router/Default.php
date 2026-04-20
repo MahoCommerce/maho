@@ -79,8 +79,15 @@ class Mage_Core_Controller_Varien_Router_Default extends Mage_Core_Controller_Va
             return $dispatcher->dispatch($params, $request, Mage::app()->getResponse());
         } catch (\Symfony\Component\Routing\Exception\ResourceNotFoundException) {
             return $dispatcher->dispatchLegacyPath($request, Mage::app()->getResponse());
-        } catch (\Symfony\Component\Routing\Exception\MethodNotAllowedException) {
-            return false;
+        } catch (\Symfony\Component\Routing\Exception\MethodNotAllowedException $e) {
+            $response = Mage::app()->getResponse();
+            $response->setHttpResponseCode(405);
+            $response->setHeader('Allow', implode(', ', $e->getAllowedMethods()));
+            if ($response->getBody() === '') {
+                $response->setBody('Method Not Allowed');
+            }
+            $request->setDispatched(true);
+            return true;
         } finally {
             \Maho\Profiler::stop('mage::dispatch::symfony_match');
         }
