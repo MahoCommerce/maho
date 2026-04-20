@@ -153,6 +153,34 @@ describe('URL rewrite DB integration', function () {
         expect($request->getPathInfo())->toBe('/should-not-rewrite.html');
     });
 
+    it('preserves query string params across the rewrite', function () {
+        // After a DB rewrite fires, the target_path becomes the new pathInfo
+        // but the original query string must remain accessible via getParam().
+        // Without this, code like getParam('utm_source') on a rewritten URL
+        // would silently drop tracking data.
+        $write = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $table = Mage::getSingleton('core/resource')->getTableName('core/url_rewrite');
+        $write->insert($table, [
+            'store_id'     => $this->storeId,
+            'id_path'      => 'test_rewrite_qs_' . uniqid(),
+            'request_path' => 'promo-page.html',
+            'target_path'  => 'catalog/product/view/id/999',
+            'is_system'    => 0,
+        ]);
+        $this->insertedIds[] = (int) $write->lastInsertId();
+
+        $symfonyRequest = SymfonyRequest::create('/promo-page.html?utm_source=newsletter&ref=42');
+        $request = new Mage_Core_Controller_Request_Http($symfonyRequest);
+        $request->setPathInfo('/promo-page.html');
+        $response = new Mage_Core_Controller_Response_Http();
+
+        callRewriteDb($request, $response);
+
+        expect($request->getPathInfo())->toBe('catalog/product/view/id/999');
+        expect($request->getParam('utm_source'))->toBe('newsletter');
+        expect($request->getParam('ref'))->toBe('42');
+    });
+
     it('loads the rewrite via loadByRequestPath exactly as the observer does', function () {
         // This asserts the Mage_Core_Model_Url_Rewrite lookup primitive used
         // by the observer is still functional post-migration.

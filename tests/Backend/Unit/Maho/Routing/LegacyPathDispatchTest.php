@@ -98,4 +98,39 @@ describe('ControllerDispatcher::dispatchLegacyPath()', function () {
         expect($request->getParam('id'))->toBe('14');
         expect($request->getParam('orphan'))->toBe('');
     });
+
+    it('is case-insensitive on frontName and controllerName', function () {
+        // resolveControllerModule() lowercases both lookup keys, so the legacy
+        // path must continue to work even if an old rewrite used mixed case.
+        $dispatcher = new ControllerDispatcher();
+        $request = legacyRequest('/CATALOG/Index/nonexistentAction');
+
+        $dispatcher->dispatchLegacyPath($request, new Mage_Core_Controller_Response_Http());
+
+        // The request stores the segments as-written; the module resolves
+        // because the lookup is case-insensitive.
+        expect($request->getModuleName())->toBe('CATALOG');
+        expect($request->getControllerName())->toBe('Index');
+    });
+
+    it('tolerates leading and trailing slashes', function () {
+        $dispatcher = new ControllerDispatcher();
+        $request = legacyRequest('/catalog/index/nonexistentAction/');
+
+        $dispatcher->dispatchLegacyPath($request, new Mage_Core_Controller_Response_Http());
+
+        expect($request->getActionName())->toBe('nonexistentAction');
+    });
+
+    it('bails out when a path segment is empty (double slash)', function () {
+        // '/catalog//nonexistentAction' explodes to ['catalog', '', 'nonexistentAction'].
+        // The empty controllerName cannot resolve to a class, so the dispatcher
+        // must return false rather than guessing or falling through to index.
+        $dispatcher = new ControllerDispatcher();
+        $request = legacyRequest('/catalog//nonexistentAction');
+
+        $result = $dispatcher->dispatchLegacyPath($request, new Mage_Core_Controller_Response_Http());
+
+        expect($result)->toBeFalse();
+    });
 });

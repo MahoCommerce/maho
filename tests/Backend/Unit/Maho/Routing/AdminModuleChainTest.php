@@ -97,4 +97,39 @@ describe('ControllerDispatcher::buildAdminModuleChain()', function () {
         expect(callBuildAdminModuleChain(new ControllerDispatcher()))
             ->toBe(['Mage_Adminhtml', 'Valid_Module']);
     });
+
+    it('inserts later before-siblings between earlier ones and the target', function () {
+        // Both want to go before Mage_Adminhtml. The one registered first lands
+        // at position 0; the second lands at Mage_Adminhtml's new position,
+        // which pushes it between the first module and Mage_Adminhtml.
+        registerAdminModule('first', 'A_First', before: 'Mage_Adminhtml');
+        registerAdminModule('second', 'B_Second', before: 'Mage_Adminhtml');
+
+        expect(callBuildAdminModuleChain(new ControllerDispatcher()))
+            ->toBe(['A_First', 'B_Second', 'Mage_Adminhtml']);
+    });
+
+    it('prefers "before" when a single node has both before and after attributes', function () {
+        // Defensive: config XML should not combine both, but if it does the
+        // implementation must pick one deterministically instead of doubling up.
+        registerAdminModule('both', 'Both_Module', before: 'Mage_Adminhtml', after: 'Mage_Adminhtml');
+
+        $chain = callBuildAdminModuleChain(new ControllerDispatcher());
+
+        expect($chain)->toBe(['Both_Module', 'Mage_Adminhtml']);
+        expect(array_count_values($chain)['Both_Module'])->toBe(1);
+    });
+
+    it('does not loop infinitely on circular before references', function () {
+        // A says before=B, B says before=A. Neither target is in the list yet
+        // when processed, so each falls back to prepend. The point of the test
+        // is to prove the builder terminates with a deterministic output.
+        registerAdminModule('circ_a', 'Circ_A', before: 'Circ_B');
+        registerAdminModule('circ_b', 'Circ_B', before: 'Circ_A');
+
+        $chain = callBuildAdminModuleChain(new ControllerDispatcher());
+
+        expect($chain)->toContain('Mage_Adminhtml', 'Circ_A', 'Circ_B');
+        expect(count($chain))->toBe(3);
+    });
 });
