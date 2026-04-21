@@ -104,7 +104,7 @@ describe('Front observer HTTPS enforcement — skip conditions', function () {
         Mage::app()->setCurrentStore(Mage::app()->getDefaultStoreView());
     });
 
-    afterEach(fn () => httpsResetConfig());
+    afterEach(fn() => httpsResetConfig());
 
     it('does not redirect on a POST submission even when HTTPS is required', function () {
         // The skip check is `$request->getPost()` — body data, not method —
@@ -182,7 +182,7 @@ describe('Front observer HTTPS enforcement — admin branch', function () {
 });
 
 describe('Front observer HTTPS enforcement — frontend branch', function () {
-    afterEach(fn () => httpsResetConfig());
+    afterEach(fn() => httpsResetConfig());
 
     it('does not redirect when SECURE_IN_FRONTEND is off', function () {
         httpsConfig('http://localhost/', 'https://localhost/', '0', '0');

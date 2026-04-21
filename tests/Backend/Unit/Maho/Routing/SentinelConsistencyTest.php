@@ -41,7 +41,7 @@ describe('Admin/install sentinels stay aligned between compiler and runtime', fu
         $prefix = RouteCollectionBuilder::ADMIN_SENTINEL . '/';
         $adminEntries = array_filter(
             array_keys($compiled['controllerLookup']),
-            static fn (string $key): bool => str_starts_with($key, $prefix),
+            static fn(string $key): bool => str_starts_with($key, $prefix),
         );
 
         expect($adminEntries)->not->toBeEmpty();
@@ -52,7 +52,7 @@ describe('Admin/install sentinels stay aligned between compiler and runtime', fu
         $prefix = RouteCollectionBuilder::INSTALL_SENTINEL . '/';
         $installEntries = array_filter(
             array_keys($compiled['controllerLookup']),
-            static fn (string $key): bool => str_starts_with($key, $prefix),
+            static fn(string $key): bool => str_starts_with($key, $prefix),
         );
 
         expect($installEntries)->not->toBeEmpty();
