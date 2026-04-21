@@ -745,7 +745,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
                 !$this->_getData('is_in_stock')
                 && Mage::getStoreConfigFlag(self::XML_PATH_SYNC_AVAIL_WITH_QTY)
             ) {
-                $this->setIsInStock(true);
+                $this->setIsInStock(1);
             }
 
             // if qty is below notify qty, update the low stock date to today date otherwise set null
