@@ -46,6 +46,7 @@
 "Some of the products cannot be ordered in the requested quantity.","Some of the products cannot be ordered in the requested quantity."
 "Stock Options","Stock Options"
 "Stock Status","Stock Status"
+"Sync Stock Availability with Qty","Sync Stock Availability with Qty"
 "The maximum quantity allowed for purchase is %s.","The maximum quantity allowed for purchase is %s."
 "The minimum quantity allowed for purchase is %s.","The minimum quantity allowed for purchase is %s."
 "The requested quantity for ""%s"" is not available.","The requested quantity for ""%s"" is not available."
@@ -61,3 +62,4 @@
 "Update","Update"
 "Update product stock data","Update product stock data"
 "Update the Product","Update the Product"
+"When enabled, products automatically return to In Stock as soon as Qty rises above the threshold.","When enabled, products automatically return to In Stock as soon as Qty rises above the threshold."

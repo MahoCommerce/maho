@@ -130,6 +130,7 @@
             <options>
                 <can_subtract>1</can_subtract>
                 <can_back_in_stock>1</can_back_in_stock>
+                <sync_stock_availability_with_qty>1</sync_stock_availability_with_qty>
                 <show_out_of_stock>0</show_out_of_stock>
                 <stock_threshold_qty>0</stock_threshold_qty>
                 <display_product_stock_status>1</display_product_stock_status>

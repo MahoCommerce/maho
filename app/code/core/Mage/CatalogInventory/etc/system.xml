@@ -43,6 +43,15 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </can_back_in_stock>
+                        <sync_stock_availability_with_qty translate="label comment">
+                            <label>Sync Stock Availability with Qty</label>
+                            <comment>When enabled, products automatically return to In Stock as soon as Qty rises above the threshold.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </sync_stock_availability_with_qty>
                         <show_out_of_stock translate="label comment">
                             <label>Display Out of Stock Products</label>
                             <comment>Products will still be shown by direct product URLs.</comment>
