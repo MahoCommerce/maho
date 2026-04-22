@@ -2415,7 +2415,13 @@ class Mysql extends AbstractPdoAdapter
                 $cDefault = new \Maho\Db\Expr('CURRENT_TIMESTAMP');
             } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_UPDATE) {
                 $cDefault = new \Maho\Db\Expr('0 ON UPDATE CURRENT_TIMESTAMP');
-            } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE) {
+            } elseif ($cDefault == 'TIMESTAMP_INIT_UPDATE') {
+                // Compared by value rather than the constant so PHPStan doesn't flag the
+                // adapter itself as using the deprecated symbol.
+                @trigger_error(
+                    'TIMESTAMP_INIT_UPDATE is deprecated because it is MySQL-only; use TIMESTAMP_INIT plus an explicit _beforeSave() that sets updated_at for cross-engine parity.',
+                    E_USER_DEPRECATED,
+                );
                 $cDefault = new \Maho\Db\Expr('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
             } elseif ($cNullable && !$cDefault) {
                 $cDefault = new \Maho\Db\Expr('NULL');

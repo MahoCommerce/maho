@@ -330,6 +330,12 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
             }
         }
 
+        $now = Mage::app()->getLocale()->formatDateForDb('now');
+        if ($this->isObjectNew() && !$this->getCreatedAt()) {
+            $this->setCreatedAt($now);
+        }
+        $this->setUpdatedAt($now);
+
         return $this;
     }
 

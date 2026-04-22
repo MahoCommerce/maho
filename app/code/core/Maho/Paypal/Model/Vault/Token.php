@@ -18,6 +18,18 @@ class Maho_Paypal_Model_Vault_Token extends Mage_Core_Model_Abstract
         $this->_init('maho_paypal/vault_token');
     }
 
+    #[\Override]
+    protected function _beforeSave()
+    {
+        parent::_beforeSave();
+        $now = Mage::app()->getLocale()->formatDateForDb('now');
+        if (!$this->getId()) {
+            $this->setCreatedAt($now);
+        }
+        $this->setUpdatedAt($now);
+        return $this;
+    }
+
     public function getDisplayLabel(): string
     {
         if ($this->getLabel()) {

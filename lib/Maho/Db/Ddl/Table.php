@@ -53,7 +53,12 @@ class Table
     public const MAX_VARBINARY_SIZE    = 2147483648;
 
     /**
-     * Default values for timestampses - fill with current timestamp on inserting record, on changing and both cases
+     * Default values for timestamp columns: fill with current timestamp on insert, on update, or both.
+     *
+     * @deprecated TIMESTAMP_INIT_UPDATE is MySQL-only. PgSQL and SQLite silently downgrade it to
+     * plain CURRENT_TIMESTAMP (no on-update auto-bump). Use TIMESTAMP_INIT plus an explicit
+     * _beforeSave() that calls setUpdatedAt(Mage::app()->getLocale()->formatDateForDb('now'))
+     * for cross-engine parity.
      */
     public const TIMESTAMP_INIT_UPDATE = 'TIMESTAMP_INIT_UPDATE';
     public const TIMESTAMP_INIT        = 'TIMESTAMP_INIT';

@@ -209,7 +209,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     #[\Override]
     public function save(\Maho\DataObject $object)
     {
-        $now = Mage::app()->getLocale()->nowUtc();
+        $now = Mage::app()->getLocale()->formatDateForDb('now');
 
         if (!$object->getId()) {
             $object->setCreatedAt($now);
