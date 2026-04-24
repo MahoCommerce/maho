@@ -101,12 +101,12 @@ $table = $installer->getConnection()
         'default'   => '1',
     ], 'Template Actual')
     ->addColumn('added_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable' => true,
+        'default'  => null,
     ], 'Added At')
     ->addColumn('modified_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable' => true,
+        'default'  => null,
     ], 'Modified At')
     ->addIndex(
         $installer->getIdxName('newsletter/template', ['template_actual']),

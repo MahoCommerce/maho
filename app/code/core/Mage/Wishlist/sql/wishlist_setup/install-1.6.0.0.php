@@ -38,8 +38,8 @@ $table = $installer->getConnection()
     ->addColumn('sharing_code', Maho\Db\Ddl\Table::TYPE_TEXT, 32, [
     ], 'Sharing encrypted code')
     ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable' => true,
+        'default'  => null,
     ], 'Last updated date')
     ->addIndex($installer->getIdxName('wishlist/wishlist', 'shared'), 'shared')
     ->addIndex(
@@ -84,8 +84,8 @@ $table = $installer->getConnection()
         'nullable'  => true,
     ], 'Store ID')
     ->addColumn('added_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable' => true,
+        'default'  => null,
     ], 'Add date and time')
     ->addColumn('description', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Short description of wish list item')

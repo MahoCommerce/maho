@@ -37,8 +37,8 @@ $table = $installer->getConnection()
         'default'  => null,
     ], 'Block Creation Time')
     ->addColumn('update_time', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable' => true,
+        'default'  => null,
     ], 'Block Modification Time')
     ->addColumn('is_active', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'nullable'  => false,
@@ -120,8 +120,8 @@ $table = $installer->getConnection()
         'default'  => null,
     ], 'Page Creation Time')
     ->addColumn('update_time', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable' => true,
+        'default'  => null,
     ], 'Page Modification Time')
     ->addColumn('is_active', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'nullable'  => false,

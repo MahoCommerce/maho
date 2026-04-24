@@ -15,9 +15,7 @@ $installer = $this;
 $installer->startSetup();
 
 // Drop MySQL-only `ON UPDATE CURRENT_TIMESTAMP` clause on updated_at columns that were originally
-// declared with TIMESTAMP_INIT_UPDATE (#856), and force explicit DEFAULT on TYPE_TIMESTAMP columns
-// that were declared without one so MySQL's `explicit_defaults_for_timestamp = OFF` cannot silently
-// inject `DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP` (#857).
+// declared with TIMESTAMP_INIT_UPDATE (#856). Value is now managed via PHP _beforeSave for cross-engine parity.
 if ($installer->getConnection() instanceof \Maho\Db\Adapter\Pdo\Mysql) {
     $installer->getConnection()->modifyColumn(
         $installer->getTable('catalog/category_dynamic_rule'),
@@ -27,46 +25,6 @@ if ($installer->getConnection() instanceof \Maho\Db\Adapter\Pdo\Mysql) {
             'nullable' => false,
             'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
             'comment'  => 'Updated At',
-        ],
-    );
-    $installer->getConnection()->modifyColumn(
-        $installer->getTable('catalog/category'),
-        'created_at',
-        [
-            'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
-            'nullable' => false,
-            'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
-            'comment'  => 'Creation Time',
-        ],
-    );
-    $installer->getConnection()->modifyColumn(
-        $installer->getTable('catalog/category'),
-        'updated_at',
-        [
-            'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
-            'nullable' => false,
-            'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
-            'comment'  => 'Update Time',
-        ],
-    );
-    $installer->getConnection()->modifyColumn(
-        $installer->getTable('catalog/product'),
-        'created_at',
-        [
-            'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
-            'nullable' => false,
-            'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
-            'comment'  => 'Creation Time',
-        ],
-    );
-    $installer->getConnection()->modifyColumn(
-        $installer->getTable('catalog/product'),
-        'updated_at',
-        [
-            'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
-            'nullable' => false,
-            'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
-            'comment'  => 'Update Time',
         ],
     );
 }

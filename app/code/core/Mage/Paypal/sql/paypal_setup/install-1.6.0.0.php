@@ -34,8 +34,8 @@ $table = $installer->getConnection()
     ->addColumn('filename', Maho\Db\Ddl\Table::TYPE_TEXT, 24, [
     ], 'Filename')
     ->addColumn('last_modified', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable' => true,
+        'default'  => null,
     ], 'Last Modified')
     ->addIndex(
         $installer->getIdxName('paypal/settlement_report', ['report_date', 'account_id'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
@@ -135,8 +135,8 @@ $table = $installer->getConnection()
     ->addColumn('content', Maho\Db\Ddl\Table::TYPE_TEXT, '64K', [
     ], 'Content')
     ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable' => true,
+        'default'  => null,
     ], 'Updated At')
     ->addIndex(
         $installer->getIdxName('paypal/cert', ['website_id']),

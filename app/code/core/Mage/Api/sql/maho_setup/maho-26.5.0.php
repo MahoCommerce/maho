@@ -44,8 +44,8 @@ if ($installer->getConnection() instanceof \Maho\Db\Adapter\Pdo\Mysql) {
         'modified',
         [
             'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
-            'nullable' => false,
-            'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+            'nullable' => true,
+            'default'  => null,
             'comment'  => 'User record modify date',
         ],
     );

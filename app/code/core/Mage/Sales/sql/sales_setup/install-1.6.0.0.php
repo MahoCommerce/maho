@@ -273,12 +273,12 @@ $table = $installer->getConnection()
     ->addColumn('customer_note', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Customer Note')
     ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable' => true,
+        'default'  => null,
     ], 'Created At')
     ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable' => true,
+        'default'  => null,
     ], 'Updated At')
     ->addColumn('total_item_count', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
@@ -1078,8 +1078,8 @@ $table = $installer->getConnection()
     ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Created At')
     ->addColumn('order_created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable' => true,
+        'default'  => null,
     ], 'Order Created At')
     ->addColumn('shipping_name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Shipping Name')

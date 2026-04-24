@@ -261,12 +261,12 @@ $table = $installer->getConnection()
     ->addColumn('template_sender_email', Maho\Db\Ddl\Table::TYPE_TEXT, 200, [
     ], 'Template Sender Email')
     ->addColumn('added_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable' => true,
+        'default'  => null,
     ], 'Date of Template Creation')
     ->addColumn('modified_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable' => true,
+        'default'  => null,
     ], 'Date of Template Modification')
     ->addColumn('orig_template_code', Maho\Db\Ddl\Table::TYPE_TEXT, 200, [
     ], 'Original Template Code')
