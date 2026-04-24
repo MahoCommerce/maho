@@ -23,7 +23,7 @@ class Maho_Paypal_Model_Vault_Token extends Mage_Core_Model_Abstract
     {
         parent::_beforeSave();
         $now = Mage::app()->getLocale()->formatDateForDb('now');
-        if (!$this->getId()) {
+        if ($this->isObjectNew() && !$this->getCreatedAt()) {
             $this->setCreatedAt($now);
         }
         $this->setUpdatedAt($now);

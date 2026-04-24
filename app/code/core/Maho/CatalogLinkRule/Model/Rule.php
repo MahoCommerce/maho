@@ -33,7 +33,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
     {
         parent::_beforeSave();
         $now = Mage::app()->getLocale()->formatDateForDb('now');
-        if (!$this->getId()) {
+        if ($this->isObjectNew() && !$this->getCreatedAt()) {
             $this->setCreatedAt($now);
         }
         $this->setUpdatedAt($now);
