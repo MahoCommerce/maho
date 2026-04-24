@@ -59,7 +59,7 @@ if (!$installer->getConnection()->isTableExists($installer->getTable('customerse
         ], 'Created At')
         ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
             'nullable'  => false,
-            'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
+            'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
         ], 'Updated At')
         ->addColumn('matched_customers_count', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
             'unsigned'  => true,
@@ -124,7 +124,7 @@ if (!$installer->getConnection()->isTableExists($installer->getTable('customerse
         ], 'Added to Segment At')
         ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
             'nullable'  => false,
-            'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
+            'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
         ], 'Updated At')
         ->addIndex(
             $installer->getIdxName('customersegmentation/segment_customer', ['segment_id', 'customer_id', 'website_id']),

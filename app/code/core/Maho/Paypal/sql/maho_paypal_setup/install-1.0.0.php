@@ -122,7 +122,7 @@ $vaultTable = $connection
     ], 'Created At')
     ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
+        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Updated At')
     ->addIndex(
         $installer->getIdxName('maho_paypal/vault_token', ['paypal_token_id_hash'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),

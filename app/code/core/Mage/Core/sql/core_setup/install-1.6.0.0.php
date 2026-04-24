@@ -716,7 +716,7 @@ $table = $installer->getConnection()
     ], 'Flag Data')
     ->addColumn('last_update', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
-        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
+        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Date of Last Flag Update')
     ->addIndex(
         $installer->getIdxName('core/flag', ['last_update']),
