@@ -42,8 +42,7 @@ $table = $adapter->newTable($installer->getTable('api2/acl_role'))
         Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
         null,
         [
-            'nullable' => false,
-            'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+            'nullable'  => true,
         ],
         'Updated At',
     )
