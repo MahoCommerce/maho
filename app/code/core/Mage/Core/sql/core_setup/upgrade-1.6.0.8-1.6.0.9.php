@@ -15,6 +15,11 @@ $installer = $this;
 $installer->startSetup();
 
 $connection = $installer->getConnection();
-$connection->addColumn($installer->getTable('core_config_data'), 'updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP);
+$connection->addColumn($installer->getTable('core_config_data'), 'updated_at', [
+    'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
+    'nullable' => false,
+    'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+    'comment'  => 'Last Update Time',
+]);
 
 $installer->endSetup();
