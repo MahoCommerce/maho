@@ -68,12 +68,8 @@ $table = $installer->getConnection()
         'default'   => 'pending',
     ], 'Status')
     ->addColumn('started_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Started At')
     ->addColumn('ended_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Ended At')
     ->addColumn('mode', Maho\Db\Ddl\Table::TYPE_TEXT, 9, [
         'nullable'  => false,

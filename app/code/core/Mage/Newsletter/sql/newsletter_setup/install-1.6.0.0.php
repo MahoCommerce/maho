@@ -30,8 +30,6 @@ $table = $installer->getConnection()
         'default'   => '0',
     ], 'Store Id')
     ->addColumn('change_status_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Change Status At')
     ->addColumn('customer_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
@@ -101,12 +99,8 @@ $table = $installer->getConnection()
         'default'   => '1',
     ], 'Template Actual')
     ->addColumn('added_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Added At')
     ->addColumn('modified_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Modified At')
     ->addIndex(
         $installer->getIdxName('newsletter/template', ['template_actual']),
@@ -157,12 +151,8 @@ $table = $installer->getConnection()
         'default'   => '0',
     ], 'Queue Status')
     ->addColumn('queue_start_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Queue Start At')
     ->addColumn('queue_finish_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Queue Finish At')
     ->addIndex(
         $installer->getIdxName('newsletter/queue', ['template_id']),
@@ -201,8 +191,6 @@ $table = $installer->getConnection()
         'default'   => '0',
     ], 'Subscriber Id')
     ->addColumn('letter_sent_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Letter Sent At')
     ->addIndex(
         $installer->getIdxName('newsletter/queue_link', ['subscriber_id']),

@@ -26,16 +26,12 @@ $table = $installer->getConnection()
         'primary'   => true,
     ], 'Report Id')
     ->addColumn('report_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Report Date')
     ->addColumn('account_id', Maho\Db\Ddl\Table::TYPE_TEXT, 64, [
     ], 'Account Id')
     ->addColumn('filename', Maho\Db\Ddl\Table::TYPE_TEXT, 24, [
     ], 'Filename')
     ->addColumn('last_modified', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Last Modified')
     ->addIndex(
         $installer->getIdxName('paypal/settlement_report', ['report_date', 'account_id'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
@@ -71,12 +67,8 @@ $table = $installer->getConnection()
     ->addColumn('transaction_event_code', Maho\Db\Ddl\Table::TYPE_TEXT, 5, [
     ], 'Transaction Event Code')
     ->addColumn('transaction_initiation_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Transaction Initiation Date')
     ->addColumn('transaction_completion_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Transaction Completion Date')
     ->addColumn('transaction_debit_or_credit', Maho\Db\Ddl\Table::TYPE_TEXT, 2, [
         'nullable'  => false,
@@ -135,8 +127,6 @@ $table = $installer->getConnection()
     ->addColumn('content', Maho\Db\Ddl\Table::TYPE_TEXT, '64K', [
     ], 'Content')
     ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Updated At')
     ->addIndex(
         $installer->getIdxName('paypal/cert', ['website_id']),

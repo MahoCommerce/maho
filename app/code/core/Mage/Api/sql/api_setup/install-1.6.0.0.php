@@ -154,8 +154,6 @@ $table = $installer->getConnection()
         'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'User record create date')
     ->addColumn('modified', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'User record modify date')
     ->addColumn('lognum', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
@@ -183,8 +181,6 @@ $table = $installer->getConnection()
         'nullable'  => false,
     ], 'User id')
     ->addColumn('logdate', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Login date')
     ->addColumn('sessid', Maho\Db\Ddl\Table::TYPE_TEXT, 40, [
     ], 'Sessioin id')

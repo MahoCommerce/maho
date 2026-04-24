@@ -91,8 +91,6 @@ $table = $installer->getConnection()
         'default'   => '1',
     ], 'Active')
     ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Created At')
     ->addIndex(
         $installer->getIdxName('tag/relation', ['tag_id', 'customer_id', 'product_id', 'store_id'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),

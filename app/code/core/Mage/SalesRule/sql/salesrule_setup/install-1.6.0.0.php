@@ -137,8 +137,6 @@ $table = $installer->getConnection()
         'default'   => '0',
     ], 'Times Used')
     ->addColumn('expiration_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Expiration Date')
     ->addColumn('is_primary', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,

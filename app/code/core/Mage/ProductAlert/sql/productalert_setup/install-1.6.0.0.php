@@ -45,12 +45,8 @@ $table = $installer->getConnection()
         'default'   => '0',
     ], 'Website id')
     ->addColumn('add_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Product alert add date')
     ->addColumn('last_send_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Product alert last send date')
     ->addColumn('send_count', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
@@ -131,8 +127,6 @@ $table = $installer->getConnection()
         'nullable'  => false,
     ], 'Product alert add date')
     ->addColumn('send_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Product alert send date')
     ->addColumn('send_count', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,

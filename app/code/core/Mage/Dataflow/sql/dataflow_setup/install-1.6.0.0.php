@@ -28,8 +28,6 @@ $table = $installer->getConnection()
         'nullable'  => false,
     ], 'User Id')
     ->addColumn('created_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Created Date')
     ->addColumn('file', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'File')
@@ -93,12 +91,8 @@ $table = $installer->getConnection()
     ->addColumn('name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Name')
     ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Created At')
     ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Updated At')
     ->addColumn('actions_xml', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Actions Xml')
@@ -142,8 +136,6 @@ $table = $installer->getConnection()
         'default'   => '0',
     ], 'User Id')
     ->addColumn('performed_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Performed At')
     ->addIndex(
         $installer->getIdxName('dataflow/profile_history', ['profile_id']),

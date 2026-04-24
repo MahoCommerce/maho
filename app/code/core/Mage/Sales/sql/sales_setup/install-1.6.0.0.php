@@ -273,12 +273,8 @@ $table = $installer->getConnection()
     ->addColumn('customer_note', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Customer Note')
     ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Created At')
     ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Updated At')
     ->addColumn('total_item_count', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
@@ -1078,8 +1074,6 @@ $table = $installer->getConnection()
     ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Created At')
     ->addColumn('order_created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Order Created At')
     ->addColumn('shipping_name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Shipping Name')
@@ -2084,8 +2078,6 @@ $table = $installer->getConnection()
         'nullable'  => false,
     ], 'Updated At')
     ->addColumn('converted_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Converted At')
     ->addColumn('is_active', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
@@ -3822,8 +3814,6 @@ $table = $installer->getConnection()
     ->addColumn('subscriber_name', Maho\Db\Ddl\Table::TYPE_TEXT, 150, [
     ], 'Subscriber Name')
     ->addColumn('start_datetime', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
     ], 'Start Datetime')
     ->addColumn('internal_reference_id', Maho\Db\Ddl\Table::TYPE_TEXT, 42, [
         'nullable'  => false,
