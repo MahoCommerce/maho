@@ -33,9 +33,12 @@ $table = $installer->getConnection()
         'default'   => '0',
     ], 'Customer ID')
     ->addColumn('login_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable'  => false,
+        'nullable' => true,
+        'default'  => null,
     ], 'Login Time')
     ->addColumn('logout_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+        'nullable' => true,
+        'default'  => null,
     ], 'Logout Time')
     ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
@@ -63,9 +66,12 @@ $table = $installer->getConnection()
         'unsigned'  => true,
     ], 'Visitor ID')
     ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable'  => false,
+        'nullable' => false,
+        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Creation Time')
     ->addColumn('deleted_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+        'nullable' => true,
+        'default'  => null,
     ], 'Deletion Time')
     ->setComment('Log Quotes Table');
 $installer->getConnection()->createTable($table);
@@ -97,7 +103,8 @@ $table = $installer->getConnection()
         'default'   => '0',
     ], 'Customer Count')
     ->addColumn('add_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable'  => false,
+        'nullable' => true,
+        'default'  => null,
     ], 'Date')
     ->setComment('Log Summary Table');
 $installer->getConnection()->createTable($table);
@@ -144,7 +151,8 @@ $table = $installer->getConnection()
         'unsigned'  => true,
     ], 'Visitor ID')
     ->addColumn('visit_time', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable'  => false,
+        'nullable' => true,
+        'default'  => null,
     ], 'Visit Time')
     ->addIndex(
         $installer->getIdxName('log/url_table', ['visitor_id']),
@@ -189,9 +197,12 @@ $table = $installer->getConnection()
         'default'   => null,
     ], 'Session ID')
     ->addColumn('first_visit_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+        'nullable' => true,
+        'default'  => null,
     ], 'First Visit Time')
     ->addColumn('last_visit_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable'  => false,
+        'nullable' => true,
+        'default'  => null,
     ], 'Last Visit Time')
     ->addColumn('last_url_id', Maho\Db\Ddl\Table::TYPE_BIGINT, null, [
         'unsigned'  => true,

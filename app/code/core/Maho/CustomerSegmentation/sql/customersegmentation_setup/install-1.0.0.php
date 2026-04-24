@@ -67,7 +67,8 @@ if (!$installer->getConnection()->isTableExists($installer->getTable('customerse
             'default'   => '0',
         ], 'Cached Count of Matched Customers')
         ->addColumn('last_refresh_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-            'nullable'  => true,
+            'nullable' => true,
+            'default'  => null,
         ], 'Last Refresh Time')
         ->addColumn('refresh_status', Maho\Db\Ddl\Table::TYPE_TEXT, 20, [
             'nullable'  => true,

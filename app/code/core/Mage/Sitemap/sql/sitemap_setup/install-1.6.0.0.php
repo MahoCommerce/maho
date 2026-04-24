@@ -32,7 +32,8 @@ $table = $installer->getConnection()
     ->addColumn('sitemap_path', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
     ], 'Sitemap Path')
     ->addColumn('sitemap_time', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable'  => true,
+        'nullable' => true,
+        'default'  => null,
     ], 'Sitemap Time')
     ->addColumn('store_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,

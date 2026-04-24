@@ -57,7 +57,8 @@ $table = $installer->getConnection()
         'default'   => '0',
     ], 'Processed status')
     ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable'  => false,
+        'nullable' => false,
+        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Updated at')
     ->addIndex(
         $installer->getIdxName('catalogsearch/search_query', ['query_text','store_id','popularity']),

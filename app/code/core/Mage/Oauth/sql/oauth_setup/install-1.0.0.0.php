@@ -32,7 +32,8 @@ $table = $adapter->newTable($installer->getTable('oauth/consumer'))
         'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Created At')
     ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
+        'nullable' => false,
+        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Updated At')
     ->addColumn('name', Maho\Db\Ddl\Table::TYPE_VARCHAR, 255, [
         'nullable' => false,

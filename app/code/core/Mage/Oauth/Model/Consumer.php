@@ -56,9 +56,7 @@ class Mage_Oauth_Model_Consumer extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _beforeSave()
     {
-        if (!$this->getId()) {
-            $this->setUpdatedAt(time());
-        }
+        $this->setUpdatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         $this->setCallbackUrl(trim($this->getCallbackUrl()));
         $this->setRejectedCallbackUrl(trim($this->getRejectedCallbackUrl()));
         $this->validate();

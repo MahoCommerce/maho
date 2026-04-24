@@ -60,7 +60,8 @@ $table = $installer->getConnection()
         'primary'   => true,
     ], 'Review id')
     ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable'  => false,
+        'nullable' => false,
+        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Review create date')
     ->addColumn('entity_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,

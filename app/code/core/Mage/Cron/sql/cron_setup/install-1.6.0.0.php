@@ -36,16 +36,20 @@ $table = $installer->getConnection()
     ->addColumn('messages', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
     ], 'Messages')
     ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable'  => false,
+        'nullable' => false,
+        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Created At')
     ->addColumn('scheduled_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable'  => true,
+        'nullable' => true,
+        'default'  => null,
     ], 'Scheduled At')
     ->addColumn('executed_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable'  => true,
+        'nullable' => true,
+        'default'  => null,
     ], 'Executed At')
     ->addColumn('finished_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable'  => true,
+        'nullable' => true,
+        'default'  => null,
     ], 'Finished At')
     ->addIndex(
         $installer->getIdxName('cron/schedule', ['job_code']),

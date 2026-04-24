@@ -34,7 +34,8 @@ $table = $installer->getConnection()
     ->addColumn('entity_pk', Maho\Db\Ddl\Table::TYPE_BIGINT, null, [
     ], 'Entity Primary Key')
     ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable'  => false,
+        'nullable' => false,
+        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Creation Time')
     ->addColumn('old_data', Maho\Db\Ddl\Table::TYPE_TEXT, '2M', [
     ], 'Old Data')
@@ -67,8 +68,12 @@ $table = $installer->getConnection()
         'default'   => 'pending',
     ], 'Status')
     ->addColumn('started_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+        'nullable' => true,
+        'default'  => null,
     ], 'Started At')
     ->addColumn('ended_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+        'nullable' => true,
+        'default'  => null,
     ], 'Ended At')
     ->addColumn('mode', Maho\Db\Ddl\Table::TYPE_TEXT, 9, [
         'nullable'  => false,

@@ -56,6 +56,7 @@ $webhookTable = $connection
     ], 'Created At')
     ->addColumn('processed_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable' => true,
+        'default'  => null,
     ], 'Processed At')
     ->addIndex(
         $installer->getIdxName('maho_paypal/webhook_event', ['paypal_event_id'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),

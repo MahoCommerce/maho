@@ -103,6 +103,8 @@ $table = $installer->getConnection()
         'default'   => '0',
     ], 'Is In Stock')
     ->addColumn('low_stock_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+        'nullable' => true,
+        'default'  => null,
     ], 'Low Stock Date')
     ->addColumn('notify_stock_qty', Maho\Db\Ddl\Table::TYPE_DECIMAL, '12,4', [
     ], 'Notify Stock Qty')

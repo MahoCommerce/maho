@@ -42,8 +42,12 @@ $table = $installer->getConnection()
         'nullable'  => false,
     ], 'Message Parameters')
     ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+        'nullable' => false,
+        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Creation Time')
     ->addColumn('processed_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+        'nullable' => true,
+        'default'  => null,
     ], 'Finish Time')
     ->addIndex(
         $installer->getIdxName(

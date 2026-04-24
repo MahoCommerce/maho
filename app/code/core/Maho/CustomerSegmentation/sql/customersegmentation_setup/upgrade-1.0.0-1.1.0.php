@@ -199,9 +199,11 @@ if (!$installer->getConnection()->isTableExists($installer->getTable('customer_s
         ], 'Created At')
         ->addColumn('scheduled_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
             'nullable' => true,
+            'default'  => null,
         ], 'Scheduled Send Time')
         ->addColumn('sent_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
             'nullable' => true,
+            'default'  => null,
         ], 'Actual Send Time')
         ->addIndex(
             'idx_scheduled_at_status',
