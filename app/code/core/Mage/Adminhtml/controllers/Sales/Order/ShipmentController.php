@@ -447,9 +447,6 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      */
     protected function _createShippingLabel(Mage_Sales_Model_Order_Shipment $shipment)
     {
-        if (!$shipment) {
-            return false;
-        }
         $carrier = $shipment->getOrder()->getShippingCarrier();
         if (!$carrier->isShippingLabelsAvailable()) {
             return false;

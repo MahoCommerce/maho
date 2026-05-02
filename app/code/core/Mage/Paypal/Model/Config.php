@@ -713,9 +713,7 @@ class Mage_Paypal_Model_Config
                 // check for direct payments dependence
                 if ($this->isMethodActive(self::METHOD_WPP_PE_DIRECT)) {
                     $result = true;
-                } elseif (!$this->isMethodActive(self::METHOD_WPP_PE_DIRECT)
-                    && !$this->isMethodActive(self::METHOD_PAYFLOWPRO)
-                ) {
+                } elseif (!$this->isMethodActive(self::METHOD_PAYFLOWPRO)) {
                     $result = false;
                 }
                 break;

@@ -1343,8 +1343,6 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     protected function _saveProducts()
     {
         $priceIsGlobal  = Mage::helper('catalog')->isPriceGlobal();
-        $productLimit   = null;
-        $productsQty    = null;
 
         while ($bunch = $this->_dataSourceModel->getNextBunch()) {
             $entityRowsIn = [];
@@ -1380,21 +1378,14 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                             'attribute_set_id' => $this->_oldSku[$rowSku]['attr_set_id'],
                         ];
                     } else { // new row
-                        if (!$productLimit || $productsQty < $productLimit) {
-                            $entityRowsIn[$rowSku] = [
-                                'entity_type_id'   => $this->_entityTypeId,
-                                'attribute_set_id' => $this->_newSku[$rowSku]['attr_set_id'],
-                                'type_id'          => $this->_newSku[$rowSku]['type_id'],
-                                'sku'              => $rowSku,
-                                'created_at'       => $now,
-                                'updated_at'       => $now,
-                            ];
-                            $productsQty++;
-                        } else {
-                            $rowSku = null; // sign for child rows to be skipped
-                            $this->_rowsToSkip[$rowNum] = true;
-                            continue;
-                        }
+                        $entityRowsIn[$rowSku] = [
+                            'entity_type_id'   => $this->_entityTypeId,
+                            'attribute_set_id' => $this->_newSku[$rowSku]['attr_set_id'],
+                            'type_id'          => $this->_newSku[$rowSku]['type_id'],
+                            'sku'              => $rowSku,
+                            'created_at'       => $now,
+                            'updated_at'       => $now,
+                        ];
                     }
                 } elseif ($rowSku === null) {
                     $this->_rowsToSkip[$rowNum] = true;

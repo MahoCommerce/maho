@@ -73,12 +73,6 @@ parameters:
 			path: app/Mage.php
 
 		-
-			rawMessage: Right side of && is always false.
-			identifier: booleanAnd.rightAlwaysFalse
-			count: 1
-			path: app/Mage.php
-
-		-
 			rawMessage: 'Method Mage_Admin_Model_Acl_Assert_Ip::_isCleanIP() should return bool|null but return statement is missing.'
 			identifier: return.missing
 			count: 1
@@ -5074,12 +5068,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Catalog/Product/SetController.php
 
 		-
-			rawMessage: Ternary operator condition is always true.
-			identifier: ternary.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Catalog/Product/SetController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Catalog_ProductController::_filterStockData() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -5404,12 +5392,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/CreditmemoController.php
 
 		-
-			rawMessage: Right side of && is always true.
-			identifier: booleanAnd.rightAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/CreditmemoController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Sales_Order_InvoiceController::_getItemQtys() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -5434,24 +5416,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/InvoiceController.php
 
 		-
-			rawMessage: Result of && is always false.
-			identifier: booleanAnd.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/InvoiceController.php
-
-		-
-			rawMessage: 'Undefined variable: $shippingResponse'
-			identifier: variable.undefined
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/InvoiceController.php
-
-		-
-			rawMessage: 'Variable $shippingResponse in isset() is never defined.'
-			identifier: isset.variable
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/InvoiceController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Sales_Order_ShipmentController::_getItemQtys() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -5460,12 +5424,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_Sales_Order_ShipmentController::printLabelAction() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
-
-		-
-			rawMessage: Negated boolean expression is always false.
-			identifier: booleanNot.alwaysFalse
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
 
@@ -6364,12 +6322,6 @@ parameters:
 			path: app/code/core/Mage/Bundle/Model/Product/Price.php
 
 		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/Product/Type.php
-
-		-
 			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getProduct() expects int|string|null, Mage_Catalog_Model_Product|null given.'
 			identifier: argument.type
 			count: 1
@@ -6808,12 +6760,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Helper/Product.php
 
 		-
-			rawMessage: Ternary operator condition is always true.
-			identifier: ternary.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Catalog/Helper/Product.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Helper_Product_Compare::_getUrlCustomParams() has parameter $url with no type specified.'
 			identifier: missingType.parameter
 			count: 1
@@ -6914,12 +6860,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
-
-		-
-			rawMessage: If condition is always false.
-			identifier: if.alwaysFalse
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Api2_Product_Rest::_applyCategoryFilter() has no return type specified.'
@@ -7269,12 +7209,6 @@ parameters:
 				since 26.5 Flat Catalog will be removed in a future version
 			'''
 			identifier: method.deprecatedClass
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Category.php
-
-		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Category.php
 
@@ -8371,12 +8305,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Abstract.php
 
 		-
-			rawMessage: Right side of || is always true.
-			identifier: booleanOr.rightAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Abstract.php
-
-		-
 			rawMessage: 'Parameter #1 $object of method Mage_Catalog_Model_Resource_Attribute::_clearUselessAttributeValues() expects Mage_Catalog_Model_Resource_Eav_Attribute, Mage_Eav_Model_Entity_Attribute given.'
 			identifier: argument.type
 			count: 1
@@ -8810,12 +8738,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Link/Collection.php
-
-		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Link/Product/Collection.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Option::_construct() has no return type specified.'
@@ -10153,12 +10075,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Cart/Api.php
 
 		-
-			rawMessage: Negated boolean expression is always false.
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart/Coupon/Api.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
 			identifier: argument.type
 			count: 1
@@ -10677,12 +10593,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Core_Block_Messages::setMessagesSecondLevelTagName() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Block/Messages.php
-
-		-
-			rawMessage: Ternary operator condition is always true.
-			identifier: ternary.alwaysTrue
 			count: 1
 			path: app/code/core/Mage/Core/Block/Messages.php
 
@@ -11455,27 +11365,9 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
 
 		-
-			rawMessage: Result of && is always false.
-			identifier: booleanAnd.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
-
-		-
-			rawMessage: 'Variable $alias in isset() always exists and is always null.'
-			identifier: isset.variable
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
-
-		-
 			rawMessage: Variable $alias might not be defined.
 			identifier: variable.undefined
 			count: 3
-			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
-
-		-
-			rawMessage: 'Variable $columnsToSelect in isset() always exists and is not nullable.'
-			identifier: isset.variable
-			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
 
 		-
@@ -11555,12 +11447,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Setup.php
-
-		-
-			rawMessage: Negated boolean expression is always false.
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Setup/Query/Modifier.php
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Resource_Store::_construct() has no return type specified.'
@@ -12793,21 +12679,9 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Interface.php
 
 		-
-			rawMessage: If condition is always false.
-			identifier: if.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Io.php
-
-		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Io::getResource() has parameter $forWrite with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Io.php
-
-		-
-			rawMessage: Negated boolean expression is always true.
-			identifier: booleanNot.alwaysTrue
-			count: 2
 			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Io.php
 
 		-
@@ -13659,12 +13533,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Dataflow_Model_Profile::_parseGuiData() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Profile.php
-
-		-
-			rawMessage: Right side of && is always true.
-			identifier: booleanAnd.rightAlwaysTrue
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Profile.php
 
@@ -14719,20 +14587,8 @@ parameters:
 			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Product.php
 
 		-
-			rawMessage: Negated boolean expression is always true.
-			identifier: booleanNot.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Product.php
-
-		-
 			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, Closure(mixed): int<0, max> given.'
 			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Product.php
-
-		-
-			rawMessage: Result of || is always true.
-			identifier: booleanOr.alwaysTrue
 			count: 1
 			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Product.php
 
@@ -16099,12 +15955,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Cart.php
 
 		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Cart.php
-
-		-
 			rawMessage: 'Method Mage_Paypal_Model_Cart::_applyHiddenTaxWorkaround() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -16149,12 +15999,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Paypal_Model_Config::isMethodSupportedForCountry() has parameter $method with no type specified.'
 			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Config.php
-
-		-
-			rawMessage: Negated boolean expression is always true.
-			identifier: booleanNot.alwaysTrue
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Config.php
 
@@ -18469,12 +18313,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Address.php
 
 		-
-			rawMessage: Right side of && is always true.
-			identifier: booleanAnd.rightAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address.php
-
-		-
 			rawMessage: Property Mage_Sales_Model_Quote_Address_Item::$_quote has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -18533,12 +18371,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Nominal/Shipping.php
-
-		-
-			rawMessage: Negated boolean expression is always true.
-			identifier: booleanNot.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Shipping.php
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setFreeMethodWeight() expects int, float given.'
@@ -19039,12 +18871,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Service/Quote.php
 
 		-
-			rawMessage: Negated boolean expression is always true.
-			identifier: booleanNot.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Service/Quote.php
-
-		-
 			rawMessage: 'Parameter #1 $message of static method Mage::throwException() expects string, array given.'
 			identifier: argument.type
 			count: 1
@@ -19061,12 +18887,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Service/Quote.php
-
-		-
-			rawMessage: Negated boolean expression is always false.
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Status/List.php
 
 		-
 			rawMessage: 'Method Mage_Sales_DownloadController::_validateFilePath() has no return type specified.'
@@ -19125,12 +18945,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_SalesRule_Model_Resource_Coupon::_construct() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Resource/Coupon.php
-
-		-
-			rawMessage: Negated boolean expression is always false.
-			identifier: booleanNot.alwaysFalse
 			count: 1
 			path: app/code/core/Mage/SalesRule/Model/Resource/Coupon.php
 
@@ -19279,12 +19093,6 @@ parameters:
 			path: app/code/core/Mage/Shipping/Model/Carrier/Abstract.php
 
 		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Carrier/Abstract.php
-
-		-
 			rawMessage: 'Method Mage_Shipping_Model_Carrier_Abstract::_debug() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -19299,12 +19107,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Shipping_Model_Carrier_Abstract::debugData() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Carrier/Abstract.php
-
-		-
-			rawMessage: Negated boolean expression is always false.
-			identifier: booleanNot.alwaysFalse
 			count: 1
 			path: app/code/core/Mage/Shipping/Model/Carrier/Abstract.php
 
@@ -19714,12 +19516,6 @@ parameters:
 			path: app/code/core/Mage/Tax/Helper/Data.php
 
 		-
-			rawMessage: If condition is always false.
-			identifier: if.alwaysFalse
-			count: 3
-			path: app/code/core/Mage/Tax/Helper/Data.php
-
-		-
 			rawMessage: 'Parameter #1 $shippingAddress of method Mage_Tax_Model_Calculation::getRateRequest() expects Mage_Sales_Model_Quote_Address|false|null, Mage_Customer_Model_Address|null given.'
 			identifier: argument.type
 			count: 2
@@ -19734,12 +19530,6 @@ parameters:
 		-
 			rawMessage: 'Parameter #2 $format of method Mage_Core_Model_Store::convertPrice() expects bool, string|null given.'
 			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Tax/Helper/Data.php
-
-		-
-			rawMessage: Right side of && is always false.
-			identifier: booleanAnd.rightAlwaysFalse
 			count: 1
 			path: app/code/core/Mage/Tax/Helper/Data.php
 
@@ -20446,12 +20236,6 @@ parameters:
 			path: app/code/core/Mage/Weee/Model/Resource/Tax.php
 
 		-
-			rawMessage: Right side of && is always true.
-			identifier: booleanAnd.rightAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Resource/Tax.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_Abstract::_init() invoked with 2 parameters, 1 required.'
 			identifier: arguments.count
 			count: 1
@@ -20980,12 +20764,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/system/autocomplete.phtml
 
 		-
-			rawMessage: Negated boolean expression is always true.
-			identifier: booleanNot.alwaysTrue
-			count: 2
-			path: app/design/adminhtml/default/default/template/system/store/tree.phtml
-
-		-
 			rawMessage: 'Call to deprecated method getSaveUrl() of class Mage_Adminhtml_Block_Tag_Edit.'
 			identifier: method.deprecated
 			count: 1
@@ -21184,18 +20962,6 @@ parameters:
 			path: app/design/frontend/base/default/template/catalog/product/list/toolbar.phtml
 
 		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: app/design/frontend/base/default/template/catalog/product/price.phtml
-
-		-
-			rawMessage: Ternary operator condition is always true.
-			identifier: ternary.alwaysTrue
-			count: 1
-			path: app/design/frontend/base/default/template/catalog/product/price.phtml
-
-		-
 			rawMessage: Variable $_weeeTaxAttributes might not be defined.
 			identifier: variable.undefined
 			count: 9
@@ -21230,12 +20996,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/design/frontend/base/default/template/checkout/cart/minicart/items.phtml
-
-		-
-			rawMessage: Ternary operator condition is always true.
-			identifier: ternary.alwaysTrue
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/onepage/progress/shipping.phtml
 
 		-
 			rawMessage: 'Parameter #1 $amount of method Mage_Checkout_Block_Total_Nominal::formatPrice() expects float, string given.'
@@ -21758,12 +21518,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: lib/Maho/Convert/Exception.php
-
-		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: lib/Maho/Convert/Mapper/Column.php
 
 		-
 			rawMessage: 'Method Maho\Convert\Mapper\Column::map() has no return type specified.'
@@ -23298,18 +23052,6 @@ parameters:
 		-
 			rawMessage: Property Maho\Simplexml\Config::$_xpathExtends has no type specified.
 			identifier: missingType.property
-			count: 1
-			path: lib/Maho/Simplexml/Config.php
-
-		-
-			rawMessage: Result of && is always false.
-			identifier: booleanAnd.alwaysFalse
-			count: 1
-			path: lib/Maho/Simplexml/Config.php
-
-		-
-			rawMessage: 'Strict comparison using === between mixed and false will always evaluate to false.'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: lib/Maho/Simplexml/Config.php
 

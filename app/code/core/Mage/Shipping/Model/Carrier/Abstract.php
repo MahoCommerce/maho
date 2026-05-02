@@ -191,7 +191,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
         if (empty($containersFilter)) {
             return $containersAll;
         }
-        if (!$params || !$method || !$countryShipper || !$countryRecipient) {
+        if (!$method || !$countryShipper || !$countryRecipient) {
             return $containersAll;
         }
 
@@ -258,8 +258,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
             if ($availableCountries && in_array($request->getDestCountryId(), $availableCountries)) {
                 return $this;
             }
-            if ($showMethod && (!$availableCountries || ($availableCountries
-                 && !in_array($request->getDestCountryId(), $availableCountries)))) {
+            if ($showMethod) {
                 $error = Mage::getModel('shipping/rate_result_error');
                 $error->setCarrier($this->_code);
                 $error->setCarrierTitle($this->getConfigData('title'));

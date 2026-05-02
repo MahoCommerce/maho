@@ -579,7 +579,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
                             $moreSelections = false;
                         }
                         if ($selectedOption->getRequired()
-                            && (!$selectedOption->isMultiSelection() || ($selectedOption->isMultiSelection() && !$moreSelections))
+                            && (!$selectedOption->isMultiSelection() || !$moreSelections)
                         ) {
                             return Mage::helper('bundle')->__('Selected required options are not available.');
                         }

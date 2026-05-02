@@ -99,7 +99,7 @@ class Mage_Sales_Model_Status_List
      */
     public function removeItems($indexes)
     {
-        if (![$indexes]) {
+        if (!is_array($indexes)) {
             $indexes = [$indexes];
         }
         if (!$indexes) {

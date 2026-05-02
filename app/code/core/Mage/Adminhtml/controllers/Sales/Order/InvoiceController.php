@@ -250,9 +250,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
                 }
                 $transactionSave->save();
 
-                if (isset($shippingResponse) && $shippingResponse->hasErrors()) {
-                    $this->_getSession()->addError($this->__('The invoice and the shipment  have been created. The shipping label cannot be created at the moment.'));
-                } elseif (!empty($data['do_shipment'])) {
+                if (!empty($data['do_shipment'])) {
                     $this->_getSession()->addSuccess($this->__('The invoice and shipment have been created.'));
                 } else {
                     $this->_getSession()->addSuccess($this->__('The invoice has been created.'));

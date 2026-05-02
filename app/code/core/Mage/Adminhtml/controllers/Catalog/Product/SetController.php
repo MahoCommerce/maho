@@ -56,7 +56,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
             return;
         }
 
-        $this->_title($attributeSet->getId() ? $attributeSet->getAttributeSetName() : $this->__('New Set'));
+        $this->_title($attributeSet->getAttributeSetName());
 
         Mage::register('current_attribute_set', $attributeSet);
 
