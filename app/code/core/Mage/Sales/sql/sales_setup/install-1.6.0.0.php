@@ -2078,6 +2078,7 @@ $table = $installer->getConnection()
         'nullable'  => false,
     ], 'Updated At')
     ->addColumn('converted_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+        'nullable'  => true,
     ], 'Converted At')
     ->addColumn('is_active', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
@@ -3814,8 +3815,7 @@ $table = $installer->getConnection()
     ->addColumn('subscriber_name', Maho\Db\Ddl\Table::TYPE_TEXT, 150, [
     ], 'Subscriber Name')
     ->addColumn('start_datetime', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable'  => false,
     ], 'Start Datetime')
     ->addColumn('internal_reference_id', Maho\Db\Ddl\Table::TYPE_TEXT, 42, [
         'nullable'  => false,

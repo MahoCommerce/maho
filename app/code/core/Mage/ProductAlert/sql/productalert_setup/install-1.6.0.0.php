@@ -45,6 +45,7 @@ $table = $installer->getConnection()
         'default'   => '0',
     ], 'Website id')
     ->addColumn('add_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+        'nullable'  => false,
     ], 'Product alert add date')
     ->addColumn('last_send_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Product alert last send date')

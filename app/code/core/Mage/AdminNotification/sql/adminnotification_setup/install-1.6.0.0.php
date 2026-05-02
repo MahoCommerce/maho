@@ -30,8 +30,7 @@ $table = $installer->getConnection()
         'default'   => '0',
     ], 'Problem type')
     ->addColumn('date_added', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable'  => false,
     ], 'Create date')
     ->addColumn('title', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
         'nullable'  => false,

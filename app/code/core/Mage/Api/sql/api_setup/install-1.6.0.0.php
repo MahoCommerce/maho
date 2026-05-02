@@ -150,8 +150,7 @@ $table = $installer->getConnection()
     ->addColumn('api_key', Maho\Db\Ddl\Table::TYPE_TEXT, 40, [
     ], 'Api key')
     ->addColumn('created', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable'  => false,
     ], 'User record create date')
     ->addColumn('modified', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'User record modify date')
@@ -181,6 +180,7 @@ $table = $installer->getConnection()
         'nullable'  => false,
     ], 'User id')
     ->addColumn('logdate', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+        'nullable'  => false,
     ], 'Login date')
     ->addColumn('sessid', Maho\Db\Ddl\Table::TYPE_TEXT, 40, [
     ], 'Sessioin id')

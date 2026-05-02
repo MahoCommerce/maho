@@ -33,6 +33,7 @@ $table = $installer->getConnection()
         'default'   => '0',
     ], 'Customer ID')
     ->addColumn('login_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+        'nullable'  => false,
     ], 'Login Time')
     ->addColumn('logout_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Logout Time')
@@ -62,8 +63,7 @@ $table = $installer->getConnection()
         'unsigned'  => true,
     ], 'Visitor ID')
     ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable'  => false,
     ], 'Creation Time')
     ->addColumn('deleted_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'Deletion Time')
@@ -97,6 +97,7 @@ $table = $installer->getConnection()
         'default'   => '0',
     ], 'Customer Count')
     ->addColumn('add_date', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+        'nullable'  => false,
     ], 'Date')
     ->setComment('Log Summary Table');
 $installer->getConnection()->createTable($table);
@@ -143,6 +144,7 @@ $table = $installer->getConnection()
         'unsigned'  => true,
     ], 'Visitor ID')
     ->addColumn('visit_time', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+        'nullable'  => false,
     ], 'Visit Time')
     ->addIndex(
         $installer->getIdxName('log/url_table', ['visitor_id']),
@@ -189,6 +191,7 @@ $table = $installer->getConnection()
     ->addColumn('first_visit_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'First Visit Time')
     ->addColumn('last_visit_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+        'nullable'  => false,
     ], 'Last Visit Time')
     ->addColumn('last_url_id', Maho\Db\Ddl\Table::TYPE_BIGINT, null, [
         'unsigned'  => true,

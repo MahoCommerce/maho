@@ -34,8 +34,7 @@ $table = $installer->getConnection()
     ->addColumn('entity_pk', Maho\Db\Ddl\Table::TYPE_BIGINT, null, [
     ], 'Entity Primary Key')
     ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable'  => false,
     ], 'Creation Time')
     ->addColumn('old_data', Maho\Db\Ddl\Table::TYPE_TEXT, '2M', [
     ], 'Old Data')

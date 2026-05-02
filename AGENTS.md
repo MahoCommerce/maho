@@ -140,6 +140,10 @@ All Zend Framework and Varien components have been completely removed. **NEVER**
 - Feel free to modify core files directly
 - Avoid creating a new module unless asked for it
 
+### Database Schema Changes
+- **Never modify historical install or upgrade scripts.** They are immutable snapshots of the schema at a given version. To change the schema, bump the module version in `etc/config.xml` and add a new `upgrade-X.Y.Z-A.B.C.php` (or `maho-X.Y.Z.php`) script. Fresh installs run install + every upgrade in sequence, so the new script repairs both fresh and existing installs.
+- This rule applies even to "obvious cleanups" (e.g. adding an explicit `default` to a column declared without one) — the fix belongs in a new upgrade, not in the install file.
+
 ## Modernizations
 
 ### Logging (Monolog)

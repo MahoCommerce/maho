@@ -140,12 +140,10 @@ $table = $installer->getConnection()
         'default'   => '0',
     ], 'Order Item ID')
     ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable'  => false,
     ], 'Date of creation')
     ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable'  => false,
     ], 'Date of modification')
     ->addColumn('customer_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
@@ -238,12 +236,10 @@ $table = $installer->getConnection()
     ->addColumn('status', Maho\Db\Ddl\Table::TYPE_TEXT, 50, [
     ], 'Status')
     ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable'  => false,
     ], 'Creation Time')
     ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+        'nullable'  => false,
     ], 'Update Time')
     ->addIndex($installer->getIdxName('downloadable/link_purchased_item', 'link_hash'), 'link_hash')
     ->addIndex($installer->getIdxName('downloadable/link_purchased_item', 'order_item_id'), 'order_item_id')

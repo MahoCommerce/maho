@@ -48,8 +48,7 @@ $table = $installer->getConnection()
         'primary'   => true,
     ], 'Event Id')
     ->addColumn('logged_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-        'nullable' => true,
-        'default'  => null,
+        'nullable'  => false,
     ], 'Logged At')
     ->addColumn('event_type_id', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned'  => true,
@@ -143,8 +142,7 @@ if (!$installer->tableExists($tableName)) {
             'unsigned'  => true,
         ], 'Store Id')
         ->addColumn('added_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
-            'nullable' => false,
-            'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
+            'nullable'  => false,
         ], 'Added At')
         ->addIndex(
             $installer->getIdxName('reports/compared_product_index', ['visitor_id', 'product_id']),
