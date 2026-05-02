@@ -181,4 +181,13 @@ $conn->addIndex(
     ['paypal_order_id'],
 );
 
+// Migrate `main`-tracker config from the pre-#877 maho_paypal/... namespace.
+// No-op for fresh installs and for case-3 legacy Mage_Paypal merchants since
+// neither has any maho_paypal/... rows.
+$conn->update(
+    $installer->getTable('core/config_data'),
+    ['path' => new Maho\Db\Expr("REPLACE(path, 'maho_paypal/', 'paypal/')")],
+    ['path LIKE ?' => 'maho_paypal/%'],
+);
+
 $installer->endSetup();
