@@ -37,7 +37,7 @@ class Mage_Paypal_Model_Cart
      * Rendered cart items
      * Array of \Maho\DataObject
      *
-     * @var array
+     * @var array<int, \Maho\DataObject>
      */
     protected $_items = [];
 

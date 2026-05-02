@@ -1015,7 +1015,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
             $this->_callErrors[] = $error['code'];
         }
 
-        $errorMessages = implode(' ', array_values($errorMessages));
+        $errorMessages = implode(' ', $errorMessages);
         $exceptionLogMessage = sprintf(
             'PayPal NVP gateway errors: %s Correlation ID: %s. Version: %s.',
             $errorMessages,

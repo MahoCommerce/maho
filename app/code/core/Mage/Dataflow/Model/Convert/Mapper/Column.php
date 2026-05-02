@@ -63,7 +63,7 @@ class Mage_Dataflow_Model_Convert_Mapper_Column extends Mage_Dataflow_Model_Conv
     /**
      * Retrieve Batch import model
      *
-     * @return Mage_Dataflow_Model_Import_Export
+     * @return Mage_Dataflow_Model_Batch_Import
      */
     public function getBatchImportModel()
     {

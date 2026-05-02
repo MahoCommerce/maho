@@ -477,8 +477,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
         }
         $block = new $className($attributes);
         if (!$block instanceof Mage_Core_Block_Abstract) {
-            $block = is_object($block) ? $block::class : $block;
-            Mage::throwException(Mage::helper('core')->__('Invalid block type: %s', $block));
+            Mage::throwException(Mage::helper('core')->__('Invalid block type: %s', $block::class));
         }
         return $block;
     }

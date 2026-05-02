@@ -18,9 +18,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
      */
     public const ADMIN_RESOURCE = 'sales/tax/rules';
 
-    /**
-     * @inheritDoc
-     */
+    #[\Override]
     protected function _construct()
     {
         $this->setUsedModuleName('Mage_Tax');

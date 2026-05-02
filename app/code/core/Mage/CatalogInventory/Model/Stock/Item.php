@@ -553,9 +553,6 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
              */
             $result->setItemQty($qty);
 
-            if (!is_numeric($qty)) {
-                $qty = Mage::app()->getLocale()->getNumber($qty);
-            }
             $origQty = (int) $origQty;
             $result->setOrigQty($origQty);
         }

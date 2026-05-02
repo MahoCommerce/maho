@@ -177,7 +177,7 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
             }
         }
         \Maho\Profiler::stop('mage::dispatch::routers_match');
-        if ($i > 100) {
+        if (!$request->isDispatched()) {
             Mage::throwException('Front controller reached 100 router match iterations');
         }
         // This event gives possibility to launch something before sending output (allow cookie setting)

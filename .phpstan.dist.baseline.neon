@@ -2659,12 +2659,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
 
 		-
-			rawMessage: 'Parameter #1 $array (array{non-empty-string, non-empty-string}) of array_values is already a list, call has no effect.'
-			identifier: arrayValues.list
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
-
-		-
 			rawMessage: 'Parameter #1 $element of method Mage_Adminhtml_Block_System_Config_Form::_prepareGroupComment() expects Mage_Core_Model_Config_Element, Maho\Simplexml\Element given.'
 			identifier: argument.type
 			count: 1
@@ -3843,12 +3837,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Widget_Tabs::bindShadowTabs() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Tabs.php
-
-		-
-			rawMessage: 'PHPDoc tag @param references unknown parameter: $tabNId'
-			identifier: parameter.notFound
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Tabs.php
 
@@ -5500,18 +5488,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/OrderController.php
 
 		-
-			rawMessage: 'Call to $this->getLayout()->createBlock(''adminhtml/sales'', ''sales'') resulted in invalid type Mage_Adminhtml_Block_Sales.'
-			identifier: mage.invalidType
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/SalesController.php
-
-		-
-			rawMessage: 'Parameter #1 $block of method Mage_Adminhtml_Controller_Action::_addContent() expects Mage_Core_Block_Abstract, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/SalesController.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Admin_Model_User::setPasskeyCredentialIdHash() expects string, null given.'
 			identifier: argument.type
 			count: 1
@@ -7114,12 +7090,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Api2/Product/Validator/Product.php
 
 		-
-			rawMessage: 'Strict comparison using !== between mixed and 0 will always evaluate to true.'
-			identifier: notIdentical.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Api2/Product/Validator/Product.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Api2_Product_Website_Rest::_delete() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -7450,20 +7420,8 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Config.php
 
 		-
-			rawMessage: 'Call to Mage::getResourceSingleton(''catalog_entity/convert'') resulted in invalid type bool(false).'
-			identifier: mage.invalidType
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Abstract::getStoreId().'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
-
-		-
-			rawMessage: 'Cannot call method addProductToStore() on false.'
-			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
 
@@ -8569,12 +8527,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product.php
 
 		-
-			rawMessage: 'Call to function is_array() with non-empty-array will always evaluate to true.'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Action::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8975,12 +8927,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Url.php
-
-		-
-			rawMessage: 'Loose comparison using == between true and true will always evaluate to true.'
-			identifier: equal.alwaysTrue
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Url.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Url::_addCategoryUrlPath() has no return type specified.'
@@ -9539,12 +9485,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogInventory/Model/Stock.php
-
-		-
-			rawMessage: 'Call to function is_numeric() with int will always evaluate to true.'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Model/Stock/Item.php
 
 		-
 			rawMessage: 'Method Mage_Sales_Model_Quote_Item::setMessage() invoked with 1 parameter, 0 required.'
@@ -10897,12 +10837,6 @@ parameters:
 			path: app/code/core/Mage/Core/Controller/Varien/Front.php
 
 		-
-			rawMessage: 'Comparison operation ">" between int<0, 100> and 100 is always false.'
-			identifier: greater.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Front.php
-
-		-
 			rawMessage: 'Method Mage_Core_Controller_Varien_Front::_checkBaseUrl() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -11313,12 +11247,6 @@ parameters:
 		-
 			rawMessage: 'Call to an undefined method SimpleXMLElement::getAttribute().'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Core/Model/Layout.php
-
-		-
-			rawMessage: 'Call to function is_object() with object will always evaluate to true.'
-			identifier: function.alreadyNarrowedType
 			count: 1
 			path: app/code/core/Mage/Core/Model/Layout.php
 
@@ -13313,12 +13241,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Mapper_Column::getBatchImportModel() has invalid return type Mage_Dataflow_Model_Import_Export.'
-			identifier: class.notFound
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Mapper/Column.php
 
 		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Mapper_Column::map() has no return type specified.'
@@ -15709,12 +15631,6 @@ parameters:
 			path: app/code/core/Mage/Payment/Model/Method/Abstract.php
 
 		-
-			rawMessage: 'Loose comparison using != between ''''|''OT'' and ''SS'' will always evaluate to true.'
-			identifier: notEqual.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Payment/Model/Method/Cc.php
-
-		-
 			rawMessage: Property Mage_Payment_Model_Method_Cc::$_canSaveCc has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -16041,12 +15957,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callUpdateBillingAgreement() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Parameter #1 $array (non-empty-list) of array_values is already a list, call has no effect.'
-			identifier: arrayValues.list
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
 
@@ -18649,12 +18559,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Config.php
 
 		-
-			rawMessage: Instanceof between Mage_Sales_Model_Quote_Item_Option and Mage_Sales_Model_Quote_Item_Option will always evaluate to true.
-			identifier: instanceof.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Item.php
-
-		-
 			rawMessage: 'Method Mage_Sales_Model_Quote_Item::setMessage() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 1
@@ -19954,18 +19858,6 @@ parameters:
 			path: app/code/core/Mage/Tax/Model/Config/Notification.php
 
 		-
-			rawMessage: 'Call to an undefined static method Mage_Core_Model_Config_Data::afterSave().'
-			identifier: staticMethod.notFound
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Config/Price/Include.php
-
-		-
-			rawMessage: 'Method Mage_Tax_Model_Config_Price_Include::afterSave() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Config/Price/Include.php
-
-		-
 			rawMessage: 'Parameter #1 $tags of method Mage_Core_Model_App::cleanCache() expects array, string given.'
 			identifier: argument.type
 			count: 1
@@ -20968,12 +20860,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/rating/stars/detailed.phtml
 
 		-
-			rawMessage: 'Comparison operation ">" between int<1, max> and 0 is always true.'
-			identifier: greater.alwaysTrue
-			count: 1
-			path: app/design/adminhtml/default/default/template/report/grid.phtml
-
-		-
 			rawMessage: Variable $minAdminPasswordLength might not be defined.
 			identifier: variable.undefined
 			count: 2
@@ -21400,24 +21286,6 @@ parameters:
 			path: app/design/frontend/base/default/template/customer/balance.phtml
 
 		-
-			rawMessage: PHPDoc tag @var contains unresolvable type.
-			identifier: varTag.unresolvableType
-			count: 1
-			path: app/design/frontend/base/default/template/customer/form/remember.phtml
-
-		-
-			rawMessage: PHPDoc tag @var does not specify variable name.
-			identifier: varTag.noVariable
-			count: 1
-			path: app/design/frontend/base/default/template/customer/form/remember.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 4
-			path: app/design/frontend/base/default/template/customer/form/remember.phtml
-
-		-
 			rawMessage: Variable $currency might not be defined.
 			identifier: variable.undefined
 			count: 1
@@ -21520,12 +21388,6 @@ parameters:
 			path: app/design/frontend/base/default/template/page/html/breadcrumbs.phtml
 
 		-
-			rawMessage: 'Call to protected method _getRenderedMenuItemAttributes() of class Mage_Page_Block_Html_Topmenu.'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/base/default/template/page/html/topmenu/renderer.phtml
-
-		-
 			rawMessage: Variable $this might not be defined.
 			identifier: variable.undefined
 			count: 7
@@ -21536,12 +21398,6 @@ parameters:
 			identifier: variable.undefined
 			count: 82
 			path: app/design/frontend/base/default/template/paypal/express/review/address.phtml
-
-		-
-			rawMessage: 'Class Mage_Paypal_Block_Express_Form referenced with incorrect case: Mage_PayPal_Block_Express_Form.'
-			identifier: class.nameCase
-			count: 1
-			path: app/design/frontend/base/default/template/paypal/payment/redirect.phtml
 
 		-
 			rawMessage: Variable $data might not be defined.

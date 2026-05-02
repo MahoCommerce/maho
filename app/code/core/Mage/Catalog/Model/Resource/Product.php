@@ -621,7 +621,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
         if (!empty($columns) && is_string($columns)) {
             $columns = [$columns];
         }
-        if (empty($columns) || !is_array($columns)) {
+        if (empty($columns)) {
             $columns = $this->_getDefaultAttributes();
         }
 
