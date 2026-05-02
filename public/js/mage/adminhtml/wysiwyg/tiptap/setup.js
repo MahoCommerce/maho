@@ -128,11 +128,13 @@ class tiptapWysiwygSetup {
     }
 
     convertToPlain(content) {
-        // ProseMirror's schema requires a trailing block node, so editor.getHTML()
-        // always emits a trailing <p></p>. Strip empty trailing paragraphs so they
-        // don't leak into saved content.
+        // ProseMirror's schema requires the cursor to live inside a block node, so
+        // editor.getHTML() emits a trailing empty <p></p> that's just "where the
+        // cursor is parked" — not content. Strip a single trailing empty paragraph
+        // so it doesn't leak into saved content. User-authored blank lines (a
+        // second Enter beyond the cursor's home paragraph) survive.
         const doc = new DOMParser().parseFromString(content, 'text/html');
-        while (doc.body.lastElementChild?.tagName === 'P'
+        if (doc.body.lastElementChild?.tagName === 'P'
             && doc.body.lastElementChild.innerHTML.trim() === '') {
             doc.body.lastElementChild.remove();
         }
