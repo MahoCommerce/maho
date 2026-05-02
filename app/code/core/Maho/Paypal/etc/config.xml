@@ -11,7 +11,7 @@
 <config>
     <modules>
         <Maho_Paypal>
-            <version>1.0.1</version>
+            <version>6.0.0</version>
         </Maho_Paypal>
     </modules>
 
@@ -38,7 +38,6 @@
             <paypal_setup>
                 <setup>
                     <module>Maho_Paypal</module>
-                    <class>Maho_Paypal_Model_Resource_Setup</class>
                 </setup>
             </paypal_setup>
         </resources>
