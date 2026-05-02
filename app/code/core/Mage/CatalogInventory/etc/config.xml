@@ -12,7 +12,7 @@
 <config>
     <modules>
         <Mage_CatalogInventory>
-            <version>1.6.0.0.2</version>
+            <version>1.6.0.0.3</version>
         </Mage_CatalogInventory>
     </modules>
     <global>
