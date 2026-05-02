@@ -57,7 +57,7 @@ class Maho_Paypal_Model_Webhook_Handler_OrderApproved extends Maho_Paypal_Model_
             $intent = $config->getNewPaymentAction($methodCode, (int) $quote->getStoreId());
 
             /** @var Maho_Paypal_Model_Api_Client $client */
-            $client = Mage::getModel('maho_paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
+            $client = Mage::getModel('paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
 
             if ($intent === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE) {
                 $paypalResult = $client->captureOrder($paypalOrderId);

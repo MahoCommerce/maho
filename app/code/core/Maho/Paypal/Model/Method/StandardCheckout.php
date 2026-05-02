@@ -14,7 +14,7 @@ class Maho_Paypal_Model_Method_StandardCheckout extends Maho_Paypal_Model_Method
 {
     protected $_code = Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT;
 
-    protected $_formBlockType = 'maho_paypal/checkout_standard_form';
+    protected $_formBlockType = 'paypal/checkout_standard_form';
 
     protected $_canUseInternal = false;
     protected $_canReviewPayment = false;

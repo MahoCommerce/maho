@@ -44,7 +44,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             $storeId = $quote->getStoreId() ? (int) $quote->getStoreId() : null;
 
             /** @var Maho_Paypal_Model_Api_Client $client */
-            $client = Mage::getModel('maho_paypal/api_client', ['store_id' => $storeId]);
+            $client = Mage::getModel('paypal/api_client', ['store_id' => $storeId]);
             $clientToken = $client->generateClientToken();
 
             $result['success'] = true;
@@ -64,12 +64,12 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 
         try {
             if (!$this->_validateFormKey()) {
-                Mage::throwException(Mage::helper('maho_paypal')->__('Invalid form key.'));
+                Mage::throwException(Mage::helper('paypal')->__('Invalid form key.'));
             }
 
             $quote = Mage::getSingleton('checkout/session')->getQuote();
             if (!$quote->getId() || !$quote->getItemsCount()) {
-                Mage::throwException(Mage::helper('maho_paypal')->__('Cart is empty.'));
+                Mage::throwException(Mage::helper('paypal')->__('Cart is empty.'));
             }
 
             $methodCode = $this->_validateMethodCode(
@@ -96,7 +96,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             $vaultSourceType = null;
             if ($vaultTokenId && $methodCode === Maho_Paypal_Model_Config::METHOD_VAULT) {
                 /** @var Maho_Paypal_Model_Vault_Token $vaultToken */
-                $vaultToken = Mage::getModel('maho_paypal/vault_token')->load($vaultTokenId);
+                $vaultToken = Mage::getModel('paypal/vault_token')->load($vaultTokenId);
                 if ($vaultToken->getId() && $vaultToken->getIsActive()
                     && (int) $vaultToken->getCustomerId() === (int) $quote->getCustomerId()) {
                     $vaultPaypalTokenId = $vaultToken->getPaypalTokenId();
@@ -105,7 +105,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             }
 
             /** @var Maho_Paypal_Model_Api_OrderBuilder $builder */
-            $builder = Mage::getModel('maho_paypal/api_orderBuilder');
+            $builder = Mage::getModel('paypal/api_orderBuilder');
 
             $returnUrl = null;
             $cancelUrl = null;
@@ -128,7 +128,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             );
 
             /** @var Maho_Paypal_Model_Api_Client $client */
-            $client = Mage::getModel('maho_paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
+            $client = Mage::getModel('paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
             $paypalOrder = $client->createOrder(['body' => $orderRequest]);
 
             $paypalOrderId = $paypalOrder['id'] ?? null;
@@ -136,8 +136,8 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                 Mage::log('PayPal createOrder response: ' . Mage::helper('core')->jsonEncode($paypalOrder), Mage::LOG_ERROR, 'paypal.log');
                 $apiMessage = $paypalOrder['message'] ?? $paypalOrder['details'][0]['description'] ?? '';
                 $errorMsg = $apiMessage
-                    ? Mage::helper('maho_paypal')->__('Failed to create PayPal order: %s', $apiMessage)
-                    : Mage::helper('maho_paypal')->__('Failed to create PayPal order.');
+                    ? Mage::helper('paypal')->__('Failed to create PayPal order: %s', $apiMessage)
+                    : Mage::helper('paypal')->__('Failed to create PayPal order.');
                 Mage::throwException($errorMsg);
             }
 
@@ -179,13 +179,13 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 
         try {
             if (!$this->_validateFormKey()) {
-                Mage::throwException(Mage::helper('maho_paypal')->__('Invalid form key.'));
+                Mage::throwException(Mage::helper('paypal')->__('Invalid form key.'));
             }
 
             $quote = Mage::getSingleton('checkout/session')->getQuote();
 
             if (!$quote->getIsActive()) {
-                Mage::throwException(Mage::helper('maho_paypal')->__('This order has already been placed.'));
+                Mage::throwException(Mage::helper('paypal')->__('This order has already been placed.'));
             }
 
             // Prefer the PayPal order ID sent by the frontend (the one the user actually
@@ -215,7 +215,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             } elseif ($storedPaypalOrderId) {
                 $paypalOrderId = $storedPaypalOrderId;
             } else {
-                Mage::throwException(Mage::helper('maho_paypal')->__('Missing PayPal order ID.'));
+                Mage::throwException(Mage::helper('paypal')->__('Missing PayPal order ID.'));
             }
             $methodCode = $this->_validateMethodCode(
                 $this->getRequest()->getParam('method', Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT),
@@ -225,7 +225,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             $lock = Mage_Index_Model_Lock::getInstance();
             $lockName = 'paypal_order_' . $paypalOrderId;
             if (!$lock->setLock($lockName, file: true, block: true)) {
-                Mage::throwException(Mage::helper('maho_paypal')->__('Could not acquire order lock.'));
+                Mage::throwException(Mage::helper('paypal')->__('Could not acquire order lock.'));
             }
 
             try {
@@ -238,7 +238,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                     $orderPayments->setPageSize(1);
                     $orderPayment = $orderPayments->getFirstItem();
                     if (!$orderPayment->getId()) {
-                        Mage::throwException(Mage::helper('maho_paypal')->__('Quote is no longer active and no matching order was found.'));
+                        Mage::throwException(Mage::helper('paypal')->__('Quote is no longer active and no matching order was found.'));
                     }
                     // Webhook placed the order while we waited for the lock — populate
                     // checkout session so the success page renders instead of redirecting to cart
@@ -258,7 +258,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                     $intent = $config->getNewPaymentAction($methodCode);
 
                     /** @var Maho_Paypal_Model_Api_Client $client */
-                    $client = Mage::getModel('maho_paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
+                    $client = Mage::getModel('paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
 
                     // Fetch current order status (include payment details in case it's already completed)
                     $paypalResult = $client->getOrder($paypalOrderId, 'purchase_units.payments');
@@ -276,10 +276,10 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                     }
 
                     if (!in_array($status, ['COMPLETED', 'APPROVED'])) {
-                        Mage::throwException(Mage::helper('maho_paypal')->__('PayPal order could not be approved. Status: %s', $status));
+                        Mage::throwException(Mage::helper('paypal')->__('PayPal order could not be approved. Status: %s', $status));
                     }
 
-                    Mage::helper('maho_paypal')->placeOrderFromPaypalResult($quote, $paypalResult, $methodCode, $intent);
+                    Mage::helper('paypal')->placeOrderFromPaypalResult($quote, $paypalResult, $methodCode, $intent);
 
                     $result['success'] = true;
                     $result['redirect_url'] = Mage::getUrl('checkout/onepage/success', ['_secure' => true]);
@@ -352,7 +352,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             $currency = $quote->getBaseCurrencyCode();
 
             /** @var Maho_Paypal_Model_Api_OrderBuilder $builder */
-            $builder = Mage::getModel('maho_paypal/api_orderBuilder');
+            $builder = Mage::getModel('paypal/api_orderBuilder');
             $breakdown = $builder->buildBreakdown($quote, $currency);
 
             $amount = [
@@ -405,7 +405,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             Maho_Paypal_Model_Config::METHOD_VAULT,
         ];
         if (!in_array($methodCode, $allowed, true)) {
-            Mage::throwException(Mage::helper('maho_paypal')->__('Invalid payment method.'));
+            Mage::throwException(Mage::helper('paypal')->__('Invalid payment method.'));
         }
         return $methodCode;
     }

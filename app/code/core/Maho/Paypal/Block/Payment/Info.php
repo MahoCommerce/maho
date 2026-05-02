@@ -29,48 +29,48 @@ class Maho_Paypal_Block_Payment_Info extends Mage_Payment_Block_Info
 
         $paypalOrderId = $info->getAdditionalInformation('paypal_order_id');
         if ($paypalOrderId) {
-            $data[Mage::helper('maho_paypal')->__('PayPal Order ID')] = $paypalOrderId;
+            $data[Mage::helper('paypal')->__('PayPal Order ID')] = $paypalOrderId;
         }
 
         $payerEmail = $info->getAdditionalInformation('payer_email');
         if ($payerEmail) {
-            $data[Mage::helper('maho_paypal')->__('Payer Email')] = $payerEmail;
+            $data[Mage::helper('paypal')->__('Payer Email')] = $payerEmail;
         }
 
         $payerId = $info->getAdditionalInformation('payer_id');
         if ($payerId) {
-            $data[Mage::helper('maho_paypal')->__('Payer ID')] = $payerId;
+            $data[Mage::helper('paypal')->__('Payer ID')] = $payerId;
         }
 
         $authId = $info->getAdditionalInformation('paypal_authorization_id');
         if ($authId) {
-            $data[Mage::helper('maho_paypal')->__('Authorization ID')] = $authId;
+            $data[Mage::helper('paypal')->__('Authorization ID')] = $authId;
         }
 
         $captureId = $info->getAdditionalInformation('paypal_capture_id');
         if ($captureId) {
-            $data[Mage::helper('maho_paypal')->__('Capture ID')] = $captureId;
+            $data[Mage::helper('paypal')->__('Capture ID')] = $captureId;
         }
 
         if (!$this->getIsSecureMode()) {
             $avs = $info->getAdditionalInformation('avs_code');
             if ($avs) {
-                $data[Mage::helper('maho_paypal')->__('AVS Code')] = $avs;
+                $data[Mage::helper('paypal')->__('AVS Code')] = $avs;
             }
 
             $cvv = $info->getAdditionalInformation('cvv_code');
             if ($cvv) {
-                $data[Mage::helper('maho_paypal')->__('CVV Code')] = $cvv;
+                $data[Mage::helper('paypal')->__('CVV Code')] = $cvv;
             }
 
             $processorCode = $info->getAdditionalInformation('processor_response_code');
             if ($processorCode) {
-                $data[Mage::helper('maho_paypal')->__('Processor Response')] = $processorCode;
+                $data[Mage::helper('paypal')->__('Processor Response')] = $processorCode;
             }
 
             $threeDSecure = $info->getAdditionalInformation('three_d_secure');
             if ($threeDSecure) {
-                $data[Mage::helper('maho_paypal')->__('3D Secure')] = is_array($threeDSecure)
+                $data[Mage::helper('paypal')->__('3D Secure')] = is_array($threeDSecure)
                     ? Mage::helper('core')->jsonEncode($threeDSecure)
                     : $threeDSecure;
             }
@@ -78,7 +78,7 @@ class Maho_Paypal_Block_Payment_Info extends Mage_Payment_Block_Info
 
         $vaultLabel = $info->getAdditionalInformation('vault_label');
         if ($vaultLabel) {
-            $data[Mage::helper('maho_paypal')->__('Saved Payment')] = $vaultLabel;
+            $data[Mage::helper('paypal')->__('Saved Payment')] = $vaultLabel;
         }
 
         return $transport->addData($data);

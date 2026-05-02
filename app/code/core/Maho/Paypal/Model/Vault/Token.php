@@ -15,7 +15,7 @@ class Maho_Paypal_Model_Vault_Token extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _construct(): void
     {
-        $this->_init('maho_paypal/vault_token');
+        $this->_init('paypal/vault_token');
     }
 
     #[\Override]
@@ -45,6 +45,6 @@ class Maho_Paypal_Model_Vault_Token extends Mage_Core_Model_Abstract
             return "PayPal ({$this->getPayerEmail()})";
         }
 
-        return Mage::helper('maho_paypal')->__('Saved Payment Method');
+        return Mage::helper('paypal')->__('Saved Payment Method');
     }
 }

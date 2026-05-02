@@ -67,7 +67,7 @@ class Maho_Paypal_Block_Shortcut_Button extends Mage_Core_Block_Template
             return $result;
         }
 
-        $this->setShortcutHtmlId(Mage::helper('core')->uniqHash('maho_paypal_shortcut_'));
+        $this->setShortcutHtmlId(Mage::helper('core')->uniqHash('paypal_shortcut_'));
 
         return $result;
     }

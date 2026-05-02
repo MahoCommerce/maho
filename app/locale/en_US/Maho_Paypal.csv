@@ -34,7 +34,6 @@
 "iDEAL","iDEAL"
 "Invalid form key.","Invalid form key."
 "Invalid payment method.","Invalid payment method."
-"Legacy PayPal payment methods are active (%s). Consider migrating to the new PayPal integration under System > Configuration > Payment Methods.","Legacy PayPal payment methods are active (%s). Consider migrating to the new PayPal integration under System > Configuration > Payment Methods."
 "Log API requests and responses to var/log/paypal.log","Log API requests and responses to var/log/paypal.log"
 "Maho PayPal","Maho PayPal"
 "Missing PayPal order ID.","Missing PayPal order ID."

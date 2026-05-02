@@ -44,17 +44,17 @@ class Maho_Paypal_VaultController extends Mage_Core_Controller_Front_Action
 
         try {
             /** @var Maho_Paypal_Model_Vault_Token $token */
-            $token = Mage::getModel('maho_paypal/vault_token')->load($tokenId);
+            $token = Mage::getModel('paypal/vault_token')->load($tokenId);
 
             if (!$token->getId() || (int) $token->getCustomerId() !== $customerId) {
-                Mage::throwException(Mage::helper('maho_paypal')->__('Invalid payment method.'));
+                Mage::throwException(Mage::helper('paypal')->__('Invalid payment method.'));
             }
 
             // Delete from PayPal first, then remove locally
             $paypalDeleteSucceeded = false;
             try {
                 /** @var Maho_Paypal_Model_Api_Client $client */
-                $client = Mage::getModel('maho_paypal/api_client');
+                $client = Mage::getModel('paypal/api_client');
                 $client->deletePaymentToken($token->getPaypalTokenId());
                 $paypalDeleteSucceeded = true;
             } catch (\Throwable $e) {
@@ -70,11 +70,11 @@ class Maho_Paypal_VaultController extends Mage_Core_Controller_Front_Action
             }
 
             Mage::getSingleton('customer/session')->addSuccess(
-                Mage::helper('maho_paypal')->__('Payment method has been deleted.'),
+                Mage::helper('paypal')->__('Payment method has been deleted.'),
             );
         } catch (\Throwable $e) {
             Mage::getSingleton('customer/session')->addError(
-                Mage::helper('maho_paypal')->__('Unable to delete payment method.'),
+                Mage::helper('paypal')->__('Unable to delete payment method.'),
             );
             Mage::logException($e);
         }
