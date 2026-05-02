@@ -14,51 +14,29 @@ declare(strict_types=1);
 $installer = $this;
 $installer->startSetup();
 
-// Force explicit DEFAULT on TYPE_TIMESTAMP columns originally declared without one.
-// On MySQL with `explicit_defaults_for_timestamp = OFF` such TIMESTAMP NOT NULL columns
-// silently receive `DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP`, which is
-// engine-specific (PgSQL/SQLite don't do it). See issue #857.
+// Replace DBAL's implicit `DEFAULT '0000-00-00 00:00:00'` / MySQL's implicit
+// `ON UPDATE CURRENT_TIMESTAMP` on TIMESTAMP columns with explicit defaults.
+// MySQL-only: PgSQL/SQLite never emit either. See issue #857.
 if ($installer->getConnection() instanceof \Maho\Db\Adapter\Pdo\Mysql) {
-    $installer->getConnection()->modifyColumn(
-        $installer->getTable('productalert/price'),
-        'add_date',
-        [
-            'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
-            'nullable' => true,
-            'default'  => null,
-            'comment'  => 'Product alert add date',
-        ],
-    );
-    $installer->getConnection()->modifyColumn(
-        $installer->getTable('productalert/price'),
-        'last_send_date',
-        [
-            'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
-            'nullable' => true,
-            'default'  => null,
-            'comment'  => 'Product alert last send date',
-        ],
-    );
-    $installer->getConnection()->modifyColumn(
-        $installer->getTable('productalert/stock'),
-        'add_date',
-        [
-            'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
-            'nullable' => true,
-            'default'  => null,
-            'comment'  => 'Product alert add date',
-        ],
-    );
-    $installer->getConnection()->modifyColumn(
-        $installer->getTable('productalert/stock'),
-        'send_date',
-        [
-            'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
-            'nullable' => true,
-            'default'  => null,
-            'comment'  => 'Product alert send date',
-        ],
-    );
+    $columns = [
+        ['productalert/price', 'add_date',       true,  null,                                     'Product alert add date'],
+        ['productalert/price', 'last_send_date', true,  null,                                     'Product alert last send date'],
+        ['productalert/stock', 'add_date',       true,  null,                                     'Product alert add date'],
+        ['productalert/stock', 'send_date',      true,  null,                                     'Product alert send date'],
+    ];
+
+    foreach ($columns as [$table, $column, $nullable, $default, $comment]) {
+        $installer->getConnection()->modifyColumn(
+            $installer->getTable($table),
+            $column,
+            [
+                'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
+                'nullable' => $nullable,
+                'default'  => $default,
+                'comment'  => $comment,
+            ],
+        );
+    }
 }
 
 $installer->endSetup();
