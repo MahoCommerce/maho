@@ -137,7 +137,6 @@ All Zend Framework and Varien components have been completely removed. **NEVER**
 - When overriding admin routes in Maho modules, use `before="Mage_Adminhtml"` pattern
 
 ### Modifying Existing Features
-- Do not increment module version in `config.xml`
 - Feel free to modify core files directly
 - Avoid creating a new module unless asked for it
 
