@@ -30,11 +30,7 @@ if ($installer->getConnection() instanceof \Maho\Db\Adapter\Pdo\Mysql) {
         $installer->getConnection()->modifyColumn(
             $table,
             'updated_at',
-            [
-                'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
-                'nullable' => false,
-                'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
-            ],
+            ['default' => Maho\Db\Ddl\Table::TIMESTAMP_INIT],
         );
     }
 }

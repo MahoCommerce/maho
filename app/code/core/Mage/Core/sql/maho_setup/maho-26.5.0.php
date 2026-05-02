@@ -23,22 +23,12 @@ if ($installer->getConnection() instanceof \Maho\Db\Adapter\Pdo\Mysql) {
     $installer->getConnection()->modifyColumn(
         $installer->getTable('core/flag'),
         'last_update',
-        [
-            'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
-            'nullable' => false,
-            'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
-            'comment'  => 'Date of Last Flag Update',
-        ],
+        ['default' => Maho\Db\Ddl\Table::TIMESTAMP_INIT],
     );
     $installer->getConnection()->modifyColumn(
         $installer->getTable('core/config_data'),
         'updated_at',
-        [
-            'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
-            'nullable' => false,
-            'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
-            'comment'  => 'Last Update Time',
-        ],
+        ['default' => Maho\Db\Ddl\Table::TIMESTAMP_INIT],
     );
 }
 

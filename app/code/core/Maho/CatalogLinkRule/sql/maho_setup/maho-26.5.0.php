@@ -23,12 +23,7 @@ if ($installer->getConnection() instanceof \Maho\Db\Adapter\Pdo\Mysql) {
     $installer->getConnection()->modifyColumn(
         $installer->getTable('cataloglinkrule/rule'),
         'updated_at',
-        [
-            'type'     => Table::TYPE_TIMESTAMP,
-            'nullable' => false,
-            'default'  => Table::TIMESTAMP_INIT,
-            'comment'  => 'Updated At',
-        ],
+        ['default' => Table::TIMESTAMP_INIT],
     );
 }
 

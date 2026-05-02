@@ -18,29 +18,27 @@ $installer->startSetup();
 // `ON UPDATE CURRENT_TIMESTAMP` on TIMESTAMP columns with explicit defaults.
 // MySQL-only: PgSQL/SQLite never emit either. See issue #857.
 if ($installer->getConnection() instanceof \Maho\Db\Adapter\Pdo\Mysql) {
+    // Pairs of [tableAlias, columnName, partial-modifyColumn definition].
+    // Most columns become NULLABLE with NULL default; quote_table.created_at keeps NOT NULL
+    // and re-asserts CURRENT_TIMESTAMP (the partial drops the implicit ON UPDATE clause).
     $columns = [
-        ['log/customer',       'login_at',       true,  null,                                     'Login Time'],
-        ['log/customer',       'logout_at',      true,  null,                                     'Logout Time'],
-        ['log/quote_table',    'created_at',     false, Maho\Db\Ddl\Table::TIMESTAMP_INIT,        'Creation Time'],
-        ['log/quote_table',    'deleted_at',     true,  null,                                     'Deletion Time'],
-        ['log/summary_table',  'add_date',       true,  null,                                     'Date'],
-        ['log/url_table',      'visit_time',     true,  null,                                     'Visit Time'],
-        ['log/visitor',        'first_visit_at', true,  null,                                     'First Visit Time'],
-        ['log/visitor',        'last_visit_at',  true,  null,                                     'Last Visit Time'],
-        ['log/visitor_online', 'first_visit_at', true,  null,                                     'First Visit Time'],
-        ['log/visitor_online', 'last_visit_at',  true,  null,                                     'Last Visit Time'],
+        ['log/customer',       'login_at',       ['nullable' => true, 'default' => null]],
+        ['log/customer',       'logout_at',      ['nullable' => true, 'default' => null]],
+        ['log/quote_table',    'created_at',     ['default' => Maho\Db\Ddl\Table::TIMESTAMP_INIT]],
+        ['log/quote_table',    'deleted_at',     ['nullable' => true, 'default' => null]],
+        ['log/summary_table',  'add_date',       ['nullable' => true, 'default' => null]],
+        ['log/url_table',      'visit_time',     ['nullable' => true, 'default' => null]],
+        ['log/visitor',        'first_visit_at', ['nullable' => true, 'default' => null]],
+        ['log/visitor',        'last_visit_at',  ['nullable' => true, 'default' => null]],
+        ['log/visitor_online', 'first_visit_at', ['nullable' => true, 'default' => null]],
+        ['log/visitor_online', 'last_visit_at',  ['nullable' => true, 'default' => null]],
     ];
 
-    foreach ($columns as [$table, $column, $nullable, $default, $comment]) {
+    foreach ($columns as [$table, $column, $definition]) {
         $installer->getConnection()->modifyColumn(
             $installer->getTable($table),
             $column,
-            [
-                'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
-                'nullable' => $nullable,
-                'default'  => $default,
-                'comment'  => $comment,
-            ],
+            $definition,
         );
     }
 }
