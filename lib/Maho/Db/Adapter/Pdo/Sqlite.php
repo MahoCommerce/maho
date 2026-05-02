@@ -1636,7 +1636,30 @@ class Sqlite extends AbstractPdoAdapter
                     $editor->setNotNull(!$definition['NULLABLE']);
                 }
                 if (array_key_exists('DEFAULT', $definition)) {
-                    $editor->setDefaultValue($definition['DEFAULT']);
+                    $defaultValue = $definition['DEFAULT'];
+                    // Translate Maho's TIMESTAMP_* constants into DBAL default expressions
+                    // so SQLite emits them unquoted (DEFAULT CURRENT_TIMESTAMP, not the
+                    // string literal). SQLite has no ON UPDATE syntax, so the deprecated
+                    // TIMESTAMP_INIT_UPDATE degrades to TIMESTAMP_INIT semantics with a
+                    // deprecation warning. Compared by value so PHPStan doesn't flag the
+                    // adapter itself as using the deprecated symbol.
+                    if ($defaultValue === 'TIMESTAMP_INIT_UPDATE') {
+                        @trigger_error(
+                            'TIMESTAMP_INIT_UPDATE is deprecated because it is MySQL-only (SQLite has no equivalent on-update syntax); use TIMESTAMP_INIT plus an explicit _beforeSave() that sets updated_at for cross-engine parity.',
+                            E_USER_DEPRECATED,
+                        );
+                        $defaultValue = \Maho\Db\Ddl\Table::TIMESTAMP_INIT;
+                    }
+                    if ($defaultValue === \Maho\Db\Ddl\Table::TIMESTAMP_INIT) {
+                        $defaultValue = new \Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp();
+                    } elseif ($defaultValue === \Maho\Db\Ddl\Table::TIMESTAMP_UPDATE) {
+                        // SQLite has no ON UPDATE; closest analog is the literal '0' default,
+                        // matching the MySQL emit ("0 ON UPDATE CURRENT_TIMESTAMP" minus the
+                        // ON UPDATE clause). Application code must update the column via
+                        // _beforeSave() for cross-engine parity.
+                        $defaultValue = '0';
+                    }
+                    $editor->setDefaultValue($defaultValue);
                 }
                 if (isset($definition['LENGTH'])) {
                     $editor->setLength((int) $definition['LENGTH']);

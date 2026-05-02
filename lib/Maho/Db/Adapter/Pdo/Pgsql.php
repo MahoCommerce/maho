@@ -1568,43 +1568,57 @@ class Pgsql extends AbstractPdoAdapter
         $qualifiedTable = $this->quoteIdentifier($this->_getTableName($tableName, $schemaName));
         $quotedColumn = $this->quoteIdentifier($columnName);
 
-        // If definition is an array, we can handle type, nullable, and default separately
+        // If definition is an array, we can handle type, nullable, default and comment
+        // independently — each clause is gated by `array_key_exists` so a partial
+        // definition only modifies the attributes the caller specified.
         if (is_array($definition)) {
             $definition = array_change_key_case($definition, CASE_UPPER);
+
+            // Change the column type only if TYPE/COLUMN_TYPE was provided.
             $ddlType = $this->_getDdlType($definition);
-
-            // Get the type-only definition (without NULL/NOT NULL and DEFAULT)
-            $typeOnly = $this->_getColumnTypeOnly($definition, $ddlType);
-
-            // Change the column type
-            $this->raw_query(sprintf(
-                'ALTER TABLE %s ALTER COLUMN %s TYPE %s USING %s::%s',
-                $qualifiedTable,
-                $quotedColumn,
-                $typeOnly,
-                $quotedColumn,
-                $typeOnly,
-            ));
-
-            // Handle nullability
-            $nullable = !isset($definition['NULLABLE']) || (bool) $definition['NULLABLE'];
-            if ($nullable) {
+            if ($ddlType !== null) {
+                $typeOnly = $this->_getColumnTypeOnly($definition, $ddlType);
                 $this->raw_query(sprintf(
-                    'ALTER TABLE %s ALTER COLUMN %s DROP NOT NULL',
+                    'ALTER TABLE %s ALTER COLUMN %s TYPE %s USING %s::%s',
                     $qualifiedTable,
                     $quotedColumn,
-                ));
-            } else {
-                $this->raw_query(sprintf(
-                    'ALTER TABLE %s ALTER COLUMN %s SET NOT NULL',
-                    $qualifiedTable,
+                    $typeOnly,
                     $quotedColumn,
+                    $typeOnly,
                 ));
             }
 
-            // Handle default value
+            // Handle nullability only if NULLABLE was provided.
+            if (array_key_exists('NULLABLE', $definition)) {
+                $nullable = (bool) $definition['NULLABLE'];
+                if ($nullable) {
+                    $this->raw_query(sprintf(
+                        'ALTER TABLE %s ALTER COLUMN %s DROP NOT NULL',
+                        $qualifiedTable,
+                        $quotedColumn,
+                    ));
+                } else {
+                    $this->raw_query(sprintf(
+                        'ALTER TABLE %s ALTER COLUMN %s SET NOT NULL',
+                        $qualifiedTable,
+                        $quotedColumn,
+                    ));
+                }
+            }
+
+            // Handle default value only if DEFAULT was provided.
             if (array_key_exists('DEFAULT', $definition)) {
                 $default = $definition['DEFAULT'];
+                // PgSQL has no ON UPDATE syntax, so the deprecated TIMESTAMP_INIT_UPDATE
+                // is treated as TIMESTAMP_INIT (DEFAULT CURRENT_TIMESTAMP) and warns.
+                // Compared by value to avoid PHPStan flagging the deprecated symbol here.
+                if ($default === 'TIMESTAMP_INIT_UPDATE') {
+                    @trigger_error(
+                        'TIMESTAMP_INIT_UPDATE is deprecated because it is MySQL-only (PgSQL has no equivalent on-update syntax); use TIMESTAMP_INIT plus an explicit _beforeSave() that sets updated_at for cross-engine parity.',
+                        E_USER_DEPRECATED,
+                    );
+                    $default = \Maho\Db\Ddl\Table::TIMESTAMP_INIT;
+                }
                 if ($default === null || $default === '') {
                     $this->raw_query(sprintf(
                         'ALTER TABLE %s ALTER COLUMN %s DROP DEFAULT',
@@ -1625,6 +1639,17 @@ class Pgsql extends AbstractPdoAdapter
                         $this->quote($default),
                     ));
                 }
+            }
+
+            // Handle comment only if COMMENT was provided. Empty string clears the comment.
+            if (array_key_exists('COMMENT', $definition)) {
+                $comment = (string) $definition['COMMENT'];
+                $this->raw_query(sprintf(
+                    'COMMENT ON COLUMN %s.%s IS %s',
+                    $qualifiedTable,
+                    $quotedColumn,
+                    $comment === '' ? 'NULL' : $this->quote($comment),
+                ));
             }
         } else {
             // String definition - parse out the type only (strip NULL/NOT NULL/DEFAULT/COMMENT)

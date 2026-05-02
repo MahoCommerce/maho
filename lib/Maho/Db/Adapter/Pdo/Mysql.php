@@ -829,7 +829,12 @@ class Mysql extends AbstractPdoAdapter
             throw new \Maho\Db\Exception(sprintf('Column "%s" does not exist in table "%s".', $columnName, $tableName));
         }
         if (is_array($definition)) {
-            $definition = $this->_getColumnDefinition($definition);
+            // MySQL has no surgical primitive — ALTER TABLE ... MODIFY COLUMN always re-emits
+            // the full definition. To preserve attributes the caller omitted, introspect the
+            // current column and merge the partial definition over it.
+            $current = $this->_introspectColumnDefinition($tableName, $columnName, $schemaName);
+            $merged = $this->_mergeColumnDefinition($current, $definition);
+            $definition = $this->_getColumnDefinition($merged);
         }
 
         $sql = sprintf(
@@ -2455,6 +2460,131 @@ class Mysql extends AbstractPdoAdapter
             $this->quote($comment),
             $after ? 'AFTER ' . $this->quoteIdentifier($after) : '',
         );
+    }
+
+    /**
+     * Introspect a column from INFORMATION_SCHEMA and produce a normalized definition
+     * array suitable for `_getColumnDefinition()`.
+     *
+     * Used by `modifyColumn()` to preserve attributes the caller omits from a partial
+     * definition. Translates MySQL-flavored introspection results back to Maho's
+     * internal representation:
+     *  - DATA_TYPE/COLUMN_TYPE → TYPE constant + UNSIGNED flag
+     *  - COLUMN_DEFAULT + EXTRA → DEFAULT value (TIMESTAMP_INIT / TIMESTAMP_UPDATE /
+     *    TIMESTAMP_INIT_UPDATE for the various CURRENT_TIMESTAMP forms)
+     *  - EXTRA `auto_increment` → IDENTITY
+     *  - EXTRA `STORED|VIRTUAL GENERATED` → throws (unsafe to round-trip)
+     *  - COLUMN_COMMENT → COMMENT
+     *  - CHARACTER_MAXIMUM_LENGTH → LENGTH; NUMERIC_PRECISION/SCALE → PRECISION/SCALE
+     *
+     * @return array<string, mixed>
+     * @throws \Maho\Db\Exception
+     */
+    protected function _introspectColumnDefinition(string $tableName, string $columnName, ?string $schemaName = null): array
+    {
+        $sql = sprintf(
+            'SELECT DATA_TYPE, COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT, COLUMN_COMMENT, EXTRA, '
+            . 'CHARACTER_MAXIMUM_LENGTH, NUMERIC_PRECISION, NUMERIC_SCALE '
+            . 'FROM INFORMATION_SCHEMA.COLUMNS '
+            . 'WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s',
+            $schemaName ? $this->quote($schemaName) : 'DATABASE()',
+            $this->quote($tableName),
+            $this->quote($columnName),
+        );
+        $row = $this->raw_fetchRow($sql);
+        if (!is_array($row) || $row === []) {
+            throw new \Maho\Db\Exception(sprintf('Column "%s" does not exist in table "%s".', $columnName, $tableName));
+        }
+
+        $extra = strtoupper((string) ($row['EXTRA'] ?? ''));
+        if (str_contains($extra, 'STORED GENERATED') || str_contains($extra, 'VIRTUAL GENERATED')) {
+            throw new \Maho\Db\Exception(sprintf(
+                'Cannot surgically modify generated column "%s" in table "%s"; drop and re-add the column instead.',
+                $columnName,
+                $tableName,
+            ));
+        }
+
+        $dataType = strtolower((string) $row['DATA_TYPE']);
+        $columnType = (string) ($row['COLUMN_TYPE'] ?? '');
+        $unsigned = stripos($columnType, 'unsigned') !== false;
+        $ddlType = $this->_getColumnTypeByDdl(['DATA_TYPE' => $dataType]);
+
+        $rawDefault = $row['COLUMN_DEFAULT'];
+        $default = $rawDefault;
+        $hasOnUpdateCurrentTs = str_contains($extra, 'ON UPDATE CURRENT_TIMESTAMP');
+        $isCurrentTimestamp = is_string($rawDefault)
+            && preg_match('/^current_timestamp(\s*\(\s*\d*\s*\))?$/i', trim($rawDefault)) === 1;
+
+        if ($ddlType === \Maho\Db\Ddl\Table::TYPE_TIMESTAMP) {
+            if ($isCurrentTimestamp && $hasOnUpdateCurrentTs) {
+                // Round-trip via the deprecated constant value. _getColumnDefinition()
+                // recognizes the literal string 'TIMESTAMP_INIT_UPDATE' and re-emits
+                // CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP. The deprecation warning
+                // will fire on re-emit — that's intended, surfacing the deprecation to
+                // any caller modifying a column that still uses the legacy idiom.
+                $default = 'TIMESTAMP_INIT_UPDATE';
+            } elseif ($isCurrentTimestamp) {
+                $default = \Maho\Db\Ddl\Table::TIMESTAMP_INIT;
+            } elseif ($hasOnUpdateCurrentTs) {
+                $default = \Maho\Db\Ddl\Table::TIMESTAMP_UPDATE;
+            }
+        }
+
+        // MySQL bug: int columns without an explicit default are reported as ''.
+        $intTypes = ['tinyint', 'smallint', 'mediumint', 'int', 'bigint', 'integer'];
+        if ($default === '' && in_array($dataType, $intTypes, true)) {
+            $default = null;
+        }
+
+        $isNullable = strtoupper((string) $row['IS_NULLABLE']) === 'YES';
+        $isAutoIncrement = str_contains($extra, 'AUTO_INCREMENT');
+
+        $definition = [
+            'TYPE' => $ddlType,
+            'NULLABLE' => $isNullable,
+            'COMMENT' => (string) ($row['COLUMN_COMMENT'] ?? ''),
+            'IDENTITY' => $isAutoIncrement,
+            'UNSIGNED' => $unsigned,
+        ];
+
+        // Only include DEFAULT when the column actually has one (or is nullable, where
+        // NULL is a meaningful default). Including DEFAULT=null on a NOT NULL column
+        // would cause _getColumnDefinition() to emit `default NULL`, which MySQL rejects
+        // (e.g. on PRIMARY KEY auto_increment columns).
+        if ($default !== null || $isNullable) {
+            $definition['DEFAULT'] = $default;
+        }
+
+        if ($row['CHARACTER_MAXIMUM_LENGTH'] !== null) {
+            $definition['LENGTH'] = (int) $row['CHARACTER_MAXIMUM_LENGTH'];
+        }
+        if ($ddlType === \Maho\Db\Ddl\Table::TYPE_DECIMAL) {
+            if ($row['NUMERIC_PRECISION'] !== null) {
+                $definition['PRECISION'] = (int) $row['NUMERIC_PRECISION'];
+            }
+            if ($row['NUMERIC_SCALE'] !== null) {
+                $definition['SCALE'] = (int) $row['NUMERIC_SCALE'];
+            }
+        }
+
+        return $definition;
+    }
+
+    /**
+     * Merge a partial column definition over a fully-introspected one. Keys present in
+     * the partial array (case-insensitive) override the current values; absent keys are
+     * preserved. Extra keys in the partial that aren't in the current array (e.g. AFTER)
+     * pass through.
+     *
+     * @param array<string, mixed> $current
+     * @param array<string, mixed> $partial
+     * @return array<string, mixed>
+     */
+    protected function _mergeColumnDefinition(array $current, array $partial): array
+    {
+        $partial = array_change_key_case($partial, CASE_UPPER);
+        return array_merge($current, $partial);
     }
 
     /**

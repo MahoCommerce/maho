@@ -302,6 +302,229 @@ describe('DDL Operations - Column Management', function () {
     });
 });
 
+describe('DDL Operations - modifyColumn (surgical)', function () {
+    // A partial $definition passed to modifyColumn() must only touch the attributes the
+    // caller specified; every other attribute (type, length, nullability, default,
+    // comment) must round-trip unchanged. These tests build a column with all attributes
+    // populated, snapshot describeTable() before, apply a partial modifyColumn, then
+    // assert that only the targeted attribute changed.
+
+    $createBaseTable = function ($adapter, $tableName) {
+        $table = $adapter->newTable($tableName)
+            ->addColumn('id', Table::TYPE_INTEGER, null, ['nullable' => false, 'primary' => true], 'ID')
+            ->addColumn('label', Table::TYPE_TEXT, 64, [
+                'nullable' => false,
+                'default' => 'pending',
+            ], 'Label');
+        $adapter->createTable($table);
+    };
+
+    it('changes only DEFAULT and preserves type, length, nullable', function () use ($createBaseTable) {
+        $createBaseTable($this->adapter, $this->testTableName);
+        $before = $this->adapter->describeTable($this->testTableName)['label'];
+
+        $this->adapter->modifyColumn($this->testTableName, 'label', ['default' => 'queued']);
+
+        $after = $this->adapter->describeTable($this->testTableName)['label'];
+        expect($after['DEFAULT'])->toBe('queued');
+        expect($after['DATA_TYPE'])->toBe($before['DATA_TYPE']);
+        expect($after['LENGTH'])->toBe($before['LENGTH']);
+        expect($after['NULLABLE'])->toBe($before['NULLABLE']);
+    });
+
+    it('changes only NULLABLE and preserves type, length, default', function () use ($createBaseTable) {
+        $createBaseTable($this->adapter, $this->testTableName);
+        $before = $this->adapter->describeTable($this->testTableName)['label'];
+
+        $this->adapter->modifyColumn($this->testTableName, 'label', ['nullable' => true]);
+
+        $after = $this->adapter->describeTable($this->testTableName)['label'];
+        expect($after['NULLABLE'])->toBeTrue();
+        expect($after['DATA_TYPE'])->toBe($before['DATA_TYPE']);
+        expect($after['LENGTH'])->toBe($before['LENGTH']);
+        expect($after['DEFAULT'])->toBe($before['DEFAULT']);
+    });
+
+    it('changes only COMMENT and preserves type, length, nullable, default', function () use ($createBaseTable) {
+        $createBaseTable($this->adapter, $this->testTableName);
+        $before = $this->adapter->describeTable($this->testTableName)['label'];
+
+        $this->adapter->modifyColumn($this->testTableName, 'label', ['comment' => 'New label']);
+
+        $after = $this->adapter->describeTable($this->testTableName)['label'];
+        expect($after['DATA_TYPE'])->toBe($before['DATA_TYPE']);
+        expect($after['LENGTH'])->toBe($before['LENGTH']);
+        expect($after['NULLABLE'])->toBe($before['NULLABLE']);
+        expect($after['DEFAULT'])->toBe($before['DEFAULT']);
+
+        // MySQL exposes COLUMN_COMMENT via INFORMATION_SCHEMA; verify the comment
+        // actually changed there.
+        if ($this->adapter instanceof \Maho\Db\Adapter\Pdo\Mysql) {
+            $comment = $this->adapter->raw_fetchRow(sprintf(
+                "SELECT COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s AND COLUMN_NAME = 'label'",
+                $this->adapter->quote($this->testTableName),
+            ), 'COLUMN_COMMENT');
+            expect($comment)->toBe('New label');
+        }
+    });
+
+    it('widens column with combined NULLABLE+DEFAULT change', function () use ($createBaseTable) {
+        $createBaseTable($this->adapter, $this->testTableName);
+        $before = $this->adapter->describeTable($this->testTableName)['label'];
+
+        $this->adapter->modifyColumn($this->testTableName, 'label', [
+            'nullable' => true,
+            'default' => null,
+        ]);
+
+        $after = $this->adapter->describeTable($this->testTableName)['label'];
+        expect($after['NULLABLE'])->toBeTrue();
+        expect($after['DEFAULT'])->toBeNull();
+        expect($after['DATA_TYPE'])->toBe($before['DATA_TYPE']);
+        expect($after['LENGTH'])->toBe($before['LENGTH']);
+    });
+
+    it('preserves TIMESTAMP CURRENT_TIMESTAMP default through unrelated change', function () {
+        $table = $this->adapter->newTable($this->testTableName)
+            ->addColumn('id', Table::TYPE_INTEGER, null, ['nullable' => false, 'primary' => true], 'ID')
+            ->addColumn('created_at', Table::TYPE_TIMESTAMP, null, [
+                'nullable' => false,
+                'default' => Table::TIMESTAMP_INIT,
+            ], 'Created At');
+        $this->adapter->createTable($table);
+
+        $before = $this->adapter->describeTable($this->testTableName)['created_at'];
+
+        // No-op-ish change: just rewrite NULLABLE to its existing value. Should preserve
+        // the CURRENT_TIMESTAMP default.
+        $this->adapter->modifyColumn($this->testTableName, 'created_at', ['nullable' => false]);
+
+        $after = $this->adapter->describeTable($this->testTableName)['created_at'];
+        expect($after['NULLABLE'])->toBe($before['NULLABLE']);
+        expect($after['DATA_TYPE'])->toBe($before['DATA_TYPE']);
+        // DEFAULT must round-trip identically — losing CURRENT_TIMESTAMP would make the
+        // column non-functional on MySQL.
+        expect($after['DEFAULT'])->toBe($before['DEFAULT']);
+    });
+
+    it('preserves DECIMAL precision and scale through comment-only change', function () {
+        $table = $this->adapter->newTable($this->testTableName)
+            ->addColumn('id', Table::TYPE_INTEGER, null, ['nullable' => false, 'primary' => true], 'ID')
+            ->addColumn('amount', Table::TYPE_DECIMAL, '12,4', [
+                'nullable' => false,
+                'default' => '0.0000',
+            ], 'Amount');
+        $this->adapter->createTable($table);
+
+        $before = $this->adapter->describeTable($this->testTableName)['amount'];
+
+        $this->adapter->modifyColumn($this->testTableName, 'amount', ['comment' => 'New amount']);
+
+        $after = $this->adapter->describeTable($this->testTableName)['amount'];
+        expect($after['PRECISION'])->toBe($before['PRECISION']);
+        expect($after['SCALE'])->toBe($before['SCALE']);
+        expect($after['NULLABLE'])->toBe($before['NULLABLE']);
+        expect((string) $after['DEFAULT'])->toBe((string) $before['DEFAULT']);
+    });
+
+    it('preserves INT UNSIGNED through unrelated change on MySQL', function () {
+        if (!($this->adapter instanceof \Maho\Db\Adapter\Pdo\Mysql)) {
+            $this->markTestSkipped('UNSIGNED is MySQL-only');
+        }
+
+        $table = $this->adapter->newTable($this->testTableName)
+            ->addColumn('id', Table::TYPE_INTEGER, null, ['nullable' => false, 'primary' => true], 'ID')
+            ->addColumn('count', Table::TYPE_INTEGER, null, [
+                'unsigned' => true,
+                'nullable' => false,
+                'default' => 0,
+            ], 'Count');
+        $this->adapter->createTable($table);
+
+        $before = $this->adapter->describeTable($this->testTableName)['count'];
+        expect($before['UNSIGNED'])->toBeTrue();
+
+        $this->adapter->modifyColumn($this->testTableName, 'count', ['comment' => 'Updated comment']);
+
+        $after = $this->adapter->describeTable($this->testTableName)['count'];
+        expect($after['UNSIGNED'])->toBeTrue();
+        expect($after['NULLABLE'])->toBe($before['NULLABLE']);
+        expect((string) $after['DEFAULT'])->toBe((string) $before['DEFAULT']);
+    });
+
+    it('preserves ON UPDATE CURRENT_TIMESTAMP through unrelated change on MySQL', function () {
+        if (!($this->adapter instanceof \Maho\Db\Adapter\Pdo\Mysql)) {
+            $this->markTestSkipped('ON UPDATE CURRENT_TIMESTAMP is MySQL-specific');
+        }
+
+        // Create a column with DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP via
+        // raw SQL — there's no clean DDL Table API for ON UPDATE without using the
+        // deprecated TIMESTAMP_INIT_UPDATE constant, and we want to verify that legacy
+        // columns already in the wild round-trip safely.
+        $this->adapter->raw_query(sprintf(
+            'CREATE TABLE %s (id INT NOT NULL PRIMARY KEY, '
+            . "updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Updated At')",
+            $this->adapter->quoteIdentifier($this->testTableName),
+        ));
+
+        // Suppress the TIMESTAMP_INIT_UPDATE deprecation that fires when the
+        // introspected ON UPDATE CURRENT_TIMESTAMP form round-trips through
+        // _getColumnDefinition(). Use error_reporting() rather than set_error_handler()
+        // so PHPUnit's risky-test detector doesn't flag the test for mutating the
+        // global error handler.
+        $prevLevel = error_reporting(error_reporting() & ~E_USER_DEPRECATED);
+        try {
+            $this->adapter->modifyColumn($this->testTableName, 'updated_at', ['comment' => 'New comment']);
+        } finally {
+            error_reporting($prevLevel);
+        }
+
+        // ON UPDATE CURRENT_TIMESTAMP must survive in INFORMATION_SCHEMA.EXTRA.
+        $extra = $this->adapter->raw_fetchRow(sprintf(
+            "SELECT EXTRA FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s AND COLUMN_NAME = 'updated_at'",
+            $this->adapter->quote($this->testTableName),
+        ), 'EXTRA');
+        expect(stripos((string) $extra, 'on update CURRENT_TIMESTAMP'))->not->toBeFalse();
+    });
+
+    it('preserves auto_increment IDENTITY through unrelated change on MySQL', function () {
+        if (!($this->adapter instanceof \Maho\Db\Adapter\Pdo\Mysql)) {
+            $this->markTestSkipped('IDENTITY round-trip is MySQL-specific via this path');
+        }
+
+        $table = $this->adapter->newTable($this->testTableName)
+            ->addColumn('id', Table::TYPE_INTEGER, null, [
+                'identity' => true,
+                'unsigned' => true,
+                'nullable' => false,
+                'primary' => true,
+            ], 'ID')
+            ->addColumn('name', Table::TYPE_TEXT, 64, ['nullable' => false], 'Name');
+        $this->adapter->createTable($table);
+
+        // Comment-only change to the AUTO_INCREMENT column should not strip auto_increment.
+        $this->adapter->modifyColumn($this->testTableName, 'id', ['comment' => 'Primary key']);
+
+        $describe = $this->adapter->describeTable($this->testTableName);
+        expect($describe['id']['IDENTITY'])->toBeTrue();
+    });
+
+    it('rejects modification of generated columns on MySQL', function () {
+        if (!($this->adapter instanceof \Maho\Db\Adapter\Pdo\Mysql)) {
+            $this->markTestSkipped('Generated columns vary across engines');
+        }
+
+        $this->adapter->raw_query(sprintf(
+            'CREATE TABLE %s (id INT NOT NULL PRIMARY KEY, a INT NOT NULL, '
+            . "b INT GENERATED ALWAYS AS (a + 1) STORED COMMENT 'Computed')",
+            $this->adapter->quoteIdentifier($this->testTableName),
+        ));
+
+        expect(fn() => $this->adapter->modifyColumn($this->testTableName, 'b', ['comment' => 'X']))
+            ->toThrow(\Maho\Db\Exception::class, 'generated column');
+    });
+});
+
 describe('DDL Operations - Index Management', function () {
     it('adds index to existing table', function () {
         $table = $this->adapter->newTable($this->testTableName)
