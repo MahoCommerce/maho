@@ -5,7 +5,7 @@
  *
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2026 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -95,7 +95,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
         }
 
         $ruleId = (int) $this->getRequest()->getParam('tax_calculation_rule_id');
-        $ruleModel = Mage::getSingleton('tax/calculation_rule')->load($ruleId);
+        $ruleModel = Mage::getModel('tax/calculation_rule')->load($ruleId);
         $ruleModel->setData($postData);
         $ruleModel->setCalculateSubtotal($this->getRequest()->getParam('calculate_subtotal', 0));
 
@@ -117,9 +117,9 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
 
             return $this->_redirect('*/*/');
         } catch (Mage_Core_Exception $e) {
-            $session->addError($e->getMessage());
+            $session->addException($e, $e->getMessage());
         } catch (Exception $e) {
-            $session->addError(Mage::helper('tax')->__('An error occurred while saving this tax rule.'));
+            $session->addException($e, Mage::helper('tax')->__('An error occurred while saving this tax rule.'));
         }
 
         Mage::getSingleton('adminhtml/session')->setRuleData($postData);
@@ -180,10 +180,10 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
 
             return;
         } catch (Mage_Core_Exception $e) {
-            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+            Mage::getSingleton('adminhtml/session')->addException($e, $e->getMessage());
         } catch (Exception $e) {
             Mage::getSingleton('adminhtml/session')
-                ->addError(Mage::helper('tax')->__('An error occurred while deleting this tax rule.'));
+                ->addException($e, Mage::helper('tax')->__('An error occurred while deleting this tax rule.'));
         }
 
         $this->_redirectReferer();
