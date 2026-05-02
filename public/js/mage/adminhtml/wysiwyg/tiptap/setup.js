@@ -128,6 +128,16 @@ class tiptapWysiwygSetup {
     }
 
     convertToPlain(content) {
+        // ProseMirror's schema requires a trailing block node, so editor.getHTML()
+        // always emits a trailing <p></p>. Strip empty trailing paragraphs so they
+        // don't leak into saved content.
+        const doc = new DOMParser().parseFromString(content, 'text/html');
+        while (doc.body.lastElementChild?.tagName === 'P'
+            && doc.body.lastElementChild.innerHTML.trim() === '') {
+            doc.body.lastElementChild.remove();
+        }
+        content = doc.body.innerHTML;
+
         // TipTap generates minified HTML, so when switching to the plain editor beautify it
         content = html_beautify(content, { indent_size: 4 });
 
