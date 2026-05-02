@@ -19,26 +19,23 @@ $installer->startSetup();
 // declared without one so MySQL's `explicit_defaults_for_timestamp = OFF` cannot silently inject
 // `DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP` (#857).
 if ($installer->getConnection() instanceof \Maho\Db\Adapter\Pdo\Mysql) {
-    $installer->getConnection()->modifyColumn(
-        $installer->getTable('maho_paypal/vault_token'),
-        'updated_at',
-        [
-            'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
-            'nullable' => false,
-            'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
-            'comment'  => 'Updated At',
-        ],
-    );
-    $installer->getConnection()->modifyColumn(
-        $installer->getTable('maho_paypal/webhook_event'),
-        'processed_at',
-        [
-            'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
-            'nullable' => true,
-            'default'  => null,
-            'comment'  => 'Processed At',
-        ],
-    );
+    $columns = [
+        ['maho_paypal/vault_token',    'updated_at',   false, Maho\Db\Ddl\Table::TIMESTAMP_INIT, 'Updated At'],
+        ['maho_paypal/webhook_event',  'processed_at', true,  null,                              'Processed At'],
+    ];
+
+    foreach ($columns as [$table, $column, $nullable, $default, $comment]) {
+        $installer->getConnection()->modifyColumn(
+            $installer->getTable($table),
+            $column,
+            [
+                'type'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
+                'nullable' => $nullable,
+                'default'  => $default,
+                'comment'  => $comment,
+            ],
+        );
+    }
 }
 
 $installer->endSetup();
