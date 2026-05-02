@@ -27,7 +27,10 @@ class Maho_Paypal_Model_Resource_Setup extends Mage_Core_Model_Resource_Setup
      *   for the new `paypal_setup` matches what `maho_paypal_setup` produced, so simply renaming
      *   the row preserves history without re-running install scripts.
      * - The deleted Mage_Paypal module also owned the `paypal_setup` resource at version 1.6.x.
-     *   Drop its tables and reset the row so the new install pipeline runs cleanly.
+     *   Reset its row so the new install pipeline runs cleanly. The legacy module's tables
+     *   (paypal_api_debug, paypal_settlement_report*, paypal_cert) are deliberately left in place
+     *   — settlement reports / cert blobs may have audit value, dropping them is the merchant's
+     *   call. See the release notes for guidance.
      */
     private function _migrateLegacyResourceRow(): void
     {
@@ -40,16 +43,11 @@ class Maho_Paypal_Model_Resource_Setup extends Mage_Core_Model_Resource_Setup
             return;
         }
 
-        // Legacy Mage_Paypal: drop its tables and clear its core_resource row.
+        // Legacy Mage_Paypal: clear its core_resource row so the new install pipeline runs.
         $paypalRow = $conn->fetchRow(
             $conn->select()->from($coreResource)->where('code = ?', 'paypal_setup'),
         );
         if ($paypalRow && version_compare((string) ($paypalRow['version'] ?? '0'), '1.6.0.0', '>=')) {
-            foreach (['paypal_api_debug', 'paypal_settlement_report_row', 'paypal_settlement_report', 'paypal_cert'] as $tbl) {
-                if ($conn->isTableExists($tbl)) {
-                    $conn->dropTable($tbl);
-                }
-            }
             $conn->delete($coreResource, ['code = ?' => 'paypal_setup']);
         }
 

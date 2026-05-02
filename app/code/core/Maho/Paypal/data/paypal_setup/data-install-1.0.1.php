@@ -17,12 +17,11 @@ $installer->startSetup();
 $conn = $installer->getConnection();
 $tbl  = $installer->getTable('core/config_data');
 
-// Drop stale legacy Mage_Paypal config rows under 'paypal/...'.
-// The deleted Mage_Paypal module wrote here; its keys never overlap with the new
-// Maho_Paypal keys we're about to migrate in, so it's safe to clear the namespace.
-$conn->delete($tbl, ['path LIKE ?' => 'paypal/%']);
-
-// Migrate Maho_Paypal config from 'maho_paypal/...' to 'paypal/...'.
+// Migrate Maho_Paypal config from 'maho_paypal/...' to 'paypal/...'. Legacy Mage_Paypal
+// rows under paypal/... are deliberately left in place — its surviving keys (account/...,
+// general/business_account, general/merchant_country, wpp/..., paypal_payment_*) and
+// Maho_Paypal's renamed keys (credentials/*, general/paylater_*) live under disjoint
+// sub-paths, so the UNIQUE (scope, scope_id, path) constraint can't fire on the rename.
 $conn->update(
     $tbl,
     ['path' => new Maho\Db\Expr("REPLACE(path, 'maho_paypal/', 'paypal/')")],
