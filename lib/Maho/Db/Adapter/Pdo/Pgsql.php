@@ -103,6 +103,7 @@ class Pgsql extends AbstractPdoAdapter
         $this->_connection->executeStatement("SET client_encoding = 'UTF8'");
         // Set standard conforming strings
         $this->_connection->executeStatement('SET standard_conforming_strings = on');
+        $this->_connection->executeStatement("SET TIME ZONE 'UTC'");
     }
 
     /**

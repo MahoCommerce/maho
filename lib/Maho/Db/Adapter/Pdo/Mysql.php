@@ -132,6 +132,7 @@ class Mysql extends AbstractPdoAdapter
     {
         /** @link http://bugs.mysql.com/bug.php?id=18551 */
         $this->_connection->executeStatement("SET SQL_MODE=''");
+        $this->_connection->executeStatement("SET time_zone = '+00:00'");
     }
 
     /**
