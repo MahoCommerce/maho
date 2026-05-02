@@ -3814,6 +3814,8 @@ $table = $installer->getConnection()
     ->addColumn('subscriber_name', Maho\Db\Ddl\Table::TYPE_TEXT, 150, [
     ], 'Subscriber Name')
     ->addColumn('start_datetime', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
+        'nullable' => false,
+        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Start Datetime')
     ->addColumn('internal_reference_id', Maho\Db\Ddl\Table::TYPE_TEXT, 42, [
         'nullable'  => false,
