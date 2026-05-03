@@ -277,7 +277,8 @@ class Maho_Blog_Model_Observer
 
     protected function getBlogPostsForSitemap(int $storeId): array
     {
-        $today = Mage::app()->getLocale()->todayUtc();
+        // publish_date is admin-entered as store-local — compare against today in the target store's TZ
+        $today = Mage::app()->getLocale()->utcToStore(Mage::app()->getStore($storeId))->format(Mage_Core_Model_Locale::DATE_FORMAT);
 
         /** @var Maho_Blog_Model_Resource_Post_Collection $collection */
         $collection = Mage::getResourceModel('blog/post_collection')

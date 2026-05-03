@@ -170,9 +170,9 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         $isActive = $coreHelper->filterInt($object->getData('is_active') ?? 0) ? 1 : 0;
         $object->setData('is_active', $isActive);
 
-        // Validate publish_date and set to today if empty/invalid
+        // Validate publish_date and set to today (in store TZ — matches admin's view) if empty/invalid
         if (!$object->hasData('publish_date') || empty($object->getData('publish_date')) || !$coreHelper->isValidDate($object->getData('publish_date'))) {
-            $object->setData('publish_date', Mage::app()->getLocale()->todayUtc());
+            $object->setData('publish_date', Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT));
         }
 
         // Filter HTML content
