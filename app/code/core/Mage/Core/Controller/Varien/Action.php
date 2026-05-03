@@ -464,7 +464,7 @@ abstract class Mage_Core_Controller_Varien_Action
             return;
         }
 
-        Mage::dispatchEvent('controller_action_predispatch_start_session', ['controller_action' => $this]);
+        Mage::dispatchEvent('controller_action_predispatch_session_start', ['controller_action' => $this]);
 
         if (!$this->getFlag('', self::FLAG_NO_START_SESSION)) {
             Mage::getSingleton('core/session', ['name' => $this->_sessionNamespace])->start();
