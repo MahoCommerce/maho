@@ -28,14 +28,17 @@ class Table
     public const TYPE_DATE             = 'date';
     public const TYPE_DATETIME         = 'datetime';
     /**
-     * @deprecated Use TYPE_DATETIME. Kept as a value-equal alias for source-compat with
-     * historical install scripts and third-party modules. Both physically create a MySQL
-     * `datetime` column — Doctrine DBAL's column model conflates TIMESTAMP and DATETIME,
-     * silently rewriting TIMESTAMP→DATETIME on diff, and Maho forces session TZ to UTC
-     * on connect (#861) which makes TIMESTAMP's TZ auto-conversion a no-op anyway.
-     * `DEFAULT CURRENT_TIMESTAMP` and `ON UPDATE CURRENT_TIMESTAMP` (the original
-     * features that justified TIMESTAMP) are supported on DATETIME on MySQL 5.6+ /
-     * MariaDB 10.0+.
+     * Value-equal alias for TYPE_DATETIME — both physically create a MySQL `datetime`
+     * column. Kept for source-compat with historical install scripts and third-party
+     * modules; new code should prefer TYPE_DATETIME for clarity. Doctrine DBAL's column
+     * model conflates TIMESTAMP and DATETIME and silently rewrites TIMESTAMP→DATETIME
+     * on diff, and Maho forces session TZ to UTC on connect (#861) which makes
+     * TIMESTAMP's TZ auto-conversion a no-op anyway. `DEFAULT CURRENT_TIMESTAMP` and
+     * `ON UPDATE CURRENT_TIMESTAMP` (the features that justified TIMESTAMP) are
+     * supported on DATETIME since MySQL 5.6 / MariaDB 10.0.
+     *
+     * Not formally @deprecated to avoid flooding PHPStan with warnings on the dozens
+     * of immutable historical install scripts that already use this constant.
      */
     public const TYPE_TIMESTAMP        = self::TYPE_DATETIME;
     public const TYPE_TEXT             = 'text';
