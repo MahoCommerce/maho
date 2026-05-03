@@ -49,9 +49,7 @@ class Mysql extends AbstractPdoAdapter
         \Maho\Db\Ddl\Table::TYPE_FLOAT         => 'float',
         \Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'decimal',
         \Maho\Db\Ddl\Table::TYPE_DATE          => 'date',
-        // TYPE_TIMESTAMP is a deprecated value-equal alias for TYPE_DATETIME (see
-        // Table::TYPE_TIMESTAMP docblock for the migration rationale), so a single map
-        // entry covers both.
+        // TYPE_TIMESTAMP aliases TYPE_DATETIME — single entry covers both.
         \Maho\Db\Ddl\Table::TYPE_DATETIME      => 'datetime',
         \Maho\Db\Ddl\Table::TYPE_TEXT          => 'text',
         \Maho\Db\Ddl\Table::TYPE_VARCHAR       => 'varchar',
@@ -844,7 +842,7 @@ class Mysql extends AbstractPdoAdapter
             ));
         } else {
             $definition = array_change_key_case($definition, CASE_UPPER);
-            $this->_assertColumnIsNotGenerated($tableName, $columnName, $schemaName);
+            $this->_assertColumnIsSafeToModify($tableName, $columnName, $schemaName);
             $this->_applySurgicalColumnModification($tableName, $columnName, $definition, $schemaName);
         }
 
@@ -857,11 +855,13 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
-     * Refuse to surgically modify a generated column — DBAL's diff would silently strip
-     * the GENERATED expression and rewrite the column as a plain default-NULL data
-     * column. Callers must drop and re-add the column instead.
+     * Pre-flight checks before handing a column to DBAL's surgical diff:
+     * - throws on generated columns (DBAL would strip the GENERATED expression and
+     *   rewrite the column as a plain default-NULL data column)
+     * - emits an E_USER_DEPRECATED notice when a legacy ON UPDATE CURRENT_TIMESTAMP
+     *   clause is about to be silently dropped (DBAL has no on-update concept)
      */
-    protected function _assertColumnIsNotGenerated(string $tableName, string $columnName, ?string $schemaName = null): void
+    protected function _assertColumnIsSafeToModify(string $tableName, string $columnName, ?string $schemaName = null): void
     {
         $sql = sprintf(
             'SELECT EXTRA FROM INFORMATION_SCHEMA.COLUMNS '
@@ -871,6 +871,7 @@ class Mysql extends AbstractPdoAdapter
             $this->quote($columnName),
         );
         $extra = strtoupper((string) $this->raw_fetchRow($sql, 'EXTRA'));
+
         if (str_contains($extra, 'STORED GENERATED') || str_contains($extra, 'VIRTUAL GENERATED')) {
             throw new \Maho\Db\Exception(sprintf(
                 'Cannot surgically modify generated column "%s" in table "%s": DBAL would strip '
@@ -878,6 +879,15 @@ class Mysql extends AbstractPdoAdapter
                 $columnName,
                 $tableName,
             ));
+        }
+
+        if (str_contains($extra, 'ON UPDATE CURRENT_TIMESTAMP')) {
+            @trigger_error(sprintf(
+                'Surgical modifyColumn on "%s.%s" will drop ON UPDATE CURRENT_TIMESTAMP — '
+                . 'DBAL has no on-update concept. Bump the column via _beforeSave() for cross-engine parity.',
+                $tableName,
+                $columnName,
+            ), E_USER_DEPRECATED);
         }
     }
 
@@ -2444,8 +2454,7 @@ class Mysql extends AbstractPdoAdapter
             $cDefault = str_replace("'", '', $cDefault);
         }
 
-        // prepare default value string. TYPE_TIMESTAMP is a value-equal alias for
-        // TYPE_DATETIME, so this branch covers both via the shared 'datetime' value.
+        // Branch covers both TYPE_DATETIME and TYPE_TIMESTAMP (value-equal aliases).
         if ($ddlType == \Maho\Db\Ddl\Table::TYPE_DATETIME) {
             if ($cDefault === null) {
                 $cDefault = new \Maho\Db\Expr('NULL');

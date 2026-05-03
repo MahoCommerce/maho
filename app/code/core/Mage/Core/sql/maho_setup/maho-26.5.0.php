@@ -46,10 +46,14 @@ if ($connection instanceof \Maho\Db\Adapter\Pdo\Mysql) {
 // comment — read straight from INFORMATION_SCHEMA so we don't have to enumerate columns
 // per module.
 if ($connection instanceof \Maho\Db\Adapter\Pdo\Mysql) {
+    // Generated columns can't be retyped via plain MODIFY COLUMN — would require dropping
+    // and recomputing the GENERATED expression, which we can't do generically here. Skip
+    // them; the surgical modifyColumn path also refuses them via _assertColumnIsSafeToModify.
     $columns = $connection->fetchAll(
         'SELECT TABLE_NAME, COLUMN_NAME, IS_NULLABLE, COLUMN_DEFAULT, COLUMN_COMMENT, EXTRA '
         . 'FROM INFORMATION_SCHEMA.COLUMNS '
         . 'WHERE TABLE_SCHEMA = DATABASE() AND DATA_TYPE = \'timestamp\' '
+        . 'AND EXTRA NOT LIKE \'%GENERATED%\' '
         . 'ORDER BY TABLE_NAME, ORDINAL_POSITION',
     );
 

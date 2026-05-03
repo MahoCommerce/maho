@@ -1697,7 +1697,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     {
         return function (\Doctrine\DBAL\Schema\ColumnEditor $editor) use ($definition): void {
             if (array_key_exists('NULLABLE', $definition)) {
-                $editor->setNotNull(!$definition['NULLABLE']);
+                $editor->setNotNull(!(bool) $definition['NULLABLE']);
             }
             if (array_key_exists('DEFAULT', $definition)) {
                 $defaultValue = $definition['DEFAULT'];
@@ -1712,13 +1712,16 @@ abstract class AbstractPdoAdapter implements AdapterInterface
                     );
                     $defaultValue = \Maho\Db\Ddl\Table::TIMESTAMP_INIT;
                 }
-                if ($defaultValue === \Maho\Db\Ddl\Table::TIMESTAMP_INIT) {
+                if ($defaultValue === \Maho\Db\Ddl\Table::TIMESTAMP_INIT
+                    || $defaultValue === \Maho\Db\Ddl\Table::TIMESTAMP_UPDATE
+                ) {
+                    // TIMESTAMP_UPDATE used to mean `0 ON UPDATE CURRENT_TIMESTAMP` on MySQL.
+                    // DBAL drops the ON UPDATE clause across all adapters, so the literal
+                    // `0` initial value lost its purpose and would also be rejected by
+                    // MySQL strict mode on DATETIME. Use CURRENT_TIMESTAMP as the initial
+                    // value; application code must still bump the column via _beforeSave()
+                    // for the on-update behavior.
                     $defaultValue = new \Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp();
-                } elseif ($defaultValue === \Maho\Db\Ddl\Table::TIMESTAMP_UPDATE) {
-                    // No on-update support in DBAL. Literal '0' baseline matches MySQL's
-                    // historical emit minus the ON UPDATE clause; application code must
-                    // bump the column via _beforeSave() for cross-engine parity.
-                    $defaultValue = '0';
                 }
                 $editor->setDefaultValue($defaultValue);
             }

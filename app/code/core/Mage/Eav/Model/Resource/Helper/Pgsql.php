@@ -65,7 +65,8 @@ class Mage_Eav_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Resource_Help
             'datetime' => Maho\Db\Ddl\Table::TYPE_DATETIME,
             'datetimetz' => Maho\Db\Ddl\Table::TYPE_DATETIME,
             'date'     => Maho\Db\Ddl\Table::TYPE_DATE,
-            'time'     => Maho\Db\Ddl\Table::TYPE_DATETIME,
+            // 'time' deliberately omitted — TIME and DATETIME are semantically distinct,
+            // and Maho doesn't define a TYPE_TIME constant. Falls through to the array_search.
             'blob'     => Maho\Db\Ddl\Table::TYPE_BLOB,
             'binary'   => Maho\Db\Ddl\Table::TYPE_VARBINARY,
         ];

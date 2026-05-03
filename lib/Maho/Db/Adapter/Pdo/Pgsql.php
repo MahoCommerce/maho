@@ -2276,8 +2276,7 @@ class Pgsql extends AbstractPdoAdapter
             $cDefault = str_replace("'", '', $cDefault);
         }
 
-        // Handle timestamp defaults. TYPE_TIMESTAMP is a value-equal alias for
-        // TYPE_DATETIME, so this branch covers both via the shared 'datetime' value.
+        // Branch covers both TYPE_DATETIME and TYPE_TIMESTAMP (value-equal aliases).
         if ($ddlType == \Maho\Db\Ddl\Table::TYPE_DATETIME) {
             if ($cDefault === null) {
                 $cDefault = new \Maho\Db\Expr('NULL');
