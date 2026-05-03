@@ -582,7 +582,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
 
     /**
      * Prepare data for group website relation
-     * @param string $timestamp
+     * @param int $timestamp
      */
     protected function _prepareGroupWebsite($timestamp)
     {

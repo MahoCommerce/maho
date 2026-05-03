@@ -260,8 +260,8 @@ $data = [
     'template_sender_name' => Mage::getStoreConfig('trans_email/ident_general/name'),
     'template_sender_email' => Mage::getStoreConfig('trans_email/ident_general/email'),
     'template_actual' => 1,
-    'added_at' => Mage::getSingleton('core/date')->gmtDate(),
-    'modified_at' => Mage::getSingleton('core/date')->gmtDate(),
+    'added_at' => Mage::app()->getLocale()->formatDateForDb('now'),
+    'modified_at' => Mage::app()->getLocale()->formatDateForDb('now'),
 ];
 
 $model = Mage::getModel('newsletter/template')->setData($data);
