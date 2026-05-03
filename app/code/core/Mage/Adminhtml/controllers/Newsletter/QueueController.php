@@ -95,7 +95,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
                 return;
             }
 
-            $queue->setQueueStartAt(Mage::getSingleton('core/date')->gmtDate())
+            $queue->setQueueStartAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->setQueueStatus(Queue::STATUS_SENDING)
                 ->save();
         }

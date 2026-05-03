@@ -185,7 +185,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
             $matchedCustomers = $this->getMatchingCustomerIds();
             $this->getResource()->updateCustomerMembership($this, $matchedCustomers);
 
-            $nowString = Mage::app()->getLocale()->nowUtc();
+            $nowString = Mage::app()->getLocale()->formatDateForDb('now');
 
             $this->setMatchedCustomersCount(count($matchedCustomers))
                 ->setLastRefreshAt($nowString)

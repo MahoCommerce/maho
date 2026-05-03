@@ -58,12 +58,12 @@ class Maho_Paypal_Model_Webhook_Processor
 
             $event->setStatus('processed');
             $event->setPayload(null);
-            $event->setProcessedAt(Mage::app()->getLocale()->nowUtc());
+            $event->setProcessedAt(Mage::app()->getLocale()->formatDateForDb('now'));
             $event->save();
         } catch (\Throwable $e) {
             $event->setStatus('error');
             $event->setErrorMessage($e->getMessage());
-            $event->setProcessedAt(Mage::app()->getLocale()->nowUtc());
+            $event->setProcessedAt(Mage::app()->getLocale()->formatDateForDb('now'));
             $event->save();
             throw $e;
         }

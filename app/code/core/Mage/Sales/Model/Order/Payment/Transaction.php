@@ -625,7 +625,7 @@ class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstrac
                 $this->setOrderId($this->_order->getId());
             }
 
-            $this->setCreatedAt(Mage::getModel('core/date')->gmtDate());
+            $this->setCreatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         }
         return parent::_beforeSave();
     }

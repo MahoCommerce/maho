@@ -261,7 +261,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
 
         // set current date if added at data is not defined
         if (is_null($this->getAddedAt())) {
-            $this->setAddedAt(Mage::getSingleton('core/date')->gmtDate());
+            $this->setAddedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         }
 
         return $this;

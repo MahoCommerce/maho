@@ -170,7 +170,7 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
         $this->getSelect()
             ->where('main_table.queue_status in (?)', [Mage_Newsletter_Model_Queue::STATUS_SENDING,
                 Mage_Newsletter_Model_Queue::STATUS_NEVER])
-            ->where('main_table.queue_start_at < ?', Mage::getSingleton('core/date')->gmtDate())
+            ->where('main_table.queue_start_at < ?', Mage::app()->getLocale()->formatDateForDb('now'))
             ->where('main_table.queue_start_at IS NOT NULL');
 
         return $this;

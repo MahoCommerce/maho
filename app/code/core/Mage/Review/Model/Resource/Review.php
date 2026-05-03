@@ -104,7 +104,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if (!$object->getId()) {
-            $object->setCreatedAt(Mage::getSingleton('core/date')->gmtDate());
+            $object->setCreatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         }
         if ($object->hasData('stores') && is_array($object->getStores())) {
             $stores = $object->getStores();

@@ -50,7 +50,7 @@ abstract class Mage_Reports_Model_Product_Index_Abstract extends Mage_Core_Model
             $this->setStoreId($this->getStoreId());
         }
         if (!$this->hasAddedAt()) {
-            $this->setAddedAt(Mage::app()->getLocale()->nowUtc());
+            $this->setAddedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         }
 
         // Thanks to new performance tweaks it is possible to switch off visitor logging

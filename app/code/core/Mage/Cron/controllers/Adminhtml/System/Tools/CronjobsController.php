@@ -144,7 +144,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         }
 
         $schedule = Mage::getModel('cron/schedule');
-        $now = Mage::app()->getLocale()->nowUtc();
+        $now = Mage::app()->getLocale()->formatDateForDb('now');
         $schedule->setJobCode($jobCode)
             ->setStatus(Mage_Cron_Model_Schedule::STATUS_RUNNING)
             ->setCreatedAt($now)
@@ -183,12 +183,12 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
             call_user_func([$model, $run[2]], $schedule);
 
             $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_SUCCESS)
-                ->setFinishedAt(Mage::app()->getLocale()->nowUtc())
+                ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->save();
         } catch (Exception $e) {
             $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
                 ->setMessages($e->getMessage())
-                ->setFinishedAt(Mage::app()->getLocale()->nowUtc())
+                ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->save();
         }
 

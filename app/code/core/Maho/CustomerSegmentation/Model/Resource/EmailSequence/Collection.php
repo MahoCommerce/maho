@@ -165,7 +165,7 @@ class Maho_CustomerSegmentation_Model_Resource_EmailSequence_Collection extends 
             [],
         )
         ->where('progress.status = ?', Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED)
-        ->where('progress.scheduled_at <= ?', Mage::getSingleton('core/date')->gmtDate())
+        ->where('progress.scheduled_at <= ?', Mage::app()->getLocale()->formatDateForDb('now'))
         ->group('main_table.sequence_id');
 
         return $this;

@@ -893,7 +893,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                         'entity_id'        => $productId,
                         'has_options'      => 0,
                         'required_options' => 0,
-                        'updated_at'       => Mage::app()->getLocale()->nowUtc(),
+                        'updated_at'       => Mage::app()->getLocale()->formatDateForDb('now'),
                     ];
                 }
 
@@ -1367,7 +1367,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
 
                 if (self::SCOPE_DEFAULT == $rowScope) {
                     $rowSku = $rowData[self::COL_SKU];
-                    $now = Mage::app()->getLocale()->nowUtc();
+                    $now = Mage::app()->getLocale()->formatDateForDb('now');
 
                     // 1. Entity phase
                     if (isset($this->_oldSku[$rowSku])) { // existing row

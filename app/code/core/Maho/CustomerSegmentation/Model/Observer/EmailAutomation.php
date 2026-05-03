@@ -409,7 +409,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
               ->setNewsletterSenderName($template->getTemplateSenderName())
               ->setNewsletterSenderEmail($template->getTemplateSenderEmail())
               ->setQueueStatus(Mage_Newsletter_Model_Queue::STATUS_SENDING)
-              ->setQueueStartAt(Mage::getSingleton('core/date')->gmtDate())
+              ->setQueueStartAt(Mage::app()->getLocale()->formatDateForDb('now'))
               ->setAutomationSource('customer_segmentation')
               ->setAutomationSourceId($sequenceData['segment_id'])
               ->save();

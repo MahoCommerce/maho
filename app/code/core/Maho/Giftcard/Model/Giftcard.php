@@ -300,7 +300,7 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             'order_id' => $orderId,
             'comment' => $comment,
             'admin_user_id' => $adminUserId,
-            'created_at' => Mage::app()->getLocale()->nowUtc(),
+            'created_at' => Mage::app()->getLocale()->formatDateForDb('now'),
         ]);
         $history->save();
     }

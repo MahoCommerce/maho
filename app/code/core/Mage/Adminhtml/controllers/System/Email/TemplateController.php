@@ -123,12 +123,12 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
                 ->setTemplateCode($request->getParam('template_code'))
                 ->setTemplateText($request->getParam('template_text'))
                 ->setTemplateStyles($request->getParam('template_styles'))
-                ->setModifiedAt(Mage::getSingleton('core/date')->gmtDate())
+                ->setModifiedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->setOrigTemplateCode($request->getParam('orig_template_code'))
                 ->setOrigTemplateVariables($request->getParam('orig_template_variables'));
 
             if (!$template->getId()) {
-                $template->setAddedAt(Mage::getSingleton('core/date')->gmtDate());
+                $template->setAddedAt(Mage::app()->getLocale()->formatDateForDb('now'));
                 $template->setTemplateType(Mage_Core_Model_Email_Template::TYPE_HTML);
             }
 

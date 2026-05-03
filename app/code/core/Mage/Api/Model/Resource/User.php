@@ -67,7 +67,7 @@ class Mage_Api_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstract
             ->from($this->getTable('api/session'), 'user_id')
             ->where('user_id = ?', $user->getId())
             ->where('sessid = ?', $user->getSessid());
-        $loginDate = Mage::app()->getLocale()->nowUtc();
+        $loginDate = Mage::app()->getLocale()->formatDateForDb('now');
         if ($readAdapter->fetchRow($select)) {
             $writeAdapter->update(
                 $this->getTable('api/session'),
@@ -105,7 +105,7 @@ class Mage_Api_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstract
             Maho\Db\Adapter\AdapterInterface::INTERVAL_SECOND,
         );
         $where = [
-            $readAdapter->quote(Mage::app()->getLocale()->nowUtc()) . ' > ' . $timeSubtract,
+            $readAdapter->quote(Mage::app()->getLocale()->formatDateForDb('now')) . ' > ' . $timeSubtract,
         ];
         if ($user) {
             $where['user_id = ?'] = $user->getId();
@@ -204,7 +204,7 @@ class Mage_Api_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstract
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $user)
     {
-        $now = Mage::app()->getLocale()->nowUtc();
+        $now = Mage::app()->getLocale()->formatDateForDb('now');
         if (!$user->getId()) {
             $user->setCreated($now);
         }

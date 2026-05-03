@@ -91,7 +91,7 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
                 ['subscriber_status'],
             )
             ->where('p.status = ?', Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED)
-            ->where('p.scheduled_at <= ?', Mage::getSingleton('core/date')->gmtDate())
+            ->where('p.scheduled_at <= ?', Mage::app()->getLocale()->formatDateForDb('now'))
             ->where('s.is_active = ?', 1)
             ->where('seg.auto_email_active = ?', 1)
             ->where('sub.subscriber_status = ?', Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED)
@@ -244,7 +244,7 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
 
         try {
             $data = [];
-            $now = Mage::getSingleton('core/date')->gmtDate();
+            $now = Mage::app()->getLocale()->formatDateForDb('now');
 
             foreach ($sequences as $sequence) {
                 $scheduledAt = $now;

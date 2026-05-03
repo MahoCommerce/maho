@@ -153,7 +153,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
                 ->setTemplateSenderName($request->getParam('sender_name'))
                 ->setTemplateText($request->getParam('text'))
                 ->setTemplateStyles($request->getParam('styles'))
-                ->setModifiedAt(Mage::getSingleton('core/date')->gmtDate());
+                ->setModifiedAt(Mage::app()->getLocale()->formatDateForDb('now'));
 
             if (!$template->getId()) {
                 $template->setTemplateType(Mage_Core_Model_Template::TYPE_HTML);

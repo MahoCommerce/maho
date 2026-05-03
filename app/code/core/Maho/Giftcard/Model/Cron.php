@@ -76,7 +76,7 @@ class Maho_Giftcard_Model_Cron
                         'balance_before' => (float) $giftcard->getBalance(),
                         'balance_after' => (float) $giftcard->getBalance(),
                         'comment' => 'Automatically expired by cron',
-                        'created_at' => Mage::app()->getLocale()->nowUtc(),
+                        'created_at' => Mage::app()->getLocale()->formatDateForDb('now'),
                     ]);
                     $history->save();
 

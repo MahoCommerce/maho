@@ -73,7 +73,7 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
             'firstname' => $this->getFirstname(),
             'lastname'  => $this->getLastname(),
             'email'     => $this->getEmail(),
-            'modified'  => Mage::getSingleton('core/date')->gmtDate(),
+            'modified'  => Mage::app()->getLocale()->formatDateForDb('now'),
         ];
 
         if ($this->getId() > 0) {

@@ -86,7 +86,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
 
             try {
                 $model->addData($data)
-                    ->setUpdatedAt(Mage::getSingleton('core/date')->gmtDate())
+                    ->setUpdatedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                     ->save();
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(

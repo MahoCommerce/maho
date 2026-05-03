@@ -48,7 +48,7 @@ class Mage_Reports_Model_Event extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _beforeSave()
     {
-        $this->setLoggedAt(Mage::getModel('core/date')->gmtDate());
+        $this->setLoggedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         return parent::_beforeSave();
     }
 

@@ -89,7 +89,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
 
         $resource = Mage::getSingleton('core/resource');
         $adapter = $resource->getConnection('core_read');
-        $now = Mage::app()->getLocale()->nowUtc();
+        $now = Mage::app()->getLocale()->formatDateForDb('now');
 
         switch ($attribute) {
             case 'days_since_last_login':

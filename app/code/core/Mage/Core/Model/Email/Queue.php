@@ -183,7 +183,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
             if ($message->getId()) {
                 $transport = Mage::helper('core')->getMailTransport();
                 if (!$transport) {
-                    $message->setProcessedAt(Mage::app()->getLocale()->nowUtc());
+                    $message->setProcessedAt(Mage::app()->getLocale()->formatDateForDb('now'));
                     $message->save();
                     continue;
                 }
@@ -228,7 +228,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                     ]);
 
                     $mailer->send($email);
-                    $message->setProcessedAt(Mage::app()->getLocale()->nowUtc());
+                    $message->setProcessedAt(Mage::app()->getLocale()->formatDateForDb('now'));
                     $message->save();
 
                     foreach ($message->getRecipients() as $recipient) {

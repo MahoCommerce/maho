@@ -423,14 +423,14 @@ class Mage_Cron_Model_Observer
             }
 
             $schedule
-                ->setExecutedAt(Mage::getSingleton('core/date')->gmtDate())
+                ->setExecutedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->save();
 
             call_user_func_array($callback, [$schedule]);
 
             $schedule
                 ->setStatus(Mage_Cron_Model_Schedule::STATUS_SUCCESS)
-                ->setFinishedAt(Mage::getSingleton('core/date')->gmtDate());
+                ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         } catch (Exception $e) {
             $schedule->setStatus($errorStatus)
                 ->setMessages($e->__toString());
