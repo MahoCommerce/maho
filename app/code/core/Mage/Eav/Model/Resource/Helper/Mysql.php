@@ -24,9 +24,8 @@ class Mage_Eav_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_Help
         Maho\Db\Ddl\Table::TYPE_BIGINT        => 'bigint',
         Maho\Db\Ddl\Table::TYPE_FLOAT         => 'float',
         Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'decimal',
-        Maho\Db\Ddl\Table::TYPE_NUMERIC       => 'decimal',
         Maho\Db\Ddl\Table::TYPE_DATE          => 'date',
-        Maho\Db\Ddl\Table::TYPE_TIMESTAMP     => 'timestamp',
+        // TYPE_TIMESTAMP is a value-equal alias for TYPE_DATETIME — both fall here.
         Maho\Db\Ddl\Table::TYPE_DATETIME      => 'datetime',
         Maho\Db\Ddl\Table::TYPE_TEXT          => 'text',
         Maho\Db\Ddl\Table::TYPE_BLOB          => 'blob',

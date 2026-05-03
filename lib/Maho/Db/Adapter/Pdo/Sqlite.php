@@ -45,11 +45,10 @@ class Sqlite extends AbstractPdoAdapter
         \Maho\Db\Ddl\Table::TYPE_BIGINT        => 'INTEGER',
         \Maho\Db\Ddl\Table::TYPE_FLOAT         => 'REAL',
         \Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'NUMERIC',
-        \Maho\Db\Ddl\Table::TYPE_NUMERIC       => 'NUMERIC',
         \Maho\Db\Ddl\Table::TYPE_DATE          => 'TEXT',
-        \Maho\Db\Ddl\Table::TYPE_TIMESTAMP     => 'TEXT',
         \Maho\Db\Ddl\Table::TYPE_DATETIME      => 'TEXT',
         \Maho\Db\Ddl\Table::TYPE_TEXT          => 'TEXT',
+        // SQLite has no varchar type — both VARCHAR and TEXT store as TEXT.
         \Maho\Db\Ddl\Table::TYPE_VARCHAR       => 'TEXT',
         \Maho\Db\Ddl\Table::TYPE_BLOB          => 'BLOB',
         \Maho\Db\Ddl\Table::TYPE_VARBINARY     => 'BLOB',
@@ -2167,7 +2166,6 @@ class Sqlite extends AbstractPdoAdapter
         // Column size/precision handling (SQLite is flexible, but we honor requests)
         switch ($ddlType) {
             case \Maho\Db\Ddl\Table::TYPE_DECIMAL:
-            case \Maho\Db\Ddl\Table::TYPE_NUMERIC:
                 $precision = 10;
                 $scale = 0;
                 $match = [];
@@ -2211,8 +2209,9 @@ class Sqlite extends AbstractPdoAdapter
             $cDefault = str_replace("'", '', $cDefault);
         }
 
-        // Handle timestamp defaults
-        if ($ddlType == \Maho\Db\Ddl\Table::TYPE_TIMESTAMP) {
+        // Handle timestamp defaults. TYPE_TIMESTAMP is a value-equal alias for
+        // TYPE_DATETIME, so this branch covers both via the shared 'datetime' value.
+        if ($ddlType == \Maho\Db\Ddl\Table::TYPE_DATETIME) {
             if ($cDefault === null) {
                 $cDefault = new \Maho\Db\Expr('NULL');
             } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT) {

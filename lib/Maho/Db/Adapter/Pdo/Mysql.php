@@ -48,17 +48,10 @@ class Mysql extends AbstractPdoAdapter
         \Maho\Db\Ddl\Table::TYPE_BIGINT        => 'bigint',
         \Maho\Db\Ddl\Table::TYPE_FLOAT         => 'float',
         \Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'decimal',
-        \Maho\Db\Ddl\Table::TYPE_NUMERIC       => 'decimal',
         \Maho\Db\Ddl\Table::TYPE_DATE          => 'date',
-        // TYPE_TIMESTAMP physically maps to DATETIME (not the historical MySQL TIMESTAMP).
-        // Doctrine DBAL's column model conflates the two and rewrites TIMESTAMP→DATETIME on
-        // surgical diffs, and Maho already forces session TZ to UTC on connect (#861)
-        // making TIMESTAMP's TZ auto-conversion a no-op. DATETIME has the same
-        // CURRENT_TIMESTAMP/ON UPDATE features on MySQL 5.6+ / MariaDB 10.0+ and a wider
-        // year range (1000-9999 vs TIMESTAMP's 1970-2038). The constant name is kept for
-        // source-compatibility with the dozens of install scripts that already use it; the
-        // maho-26.5.0 upgrade migrates existing physical TIMESTAMP columns to DATETIME.
-        \Maho\Db\Ddl\Table::TYPE_TIMESTAMP     => 'datetime',
+        // TYPE_TIMESTAMP is a deprecated value-equal alias for TYPE_DATETIME (see
+        // Table::TYPE_TIMESTAMP docblock for the migration rationale), so a single map
+        // entry covers both.
         \Maho\Db\Ddl\Table::TYPE_DATETIME      => 'datetime',
         \Maho\Db\Ddl\Table::TYPE_TEXT          => 'text',
         \Maho\Db\Ddl\Table::TYPE_VARCHAR       => 'varchar',
@@ -1778,7 +1771,9 @@ class Mysql extends AbstractPdoAdapter
             case 'datetime':
                 return \Maho\Db\Ddl\Table::TYPE_DATETIME;
             case 'timestamp':
-                return \Maho\Db\Ddl\Table::TYPE_TIMESTAMP;
+                // Pre-migration TIMESTAMP columns introspect to TYPE_DATETIME (the new
+                // canonical type); TYPE_TIMESTAMP is a deprecated value-equal alias.
+                return \Maho\Db\Ddl\Table::TYPE_DATETIME;
             case 'date':
                 return \Maho\Db\Ddl\Table::TYPE_DATE;
             case 'float':
@@ -2391,7 +2386,6 @@ class Mysql extends AbstractPdoAdapter
                 }
                 break;
             case \Maho\Db\Ddl\Table::TYPE_DECIMAL:
-            case \Maho\Db\Ddl\Table::TYPE_NUMERIC:
                 $precision  = 10;
                 $scale      = 0;
                 $match      = [];
@@ -2417,15 +2411,17 @@ class Mysql extends AbstractPdoAdapter
                 } else {
                     $length = $this->_parseTextSize($options['LENGTH']);
                 }
+                $isText = $ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT
+                    || $ddlType == \Maho\Db\Ddl\Table::TYPE_VARCHAR;
                 if ($length <= 255) {
-                    $cType = ($ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT || $ddlType == \Maho\Db\Ddl\Table::TYPE_VARCHAR) ? 'varchar' : 'varbinary';
+                    $cType = $isText ? 'varchar' : 'varbinary';
                     $cType = sprintf('%s(%d)', $cType, $length);
                 } elseif ($length <= 65536) {
-                    $cType = ($ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT || $ddlType == \Maho\Db\Ddl\Table::TYPE_VARCHAR) ? 'text' : 'blob';
+                    $cType = $isText ? 'text' : 'blob';
                 } elseif ($length <= 16777216) {
-                    $cType = ($ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT || $ddlType == \Maho\Db\Ddl\Table::TYPE_VARCHAR) ? 'mediumtext' : 'mediumblob';
+                    $cType = $isText ? 'mediumtext' : 'mediumblob';
                 } else {
-                    $cType = ($ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT || $ddlType == \Maho\Db\Ddl\Table::TYPE_VARCHAR) ? 'longtext' : 'longblob';
+                    $cType = $isText ? 'longtext' : 'longblob';
                 }
                 break;
         }
@@ -2448,8 +2444,9 @@ class Mysql extends AbstractPdoAdapter
             $cDefault = str_replace("'", '', $cDefault);
         }
 
-        // prepare default value string
-        if ($ddlType == \Maho\Db\Ddl\Table::TYPE_TIMESTAMP) {
+        // prepare default value string. TYPE_TIMESTAMP is a value-equal alias for
+        // TYPE_DATETIME, so this branch covers both via the shared 'datetime' value.
+        if ($ddlType == \Maho\Db\Ddl\Table::TYPE_DATETIME) {
             if ($cDefault === null) {
                 $cDefault = new \Maho\Db\Expr('NULL');
             } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT) {

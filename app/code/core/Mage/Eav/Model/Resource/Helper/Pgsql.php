@@ -22,9 +22,9 @@ class Mage_Eav_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Resource_Help
         Maho\Db\Ddl\Table::TYPE_BIGINT        => 'bigint',
         Maho\Db\Ddl\Table::TYPE_FLOAT         => 'real',
         Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'numeric',
-        Maho\Db\Ddl\Table::TYPE_NUMERIC       => 'numeric',
         Maho\Db\Ddl\Table::TYPE_DATE          => 'date',
-        Maho\Db\Ddl\Table::TYPE_TIMESTAMP     => 'timestamp',
+        // TYPE_TIMESTAMP is a value-equal alias for TYPE_DATETIME — both fall here.
+        // PgSQL's `timestamp` is the semantic equivalent of MySQL's DATETIME.
         Maho\Db\Ddl\Table::TYPE_DATETIME      => 'timestamp',
         Maho\Db\Ddl\Table::TYPE_TEXT          => 'text',
         Maho\Db\Ddl\Table::TYPE_BLOB          => 'bytea',
@@ -65,7 +65,7 @@ class Mage_Eav_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Resource_Help
             'datetime' => Maho\Db\Ddl\Table::TYPE_DATETIME,
             'datetimetz' => Maho\Db\Ddl\Table::TYPE_DATETIME,
             'date'     => Maho\Db\Ddl\Table::TYPE_DATE,
-            'time'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
+            'time'     => Maho\Db\Ddl\Table::TYPE_DATETIME,
             'blob'     => Maho\Db\Ddl\Table::TYPE_BLOB,
             'binary'   => Maho\Db\Ddl\Table::TYPE_VARBINARY,
         ];

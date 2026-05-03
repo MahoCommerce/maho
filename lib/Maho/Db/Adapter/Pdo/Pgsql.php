@@ -49,9 +49,12 @@ class Pgsql extends AbstractPdoAdapter
         \Maho\Db\Ddl\Table::TYPE_BIGINT        => 'bigint',
         \Maho\Db\Ddl\Table::TYPE_FLOAT         => 'real',
         \Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'numeric',
-        \Maho\Db\Ddl\Table::TYPE_NUMERIC       => 'numeric',
         \Maho\Db\Ddl\Table::TYPE_DATE          => 'date',
-        \Maho\Db\Ddl\Table::TYPE_TIMESTAMP     => 'timestamp',
+        // PostgreSQL has no `datetime` type — its `timestamp` (i.e. `timestamp without
+        // time zone`) is the semantic equivalent of MySQL's `DATETIME`: literal date+time
+        // with no TZ conversion. The name collision with MySQL's TIMESTAMP type is
+        // unfortunate but correct: TYPE_TIMESTAMP (a value-equal alias for TYPE_DATETIME)
+        // also lands here via the shared 'datetime' value.
         \Maho\Db\Ddl\Table::TYPE_DATETIME      => 'timestamp',
         \Maho\Db\Ddl\Table::TYPE_TEXT          => 'text',
         \Maho\Db\Ddl\Table::TYPE_VARCHAR       => 'varchar',
@@ -1613,7 +1616,6 @@ class Pgsql extends AbstractPdoAdapter
 
         switch ($ddlType) {
             case \Maho\Db\Ddl\Table::TYPE_DECIMAL:
-            case \Maho\Db\Ddl\Table::TYPE_NUMERIC:
                 $precision = 10;
                 $scale = 0;
                 $match = [];
@@ -2221,7 +2223,6 @@ class Pgsql extends AbstractPdoAdapter
         // Column size/precision handling
         switch ($ddlType) {
             case \Maho\Db\Ddl\Table::TYPE_DECIMAL:
-            case \Maho\Db\Ddl\Table::TYPE_NUMERIC:
                 $precision = 10;
                 $scale = 0;
                 $match = [];
@@ -2270,8 +2271,9 @@ class Pgsql extends AbstractPdoAdapter
             $cDefault = str_replace("'", '', $cDefault);
         }
 
-        // Handle timestamp defaults
-        if ($ddlType == \Maho\Db\Ddl\Table::TYPE_TIMESTAMP) {
+        // Handle timestamp defaults. TYPE_TIMESTAMP is a value-equal alias for
+        // TYPE_DATETIME, so this branch covers both via the shared 'datetime' value.
+        if ($ddlType == \Maho\Db\Ddl\Table::TYPE_DATETIME) {
             if ($cDefault === null) {
                 $cDefault = new \Maho\Db\Expr('NULL');
             } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT) {

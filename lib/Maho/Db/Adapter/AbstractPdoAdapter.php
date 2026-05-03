@@ -1650,7 +1650,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             'blob', 'mediumblob', 'longblob', 'bytea', 'binary' => \Maho\Db\Ddl\Table::TYPE_BLOB,
             'boolean', 'bool', 'tinyint' => \Maho\Db\Ddl\Table::TYPE_BOOLEAN,
             'date' => \Maho\Db\Ddl\Table::TYPE_DATE,
-            'datetime', 'timestamp', 'timestamp without time zone', 'timestamp with time zone', 'datetimetz' => \Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
+            'datetime', 'timestamp', 'timestamp without time zone', 'timestamp with time zone', 'datetimetz' => \Maho\Db\Ddl\Table::TYPE_DATETIME,
             default => null,
         };
     }

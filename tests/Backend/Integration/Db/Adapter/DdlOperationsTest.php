@@ -49,7 +49,7 @@ describe('DDL Operations - Table Creation', function () {
                 'nullable' => false,
                 'default' => '1',
             ], 'Is Active')
-            ->addColumn('created_at', Table::TYPE_TIMESTAMP, null, [
+            ->addColumn('created_at', Table::TYPE_DATETIME, null, [
                 'nullable' => false,
                 'default' => Table::TIMESTAMP_INIT,
             ], 'Created At')
