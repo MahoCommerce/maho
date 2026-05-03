@@ -1474,6 +1474,15 @@ class Pgsql extends AbstractPdoAdapter
                 throw new \Maho\Db\Exception('Impossible to create a column without comment.');
             }
             $definition = $this->_getColumnDefinition($definition);
+        } else {
+            // Translate bare Maho type constants ('datetime', 'decimal', 'blob' etc.) to
+            // their PgSQL physical type ('timestamp', 'numeric', 'bytea'). Legacy install
+            // scripts call `addColumn(..., Maho\Db\Ddl\Table::TYPE_TIMESTAMP)` which used
+            // to accidentally work because the constant value happened to be a valid
+            // PgSQL type name; after the TYPE_TIMESTAMP→TYPE_DATETIME alias it doesn't.
+            if (isset($this->_ddlColumnTypes[$definition])) {
+                $definition = $this->_ddlColumnTypes[$definition];
+            }
         }
 
         $sql = sprintf(
@@ -1571,13 +1580,9 @@ class Pgsql extends AbstractPdoAdapter
         }
 
         if (is_string($definition)) {
-            // Strip MySQL-flavored noise so PgSQL accepts the type fragment.
-            $typeOnly = $definition;
-            $typeOnly = preg_replace('/\s+COMMENT\s+[\'"].*?[\'"]\s*$/i', '', $typeOnly);
-            $typeOnly = preg_replace('/\s+DEFAULT\s+(NULL|[\'"].*?[\'"]|[\d.]+)\s*/i', ' ', $typeOnly);
-            $typeOnly = preg_replace('/\s+(NOT\s+)?NULL\s*/i', ' ', $typeOnly);
-            $typeOnly = preg_replace('/\s+UNSIGNED\s*/i', ' ', $typeOnly);
-            $typeOnly = trim($typeOnly);
+            // Translate bare Maho type constants to PgSQL physical type (see addColumn
+            // for the rationale). Anything else is passed through as raw type SQL.
+            $typeOnly = $this->_ddlColumnTypes[$definition] ?? trim($definition);
 
             $qualifiedTable = $this->quoteIdentifier($this->_getTableName($tableName, $schemaName));
             $quotedColumn = $this->quoteIdentifier($columnName);
