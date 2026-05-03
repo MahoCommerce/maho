@@ -229,9 +229,9 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Format time using current locale options
      *
-     * @param   string|DateTime|null $time
-     * @param   string              $format
-     * @param   bool                $showDate
+     * @param   string|DateTimeInterface|null $time
+     * @param   string                        $format
+     * @param   bool                          $showDate
      * @return  string
      */
     public function formatTime($time = null, $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT, $showDate = false)
