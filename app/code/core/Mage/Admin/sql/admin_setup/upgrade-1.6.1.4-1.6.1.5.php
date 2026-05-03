@@ -13,6 +13,15 @@
 $installer = $this;
 $installer->startSetup();
 
-$installer->getConnection()->addColumn($installer->getTable('admin/user'), 'backend_locale', 'varchar(8) NULL');
+$installer->getConnection()->addColumn(
+    $installer->getTable('admin/user'),
+    'backend_locale',
+    [
+        'type'     => Maho\Db\Ddl\Table::TYPE_VARCHAR,
+        'length'   => 8,
+        'nullable' => true,
+        'comment'  => 'Backend Locale',
+    ],
+);
 
 $installer->endSetup();
