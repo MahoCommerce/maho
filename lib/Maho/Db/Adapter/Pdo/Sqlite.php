@@ -46,6 +46,7 @@ class Sqlite extends AbstractPdoAdapter
         \Maho\Db\Ddl\Table::TYPE_FLOAT         => 'REAL',
         \Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'NUMERIC',
         \Maho\Db\Ddl\Table::TYPE_DATE          => 'TEXT',
+        \Maho\Db\Ddl\Table::TYPE_TIME          => 'TEXT',
         \Maho\Db\Ddl\Table::TYPE_DATETIME      => 'TEXT',
         \Maho\Db\Ddl\Table::TYPE_TEXT          => 'TEXT',
         // SQLite has no varchar type — both VARCHAR and TEXT store as TEXT.

@@ -50,6 +50,11 @@ class Pgsql extends AbstractPdoAdapter
         \Maho\Db\Ddl\Table::TYPE_FLOAT         => 'real',
         \Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'numeric',
         \Maho\Db\Ddl\Table::TYPE_DATE          => 'date',
+        // Maps to TIME WITHOUT TIME ZONE (PgSQL's default — TIME WITH TIME ZONE is
+        // the SQL spec's mistake and the PgSQL docs themselves call it "of questionable
+        // usefulness" because a time-of-day with a TZ but no date is ambiguous around
+        // DST boundaries).
+        \Maho\Db\Ddl\Table::TYPE_TIME          => 'time',
         // PostgreSQL has no `datetime` type — its `timestamp` (i.e. `timestamp without
         // time zone`) is the semantic equivalent of MySQL's `DATETIME`: literal date+time
         // with no TZ conversion. The name collision with MySQL's TIMESTAMP type is

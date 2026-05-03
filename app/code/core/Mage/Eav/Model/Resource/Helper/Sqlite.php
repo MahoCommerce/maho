@@ -23,6 +23,7 @@ class Mage_Eav_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource_Hel
         Maho\Db\Ddl\Table::TYPE_FLOAT         => 'real',
         Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'real',
         Maho\Db\Ddl\Table::TYPE_DATE          => 'text',
+        Maho\Db\Ddl\Table::TYPE_TIME          => 'text',
         // TYPE_TIMESTAMP is a value-equal alias for TYPE_DATETIME — both fall here.
         Maho\Db\Ddl\Table::TYPE_DATETIME      => 'text',
         Maho\Db\Ddl\Table::TYPE_TEXT          => 'text',

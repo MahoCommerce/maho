@@ -49,6 +49,7 @@ class Mysql extends AbstractPdoAdapter
         \Maho\Db\Ddl\Table::TYPE_FLOAT         => 'float',
         \Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'decimal',
         \Maho\Db\Ddl\Table::TYPE_DATE          => 'date',
+        \Maho\Db\Ddl\Table::TYPE_TIME          => 'time',
         // TYPE_TIMESTAMP aliases TYPE_DATETIME — single entry covers both.
         \Maho\Db\Ddl\Table::TYPE_DATETIME      => 'datetime',
         \Maho\Db\Ddl\Table::TYPE_TEXT          => 'text',
@@ -1786,6 +1787,8 @@ class Mysql extends AbstractPdoAdapter
                 return \Maho\Db\Ddl\Table::TYPE_DATETIME;
             case 'date':
                 return \Maho\Db\Ddl\Table::TYPE_DATE;
+            case 'time':
+                return \Maho\Db\Ddl\Table::TYPE_TIME;
             case 'float':
                 return \Maho\Db\Ddl\Table::TYPE_FLOAT;
             case 'decimal':

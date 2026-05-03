@@ -26,6 +26,15 @@ class Table
     public const TYPE_FLOAT            = 'float';
     public const TYPE_DECIMAL          = 'decimal';
     public const TYPE_DATE             = 'date';
+    /**
+     * Time-of-day, no date, no timezone. Stored as `HH:MM:SS` on MySQL and
+     * `TIME WITHOUT TIME ZONE` on PgSQL; SQLite has no native type and stores as TEXT.
+     * Intended for store-relative wall-clock values like opening hours — values are
+     * interpreted in whatever frame the caller is using (typically the store's local
+     * clock); there is no UTC convention because a time without a date can't be
+     * unambiguously converted across timezones (DST boundaries shift).
+     */
+    public const TYPE_TIME             = 'time';
     public const TYPE_DATETIME         = 'datetime';
     /**
      * Value-equal alias for TYPE_DATETIME — both physically create a MySQL `datetime`
@@ -317,6 +326,7 @@ class Table
                 }
                 break;
             case self::TYPE_DATE:
+            case self::TYPE_TIME:
             case self::TYPE_DATETIME:
                 // TYPE_TIMESTAMP is value-equal to TYPE_DATETIME so the case above covers both.
                 break;

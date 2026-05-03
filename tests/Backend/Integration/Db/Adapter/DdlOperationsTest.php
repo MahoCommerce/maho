@@ -73,6 +73,7 @@ describe('DDL Operations - Table Creation', function () {
             ->addColumn('col_datetime', Table::TYPE_DATETIME, null, [])
             ->addColumn('col_timestamp', Table::TYPE_TIMESTAMP, null, [])
             ->addColumn('col_date', Table::TYPE_DATE, null, [])
+            ->addColumn('col_time', Table::TYPE_TIME, null, [])
             ->addColumn('col_boolean', Table::TYPE_BOOLEAN, null, []);
 
         $this->adapter->createTable($table);
@@ -587,6 +588,26 @@ describe('DDL Operations - modifyColumn (surgical)', function () {
             $this->adapter->quote($this->testTableName),
         ), 'DATA_TYPE');
         expect(strtolower((string) $dataType))->toBe('datetime');
+    });
+
+    it('round-trips TIME column values across engines', function () {
+        // TYPE_TIME → MySQL TIME, PgSQL TIME WITHOUT TIME ZONE, SQLite TEXT.
+        // Insert a wall-clock value and assert it comes back byte-identical, and that
+        // describeTable reports the column as TYPE_TIME so introspection round-trips.
+        $table = $this->adapter->newTable($this->testTableName)
+            ->addColumn('id', Table::TYPE_INTEGER, null, ['nullable' => false, 'primary' => true], 'ID')
+            ->addColumn('opens_at', Table::TYPE_TIME, null, ['nullable' => false], 'Opens At');
+        $this->adapter->createTable($table);
+
+        $this->adapter->insert($this->testTableName, ['id' => 1, 'opens_at' => '09:30:00']);
+
+        $row = $this->adapter->fetchRow(
+            $this->adapter->select()->from($this->testTableName)->where('id = ?', 1),
+        );
+        expect($row['opens_at'])->toBe('09:30:00');
+
+        $describe = $this->adapter->describeTable($this->testTableName);
+        expect($describe['opens_at']['DATA_TYPE'])->toBe(Table::TYPE_TIME);
     });
 });
 
