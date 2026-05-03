@@ -17,6 +17,7 @@ class Mage_Eav_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource_Hel
      */
     protected $_ddlColumnTypes = [
         Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'integer',
+        Maho\Db\Ddl\Table::TYPE_TINYINT       => 'integer',
         Maho\Db\Ddl\Table::TYPE_SMALLINT      => 'integer',
         Maho\Db\Ddl\Table::TYPE_INTEGER       => 'integer',
         Maho\Db\Ddl\Table::TYPE_BIGINT        => 'integer',

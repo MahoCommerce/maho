@@ -44,6 +44,9 @@ class Pgsql extends AbstractPdoAdapter
      */
     protected array $_ddlColumnTypes = [
         \Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'boolean',
+        // PgSQL has no 1-byte integer — TINYINT downgrades to smallint (2 bytes).
+        // The MySQL byte-saving doesn't apply, but the column still works correctly.
+        \Maho\Db\Ddl\Table::TYPE_TINYINT       => 'smallint',
         \Maho\Db\Ddl\Table::TYPE_SMALLINT      => 'smallint',
         \Maho\Db\Ddl\Table::TYPE_INTEGER       => 'integer',
         \Maho\Db\Ddl\Table::TYPE_BIGINT        => 'bigint',

@@ -592,8 +592,10 @@ describe('DDL Operations - modifyColumn (surgical)', function () {
 
     it('round-trips TIME column values across engines', function () {
         // TYPE_TIME → MySQL TIME, PgSQL TIME WITHOUT TIME ZONE, SQLite TEXT.
-        // Insert a wall-clock value and assert it comes back byte-identical, and that
-        // describeTable reports the column as TYPE_TIME so introspection round-trips.
+        // Insert a wall-clock value and assert it comes back byte-identical.
+        // Introspection-direction round-trip works on MySQL/PgSQL (real TIME types)
+        // but not on SQLite — type affinity flattens TIME to TEXT, with no way to
+        // recover the original semantic type.
         $table = $this->adapter->newTable($this->testTableName)
             ->addColumn('id', Table::TYPE_INTEGER, null, ['nullable' => false, 'primary' => true], 'ID')
             ->addColumn('opens_at', Table::TYPE_TIME, null, ['nullable' => false], 'Opens At');
@@ -606,8 +608,41 @@ describe('DDL Operations - modifyColumn (surgical)', function () {
         );
         expect($row['opens_at'])->toBe('09:30:00');
 
-        $describe = $this->adapter->describeTable($this->testTableName);
-        expect($describe['opens_at']['DATA_TYPE'])->toBe(Table::TYPE_TIME);
+        if (!($this->adapter instanceof \Maho\Db\Adapter\Pdo\Sqlite)) {
+            $describe = $this->adapter->describeTable($this->testTableName);
+            expect($describe['opens_at']['DATA_TYPE'])->toBe(Table::TYPE_TIME);
+        }
+    });
+
+    it('round-trips TINYINT column values across engines', function () {
+        // TYPE_TINYINT → MySQL `tinyint` (1 byte), PgSQL `smallint` (no native — 2 bytes),
+        // SQLite `INTEGER` (dynamic). Insert a value within the 1-byte range and assert
+        // it round-trips. Introspection round-trip only works cleanly on MySQL — PgSQL
+        // physically stores as smallint, SQLite has only INTEGER affinity.
+        $table = $this->adapter->newTable($this->testTableName)
+            ->addColumn('id', Table::TYPE_INTEGER, null, ['nullable' => false, 'primary' => true], 'ID')
+            ->addColumn('flags', Table::TYPE_TINYINT, null, ['nullable' => false, 'default' => 0], 'Flags');
+        $this->adapter->createTable($table);
+
+        $this->adapter->insert($this->testTableName, ['id' => 1, 'flags' => 42]);
+
+        $row = $this->adapter->fetchRow(
+            $this->adapter->select()->from($this->testTableName)->where('id = ?', 1),
+        );
+        expect((int) $row['flags'])->toBe(42);
+
+        if ($this->adapter instanceof \Maho\Db\Adapter\Pdo\Mysql) {
+            // Verify the physical type is actually tinyint (1 byte) — the whole point
+            // of TYPE_TINYINT vs TYPE_SMALLINT.
+            $dataType = $this->adapter->raw_fetchRow(sprintf(
+                "SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s AND COLUMN_NAME = 'flags'",
+                $this->adapter->quote($this->testTableName),
+            ), 'DATA_TYPE');
+            expect(strtolower((string) $dataType))->toBe('tinyint');
+
+            $describe = $this->adapter->describeTable($this->testTableName);
+            expect($describe['flags']['DATA_TYPE'])->toBe(Table::TYPE_TINYINT);
+        }
     });
 });
 

@@ -62,6 +62,10 @@ class Mage_Eav_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Resource_Help
             'float'    => Maho\Db\Ddl\Table::TYPE_FLOAT,
             'decimal'  => Maho\Db\Ddl\Table::TYPE_DECIMAL,
             'boolean'  => Maho\Db\Ddl\Table::TYPE_BOOLEAN,
+            // PgSQL has no native tinyint; this entry exists only for callers that
+            // explicitly pass TYPE_TINYINT through the EAV path. The physical column
+            // is created as smallint (see adapter map).
+            'tinyint'  => Maho\Db\Ddl\Table::TYPE_TINYINT,
             'datetime' => Maho\Db\Ddl\Table::TYPE_DATETIME,
             'datetimetz' => Maho\Db\Ddl\Table::TYPE_DATETIME,
             'date'     => Maho\Db\Ddl\Table::TYPE_DATE,

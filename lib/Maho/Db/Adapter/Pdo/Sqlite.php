@@ -40,6 +40,7 @@ class Sqlite extends AbstractPdoAdapter
      */
     protected array $_ddlColumnTypes = [
         \Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'INTEGER',
+        \Maho\Db\Ddl\Table::TYPE_TINYINT       => 'INTEGER',
         \Maho\Db\Ddl\Table::TYPE_SMALLINT      => 'INTEGER',
         \Maho\Db\Ddl\Table::TYPE_INTEGER       => 'INTEGER',
         \Maho\Db\Ddl\Table::TYPE_BIGINT        => 'INTEGER',

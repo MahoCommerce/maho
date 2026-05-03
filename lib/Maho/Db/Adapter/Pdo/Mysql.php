@@ -43,6 +43,7 @@ class Mysql extends AbstractPdoAdapter
      */
     protected array $_ddlColumnTypes = [
         \Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'bool',
+        \Maho\Db\Ddl\Table::TYPE_TINYINT       => 'tinyint',
         \Maho\Db\Ddl\Table::TYPE_SMALLINT      => 'smallint',
         \Maho\Db\Ddl\Table::TYPE_INTEGER       => 'int',
         \Maho\Db\Ddl\Table::TYPE_BIGINT        => 'bigint',
@@ -1766,6 +1767,7 @@ class Mysql extends AbstractPdoAdapter
             case 'tinyint':
             case 'tinyinteger':
             case 'tinyint unsigned':
+                return \Maho\Db\Ddl\Table::TYPE_TINYINT;
             case 'smallint':
             case 'smallinteger':
             case 'smallint unsigned':
@@ -2391,6 +2393,7 @@ class Mysql extends AbstractPdoAdapter
         // column size
         $cType = $this->_ddlColumnTypes[$ddlType];
         switch ($ddlType) {
+            case \Maho\Db\Ddl\Table::TYPE_TINYINT:
             case \Maho\Db\Ddl\Table::TYPE_SMALLINT:
             case \Maho\Db\Ddl\Table::TYPE_INTEGER:
             case \Maho\Db\Ddl\Table::TYPE_BIGINT:

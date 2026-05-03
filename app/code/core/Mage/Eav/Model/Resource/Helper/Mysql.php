@@ -19,6 +19,7 @@ class Mage_Eav_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_Help
      */
     protected $_ddlColumnTypes      = [
         Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'bool',
+        Maho\Db\Ddl\Table::TYPE_TINYINT       => 'tinyint',
         Maho\Db\Ddl\Table::TYPE_SMALLINT      => 'smallint',
         Maho\Db\Ddl\Table::TYPE_INTEGER       => 'int',
         Maho\Db\Ddl\Table::TYPE_BIGINT        => 'bigint',

@@ -20,6 +20,13 @@ class Table
      * Types of columns
      */
     public const TYPE_BOOLEAN          = 'boolean';
+    /**
+     * 1-byte signed integer (-128/127) on MySQL. PgSQL has no native equivalent —
+     * downgrades to `smallint` (2 bytes); SQLite uses INTEGER affinity. The 1-byte
+     * width is a MySQL-specific storage win for status enums and small flags;
+     * cross-engine code that doesn't care about the byte should use TYPE_SMALLINT.
+     */
+    public const TYPE_TINYINT          = 'tinyint';
     public const TYPE_SMALLINT         = 'smallint';
     public const TYPE_INTEGER          = 'integer';
     public const TYPE_BIGINT           = 'bigint';
@@ -281,6 +288,7 @@ class Table
             case self::TYPE_BOOLEAN:
                 break;
 
+            case self::TYPE_TINYINT:
             case self::TYPE_SMALLINT:
             case self::TYPE_INTEGER:
             case self::TYPE_BIGINT:
