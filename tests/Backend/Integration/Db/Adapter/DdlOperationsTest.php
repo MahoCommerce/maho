@@ -452,39 +452,31 @@ describe('DDL Operations - modifyColumn (surgical)', function () {
         expect((string) $after['DEFAULT'])->toBe((string) $before['DEFAULT']);
     });
 
-    it('preserves ON UPDATE CURRENT_TIMESTAMP through unrelated change on MySQL', function () {
+    it('drops legacy ON UPDATE CURRENT_TIMESTAMP and converts TIMESTAMP→DATETIME on surgical modify (MySQL)', function () {
         if (!($this->adapter instanceof \Maho\Db\Adapter\Pdo\Mysql)) {
-            $this->markTestSkipped('ON UPDATE CURRENT_TIMESTAMP is MySQL-specific');
+            $this->markTestSkipped('TIMESTAMP/DATETIME and ON UPDATE are MySQL-specific concerns');
         }
 
-        // Create a column with DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP via
-        // raw SQL — there's no clean DDL Table API for ON UPDATE without using the
-        // deprecated TIMESTAMP_INIT_UPDATE constant, and we want to verify that legacy
-        // columns already in the wild round-trip safely.
+        // Legacy column shape — TIMESTAMP with ON UPDATE CURRENT_TIMESTAMP. After the
+        // maho-26.5.0 schema migration these don't exist in core anymore, but third-party
+        // modules may still have them. The DBAL-based surgical path can't represent
+        // ON UPDATE, so it gets dropped; the type also normalizes to DATETIME (which
+        // Maho now uses everywhere via TYPE_TIMESTAMP). This test pins that behavior.
         $this->adapter->raw_query(sprintf(
             'CREATE TABLE %s (id INT NOT NULL PRIMARY KEY, '
             . "updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Updated At')",
             $this->adapter->quoteIdentifier($this->testTableName),
         ));
 
-        // Suppress the TIMESTAMP_INIT_UPDATE deprecation that fires when the
-        // introspected ON UPDATE CURRENT_TIMESTAMP form round-trips through
-        // _getColumnDefinition(). Use error_reporting() rather than set_error_handler()
-        // so PHPUnit's risky-test detector doesn't flag the test for mutating the
-        // global error handler.
-        $prevLevel = error_reporting(error_reporting() & ~E_USER_DEPRECATED);
-        try {
-            $this->adapter->modifyColumn($this->testTableName, 'updated_at', ['comment' => 'New comment']);
-        } finally {
-            error_reporting($prevLevel);
-        }
+        $this->adapter->modifyColumn($this->testTableName, 'updated_at', ['comment' => 'New comment']);
 
-        // ON UPDATE CURRENT_TIMESTAMP must survive in INFORMATION_SCHEMA.EXTRA.
-        $extra = $this->adapter->raw_fetchRow(sprintf(
-            "SELECT EXTRA FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s AND COLUMN_NAME = 'updated_at'",
+        $row = $this->adapter->raw_fetchRow(sprintf(
+            "SELECT DATA_TYPE, EXTRA, COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s AND COLUMN_NAME = 'updated_at'",
             $this->adapter->quote($this->testTableName),
-        ), 'EXTRA');
-        expect(stripos((string) $extra, 'on update CURRENT_TIMESTAMP'))->not->toBeFalse();
+        ));
+        expect(strtolower((string) $row['DATA_TYPE']))->toBe('datetime');
+        expect(stripos((string) $row['EXTRA'], 'on update CURRENT_TIMESTAMP'))->toBeFalse();
+        expect((string) $row['COLUMN_COMMENT'])->toBe('New comment');
     });
 
     it('preserves auto_increment IDENTITY through unrelated change on MySQL', function () {
@@ -522,6 +514,79 @@ describe('DDL Operations - modifyColumn (surgical)', function () {
 
         expect(fn() => $this->adapter->modifyColumn($this->testTableName, 'b', ['comment' => 'X']))
             ->toThrow(\Maho\Db\Exception::class, 'generated column');
+    });
+
+    it('preserves DEFAULT NULL on a NULLABLE TEXT column through unrelated change', function () {
+        // Verifies MariaDB INFORMATION_SCHEMA quirk: explicit DEFAULT NULL must round-trip
+        // as NULL, not as the string literal 'NULL'. Also exercises MySQL/PgSQL/SQLite
+        // for cross-engine parity.
+        $table = $this->adapter->newTable($this->testTableName)
+            ->addColumn('id', Table::TYPE_INTEGER, null, ['nullable' => false, 'primary' => true], 'ID')
+            ->addColumn('note', Table::TYPE_TEXT, 64, [
+                'nullable' => true,
+                'default' => null,
+            ], 'Note');
+        $this->adapter->createTable($table);
+
+        $before = $this->adapter->describeTable($this->testTableName)['note'];
+        expect($before['DEFAULT'])->toBeNull();
+        expect($before['NULLABLE'])->toBeTrue();
+
+        // Touch only COMMENT — DEFAULT must remain NULL, not become the string 'NULL'.
+        $this->adapter->modifyColumn($this->testTableName, 'note', ['comment' => 'Note text']);
+
+        $after = $this->adapter->describeTable($this->testTableName)['note'];
+        expect($after['DEFAULT'])->toBeNull();
+        expect($after['NULLABLE'])->toBeTrue();
+        expect($after['DATA_TYPE'])->toBe($before['DATA_TYPE']);
+        expect($after['LENGTH'])->toBe($before['LENGTH']);
+    });
+
+    it('handles ENUM column comment-only modify on MySQL via DBAL', function () {
+        if (!($this->adapter instanceof \Maho\Db\Adapter\Pdo\Mysql)) {
+            $this->markTestSkipped('ENUM is MySQL-specific');
+        }
+
+        // DBAL has a dedicated EnumType in 4.x, so a surgical comment-only modify
+        // preserves the ENUM definition rather than silently rewriting it to TEXT.
+        $this->adapter->raw_query(sprintf(
+            'CREATE TABLE %s (id INT NOT NULL PRIMARY KEY, '
+            . "status ENUM('active', 'inactive') NOT NULL DEFAULT 'active')",
+            $this->adapter->quoteIdentifier($this->testTableName),
+        ));
+
+        $this->adapter->modifyColumn($this->testTableName, 'status', ['comment' => 'Status']);
+
+        $createSql = $this->adapter->raw_fetchRow(sprintf(
+            'SHOW CREATE TABLE %s',
+            $this->adapter->quoteIdentifier($this->testTableName),
+        ), 'Create Table');
+        expect(stripos((string) $createSql, "enum('active','inactive')"))->not->toBeFalse();
+        expect(stripos((string) $createSql, "COMMENT 'Status'"))->not->toBeFalse();
+    });
+
+    it('migrates pre-existing TIMESTAMP columns to DATETIME on surgical modify (MySQL)', function () {
+        if (!($this->adapter instanceof \Maho\Db\Adapter\Pdo\Mysql)) {
+            $this->markTestSkipped('TIMESTAMP/DATETIME distinction is MySQL-specific');
+        }
+
+        // Verifies the new behavior post maho-26.5.0: any leftover physical TIMESTAMP
+        // column (e.g. on a third-party module table not yet migrated) gets normalized
+        // to DATETIME the first time it goes through the surgical path. This is the
+        // intended consequence of TYPE_TIMESTAMP physically mapping to DATETIME.
+        $this->adapter->raw_query(sprintf(
+            'CREATE TABLE %s (id INT NOT NULL PRIMARY KEY, '
+            . "created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Created')",
+            $this->adapter->quoteIdentifier($this->testTableName),
+        ));
+
+        $this->adapter->modifyColumn($this->testTableName, 'created_at', ['comment' => 'Created at']);
+
+        $dataType = $this->adapter->raw_fetchRow(sprintf(
+            "SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s AND COLUMN_NAME = 'created_at'",
+            $this->adapter->quote($this->testTableName),
+        ), 'DATA_TYPE');
+        expect(strtolower((string) $dataType))->toBe('datetime');
     });
 });
 

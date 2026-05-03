@@ -1554,7 +1554,9 @@ class Pgsql extends AbstractPdoAdapter
     }
 
     /**
-     * Modify the column definition
+     * Modify the column definition via DBAL's surgical diff. String definitions take a
+     * legacy ALTER COLUMN ... TYPE path because PgSQL needs an explicit USING clause
+     * that DBAL's diff can't synthesize from raw SQL.
      *
      * @throws \Maho\Db\Exception
      */
@@ -1565,114 +1567,17 @@ class Pgsql extends AbstractPdoAdapter
             throw new \Maho\Db\Exception(sprintf('Column "%s" does not exist in table "%s".', $columnName, $tableName));
         }
 
-        $qualifiedTable = $this->quoteIdentifier($this->_getTableName($tableName, $schemaName));
-        $quotedColumn = $this->quoteIdentifier($columnName);
-
-        // If definition is an array, we can handle type, nullable, default and comment
-        // independently — each clause is gated by `array_key_exists` so a partial
-        // definition only modifies the attributes the caller specified.
-        if (is_array($definition)) {
-            $definition = array_change_key_case($definition, CASE_UPPER);
-
-            // Change the column type only if TYPE/COLUMN_TYPE was provided.
-            $ddlType = $this->_getDdlType($definition);
-            if ($ddlType !== null) {
-                $typeOnly = $this->_getColumnTypeOnly($definition, $ddlType);
-                $this->raw_query(sprintf(
-                    'ALTER TABLE %s ALTER COLUMN %s TYPE %s USING %s::%s',
-                    $qualifiedTable,
-                    $quotedColumn,
-                    $typeOnly,
-                    $quotedColumn,
-                    $typeOnly,
-                ));
-            }
-
-            // Handle nullability only if NULLABLE was provided.
-            if (array_key_exists('NULLABLE', $definition)) {
-                $nullable = (bool) $definition['NULLABLE'];
-                if ($nullable) {
-                    $this->raw_query(sprintf(
-                        'ALTER TABLE %s ALTER COLUMN %s DROP NOT NULL',
-                        $qualifiedTable,
-                        $quotedColumn,
-                    ));
-                } else {
-                    $this->raw_query(sprintf(
-                        'ALTER TABLE %s ALTER COLUMN %s SET NOT NULL',
-                        $qualifiedTable,
-                        $quotedColumn,
-                    ));
-                }
-            }
-
-            // Handle default value only if DEFAULT was provided.
-            if (array_key_exists('DEFAULT', $definition)) {
-                $default = $definition['DEFAULT'];
-                // PgSQL has no ON UPDATE syntax, so the deprecated TIMESTAMP_INIT_UPDATE
-                // is treated as TIMESTAMP_INIT (DEFAULT CURRENT_TIMESTAMP) and warns.
-                // Compared by value to avoid PHPStan flagging the deprecated symbol here.
-                if ($default === 'TIMESTAMP_INIT_UPDATE') {
-                    @trigger_error(
-                        'TIMESTAMP_INIT_UPDATE is deprecated because it is MySQL-only (PgSQL has no equivalent on-update syntax); use TIMESTAMP_INIT plus an explicit _beforeSave() that sets updated_at for cross-engine parity.',
-                        E_USER_DEPRECATED,
-                    );
-                    $default = \Maho\Db\Ddl\Table::TIMESTAMP_INIT;
-                }
-                if ($default === null || $default === '') {
-                    $this->raw_query(sprintf(
-                        'ALTER TABLE %s ALTER COLUMN %s DROP DEFAULT',
-                        $qualifiedTable,
-                        $quotedColumn,
-                    ));
-                } elseif ($default === \Maho\Db\Ddl\Table::TIMESTAMP_INIT) {
-                    $this->raw_query(sprintf(
-                        'ALTER TABLE %s ALTER COLUMN %s SET DEFAULT CURRENT_TIMESTAMP',
-                        $qualifiedTable,
-                        $quotedColumn,
-                    ));
-                } else {
-                    $this->raw_query(sprintf(
-                        'ALTER TABLE %s ALTER COLUMN %s SET DEFAULT %s',
-                        $qualifiedTable,
-                        $quotedColumn,
-                        $this->quote($default),
-                    ));
-                }
-            }
-
-            // Handle comment only if COMMENT was provided. Empty string clears the comment.
-            if (array_key_exists('COMMENT', $definition)) {
-                $comment = (string) $definition['COMMENT'];
-                $this->raw_query(sprintf(
-                    'COMMENT ON COLUMN %s.%s IS %s',
-                    $qualifiedTable,
-                    $quotedColumn,
-                    $comment === '' ? 'NULL' : $this->quote($comment),
-                ));
-            }
-        } else {
-            // String definition - parse out the type only (strip NULL/NOT NULL/DEFAULT/COMMENT)
-            // Handle various MySQL patterns like:
-            // - "VARCHAR(255) default NULL COMMENT 'Remote Ip'"
-            // - "VARCHAR(255) NOT NULL DEFAULT ''"
-            // - "INT(11) UNSIGNED NOT NULL"
+        if (is_string($definition)) {
+            // Strip MySQL-flavored noise so PgSQL accepts the type fragment.
             $typeOnly = $definition;
-
-            // Remove COMMENT clause (MySQL-specific)
             $typeOnly = preg_replace('/\s+COMMENT\s+[\'"].*?[\'"]\s*$/i', '', $typeOnly);
-
-            // Remove DEFAULT clause
             $typeOnly = preg_replace('/\s+DEFAULT\s+(NULL|[\'"].*?[\'"]|[\d.]+)\s*/i', ' ', $typeOnly);
-
-            // Remove NULL / NOT NULL
             $typeOnly = preg_replace('/\s+(NOT\s+)?NULL\s*/i', ' ', $typeOnly);
-
-            // Remove UNSIGNED (PostgreSQL doesn't support it but we can ignore it)
             $typeOnly = preg_replace('/\s+UNSIGNED\s*/i', ' ', $typeOnly);
-
             $typeOnly = trim($typeOnly);
 
+            $qualifiedTable = $this->quoteIdentifier($this->_getTableName($tableName, $schemaName));
+            $quotedColumn = $this->quoteIdentifier($columnName);
             $this->raw_query(sprintf(
                 'ALTER TABLE %s ALTER COLUMN %s TYPE %s USING %s::%s',
                 $qualifiedTable,
@@ -1681,6 +1586,9 @@ class Pgsql extends AbstractPdoAdapter
                 $quotedColumn,
                 $typeOnly,
             ));
+        } else {
+            $definition = array_change_key_case($definition, CASE_UPPER);
+            $this->_applySurgicalColumnModification($tableName, $columnName, $definition, $schemaName);
         }
 
         $this->resetDdlCache($tableName, $schemaName);

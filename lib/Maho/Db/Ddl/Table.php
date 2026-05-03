@@ -62,6 +62,11 @@ class Table
      */
     public const TIMESTAMP_INIT_UPDATE = 'TIMESTAMP_INIT_UPDATE';
     public const TIMESTAMP_INIT        = 'TIMESTAMP_INIT';
+    /**
+     * MySQL emits `0 ON UPDATE CURRENT_TIMESTAMP`. PgSQL and SQLite have no equivalent
+     * on-update syntax — both fall back to a literal `0` default with no auto-bump.
+     * For cross-engine parity, application code must update the column via _beforeSave().
+     */
     public const TIMESTAMP_UPDATE      = 'TIMESTAMP_UPDATE';
 
     /**
