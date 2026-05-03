@@ -67,11 +67,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Startdate extends Mage_Eav_Mo
         }
 
         if ($maxDate) {
-            $locale   = Mage::app()->getLocale();
-            $value    = $locale->utcToStore(null, $startDate)->getTimestamp();
-            $maxValue = $locale->utcToStore(null, $maxDate)->getTimestamp();
-
-            if ($value > $maxValue) {
+            if (strtotime($startDate) > strtotime($maxDate)) {
                 $message = Mage::helper('catalog')->__('The From Date value should be less than or equal to the To Date value.');
                 $eavExc  = new Mage_Eav_Model_Entity_Attribute_Exception($message);
                 $eavExc->setAttributeCode($attr->getName());
