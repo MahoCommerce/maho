@@ -191,8 +191,8 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         $locale = Mage::app()->getLocale();
         if (empty($date)) {
             $date = $useTimezone
-                ? $locale->utcToStore(null, Mage::getSingleton('core/date')->gmtTimestamp())
-                : new DateTime('@' . Mage::getSingleton('core/date')->gmtTimestamp());
+                ? $locale->utcToStore(null, time())
+                : new DateTime('@' . time());
         } elseif (is_int($date)) {
             $date = $useTimezone
                 ? $locale->utcToStore(null, $date)

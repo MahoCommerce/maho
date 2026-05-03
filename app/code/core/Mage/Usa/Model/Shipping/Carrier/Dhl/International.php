@@ -1473,7 +1473,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
             $nodeShipmentDetails->addChild('GlobalProductCode', $rawRequest->getShippingMethod());
             $nodeShipmentDetails->addChild('LocalProductCode', $rawRequest->getShippingMethod());
 
-            $nodeShipmentDetails->addChild('Date', Mage::getModel('core/date')->date(self::REQUEST_DATE_FORMAT));
+            $nodeShipmentDetails->addChild('Date', Mage::app()->getLocale()->utcToStore()->format(self::REQUEST_DATE_FORMAT));
             $nodeShipmentDetails->addChild('Contents', 'DHL Parcel');
             /*
              * The DoorTo Element defines the type of delivery service that applies to the shipment.
@@ -1512,7 +1512,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
              * Door non-compliant)
              */
             $nodeShipmentDetails->addChild('DoorTo', 'DD');
-            $nodeShipmentDetails->addChild('Date', Mage::getModel('core/date')->date(self::REQUEST_DATE_FORMAT));
+            $nodeShipmentDetails->addChild('Date', Mage::app()->getLocale()->utcToStore()->format(self::REQUEST_DATE_FORMAT));
             $nodeShipmentDetails->addChild('Contents', 'DHL Parcel');
         }
     }

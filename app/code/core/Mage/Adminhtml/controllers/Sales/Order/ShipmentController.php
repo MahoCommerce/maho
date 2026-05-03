@@ -587,7 +587,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
         if ($shipment) {
             $pdf = Mage::getModel('sales/order_pdf_shipment_packaging')->getPdf([$shipment]);
             $this->_prepareDownloadResponse(
-                'packingslip' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf',
+                'packingslip' . Mage::app()->getLocale()->utcToStore()->format('Y-m-d_H-i-s') . '.pdf',
                 $pdf,
                 'application/pdf',
             );

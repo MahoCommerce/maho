@@ -460,7 +460,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
             if (!empty($allInvoices)) {
                 $pdf = Mage::getModel('sales/order_pdf_invoice')->getPdf($allInvoices);
                 return $this->_prepareDownloadResponse(
-                    'invoice' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf',
+                    'invoice' . Mage::app()->getLocale()->utcToStore()->format('Y-m-d_H-i-s') . '.pdf',
                     $pdf,
                     'application/pdf',
                 );
@@ -495,7 +495,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
             if (!empty($allShipments)) {
                 $pdf = Mage::getModel('sales/order_pdf_shipment')->getPdf($allShipments);
                 return $this->_prepareDownloadResponse(
-                    'packingslip' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf',
+                    'packingslip' . Mage::app()->getLocale()->utcToStore()->format('Y-m-d_H-i-s') . '.pdf',
                     $pdf,
                     'application/pdf',
                 );
@@ -530,7 +530,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
             if (!empty($allCreditmemos)) {
                 $pdf = Mage::getModel('sales/order_pdf_creditmemo')->getPdf($allCreditmemos);
                 return $this->_prepareDownloadResponse(
-                    'creditmemo' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf',
+                    'creditmemo' . Mage::app()->getLocale()->utcToStore()->format('Y-m-d_H-i-s') . '.pdf',
                     $pdf,
                     'application/pdf',
                 );
@@ -595,7 +595,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
 
             if (!empty($pdfContent)) {
                 return $this->_prepareDownloadResponse(
-                    'docs' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf',
+                    'docs' . Mage::app()->getLocale()->utcToStore()->format('Y-m-d_H-i-s') . '.pdf',
                     $pdfContent,
                     'application/pdf',
                 );

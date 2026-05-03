@@ -165,7 +165,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                         return false;
                     }
                     // check coupon expiration
-                    if ($coupon->hasExpirationDate() && ($coupon->getExpirationDate() < Mage::getModel('core/date')->date())) {
+                    if ($coupon->hasExpirationDate() && ($coupon->getExpirationDate() < Mage::app()->getLocale()->formatDateForDb('now'))) {
                         $rule->setIsValidForAddress($address, false);
                         return false;
                     }

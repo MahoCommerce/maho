@@ -167,13 +167,12 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
 
         $customerGroupIds = $rule->getCustomerGroupIds();
 
-        $fromTime = (int) Mage::getModel('core/date')->gmtTimestamp(strtotime((string) $rule->getFromDate()));
+        $locale = Mage::app()->getLocale();
+        $fromTime = (int) $locale->storeToUtc(null, (string) $rule->getFromDate())->getTimestamp();
         $toTime = 0;
         if ($rule->getToDate()) {
-            // Create a DateTime object for the end date and set it to end of day (23:59:59)
-            // This properly handles daylight saving time transitions instead of adding fixed seconds
-            $endDate = new DateTime((string) $rule->getToDate() . ' 23:59:59');
-            $toTime = (int) Mage::getModel('core/date')->gmtTimestamp($endDate->getTimestamp());
+            // End-of-day in store TZ, converted to UTC — handles DST transitions correctly
+            $toTime = (int) $locale->storeToUtc(null, (string) $rule->getToDate() . ' 23:59:59')->getTimestamp();
         }
 
         $timestamp = time();
