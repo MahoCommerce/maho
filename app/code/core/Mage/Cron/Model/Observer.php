@@ -51,7 +51,7 @@ class Mage_Cron_Model_Observer
         $adapter = $resource->getConnection('core_read');
         $table = $resource->getTableName('cron/schedule');
 
-        $threshold = gmdate('Y-m-d H:i:s', $now - self::CRON_NOT_RUNNING_THRESHOLD);
+        $threshold = Mage::app()->getLocale()->formatDateForDb($now - self::CRON_NOT_RUNNING_THRESHOLD);
 
         $hasRecentExecution = $adapter->fetchOne(
             $adapter->select()
