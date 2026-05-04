@@ -10747,12 +10747,6 @@ parameters:
 			path: app/code/core/Mage/Core/Controller/Varien/Front.php
 
 		-
-			rawMessage: 'Comparison operation ">" between int<0, 100> and 100 is always false.'
-			identifier: greater.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Front.php
-
-		-
 			rawMessage: Property Mage_Core_Controller_Varien_Front::$_defaults has no type specified.
 			identifier: missingType.property
 			count: 1

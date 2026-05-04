@@ -184,18 +184,24 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
     protected function _runDispatchLoop(Mage_Core_Controller_Request_Http $request): void
     {
         \Maho\Profiler::start('mage::dispatch::routers_match');
-        $i = 0;
-        while (!$request->isDispatched() && $i++ < self::MAX_FORWARD_ITERATIONS) {
-            foreach ($this->_routers as $router) {
-                /** @var Mage_Core_Controller_Varien_Router_Abstract $router */
-                if ($router->match($request)) {
-                    break;
+        try {
+            $iterations = 0;
+            while (!$request->isDispatched()) {
+                if ($iterations++ >= self::MAX_FORWARD_ITERATIONS) {
+                    Mage::throwException(sprintf(
+                        'Front controller reached %d forward iterations - possible infinite _forward() loop',
+                        self::MAX_FORWARD_ITERATIONS,
+                    ));
+                }
+                foreach ($this->_routers as $router) {
+                    /** @var Mage_Core_Controller_Varien_Router_Abstract $router */
+                    if ($router->match($request)) {
+                        break;
+                    }
                 }
             }
-        }
-        \Maho\Profiler::stop('mage::dispatch::routers_match');
-        if ($i > self::MAX_FORWARD_ITERATIONS) {
-            Mage::throwException(sprintf('Front controller reached %d forward iterations — infinite _forward() loop?', self::MAX_FORWARD_ITERATIONS));
+        } finally {
+            \Maho\Profiler::stop('mage::dispatch::routers_match');
         }
     }
 

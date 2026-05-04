@@ -27,6 +27,15 @@ use Mage_Core_Controller_Response_Http;
 class ControllerDispatcher
 {
     /**
+     * Cached admin module chain for this dispatcher instance.
+     * The chain is invariant per dispatcher, so subsequent resolveControllerClass /
+     * resolveAttributeControllerClass calls within one dispatch flow reuse it.
+     *
+     * @var string[]|null
+     */
+    private ?array $adminModuleChain = null;
+
+    /**
      * Dispatch an internally-forwarded request.
      *
      * Called when another router (CMS, URL rewrite, _forward()) has set
@@ -91,7 +100,8 @@ class ControllerDispatcher
         }
 
         for ($i = 3, $l = count($parts); $i < $l; $i += 2) {
-            $request->setParam($parts[$i], isset($parts[$i + 1]) ? urldecode($parts[$i + 1]) : '');
+            $key = urldecode($parts[$i]);
+            $request->setParam($key, isset($parts[$i + 1]) ? urldecode($parts[$i + 1]) : '');
         }
 
         $request->setModuleName($frontName);
@@ -226,10 +236,14 @@ class ControllerDispatcher
      */
     private function buildAdminModuleChain(): array
     {
+        if ($this->adminModuleChain !== null) {
+            return $this->adminModuleChain;
+        }
+
         $modules = ['Mage_Adminhtml'];
         $modulesNode = Mage::getConfig()->getNode('admin/routers/adminhtml/args/modules');
         if (!$modulesNode) {
-            return $modules;
+            return $this->adminModuleChain = $modules;
         }
 
         foreach ($modulesNode->children() as $customModule) {
@@ -251,7 +265,7 @@ class ControllerDispatcher
             }
         }
 
-        return $modules;
+        return $this->adminModuleChain = $modules;
     }
 
     protected function parseUrlParams(string $paramsString, Mage_Core_Controller_Request_Http $request): void
@@ -262,7 +276,8 @@ class ControllerDispatcher
 
         $parts = explode('/', $paramsString);
         for ($i = 0, $l = count($parts); $i < $l; $i += 2) {
-            $request->setParam($parts[$i], isset($parts[$i + 1]) ? urldecode($parts[$i + 1]) : '');
+            $key = urldecode($parts[$i]);
+            $request->setParam($key, isset($parts[$i + 1]) ? urldecode($parts[$i + 1]) : '');
         }
     }
 
