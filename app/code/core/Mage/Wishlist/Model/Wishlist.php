@@ -78,7 +78,7 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _beforeSave()
     {
-        $this->setUpdatedAt(Mage::getSingleton('core/date')->gmtDate());
+        $this->setUpdatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         return parent::_beforeSave();
     }
 

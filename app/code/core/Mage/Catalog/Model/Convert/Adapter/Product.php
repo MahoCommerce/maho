@@ -510,15 +510,8 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
                                 unset($default);
                             } // end
 
-                            #Mage::getResourceSingleton('catalog_entity/convert')->addProductToStore($model->getId(), 0);
                         }
                         if (!$new || $storeId !== 0) {
-                            if ($storeId !== 0) {
-                                Mage::getResourceSingleton('catalog_entity/convert')->addProductToStore(
-                                    $model->getId(),
-                                    $storeId,
-                                );
-                            }
                             $model->save();
                         }
 

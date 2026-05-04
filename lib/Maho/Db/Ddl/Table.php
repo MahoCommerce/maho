@@ -20,30 +20,48 @@ class Table
      * Types of columns
      */
     public const TYPE_BOOLEAN          = 'boolean';
+    /**
+     * 1-byte signed integer (-128/127) on MySQL. PgSQL has no native equivalent —
+     * downgrades to `smallint` (2 bytes); SQLite uses INTEGER affinity. The 1-byte
+     * width is a MySQL-specific storage win for status enums and small flags;
+     * cross-engine code that doesn't care about the byte should use TYPE_SMALLINT.
+     */
+    public const TYPE_TINYINT          = 'tinyint';
     public const TYPE_SMALLINT         = 'smallint';
     public const TYPE_INTEGER          = 'integer';
     public const TYPE_BIGINT           = 'bigint';
     public const TYPE_FLOAT            = 'float';
-    public const TYPE_NUMERIC          = 'numeric';
     public const TYPE_DECIMAL          = 'decimal';
     public const TYPE_DATE             = 'date';
-    public const TYPE_TIMESTAMP        = 'timestamp'; // Capable to support date-time from 1970 + auto-triggers in some RDBMS
-    public const TYPE_DATETIME         = 'datetime'; // Capable to support long date-time before 1970
+    /**
+     * Time-of-day, no date, no timezone. Stored as `HH:MM:SS` on MySQL and
+     * `TIME WITHOUT TIME ZONE` on PgSQL; SQLite has no native type and stores as TEXT.
+     * Intended for store-relative wall-clock values like opening hours — values are
+     * interpreted in whatever frame the caller is using (typically the store's local
+     * clock); there is no UTC convention because a time without a date can't be
+     * unambiguously converted across timezones (DST boundaries shift).
+     */
+    public const TYPE_TIME             = 'time';
+    public const TYPE_DATETIME         = 'datetime';
+    /**
+     * Value-equal alias for TYPE_DATETIME — both physically create a MySQL `datetime`
+     * column. Kept for source-compat with historical install scripts and third-party
+     * modules; new code should prefer TYPE_DATETIME for clarity. Doctrine DBAL's column
+     * model conflates TIMESTAMP and DATETIME and silently rewrites TIMESTAMP→DATETIME
+     * on diff, and Maho forces session TZ to UTC on connect (#861) which makes
+     * TIMESTAMP's TZ auto-conversion a no-op anyway. `DEFAULT CURRENT_TIMESTAMP` and
+     * `ON UPDATE CURRENT_TIMESTAMP` (the features that justified TIMESTAMP) are
+     * supported on DATETIME since MySQL 5.6 / MariaDB 10.0.
+     *
+     * Not formally @deprecated to avoid flooding PHPStan with warnings on the dozens
+     * of immutable historical install scripts that already use this constant.
+     */
+    public const TYPE_TIMESTAMP        = self::TYPE_DATETIME;
     public const TYPE_TEXT             = 'text';
     public const TYPE_BLOB             = 'blob'; // Used for back compatibility, when query param can't use statement options
     public const TYPE_VARBINARY        = 'varbinary'; // A real blob, stored as binary inside DB
 
-    // Deprecated column types, support is left only in MySQL adapter.
-    public const TYPE_TINYINT          = 'tinyint';        // Internally converted to TYPE_SMALLINT
-    public const TYPE_CHAR             = 'char';           // Internally converted to TYPE_TEXT
-    public const TYPE_VARCHAR          = 'varchar';        // Internally converted to TYPE_TEXT
-    public const TYPE_LONGVARCHAR      = 'longvarchar';    // Internally converted to TYPE_TEXT
-    public const TYPE_CLOB             = 'cblob';          // Internally converted to TYPE_TEXT
-    public const TYPE_DOUBLE           = 'double';         // Internally converted to TYPE_FLOAT
-    public const TYPE_REAL             = 'real';           // Internally converted to TYPE_FLOAT
-    public const TYPE_TIME             = 'time';           // Internally converted to TYPE_TIMESTAMP
-    public const TYPE_BINARY           = 'binary';         // Internally converted to TYPE_BLOB
-    public const TYPE_LONGVARBINARY    = 'longvarbinary';  // Internally converted to TYPE_BLOB
+    public const TYPE_VARCHAR          = 'varchar';
 
     /**
      * Default and maximal TEXT and BLOB columns sizes we can support for different DB systems.
@@ -53,10 +71,22 @@ class Table
     public const MAX_VARBINARY_SIZE    = 2147483648;
 
     /**
-     * Default values for timestampses - fill with current timestamp on inserting record, on changing and both cases
+     * Default values for timestamp columns: fill with current timestamp on insert, on update, or both.
+     *
+     * @deprecated TIMESTAMP_INIT_UPDATE is unsafe for cross-engine use: PgSQL and SQLite
+     * silently downgrade it to plain CURRENT_TIMESTAMP (no on-update auto-bump), and the
+     * surgical modifyColumn path drops the ON UPDATE clause across all adapters because
+     * Doctrine DBAL's column model has no on-update concept. Use TIMESTAMP_INIT plus an
+     * explicit _beforeSave() that calls setUpdatedAt(Mage::app()->getLocale()->formatDateForDb('now'))
+     * for cross-engine parity.
      */
     public const TIMESTAMP_INIT_UPDATE = 'TIMESTAMP_INIT_UPDATE';
     public const TIMESTAMP_INIT        = 'TIMESTAMP_INIT';
+    /**
+     * MySQL emits `0 ON UPDATE CURRENT_TIMESTAMP`. PgSQL and SQLite have no equivalent
+     * on-update syntax — both fall back to a literal `0` default with no auto-bump.
+     * For cross-engine parity, application code must update the column via _beforeSave().
+     */
     public const TIMESTAMP_UPDATE      = 'TIMESTAMP_UPDATE';
 
     /**
@@ -248,35 +278,17 @@ class Table
         $primaryPosition    = 0;
         $identity           = false;
 
-        // Convert deprecated types
-        switch ($type) {
-            case self::TYPE_CHAR:
-            case self::TYPE_VARCHAR:
-            case self::TYPE_LONGVARCHAR:
-            case self::TYPE_CLOB:
-                $type = self::TYPE_TEXT;
-                break;
-            case self::TYPE_TINYINT:
-                $type = self::TYPE_SMALLINT;
-                break;
-            case self::TYPE_DOUBLE:
-            case self::TYPE_REAL:
-                $type = self::TYPE_FLOAT;
-                break;
-            case self::TYPE_TIME:
-                $type = self::TYPE_TIMESTAMP;
-                break;
-            case self::TYPE_BINARY:
-            case self::TYPE_LONGVARBINARY:
-                $type = self::TYPE_BLOB;
-                break;
-        }
+        // The historical zero-usage aliases (TYPE_TINYINT→SMALLINT, TYPE_CHAR/LONGVARCHAR/
+        // CLOB→TEXT, TYPE_DOUBLE/REAL→FLOAT, TYPE_TIME→DATETIME, TYPE_BINARY/
+        // LONGVARBINARY→BLOB) were removed; their silent coercion to a different physical
+        // type was a footgun, and nothing in core ever called them.
 
         // Prepare different properties
         switch ($type) {
             case self::TYPE_BOOLEAN:
                 break;
 
+            case self::TYPE_TINYINT:
             case self::TYPE_SMALLINT:
             case self::TYPE_INTEGER:
             case self::TYPE_BIGINT:
@@ -293,7 +305,6 @@ class Table
                 break;
 
             case self::TYPE_DECIMAL:
-            case self::TYPE_NUMERIC:
                 $match      = [];
                 //For decimal(M,D), M must be >= D
                 $precision  = 10;
@@ -323,10 +334,12 @@ class Table
                 }
                 break;
             case self::TYPE_DATE:
+            case self::TYPE_TIME:
             case self::TYPE_DATETIME:
-            case self::TYPE_TIMESTAMP:
+                // TYPE_TIMESTAMP is value-equal to TYPE_DATETIME so the case above covers both.
                 break;
             case self::TYPE_TEXT:
+            case self::TYPE_VARCHAR:
             case self::TYPE_BLOB:
             case self::TYPE_VARBINARY:
                 $length = $size;

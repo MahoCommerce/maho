@@ -391,7 +391,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
         $tzTransitions = [];
         try {
             if (!empty($from)) {
-                if ($from instanceof DateTime) {
+                if ($from instanceof DateTimeInterface) {
                     $from = $from->getTimestamp();
                 } else {
                     $fromOriginal = $from;
@@ -400,7 +400,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
                 }
             }
 
-            if ($to instanceof DateTime) {
+            if ($to instanceof DateTimeInterface) {
                 $nextPeriod = $this->_getWriteAdapter()->formatDate($to->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
                 $to = $to->getTimestamp();
             } elseif (!empty($to)) {

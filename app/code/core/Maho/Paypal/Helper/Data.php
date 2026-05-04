@@ -228,14 +228,14 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         /** @var Maho_Paypal_Model_Resource_Vault_Token_Collection $existing */
-        $existing = Mage::getResourceModel('maho_paypal/vault_token_collection');
+        $existing = Mage::getResourceModel('paypal/vault_token_collection');
         $existing->addPaypalTokenFilter($paypalTokenId);
         if ($existing->getSize() > 0) {
             return;
         }
 
         /** @var Maho_Paypal_Model_Resource_Vault_Token_Collection $oldTokens */
-        $oldTokens = Mage::getResourceModel('maho_paypal/vault_token_collection');
+        $oldTokens = Mage::getResourceModel('paypal/vault_token_collection');
         $oldTokens->addCustomerFilter((int) $customerId)->addActiveFilter();
         $oldTokens->addFieldToFilter('payment_source_type', $sourceType);
         if ($sourceType === 'card') {
@@ -249,7 +249,7 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         /** @var Maho_Paypal_Model_Vault_Token $token */
-        $token = Mage::getModel('maho_paypal/vault_token');
+        $token = Mage::getModel('paypal/vault_token');
         $token->setData([
             'customer_id' => (int) $customerId,
             'paypal_token_id' => $paypalTokenId,

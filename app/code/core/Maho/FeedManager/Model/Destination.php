@@ -235,7 +235,7 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
             $this->setData('config', Mage::helper('core')->encryptIdempotent($config));
         }
 
-        $now = Mage::app()->getLocale()->nowUtc();
+        $now = Mage::app()->getLocale()->formatDateForDb('now');
         if (!$this->getCreatedAt()) {
             $this->setCreatedAt($now);
         }

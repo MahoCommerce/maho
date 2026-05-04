@@ -14,7 +14,7 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
 {
     protected $_code = Maho_Paypal_Model_Config::METHOD_VAULT;
 
-    protected $_formBlockType = 'maho_paypal/checkout_vault_form';
+    protected $_formBlockType = 'paypal/checkout_vault_form';
 
     protected $_canUseInternal = true;
 
@@ -29,7 +29,7 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
         }
 
         /** @var Maho_Paypal_Model_Resource_Vault_Token_Collection $tokens */
-        $tokens = Mage::getResourceModel('maho_paypal/vault_token_collection');
+        $tokens = Mage::getResourceModel('paypal/vault_token_collection');
         $tokens->addCustomerFilter((int) $customerId)->addActiveFilter();
 
         if ($tokens->getSize() === 0) {
@@ -63,13 +63,13 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
 
         $vaultTokenId = $payment->getAdditionalInformation('vault_token_id');
         /** @var Maho_Paypal_Model_Vault_Token $token */
-        $token = Mage::getModel('maho_paypal/vault_token')->load($vaultTokenId);
+        $token = Mage::getModel('paypal/vault_token')->load($vaultTokenId);
 
         $intent = ($paymentAction === 'authorize') ? 'AUTHORIZE' : 'CAPTURE';
         $quote->reserveOrderId();
 
         /** @var Maho_Paypal_Model_Api_OrderBuilder $builder */
-        $builder = Mage::getModel('maho_paypal/api_orderBuilder');
+        $builder = Mage::getModel('paypal/api_orderBuilder');
         $orderRequest = $builder->buildFromQuote(
             $quote,
             $intent,
@@ -83,12 +83,12 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
             $result = $client->createOrder(['body' => $orderRequest]);
         } catch (\Throwable $e) {
             Mage::logException($e);
-            Mage::throwException(Mage::helper('maho_paypal')->__('Failed to create PayPal order: %s', $e->getMessage()));
+            Mage::throwException(Mage::helper('paypal')->__('Failed to create PayPal order: %s', $e->getMessage()));
         }
 
         $paypalOrderId = $result['id'] ?? null;
         if (!$paypalOrderId) {
-            Mage::throwException(Mage::helper('maho_paypal')->__('Failed to create PayPal order.'));
+            Mage::throwException(Mage::helper('paypal')->__('Failed to create PayPal order.'));
         }
 
         $payment->setAdditionalInformation('paypal_order_id', $paypalOrderId);
@@ -138,7 +138,7 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
         $vaultTokenId = $data->getVaultTokenId();
         if ($vaultTokenId) {
             /** @var Maho_Paypal_Model_Vault_Token $token */
-            $token = Mage::getModel('maho_paypal/vault_token')->load($vaultTokenId);
+            $token = Mage::getModel('paypal/vault_token')->load($vaultTokenId);
 
             $customerId = (int) (Mage::getSingleton('customer/session')->getCustomerId()
                 ?: Mage::getSingleton('adminhtml/session_quote')->getCustomerId());

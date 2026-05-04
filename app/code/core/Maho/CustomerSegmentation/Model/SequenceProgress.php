@@ -60,7 +60,7 @@ class Maho_CustomerSegmentation_Model_SequenceProgress extends Mage_Core_Model_A
             $this->setQueueId($queueId);
         }
         $this->setStatus(self::STATUS_SENT)
-             ->setSentAt(Mage::getSingleton('core/date')->gmtDate())
+             ->setSentAt(Mage::app()->getLocale()->formatDateForDb('now'))
              ->save();
         return $this;
     }

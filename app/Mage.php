@@ -669,7 +669,7 @@ final class Mage
             }
             try {
                 self::dispatchEvent('mage_run_exception', ['exception' => $e]);
-                if (!headers_sent() && self::isInstalled()) {
+                if (!headers_sent()) {
                     header('Location:' . self::getUrl('install'));
                 } else {
                     self::printException($e);

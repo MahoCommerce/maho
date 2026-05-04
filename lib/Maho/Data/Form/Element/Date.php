@@ -13,6 +13,7 @@
 namespace Maho\Data\Form\Element;
 
 use DateTime;
+use DateTimeInterface;
 use Maho\Data\Form\Element\AbstractElement;
 
 /**
@@ -26,7 +27,7 @@ use Maho\Data\Form\Element\AbstractElement;
 class Date extends AbstractElement
 {
     /**
-     * @var DateTime|string
+     * @var DateTimeInterface|string
      */
     protected $_value;
 
@@ -84,7 +85,7 @@ class Date extends AbstractElement
             return $this;
         }
 
-        if ($value instanceof DateTime) {
+        if ($value instanceof DateTimeInterface) {
             $this->_value = $value;
             return $this;
         }
@@ -151,7 +152,7 @@ class Date extends AbstractElement
         if (null === $format) {
             $format = $this->getFormat();
         }
-        if ($this->_value instanceof DateTime) {
+        if ($this->_value instanceof DateTimeInterface) {
             return $this->_value->format($format);
         }
         return (string) $this->_value;
@@ -160,7 +161,7 @@ class Date extends AbstractElement
     /**
      * Get value instance, if any
      *
-     * @return DateTime|string|null
+     * @return DateTimeInterface|string|null
      */
     public function getValueInstance()
     {
@@ -185,7 +186,7 @@ class Date extends AbstractElement
 
         // Convert the value to ISO format for native date input
         $isoValue = '';
-        if ($this->_value instanceof DateTime) {
+        if ($this->_value instanceof DateTimeInterface) {
             // Validate that the date has a valid year (not from MySQL zero date)
             if ($this->_value->format('Y') >= 1) {
                 if ($this->getTime()) {

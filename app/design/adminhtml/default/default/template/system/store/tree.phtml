@@ -28,14 +28,9 @@
             <?php if (count($webSiteData['storeGroups']) == 0): ?>
 
                 <tr>
-                    <?php if (!$printedWebsite): ?>
-                        <td class="a-left" rowspan="<?= $webSiteData['count'] ?>"><?= $this->renderWebsite($webSiteData['object']) ?></td>
-                    <?php endif ?>
-
+                    <td class="a-left" rowspan="<?= $webSiteData['count'] ?>"><?= $this->renderWebsite($webSiteData['object']) ?></td>
                     <td colspan="2" class="a-left last"><span class="not-available"></span></td>
                 </tr>
-
-                <?php $printedWebsite = false; ?>
                 <?php continue ?>
             <?php endif ?>
 
@@ -47,13 +42,9 @@
                             <?php $printedWebsite = true; ?>
                         <?php endif ?>
 
-                        <?php if (!$printedStoreGroup): ?>
                         <td class="a-left" rowspan="<?= $storeGroupData['count'] ?>"><?= $this->renderStoreGroup($storeGroupData['object']) ?></td>
-                        <?php endif ?>
-
                         <td class="a-left last"><span class="not-available"></span></td>
                     </tr>
-                    <?php $printedStoreGroup = false; ?>
                     <?php continue ?>
                 <?php endif ?>
 

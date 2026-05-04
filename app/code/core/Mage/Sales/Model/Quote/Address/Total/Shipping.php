@@ -105,9 +105,7 @@ class Mage_Sales_Model_Quote_Address_Total_Shipping extends Mage_Sales_Model_Quo
                     $item->setRowWeight($rowWeight);
                 }
             } else {
-                if (!$item->getProduct()->isVirtual()) {
-                    $addressQty += $item->getQty();
-                }
+                $addressQty += $item->getQty();
                 $itemWeight = $item->getWeight();
                 $rowWeight  = $itemWeight * $item->getQty();
                 $addressWeight += $rowWeight;

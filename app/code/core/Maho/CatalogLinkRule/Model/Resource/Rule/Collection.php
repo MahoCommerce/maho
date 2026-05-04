@@ -26,7 +26,8 @@ class Maho_CatalogLinkRule_Model_Resource_Rule_Collection extends Mage_Core_Mode
      */
     public function addDateFilter(): self
     {
-        $now = Mage::app()->getLocale()->nowUtc();
+        // from_date/to_date are admin-entered as store-local — compare in store TZ
+        $now = Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
 
         $this->getSelect()
             ->where('from_date IS NULL OR from_date <= ?', $now)

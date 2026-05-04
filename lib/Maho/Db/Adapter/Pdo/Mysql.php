@@ -43,14 +43,15 @@ class Mysql extends AbstractPdoAdapter
      */
     protected array $_ddlColumnTypes = [
         \Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'bool',
+        \Maho\Db\Ddl\Table::TYPE_TINYINT       => 'tinyint',
         \Maho\Db\Ddl\Table::TYPE_SMALLINT      => 'smallint',
         \Maho\Db\Ddl\Table::TYPE_INTEGER       => 'int',
         \Maho\Db\Ddl\Table::TYPE_BIGINT        => 'bigint',
         \Maho\Db\Ddl\Table::TYPE_FLOAT         => 'float',
         \Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'decimal',
-        \Maho\Db\Ddl\Table::TYPE_NUMERIC       => 'decimal',
         \Maho\Db\Ddl\Table::TYPE_DATE          => 'date',
-        \Maho\Db\Ddl\Table::TYPE_TIMESTAMP     => 'timestamp',
+        \Maho\Db\Ddl\Table::TYPE_TIME          => 'time',
+        // TYPE_TIMESTAMP aliases TYPE_DATETIME — single entry covers both.
         \Maho\Db\Ddl\Table::TYPE_DATETIME      => 'datetime',
         \Maho\Db\Ddl\Table::TYPE_TEXT          => 'text',
         \Maho\Db\Ddl\Table::TYPE_VARCHAR       => 'varchar',
@@ -132,6 +133,7 @@ class Mysql extends AbstractPdoAdapter
     {
         /** @link http://bugs.mysql.com/bug.php?id=18551 */
         $this->_connection->executeStatement("SET SQL_MODE=''");
+        $this->_connection->executeStatement("SET time_zone = '+00:00'");
     }
 
     /**
@@ -817,7 +819,12 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
-     * Modify the column definition
+     * Modify the column definition via DBAL's surgical diff. String definitions take a
+     * raw `ALTER TABLE ... MODIFY COLUMN` path (full-replace semantics) since DBAL has
+     * no entry point for raw SQL column definitions.
+     *
+     * Refuses generated columns — DBAL's diff would silently strip the GENERATED
+     * expression and rewrite the column as a plain default-NULL data column.
      *
      * @throws \Maho\Db\Exception
      */
@@ -827,24 +834,63 @@ class Mysql extends AbstractPdoAdapter
         if (!$this->tableColumnExists($tableName, $columnName, $schemaName)) {
             throw new \Maho\Db\Exception(sprintf('Column "%s" does not exist in table "%s".', $columnName, $tableName));
         }
-        if (is_array($definition)) {
-            $definition = $this->_getColumnDefinition($definition);
+
+        if (is_string($definition)) {
+            $this->raw_query(sprintf(
+                'ALTER TABLE %s MODIFY COLUMN %s %s',
+                $this->quoteIdentifier($tableName),
+                $this->quoteIdentifier($columnName),
+                $definition,
+            ));
+        } else {
+            $definition = array_change_key_case($definition, CASE_UPPER);
+            $this->_assertColumnIsSafeToModify($tableName, $columnName, $schemaName);
+            $this->_applySurgicalColumnModification($tableName, $columnName, $definition, $schemaName);
         }
 
-        $sql = sprintf(
-            'ALTER TABLE %s MODIFY COLUMN %s %s',
-            $this->quoteIdentifier($tableName),
-            $this->quoteIdentifier($columnName),
-            $definition,
-        );
-
-        $this->raw_query($sql);
         if ($flushData) {
             $this->showTableStatus($tableName, $schemaName);
         }
         $this->resetDdlCache($tableName, $schemaName);
 
         return $this;
+    }
+
+    /**
+     * Pre-flight checks before handing a column to DBAL's surgical diff:
+     * - throws on generated columns (DBAL would strip the GENERATED expression and
+     *   rewrite the column as a plain default-NULL data column)
+     * - emits an E_USER_DEPRECATED notice when a legacy ON UPDATE CURRENT_TIMESTAMP
+     *   clause is about to be silently dropped (DBAL has no on-update concept)
+     */
+    protected function _assertColumnIsSafeToModify(string $tableName, string $columnName, ?string $schemaName = null): void
+    {
+        $sql = sprintf(
+            'SELECT EXTRA FROM INFORMATION_SCHEMA.COLUMNS '
+            . 'WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s',
+            $schemaName ? $this->quote($schemaName) : 'DATABASE()',
+            $this->quote($tableName),
+            $this->quote($columnName),
+        );
+        $extra = strtoupper((string) $this->raw_fetchRow($sql, 'EXTRA'));
+
+        if (str_contains($extra, 'STORED GENERATED') || str_contains($extra, 'VIRTUAL GENERATED')) {
+            throw new \Maho\Db\Exception(sprintf(
+                'Cannot surgically modify generated column "%s" in table "%s": DBAL would strip '
+                . 'the GENERATED expression. Drop and re-add the column instead.',
+                $columnName,
+                $tableName,
+            ));
+        }
+
+        if (str_contains($extra, 'ON UPDATE CURRENT_TIMESTAMP')) {
+            @trigger_error(sprintf(
+                'Surgical modifyColumn on "%s.%s" will drop ON UPDATE CURRENT_TIMESTAMP — '
+                . 'DBAL has no on-update concept. Bump the column via _beforeSave() for cross-engine parity.',
+                $tableName,
+                $columnName,
+            ), E_USER_DEPRECATED);
+        }
     }
 
     /**
@@ -1721,6 +1767,7 @@ class Mysql extends AbstractPdoAdapter
             case 'tinyint':
             case 'tinyinteger':
             case 'tinyint unsigned':
+                return \Maho\Db\Ddl\Table::TYPE_TINYINT;
             case 'smallint':
             case 'smallinteger':
             case 'smallint unsigned':
@@ -1737,9 +1784,13 @@ class Mysql extends AbstractPdoAdapter
             case 'datetime':
                 return \Maho\Db\Ddl\Table::TYPE_DATETIME;
             case 'timestamp':
-                return \Maho\Db\Ddl\Table::TYPE_TIMESTAMP;
+                // Pre-migration TIMESTAMP columns introspect to TYPE_DATETIME (the new
+                // canonical type); TYPE_TIMESTAMP is a deprecated value-equal alias.
+                return \Maho\Db\Ddl\Table::TYPE_DATETIME;
             case 'date':
                 return \Maho\Db\Ddl\Table::TYPE_DATE;
+            case 'time':
+                return \Maho\Db\Ddl\Table::TYPE_TIME;
             case 'float':
                 return \Maho\Db\Ddl\Table::TYPE_FLOAT;
             case 'decimal':
@@ -2342,6 +2393,7 @@ class Mysql extends AbstractPdoAdapter
         // column size
         $cType = $this->_ddlColumnTypes[$ddlType];
         switch ($ddlType) {
+            case \Maho\Db\Ddl\Table::TYPE_TINYINT:
             case \Maho\Db\Ddl\Table::TYPE_SMALLINT:
             case \Maho\Db\Ddl\Table::TYPE_INTEGER:
             case \Maho\Db\Ddl\Table::TYPE_BIGINT:
@@ -2350,7 +2402,6 @@ class Mysql extends AbstractPdoAdapter
                 }
                 break;
             case \Maho\Db\Ddl\Table::TYPE_DECIMAL:
-            case \Maho\Db\Ddl\Table::TYPE_NUMERIC:
                 $precision  = 10;
                 $scale      = 0;
                 $match      = [];
@@ -2376,15 +2427,17 @@ class Mysql extends AbstractPdoAdapter
                 } else {
                     $length = $this->_parseTextSize($options['LENGTH']);
                 }
+                $isText = $ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT
+                    || $ddlType == \Maho\Db\Ddl\Table::TYPE_VARCHAR;
                 if ($length <= 255) {
-                    $cType = ($ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT || $ddlType == \Maho\Db\Ddl\Table::TYPE_VARCHAR) ? 'varchar' : 'varbinary';
+                    $cType = $isText ? 'varchar' : 'varbinary';
                     $cType = sprintf('%s(%d)', $cType, $length);
                 } elseif ($length <= 65536) {
-                    $cType = ($ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT || $ddlType == \Maho\Db\Ddl\Table::TYPE_VARCHAR) ? 'text' : 'blob';
+                    $cType = $isText ? 'text' : 'blob';
                 } elseif ($length <= 16777216) {
-                    $cType = ($ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT || $ddlType == \Maho\Db\Ddl\Table::TYPE_VARCHAR) ? 'mediumtext' : 'mediumblob';
+                    $cType = $isText ? 'mediumtext' : 'mediumblob';
                 } else {
-                    $cType = ($ddlType == \Maho\Db\Ddl\Table::TYPE_TEXT || $ddlType == \Maho\Db\Ddl\Table::TYPE_VARCHAR) ? 'longtext' : 'longblob';
+                    $cType = $isText ? 'longtext' : 'longblob';
                 }
                 break;
         }
@@ -2407,15 +2460,21 @@ class Mysql extends AbstractPdoAdapter
             $cDefault = str_replace("'", '', $cDefault);
         }
 
-        // prepare default value string
-        if ($ddlType == \Maho\Db\Ddl\Table::TYPE_TIMESTAMP) {
+        // Branch covers both TYPE_DATETIME and TYPE_TIMESTAMP (value-equal aliases).
+        if ($ddlType == \Maho\Db\Ddl\Table::TYPE_DATETIME) {
             if ($cDefault === null) {
                 $cDefault = new \Maho\Db\Expr('NULL');
             } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT) {
                 $cDefault = new \Maho\Db\Expr('CURRENT_TIMESTAMP');
             } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_UPDATE) {
                 $cDefault = new \Maho\Db\Expr('0 ON UPDATE CURRENT_TIMESTAMP');
-            } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE) {
+            } elseif ($cDefault == 'TIMESTAMP_INIT_UPDATE') {
+                // Compared by value rather than the constant so PHPStan doesn't flag the
+                // adapter itself as using the deprecated symbol.
+                @trigger_error(
+                    'TIMESTAMP_INIT_UPDATE is deprecated because it is MySQL-only; use TIMESTAMP_INIT plus an explicit _beforeSave() that sets updated_at for cross-engine parity.',
+                    E_USER_DEPRECATED,
+                );
                 $cDefault = new \Maho\Db\Expr('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP');
             } elseif ($cNullable && !$cDefault) {
                 $cDefault = new \Maho\Db\Expr('NULL');

@@ -28,6 +28,18 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
         $this->_init('cataloglinkrule/rule');
     }
 
+    #[\Override]
+    protected function _beforeSave()
+    {
+        parent::_beforeSave();
+        $now = Mage::app()->getLocale()->formatDateForDb('now');
+        if ($this->isObjectNew() && !$this->getCreatedAt()) {
+            $this->setCreatedAt($now);
+        }
+        $this->setUpdatedAt($now);
+        return $this;
+    }
+
     public function hasConditionsSerialized(): bool
     {
         return $this->hasData('source_conditions_serialized');

@@ -135,7 +135,7 @@ class Mage_Page_Block_Html_Topmenu extends Mage_Core_Block_Template
      *
      * @return string
      */
-    protected function _getRenderedMenuItemAttributes(\Maho\Data\Tree\Node $item)
+    public function _getRenderedMenuItemAttributes(\Maho\Data\Tree\Node $item)
     {
         $html = '';
         $attributes = $this->_getMenuItemAttributes($item);

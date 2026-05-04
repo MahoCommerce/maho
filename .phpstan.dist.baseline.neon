@@ -73,12 +73,6 @@ parameters:
 			path: app/Mage.php
 
 		-
-			rawMessage: Right side of && is always false.
-			identifier: booleanAnd.rightAlwaysFalse
-			count: 1
-			path: app/Mage.php
-
-		-
 			rawMessage: 'Method Mage_Admin_Model_Acl_Assert_Ip::_isCleanIP() should return bool|null but return statement is missing.'
 			identifier: return.missing
 			count: 1
@@ -2659,12 +2653,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
 
 		-
-			rawMessage: 'Parameter #1 $array (array{non-empty-string, non-empty-string}) of array_values is already a list, call has no effect.'
-			identifier: arrayValues.list
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/System/Config/Form.php
-
-		-
 			rawMessage: 'Parameter #1 $element of method Mage_Adminhtml_Block_System_Config_Form::_prepareGroupComment() expects Mage_Core_Model_Config_Element, Maho\Simplexml\Element given.'
 			identifier: argument.type
 			count: 1
@@ -3843,12 +3831,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Widget_Tabs::bindShadowTabs() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Tabs.php
-
-		-
-			rawMessage: 'PHPDoc tag @param references unknown parameter: $tabNId'
-			identifier: parameter.notFound
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Tabs.php
 
@@ -5086,12 +5068,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Catalog/Product/SetController.php
 
 		-
-			rawMessage: Ternary operator condition is always true.
-			identifier: ternary.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Catalog/Product/SetController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Catalog_ProductController::_filterStockData() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -5416,12 +5392,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/CreditmemoController.php
 
 		-
-			rawMessage: Right side of && is always true.
-			identifier: booleanAnd.rightAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/CreditmemoController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Sales_Order_InvoiceController::_getItemQtys() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -5446,24 +5416,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/InvoiceController.php
 
 		-
-			rawMessage: Result of && is always false.
-			identifier: booleanAnd.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/InvoiceController.php
-
-		-
-			rawMessage: 'Undefined variable: $shippingResponse'
-			identifier: variable.undefined
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/InvoiceController.php
-
-		-
-			rawMessage: 'Variable $shippingResponse in isset() is never defined.'
-			identifier: isset.variable
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/InvoiceController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Sales_Order_ShipmentController::_getItemQtys() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -5472,12 +5424,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_Sales_Order_ShipmentController::printLabelAction() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
-
-		-
-			rawMessage: Negated boolean expression is always false.
-			identifier: booleanNot.alwaysFalse
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
 
@@ -5498,18 +5444,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/OrderController.php
-
-		-
-			rawMessage: 'Call to $this->getLayout()->createBlock(''adminhtml/sales'', ''sales'') resulted in invalid type Mage_Adminhtml_Block_Sales.'
-			identifier: mage.invalidType
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/SalesController.php
-
-		-
-			rawMessage: 'Parameter #1 $block of method Mage_Adminhtml_Controller_Action::_addContent() expects Mage_Core_Block_Abstract, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/SalesController.php
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Admin_Model_User::setPasskeyCredentialIdHash() expects string, null given.'
@@ -6388,12 +6322,6 @@ parameters:
 			path: app/code/core/Mage/Bundle/Model/Product/Price.php
 
 		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/Product/Type.php
-
-		-
 			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getProduct() expects int|string|null, Mage_Catalog_Model_Product|null given.'
 			identifier: argument.type
 			count: 1
@@ -6832,12 +6760,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Helper/Product.php
 
 		-
-			rawMessage: Ternary operator condition is always true.
-			identifier: ternary.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Catalog/Helper/Product.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Helper_Product_Compare::_getUrlCustomParams() has parameter $url with no type specified.'
 			identifier: missingType.parameter
 			count: 1
@@ -6938,12 +6860,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Api2/Product/Image/Rest/Admin/V1.php
-
-		-
-			rawMessage: If condition is always false.
-			identifier: if.alwaysFalse
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Api2/Product/Rest.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Api2_Product_Rest::_applyCategoryFilter() has no return type specified.'
@@ -7110,12 +7026,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Api2_Product_Validator_Product::_validateWebsiteIdForGroupPrice() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Api2/Product/Validator/Product.php
-
-		-
-			rawMessage: 'Strict comparison using !== between mixed and 0 will always evaluate to true.'
-			identifier: notIdentical.alwaysTrue
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Api2/Product/Validator/Product.php
 
@@ -7303,12 +7213,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Category.php
 
 		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Category.php
-
-		-
 			rawMessage: '''
 				PHPDoc tag @method for _getResource() references deprecated class Mage_Catalog_Model_Resource_Category_Flat:
 				since 26.5 Flat Catalog will be removed in a future version
@@ -7450,20 +7354,8 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Config.php
 
 		-
-			rawMessage: 'Call to Mage::getResourceSingleton(''catalog_entity/convert'') resulted in invalid type bool(false).'
-			identifier: mage.invalidType
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Eav_Model_Entity_Abstract::getStoreId().'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
-
-		-
-			rawMessage: 'Cannot call method addProductToStore() on false.'
-			identifier: method.nonObject
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Convert/Adapter/Product.php
 
@@ -8413,12 +8305,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Abstract.php
 
 		-
-			rawMessage: Right side of || is always true.
-			identifier: booleanOr.rightAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Abstract.php
-
-		-
 			rawMessage: 'Parameter #1 $object of method Mage_Catalog_Model_Resource_Attribute::_clearUselessAttributeValues() expects Mage_Catalog_Model_Resource_Eav_Attribute, Mage_Eav_Model_Entity_Attribute given.'
 			identifier: argument.type
 			count: 1
@@ -8566,12 +8452,6 @@ parameters:
 			rawMessage: 'Call to an undefined method Mage_Catalog_Model_Resource_Category::refreshProductIndex().'
 			identifier: method.notFound
 			count: 2
-			path: app/code/core/Mage/Catalog/Model/Resource/Product.php
-
-		-
-			rawMessage: 'Call to function is_array() with non-empty-array will always evaluate to true.'
-			identifier: function.alreadyNarrowedType
-			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product.php
 
 		-
@@ -8860,12 +8740,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Link/Collection.php
 
 		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Link/Product/Collection.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Option::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8975,12 +8849,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Url.php
-
-		-
-			rawMessage: 'Loose comparison using == between true and true will always evaluate to true.'
-			identifier: equal.alwaysTrue
-			count: 2
-			path: app/code/core/Mage/Catalog/Model/Url.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Url::_addCategoryUrlPath() has no return type specified.'
@@ -9539,12 +9407,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogInventory/Model/Stock.php
-
-		-
-			rawMessage: 'Call to function is_numeric() with int will always evaluate to true.'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/code/core/Mage/CatalogInventory/Model/Stock/Item.php
 
 		-
 			rawMessage: 'Method Mage_Sales_Model_Quote_Item::setMessage() invoked with 1 parameter, 0 required.'
@@ -10213,12 +10075,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Cart/Api.php
 
 		-
-			rawMessage: Negated boolean expression is always false.
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart/Coupon/Api.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
 			identifier: argument.type
 			count: 1
@@ -10741,12 +10597,6 @@ parameters:
 			path: app/code/core/Mage/Core/Block/Messages.php
 
 		-
-			rawMessage: Ternary operator condition is always true.
-			identifier: ternary.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Core/Block/Messages.php
-
-		-
 			rawMessage: 'Parameter #2 $return of function print_r expects bool, int given.'
 			identifier: argument.type
 			count: 1
@@ -11251,12 +11101,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Layout.php
 
 		-
-			rawMessage: 'Call to function is_object() with object will always evaluate to true.'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: app/code/core/Mage/Core/Model/Layout.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_Layout::_translateLayoutNode() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -11461,27 +11305,9 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
 
 		-
-			rawMessage: Result of && is always false.
-			identifier: booleanAnd.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
-
-		-
-			rawMessage: 'Variable $alias in isset() always exists and is always null.'
-			identifier: isset.variable
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
-
-		-
 			rawMessage: Variable $alias might not be defined.
 			identifier: variable.undefined
 			count: 3
-			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
-
-		-
-			rawMessage: 'Variable $columnsToSelect in isset() always exists and is not nullable.'
-			identifier: isset.variable
-			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
 
 		-
@@ -11561,12 +11387,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Setup.php
-
-		-
-			rawMessage: Negated boolean expression is always false.
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Setup/Query/Modifier.php
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Resource_Store::_construct() has no return type specified.'
@@ -12787,21 +12607,9 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Interface.php
 
 		-
-			rawMessage: If condition is always false.
-			identifier: if.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Io.php
-
-		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Io::getResource() has parameter $forWrite with no type specified.'
 			identifier: missingType.parameter
 			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Io.php
-
-		-
-			rawMessage: Negated boolean expression is always true.
-			identifier: booleanNot.alwaysTrue
-			count: 2
 			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Io.php
 
 		-
@@ -13237,12 +13045,6 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator.php
 
 		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Mapper_Column::getBatchImportModel() has invalid return type Mage_Dataflow_Model_Import_Export.'
-			identifier: class.notFound
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Mapper/Column.php
-
-		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Mapper_Column::map() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -13659,12 +13461,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Dataflow_Model_Profile::_parseGuiData() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Profile.php
-
-		-
-			rawMessage: Right side of && is always true.
-			identifier: booleanAnd.rightAlwaysTrue
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Profile.php
 
@@ -14701,12 +14497,6 @@ parameters:
 			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Abstract.php
 
 		-
-			rawMessage: 'Parameter #1 $str of method Mage_Core_Helper_UnserializeArray::unserialize() expects string, array given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Customer.php
-
-		-
 			rawMessage: 'Method Mage_ImportExport_Model_Import_Entity_Product::_filterRowData() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -14725,20 +14515,8 @@ parameters:
 			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Product.php
 
 		-
-			rawMessage: Negated boolean expression is always true.
-			identifier: booleanNot.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Product.php
-
-		-
 			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, Closure(mixed): int<0, max> given.'
 			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Product.php
-
-		-
-			rawMessage: Result of || is always true.
-			identifier: booleanOr.alwaysTrue
 			count: 1
 			path: app/code/core/Mage/ImportExport/Model/Import/Entity/Product.php
 
@@ -15637,12 +15415,6 @@ parameters:
 			path: app/code/core/Mage/Payment/Model/Method/Abstract.php
 
 		-
-			rawMessage: 'Loose comparison using != between ''''|''OT'' and ''SS'' will always evaluate to true.'
-			identifier: notEqual.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Payment/Model/Method/Cc.php
-
-		-
 			rawMessage: Property Mage_Payment_Model_Method_Cc::$_canSaveCc has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -15713,1284 +15485,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Payment/Model/Recurring/Profile/MethodInterface.php
-
-		-
-			rawMessage: 'Parameter #2 $value of method Mage_Core_Model_Config::saveConfig() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Deprecated.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Block_Express_Review::setPaypalActionPrefix() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Block/Express/Review.php
-
-		-
-			rawMessage: Property Mage_Paypal_Block_Express_Review_Details::$_address has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Block/Express/Review/Details.php
-
-		-
-			rawMessage: 'Return type (false) of method Mage_Paypal_Block_Hosted_Pro_Info::getCcTypeName() should be compatible with return type (string|null) of method Mage_Paypal_Block_Payment_Info::getCcTypeName()'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/Paypal/Block/Hosted/Pro/Info.php
-
-		-
-			rawMessage: 'Return type (false) of method Mage_Paypal_Block_Payflow_Link_Info::getCcTypeName() should be compatible with return type (string|null) of method Mage_Paypal_Block_Payment_Info::getCcTypeName()'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/Paypal/Block/Payflow/Link/Info.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Controller_Express_Abstract::_processPaypalApiError() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Controller/Express/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Controller_Express_Abstract::_redirectSameToken() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Controller/Express/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Controller_Express_Abstract::_redirectToCartAndShowError() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Controller/Express/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Controller_Express_Abstract::redirectLogin() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Controller/Express/Abstract.php
-
-		-
-			rawMessage: 'Parameter #1 $setToken of method Mage_Paypal_Controller_Express_Abstract::_initToken() expects string|null, false given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Paypal/Controller/Express/Abstract.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setReservedOrderId() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Helper/Checkout.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Abstract::_debug() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Abstract::_importFromResponse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Abstract::_importStreetFromAddress() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Abstract::getBusinessAccount() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Abstract::getFraudManagementFiltersEnabled() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Abstract.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Paypal_Model_Api_Nvp::_export().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Paypal_Model_Api_Nvp::_import().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::_analyzeRecurringProfileStatus() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::_applyCountryWorkarounds() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::_applyStreetAndRegionWorkarounds() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::_exportAddressses() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::_handleCallErrors() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::_prepareExpressCheckoutCallRequest() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callCreateBillingAgreement() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callCreateRecurringPaymentsProfile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callDoCapture() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callDoDirectPayment() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callDoExpressCheckoutPayment() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callDoReauthorization() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callDoReferenceTransaction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callDoVoid() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callGetBillingAgreementCustomerDetails() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callGetExpressCheckoutDetails() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callGetPalDetails() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callGetRecurringPaymentsProfileDetails() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callGetTransactionDetails() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callManagePendingTransactionStatus() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callManageRecurringPaymentsProfileStatus() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callRefundTransaction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callSetCustomerBillingAgreement() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callSetExpressCheckout() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Nvp::callUpdateBillingAgreement() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Parameter #1 $array (non-empty-list) of array_values is already a list, call has no effect.'
-			identifier: arrayValues.list
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_billingAgreementCustomerDetailsResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_captureTypeNotcomplete has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_createBillingAgreementResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_createRecurringPaymentsProfileResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_customerBillingAgreementResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_doAuthorizationResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_doCaptureResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_doDirectPaymentResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_doExpressCheckoutPaymentResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_doReauthorizationResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_doReferenceTransactionResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_getRecurringPaymentsProfileDetailsResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_getTransactionDetailsResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_managePendingTransactionStatusRequest has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_managePendingTransactionStatusResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_refundTransactionResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_setExpressCheckoutResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Api_Nvp::$_updateBillingAgreementResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Standard::_applyCountryWorkarounds() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Standard.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Standard::_importAddress() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Standard.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Api_Standard::getStandardCheckoutRequest() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Api/Standard.php
-
-		-
-			rawMessage: 'Call to an undefined method Maho\DataObject::isNominal().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Cart.php
-
-		-
-			rawMessage: Empty array passed to foreach.
-			identifier: foreach.emptyArray
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Cart.php
-
-		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Cart.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Cart::_applyHiddenTaxWorkaround() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Cart.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Cart::_render() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Cart.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Cart::_validate() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Cart.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Cert::_createCertFile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Cert.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Cert::_removeOutdatedCertFile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Cert.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Config::exportExpressCheckoutStyleSettings() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Config.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Config::isMethodSupportedForCountry() has parameter $countryCode with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Config.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Config::isMethodSupportedForCountry() has parameter $method with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Config.php
-
-		-
-			rawMessage: Negated boolean expression is always true.
-			identifier: booleanNot.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Config.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Direct::__construct() has parameter $params with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Direct.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Direct::_importResultToPayment() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Direct.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Direct::$_canSaveCc has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Direct.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Paypal_Model_Api_Abstract::callDoExpressCheckoutPayment().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express.php
-
-		-
-			rawMessage: If condition is always false.
-			identifier: if.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Express::__construct() has parameter $params with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Express::_importToPayment() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Express::getRecurringProfileDetails() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Express::submitRecurringProfile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Express::updateRecurringProfile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Express::updateRecurringProfileStatus() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Express::validateRecurringProfile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express.php
-
-		-
-			rawMessage: 'Method Maho\DataObject::setAdditionalInformation() invoked with 2 parameters, 0-1 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express.php
-
-		-
-			rawMessage: 'Parameter #1 $amount of method Mage_Paypal_Model_Express::_callDoAuthorize() expects int, float given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Paypal/Model/Express.php
-
-		-
-			rawMessage: 'Parameter #1 $api of method Mage_Paypal_Model_Express::_importToPayment() expects Mage_Paypal_Model_Api_Nvp, Mage_Paypal_Model_Api_Abstract given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express.php
-
-		-
-			rawMessage: 'Parameter #1 $datetime of class DateTime constructor expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order_Payment_Transaction::setIsClosed() expects int, true given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Paypal/Model/Express.php
-
-		-
-			rawMessage: 'Cannot call method getData() on array.'
-			identifier: method.nonObject
-			count: 2
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Cannot call method getExportedKeys() on array.'
-			identifier: method.nonObject
-			count: 2
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Express_Checkout::_ignoreAddressValidation() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Express_Checkout::_prepareShippingOptions() has parameter $calculateTax with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Express_Checkout::_setExportedAddressData() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Express_Checkout::place() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Express_Checkout::prepareOrderReview() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Express_Checkout::returnFromPaypal() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Express_Checkout::updateShippingMethod() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Parameter #1 $message of static method Mage::throwException() expects string, array given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Parameter #1 $string of method Mage_Sales_Model_Quote_Address::setLastname() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Parameter #1 $string of method Mage_Sales_Model_Quote_Address::setMiddlename() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Parameter #1 $string of method Mage_Sales_Model_Quote_Address::setPrefix() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerId() expects int, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerIsGuest() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
-			identifier: argument.type
-			count: 4
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setSuffix() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Property Mage_Paypal_Model_Express_Checkout::$_api (Mage_Paypal_Model_Api_Nvp) does not accept Mage_Core_Model_Abstract.'
-			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Express_Checkout::$_checkoutRedirectUrl has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Express_Checkout::$_pendingPaymentMessage has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Hostedpro::_setPaymentFormUrl() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Hostedpro.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Hostedpro::$_canSaveCc has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Hostedpro.php
-
-		-
-			rawMessage: 'Return type (bool) of method Mage_Paypal_Model_Hostedpro::getAllowedCcTypes() should be compatible with return type (string) of method Mage_Paypal_Model_Direct::getAllowedCcTypes()'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Hostedpro.php
-
-		-
-			rawMessage: 'Return type (bool) of method Mage_Paypal_Model_Hostedpro::validate() should be compatible with return type ($this(Mage_Payment_Model_Method_Cc)) of method Mage_Payment_Model_Method_Cc::validate()'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Hostedpro.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Info::importToPayment() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Info.php
-
-		-
-			rawMessage: Binary operation "-" between array|string and array|string results in an error.
-			identifier: binaryOp.invalid
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_debug() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_postBack() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_processOrder() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_processRecurringProfile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_registerAdjustment() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_registerDispute() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_registerMasspaymentsSuccess() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_registerPaymentAuthorization() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_registerPaymentCapture() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_registerPaymentDenial() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_registerPaymentFailure() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_registerPaymentPending() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_registerPaymentRefund() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_registerPaymentReversal() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_registerPaymentVoid() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_registerRecurringProfilePaymentCapture() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_registerTransaction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::_verifyOrder() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Ipn::processIpnRequest() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Parameter #1 $amount of method Mage_Sales_Model_Order_Payment::registerAuthorizationNotification() expects float, array|string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Parameter #1 $amount of method Mage_Sales_Model_Order_Payment::registerCaptureNotification() expects float, array|string given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Paypal/Model/Ipn.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Paypal_Model_Api_Abstract::callDoReferenceTransaction().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Method/Agreement.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Paypal_Model_Api_Abstract::callGetTransactionDetails().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Method/Agreement.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Method_Agreement::_isAvailable() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Method/Agreement.php
-
-		-
-			rawMessage: 'Parameter #1 $payment of method Mage_Paypal_Model_Method_Agreement::_placeOrder() expects Mage_Sales_Model_Order_Payment, Maho\DataObject given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Method/Agreement.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Observer::fetchReports() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Observer.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Observer::loadCountryDependentSolutionsConfig() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Observer.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Observer::observeHtmlTransactionId() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Observer.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Payflowlink::_processOrder() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowlink.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Payflowlink::_processTokenErrors() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowlink.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Payflowlink::process() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowlink.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsActive() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowlink.php
-
-		-
-			rawMessage: 'Return type (bool) of method Mage_Paypal_Model_Payflowlink::validate() should be compatible with return type ($this(Mage_Payment_Model_Method_Cc)) of method Mage_Payment_Model_Method_Cc::validate()'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowlink.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Payflowpro::_applyCountryWorkarounds() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Payflowpro::_processErrors() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
-
-		-
-			rawMessage: 'Parameter #1 $payment of method Mage_Paypal_Model_Payflowpro::_buildBasicRequest() expects Mage_Sales_Model_Order_Payment, Mage_Payment_Model_Info given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
-
-		-
-			rawMessage: 'Parameter #1 $payment of method Mage_Paypal_Model_Payflowpro::void() expects Mage_Sales_Model_Order_Payment, Maho\DataObject given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order_Payment::setShouldCloseParentTransaction() expects bool, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
-
-		-
-			rawMessage: 'Parameter #2 $storeId of method Mage_Payment_Model_Method_Abstract::getConfigData() expects int|Mage_Core_Model_Store|string|null, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Payflowpro::$_canSaveCc has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Payflowpro::$_clientTimeout has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Payflowpro::$_isProxy has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Pro::_importCaptureResultToPayment() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Pro.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Pro::_importRefundResultToPayment() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Pro.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Pro::cancel() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Pro.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Pro::capture() should return false|null but return statement is missing.'
-			identifier: return.missing
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Pro.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Pro::getRecurringProfileDetails() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Pro.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Pro::refund() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Pro.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Pro::submitRecurringProfile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Pro.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Pro::updateRecurringProfile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Pro.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Pro::updateRecurringProfileStatus() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Pro.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Pro::validateRecurringProfile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Pro.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Pro::void() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Pro.php
-
-		-
-			rawMessage: 'Parameter #1 $string of function strlen expects string, int given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Paypal/Model/Pro.php
-
-		-
-			rawMessage: 'Parameter #2 $payment of method Mage_Paypal_Model_Pro::_importCaptureResultToPayment() expects Mage_Sales_Model_Order_Payment, Maho\DataObject given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Pro.php
-
-		-
-			rawMessage: 'Parameter #2 $payment of method Mage_Paypal_Model_Pro::_importRefundResultToPayment() expects Mage_Sales_Model_Order_Payment, Maho\DataObject given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Pro.php
-
-		-
-			rawMessage: 'Parameter #2 $to of method Mage_Paypal_Model_Pro::importPaymentInfo() expects Mage_Payment_Model_Info, Maho\DataObject given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Pro.php
-
-		-
-			rawMessage: Property Mage_Paypal_Model_Report_Settlement::$_csvColumns has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Report/Settlement.php
-
-		-
-			rawMessage: 'Variable $line in empty() always exists and is not falsy.'
-			identifier: empty.variable
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Report/Settlement.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Report_Settlement_Row::_castAmount() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Report/Settlement/Row.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Report_Settlement_Row::_generateEventLabels() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Report/Settlement/Row.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Resource_Cert::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Resource/Cert.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Resource_Report_Settlement::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Resource/Report/Settlement.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Resource_Report_Settlement_Row::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Resource/Report/Settlement/Row.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Standard::createFormBlock() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Standard.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Standard::createFormBlock() has parameter $name with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Standard.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_System_Config_Source_BuyerCountry::toOptionArray() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/System/Config/Source/BuyerCountry.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_System_Config_Source_BuyerCountry::toOptionArray() has parameter $isMultiselect with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/System/Config/Source/BuyerCountry.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_System_Config_Source_MerchantCountry::toOptionArray() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/System/Config/Source/MerchantCountry.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_System_Config_Source_MerchantCountry::toOptionArray() has parameter $isMultiselect with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/System/Config/Source/MerchantCountry.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_StandardController::_expireAjax() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/controllers/StandardController.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsActive() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/controllers/StandardController.php
-
-		-
-			rawMessage: Property Mage_Paypal_StandardController::$_order has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/controllers/StandardController.php
-
-		-
-			rawMessage: 'Method Mage_PaypalUk_Model_Api_Express_Nvp::_setSpecificForNegativeLineItems() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Express/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_PaypalUk_Model_Api_Nvp::_applyCountryWorkarounds() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_PaypalUk_Model_Api_Nvp::_handleCallErrors() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_PaypalUk_Model_Api_Nvp::_importFraudFiltersResult() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_PaypalUk_Model_Api_Nvp::_setSpecificForNegativeLineItems() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_PaypalUk_Model_Api_Nvp::callGetTransactionDetails() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_PaypalUk_Model_Api_Nvp::$_captureTypeNotcomplete has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_PaypalUk_Model_Api_Nvp::$_doCaptureResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_PaypalUk_Model_Api_Nvp::$_doDirectPaymentResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_PaypalUk_Model_Api_Nvp::$_doExpressCheckoutPaymentResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_PaypalUk_Model_Api_Nvp::$_getTransactionDetailsResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_PaypalUk_Model_Api_Nvp::$_refundTransactionResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Nvp.php
-
-		-
-			rawMessage: Property Mage_PaypalUk_Model_Api_Nvp::$_setExpressCheckoutResponse has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Api/Nvp.php
-
-		-
-			rawMessage: 'Method Mage_PaypalUk_Model_Direct::_importResultToPayment() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Direct.php
-
-		-
-			rawMessage: 'Method Mage_PaypalUk_Model_Express::_importToPayment() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Express.php
-
-		-
-			rawMessage: 'Method Mage_PaypalUk_Model_Express_Checkout::updateShippingMethod() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Method Mage_PaypalUk_Model_Pro::_importCaptureResultToPayment() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Pro.php
-
-		-
-			rawMessage: 'Method Mage_PaypalUk_Model_Pro::_importRefundResultToPayment() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Pro.php
-
-		-
-			rawMessage: 'Method Mage_PaypalUk_Model_Pro::refund() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Pro.php
-
-		-
-			rawMessage: 'Return type (void) of method Mage_PaypalUk_Model_Pro::fetchTransactionInfo() should be compatible with return type (array) of method Mage_Paypal_Model_Pro::fetchTransactionInfo()'
-			identifier: method.childReturnType
-			count: 1
-			path: app/code/core/Mage/PaypalUk/Model/Pro.php
 
 		-
 			rawMessage: 'Method Mage_ProductAlert_Block_Email_Abstract::addProduct() has no return type specified.'
@@ -18487,12 +16981,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Address.php
 
 		-
-			rawMessage: Right side of && is always true.
-			identifier: booleanAnd.rightAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address.php
-
-		-
 			rawMessage: Property Mage_Sales_Model_Quote_Address_Item::$_quote has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -18553,12 +17041,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Nominal/Shipping.php
 
 		-
-			rawMessage: Negated boolean expression is always true.
-			identifier: booleanNot.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Shipping.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setFreeMethodWeight() expects int, float given.'
 			identifier: argument.type
 			count: 1
@@ -18575,12 +17057,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Quote/Config.php
-
-		-
-			rawMessage: Instanceof between Mage_Sales_Model_Quote_Item_Option and Mage_Sales_Model_Quote_Item_Option will always evaluate to true.
-			identifier: instanceof.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Item.php
 
 		-
 			rawMessage: 'Method Mage_Sales_Model_Quote_Item::setMessage() invoked with 1 parameter, 0 required.'
@@ -19063,12 +17539,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Service/Quote.php
 
 		-
-			rawMessage: Negated boolean expression is always true.
-			identifier: booleanNot.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Service/Quote.php
-
-		-
 			rawMessage: 'Parameter #1 $message of static method Mage::throwException() expects string, array given.'
 			identifier: argument.type
 			count: 1
@@ -19085,12 +17555,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Service/Quote.php
-
-		-
-			rawMessage: Negated boolean expression is always false.
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Status/List.php
 
 		-
 			rawMessage: 'Method Mage_Sales_DownloadController::_validateFilePath() has no return type specified.'
@@ -19149,12 +17613,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_SalesRule_Model_Resource_Coupon::_construct() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/SalesRule/Model/Resource/Coupon.php
-
-		-
-			rawMessage: Negated boolean expression is always false.
-			identifier: booleanNot.alwaysFalse
 			count: 1
 			path: app/code/core/Mage/SalesRule/Model/Resource/Coupon.php
 
@@ -19303,12 +17761,6 @@ parameters:
 			path: app/code/core/Mage/Shipping/Model/Carrier/Abstract.php
 
 		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Carrier/Abstract.php
-
-		-
 			rawMessage: 'Method Mage_Shipping_Model_Carrier_Abstract::_debug() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -19323,12 +17775,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Shipping_Model_Carrier_Abstract::debugData() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Carrier/Abstract.php
-
-		-
-			rawMessage: Negated boolean expression is always false.
-			identifier: booleanNot.alwaysFalse
 			count: 1
 			path: app/code/core/Mage/Shipping/Model/Carrier/Abstract.php
 
@@ -19738,12 +18184,6 @@ parameters:
 			path: app/code/core/Mage/Tax/Helper/Data.php
 
 		-
-			rawMessage: If condition is always false.
-			identifier: if.alwaysFalse
-			count: 3
-			path: app/code/core/Mage/Tax/Helper/Data.php
-
-		-
 			rawMessage: 'Parameter #1 $shippingAddress of method Mage_Tax_Model_Calculation::getRateRequest() expects Mage_Sales_Model_Quote_Address|false|null, Mage_Customer_Model_Address|null given.'
 			identifier: argument.type
 			count: 2
@@ -19758,12 +18198,6 @@ parameters:
 		-
 			rawMessage: 'Parameter #2 $format of method Mage_Core_Model_Store::convertPrice() expects bool, string|null given.'
 			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Tax/Helper/Data.php
-
-		-
-			rawMessage: Right side of && is always false.
-			identifier: booleanAnd.rightAlwaysFalse
 			count: 1
 			path: app/code/core/Mage/Tax/Helper/Data.php
 
@@ -19880,18 +18314,6 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: app/code/core/Mage/Tax/Model/Config/Notification.php
-
-		-
-			rawMessage: 'Call to an undefined static method Mage_Core_Model_Config_Data::afterSave().'
-			identifier: staticMethod.notFound
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Config/Price/Include.php
-
-		-
-			rawMessage: 'Method Mage_Tax_Model_Config_Price_Include::afterSave() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Tax/Model/Config/Price/Include.php
 
 		-
 			rawMessage: 'Parameter #1 $tags of method Mage_Core_Model_App::cleanCache() expects array, string given.'
@@ -20482,12 +18904,6 @@ parameters:
 			path: app/code/core/Mage/Weee/Model/Resource/Tax.php
 
 		-
-			rawMessage: Right side of && is always true.
-			identifier: booleanAnd.rightAlwaysTrue
-			count: 1
-			path: app/code/core/Mage/Weee/Model/Resource/Tax.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_Abstract::_init() invoked with 2 parameters, 1 required.'
 			identifier: arguments.count
 			count: 1
@@ -20896,12 +19312,6 @@ parameters:
 			path: app/design/adminhtml/default/default/template/rating/stars/detailed.phtml
 
 		-
-			rawMessage: 'Comparison operation ">" between int<1, max> and 0 is always true.'
-			identifier: greater.alwaysTrue
-			count: 1
-			path: app/design/adminhtml/default/default/template/report/grid.phtml
-
-		-
 			rawMessage: Variable $minAdminPasswordLength might not be defined.
 			identifier: variable.undefined
 			count: 2
@@ -21020,12 +19430,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/design/adminhtml/default/default/template/system/autocomplete.phtml
-
-		-
-			rawMessage: Negated boolean expression is always true.
-			identifier: booleanNot.alwaysTrue
-			count: 2
-			path: app/design/adminhtml/default/default/template/system/store/tree.phtml
 
 		-
 			rawMessage: 'Call to deprecated method getSaveUrl() of class Mage_Adminhtml_Block_Tag_Edit.'
@@ -21226,18 +19630,6 @@ parameters:
 			path: app/design/frontend/base/default/template/catalog/product/list/toolbar.phtml
 
 		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: app/design/frontend/base/default/template/catalog/product/price.phtml
-
-		-
-			rawMessage: Ternary operator condition is always true.
-			identifier: ternary.alwaysTrue
-			count: 1
-			path: app/design/frontend/base/default/template/catalog/product/price.phtml
-
-		-
 			rawMessage: Variable $_weeeTaxAttributes might not be defined.
 			identifier: variable.undefined
 			count: 9
@@ -21272,12 +19664,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/design/frontend/base/default/template/checkout/cart/minicart/items.phtml
-
-		-
-			rawMessage: Ternary operator condition is always true.
-			identifier: ternary.alwaysTrue
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/onepage/progress/shipping.phtml
 
 		-
 			rawMessage: 'Parameter #1 $amount of method Mage_Checkout_Block_Total_Nominal::formatPrice() expects float, string given.'
@@ -21326,24 +19712,6 @@ parameters:
 			identifier: variable.undefined
 			count: 4
 			path: app/design/frontend/base/default/template/customer/balance.phtml
-
-		-
-			rawMessage: PHPDoc tag @var contains unresolvable type.
-			identifier: varTag.unresolvableType
-			count: 1
-			path: app/design/frontend/base/default/template/customer/form/remember.phtml
-
-		-
-			rawMessage: PHPDoc tag @var does not specify variable name.
-			identifier: varTag.noVariable
-			count: 1
-			path: app/design/frontend/base/default/template/customer/form/remember.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 4
-			path: app/design/frontend/base/default/template/customer/form/remember.phtml
 
 		-
 			rawMessage: Variable $currency might not be defined.
@@ -21448,28 +19816,10 @@ parameters:
 			path: app/design/frontend/base/default/template/page/html/breadcrumbs.phtml
 
 		-
-			rawMessage: 'Call to protected method _getRenderedMenuItemAttributes() of class Mage_Page_Block_Html_Topmenu.'
-			identifier: method.protected
-			count: 1
-			path: app/design/frontend/base/default/template/page/html/topmenu/renderer.phtml
-
-		-
 			rawMessage: Variable $this might not be defined.
 			identifier: variable.undefined
 			count: 7
 			path: app/design/frontend/base/default/template/page/redirect.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 82
-			path: app/design/frontend/base/default/template/paypal/express/review/address.phtml
-
-		-
-			rawMessage: 'Class Mage_Paypal_Block_Express_Form referenced with incorrect case: Mage_PayPal_Block_Express_Form.'
-			identifier: class.nameCase
-			count: 1
-			path: app/design/frontend/base/default/template/paypal/payment/redirect.phtml
 
 		-
 			rawMessage: Variable $data might not be defined.
@@ -21830,12 +20180,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: lib/Maho/Convert/Exception.php
-
-		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: lib/Maho/Convert/Mapper/Column.php
 
 		-
 			rawMessage: 'Method Maho\Convert\Mapper\Column::map() has no return type specified.'
@@ -23374,18 +21718,6 @@ parameters:
 			path: lib/Maho/Simplexml/Config.php
 
 		-
-			rawMessage: Result of && is always false.
-			identifier: booleanAnd.alwaysFalse
-			count: 1
-			path: lib/Maho/Simplexml/Config.php
-
-		-
-			rawMessage: 'Strict comparison using === between mixed and false will always evaluate to false.'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: lib/Maho/Simplexml/Config.php
-
-		-
 			rawMessage: 'Method Maho\Simplexml\Element::getAttribute() has parameter $name with no type specified.'
 			identifier: missingType.parameter
 			count: 1
@@ -23420,12 +21752,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Maho/Simplexml/Element.php
-
-		-
-			message: '#Fetching deprecated class constant DEPRECATED_METHODS of class Maho_Paypal_Model_Config#'
-			identifier: classConstant.deprecated
-			count: 1
-			path: app/code/core/Maho/Paypal/Model/Config.php
 
 		-
 			message: '#Property Maho_Paypal_Model_Method_AdvancedCheckout::\$_canSaveCc has no type specified#'

@@ -51,7 +51,7 @@ class Mage_Core_Model_Flag extends Mage_Core_Model_Abstract
         }
 
         $this->setFlagCode($this->_flagCode);
-        $this->setLastUpdate(date(Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT));
+        $this->setLastUpdate(Mage::app()->getLocale()->formatDateForDb('now'));
 
         return parent::_beforeSave();
     }

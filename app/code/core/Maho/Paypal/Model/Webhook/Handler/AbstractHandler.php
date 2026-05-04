@@ -143,7 +143,7 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
         string $intent,
     ): void {
         /** @var Maho_Paypal_Helper_Data $helper */
-        $helper = Mage::helper('maho_paypal');
+        $helper = Mage::helper('paypal');
         $helper->placeOrderFromPaypalResult($quote, $paypalResult, $methodCode, $intent);
     }
 

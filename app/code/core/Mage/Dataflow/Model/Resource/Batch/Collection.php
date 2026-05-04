@@ -28,10 +28,8 @@ class Mage_Dataflow_Model_Resource_Batch_Collection extends Mage_Core_Model_Reso
      */
     public function addExpireFilter()
     {
-        $date = Mage::getSingleton('core/date');
-        /** @var Mage_Core_Model_Date $date */
         $lifetime = Mage_Dataflow_Model_Batch::LIFETIME;
-        $expire   = $date->gmtDate(null, $date->timestamp() - $lifetime);
+        $expire   = Mage::app()->getLocale()->formatDateForDb(time() - $lifetime);
 
         $this->getSelect()->where('created_at < ?', $expire);
     }

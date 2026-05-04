@@ -84,6 +84,7 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
     public const XML_PATH_GLOBAL                = 'cataloginventory/options/';
     public const XML_PATH_CAN_SUBTRACT          = 'cataloginventory/options/can_subtract';
     public const XML_PATH_CAN_BACK_IN_STOCK     = 'cataloginventory/options/can_back_in_stock';
+    public const XML_PATH_SYNC_AVAIL_WITH_QTY   = 'cataloginventory/options/sync_stock_availability_with_qty';
 
     public const XML_PATH_ITEM                  = 'cataloginventory/item_options/';
     public const XML_PATH_MIN_QTY               = 'cataloginventory/item_options/min_qty';
@@ -552,9 +553,6 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
              */
             $result->setItemQty($qty);
 
-            if (!is_numeric($qty)) {
-                $qty = Mage::app()->getLocale()->getNumber($qty);
-            }
             $origQty = (int) $origQty;
             $result->setOrigQty($origQty);
         }
@@ -740,6 +738,11 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
             if (!$this->verifyStock()) {
                 $this->setIsInStock(false)
                     ->setStockStatusChangedAutomaticallyFlag(true);
+            } elseif (
+                !$this->_getData('is_in_stock')
+                && Mage::getStoreConfigFlag(self::XML_PATH_SYNC_AVAIL_WITH_QTY)
+            ) {
+                $this->setIsInStock(1);
             }
 
             // if qty is below notify qty, update the low stock date to today date otherwise set null

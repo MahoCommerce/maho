@@ -55,7 +55,7 @@ $table = $connection
     ], 'Created At')
     ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
+        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Updated At')
     ->addIndex(
         $installer->getIdxName('feedmanager/destination', ['type']),
@@ -263,7 +263,7 @@ $table = $connection
     ], 'Created At')
     ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
+        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Updated At')
     ->addIndex(
         $installer->getIdxName('feedmanager/feed', ['platform']),
@@ -508,7 +508,7 @@ $table = $connection
     ], 'Created At')
     ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable' => false,
-        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
+        'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'Updated At')
     ->addIndex(
         $installer->getIdxName('feedmanager/dynamic_rule', ['code'], 'unique'),

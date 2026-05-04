@@ -377,7 +377,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     {
         $customer = $this->getQuote()->getCustomer();
         return !$customer->getDefaultShippingAddress()
-            || $customer->getDefaultBillingAddress() && $customer->getDefaultShippingAddress()
+            || $customer->getDefaultBillingAddress()
                 && $customer->getDefaultBillingAddress()->getId() == $customer->getDefaultShippingAddress()->getId();
     }
 

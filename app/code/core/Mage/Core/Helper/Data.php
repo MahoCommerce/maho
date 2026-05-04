@@ -191,8 +191,8 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         $locale = Mage::app()->getLocale();
         if (empty($date)) {
             $date = $useTimezone
-                ? $locale->utcToStore(null, Mage::getSingleton('core/date')->gmtTimestamp())
-                : new DateTime('@' . Mage::getSingleton('core/date')->gmtTimestamp());
+                ? $locale->utcToStore(null, time())
+                : new DateTime('@' . time());
         } elseif (is_int($date)) {
             $date = $useTimezone
                 ? $locale->utcToStore(null, $date)
@@ -229,9 +229,9 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Format time using current locale options
      *
-     * @param   string|DateTime|null $time
-     * @param   string              $format
-     * @param   bool                $showDate
+     * @param   string|DateTimeInterface|null $time
+     * @param   string                        $format
+     * @param   bool                          $showDate
      * @return  string
      */
     public function formatTime($time = null, $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT, $showDate = false)
@@ -243,7 +243,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         $locale = Mage::app()->getLocale();
         if (is_null($time)) {
             $date = $locale->utcToStore(null, time());
-        } elseif ($time instanceof DateTime) {
+        } elseif ($time instanceof DateTimeInterface) {
             $date = $time;
         } else {
             $date = $locale->utcToStore(null, strtotime($time));

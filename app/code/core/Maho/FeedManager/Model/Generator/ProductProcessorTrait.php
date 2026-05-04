@@ -969,7 +969,7 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
                         $tableName,
                         [
                             'status' => Maho_FeedManager_Model_Log::STATUS_FAILED,
-                            'completed_at' => Mage::app()->getLocale()->nowUtc(),
+                            'completed_at' => Mage::app()->getLocale()->formatDateForDb('now'),
                         ],
                         ['log_id = ?' => $runningRow['log_id']],
                     );
@@ -999,7 +999,7 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
             $this->_log = Mage::getModel('feedmanager/log');
             $this->_log->setFeedId($this->_feed->getId())
                 ->setStatus(Maho_FeedManager_Model_Log::STATUS_RUNNING)
-                ->setStartedAt(Mage::app()->getLocale()->nowUtc())
+                ->setStartedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->save();
 
             $connection->commit();
@@ -1089,14 +1089,14 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
     protected function _finalizeGenerationSuccess(int $productCount, int $fileSize, array $errors): void
     {
         $this->_log->setStatus(Maho_FeedManager_Model_Log::STATUS_COMPLETED)
-            ->setCompletedAt(Mage::app()->getLocale()->nowUtc())
+            ->setCompletedAt(Mage::app()->getLocale()->formatDateForDb('now'))
             ->setProductCount($productCount)
             ->setFileSize($fileSize);
 
         $this->_saveErrorsToLog($errors);
         $this->_log->save();
 
-        $this->_feed->setLastGeneratedAt(Mage::app()->getLocale()->nowUtc())
+        $this->_feed->setLastGeneratedAt(Mage::app()->getLocale()->formatDateForDb('now'))
             ->setLastProductCount($productCount)
             ->setLastFileSize($fileSize)
             ->save();

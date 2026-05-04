@@ -132,9 +132,7 @@ class Mage_SalesRule_Model_Coupon_Massgenerator extends Mage_Core_Model_Abstract
             $this->setLength($length);
         }
 
-        $now = Mage::app()->getLocale()->formatDateForDb(
-            Mage::getSingleton('core/date')->gmtTimestamp(),
-        );
+        $now = Mage::app()->getLocale()->formatDateForDb('now');
 
         for ($i = 0; $i < $size; $i++) {
             $attempt = 0;
@@ -147,7 +145,7 @@ class Mage_SalesRule_Model_Coupon_Massgenerator extends Mage_Core_Model_Abstract
             } while ($this->getResource()->exists($code));
 
             $expirationDate = $this->getToDate();
-            if ($expirationDate instanceof DateTime) {
+            if ($expirationDate instanceof DateTimeInterface) {
                 $expirationDate = $expirationDate->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
             }
 

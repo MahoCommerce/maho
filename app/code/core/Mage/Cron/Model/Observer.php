@@ -39,7 +39,7 @@ class Mage_Cron_Model_Observer
             return;
         }
 
-        $now = Mage::getSingleton('core/date')->gmtTimestamp();
+        $now = time();
         $lastCheck = Mage::app()->loadCache(self::CACHE_KEY_LAST_CRON_STATUS_CHECK);
         if ($lastCheck && $lastCheck > $now - self::CRON_STATUS_CHECK_INTERVAL) {
             return;
@@ -51,10 +51,7 @@ class Mage_Cron_Model_Observer
         $adapter = $resource->getConnection('core_read');
         $table = $resource->getTableName('cron/schedule');
 
-        $threshold = Mage::getSingleton('core/date')->gmtDate(
-            'Y-m-d H:i:s',
-            $now - self::CRON_NOT_RUNNING_THRESHOLD,
-        );
+        $threshold = Mage::app()->getLocale()->formatDateForDb($now - self::CRON_NOT_RUNNING_THRESHOLD);
 
         $hasRecentExecution = $adapter->fetchOne(
             $adapter->select()
@@ -192,7 +189,7 @@ class Mage_Cron_Model_Observer
          * check if schedule generation is needed
          */
         $lastRun = Mage::app()->loadCache(self::CACHE_KEY_LAST_SCHEDULE_GENERATE_AT);
-        if ($lastRun > Mage::getSingleton('core/date')->gmtTimestamp() - Mage::getStoreConfig(self::XML_PATH_SCHEDULE_GENERATE_EVERY) * 60) {
+        if ($lastRun > time() - Mage::getStoreConfig(self::XML_PATH_SCHEDULE_GENERATE_EVERY) * 60) {
             return $this;
         }
 
@@ -223,7 +220,7 @@ class Mage_Cron_Model_Observer
         /**
          * save time schedules generation was ran with no expiration
          */
-        Mage::app()->saveCache(Mage::getSingleton('core/date')->gmtTimestamp(), self::CACHE_KEY_LAST_SCHEDULE_GENERATE_AT, ['crontab'], null);
+        Mage::app()->saveCache(time(), self::CACHE_KEY_LAST_SCHEDULE_GENERATE_AT, ['crontab'], null);
 
         return $this;
     }
@@ -255,7 +252,7 @@ class Mage_Cron_Model_Observer
                 continue;
             }
 
-            $now = Mage::getSingleton('core/date')->gmtTimestamp();
+            $now = time();
             $timeAhead = $now + $scheduleAheadFor;
             $schedule->setJobCode($jobCode)
                 ->setCronExpr($cronExpr)
@@ -286,7 +283,7 @@ class Mage_Cron_Model_Observer
     {
         // check if history cleanup is needed
         $lastCleanup = Mage::app()->loadCache(self::CACHE_KEY_LAST_HISTORY_CLEANUP_AT);
-        if ($lastCleanup > Mage::getSingleton('core/date')->gmtTimestamp() - Mage::getStoreConfig(self::XML_PATH_HISTORY_CLEANUP_EVERY) * 60) {
+        if ($lastCleanup > time() - Mage::getStoreConfig(self::XML_PATH_HISTORY_CLEANUP_EVERY) * 60) {
             return $this;
         }
 
@@ -304,7 +301,7 @@ class Mage_Cron_Model_Observer
             Mage_Cron_Model_Schedule::STATUS_ERROR => Mage::getStoreConfig(self::XML_PATH_HISTORY_FAILURE) * 60,
         ];
 
-        $now = Mage::getSingleton('core/date')->gmtTimestamp();
+        $now = time();
         foreach ($history->getIterator() as $record) {
             $referenceTime = $record->getExecutedAt() ?: $record->getScheduledAt();
             if ($referenceTime && strtotime($referenceTime) < $now - $historyLifetimes[$record->getStatus()]) {
@@ -313,7 +310,7 @@ class Mage_Cron_Model_Observer
         }
 
         // save time history cleanup was ran with no expiration
-        Mage::app()->saveCache(Mage::getSingleton('core/date')->gmtTimestamp(), self::CACHE_KEY_LAST_HISTORY_CLEANUP_AT, ['crontab'], null);
+        Mage::app()->saveCache(time(), self::CACHE_KEY_LAST_HISTORY_CLEANUP_AT, ['crontab'], null);
 
         return $this;
     }
@@ -394,7 +391,7 @@ class Mage_Cron_Model_Observer
     {
         if (!$isAlways) {
             $scheduleLifetime = Mage::getStoreConfig(self::XML_PATH_SCHEDULE_LIFETIME) * 60;
-            $now = Mage::getSingleton('core/date')->gmtTimestamp();
+            $now = time();
             $time = strtotime($schedule->getScheduledAt());
             if ($time > $now) {
                 return $this;
@@ -423,14 +420,14 @@ class Mage_Cron_Model_Observer
             }
 
             $schedule
-                ->setExecutedAt(Mage::getSingleton('core/date')->gmtDate())
+                ->setExecutedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->save();
 
             call_user_func_array($callback, [$schedule]);
 
             $schedule
                 ->setStatus(Mage_Cron_Model_Schedule::STATUS_SUCCESS)
-                ->setFinishedAt(Mage::getSingleton('core/date')->gmtDate());
+                ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         } catch (Exception $e) {
             $schedule->setStatus($errorStatus)
                 ->setMessages($e->__toString());
@@ -450,7 +447,7 @@ class Mage_Cron_Model_Observer
         $scheduleAheadFor = Mage::getStoreConfig(self::XML_PATH_SCHEDULE_AHEAD_FOR) * 60;
         $schedule = Mage::getModel('cron/schedule');
         $cronHelper = Mage::helper('cron');
-        $now = Mage::getSingleton('core/date')->gmtTimestamp();
+        $now = time();
         $timeAhead = $now + $scheduleAheadFor;
 
         foreach (Maho::getCompiledAttributes()['crontab'] ?? [] as $jobCode => $jobDef) {
@@ -497,7 +494,7 @@ class Mage_Cron_Model_Observer
         /** @var Mage_Cron_Model_Schedule $schedule */
         $schedule = Mage::getModel('cron/schedule')->load($jobCode, 'job_code');
         if ($schedule->getId() === null) {
-            $ts = Mage::getSingleton('core/date')->gmtDate('Y-m-d H:i:00');
+            $ts = gmdate('Y-m-d H:i:00');
             $schedule->setJobCode($jobCode)
                 ->setCreatedAt($ts)
                 ->setScheduledAt($ts);

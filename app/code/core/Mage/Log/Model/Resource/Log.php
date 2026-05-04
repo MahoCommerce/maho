@@ -53,7 +53,7 @@ class Mage_Log_Model_Resource_Log extends Mage_Core_Model_Resource_Db_Abstract
         $readAdapter    = $this->_getReadAdapter();
         $writeAdapter   = $this->_getWriteAdapter();
 
-        $timeLimit = Mage::app()->getLocale()->formatDateForDb(Mage::getModel('core/date')->gmtTimestamp() - $time);
+        $timeLimit = Mage::app()->getLocale()->formatDateForDb(time() - $time);
 
         while (true) {
             $select = $readAdapter->select()
@@ -104,7 +104,7 @@ class Mage_Log_Model_Resource_Log extends Mage_Core_Model_Resource_Db_Abstract
         $readAdapter    = $this->_getReadAdapter();
         $writeAdapter   = $this->_getWriteAdapter();
 
-        $timeLimit = Mage::app()->getLocale()->formatDateForDb(Mage::getModel('core/date')->gmtTimestamp() - $time);
+        $timeLimit = Mage::app()->getLocale()->formatDateForDb(time() - $time);
 
         // retrieve last active customer log id
         $lastLogId = (int) $readAdapter->fetchOne(

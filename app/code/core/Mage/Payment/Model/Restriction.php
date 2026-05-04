@@ -21,6 +21,18 @@ class Mage_Payment_Model_Restriction extends Mage_Core_Model_Abstract
         $this->_init('payment/restriction');
     }
 
+    #[\Override]
+    protected function _beforeSave()
+    {
+        parent::_beforeSave();
+        $now = Mage::app()->getLocale()->formatDateForDb('now');
+        if ($this->isObjectNew() && !$this->getCreatedAt()) {
+            $this->setCreatedAt($now);
+        }
+        $this->setUpdatedAt($now);
+        return $this;
+    }
+
     /**
      * Validate payment method against restrictions
      */

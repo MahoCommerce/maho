@@ -40,16 +40,17 @@ class Sqlite extends AbstractPdoAdapter
      */
     protected array $_ddlColumnTypes = [
         \Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'INTEGER',
+        \Maho\Db\Ddl\Table::TYPE_TINYINT       => 'INTEGER',
         \Maho\Db\Ddl\Table::TYPE_SMALLINT      => 'INTEGER',
         \Maho\Db\Ddl\Table::TYPE_INTEGER       => 'INTEGER',
         \Maho\Db\Ddl\Table::TYPE_BIGINT        => 'INTEGER',
         \Maho\Db\Ddl\Table::TYPE_FLOAT         => 'REAL',
         \Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'NUMERIC',
-        \Maho\Db\Ddl\Table::TYPE_NUMERIC       => 'NUMERIC',
         \Maho\Db\Ddl\Table::TYPE_DATE          => 'TEXT',
-        \Maho\Db\Ddl\Table::TYPE_TIMESTAMP     => 'TEXT',
+        \Maho\Db\Ddl\Table::TYPE_TIME          => 'TEXT',
         \Maho\Db\Ddl\Table::TYPE_DATETIME      => 'TEXT',
         \Maho\Db\Ddl\Table::TYPE_TEXT          => 'TEXT',
+        // SQLite has no varchar type — both VARCHAR and TEXT store as TEXT.
         \Maho\Db\Ddl\Table::TYPE_VARCHAR       => 'TEXT',
         \Maho\Db\Ddl\Table::TYPE_BLOB          => 'BLOB',
         \Maho\Db\Ddl\Table::TYPE_VARBINARY     => 'BLOB',
@@ -1628,32 +1629,11 @@ class Sqlite extends AbstractPdoAdapter
         // Save existing indexes BEFORE modification
         $indexesBefore = $this->_saveIndexesBeforeModification($table);
 
-        // Modify column WITHOUT touching indexes
+        // Modify column WITHOUT touching indexes — closure shared with MySQL/PgSQL via
+        // AbstractPdoAdapter so the surgical contract stays consistent across adapters.
         $newTable = $table->edit()->modifyColumn(
             \Doctrine\DBAL\Schema\Name\UnqualifiedName::unquoted($columnName),
-            function (\Doctrine\DBAL\Schema\ColumnEditor $editor) use ($definition): void {
-                if (array_key_exists('NULLABLE', $definition)) {
-                    $editor->setNotNull(!$definition['NULLABLE']);
-                }
-                if (array_key_exists('DEFAULT', $definition)) {
-                    $editor->setDefaultValue($definition['DEFAULT']);
-                }
-                if (isset($definition['LENGTH'])) {
-                    $editor->setLength((int) $definition['LENGTH']);
-                }
-                if (isset($definition['PRECISION'])) {
-                    $editor->setPrecision((int) $definition['PRECISION']);
-                }
-                if (isset($definition['SCALE'])) {
-                    $editor->setScale((int) $definition['SCALE']);
-                }
-                if (isset($definition['UNSIGNED'])) {
-                    $editor->setUnsigned((bool) $definition['UNSIGNED']);
-                }
-                if (isset($definition['COMMENT'])) {
-                    $editor->setComment($definition['COMMENT']);
-                }
-            },
+            $this->_buildColumnEditorClosure($definition),
         )
             ->create();
 
@@ -2188,7 +2168,6 @@ class Sqlite extends AbstractPdoAdapter
         // Column size/precision handling (SQLite is flexible, but we honor requests)
         switch ($ddlType) {
             case \Maho\Db\Ddl\Table::TYPE_DECIMAL:
-            case \Maho\Db\Ddl\Table::TYPE_NUMERIC:
                 $precision = 10;
                 $scale = 0;
                 $match = [];
@@ -2232,11 +2211,17 @@ class Sqlite extends AbstractPdoAdapter
             $cDefault = str_replace("'", '', $cDefault);
         }
 
-        // Handle timestamp defaults
-        if ($ddlType == \Maho\Db\Ddl\Table::TYPE_TIMESTAMP) {
+        // Branch covers both TYPE_DATETIME and TYPE_TIMESTAMP (value-equal aliases).
+        if ($ddlType == \Maho\Db\Ddl\Table::TYPE_DATETIME) {
             if ($cDefault === null) {
                 $cDefault = new \Maho\Db\Expr('NULL');
-            } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT || $cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE) {
+            } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT) {
+                $cDefault = new \Maho\Db\Expr('CURRENT_TIMESTAMP');
+            } elseif ($cDefault == 'TIMESTAMP_INIT_UPDATE') {
+                @trigger_error(
+                    'TIMESTAMP_INIT_UPDATE is deprecated because it is MySQL-only (SQLite has no equivalent on-update syntax); use TIMESTAMP_INIT plus an explicit _beforeSave() that sets updated_at for cross-engine parity.',
+                    E_USER_DEPRECATED,
+                );
                 $cDefault = new \Maho\Db\Expr('CURRENT_TIMESTAMP');
             } elseif ($cNullable && !$cDefault) {
                 $cDefault = new \Maho\Db\Expr('NULL');

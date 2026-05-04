@@ -44,14 +44,25 @@ class Pgsql extends AbstractPdoAdapter
      */
     protected array $_ddlColumnTypes = [
         \Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'boolean',
+        // PgSQL has no 1-byte integer — TINYINT downgrades to smallint (2 bytes).
+        // The MySQL byte-saving doesn't apply, but the column still works correctly.
+        \Maho\Db\Ddl\Table::TYPE_TINYINT       => 'smallint',
         \Maho\Db\Ddl\Table::TYPE_SMALLINT      => 'smallint',
         \Maho\Db\Ddl\Table::TYPE_INTEGER       => 'integer',
         \Maho\Db\Ddl\Table::TYPE_BIGINT        => 'bigint',
         \Maho\Db\Ddl\Table::TYPE_FLOAT         => 'real',
         \Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'numeric',
-        \Maho\Db\Ddl\Table::TYPE_NUMERIC       => 'numeric',
         \Maho\Db\Ddl\Table::TYPE_DATE          => 'date',
-        \Maho\Db\Ddl\Table::TYPE_TIMESTAMP     => 'timestamp',
+        // Maps to TIME WITHOUT TIME ZONE (PgSQL's default — TIME WITH TIME ZONE is
+        // the SQL spec's mistake and the PgSQL docs themselves call it "of questionable
+        // usefulness" because a time-of-day with a TZ but no date is ambiguous around
+        // DST boundaries).
+        \Maho\Db\Ddl\Table::TYPE_TIME          => 'time',
+        // PostgreSQL has no `datetime` type — its `timestamp` (i.e. `timestamp without
+        // time zone`) is the semantic equivalent of MySQL's `DATETIME`: literal date+time
+        // with no TZ conversion. The name collision with MySQL's TIMESTAMP type is
+        // unfortunate but correct: TYPE_TIMESTAMP (a value-equal alias for TYPE_DATETIME)
+        // also lands here via the shared 'datetime' value.
         \Maho\Db\Ddl\Table::TYPE_DATETIME      => 'timestamp',
         \Maho\Db\Ddl\Table::TYPE_TEXT          => 'text',
         \Maho\Db\Ddl\Table::TYPE_VARCHAR       => 'varchar',
@@ -103,6 +114,7 @@ class Pgsql extends AbstractPdoAdapter
         $this->_connection->executeStatement("SET client_encoding = 'UTF8'");
         // Set standard conforming strings
         $this->_connection->executeStatement('SET standard_conforming_strings = on');
+        $this->_connection->executeStatement("SET TIME ZONE 'UTC'");
     }
 
     /**
@@ -1470,6 +1482,15 @@ class Pgsql extends AbstractPdoAdapter
                 throw new \Maho\Db\Exception('Impossible to create a column without comment.');
             }
             $definition = $this->_getColumnDefinition($definition);
+        } else {
+            // Translate bare Maho type constants ('datetime', 'decimal', 'blob' etc.) to
+            // their PgSQL physical type ('timestamp', 'numeric', 'bytea'). Legacy install
+            // scripts call `addColumn(..., Maho\Db\Ddl\Table::TYPE_TIMESTAMP)` which used
+            // to accidentally work because the constant value happened to be a valid
+            // PgSQL type name; after the TYPE_TIMESTAMP→TYPE_DATETIME alias it doesn't.
+            if (isset($this->_ddlColumnTypes[$definition])) {
+                $definition = $this->_ddlColumnTypes[$definition];
+            }
         }
 
         $sql = sprintf(
@@ -1553,7 +1574,9 @@ class Pgsql extends AbstractPdoAdapter
     }
 
     /**
-     * Modify the column definition
+     * Modify the column definition via DBAL's surgical diff. String definitions take a
+     * legacy ALTER COLUMN ... TYPE path because PgSQL needs an explicit USING clause
+     * that DBAL's diff can't synthesize from raw SQL.
      *
      * @throws \Maho\Db\Exception
      */
@@ -1564,18 +1587,13 @@ class Pgsql extends AbstractPdoAdapter
             throw new \Maho\Db\Exception(sprintf('Column "%s" does not exist in table "%s".', $columnName, $tableName));
         }
 
-        $qualifiedTable = $this->quoteIdentifier($this->_getTableName($tableName, $schemaName));
-        $quotedColumn = $this->quoteIdentifier($columnName);
+        if (is_string($definition)) {
+            // Translate bare Maho type constants to PgSQL physical type (see addColumn
+            // for the rationale). Anything else is passed through as raw type SQL.
+            $typeOnly = $this->_ddlColumnTypes[$definition] ?? trim($definition);
 
-        // If definition is an array, we can handle type, nullable, and default separately
-        if (is_array($definition)) {
-            $definition = array_change_key_case($definition, CASE_UPPER);
-            $ddlType = $this->_getDdlType($definition);
-
-            // Get the type-only definition (without NULL/NOT NULL and DEFAULT)
-            $typeOnly = $this->_getColumnTypeOnly($definition, $ddlType);
-
-            // Change the column type
+            $qualifiedTable = $this->quoteIdentifier($this->_getTableName($tableName, $schemaName));
+            $quotedColumn = $this->quoteIdentifier($columnName);
             $this->raw_query(sprintf(
                 'ALTER TABLE %s ALTER COLUMN %s TYPE %s USING %s::%s',
                 $qualifiedTable,
@@ -1584,71 +1602,9 @@ class Pgsql extends AbstractPdoAdapter
                 $quotedColumn,
                 $typeOnly,
             ));
-
-            // Handle nullability
-            $nullable = !isset($definition['NULLABLE']) || (bool) $definition['NULLABLE'];
-            if ($nullable) {
-                $this->raw_query(sprintf(
-                    'ALTER TABLE %s ALTER COLUMN %s DROP NOT NULL',
-                    $qualifiedTable,
-                    $quotedColumn,
-                ));
-            } else {
-                $this->raw_query(sprintf(
-                    'ALTER TABLE %s ALTER COLUMN %s SET NOT NULL',
-                    $qualifiedTable,
-                    $quotedColumn,
-                ));
-            }
-
-            // Handle default value
-            if (array_key_exists('DEFAULT', $definition)) {
-                $default = $definition['DEFAULT'];
-                if ($default === null || $default === '') {
-                    $this->raw_query(sprintf(
-                        'ALTER TABLE %s ALTER COLUMN %s DROP DEFAULT',
-                        $qualifiedTable,
-                        $quotedColumn,
-                    ));
-                } else {
-                    $this->raw_query(sprintf(
-                        'ALTER TABLE %s ALTER COLUMN %s SET DEFAULT %s',
-                        $qualifiedTable,
-                        $quotedColumn,
-                        $this->quote($default),
-                    ));
-                }
-            }
         } else {
-            // String definition - parse out the type only (strip NULL/NOT NULL/DEFAULT/COMMENT)
-            // Handle various MySQL patterns like:
-            // - "VARCHAR(255) default NULL COMMENT 'Remote Ip'"
-            // - "VARCHAR(255) NOT NULL DEFAULT ''"
-            // - "INT(11) UNSIGNED NOT NULL"
-            $typeOnly = $definition;
-
-            // Remove COMMENT clause (MySQL-specific)
-            $typeOnly = preg_replace('/\s+COMMENT\s+[\'"].*?[\'"]\s*$/i', '', $typeOnly);
-
-            // Remove DEFAULT clause
-            $typeOnly = preg_replace('/\s+DEFAULT\s+(NULL|[\'"].*?[\'"]|[\d.]+)\s*/i', ' ', $typeOnly);
-
-            // Remove NULL / NOT NULL
-            $typeOnly = preg_replace('/\s+(NOT\s+)?NULL\s*/i', ' ', $typeOnly);
-
-            // Remove UNSIGNED (PostgreSQL doesn't support it but we can ignore it)
-            $typeOnly = preg_replace('/\s+UNSIGNED\s*/i', ' ', $typeOnly);
-
-            $typeOnly = trim($typeOnly);
-
-            $this->raw_query(sprintf(
-                'ALTER TABLE %s ALTER COLUMN %s TYPE %s USING %s::%s',
-                $qualifiedTable,
-                $quotedColumn,
-                $typeOnly,
-                $quotedColumn,
-                $typeOnly,
-            ));
+            $definition = array_change_key_case($definition, CASE_UPPER);
+            $this->_applySurgicalColumnModification($tableName, $columnName, $definition, $schemaName);
         }
 
         $this->resetDdlCache($tableName, $schemaName);
@@ -1673,7 +1629,6 @@ class Pgsql extends AbstractPdoAdapter
 
         switch ($ddlType) {
             case \Maho\Db\Ddl\Table::TYPE_DECIMAL:
-            case \Maho\Db\Ddl\Table::TYPE_NUMERIC:
                 $precision = 10;
                 $scale = 0;
                 $match = [];
@@ -2281,7 +2236,6 @@ class Pgsql extends AbstractPdoAdapter
         // Column size/precision handling
         switch ($ddlType) {
             case \Maho\Db\Ddl\Table::TYPE_DECIMAL:
-            case \Maho\Db\Ddl\Table::TYPE_NUMERIC:
                 $precision = 10;
                 $scale = 0;
                 $match = [];
@@ -2330,11 +2284,17 @@ class Pgsql extends AbstractPdoAdapter
             $cDefault = str_replace("'", '', $cDefault);
         }
 
-        // Handle timestamp defaults
-        if ($ddlType == \Maho\Db\Ddl\Table::TYPE_TIMESTAMP) {
+        // Branch covers both TYPE_DATETIME and TYPE_TIMESTAMP (value-equal aliases).
+        if ($ddlType == \Maho\Db\Ddl\Table::TYPE_DATETIME) {
             if ($cDefault === null) {
                 $cDefault = new \Maho\Db\Expr('NULL');
-            } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT || $cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE) {
+            } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT) {
+                $cDefault = new \Maho\Db\Expr('CURRENT_TIMESTAMP');
+            } elseif ($cDefault == 'TIMESTAMP_INIT_UPDATE') {
+                @trigger_error(
+                    'TIMESTAMP_INIT_UPDATE is deprecated because it is MySQL-only (PgSQL has no equivalent on-update syntax); use TIMESTAMP_INIT plus an explicit _beforeSave() that sets updated_at for cross-engine parity.',
+                    E_USER_DEPRECATED,
+                );
                 $cDefault = new \Maho\Db\Expr('CURRENT_TIMESTAMP');
             } elseif ($cNullable && !$cDefault) {
                 $cDefault = new \Maho\Db\Expr('NULL');

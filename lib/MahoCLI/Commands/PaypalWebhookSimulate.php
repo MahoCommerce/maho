@@ -79,7 +79,7 @@ class PaypalWebhookSimulate extends BaseMahoCommand
 
         try {
             /** @var \Maho_Paypal_Model_Webhook_Processor $processor */
-            $processor = Mage::getModel('maho_paypal/webhook_processor');
+            $processor = Mage::getModel('paypal/webhook_processor');
             $processor->processUnsafe($payload);
 
             $output->writeln('<info>Webhook event processed successfully.</info>');

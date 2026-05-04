@@ -33,8 +33,8 @@ class Maho_Blog_Block_Post_List extends Mage_Core_Block_Template
     public function getPosts(): Maho_Blog_Model_Resource_Post_Collection
     {
         if (!$this->_posts) {
-            // Get today's date for filtering published posts
-            $today = Mage::app()->getLocale()->todayUtc();
+            // publish_date is admin-entered as store-local — compare against today in store TZ
+            $today = Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT);
 
             // Get current page from request
             $page = (int) $this->getRequest()->getParam('p', 1);

@@ -4710,7 +4710,8 @@ dl.accordion dt.open a:after,div.collapseable a.open:after {
 
 .grid-severity-minor span,.grid-severity-major span,.grid-severity-critical span,.grid-severity-notice span {
     font: 400 12px/1.33 ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
-    padding: 2px 10px
+    padding: 2px 10px;
+    white-space: nowrap
 }
 
 .grid-severity-minor span,.grid-severity-major span {

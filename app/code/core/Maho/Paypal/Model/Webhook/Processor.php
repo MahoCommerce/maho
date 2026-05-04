@@ -13,20 +13,20 @@ declare(strict_types=1);
 class Maho_Paypal_Model_Webhook_Processor
 {
     protected const HANDLER_MAP = [
-        'CHECKOUT.ORDER.APPROVED'        => 'maho_paypal/webhook_handler_orderApproved',
-        'CHECKOUT.ORDER.COMPLETED'       => 'maho_paypal/webhook_handler_orderCompleted',
-        'PAYMENT.CAPTURE.COMPLETED'      => 'maho_paypal/webhook_handler_captureCompleted',
-        'PAYMENT.CAPTURE.PENDING'        => 'maho_paypal/webhook_handler_capturePending',
-        'PAYMENT.CAPTURE.DECLINED'       => 'maho_paypal/webhook_handler_captureDeclined',
-        'PAYMENT.CAPTURE.REFUNDED'       => 'maho_paypal/webhook_handler_captureRefunded',
-        'PAYMENT.CAPTURE.REVERSED'       => 'maho_paypal/webhook_handler_captureReversed',
-        'PAYMENT.AUTHORIZATION.CREATED'  => 'maho_paypal/webhook_handler_authorizationCreated',
-        'PAYMENT.AUTHORIZATION.VOIDED'   => 'maho_paypal/webhook_handler_authorizationVoided',
-        'CUSTOMER.DISPUTE.CREATED'       => 'maho_paypal/webhook_handler_disputeCreated',
-        'CUSTOMER.DISPUTE.UPDATED'       => 'maho_paypal/webhook_handler_disputeUpdated',
-        'CUSTOMER.DISPUTE.RESOLVED'      => 'maho_paypal/webhook_handler_disputeResolved',
-        'VAULT.PAYMENT-TOKEN.CREATED'    => 'maho_paypal/webhook_handler_vaultTokenCreated',
-        'VAULT.PAYMENT-TOKEN.DELETED'    => 'maho_paypal/webhook_handler_vaultTokenDeleted',
+        'CHECKOUT.ORDER.APPROVED'        => 'paypal/webhook_handler_orderApproved',
+        'CHECKOUT.ORDER.COMPLETED'       => 'paypal/webhook_handler_orderCompleted',
+        'PAYMENT.CAPTURE.COMPLETED'      => 'paypal/webhook_handler_captureCompleted',
+        'PAYMENT.CAPTURE.PENDING'        => 'paypal/webhook_handler_capturePending',
+        'PAYMENT.CAPTURE.DECLINED'       => 'paypal/webhook_handler_captureDeclined',
+        'PAYMENT.CAPTURE.REFUNDED'       => 'paypal/webhook_handler_captureRefunded',
+        'PAYMENT.CAPTURE.REVERSED'       => 'paypal/webhook_handler_captureReversed',
+        'PAYMENT.AUTHORIZATION.CREATED'  => 'paypal/webhook_handler_authorizationCreated',
+        'PAYMENT.AUTHORIZATION.VOIDED'   => 'paypal/webhook_handler_authorizationVoided',
+        'CUSTOMER.DISPUTE.CREATED'       => 'paypal/webhook_handler_disputeCreated',
+        'CUSTOMER.DISPUTE.UPDATED'       => 'paypal/webhook_handler_disputeUpdated',
+        'CUSTOMER.DISPUTE.RESOLVED'      => 'paypal/webhook_handler_disputeResolved',
+        'VAULT.PAYMENT-TOKEN.CREATED'    => 'paypal/webhook_handler_vaultTokenCreated',
+        'VAULT.PAYMENT-TOKEN.DELETED'    => 'paypal/webhook_handler_vaultTokenDeleted',
     ];
 
     public function process(array $payload): void
@@ -58,12 +58,12 @@ class Maho_Paypal_Model_Webhook_Processor
 
             $event->setStatus('processed');
             $event->setPayload(null);
-            $event->setProcessedAt(Mage::app()->getLocale()->nowUtc());
+            $event->setProcessedAt(Mage::app()->getLocale()->formatDateForDb('now'));
             $event->save();
         } catch (\Throwable $e) {
             $event->setStatus('error');
             $event->setErrorMessage($e->getMessage());
-            $event->setProcessedAt(Mage::app()->getLocale()->nowUtc());
+            $event->setProcessedAt(Mage::app()->getLocale()->formatDateForDb('now'));
             $event->save();
             throw $e;
         }
@@ -84,7 +84,7 @@ class Maho_Paypal_Model_Webhook_Processor
     protected function _createEventRecord(array $payload): ?Maho_Paypal_Model_Webhook_Event
     {
         /** @var Maho_Paypal_Model_Webhook_Event $event */
-        $event = Mage::getModel('maho_paypal/webhook_event');
+        $event = Mage::getModel('paypal/webhook_event');
         $event->setData([
             'paypal_event_id' => $payload['id'],
             'event_type'      => $payload['event_type'],

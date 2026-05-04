@@ -8,9 +8,9 @@
 
 function mahoPaypalGetCredentials() {
     const params = new URLSearchParams();
-    params.set('sandbox', document.getElementById('payment_maho_paypal_credentials_sandbox')?.value ?? '');
-    params.set('client_id', document.getElementById('payment_maho_paypal_credentials_client_id')?.value ?? '');
-    params.set('client_secret', document.getElementById('payment_maho_paypal_credentials_client_secret')?.value ?? '');
+    params.set('sandbox', document.getElementById('payment_paypal_credentials_sandbox')?.value ?? '');
+    params.set('client_id', document.getElementById('payment_paypal_credentials_client_id')?.value ?? '');
+    params.set('client_secret', document.getElementById('payment_paypal_credentials_client_secret')?.value ?? '');
 
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('website')) params.set('website', urlParams.get('website'));
@@ -57,7 +57,7 @@ async function mahoPaypalRegisterWebhook(button) {
         resultSpan.style.color = response.success ? 'green' : 'red';
 
         if (response.webhook_id) {
-            const webhookField = document.getElementById('payment_maho_paypal_credentials_webhook_id');
+            const webhookField = document.getElementById('payment_paypal_credentials_webhook_id');
             if (webhookField) {
                 webhookField.value = response.webhook_id;
             }

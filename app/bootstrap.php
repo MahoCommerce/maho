@@ -130,7 +130,7 @@ if (($_ENV['MAHO_ENABLE_VARIEN_ALIASES'] ?? $_SERVER['MAHO_ENABLE_VARIEN_ALIASES
     class_alias(\Maho\Io\Sftp::class, 'Varien_Io_Sftp');
     class_alias(\Maho\DataObject::class, 'Varien_Object');
     class_alias(\Maho\DataObject\Cache::class, 'Varien_Object_Cache');
-    class_alias(\Maho\DataObject\Mapper::class, 'Varien_Object_Mapper');
+    class_alias(\Maho\DataObject\Mapper::class, 'Varien_Object_Mapper'); // @phpstan-ignore classConstant.deprecatedClass
     class_alias(\Maho\Simplexml\Config::class, 'Varien_Simplexml_Config');
     class_alias(\Maho\Simplexml\Element::class, 'Varien_Simplexml_Element');
     class_alias(\Maho\Exception::class, 'Varien_Exception');

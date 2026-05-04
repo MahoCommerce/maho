@@ -40,8 +40,8 @@ const parseDirective = (directiveStr) => {
         }
         // Handle normal key="value" format
         else {
-            for (const match of trimmedAttr.matchAll(/([\w\-]+)="(.*?)"/g)) {
-                directiveObj.params[match[1]] = match[2];
+            for (const match of trimmedAttr.matchAll(/([\w\-]+)=(["'])(.*?)\2/g)) {
+                directiveObj.params[match[1]] = match[3];
             }
         }
     }

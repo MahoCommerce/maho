@@ -483,7 +483,7 @@ class Mage_CatalogRule_Model_Observer
         // Convert DateTime objects to date strings for key generation
         $processedInfo = [];
         foreach ($keyInfo as $info) {
-            if ($info instanceof DateTime) {
+            if ($info instanceof DateTimeInterface) {
                 $processedInfo[] = $info->format(Mage_Core_Model_Locale::DATE_FORMAT);
             } else {
                 $processedInfo[] = $info;

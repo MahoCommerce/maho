@@ -429,7 +429,7 @@ class Mage_Catalog_Model_Url
         $process = true;
         $lastEntityId = 0;
         $firstIteration = true;
-        while ($process == true) {
+        while ($process) {
             $products = $this->getResource()->getProductsByCategory($category, $lastEntityId);
             if (!$products) {
                 if ($firstIteration) {
@@ -575,7 +575,7 @@ class Mage_Catalog_Model_Url
         $lastEntityId = 0;
         $process = true;
 
-        while ($process == true) {
+        while ($process) {
             $products = $this->getResource()->getProductsByStore($storeId, $lastEntityId);
             if (!$products) {
                 $process = false;

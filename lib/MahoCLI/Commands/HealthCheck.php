@@ -93,7 +93,7 @@ class HealthCheck extends BaseMahoCommand
         'Varien_Io_Sftp' => \Maho\Io\Sftp::class,
         'Varien_Object' => \Maho\DataObject::class,
         'Varien_Object_Cache' => \Maho\DataObject\Cache::class,
-        'Varien_Object_Mapper' => \Maho\DataObject\Mapper::class,
+        'Varien_Object_Mapper' => \Maho\DataObject\Mapper::class, // @phpstan-ignore classConstant.deprecatedClass
         'Varien_Simplexml_Config' => \Maho\Simplexml\Config::class,
         'Varien_Simplexml_Element' => \Maho\Simplexml\Element::class,
         'Varien_Exception' => \Maho\Exception::class,

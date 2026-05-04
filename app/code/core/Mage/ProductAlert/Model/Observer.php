@@ -131,7 +131,7 @@ class Mage_ProductAlert_Model_Observer
                         $emailAlertModel->addPriceProduct($product);
 
                         $alert->setPrice($productPrice);
-                        $alert->setLastSendDate(Mage::getModel('core/date')->gmtDate());
+                        $alert->setLastSendDate(Mage::app()->getLocale()->formatDateForDb('now'));
                         $alert->setSendCount($alert->getSendCount() + 1);
                         $alert->setStatus(1);
                         $alert->save();
@@ -216,7 +216,7 @@ class Mage_ProductAlert_Model_Observer
                     if ($product->isSalable()) {
                         $emailAlertModel->addStockProduct($product);
 
-                        $alert->setSendDate(Mage::getModel('core/date')->gmtDate());
+                        $alert->setSendDate(Mage::app()->getLocale()->formatDateForDb('now'));
                         $alert->setSendCount($alert->getSendCount() + 1);
                         $alert->setStatus(1);
                         $alert->save();

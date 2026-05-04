@@ -44,7 +44,7 @@ class Mage_Customer_Model_Flowpassword extends Mage_Core_Model_Abstract
     {
         $validatorData = Mage::getSingleton('customer/session')->getValidatorData();
         $this->setIp($validatorData[Mage_Customer_Model_Session::VALIDATOR_REMOTE_ADDR_KEY])
-            ->setRequestedDate(Mage::getModel('core/date')->date());
+            ->setRequestedDate(Mage::app()->getLocale()->formatDateForDb('now'));
         return $this;
     }
 
@@ -67,7 +67,7 @@ class Mage_Customer_Model_Flowpassword extends Mage_Core_Model_Abstract
                 ->addFieldToFilter('email', ['eq' => $email])
                 ->addFieldToFilter(
                     'requested_date',
-                    ['gt' => Mage::getModel('core/date')->date(null, '-1 day')],
+                    ['gt' => Mage::app()->getLocale()->formatDateForDb('-1 day')],
                 );
 
             if ($forgotPassword->getSize() > $helper->getCustomerForgotPasswordEmailTimes()) {
@@ -97,7 +97,7 @@ class Mage_Customer_Model_Flowpassword extends Mage_Core_Model_Abstract
                 ->addFieldToFilter('ip', ['eq' => $remoteAddr])
                 ->addFieldToFilter(
                     'requested_date',
-                    ['gt' => Mage::getModel('core/date')->date(null, '-1 hour')],
+                    ['gt' => Mage::app()->getLocale()->formatDateForDb('-1 hour')],
                 );
 
             if ($forgotPassword->getSize() > $helper->getCustomerForgotPasswordIpTimes()) {
@@ -123,7 +123,7 @@ class Mage_Customer_Model_Flowpassword extends Mage_Core_Model_Abstract
             ->addFieldToFilter('email', ['eq' => $email])
             ->addFieldToFilter(
                 'requested_date',
-                ['gt' => Mage::getModel('core/date')->date(null, '-1 hour')],
+                ['gt' => Mage::app()->getLocale()->formatDateForDb('-1 hour')],
             );
 
         if ($magicLinkRequests->getSize() >= $limit) {
@@ -152,7 +152,7 @@ class Mage_Customer_Model_Flowpassword extends Mage_Core_Model_Abstract
                 ->addFieldToFilter('ip', ['eq' => $remoteAddr])
                 ->addFieldToFilter(
                     'requested_date',
-                    ['gt' => Mage::getModel('core/date')->date(null, '-1 hour')],
+                    ['gt' => Mage::app()->getLocale()->formatDateForDb('-1 hour')],
                 );
 
             if ($magicLinkRequests->getSize() >= $limit) {

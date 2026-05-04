@@ -24,7 +24,7 @@ class Maho_Paypal_Model_Webhook_Verifier
         }
 
         /** @var Maho_Paypal_Model_Api_Client $client */
-        $client = Mage::getModel('maho_paypal/api_client');
+        $client = Mage::getModel('paypal/api_client');
         return $client->verifyWebhookSignature($headers, $body, $webhookId);
     }
 }

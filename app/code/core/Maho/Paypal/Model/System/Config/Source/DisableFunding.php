@@ -14,7 +14,7 @@ class Maho_Paypal_Model_System_Config_Source_DisableFunding
 {
     public function toOptionArray(): array
     {
-        $helper = Mage::helper('maho_paypal');
+        $helper = Mage::helper('paypal');
 
         return [
             ['value' => 'credit', 'label' => $helper->__('PayPal Credit')],

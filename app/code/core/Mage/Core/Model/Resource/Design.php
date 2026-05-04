@@ -134,7 +134,8 @@ class Mage_Core_Model_Resource_Design extends Mage_Core_Model_Resource_Db_Abstra
     public function loadChange($storeId, $date = null)
     {
         if (is_null($date)) {
-            $date = Mage::app()->getLocale()->nowUtc();
+            // date_from/date_to are admin-entered as store-local — compare in store TZ
+            $date = Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
         }
 
         $select = $this->_getReadAdapter()->select()

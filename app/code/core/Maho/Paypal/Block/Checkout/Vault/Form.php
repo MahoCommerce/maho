@@ -32,7 +32,7 @@ class Maho_Paypal_Block_Checkout_Vault_Form extends Mage_Payment_Block_Form
         }
 
         /** @var Maho_Paypal_Model_Resource_Vault_Token_Collection $collection */
-        $collection = Mage::getResourceModel('maho_paypal/vault_token_collection');
+        $collection = Mage::getResourceModel('paypal/vault_token_collection');
         $collection->addCustomerFilter($customerId)->addActiveFilter();
 
         return $collection;

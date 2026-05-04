@@ -100,7 +100,7 @@ if (!$installer->getConnection()->isTableExists($installer->getTable('customer_s
         ], 'Created At')
         ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
             'nullable' => false,
-            'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
+            'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
         ], 'Updated At')
         ->addIndex(
             'unique_segment_trigger_step',

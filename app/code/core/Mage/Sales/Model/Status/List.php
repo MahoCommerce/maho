@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -8,7 +10,6 @@
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-
 /**
  * Service model for managing statuses information. Statuses are just records with code, message and any
  * additional data. The model helps to keep track and manipulate statuses, that different modules want to set
@@ -99,7 +100,7 @@ class Mage_Sales_Model_Status_List
      */
     public function removeItems($indexes)
     {
-        if (![$indexes]) {
+        if (!is_array($indexes)) {
             $indexes = [$indexes];
         }
         if (!$indexes) {

@@ -23,7 +23,7 @@ class Maho_Giftcard_Model_Resource_History extends Mage_Core_Model_Resource_Db_A
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if (!$object->getId()) {
-            $object->setCreatedAt(Mage::app()->getLocale()->nowUtc());
+            $object->setCreatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         }
 
         return parent::_beforeSave($object);

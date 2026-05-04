@@ -67,7 +67,7 @@ abstract class Mage_Core_Model_File_Storage_Abstract extends Mage_Core_Model_Abs
         return [
             'filename'      => basename($path),
             'content'       => @file_get_contents($fullPath),
-            'update_time'   => Mage::getSingleton('core/date')->date(),
+            'update_time'   => Mage::app()->getLocale()->formatDateForDb('now'),
             'directory'     => $directory,
         ];
     }

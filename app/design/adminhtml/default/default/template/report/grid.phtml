@@ -107,7 +107,7 @@ $numColumns = count($this->getColumns());
                     <?php endforeach ?>
                     </tr>
                 <?php endforeach ?>
-                <?php if($this->getCountTotals() && $rows > 0 && $this->getSubtotalVisibility()): ?>
+                <?php if($this->getCountTotals() && $this->getSubtotalVisibility()): ?>
                 <tr>
                     <?php $j=0;
                     foreach ($this->getColumns() as $_column): ?>

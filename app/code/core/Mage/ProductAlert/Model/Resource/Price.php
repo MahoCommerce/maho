@@ -39,7 +39,7 @@ class Mage_ProductAlert_Model_Resource_Price extends Mage_ProductAlert_Model_Res
             }
         }
         if (is_null($object->getAddDate())) {
-            $object->setAddDate(Mage::getModel('core/date')->gmtDate());
+            $object->setAddDate(Mage::app()->getLocale()->formatDateForDb('now'));
         }
         return parent::_beforeSave($object);
     }

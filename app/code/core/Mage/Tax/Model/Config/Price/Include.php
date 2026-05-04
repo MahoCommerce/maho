@@ -11,9 +11,11 @@
 
 class Mage_Tax_Model_Config_Price_Include extends Mage_Core_Model_Config_Data
 {
-    public function afterSave()
+    #[\Override]
+    protected function _afterSave()
     {
-        parent::afterSave();
+        parent::_afterSave();
         Mage::app()->cleanCache('checkout_quote');
+        return $this;
     }
 }

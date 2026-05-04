@@ -446,7 +446,11 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
         try {
             $unsterilizedData = Mage::helper('core/unserializeArray')->unserialize($user->getExtra());
             $user->setExtra($unsterilizedData);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
+            // Catch Throwable, not Exception — PHP 8's TypeError extends
+            // Error (not Exception), and the helper called above can throw
+            // TypeError (json_validate requires string) on a re-load where
+            // setExtra(array) was already called by a previous pass.
             $user->setExtra(false);
         }
         return $user;

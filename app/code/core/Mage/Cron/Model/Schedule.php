@@ -90,16 +90,16 @@ class Mage_Cron_Model_Schedule extends Mage_Core_Model_Abstract
             $time = null;
         }
 
-        $d = getdate(Mage::getSingleton('core/date')->timestamp($time));
+        $dt = Mage::app()->getLocale()->utcToStore(null, $time);
 
-        $match = $this->matchCronExpression($e[0], $d['minutes'])
-            && $this->matchCronExpression($e[1], $d['hours'])
-            && $this->matchCronExpression($e[2], $d['mday'])
-            && $this->matchCronExpression($e[3], $d['mon'])
-            && $this->matchCronExpression($e[4], $d['wday']);
+        $match = $this->matchCronExpression($e[0], (int) $dt->format('i'))
+            && $this->matchCronExpression($e[1], (int) $dt->format('G'))
+            && $this->matchCronExpression($e[2], (int) $dt->format('j'))
+            && $this->matchCronExpression($e[3], (int) $dt->format('n'))
+            && $this->matchCronExpression($e[4], (int) $dt->format('w'));
 
         if ($match) {
-            $this->setCreatedAt(Mage::getSingleton('core/date')->gmtDate());
+            $this->setCreatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
             $this->setScheduledAt(gmdate('Y-m-d H:i:00', $time));
         }
         return $match;

@@ -102,7 +102,8 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Tab_Content extends Mage_Adminhtml_Blo
         ]);
 
         if (!$model->getId() && !$model->getData('publish_date')) {
-            $model->setData('publish_date', Mage::app()->getLocale()->todayUtc());
+            // Default to today in store TZ — matches what the admin sees on the date picker
+            $model->setData('publish_date', Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT));
         }
 
         $fieldset->addField('content', 'editor', [

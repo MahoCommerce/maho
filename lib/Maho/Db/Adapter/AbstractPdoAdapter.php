@@ -1648,10 +1648,103 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             'string', 'varchar', 'character varying' => \Maho\Db\Ddl\Table::TYPE_VARCHAR,
             'text', 'mediumtext', 'longtext' => \Maho\Db\Ddl\Table::TYPE_TEXT,
             'blob', 'mediumblob', 'longblob', 'bytea', 'binary' => \Maho\Db\Ddl\Table::TYPE_BLOB,
-            'boolean', 'bool', 'tinyint' => \Maho\Db\Ddl\Table::TYPE_BOOLEAN,
+            'boolean', 'bool' => \Maho\Db\Ddl\Table::TYPE_BOOLEAN,
+            'tinyint' => \Maho\Db\Ddl\Table::TYPE_TINYINT,
             'date' => \Maho\Db\Ddl\Table::TYPE_DATE,
-            'datetime', 'timestamp', 'timestamp without time zone', 'timestamp with time zone', 'datetimetz' => \Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
+            'time', 'time without time zone' => \Maho\Db\Ddl\Table::TYPE_TIME,
+            'datetime', 'timestamp', 'timestamp without time zone' => \Maho\Db\Ddl\Table::TYPE_DATETIME,
             default => null,
+        };
+    }
+
+    /**
+     * Apply a surgical column modification via DBAL's SchemaManager + Comparator.
+     *
+     * The partial $definition only modifies the keys present; everything else round-trips
+     * from the introspected column. Adapters share this entry point so the surgical
+     * contract stays consistent across MySQL/PgSQL/SQLite.
+     *
+     * Adapters needing pre/post hooks (e.g. SQLite preserving indexes through table
+     * recreation) override `modifyColumn()` and call this helper.
+     *
+     * @param array<string, mixed> $definition Already upper-cased.
+     */
+    protected function _applySurgicalColumnModification(string $tableName, string $columnName, array $definition, ?string $schemaName = null): void
+    {
+        $this->_connect();
+        $schemaManager = $this->_connection->createSchemaManager();
+        $comparator = $schemaManager->createComparator();
+        $fullTableName = $this->_getTableName($tableName, $schemaName);
+        $table = $schemaManager->introspectTableByUnquotedName($fullTableName);
+
+        $newTable = $table->edit()->modifyColumn(
+            \Doctrine\DBAL\Schema\Name\UnqualifiedName::unquoted($columnName),
+            $this->_buildColumnEditorClosure($definition),
+        )->create();
+
+        $diff = $comparator->compareTables($table, $newTable);
+        if (!$diff->isEmpty()) {
+            $schemaManager->alterTable($diff);
+        }
+    }
+
+    /**
+     * Closure for DBAL's ColumnEditor: translates Maho's TIMESTAMP_* default constants
+     * into DBAL default expressions. Uses `array_key_exists` so passing a key with a
+     * null value clears that attribute while omitting the key preserves it.
+     *
+     * @param array<string, mixed> $definition Already upper-cased.
+     */
+    protected function _buildColumnEditorClosure(array $definition): \Closure
+    {
+        return function (\Doctrine\DBAL\Schema\ColumnEditor $editor) use ($definition): void {
+            if (array_key_exists('NULLABLE', $definition)) {
+                $editor->setNotNull(!(bool) $definition['NULLABLE']);
+            }
+            if (array_key_exists('DEFAULT', $definition)) {
+                $defaultValue = $definition['DEFAULT'];
+                // TIMESTAMP_INIT_UPDATE is deprecated. DBAL has no on-update concept,
+                // so it degrades to TIMESTAMP_INIT semantics with a deprecation warning.
+                // Compared by value so PHPStan doesn't flag the adapter itself as using
+                // the deprecated symbol.
+                if ($defaultValue === 'TIMESTAMP_INIT_UPDATE') {
+                    @trigger_error(
+                        'TIMESTAMP_INIT_UPDATE is deprecated; the surgical modifyColumn path drops the ON UPDATE clause. Use TIMESTAMP_INIT plus an explicit _beforeSave() that sets updated_at for cross-engine parity.',
+                        E_USER_DEPRECATED,
+                    );
+                    $defaultValue = \Maho\Db\Ddl\Table::TIMESTAMP_INIT;
+                }
+                if ($defaultValue === \Maho\Db\Ddl\Table::TIMESTAMP_INIT
+                    || $defaultValue === \Maho\Db\Ddl\Table::TIMESTAMP_UPDATE
+                ) {
+                    // TIMESTAMP_UPDATE used to mean `0 ON UPDATE CURRENT_TIMESTAMP` on MySQL.
+                    // DBAL drops the ON UPDATE clause across all adapters, so the literal
+                    // `0` initial value lost its purpose and would also be rejected by
+                    // MySQL strict mode on DATETIME. Use CURRENT_TIMESTAMP as the initial
+                    // value; application code must still bump the column via _beforeSave()
+                    // for the on-update behavior.
+                    $defaultValue = new \Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp();
+                }
+                $editor->setDefaultValue($defaultValue);
+            }
+            if (array_key_exists('LENGTH', $definition)) {
+                // Maho's TEXT/BLOB length notation uses suffixes ('64k', '4G', etc.)
+                // that a naive (int) cast would silently truncate ('4G' → 4 → TINYTEXT).
+                // _parseTextSize handles both plain integers and the suffix notation.
+                $editor->setLength($this->_parseTextSize($definition['LENGTH']));
+            }
+            if (array_key_exists('PRECISION', $definition)) {
+                $editor->setPrecision((int) $definition['PRECISION']);
+            }
+            if (array_key_exists('SCALE', $definition)) {
+                $editor->setScale((int) $definition['SCALE']);
+            }
+            if (array_key_exists('UNSIGNED', $definition)) {
+                $editor->setUnsigned((bool) $definition['UNSIGNED']);
+            }
+            if (array_key_exists('COMMENT', $definition)) {
+                $editor->setComment((string) $definition['COMMENT']);
+            }
         };
     }
 

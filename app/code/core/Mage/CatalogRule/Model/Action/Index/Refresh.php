@@ -87,11 +87,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     {
         $this->_app->dispatchEvent('catalogrule_before_apply', ['resource' => $this->_resource]);
 
-        $coreDate = $this->_factory->getModel('core/date');
-        if (!$coreDate instanceof Mage_Core_Model_Date) {
-            throw new Mage_Core_Exception('Invalid core/date model');
-        }
-        $timestamp = $coreDate->gmtTimestamp();
+        $timestamp = time();
 
         foreach ($this->_app->getWebsites(false) as $website) {
             if ($website->getDefaultStore()) {
@@ -586,7 +582,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
 
     /**
      * Prepare data for group website relation
-     * @param string $timestamp
+     * @param int $timestamp
      */
     protected function _prepareGroupWebsite($timestamp)
     {

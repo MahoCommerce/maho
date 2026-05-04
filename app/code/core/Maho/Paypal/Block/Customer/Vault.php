@@ -17,7 +17,7 @@ class Maho_Paypal_Block_Customer_Vault extends Mage_Core_Block_Template
         $customerId = (int) Mage::getSingleton('customer/session')->getCustomerId();
 
         /** @var Maho_Paypal_Model_Resource_Vault_Token_Collection $collection */
-        $collection = Mage::getResourceModel('maho_paypal/vault_token_collection');
+        $collection = Mage::getResourceModel('paypal/vault_token_collection');
         $collection->addCustomerFilter($customerId)->addActiveFilter();
 
         return $collection;

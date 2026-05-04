@@ -140,7 +140,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             'firstname' => $this->getFirstname(),
             'lastname'  => $this->getLastname(),
             'email'     => $this->getEmail(),
-            'modified'  => Mage::app()->getLocale()->nowUtc(),
+            'modified'  => Mage::app()->getLocale()->formatDateForDb('now'),
             'extra'     => Mage::helper('core')->jsonEncode($this->getExtra()),
         ];
 
@@ -799,7 +799,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             throw Mage::exception('Mage_Core', Mage::helper('adminhtml')->__('Invalid password reset token.'));
         }
         $this->setRpToken($newResetPasswordLinkToken);
-        $currentDate = Mage::app()->getLocale()->nowUtc();
+        $currentDate = Mage::app()->getLocale()->formatDateForDb('now');
         $this->setRpTokenCreatedAt($currentDate);
 
         return $this;

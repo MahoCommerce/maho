@@ -558,7 +558,7 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
     {
         $fieldsetData = Mage::getConfig()->getFieldset($fieldset, $area);
         if ($fieldsetData) {
-            return $fieldsetData ? $fieldsetData->$field : $fieldsetData;
+            return $fieldsetData->$field;
         }
         return $fieldsetData;
     }
