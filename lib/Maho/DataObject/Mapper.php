@@ -16,6 +16,10 @@ use Maho\DataObject;
 
 /**
  * Utility class for mapping data between objects or arrays
+ *
+ * @deprecated since 26.5 No remaining callers in Maho core (Mage_Paypal/Mage_Paygate were extracted/removed).
+ *             For DataObject-to-DataObject copies use $target->addData($source->toArray($map)).
+ *             For arrays use array_intersect_key() / direct assignment.
  */
 class Mapper
 {
@@ -43,6 +47,10 @@ class Mapper
      * @param array|DataObject|callable $from
      * @param array|DataObject|callable $to
      * @return array|DataObject
+     *
+     * @deprecated since 26.5 For DataObject-to-DataObject copies use $target->addData($source->toArray($map)).
+     *             For arrays use array_intersect_key() / direct assignment. The callable-array source/target
+     *             form has no remaining callers in Maho core.
      */
     public static function &accumulateByMap($from, $to, array $map, array $defaults = [])
     {
