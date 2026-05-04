@@ -131,8 +131,9 @@ public function viewAction() { ... }
 - Back-compat: modules still declaring `<frontend><routers>` in `config.xml` keep working via a legacy-XML match path that runs **before** the Symfony matcher, preserving M1's "first declared wins" precedence. A single `LOG_NOTICE` is emitted once per process listing legacy frontNames, encouraging migration.
 
 #### Overriding controllers
-- **Admin**: extension authors register their module in `<admin><routers><adminhtml><args><modules><MyMod before|after="Mage_Adminhtml"/>` in `config.xml`. The runtime walks this chain at dispatch time, so admin controllers (subclasses of `Mage_Adminhtml_Controller_Action` / `Maho\Controller\AdminAction`) override core controllers without redeclaring routes.
-- **Frontend / install**: there is no implicit subclass override. To override a frontend controller, redeclare every `#[Route]` attribute on your subclass — when two routes share a path, Symfony's matcher uses route-name uniqueness, so name your routes distinctly. Modules declaring `<frontend><routers>` in XML still match via the legacy path before the Symfony matcher (BC shim), but new code should use `#[Route]`.
+- **Admin**: register your module under `<admin><routers><adminhtml><args><modules><MyMod before|after="Mage_Adminhtml"/>` in `config.xml`. The runtime walks this chain at dispatch time, so admin controllers (subclasses of `Mage_Adminhtml_Controller_Action` / `Maho\Controller\AdminAction`) override core controllers without redeclaring routes.
+- **Frontend**: same pattern via `<frontend><routers><{routerCode}><args><modules><MyMod before|after="Mage_Customer"/>` (the router code must equal the frontName you're overriding, or supply `<args><frontName>` explicitly). Subclasses of the core controller win over the base when present; M1 chain semantics are preserved.
+- **Install**: no chain support; override by redeclaring `#[Route]` attributes on a custom controller.
 
 ## Development Guidelines
 

@@ -36,6 +36,15 @@ class ControllerDispatcher
     private ?array $adminModuleChain = null;
 
     /**
+     * Cache of frontend module chains keyed by lowercase frontName.
+     * Each chain is the ordered list of override module class prefixes from
+     * <frontend><routers><X><args><modules> for that frontName.
+     *
+     * @var array<string, string[]>
+     */
+    private array $frontendModuleChains = [];
+
+    /**
      * Dispatch an internally-forwarded request.
      *
      * Called when another router (CMS, URL rewrite, _forward()) has set
@@ -113,10 +122,22 @@ class ControllerDispatcher
 
     /**
      * Resolve a controller class from frontName + controllerName via the compiled
-     * controllerLookup map, with admin module chain as fallback.
+     * controllerLookup map, with the frontend/admin module chain as override.
+     *
+     * The frontend chain is consulted *before* the compiled lookup so that
+     * <frontend><routers><X><args><modules> overrides win over the core module
+     * (M1 parity: "module chain entries override the base module").
      */
     protected function resolveControllerClass(string $frontName, string $controllerName): ?string
     {
+        // Frontend module chain — third-party overrides win over the compiled base.
+        foreach ($this->buildFrontendModuleChain($frontName) as $chainModule) {
+            $className = $chainModule . '_' . uc_words($controllerName) . 'Controller';
+            if (class_exists($className)) {
+                return $className;
+            }
+        }
+
         $module = RouteCollectionBuilder::resolveControllerModule($frontName, $controllerName);
         if ($module !== null) {
             $className = $module . '_' . uc_words($controllerName) . 'Controller';
@@ -169,7 +190,8 @@ class ControllerDispatcher
             }
         }
 
-        $controllerClass = $this->resolveAttributeControllerClass($module, $controllerName, $area) ?? $defaultClass;
+        $frontName = $params['_maho_front_name'] ?? '';
+        $controllerClass = $this->resolveAttributeControllerClass($controllerName, $area, $frontName) ?? $defaultClass;
 
         $actionName = preg_replace('/Action$/', '', $action);
 
@@ -207,22 +229,35 @@ class ControllerDispatcher
     }
 
     /**
-     * Walk the admin module chain to find a controller override.
-     * Only admin has XML-based before/after override chains; frontend uses #[Route] directly.
+     * Walk the area's module override chain. Both admin and frontend honor
+     * <args><modules> declarations from third-party config.xml — admin via
+     * `admin/routers/adminhtml`, frontend via `frontend/routers/<frontName>`.
      */
     protected function resolveAttributeControllerClass(
-        string $module,
         string $controllerName,
         string $area,
+        string $frontName,
     ): ?string {
-        if (!$module || !$controllerName || $area !== 'adminhtml') {
+        if (!$controllerName) {
             return null;
         }
 
-        foreach ($this->buildAdminModuleChain() as $realModule) {
-            $className = $realModule . '_' . uc_words($controllerName) . 'Controller';
-            if (class_exists($className)) {
-                return $className;
+        if ($area === 'adminhtml') {
+            foreach ($this->buildAdminModuleChain() as $realModule) {
+                $className = $realModule . '_' . uc_words($controllerName) . 'Controller';
+                if (class_exists($className)) {
+                    return $className;
+                }
+            }
+            return null;
+        }
+
+        if ($area === 'frontend') {
+            foreach ($this->buildFrontendModuleChain($frontName) as $chainModule) {
+                $className = $chainModule . '_' . uc_words($controllerName) . 'Controller';
+                if (class_exists($className)) {
+                    return $className;
+                }
             }
         }
 
@@ -266,6 +301,73 @@ class ControllerDispatcher
         }
 
         return $this->adminModuleChain = $modules;
+    }
+
+    /**
+     * Build the frontend module override chain for a given frontName.
+     *
+     * Mirrors the admin chain logic for M1 BC: third-party modules can register a
+     * controller override on a core route by declaring `<frontend><routers><X><args><modules>`
+     * in their config.xml. Without this, a third-party `extends Mage_Customer_AccountController`
+     * subclass piggybacking on the `customer` frontName via `<modules>` would silently
+     * never dispatch (the compiled controllerLookup always points at the core module).
+     *
+     * Routers are matched by `<args><frontName>` if present, falling back to the router
+     * code element name (M1 convention is for them to be equal). Returns only the
+     * override modules — the base module from the compiled lookup is the caller's job.
+     *
+     * @return string[]
+     */
+    private function buildFrontendModuleChain(string $frontName): array
+    {
+        if ($frontName === '') {
+            return [];
+        }
+
+        $cacheKey = strtolower($frontName);
+        if (isset($this->frontendModuleChains[$cacheKey])) {
+            return $this->frontendModuleChains[$cacheKey];
+        }
+
+        $routersNode = Mage::getConfig()->getNode('frontend/routers');
+        if (!$routersNode) {
+            return $this->frontendModuleChains[$cacheKey] = [];
+        }
+
+        $modules = [];
+        foreach ($routersNode->children() as $routerCode => $router) {
+            $declaredFrontName = trim((string) ($router->args->frontName ?? ''));
+            $effectiveFrontName = $declaredFrontName !== '' ? $declaredFrontName : (string) $routerCode;
+            if (strtolower($effectiveFrontName) !== $cacheKey) {
+                continue;
+            }
+
+            $modulesNode = $router->args->modules ?? null;
+            if (!$modulesNode) {
+                continue;
+            }
+
+            foreach ($modulesNode->children() as $customModule) {
+                $moduleName = (string) $customModule;
+                if (!$moduleName) {
+                    continue;
+                }
+
+                if ($before = $customModule->getAttribute('before')) {
+                    $position = array_search($before, $modules, true);
+                    $position = ($position === false) ? 0 : $position;
+                    array_splice($modules, $position, 0, $moduleName);
+                } elseif ($after = $customModule->getAttribute('after')) {
+                    $position = array_search($after, $modules, true);
+                    $position = ($position === false) ? count($modules) : $position + 1;
+                    array_splice($modules, $position, 0, $moduleName);
+                } else {
+                    $modules[] = $moduleName;
+                }
+            }
+        }
+
+        return $this->frontendModuleChains[$cacheKey] = $modules;
     }
 
     protected function parseUrlParams(string $paramsString, Mage_Core_Controller_Request_Http $request): void
