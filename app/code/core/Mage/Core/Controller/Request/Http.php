@@ -785,10 +785,8 @@ class Mage_Core_Controller_Request_Http
     public function setRouteName(string $route): self
     {
         $this->_route = $route;
-        $module = \Maho\Routing\RouteCollectionBuilder::getFrontNameByRoute($route);
-        if ($module) {
-            $this->setModuleName($module);
-        }
+        $module = \Maho\Routing\RouteCollectionBuilder::getFrontNameByRoute($route) ?? $route;
+        $this->setModuleName($module);
         return $this;
     }
 
@@ -825,7 +823,7 @@ class Mage_Core_Controller_Request_Http
         if ($this->_requestedRouteName === null) {
             if ($this->_rewritedPathInfo !== null && isset($this->_rewritedPathInfo[0])) {
                 $fronName = $this->_rewritedPathInfo[0];
-                $this->_requestedRouteName = \Maho\Routing\RouteCollectionBuilder::getRouteByFrontName($fronName);
+                $this->_requestedRouteName = \Maho\Routing\RouteCollectionBuilder::getRouteByFrontName($fronName) ?? $fronName;
             } else {
                 // no rewritten path found, use default route name
                 return $this->getRouteName();

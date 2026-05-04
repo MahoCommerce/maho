@@ -202,21 +202,6 @@ class RouteCollectionBuilder
     }
 
     /**
-     * Reset all process-static caches.
-     *
-     * Needed for long-running workers (RoadRunner/FrankenPHP/swoole) where a
-     * single PHP process serves many requests, and for test isolation where
-     * otherwise these caches can serve stale data across requests or tests.
-     */
-    public static function resetCache(): void
-    {
-        self::$adminFrontName = null;
-        self::$legacyFrontNames = null;
-        self::$compiledMatcher = null;
-        self::$compiledGenerator = null;
-    }
-
-    /**
      * Instantiate the compiled URL matcher. The compiled data is loaded once
      * per process and shared across requests via opcache.
      *

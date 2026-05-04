@@ -310,8 +310,7 @@ class Mage_Core_Model_Controller_Front_Observer
     private function processRewriteUrl(string $url): string
     {
         return preg_replace_callback('/\{(\w+)\}/', function (array $matches): string {
-            $frontName = \Maho\Routing\RouteCollectionBuilder::getFrontNameByRoute($matches[1]);
-            return $frontName ?: $matches[0];
+            return \Maho\Routing\RouteCollectionBuilder::getFrontNameByRoute($matches[1]) ?? $matches[1];
         }, $url) ?? $url;
     }
 

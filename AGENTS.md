@@ -117,7 +117,11 @@ Parameters:
 
 Area auto-detection walks the class hierarchy: descendants of `Mage_Adminhtml_Controller_Action` or `Maho\Controller\AdminAction` → `adminhtml`; `Mage_Install_Controller_Action` or `Maho\Controller\InstallAction` → `install`; everything else → `frontend`.
 
-Admin routes: **do not** prefix `path` with the admin frontName. The compiler auto-prepends `{_adminFrontName}` so the runtime value (including `use_custom_admin_path`) resolves per request. Write `#[Route('/catalog/product/edit/{id}')]` on an admin controller, not `/admin/catalog/...`.
+Admin routes: the compiler resolves the admin frontName at runtime (`use_custom_admin_path`), so you don't need to hard-code it. Two equivalent forms work:
+- Bare path — `#[Route('/catalog/product/edit/{id}')]` — compiler prepends `{_adminFrontName}/`.
+- `/admin`-prefixed — `#[Route('/admin/catalog/product/edit/{id}')]` — compiler substitutes the leading `/admin` with `{_adminFrontName}`.
+
+Both compile to the same route. Existing core admin controllers use the `/admin`-prefixed form for visual continuity with the URL.
 
 ```php
 #[Maho\Config\Route('/catalog/product/view/{id}', name: 'catalog.product.view', methods: ['GET'], requirements: ['id' => '\d+'])]
