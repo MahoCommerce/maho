@@ -17,8 +17,7 @@ use Maho\DataObject;
 /**
  * Utility class for mapping data between objects or arrays
  *
- * @deprecated since 26.5 No remaining callers in Maho core (Mage_Paypal/Mage_Paygate were extracted/removed).
- *             For DataObject-to-DataObject copies use $target->addData($source->toArray($map)).
+ * @deprecated since 26.5 For DataObject-to-DataObject copies use $target->addData($source->toArray($map)).
  *             For arrays use array_intersect_key() / direct assignment.
  */
 class Mapper
