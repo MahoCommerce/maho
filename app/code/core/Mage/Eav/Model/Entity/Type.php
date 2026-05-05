@@ -59,7 +59,7 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
     /**
      * Collection of sets
      *
-     * @var Mage_Eav_Model_Resource_Entity_Attribute_Set_Collection
+     * @var Mage_Eav_Model_Resource_Entity_Attribute_Set_Collection|null
      */
     protected $_sets;
 

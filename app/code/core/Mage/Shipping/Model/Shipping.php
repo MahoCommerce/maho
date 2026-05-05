@@ -32,7 +32,7 @@ class Mage_Shipping_Model_Shipping
     /**
      * Cached result
      *
-     * @var Mage_Shipping_Model_Rate_Result
+     * @var Mage_Shipping_Model_Rate_Result|null
      */
     protected $_result = null;
 

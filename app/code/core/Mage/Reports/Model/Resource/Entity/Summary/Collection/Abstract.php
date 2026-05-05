@@ -17,7 +17,7 @@ class Mage_Reports_Model_Resource_Entity_Summary_Collection_Abstract extends \Ma
     /**
      * Entity collection for summaries
      *
-     * @var Mage_Eav_Model_Entity_Collection_Abstract
+     * @var Mage_Eav_Model_Entity_Collection_Abstract|null
      */
     protected $_entityCollection;
 

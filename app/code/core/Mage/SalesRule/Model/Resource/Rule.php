@@ -5,7 +5,7 @@
  *
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2017-2026 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -237,12 +237,12 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
     public function getActiveAttributes($websiteId, $customerGroupId)
     {
         $read = $this->_getReadAdapter();
+        $distinctAttributeIds = $read->select()
+            ->distinct(true)
+            ->from($this->getTable('salesrule/product_attribute'), 'attribute_id');
         $select = $read->select()
-            ->from(
-                ['a' => $this->getTable('salesrule/product_attribute')],
-                new Maho\Db\Expr('DISTINCT ea.attribute_code'),
-            )
-            ->joinInner(['ea' => $this->getTable('eav/attribute')], 'ea.attribute_id = a.attribute_id', []);
+            ->from(['ea' => $this->getTable('eav/attribute')], ['attribute_code'])
+            ->joinInner(['a' => $distinctAttributeIds], 'ea.attribute_id = a.attribute_id', []);
         return $read->fetchAll($select);
     }
 

@@ -191,7 +191,7 @@ abstract class Mage_Rule_Model_Action_Abstract extends \Maho\DataObject implemen
     public function getValueName()
     {
         $value = $this->getValue();
-        return !empty($value) || $value === 0 ? $value : '...';
+        return !empty($value) || (string) $value === '0' ? $value : '...';
     }
 
     /**

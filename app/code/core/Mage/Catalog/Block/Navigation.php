@@ -375,7 +375,7 @@ class Mage_Catalog_Block_Navigation extends Mage_Core_Block_Template
 
         if (in_array($category->getId(), $this->getCurrentCategoryPath())) {
             $children = $category->getChildren();
-            $hasChildren = $children && $children->count();
+            $hasChildren = is_iterable($children) && (is_array($children) ? count($children) : $children->count());
 
             if ($hasChildren) {
                 $htmlChildren = '';

@@ -29,7 +29,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     /**
      * Entity object to define collection's attributes
      *
-     * @var Mage_Eav_Model_Entity_Abstract
+     * @var Mage_Eav_Model_Entity_Abstract|null
      */
     protected $_entity;
 
