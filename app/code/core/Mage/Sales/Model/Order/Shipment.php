@@ -70,12 +70,12 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
     public const HISTORY_ENTITY_NAME = 'shipment';
 
     /**
-     * @var Mage_Sales_Model_Resource_Order_Shipment_Item_Collection
+     * @var Mage_Sales_Model_Resource_Order_Shipment_Item_Collection|null
      */
     protected $_items;
 
     /**
-     * @var Mage_Sales_Model_Resource_Order_Shipment_Track_Collection
+     * @var Mage_Sales_Model_Resource_Order_Shipment_Track_Collection|null
      */
     protected $_tracks;
 

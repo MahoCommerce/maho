@@ -79,7 +79,7 @@ class Mage_Catalog_Model_Url
     /**
      * Flag to overwrite config settings for Catalog URL rewrites history maintenance
      *
-     * @var bool
+     * @var bool|null
      */
     protected $_saveRewritesHistory = null;
 

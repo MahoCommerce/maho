@@ -70,7 +70,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Admin_Page
         $parentArr = [];
         $sortOrder = 0;
         foreach ($parent->children() as $childName => $child) {
-            if (($child->disabled == 1)
+            if (((string) $child->disabled === '1')
                 || ($child->depends && !$this->_checkDepends($child->depends))
             ) {
                 continue;

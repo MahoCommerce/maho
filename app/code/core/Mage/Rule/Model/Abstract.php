@@ -34,7 +34,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Store rule combine conditions model
      *
-     * @var Mage_Rule_Model_Condition_Combine
+     * @var Mage_Rule_Model_Condition_Combine|null
      */
     protected $_conditions;
 

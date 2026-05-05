@@ -362,13 +362,13 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
                 $this->setStoreFilter($condition);
                 break;
             case 'type':
-                if ($condition == 1) {
+                if ((int) $condition === 1) {
                     $conditionParts = [
                         $this->_getConditionSql('rdt.customer_id', ['is' => new Maho\Db\Expr('NULL')]),
                         $this->_getConditionSql('rdt.store_id', ['eq' => Mage_Core_Model_App::ADMIN_STORE_ID]),
                     ];
                     $conditionSql = implode(' AND ', $conditionParts);
-                } elseif ($condition == 2) {
+                } elseif ((int) $condition === 2) {
                     $conditionSql = $this->_getConditionSql('rdt.customer_id', ['gt' => 0]);
                 } else {
                     $conditionParts = [

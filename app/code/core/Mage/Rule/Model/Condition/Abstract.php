@@ -53,7 +53,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     /**
      * Defines which operators will be available for this condition
      *
-     * @var string
+     * @var string|null
      */
     protected $_inputType = null;
 

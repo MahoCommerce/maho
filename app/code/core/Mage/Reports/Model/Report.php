@@ -37,7 +37,7 @@ class Mage_Reports_Model_Report extends Mage_Core_Model_Abstract
     /**
      * @param string $from
      * @param string $to
-     * @return Mage_Reports_Model_Report
+     * @return Maho\Data\Collection
      */
     public function getReportFull($from, $to)
     {
@@ -50,7 +50,7 @@ class Mage_Reports_Model_Report extends Mage_Core_Model_Abstract
     /**
      * @param string $from
      * @param string $to
-     * @return Mage_Reports_Model_Report
+     * @return Maho\Data\Collection
      */
     public function getReport($from, $to)
     {

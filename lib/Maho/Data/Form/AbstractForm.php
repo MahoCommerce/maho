@@ -34,7 +34,7 @@ abstract class AbstractForm extends \Maho\DataObject
     /**
      * Form level elements collection
      *
-     * @var Collection
+     * @var Collection|null
      */
     protected $_elements;
 

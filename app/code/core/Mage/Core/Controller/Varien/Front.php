@@ -120,7 +120,7 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
     {
         Mage::dispatchEvent('controller_front_init_before', ['front' => $this]);
 
-        $routersInfo = Mage::app()->getStore()->getConfig(self::XML_STORE_ROUTERS_PATH);
+        $routersInfo = (array) Mage::app()->getStore()->getConfig(self::XML_STORE_ROUTERS_PATH);
 
         \Maho\Profiler::start('mage::app::init_front_controller::collect_routers');
         foreach ($routersInfo as $routerCode => $routerInfo) {

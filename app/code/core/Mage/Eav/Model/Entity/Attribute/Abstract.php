@@ -65,21 +65,21 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
     /**
      * Backend instance
      *
-     * @var Mage_Eav_Model_Entity_Attribute_Backend_Abstract
+     * @var Mage_Eav_Model_Entity_Attribute_Backend_Abstract|null
      */
     protected $_backend;
 
     /**
      * Frontend instance
      *
-     * @var Mage_Eav_Model_Entity_Attribute_Frontend_Abstract
+     * @var Mage_Eav_Model_Entity_Attribute_Frontend_Abstract|null
      */
     protected $_frontend;
 
     /**
      * Source instance
      *
-     * @var Mage_Eav_Model_Entity_Attribute_Source_Abstract
+     * @var Mage_Eav_Model_Entity_Attribute_Source_Abstract|null
      */
     protected $_source;
 

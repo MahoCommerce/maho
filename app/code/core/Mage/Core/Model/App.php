@@ -181,14 +181,14 @@ class Mage_Core_Model_App
     /**
      * Request object
      *
-     * @var Mage_Core_Controller_Request_Http
+     * @var Mage_Core_Controller_Request_Http|null
      */
     protected $_request;
 
     /**
      * Response object
      *
-     * @var Mage_Core_Controller_Response_Http
+     * @var Mage_Core_Controller_Response_Http|null
      */
     protected $_response;
 

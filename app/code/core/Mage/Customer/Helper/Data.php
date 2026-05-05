@@ -154,14 +154,14 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     ];
 
     /**
-     * @var Mage_Customer_Model_Customer
+     * @var Mage_Customer_Model_Customer|null
      */
     protected $_customer;
 
     /**
      * Customer groups collection
      *
-     * @var Mage_Customer_Model_Entity_Group_Collection
+     * @var Mage_Customer_Model_Entity_Group_Collection|null
      */
     protected $_groups;
 

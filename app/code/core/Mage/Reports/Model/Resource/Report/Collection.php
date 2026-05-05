@@ -248,7 +248,7 @@ class Mage_Reports_Model_Resource_Report_Collection
      *
      * @param string $from
      * @param string $to
-     * @return Mage_Reports_Model_Report
+     * @return Maho\Data\Collection
      */
     public function getReportFull($from, $to)
     {
@@ -260,7 +260,7 @@ class Mage_Reports_Model_Resource_Report_Collection
      *
      * @param string $from
      * @param string $to
-     * @return Mage_Reports_Model_Report
+     * @return Maho\Data\Collection
      */
     public function getReport($from, $to)
     {

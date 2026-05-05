@@ -23,7 +23,7 @@ class Mage_Core_Model_Design_Package
     /**
      * Current Store for generation ofr base_dir and base_url
      *
-     * @var string|integer|Mage_Core_Model_Store
+     * @var string|integer|Mage_Core_Model_Store|null
      */
     protected $_store = null;
 

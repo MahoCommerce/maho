@@ -22,7 +22,7 @@ class Mage_Catalog_Model_Resource_Config extends Mage_Core_Model_Resource_Db_Abs
     /**
      * Store id
      *
-     * @var int
+     * @var int|null
      */
     protected $_storeId          = null;
 

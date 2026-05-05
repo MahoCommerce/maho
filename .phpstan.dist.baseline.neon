@@ -85,12 +85,6 @@ parameters:
 			path: app/code/core/Mage/Admin/Model/Acl/Assert/Time.php
 
 		-
-			rawMessage: 'Comparison operation "==" between (Maho\Simplexml\Element|null) and 1 results in an error.'
-			identifier: equal.invalid
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Config.php
-
-		-
 			rawMessage: 'Method Mage_Admin_Model_Observer::actionPreDispatchAdmin() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -177,12 +171,6 @@ parameters:
 		-
 			rawMessage: 'Call to an undefined method Mage_Admin_Model_Resource_Roles::update().'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Roles.php
-
-		-
-			rawMessage: 'Comparison operation "==" between (Maho\Simplexml\Element|null) and 1 results in an error.'
-			identifier: equal.invalid
 			count: 1
 			path: app/code/core/Mage/Admin/Model/Roles.php
 
@@ -1217,12 +1205,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Page/Header.php
-
-		-
-			rawMessage: 'Comparison operation "==" between (Maho\Simplexml\Element|null) and 1 results in an error.'
-			identifier: equal.invalid
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Page/Menu.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Permissions_Buttons::getBackButtonHtml() has no return type specified.'
@@ -3691,12 +3673,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Checkbox.php
 
 		-
-			rawMessage: 'Argument of an invalid type string supplied for foreach, only iterables are supported.'
-			identifier: foreach.nonIterable
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Concat.php
-
-		-
 			rawMessage: Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Currency::$_currencies has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -4619,12 +4595,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Model/System/Config/Backend/Image.php
-
-		-
-			rawMessage: 'Comparison operation "==" between (Maho\Simplexml\Element|null) and 1 results in an error.'
-			identifier: equal.invalid
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Model/System/Config/Source/Admin/Page.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Model_System_Config_Source_Admin_Page::_buildMenuArray() has no return type specified.'
@@ -6232,12 +6202,6 @@ parameters:
 			path: app/code/core/Mage/Bundle/Block/Catalog/Product/View/Type/Bundle.php
 
 		-
-			rawMessage: 'Argument of an invalid type string supplied for foreach, only iterables are supported.'
-			identifier: foreach.nonIterable
-			count: 1
-			path: app/code/core/Mage/Bundle/Block/Checkout/Cart/Item/Renderer.php
-
-		-
 			rawMessage: 'Method Mage_Sales_Model_Quote_Item::getMessage() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 1
@@ -6406,12 +6370,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Layer/View.php
 
 		-
-			rawMessage: 'Argument of an invalid type string supplied for foreach, only iterables are supported.'
-			identifier: foreach.nonIterable
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Navigation.php
-
-		-
 			rawMessage: '''
 				Call to method isAvailable() of deprecated class Mage_Catalog_Helper_Flat_Abstract:
 				since 26.5 Flat Catalog will be removed in a future version
@@ -6432,7 +6390,7 @@ parameters:
 		-
 			rawMessage: 'Cannot call method count() on string.'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: app/code/core/Mage/Catalog/Block/Navigation.php
 
 		-
@@ -7268,6 +7226,12 @@ parameters:
 			identifier: method.deprecatedClass
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Category/Dynamic/Processor.php
+
+		-
+			rawMessage: 'Cannot call method setConditions() on null.'
+			identifier: method.nonObject
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category/Dynamic/Rule.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Category_Indexer_Flat::_processEvent() has no return type specified.'
@@ -8317,12 +8281,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Category.php
 
 		-
-			rawMessage: 'Property Mage_Catalog_Model_Resource_Category::$_storeId (int) on left side of ?? is not nullable.'
-			identifier: nullCoalesce.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Category.php
-
-		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Category_Collection::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8421,12 +8379,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Config::_construct() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Config.php
-
-		-
-			rawMessage: 'Property Mage_Catalog_Model_Resource_Config::$_storeId (int) on left side of ?? is not nullable.'
-			identifier: nullCoalesce.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Config.php
 
@@ -8853,12 +8805,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Url::_addCategoryUrlPath() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Url.php
-
-		-
-			rawMessage: 'Property Mage_Catalog_Model_Url::$_saveRewritesHistory (bool) on left side of ?? is not nullable.'
-			identifier: nullCoalesce.property
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Url.php
 
@@ -9883,12 +9829,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Block/Cart/Crosssell.php
 
 		-
-			rawMessage: 'Argument of an invalid type string supplied for foreach, only iterables are supported.'
-			identifier: foreach.nonIterable
-			count: 1
-			path: app/code/core/Mage/Checkout/Block/Cart/Item/Renderer.php
-
-		-
 			rawMessage: 'Method Mage_Sales_Model_Quote_Item::getMessage() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 1
@@ -10228,12 +10168,6 @@ parameters:
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCustomerAddressId() expects int, null given.'
 			identifier: argument.type
 			count: 2
-			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
-
-		-
-			rawMessage: 'Property Mage_Checkout_Model_Type_Onepage::$_quote (Mage_Sales_Model_Quote) on left side of ?? is not nullable.'
-			identifier: nullCoalesce.property
-			count: 1
 			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
 
 		-
@@ -10741,14 +10675,20 @@ parameters:
 			path: app/code/core/Mage/Core/Controller/Varien/Exception.php
 
 		-
-			rawMessage: 'Argument of an invalid type string supplied for foreach, only iterables are supported.'
-			identifier: foreach.nonIterable
+			rawMessage: 'Method Mage_Core_Controller_Varien_Front::_checkBaseUrl() has no return type specified.'
+			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Core/Controller/Varien/Front.php
 
 		-
-			rawMessage: 'Method Mage_Core_Controller_Varien_Front::_checkBaseUrl() has no return type specified.'
-			identifier: missingType.return
+			rawMessage: 'Parameter #1 $name of method Mage_Core_Controller_Varien_Front::addRouter() expects string, int given.'
+			identifier: argument.type
+			count: 1
+			path: app/code/core/Mage/Core/Controller/Varien/Front.php
+
+		-
+			rawMessage: 'Parameter #2 $useRouterName of method Mage_Core_Controller_Varien_Router_Standard::collectRoutes() expects string, int given.'
+			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Controller/Varien/Front.php
 
@@ -10873,12 +10813,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Abstract.php
 
 		-
-			rawMessage: 'Property Mage_Core_Model_Abstract::$_isObjectNew (bool) on left side of ?? is not nullable.'
-			identifier: nullCoalesce.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Abstract.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_App::_initStores() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -10911,18 +10845,6 @@ parameters:
 		-
 			rawMessage: 'Parameter #1 $group of method Mage_Core_Model_App::_getStoreByGroup() expects int, string given.'
 			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/App.php
-
-		-
-			rawMessage: 'Property Mage_Core_Model_App::$_request (Mage_Core_Controller_Request_Http) in empty() is not falsy.'
-			identifier: empty.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/App.php
-
-		-
-			rawMessage: 'Property Mage_Core_Model_App::$_response (Mage_Core_Controller_Response_Http) in empty() is not falsy.'
-			identifier: empty.property
 			count: 1
 			path: app/code/core/Mage/Core/Model/App.php
 
@@ -11017,12 +10939,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Design/Fallback.php
 
 		-
-			rawMessage: 'Property Mage_Core_Model_Design_Fallback::$_store (Mage_Core_Model_Store) on left side of ?? is not nullable.'
-			identifier: nullCoalesce.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Design/Fallback.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_Design_Package::_setCallbackFileDir() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -11037,12 +10953,6 @@ parameters:
 		-
 			rawMessage: Property Mage_Core_Model_Design_Package::$_regexMatchCache has no type specified.
 			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Model/Design/Package.php
-
-		-
-			rawMessage: 'Property Mage_Core_Model_Design_Package::$_store (int|Mage_Core_Model_Store|string) on left side of ?? is not nullable.'
-			identifier: nullCoalesce.property
 			count: 1
 			path: app/code/core/Mage/Core/Model/Design/Package.php
 
@@ -11353,14 +11263,8 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
 
 		-
-			rawMessage: 'Property Mage_Core_Model_Resource_Db_Collection_Abstract::$_resource (Mage_Core_Model_Resource_Db_Abstract) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
+			rawMessage: 'Property Mage_Core_Model_Resource_Db_Collection_Abstract::$_resource (Mage_Core_Model_Resource_Db_Abstract|null) does not accept Mage_Core_Model_Resource_Db_Collection_Abstract|false.'
 			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
-
-		-
-			rawMessage: 'Property Mage_Core_Model_Resource_Db_Collection_Abstract::$_resource (Mage_Core_Model_Resource_Db_Abstract) in empty() is not falsy.'
-			identifier: empty.property
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Db/Collection/Abstract.php
 
@@ -11887,26 +11791,20 @@ parameters:
 			path: app/code/core/Mage/Customer/Helper/Address.php
 
 		-
+			rawMessage: 'Method Mage_Customer_Helper_Data::getGroups() should return Mage_Customer_Model_Entity_Group_Collection but returns Mage_Customer_Model_Resource_Group_Collection.'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Customer/Helper/Data.php
+
+		-
 			rawMessage: 'Method Mage_Customer_Model_Session::getNoReferer() invoked with 0 parameters, 1 required.'
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Customer/Helper/Data.php
 
 		-
-			rawMessage: 'Property Mage_Customer_Helper_Data::$_customer (Mage_Customer_Model_Customer) in empty() is not falsy.'
-			identifier: empty.property
-			count: 1
-			path: app/code/core/Mage/Customer/Helper/Data.php
-
-		-
-			rawMessage: 'Property Mage_Customer_Helper_Data::$_groups (Mage_Customer_Model_Entity_Group_Collection) does not accept Mage_Customer_Model_Resource_Group_Collection.'
+			rawMessage: 'Property Mage_Customer_Helper_Data::$_groups (Mage_Customer_Model_Entity_Group_Collection|null) does not accept Mage_Customer_Model_Resource_Group_Collection.'
 			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Customer/Helper/Data.php
-
-		-
-			rawMessage: 'Property Mage_Customer_Helper_Data::$_groups (Mage_Customer_Model_Entity_Group_Collection) in empty() is not falsy.'
-			identifier: empty.property
 			count: 1
 			path: app/code/core/Mage/Customer/Helper/Data.php
 
@@ -14095,12 +13993,6 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
 
 		-
-			rawMessage: 'Property Mage_Eav_Model_Entity_Abstract::$_type (Mage_Eav_Model_Entity_Type) in empty() is not falsy.'
-			identifier: empty.property
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Abstract.php
-
-		-
 			rawMessage: Variable $id might not be defined.
 			identifier: variable.undefined
 			count: 1
@@ -14119,14 +14011,8 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
 
 		-
-			rawMessage: 'Property Mage_Eav_Model_Entity_Attribute_Abstract::$_backend (Mage_Eav_Model_Entity_Attribute_Backend_Abstract) does not accept Mage_Core_Model_Abstract.'
+			rawMessage: 'Property Mage_Eav_Model_Entity_Attribute_Abstract::$_backend (Mage_Eav_Model_Entity_Attribute_Backend_Abstract|null) does not accept Mage_Core_Model_Abstract.'
 			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
-
-		-
-			rawMessage: 'Property Mage_Eav_Model_Entity_Attribute_Abstract::$_backend (Mage_Eav_Model_Entity_Attribute_Backend_Abstract) in empty() is not falsy.'
-			identifier: empty.property
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
 
@@ -14137,26 +14023,14 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
 
 		-
-			rawMessage: 'Property Mage_Eav_Model_Entity_Attribute_Abstract::$_frontend (Mage_Eav_Model_Entity_Attribute_Frontend_Abstract) does not accept Mage_Core_Model_Abstract.'
+			rawMessage: 'Property Mage_Eav_Model_Entity_Attribute_Abstract::$_frontend (Mage_Eav_Model_Entity_Attribute_Frontend_Abstract|null) does not accept Mage_Core_Model_Abstract.'
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
 
 		-
-			rawMessage: 'Property Mage_Eav_Model_Entity_Attribute_Abstract::$_frontend (Mage_Eav_Model_Entity_Attribute_Frontend_Abstract) in empty() is not falsy.'
-			identifier: empty.property
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
-
-		-
-			rawMessage: 'Property Mage_Eav_Model_Entity_Attribute_Abstract::$_source (Mage_Eav_Model_Entity_Attribute_Source_Abstract) does not accept Mage_Core_Model_Abstract.'
+			rawMessage: 'Property Mage_Eav_Model_Entity_Attribute_Abstract::$_source (Mage_Eav_Model_Entity_Attribute_Source_Abstract|null) does not accept Mage_Core_Model_Abstract.'
 			identifier: assign.propertyType
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
-
-		-
-			rawMessage: 'Property Mage_Eav_Model_Entity_Attribute_Abstract::$_source (Mage_Eav_Model_Entity_Attribute_Source_Abstract) in empty() is not falsy.'
-			identifier: empty.property
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Attribute/Abstract.php
 
@@ -14281,12 +14155,6 @@ parameters:
 			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
 
 		-
-			rawMessage: 'Property Mage_Eav_Model_Entity_Collection_Abstract::$_entity (Mage_Eav_Model_Entity_Abstract) in empty() is not falsy.'
-			identifier: empty.property
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Collection/Abstract.php
-
-		-
 			rawMessage: 'Method Mage_Eav_Model_Entity_Increment_Interface::getNextId() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -14313,12 +14181,6 @@ parameters:
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Eav_Model_Entity_Store::setIncrementPrefix() expects string, int given.'
 			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Eav/Model/Entity/Type.php
-
-		-
-			rawMessage: 'Property Mage_Eav_Model_Entity_Type::$_sets (Mage_Eav_Model_Resource_Entity_Attribute_Set_Collection) in empty() is not falsy.'
-			identifier: empty.property
 			count: 1
 			path: app/code/core/Mage/Eav/Model/Entity/Type.php
 
@@ -14685,12 +14547,6 @@ parameters:
 		-
 			rawMessage: 'Parameter #3 ...$values of function sprintf expects bool|float|int|string|null, array<string, int|string>|null given.'
 			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Index/Model/Lock.php
-
-		-
-			rawMessage: 'Strict comparison using === between mixed and null will always evaluate to false.'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: app/code/core/Mage/Index/Model/Lock.php
 
@@ -15703,6 +15559,18 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Product/Index/Abstract.php
 
 		-
+			rawMessage: 'Method Mage_Reports_Model_Report::getReport() should return Maho\Data\Collection but returns Mage_Reports_Model_Report.'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Reports/Model/Report.php
+
+		-
+			rawMessage: 'Method Mage_Reports_Model_Report::getReportFull() should return Maho\Data\Collection but returns Mage_Reports_Model_Report.'
+			identifier: return.type
+			count: 1
+			path: app/code/core/Mage/Reports/Model/Report.php
+
+		-
 			rawMessage: 'Parameter #1 $value of method Mage_Reports_Model_Report::setPageSize() expects int, false given.'
 			identifier: argument.type
 			count: 1
@@ -15725,12 +15593,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Resource/Customer/Collection.php
-
-		-
-			rawMessage: 'Property Mage_Reports_Model_Resource_Entity_Summary_Collection_Abstract::$_entityCollection (Mage_Eav_Model_Entity_Collection_Abstract) in empty() is not falsy.'
-			identifier: empty.property
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Entity/Summary/Collection/Abstract.php
 
 		-
 			rawMessage: 'Call to an undefined method Maho\Data\Collection\Db::getResource().'
@@ -15871,12 +15733,6 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Resource/Tag/Product/Collection.php
 
 		-
-			rawMessage: 'Argument of an invalid type Mage_Reports_Model_Report supplied for foreach, only iterables are supported.'
-			identifier: foreach.nonIterable
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Totals.php
-
-		-
 			rawMessage: 'Parameter #1 $entityPkValue of method Mage_Review_Block_Customer_View::setTotalReviewsCache() expects int, string given.'
 			identifier: argument.type
 			count: 1
@@ -15971,18 +15827,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Review/Model/Resource/Review/Collection.php
-
-		-
-			rawMessage: 'Comparison operation "==" between array|null and 1 results in an error.'
-			identifier: equal.invalid
-			count: 1
-			path: app/code/core/Mage/Review/Model/Resource/Review/Product/Collection.php
-
-		-
-			rawMessage: 'Comparison operation "==" between array|null and 2 results in an error.'
-			identifier: equal.invalid
-			count: 1
-			path: app/code/core/Mage/Review/Model/Resource/Review/Product/Collection.php
 
 		-
 			rawMessage: 'Method Mage_Review_Model_Resource_Review_Product_Collection::_addStoreData() has no return type specified.'
@@ -16231,12 +16075,6 @@ parameters:
 			path: app/code/core/Mage/Rule/Model/Abstract.php
 
 		-
-			rawMessage: 'Property Mage_Rule_Model_Abstract::$_conditions (Mage_Rule_Model_Condition_Combine) in empty() is not falsy.'
-			identifier: empty.property
-			count: 1
-			path: app/code/core/Mage/Rule/Model/Abstract.php
-
-		-
 			rawMessage: 'Method Mage_Rule_Model_Action_Abstract::getAttributeOption() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 1
@@ -16245,12 +16083,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Rule_Model_Action_Abstract::getOperatorOption() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Rule/Model/Action/Abstract.php
-
-		-
-			rawMessage: 'Strict comparison using === between ''''|''0'' and 0 will always evaluate to false.'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: app/code/core/Mage/Rule/Model/Action/Abstract.php
 
@@ -16303,18 +16135,6 @@ parameters:
 			path: app/code/core/Mage/Rule/Model/Condition/Abstract.php
 
 		-
-			rawMessage: 'Property Mage_Rule_Model_Condition_Abstract::$_inputType (string) on left side of ?? is not nullable.'
-			identifier: nullCoalesce.property
-			count: 1
-			path: app/code/core/Mage/Rule/Model/Condition/Abstract.php
-
-		-
-			rawMessage: 'Argument of an invalid type string supplied for foreach, only iterables are supported.'
-			identifier: foreach.nonIterable
-			count: 2
-			path: app/code/core/Mage/Rule/Model/Condition/Combine.php
-
-		-
 			rawMessage: 'Method Mage_Rule_Model_Condition_Abstract::loadArray() invoked with 2 parameters, 1 required.'
 			identifier: arguments.count
 			count: 1
@@ -16334,6 +16154,12 @@ parameters:
 
 		-
 			rawMessage: 'Parameter #1 $arr of method Mage_Rule_Model_Condition_Combine::loadArray() expects array, $this(Mage_Rule_Model_Condition_Combine) given.'
+			identifier: argument.type
+			count: 1
+			path: app/code/core/Mage/Rule/Model/Condition/Combine.php
+
+		-
+			rawMessage: 'Parameter #1 $value of method Mage_Rule_Model_Condition_Combine::setAggregator() expects string, int given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Rule/Model/Condition/Combine.php
@@ -16675,12 +16501,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Order/Creditmemo.php
 
 		-
-			rawMessage: 'Property Mage_Sales_Model_Order_Creditmemo::$_items (iterable<Mage_Sales_Model_Order_Creditmemo_Item>&Mage_Sales_Model_Resource_Order_Creditmemo_Item_Collection) in empty() is not falsy.'
-			identifier: empty.property
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Creditmemo.php
-
-		-
 			rawMessage: Property Mage_Sales_Model_Order_Creditmemo::$_states has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -16905,18 +16725,6 @@ parameters:
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order_Shipment_Comment::setIsVisibleOnFront() expects int, bool given.'
 			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Shipment.php
-
-		-
-			rawMessage: 'Property Mage_Sales_Model_Order_Shipment::$_items (Mage_Sales_Model_Resource_Order_Shipment_Item_Collection) in empty() is not falsy.'
-			identifier: empty.property
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Shipment.php
-
-		-
-			rawMessage: 'Property Mage_Sales_Model_Order_Shipment::$_tracks (Mage_Sales_Model_Resource_Order_Shipment_Track_Collection) in empty() is not falsy.'
-			identifier: empty.property
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Order/Shipment.php
 
@@ -17935,12 +17743,6 @@ parameters:
 			path: app/code/core/Mage/Shipping/Model/Shipping.php
 
 		-
-			rawMessage: 'Property Mage_Shipping_Model_Shipping::$_result (Mage_Shipping_Model_Rate_Result) in empty() is not falsy.'
-			identifier: empty.property
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Shipping.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Shipping_Model_Rate_Result::getAllTrackings().'
 			identifier: method.notFound
 			count: 1
@@ -18610,12 +18412,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Abstract.php
 
 		-
-			rawMessage: 'Property Mage_Shipping_Model_Carrier_Abstract::$_code (string) on left side of ?? is not nullable.'
-			identifier: nullCoalesce.property
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Abstract.php
-
-		-
 			rawMessage: Property Mage_Usa_Model_Shipping_Carrier_Abstract::$_quotesCache has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -19262,6 +19058,12 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Wishlist/controllers/SharedController.php
+
+		-
+			rawMessage: Property Maho_Paypal_Model_Method_AdvancedCheckout::$_canSaveCc has no type specified.
+			identifier: missingType.property
+			count: 1
+			path: app/code/core/Maho/Paypal/Model/Method/AdvancedCheckout.php
 
 		-
 			rawMessage: 'Call to an undefined method Mage_Core_Block_Abstract::_getUsers().'
@@ -20686,12 +20488,6 @@ parameters:
 			path: lib/Maho/Data/Form.php
 
 		-
-			rawMessage: 'Property Maho\Data\Form\AbstractForm::$_elements (Maho\Data\Form\Element\Collection) in empty() is not falsy.'
-			identifier: empty.property
-			count: 1
-			path: lib/Maho/Data/Form/AbstractForm.php
-
-		-
 			rawMessage: 'Method Maho\Data\Form\Element\AbstractElement::getValue() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 1
@@ -21824,9 +21620,3 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Maho/Simplexml/Element.php
-
-		-
-			message: '#Property Maho_Paypal_Model_Method_AdvancedCheckout::\$_canSaveCc has no type specified#'
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Maho/Paypal/Model/Method/AdvancedCheckout.php
