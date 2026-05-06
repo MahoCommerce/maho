@@ -348,13 +348,15 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
         }
 
         $item = [
-            'id'    => (int) $node->getId(),
-            'text'  => $this->buildNodeName($node),
-            'title' => Mage::helper('catalog')->__('ID: %s', (int) $node->getId()),
-            'type'  => 'folder',
-            'cls'   => 'folder',
-            'store' => (int) $this->getStore()->getId(),
-            'path'  => $node->getData('path'),
+            'id'            => (int) $node->getId(),
+            'text'          => $this->buildNodeName($node),
+            'title'         => Mage::helper('catalog')->__('ID: %s', (int) $node->getId()),
+            'category_name' => $this->escapeHtml($node->getName()),
+            'product_count' => $this->_withProductCount ? (int) $node->getProductCount() : null,
+            'type'          => 'folder',
+            'cls'           => 'folder',
+            'store'         => (int) $this->getStore()->getId(),
+            'path'          => $node->getData('path'),
         ];
 
         $item['cls'] .= $node->getIsActive() ? ' active-category' : ' no-active-category';

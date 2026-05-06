@@ -72,11 +72,58 @@ class CategoryEditForm {
                         params.append('expand_all', '1');
                     }
                 },
+                onLoad: () => {
+                    this.applyLabelOptions();
+                },
                 onLoadException: (node, error) => {
                     setMessagesDiv(Translator.translate('Error loading children: %s', error), 'error');
                 }
             }
         });
+
+        this.initLabelOptions();
+    }
+
+    initLabelOptions() {
+        const showIdEl = document.getElementById('tree-show-id');
+        const showCountEl = document.getElementById('tree-show-count');
+        if (!showIdEl || !showCountEl) {
+            return;
+        }
+        showIdEl.checked = localStorage.getItem('category_tree_show_id') === '1';
+        showCountEl.checked = localStorage.getItem('category_tree_show_count') !== '0';
+        showIdEl.addEventListener('change', () => {
+            localStorage.setItem('category_tree_show_id', showIdEl.checked ? '1' : '0');
+            this.applyLabelOptions();
+        });
+        showCountEl.addEventListener('change', () => {
+            localStorage.setItem('category_tree_show_count', showCountEl.checked ? '1' : '0');
+            this.applyLabelOptions();
+        });
+    }
+
+    applyLabelOptions() {
+        const showId = localStorage.getItem('category_tree_show_id') === '1';
+        const showCount = localStorage.getItem('category_tree_show_count') !== '0';
+        const root = this.tree?.getRootNode();
+        if (!root) {
+            return;
+        }
+        const walk = (node) => {
+            const name = node.attributes.category_name;
+            if (typeof name === 'string') {
+                let text = name;
+                if (showCount && typeof node.attributes.product_count === 'number') {
+                    text += ` (${node.attributes.product_count})`;
+                }
+                if (showId) {
+                    text += ` - ID: ${node.attributes.id}`;
+                }
+                node.ui.textNode.textContent = text;
+            }
+            node.childNodes.forEach(walk);
+        };
+        walk(root);
     }
 
     getEditUrl() {
@@ -165,6 +212,8 @@ class CategoryEditForm {
             children: config.data,
             expanded: true,
         });
+
+        this.applyLabelOptions();
 
         if (expanded) {
             this.expandTree();
@@ -300,6 +349,7 @@ class CategoryEditForm {
                 if (this.ui.addSubCategoryBtn) {
                     this.ui.addSubCategoryBtn.disabled = !window.categoryInfo.can_add_sub;
                 }
+                this.applyLabelOptions();
             }
 
             window[this.config.tabsJsObjectName]?.moveTabContentInDest();

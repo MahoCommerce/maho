@@ -29,6 +29,7 @@ class MahoTree {
      * @prop {string} [dataUrl] - URL to load children from
      * @prop {string} [nodeParameter='node'] - POST param to send node's ID as
      * @prop {function(MahoTreeNode, URLSearchParams):null} [onBeforeLoad] - callback before children are loaded
+     * @prop {function(MahoTreeNode):null} [onLoad] - callback after children are loaded
      * @prop {function(MahoTreeNode, Error):null} [onLoadException] - callback when loading children fails
      *
      * @typedef {Object} MahoTreeCssVars
@@ -95,6 +96,7 @@ class MahoTree {
             dataUrl: null,
             nodeParameter: 'node',
             onBeforeLoad: null,
+            onLoad: null,
             onLoadException: null,
         };
 
@@ -728,6 +730,10 @@ class MahoTreeNode {
                 this.appendChild(new MahoTreeNode(this.tree, child))
             }
             this.hasLoadedChildren = true;
+
+            if (typeof this.tree.lazyloadOpts.onLoad === 'function') {
+                this.tree.lazyloadOpts.onLoad(this);
+            }
 
         } catch (error) {
             console.error('Error loading children:', error)

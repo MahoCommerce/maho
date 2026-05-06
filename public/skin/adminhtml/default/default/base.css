@@ -3003,6 +3003,15 @@ ul.item-options li {
     margin: 10px 20px 10px 0
 }
 
+.categories-side-col .tree-actions.tree-label-options {
+    margin-top: -4px;
+    font-size: 11px
+}
+
+.categories-side-col .tree-actions.tree-label-options label {
+    cursor: pointer
+}
+
 .categories-side-col .tree-holder {
     margin-right: 20px
 }
