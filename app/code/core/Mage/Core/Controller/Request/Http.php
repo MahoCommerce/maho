@@ -493,6 +493,28 @@ class Mage_Core_Controller_Request_Http
                 $pathInfo = $requestUri;
             }
 
+            // Strip the store-code prefix here (rather than in the dispatch_before
+            // observer) so that _requestString stays in sync with _pathInfo.
+            // Mage_Core_Model_Store::getCurrentUrl() and other consumers read
+            // _requestString to build cross-store URLs; leaving the prefix in
+            // would produce broken URLs like /fr/en/... when switching stores.
+            if (Mage::isInstalled()
+                && Mage::getStoreConfigFlag(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL)
+            ) {
+                $pathParts = explode('/', ltrim($pathInfo, '/'), 2);
+                $storeCode = $pathParts[0];
+
+                if (!$this->isDirectAccessFrontendName($storeCode)) {
+                    $stores = Mage::app()->getStores(true, true);
+                    if ($storeCode !== '' && isset($stores[$storeCode])) {
+                        Mage::app()->setCurrentStore($storeCode);
+                        $pathInfo = '/' . ($pathParts[1] ?? '');
+                    } elseif ($storeCode !== '') {
+                        $this->setActionName('noRoute');
+                    }
+                }
+            }
+
             $this->_originalPathInfo = (string) $pathInfo;
             $this->_requestString = $pathInfo . ($pos !== false ? substr($requestUri, $pos) : '');
         }

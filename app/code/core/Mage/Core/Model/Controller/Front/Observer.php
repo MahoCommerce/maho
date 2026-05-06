@@ -27,7 +27,6 @@ class Mage_Core_Model_Controller_Front_Observer
         $steps = [
             $this->checkBaseUrl(...),
             $this->checkTrailingSlash(...),
-            $this->resolveStore(...),
             $this->rewriteDb(...),
             $this->rewriteConfig(...),
             $this->enforceHttps(...),
@@ -95,33 +94,6 @@ class Mage_Core_Model_Controller_Front_Observer
 
         if ($canonicalUri !== $requestUri) {
             $response->setRedirect($canonicalUri, 301);
-        }
-    }
-
-    private function resolveStore(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void
-    {
-        if (!Mage::isInstalled()) {
-            return;
-        }
-
-        if (!Mage::getStoreConfigFlag(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL)) {
-            return;
-        }
-
-        $pathInfo = $request->getPathInfo();
-        $pathParts = explode('/', ltrim($pathInfo, '/'), 2);
-        $storeCode = $pathParts[0];
-
-        if ($request->isDirectAccessFrontendName($storeCode)) {
-            return;
-        }
-
-        $stores = Mage::app()->getStores(true, true);
-        if ($storeCode !== '' && isset($stores[$storeCode])) {
-            Mage::app()->setCurrentStore($storeCode);
-            $request->setPathInfo('/' . ($pathParts[1] ?? ''));
-        } elseif ($storeCode !== '') {
-            $request->setActionName('noRoute');
         }
     }
 
