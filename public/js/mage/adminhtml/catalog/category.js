@@ -112,14 +112,25 @@ class CategoryEditForm {
         const walk = (node) => {
             const name = node.attributes.category_name;
             if (typeof name === 'string') {
-                let text = unescapeHtml(name);
+                node.ui.textNode.textContent = unescapeHtml(name);
+                let metaEl = node.ui.label.querySelector('.tree-node-meta');
+                const parts = [];
                 if (showCount && typeof node.attributes.product_count === 'number') {
-                    text += ` ×${node.attributes.product_count}`;
+                    parts.push(`×${node.attributes.product_count}`);
                 }
                 if (showId) {
-                    text += ` #${node.attributes.id}`;
+                    parts.push(`#${node.attributes.id}`);
                 }
-                node.ui.textNode.textContent = text;
+                if (parts.length) {
+                    if (!metaEl) {
+                        metaEl = document.createElement('span');
+                        metaEl.className = 'tree-node-meta';
+                        node.ui.textNode.after(metaEl);
+                    }
+                    metaEl.textContent = parts.join(' ');
+                } else if (metaEl) {
+                    metaEl.remove();
+                }
             }
             node.childNodes.forEach(walk);
         };
