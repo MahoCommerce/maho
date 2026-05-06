@@ -35,7 +35,7 @@ class Mage_Adminhtml_Block_Report_Grid_Abstract extends Mage_Adminhtml_Block_Wid
     /**
      * Column for grid to be grouped by
      *
-     * @var string
+     * @var string|null
      */
     protected $_columnGroupBy;
 

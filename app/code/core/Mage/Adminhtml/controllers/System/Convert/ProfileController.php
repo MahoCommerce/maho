@@ -172,9 +172,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
             $profile = Mage::registry('current_convert_profile');
 
             // Prepare profile saving data
-            if (isset($data)) {
-                $profile->addData($data);
-            }
+            $profile->addData($data);
 
             try {
                 $profile->save();

@@ -1537,12 +1537,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Report/Grid/Abstract.php
 
 		-
-			rawMessage: 'Property Mage_Adminhtml_Block_Report_Grid_Abstract::$_columnGroupBy (string) in isset() is not nullable.'
-			identifier: isset.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Report/Grid/Abstract.php
-
-		-
 			rawMessage: Property Mage_Adminhtml_Block_Report_Grid_Shopcart::$_currentCurrencyCode has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -2247,12 +2241,6 @@ parameters:
 		-
 			rawMessage: 'Call to an undefined method Mage_Shipping_Model_Carrier_Abstract::isGirthAllowed().'
 			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Shipment/Packaging.php
-
-		-
-			rawMessage: 'Method Mage_Adminhtml_Block_Sales_Order_Shipment_Packaging::getQtyOrderedItem() should return int|null but empty return statement found.'
-			identifier: return.empty
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/Shipment/Packaging.php
 
@@ -5140,12 +5128,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Newsletter/TemplateController.php
 
 		-
-			rawMessage: 'Variable $id in isset() always exists and is not nullable.'
-			identifier: isset.variable
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Permissions/BlockController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Permissions_RoleController::_initRole() has parameter $requestVariable with no type specified.'
 			identifier: missingType.parameter
 			count: 1
@@ -5162,12 +5144,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/Permissions/UserController.php
-
-		-
-			rawMessage: 'Variable $id in isset() always exists and is not nullable.'
-			identifier: isset.variable
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Permissions/VariableController.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_Promo_CatalogController::_initAction() has no return type specified.'
@@ -5484,12 +5460,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Adminhtml_System_Convert_ProfileController::_initProfile() has parameter $idFieldName with no type specified.'
 			identifier: missingType.parameter
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/System/Convert/ProfileController.php
-
-		-
-			rawMessage: 'Variable $data in isset() always exists and is not nullable.'
-			identifier: isset.variable
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/System/Convert/ProfileController.php
 
@@ -9685,12 +9655,6 @@ parameters:
 			path: app/code/core/Mage/CatalogSearch/Helper/Data.php
 
 		-
-			rawMessage: 'Property Mage_CatalogSearch_Helper_Data::$_queryText (string) in isset() is not nullable.'
-			identifier: isset.property
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Helper/Data.php
-
-		-
 			rawMessage: 'Method Mage_CatalogSearch_Model_Advanced::getProductCollection() should return Mage_CatalogSearch_Model_Resource_Advanced_Collection but returns array|float|int|string|false|null.'
 			identifier: return.type
 			count: 1
@@ -13060,12 +13024,6 @@ parameters:
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Profile_Abstract::importXml() has no return type specified.'
 			identifier: missingType.return
 			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Profile_Abstract::run() should return Mage_Dataflow_Model_Convert_Profile_Abstract but empty return statement found.'
-			identifier: return.empty
-			count: 2
 			path: app/code/core/Mage/Dataflow/Model/Convert/Profile/Abstract.php
 
 		-
@@ -16783,12 +16741,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Shipping.php
 
 		-
-			rawMessage: 'Variable $addressQty in isset() always exists and is not nullable.'
-			identifier: isset.variable
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Shipping.php
-
-		-
 			rawMessage: 'Method Mage_Sales_Model_Quote_Config::getTotalModels() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -17525,12 +17477,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Shipping/Model/Carrier/Freeshipping.php
-
-		-
-			rawMessage: 'Variable $rate in empty() is never defined.'
-			identifier: empty.variable
-			count: 1
-			path: app/code/core/Mage/Shipping/Model/Carrier/Pickup.php
 
 		-
 			rawMessage: Property Mage_Shipping_Model_Config::$_carriers has no type specified.
@@ -19538,18 +19484,6 @@ parameters:
 			identifier: variable.undefined
 			count: 3
 			path: app/design/frontend/base/default/template/review/form.phtml
-
-		-
-			rawMessage: 'Parameter #1 (non-empty-array) of echo cannot be converted to string.'
-			identifier: echo.nonString
-			count: 1
-			path: app/design/frontend/base/default/template/review/helper/summary.phtml
-
-		-
-			rawMessage: 'Parameter #1 (non-empty-array) of echo cannot be converted to string.'
-			identifier: echo.nonString
-			count: 1
-			path: app/design/frontend/base/default/template/review/helper/summary_short.phtml
 
 		-
 			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getStatusHistoryRssUrl() expects int|string|null, Mage_Sales_Model_Order given.'

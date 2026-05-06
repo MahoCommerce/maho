@@ -48,7 +48,7 @@ class Mage_Review_Block_Helper extends Mage_Core_Block_Template
     }
 
     /**
-     * @return array
+     * @return int
      */
     public function getRatingSummary()
     {

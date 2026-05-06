@@ -349,6 +349,6 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_Packaging extends Mage_Adminhtml
         if ($itemId) {
             return $this->getShipment()->getOrder()->getItemById($itemId)->getQtyOrdered() * 1;
         }
-        return;
+        return null;
     }
 }
