@@ -3019,6 +3019,14 @@ ul.item-options li {
     font-weight: normal
 }
 
+.categories-side-col .tree-node-meta>span+span {
+    margin-left: 0.5em
+}
+
+.categories-side-col .tree-node-meta>span {
+    cursor: help
+}
+
 .categories-side-col .tree-holder {
     margin-right: 20px
 }
