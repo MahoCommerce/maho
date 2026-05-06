@@ -123,19 +123,19 @@ class CategoryEditForm {
                         node.ui.textNode.after(metaEl);
                     }
                     metaEl.replaceChildren();
-                    if (showThisCount) {
-                        const countEl = document.createElement('span');
-                        countEl.className = 'tree-node-count';
-                        countEl.title = Translator.translate('Products count');
-                        countEl.textContent = `(${node.attributes.product_count})`;
-                        metaEl.append(countEl);
-                    }
                     if (showThisId) {
                         const idEl = document.createElement('span');
                         idEl.className = 'tree-node-id';
                         idEl.title = Translator.translate('Category ID');
                         idEl.textContent = `[${node.attributes.id}]`;
                         metaEl.append(idEl);
+                    }
+                    if (showThisCount) {
+                        const countEl = document.createElement('span');
+                        countEl.className = 'tree-node-count';
+                        countEl.title = Translator.translate('Products count');
+                        countEl.textContent = `(${node.attributes.product_count})`;
+                        metaEl.append(countEl);
                     }
                 } else if (metaEl) {
                     metaEl.remove();
