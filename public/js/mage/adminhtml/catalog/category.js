@@ -53,9 +53,13 @@ class CategoryEditForm {
         this.initVarienForm();
         this.initProductsGrid();
 
+        const showId = localStorage.getItem('category_tree_show_id') === '1';
+        const showCount = localStorage.getItem('category_tree_show_count') !== '0';
+
         this.tree = new MahoTree(this.config.treeDiv, {
             showRootNode: true,
             treatAllNodesAsFolders: true,
+            metaOverrides: { id: showId, count: showCount },
             selectable: {
                 mode: 'radio',
                 showInputs: false,
@@ -71,9 +75,6 @@ class CategoryEditForm {
                     if (this.wasExpanded) {
                         params.append('expand_all', '1');
                     }
-                },
-                onLoad: () => {
-                    this.applyLabelOptions();
                 },
                 onLoadException: (node, error) => {
                     setMessagesDiv(Translator.translate('Error loading children: %s', error), 'error');
@@ -94,56 +95,12 @@ class CategoryEditForm {
         showCountEl.checked = localStorage.getItem('category_tree_show_count') !== '0';
         showIdEl.addEventListener('change', () => {
             localStorage.setItem('category_tree_show_id', showIdEl.checked ? '1' : '0');
-            this.applyLabelOptions();
+            this.tree.setMetaVisible('id', showIdEl.checked);
         });
         showCountEl.addEventListener('change', () => {
             localStorage.setItem('category_tree_show_count', showCountEl.checked ? '1' : '0');
-            this.applyLabelOptions();
+            this.tree.setMetaVisible('count', showCountEl.checked);
         });
-    }
-
-    applyLabelOptions() {
-        const showId = localStorage.getItem('category_tree_show_id') === '1';
-        const showCount = localStorage.getItem('category_tree_show_count') !== '0';
-        const root = this.tree?.getRootNode();
-        if (!root) {
-            return;
-        }
-        const walk = (node) => {
-            const name = node.attributes.category_name;
-            if (typeof name === 'string') {
-                node.ui.textNode.textContent = unescapeHtml(name);
-                let metaEl = node.ui.label.querySelector('.tree-node-meta');
-                const showThisCount = showCount && typeof node.attributes.product_count === 'number';
-                const showThisId = showId;
-                if (showThisCount || showThisId) {
-                    if (!metaEl) {
-                        metaEl = document.createElement('span');
-                        metaEl.className = 'tree-node-meta';
-                        node.ui.textNode.after(metaEl);
-                    }
-                    metaEl.replaceChildren();
-                    if (showThisId) {
-                        const idEl = document.createElement('span');
-                        idEl.className = 'tree-node-id';
-                        idEl.title = Translator.translate('Category ID');
-                        idEl.textContent = `[${node.attributes.id}]`;
-                        metaEl.append(idEl);
-                    }
-                    if (showThisCount) {
-                        const countEl = document.createElement('span');
-                        countEl.className = 'tree-node-count';
-                        countEl.title = Translator.translate('Products count');
-                        countEl.textContent = `(${node.attributes.product_count})`;
-                        metaEl.append(countEl);
-                    }
-                } else if (metaEl) {
-                    metaEl.remove();
-                }
-            }
-            node.childNodes.forEach(walk);
-        };
-        walk(root);
     }
 
     getEditUrl() {
@@ -232,8 +189,6 @@ class CategoryEditForm {
             children: config.data,
             expanded: true,
         });
-
-        this.applyLabelOptions();
 
         if (expanded) {
             this.expandTree();
@@ -369,7 +324,6 @@ class CategoryEditForm {
                 if (this.ui.addSubCategoryBtn) {
                     this.ui.addSubCategoryBtn.disabled = !window.categoryInfo.can_add_sub;
                 }
-                this.applyLabelOptions();
             }
 
             window[this.config.tabsJsObjectName]?.moveTabContentInDest();

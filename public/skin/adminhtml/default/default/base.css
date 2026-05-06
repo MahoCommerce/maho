@@ -3019,21 +3019,6 @@ ul.item-options li {
     vertical-align: middle
 }
 
-.categories-side-col .tree-node-meta {
-    margin-left: 0.5em;
-    color: #999;
-    font-size: 0.85em;
-    font-weight: normal
-}
-
-.categories-side-col .tree-node-meta>span+span {
-    margin-left: 0.5em
-}
-
-.categories-side-col .tree-node-meta>span {
-    cursor: help
-}
-
 .categories-side-col .tree-holder {
     margin-right: 20px
 }
@@ -5676,6 +5661,21 @@ img.rule-param-add {
     --label-gap: 0.25rem;
     --disabled-color: #999;
     --drop-color: #ccc
+}
+
+.maho-tree .maho-tree-meta {
+    margin-left: 0.5em;
+    color: #999;
+    font-size: 0.85em;
+    font-weight: normal
+}
+
+.maho-tree .maho-tree-meta-item {
+    cursor: help
+}
+
+.maho-tree .maho-tree-meta-item+.maho-tree-meta-item {
+    margin-left: 0.5em
 }
 
 .hor-scroll .maho-tree {
