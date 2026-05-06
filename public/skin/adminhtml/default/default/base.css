@@ -3000,15 +3000,15 @@ ul.item-options li {
 
 .categories-side-col .tree-actions {
     text-align: center;
-    margin: 10px 20px 10px 0
+    margin: 10px 20px 10px 0;
+    display: flex;
+    justify-content: center;
+    gap: 16px
 }
 
 .categories-side-col .tree-actions.tree-label-options {
     margin-top: -4px;
-    font-size: 11px;
-    display: flex;
-    justify-content: center;
-    gap: 16px
+    font-size: 11px
 }
 
 .categories-side-col .tree-actions.tree-label-options label {
