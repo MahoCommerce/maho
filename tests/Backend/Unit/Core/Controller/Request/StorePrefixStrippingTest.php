@@ -39,17 +39,21 @@ function makeRequestForPath(string $requestUri): Mage_Core_Controller_Request_Ht
 
 function setUseStoreFlag(string $value): void
 {
-    $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
-    $adapter->insertOnDuplicate(
-        Mage::getSingleton('core/resource')->getTableName('core_config_data'),
-        ['scope' => 'default', 'scope_id' => 0, 'path' => 'web/url/use_store', 'value' => $value],
-        ['value'],
-    );
-    // Flush the config cache and rebuild stores so the per-store _configCache
-    // reflects the new value.
-    Mage::app()->getCache()->cleanType('config');
-    Mage::getConfig()->reinit();
-    Mage::app()->reinitStores();
+    // Mage_Core_Model_Store::getConfig reads from `stores/{code}/{path}`, which
+    // the framework builds at config init time by merging `default/` with per-store
+    // overrides. setNode('default/...') alone won't propagate to already-merged
+    // store paths, so set the per-store path directly for each known store.
+    $stores = Mage::app()->getStores(true, true);
+    foreach ($stores as $store) {
+        Mage::getConfig()->setNode('stores/' . $store->getCode() . '/web/url/use_store', $value);
+    }
+
+    // Clear each store's $_configCache so the next getConfigFlag() read picks
+    // up the new value rather than the cached previous one.
+    $configCacheRef = new ReflectionProperty(Mage_Core_Model_Store::class, '_configCache');
+    foreach ($stores as $store) {
+        $configCacheRef->setValue($store, []);
+    }
 }
 
 describe('setPathInfo() with web/url/use_store=1', function () {
