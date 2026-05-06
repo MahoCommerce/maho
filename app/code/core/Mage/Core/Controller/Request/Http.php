@@ -504,7 +504,14 @@ class Mage_Core_Controller_Request_Http
                 $pathParts = explode('/', ltrim($pathInfo, '/'), 2);
                 $storeCode = $pathParts[0];
 
-                if (!$this->isDirectAccessFrontendName($storeCode)) {
+                // The admin frontName collides with the admin store code
+                // (both are 'admin' by default). Skip stripping when the path
+                // is an admin URL — otherwise /admin/dashboard becomes /dashboard
+                // and ends up rendering the frontend home page.
+                $adminFrontName = \Maho\Routing\RouteCollectionBuilder::getAdminFrontName();
+                $isAdminUrl = $adminFrontName !== '' && strcasecmp($storeCode, $adminFrontName) === 0;
+
+                if (!$isAdminUrl && !$this->isDirectAccessFrontendName($storeCode)) {
                     $stores = Mage::app()->getStores(true, true);
                     if ($storeCode !== '' && isset($stores[$storeCode])) {
                         Mage::app()->setCurrentStore($storeCode);
