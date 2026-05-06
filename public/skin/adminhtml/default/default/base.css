@@ -3016,7 +3016,8 @@ ul.item-options li {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    vertical-align: middle
+    vertical-align: middle;
+    color: #0090ff
 }
 
 .categories-side-col .tree-node-meta {
