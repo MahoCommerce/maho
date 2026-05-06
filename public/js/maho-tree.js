@@ -459,6 +459,12 @@ class MahoTreeNode {
         this.ui.wrap.dataset.text = this.text;
         this.ui.textNode.textContent = unescapeHtml(this.text);
 
+        if (typeof this.attributes.title === 'string' && this.attributes.title !== '') {
+            this.ui.label.title = this.attributes.title;
+        } else {
+            this.ui.label.removeAttribute('title');
+        }
+
         this.ui.label.classList.toggle('disabled', this.attributes.disabled ?? false);
 
         this.icons = [];

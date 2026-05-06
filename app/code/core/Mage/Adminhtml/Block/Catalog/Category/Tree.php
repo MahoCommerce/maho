@@ -126,6 +126,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tree extends Mage_Adminhtml_Block_Ca
             'data' => $this->getTree(),
             'parameters' => [
                 'text'         => $this->buildNodeName($root),
+                'title'        => Mage::helper('catalog')->__('ID: %s', (int) $root->getId()),
                 'allowDrag'    => false,
                 'allowDrop'    => (bool) $root->getIsVisible(),
                 'id'           => (int) $root->getId(),

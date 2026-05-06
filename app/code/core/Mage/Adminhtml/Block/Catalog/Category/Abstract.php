@@ -350,6 +350,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
         $item = [
             'id'    => (int) $node->getId(),
             'text'  => $this->buildNodeName($node),
+            'title' => Mage::helper('catalog')->__('ID: %s', (int) $node->getId()),
             'type'  => 'folder',
             'cls'   => 'folder',
             'store' => (int) $this->getStore()->getId(),
