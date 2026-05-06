@@ -87,7 +87,6 @@ class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
         }
 
         if (!$product = Mage::getModel('catalog/product')->load($productId)) {
-            /** @var Mage_Catalog_Model_Product $product */
             $session->addError($this->__('Not enough parameters.'));
             $this->_redirectUrl($backUrl);
             return ;

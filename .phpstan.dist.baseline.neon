@@ -9943,12 +9943,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Api/Resource/Customer.php
 
 		-
-			rawMessage: PHPDoc tag @var with type Mage_Sales_Model_Quote_Item is not subtype of native type null.
-			identifier: varTag.nativeType
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Api/Resource/Product.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, false given.'
 			identifier: argument.type
 			count: 1
@@ -15291,12 +15285,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_ProductAlert_Model_Observer::process() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/ProductAlert/controllers/AddController.php
-
-		-
-			rawMessage: 'PHPDoc tag @var with type Mage_Catalog_Model_Product is not subtype of native type 0|0.0|''''|''0''|array{}|false|null.'
-			identifier: varTag.nativeType
 			count: 1
 			path: app/code/core/Mage/ProductAlert/controllers/AddController.php
 

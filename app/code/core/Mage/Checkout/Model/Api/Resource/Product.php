@@ -91,7 +91,7 @@ class Mage_Checkout_Model_Api_Resource_Product extends Mage_Checkout_Model_Api_R
             $cartCandidates = [$cartCandidates];
         }
 
-        /** @var Mage_Sales_Model_Quote_Item $item */
+        /** @var Mage_Sales_Model_Quote_Item|null $item */
         $item = null;
         foreach ($cartCandidates as $candidate) {
             if ($candidate->getParentProductId()) {
