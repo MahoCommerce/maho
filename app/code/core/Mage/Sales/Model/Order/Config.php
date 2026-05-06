@@ -217,7 +217,7 @@ class Mage_Sales_Model_Order_Config extends Mage_Core_Model_Config_Base
     /**
      * If not yet initialized, loads the "_states" array object.
      */
-    private function _getStates()
+    private function _getStates(): void
     {
         if ($this->_states === null) {
             $this->_states = [

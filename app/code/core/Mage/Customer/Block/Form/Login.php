@@ -19,7 +19,7 @@
  */
 class Mage_Customer_Block_Form_Login extends Mage_Core_Block_Template
 {
-    private $_username = -1;
+    private string|int $_username = -1;
 
     /**
      * Set redirect URL before rendering login form

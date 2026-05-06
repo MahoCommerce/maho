@@ -45,7 +45,7 @@ class Mage_Downloadable_Model_Link_Api_Uploader extends Mage_Core_Model_File_Upl
      * @throws Exception
      * @param array $fileInfo
      */
-    private function _setUploadFile($fileInfo)
+    private function _setUploadFile($fileInfo): void
     {
         if (!is_array($fileInfo)) {
             throw new Exception('', 'file_data_not_correct');

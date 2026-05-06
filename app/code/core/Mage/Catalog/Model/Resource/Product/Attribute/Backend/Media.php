@@ -17,7 +17,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media extends Mage_C
 
     protected $_eventPrefix = 'catalog_product_attribute_backend_media';
 
-    private $_attributeId = null;
+    private ?int $_attributeId = null;
 
     #[\Override]
     protected function _construct()

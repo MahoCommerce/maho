@@ -8425,12 +8425,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Attribute/Backend/Media.php
 
 		-
-			rawMessage: Property Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media::$_attributeId has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Attribute/Backend/Media.php
-
-		-
 			rawMessage: Property Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media::$_eventPrefix has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -10459,18 +10453,6 @@ parameters:
 			path: app/code/core/Mage/ConfigurableSwatches/Model/Observer.php
 
 		-
-			rawMessage: Property Mage_ConfigurableSwatches_Model_Resource_Catalog_Product_Attribute_Super_Collection::$_eavAttributesJoined has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/ConfigurableSwatches/Model/Resource/Catalog/Product/Attribute/Super/Collection.php
-
-		-
-			rawMessage: Property Mage_ConfigurableSwatches_Model_Resource_Catalog_Product_Attribute_Super_Collection::$_storeId has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/ConfigurableSwatches/Model/Resource/Catalog/Product/Attribute/Super/Collection.php
-
-		-
 			rawMessage: 'Method Mage_ConfigurableSwatches_Model_Resource_Catalog_Product_Type_Configurable_Product_Collection::addProductSetFilter() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -11637,12 +11619,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Customer_Model_Session::getUsername() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Customer/Block/Form/Login.php
-
-		-
-			rawMessage: Property Mage_Customer_Block_Form_Login::$_username has no type specified.
-			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Customer/Block/Form/Login.php
 
@@ -13519,12 +13495,6 @@ parameters:
 			path: app/code/core/Mage/Downloadable/Helper/Download.php
 
 		-
-			rawMessage: 'Method Mage_Downloadable_Model_Link_Api_Uploader::_setUploadFile() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Link/Api/Uploader.php
-
-		-
 			rawMessage: 'Parameter #2 $code of class Exception constructor expects int, string given.'
 			identifier: argument.type
 			count: 2
@@ -14531,24 +14501,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Index/Model/Resource/Process.php
-
-		-
-			rawMessage: 'Method Mage_Log_Model_Aggregation::_insert() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Log/Model/Aggregation.php
-
-		-
-			rawMessage: 'Method Mage_Log_Model_Aggregation::_save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Log/Model/Aggregation.php
-
-		-
-			rawMessage: 'Method Mage_Log_Model_Aggregation::_update() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Log/Model/Aggregation.php
 
 		-
 			rawMessage: 'Method Mage_Log_Model_Aggregation::run() has no return type specified.'
@@ -16111,12 +16063,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Block/Order/Creditmemo/Totals.php
 
 		-
-			rawMessage: 'Method Mage_Sales_Block_Order_Info::checkLinks() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Block/Order/Info.php
-
-		-
 			rawMessage: Property Mage_Sales_Block_Order_Info::$_links has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -16379,12 +16325,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Order.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Order_Config::_getStates() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Order/Config.php
 
 		-
 			rawMessage: 'Parameter #1 $string of function trim expects string, float given.'
@@ -16922,12 +16862,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Sales_Model_Recurring_Profile::_addAdditionalOptionToItem() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Recurring_Profile::_cleanupArray() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Recurring/Profile.php
@@ -18478,12 +18412,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
 
 		-
-			rawMessage: 'Method Mage_Usa_Model_Shipping_Carrier_Ups::setTrackingResultData() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Ups.php
-
-		-
 			rawMessage: 'Parameter #1 $error of method Mage_Shipping_Model_Rate_Result::setError() expects bool, string given.'
 			identifier: argument.type
 			count: 1
@@ -18830,12 +18758,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Widget/Model/Widget/Instance.php
-
-		-
-			rawMessage: 'Method Mage_Widget_Adminhtml_Widget_InstanceController::setBody() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Widget/controllers/Adminhtml/Widget/InstanceController.php
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Widget_Model_Widget_Instance::setWidgetParameters() expects string, array given.'
@@ -20771,30 +20693,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Maho\File\Uploader::_addDirSeparator() has parameter $dir with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Maho/File/Uploader.php
-
-		-
-			rawMessage: 'Method Maho\File\Uploader::_createDestinationFolder() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/File/Uploader.php
-
-		-
-			rawMessage: 'Method Maho\File\Uploader::_createDestinationFolder() has parameter $destinationFolder with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Maho/File/Uploader.php
-
-		-
-			rawMessage: 'Method Maho\File\Uploader::_getMimeType() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/File/Uploader.php
-
-		-
-			rawMessage: 'Method Maho\File\Uploader::_setUploadFileId() has parameter $fileId with no type specified.'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Maho/File/Uploader.php
