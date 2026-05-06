@@ -3005,7 +3005,10 @@ ul.item-options li {
 
 .categories-side-col .tree-actions.tree-label-options {
     margin-top: -4px;
-    font-size: 11px
+    font-size: 11px;
+    display: flex;
+    justify-content: center;
+    gap: 16px
 }
 
 .categories-side-col .tree-actions.tree-label-options label {
