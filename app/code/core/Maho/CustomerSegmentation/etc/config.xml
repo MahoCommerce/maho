@@ -63,17 +63,6 @@
             </customersegmentation>
         </helpers>
     </global>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <Maho_CustomerSegmentation before="Mage_Adminhtml">Maho_CustomerSegmentation_Adminhtml</Maho_CustomerSegmentation>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
     <adminhtml>
         <layout>
             <updates>

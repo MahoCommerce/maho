@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 class Maho_Paypal_WebhookController extends Mage_Core_Controller_Front_Action
 {
+    #[Maho\Config\Route('/paypal/webhook', methods: ['POST'])]
     public function indexAction(): void
     {
         if (!$this->getRequest()->isPost()) {

@@ -61,17 +61,6 @@
             </indexer>
         </index>
     </global>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <Mage_Index before="Mage_Adminhtml">Mage_Index_Adminhtml</Mage_Index>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
     <adminhtml>
         <layout>
             <updates>

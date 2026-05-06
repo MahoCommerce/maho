@@ -104,6 +104,37 @@ public function runJob(Mage_Cron_Model_Schedule $schedule) {}
 - Prefer global area (default, omit `area:`) unless the observer must be restricted to a specific area
 - Do **not** define observers or cron jobs in `config.xml`
 
+### Routing (#[Route] attributes)
+Routes are defined via the `#[Maho\Config\Route]` attribute (`lib/Maho/Config/Route.php`) on controller action methods — **not** in `<frontend><routers>` XML. The attribute is repeatable: stack multiple attributes on the same method for multiple paths or method lists. Run `composer dump-autoload` after any change; routes compile to `vendor/composer/maho_url_matcher.php`, `maho_url_generator.php`, and `maho_attributes.php`.
+
+Parameters:
+- `path` (required): URL pattern, e.g. `/catalog/product/view/{id}`
+- `name`: route name for URL generation — auto-derived from `class::method` if omitted
+- `methods`: HTTP method allow-list (e.g. `['GET', 'POST']`); empty = any
+- `defaults`: default parameter values
+- `requirements`: regex constraints per param (e.g. `['id' => '\d+']`)
+- `area`: `frontend` | `adminhtml` | `install` — auto-detected from the controller base class, override only when needed
+
+Area auto-detection walks the class hierarchy: descendants of `Mage_Adminhtml_Controller_Action` or `Maho\Controller\AdminAction` → `adminhtml`; `Mage_Install_Controller_Action` or `Maho\Controller\InstallAction` → `install`; everything else → `frontend`.
+
+Admin routes: the compiler resolves the admin frontName at runtime (`use_custom_admin_path`), so you don't need to hard-code it. Two equivalent forms work:
+- Bare path — `#[Route('/catalog/product/edit/{id}')]` — compiler prepends `{_adminFrontName}/`.
+- `/admin`-prefixed — `#[Route('/admin/catalog/product/edit/{id}')]` — compiler substitutes the leading `/admin` with `{_adminFrontName}`.
+
+Both compile to the same route. Existing core admin controllers use the `/admin`-prefixed form for visual continuity with the URL.
+
+```php
+#[Maho\Config\Route('/catalog/product/view/{id}', name: 'catalog.product.view', methods: ['GET'], requirements: ['id' => '\d+'])]
+public function viewAction() { ... }
+```
+
+- Back-compat: modules still declaring `<frontend><routers>` in `config.xml` keep working via a legacy-XML match path that runs **before** the Symfony matcher, preserving M1's "first declared wins" precedence. A single `LOG_NOTICE` is emitted once per process listing legacy frontNames, encouraging migration.
+
+#### Overriding controllers
+- **Admin**: register your module under `<admin><routers><adminhtml><args><modules><MyMod before|after="Mage_Adminhtml"/>` in `config.xml`. The runtime walks this chain at dispatch time, so admin controllers (subclasses of `Mage_Adminhtml_Controller_Action` / `Maho\Controller\AdminAction`) override core controllers without redeclaring routes.
+- **Frontend**: same pattern via `<frontend><routers><{routerCode}><args><modules><MyMod before|after="Mage_Customer"/>` (the router code must equal the frontName you're overriding, or supply `<args><frontName>` explicitly). Subclasses of the core controller win over the base when present; M1 chain semantics are preserved.
+- **Install**: no chain support; override by redeclaring `#[Route]` attributes on a custom controller.
+
 ## Development Guidelines
 
 ### Critical Rules — Removed Components

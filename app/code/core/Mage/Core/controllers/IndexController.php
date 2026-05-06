@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
 {
+    #[Maho\Config\Route('/core', name: 'core.index')]
     public function indexAction(): void
     {
         $this->_forward('noRoute');
@@ -27,6 +28,7 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
      * The browser then fetches images in parallel, each request generating and
      * caching one thumbnail.
      */
+    #[Maho\Config\Route('/core/index/resize', name: 'core.index.resize', methods: ['GET'])]
     public function resizeAction(): void
     {
         $t = $this->getRequest()->getParam('t', '');

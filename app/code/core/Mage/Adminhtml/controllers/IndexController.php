@@ -34,6 +34,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
      * Admin area entry point
      * Always redirects to the startup page url
      */
+    #[Maho\Config\Route('/admin/index/index')]
     public function indexAction(): void
     {
         $session = Mage::getSingleton('admin/session');
@@ -48,6 +49,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Administrator prelogin action
      */
+    #[Maho\Config\Route('/admin/index/prelogin')]
     public function preloginAction(): void
     {
         /** @var Mage_Admin_Model_Session $adminSession */
@@ -73,6 +75,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Administrator login action
      */
+    #[Maho\Config\Route('/admin/index/login')]
     public function loginAction(): void
     {
         if (Mage::getSingleton('admin/session')->isLoggedIn()) {
@@ -89,6 +92,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Administrator logout action
      */
+    #[Maho\Config\Route('/admin/index/logout')]
     public function logoutAction(): void
     {
         /** @var Mage_Admin_Model_Session $adminSession */
@@ -102,6 +106,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Global Search Action
      */
+    #[Maho\Config\Route('/admin/index/globalSearch')]
     public function globalSearchAction(): void
     {
         $searchModules = Mage::getConfig()->getNode('adminhtml/global_search');
@@ -160,6 +165,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Example action
      */
+    #[Maho\Config\Route('/admin/index/example')]
     public function exampleAction(): void
     {
         $this->_outTemplate('example');
@@ -168,6 +174,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Test action
      */
+    #[Maho\Config\Route('/admin/index/test')]
     public function testAction(): void
     {
         echo $this->getLayout()->createBlock('core/profiler')->toHtml();
@@ -176,6 +183,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Change locale action
      */
+    #[Maho\Config\Route('/admin/index/changeLocale')]
     public function changeLocaleAction(): void
     {
         $locale = $this->getRequest()->getParam('locale');
@@ -188,6 +196,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Denied JSON action
      */
+    #[Maho\Config\Route('/admin/index/deniedJson')]
     public function deniedJsonAction(): void
     {
         $this->getResponse()->setBody($this->_getDeniedJson());
@@ -207,6 +216,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Denied IFrame action
      */
+    #[Maho\Config\Route('/admin/index/deniedIframe')]
     public function deniedIframeAction(): void
     {
         $this->getResponse()->setBody($this->_getDeniedIframe());
@@ -224,6 +234,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Forgot administrator password action
      */
+    #[Maho\Config\Route('/admin/index/forgotpassword')]
     public function forgotpasswordAction(): void
     {
         $params = $this->getRequest()->getParams();
@@ -280,6 +291,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
      *
      * User is redirected on this action when he clicks on the corresponding link in password reset confirmation email
      */
+    #[Maho\Config\Route('/admin/index/resetPassword')]
     public function resetPasswordAction(): void
     {
         $resetPasswordLinkToken = (string) $this->getRequest()->getQuery('token');
@@ -303,6 +315,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
      *
      * Used to handle data received from reset forgotten password form
      */
+    #[Maho\Config\Route('/admin/index/resetPasswordPost')]
     public function resetPasswordPostAction(): void
     {
         $resetPasswordLinkToken = (string) $this->getRequest()->getQuery('token');
@@ -373,6 +386,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Administrator passkey register start action
      */
+    #[Maho\Config\Route('/admin/index/passkeyregisterstart')]
     public function passkeyregisterstartAction(): void
     {
         try {
@@ -406,6 +420,7 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     /**
      * Administrator passkey login start action
      */
+    #[Maho\Config\Route('/admin/index/passkeyloginstart')]
     public function passkeyloginstartAction(): void
     {
         try {

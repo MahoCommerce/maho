@@ -40,6 +40,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/api_role/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -53,6 +54,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/api_role/roleGrid')]
     public function roleGridAction(): void
     {
         $this->getResponse()
@@ -61,6 +63,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
             ->toHtml());
     }
 
+    #[Maho\Config\Route('/admin/api_role/editRole')]
     public function editRoleAction(): void
     {
         $this->_title($this->__('System'))
@@ -97,6 +100,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/api_role/delete')]
     public function deleteAction(): void
     {
         $rid = $this->getRequest()->getParam('role_id', false);
@@ -124,6 +128,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/api_role/saveRole')]
     public function saveRoleAction(): void
     {
         $rid        = $this->getRequest()->getParam('role_id', false);
@@ -190,6 +195,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/editrole', ['rid' => $rid]);
     }
 
+    #[Maho\Config\Route('/admin/api_role/editrolegrid')]
     public function editrolegridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/api_role_grid_user')->toHtml());

@@ -15,6 +15,7 @@ class Mage_Adminhtml_Tax_ClassController extends Mage_Adminhtml_Controller_Actio
     /**
      * save class action
      */
+    #[Maho\Config\Route('/admin/tax_class/save')]
     public function saveAction(): void
     {
         if ($postData = $this->getRequest()->getPost()) {

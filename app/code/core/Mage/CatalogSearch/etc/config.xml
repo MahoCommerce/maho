@@ -65,15 +65,6 @@
         </index>
     </global>
     <frontend>
-        <routers>
-            <catalogsearch>
-                <use>standard</use>
-                <args>
-                    <module>Mage_CatalogSearch</module>
-                    <frontName>catalogsearch</frontName>
-                </args>
-            </catalogsearch>
-        </routers>
         <translate>
             <modules>
                 <Mage_CatalogSearch>

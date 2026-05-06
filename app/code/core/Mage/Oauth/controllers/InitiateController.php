@@ -28,6 +28,7 @@ class Mage_Oauth_InitiateController extends Mage_Core_Controller_Front_Action
     /**
      * Index action. Receive initiate request and response OAuth token
      */
+    #[Maho\Config\Route('/oauth/initiate', name: 'oauth.initiate', methods: ['POST'])]
     public function indexAction(): void
     {
         /** @var Mage_Oauth_Model_Server $server */

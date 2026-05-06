@@ -30,6 +30,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizedTokensController extends Mage_Adminht
     /**
      * Render grid page
      */
+    #[Maho\Config\Route('/admin/oauth_authorizedtokens/index')]
     public function indexAction(): void
     {
         $this
@@ -41,6 +42,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizedTokensController extends Mage_Adminht
     /**
      * Render grid AJAX request
      */
+    #[Maho\Config\Route('/admin/oauth_authorizedtokens/grid')]
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -50,6 +52,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizedTokensController extends Mage_Adminht
     /**
      * Update revoke status action
      */
+    #[Maho\Config\Route('/admin/oauth_authorizedtokens/revoke')]
     public function revokeAction(): void
     {
         $ids = $this->getRequest()->getParam('items');
@@ -102,6 +105,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizedTokensController extends Mage_Adminht
     /**
      * Delete action
      */
+    #[Maho\Config\Route('/admin/oauth_authorizedtokens/delete')]
     public function deleteAction(): void
     {
         $ids = $this->getRequest()->getParam('items');

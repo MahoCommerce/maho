@@ -34,6 +34,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_HistoryController extends Mage_Adminhtml_
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/giftcard_history/index')]
     public function indexAction(): void
     {
         $this->_initAction();
@@ -41,6 +42,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_HistoryController extends Mage_Adminhtml_
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/giftcard_history/grid')]
     public function gridAction(): void
     {
         $this->loadLayout();

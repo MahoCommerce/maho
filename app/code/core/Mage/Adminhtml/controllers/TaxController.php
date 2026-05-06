@@ -17,6 +17,7 @@ class Mage_Adminhtml_TaxController extends Mage_Adminhtml_Controller_Action
     /**
      * Set tax ignore notification flag and redirect back
      */
+    #[Maho\Config\Route('/admin/tax/ignoreTaxNotification')]
     public function ignoreTaxNotificationAction(): void
     {
         $section = $this->getRequest()->getParam('section');

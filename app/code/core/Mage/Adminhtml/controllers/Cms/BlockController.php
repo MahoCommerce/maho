@@ -49,6 +49,7 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
     /**
      * Index action
      */
+    #[Maho\Config\Route('/admin/cms_block/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('CMS'))->_title($this->__('Static Blocks'));
@@ -60,6 +61,7 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
     /**
      * Create new CMS block
      */
+    #[Maho\Config\Route('/admin/cms_block/new')]
     public function newAction(): void
     {
         // the same form is used to create and edit
@@ -69,6 +71,7 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
     /**
      * Edit CMS block
      */
+    #[Maho\Config\Route('/admin/cms_block/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('CMS'))->_title($this->__('Static Blocks'));
@@ -107,6 +110,7 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
     /**
      * Save action
      */
+    #[Maho\Config\Route('/admin/cms_block/save')]
     public function saveAction(): void
     {
         // check if data sent
@@ -156,6 +160,7 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
     /**
      * Delete action
      */
+    #[Maho\Config\Route('/admin/cms_block/delete')]
     public function deleteAction(): void
     {
         // check if we know what should be deleted

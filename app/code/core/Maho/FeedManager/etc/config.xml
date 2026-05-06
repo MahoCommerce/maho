@@ -77,18 +77,6 @@
         </template>
     </global>
 
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <maho_feedmanager before="Mage_Adminhtml">Maho_FeedManager_Adminhtml</maho_feedmanager>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
-
     <adminhtml>
         <translate>
             <modules>

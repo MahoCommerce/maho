@@ -15,6 +15,7 @@ class Mage_Adminhtml_Sales_CreditmemoController extends Mage_Adminhtml_Controlle
     /**
      * Export credit memo grid to CSV format
      */
+    #[Maho\Config\Route('/admin/sales_creditmemo/exportCsv')]
     public function exportCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/sales_creditmemo_grid');
@@ -24,6 +25,7 @@ class Mage_Adminhtml_Sales_CreditmemoController extends Mage_Adminhtml_Controlle
     /**
      * Export credit memo grid to Excel XML format
      */
+    #[Maho\Config\Route('/admin/sales_creditmemo/exportExcel')]
     public function exportExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/sales_creditmemo_grid');
@@ -34,6 +36,7 @@ class Mage_Adminhtml_Sales_CreditmemoController extends Mage_Adminhtml_Controlle
      * Index page
      */
     #[\Override]
+    #[Maho\Config\Route('/admin/sales_creditmemo/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Sales'))->_title($this->__('Credit Memos'));

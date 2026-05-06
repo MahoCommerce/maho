@@ -25,6 +25,7 @@ class Maho_Paypal_VaultController extends Mage_Core_Controller_Front_Action
         return $this;
     }
 
+    #[Maho\Config\Route('/paypal/vault', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->loadLayout();
@@ -32,6 +33,7 @@ class Maho_Paypal_VaultController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/paypal/vault/delete', methods: ['POST'])]
     public function deleteAction(): void
     {
         if (!$this->getRequest()->isPost() || !$this->_validateFormKey()) {

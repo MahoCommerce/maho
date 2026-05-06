@@ -99,15 +99,6 @@
         </layout>
     </adminhtml>
     <frontend>
-        <routers>
-            <newsletter>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Newsletter</module>
-                    <frontName>newsletter</frontName>
-                </args>
-            </newsletter>
-        </routers>
         <translate>
             <modules>
                 <Mage_Newsletter>

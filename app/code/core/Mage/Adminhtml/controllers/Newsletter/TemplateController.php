@@ -37,6 +37,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
     /**
      * View Templates list
      */
+    #[Maho\Config\Route('/admin/newsletter_template/index')]
     public function indexAction(): void
     {
         $this->_setTitle();
@@ -55,6 +56,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
     /**
      * JSON Grid Action
      */
+    #[Maho\Config\Route('/admin/newsletter_template/grid')]
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -66,6 +68,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
     /**
      * Create new Newsletter Template
      */
+    #[Maho\Config\Route('/admin/newsletter_template/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -74,6 +77,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
     /**
      * Edit Newsletter Template
      */
+    #[Maho\Config\Route('/admin/newsletter_template/edit')]
     public function editAction(): void
     {
         $this->_setTitle();
@@ -115,6 +119,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
     /**
      * Drop Newsletter Template
      */
+    #[Maho\Config\Route('/admin/newsletter_template/drop')]
     public function dropAction(): void
     {
         $request = $this->getRequest();
@@ -128,6 +133,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
     /**
      * Save Newsletter Template
      */
+    #[Maho\Config\Route('/admin/newsletter_template/save')]
     public function saveAction(): void
     {
         $request = $this->getRequest();
@@ -183,6 +189,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
     /**
      * Delete newsletter Template
      */
+    #[Maho\Config\Route('/admin/newsletter_template/delete')]
     public function deleteAction(): void
     {
         $template = Mage::getModel('newsletter/template')
@@ -219,6 +226,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
     /**
      * Preview Newsletter template
      */
+    #[Maho\Config\Route('/admin/newsletter_template/preview')]
     public function previewAction()
     {
         $this->_setTitle();
@@ -240,6 +248,7 @@ class Mage_Adminhtml_Newsletter_TemplateController extends Mage_Adminhtml_Contro
     /**
      * WYSIWYG variable chooser action for newsletter templates
      */
+    #[Maho\Config\Route('/admin/newsletter_template/wysiwygVariable')]
     public function wysiwygVariableAction(): void
     {
         $this->getResponse()

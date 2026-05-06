@@ -38,7 +38,8 @@ class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abs
                 Mage_Core_Model_Url_Rewrite::REWRITE_REQUEST_PATH_ALIAS,
                 $identifier,
             );
-            return true;
+            $dispatcher = new \Maho\Routing\ControllerDispatcher();
+            return $dispatcher->dispatchForward($request, Mage::app()->getFrontController()->getResponse());
         }
 
         // Check if this is a blog URL (prefix/...)
@@ -78,7 +79,8 @@ class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abs
                         Mage_Core_Model_Url_Rewrite::REWRITE_REQUEST_PATH_ALIAS,
                         $identifier,
                     );
-                    return true;
+                    $dispatcher = new \Maho\Routing\ControllerDispatcher();
+                    return $dispatcher->dispatchForward($request, Mage::app()->getFrontController()->getResponse());
                 }
             }
         }
@@ -100,6 +102,7 @@ class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abs
             $identifier,
         );
 
-        return true;
+        $dispatcher = new \Maho\Routing\ControllerDispatcher();
+        return $dispatcher->dispatchForward($request, Mage::app()->getFrontController()->getResponse());
     }
 }

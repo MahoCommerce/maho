@@ -31,6 +31,7 @@ class Mage_Oauth_TokenController extends Mage_Core_Controller_Front_Action
     /**
      * Index action. Process request and response permanent token
      */
+    #[Maho\Config\Route('/oauth/token', name: 'oauth.token', methods: ['POST'])]
     public function indexAction(): void
     {
         /** @var Mage_Oauth_Model_Server $server */

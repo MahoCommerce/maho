@@ -15,6 +15,7 @@ class Mage_Adminhtml_AjaxController extends Mage_Adminhtml_Controller_Action
     /**
      * Ajax action for inline translation
      */
+    #[Maho\Config\Route('/admin/ajax/translate')]
     public function translateAction(): void
     {
         $translation = $this->getRequest()->getPost('translate');

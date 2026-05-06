@@ -23,6 +23,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
     /**
      * Queue list action
      */
+    #[Maho\Config\Route('/admin/newsletter_queue/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Newsletter'))->_title($this->__('Newsletter Queue'));
@@ -48,6 +49,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
     /**
      * Drop Newsletter queue template
      */
+    #[Maho\Config\Route('/admin/newsletter_queue/drop')]
     public function dropAction(): void
     {
         $request = $this->getRequest();
@@ -61,6 +63,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
     /**
      * Preview Newsletter queue template
      */
+    #[Maho\Config\Route('/admin/newsletter_queue/preview')]
     public function previewAction()
     {
         $this->loadLayout();
@@ -80,11 +83,13 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
     /**
      * Queue list Ajax action
      */
+    #[Maho\Config\Route('/admin/newsletter_queue/grid')]
     public function gridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/newsletter_queue_grid')->toHtml());
     }
 
+    #[Maho\Config\Route('/admin/newsletter_queue/start')]
     public function startAction(): void
     {
         $queue = Mage::getModel('newsletter/queue')
@@ -103,6 +108,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
         $this->_redirect('*/*');
     }
 
+    #[Maho\Config\Route('/admin/newsletter_queue/pause')]
     public function pauseAction(): void
     {
         $queue = Mage::getSingleton('newsletter/queue')
@@ -119,6 +125,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
         $this->_redirect('*/*');
     }
 
+    #[Maho\Config\Route('/admin/newsletter_queue/resume')]
     public function resumeAction(): void
     {
         $queue = Mage::getSingleton('newsletter/queue')
@@ -135,6 +142,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
         $this->_redirect('*/*');
     }
 
+    #[Maho\Config\Route('/admin/newsletter_queue/cancel')]
     public function cancelAction(): void
     {
         $queue = Mage::getSingleton('newsletter/queue')
@@ -151,6 +159,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
         $this->_redirect('*/*');
     }
 
+    #[Maho\Config\Route('/admin/newsletter_queue/sending')]
     public function sendingAction(): void
     {
         // Todo: put it somewhere in config!
@@ -166,6 +175,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
         $collection->walk('sendPerSubscriber', [$countOfSubscritions]);
     }
 
+    #[Maho\Config\Route('/admin/newsletter_queue/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('Newsletter'))->_title($this->__('Newsletter Queue'));
@@ -198,6 +208,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/newsletter_queue/save')]
     public function saveAction(): void
     {
         try {

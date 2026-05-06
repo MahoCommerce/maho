@@ -71,15 +71,6 @@
             <rss_order_new>/rss/order/new</rss_order_new>
             <rss_catalog_notifystock>/rss/catalog/notifystock</rss_catalog_notifystock>
         </secure_url>
-        <routers>
-            <rss>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Rss</module>
-                    <frontName>rss</frontName>
-                </args>
-            </rss>
-        </routers>
         <layout>
             <updates>
                 <rss>

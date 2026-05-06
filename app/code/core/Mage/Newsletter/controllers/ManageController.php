@@ -32,6 +32,7 @@ class Mage_Newsletter_ManageController extends Mage_Core_Controller_Front_Action
         return $this;
     }
 
+    #[Maho\Config\Route('/newsletter/manage', name: 'newsletter.manage.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->loadLayout();
@@ -45,6 +46,7 @@ class Mage_Newsletter_ManageController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/newsletter/manage/save', name: 'newsletter.manage.save', methods: ['POST'])]
     public function saveAction()
     {
         if (!$this->_validateFormKey()) {

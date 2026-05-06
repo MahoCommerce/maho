@@ -15,6 +15,7 @@ class Mage_Tag_IndexController extends Mage_Core_Controller_Front_Action
     /**
      * Saving tag and relation between tag, customer, product and store
      */
+    #[Maho\Config\Route('/tag/index/save', name: 'tag.index.save')]
     public function saveAction(): void
     {
         $helper = Mage::helper('tag');

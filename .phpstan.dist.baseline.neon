@@ -10675,19 +10675,7 @@ parameters:
 			path: app/code/core/Mage/Core/Controller/Varien/Exception.php
 
 		-
-			rawMessage: 'Method Mage_Core_Controller_Varien_Front::_checkBaseUrl() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Front.php
-
-		-
 			rawMessage: 'Parameter #1 $name of method Mage_Core_Controller_Varien_Front::addRouter() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Front.php
-
-		-
-			rawMessage: 'Parameter #2 $useRouterName of method Mage_Core_Controller_Varien_Router_Standard::collectRoutes() expects string, int given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Core/Controller/Varien/Front.php
@@ -10709,66 +10697,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Core/Controller/Varien/Router/Abstract.php
-
-		-
-			rawMessage: 'Method Mage_Core_Controller_Varien_Router_Admin::collectRoutes() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Router/Admin.php
-
-		-
-			rawMessage: 'Method Mage_Core_Controller_Varien_Router_Admin::fetchDefault() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Router/Admin.php
-
-		-
-			rawMessage: 'Parameter #2 $useRouterName (bool) of method Mage_Core_Controller_Varien_Router_Admin::collectRoutes() should be compatible with parameter $useRouterName (string) of method Mage_Core_Controller_Varien_Router_Standard::collectRoutes()'
-			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Router/Admin.php
-
-		-
-			rawMessage: 'Parameter #2 $useRouterName of method Mage_Core_Controller_Varien_Router_Standard::collectRoutes() expects string, bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Router/Admin.php
-
-		-
-			rawMessage: 'Method Mage_Core_Controller_Varien_Router_Standard::_checkShouldBeSecure() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Router/Standard.php
-
-		-
-			rawMessage: 'Method Mage_Core_Controller_Varien_Router_Standard::collectRoutes() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Router/Standard.php
-
-		-
-			rawMessage: 'Method Mage_Core_Controller_Varien_Router_Standard::fetchDefault() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Router/Standard.php
-
-		-
-			rawMessage: Property Mage_Core_Controller_Varien_Router_Standard::$_dispatchData has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Router/Standard.php
-
-		-
-			rawMessage: Property Mage_Core_Controller_Varien_Router_Standard::$_modules has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Router/Standard.php
-
-		-
-			rawMessage: Property Mage_Core_Controller_Varien_Router_Standard::$_routes has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Core/Controller/Varien/Router/Standard.php
 
 		-
 			rawMessage: Property Mage_Core_Exception::$_messages has no type specified.
@@ -11531,18 +11459,6 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Core/Model/Url/Rewrite.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Url_Rewrite_Request::_sendRedirectHeaders() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Url/Rewrite/Request.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Url_Rewrite_Request::_setStoreCodeCookie() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Url/Rewrite/Request.php
 
 		-
 			rawMessage: Property Mage_Core_Model_Variable::$_storeId has no type specified.

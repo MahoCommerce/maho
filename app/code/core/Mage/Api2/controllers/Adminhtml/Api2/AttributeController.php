@@ -33,6 +33,7 @@ class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Contro
     /**
      * Show user types grid
      */
+    #[Maho\Config\Route('/admin/api2_attribute/index')]
     public function indexAction(): void
     {
         $this
@@ -50,6 +51,7 @@ class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Contro
     /**
      * Edit role
      */
+    #[Maho\Config\Route('/admin/api2_attribute/edit')]
     public function editAction(): void
     {
         $this->loadLayout()
@@ -78,6 +80,7 @@ class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Contro
     /**
      * Save role
      */
+    #[Maho\Config\Route('/admin/api2_attribute/save')]
     public function saveAction(): void
     {
         $request = $this->getRequest();

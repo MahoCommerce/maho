@@ -48,6 +48,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/promo_catalog/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Promotions'))->_title($this->__('Catalog Price Rules'));
@@ -65,11 +66,13 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
             ->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/promo_catalog/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
+    #[Maho\Config\Route('/admin/promo_catalog/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('Promotions'))->_title($this->__('Catalog Price Rules'));
@@ -108,6 +111,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         $this->_addBreadcrumb($breadcrumb, $breadcrumb)->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/promo_catalog/save')]
     public function saveAction(): void
     {
         if ($this->getRequest()->getPost()) {
@@ -187,6 +191,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/promo_catalog/delete')]
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -226,6 +231,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/promo_catalog/newConditionHtml')]
     public function newConditionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -250,6 +256,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         $this->getResponse()->setBody($html);
     }
 
+    #[Maho\Config\Route('/admin/promo_catalog/newActionHtml')]
     public function newActionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -277,6 +284,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
     /**
      * Apply all active catalog price rules
      */
+    #[Maho\Config\Route('/admin/promo_catalog/applyRules')]
     public function applyRulesAction(): void
     {
         $errorMessage = Mage::helper('catalogrule')->__('Unable to apply rules.');

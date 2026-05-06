@@ -21,6 +21,7 @@ class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Ma
     /**
      * Load downloadable tab fieldsets
      */
+    #[Maho\Config\Route('/admin/downloadable_product_edit/form')]
     public function formAction(): void
     {
         $this->_initProduct();
@@ -73,6 +74,7 @@ class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Ma
     /**
      * Download link action
      */
+    #[Maho\Config\Route('/admin/downloadable_product_edit/link')]
     public function linkAction(): void
     {
         $linkId = $this->getRequest()->getParam('id', 0);

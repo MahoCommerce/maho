@@ -26,12 +26,14 @@ class Mage_Customer_ReviewController extends Mage_Core_Controller_Front_Action
         return $this;
     }
 
+    #[Maho\Config\Route('/customer/review', name: 'customer.review.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/customer/review/view', name: 'customer.review.view', methods: ['GET'])]
     public function viewAction(): void
     {
         $this->loadLayout();

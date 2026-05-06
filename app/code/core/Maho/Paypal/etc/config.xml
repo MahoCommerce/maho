@@ -56,18 +56,6 @@
     </global>
 
     <frontend>
-        <routers>
-            <paypal>
-                <use>standard</use>
-                <args>
-                    <module>Maho_Paypal</module>
-                    <frontName>paypal</frontName>
-                    <modules>
-                        <Maho_Paypal>Maho_Paypal</Maho_Paypal>
-                    </modules>
-                </args>
-            </paypal>
-        </routers>
         <secure_url>
             <paypal_checkout>/paypal/checkout</paypal_checkout>
             <paypal_webhook>/paypal/webhook</paypal_webhook>
@@ -90,18 +78,6 @@
             </updates>
         </layout>
     </frontend>
-
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <paypal before="Mage_Adminhtml">Maho_Paypal_Adminhtml</paypal>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
 
     <adminhtml>
         <translate>

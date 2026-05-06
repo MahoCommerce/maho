@@ -29,6 +29,7 @@ class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
         return $this;
     }
 
+    #[Maho\Config\Route('/productalert/add/testObserver', name: 'productalert.add.testobserver')]
     public function testObserverAction(): void
     {
         $object = new \Maho\DataObject();
@@ -36,6 +37,7 @@ class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
         $observer->process($object);
     }
 
+    #[Maho\Config\Route('/productalert/add/price', name: 'productalert.add.price')]
     public function priceAction(): void
     {
         $session = Mage::getSingleton('catalog/session');
@@ -72,6 +74,7 @@ class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
         $this->_redirectReferer();
     }
 
+    #[Maho\Config\Route('/productalert/add/stock', name: 'productalert.add.stock')]
     public function stockAction(): void
     {
         $session = Mage::getSingleton('catalog/session');

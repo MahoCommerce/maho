@@ -22,6 +22,7 @@ class Mage_Adminhtml_Sales_Order_EditController extends Mage_Adminhtml_Sales_Ord
      * Start edit order initialization
      */
     #[\Override]
+    #[Maho\Config\Route('/admin/sales_order_edit/start')]
     public function startAction(): void
     {
         $this->_getSession()->clear();
@@ -54,6 +55,7 @@ class Mage_Adminhtml_Sales_Order_EditController extends Mage_Adminhtml_Sales_Ord
      * Index page
      */
     #[\Override]
+    #[Maho\Config\Route('/admin/sales_order_edit/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Sales'))->_title($this->__('Orders'))->_title($this->__('Edit Order'));

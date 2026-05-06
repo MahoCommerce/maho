@@ -16,15 +16,6 @@
         </Mage_Contacts>
     </modules>
     <frontend>
-        <routers>
-            <contacts>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Contacts</module>
-                    <frontName>contacts</frontName>
-                </args>
-            </contacts>
-        </routers>
         <translate>
             <modules>
                 <Mage_Contacts>

@@ -12,6 +12,7 @@
 
 class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller_Action
 {
+    #[Maho\Config\Route('/admin/report_shopcart/_init')]
     public function _initAction()
     {
         $act = $this->getRequest()->getActionName();
@@ -21,6 +22,7 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/report_shopcart/customer')]
     public function customerAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -37,6 +39,7 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
     /**
      * Export shopcart customer report to CSV format
      */
+    #[Maho\Config\Route('/admin/report_shopcart/exportCustomerCsv')]
     public function exportCustomerCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_shopcart_customer_grid');
@@ -46,12 +49,14 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
     /**
      * Export shopcart customer report to Excel XML format
      */
+    #[Maho\Config\Route('/admin/report_shopcart/exportCustomerExcel')]
     public function exportCustomerExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_shopcart_customer_grid');
         $this->_prepareDownloadResponse(...$grid->getExcelFile('shopcart_customer.xml', -1));
     }
 
+    #[Maho\Config\Route('/admin/report_shopcart/product')]
     public function productAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -68,6 +73,7 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
     /**
      * Export products report grid to CSV format
      */
+    #[Maho\Config\Route('/admin/report_shopcart/exportProductCsv')]
     public function exportProductCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_shopcart_product_grid');
@@ -77,12 +83,14 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
     /**
      * Export products report to Excel XML format
      */
+    #[Maho\Config\Route('/admin/report_shopcart/exportProductExcel')]
     public function exportProductExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_shopcart_product_grid');
         $this->_prepareDownloadResponse(...$grid->getExcelFile('shopcart_product.xml', -1));
     }
 
+    #[Maho\Config\Route('/admin/report_shopcart/abandoned')]
     public function abandonedAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -99,6 +107,7 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
     /**
      * Export abandoned carts report grid to CSV format
      */
+    #[Maho\Config\Route('/admin/report_shopcart/exportAbandonedCsv')]
     public function exportAbandonedCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_shopcart_abandoned_grid');
@@ -108,6 +117,7 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
     /**
      * Export abandoned carts report to Excel XML format
      */
+    #[Maho\Config\Route('/admin/report_shopcart/exportAbandonedExcel')]
     public function exportAbandonedExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_shopcart_abandoned_grid');

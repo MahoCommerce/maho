@@ -18,6 +18,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
      */
     public const ADMIN_RESOURCE = 'catalog/attributes/sets';
 
+    #[Maho\Config\Route('/admin/catalog_product_set/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -41,6 +42,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_set/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -74,6 +76,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_set/setGrid')]
     public function setGridAction(): void
     {
         $this->_setTypeId();
@@ -90,6 +93,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
      * [POST] Create attribute set from another set and redirect to edit page
      * [AJAX] Save attribute set data
      */
+    #[Maho\Config\Route('/admin/catalog_product_set/save')]
     public function saveAction(): void
     {
         $entityTypeId   = $this->_getEntityTypeId();
@@ -153,6 +157,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         }
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_set/add')]
     public function addAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -170,6 +175,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_set/delete')]
     public function deleteAction(): void
     {
         $setId = $this->getRequest()->getParam('id');

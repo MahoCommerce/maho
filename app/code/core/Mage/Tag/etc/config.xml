@@ -68,15 +68,6 @@
         </index>
     </global>
     <frontend>
-        <routers>
-            <tag>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Tag</module>
-                    <frontName>tag</frontName>
-                </args>
-            </tag>
-        </routers>
         <translate>
             <modules>
                 <Mage_Tag>
