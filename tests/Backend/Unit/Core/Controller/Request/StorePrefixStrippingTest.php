@@ -39,12 +39,21 @@ function makeRequestForPath(string $requestUri): Mage_Core_Controller_Request_Ht
 
 function setUseStoreFlag(string $value): void
 {
-    // Pre-populate each store's $_configCache so that getConfigFlag('web/url/use_store')
+    // Pre-populate each store's $_configCache so getConfigFlag('web/url/use_store')
     // returns our value without consulting the merged XML config tree at all. This
-    // sidesteps cross-DB / merge-timing differences (an earlier approach using
-    // setNode + cache clear worked on MySQL but failed on PostgreSQL CI).
-    $stores = Mage::app()->getStores(true, true);
+    // sidesteps cross-DB / merge-timing differences (earlier approaches using
+    // setNode + cache clear and direct DB writes both passed on MySQL but failed
+    // on PostgreSQL CI).
+    //
+    // Mage_Core_App::getStore() can return a *standalone* default store (built
+    // by _getDefaultStore, NOT contained in getStores()) when _isInstalled was
+    // probed early. Prime that instance too so the lookup hits our cache value
+    // regardless of which path the framework takes.
     $configCacheRef = new ReflectionProperty(Mage_Core_Model_Store::class, '_configCache');
+
+    $stores = Mage::app()->getStores(true, true);
+    $stores[] = Mage::app()->getStore();
+
     foreach ($stores as $store) {
         $cache = $configCacheRef->getValue($store) ?? [];
         $cache['web/url/use_store'] = $value;
