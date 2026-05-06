@@ -3009,7 +3009,11 @@ ul.item-options li {
 }
 
 .categories-side-col .tree-actions.tree-label-options label {
-    cursor: pointer
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    vertical-align: middle
 }
 
 .categories-side-col .tree-node-meta {
