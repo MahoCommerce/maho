@@ -114,10 +114,10 @@ class CategoryEditForm {
             if (typeof name === 'string') {
                 let text = unescapeHtml(name);
                 if (showCount && typeof node.attributes.product_count === 'number') {
-                    text += ` (${node.attributes.product_count})`;
+                    text += ` ×${node.attributes.product_count}`;
                 }
                 if (showId) {
-                    text += ` - ID: ${node.attributes.id}`;
+                    text += ` #${node.attributes.id}`;
                 }
                 node.ui.textNode.textContent = text;
             }
