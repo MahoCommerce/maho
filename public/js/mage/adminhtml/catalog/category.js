@@ -112,7 +112,7 @@ class CategoryEditForm {
         const walk = (node) => {
             const name = node.attributes.category_name;
             if (typeof name === 'string') {
-                let text = name;
+                let text = unescapeHtml(name);
                 if (showCount && typeof node.attributes.product_count === 'number') {
                     text += ` (${node.attributes.product_count})`;
                 }
