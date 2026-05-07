@@ -10,7 +10,7 @@
 
 class Maho_Captcha_IndexController extends Mage_Core_Controller_Front_Action
 {
-    #[Maho\Config\Route('/captcha/index/challenge', methods: ['POST'])]
+    #[Maho\Config\Route('/captcha/index/challenge')]
     public function challengeAction(): void
     {
         $helper = Mage::helper('captcha');
