@@ -66,7 +66,6 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
     {
         return new \Maho\DataObject([
             'challenge' => $this->getChallengeUrl(),
-            'name' => 'maho_captcha',
             'id' => 'maho_captcha',
             'auto' => 'onload',
             'hideLogo' => '',
