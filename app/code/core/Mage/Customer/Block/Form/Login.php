@@ -115,8 +115,6 @@ class Mage_Customer_Block_Form_Login extends Mage_Core_Block_Template
 
     /**
      * Retrieve username for form field
-     *
-     * @return string
      */
     public function getUsername(): string
     {
