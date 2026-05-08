@@ -639,9 +639,13 @@ async function validateHtmlContent(textareaId, url) {
         });
 
         const messages = result.messages ?? [];
+        const ignored = result.ignored ?? 0;
+        const ignoredNote = ignored > 0
+            ? `<p class="note-msg">${ignored} message${ignored > 1 ? 's' : ''} hidden by ignore list.</p>`
+            : '';
 
         if (messages.length === 0) {
-            Dialog.info('<p class="validate-ok">No errors or warnings found.</p>', { title: 'HTML Validation', width: 500 });
+            Dialog.info(`<p class="validate-ok">No errors or warnings found.</p>${ignoredNote}`, { title: 'HTML Validation', width: 500 });
             return;
         }
 
@@ -684,6 +688,7 @@ async function validateHtmlContent(textareaId, url) {
                 .dialog-content .warning-msg mark { background: #fed7aa; padding: 1px 2px; border-radius: 2px; }
             </style>
             <p>${summary.join(' and ')} found:</p>
+            ${ignoredNote}
             ${items}`;
 
         Dialog.info(content, { title: 'HTML Validation', width: 600 });
