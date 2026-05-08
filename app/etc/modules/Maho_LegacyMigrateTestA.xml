@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Maho_LegacyMigrateTestA>
+            <active>true</active>
+            <codePool>local</codePool>
+        </Maho_LegacyMigrateTestA>
+    </modules>
+</config>

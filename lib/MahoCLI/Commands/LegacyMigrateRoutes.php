@@ -151,16 +151,12 @@ class LegacyMigrateRoutes extends BaseMahoCommand
                     }
                 }
 
-                // Detach the legacy router declaration from <routers>
-                $routerNode->parentNode?->removeChild($routerNode);
+                // Bubble up through <routers> and the area scope if they become empty.
+                $this->detachAndPrune($routerNode);
             }
 
             if (!$dryRun) {
-                $this->saveConfigXml(
-                    $dom,
-                    $configPath,
-                    ['routers', 'frontend', 'admin', 'install'],
-                );
+                $this->saveConfigXml($dom, $configPath);
             }
 
             $output->writeln('');
@@ -175,10 +171,10 @@ class LegacyMigrateRoutes extends BaseMahoCommand
 
         if ($dryRun && $totalRoutes > 0) {
             $output->writeln('Re-run without --dry-run to apply.');
-            $output->writeln('<comment>Tip: review the generated routes carefully — controller-method scanning is best-effort.</comment>');
+            $output->writeln('<comment>Tip: review the generated routes carefully; controller-method scanning is best-effort.</comment>');
         } elseif (!$dryRun && $totalRoutes > 0) {
             $output->writeln('Run <info>composer dump-autoload</info> to compile the new attributes.');
-            $output->writeln('<comment>Tip: review the generated routes carefully — controller-method scanning is best-effort.</comment>');
+            $output->writeln('<comment>Tip: review the generated routes carefully; controller-method scanning is best-effort.</comment>');
         }
 
         return Command::SUCCESS;

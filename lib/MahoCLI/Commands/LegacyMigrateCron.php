@@ -43,6 +43,8 @@ class LegacyMigrateCron extends BaseMahoCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initMaho();
+        // Force a fresh config load so newly-added module XML is visible to alias resolution
+        Mage::app()->getConfig()->reinit();
 
         $dryRun = (bool) $input->getOption('dry-run');
         if ($dryRun) {
@@ -137,12 +139,13 @@ class LegacyMigrateCron extends BaseMahoCommand
                     ));
                 }
 
-                $jobNode->parentNode?->removeChild($jobNode);
+                // Bubble up through <jobs> and <crontab> if they become empty.
+                $this->detachAndPrune($jobNode);
                 $totalMigrated++;
             }
 
             if (!$dryRun) {
-                $this->saveConfigXml($dom, $configPath, ['jobs', 'crontab']);
+                $this->saveConfigXml($dom, $configPath);
             }
 
             $output->writeln('');

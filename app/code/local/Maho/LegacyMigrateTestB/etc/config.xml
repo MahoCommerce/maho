@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!--
+    Test fixture for ./maho legacy:migrate-* commands.
+
+    Exercises:
+    - Legacy adminhtml-area observer (alternate area scope)
+    - Legacy cron job with <config_path> schedule (vs <cron_expr>)
+-->
+<config>
+    <modules>
+        <Maho_LegacyMigrateTestB>
+            <version>1.0.0</version>
+        </Maho_LegacyMigrateTestB>
+    </modules>
+    <global>
+        <models>
+            <legacymigratetestb>
+                <class>Maho_LegacyMigrateTestB_Model</class>
+            </legacymigratetestb>
+        </models>
+        <helpers>
+            <legacymigratetestb>
+                <class>Maho_LegacyMigrateTestB_Helper</class>
+            </legacymigratetestb>
+        </helpers>
+    </global>
+    <adminhtml>
+        <events>
+            <admin_user_authenticate_after>
+                <observers>
+                    <legacymigratetestb_admin_login>
+                        <class>legacymigratetestb/observer</class>
+                        <method>onAdminLogin</method>
+                    </legacymigratetestb_admin_login>
+                </observers>
+            </admin_user_authenticate_after>
+        </events>
+    </adminhtml>
+    <crontab>
+        <jobs>
+            <legacymigratetestb_report>
+                <schedule>
+                    <config_path>legacymigratetestb/cron/schedule</config_path>
+                </schedule>
+                <run>
+                    <model>legacymigratetestb/observer::generateReport</model>
+                </run>
+            </legacymigratetestb_report>
+        </jobs>
+    </crontab>
+</config>

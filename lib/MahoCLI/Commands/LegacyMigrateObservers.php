@@ -51,6 +51,8 @@ class LegacyMigrateObservers extends BaseMahoCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->initMaho();
+        // Force a fresh config load so newly-added module XML is visible to alias resolution
+        Mage::app()->getConfig()->reinit();
 
         $dryRun = (bool) $input->getOption('dry-run');
         if ($dryRun) {
@@ -149,19 +151,15 @@ class LegacyMigrateObservers extends BaseMahoCommand
                     ));
                 }
 
-                // Detach the <observer> node from its <observers> parent
-                $observerNode->parentNode?->removeChild($observerNode);
+                // Detach the <observer> node and bubble up through any now-empty
+                // wrappers (<observers>, the event name tag, <events>, the area
+                // scope). Stops naturally when an ancestor still has children.
+                $this->detachAndPrune($observerNode);
                 $totalMigrated++;
             }
 
             if (!$dryRun) {
-                // Empty <observers>, <event_name>, <events>, <global|frontend|adminhtml|crontab|install>
-                // get pruned automatically. Keep the safelist conservative.
-                $this->saveConfigXml(
-                    $dom,
-                    $configPath,
-                    ['observers', 'events'],
-                );
+                $this->saveConfigXml($dom, $configPath);
             }
 
             $output->writeln('');

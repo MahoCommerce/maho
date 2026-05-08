@@ -80,47 +80,56 @@ trait LegacyMigrateTrait
     }
 
     /**
-     * Saves the DOM back to disk, dropping any element nodes left empty by node
-     * removals (e.g. <events/> after the last child observer was migrated). The
-     * cleanup is conservative: it only removes element nodes with no element
-     * children whose tag matches the safelist passed in.
+     * Removes an element from its parent and bubbles up: if the parent now has
+     * no element children, remove it too, and so on. Walks until we hit an
+     * ancestor that still has element children, or the document root.
      *
-     * @param list<string> $pruneIfEmpty Element local names safe to drop when empty
+     * Use this after detaching a leaf XML node (e.g. <observer_name>) to
+     * collapse arbitrary intermediate wrapper nodes (<observers>, the event
+     * name tag, <events>, the area scope) without having to safelist their
+     * names. Stops naturally at any ancestor that holds other config
+     * (e.g. <global> stays because it usually has <models>/<helpers>).
      */
-    protected function saveConfigXml(DOMDocument $dom, string $path, array $pruneIfEmpty): void
+    protected function detachAndPrune(DOMNode $node): void
     {
-        // Iteratively prune empty elements until no more changes (handles nested empties)
-        $changed = true;
-        while ($changed) {
-            $changed = false;
-            foreach ($pruneIfEmpty as $tag) {
-                $nodes = $dom->getElementsByTagName($tag);
-                // Snapshot to a list because removing during iteration is unsafe
-                $candidates = [];
-                foreach ($nodes as $node) {
-                    $candidates[] = $node;
-                }
-                foreach ($candidates as $node) {
-                    if ($this->elementHasChildElements($node)) {
-                        continue;
-                    }
-                    $parent = $node->parentNode;
-                    if ($parent === null) {
-                        continue;
-                    }
-                    // Also remove the immediately preceding text node if it's pure whitespace
-                    if ($node->previousSibling !== null
-                        && $node->previousSibling->nodeType === XML_TEXT_NODE
-                        && trim((string) $node->previousSibling->nodeValue) === ''
-                    ) {
-                        $parent->removeChild($node->previousSibling);
-                    }
-                    $parent->removeChild($node);
-                    $changed = true;
-                }
-            }
+        $parent = $node->parentNode;
+        if ($parent === null) {
+            return;
         }
+        $this->removeNodeWithLeadingWhitespace($node);
 
+        $cur = $parent;
+        while ($cur instanceof DOMNode && $cur->nodeType === XML_ELEMENT_NODE) {
+            // Don't prune the document element itself
+            if (!($cur->parentNode instanceof DOMNode) || $cur->parentNode->nodeType !== XML_ELEMENT_NODE) {
+                break;
+            }
+            if ($this->elementHasChildElements($cur)) {
+                break;
+            }
+            $next = $cur->parentNode;
+            $this->removeNodeWithLeadingWhitespace($cur);
+            $cur = $next;
+        }
+    }
+
+    private function removeNodeWithLeadingWhitespace(DOMNode $node): void
+    {
+        $parent = $node->parentNode;
+        if ($parent === null) {
+            return;
+        }
+        if ($node->previousSibling !== null
+            && $node->previousSibling->nodeType === XML_TEXT_NODE
+            && trim((string) $node->previousSibling->nodeValue) === ''
+        ) {
+            $parent->removeChild($node->previousSibling);
+        }
+        $parent->removeChild($node);
+    }
+
+    protected function saveConfigXml(DOMDocument $dom, string $path): void
+    {
         $xml = $dom->saveXML();
         if ($xml === false) {
             return;
