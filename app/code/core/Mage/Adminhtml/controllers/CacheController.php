@@ -147,6 +147,26 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     }
 
     /**
+     * Recompile PHP attributes (observers, cron jobs, routes, API permissions)
+     * by shelling out to `composer dump-autoload`.
+     */
+    #[Maho\Config\Route('/admin/cache/recompileAttributes')]
+    public function recompileAttributesAction(): void
+    {
+        [$ok, $message] = Maho::recompilePhpAttributes();
+        if ($ok) {
+            $this->_getSession()->addSuccess(
+                Mage::helper('adminhtml')->__('PHP attributes were recompiled.'),
+            );
+        } else {
+            $this->_getSession()->addError(
+                Mage::helper('adminhtml')->__('PHP attribute recompilation failed: %s', $message),
+            );
+        }
+        $this->_redirect('*/*');
+    }
+
+    /**
      * Clean catalog files cache
      */
     #[Maho\Config\Route('/admin/cache/cleanImages')]

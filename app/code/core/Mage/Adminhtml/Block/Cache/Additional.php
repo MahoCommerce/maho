@@ -26,4 +26,9 @@ class Mage_Adminhtml_Block_Cache_Additional extends Mage_Adminhtml_Block_Templat
     {
         return $this->getUrl('*/*/cleanMinifiedFiles');
     }
+
+    public function getRecompileAttributesUrl(): string
+    {
+        return $this->getUrl('*/*/recompileAttributes');
+    }
 }
