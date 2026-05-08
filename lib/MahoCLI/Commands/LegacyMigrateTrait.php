@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use DOMDocument;
+use DOMElement;
 use DOMNode;
 use ReflectionClass;
 
@@ -99,9 +100,9 @@ trait LegacyMigrateTrait
         $this->removeNodeWithLeadingWhitespace($node);
 
         $cur = $parent;
-        while ($cur instanceof DOMNode && $cur->nodeType === XML_ELEMENT_NODE) {
+        while ($cur instanceof DOMElement) {
             // Don't prune the document element itself
-            if (!($cur->parentNode instanceof DOMNode) || $cur->parentNode->nodeType !== XML_ELEMENT_NODE) {
+            if (!($cur->parentNode instanceof DOMElement)) {
                 break;
             }
             if ($this->elementHasChildElements($cur)) {
