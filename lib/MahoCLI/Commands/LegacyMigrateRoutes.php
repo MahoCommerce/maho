@@ -347,7 +347,7 @@ class LegacyMigrateRoutes extends BaseMahoCommand
     private function formatAttributeLine(string $path, string $name): string
     {
         return sprintf(
-            "#[\\Maho\\Config\\Route(%s, name: %s)]",
+            '#[\\Maho\\Config\\Route(%s, name: %s)]',
             var_export($path, true),
             var_export($name, true),
         );

@@ -10,6 +10,4 @@
 
 declare(strict_types=1);
 
-class Maho_LegacyMigrateTestA_Helper_Data extends Mage_Core_Helper_Abstract
-{
-}
+class Maho_LegacyMigrateTestA_Helper_Data extends Mage_Core_Helper_Abstract {}

@@ -12,11 +12,7 @@ declare(strict_types=1);
 
 class Maho_LegacyMigrateTestB_Model_Observer
 {
-    public function onAdminLogin(Maho\Event\Observer $observer): void
-    {
-    }
+    public function onAdminLogin(Maho\Event\Observer $observer): void {}
 
-    public function generateReport(Mage_Cron_Model_Schedule $schedule): void
-    {
-    }
+    public function generateReport(Mage_Cron_Model_Schedule $schedule): void {}
 }

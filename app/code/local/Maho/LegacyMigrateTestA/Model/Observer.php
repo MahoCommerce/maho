@@ -12,15 +12,9 @@ declare(strict_types=1);
 
 class Maho_LegacyMigrateTestA_Model_Observer
 {
-    public function onProductSave(Maho\Event\Observer $observer): void
-    {
-    }
+    public function onProductSave(Maho\Event\Observer $observer): void {}
 
-    public function onCustomerLogin(Maho\Event\Observer $observer): void
-    {
-    }
+    public function onCustomerLogin(Maho\Event\Observer $observer): void {}
 
-    public function runDailyCleanup(Mage_Cron_Model_Schedule $schedule): void
-    {
-    }
+    public function runDailyCleanup(Mage_Cron_Model_Schedule $schedule): void {}
 }
