@@ -31,7 +31,7 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
         $prefixLines = substr_count($prefix, "\n");
 
         $ignoreList = [];
-        $ignoreConfig = (string) Mage::getStoreConfig('cms/wysiwyg/html_validator_ignore');
+        $ignoreConfig = (string) Mage::getStoreConfig('cms/html_validator/ignore');
         foreach (explode("\n", $ignoreConfig) as $line) {
             $line = trim($line);
             if ($line === '' || str_starts_with($line, '#')) {
