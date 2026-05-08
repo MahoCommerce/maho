@@ -70,6 +70,9 @@ $application->addCommand(new \MahoCLI\Commands\HealthCheck());
 $application->addCommand(new \MahoCLI\Commands\Install());
 $application->addCommand(new \MahoCLI\Commands\Migrate());
 $application->addCommand(new \MahoCLI\Commands\LegacyRenameMysql4Classes());
+$application->addCommand(new \MahoCLI\Commands\LegacyMigrateObservers());
+$application->addCommand(new \MahoCLI\Commands\LegacyMigrateCron());
+$application->addCommand(new \MahoCLI\Commands\LegacyMigrateRoutes());
 
 $application->addCommand(new \MahoCLI\Commands\Serve());
 $application->addCommand(new \MahoCLI\Commands\Shell());

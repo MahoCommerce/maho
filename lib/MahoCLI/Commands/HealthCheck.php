@@ -42,6 +42,11 @@ class HealthCheck extends BaseMahoCommand
         'skin',
     ];
 
+    public const LEGACY_XML_SCAN_DIRS = [
+        'app/code/local',
+        'app/code/community',
+    ];
+
     private const DESIGN_PATH = 'app/design/frontend';
     private const SKIN_PATH = 'public/skin/frontend';
 
@@ -144,6 +149,128 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * Scans user code (app/code/local and app/code/community) for legacy XML config
+     * declarations that have PHP-attribute equivalents introduced in v26.5.
+     *
+     * @return array{
+     *     routes: list<array{module: string, file: string, frontName: string, area: string}>,
+     *     observers: list<array{module: string, file: string, count: int}>,
+     *     cron: list<array{module: string, file: string, count: int}>
+     * }
+     */
+    public static function findLegacyXmlConfig(): array
+    {
+        $findings = ['routes' => [], 'observers' => [], 'cron' => []];
+
+        foreach (self::LEGACY_XML_SCAN_DIRS as $dir) {
+            $base = MAHO_ROOT_DIR . '/' . $dir;
+            if (!is_dir($base)) {
+                continue;
+            }
+
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($base, \RecursiveDirectoryIterator::SKIP_DOTS),
+            );
+
+            foreach ($iterator as $file) {
+                if ($file->getFilename() !== 'config.xml') {
+                    continue;
+                }
+
+                $relPath = str_replace(MAHO_ROOT_DIR . '/', '', $file->getPathname());
+                $parts = explode('/', $relPath);
+                // Expected layout: app/code/{pool}/{Vendor}/{Module}/etc/config.xml
+                if (count($parts) < 7 || $parts[5] !== 'etc') {
+                    continue;
+                }
+                $moduleName = $parts[3] . '_' . $parts[4];
+
+                libxml_use_internal_errors(true);
+                $xml = simplexml_load_file($file->getPathname());
+                libxml_clear_errors();
+                if ($xml === false) {
+                    continue;
+                }
+
+                // Legacy router declarations: <{area}><routers><X><use>{type}</use>
+                $areaUseMap = ['frontend' => 'standard', 'admin' => 'admin', 'install' => 'install'];
+                foreach ($areaUseMap as $area => $expectedUse) {
+                    if (!isset($xml->{$area}->routers)) {
+                        continue;
+                    }
+                    foreach ($xml->{$area}->routers->children() as $routerCode => $routerNode) {
+                        $use = (string) ($routerNode->use ?? '');
+                        if ($use !== $expectedUse) {
+                            continue;
+                        }
+                        $frontName = (string) ($routerNode->args->frontName ?? $routerCode);
+                        $findings['routes'][] = [
+                            'module' => $moduleName,
+                            'file' => $relPath,
+                            'frontName' => $frontName,
+                            'area' => $area,
+                        ];
+                    }
+                }
+
+                // Legacy observer declarations: <events> blocks under any scope
+                $observerCount = 0;
+                foreach (['global', 'frontend', 'adminhtml', 'crontab'] as $scope) {
+                    if (!isset($xml->{$scope}->events)) {
+                        continue;
+                    }
+                    foreach ($xml->{$scope}->events->children() as $eventNode) {
+                        if (isset($eventNode->observers)) {
+                            $observerCount += count($eventNode->observers->children());
+                        }
+                    }
+                }
+                if ($observerCount > 0) {
+                    $findings['observers'][] = [
+                        'module' => $moduleName,
+                        'file' => $relPath,
+                        'count' => $observerCount,
+                    ];
+                }
+
+                // Legacy cron declarations: <crontab><jobs><X><run>
+                $cronCount = 0;
+                if (isset($xml->crontab->jobs)) {
+                    foreach ($xml->crontab->jobs->children() as $jobNode) {
+                        if (isset($jobNode->run)) {
+                            $cronCount++;
+                        }
+                    }
+                }
+                if ($cronCount > 0) {
+                    $findings['cron'][] = [
+                        'module' => $moduleName,
+                        'file' => $relPath,
+                        'count' => $cronCount,
+                    ];
+                }
+            }
+        }
+
+        return $findings;
+    }
+
+    /**
+     * @param list<array{module: string, file?: string, frontName?: string, area?: string, count?: int}> $findings
+     */
+    private static function formatLegacyXmlSummary(string $label, array $findings, string $attribute): string
+    {
+        $modules = array_values(array_unique(array_column($findings, 'module')));
+        return sprintf(
+            'Found legacy XML %s in %d module(s): %s. Migrate to %s attributes.',
+            $label,
+            count($modules),
+            implode(', ', $modules),
+            $attribute,
+        );
+    }
+
+    /**
      * @return array<int, array{check: string, severity: string, details: string}>
      */
     public static function getCheckResults(): array
@@ -187,6 +314,38 @@ class HealthCheck extends BaseMahoCommand
                 ];
             }
         }
+
+        $legacyXml = self::findLegacyXmlConfig();
+
+        $checks[] = [
+            'check' => 'Legacy XML Routing',
+            'severity' => empty($legacyXml['routes']) ? 'ok' : 'warning',
+            'details' => empty($legacyXml['routes']) ? '' : self::formatLegacyXmlSummary(
+                'route declarations',
+                $legacyXml['routes'],
+                '#[Maho\\Config\\Route]',
+            ),
+        ];
+
+        $checks[] = [
+            'check' => 'Legacy XML Observers',
+            'severity' => empty($legacyXml['observers']) ? 'ok' : 'warning',
+            'details' => empty($legacyXml['observers']) ? '' : self::formatLegacyXmlSummary(
+                'observer declarations',
+                $legacyXml['observers'],
+                '#[Maho\\Config\\Observer]',
+            ),
+        ];
+
+        $checks[] = [
+            'check' => 'Legacy XML Cron Jobs',
+            'severity' => empty($legacyXml['cron']) ? 'ok' : 'warning',
+            'details' => empty($legacyXml['cron']) ? '' : self::formatLegacyXmlSummary(
+                'cron job declarations',
+                $legacyXml['cron'],
+                '#[Maho\\Config\\CronJob]',
+            ),
+        ];
 
         return $checks;
     }
@@ -623,6 +782,47 @@ class HealthCheck extends BaseMahoCommand
             }
             $output->writeln('');
             $output->writeln('See: https://github.com/MahoCommerce/maho/pull/340');
+            $output->writeln('');
+        }
+
+        // Check for legacy XML config (routes, observers, cron jobs)
+        $output->write('Checking for legacy XML config... ');
+        $legacyXml = self::findLegacyXmlConfig();
+        $totalLegacy = count($legacyXml['routes']) + count($legacyXml['observers']) + count($legacyXml['cron']);
+
+        if ($totalLegacy === 0) {
+            $output->writeln('<info>OK</info>');
+        } else {
+            $output->writeln('');
+            $output->writeln('<comment>Warning: Found legacy XML configuration in user modules:</comment>');
+            $output->writeln('These declarations still work via a back-compatibility shim, but should be migrated to PHP attributes.');
+            $output->writeln('');
+
+            if (!empty($legacyXml['routes'])) {
+                $output->writeln('<comment>Legacy XML routes (migrate to #[Maho\Config\Route]):</comment>');
+                foreach ($legacyXml['routes'] as $r) {
+                    $output->writeln(sprintf('  - %s (%s area, frontName: %s) in %s', $r['module'], $r['area'], $r['frontName'], $r['file']));
+                }
+                $output->writeln('');
+            }
+
+            if (!empty($legacyXml['observers'])) {
+                $output->writeln('<comment>Legacy XML observers (migrate to #[Maho\Config\Observer]):</comment>');
+                foreach ($legacyXml['observers'] as $o) {
+                    $output->writeln(sprintf('  - %s (%d observer(s)) in %s', $o['module'], $o['count'], $o['file']));
+                }
+                $output->writeln('');
+            }
+
+            if (!empty($legacyXml['cron'])) {
+                $output->writeln('<comment>Legacy XML cron jobs (migrate to #[Maho\Config\CronJob]):</comment>');
+                foreach ($legacyXml['cron'] as $c) {
+                    $output->writeln(sprintf('  - %s (%d job(s)) in %s', $c['module'], $c['count'], $c['file']));
+                }
+                $output->writeln('');
+            }
+
+            $output->writeln('See: https://mahocommerce.com/routing/');
             $output->writeln('');
         }
 
