@@ -12,8 +12,6 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adminhtml_Controller_Action
 {
-    use Maho_FeedManager_Controller_Adminhtml_JsonResponseTrait;
-
     public const ADMIN_RESOURCE = 'catalog/feedmanager/category_mapping';
 
     #[\Override]
@@ -124,13 +122,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
         $platform = $this->getRequest()->getParam('platform', 'google');
 
         if (!$mappingsJson) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('No mappings provided')]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('No mappings provided')]);
             return;
         }
 
         $mappings = Mage::helper('core')->jsonDecode($mappingsJson);
         if (!is_array($mappings)) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Invalid mappings data')]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Invalid mappings data')]);
             return;
         }
 
@@ -159,11 +157,11 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
             Mage::getSingleton('adminhtml/session')->addSuccess(
                 $this->__('Saved %d category mappings.', $saved),
             );
-            $this->_sendJsonResponse(['success' => true]);
+            $this->getResponse()->setBodyJson(['success' => true]);
         } catch (Exception $e) {
             Mage::logException($e);
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-            $this->_sendJsonResponse(['error' => true]);
+            $this->getResponse()->setBodyJson(['error' => true]);
         }
     }
 
@@ -177,18 +175,18 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
         $query = $this->getRequest()->getParam('q', '');
 
         if (strlen($query) < 2) {
-            $this->_sendJsonResponse([]);
+            $this->getResponse()->setBodyJson([]);
             return;
         }
 
         $adapter = Maho_FeedManager_Model_Platform::getAdapter($platform);
         if (!$adapter) {
-            $this->_sendJsonResponse([]);
+            $this->getResponse()->setBodyJson([]);
             return;
         }
 
         $results = $adapter->searchTaxonomy($query, 20);
-        $this->_sendJsonResponse($results);
+        $this->getResponse()->setBodyJson($results);
     }
 
     /**
@@ -202,7 +200,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
         try {
             $adapter = Maho_FeedManager_Model_Platform::getAdapter($platform);
             if (!$adapter) {
-                $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Platform not found')]);
+                $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Platform not found')]);
                 return;
             }
 
@@ -238,11 +236,11 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
             Mage::getSingleton('adminhtml/session')->addSuccess(
                 $this->__('Auto-mapped %d categories.', $mapped),
             );
-            $this->_sendJsonResponse(['success' => true]);
+            $this->getResponse()->setBodyJson(['success' => true]);
         } catch (Exception $e) {
             Mage::logException($e);
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-            $this->_sendJsonResponse(['error' => true]);
+            $this->getResponse()->setBodyJson(['error' => true]);
         }
     }
 }

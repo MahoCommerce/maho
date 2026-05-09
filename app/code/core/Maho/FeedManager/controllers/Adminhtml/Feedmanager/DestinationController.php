@@ -12,8 +12,6 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_Adminhtml_Controller_Action
 {
-    use Maho_FeedManager_Controller_Adminhtml_JsonResponseTrait;
-
     public const ADMIN_RESOURCE = 'catalog/feedmanager/destinations';
 
     #[\Override]
@@ -269,7 +267,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
         $id = (int) $this->getRequest()->getParam('id');
 
         if (!$id) {
-            $this->_sendJsonResponse(['error' => true, 'message' => 'Destination ID required']);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => 'Destination ID required']);
             return;
         }
 
@@ -277,7 +275,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
             $destination = Mage::getModel('feedmanager/destination')->load($id);
 
             if (!$destination->getId()) {
-                $this->_sendJsonResponse(['error' => true, 'message' => 'Destination not found']);
+                $this->getResponse()->setBodyJson(['error' => true, 'message' => 'Destination not found']);
                 return;
             }
 
@@ -285,19 +283,19 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
             $result = $uploader->testConnection();
 
             if ($result['success']) {
-                $this->_sendJsonResponse([
+                $this->getResponse()->setBodyJson([
                     'success' => true,
                     'message' => 'Connection successful',
                 ]);
             } else {
-                $this->_sendJsonResponse([
+                $this->getResponse()->setBodyJson([
                     'error' => true,
                     'message' => $result['message'] ?? 'Connection failed',
                 ]);
             }
 
         } catch (Exception $e) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $e->getMessage()]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
     }
 
