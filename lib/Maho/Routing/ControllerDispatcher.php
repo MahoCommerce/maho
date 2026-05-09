@@ -121,16 +121,20 @@ class ControllerDispatcher
     }
 
     /**
-     * Resolve a controller class from frontName + controllerName via the compiled
-     * controllerLookup map, with the frontend/admin module chain as override.
+     * Resolve a controller class from frontName + controllerName.
      *
-     * The frontend chain is consulted *before* the compiled lookup so that
-     * <frontend><routers><X><args><modules> overrides win over the core module
-     * (M1 parity: "module chain entries override the base module").
+     * Lookup order:
+     *  1. Frontend `<modules>` chain — third-party overrides on a core frontName.
+     *  2. Legacy XML base module — `<frontend><routers><X><args><module>` declarations
+     *     (M1 BC). Takes precedence over compiled attribute routes so a legacy frontName
+     *     shadowing a core route still wins ("first declared wins").
+     *  3. Compiled attribute routes — `controllerLookup` stores the full class FQCN
+     *     (no reconstruction; the compiler captured the actual class at compile time).
+     *  4. Admin `<modules>` chain — third-party admin extensions without `#[Route]`.
      */
     protected function resolveControllerClass(string $frontName, string $controllerName): ?string
     {
-        // Frontend module chain — third-party overrides win over the compiled base.
+        // 1. Frontend module chain — third-party overrides win over the compiled base.
         foreach ($this->buildFrontendModuleChain($frontName) as $chainModule) {
             $className = $chainModule . '_' . uc_words($controllerName) . 'Controller';
             if (class_exists($className)) {
@@ -138,15 +142,22 @@ class ControllerDispatcher
             }
         }
 
-        $module = RouteCollectionBuilder::resolveControllerModule($frontName, $controllerName);
-        if ($module !== null) {
-            $className = $module . '_' . uc_words($controllerName) . 'Controller';
+        // 2. Legacy XML base module (M1 BC for `<frontend><routers>` without #[Route]).
+        $legacyModule = RouteCollectionBuilder::getLegacyFrontNames()[strtolower($frontName)] ?? null;
+        if ($legacyModule !== null) {
+            $className = $legacyModule . '_' . uc_words($controllerName) . 'Controller';
             if (class_exists($className)) {
                 return $className;
             }
         }
 
-        // Fall back to admin module chain for third-party admin extensions without #[Route]
+        // 3. Compiled attribute routes — full class is in the lookup, no reconstruction needed.
+        $className = RouteCollectionBuilder::resolveControllerClass($frontName, $controllerName);
+        if ($className !== null && class_exists($className)) {
+            return $className;
+        }
+
+        // 4. Admin module chain — third-party admin extensions without `#[Route]`.
         if (strtolower($frontName) === strtolower(RouteCollectionBuilder::getAdminFrontName())) {
             foreach ($this->buildAdminModuleChain() as $chainModule) {
                 $className = $chainModule . '_' . uc_words($controllerName) . 'Controller';

@@ -18,11 +18,11 @@ uses(Tests\MahoBackendTestCase::class);
  * BC shim tests for the classic M1/OpenMage `<frontend><routers>` config.
  *
  * Modules that declare a frontName via XML (instead of `#[Maho\Config\Route]`)
- * must still dispatch: the frontName → module class-prefix map is read from
- * merged config and consulted by `resolveControllerModule()` before the compiled
- * attribute lookup. Router_Default also runs this path *before* the Symfony
- * matcher so a legacy frontName that collides with a core route takes
- * precedence (preserving M1 "first declared wins" semantics).
+ * must still dispatch: `getLegacyFrontNames()` reads the frontName → module map
+ * from merged config, and `ControllerDispatcher::resolveControllerClass()` checks
+ * it before consulting the compiled attribute lookup. Router_Default also runs
+ * this path *before* the Symfony matcher so a legacy frontName that collides
+ * with a core route takes precedence (preserving M1 "first declared wins" semantics).
  */
 
 function resetLegacyFrontNamesCache(): void
@@ -76,36 +76,76 @@ describe('RouteCollectionBuilder::getLegacyFrontNames()', function () {
     });
 });
 
-describe('RouteCollectionBuilder::resolveControllerModule() with legacy XML', function () {
+describe('RouteCollectionBuilder::resolveControllerClass() (compiled attribute routes)', function () {
     beforeEach(fn() => resetLegacyFrontNamesCache());
     afterEach(fn() => resetLegacyFrontNamesCache());
 
-    it('falls back to the legacy map when the compiled lookup misses', function () {
-        registerLegacyXmlRoute('mymodule', 'mymodule', 'MyVendor_Mymodule');
-
-        expect(RouteCollectionBuilder::resolveControllerModule('mymodule', 'index'))
-            ->toBe('MyVendor_Mymodule');
+    it('returns the full controller class FQCN for a compiled frontName', function () {
+        // The compiled lookup stores classes directly — no convention-based reconstruction.
+        expect(RouteCollectionBuilder::resolveControllerClass('catalog', 'product'))
+            ->toBe('Mage_Catalog_ProductController');
     });
 
-    it('gives the legacy declaration precedence over a compiled core frontName', function () {
-        // `catalog` is a compiled core frontName (Mage_Catalog). A legacy module
-        // declaring the same frontName must win to preserve M1 shadow-by-frontName
-        // semantics. If the declared module class doesn't exist the dispatcher
-        // falls through — resolveControllerModule itself just answers the mapping.
-        registerLegacyXmlRoute('legacy_catalog', 'catalog', 'Shadow_Catalog');
-
-        expect(RouteCollectionBuilder::resolveControllerModule('catalog', 'product'))
-            ->toBe('Shadow_Catalog');
+    it('returns the FQCN with `_Adminhtml_` infix for Maho-style admin modules', function () {
+        // Maho_FeedManager has its admin controllers in `controllers/Adminhtml/Feedmanager/`,
+        // so the class is `Maho_FeedManager_Adminhtml_Feedmanager_FeedController`. The lookup
+        // captures this verbatim — it doesn't matter that the URL controllerName is the
+        // shorter `feedmanager_feed`.
+        expect(RouteCollectionBuilder::resolveControllerClass('admin', 'feedmanager_feed'))
+            ->toBe('Maho_FeedManager_Adminhtml_Feedmanager_FeedController');
     });
 
-    it('still resolves compiled frontNames when no legacy declaration shadows them', function () {
-        expect(RouteCollectionBuilder::resolveControllerModule('catalog', 'product'))
-            ->toBe('Mage_Catalog');
-    });
-
-    it('returns null when neither the legacy map nor the compiled lookup knows the frontName', function () {
-        expect(RouteCollectionBuilder::resolveControllerModule('definitely-not-a-frontname', 'index'))
+    it('returns null for unknown frontName/controller pairs', function () {
+        expect(RouteCollectionBuilder::resolveControllerClass('definitely-not-a-frontname', 'index'))
             ->toBeNull();
+    });
+
+    it('does NOT consult the legacy XML map (that path is owned by the dispatcher)', function () {
+        // resolveControllerClass() only reads the compiled lookup. Legacy XML lives in
+        // `getLegacyFrontNames()`, and ControllerDispatcher::resolveControllerClass()
+        // composes them in the right precedence order.
+        registerLegacyXmlRoute('legacy_only', 'unique-legacy-frontname', 'Some_Module');
+
+        expect(RouteCollectionBuilder::resolveControllerClass('unique-legacy-frontname', 'index'))
+            ->toBeNull();
+    });
+});
+
+describe('ControllerDispatcher::resolveControllerClass() — legacy XML precedence', function () {
+    beforeEach(fn() => resetLegacyFrontNamesCache());
+    afterEach(fn() => resetLegacyFrontNamesCache());
+
+    /**
+     * The dispatcher's resolveControllerClass() composes three sources in priority order;
+     * this group pins the M1 "first declared wins" rule: a legacy XML module shadowing
+     * a core compiled frontName must dispatch to the legacy controller, not the core one.
+     */
+    function callDispatcherResolveControllerClass(string $frontName, string $controllerName): ?string
+    {
+        $dispatcher = new \Maho\Routing\ControllerDispatcher();
+        $ref = new ReflectionMethod(\Maho\Routing\ControllerDispatcher::class, 'resolveControllerClass');
+        return $ref->invoke($dispatcher, $frontName, $controllerName);
+    }
+
+    it('lets a legacy XML module shadow a compiled core frontName when the class exists', function () {
+        // Mage_Catalog has a compiled `catalog/product` route resolving to
+        // Mage_Catalog_ProductController. A legacy XML module declaring frontName=catalog
+        // and pointing to Mage_Adminhtml (which happens to have a ProductController via
+        // Mage_Adminhtml_Catalog_ProductController — but here we just pick any module
+        // with an Index controller for simplicity) must win the lookup if its class exists.
+        registerLegacyXmlRoute('shadow', 'catalog', 'Mage_Adminhtml');
+        // Mage_Adminhtml_IndexController exists; assert it wins over Mage_Catalog_IndexController.
+        expect(callDispatcherResolveControllerClass('catalog', 'index'))
+            ->toBe('Mage_Adminhtml_IndexController');
+    });
+
+    it('falls through to the compiled lookup when the legacy module class is missing', function () {
+        // Legacy XML declares a non-existent class — dispatcher must skip it (not return
+        // a string for a class that fails class_exists) and fall through to the compiled
+        // route, preserving graceful behavior on misconfiguration.
+        registerLegacyXmlRoute('broken', 'catalog', 'Totally_Nonexistent_Module');
+        expect(callDispatcherResolveControllerClass('catalog', 'product'))
+            ->toBe('Mage_Catalog_ProductController');
     });
 });
 
@@ -175,7 +215,7 @@ describe('Router_Default legacy XML pre-check', function () {
 
         // If the case-check was broken, dispatchLegacyPath would never be called
         // and this would still return false — but from the fast-path miss rather
-        // than the class-resolution miss. The resolveControllerModule unit tests
+        // than the class-resolution miss. The getLegacyFrontNames() unit tests
         // already pin the case-insensitive map; this just guards the glue.
         expect(callMatchLegacyXmlRoute($router, $request))->toBeFalse();
     });

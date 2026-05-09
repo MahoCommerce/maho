@@ -115,10 +115,19 @@ describe('Compiled matcher route table integrity', function () {
     it('has a controllerLookup map for resolveControllerClass', function () {
         $compiled = Maho::getCompiledAttributes();
         // Used by ControllerDispatcher::resolveControllerClass() + the legacy-path
-        // fallback. A few known entries must be present.
-        expect($compiled['controllerLookup']['catalog/product'] ?? null)->toBe('Mage_Catalog');
-        expect($compiled['controllerLookup']['__admin__/dashboard'] ?? null)->toBe('Mage_Adminhtml');
-        expect($compiled['controllerLookup']['__install__/wizard'] ?? null)->toBe('Mage_Install');
+        // fallback. The lookup stores full controller class FQCNs so the runtime
+        // never has to reconstruct them by convention.
+        expect($compiled['controllerLookup']['catalog/product'] ?? null)
+            ->toBe('Mage_Catalog_ProductController');
+        expect($compiled['controllerLookup']['__admin__/dashboard'] ?? null)
+            ->toBe('Mage_Adminhtml_DashboardController');
+        expect($compiled['controllerLookup']['__install__/wizard'] ?? null)
+            ->toBe('Mage_Install_WizardController');
+        // Maho-style admin module: class lives at controllers/Adminhtml/<Group>/, so the
+        // FQCN has an `_Adminhtml_` infix. This is the case that broke forward-dispatch
+        // when the lookup stored the module name and the runtime had to reconstruct.
+        expect($compiled['controllerLookup']['__admin__/feedmanager_feed'] ?? null)
+            ->toBe('Maho_FeedManager_Adminhtml_Feedmanager_FeedController');
     });
 
     it('rejects paths outside the route table via ResourceNotFoundException', function () {

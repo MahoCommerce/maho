@@ -100,7 +100,7 @@ describe('ControllerDispatcher::dispatchLegacyPath()', function () {
     });
 
     it('is case-insensitive on frontName and controllerName', function () {
-        // resolveControllerModule() lowercases both lookup keys, so the legacy
+        // resolveControllerClass() lowercases both lookup keys, so the legacy
         // path must continue to work even if an old rewrite used mixed case.
         $dispatcher = new ControllerDispatcher();
         $request = legacyRequest('/CATALOG/Index/nonexistentAction');
