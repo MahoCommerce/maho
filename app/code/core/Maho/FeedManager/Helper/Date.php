@@ -33,8 +33,11 @@ class Maho_FeedManager_Helper_Date extends Mage_Core_Helper_Abstract
     /**
      * Format a `{from}/{to}` ISO 8601 range from two UTC datetime strings
      *
-     * Returns empty string when either bound is missing — matches the
-     * shopping-feed requirement that incomplete ranges be omitted.
+     * Returns empty string when either bound is missing. Google/Facebook/Bing/
+     * Pinterest all require both bounds: `(YYYY-MM-DD)T(HH:MM±HHMM)/(YYYY-MM-DD)T(HH:MM±HHMM)`,
+     * there is no half-open form. When the field is omitted, the sale_price
+     * is treated as active for as long as it's submitted, which is the right
+     * fallback when only one bound is known.
      */
     public function toIso8601Range(?string $from, ?string $to): string
     {
