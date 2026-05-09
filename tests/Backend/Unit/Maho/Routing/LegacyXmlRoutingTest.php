@@ -116,9 +116,10 @@ describe('ControllerDispatcher::resolveControllerClass() — legacy XML preceden
     afterEach(fn() => resetLegacyFrontNamesCache());
 
     /**
-     * The dispatcher's resolveControllerClass() composes three sources in priority order;
-     * this group pins the M1 "first declared wins" rule: a legacy XML module shadowing
-     * a core compiled frontName must dispatch to the legacy controller, not the core one.
+     * The dispatcher's resolveControllerClass() composes the legacy XML map with the
+     * compiled lookup (plus the frontend/admin module chains); this group pins the M1
+     * "first declared wins" rule: a legacy XML module shadowing a core compiled
+     * frontName must dispatch to the legacy controller, not the core one.
      */
     function callDispatcherResolveControllerClass(string $frontName, string $controllerName): ?string
     {
@@ -128,13 +129,10 @@ describe('ControllerDispatcher::resolveControllerClass() — legacy XML preceden
     }
 
     it('lets a legacy XML module shadow a compiled core frontName when the class exists', function () {
-        // Mage_Catalog has a compiled `catalog/product` route resolving to
-        // Mage_Catalog_ProductController. A legacy XML module declaring frontName=catalog
-        // and pointing to Mage_Adminhtml (which happens to have a ProductController via
-        // Mage_Adminhtml_Catalog_ProductController — but here we just pick any module
-        // with an Index controller for simplicity) must win the lookup if its class exists.
+        // The compiled lookup resolves `catalog/index` to Mage_Catalog_IndexController.
+        // A legacy XML declaration shadowing the `catalog` frontName onto Mage_Adminhtml
+        // must win and resolve to Mage_Adminhtml_IndexController instead.
         registerLegacyXmlRoute('shadow', 'catalog', 'Mage_Adminhtml');
-        // Mage_Adminhtml_IndexController exists; assert it wins over Mage_Catalog_IndexController.
         expect(callDispatcherResolveControllerClass('catalog', 'index'))
             ->toBe('Mage_Adminhtml_IndexController');
     });
