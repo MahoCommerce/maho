@@ -66,9 +66,11 @@
         </fieldset>
         <?php endif ?>
         <div class="user-menu-icons">
+            <?php if (Mage::getSingleton('admin/session')->isAllowed('admin/system/myaccount')): ?>
             <a href="<?= Mage::helper("adminhtml")->getUrl("adminhtml/system_account") ?>" class="user-icon" title="<?= $this->__("My Account") ?>">
                 <?= $this->getIconSvg('user') ?>
             </a>
+            <?php endif ?>
             <a href="<?= $this->getLogoutLink() ?>" class="logout-icon" title="<?= $this->__('Log Out') ?>">
                 <?= $this->getIconSvg('logout') ?>
             </a>

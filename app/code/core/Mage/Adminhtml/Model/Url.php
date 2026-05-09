@@ -116,7 +116,12 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
             $action = empty($p[2]) ? $this->getRequest()->getActionName() : $p[2];
         }
 
-        $secret = $controller . $action . $salt;
+        // Normalize case so the hash matches regardless of how the caller cased the
+        // identifiers. The URL emitted by the Symfony generator preserves the case
+        // declared in #[Route], but the menu placeholder, getUrl(*/*/foo) shorthand,
+        // and getOriginalPathInfo() can all surface different cases; lowercasing here
+        // means generation and validation always agree.
+        $secret = strtolower($controller) . strtolower($action) . $salt;
         return Mage::helper('core')->getHash($secret);
     }
 

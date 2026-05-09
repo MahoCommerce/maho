@@ -128,7 +128,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     public function generateXml()
     {
         $storeId = $this->getStoreId();
-        $date = Mage::getSingleton('core/date')->gmtDate(Mage_Core_Model_Locale::DATE_FORMAT);
+        $date = Mage::app()->getLocale()->todayUtc();
         $baseUrl = Mage::app()->getStore($storeId)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
         $maxUrlsPerFile = (int) Mage::getStoreConfig('sitemap/generate/max_urls_per_file', $storeId);
 
@@ -156,9 +156,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         // Generate sitemap index
         $this->generateSitemapIndex($storeId, $baseUrl, $date);
 
-        $this->setSitemapTime(
-            Mage::getSingleton('core/date')->gmtDate(Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT),
-        );
+        $this->setSitemapTime(Mage::app()->getLocale()->formatDateForDb('now'));
         $this->save();
 
         return $this;
@@ -361,7 +359,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
 
         $this->_sitemapFiles[] = [
             'filename' => $filename,
-            'lastmod' => Mage::getSingleton('core/date')->gmtDate(Mage_Core_Model_Locale::DATE_FORMAT),
+            'lastmod' => Mage::app()->getLocale()->todayUtc(),
         ];
 
         foreach ($items as $item) {
@@ -478,7 +476,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     public function addSitemapFile(string $filename, ?string $lastmod = null): void
     {
         if (!$lastmod) {
-            $lastmod = Mage::getSingleton('core/date')->gmtDate(Mage_Core_Model_Locale::DATE_FORMAT);
+            $lastmod = Mage::app()->getLocale()->todayUtc();
         }
 
         $this->_sitemapFiles[] = [

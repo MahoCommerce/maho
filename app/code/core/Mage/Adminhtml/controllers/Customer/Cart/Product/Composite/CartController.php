@@ -74,6 +74,7 @@ class Mage_Adminhtml_Customer_Cart_Product_Composite_CartController extends Mage
      *
      * @return $this
      */
+    #[Maho\Config\Route('/admin/customer_cart_product_composite_cart/configure')]
     public function configureAction()
     {
         try {
@@ -114,6 +115,7 @@ class Mage_Adminhtml_Customer_Cart_Product_Composite_CartController extends Mage
      *
      * @return false
      */
+    #[Maho\Config\Route('/admin/customer_cart_product_composite_cart/update')]
     public function updateAction()
     {
         try {

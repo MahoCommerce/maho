@@ -144,9 +144,9 @@ $attributes = [
     'taxvat'            => [
         'is_user_defined'   => 0,
         'is_system'         => 0,
-        'is_visible'        => $addressHelper->getConfig('dob_show', $store) == '' ? 0 : 1,
+        'is_visible'        => $addressHelper->getConfig('taxvat_show', $store) == '' ? 0 : 1,
         'sort_order'        => 100,
-        'is_required'       => $addressHelper->getConfig('dob_show', $store) == 'req' ? 1 : 0,
+        'is_required'       => $addressHelper->getConfig('taxvat_show', $store) == 'req' ? 1 : 0,
         'validate_rules'    => [
             'max_text_length'   => 255,
         ],

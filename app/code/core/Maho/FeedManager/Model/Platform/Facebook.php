@@ -236,7 +236,7 @@ class Maho_FeedManager_Model_Platform_Facebook extends Maho_FeedManager_Model_Pl
         'additional_image_link' => ['source_type' => 'attribute', 'source_value' => 'additional_images_csv', 'use_parent' => 'if_empty'],
         'price' => ['source_type' => 'attribute', 'source_value' => 'price'],
         'sale_price' => ['source_type' => 'attribute', 'source_value' => 'special_price'],
-        'sale_price_effective_date' => ['source_type' => 'static', 'source_value' => ''],
+        'sale_price_effective_date' => ['source_type' => 'attribute', 'source_value' => 'sale_price_effective_date', 'use_parent' => 'if_empty'],
         'brand' => ['source_type' => 'attribute', 'source_value' => 'manufacturer', 'use_parent' => 'if_empty'],
         'gtin' => ['source_type' => 'attribute', 'source_value' => 'gtin'],
         'mpn' => ['source_type' => 'attribute', 'source_value' => 'mpn'],

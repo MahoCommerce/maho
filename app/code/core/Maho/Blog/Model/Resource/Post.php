@@ -170,11 +170,9 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         $isActive = $coreHelper->filterInt($object->getData('is_active') ?? 0) ? 1 : 0;
         $object->setData('is_active', $isActive);
 
-        // Validate publish_date and set to today if empty/invalid
+        // Validate publish_date and set to today (in store TZ — matches admin's view) if empty/invalid
         if (!$object->hasData('publish_date') || empty($object->getData('publish_date')) || !$coreHelper->isValidDate($object->getData('publish_date'))) {
-            $locale = Mage::app()->getLocale();
-            $today = $locale->utcDate(null, null, true, Mage_Core_Model_Locale::DATE_FORMAT);
-            $object->setData('publish_date', $today);
+            $object->setData('publish_date', Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT));
         }
 
         // Filter HTML content
@@ -211,12 +209,12 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     #[\Override]
     public function save(\Maho\DataObject $object)
     {
-        $locale = Mage::app()->getLocale();
+        $now = Mage::app()->getLocale()->formatDateForDb('now');
 
         if (!$object->getId()) {
-            $object->setCreatedAt($locale->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+            $object->setCreatedAt($now);
         }
-        $object->setUpdatedAt($locale->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+        $object->setUpdatedAt($now);
 
         // First do the EAV save (creates entity and gets ID)
         parent::save($object);

@@ -23,10 +23,15 @@
     <div class="tree-actions">
         <?php if($this->getRoot()): ?>
             <a href="#" onclick="tree.collapseTree(); return false;"><?= Mage::helper('catalog')->__('Collapse All') ?></a>
-            <span class="separator">|</span>
             <a href="#" onclick="tree.expandTree(); return false;"><?= Mage::helper('catalog')->__('Expand All') ?></a>
         <?php endif ?>
     </div>
+    <?php if($this->getRoot()): ?>
+        <div class="tree-actions tree-label-options">
+            <label><input type="checkbox" id="tree-show-id"> <?= Mage::helper('catalog')->__('Show ID') ?></label>
+            <label><input type="checkbox" id="tree-show-count" checked> <?= Mage::helper('catalog')->__('Show count') ?></label>
+        </div>
+    <?php endif ?>
     <div class="tree-holder">
         <div id="tree-div" class="hor-scroll"></div>
     </div>

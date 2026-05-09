@@ -15,6 +15,6 @@ class Maho_Paypal_Model_Resource_Webhook_Event extends Mage_Core_Model_Resource_
     #[\Override]
     protected function _construct(): void
     {
-        $this->_init('maho_paypal/webhook_event', 'event_id');
+        $this->_init('paypal/webhook_event', 'event_id');
     }
 }

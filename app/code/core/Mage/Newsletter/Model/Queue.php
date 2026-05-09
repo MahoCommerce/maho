@@ -118,9 +118,8 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
             $this->setQueueStartAt(null);
         } else {
             $locale = Mage::app()->getLocale();
-            $format = $locale->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM);
-            $time = $locale->date($startAt, $format)->getTimestamp();
-            $this->setQueueStartAt(Mage::getModel('core/date')->gmtDate(null, $time));
+            $utcDate = $locale->storeToUtc(null, $startAt);
+            $this->setQueueStartAt($utcDate->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
         }
         return $this;
     }
@@ -195,7 +194,7 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
      */
     protected function _finishQueue()
     {
-        $this->setQueueFinishAt(Mage::getSingleton('core/date')->gmtDate());
+        $this->setQueueFinishAt(Mage::app()->getLocale()->formatDateForDb('now'));
         $this->setQueueStatus(self::STATUS_SENT);
         $this->save();
 

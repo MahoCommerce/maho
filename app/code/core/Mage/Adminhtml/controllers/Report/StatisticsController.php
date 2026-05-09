@@ -25,6 +25,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
      */
     protected $_adminSession = null;
 
+    #[Maho\Config\Route('/admin/report_statistics/_init')]
     public function _initAction()
     {
         $act = $this->getRequest()->getActionName();
@@ -38,6 +39,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/report_statistics/_initReport')]
     public function _initReportAction($blocks)
     {
         if (!is_array($blocks)) {
@@ -105,11 +107,12 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
      *
      * @return $this
      */
+    #[Maho\Config\Route('/admin/report_statistics/refreshRecent')]
     public function refreshRecentAction()
     {
         try {
             $collectionsNames = $this->_getCollectionNames();
-            $currentDate = Mage::app()->getLocale()->dateImmutable();
+            $currentDate = Mage::app()->getLocale()->utcToStore();
             $date = $currentDate->modify('-25 hours');
             foreach ($collectionsNames as $collectionName) {
                 Mage::getResourceModel($collectionName)->aggregate($date);
@@ -135,6 +138,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
      *
      * @return $this
      */
+    #[Maho\Config\Route('/admin/report_statistics/refreshLifetime')]
     public function refreshLifetimeAction()
     {
         try {
@@ -159,6 +163,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/report_statistics/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Reports'))->_title($this->__('Sales'))->_title($this->__('Refresh Statistics'));

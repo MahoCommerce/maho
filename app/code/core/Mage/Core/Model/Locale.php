@@ -533,8 +533,9 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
 
 
     /**
-     * Use dateMutable() or dateImmutable() instead of this one.
-     *
+     * @deprecated since 26.5 Use utcToStore() or storeToUtc() instead
+     * @see utcToStore()
+     * @see storeToUtc()
      * @param string             $part
      */
     public function date(string|int|DateTime|DateTimeImmutable|null $date = null, ?string $part = null, ?string $locale = null, bool $useTimezone = true): DateTime
@@ -567,6 +568,10 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     /**
      * Create mutable DateTime object for current locale
      * Alias for date() method with explicit name
+     *
+     * @deprecated since 26.5 Use utcToStore() or storeToUtc() instead
+     * @see utcToStore()
+     * @see storeToUtc()
      */
     public function dateMutable(
         string|int|DateTime|null $date = null,
@@ -579,6 +584,10 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
 
     /**
      * Create immutable DateTime object for current locale
+     *
+     * @deprecated since 26.5 Use utcToStore() or storeToUtc() with DateTimeImmutable::createFromMutable() instead
+     * @see utcToStore()
+     * @see storeToUtc()
      */
     public function dateImmutable(
         string|int|DateTime|null $date = null,
@@ -592,6 +601,9 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
 
     /**
      * Create DateTime object with date converted to store timezone and store Locale
+     *
+     * @deprecated since 26.5 Use utcToStore() instead. Callers should format the result themselves.
+     * @see utcToStore()
      *
      * @param   null|string|bool|int|Mage_Core_Model_Store $store Information about store
      * @param   string|int|DateTime|DateTimeImmutable|null $date date in UTC
@@ -661,6 +673,9 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      * to UTC time zone. Date can be passed in format of store's locale
      * or in format which was passed as parameter.
      *
+     * @deprecated since 26.5 Use storeToUtc() instead. Callers should format the result themselves.
+     * @see storeToUtc()
+     *
      * @param mixed $store Information about store
      * @param string|int|DateTime|DateTimeImmutable|null $date date in store's timezone
      * @param bool $includeTime flag for including time to date
@@ -675,15 +690,19 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     {
         // Special handling for HTML5 native input formats
         if ($format === 'html5' && is_string($date)) {
+            // Parse date in store timezone so midnight/time values are correct for the store
+            $storeTimezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
+            $storeTz = new DateTimeZone($storeTimezone);
+
             if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $date)) {
                 // datetime-local format - validate the datetime
-                $dateTime = DateTime::createFromFormat(self::HTML5_DATETIME_FORMAT, substr($date, 0, 16));
+                $dateTime = DateTime::createFromFormat(self::HTML5_DATETIME_FORMAT, substr($date, 0, 16), $storeTz);
                 if ($dateTime === false || $dateTime->format(self::HTML5_DATETIME_FORMAT) !== substr($date, 0, 16)) {
                     return null;
                 }
             } elseif (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
                 // date format - validate the date
-                $dateTime = DateTime::createFromFormat(self::DATE_FORMAT, $date);
+                $dateTime = DateTime::createFromFormat(self::DATE_FORMAT, $date, $storeTz);
                 if ($dateTime === false || $dateTime->format(self::DATE_FORMAT) !== $date) {
                     return null;
                 }
@@ -693,10 +712,6 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
             } else {
                 return null;
             }
-
-            // Set to store timezone first
-            $storeTimezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
-            $dateTime->setTimezone(new DateTimeZone($storeTimezone));
 
             // Convert to UTC
             $dateTime->setTimezone(new DateTimeZone(self::DEFAULT_TIMEZONE));
@@ -711,38 +726,150 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     }
 
     /**
-     * Get current date and time in standard format
+     * Current UTC datetime as a 'Y-m-d H:i:s' string, suitable for DB columns.
      *
-     * @return string Current datetime as 'Y-m-d H:i:s'
+     * The "Utc" suffix is intentional: the whole codebase stores timestamps in UTC, and the method
+     * name makes that invariant visible at every call site — no need to check the docblock to know
+     * which timezone the returned string is in. Uses gmdate() internally, so the result is UTC
+     * regardless of PHP's default timezone.
+     *
+     * If you need "now" in the store's timezone (for computation or display), call
+     * $locale->utcToStore() with no arguments — it returns a DateTime you can format however you want.
+     * Do NOT format this method's return value as if it were store-local; it isn't.
+     *
+     * No companion nowInStoreTimezone() / nowStore() method exists, and that's deliberate:
+     *   - A store-local datetime string in a DB column is ambiguous (same string, different instants
+     *     across stores) and would violate the "DB is always UTC" invariant this API relies on.
+     *   - For computation or display you want a DateTime object, not a string, so you can do
+     *     arithmetic or pass it to a locale-aware formatter — utcToStore() already returns that.
+     * A nowStore() string method would invite exactly the bug class the UTC-only DB convention is
+     * meant to prevent, so the API forces you to reach for utcToStore() instead.
      */
-    public static function now(): string
+    public static function nowUtc(): string
     {
-        return date(self::DATETIME_FORMAT);
+        return gmdate(self::DATETIME_FORMAT);
     }
 
     /**
-     * Get current date in standard format (without time)
+     * Current UTC date (no time) as a 'Y-m-d' string, suitable for date-only DB columns.
      *
-     * @return string Current date as 'Y-m-d'
+     * Same rationale as nowUtc() — the "Utc" suffix encodes the timezone at the call site, and
+     * the deliberate absence of a todayInStoreTimezone() / todayStore() counterpart prevents
+     * store-local date strings from creeping into DB columns. For "today" in the store's timezone,
+     * use $locale->utcToStore()->format('Y-m-d').
      */
-    public static function today(): string
+    public static function todayUtc(): string
     {
-        return date(self::DATE_FORMAT);
+        return gmdate(self::DATE_FORMAT);
     }
 
     /**
      * Get store timestamp
      *
      * Timestamp will be built with store timezone settings
+     *
+     * @deprecated since 26.5 Use utcToStore($store) for store-local dates, or time() for real timestamps
+     * @see utcToStore()
      */
     public function storeTimeStamp(mixed $store = null): int
     {
-        $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
-        $currentTimezone = @date_default_timezone_get();
-        @date_default_timezone_set($timezone);
-        $date = date(Mage_Core_Model_Locale::DATETIME_FORMAT);
-        @date_default_timezone_set($currentTimezone);
-        return strtotime($date);
+        return $this->utcToStore($store)->getTimestamp();
+    }
+
+    /**
+     * Convert a UTC date to the store's configured timezone.
+     *
+     * Always returns a DateTimeImmutable object with the store's timezone set.
+     * Use PHP's DateTimeImmutable::format() for machine-readable output (e.g. $result->format('Y-m-d')).
+     * For locale-aware display formatting, use Mage::helper('core')->formatDate() instead.
+     *
+     * Note: if $date is a DateTime/DateTimeImmutable, its existing timezone is preserved as the
+     * source timezone (i.e. setTimezone converts from the object's current TZ, not necessarily UTC).
+     * For correct results, pass DateTime objects that are already in UTC.
+     *
+     * @param null|string|bool|int|Mage_Core_Model_Store $store Store (null = current store)
+     * @param string|int|DateTime|DateTimeImmutable|null $date Date in UTC (null or 'now' = current time)
+     */
+    public function utcToStore(mixed $store = null, string|int|DateTime|DateTimeImmutable|null $date = null): DateTimeImmutable
+    {
+        $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE) ?: self::DEFAULT_TIMEZONE;
+        return $this->parseDate($date, new DateTimeZone(self::DEFAULT_TIMEZONE))
+            ->setTimezone(new DateTimeZone($timezone));
+    }
+
+    /**
+     * Convert a store-timezone date to UTC.
+     *
+     * Always returns a DateTimeImmutable object with UTC timezone set.
+     * Use PHP's DateTimeImmutable::format() for machine-readable output (e.g. $result->format('Y-m-d H:i:s')).
+     * For locale-aware display formatting, use Mage::helper('core')->formatDate() instead.
+     *
+     * Note: if $date is a DateTime/DateTimeImmutable, its existing timezone is preserved as the
+     * source timezone (i.e. setTimezone converts from the object's current TZ, not necessarily the
+     * store's timezone). For correct results, pass DateTime objects that are already in store TZ.
+     *
+     * @param null|string|bool|int|Mage_Core_Model_Store $store Store (null = current store)
+     * @param string|int|DateTime|DateTimeImmutable|null $date Date in store timezone (null or 'now' = current time)
+     */
+    public function storeToUtc(mixed $store = null, string|int|DateTime|DateTimeImmutable|null $date = null): DateTimeImmutable
+    {
+        $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE) ?: self::DEFAULT_TIMEZONE;
+        return $this->parseDate($date, new DateTimeZone($timezone))
+            ->setTimezone(new DateTimeZone(self::DEFAULT_TIMEZONE));
+    }
+
+    /**
+     * Format any date input to database format string.
+     *
+     * Does not perform timezone conversion. DateTime/DateTimeImmutable inputs are formatted
+     * in their current timezone; string inputs are parsed as UTC; int inputs are formatted
+     * as UTC via gmdate(). Callers should ensure the input is already in the desired timezone
+     * (typically UTC for strings/ints, or the correct timezone for DateTime objects).
+     *
+     * @param int|string|DateTime|DateTimeImmutable|null $date Date input
+     * @param bool $withTime Whether to include time component
+     * @return string|null Formatted date string or null if input is empty
+     */
+    public function formatDateForDb(int|string|DateTime|DateTimeImmutable|null $date, bool $withTime = true): ?string
+    {
+        $format = $withTime ? self::DATETIME_FORMAT : self::DATE_FORMAT;
+
+        if ($date instanceof DateTimeInterface) {
+            return $date->format($format);
+        }
+
+        if (empty($date) && !is_numeric($date)) {
+            return null;
+        }
+
+        if (!is_numeric($date)) {
+            // Parse string dates explicitly as UTC to avoid server-timezone shifts
+            // when PHP's default timezone is not UTC
+            $dateTime = new DateTime($date, new DateTimeZone(self::DEFAULT_TIMEZONE));
+            return $dateTime->format($format);
+        }
+
+        return gmdate($format, (int) $date);
+    }
+
+    /**
+     * Parse various date input types into a DateTimeImmutable in the given timezone.
+     */
+    private function parseDate(string|int|DateTime|DateTimeImmutable|null $date, DateTimeZone $timezone): DateTimeImmutable
+    {
+        if ($date instanceof DateTimeImmutable) {
+            return $date;
+        }
+
+        if ($date instanceof DateTime) {
+            return DateTimeImmutable::createFromMutable($date);
+        }
+
+        if (is_int($date) || (is_string($date) && is_numeric($date))) {
+            return (new DateTimeImmutable('@' . $date))->setTimezone($timezone);
+        }
+
+        return new DateTimeImmutable($date ?: 'now', $timezone);
     }
 
     /**
@@ -1353,12 +1480,17 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
             $store = Mage::app()->getStore($store);
         }
 
-        $storeTimeStamp = $this->storeTimeStamp($store);
-        $fromTimeStamp  = strtotime((string) $dateFrom);
-        $toTimeStamp    = strtotime((string) $dateTo);
+        // Parse all dates in the store timezone so interval boundaries align with
+        // the store's local calendar day, not the server's default timezone
+        $storeTz = new DateTimeZone(
+            $store->getConfig(self::XML_PATH_DEFAULT_TIMEZONE) ?: self::DEFAULT_TIMEZONE,
+        );
+        $storeTimeStamp = $this->utcToStore($store)->getTimestamp();
+        $fromTimeStamp  = $dateFrom ? (new DateTime($dateFrom, $storeTz))->getTimestamp() : false;
+        $toTimeStamp    = false;
         if ($dateTo) {
             // fix date YYYY-MM-DD 00:00:00 to YYYY-MM-DD 23:59:59
-            $endDate = new DateTime((string) $dateTo);
+            $endDate = new DateTime($dateTo, $storeTz);
             $endDate->setTime(23, 59, 59);
             $toTimeStamp = $endDate->getTimestamp();
         }

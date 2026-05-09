@@ -296,7 +296,7 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
         $newData = $this->getNewData(false);
         $this->setNewData(Mage::helper('core')->jsonEncode($newData));
         if (!$this->hasCreatedAt()) {
-            $this->setCreatedAt($this->_getResource()->formatDate(time(), true));
+            $this->setCreatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         }
         return parent::_beforeSave();
     }

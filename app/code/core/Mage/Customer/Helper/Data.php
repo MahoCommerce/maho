@@ -154,14 +154,14 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     ];
 
     /**
-     * @var Mage_Customer_Model_Customer
+     * @var Mage_Customer_Model_Customer|null
      */
     protected $_customer;
 
     /**
      * Customer groups collection
      *
-     * @var Mage_Customer_Model_Entity_Group_Collection
+     * @var Mage_Customer_Model_Entity_Group_Collection|null
      */
     protected $_groups;
 
@@ -692,7 +692,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
             return new \Maho\DataObject([
                 'is_valid' => false,
                 'request_success' => true,
-                'request_date' => Mage_Core_Model_Locale::now(),
+                'request_date' => Mage::app()->getLocale()->nowUtc(),
                 'request_identifier' => '',
                 'format_valid' => false,
                 'format_only' => true,
@@ -706,7 +706,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
             return new \Maho\DataObject([
                 'is_valid' => true,
                 'request_success' => true,
-                'request_date' => Mage_Core_Model_Locale::now(),
+                'request_date' => Mage::app()->getLocale()->nowUtc(),
                 'request_identifier' => '',
                 'format_valid' => true,
                 'format_only' => true,
@@ -737,7 +737,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
             $result = new \Maho\DataObject([
                 'is_valid' => (bool) $viesResult->getIsValid(),
                 'request_success' => (bool) $viesResult->getRequestSuccess(),
-                'request_date' => $viesResult->getRequestDate() ?: Mage_Core_Model_Locale::now(),
+                'request_date' => $viesResult->getRequestDate() ?: Mage::app()->getLocale()->nowUtc(),
                 'request_identifier' => $viesResult->getRequestIdentifier() ?: '',
                 'format_valid' => true,
                 'format_only' => false,
@@ -767,7 +767,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
                 return new \Maho\DataObject([
                     'is_valid' => true,
                     'request_success' => false,
-                    'request_date' => Mage_Core_Model_Locale::now(),
+                    'request_date' => Mage::app()->getLocale()->nowUtc(),
                     'request_identifier' => '',
                     'format_valid' => true,
                     'format_only' => true,
@@ -779,7 +779,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
             return new \Maho\DataObject([
                 'is_valid' => false,
                 'request_success' => false,
-                'request_date' => Mage_Core_Model_Locale::now(),
+                'request_date' => Mage::app()->getLocale()->nowUtc(),
                 'request_identifier' => '',
                 'format_valid' => true,
                 'format_only' => false,

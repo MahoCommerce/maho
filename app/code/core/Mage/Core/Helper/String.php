@@ -574,6 +574,11 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
             return true;
         }
 
+        // JSON cannot encode PHP objects — unserialize() must never run on it
+        if (json_validate($str)) {
+            return true;
+        }
+
         if (!unserialize($str, ['allowed_classes' => false])) {
             return false;
         }

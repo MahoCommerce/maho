@@ -18,6 +18,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
      */
     public const ADMIN_RESOURCE = 'system/myaccount';
 
+    #[Maho\Config\Route('/admin/system_account/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))->_title($this->__('My Account'));
@@ -31,6 +32,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
     /**
      * Saving edited user information
      */
+    #[Maho\Config\Route('/admin/system_account/save')]
     public function saveAction(): void
     {
         $userId = Mage::getSingleton('admin/session')->getUser()->getId();

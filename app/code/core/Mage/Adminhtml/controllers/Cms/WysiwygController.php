@@ -30,6 +30,16 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
         $suffix = "\n</body>\n</html>";
         $prefixLines = substr_count($prefix, "\n");
 
+        $ignoreList = [];
+        $ignoreConfig = (string) Mage::getStoreConfig('cms/html_validator/ignore');
+        foreach (explode("\n", $ignoreConfig) as $line) {
+            $line = trim($line);
+            if ($line === '' || str_starts_with($line, '#')) {
+                continue;
+            }
+            $ignoreList[] = $line;
+        }
+
         try {
             $client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 15]);
             $response = $client->request('POST', 'https://validator.w3.org/nu/?out=json', [
@@ -39,6 +49,7 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
 
             $result = json_decode($response->getContent(), true);
             $messages = [];
+            $ignoredCount = 0;
 
             foreach ($result['messages'] ?? [] as $msg) {
                 if (isset($msg['firstLine'])) {
@@ -50,12 +61,27 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
                 if (($msg['lastLine'] ?? 1) < 1) {
                     continue;
                 }
+                $text = (string) ($msg['message'] ?? '');
+                $skip = false;
+                foreach ($ignoreList as $needle) {
+                    if (str_contains($text, $needle)) {
+                        $skip = true;
+                        break;
+                    }
+                }
+                if ($skip) {
+                    $ignoredCount++;
+                    continue;
+                }
                 $messages[] = $msg;
             }
 
             $this->getResponse()
                 ->setHeader('Content-Type', 'application/json', true)
-                ->setBody(Mage::helper('core')->jsonEncode(['messages' => $messages]));
+                ->setBody(Mage::helper('core')->jsonEncode([
+                    'messages' => $messages,
+                    'ignored' => $ignoredCount,
+                ]));
         } catch (\Exception $e) {
             Mage::logException($e);
             $this->getResponse()
@@ -70,6 +96,7 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     /**
      * Template directives callback
      */
+    #[Maho\Config\Route('/admin/cms_wysiwyg/directive')]
     public function directiveAction(): void
     {
         try {

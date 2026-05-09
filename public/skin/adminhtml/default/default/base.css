@@ -3000,7 +3000,23 @@ ul.item-options li {
 
 .categories-side-col .tree-actions {
     text-align: center;
-    margin: 10px 20px 10px 0
+    margin: 10px 20px 10px 0;
+    display: flex;
+    justify-content: center;
+    gap: 16px
+}
+
+.categories-side-col .tree-actions.tree-label-options {
+    margin-top: -4px;
+    font-size: 11px
+}
+
+.categories-side-col .tree-actions.tree-label-options label {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    vertical-align: middle
 }
 
 .categories-side-col .tree-holder {
@@ -4710,7 +4726,8 @@ dl.accordion dt.open a:after,div.collapseable a.open:after {
 
 .grid-severity-minor span,.grid-severity-major span,.grid-severity-critical span,.grid-severity-notice span {
     font: 400 12px/1.33 ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
-    padding: 2px 10px
+    padding: 2px 10px;
+    white-space: nowrap
 }
 
 .grid-severity-minor span,.grid-severity-major span {
@@ -5644,6 +5661,20 @@ img.rule-param-add {
     --label-gap: 0.25rem;
     --disabled-color: #999;
     --drop-color: #ccc
+}
+
+.maho-tree .maho-tree-meta {
+    color: #666;
+    font-size: 0.85em;
+    font-weight: normal
+}
+
+.maho-tree .maho-tree-meta-item {
+    cursor: help
+}
+
+.maho-tree .maho-tree-meta-item+.maho-tree-meta-item {
+    margin-left: 0.5em
 }
 
 .hor-scroll .maho-tree {

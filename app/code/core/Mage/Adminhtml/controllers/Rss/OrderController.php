@@ -8,6 +8,7 @@ declare(strict_types=1);
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,6 +20,7 @@ class Mage_Adminhtml_Rss_OrderController extends Mage_Adminhtml_Controller_Rss_A
      */
     public const ADMIN_RESOURCE = 'sales/order/actions/view';
 
+    #[Maho\Config\Route('/admin/rss_order/new')]
     public function newAction(): void
     {
         if ($this->checkFeedEnable('order/new')) {

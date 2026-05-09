@@ -98,7 +98,7 @@ $table = $connection
     ])
     ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
-        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
+        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ])
     ->addIndex(
         $installer->getIdxName('blog/category', ['entity_type_id']),

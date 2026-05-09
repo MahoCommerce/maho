@@ -58,7 +58,7 @@ class Maho_Paypal_Model_Webhook_Handler_OrderCompleted extends Maho_Paypal_Model
 
             // Fetch fresh order data with payment details to ensure capture/auth IDs are populated
             /** @var Maho_Paypal_Model_Api_Client $client */
-            $client = Mage::getModel('maho_paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
+            $client = Mage::getModel('paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
             $paypalResult = $client->getOrder($paypalOrderId, 'purchase_units.payments');
 
             $status = $paypalResult['status'] ?? '';

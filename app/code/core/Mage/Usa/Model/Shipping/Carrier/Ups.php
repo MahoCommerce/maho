@@ -796,7 +796,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
      * @param string $trackingValue
      * @param string $errorTitle
      */
-    private function setTrackingResultData(array $resultArr, $trackingValue, $errorTitle)
+    private function setTrackingResultData(array $resultArr, $trackingValue, $errorTitle): void
     {
         if (!$this->_trackingResult) {
             $this->_trackingResult = Mage::getModel('shipping/tracking_result');

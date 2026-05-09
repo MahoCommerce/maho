@@ -37,6 +37,7 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
         return $this;
     }
 
+    #[Maho\Config\Route('/catalog/product_compare', name: 'catalog.product.compare.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $items = $this->getRequest()->getParam('items');
@@ -61,6 +62,7 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
     /**
      * Add item to compare list
      */
+    #[Maho\Config\Route('/catalog/product_compare/add', name: 'catalog.product.compare.add', methods: ['POST'])]
     public function addAction(): void
     {
         if (!$this->_validateFormKey()) {
@@ -93,6 +95,7 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
     /**
      * Remove item from compare list
      */
+    #[Maho\Config\Route('/catalog/product_compare/remove', name: 'catalog.product.compare.remove', methods: ['POST'])]
     public function removeAction(): void
     {
         $productId = (int) $this->getRequest()->getParam('product');
@@ -135,6 +138,7 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
     /**
      * Remove all items from comparison list
      */
+    #[Maho\Config\Route('/catalog/product_compare/clear', name: 'catalog.product.compare.clear', methods: ['POST'])]
     public function clearAction(): void
     {
         $items = Mage::getResourceModel('catalog/product_compare_item_collection');

@@ -636,10 +636,8 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
             $option = Mage::getModel('sales/quote_item_option')->setData($option->getData())
                 ->setProduct($option->getProduct())
                 ->setItem($this);
-        } elseif ($option instanceof Mage_Sales_Model_Quote_Item_Option) {
-            $option->setItem($this);
         } else {
-            Mage::throwException(Mage::helper('sales')->__('Invalid item option format.'));
+            $option->setItem($this);
         }
 
         if ($exOption = $this->getOptionByCode($option->getCode())) {

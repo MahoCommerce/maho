@@ -86,7 +86,7 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
     /**
      * Flag which allow detect object state: is it new object (without id) or existing one (with id)
      *
-     * @var bool
+     * @var bool|null
      */
     protected $_isObjectNew     = null;
 

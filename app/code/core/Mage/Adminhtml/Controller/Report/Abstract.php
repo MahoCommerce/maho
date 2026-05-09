@@ -101,7 +101,7 @@ abstract class Mage_Adminhtml_Controller_Report_Abstract extends Mage_Adminhtml_
                         $dateObj = new DateTime($lastUpdate);
                     }
 
-                    $updatedAt = Mage::app()->getLocale()->storeDate(0, $dateObj, true);
+                    $updatedAt = Mage::app()->getLocale()->utcToStore(0, $dateObj)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 } catch (Exception $e) {
                     // Graceful degradation - use raw value
                     $updatedAt = $lastUpdate;

@@ -212,7 +212,7 @@ class Maho_FeedManager_Model_Platform_Bing extends Maho_FeedManager_Model_Platfo
         'additional_image_link' => ['source_type' => 'attribute', 'source_value' => 'additional_images_csv', 'use_parent' => 'if_empty'],
         'price' => ['source_type' => 'attribute', 'source_value' => 'price'],
         'sale_price' => ['source_type' => 'attribute', 'source_value' => 'special_price'],
-        'sale_price_effective_date' => ['source_type' => 'static', 'source_value' => ''],
+        'sale_price_effective_date' => ['source_type' => 'attribute', 'source_value' => 'sale_price_effective_date', 'use_parent' => 'if_empty'],
         'availability' => ['source_type' => 'rule', 'source_value' => 'stock_status'],
         'brand' => ['source_type' => 'attribute', 'source_value' => 'manufacturer', 'use_parent' => 'if_empty'],
         'gtin' => ['source_type' => 'attribute', 'source_value' => 'gtin'],

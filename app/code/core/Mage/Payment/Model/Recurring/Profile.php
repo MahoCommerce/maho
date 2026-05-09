@@ -220,7 +220,7 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
             if (!Mage_Core_Model_Locale::isValidDate($startDate)) {
                 Mage::throwException(Mage::helper('payment')->__('Recurring profile start date has invalid format.'));
             }
-            $utcTime = $this->_locale->utcDate($this->_store, $startDate, true, Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT)
+            $utcTime = $this->_locale->storeToUtc($this->_store, $startDate)
                 ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
             $this->setStartDatetime($utcTime)->setImportedStartDatetime($startDate);
         }
@@ -306,7 +306,7 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
      * Convert the start datetime (if set) to proper locale/timezone and return
      *
      * @param bool $asString
-     * @return DateTime|string
+     * @return DateTimeImmutable|string
      */
     public function exportStartDatetime($asString = true)
     {
@@ -314,7 +314,7 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
         if (!$datetime || !$this->_locale || !$this->_store) {
             return '';
         }
-        $date = $this->_locale->storeDate($this->_store, strtotime($datetime), true);
+        $date = $this->_locale->utcToStore($this->_store, $datetime);
         if ($asString) {
             return $date->format($this->_locale->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT));
         }

@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 class Maho_Paypal_WebhookController extends Mage_Core_Controller_Front_Action
 {
+    #[Maho\Config\Route('/paypal/webhook', methods: ['POST'])]
     public function indexAction(): void
     {
         if (!$this->getRequest()->isPost()) {
@@ -24,7 +25,7 @@ class Maho_Paypal_WebhookController extends Mage_Core_Controller_Front_Action
 
         try {
             /** @var Maho_Paypal_Model_Webhook_Verifier $verifier */
-            $verifier = Mage::getModel('maho_paypal/webhook_verifier');
+            $verifier = Mage::getModel('paypal/webhook_verifier');
             if (!$verifier->verify($headers, $body)) {
                 Mage::log('PayPal webhook signature verification failed', Mage::LOG_WARNING, 'paypal.log');
                 $this->getResponse()->setHttpResponseCode(401);
@@ -34,7 +35,7 @@ class Maho_Paypal_WebhookController extends Mage_Core_Controller_Front_Action
             $payload = Mage::helper('core')->jsonDecode($body);
 
             /** @var Maho_Paypal_Model_Webhook_Processor $processor */
-            $processor = Mage::getModel('maho_paypal/webhook_processor');
+            $processor = Mage::getModel('paypal/webhook_processor');
             $processor->process($payload);
 
             $this->getResponse()->setHttpResponseCode(200);

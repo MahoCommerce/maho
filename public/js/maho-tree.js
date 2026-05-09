@@ -29,6 +29,7 @@ class MahoTree {
      * @prop {string} [dataUrl] - URL to load children from
      * @prop {string} [nodeParameter='node'] - POST param to send node's ID as
      * @prop {function(MahoTreeNode, URLSearchParams):null} [onBeforeLoad] - callback before children are loaded
+     * @prop {function(MahoTreeNode):null} [onLoad] - callback after children are loaded
      * @prop {function(MahoTreeNode, Error):null} [onLoadException] - callback when loading children fails
      *
      * @typedef {Object} MahoTreeCssVars
@@ -52,6 +53,7 @@ class MahoTree {
      * @param {boolean} [config.treatAllNodesAsFolders=false] - make all node type folder
      * @param {boolean} [config.varienSetHasChanges] - emit event marking the tab as having changes
      * @param {MahoTreeCssVars} [config.cssVars] -
+     * @param {Object<string, boolean>} [config.metaOverrides={}] - initial visibility overrides for node meta items by `key`
      */
     constructor(container, config = {}) {
         const containerEl = document.getElementById(container);
@@ -70,8 +72,11 @@ class MahoTree {
             showIcons: true,
             varienSetHasChanges: true,
             cssVars: {},
+            metaOverrides: {},
             ...config,
         };
+
+        this.metaOverrides = { ...this.config.metaOverrides };
 
         this.selectableOpts = {
             mode: 'nested',
@@ -95,6 +100,7 @@ class MahoTree {
             dataUrl: null,
             nodeParameter: 'node',
             onBeforeLoad: null,
+            onLoad: null,
             onLoadException: null,
         };
 
@@ -157,6 +163,17 @@ class MahoTree {
     setRootVisible(flag) {
         this.config.showRootNode = flag;
         this.rootEl.classList.toggle('hide-root-node', !flag);
+    }
+
+    setMetaVisible(key, visible) {
+        this.metaOverrides[key] = visible;
+        const walk = (node) => {
+            node.renderMeta();
+            node.childNodes.forEach(walk);
+        };
+        if (this.rootNode) {
+            walk(this.rootNode);
+        }
     }
 
     createElement() {
@@ -339,11 +356,18 @@ class MahoTree {
  */
 class MahoTreeNode {
     /**
+     * @typedef {Object} MahoTreeMetaItem
+     * @prop {string} [key] - identifier for runtime visibility overrides via `MahoTree.setMetaVisible(key, bool)`
+     * @prop {string|number} [value] - text content of the meta chip
+     * @prop {string} [title] - tooltip shown on hover
+     * @prop {boolean} [visible=true] - default visibility (overridden by tree-level overrides)
+     *
      * @typedef {Object} MahoTreeNodeData
      * @prop {string|number} [id] - a unique id for this node
      * @prop {string} [type] - type of node, can be `folder|leaf`, or blank for auto-detection
      * @prop {string} [text] - label for the node
      * @prop {string} [name] - alias for text
+     * @prop {string} [title] - tooltip shown on hover of the node label
      * @prop {string|boolean} [icon] - icon for the node, or false to hide
      * @prop {string} [cls] - extra classes to add to icon node
      * @prop {boolean} [selectable] - is the node selectable, defaults to tree setting
@@ -351,6 +375,7 @@ class MahoTreeNode {
      * @prop {boolean} [expanded=false] - if type folder, is the node expanded
      * @prop {boolean} [allowDrag=true] - can the node be dragged
      * @prop {boolean} [allowDrop=true] - if type folder, can nodes be dropped into it
+     * @prop {MahoTreeMetaItem[]} [meta] - small chips rendered next to the label (e.g. ID, count)
      * @prop {MahoTreeNodeData[]} [children] - if type folder, list of child nodes
      *
      * @param {MahoTree} tree - the MahoTree instance this node is attached to
@@ -459,6 +484,14 @@ class MahoTreeNode {
         this.ui.wrap.dataset.text = this.text;
         this.ui.textNode.textContent = unescapeHtml(this.text);
 
+        if (typeof this.attributes.title === 'string' && this.attributes.title !== '') {
+            this.ui.label.title = this.attributes.title;
+        } else {
+            this.ui.label.removeAttribute('title');
+        }
+
+        this.renderMeta();
+
         this.ui.label.classList.toggle('disabled', this.attributes.disabled ?? false);
 
         this.icons = [];
@@ -482,6 +515,40 @@ class MahoTreeNode {
                 ? this.tree.selectableOpts.radioName
                 : this.attributes.name;
         }
+    }
+
+    renderMeta() {
+        const items = Array.isArray(this.attributes.meta) ? this.attributes.meta : [];
+        const overrides = this.tree.metaOverrides ?? {};
+        const visible = items.filter((item) => {
+            if (Object.hasOwn(overrides, item.key)) {
+                return Boolean(overrides[item.key]);
+            }
+            return item.visible !== false;
+        });
+
+        let metaEl = this.ui.label.querySelector(':scope > .maho-tree-meta');
+        if (visible.length === 0) {
+            metaEl?.remove();
+            return;
+        }
+        if (!metaEl) {
+            metaEl = document.createElement('span');
+            metaEl.className = 'maho-tree-meta';
+            this.ui.textNode.after(metaEl);
+        }
+        metaEl.replaceChildren(...visible.map((item) => {
+            const itemEl = document.createElement('span');
+            itemEl.className = 'maho-tree-meta-item';
+            if (typeof item.key === 'string' && item.key !== '') {
+                itemEl.dataset.key = item.key;
+            }
+            if (typeof item.title === 'string' && item.title !== '') {
+                itemEl.title = item.title;
+            }
+            itemEl.textContent = String(item.value ?? '');
+            return itemEl;
+        }));
     }
 
     bindEventListeners() {
@@ -722,6 +789,10 @@ class MahoTreeNode {
                 this.appendChild(new MahoTreeNode(this.tree, child))
             }
             this.hasLoadedChildren = true;
+
+            if (typeof this.tree.lazyloadOpts.onLoad === 'function') {
+                this.tree.lazyloadOpts.onLoad(this);
+            }
 
         } catch (error) {
             console.error('Error loading children:', error)

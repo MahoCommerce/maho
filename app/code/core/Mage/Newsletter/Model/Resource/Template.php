@@ -102,9 +102,9 @@ class Mage_Newsletter_Model_Resource_Template extends Mage_Core_Model_Resource_D
             $object->setTemplateActual(1);
         }
         if (!$object->hasAddedAt()) {
-            $object->setAddedAt(Mage::getSingleton('core/date')->gmtDate());
+            $object->setAddedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         }
-        $object->setModifiedAt(Mage::getSingleton('core/date')->gmtDate());
+        $object->setModifiedAt(Mage::app()->getLocale()->formatDateForDb('now'));
 
         return parent::_beforeSave($object);
     }

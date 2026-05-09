@@ -464,6 +464,8 @@ abstract class Mage_Core_Controller_Varien_Action
             return;
         }
 
+        Mage::dispatchEvent('controller_action_predispatch_session_start', ['controller_action' => $this]);
+
         if (!$this->getFlag('', self::FLAG_NO_START_SESSION)) {
             Mage::getSingleton('core/session', ['name' => $this->_sessionNamespace])->start();
         }
@@ -995,7 +997,7 @@ abstract class Mage_Core_Controller_Varien_Action
             ->setHeader('Pragma', 'public', true)
             ->setHeader('Cache-Control', 'must-revalidate, post-check=0, pre-check=0', true)
             ->setHeader('Content-type', $contentType, true)
-            ->setHeader('Content-Length', (string) (is_null($contentLength) ? strlen($content) : $contentLength), true)
+            ->setHeader('Content-Length', (string) ($contentLength ?? strlen($content)), true)
             ->setHeader('Content-Disposition', 'attachment; filename="' . $fileName . '"', true)
             ->setHeader('Last-Modified', date('r'), true);
 

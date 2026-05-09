@@ -6,6 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,6 +18,7 @@ class Mage_Adminhtml_Newsletter_ProblemController extends Mage_Adminhtml_Control
      */
     public const ADMIN_RESOURCE = 'newsletter/problem';
 
+    #[Maho\Config\Route('/admin/newsletter_problem/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Newsletter'))->_title($this->__('Newsletter Problems'));
@@ -42,6 +44,7 @@ class Mage_Adminhtml_Newsletter_ProblemController extends Mage_Adminhtml_Control
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/newsletter_problem/grid')]
     public function gridAction(): void
     {
         if ($this->getRequest()->getParam('_unsubscribe')) {

@@ -396,7 +396,6 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
      *
      * @param string $tabOneId
      * @param string $tabTwoId
-     * @param string $tabNId...
      */
     public function bindShadowTabs($tabOneId, $tabTwoId)
     {

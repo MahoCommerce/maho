@@ -21,7 +21,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Concat extends Mage_Admin
     public function render(\Maho\DataObject $row)
     {
         $dataArr = [];
-        foreach ($this->getColumn()->getIndex() as $index) {
+        foreach ((array) $this->getColumn()->getIndex() as $index) {
             if ($data = $row->getData($index)) {
                 $dataArr[] = $data;
             }

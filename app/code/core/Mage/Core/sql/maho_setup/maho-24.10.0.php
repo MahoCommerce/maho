@@ -12,7 +12,15 @@
 $installer = $this;
 $installer->startSetup();
 
-$installer->getConnection()
-    ->addColumn($installer->getTable('core/resource'), 'maho_version', 'varchar(50)');
+$installer->getConnection()->addColumn(
+    $installer->getTable('core/resource'),
+    'maho_version',
+    [
+        'type'     => Maho\Db\Ddl\Table::TYPE_VARCHAR,
+        'length'   => 50,
+        'nullable' => true,
+        'comment'  => 'Maho Version',
+    ],
+);
 
 $installer->endSetup();

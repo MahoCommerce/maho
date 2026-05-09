@@ -53,9 +53,13 @@ class CategoryEditForm {
         this.initVarienForm();
         this.initProductsGrid();
 
+        const showId = localStorage.getItem('category_tree_show_id') === '1';
+        const showCount = localStorage.getItem('category_tree_show_count') !== '0';
+
         this.tree = new MahoTree(this.config.treeDiv, {
             showRootNode: true,
             treatAllNodesAsFolders: true,
+            metaOverrides: { id: showId, count: showCount },
             selectable: {
                 mode: 'radio',
                 showInputs: false,
@@ -76,6 +80,26 @@ class CategoryEditForm {
                     setMessagesDiv(Translator.translate('Error loading children: %s', error), 'error');
                 }
             }
+        });
+
+        this.initLabelOptions();
+    }
+
+    initLabelOptions() {
+        const showIdEl = document.getElementById('tree-show-id');
+        const showCountEl = document.getElementById('tree-show-count');
+        if (!showIdEl || !showCountEl) {
+            return;
+        }
+        showIdEl.checked = localStorage.getItem('category_tree_show_id') === '1';
+        showCountEl.checked = localStorage.getItem('category_tree_show_count') !== '0';
+        showIdEl.addEventListener('change', () => {
+            localStorage.setItem('category_tree_show_id', showIdEl.checked ? '1' : '0');
+            this.tree.setMetaVisible('id', showIdEl.checked);
+        });
+        showCountEl.addEventListener('change', () => {
+            localStorage.setItem('category_tree_show_count', showCountEl.checked ? '1' : '0');
+            this.tree.setMetaVisible('count', showCountEl.checked);
         });
     }
 

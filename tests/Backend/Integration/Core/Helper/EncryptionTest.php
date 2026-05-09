@@ -214,7 +214,7 @@ describe('PayPal Vault Token', function () {
     test('encrypts paypal_token_id on save and decrypts on load', function () {
         $tokenId = 'paypal-vault-token-' . uniqid();
 
-        $token = Mage::getModel('maho_paypal/vault_token');
+        $token = Mage::getModel('paypal/vault_token');
         $token->setCustomerId($this->customer->getId());
         $token->setPaypalTokenId($tokenId);
         $token->setPaymentSourceType('card');
@@ -222,7 +222,7 @@ describe('PayPal Vault Token', function () {
         $token->setCardBrand('visa');
         $token->save();
 
-        $loaded = Mage::getModel('maho_paypal/vault_token')->load($token->getId());
+        $loaded = Mage::getModel('paypal/vault_token')->load($token->getId());
         expect($loaded->getPaypalTokenId())->toBe($tokenId);
 
         $loaded->delete();
@@ -231,14 +231,14 @@ describe('PayPal Vault Token', function () {
     test('double save does not double-encrypt', function () {
         $tokenId = 'paypal-vault-double-' . uniqid();
 
-        $token = Mage::getModel('maho_paypal/vault_token');
+        $token = Mage::getModel('paypal/vault_token');
         $token->setCustomerId($this->customer->getId());
         $token->setPaypalTokenId($tokenId);
         $token->setPaymentSourceType('paypal');
         $token->save();
         $token->save();
 
-        $loaded = Mage::getModel('maho_paypal/vault_token')->load($token->getId());
+        $loaded = Mage::getModel('paypal/vault_token')->load($token->getId());
         expect($loaded->getPaypalTokenId())->toBe($tokenId);
 
         $loaded->delete();
@@ -248,7 +248,7 @@ describe('PayPal Vault Token', function () {
         $tokenId = 'paypal-hash-test-' . uniqid();
         $expectedHash = hash('sha256', $tokenId);
 
-        $token = Mage::getModel('maho_paypal/vault_token');
+        $token = Mage::getModel('paypal/vault_token');
         $token->setCustomerId($this->customer->getId());
         $token->setPaypalTokenId($tokenId);
         $token->setPaymentSourceType('card');
@@ -258,7 +258,7 @@ describe('PayPal Vault Token', function () {
         $read = $resource->getConnection('core_read');
         $row = $read->fetchRow(
             $read->select()
-                ->from($resource->getTableName('maho_paypal/vault_token'))
+                ->from($resource->getTableName('paypal/vault_token'))
                 ->where('token_id = ?', $token->getId()),
         );
 
@@ -269,7 +269,7 @@ describe('PayPal Vault Token', function () {
 
         $row2 = $read->fetchRow(
             $read->select()
-                ->from($resource->getTableName('maho_paypal/vault_token'))
+                ->from($resource->getTableName('paypal/vault_token'))
                 ->where('token_id = ?', $token->getId()),
         );
 
@@ -373,7 +373,7 @@ describe('Encryption key regeneration (recryptTable)', function () {
         $customer->setPassword('password123');
         $customer->save();
 
-        $token = Mage::getModel('maho_paypal/vault_token');
+        $token = Mage::getModel('paypal/vault_token');
         $token->setCustomerId($customer->getId());
         $token->setPaypalTokenId($tokenId);
         $token->setPaymentSourceType('card');
@@ -381,12 +381,12 @@ describe('Encryption key regeneration (recryptTable)', function () {
         $token->save();
 
         simulateKeyRegeneration(
-            Mage::getSingleton('core/resource')->getTableName('maho_paypal/vault_token'),
+            Mage::getSingleton('core/resource')->getTableName('paypal/vault_token'),
             'token_id',
             ['paypal_token_id'],
         );
 
-        $loaded = Mage::getModel('maho_paypal/vault_token')->load($token->getId());
+        $loaded = Mage::getModel('paypal/vault_token')->load($token->getId());
         expect($loaded->getPaypalTokenId())->toBe($tokenId);
 
         $loaded->delete();

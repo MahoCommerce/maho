@@ -19,14 +19,15 @@ class Mage_Eav_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_Help
      */
     protected $_ddlColumnTypes      = [
         Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'bool',
+        Maho\Db\Ddl\Table::TYPE_TINYINT       => 'tinyint',
         Maho\Db\Ddl\Table::TYPE_SMALLINT      => 'smallint',
         Maho\Db\Ddl\Table::TYPE_INTEGER       => 'int',
         Maho\Db\Ddl\Table::TYPE_BIGINT        => 'bigint',
         Maho\Db\Ddl\Table::TYPE_FLOAT         => 'float',
         Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'decimal',
-        Maho\Db\Ddl\Table::TYPE_NUMERIC       => 'decimal',
         Maho\Db\Ddl\Table::TYPE_DATE          => 'date',
-        Maho\Db\Ddl\Table::TYPE_TIMESTAMP     => 'timestamp',
+        Maho\Db\Ddl\Table::TYPE_TIME          => 'time',
+        // TYPE_TIMESTAMP is a value-equal alias for TYPE_DATETIME — both fall here.
         Maho\Db\Ddl\Table::TYPE_DATETIME      => 'datetime',
         Maho\Db\Ddl\Table::TYPE_TEXT          => 'text',
         Maho\Db\Ddl\Table::TYPE_BLOB          => 'blob',

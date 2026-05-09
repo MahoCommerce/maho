@@ -17,11 +17,11 @@ class Maho_Paypal_Model_System_Config_Source_PaymentAction
         return [
             [
                 'value' => Maho_Paypal_Model_Config::PAYMENT_ACTION_AUTHORIZE,
-                'label' => Mage::helper('maho_paypal')->__('Authorize Only'),
+                'label' => Mage::helper('paypal')->__('Authorize Only'),
             ],
             [
                 'value' => Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE,
-                'label' => Mage::helper('maho_paypal')->__('Authorize and Capture'),
+                'label' => Mage::helper('paypal')->__('Authorize and Capture'),
             ],
         ];
     }

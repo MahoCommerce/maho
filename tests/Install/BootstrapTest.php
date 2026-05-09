@@ -14,7 +14,6 @@ uses(Tests\MahoInstallTestCase::class);
 it('can load Maho install classes and path is set correctly', function () {
     // Test that install classes are available via autoloader
     expect(class_exists('Mage_Install_Model_Installer'))->toBeTrue();
-    expect(class_exists('Mage_Install_Controller_Router_Install'))->toBeTrue();
 
     // Test that Maho root path is set correctly (should point to main Maho directory)
     expect(Mage::getRoot())->toBe(dirname(__DIR__, 2));
@@ -77,7 +76,7 @@ describe('Sale Category Integration', function () {
                 $specialFromDate = $product->getSpecialFromDate();
                 $specialToDate = $product->getSpecialToDate();
 
-                $now = Mage_Core_Model_Locale::now();
+                $now = Mage::app()->getLocale()->nowUtc();
                 $isSpecialPriceActive = true;
 
                 if ($specialFromDate && $specialFromDate > $now) {

@@ -94,7 +94,7 @@ class Maho_FeedManager_Model_Platform_GoogleLocalInventory extends Maho_FeedMana
         'availability' => ['source_type' => 'rule', 'source_value' => 'stock_status'],
         'price' => ['source_type' => 'attribute', 'source_value' => 'price'],
         'sale_price' => ['source_type' => 'attribute', 'source_value' => 'special_price'],
-        'sale_price_effective_date' => ['source_type' => 'static', 'source_value' => ''],
+        'sale_price_effective_date' => ['source_type' => 'attribute', 'source_value' => 'sale_price_effective_date', 'use_parent' => 'if_empty'],
         'quantity' => ['source_type' => 'attribute', 'source_value' => 'qty'],
         'pickup_method' => ['source_type' => 'static', 'source_value' => ''],
         'pickup_sla' => ['source_type' => 'static', 'source_value' => ''],

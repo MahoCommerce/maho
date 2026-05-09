@@ -53,7 +53,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
     /**
      * Defines which operators will be available for this condition
      *
-     * @var string
+     * @var string|null
      */
     protected $_inputType = null;
 
@@ -371,15 +371,13 @@ abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject imple
                     break;
             }
 
-            if ($format !== null) {
-                $this->setValue(
-                    Mage::app()->getLocale()->dateMutable(
-                        $this->getData('value'),
-                        $format,
-                        null,
-                        false,
-                    )->format($format),
-                );
+            $value = $this->getData('value');
+            if ($format !== null && $value !== null && $value !== '') {
+                $parsed = DateTime::createFromFormat($format, $value);
+                if ($parsed === false) {
+                    $parsed = new DateTime($value);
+                }
+                $this->setValue($parsed->format($format));
                 $this->setIsValueParsed(true);
             }
         }

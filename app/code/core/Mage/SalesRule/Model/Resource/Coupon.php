@@ -32,7 +32,7 @@ class Mage_SalesRule_Model_Resource_Coupon extends Mage_Core_Model_Resource_Db_A
     {
         if (!$object->getExpirationDate()) {
             $object->setExpirationDate(null);
-        } elseif ($object->getExpirationDate() instanceof DateTime) {
+        } elseif ($object->getExpirationDate() instanceof DateTimeInterface) {
             $object->setExpirationDate($object->getExpirationDate()->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
         }
 
@@ -100,7 +100,7 @@ class Mage_SalesRule_Model_Resource_Coupon extends Mage_Core_Model_Resource_Db_A
      */
     public function updateSpecificCoupons(Mage_SalesRule_Model_Rule $rule)
     {
-        if (!$rule || !$rule->getId() || !$rule->hasDataChanges()) {
+        if (!$rule->getId() || !$rule->hasDataChanges()) {
             return $this;
         }
 

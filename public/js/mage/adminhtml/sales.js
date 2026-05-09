@@ -720,8 +720,15 @@ class AdminOrder
         if (this.collectElementsValue) {
             var elems = document.getElementById(this.getAreaId('sidebar')).querySelectorAll('input');
             for (var i=0; i < elems.length; i++) {
-                if (elems[i].value) {
-                    data[elems[i].name] = elems[i].value;
+                var el = elems[i];
+                if (!el.name) continue;
+                // Checkboxes/radios always have a .value attribute regardless
+                // of whether the user ticked them. Skip them when not :checked
+                // so unticked sidebar items don't get auto-added to the order.
+                if ((el.type === 'checkbox' || el.type === 'radio')) {
+                    if (el.checked && el.value) data[el.name] = el.value;
+                } else if (el.value) {
+                    data[el.name] = el.value;
                 }
             }
         }

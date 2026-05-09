@@ -163,6 +163,7 @@ $table = $installer->getConnection()
     ], 'User Password')
     ->addColumn('created', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
         'nullable'  => false,
+        'default'   => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
     ], 'User Created Time')
     ->addColumn('modified', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
     ], 'User Modified Time')

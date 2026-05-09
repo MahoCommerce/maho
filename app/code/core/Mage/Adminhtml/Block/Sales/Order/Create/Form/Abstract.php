@@ -123,6 +123,9 @@ abstract class Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract extends Mag
 
         foreach ($attributes as $attribute) {
             /** @var Mage_Customer_Model_Attribute $attribute */
+            if (!$attribute->getIsVisible()) {
+                continue;
+            }
             $attribute->setStoreId(Mage::getSingleton('adminhtml/session_quote')->getStoreId());
             $inputType = $attribute->getFrontend()->getInputType();
 

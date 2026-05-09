@@ -138,7 +138,7 @@ final class VarienToMahoClassMap
             // Object/DataObject namespace
             'Varien_Object' => \Maho\DataObject::class,
             'Varien_Object_Cache' => \Maho\DataObject\Cache::class,
-            'Varien_Object_Mapper' => \Maho\DataObject\Mapper::class,
+            'Varien_Object_Mapper' => \Maho\DataObject\Mapper::class, // @phpstan-ignore classConstant.deprecatedClass
 
             // Simplexml namespace
             'Varien_Simplexml_Config' => \Maho\Simplexml\Config::class,

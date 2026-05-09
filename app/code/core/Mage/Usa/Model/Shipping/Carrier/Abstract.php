@@ -46,7 +46,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
     #[\Override]
     public function getCarrierCode()
     {
-        return $this->_code ?? null;
+        return $this->_code;
     }
 
     public function getTrackingInfo($tracking)

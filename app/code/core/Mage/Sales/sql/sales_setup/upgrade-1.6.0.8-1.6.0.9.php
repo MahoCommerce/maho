@@ -18,7 +18,13 @@ $installer->getConnection()->changeColumn(
     $installer->getTable('sales/quote'),
     'remote_ip',
     'remote_ip',
-    'VARCHAR(255) default NULL COMMENT \'Remote Ip\'',
+    [
+        'type'     => Maho\Db\Ddl\Table::TYPE_VARCHAR,
+        'length'   => 255,
+        'nullable' => true,
+        'default'  => null,
+        'comment'  => 'Remote Ip',
+    ],
 );
 
 $installer->endSetup();

@@ -52,6 +52,9 @@ class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         foreach (Maho::getCompiledAttributes()['crontab'] ?? [] as $jobCode => $jobDef) {
+            if (!empty($jobDef['module']) && !$this->isModuleEnabled($jobDef['module'])) {
+                continue;
+            }
             $configPath = $jobDef['config_path'] ?? '';
             $result[$jobCode] = [
                 'job_code' => $jobCode,

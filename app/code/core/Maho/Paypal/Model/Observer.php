@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Maho_Paypal_Model_Observer
 {
-    #[Maho\Config\Observer('checkout_submit_all_after', id: 'maho_paypal_save_order_after_submit')]
+    #[Maho\Config\Observer('checkout_submit_all_after', id: 'paypal_save_order_after_submit')]
     public function saveOrderAfterSubmit(\Maho\DataObject $observer): void
     {
         $order = $observer->getData('order');
@@ -43,7 +43,7 @@ class Maho_Paypal_Model_Observer
         }
     }
 
-    #[Maho\Config\Observer('encryption_key_regenerated', id: 'maho_paypal_encryption_key_regenerated')]
+    #[Maho\Config\Observer('encryption_key_regenerated', id: 'paypal_encryption_key_regenerated')]
     public function encryptionKeyRegenerated(Maho\Event\Observer $observer): void
     {
         /** @var \Symfony\Component\Console\Output\OutputInterface $output */
@@ -53,7 +53,7 @@ class Maho_Paypal_Model_Observer
 
         $output->write('Re-encrypting data on paypal_vault_token table... ');
         $result = Mage::helper('core')->recryptTable(
-            Mage::getSingleton('core/resource')->getTableName('maho_paypal/vault_token'),
+            Mage::getSingleton('core/resource')->getTableName('paypal/vault_token'),
             'token_id',
             ['paypal_token_id'],
             $encryptCallback,
@@ -61,25 +61,5 @@ class Maho_Paypal_Model_Observer
             output: $output,
         );
         $output->writeln($result ? 'OK' : '<comment>SKIPPED</comment>');
-    }
-
-    #[Maho\Config\Observer('adminhtml_init_system_config', area: 'adminhtml')]
-    public function addDeprecationNotice(\Maho\DataObject $observer): void
-    {
-        /** @var Maho_Paypal_Model_Config $config */
-        $config = Mage::getModel('paypal/config');
-        $deprecated = $config->getActiveDeprecatedMethods();
-
-        if ($deprecated === []) {
-            return;
-        }
-
-        $methods = implode(', ', $deprecated);
-        Mage::getSingleton('adminhtml/session')->addNotice(
-            Mage::helper('maho_paypal')->__(
-                'Legacy PayPal payment methods are active (%s). Consider migrating to the new PayPal integration under System > Configuration > Payment Methods.',
-                $methods,
-            ),
-        );
     }
 }

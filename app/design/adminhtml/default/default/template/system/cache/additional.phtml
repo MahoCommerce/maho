@@ -16,7 +16,8 @@
     <h3><?= Mage::helper('adminhtml')->__('Additional Cache Management') ?></h3>
     <p class="content-buttons form-buttons"></p>
 </div>
-<table class="form-list">
+<style>.form-list.additional-cache-actions button { min-width: 220px; }</style>
+<table class="form-list additional-cache-actions">
     <tr>
         <td class="scope-label">
             <button onclick="setLocation('<?= $this->getCleanImagesUrl()?>')" type="button" class="scalable"><span><?= Mage::helper('adminhtml')->__('Flush Catalog Images Cache') ?></span></button>
@@ -39,6 +40,14 @@
         </td>
         <td class="scope-label">
             <?= Mage::helper('adminhtml')->__('Minified CSS and JavaScript files.') ?>
+        </td>
+    </tr>
+    <tr>
+        <td class="scope-label">
+            <button onclick="setLocation('<?= $this->getRecompileAttributesUrl()?>')" type="button" class="scalable"><span><?= Mage::helper('adminhtml')->__('Recompile PHP Attributes') ?></span></button>
+        </td>
+        <td class="scope-label">
+            <?= Mage::helper('adminhtml')->__('Compiled observers, cron jobs, routes, and API permissions.') ?>
         </td>
     </tr>
 </table>

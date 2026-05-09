@@ -244,7 +244,7 @@ class Mage_Core_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource_He
                         $preparedColumns[strtoupper($col)] = [$correlationName, $col, null];
                     }
                 } else {
-                    $columnKey = is_null($alias) ? $column : $alias;
+                    $columnKey = $alias ?? $column;
                     $preparedColumns[strtoupper($columnKey)] = [$correlationName, $column, $alias];
                 }
             }

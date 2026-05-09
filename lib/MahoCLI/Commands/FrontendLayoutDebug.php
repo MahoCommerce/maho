@@ -138,20 +138,15 @@ class FrontendLayoutDebug extends BaseMahoCommand
         $front = Mage::app()->getFrontController();
         $front->init();
 
-        // Apply URL rewrites (determines store and rewrites path)
-        /** @var \Mage_Core_Model_Url_Rewrite_Request $rewriteRequest */
-        $rewriteRequest = Mage::getModel('core/url_rewrite_request', [
-            'request' => $request,
-            'routers' => $front->getRouters(),
-        ]);
-        $rewriteRequest->rewrite();
+        $response = Mage::app()->getResponse();
 
-        // Dispatch with output buffering to capture/discard HTML output
+        // Run pre-dispatch checks (store resolution, URL rewrites, etc.) then route matching
         ob_start();
 
         try {
+            Mage::dispatchEvent('controller_front_dispatch_before', ['front' => $front]);
+
             foreach ($front->getRouters() as $router) {
-                /** @var \Mage_Core_Controller_Varien_Router_Abstract $router */
                 if ($router->match($request)) {
                     break;
                 }

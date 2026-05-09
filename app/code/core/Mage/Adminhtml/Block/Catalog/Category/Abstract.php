@@ -350,6 +350,8 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
         $item = [
             'id'    => (int) $node->getId(),
             'text'  => $this->buildNodeName($node),
+            'title' => Mage::helper('catalog')->__('ID: %s', (int) $node->getId()),
+            'meta'  => $this->buildNodeMeta($node),
             'type'  => 'folder',
             'cls'   => 'folder',
             'store' => (int) $this->getStore()->getId(),
@@ -388,11 +390,35 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
      */
     public function buildNodeName($node)
     {
-        $result = $this->escapeHtml($node->getName());
+        return $this->escapeHtml($node->getName());
+    }
+
+    /**
+     * Get the metadata chips rendered next to the node label
+     *
+     * @param \Maho\DataObject $node
+     * @return list<array{key: string, value: string, title: string, visible: bool}>
+     */
+    public function buildNodeMeta($node)
+    {
+        $helper = Mage::helper('catalog');
+        $meta = [
+            [
+                'key'     => 'id',
+                'value'   => '[' . (int) $node->getId() . ']',
+                'title'   => $helper->__('Category ID'),
+                'visible' => false,
+            ],
+        ];
         if ($this->_withProductCount) {
-            $result .= " ({$node->getProductCount()})";
+            $meta[] = [
+                'key'     => 'count',
+                'value'   => '(' . (int) $node->getProductCount() . ')',
+                'title'   => $helper->__('Products count'),
+                'visible' => true,
+            ];
         }
-        return $result;
+        return $meta;
     }
 
     /**

@@ -23,6 +23,7 @@ class Mage_Adminhtml_Catalog_Product_Action_SetController extends Mage_Adminhtml
         $this->setUsedModuleName('Mage_Catalog');
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_action_set/save')]
     public function saveAction(): void
     {
         try {

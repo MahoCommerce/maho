@@ -21,6 +21,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
     /**
      * Index action
      */
+    #[Maho\Config\Route('/admin/system_email_template/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))->_title($this->__('Transactional Emails'));
@@ -44,6 +45,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
     /**
      * Grid action
      */
+    #[Maho\Config\Route('/admin/system_email_template/grid')]
     public function gridAction(): void
     {
         $this->getResponse()->setBody(
@@ -54,6 +56,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
     /**
      * New transactional email action
      */
+    #[Maho\Config\Route('/admin/system_email_template/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -62,6 +65,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
     /**
      * Edit transactional email action
      */
+    #[Maho\Config\Route('/admin/system_email_template/edit')]
     public function editAction(): void
     {
         $this->loadLayout();
@@ -99,6 +103,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
      *
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/system_email_template/save')]
     public function saveAction(): void
     {
         $request = $this->getRequest();
@@ -123,12 +128,12 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
                 ->setTemplateCode($request->getParam('template_code'))
                 ->setTemplateText($request->getParam('template_text'))
                 ->setTemplateStyles($request->getParam('template_styles'))
-                ->setModifiedAt(Mage::getSingleton('core/date')->gmtDate())
+                ->setModifiedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->setOrigTemplateCode($request->getParam('orig_template_code'))
                 ->setOrigTemplateVariables($request->getParam('orig_template_variables'));
 
             if (!$template->getId()) {
-                $template->setAddedAt(Mage::getSingleton('core/date')->gmtDate());
+                $template->setAddedAt(Mage::app()->getLocale()->formatDateForDb('now'));
                 $template->setTemplateType(Mage_Core_Model_Email_Template::TYPE_HTML);
             }
 
@@ -156,6 +161,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
     /**
      * Delete action
      */
+    #[Maho\Config\Route('/admin/system_email_template/delete')]
     public function deleteAction(): void
     {
         $template = $this->_initTemplate('id');
@@ -187,6 +193,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
     /**
      * Preview action
      */
+    #[Maho\Config\Route('/admin/system_email_template/preview')]
     public function previewAction(): void
     {
         $this->loadLayout('systemPreview');
@@ -196,6 +203,7 @@ class Mage_Adminhtml_System_Email_TemplateController extends Mage_Adminhtml_Cont
     /**
      * Set template data to retrieve it in template info form
      */
+    #[Maho\Config\Route('/admin/system_email_template/defaultTemplate')]
     public function defaultTemplateAction(): void
     {
         $template = $this->_initTemplate('id');

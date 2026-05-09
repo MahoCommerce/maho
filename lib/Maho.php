@@ -58,6 +58,50 @@ final class Maho
     }
 
     /**
+     * Recompile PHP attributes (observers, cron jobs, routes, API permissions)
+     * via the plugin's runtime entry — no composer binary, no subprocess.
+     *
+     * Returns [success, message]. The message contains any warnings/errors
+     * surfaced during compilation, which is the value to show the user.
+     *
+     * @return array{0: bool, 1: string}
+     */
+    public static function recompilePhpAttributes(): array
+    {
+        $messages = [];
+        $hasError = false;
+        $log = static function (string $level, string $message) use (&$messages, &$hasError): void {
+            if ($level === 'error') {
+                $hasError = true;
+            }
+            $messages[] = "[{$level}] {$message}";
+        };
+
+        $outputDir = self::getBasePath() . '/vendor/composer';
+
+        try {
+            \Maho\ComposerPlugin\AttributeCompiler::compileRuntime($outputDir, $log);
+
+            if (class_exists(\ApiPlatform\Metadata\ApiResource::class)
+                && class_exists(\Maho\Config\ApiResource::class)
+            ) {
+                \Maho\ComposerPlugin\ApiPermissionCompiler::compileRuntime($outputDir, $log);
+            }
+        } catch (\Throwable $e) {
+            return [false, $e->getMessage() . (empty($messages) ? '' : "\n" . implode("\n", $messages))];
+        }
+
+        // Drop the cached attributes singleton so the next call re-reads the new file.
+        self::$compiledAttributes = null;
+
+        if (function_exists('opcache_reset')) {
+            @opcache_reset();
+        }
+
+        return [!$hasError, implode("\n", $messages)];
+    }
+
+    /**
      * Convert an absolute path to one relative to the base path
      */
     public static function toRelativePath(string $path): string

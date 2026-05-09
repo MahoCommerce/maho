@@ -247,6 +247,12 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
             }
         }
 
+        $now = Mage::app()->getLocale()->formatDateForDb('now');
+        if ($this->isObjectNew() && !$this->getCreatedAt()) {
+            $this->setCreatedAt($now);
+        }
+        $this->setUpdatedAt($now);
+
         return $this;
     }
 

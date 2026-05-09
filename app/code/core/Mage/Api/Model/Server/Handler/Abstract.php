@@ -128,7 +128,7 @@ abstract class Mage_Api_Model_Server_Handler_Abstract
         }
         $this->_getServer()->getAdapter()->fault(
             $faults[$faultName]['code'],
-            (is_null($customMessage) ? $faults[$faultName]['message'] : $customMessage),
+            ($customMessage ?? $faults[$faultName]['message']),
         );
     }
 
@@ -153,7 +153,7 @@ abstract class Mage_Api_Model_Server_Handler_Abstract
         return [
             'isFault'      => true,
             'faultCode'    => $faults[$faultName]['code'],
-            'faultMessage' => (is_null($customMessage) ? $faults[$faultName]['message'] : $customMessage),
+            'faultMessage' => ($customMessage ?? $faults[$faultName]['message']),
         ];
     }
 

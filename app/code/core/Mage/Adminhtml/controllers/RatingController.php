@@ -6,6 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,6 +18,7 @@ class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
      */
     public const ADMIN_RESOURCE = 'catalog/reviews_ratings/ratings';
 
+    #[Maho\Config\Route('/admin/rating/index')]
     public function indexAction(): void
     {
         $this->_initEnityId();
@@ -29,6 +31,7 @@ class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/rating/edit')]
     public function editAction(): void
     {
         $this->_initEnityId();
@@ -49,6 +52,7 @@ class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/rating/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -57,6 +61,7 @@ class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
     /**
      * Save rating
      */
+    #[Maho\Config\Route('/admin/rating/save')]
     public function saveAction(): void
     {
         $this->_initEnityId();
@@ -110,6 +115,7 @@ class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/rating/delete')]
     public function deleteAction(): void
     {
         if ($this->getRequest()->getParam('id') > 0) {

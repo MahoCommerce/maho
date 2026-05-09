@@ -16,8 +16,10 @@
  * @package    Mage_CatalogSearch
  * @module     Catalog
  */
+
 class Mage_CatalogSearch_AdvancedController extends Mage_Core_Controller_Front_Action
 {
+    #[Maho\Config\Route('/catalogsearch/advanced', name: 'catalogsearch.advanced.index', methods: ['GET'])]
     public function indexAction(): void
     {
         if (!Mage::helper('catalogsearch')->isAdvancedSearchEnabled()) {
@@ -30,6 +32,7 @@ class Mage_CatalogSearch_AdvancedController extends Mage_Core_Controller_Front_A
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/catalogsearch/advanced/result', name: 'catalogsearch.advanced.result', methods: ['GET'])]
     public function resultAction(): void
     {
         if (!Mage::helper('catalogsearch')->isAdvancedSearchEnabled()) {

@@ -153,17 +153,6 @@
             </response>
         </api2>
     </global>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <api2 before="Mage_Adminhtml">Mage_Api2_Adminhtml</api2>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
     <adminhtml>
         <layout>
             <updates>

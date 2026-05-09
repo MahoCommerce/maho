@@ -308,7 +308,7 @@ class Mage_Core_Model_Resource_Setup_Query_Modifier
             }
 
             // We fix only int columns
-            if (!$refColumnDefinition || !in_array($refColumnDefinition['type'], $this->_processedTypes)) {
+            if (!in_array($refColumnDefinition['type'], $this->_processedTypes)) {
                 continue;
             }
 

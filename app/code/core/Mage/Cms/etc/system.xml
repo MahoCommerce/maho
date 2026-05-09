@@ -72,6 +72,24 @@
                         </enabled>
                     </fields>
                 </wysiwyg>
+                <html_validator translate="label">
+                    <label>HTML Validator</label>
+                    <sort_order>110</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <ignore translate="label comment">
+                            <label>Ignore List</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[One substring per line. Validator messages containing any of these substrings will be hidden. Matching is case-sensitive. Lines starting with # are treated as comments.]]></comment>
+                        </ignore>
+                    </fields>
+                </html_validator>
             </groups>
         </cms>
     </sections>

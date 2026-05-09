@@ -73,7 +73,7 @@ class Mage_Bundle_Block_Checkout_Cart_Item_Renderer extends Mage_Checkout_Block_
         $quoteItem = $this->getItem();
 
         // Add basic messages occurring during this page load
-        $baseMessages = $quoteItem->getMessage(false);
+        $baseMessages = (array) $quoteItem->getMessage(false);
         if ($baseMessages) {
             foreach ($baseMessages as $message) {
                 $messages[] = [

@@ -182,7 +182,7 @@ describe('Blog Helper Data', function () {
             ->addFieldToFilter('entity_id', $currentStorePost->getId());
         $storeFilteredCollection->getSelect()->where(
             'publish_date IS NULL OR publish_date <= ?',
-            Mage_Core_Model_Locale::today(),
+            Mage::app()->getLocale()->todayUtc(),
         );
 
         expect($storeFilteredCollection->getSize())->toBe(1); // Post visible with store filter

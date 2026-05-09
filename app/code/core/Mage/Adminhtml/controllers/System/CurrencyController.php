@@ -36,6 +36,7 @@ class Mage_Adminhtml_System_CurrencyController extends Mage_Adminhtml_Controller
     /**
      * Currency management main page
      */
+    #[Maho\Config\Route('/admin/system_currency/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))->_title($this->__('Manage Currency Rates'));
@@ -46,6 +47,7 @@ class Mage_Adminhtml_System_CurrencyController extends Mage_Adminhtml_Controller
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/system_currency/fetchRates')]
     public function fetchRatesAction(): void
     {
         try {
@@ -79,6 +81,7 @@ class Mage_Adminhtml_System_CurrencyController extends Mage_Adminhtml_Controller
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/system_currency/saveRates')]
     public function saveRatesAction(): void
     {
         $data = $this->getRequest()->getParam('rate');

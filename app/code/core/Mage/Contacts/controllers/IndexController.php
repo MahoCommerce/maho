@@ -33,6 +33,7 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
         return $this;
     }
 
+    #[Maho\Config\Route('/contacts', name: 'contacts.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->loadLayout();
@@ -44,6 +45,7 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/contacts/post', name: 'contacts.post', methods: ['POST'])]
     public function postAction(): void
     {
         $post = $this->getRequest()->getPost();

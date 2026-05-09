@@ -82,7 +82,7 @@ class Mage_Log_Model_Aggregation extends Mage_Core_Model_Abstract
      * @param  string $from
      * @param  string $to
      */
-    private function _save(array $data, $from, $to)
+    private function _save(array $data, $from, $to): void
     {
         if ($logId = $this->_getResource()->getLogId($from, $to)) {
             $this->_update($logId, $data);
@@ -95,7 +95,7 @@ class Mage_Log_Model_Aggregation extends Mage_Core_Model_Abstract
      * @param string $id
      * @param array $data
      */
-    private function _update($id, $data)
+    private function _update($id, $data): void
     {
         $this->_getResource()->saveLog($data, $id);
     }
@@ -103,7 +103,7 @@ class Mage_Log_Model_Aggregation extends Mage_Core_Model_Abstract
     /**
      * @param array $data
      */
-    private function _insert($data)
+    private function _insert($data): void
     {
         $this->_getResource()->saveLog($data);
     }

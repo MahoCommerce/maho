@@ -35,6 +35,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         return $this;
     }
 
+    #[Maho\Config\Route('/paypal/checkout/clientToken', methods: ['POST'])]
     public function clientTokenAction(): void
     {
         $result = ['success' => false];
@@ -44,7 +45,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             $storeId = $quote->getStoreId() ? (int) $quote->getStoreId() : null;
 
             /** @var Maho_Paypal_Model_Api_Client $client */
-            $client = Mage::getModel('maho_paypal/api_client', ['store_id' => $storeId]);
+            $client = Mage::getModel('paypal/api_client', ['store_id' => $storeId]);
             $clientToken = $client->generateClientToken();
 
             $result['success'] = true;
@@ -58,18 +59,19 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
     }
 
+    #[Maho\Config\Route('/paypal/checkout/createOrder', methods: ['POST'])]
     public function createOrderAction(): void
     {
         $result = ['success' => false];
 
         try {
             if (!$this->_validateFormKey()) {
-                Mage::throwException(Mage::helper('maho_paypal')->__('Invalid form key.'));
+                Mage::throwException(Mage::helper('paypal')->__('Invalid form key.'));
             }
 
             $quote = Mage::getSingleton('checkout/session')->getQuote();
             if (!$quote->getId() || !$quote->getItemsCount()) {
-                Mage::throwException(Mage::helper('maho_paypal')->__('Cart is empty.'));
+                Mage::throwException(Mage::helper('paypal')->__('Cart is empty.'));
             }
 
             $methodCode = $this->_validateMethodCode(
@@ -96,7 +98,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             $vaultSourceType = null;
             if ($vaultTokenId && $methodCode === Maho_Paypal_Model_Config::METHOD_VAULT) {
                 /** @var Maho_Paypal_Model_Vault_Token $vaultToken */
-                $vaultToken = Mage::getModel('maho_paypal/vault_token')->load($vaultTokenId);
+                $vaultToken = Mage::getModel('paypal/vault_token')->load($vaultTokenId);
                 if ($vaultToken->getId() && $vaultToken->getIsActive()
                     && (int) $vaultToken->getCustomerId() === (int) $quote->getCustomerId()) {
                     $vaultPaypalTokenId = $vaultToken->getPaypalTokenId();
@@ -105,7 +107,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             }
 
             /** @var Maho_Paypal_Model_Api_OrderBuilder $builder */
-            $builder = Mage::getModel('maho_paypal/api_orderBuilder');
+            $builder = Mage::getModel('paypal/api_orderBuilder');
 
             $returnUrl = null;
             $cancelUrl = null;
@@ -128,7 +130,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             );
 
             /** @var Maho_Paypal_Model_Api_Client $client */
-            $client = Mage::getModel('maho_paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
+            $client = Mage::getModel('paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
             $paypalOrder = $client->createOrder(['body' => $orderRequest]);
 
             $paypalOrderId = $paypalOrder['id'] ?? null;
@@ -136,8 +138,8 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                 Mage::log('PayPal createOrder response: ' . Mage::helper('core')->jsonEncode($paypalOrder), Mage::LOG_ERROR, 'paypal.log');
                 $apiMessage = $paypalOrder['message'] ?? $paypalOrder['details'][0]['description'] ?? '';
                 $errorMsg = $apiMessage
-                    ? Mage::helper('maho_paypal')->__('Failed to create PayPal order: %s', $apiMessage)
-                    : Mage::helper('maho_paypal')->__('Failed to create PayPal order.');
+                    ? Mage::helper('paypal')->__('Failed to create PayPal order: %s', $apiMessage)
+                    : Mage::helper('paypal')->__('Failed to create PayPal order.');
                 Mage::throwException($errorMsg);
             }
 
@@ -173,19 +175,20 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
     /**
      * Approve (authorize or capture) a PayPal order and place the Mage order
      */
+    #[Maho\Config\Route('/paypal/checkout/approveOrder', methods: ['POST'])]
     public function approveOrderAction(): void
     {
         $result = ['success' => false];
 
         try {
             if (!$this->_validateFormKey()) {
-                Mage::throwException(Mage::helper('maho_paypal')->__('Invalid form key.'));
+                Mage::throwException(Mage::helper('paypal')->__('Invalid form key.'));
             }
 
             $quote = Mage::getSingleton('checkout/session')->getQuote();
 
             if (!$quote->getIsActive()) {
-                Mage::throwException(Mage::helper('maho_paypal')->__('This order has already been placed.'));
+                Mage::throwException(Mage::helper('paypal')->__('This order has already been placed.'));
             }
 
             // Prefer the PayPal order ID sent by the frontend (the one the user actually
@@ -215,7 +218,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             } elseif ($storedPaypalOrderId) {
                 $paypalOrderId = $storedPaypalOrderId;
             } else {
-                Mage::throwException(Mage::helper('maho_paypal')->__('Missing PayPal order ID.'));
+                Mage::throwException(Mage::helper('paypal')->__('Missing PayPal order ID.'));
             }
             $methodCode = $this->_validateMethodCode(
                 $this->getRequest()->getParam('method', Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT),
@@ -225,7 +228,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             $lock = Mage_Index_Model_Lock::getInstance();
             $lockName = 'paypal_order_' . $paypalOrderId;
             if (!$lock->setLock($lockName, file: true, block: true)) {
-                Mage::throwException(Mage::helper('maho_paypal')->__('Could not acquire order lock.'));
+                Mage::throwException(Mage::helper('paypal')->__('Could not acquire order lock.'));
             }
 
             try {
@@ -238,18 +241,31 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                     $orderPayments->setPageSize(1);
                     $orderPayment = $orderPayments->getFirstItem();
                     if (!$orderPayment->getId()) {
-                        Mage::throwException(Mage::helper('maho_paypal')->__('Quote is no longer active and no matching order was found.'));
+                        Mage::throwException(Mage::helper('paypal')->__('Quote is no longer active and no matching order was found.'));
                     }
                     // Webhook placed the order while we waited for the lock — populate
                     // checkout session so the success page renders instead of redirecting to cart
                     $order = Mage::getModel('sales/order')->load($orderPayment->getParentId());
-                    if ($order->getId()) {
-                        $checkoutSession = Mage::getSingleton('checkout/session');
-                        $checkoutSession->setLastQuoteId($quote->getId());
-                        $checkoutSession->setLastSuccessQuoteId($quote->getId());
-                        $checkoutSession->setLastOrderId($order->getId());
-                        $checkoutSession->setLastRealOrderId($order->getIncrementId());
+                    if (!$order->getId() || (int) $order->getQuoteId() !== (int) $quote->getId()) {
+                        // Refuse to surface another quote's order via a replayed paypal_order_id
+                        Mage::log(
+                            sprintf(
+                                'PayPal approveOrder: paypal_order_id %s resolves to order %s belonging to quote %s, not session quote %s.',
+                                $paypalOrderId,
+                                $order->getId() ?: 'n/a',
+                                $order->getQuoteId() ?: 'n/a',
+                                $quote->getId(),
+                            ),
+                            Mage::LOG_ERROR,
+                            'paypal.log',
+                        );
+                        Mage::throwException(Mage::helper('paypal')->__('PayPal order does not belong to this cart.'));
                     }
+                    $checkoutSession = Mage::getSingleton('checkout/session');
+                    $checkoutSession->setLastQuoteId($quote->getId());
+                    $checkoutSession->setLastSuccessQuoteId($quote->getId());
+                    $checkoutSession->setLastOrderId($order->getId());
+                    $checkoutSession->setLastRealOrderId($order->getIncrementId());
                     $result['success'] = true;
                     $result['redirect_url'] = Mage::getUrl('checkout/onepage/success', ['_secure' => true]);
                 } else {
@@ -258,10 +274,18 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                     $intent = $config->getNewPaymentAction($methodCode);
 
                     /** @var Maho_Paypal_Model_Api_Client $client */
-                    $client = Mage::getModel('maho_paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
+                    $client = Mage::getModel('paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
 
                     // Fetch current order status (include payment details in case it's already completed)
                     $paypalResult = $client->getOrder($paypalOrderId, 'purchase_units.payments');
+
+                    // SECURITY: refuse to act on a PayPal order that wasn't created for this
+                    // quote, or whose total/currency was tampered with. Without this check an
+                    // attacker could replay any past completed paypal_order_id against a
+                    // different cart and place an order paid by someone else's capture.
+                    $this->_assertPaypalOrderMatchesQuote($paypalResult, $quote);
+                    $this->_assertPaypalOrderNotAlreadyUsed($paypalOrderId);
+
                     $status = $paypalResult['status'] ?? '';
 
                     // If order is not yet completed (standard/advanced checkout flow),
@@ -276,10 +300,10 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                     }
 
                     if (!in_array($status, ['COMPLETED', 'APPROVED'])) {
-                        Mage::throwException(Mage::helper('maho_paypal')->__('PayPal order could not be approved. Status: %s', $status));
+                        Mage::throwException(Mage::helper('paypal')->__('PayPal order could not be approved. Status: %s', $status));
                     }
 
-                    Mage::helper('maho_paypal')->placeOrderFromPaypalResult($quote, $paypalResult, $methodCode, $intent);
+                    Mage::helper('paypal')->placeOrderFromPaypalResult($quote, $paypalResult, $methodCode, $intent);
 
                     $result['success'] = true;
                     $result['redirect_url'] = Mage::getUrl('checkout/onepage/success', ['_secure' => true]);
@@ -301,6 +325,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
      * their shipping address or selects a shipping option inside the popup.
      * PayPal POSTs order data and expects updated purchase_units in response.
      */
+    #[Maho\Config\Route('/paypal/checkout/shippingCallback', methods: ['POST'])]
     public function shippingCallbackAction(): void
     {
         try {
@@ -352,7 +377,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             $currency = $quote->getBaseCurrencyCode();
 
             /** @var Maho_Paypal_Model_Api_OrderBuilder $builder */
-            $builder = Mage::getModel('maho_paypal/api_orderBuilder');
+            $builder = Mage::getModel('paypal/api_orderBuilder');
             $breakdown = $builder->buildBreakdown($quote, $currency);
 
             $amount = [
@@ -405,9 +430,94 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             Maho_Paypal_Model_Config::METHOD_VAULT,
         ];
         if (!in_array($methodCode, $allowed, true)) {
-            Mage::throwException(Mage::helper('maho_paypal')->__('Invalid payment method.'));
+            Mage::throwException(Mage::helper('paypal')->__('Invalid payment method.'));
         }
         return $methodCode;
+    }
+
+    /**
+     * Refuse to act on a PayPal order that wasn't created for this quote.
+     * Bound via invoice_id (== quote's reservedOrderId) plus amount/currency
+     * cross-check, so a leaked paypal_order_id from another cart cannot be
+     * replayed against the current session.
+     */
+    protected function _assertPaypalOrderMatchesQuote(array $paypalResult, Mage_Sales_Model_Quote $quote): void
+    {
+        $purchaseUnit = $paypalResult['purchase_units'][0] ?? [];
+        $paypalOrderId = (string) ($paypalResult['id'] ?? '');
+
+        $expectedInvoiceId = (string) $quote->getReservedOrderId();
+        $actualInvoiceId = (string) ($purchaseUnit['invoice_id'] ?? '');
+        if ($expectedInvoiceId === '' || $actualInvoiceId !== $expectedInvoiceId) {
+            Mage::log(
+                sprintf(
+                    'PayPal order %s invoice_id mismatch: expected "%s", got "%s" (quote %s).',
+                    $paypalOrderId,
+                    $expectedInvoiceId,
+                    $actualInvoiceId,
+                    $quote->getId(),
+                ),
+                Mage::LOG_ERROR,
+                'paypal.log',
+            );
+            Mage::throwException(Mage::helper('paypal')->__('PayPal order does not belong to this cart.'));
+        }
+
+        $expectedCurrency = (string) $quote->getBaseCurrencyCode();
+        $actualCurrency = (string) ($purchaseUnit['amount']['currency_code'] ?? '');
+        if ($actualCurrency !== $expectedCurrency) {
+            Mage::log(
+                sprintf(
+                    'PayPal order %s currency mismatch: expected "%s", got "%s" (quote %s).',
+                    $paypalOrderId,
+                    $expectedCurrency,
+                    $actualCurrency,
+                    $quote->getId(),
+                ),
+                Mage::LOG_ERROR,
+                'paypal.log',
+            );
+            Mage::throwException(Mage::helper('paypal')->__('PayPal order currency does not match this cart.'));
+        }
+
+        $expectedAmount = (float) $quote->getBaseGrandTotal();
+        $actualAmount = (float) ($purchaseUnit['amount']['value'] ?? 0);
+        // 1-cent tolerance absorbs rounding drift between Maho and PayPal
+        if (abs($expectedAmount - $actualAmount) > 0.01) {
+            Mage::log(
+                sprintf(
+                    'PayPal order %s amount mismatch: expected %.2f, got %.2f (quote %s).',
+                    $paypalOrderId,
+                    $expectedAmount,
+                    $actualAmount,
+                    $quote->getId(),
+                ),
+                Mage::LOG_ERROR,
+                'paypal.log',
+            );
+            Mage::throwException(Mage::helper('paypal')->__('PayPal order amount does not match this cart.'));
+        }
+    }
+
+    /**
+     * Reject a paypal_order_id already tied to an existing order payment.
+     * In the active-quote branch this should never be true legitimately —
+     * if it is, someone is trying to replay a completed PayPal order.
+     */
+    protected function _assertPaypalOrderNotAlreadyUsed(string $paypalOrderId): void
+    {
+        /** @var Mage_Sales_Model_Resource_Order_Payment_Collection $payments */
+        $payments = Mage::getResourceModel('sales/order_payment_collection');
+        $payments->addFieldToFilter('paypal_order_id', $paypalOrderId);
+        $payments->setPageSize(1);
+        if ($payments->getFirstItem()->getId()) {
+            Mage::log(
+                sprintf('PayPal approveOrder: refused replay of paypal_order_id %s already tied to an order.', $paypalOrderId),
+                Mage::LOG_ERROR,
+                'paypal.log',
+            );
+            Mage::throwException(Mage::helper('paypal')->__('This PayPal order has already been used.'));
+        }
     }
 
     protected function _findQuoteByPaypalOrderId(string $paypalOrderId): ?Mage_Sales_Model_Quote

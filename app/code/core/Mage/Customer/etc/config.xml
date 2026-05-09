@@ -13,7 +13,7 @@
 <config>
     <modules>
         <Mage_Customer>
-            <version>1.6.2.0.7</version>
+            <version>1.6.2.0.8</version>
         </Mage_Customer>
     </modules>
     <admin>
@@ -441,15 +441,6 @@
         <secure_url>
             <customer>/customer/</customer>
         </secure_url>
-        <routers>
-            <customer>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Customer</module>
-                    <frontName>customer</frontName>
-                </args>
-            </customer>
-        </routers>
         <translate>
             <modules>
                 <Mage_Customer>

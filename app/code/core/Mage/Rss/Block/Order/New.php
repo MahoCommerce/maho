@@ -40,7 +40,7 @@ class Mage_Rss_Block_Order_New extends Mage_Core_Block_Template
         $storeId = $this->getRequest()->getParam('store');
         $order = Mage::getModel('sales/order');
         $period = Mage::helper('rss')->getRssAdminOrderNewPeriod($storeId);
-        $passDate = $order->getResource()->formatDate(
+        $passDate = Mage::app()->getLocale()->formatDateForDb(
             mktime(0, 0, 0, (int) date('m'), (int) date('d') - $period),
         );
 

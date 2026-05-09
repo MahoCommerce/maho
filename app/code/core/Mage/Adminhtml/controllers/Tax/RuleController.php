@@ -5,7 +5,7 @@
  *
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2026 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -18,11 +18,18 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
      */
     public const ADMIN_RESOURCE = 'sales/tax/rules';
 
+    #[\Override]
+    protected function _construct()
+    {
+        $this->setUsedModuleName('Mage_Tax');
+    }
+
     /**
      * Index action
      *
      * @return $this
      */
+    #[Maho\Config\Route('/admin/tax_rule/index')]
     public function indexAction()
     {
         $this->_title($this->__('Sales'))
@@ -38,6 +45,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
     /**
      * Redirect to edit action
      */
+    #[Maho\Config\Route('/admin/tax_rule/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -46,6 +54,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
     /**
      * Edit action
      */
+    #[Maho\Config\Route('/admin/tax_rule/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -59,7 +68,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
             if (!$ruleModel->getId()) {
                 Mage::getSingleton('adminhtml/session')->unsRuleData();
                 Mage::getSingleton('adminhtml/session')
-                    ->addError(Mage::helper('tax')->__('This rule no longer exists.'));
+                    ->addError($this->__('This rule no longer exists.'));
                 $this->_redirect('*/*/');
                 return;
             }
@@ -76,8 +85,8 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
 
         $this->_initAction()
             ->_addBreadcrumb(
-                $taxRuleId ? Mage::helper('tax')->__('Edit Rule') : Mage::helper('tax')->__('New Rule'),
-                $taxRuleId ? Mage::helper('tax')->__('Edit Rule') : Mage::helper('tax')->__('New Rule'),
+                $taxRuleId ? $this->__('Edit Rule') : $this->__('New Rule'),
+                $taxRuleId ? $this->__('Edit Rule') : $this->__('New Rule'),
             )
             ->_addContent($this->getLayout()->createBlock('adminhtml/tax_rule_edit')
                 ->setData('action', $this->getUrl('*/tax_rule/save')))
@@ -87,6 +96,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
     /**
      * Save action
      */
+    #[Maho\Config\Route('/admin/tax_rule/save')]
     public function saveAction()
     {
         $postData = $this->getRequest()->getPost();
@@ -95,7 +105,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
         }
 
         $ruleId = (int) $this->getRequest()->getParam('tax_calculation_rule_id');
-        $ruleModel = Mage::getSingleton('tax/calculation_rule')->load($ruleId);
+        $ruleModel = Mage::getModel('tax/calculation_rule')->load($ruleId);
         $ruleModel->setData($postData);
         $ruleModel->setCalculateSubtotal($this->getRequest()->getParam('calculate_subtotal', 0));
 
@@ -109,7 +119,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
             }
 
             $ruleModel->save();
-            $session->addSuccess(Mage::helper('tax')->__('The tax rule has been saved.'));
+            $session->addSuccess($this->__('The tax rule has been saved.'));
 
             if ($this->getRequest()->getParam('back')) {
                 return $this->_redirect('*/*/edit', ['rule' => $ruleModel->getId()]);
@@ -117,9 +127,9 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
 
             return $this->_redirect('*/*/');
         } catch (Mage_Core_Exception $e) {
-            $session->addError($e->getMessage());
+            $session->addException($e, $e->getMessage());
         } catch (Exception $e) {
-            $session->addError(Mage::helper('tax')->__('An error occurred while saving this tax rule.'));
+            $session->addException($e, $this->__('An error occurred while saving this tax rule.'));
         }
 
         Mage::getSingleton('adminhtml/session')->setRuleData($postData);
@@ -150,7 +160,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
         if (count($existingRules) > 0) {
             $ruleCodes = implode(',', $existingRules);
             $session->addError(
-                Mage::helper('tax')->__('Rules (%s) already exist for the specified Tax Rate, Customer Tax Class and Product Tax Class combinations', $ruleCodes),
+                $this->__('Rules (%s) already exist for the specified Tax Rate, Customer Tax Class and Product Tax Class combinations', $ruleCodes),
             );
             return false;
         }
@@ -160,13 +170,14 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
     /**
      * Delete action
      */
+    #[Maho\Config\Route('/admin/tax_rule/delete')]
     public function deleteAction(): void
     {
         $ruleId = (int) $this->getRequest()->getParam('rule');
         $ruleModel = Mage::getSingleton('tax/calculation_rule')
             ->load($ruleId);
         if (!$ruleModel->getId()) {
-            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('tax')->__('This rule no longer exists'));
+            Mage::getSingleton('adminhtml/session')->addError($this->__('This rule no longer exists'));
             $this->_redirect('*/*/');
             return;
         }
@@ -175,15 +186,15 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
             $ruleModel->delete();
 
             Mage::getSingleton('adminhtml/session')
-                ->addSuccess(Mage::helper('tax')->__('The tax rule has been deleted.'));
+                ->addSuccess($this->__('The tax rule has been deleted.'));
             $this->_redirect('*/*/');
 
             return;
         } catch (Mage_Core_Exception $e) {
-            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+            Mage::getSingleton('adminhtml/session')->addException($e, $e->getMessage());
         } catch (Exception $e) {
             Mage::getSingleton('adminhtml/session')
-                ->addError(Mage::helper('tax')->__('An error occurred while deleting this tax rule.'));
+                ->addException($e, $this->__('An error occurred while deleting this tax rule.'));
         }
 
         $this->_redirectReferer();
@@ -198,8 +209,8 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
     {
         $this->loadLayout()
             ->_setActiveMenu('sales/tax/rules')
-            ->_addBreadcrumb(Mage::helper('tax')->__('Tax'), Mage::helper('tax')->__('Tax'))
-            ->_addBreadcrumb(Mage::helper('tax')->__('Tax Rules'), Mage::helper('tax')->__('Tax Rules'))
+            ->_addBreadcrumb($this->__('Tax'), $this->__('Tax'))
+            ->_addBreadcrumb($this->__('Tax Rules'), $this->__('Tax Rules'))
         ;
         return $this;
     }

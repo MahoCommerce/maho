@@ -421,7 +421,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
                     $method = false;
                     if (preg_match('/^([^:]+?)::([^:]+?)$/', $factoryName, $matches)) {
                         array_shift($matches);
-                        [$factoryName, $method] = array_values($matches);
+                        [$factoryName, $method] = $matches;
                     }
 
                     $sourceModel = Mage::getSingleton($factoryName);

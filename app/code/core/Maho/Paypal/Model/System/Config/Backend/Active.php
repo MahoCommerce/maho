@@ -17,11 +17,11 @@ class Maho_Paypal_Model_System_Config_Backend_Active extends Mage_Core_Model_Con
     {
         if ($this->getValue() === '1') {
             if (!$this->_hasCredentialsInRequest()) {
-                $config = Mage::getModel('maho_paypal/config');
+                $config = Mage::getModel('paypal/config');
 
                 if (!$config->hasCredentials()) {
                     Mage::throwException(
-                        Mage::helper('maho_paypal')->__('PayPal Client ID and Client Secret are required when a PayPal payment method is enabled.'),
+                        Mage::helper('paypal')->__('PayPal Client ID and Client Secret are required when a PayPal payment method is enabled.'),
                     );
                 }
             }
@@ -36,8 +36,8 @@ class Maho_Paypal_Model_System_Config_Backend_Active extends Mage_Core_Model_Con
         if (!is_array($groups)) {
             return false;
         }
-        $clientId = $groups['maho_paypal_credentials']['fields']['client_id']['value'] ?? '';
-        $clientSecret = $groups['maho_paypal_credentials']['fields']['client_secret']['value'] ?? '';
+        $clientId = $groups['paypal_credentials']['fields']['client_id']['value'] ?? '';
+        $clientSecret = $groups['paypal_credentials']['fields']['client_secret']['value'] ?? '';
         $isPlaceholder = static fn(string $v): bool => $v === '' || (bool) preg_match('/^\*+$/', $v);
         return !$isPlaceholder($clientId) && !$isPlaceholder($clientSecret);
     }

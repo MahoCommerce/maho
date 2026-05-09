@@ -481,12 +481,12 @@ class Uploader
         return in_array(strtolower($extension), $this->_allowedExtensions);
     }
 
-    private function _getMimeType()
+    private function _getMimeType(): string
     {
         return $this->_file['type'];
     }
 
-    private function _setUploadFileId($fileId): void
+    private function _setUploadFileId(string|array $fileId): void
     {
         if (empty($_FILES)) {
             throw new \Exception('$_FILES array is empty', UPLOAD_ERR_NO_FILE);
@@ -518,7 +518,7 @@ class Uploader
         }
     }
 
-    private function _createDestinationFolder($destinationFolder)
+    private function _createDestinationFolder(string $destinationFolder): self
     {
         if (!$destinationFolder) {
             return $this;

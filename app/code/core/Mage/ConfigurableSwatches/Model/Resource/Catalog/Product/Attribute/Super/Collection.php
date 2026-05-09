@@ -12,8 +12,8 @@
 
 class Mage_ConfigurableSwatches_Model_Resource_Catalog_Product_Attribute_Super_Collection extends Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute_Collection
 {
-    private $_eavAttributesJoined = false;
-    private $_storeId = null;
+    private bool $_eavAttributesJoined = false;
+    private ?int $_storeId = null;
 
     /**
      * Filter parent products to these IDs

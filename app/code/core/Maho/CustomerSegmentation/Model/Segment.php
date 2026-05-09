@@ -185,8 +185,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
             $matchedCustomers = $this->getMatchingCustomerIds();
             $this->getResource()->updateCustomerMembership($this, $matchedCustomers);
 
-            $utcDateTime = Mage::app()->getLocale()->utcDate(null, null, true);
-            $nowString = $utcDateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+            $nowString = Mage::app()->getLocale()->formatDateForDb('now');
 
             $this->setMatchedCustomersCount(count($matchedCustomers))
                 ->setLastRefreshAt($nowString)
@@ -330,6 +329,12 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
                 Mage::throwException(implode("\n", $errors));
             }
         }
+
+        $now = Mage::app()->getLocale()->formatDateForDb('now');
+        if ($this->isObjectNew() && !$this->getCreatedAt()) {
+            $this->setCreatedAt($now);
+        }
+        $this->setUpdatedAt($now);
 
         return $this;
     }

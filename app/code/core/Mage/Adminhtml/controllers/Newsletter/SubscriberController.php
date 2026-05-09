@@ -6,6 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,6 +18,7 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
      */
     public const ADMIN_RESOURCE = 'newsletter/subscriber';
 
+    #[Maho\Config\Route('/admin/newsletter_subscriber/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Newsletter'))->_title($this->__('Newsletter Subscribers'));
@@ -40,6 +42,7 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/newsletter_subscriber/grid')]
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -51,6 +54,7 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
     /**
      * Export subscribers grid to CSV format
      */
+    #[Maho\Config\Route('/admin/newsletter_subscriber/exportCsv')]
     public function exportCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/newsletter_subscriber_grid');
@@ -60,12 +64,14 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
     /**
      * Export subscribers grid to XML format
      */
+    #[Maho\Config\Route('/admin/newsletter_subscriber/exportXml')]
     public function exportXmlAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/newsletter_subscriber_grid');
         $this->_prepareDownloadResponse(...$grid->getExcelFile('subscribers.xml', -1));
     }
 
+    #[Maho\Config\Route('/admin/newsletter_subscriber/massUnsubscribe')]
     public function massUnsubscribeAction(): void
     {
         $subscribersIds = $this->getRequest()->getParam('subscriber');
@@ -88,6 +94,7 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
         $this->_redirect('*/*/index');
     }
 
+    #[Maho\Config\Route('/admin/newsletter_subscriber/massDelete')]
     public function massDeleteAction(): void
     {
         $subscribersIds = $this->getRequest()->getParam('subscriber');

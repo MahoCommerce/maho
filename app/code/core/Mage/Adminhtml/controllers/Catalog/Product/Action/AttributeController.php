@@ -25,6 +25,7 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
         $this->setUsedModuleName('Mage_Catalog');
     }
 
+    #[Maho\Config\Route('/admin/catalog_product_action_attribute/edit')]
     public function editAction(): void
     {
         if (!$this->_validateProducts()) {
@@ -38,6 +39,7 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
     /**
      * Update product attributes
      */
+    #[Maho\Config\Route('/admin/catalog_product_action_attribute/save')]
     public function saveAction(): void
     {
         if (!$this->_validateProducts()) {
@@ -231,6 +233,7 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
     /**
      * Attributes validation action
      */
+    #[Maho\Config\Route('/admin/catalog_product_action_attribute/validate')]
     public function validateAction(): void
     {
         $response = new \Maho\DataObject();

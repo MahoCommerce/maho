@@ -205,7 +205,9 @@ class Maho_Paypal_Model_Api_OrderBuilder
             $qty = (int) $quoteItem->getTotalQty();
             $price = (float) $quoteItem->getBaseCalculationPrice();
 
-            // Handle precision issues (same logic as Mage_Paypal_Model_Cart::_addRegularItem)
+            // Float prices like 12.345 round to a different total when multiplied by qty
+            // (12.345 × 3 = 37.035) than when summed (37.04). Fall back to row total in
+            // those cases so PayPal's line-item check matches the cart total to the cent.
             if ($this->_hasPrecisionIssue($price)) {
                 $price = (float) $quoteItem->getBaseRowTotal();
                 $qty = 1;

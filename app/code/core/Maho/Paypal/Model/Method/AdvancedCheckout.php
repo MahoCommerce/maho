@@ -19,7 +19,7 @@ class Maho_Paypal_Model_Method_AdvancedCheckout extends Maho_Paypal_Model_Method
 {
     protected $_code = Maho_Paypal_Model_Config::METHOD_ADVANCED_CHECKOUT;
 
-    protected $_formBlockType = 'maho_paypal/checkout_advanced_form';
+    protected $_formBlockType = 'paypal/checkout_advanced_form';
 
     protected $_canUseInternal = false;
     protected $_canSaveCc = false;

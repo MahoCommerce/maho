@@ -20,9 +20,6 @@ class Mage_Adminhtml_Block_Sitemap_Grid_Renderer_Time extends Mage_Adminhtml_Blo
     #[\Override]
     public function render(\Maho\DataObject $row)
     {
-        return date(
-            Mage_Core_Model_Locale::DATETIME_FORMAT,
-            strtotime($row->getSitemapTime()) + Mage::getSingleton('core/date')->getGmtOffset(),
-        );
+        return Mage::app()->getLocale()->utcToStore(null, $row->getSitemapTime())->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
     }
 }

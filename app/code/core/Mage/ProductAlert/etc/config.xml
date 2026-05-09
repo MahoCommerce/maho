@@ -12,7 +12,7 @@
 <config>
     <modules>
         <Mage_ProductAlert>
-            <version>1.6.0.0</version>
+            <version>1.6.0.1</version>
         </Mage_ProductAlert>
     </modules>
     <global>
@@ -98,15 +98,6 @@
                 </productalert>
             </updates>
         </layout>
-        <routers>
-            <productalert>
-                <use>standard</use>
-                <args>
-                    <module>Mage_ProductAlert</module>
-                    <frontName>productalert</frontName>
-                </args>
-            </productalert>
-        </routers>
     </frontend>
     <default>
         <catalog>

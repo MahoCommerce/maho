@@ -55,6 +55,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
     /**
      * Order view form page
      */
+    #[Maho\Config\Route('/sales/guest/form', name: 'sales.guest.form', methods: ['GET'])]
     public function formAction(): void
     {
         if (Mage::getSingleton('customer/session')->isLoggedIn()) {

@@ -31,7 +31,7 @@ class Column extends AbstractMapper
         foreach ($data as $i => $row) {
             $newRow = [];
             foreach ($row as $field => $value) {
-                if (!$onlySpecified || $onlySpecified && isset($attributesToSelect[$field])) {
+                if (!$onlySpecified || isset($attributesToSelect[$field])) {
                     $newRow[$this->getVar($field, $field)] = $value;
                 }
             }

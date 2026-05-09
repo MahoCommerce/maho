@@ -51,8 +51,18 @@ class Mage_Admin_Model_Resource_Rules extends Mage_Core_Model_Resource_Db_Abstra
 
                     $adapter->insert($this->getMainTable(), $insertData);
                 } else {
-                    foreach (Mage::getModel('admin/roles')->getResourcesList2D() as $index => $resName) {
-                        $row['permission']  = (in_array($resName, $postedResources) ? 'allow' : 'deny');
+                    // Auto-allow ancestors of any posted resource: a partially-selected parent
+                    // would otherwise be saved as deny, hiding its (allowed) children from the menu.
+                    $allowedResources = [];
+                    foreach ($postedResources as $resource) {
+                        $parts = explode('/', $resource);
+                        for ($i = 1, $n = count($parts); $i <= $n; $i++) {
+                            $allowedResources[implode('/', array_slice($parts, 0, $i))] = true;
+                        }
+                    }
+
+                    foreach (Mage::getModel('admin/roles')->getResourcesList2D() as $resName) {
+                        $row['permission']  = (isset($allowedResources[$resName]) ? 'allow' : 'deny');
                         $row['resource_id'] = trim($resName, '/');
 
                         $insertData = $this->_prepareDataForTable(new \Maho\DataObject($row), $this->getMainTable());

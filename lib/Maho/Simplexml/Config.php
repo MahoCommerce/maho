@@ -301,7 +301,7 @@ class Config
             return true;
         }
         $cachedChecksum = $this->getCache()->load($this->getCacheChecksumId());
-        return $newChecksum === false && $cachedChecksum === false || $newChecksum === $cachedChecksum;
+        return $newChecksum === $cachedChecksum;
     }
 
     /**

@@ -62,7 +62,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
                 // Validate that the datetime is actually valid (not just format)
                 $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT, substr($date, 0, 16));
                 if ($dateTime && $dateTime->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT) === substr($date, 0, 16)) {
-                    return Mage::app()->getLocale()->utcDate(null, $date, true, 'html5');
+                    return Mage::app()->getLocale()->storeToUtc(null, $date)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 }
             }
         }
@@ -90,12 +90,14 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
         $toValue = '';
         $isDateOnly = !$this->getColumn()->getFilterTime();
 
+        $dateFormat = $isDateOnly ? Mage_Core_Model_Locale::DATE_FORMAT : Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT;
+
         if ($fromDate = $this->getValue('from')) {
-            $fromValue = Mage::app()->getLocale()->storeDate(null, $fromDate, !$isDateOnly, 'html5') ?? '';
+            $fromValue = Mage::app()->getLocale()->utcToStore(null, $fromDate)->format($dateFormat);
         }
 
         if ($toDate = $this->getValue('to')) {
-            $toValue = Mage::app()->getLocale()->storeDate(null, $toDate, !$isDateOnly, 'html5') ?? '';
+            $toValue = Mage::app()->getLocale()->utcToStore(null, $toDate)->format($dateFormat);
         }
 
         $html = '<div class="range"><div class="range-line date">'

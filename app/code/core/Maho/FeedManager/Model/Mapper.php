@@ -218,6 +218,10 @@ class Maho_FeedManager_Model_Mapper
         $data['special_price'] = $product->getSpecialPrice();
         $data['special_from_date'] = $product->getSpecialFromDate();
         $data['special_to_date'] = $product->getSpecialToDate();
+        $data['sale_price_effective_date'] = Mage::helper('feedmanager/date')->toIso8601Range(
+            $data['special_from_date'],
+            $data['special_to_date'],
+        );
         $data['type_id'] = $product->getTypeId();
         $data['visibility'] = $product->getVisibility();
         $data['status'] = $product->getStatus();
@@ -389,6 +393,10 @@ class Maho_FeedManager_Model_Mapper
         $data['special_price'] = $parent->getSpecialPrice();
         $data['special_from_date'] = $parent->getSpecialFromDate();
         $data['special_to_date'] = $parent->getSpecialToDate();
+        $data['sale_price_effective_date'] = Mage::helper('feedmanager/date')->toIso8601Range(
+            $data['special_from_date'],
+            $data['special_to_date'],
+        );
         $data['url'] = $this->_getProductSeoUrl($parent);
         $data['image'] = $this->_getImageUrl($parent, 'image');
         $data['small_image'] = $this->_getImageUrl($parent, 'small_image');

@@ -29,7 +29,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Entity type configuration
      *
-     * @var Mage_Eav_Model_Entity_Type
+     * @var Mage_Eav_Model_Entity_Type|null
      */
     protected $_type;
 

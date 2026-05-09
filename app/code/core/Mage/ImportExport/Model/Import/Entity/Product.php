@@ -893,7 +893,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                         'entity_id'        => $productId,
                         'has_options'      => 0,
                         'required_options' => 0,
-                        'updated_at'       => Mage_Core_Model_Locale::now(),
+                        'updated_at'       => Mage::app()->getLocale()->formatDateForDb('now'),
                     ];
                 }
 
@@ -1343,8 +1343,6 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     protected function _saveProducts()
     {
         $priceIsGlobal  = Mage::helper('catalog')->isPriceGlobal();
-        $productLimit   = null;
-        $productsQty    = null;
 
         while ($bunch = $this->_dataSourceModel->getNextBunch()) {
             $entityRowsIn = [];
@@ -1369,7 +1367,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
 
                 if (self::SCOPE_DEFAULT == $rowScope) {
                     $rowSku = $rowData[self::COL_SKU];
-                    $now = Mage_Core_Model_Locale::now();
+                    $now = Mage::app()->getLocale()->formatDateForDb('now');
 
                     // 1. Entity phase
                     if (isset($this->_oldSku[$rowSku])) { // existing row
@@ -1380,21 +1378,14 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                             'attribute_set_id' => $this->_oldSku[$rowSku]['attr_set_id'],
                         ];
                     } else { // new row
-                        if (!$productLimit || $productsQty < $productLimit) {
-                            $entityRowsIn[$rowSku] = [
-                                'entity_type_id'   => $this->_entityTypeId,
-                                'attribute_set_id' => $this->_newSku[$rowSku]['attr_set_id'],
-                                'type_id'          => $this->_newSku[$rowSku]['type_id'],
-                                'sku'              => $rowSku,
-                                'created_at'       => $now,
-                                'updated_at'       => $now,
-                            ];
-                            $productsQty++;
-                        } else {
-                            $rowSku = null; // sign for child rows to be skipped
-                            $this->_rowsToSkip[$rowNum] = true;
-                            continue;
-                        }
+                        $entityRowsIn[$rowSku] = [
+                            'entity_type_id'   => $this->_entityTypeId,
+                            'attribute_set_id' => $this->_newSku[$rowSku]['attr_set_id'],
+                            'type_id'          => $this->_newSku[$rowSku]['type_id'],
+                            'sku'              => $rowSku,
+                            'created_at'       => $now,
+                            'updated_at'       => $now,
+                        ];
                     }
                 } elseif ($rowSku === null) {
                     $this->_rowsToSkip[$rowNum] = true;
@@ -1895,9 +1886,9 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                 unset($row);
                 if ($helper->isQty($this->_newSku[$rowData[self::COL_SKU]]['type_id'])) {
                     if ($stockItem->verifyNotification()) {
-                        $stockItem->setLowStockDate(Mage::app()->getLocale()
-                            ->date(null, null, null, false)
-                            ->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+                        $stockItem->setLowStockDate(
+                            (new DateTime())->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                        );
                     }
                     $stockItem->setStockStatusChangedAutomatically((int) !$stockItem->verifyStock());
                 } else {

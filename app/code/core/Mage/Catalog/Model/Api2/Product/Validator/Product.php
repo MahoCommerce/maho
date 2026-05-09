@@ -190,7 +190,7 @@ class Mage_Catalog_Model_Api2_Product_Validator_Product extends Mage_Api2_Model_
                     }
                 }
                 // Validate positive number required attributes
-                if (in_array($attributeCode, $positiveNumberAttributes) && (!empty($value) && $value !== 0)
+                if (in_array($attributeCode, $positiveNumberAttributes) && !empty($value)
                     && (!is_numeric($value) || $value < 0)
                 ) {
                     $this->_addError(sprintf('Please enter a number 0 or greater in the "%s" field.', $attributeCode));

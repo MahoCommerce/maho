@@ -12,7 +12,7 @@
 
 class Mage_Adminhtml_Helper_Data extends Mage_Adminhtml_Helper_Help_Mapping
 {
-    public const XML_PATH_ADMINHTML_ROUTER_FRONTNAME   = 'admin/routers/adminhtml/args/frontName';
+    public const XML_PATH_ADMINHTML_ROUTER_FRONTNAME   = 'admin/base_path';
     public const XML_PATH_USE_CUSTOM_ADMIN_URL         = 'default/admin/url/use_custom';
     public const XML_PATH_USE_CUSTOM_ADMIN_PATH        = 'default/admin/url/use_custom_path';
     public const XML_PATH_CUSTOM_ADMIN_PATH            = 'default/admin/url/custom_path';

@@ -15,7 +15,7 @@ class Maho_Paypal_Model_Resource_Vault_Token_Collection extends Mage_Core_Model_
     #[\Override]
     protected function _construct(): void
     {
-        $this->_init('maho_paypal/vault_token');
+        $this->_init('paypal/vault_token');
     }
 
     public function addCustomerFilter(int $customerId): self

@@ -76,7 +76,7 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
     protected function _beforeSave()
     {
         if (!$this->getId()) {
-            $this->setCreatedAt(Mage::getModel('core/date')->gmtDate());
+            $this->setCreatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         }
 
         $helper = Mage::helper('core');

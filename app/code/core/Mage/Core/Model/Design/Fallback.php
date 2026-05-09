@@ -18,7 +18,7 @@ class Mage_Core_Model_Design_Fallback
     protected $_config = null;
 
     /**
-     * @var Mage_Core_Model_Store
+     * @var Mage_Core_Model_Store|null
      */
     protected $_store = null;
 

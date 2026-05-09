@@ -12,13 +12,13 @@ declare(strict_types=1);
 uses(Tests\MahoFrontendTestCase::class)->group('frontend', 'paypal');
 
 it('can instantiate standard checkout payment method', function () {
-    $method = Mage::getModel('maho_paypal/method_standardCheckout');
+    $method = Mage::getModel('paypal/method_standardCheckout');
     expect($method)->toBeInstanceOf(Maho_Paypal_Model_Method_StandardCheckout::class);
     expect($method->getCode())->toBe('paypal_standard_checkout');
 });
 
 it('has correct capability flags', function () {
-    $method = Mage::getModel('maho_paypal/method_standardCheckout');
+    $method = Mage::getModel('paypal/method_standardCheckout');
     expect($method->canAuthorize())->toBeTrue();
     expect($method->canCapture())->toBeTrue();
     expect($method->canRefund())->toBeTrue();
@@ -28,19 +28,19 @@ it('has correct capability flags', function () {
 });
 
 it('has correct form and info block types', function () {
-    $method = Mage::getModel('maho_paypal/method_standardCheckout');
-    expect($method->getFormBlockType())->toBe('maho_paypal/checkout_standard_form');
-    expect($method->getInfoBlockType())->toBe('maho_paypal/payment_info');
+    $method = Mage::getModel('paypal/method_standardCheckout');
+    expect($method->getFormBlockType())->toBe('paypal/checkout_standard_form');
+    expect($method->getInfoBlockType())->toBe('paypal/payment_info');
 });
 
-it('can instantiate config model as rewrite', function () {
+it('resolves paypal/config alias to Maho_Paypal_Model_Config', function () {
     $config = Mage::getModel('paypal/config');
     expect($config)->toBeInstanceOf(Maho_Paypal_Model_Config::class);
 });
 
 it('provides JS SDK URL for correct environment', function () {
     $config = Mage::getModel('paypal/config');
-    Mage::app()->getStore()->setConfig('maho_paypal/credentials/sandbox', '1');
+    Mage::app()->getStore()->setConfig('paypal/credentials/sandbox', '1');
 
     $url = $config->getJsSdkUrl();
     expect($url)->toContain('sandbox.paypal.com');

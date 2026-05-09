@@ -78,7 +78,7 @@ class Mage_Admin_Model_Config extends \Maho\Simplexml\Config
         }
 
         foreach ($children as $res) {
-            if ($res->disabled == 1) {
+            if ((string) $res->disabled === '1') {
                 continue;
             }
             $this->loadAclResources($acl, $res, $resourceName);

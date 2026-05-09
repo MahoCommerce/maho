@@ -31,6 +31,7 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
     /**
      * Index action
      */
+    #[Maho\Config\Route('/admin/cms_page/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('CMS'))
@@ -44,6 +45,7 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
     /**
      * Create new CMS page
      */
+    #[Maho\Config\Route('/admin/cms_page/new')]
     public function newAction(): void
     {
         // the same form is used to create and edit
@@ -53,6 +55,7 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
     /**
      * Edit CMS page
      */
+    #[Maho\Config\Route('/admin/cms_page/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('CMS'))
@@ -102,6 +105,7 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
     /**
      * Save action
      */
+    #[Maho\Config\Route('/admin/cms_page/save')]
     public function saveAction(): void
     {
         // check if data sent
@@ -166,6 +170,7 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
     /**
      * Delete action
      */
+    #[Maho\Config\Route('/admin/cms_page/delete')]
     public function deleteAction(): void
     {
         // check if we know what should be deleted

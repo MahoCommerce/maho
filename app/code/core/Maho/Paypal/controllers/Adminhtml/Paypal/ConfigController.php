@@ -31,6 +31,7 @@ class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Contr
         'VAULT.PAYMENT-TOKEN.DELETED',
     ];
 
+    #[Maho\Config\Route('/admin/paypal_config/testConnection')]
     public function testConnectionAction(): void
     {
         $result = ['success' => false, 'message' => ''];
@@ -54,6 +55,7 @@ class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Contr
         $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
     }
 
+    #[Maho\Config\Route('/admin/paypal_config/registerWebhook')]
     public function registerWebhookAction(): void
     {
         $result = ['success' => false, 'message' => ''];
@@ -71,7 +73,7 @@ class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Contr
 
             if (!empty($response['id'])) {
                 Mage::getModel('core/config')->saveConfig(
-                    'maho_paypal/credentials/webhook_id',
+                    'paypal/credentials/webhook_id',
                     $response['id'],
                 );
                 Mage::getConfig()->reinit();
@@ -116,7 +118,7 @@ class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Contr
         }
 
         /** @var Maho_Paypal_Model_Api_Client $client */
-        $client = Mage::getModel('maho_paypal/api_client');
+        $client = Mage::getModel('paypal/api_client');
         $client->setExplicitCredentials($clientId, $clientSecret, $sandbox);
 
         return $client;

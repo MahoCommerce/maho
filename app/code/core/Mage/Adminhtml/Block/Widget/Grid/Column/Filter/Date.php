@@ -39,11 +39,11 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
         $toValue = '';
 
         if ($fromDate = $this->getValue('from')) {
-            $fromValue = Mage::app()->getLocale()->storeDate(null, $fromDate, false, 'html5') ?? '';
+            $fromValue = Mage::app()->getLocale()->utcToStore(null, $fromDate)->format(Mage_Core_Model_Locale::DATE_FORMAT);
         }
 
         if ($toDate = $this->getValue('to')) {
-            $toValue = Mage::app()->getLocale()->storeDate(null, $toDate, false, 'html5') ?? '';
+            $toValue = Mage::app()->getLocale()->utcToStore(null, $toDate)->format(Mage_Core_Model_Locale::DATE_FORMAT);
         }
 
         $html = '<div class="range"><div class="range-line date">'
@@ -135,7 +135,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
             // Validate that the date is actually valid (not just format)
             $dateTime = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $date);
             if ($dateTime && $dateTime->format(Mage_Core_Model_Locale::DATE_FORMAT) === $date) {
-                return Mage::app()->getLocale()->utcDate(null, $date, false, 'html5');
+                return Mage::app()->getLocale()->storeToUtc(null, $date)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
             }
         }
 

@@ -12,7 +12,7 @@
 <config>
     <modules>
         <Maho_CustomerSegmentation>
-            <version>1.1.0</version>
+            <version>1.2.0</version>
         </Maho_CustomerSegmentation>
     </modules>
     <global>
@@ -63,17 +63,6 @@
             </customersegmentation>
         </helpers>
     </global>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <Maho_CustomerSegmentation before="Mage_Adminhtml">Maho_CustomerSegmentation_Adminhtml</Maho_CustomerSegmentation>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
     <adminhtml>
         <layout>
             <updates>

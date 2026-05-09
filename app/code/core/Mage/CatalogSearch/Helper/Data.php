@@ -34,7 +34,7 @@ class Mage_CatalogSearch_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Query string
      *
-     * @var string
+     * @var string|null
      */
     protected $_queryText;
 

@@ -40,6 +40,7 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
         return $model;
     }
 
+    #[Maho\Config\Route('/admin/blog_category/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Blog Categories'));
@@ -47,11 +48,13 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/blog_category/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
+    #[Maho\Config\Route('/admin/blog_category/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('Blog Category'));
@@ -87,6 +90,7 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
             ->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/blog_category/save')]
     public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost('category')) {
@@ -131,6 +135,7 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/blog_category/delete')]
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -154,6 +159,7 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/blog_category/massDelete')]
     public function massDeleteAction(): void
     {
         $categoryIds = $this->getRequest()->getParam('category');
@@ -186,6 +192,7 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
     /**
      * AJAX action for Posts tab (initial load with serializer)
      */
+    #[Maho\Config\Route('/admin/blog_category/posts')]
     public function postsAction(): void
     {
         $this->_initCategory();
@@ -198,6 +205,7 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
     /**
      * AJAX action for Posts tab grid (filter/sort/page reload)
      */
+    #[Maho\Config\Route('/admin/blog_category/postsGrid')]
     public function postsGridAction(): void
     {
         $this->_initCategory();

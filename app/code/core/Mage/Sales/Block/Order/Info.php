@@ -96,7 +96,7 @@ class Mage_Sales_Block_Order_Info extends Mage_Core_Block_Template
         return $this->_links;
     }
 
-    private function checkLinks()
+    private function checkLinks(): void
     {
         $order = $this->getOrder();
         if (!$order->hasInvoices()) {

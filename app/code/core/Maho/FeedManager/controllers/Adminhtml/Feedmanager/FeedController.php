@@ -12,8 +12,6 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminhtml_Controller_Action
 {
-    use Maho_FeedManager_Controller_Adminhtml_JsonResponseTrait;
-
     public const ADMIN_RESOURCE = 'catalog/feedmanager/feeds';
 
     #[\Override]
@@ -47,6 +45,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_feed/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -57,11 +56,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_feed/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_feed/edit')]
     public function editAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -98,6 +99,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_feed/save')]
     public function saveAction(): void
     {
         $data = $this->getRequest()->getPost();
@@ -248,6 +250,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         return $arr['conditions'];
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_feed/delete')]
     public function deleteAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -273,6 +276,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * Duplicate a feed
      */
+    #[Maho\Config\Route('/admin/feedmanager_feed/duplicate')]
     public function duplicateAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -339,6 +343,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * Generate action - redirects to edit page where async batch JS handles generation
      */
+    #[Maho\Config\Route('/admin/feedmanager_feed/generate')]
     public function generateAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -363,22 +368,24 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action to get generation status
      */
+    #[Maho\Config\Route('/admin/feedmanager_feed/status')]
     public function statusAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
 
         if (!$id) {
-            $this->_sendJsonResponse(['error' => true, 'message' => 'Feed ID required']);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => 'Feed ID required']);
             return;
         }
 
         $status = Maho_FeedManager_Model_Generator::getGenerationStatus($id);
-        $this->_sendJsonResponse($status);
+        $this->getResponse()->setBodyJson($status);
     }
 
     /**
      * AJAX action for CSV preview - uses Mapper for consistent output
      */
+    #[Maho\Config\Route('/admin/feedmanager_feed/csvPreview')]
     public function csvPreviewAction(): void
     {
         $feedId = (int) $this->getRequest()->getParam('id');
@@ -394,7 +401,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $columnsData = $columns ? Mage::helper('core')->jsonDecode($columns) : [];
 
             if (empty($columnsData)) {
-                $this->_sendJsonResponse([
+                $this->getResponse()->setBodyJson([
                     'success' => true,
                     'preview' => '',
                     'count' => 0,
@@ -426,20 +433,21 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $enclosure = $feed->getCsvEnclosure() ?? '"';
             $csv = $this->_formatCsvOutput($output, $delimiter, $enclosure);
 
-            $this->_sendJsonResponse([
+            $this->getResponse()->setBodyJson([
                 'success' => true,
                 'preview' => $csv,
                 'count' => count($output) - 1,
             ]);
 
         } catch (Exception $e) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $e->getMessage()]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
     }
 
     /**
      * AJAX action for JSON preview - uses Mapper for consistent output
      */
+    #[Maho\Config\Route('/admin/feedmanager_feed/jsonPreview')]
     public function jsonPreviewAction(): void
     {
         $feedId = (int) $this->getRequest()->getParam('id');
@@ -457,7 +465,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $rootKey = $feed->getJsonRootKey() ?: 'products';
 
             if (empty($structureData)) {
-                $this->_sendJsonResponse([
+                $this->getResponse()->setBodyJson([
                     'success' => true,
                     'preview' => json_encode([$rootKey => []], JSON_PRETTY_PRINT),
                     'count' => 0,
@@ -478,20 +486,21 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 
             $output = [$rootKey => $products];
 
-            $this->_sendJsonResponse([
+            $this->getResponse()->setBodyJson([
                 'success' => true,
                 'preview' => json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
                 'count' => count($products),
             ]);
 
         } catch (Exception $e) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $e->getMessage()]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
     }
 
     /**
      * AJAX action for XML preview - uses Mapper for consistent output
      */
+    #[Maho\Config\Route('/admin/feedmanager_feed/xmlPreview')]
     public function xmlPreviewAction(): void
     {
         $feedId = (int) $this->getRequest()->getParam('id');
@@ -509,7 +518,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $itemTag = $feed->getXmlItemTag() ?: 'item';
 
             if (empty($structureData)) {
-                $this->_sendJsonResponse([
+                $this->getResponse()->setBodyJson([
                     'success' => true,
                     'preview' => '<' . $itemTag . ">\n</" . $itemTag . '>',
                     'count' => 0,
@@ -545,14 +554,14 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 }
             }
 
-            $this->_sendJsonResponse([
+            $this->getResponse()->setBodyJson([
                 'success' => true,
                 'preview' => $xml,
                 'count' => count($collection),
             ]);
 
         } catch (Exception $e) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $e->getMessage()]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
     }
 
@@ -600,13 +609,14 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action to get platform preset data for CSV/JSON/XML builders
      */
+    #[Maho\Config\Route('/admin/feedmanager_feed/platformPreset')]
     public function platformPresetAction(): void
     {
         $platform = $this->getRequest()->getParam('platform');
         $format = $this->getRequest()->getParam('format', 'csv');
 
         if (!$platform) {
-            $this->_sendJsonResponse(['error' => true, 'message' => 'Platform required']);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => 'Platform required']);
             return;
         }
 
@@ -616,7 +626,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $adapter = $platformModel->getAdapter($platform);
 
             if (!$adapter) {
-                $this->_sendJsonResponse(['error' => true, 'message' => 'Unknown platform']);
+                $this->getResponse()->setBodyJson(['error' => true, 'message' => 'Unknown platform']);
                 return;
             }
 
@@ -668,7 +678,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 }
             }
 
-            $this->_sendJsonResponse([
+            $this->getResponse()->setBodyJson([
                 'success' => true,
                 'columns' => $columns,
                 'structure' => $structure,
@@ -676,13 +686,14 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             ]);
 
         } catch (Exception $e) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $e->getMessage()]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
     }
 
     /**
      * Reset a hung feed
      */
+    #[Maho\Config\Route('/admin/feedmanager_feed/reset')]
     public function resetAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -715,7 +726,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 
         foreach ($collection as $log) {
             $log->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED)
-                ->setCompletedAt(Mage_Core_Model_Locale::now())
+                ->setCompletedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->addError('Cancelled - new generation started')
                 ->save();
         }
@@ -733,6 +744,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         }
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_feed/view')]
     public function viewAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -770,6 +782,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         }
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_feed/download')]
     public function downloadAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -815,6 +828,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $this->_redirect('*/*/');
         }
     }
+    #[Maho\Config\Route('/admin/feedmanager_feed/massStatus')]
     public function massStatusAction(): void
     {
         $feedIds = $this->getRequest()->getParam('feed_ids');
@@ -844,6 +858,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_feed/massDelete')]
     public function massDeleteAction(): void
     {
         $feedIds = $this->getRequest()->getParam('feed_ids');
@@ -872,6 +887,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_feed/massGenerate')]
     public function massGenerateAction(): void
     {
         $feedIds = $this->getRequest()->getParam('feed_ids');
@@ -928,6 +944,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_feed/logsGrid')]
     public function logsGridAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -941,12 +958,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action to initialize batch generation
      */
+    #[Maho\Config\Route('/admin/feedmanager_feed/generateInit')]
     public function generateInitAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
 
         if (!$id) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Feed ID required')]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Feed ID required')]);
             return;
         }
 
@@ -954,7 +972,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $feed = Mage::getModel('feedmanager/feed')->load($id);
 
             if (!$feed->getId()) {
-                $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Feed not found')]);
+                $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Feed not found')]);
                 return;
             }
 
@@ -965,7 +983,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                     // Force cleanup any stuck running jobs
                     $this->_forceCleanupRunningJobs($id);
                 } else {
-                    $this->_sendJsonResponse([
+                    $this->getResponse()->setBodyJson([
                         'error' => true,
                         'message' => $this->__('Feed is already being generated.'),
                         'status' => Maho_FeedManager_Model_Generator::getGenerationStatus($id),
@@ -978,7 +996,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $batchGenerator = new Maho_FeedManager_Model_Generator_Batch();
             $result = $batchGenerator->initBatch($feed);
 
-            $this->_sendJsonResponse([
+            $this->getResponse()->setBodyJson([
                 'success' => true,
                 'feed_name' => $feed->getName(),
                 'job_id' => $result['job_id'],
@@ -990,19 +1008,20 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             ]);
 
         } catch (Exception $e) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $e->getMessage()]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
     }
 
     /**
      * AJAX action to process a single batch
      */
+    #[Maho\Config\Route('/admin/feedmanager_feed/generateBatch')]
     public function generateBatchAction(): void
     {
         $jobId = $this->getRequest()->getParam('job_id');
 
         if (!$jobId) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Job ID required')]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Job ID required')]);
             return;
         }
 
@@ -1010,10 +1029,10 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $batchGenerator = new Maho_FeedManager_Model_Generator_Batch();
             $result = $batchGenerator->processBatch($jobId);
 
-            $this->_sendJsonResponse($result);
+            $this->getResponse()->setBodyJson($result);
 
         } catch (Exception $e) {
-            $this->_sendJsonResponse([
+            $this->getResponse()->setBodyJson([
                 'status' => 'failed',
                 'error' => true,
                 'message' => $e->getMessage(),
@@ -1024,12 +1043,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action to finalize batch generation
      */
+    #[Maho\Config\Route('/admin/feedmanager_feed/generateFinalize')]
     public function generateFinalizeAction(): void
     {
         $jobId = $this->getRequest()->getParam('job_id');
 
         if (!$jobId) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Job ID required')]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Job ID required')]);
             return;
         }
 
@@ -1037,10 +1057,10 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $batchGenerator = new Maho_FeedManager_Model_Generator_Batch();
             $result = $batchGenerator->finalize($jobId);
 
-            $this->_sendJsonResponse($result);
+            $this->getResponse()->setBodyJson($result);
 
         } catch (Exception $e) {
-            $this->_sendJsonResponse([
+            $this->getResponse()->setBodyJson([
                 'status' => 'failed',
                 'error' => true,
                 'message' => $e->getMessage(),
@@ -1051,12 +1071,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action to cancel batch generation
      */
+    #[Maho\Config\Route('/admin/feedmanager_feed/generateCancel')]
     public function generateCancelAction(): void
     {
         $jobId = $this->getRequest()->getParam('job_id');
 
         if (!$jobId) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Job ID required')]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Job ID required')]);
             return;
         }
 
@@ -1064,10 +1085,10 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $batchGenerator = new Maho_FeedManager_Model_Generator_Batch();
             $result = $batchGenerator->cancel($jobId);
 
-            $this->_sendJsonResponse($result);
+            $this->getResponse()->setBodyJson($result);
 
         } catch (Exception $e) {
-            $this->_sendJsonResponse([
+            $this->getResponse()->setBodyJson([
                 'error' => true,
                 'message' => $e->getMessage(),
             ]);
@@ -1077,12 +1098,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action to force reset a stuck generation
      */
+    #[Maho\Config\Route('/admin/feedmanager_feed/forceReset')]
     public function forceResetAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
 
         if (!$id) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Feed ID required')]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Feed ID required')]);
             return;
         }
 
@@ -1110,25 +1132,26 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 }
             }
 
-            $this->_sendJsonResponse([
+            $this->getResponse()->setBodyJson([
                 'success' => true,
                 'message' => $this->__('Reset %d running job(s)', $count),
             ]);
 
         } catch (Exception $e) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $e->getMessage()]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
     }
 
     /**
      * AJAX action to get batch job status
      */
+    #[Maho\Config\Route('/admin/feedmanager_feed/generateStatus')]
     public function generateStatusAction(): void
     {
         $jobId = $this->getRequest()->getParam('job_id');
 
         if (!$jobId) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Job ID required')]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Job ID required')]);
             return;
         }
 
@@ -1136,10 +1159,10 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $batchGenerator = new Maho_FeedManager_Model_Generator_Batch();
             $result = $batchGenerator->getStatus($jobId);
 
-            $this->_sendJsonResponse($result);
+            $this->getResponse()->setBodyJson($result);
 
         } catch (Exception $e) {
-            $this->_sendJsonResponse([
+            $this->getResponse()->setBodyJson([
                 'error' => true,
                 'message' => $e->getMessage(),
             ]);
@@ -1149,12 +1172,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * Mass batch generate action - initializes batch generation for multiple feeds
      */
+    #[Maho\Config\Route('/admin/feedmanager_feed/massBatchGenerate')]
     public function massBatchGenerateAction(): void
     {
         $feedIds = $this->getRequest()->getParam('feed_ids');
 
         if (!is_array($feedIds)) {
-            $this->_sendJsonResponse([
+            $this->getResponse()->setBodyJson([
                 'error' => true,
                 'message' => $this->__('Please select feeds to generate.'),
             ]);
@@ -1191,7 +1215,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             }
         }
 
-        $this->_sendJsonResponse([
+        $this->getResponse()->setBodyJson([
             'success' => !empty($jobs),
             'jobs' => $jobs,
             'errors' => $errors,
@@ -1202,12 +1226,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action for manual upload
      */
+    #[Maho\Config\Route('/admin/feedmanager_feed/upload')]
     public function uploadAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
 
         if (!$id) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Feed ID required')]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Feed ID required')]);
             return;
         }
 
@@ -1216,20 +1241,20 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $feed = Mage::getModel('feedmanager/feed')->load($id);
 
             if (!$feed->getId()) {
-                $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Feed not found')]);
+                $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Feed not found')]);
                 return;
             }
 
             $destinationId = (int) $feed->getDestinationId();
             if (!$destinationId) {
-                $this->_sendJsonResponse(['error' => true, 'message' => $this->__('No destination configured for this feed')]);
+                $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('No destination configured for this feed')]);
                 return;
             }
 
             // Check if file exists
             $filePath = $feed->getOutputFilePath();
             if (!file_exists($filePath)) {
-                $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Feed file not found. Please generate the feed first.')]);
+                $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Feed file not found. Please generate the feed first.')]);
                 return;
             }
 
@@ -1237,12 +1262,12 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $destination = Mage::getModel('feedmanager/destination')->load($destinationId);
 
             if (!$destination->getId()) {
-                $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Destination not found')]);
+                $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Destination not found')]);
                 return;
             }
 
             if (!$destination->isEnabled()) {
-                $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Destination is disabled')]);
+                $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Destination is disabled')]);
                 return;
             }
 
@@ -1256,7 +1281,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $success = $uploader->upload($filePath, $remoteName);
 
             // Update destination last upload info
-            $destination->setLastUploadAt(Mage_Core_Model_Locale::now())
+            $destination->setLastUploadAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->setLastUploadStatus($success ? 'success' : 'failed')
                 ->save();
 
@@ -1275,7 +1300,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 if ($log->getId()) {
                     $log->recordUploadSuccess($destinationId, $message);
                 }
-                $this->_sendJsonResponse([
+                $this->getResponse()->setBodyJson([
                     'success' => true,
                     'message' => $message,
                 ]);
@@ -1284,7 +1309,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 if ($log->getId()) {
                     $log->recordUploadFailure($destinationId, $message);
                 }
-                $this->_sendJsonResponse([
+                $this->getResponse()->setBodyJson([
                     'error' => true,
                     'message' => $message,
                 ]);
@@ -1292,7 +1317,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 
         } catch (Exception $e) {
             Mage::logException($e);
-            $this->_sendJsonResponse(['error' => true, 'message' => $e->getMessage()]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
     }
 
@@ -1300,6 +1325,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
      * New condition HTML action (AJAX)
      * Used by the Rule conditions builder to add new conditions
      */
+    #[Maho\Config\Route('/admin/feedmanager_feed/newConditionHtml')]
     public function newConditionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');

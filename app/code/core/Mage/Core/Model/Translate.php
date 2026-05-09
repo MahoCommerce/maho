@@ -380,7 +380,7 @@ class Mage_Core_Model_Translate
             if (!empty($args)) {
                 // Convert any non-string values to strings for vsprintf
                 $stringArgs = array_map(function ($arg) {
-                    if ($arg instanceof DateTime) {
+                    if ($arg instanceof DateTimeInterface) {
                         return $arg->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                     }
                     return (string) $arg;

@@ -204,7 +204,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
             ['table' => 'sales_flat_quote_payment', 'pk' => 'payment_id', 'columns' => ['cc_number_enc', 'cc_cid_enc']],
             ['table' => 'sales_flat_order_payment', 'pk' => 'entity_id', 'columns' => ['cc_number_enc']],
             ['table' => 'sales_flat_quote', 'pk' => 'entity_id', 'columns' => ['password_hash']],
-            ['table' => 'maho_paypal/vault_token', 'pk' => 'token_id', 'columns' => ['paypal_token_id']],
+            ['table' => 'paypal/vault_token', 'pk' => 'token_id', 'columns' => ['paypal_token_id']],
             ['table' => 'feedmanager/destination', 'pk' => 'destination_id', 'columns' => ['config']],
             ['table' => 'adminactivitylog/activity', 'pk' => 'activity_id', 'columns' => ['old_data', 'new_data']],
         ];

@@ -171,8 +171,10 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
             try {
                 // Use the same format that was used to write the data (locale-specific short date format)
                 $shortDateFormat = $this->getLocale()->getDateFormat('short');
-                $from = $this->getLocale()->date($this->getFilter('report_from'), $shortDateFormat, null, false);
-                $to   = $this->getLocale()->date($this->getFilter('report_to'), $shortDateFormat, null, false);
+                $fromValue = $this->getFilter('report_from');
+                $from = DateTime::createFromFormat($shortDateFormat, $fromValue) ?: new DateTime($fromValue);
+                $toValue = $this->getFilter('report_to');
+                $to = DateTime::createFromFormat($shortDateFormat, $toValue) ?: new DateTime($toValue);
 
                 $collection->setInterval($from, $to);
             } catch (Exception $e) {
@@ -523,7 +525,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
             $csv .= implode(',', $data) . "\n";
         }
 
-        return (!empty($fileName) && ($limit != 0)) ? [str_replace('.csv', '-' . $count . '-' . Mage::getModel('core/date')->date('Ymd-His') . '.csv', $fileName), $csv, 'text/csv'] : $csv;
+        return (!empty($fileName) && ($limit != 0)) ? [str_replace('.csv', '-' . $count . '-' . Mage::app()->getLocale()->utcToStore()->format('Ymd-His') . '.csv', $fileName), $csv, 'text/csv'] : $csv;
     }
 
     /**
@@ -593,7 +595,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
         $xmlObj->setData($data);
         $xmlObj->unparse();
 
-        return (!empty($fileName) && ($limit != 0)) ? [str_replace('.xml', '-' . $count . '-' . Mage::getModel('core/date')->date('Ymd-His') . '.xml', $fileName), $xmlObj->getData(), 'application/vnd.ms-excel'] : $xmlObj->getData();
+        return (!empty($fileName) && ($limit != 0)) ? [str_replace('.xml', '-' . $count . '-' . Mage::app()->getLocale()->utcToStore()->format('Ymd-His') . '.xml', $fileName), $xmlObj->getData(), 'application/vnd.ms-excel'] : $xmlObj->getData();
     }
 
     /**

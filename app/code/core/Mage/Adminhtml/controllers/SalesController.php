@@ -27,14 +27,11 @@ class Mage_Adminhtml_SalesController extends Mage_Adminhtml_Controller_Action
         $this->setUsedModuleName('Mage_Sales');
     }
 
+    #[Maho\Config\Route('/admin/sales/index')]
     public function indexAction(): void
     {
         $this->loadLayout();
         $this->_setActiveMenu('sales');
-
-        $block = $this->getLayout()->createBlock('adminhtml/sales', 'sales');
-        $this->_addContent($block);
-
         $this->_addBreadcrumb($this->__('Sales'), $this->__('Sales'));
         $this->_addBreadcrumb($this->__('Orders'), $this->__('Orders'));
         $this->renderLayout();

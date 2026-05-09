@@ -395,19 +395,8 @@ abstract class Mage_Catalog_Model_Api2_Product_Rest extends Mage_Catalog_Model_A
                     $price = $this->_calculatePrice($price, $percent, true);
                 }
             }
-        } else {
-            if ($priceIncludesTax) {
-                if ($includingTax) {
-                    $price = $this->_calculatePrice($price, $includingPercent, false);
-                    $price = $this->_calculatePrice($price, $percent, true);
-                } else {
-                    $price = $this->_calculatePrice($price, $includingPercent, false);
-                }
-            } else {
-                if ($includingTax) {
-                    $price = $this->_calculatePrice($price, $percent, true);
-                }
-            }
+        } elseif ($priceIncludesTax) {
+            $price = $this->_calculatePrice($price, $includingPercent, false);
         }
 
         return $store->roundPrice($price);

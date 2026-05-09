@@ -36,7 +36,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
     /**
      * Store id
      *
-     * @var int
+     * @var int|null
      */
     protected $_storeId                  = null;
 

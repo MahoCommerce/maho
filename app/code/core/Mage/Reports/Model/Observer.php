@@ -21,7 +21,7 @@ class Mage_Reports_Model_Observer
     public function aggregateReportsReportProductViewedData($schedule)
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->dateMutable();
+        $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('reports/report_product_viewed')->aggregate($date);
         Mage::app()->getLocale()->revert();

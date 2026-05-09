@@ -21,6 +21,7 @@ class Mage_Adminhtml_Catalog_Category_WidgetController extends Mage_Adminhtml_Co
     /**
      * Chooser Source action
      */
+    #[Maho\Config\Route('/admin/catalog_category_widget/chooser')]
     public function chooserAction(): void
     {
         $this->getResponse()->setBody(
@@ -31,6 +32,7 @@ class Mage_Adminhtml_Catalog_Category_WidgetController extends Mage_Adminhtml_Co
     /**
      * Categories tree node (Ajax version)
      */
+    #[Maho\Config\Route('/admin/catalog_category_widget/categoriesJson')]
     public function categoriesJsonAction(): void
     {
         try {

@@ -69,7 +69,7 @@ class Mage_Weee_Model_Resource_Tax extends Mage_Core_Model_Resource_Db_Abstract
      */
     protected function _updateDiscountPercents($productCondition = null)
     {
-        $now     = strtotime(Mage_Core_Model_Locale::now());
+        $now     = strtotime(Mage::app()->getLocale()->nowUtc());
         $adapter = $this->_getWriteAdapter();
 
         $select  = $this->_getReadAdapter()->select();
@@ -103,7 +103,7 @@ class Mage_Weee_Model_Resource_Tax extends Mage_Core_Model_Resource_Db_Abstract
         $prevKey     = false;
         while ($row = $data->fetch()) {
             $key = "{$row['product_id']}-{$row['website_id']}-{$row['customer_group_id']}";
-            if (isset($stops[$key]) && $stops[$key]) {
+            if (isset($stops[$key])) {
                 continue;
             }
 

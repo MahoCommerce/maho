@@ -193,7 +193,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
         $data = new \Maho\DataObject([
             'url_id'        => $visitor->getLastUrlId(),
             'visitor_id'    => $visitor->getId(),
-            'visit_time'    => Mage::getSingleton('core/date')->gmtDate(),
+            'visit_time'    => Mage::app()->getLocale()->formatDateForDb('now'),
         ]);
         $bind = $this->_prepareDataForTable($data, $this->getTable('log/url_table'));
 
@@ -215,7 +215,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
             $data = new \Maho\DataObject([
                 'visitor_id'    => $visitor->getVisitorId(),
                 'customer_id'   => $visitor->getCustomerId(),
-                'login_at'      => Mage::getSingleton('core/date')->gmtDate(),
+                'login_at'      => Mage::app()->getLocale()->formatDateForDb('now'),
                 'store_id'      => Mage::app()->getStore()->getId(),
             ]);
             $bind = $this->_prepareDataForTable($data, $this->getTable('log/customer'));
@@ -227,7 +227,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
 
         if ($visitor->getDoCustomerLogout() && $logId = $visitor->getCustomerLogId()) {
             $data = new \Maho\DataObject([
-                'logout_at' => Mage::getSingleton('core/date')->gmtDate(),
+                'logout_at' => Mage::app()->getLocale()->formatDateForDb('now'),
                 'store_id'  => (int) Mage::app()->getStore()->getId(),
             ]);
 
@@ -260,7 +260,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
             $data = new \Maho\DataObject([
                 'quote_id'      => (int) $visitor->getQuoteId(),
                 'visitor_id'    => (int) $visitor->getId(),
-                'created_at'    => Mage::getSingleton('core/date')->gmtDate(),
+                'created_at'    => Mage::app()->getLocale()->formatDateForDb('now'),
             ]);
 
             $bind = $this->_prepareDataForTable($data, $this->getTable('log/quote_table'));

@@ -19,7 +19,7 @@
  */
 class Mage_Customer_Block_Form_Login extends Mage_Core_Block_Template
 {
-    private $_username = -1;
+    private ?string $_username = null;
 
     /**
      * Set redirect URL before rendering login form
@@ -115,13 +115,11 @@ class Mage_Customer_Block_Form_Login extends Mage_Core_Block_Template
 
     /**
      * Retrieve username for form field
-     *
-     * @return string
      */
-    public function getUsername()
+    public function getUsername(): string
     {
-        if ($this->_username === -1) {
-            $this->_username = Mage::getSingleton('customer/session')->getUsername(true);
+        if ($this->_username === null) {
+            $this->_username = (string) Mage::getSingleton('customer/session')->getUsername(true);
         }
         return $this->_username;
     }

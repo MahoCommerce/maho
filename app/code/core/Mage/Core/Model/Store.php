@@ -561,7 +561,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      */
     protected function _updatePathUseRewrites($url)
     {
-        if ($this->isAdmin() || !$this->getConfig(self::XML_PATH_USE_REWRITES) || !Mage::isInstalled()) {
+        if (!Mage::isInstalled() || !$this->getConfig(self::XML_PATH_USE_REWRITES)) {
             $indexFileName = $this->_isCustomEntryPoint() ? 'index.php' : basename($_SERVER['SCRIPT_FILENAME']);
             $url .= $indexFileName . '/';
         }
@@ -607,13 +607,21 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Returns whether url forming scheme prepends url path with store view code
+     * Returns whether url forming scheme prepends url path with store view code.
+     *
+     * The admin store is always exempt: admin URLs are prefixed with the admin
+     * frontName (configured via admin/base_path or use_custom_admin_path) at the
+     * routing layer, not with the store code. Adding the admin store's code on
+     * top would produce doubled URLs like /admin/admin/index/index/.
      *
      * @return bool
      */
     public function getStoreInUrl()
     {
-        return Mage::isInstalled() && $this->getConfig(self::XML_PATH_STORE_IN_URL);
+        if (!Mage::isInstalled() || $this->isAdmin()) {
+            return false;
+        }
+        return (bool) $this->getConfig(self::XML_PATH_STORE_IN_URL);
     }
 
     /**

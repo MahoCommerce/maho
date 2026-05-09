@@ -68,7 +68,7 @@ $table->addColumn('rule_id', Table::TYPE_INTEGER, null, [
 ], 'Created At')
 ->addColumn('updated_at', Table::TYPE_TIMESTAMP, null, [
     'nullable' => false,
-    'default'  => Table::TIMESTAMP_INIT_UPDATE,
+    'default'  => Table::TIMESTAMP_INIT,
 ], 'Updated At')
 ->addIndex(
     $installer->getIdxName('cataloglinkrule/rule', ['is_active', 'priority', 'link_type_id']),

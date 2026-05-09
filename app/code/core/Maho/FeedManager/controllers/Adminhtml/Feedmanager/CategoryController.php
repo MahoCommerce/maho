@@ -12,8 +12,6 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adminhtml_Controller_Action
 {
-    use Maho_FeedManager_Controller_Adminhtml_JsonResponseTrait;
-
     public const ADMIN_RESOURCE = 'catalog/feedmanager/category_mapping';
 
     #[\Override]
@@ -33,6 +31,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_category/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -43,11 +42,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_category/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_category/edit')]
     public function editAction(): void
     {
         $platform = $this->getRequest()->getParam('platform', '');
@@ -78,6 +79,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
     /**
      * Get categories tree as JSON for AJAX
      */
+    #[Maho\Config\Route('/admin/feedmanager_category/categoriesJson')]
     public function categoriesJsonAction(): void
     {
         $platform = $this->getRequest()->getParam('platform', 'google');
@@ -113,19 +115,20 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
     /**
      * Save category mapping
      */
+    #[Maho\Config\Route('/admin/feedmanager_category/save')]
     public function saveAction(): void
     {
         $mappingsJson = $this->getRequest()->getParam('mappings');
         $platform = $this->getRequest()->getParam('platform', 'google');
 
         if (!$mappingsJson) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('No mappings provided')]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('No mappings provided')]);
             return;
         }
 
         $mappings = Mage::helper('core')->jsonDecode($mappingsJson);
         if (!is_array($mappings)) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Invalid mappings data')]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Invalid mappings data')]);
             return;
         }
 
@@ -154,40 +157,42 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
             Mage::getSingleton('adminhtml/session')->addSuccess(
                 $this->__('Saved %d category mappings.', $saved),
             );
-            $this->_sendJsonResponse(['success' => true]);
+            $this->getResponse()->setBodyJson(['success' => true]);
         } catch (Exception $e) {
             Mage::logException($e);
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-            $this->_sendJsonResponse(['error' => true]);
+            $this->getResponse()->setBodyJson(['error' => true]);
         }
     }
 
     /**
      * Search platform taxonomy
      */
+    #[Maho\Config\Route('/admin/feedmanager_category/searchTaxonomy')]
     public function searchTaxonomyAction(): void
     {
         $platform = $this->getRequest()->getParam('platform', 'google');
         $query = $this->getRequest()->getParam('q', '');
 
         if (strlen($query) < 2) {
-            $this->_sendJsonResponse([]);
+            $this->getResponse()->setBodyJson([]);
             return;
         }
 
         $adapter = Maho_FeedManager_Model_Platform::getAdapter($platform);
         if (!$adapter) {
-            $this->_sendJsonResponse([]);
+            $this->getResponse()->setBodyJson([]);
             return;
         }
 
         $results = $adapter->searchTaxonomy($query, 20);
-        $this->_sendJsonResponse($results);
+        $this->getResponse()->setBodyJson($results);
     }
 
     /**
      * Auto-map categories based on name matching
      */
+    #[Maho\Config\Route('/admin/feedmanager_category/autoMap')]
     public function autoMapAction(): void
     {
         $platform = $this->getRequest()->getParam('platform', 'google');
@@ -195,7 +200,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
         try {
             $adapter = Maho_FeedManager_Model_Platform::getAdapter($platform);
             if (!$adapter) {
-                $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Platform not found')]);
+                $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Platform not found')]);
                 return;
             }
 
@@ -231,11 +236,11 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
             Mage::getSingleton('adminhtml/session')->addSuccess(
                 $this->__('Auto-mapped %d categories.', $mapped),
             );
-            $this->_sendJsonResponse(['success' => true]);
+            $this->getResponse()->setBodyJson(['success' => true]);
         } catch (Exception $e) {
             Mage::logException($e);
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-            $this->_sendJsonResponse(['error' => true]);
+            $this->getResponse()->setBodyJson(['error' => true]);
         }
     }
 }

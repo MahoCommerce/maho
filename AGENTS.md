@@ -104,6 +104,37 @@ public function runJob(Mage_Cron_Model_Schedule $schedule) {}
 - Prefer global area (default, omit `area:`) unless the observer must be restricted to a specific area
 - Do **not** define observers or cron jobs in `config.xml`
 
+### Routing (#[Route] attributes)
+Routes are defined via the `#[Maho\Config\Route]` attribute (`lib/Maho/Config/Route.php`) on controller action methods — **not** in `<frontend><routers>` XML. The attribute is repeatable: stack multiple attributes on the same method for multiple paths or method lists. Run `composer dump-autoload` after any change; routes compile to `vendor/composer/maho_url_matcher.php`, `maho_url_generator.php`, and `maho_attributes.php`.
+
+Parameters:
+- `path` (required): URL pattern, e.g. `/catalog/product/view/{id}`
+- `name`: route name for URL generation — auto-derived from `class::method` if omitted
+- `methods`: HTTP method allow-list (e.g. `['GET', 'POST']`); empty = any
+- `defaults`: default parameter values
+- `requirements`: regex constraints per param (e.g. `['id' => '\d+']`)
+- `area`: `frontend` | `adminhtml` | `install` — auto-detected from the controller base class, override only when needed
+
+Area auto-detection walks the class hierarchy: descendants of `Mage_Adminhtml_Controller_Action` or `Maho\Controller\AdminAction` → `adminhtml`; `Mage_Install_Controller_Action` or `Maho\Controller\InstallAction` → `install`; everything else → `frontend`.
+
+Admin routes: the compiler resolves the admin frontName at runtime (`use_custom_admin_path`), so you don't need to hard-code it. Two equivalent forms work:
+- Bare path — `#[Route('/catalog/product/edit/{id}')]` — compiler prepends `{_adminFrontName}/`.
+- `/admin`-prefixed — `#[Route('/admin/catalog/product/edit/{id}')]` — compiler substitutes the leading `/admin` with `{_adminFrontName}`.
+
+Both compile to the same route. Existing core admin controllers use the `/admin`-prefixed form for visual continuity with the URL.
+
+```php
+#[Maho\Config\Route('/catalog/product/view/{id}', name: 'catalog.product.view', methods: ['GET'], requirements: ['id' => '\d+'])]
+public function viewAction() { ... }
+```
+
+- Back-compat: modules still declaring `<frontend><routers>` in `config.xml` keep working via a legacy-XML match path that runs **before** the Symfony matcher, preserving M1's "first declared wins" precedence. A single `LOG_NOTICE` is emitted once per process listing legacy frontNames, encouraging migration.
+
+#### Overriding controllers
+- **Admin**: register your module under `<admin><routers><adminhtml><args><modules><MyMod before|after="Mage_Adminhtml"/>` in `config.xml`. The runtime walks this chain at dispatch time, so admin controllers (subclasses of `Mage_Adminhtml_Controller_Action` / `Maho\Controller\AdminAction`) override core controllers without redeclaring routes.
+- **Frontend**: same pattern via `<frontend><routers><{routerCode}><args><modules><MyMod before|after="Mage_Customer"/>` (the router code must equal the frontName you're overriding, or supply `<args><frontName>` explicitly). Subclasses of the core controller win over the base when present; M1 chain semantics are preserved.
+- **Install**: no chain support; override by redeclaring `#[Route]` attributes on a custom controller.
+
 ## Development Guidelines
 
 ### Critical Rules — Removed Components
@@ -137,9 +168,12 @@ All Zend Framework and Varien components have been completely removed. **NEVER**
 - When overriding admin routes in Maho modules, use `before="Mage_Adminhtml"` pattern
 
 ### Modifying Existing Features
-- Do not increment module version in `config.xml`
 - Feel free to modify core files directly
 - Avoid creating a new module unless asked for it
+
+### Database Schema Changes
+- **Never modify historical install or upgrade scripts.** They are immutable snapshots of the schema at a given version. To change the schema, bump the module version in `etc/config.xml` and add a new `upgrade-X.Y.Z-A.B.C.php` (or `maho-X.Y.Z.php`) script. Fresh installs run install + every upgrade in sequence, so the new script repairs both fresh and existing installs.
+- This rule applies even to "obvious cleanups" (e.g. adding an explicit `default` to a column declared without one) — the fix belongs in a new upgrade, not in the install file.
 
 ## Modernizations
 
@@ -176,16 +210,50 @@ Mage::helper('core')->isValidDate($value);
 ```
 
 ### Date Handling (Native PHP DateTime)
-- **Database storage**: Always UTC in `'Y-m-d H:i:s'` format
-- **Display**: `storeDate()` converts UTC → HTML5 format
-- **Processing**: `utcDate()` converts HTML5 → UTC for database
+
+**Mental model:**
+- DB columns always store UTC as `'Y-m-d H:i:s'`. Never store store-local strings — they're ambiguous across stores.
+- Convert **on the way in** (`storeToUtc` user input → UTC for DB) and **on the way out** (`utcToStore` DB value → store TZ for display/computation).
+- Separate concerns by destination: `formatDateForDb()` is the single entry point for DB-bound strings (including `'now'` for current time). `nowUtc()` / `todayUtc()` are for non-DB UTC strings (logs, CSV exports, API payloads). The output happens to match, but the call-site intent is different — keep them separate.
+- Method names encode the timezone — `nowUtc()` returns UTC, `utcToStore()` returns store-local. You should be able to tell which TZ a value is in by reading the call site alone.
+
+**API:**
 
 ```php
-$html = Mage::app()->getLocale()->storeDate(null, $dbDate, false, 'html5');
-$utc = Mage::app()->getLocale()->utcDate(null, $inputDate, false, 'html5');
-Mage_Core_Model_Locale::now();    // 'Y-m-d H:i:s'
-Mage_Core_Model_Locale::today();  // 'Y-m-d'
+$locale = Mage::app()->getLocale();
+
+// DB-bound strings — use formatDateForDb() for anything headed to a DB column
+$locale->formatDateForDb('now');                               // 'Y-m-d H:i:s' (UTC) — current time for DB
+$locale->formatDateForDb('now', withTime: false);              // 'Y-m-d' (UTC) — current date for DB
+$locale->formatDateForDb($date);                               // normalize arbitrary input to 'Y-m-d H:i:s'
+$locale->formatDateForDb($date, withTime: false);              // normalize arbitrary input to 'Y-m-d'
+
+// Non-DB UTC strings — logs, CSV exports, API payloads, etc.
+$locale->nowUtc();                                             // 'Y-m-d H:i:s' (UTC)
+$locale->todayUtc();                                           // 'Y-m-d' (UTC)
+
+// "Now" in store timezone — for computation/display. Use utcToStore() with no args.
+$locale->utcToStore();                                         // DateTimeImmutable in store TZ
+$locale->utcToStore()->format('Y-m-d');                        // today in store TZ
+
+// Convert a known date between timezones — always returns DateTimeImmutable
+$dt = $locale->utcToStore($store, $utcInput);                  // DateTimeImmutable in store TZ
+$dt = $locale->storeToUtc($store, $storeInput);                // DateTimeImmutable in UTC
+
+// Caller formats the result explicitly — no magic strings
+$dt->format(Mage_Core_Model_Locale::DATETIME_FORMAT);          // 'Y-m-d H:i:s'
+$dt->format(Mage_Core_Model_Locale::DATE_FORMAT);              // 'Y-m-d'
+$dt->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT);    // 'Y-m-d\TH:i'
 ```
+
+**Common pitfalls:**
+- Don't use `nowUtc()` for DB inserts/updates — use `formatDateForDb('now')`. Same output, but the call site announces its DB-binding intent, and keeps `formatDateForDb` as the single choke point for DB-bound date formatting.
+- Don't pass `nowUtc()` to a store-local field — it's UTC, not store time. If you need store-local now, use `$locale->utcToStore()` and format from the DateTimeImmutable.
+- `utcToStore()` / `storeToUtc()` return `DateTimeImmutable` — mutators like `->setTime()` and `->modify()` return a new instance, so either chain directly (`utcToStore()->setTime(0,0,0)->format(...)`) or reassign (`$d = $d->modify('-1 day')`).
+- Don't rely on PHP's default timezone — Maho forces it to UTC at bootstrap, but pass DateTime objects with explicit TZ (or just strings/ints) rather than bare `new DateTime('...')` when precision matters.
+- For locale-aware display formatting (e.g. "April 16, 2026" in en_US, "16 avril 2026" in fr_FR), use `Mage::helper('core')->formatDate()`, not `DateTimeImmutable::format()`.
+
+**Why there's no `nowInStoreTimezone()` / `nowStore()`:** deliberate. A store-local *string* has no TZ tag, so storing one in the DB breaks the "DB is always UTC" invariant and produces different instants in multi-store setups. For computation or display you want a `DateTimeImmutable` anyway — `utcToStore()` with no args returns exactly that. If you catch yourself wanting a store-local now-as-string, step back: you probably want either `formatDateForDb('now')` (for the DB), `nowUtc()` (for logs/CSV/API), or `utcToStore()->format(...)` (for display).
 
 ### Filtering & Locale
 ```php

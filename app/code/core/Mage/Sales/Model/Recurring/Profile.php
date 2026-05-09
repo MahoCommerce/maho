@@ -750,7 +750,7 @@ class Mage_Sales_Model_Recurring_Profile extends Mage_Payment_Model_Recurring_Pr
      *
      * @param array $array
      */
-    private function _cleanupArray(&$array)
+    private function _cleanupArray(&$array): void
     {
         if (!$array) {
             return;

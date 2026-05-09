@@ -180,15 +180,6 @@
                 </manage_stock>
             </catalog_product_dataflow>
         </fieldsets>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <Mage_Bundle before="Mage_Adminhtml">Mage_Bundle_Adminhtml</Mage_Bundle>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
     </admin>
     <adminhtml>
         <translate>

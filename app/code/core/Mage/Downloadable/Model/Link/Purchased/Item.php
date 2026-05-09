@@ -81,6 +81,7 @@ class Mage_Downloadable_Model_Link_Purchased_Item extends Mage_Core_Model_Abstra
                 Mage::helper('downloadable')->__('Order item id cannot be null'),
             );
         }
+        $this->setUpdatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         return parent::_beforeSave();
     }
 }

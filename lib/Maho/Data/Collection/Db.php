@@ -744,11 +744,11 @@ class Db extends Collection
     public function printLogQuery($printQuery = false, $logQuery = false, $sql = null)
     {
         if ($printQuery) {
-            echo is_null($sql) ? $this->getSelect()->__toString() : $sql;
+            echo $sql ?? $this->getSelect()->__toString();
         }
 
         if ($logQuery) {
-            \Mage::log(is_null($sql) ? $this->getSelect()->__toString() : $sql);
+            \Mage::log($sql ?? $this->getSelect()->__toString());
         }
         return $this;
     }
