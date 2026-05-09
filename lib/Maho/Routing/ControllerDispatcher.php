@@ -145,7 +145,7 @@ class ControllerDispatcher
             }
         }
 
-        // 2. Legacy XML base module (M1 BC for `<frontend><routers>` without #[Route]).
+        // 2. Legacy XML base module — wins over compiled to preserve M1 "first declared wins".
         $legacyModule = RouteCollectionBuilder::getLegacyFrontNames()[strtolower($frontName)] ?? null;
         if ($legacyModule !== null) {
             $className = $legacyModule . '_' . uc_words($controllerName) . 'Controller';
