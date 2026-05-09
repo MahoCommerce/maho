@@ -76,13 +76,13 @@ describe('RouteCollectionBuilder::getLegacyFrontNames()', function () {
     });
 });
 
-describe('RouteCollectionBuilder::resolveControllerClass() (compiled attribute routes)', function () {
+describe('RouteCollectionBuilder::lookupCompiledControllerClass() (compiled attribute routes)', function () {
     beforeEach(fn() => resetLegacyFrontNamesCache());
     afterEach(fn() => resetLegacyFrontNamesCache());
 
     it('returns the full controller class FQCN for a compiled frontName', function () {
         // The compiled lookup stores classes directly — no convention-based reconstruction.
-        expect(RouteCollectionBuilder::resolveControllerClass('catalog', 'product'))
+        expect(RouteCollectionBuilder::lookupCompiledControllerClass('catalog', 'product'))
             ->toBe('Mage_Catalog_ProductController');
     });
 
@@ -91,22 +91,22 @@ describe('RouteCollectionBuilder::resolveControllerClass() (compiled attribute r
         // so the class is `Maho_FeedManager_Adminhtml_Feedmanager_FeedController`. The lookup
         // captures this verbatim — it doesn't matter that the URL controllerName is the
         // shorter `feedmanager_feed`.
-        expect(RouteCollectionBuilder::resolveControllerClass('admin', 'feedmanager_feed'))
+        expect(RouteCollectionBuilder::lookupCompiledControllerClass('admin', 'feedmanager_feed'))
             ->toBe('Maho_FeedManager_Adminhtml_Feedmanager_FeedController');
     });
 
     it('returns null for unknown frontName/controller pairs', function () {
-        expect(RouteCollectionBuilder::resolveControllerClass('definitely-not-a-frontname', 'index'))
+        expect(RouteCollectionBuilder::lookupCompiledControllerClass('definitely-not-a-frontname', 'index'))
             ->toBeNull();
     });
 
     it('does NOT consult the legacy XML map (that path is owned by the dispatcher)', function () {
-        // resolveControllerClass() only reads the compiled lookup. Legacy XML lives in
+        // lookupCompiledControllerClass() only reads the compiled lookup. Legacy XML lives in
         // `getLegacyFrontNames()`, and ControllerDispatcher::resolveControllerClass()
         // composes them in the right precedence order.
         registerLegacyXmlRoute('legacy_only', 'unique-legacy-frontname', 'Some_Module');
 
-        expect(RouteCollectionBuilder::resolveControllerClass('unique-legacy-frontname', 'index'))
+        expect(RouteCollectionBuilder::lookupCompiledControllerClass('unique-legacy-frontname', 'index'))
             ->toBeNull();
     });
 });

@@ -127,7 +127,10 @@ class ControllerDispatcher
      *  1. Frontend `<modules>` chain — third-party overrides on a core frontName.
      *  2. Legacy XML base module — `<frontend><routers><X><args><module>` declarations
      *     (M1 BC). Takes precedence over compiled attribute routes so a legacy frontName
-     *     shadowing a core route still wins ("first declared wins").
+     *     shadowing a core route still wins ("first declared wins"). If the declared
+     *     module's class doesn't exist (misconfigured XML), this step falls through to
+     *     the compiled lookup rather than hard-failing — matches M1's chain semantics
+     *     where broken declarations are skipped.
      *  3. Compiled attribute routes — `controllerLookup` stores the full class FQCN
      *     (no reconstruction; the compiler captured the actual class at compile time).
      *  4. Admin `<modules>` chain — third-party admin extensions without `#[Route]`.
@@ -152,7 +155,7 @@ class ControllerDispatcher
         }
 
         // 3. Compiled attribute routes — full class is in the lookup, no reconstruction needed.
-        $className = RouteCollectionBuilder::resolveControllerClass($frontName, $controllerName);
+        $className = RouteCollectionBuilder::lookupCompiledControllerClass($frontName, $controllerName);
         if ($className !== null && class_exists($className)) {
             return $className;
         }

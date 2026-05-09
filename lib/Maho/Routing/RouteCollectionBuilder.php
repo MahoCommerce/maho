@@ -75,7 +75,12 @@ class RouteCollectionBuilder
     }
 
     /**
-     * Resolve the controller class FQCN for an attribute-routed (frontName, controllerName) pair.
+     * Look up the controller class FQCN for an attribute-routed (frontName, controllerName) pair
+     * in the compiled `controllerLookup` map.
+     *
+     * Narrow by design — this only reads the compiled lookup. Full controller resolution
+     * (frontend chain, legacy XML, admin chain) is `ControllerDispatcher::resolveControllerClass()`,
+     * which composes this lookup with the other sources in the right precedence order.
      *
      * The compiled lookup stores the full class because the runtime can't reconstruct it
      * unambiguously from the module name — Maho-style admin controllers live in
@@ -84,10 +89,9 @@ class RouteCollectionBuilder
      * once; callers just look it up.
      *
      * Legacy `<frontend><routers>` XML modules are NOT in this lookup — `getLegacyFrontNames()`
-     * is the BC shim for those. The dispatcher consults legacy XML before this lookup so
-     * "first declared wins" semantics are preserved.
+     * is the BC shim for those.
      */
-    public static function resolveControllerClass(string $frontName, string $controllerName): ?string
+    public static function lookupCompiledControllerClass(string $frontName, string $controllerName): ?string
     {
         $compiled = \Maho::getCompiledAttributes();
         $key = self::normalizeFrontName($frontName) . '/' . strtolower($controllerName);
