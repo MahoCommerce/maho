@@ -99,13 +99,17 @@ class Mage_Adminhtml_Helper_Data extends Mage_Adminhtml_Helper_Help_Mapping
             }
             $this->adminFrontNames = [$adminPath];
 
-            // Check for other modules that can use admin router (a lot of Magento extensions do that)
-            $adminFrontNameNodes = Mage::getConfig()->getNode('admin/routers')
-                ->xpath('*[not(self::adminhtml) and use = "admin"]/args/frontName');
-
-            if (is_array($adminFrontNameNodes)) {
-                foreach ($adminFrontNameNodes as $frontNameNode) {
-                    $this->adminFrontNames[] = (string) $frontNameNode;
+            // Check for other modules that can use admin router (a lot of Magento extensions do that).
+            // The <admin><routers> node may be absent on fresh installs that only declare <admin><base_path>.
+            $adminRoutersNode = Mage::getConfig()->getNode('admin/routers');
+            if ($adminRoutersNode) {
+                $adminFrontNameNodes = $adminRoutersNode->xpath(
+                    '*[not(self::adminhtml) and use = "admin"]/args/frontName',
+                );
+                if (is_array($adminFrontNameNodes)) {
+                    foreach ($adminFrontNameNodes as $frontNameNode) {
+                        $this->adminFrontNames[] = (string) $frontNameNode;
+                    }
                 }
             }
         }
