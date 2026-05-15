@@ -177,7 +177,97 @@ class LegacyMigrateRoutes extends BaseMahoCommand
             $output->writeln('<comment>Tip: review the generated routes carefully; controller-method scanning is best-effort.</comment>');
         }
 
+        $this->migrateLocalXmlAdminPath($output, $dryRun);
+
         return Command::SUCCESS;
+    }
+
+    /**
+     * Rewrite the legacy admin frontName declaration in `app/etc/local.xml`.
+     *
+     * Old (no longer honored after PR #834):
+     *   <admin><routers><adminhtml><args><frontName>X</frontName>
+     * New:
+     *   <admin><base_path>X</base_path>
+     */
+    private function migrateLocalXmlAdminPath(OutputInterface $output, bool $dryRun): void
+    {
+        $path = MAHO_ROOT_DIR . '/app/etc/local.xml';
+        if (!is_file($path)) {
+            return;
+        }
+
+        $dom = $this->loadConfigXmlAsDom($path);
+        if ($dom === null) {
+            return;
+        }
+
+        $config = $dom->documentElement;
+        if ($config === null) {
+            return;
+        }
+
+        $adminNode = $this->firstChildElement($config, 'admin');
+        if ($adminNode === null) {
+            return;
+        }
+        $routersNode = $this->firstChildElement($adminNode, 'routers');
+        if ($routersNode === null) {
+            return;
+        }
+        $adminhtmlNode = $this->firstChildElement($routersNode, 'adminhtml');
+        if ($adminhtmlNode === null) {
+            return;
+        }
+        $argsNode = $this->firstChildElement($adminhtmlNode, 'args');
+        if ($argsNode === null) {
+            return;
+        }
+        $frontNameNode = $this->firstChildElement($argsNode, 'frontName');
+        if ($frontNameNode === null) {
+            return;
+        }
+        $frontName = trim($frontNameNode->textContent);
+        if ($frontName === '') {
+            return;
+        }
+
+        $existingBasePath = $this->firstChildElement($adminNode, 'base_path');
+        $existingBasePathValue = $existingBasePath === null ? null : trim($existingBasePath->textContent);
+
+        $output->writeln('');
+        $output->writeln('<info>app/etc/local.xml</info> (admin frontName)');
+
+        if ($existingBasePathValue !== null && $existingBasePathValue !== '' && $existingBasePathValue !== $frontName) {
+            $output->writeln(sprintf(
+                '  <comment>skip</comment> <admin><base_path>%s</base_path> already differs from legacy <frontName>%s</frontName>; resolve manually.',
+                $existingBasePathValue,
+                $frontName,
+            ));
+            return;
+        }
+
+        if ($dryRun) {
+            $output->writeln(sprintf(
+                '  would replace <admin><routers><adminhtml><args><frontName>%s</frontName>... with <admin><base_path>%s</base_path>',
+                $frontName,
+                $frontName,
+            ));
+            return;
+        }
+
+        if ($existingBasePath === null) {
+            $newNode = $dom->createElement('base_path', $frontName);
+            $adminNode->insertBefore($newNode, $routersNode);
+        }
+
+        $this->detachAndPrune($adminhtmlNode);
+        $this->saveConfigXml($dom, $path);
+
+        $output->writeln(sprintf(
+            '  <info>migrated</info> <admin><base_path>%s</base_path>',
+            $frontName,
+        ));
     }
 
     /**

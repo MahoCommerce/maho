@@ -37,12 +37,6 @@
         <session_save>{{session_save}}</session_save>
     </global>
     <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <frontName>{{admin_frontname}}</frontName>
-                </args>
-            </adminhtml>
-        </routers>
+        <base_path>{{admin_frontname}}</base_path>
     </admin>
 </config>
