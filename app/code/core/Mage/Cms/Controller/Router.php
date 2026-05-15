@@ -33,6 +33,13 @@ class Mage_Cms_Controller_Router extends Mage_Core_Controller_Varien_Router_Abst
     public function match(Mage_Core_Controller_Request_Http $request): bool
     {
         if (!Mage::isInstalled()) {
+            // The install URL would loop if we redirected here: let the default
+            // router's Symfony matcher dispatch /install/... natively, since the
+            // legacy Mage_Install_Controller_Router_Install no longer runs ahead
+            // of us in the chain.
+            if (preg_match('#^/install(/|$)#', $request->getPathInfo()) === 1) {
+                return false;
+            }
             Mage::app()->getFrontController()->getResponse()
                 ->setRedirect(Mage::getUrl('install'))
                 ->sendResponse();
