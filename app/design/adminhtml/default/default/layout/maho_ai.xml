@@ -44,10 +44,4 @@
             <block type="ai/adminhtml_reindex" name="ai.reindex" template="maho/ai/reindex.phtml"/>
         </reference>
     </adminhtml_ai_reindex>
-
-    <adminhtml_system_config_edit>
-        <reference name="head">
-            <action method="addItem"><type>skin_css</type><name>maho/ai.css</name></action>
-        </reference>
-    </adminhtml_system_config_edit>
 </layout>

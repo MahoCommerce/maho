@@ -55,7 +55,7 @@ class Maho_Ai_Block_Adminhtml_System_Config_Form_Field_ModelSelect extends Mage_
         $btnId    = 'maho-ai-fetch-' . $elementId;
 
         $btn = sprintf(
-            '<button type="button" id="%s"><span>%s</span></button>',
+            '<button type="button" id="%s" style="margin-left:8px;white-space:nowrap"><span>%s</span></button>',
             $this->escapeHtml($btnId),
             $this->escapeHtml($label),
         );
@@ -120,6 +120,6 @@ mahoOnReady(function () {
 </script>
 HTML;
 
-        return '<div class="ai-model-select-row">' . $html . $btn . $script . '</div>';
+        return '<div style="display:flex;align-items:center">' . $html . $btn . $script . '</div>';
     }
 }
