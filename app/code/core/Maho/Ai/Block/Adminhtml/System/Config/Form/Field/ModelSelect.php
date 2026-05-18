@@ -28,9 +28,11 @@ class Maho_Ai_Block_Adminhtml_System_Config_Form_Field_ModelSelect extends Mage_
     {
         $html = parent::_getElementHtml($element);
 
-        // Element IDs: maho_ai_{general|image|embed|video}_{provider}_model
+        // Element IDs: {section}_{general|image|embed|video}_{provider}_model
+        // Section is intentionally loose so community modules that ship their own
+        // system-config section (e.g. AiContent's NanoGPT fields) can reuse this renderer.
         $elementId = $element->getHtmlId();
-        if (!preg_match('/^maho_ai_(general|image|embed|video)_(.+)_model$/', $elementId, $matches)) {
+        if (!preg_match('/^.+_(general|image|embed|video)_(.+)_model$/', $elementId, $matches)) {
             return $html;
         }
 
