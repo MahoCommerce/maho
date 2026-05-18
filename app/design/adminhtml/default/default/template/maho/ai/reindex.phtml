@@ -1,0 +1,118 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Maho_Ai
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Maho_Ai_Block_Adminhtml_Reindex $this */
+$helper       = Mage::helper('ai');
+$embedEnabled = $this->isEmbedEnabled();
+$queueEnabled = $this->isQueueEnabled();
+$productCount = $this->getProductCount();
+$categoryCount = $this->getCategoryCount();
+$pendingCount  = $this->getPendingTaskCount();
+$totalCount    = $productCount + $categoryCount;
+$estMinutes    = $this->estimateMinutes($totalCount);
+?>
+<div class="content-header">
+    <h3 class="icon-head head-edit-form"><?php echo $helper->__('Embeddings') ?></h3>
+</div>
+
+<?php if (!$embedEnabled || !$queueEnabled): ?>
+<ul class="messages">
+    <?php if (!$embedEnabled): ?>
+    <li class="error-msg">
+        <ul><li><?php echo $helper->__('Embeddings are disabled. Enable them under System &gt; AI &gt; Embed Settings before queuing.') ?></li></ul>
+    </li>
+    <?php endif ?>
+    <?php if (!$queueEnabled): ?>
+    <li class="error-msg">
+        <ul><li><?php echo $helper->__('The async queue is disabled. Enable it under System &gt; AI &gt; Queue Settings or tasks will never be processed.') ?></li></ul>
+    </li>
+    <?php endif ?>
+</ul>
+<?php endif ?>
+
+<div>
+    <h3><?php echo $helper->__('Current Configuration') ?></h3>
+    <table class="form-list" cellspacing="0">
+        <tr>
+            <td class="label"><?php echo $helper->__('Embed Status') ?></td>
+            <td class="value"><?php echo $embedEnabled ? $helper->__('Enabled') : $helper->__('Disabled') ?></td>
+        </tr>
+        <tr>
+            <td class="label"><?php echo $helper->__('Platform / Model') ?></td>
+            <td class="value"><?php echo $this->escapeHtml($this->getEmbedPlatform() . ' / ' . $this->getEmbedModel()) ?></td>
+        </tr>
+        <tr>
+            <td class="label"><?php echo $helper->__('Queue Status') ?></td>
+            <td class="value"><?php echo $queueEnabled ? $helper->__('Enabled') : $helper->__('Disabled') ?></td>
+        </tr>
+        <?php if ($pendingCount > 0): ?>
+        <tr>
+            <td class="label"><?php echo $helper->__('Pending Embed Tasks') ?></td>
+            <td class="value"><strong><?php echo number_format($pendingCount) ?></strong> <?php echo $helper->__('already queued') ?></td>
+        </tr>
+        <?php endif ?>
+    </table>
+
+    <h3 style="margin-top:24px"><?php echo $helper->__('Queue for Embedding') ?></h3>
+
+    <ul class="messages">
+        <li class="notice-msg">
+            <ul><li>
+                <?php echo $helper->__('This queues %s products and %s categories (%s tasks total) for background processing.',
+                    '<strong>' . number_format($productCount) . '</strong>',
+                    '<strong>' . number_format($categoryCount) . '</strong>',
+                    '<strong>' . number_format($totalCount) . '</strong>'
+                ) ?>
+                <?php if ($estMinutes > 0): ?>
+                <?php if ($estMinutes < 60): ?>
+                    <?php echo $helper->__('Estimated completion: ~%d minutes.', $estMinutes) ?>
+                <?php else: ?>
+                    <?php echo $helper->__('Estimated completion: ~%d hours %d minutes.', intdiv($estMinutes, 60), $estMinutes % 60) ?>
+                <?php endif ?>
+                <?php endif ?>
+            </li></ul>
+        </li>
+        <?php if ($pendingCount > 0): ?>
+        <li class="error-msg">
+            <ul><li>
+                <?php echo $helper->__('Warning: %d embedding tasks are already pending. Running this again will add duplicate tasks.', $pendingCount) ?>
+            </li></ul>
+        </li>
+        <?php endif ?>
+    </ul>
+
+    <form method="post" action="<?php echo $this->escapeUrl($this->getPostUrl()) ?>" id="reindex-form">
+        <input type="hidden" name="form_key" value="<?php echo $this->escapeHtml($this->getFormKey()) ?>"/>
+        <table class="form-list" cellspacing="0">
+            <tr>
+                <td class="label"><?php echo $helper->__('Queue') ?></td>
+                <td class="value">
+                    <div style="margin-bottom:8px">
+                        <input type="checkbox" name="types[]" value="products" id="reindex_products" checked="checked"/>
+                        <label for="reindex_products">
+                            <?php echo $helper->__('Products (%s enabled)', number_format($productCount)) ?>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="checkbox" name="types[]" value="categories" id="reindex_categories" checked="checked"/>
+                        <label for="reindex_categories">
+                            <?php echo $helper->__('Categories (%s active)', number_format($categoryCount)) ?>
+                        </label>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <div style="padding:12px 16px">
+            <button type="submit" class="scalable save" id="reindex-submit"
+                onclick="return confirm('<?php echo $this->jsQuoteEscape($helper->__('This will queue all selected items for embedding. Continue?')) ?>')">
+                <span><?php echo $helper->__('Queue for Embedding') ?></span>
+            </button>
+        </div>
+    </form>
+</div>

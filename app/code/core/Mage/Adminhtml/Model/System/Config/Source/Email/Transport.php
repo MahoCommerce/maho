@@ -80,14 +80,11 @@ class Mage_Adminhtml_Model_System_Config_Source_Email_Transport
                 continue;
             }
 
-            $scheme = explode('+', $option['value']);
-            $scheme = $scheme[0];
-
+            $scheme = explode('+', $option['value'])[0];
             if (isset(self::SCHEME_TO_PACKAGE_MAP[$scheme])) {
-                $package = self::SCHEME_TO_PACKAGE_MAP[$scheme];
-                if (!\Composer\InstalledVersions::isInstalled($package)) {
-                    $options[$k]['label'] .= " ⚠️ Install $package";
-                }
+                $options[$k]['label'] .= Mage::helper('core')->packageInstallWarning(
+                    self::SCHEME_TO_PACKAGE_MAP[$scheme],
+                );
             }
         }
 

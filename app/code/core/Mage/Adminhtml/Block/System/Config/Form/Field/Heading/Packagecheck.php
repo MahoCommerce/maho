@@ -15,8 +15,8 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Heading_Packagecheck extends
     {
         $originalData = $element->getOriginalData();
         $package = $originalData['mandatory_package'] ?? null;
-        if ($package && !\Composer\InstalledVersions::isInstalled($package)) {
-            $element->setLabel($element->getLabel() . "<br> ⚠️ Install $package");
+        if ($package) {
+            $element->setLabel($element->getLabel() . Mage::helper('core')->packageInstallWarning($package, '<br>'));
         }
 
         return parent::render($element);

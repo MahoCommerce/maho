@@ -21356,3 +21356,314 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Maho/Simplexml/Element.php
+		-
+			rawMessage: 'Call to method getMessage() on an unknown class Symfony\AI\Platform\Exception\ExceptionInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Helper/Data.php
+
+		-
+			rawMessage: Caught class Symfony\AI\Platform\Exception\ExceptionInterface not found.
+			identifier: class.notFound
+			count: 3
+			path: app/code/core/Maho/Ai/Helper/Data.php
+
+		-
+			rawMessage: Class Symfony\AI\Platform\Exception\AuthenticationException not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Helper/Data.php
+
+		-
+			rawMessage: Class Symfony\AI\Platform\Exception\ContentFilterException not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Helper/Data.php
+
+		-
+			rawMessage: Class Symfony\AI\Platform\Exception\ExceedContextSizeException not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Helper/Data.php
+
+		-
+			rawMessage: Class Symfony\AI\Platform\Exception\ModelNotFoundException not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Helper/Data.php
+
+		-
+			rawMessage: Class Symfony\AI\Platform\Exception\RateLimitExceededException not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Helper/Data.php
+
+		-
+			rawMessage: 'Parameter #1 $e of static method Mage::logException() expects Throwable, Symfony\AI\Platform\Exception\ExceptionInterface given.'
+			identifier: argument.type
+			count: 1
+			path: app/code/core/Maho/Ai/Helper/Data.php
+
+		-
+			rawMessage: 'Parameter $e of method Maho_Ai_Helper_Data::translateProviderException() has invalid type Symfony\AI\Platform\Exception\ExceptionInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Helper/Data.php
+
+		-
+			rawMessage: Access to constant INPUT_IMAGE on an unknown class Symfony\AI\Platform\Capability.
+			identifier: class.notFound
+			count: 3
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Access to constant INPUT_MESSAGES on an unknown class Symfony\AI\Platform\Capability.
+			identifier: class.notFound
+			count: 4
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Access to constant INPUT_MULTIPLE on an unknown class Symfony\AI\Platform\Capability.
+			identifier: class.notFound
+			count: 3
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Access to constant OUTPUT_IMAGE on an unknown class Symfony\AI\Platform\Capability.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Access to constant OUTPUT_STREAMING on an unknown class Symfony\AI\Platform\Capability.
+			identifier: class.notFound
+			count: 4
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Access to constant OUTPUT_STRUCTURED on an unknown class Symfony\AI\Platform\Capability.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Access to constant OUTPUT_TEXT on an unknown class Symfony\AI\Platform\Capability.
+			identifier: class.notFound
+			count: 4
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Access to constant TOOL_CALLING on an unknown class Symfony\AI\Platform\Capability.
+			identifier: class.notFound
+			count: 4
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Call to method add() on an unknown class Symfony\AI\Platform\Message\MessageBag.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Call to method getCompletionTokens() on an unknown class Symfony\AI\Platform\TokenUsage\TokenUsage.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Call to method getPromptTokens() on an unknown class Symfony\AI\Platform\TokenUsage\TokenUsage.'
+			identifier: class.notFound
+			count: 2
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Call to method getResult() on an unknown class Symfony\AI\Platform\Result\DeferredResult.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Call to method invoke() on an unknown class Symfony\AI\Platform\PlatformInterface.'
+			identifier: class.notFound
+			count: 3
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Call to static method createPlatform() on an unknown class Symfony\AI\Platform\Bridge\Anthropic\Factory.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Call to static method createPlatform() on an unknown class Symfony\AI\Platform\Bridge\Gemini\Factory.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Call to static method createPlatform() on an unknown class Symfony\AI\Platform\Bridge\Generic\Factory.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Call to static method createPlatform() on an unknown class Symfony\AI\Platform\Bridge\Mistral\Factory.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Call to static method createPlatform() on an unknown class Symfony\AI\Platform\Bridge\Ollama\Factory.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Call to static method createPlatform() on an unknown class Symfony\AI\Platform\Bridge\OpenAi\Factory.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Call to static method createPlatform() on an unknown class Symfony\AI\Platform\Bridge\OpenRouter\Factory.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Call to static method forSystem() on an unknown class Symfony\AI\Platform\Message\Message.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Call to static method ofAssistant() on an unknown class Symfony\AI\Platform\Message\Message.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Call to static method ofUser() on an unknown class Symfony\AI\Platform\Message\Message.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Class Symfony\AI\Platform\Bridge\Anthropic\Claude not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Class Symfony\AI\Platform\Bridge\Gemini\Embeddings not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Class Symfony\AI\Platform\Bridge\Gemini\Gemini not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Class Symfony\AI\Platform\Bridge\Mistral\Embeddings not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Class Symfony\AI\Platform\Bridge\Mistral\Mistral not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Class Symfony\AI\Platform\Bridge\OpenAi\DallE not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Class Symfony\AI\Platform\Bridge\OpenAi\Embeddings not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Class Symfony\AI\Platform\Bridge\OpenAi\Gpt not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Class Symfony\AI\Platform\TokenUsage\TokenUsage not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Instantiated class Symfony\AI\Platform\Bridge\Anthropic\ModelCatalog not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Instantiated class Symfony\AI\Platform\Bridge\Gemini\ModelCatalog not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Instantiated class Symfony\AI\Platform\Bridge\Mistral\ModelCatalog not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Instantiated class Symfony\AI\Platform\Bridge\OpenAi\ModelCatalog not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Instantiated class Symfony\AI\Platform\Message\MessageBag not found.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Method Maho_Ai_Model_Platform_Symfony::buildMessageBag() has invalid return type Symfony\AI\Platform\Message\MessageBag.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Method Maho_Ai_Model_Platform_Symfony::extractTokenUsage() has invalid return type Symfony\AI\Platform\TokenUsage\TokenUsage.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Parameter $deferred of method Maho_Ai_Model_Platform_Symfony::captureChatMetadata() has invalid type Symfony\AI\Platform\Result\DeferredResult.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Parameter $deferred of method Maho_Ai_Model_Platform_Symfony::extractTokenUsage() has invalid type Symfony\AI\Platform\Result\DeferredResult.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: 'Parameter $platform of method Maho_Ai_Model_Platform_Symfony::__construct() has invalid type Symfony\AI\Platform\PlatformInterface.'
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
+
+		-
+			rawMessage: Property Maho_Ai_Model_Platform_Symfony::$platform has unknown class Symfony\AI\Platform\PlatformInterface as its type.
+			identifier: class.notFound
+			count: 1
+			path: app/code/core/Maho/Ai/Model/Platform/Symfony.php
