@@ -69,7 +69,6 @@ class Maho_Ai_Block_Adminhtml_Task_Grid extends Mage_Adminhtml_Block_Widget_Grid
                 Maho_Ai_Model_Task::STATUS_FAILED     => $helper->__('Failed'),
                 Maho_Ai_Model_Task::STATUS_CANCELLED  => $helper->__('Cancelled'),
             ],
-            'frame_callback' => [$this, 'decorateStatus'],
         ]);
 
         $this->addColumn('priority', [
@@ -139,18 +138,6 @@ class Maho_Ai_Block_Adminhtml_Task_Grid extends Mage_Adminhtml_Block_Widget_Grid
         ]);
 
         return parent::_prepareColumns();
-    }
-
-    public function decorateStatus(string $value, Maho_Ai_Model_Task $row): string
-    {
-        // Status colour classes live in skin/adminhtml/.../css/maho/ai.css
-        // (.ai-status--pending / processing / complete / failed / cancelled).
-        $status = (string) $row->getData('status');
-        return sprintf(
-            '<span class="ai-status ai-status--%s">%s</span>',
-            $this->escapeHtml($status),
-            $this->escapeHtml($value),
-        );
     }
 
     #[\Override]

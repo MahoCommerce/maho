@@ -28,7 +28,7 @@
                             <action>adminhtml/ai/usage</action>
                         </usage>
                         <reindex translate="title" module="ai">
-                            <title>Queue All Embeddings</title>
+                            <title>Embeddings</title>
                             <sort_order>30</sort_order>
                             <action>adminhtml/ai/reindex</action>
                         </reindex>
@@ -56,7 +56,7 @@
                                         <sort_order>25</sort_order>
                                     </usage>
                                     <reindex translate="title" module="ai">
-                                        <title>Queue All Embeddings</title>
+                                        <title>Embeddings</title>
                                         <sort_order>30</sort_order>
                                     </reindex>
                                 </children>

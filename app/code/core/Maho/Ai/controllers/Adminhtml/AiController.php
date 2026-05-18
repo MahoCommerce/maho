@@ -174,11 +174,11 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
     #[Maho\Config\Route('/admin/ai/reindex')]
     public function reindexAction(): void
     {
-        $this->_title(Mage::helper('ai')->__('Queue All Embeddings'));
+        $this->_title(Mage::helper('ai')->__('Embeddings'));
         $this->_initAction();
         $this->_addBreadcrumb(
-            Mage::helper('ai')->__('Queue All Embeddings'),
-            Mage::helper('ai')->__('Queue All Embeddings'),
+            Mage::helper('ai')->__('Embeddings'),
+            Mage::helper('ai')->__('Embeddings'),
         );
         $this->renderLayout();
     }
