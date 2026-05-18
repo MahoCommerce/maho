@@ -90,7 +90,7 @@
         <layout>
             <updates>
                 <feedmanager>
-                    <file>maho/feedmanager.xml</file>
+                    <file>feedmanager.xml</file>
                 </feedmanager>
             </updates>
         </layout>

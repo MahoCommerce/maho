@@ -92,7 +92,7 @@
         <layout>
             <updates>
                 <paypal>
-                    <file>maho/paypal.xml</file>
+                    <file>paypal.xml</file>
                 </paypal>
             </updates>
         </layout>
