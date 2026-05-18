@@ -57,6 +57,7 @@
                         <openai_model translate="label">
                             <label>Model</label>
                             <frontend_type>select</frontend_type>
+                            <frontend_model>ai/adminhtml_system_config_form_field_modelSelect</frontend_model>
                             <source_model>ai/source_openai</source_model>
                             <sort_order>120</sort_order>
                             <show_in_default>1</show_in_default>
@@ -79,6 +80,7 @@
                         <anthropic_model translate="label">
                             <label>Model</label>
                             <frontend_type>select</frontend_type>
+                            <frontend_model>ai/adminhtml_system_config_form_field_modelSelect</frontend_model>
                             <source_model>ai/source_anthropic</source_model>
                             <sort_order>210</sort_order>
                             <show_in_default>1</show_in_default>
@@ -101,6 +103,7 @@
                         <google_model translate="label">
                             <label>Model</label>
                             <frontend_type>select</frontend_type>
+                            <frontend_model>ai/adminhtml_system_config_form_field_modelSelect</frontend_model>
                             <source_model>ai/source_google</source_model>
                             <sort_order>310</sort_order>
                             <show_in_default>1</show_in_default>
@@ -123,6 +126,7 @@
                         <mistral_model translate="label">
                             <label>Model</label>
                             <frontend_type>select</frontend_type>
+                            <frontend_model>ai/adminhtml_system_config_form_field_modelSelect</frontend_model>
                             <source_model>ai/source_mistral</source_model>
                             <sort_order>410</sort_order>
                             <show_in_default>1</show_in_default>
@@ -146,6 +150,7 @@
                             <label>Model</label>
                             <comment>e.g. openai/gpt-4o, anthropic/claude-sonnet-4-6, google/gemini-2.0-flash</comment>
                             <frontend_type>text</frontend_type>
+                            <frontend_model>ai/adminhtml_system_config_form_field_modelSelect</frontend_model>
                             <sort_order>510</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
@@ -169,6 +174,7 @@
                             <label>Model</label>
                             <comment>Must be installed locally via `ollama pull`.</comment>
                             <frontend_type>text</frontend_type>
+                            <frontend_model>ai/adminhtml_system_config_form_field_modelSelect</frontend_model>
                             <sort_order>610</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>

@@ -36,7 +36,10 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
     #[\Override]
     public function preDispatch(): static
     {
-        $this->_setForcedFormKeyActions(['reindexPost']);
+        // fetchModels triggers outbound provider HTTP and writes the cached
+        // model list to core_config_data, so it's state-changing and needs
+        // a form key.
+        $this->_setForcedFormKeyActions(['reindexPost', 'fetchModels']);
         return parent::preDispatch();
     }
 
@@ -205,6 +208,55 @@ class Maho_Ai_Adminhtml_AiController extends Mage_Adminhtml_Controller_Action
         }
 
         $this->_redirect('*/*/reindex');
+    }
+
+    /**
+     * AJAX: re-fetch a provider's available models and cache them in
+     * core_config_data. POST-only + form-key required (registered in
+     * preDispatch). The admin URL secret key is added automatically by
+     * getUrl(); mahoFetch attaches form_key from the page's FORM_KEY
+     * global on every POST. The provider whitelist is enforced by the
+     * match() in ModelFetcher::fetchForProvider().
+     *
+     * Auto-fetch on API-key save (Backend\ApiKey, Backend\FetchTrigger)
+     * covers the first-time setup; this endpoint exists so admins can
+     * pick up newly released models without re-entering the API key.
+     */
+    #[Maho\Config\Route('/admin/ai/fetchModels', methods: ['POST'])]
+    public function fetchModelsAction(): void
+    {
+        $provider = (string) $this->getRequest()->getParam('provider');
+        $capability = (string) $this->getRequest()->getParam('capability') ?: 'chat';
+        if ($provider === '') {
+            $this->getResponse()->setBodyJson(['error' => 'Provider is required.']);
+            return;
+        }
+
+        try {
+            /** @var Maho_Ai_Model_Platform_ModelFetcher $fetcher */
+            $fetcher = Mage::getModel('ai/platform_modelFetcher');
+            $models = $fetcher->fetchForProvider($provider, $capability);
+
+            Mage::getModel('core/config')->saveConfig(
+                "maho_ai/models_cache/{$provider}",
+                Mage::helper('core')->jsonEncode($models),
+            );
+            Mage::app()->getCache()->cleanType('config');
+
+            $this->getResponse()->setBodyJson(['models' => $models]);
+        } catch (Mage_Core_Exception $e) {
+            // User-facing Maho exceptions are written by us and safe to
+            // surface (e.g. "OpenAI API key is not configured.").
+            $this->getResponse()->setBodyJson(['error' => $e->getMessage()]);
+        } catch (\Throwable $e) {
+            // Upstream HttpClient exceptions can echo request URLs back —
+            // and the Google fetch URL includes ?key=<APIKEY>. Log the
+            // detail, give the admin a generic prompt to check logs.
+            Mage::logException($e);
+            $this->getResponse()->setBodyJson([
+                'error' => Mage::helper('ai')->__('Failed to fetch models. See exception.log for details.'),
+            ]);
+        }
     }
 
     /**
