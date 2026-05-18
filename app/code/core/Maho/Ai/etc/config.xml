@@ -114,7 +114,7 @@
         <layout>
             <updates>
                 <maho_ai>
-                    <file>maho_ai.xml</file>
+                    <file>ai.xml</file>
                 </maho_ai>
             </updates>
         </layout>
