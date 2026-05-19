@@ -85,25 +85,34 @@ class Mage_Eav_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_Help
     /**
      * Wrap value for GROUP BY compatibility
      *
-     * MySQL allows non-aggregated columns in SELECT even if not in GROUP BY
-     * (unless ONLY_FULL_GROUP_BY is enabled), so no wrapping is needed.
+     * MySQL normally allows non-aggregated columns in SELECT even if not in
+     * GROUP BY, but Maho enables ONLY_FULL_GROUP_BY in developer mode (see
+     * `lib/Maho/Db/Adapter/Pdo/Mysql.php::_initConnection()`). When strict
+     * mode is active, columns from LEFT-JOINed tables (like t_d.value /
+     * t_s.value in EAV reads) must be wrapped in an aggregate.
      *
      * @param string|Maho\Db\Expr $value
      * @return string|Maho\Db\Expr
      */
     public function wrapForGroupBy($value)
     {
+        if ($this->requiresStrictGroupBy()) {
+            return new Maho\Db\Expr("MAX($value)");
+        }
         return $value;
     }
 
     /**
      * Check if database requires strict GROUP BY (all SELECT columns in GROUP BY)
      *
+     * Returns true when Maho is in developer mode, since the MySQL adapter
+     * sets SQL_MODE='ONLY_FULL_GROUP_BY' in that case.
+     *
      * @return bool
      */
     public function requiresStrictGroupBy()
     {
-        return false;
+        return Mage::getIsDeveloperMode();
     }
 
     /**
