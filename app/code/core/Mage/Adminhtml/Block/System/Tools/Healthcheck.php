@@ -115,7 +115,7 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
             'jit_enabled' => isset($status['jit']['enabled']) && $status['jit']['enabled'],
             'memory_used' => $this->formatBytes((int) ($status['memory_usage']['used_memory'] ?? 0)),
             'memory_free' => $this->formatBytes((int) ($status['memory_usage']['free_memory'] ?? 0)),
-            'memory_total' => $config ? $this->formatBytes((int) ($config['directives']['opcache.memory_consumption'] ?? 0)) : 'N/A',
+            'memory_total' => $config ? $this->formatBytes((int) $config['directives']['opcache.memory_consumption']) : 'N/A',
             'memory_wasted' => $this->formatBytes((int) ($status['memory_usage']['wasted_memory'] ?? 0)),
             'memory_wasted_pct' => round($status['memory_usage']['current_wasted_percentage'] ?? 0, 1) . '%',
             'hit_rate' => isset($status['opcache_statistics']['opcache_hit_rate'])
@@ -124,7 +124,7 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
             'hits' => (int) ($status['opcache_statistics']['hits'] ?? 0),
             'misses' => (int) ($status['opcache_statistics']['misses'] ?? 0),
             'cached_scripts' => (int) ($status['opcache_statistics']['num_cached_scripts'] ?? 0),
-            'max_cached_scripts' => $config ? (int) ($config['directives']['opcache.max_accelerated_files'] ?? 0) : 0,
+            'max_cached_scripts' => $config ? (int) $config['directives']['opcache.max_accelerated_files'] : 0,
             'cached_keys' => (int) ($status['opcache_statistics']['num_cached_keys'] ?? 0),
             'max_cached_keys' => (int) ($status['opcache_statistics']['max_cached_keys'] ?? 0),
             'interned_strings_used' => isset($status['interned_strings_usage']['used_memory'])
