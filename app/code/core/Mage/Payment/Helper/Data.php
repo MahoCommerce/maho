@@ -254,7 +254,9 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
                     $labelValues[$code]['label'] = $title;
                 } elseif (isset($groupRelations[$code])) {
                     unset($labelValues[$code]);
-                    $labelValues[$groupRelations[$code]]['value'][$code] = ['value' => $code, 'label' => $title . ' (' . $code . ')'];
+                    $groupCode = $groupRelations[$code];
+                    $labelValues[$groupCode]['label'] ??= $groupCode;
+                    $labelValues[$groupCode]['value'][$code] = ['value' => $code, 'label' => $title . ' (' . $code . ')'];
                 } else {
                     $labelValues[$code] = ['value' => $code, 'label' => $title . ' (' . $code . ')'];
                 }
