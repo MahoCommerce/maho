@@ -319,7 +319,7 @@ class Mage_Tag_Model_Resource_Product_Collection extends Mage_Catalog_Model_Reso
         $this->getSelect()
             ->join(['relation' => $tagRelationTable], 'relation.product_id = e.entity_id', [
                 'product_id'    => 'product_id',
-                'item_store_id' => 'store_id',
+                'item_store_id' => new Maho\Db\Expr('MIN(relation.store_id)'),
             ])
             ->join(
                 ['t' => $tagTable],
@@ -328,10 +328,12 @@ class Mage_Tag_Model_Resource_Product_Collection extends Mage_Catalog_Model_Reso
                     'tag_id',
                     'tag_status' => 'status',
                     'tag_name'   => 'name',
-                    'store_id'   => $this->getConnection()->getCheckSql(
-                        't.first_store_id = 0',
-                        'relation.store_id',
-                        't.first_store_id',
+                    'store_id'   => new Maho\Db\Expr(
+                        'MIN(' . $this->getConnection()->getCheckSql(
+                            't.first_store_id = 0',
+                            'relation.store_id',
+                            't.first_store_id',
+                        ) . ')',
                     ),
                 ],
             );

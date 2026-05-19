@@ -136,15 +136,13 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
         }
 
         if (is_array($storesIds) && !empty($storesIds)) {
-            $inCond = $adapter->prepareSqlCondition('store.store_id', ['in' => $storesIds]);
-            $select->join(
-                ['store' => $this->_reviewStoreTable],
-                'rt.review_id=store.review_id AND ' . $inCond,
-                [],
-            )
-            ->group('rt.review_id');
-
-            $this->_useAnalyticFunction = true;
+            // Use a subquery instead of JOIN+GROUP BY to avoid ONLY_FULL_GROUP_BY violations.
+            // The subquery filters to reviews that exist in any of the requested stores
+            // without adding extra rows (no GROUP BY needed, cardinality is preserved).
+            $subquery = $adapter->select()
+                ->from(['rs' => $this->_reviewStoreTable], ['rs.review_id'])
+                ->where($adapter->prepareSqlCondition('rs.store_id', ['in' => $storesIds]));
+            $select->where('rt.review_id IN (?)', new \Maho\Db\Expr('(' . $subquery . ')'));
         } else {
             $select->join(
                 ['store' => $this->_reviewStoreTable],

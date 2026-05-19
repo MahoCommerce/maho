@@ -44,9 +44,9 @@ abstract class Mage_Reports_Model_Resource_Product_Index_Collection_Abstract ext
                 ['idx_table' => $this->_getTableName()],
                 'product_id=entity_id',
                 [
-                    'product_id'    => 'product_id',
-                    'item_store_id' => 'store_id',
-                    'added_at'      => 'added_at',
+                    'product_id'    => new Maho\Db\Expr('MAX(idx_table.product_id)'),
+                    'item_store_id' => new Maho\Db\Expr('MAX(idx_table.store_id)'),
+                    'added_at'      => new Maho\Db\Expr('MAX(idx_table.added_at)'),
                 ],
                 $this->_getWhereCondition(),
             );

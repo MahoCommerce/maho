@@ -82,11 +82,14 @@ class Mage_Reports_Model_Resource_Review_Customer_Collection extends Mage_Review
             );
         }
 
-        //Prepare fullname field result
+        //Prepare fullname field result — wrap each EAV value column in MAX() so the
+        //expression is valid under ONLY_FULL_GROUP_BY (grouped by detail.customer_id,
+        //not by the EAV table PK).  Each (entity_id, attribute_id) pair has exactly
+        //one row per the JOIN condition, so MAX() returns the same value.
         $customerFullname = $adapter->getConcatSql([
-            "table_customer_firstname.{$firstnameField}",
-            "table_customer_middlename.{$middlenameField}",
-            "table_customer_lastname.{$lastnameField}",
+            "MAX(table_customer_firstname.{$firstnameField})",
+            "MAX(table_customer_middlename.{$middlenameField})",
+            "MAX(table_customer_lastname.{$lastnameField})",
         ], ' ');
         $this->getSelect()->reset(Maho\Db\Select::COLUMNS)
             ->joinInner(
