@@ -295,6 +295,12 @@ const WidgetInstance = {
             if (layoutHandleField) {
                 layoutHandle = layoutHandleField.value;
             }
+            // For 'pages' group type: use the actual selected layout handle from the dropdown
+            const layoutSelect = element.querySelector('select#layout_handle');
+            if (layoutSelect && layoutSelect.value) {
+                layoutHandle = layoutSelect.value;
+            }
+            
             this.loadSelectBoxByType('block_reference', element, layoutHandle, additional);
         }
         this.loadSelectBoxByType('block_template', element, additional.selectedBlock, additional);
