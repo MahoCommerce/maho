@@ -1,0 +1,172 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Maho_Ai>
+            <version>1.0.0</version>
+        </Maho_Ai>
+    </modules>
+
+    <global>
+        <models>
+            <ai>
+                <class>Maho_Ai_Model</class>
+                <resourceModel>ai_resource</resourceModel>
+            </ai>
+            <ai_resource>
+                <class>Maho_Ai_Model_Resource</class>
+                <entities>
+                    <task>
+                        <table>maho_ai_task</table>
+                    </task>
+                    <usage>
+                        <table>maho_ai_usage</table>
+                    </usage>
+                    <vector>
+                        <table>maho_ai_vector</table>
+                    </vector>
+                </entities>
+            </ai_resource>
+        </models>
+
+        <helpers>
+            <ai>
+                <class>Maho_Ai_Helper</class>
+            </ai>
+        </helpers>
+
+        <blocks>
+            <ai>
+                <class>Maho_Ai_Block</class>
+            </ai>
+        </blocks>
+
+        <resources>
+            <maho_ai_setup>
+                <setup>
+                    <module>Maho_Ai</module>
+                    <class>Mage_Core_Model_Resource_Setup</class>
+                </setup>
+            </maho_ai_setup>
+        </resources>
+
+        <ai>
+            <consumers>
+                <!-- Consumer modules register here in their config.xml -->
+            </consumers>
+            <providers>
+                <!--
+                  Built-in providers route through Maho_Ai_Model_Platform_Symfony
+                  which wraps the matching symfony/ai-platform Bridge. They don't
+                  need <class> / <factory_method> here because the Factory dispatches
+                  them via createSymfonyShim() - the label / capabilities / sort_order
+                  keys still apply for the admin UI.
+                -->
+                <openai>
+                    <label>OpenAI</label>
+                    <capabilities>chat,embed,image</capabilities>
+                    <sort_order>10</sort_order>
+                </openai>
+                <anthropic>
+                    <label>Anthropic (Claude)</label>
+                    <capabilities>chat</capabilities>
+                    <sort_order>20</sort_order>
+                </anthropic>
+                <google>
+                    <label>Google (Gemini)</label>
+                    <!-- Imagen not yet wired in createForGoogle(); add 'image' here once it is. -->
+                    <capabilities>chat,embed</capabilities>
+                    <sort_order>30</sort_order>
+                </google>
+                <mistral>
+                    <label>Mistral AI</label>
+                    <capabilities>chat,embed</capabilities>
+                    <sort_order>40</sort_order>
+                </mistral>
+                <openrouter>
+                    <label>OpenRouter</label>
+                    <capabilities>chat,image</capabilities>
+                    <sort_order>50</sort_order>
+                </openrouter>
+                <ollama>
+                    <label>Ollama (Local)</label>
+                    <capabilities>chat,embed</capabilities>
+                    <sort_order>60</sort_order>
+                </ollama>
+                <generic>
+                    <label>Generic (OpenAI-compatible)</label>
+                    <capabilities>chat,embed,image</capabilities>
+                    <sort_order>70</sort_order>
+                </generic>
+            </providers>
+        </ai>
+    </global>
+
+    <adminhtml>
+        <translate>
+            <modules>
+                <Maho_Ai>
+                    <files>
+                        <default>Maho_Ai.csv</default>
+                    </files>
+                </Maho_Ai>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <maho_ai>
+                    <file>ai.xml</file>
+                </maho_ai>
+            </updates>
+        </layout>
+    </adminhtml>
+
+    <default>
+        <maho_ai>
+            <general>
+                <enabled>0</enabled>
+                <default_platform>openai</default_platform>
+                <log_requests>0</log_requests>
+                <!--
+                  No factory defaults for per-provider models / endpoints.
+                  Leaving them blank means: (1) the model dropdown's "current
+                  saved value" fallback doesn't fire on a fresh install, so
+                  Source\Models renders only the "save the API key" hint;
+                  (2) ollama_base_url's first save genuinely changes from
+                  empty to a URL, so FetchTrigger fires and fetches models.
+                  Runtime fallbacks live next to the consumers that need
+                  them (e.g. Symfony\createForOllama defaults the endpoint
+                  to http://localhost:11434 when invoked unconfigured).
+                -->
+            </general>
+            <queue>
+                <enabled>0</enabled>
+                <cron_schedule>*/2 * * * *</cron_schedule>
+                <max_tasks_per_run>10</max_tasks_per_run>
+                <task_timeout>120</task_timeout>
+            </queue>
+            <safety>
+                <injection_detection>1</injection_detection>
+                <output_sanitize_html>1</output_sanitize_html>
+                <blocked_patterns></blocked_patterns>
+                <pii_detection>0</pii_detection>
+            </safety>
+            <embed>
+                <enabled>0</enabled>
+                <default_platform>openai</default_platform>
+                <target_dimensions>512</target_dimensions>
+                <auto_embed_products>0</auto_embed_products>
+                <auto_embed_categories>0</auto_embed_categories>
+                <!-- Per-provider embed model defaults intentionally absent (see general). -->
+            </embed>
+            <image>
+                <enabled>0</enabled>
+                <default_platform>openai</default_platform>
+                <fallback_placeholder>1</fallback_placeholder>
+                <placeholder_url>https://placehold.co/{w}x{h}</placeholder_url>
+                <placeholder_width>800</placeholder_width>
+                <placeholder_height>600</placeholder_height>
+                <!-- Per-provider image model defaults intentionally absent (see general). -->
+            </image>
+        </maho_ai>
+    </default>
+</config>

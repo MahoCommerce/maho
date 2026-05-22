@@ -531,7 +531,7 @@ class OneStepCheckout {
 
                 // mahoFetch returns text/html directly for non-JSON responses
                 const html = await mahoFetch(this.urls.review, {
-                    method: 'GET',
+                    method: 'POST',
                     loaderArea: false
                 });
 

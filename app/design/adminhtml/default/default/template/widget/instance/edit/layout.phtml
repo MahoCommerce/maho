@@ -290,11 +290,9 @@ const WidgetInstance = {
         this.showBlockContainer(element);
         const blockContainer = element.querySelector('div.block_reference');
         if (blockContainer && blockContainer.innerHTML === '') {
-            let layoutHandle = '';
-            const layoutHandleField = element.querySelector('input.layout_handle_pattern');
-            if (layoutHandleField) {
-                layoutHandle = layoutHandleField.value;
-            }
+            const layoutHandle = element.querySelector('select#layout_handle')?.value
+                || element.querySelector('input.layout_handle_pattern')?.value
+                || '';
             this.loadSelectBoxByType('block_reference', element, layoutHandle, additional);
         }
         this.loadSelectBoxByType('block_template', element, additional.selectedBlock, additional);

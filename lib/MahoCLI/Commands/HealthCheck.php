@@ -256,6 +256,36 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * Detect a legacy `<admin><routers><adminhtml><args><frontName>` declaration
+     * in `app/etc/local.xml`. The constant `Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_ROUTER_FRONTNAME`
+     * now resolves to `admin/base_path`; an entry at the old path is silently ignored,
+     * leaving the admin reachable only at `/admin/...` regardless of the value declared here.
+     *
+     * @return ?array{file: string, frontName: string}
+     */
+    public static function findLegacyLocalXmlAdminPath(): ?array
+    {
+        $file = MAHO_ROOT_DIR . '/app/etc/local.xml';
+        if (!is_file($file)) {
+            return null;
+        }
+
+        libxml_use_internal_errors(true);
+        $xml = simplexml_load_file($file);
+        libxml_clear_errors();
+        if ($xml === false) {
+            return null;
+        }
+
+        $frontName = (string) ($xml->admin->routers->adminhtml->args->frontName ?? '');
+        if ($frontName === '') {
+            return null;
+        }
+
+        return ['file' => 'app/etc/local.xml', 'frontName' => $frontName];
+    }
+
+    /**
      * @param list<array{module: string, file?: string, frontName?: string, area?: string, count?: int}> $findings
      */
     private static function formatLegacyXmlSummary(string $label, array $findings, string $attribute): string
@@ -344,6 +374,19 @@ class HealthCheck extends BaseMahoCommand
                 'cron job declarations',
                 $legacyXml['cron'],
                 '#[Maho\\Config\\CronJob]',
+            ),
+        ];
+
+        $legacyAdminPath = self::findLegacyLocalXmlAdminPath();
+        $checks[] = [
+            'check' => 'Legacy Admin Frontname in local.xml',
+            'severity' => $legacyAdminPath === null ? 'ok' : 'warning',
+            'details' => $legacyAdminPath === null ? '' : sprintf(
+                'Found <admin><routers><adminhtml><args><frontName>%s</frontName> in %s. This node is ignored; '
+                . 'replace it with <admin><base_path>%s</base_path> (or run `./maho legacy:migrate-routes`).',
+                $legacyAdminPath['frontName'],
+                $legacyAdminPath['file'],
+                $legacyAdminPath['frontName'],
             ),
         ];
 
@@ -823,6 +866,28 @@ class HealthCheck extends BaseMahoCommand
             }
 
             $output->writeln('See: https://mahocommerce.com/routing/');
+            $output->writeln('');
+        }
+
+        // Check for a legacy admin frontName declaration in app/etc/local.xml
+        $output->write('Checking app/etc/local.xml admin frontName... ');
+        $legacyAdminPath = self::findLegacyLocalXmlAdminPath();
+        if ($legacyAdminPath === null) {
+            $output->writeln('<info>OK</info>');
+        } else {
+            $output->writeln('');
+            $output->writeln(sprintf(
+                '<comment>Warning: Legacy admin frontName found in %s.</comment>',
+                $legacyAdminPath['file'],
+            ));
+            $output->writeln(sprintf(
+                '  <admin><routers><adminhtml><args><frontName>%s</frontName>... is no longer honored.',
+                $legacyAdminPath['frontName'],
+            ));
+            $output->writeln(sprintf(
+                '  Replace it with <admin><base_path>%s</base_path>, or run: ./maho legacy:migrate-routes',
+                $legacyAdminPath['frontName'],
+            ));
             $output->writeln('');
         }
 

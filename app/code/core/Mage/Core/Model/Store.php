@@ -49,7 +49,6 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     public const XML_PATH_STORE_STORE_PHONE         = 'general/store_information/phone';
     public const XML_PATH_STORE_STORE_HOURS         = 'general/store_information/hours';
     public const XML_PATH_STORE_IN_URL              = 'web/url/use_store';
-    public const XML_PATH_USE_REWRITES              = 'web/seo/use_rewrites';
     public const XML_PATH_UNSECURE_BASE_URL         = 'web/unsecure/base_url';
     public const XML_PATH_UNSECURE_BASE_JS_URL      = 'web/unsecure/base_js_url';
     public const XML_PATH_UNSECURE_BASE_LINK_URL    = 'web/unsecure/base_link_url';
@@ -252,7 +251,6 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
             self::XML_PATH_SECURE_IN_FRONTEND,
             self::XML_PATH_STORE_IN_URL,
             self::XML_PATH_UNSECURE_BASE_URL,
-            self::XML_PATH_USE_REWRITES,
             self::XML_PATH_UNSECURE_BASE_LINK_URL,
             self::XML_PATH_SECURE_BASE_LINK_URL,
             'general/locale/code',
@@ -514,24 +512,19 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
                 case self::URL_TYPE_LINK:
                     $secure = (bool) $secure;
                     $url = $this->getConfig('web/' . ($secure ? 'secure' : 'unsecure') . '/base_link_url');
-                    $url = $this->_updatePathUseRewrites($url);
                     $url = $this->_updatePathUseStoreView($url);
                     break;
 
                 case self::URL_TYPE_DIRECT_LINK:
                     $secure = (bool) $secure;
                     $url = $this->getConfig('web/' . ($secure ? 'secure' : 'unsecure') . '/base_link_url');
-                    $url = $this->_updatePathUseRewrites($url);
                     break;
 
                 case self::URL_TYPE_SKIN:
                 case self::URL_TYPE_JS:
+                case self::URL_TYPE_MEDIA:
                     $secure = is_null($secure) ? Mage::app()->isCurrentlySecure() : (bool) $secure;
                     $url = $this->getConfig('web/' . ($secure ? 'secure' : 'unsecure') . '/base_' . $type . '_url');
-                    break;
-
-                case self::URL_TYPE_MEDIA:
-                    $url = $this->_updateMediaPathUseRewrites($secure);
                     break;
 
                 default:
@@ -551,45 +544,6 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         }
 
         return $this->_baseUrlCache[$cacheKey];
-    }
-
-    /**
-     * Remove script file name from url in case when server rewrites are enabled
-     *
-     * @param   string $url
-     * @return  string
-     */
-    protected function _updatePathUseRewrites($url)
-    {
-        if (!Mage::isInstalled() || !$this->getConfig(self::XML_PATH_USE_REWRITES)) {
-            $indexFileName = $this->_isCustomEntryPoint() ? 'index.php' : basename($_SERVER['SCRIPT_FILENAME']);
-            $url .= $indexFileName . '/';
-        }
-        return $url;
-    }
-
-    /**
-     * Check if used entry point is custom
-     *
-     * @return bool
-     */
-    protected function _isCustomEntryPoint()
-    {
-        return (bool) Mage::registry('custom_entry_point');
-    }
-
-    /**
-     * Retrieve URL for media catalog
-     *
-     * @param null|bool $secure
-     * @param string $type
-     * @return string
-     */
-    protected function _updateMediaPathUseRewrites($secure = null, $type = self::URL_TYPE_MEDIA)
-    {
-        $secure = is_null($secure) ? Mage::app()->isCurrentlySecure() : (bool) $secure;
-        $secureStringFlag = $secure ? 'secure' : 'unsecure';
-        return $this->getConfig('web/' . $secureStringFlag . '/base_' . $type . '_url');
     }
 
     /**
