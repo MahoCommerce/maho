@@ -160,6 +160,11 @@ describe('Provider_Event::getObserversForEvent', function () {
         expect($result['adminhtml'][0]['name'])->toBe('xml_observer');
     });
 
+    it('returns an empty array for an unknown event name', function () {
+        $provider = Mage::getModel('intelligence/provider_event');
+        expect($provider->getObserversForEvent('this_event_definitely_does_not_exist_xyz'))->toBe([]);
+    });
+
     it('is case-insensitive on event names', function () {
         injectEventsConfig('
             <global>

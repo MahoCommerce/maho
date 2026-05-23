@@ -25,6 +25,21 @@ function injectCronConfig(string $innerXml): void
     $config->extend($extra);
 }
 
+function withInjectedCompiledCron(array $extraJobs, callable $fn): void
+{
+    $prop = new ReflectionProperty(Maho::class, 'compiledAttributes');
+    $original = Maho::getCompiledAttributes();
+    $patched = $original;
+    $patched['crontab'] = array_merge($patched['crontab'] ?? [], $extraJobs);
+
+    $prop->setValue(null, $patched);
+    try {
+        $fn();
+    } finally {
+        $prop->setValue(null, $original);
+    }
+}
+
 describe('Provider_Cron attribute-based jobs', function () {
     it('returns compiled attribute cron jobs', function () {
         $jobs = Mage::getModel('intelligence/provider_cron')->getAllJobs();
@@ -128,6 +143,47 @@ describe('Provider_Cron XML-defined jobs', function () {
         expect($jobs)->toHaveKey('configurable_cron');
         expect($jobs['configurable_cron']['config_path'])->toBe('cron_test/my_schedule');
         expect($jobs['configurable_cron']['model'])->toBe('x/y::z');
+    });
+
+    it('lets attribute jobs win when the same name exists in XML', function () {
+        // api_session_cleanup is a real attribute cron job (Mage_Api).
+        injectCronConfig('
+            <crontab>
+                <jobs>
+                    <api_session_cleanup>
+                        <schedule><cron_expr>0 0 * * *</cron_expr></schedule>
+                        <run><model>fake/xml::override</model></run>
+                    </api_session_cleanup>
+                </jobs>
+            </crontab>
+        ');
+
+        $jobs = Mage::getModel('intelligence/provider_cron')->getAllJobs();
+
+        expect($jobs)->toHaveKey('api_session_cleanup');
+        expect($jobs['api_session_cleanup']['source'])->toBe('attribute');
+        expect($jobs['api_session_cleanup']['model'])->not->toBe('fake/xml::override');
+    });
+
+    it('captures config_path on attribute jobs that schedule via store config', function () {
+        withInjectedCompiledCron([
+            'attr_configurable_cron' => [
+                'module' => 'Test_Module',
+                'alias' => 'test/cron',
+                'method' => 'run',
+                'schedule' => null,
+                'config_path' => 'cron_test/attr_schedule',
+            ],
+        ], function () {
+            $jobs = Mage::getModel('intelligence/provider_cron')->getAllJobs();
+
+            expect($jobs)->toHaveKey('attr_configurable_cron');
+            $job = $jobs['attr_configurable_cron'];
+            expect($job['source'])->toBe('attribute');
+            expect($job['config_path'])->toBe('cron_test/attr_schedule');
+            expect($job['model'])->toBe('test/cron::run');
+            expect($job['module'])->toBe('Test_Module');
+        });
     });
 
     it('returns jobs sorted naturally and case-insensitively', function () {
