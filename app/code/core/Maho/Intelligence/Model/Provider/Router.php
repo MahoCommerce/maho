@@ -15,7 +15,7 @@ class Maho_Intelligence_Model_Provider_Router
     /**
      * Get all routing definitions.
      *
-     * Returns two sections — XML routers are router-level frontName→module
+     * Returns two sections: XML routers are router-level frontName→module
      * mappings (with optional controller-override chains); attribute routes
      * are per-URL Symfony routes compiled from #[Maho\Config\Route]
      * attributes into vendor/composer/maho_attributes.php.

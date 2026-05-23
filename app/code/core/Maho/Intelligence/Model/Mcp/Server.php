@@ -164,7 +164,7 @@ class Maho_Intelligence_Model_Mcp_Server
 
         $this->addTool(
             'list_routes',
-            'List routing definitions in two sections: "xml_routers" — router-level frontName→module mappings with controller-override chains (legacy XML / custom projects); and "attribute_routes" — per-URL Symfony routes defined via #[Maho\\Config\\Route] attributes.',
+            'List routing definitions in two sections: "xml_routers" (router-level frontName→module mappings with controller-override chains, used by legacy XML / custom projects), and "attribute_routes" (per-URL Symfony routes defined via #[Maho\\Config\\Route] attributes).',
             ['type' => 'object', 'properties' => new \stdClass()],
             fn(array $args) => $registry->get('router', 'getAllRoutes'),
         );

@@ -16,6 +16,10 @@ class Maho_Intelligence_Model_Provider_Cron
      * Get all cron job definitions. Merges XML-defined jobs (legacy / custom
      * projects) with PHP-attribute cron jobs compiled into
      * vendor/composer/maho_attributes.php.
+     *
+     * Collisions: if the same job name exists in both XML and as an attribute,
+     * the attribute version wins (the XML entry is replaced). This matches the
+     * runtime cron registration order.
      */
     public function getAllJobs(): array
     {
@@ -35,16 +39,18 @@ class Maho_Intelligence_Model_Provider_Cron
         $result = [];
         foreach ($jobs as $jobName => $jobConfig) {
             $cronExpr = $jobConfig['schedule']['cron_expr'] ?? null;
+            $configPath = $jobConfig['schedule']['config_path'] ?? null;
 
-            if (!$cronExpr && !empty($jobConfig['schedule']['config_path'])) {
-                $cronExpr = Mage::getStoreConfig($jobConfig['schedule']['config_path']);
+            if (!$cronExpr && !empty($configPath)) {
+                $cronExpr = Mage::getStoreConfig($configPath);
             }
 
             $result[$jobName] = [
                 'name' => $jobName,
                 'model' => $jobConfig['run']['model'] ?? '',
                 'schedule' => $cronExpr ?? '',
-                'config_path' => $jobConfig['schedule']['config_path'] ?? null,
+                'config_path' => $configPath,
+                'module' => null,
                 'source' => 'xml',
             ];
         }
@@ -54,7 +60,7 @@ class Maho_Intelligence_Model_Provider_Cron
             $cronExpr = $jobConfig['schedule'] ?? null;
             $configPath = $jobConfig['config_path'] ?? null;
 
-            if (!$cronExpr && $configPath) {
+            if (!$cronExpr && !empty($configPath)) {
                 $cronExpr = Mage::getStoreConfig($configPath);
             }
 

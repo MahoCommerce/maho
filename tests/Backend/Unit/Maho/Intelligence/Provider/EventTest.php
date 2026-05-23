@@ -134,11 +134,12 @@ describe('Provider_Event XML-defined observers', function () {
 
         $sources = array_column($observers, 'source');
         expect($sources)->toContain('xml');
+        expect($sources)->toContain('attribute');
     });
 });
 
 describe('Provider_Event::getObserversForEvent', function () {
-    it('returns observers grouped by area when both XML and attributes contribute', function () {
+    it('returns observers grouped by area for an XML-defined event', function () {
         injectEventsConfig('
             <adminhtml>
                 <events>
