@@ -12,12 +12,14 @@ declare(strict_types=1);
 
 class Maho_Intelligence_Model_Provider_Event
 {
-    private const AREAS = ['global', 'frontend', 'adminhtml', 'crontab'];
+    private const AREAS = ['global', 'frontend', 'adminhtml', 'crontab', 'install'];
 
     private ?array $cachedEvents = null;
 
     /**
-     * Get all events keyed by area, then event name, with observer details
+     * Get all events keyed by area, then event name, with observer details.
+     * Merges XML-defined observers (legacy / custom projects) with PHP-attribute
+     * observers compiled into vendor/composer/maho_attributes.php.
      */
     public function getAllEvents(): array
     {
@@ -41,21 +43,39 @@ class Maho_Intelligence_Model_Provider_Event
                     continue;
                 }
 
-                $observers = [];
                 foreach ($event->observers->children() as $observer) {
-                    $observers[] = [
+                    $result[$area][$eventName]['event'] = $eventName;
+                    $result[$area][$eventName]['area'] = $area;
+                    $result[$area][$eventName]['observers'][] = [
                         'name' => $observer->getName(),
                         'class' => (string) ($observer->class ?? ''),
                         'method' => (string) ($observer->method ?? ''),
                         'type' => (string) ($observer->type ?? 'singleton'),
+                        'module' => null,
+                        'alias' => null,
+                        'source' => 'xml',
                     ];
                 }
+            }
+        }
 
-                $result[$area][$eventName] = [
-                    'event' => $eventName,
-                    'area' => $area,
-                    'observers' => $observers,
-                ];
+        $compiledObservers = Maho::getCompiledAttributes()['observers'] ?? [];
+        foreach ($compiledObservers as $area => $events) {
+            foreach ($events as $eventName => $observers) {
+                $eventName = strtolower($eventName);
+                foreach ($observers as $observer) {
+                    $result[$area][$eventName]['event'] = $eventName;
+                    $result[$area][$eventName]['area'] = $area;
+                    $result[$area][$eventName]['observers'][] = [
+                        'name' => $observer['name'] ?? '',
+                        'class' => $observer['class'] ?? '',
+                        'method' => $observer['method'] ?? '',
+                        'type' => $observer['type'] ?? 'model',
+                        'module' => $observer['module'] ?? null,
+                        'alias' => $observer['alias'] ?? null,
+                        'source' => 'attribute',
+                    ];
+                }
             }
         }
 

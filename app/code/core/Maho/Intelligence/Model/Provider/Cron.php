@@ -13,7 +13,9 @@ declare(strict_types=1);
 class Maho_Intelligence_Model_Provider_Cron
 {
     /**
-     * Get all cron job definitions
+     * Get all cron job definitions. Merges XML-defined jobs (legacy / custom
+     * projects) with PHP-attribute cron jobs compiled into
+     * vendor/composer/maho_attributes.php.
      */
     public function getAllJobs(): array
     {
@@ -43,6 +45,30 @@ class Maho_Intelligence_Model_Provider_Cron
                 'model' => $jobConfig['run']['model'] ?? '',
                 'schedule' => $cronExpr ?? '',
                 'config_path' => $jobConfig['schedule']['config_path'] ?? null,
+                'source' => 'xml',
+            ];
+        }
+
+        $compiledCron = Maho::getCompiledAttributes()['crontab'] ?? [];
+        foreach ($compiledCron as $jobName => $jobConfig) {
+            $cronExpr = $jobConfig['schedule'] ?? null;
+            $configPath = $jobConfig['config_path'] ?? null;
+
+            if (!$cronExpr && $configPath) {
+                $cronExpr = Mage::getStoreConfig($configPath);
+            }
+
+            $alias = $jobConfig['alias'] ?? '';
+            $method = $jobConfig['method'] ?? '';
+            $model = $alias !== '' && $method !== '' ? "{$alias}::{$method}" : '';
+
+            $result[$jobName] = [
+                'name' => $jobName,
+                'model' => $model,
+                'schedule' => $cronExpr ?? '',
+                'config_path' => $configPath,
+                'module' => $jobConfig['module'] ?? null,
+                'source' => 'attribute',
             ];
         }
 
