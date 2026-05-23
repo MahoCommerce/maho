@@ -20,6 +20,13 @@ class Maho_Intelligence_Model_Provider_Event
      * Get all events keyed by area, then event name, with observer details.
      * Merges XML-defined observers (legacy / custom projects) with PHP-attribute
      * observers compiled into vendor/composer/maho_attributes.php.
+     *
+     * Observers within an event are returned in source-grouping order (XML first,
+     * then attribute). This is not the runtime dispatch order, which is determined
+     * by per-observer id/before/after semantics.
+     *
+     * Default observer `type` differs by source ('singleton' for XML, 'model' for
+     * attribute) to match each system's own default.
      */
     public function getAllEvents(): array
     {
@@ -80,7 +87,7 @@ class Maho_Intelligence_Model_Provider_Event
         }
 
         foreach ($result as &$areaEvents) {
-            ksort($areaEvents);
+            ksort($areaEvents, SORT_NATURAL | SORT_FLAG_CASE);
         }
 
         $this->cachedEvents = $result;

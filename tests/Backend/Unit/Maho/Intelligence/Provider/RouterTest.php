@@ -60,7 +60,7 @@ describe('Provider_Router attribute routes', function () {
         $result = Mage::getModel('intelligence/provider_router')->getAllRoutes();
         $names = array_keys($result['attribute_routes']);
         $sorted = $names;
-        sort($sorted);
+        sort($sorted, SORT_NATURAL | SORT_FLAG_CASE);
 
         expect($names)->toBe($sorted);
     });

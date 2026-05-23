@@ -73,7 +73,7 @@ class Maho_Intelligence_Model_Provider_Router
             }
         }
 
-        ksort($result);
+        ksort($result, SORT_NATURAL | SORT_FLAG_CASE);
         return $result;
     }
 
@@ -92,12 +92,13 @@ class Maho_Intelligence_Model_Provider_Router
                 'action' => $route['action'] ?? '',
                 'module' => $route['module'] ?? null,
                 'controller_name' => $route['controllerName'] ?? null,
+                'path_variables' => $route['pathVariables'] ?? [],
                 'defaults' => $route['defaults'] ?? [],
                 'requirements' => $route['requirements'] ?? [],
             ];
         }
 
-        ksort($result);
+        ksort($result, SORT_NATURAL | SORT_FLAG_CASE);
         return $result;
     }
 }
