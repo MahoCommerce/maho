@@ -192,24 +192,96 @@ abstract class CrudResource extends Resource
             return '';
         }
 
-        // Strip widget and block directives - they instantiate blocks that
-        // depend on sessions/layout which are not available in the API context
-        $content = preg_replace('/\{\{widget\b[^}]*\}\}/', '', $content);
-        $content = preg_replace('/\{\{block\b[^}]*\}\}/', '', $content);
+        $storeId = Service\StoreContext::getStoreId();
 
-        // If no remaining directives, return early
+        // Strip {{widget}} directives — they instantiate theme blocks that
+        // typically need layout/session context (wishlist, minicart, viewed
+        // products). The API context has no session, so rendering them would
+        // throw. If callers need widget output they should use server-side
+        // rendering at the storefront layer.
+        $content = preg_replace('/\{\{widget\b[^}]*\}\}/', '', (string) $content);
+
+        // Resolve {{block type="cms/block" block_id="..."}} directives inline
+        // by loading the referenced CMS block directly — NOT via Maho's block
+        // rendering pipeline, which calls Mage_Core_Block_Abstract::_saveCache()
+        // → $session->getSessionName() → null deref in the API context
+        // (no HTTP session). This recursive inlining is bounded to prevent
+        // cycles and unbounded nesting.
+        $content = self::resolveCmsBlockDirectives($content, $storeId);
+
+        // Any remaining non-cms-block {{block}} directives need layout context
+        // (e.g. type="core/template", type="catalog/product_list_new"). Strip
+        // them — they'd throw the same session error if rendered.
+        $content = preg_replace('/\{\{block\b[^}]*\}\}/', '', (string) $content);
+
+        // If no directives remain, return early.
         if (!str_contains($content, '{{')) {
             return $content;
         }
 
+        // Resolve remaining safe directives ({{media}}, {{config}}, {{store}}).
+        // None of these touch the session. If the filter still throws for any
+        // reason, strip what's left rather than returning empty content.
         try {
             $filter = \Mage::helper('cms')->getPageTemplateProcessor();
-            $filter->setStoreId(Service\StoreContext::getStoreId());
+            $filter->setStoreId($storeId);
             return $filter->filter($content);
         } catch (\Throwable $e) {
             \Mage::logException($e);
             return preg_replace('/\{\{[^}]+\}\}/', '', $content);
         }
+    }
+
+    /**
+     * Recursively inline {{block type="cms/block" block_id="..."}} directives
+     * by loading the referenced CMS block content from the database. Avoids
+     * Maho's block rendering pipeline (which crashes in no-session contexts).
+     *
+     * Depth-limited and cycle-safe — a block that references itself, or a
+     * chain deeper than 5 levels, falls back to stripping the directive.
+     */
+    private static function resolveCmsBlockDirectives(
+        string $content,
+        ?int $storeId,
+        array $seen = [],
+        int $depth = 0,
+    ): string {
+        if ($depth >= 5 || !str_contains($content, '{{block')) {
+            return $content;
+        }
+        // Match {{block type="cms/block" block_id="foo"}} with attrs in any order,
+        // single- or double-quoted, with optional whitespace.
+        $pattern = '/\{\{block\s+(?:[^}]*?\btype=(["\'])cms\/block\1[^}]*?\bblock_id=(["\'])([^"\']+)\2'
+                 . '|[^}]*?\bblock_id=(["\'])([^"\']+)\4[^}]*?\btype=(["\'])cms\/block\5)[^}]*\}\}/';
+        return preg_replace_callback(
+            $pattern,
+            static function (array $m) use ($storeId, $seen, $depth): string {
+                $identifier = $m[3] ?? $m[5] ?? '';
+                if ($identifier === '' || isset($seen[$identifier])) {
+                    return '';
+                }
+                $seen[$identifier] = true;
+                try {
+                    $block = \Mage::getModel('cms/block')
+                        ->setStoreId((int) $storeId)
+                        ->load($identifier, 'identifier');
+                    if (!$block->getIsActive() || !$block->getContent()) {
+                        return '';
+                    }
+                    // Recurse into the nested block's content so chained
+                    // cms/block includes resolve all the way down.
+                    return self::resolveCmsBlockDirectives(
+                        (string) $block->getContent(),
+                        $storeId,
+                        $seen,
+                        $depth + 1,
+                    );
+                } catch (\Throwable) {
+                    return '';
+                }
+            },
+            $content,
+        ) ?? $content;
     }
 
     /**
