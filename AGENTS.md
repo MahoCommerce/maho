@@ -163,7 +163,7 @@ All Zend Framework and Varien components have been completely removed. **NEVER**
 
 ### Adding New Features
 - New modules: `app/code/core/Maho/` namespace, declared in `app/etc/modules/`
-- Follow existing module patterns; use `declare(strict_types=1)` and PHP 8.3+ features
+- Follow existing module patterns; use `declare(strict_types=1)` (placed *after* the file-level docblock, not before) and PHP 8.3+ features
 - Use `#[\Override]` attribute for overridden methods
 - When overriding admin routes in Maho modules, use `before="Mage_Adminhtml"` pattern
 

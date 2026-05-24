@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Maho
  *
@@ -9,6 +7,8 @@ declare(strict_types=1);
  * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+declare(strict_types=1);
 
 /** @var Mage_Core_Model_Resource_Setup $this */
 /** @var Mage_Core_Model_Resource_Setup $installer */
