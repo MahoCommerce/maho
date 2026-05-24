@@ -335,19 +335,6 @@
         </reference>
     </adminhtml_sales_order_shipment_view>
 
-    <!--
-        Legacy URL `/admin/sales_shipment/view/...` (linked from the global Shipments grid)
-        is routed by Mage_Adminhtml_Sales_ShipmentController::viewAction(), which then
-        $this->_forward('view', 'sales_order_shipment', ...). The forward keeps the
-        original routeName ('admin', set by the legacy dispatcher) instead of 'adminhtml',
-        so getFullActionName() resolves to admin_sales_order_shipment_view and the
-        adminhtml_-prefixed handle above is never loaded. Alias the legacy handle so
-        the page renders correctly when reached via that URL.
-    -->
-    <admin_sales_order_shipment_view>
-        <update handle="adminhtml_sales_order_shipment_view"/>
-    </admin_sales_order_shipment_view>
-
     <adminhtml_sales_order_creditmemo_new>
         <reference name="content">
             <block type="adminhtml/sales_order_creditmemo_create" name="sales_creditmemo_create">

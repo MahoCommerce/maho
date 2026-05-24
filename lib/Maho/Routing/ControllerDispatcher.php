@@ -71,9 +71,14 @@ class ControllerDispatcher
             return false;
         }
 
-        // Set routeName for event dispatching (controller_action_predispatch_<routeName>)
+        // Set routeName for event dispatching (controller_action_predispatch_<routeName>).
+        // Map frontName to routeName so the admin frontName resolves to 'adminhtml', matching
+        // what setAdminRequestNames() does for Symfony-matched routes. Without this, legacy
+        // admin URLs (no #[Route] attribute, dispatched via the fallback path) end up with
+        // routeName='admin', which breaks getFullActionName() (yields 'admin_*' instead of
+        // 'adminhtml_*'), causing layout handles and predispatch observers to miss.
         if (!$request->getRouteName()) {
-            $request->setRouteName($moduleName);
+            $request->setRouteName(RouteCollectionBuilder::getRouteByFrontName($moduleName) ?? $moduleName);
         }
         $request->setDispatched(true);
         $controllerInstance->dispatch($actionName);
