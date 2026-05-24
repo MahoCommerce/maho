@@ -152,6 +152,18 @@ class Mage_Checkout_Model_Type_Onepage
         $customer = $customerSession->getCustomer();
         if ($customer) {
             $this->getQuote()->assignCustomer($customer);
+
+            // If billing and shipping default to the same address-book entry,
+            // flag same_as_billing so the template defaults to "Ship to this
+            // address" instead of forcing the customer to flip the radio.
+            $defaultBilling  = $customer->getDefaultBillingAddress();
+            $defaultShipping = $customer->getDefaultShippingAddress();
+            if ($defaultBilling && $defaultShipping
+                && $defaultBilling->getId()
+                && (int) $defaultBilling->getId() === (int) $defaultShipping->getId()
+            ) {
+                $this->getQuote()->getShippingAddress()->setSameAsBilling(1);
+            }
         }
         return $this;
     }

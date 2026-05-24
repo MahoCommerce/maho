@@ -433,10 +433,27 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         }
 
         $data = $this->getRequest()->getPost('billing', []);
+        $customerAddressId = $this->getRequest()->getPost('billing_address_id', false);
         $quote = $this->getOnepage()->getQuote();
+
+        // With an address-book selection the billing[*] payload is empty (the
+        // new-address form is hidden). Resolve the customer address by id;
+        // posted fields layer on top below via addData().
+        $customerAddress = null;
+        if ($customerAddressId) {
+            $candidate = Mage::getModel('customer/address')->load($customerAddressId);
+            if ($candidate->getId()
+                && (int) $candidate->getCustomerId() === (int) $quote->getCustomerId()
+            ) {
+                $customerAddress = $candidate;
+            }
+        }
 
         // Save to billing address
         $billingAddress = $quote->getBillingAddress();
+        if ($customerAddress) {
+            $billingAddress->importCustomerAddress($customerAddress)->setSaveInAddressBook(0);
+        }
         $billingAddress->addData($data);
         $billingAddress->implodeStreetAddress();
 
@@ -444,6 +461,10 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         $useForShipping = $data['use_for_shipping'] ?? 1;
         if ($useForShipping && !$quote->isVirtual()) {
             $shippingAddress = $quote->getShippingAddress();
+
+            if ($customerAddress) {
+                $shippingAddress->importCustomerAddress($customerAddress)->setSaveInAddressBook(0);
+            }
 
             // Remove fields that should not be copied to shipping address
             // address_id is the quote address entity ID - copying it would overwrite the shipping address identity

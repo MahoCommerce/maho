@@ -92,6 +92,14 @@ class OneStepCheckout {
         if (this.isVirtual || this.hasMinimumAddressData('billing')) {
             this.saveBilling();
         }
+
+        // saveBilling only posts the billing payload — for a separate
+        // shipping address, seed the shipping side too so rates load on
+        // initial render instead of waiting for the customer to touch it.
+        const useForShippingNo = document.getElementById('billing:use_for_shipping_no');
+        if (useForShippingNo && useForShippingNo.checked && this.hasMinimumAddressData('shipping')) {
+            this.saveShippingEstimate();
+        }
     }
 
     initPlaceholders() {
@@ -200,6 +208,13 @@ class OneStepCheckout {
      * @returns {boolean}
      */
     hasMinimumAddressData(prefix) {
+        // Address-book selections post `<prefix>_address_id` instead of the
+        // explicit address fields; the server loads the address from that id.
+        const addressBook = document.getElementById(`${prefix}-address-select`);
+        if (addressBook && addressBook.value) {
+            return true;
+        }
+
         const country = document.getElementById(`${prefix}:country_id`)?.value;
         const postcode = document.getElementById(`${prefix}:postcode`)?.value;
         const city = document.getElementById(`${prefix}:city`)?.value;
@@ -208,10 +223,16 @@ class OneStepCheckout {
             return false;
         }
 
-        // Require region for countries that have regions (like US)
+        // Only require a region when the country actually demands one.
+        // RegionUpdater toggles `required-entry` on the region field per the
+        // directory/general/region/state_required config — countries like DE
+        // have regions in the table but are not state-required, so options
+        // alone aren't a reliable signal.
         const regionSelect = document.getElementById(`${prefix}:region_id`);
-        const regionId = regionSelect?.value;
-        if (regionSelect && regionSelect.options.length > 1 && !regionId) {
+        const regionText = document.getElementById(`${prefix}:region`);
+        const regionRequired = regionSelect?.classList.contains('required-entry')
+            || regionText?.classList.contains('required-entry');
+        if (regionRequired && !(regionSelect?.value || regionText?.value)) {
             return false;
         }
 
