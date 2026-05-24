@@ -24,6 +24,7 @@ jobs:
     services:
       mysql:
         image: mysql:latest
+        command: --log-bin --gtid-mode=ON --enforce-gtid-consistency=ON
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: maho
