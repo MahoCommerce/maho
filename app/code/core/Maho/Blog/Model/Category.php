@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Maho
  *
@@ -18,6 +16,8 @@ declare(strict_types=1);
  * @method int getPosition()
  * @method int getIsActive()
  */
+
+declare(strict_types=1);
 
 class Maho_Blog_Model_Category extends Mage_Core_Model_Abstract
 {

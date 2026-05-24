@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Maho
  *
@@ -15,6 +13,8 @@ declare(strict_types=1);
  * @method string getTitle()
  * @method string getImage()
  */
+
+declare(strict_types=1);
 
 class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
 {
