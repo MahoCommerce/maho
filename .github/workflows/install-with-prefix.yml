@@ -24,6 +24,9 @@ jobs:
     services:
       mysql:
         image: mysql:latest
+        # Enable binlog + GTID so enforce_gtid_consistency actually fires in CI
+        # (mixed-engine transactions get caught, not silently warned).
+        command: --log-bin --gtid-mode=ON --enforce-gtid-consistency=ON
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: maho
