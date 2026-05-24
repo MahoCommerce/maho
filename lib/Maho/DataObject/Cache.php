@@ -3,7 +3,6 @@
 /**
  * Maho
  *
- * @package    MahoLib
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
