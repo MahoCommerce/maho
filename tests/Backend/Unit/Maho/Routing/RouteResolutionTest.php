@@ -33,7 +33,8 @@ function matchPath(string $path): array
 
 dataset('frontend_routes', [
     'home'                  => ['/',                              Mage_Cms_IndexController::class,              'indexAction'],
-    'cms (cms frontname)'   => ['/cms',                           Mage_Cms_IndexController::class,              'indexAction'],
+    'cms legacy /cms'       => ['/cms',                           Mage_Cms_IndexController::class,              'norouteAction'],
+    'cms legacy /cms/index' => ['/cms/index',                     Mage_Cms_IndexController::class,              'norouteAction'],
     'cms page view'         => ['/cms/page/view/2',               Mage_Cms_PageController::class,               'viewAction'],
     'catalog product view'  => ['/catalog/product/view/1',        Mage_Catalog_ProductController::class,        'viewAction'],
     'catalog category view' => ['/catalog/category/view/2',       Mage_Catalog_CategoryController::class,       'viewAction'],

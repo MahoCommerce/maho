@@ -18,7 +18,6 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
      * @param string $coreRoute
      */
     #[Maho\Config\Route('/', name: 'cms.home', methods: ['GET'])]
-    #[Maho\Config\Route('/cms', name: 'cms.index', methods: ['GET'])]
     public function indexAction($coreRoute = null)
     {
         $pageId = Mage::getStoreConfig(Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE);
@@ -50,6 +49,8 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
      * @param string $coreRoute
      */
     #[\Override]
+    #[Maho\Config\Route('/cms', name: 'cms.index')]
+    #[Maho\Config\Route('/cms/index', name: 'cms.index_index')]
     public function norouteAction($coreRoute = null): void
     {
         $this->getResponse()->setHeader('HTTP/1.1', '404 Not Found');
