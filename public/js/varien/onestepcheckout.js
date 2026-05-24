@@ -878,6 +878,14 @@ class OneStepCheckout {
     }
 
     /**
+     * Mirrors Checkout.ajaxFailure() for the shared `window.checkout` global.
+     */
+    ajaxFailure(error) {
+        alert(error);
+        location.href = encodeURI(this.urls.failure);
+    }
+
+    /**
      * Get URLs object (for compatibility)
      */
     get progressUrl() { return this.urls.progress; }
