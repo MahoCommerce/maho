@@ -116,9 +116,11 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
 
             $this->loadLayout();
 
-            /** @var Mage_Adminhtml_Block_Sales_Order_Shipment_View $block */
+            /** @var Mage_Adminhtml_Block_Sales_Order_Shipment_View|false $block */
             $block = $this->getLayout()->getBlock('sales_shipment_view');
-            $block->updateBackButtonUrl($this->getRequest()->getParam('come_from'));
+            if ($block) {
+                $block->updateBackButtonUrl($this->getRequest()->getParam('come_from'));
+            }
 
             $this->_setActiveMenu('sales/shipment')
                 ->renderLayout();
