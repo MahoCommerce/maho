@@ -63,8 +63,6 @@ jobs:
     services:
       db:
         image: ${{ matrix.db_image }}
-        # MySQL: enable binlog + GTID so enforce_gtid_consistency actually fires
-        # in CI (mixed-engine transactions get caught, not silently warned).
         command: ${{ matrix.db_command }}
         env:
           MYSQL_ROOT_PASSWORD: root
