@@ -878,6 +878,17 @@ class OneStepCheckout {
     }
 
     /**
+     * Mirror Checkout.ajaxFailure() so error handlers in Billing/Shipping/Payment/Review
+     * (defined in opcheckout.js) that fall back to the global `checkout` reference can
+     * surface the failure and redirect to the cart, instead of throwing
+     * "checkout.ajaxFailure is not a function".
+     */
+    ajaxFailure(error) {
+        alert(error);
+        location.href = encodeURI(this.urls.failure);
+    }
+
+    /**
      * Get URLs object (for compatibility)
      */
     get progressUrl() { return this.urls.progress; }
