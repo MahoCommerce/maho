@@ -436,40 +436,35 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         $customerAddressId = $this->getRequest()->getPost('billing_address_id', false);
         $quote = $this->getOnepage()->getQuote();
 
-        // With an address-book selection the billing[*] payload is empty (the
-        // new-address form is hidden). Resolve the customer address by id;
-        // posted fields layer on top below via addData(). Lookup goes through
-        // the customer's own address collection (filtered by parent_id at the
-        // SQL layer), so a foreign id is never loaded into memory.
+        // Address-book lookup is parent_id-scoped, so a foreign id never resolves.
+        // When present, the saved address wins over the posted form: the hidden
+        // new-address form is pre-filled with the customer's *default* address
+        // and addData() would otherwise clobber the chosen one.
         $customerAddress = null;
         if ($customerAddressId && $quote->getCustomerId()) {
             $customerAddress = $quote->getCustomer()->getAddressItemById($customerAddressId);
         }
 
-        // Save to billing address
         $billingAddress = $quote->getBillingAddress();
         if ($customerAddress) {
             $billingAddress->importCustomerAddress($customerAddress)->setSaveInAddressBook(0);
+        } else {
+            $billingAddress->addData($data);
         }
-        $billingAddress->addData($data);
         $billingAddress->implodeStreetAddress();
 
-        // If using billing for shipping, also set shipping address
+        // `billing[use_for_shipping]` lives outside the hidden form and is always posted.
         $useForShipping = $data['use_for_shipping'] ?? 1;
         if ($useForShipping && !$quote->isVirtual()) {
             $shippingAddress = $quote->getShippingAddress();
-
             if ($customerAddress) {
                 $shippingAddress->importCustomerAddress($customerAddress)->setSaveInAddressBook(0);
+            } else {
+                $shippingData = $data;
+                unset($shippingData['address_id']);
+                $shippingAddress->addData($shippingData);
             }
-
-            // Remove fields that should not be copied to shipping address
-            // address_id is the quote address entity ID - copying it would overwrite the shipping address identity
-            $shippingData = $data;
-            unset($shippingData['address_id']);
-
             $shippingAddress->setSameAsBilling(1)
-                ->addData($shippingData)
                 ->implodeStreetAddress()
                 ->setCollectShippingRates(true);
         }
