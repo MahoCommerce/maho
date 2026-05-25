@@ -18163,7 +18163,7 @@ parameters:
 			rawMessage: 'Parameter #2 $arguments of static method Mage::getResourceModel() expects array, string given.'
 			identifier: argument.type
 			count: 1
-			path: app/code/core/Mage/Tax/sql/tax_setup/install-1.6.0.0.php
+			path: app/code/core/Mage/Tax/data/tax_setup/data-install-1.6.0.0.php
 
 		-
 			rawMessage: 'Method Mage_Usa_Helper_Data::getMeasureDimensionName() has parameter $key with no type specified.'
