@@ -13,6 +13,7 @@ namespace MahoCLI\Commands;
 
 use Mage;
 use Mage_Core_Model_Resource_Setup;
+use Maho\Db\Schema\Applier;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -40,8 +41,26 @@ class Migrate extends BaseMahoCommand
             Mage::app()->cleanCache();
             $output->writeln('✓ Cleaned cache');
 
+            /** @var \Maho\Db\Adapter\AdapterInterface $adapter */
+            $adapter = Mage::getSingleton('core/resource')->getConnection('core_setup');
+            $result = Applier::applyAll($adapter->getConnection());
+            if ($result['contributors'] === []) {
+                $output->writeln('✓ Applied declarative schema (no modules declare etc/db_schema.php)');
+            } elseif ($result['executed'] === []) {
+                $output->writeln(sprintf(
+                    '✓ Applied declarative schema (%d module(s), already up to date)',
+                    count($result['contributors']),
+                ));
+            } else {
+                $output->writeln(sprintf(
+                    '✓ Applied declarative schema (%d module(s), %d statement(s) executed)',
+                    count($result['contributors']),
+                    count($result['executed']),
+                ));
+            }
+
             Mage_Core_Model_Resource_Setup::applyAllUpdates();
-            $output->writeln('✓ Applied schema updates');
+            $output->writeln('✓ Applied legacy schema/data updates');
 
             Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
             $output->writeln('✓ Applied data updates');

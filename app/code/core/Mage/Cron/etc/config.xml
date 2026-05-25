@@ -16,13 +16,6 @@
         </Mage_Cron>
     </modules>
     <global>
-        <resources>
-            <cron_setup>
-                <setup>
-                    <module>Mage_Cron</module>
-                </setup>
-            </cron_setup>
-        </resources>
         <models>
             <cron>
                 <class>Mage_Cron_Model</class>
