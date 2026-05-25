@@ -35,11 +35,7 @@ final class Applier
         $tablesToCreate = [];
         $tablesToAlter = [];
         foreach ($target->getTables() as $targetTable) {
-            // Use getName() (deprecated) instead of getObjectName()->toString():
-            // DBAL 4.x's Schema::renameTable() updates the legacy _name field but
-            // does not refresh the new parsed-identifier API, so the two diverge
-            // after a rename. getName() is the source of truth post-rename.
-            $name = $targetTable->getName();
+            $name = $targetTable->getObjectName()->toString();
             if ($schemaManager->tablesExist([$name])) {
                 $existingTables[] = $schemaManager->introspectTableByUnquotedName($name);
                 $tablesToAlter[] = $targetTable;
@@ -104,8 +100,7 @@ final class Applier
      */
     public static function applyAll(Connection $connection, bool $allowDestructive = false): array
     {
-        $target = new Schema();
-        $contributors = Collector::collect($target);
+        [$target, $contributors] = Collector::collect();
         if ($contributors === []) {
             return ['contributors' => [], 'executed' => []];
         }
@@ -119,9 +114,8 @@ final class Applier
             $destructive = self::destructiveStatements($sql);
             if ($destructive !== []) {
                 throw new RuntimeException(
-                    'Refusing to apply declarative schema with destructive statements. '
-                    . 'Run `./maho db:schema:upgrade --dry-run` to inspect, then either fix the schema '
-                    . "or pass --allow-destructive. Statements: \n  " . implode("\n  ", $destructive),
+                    "Refusing to apply declarative schema with destructive statements:\n  "
+                    . implode("\n  ", $destructive),
                 );
             }
         }

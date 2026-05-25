@@ -12,8 +12,10 @@ declare(strict_types=1);
 
 namespace Maho\Db\Schema;
 
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Name\UnqualifiedName;
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\Table;
 use Mage;
 use Maho;
 use RuntimeException;
@@ -22,15 +24,18 @@ final class Collector
 {
     /**
      * Walk every active module, load its sql/schema.php closure if present,
-     * and let each closure contribute tables to a shared Schema instance.
+     * and let each closure contribute tables to a shared Schema. Then apply
+     * the configured table_prefix and the default table options Maho's legacy
+     * adapter uses (charset/collation).
      *
      * Module load order respects depends_on, so a later module can
      * $schema->getTable('foo') on a table defined by an earlier one.
      *
-     * @return list<string> names of modules that contributed a schema
+     * @return array{0: Schema, 1: list<string>} the final target schema, and the names of modules that contributed
      */
-    public static function collect(Schema $schema): array
+    public static function collect(): array
     {
+        $schema = new Schema();
         $contributors = [];
         $modules = Mage::getConfig()->getNode('modules')->children();
         foreach ($modules as $modName => $module) {
@@ -55,20 +60,10 @@ final class Collector
             $contributors[] = (string) $modName;
         }
 
-        self::applyTablePrefix($schema);
+        $schema = self::applyTablePrefix($schema);
         self::applyTableDefaults($schema);
 
-        return $contributors;
-    }
-
-    /**
-     * Convenience: build a target Schema from all module contributions.
-     */
-    public static function buildTargetSchema(): Schema
-    {
-        $schema = new Schema();
-        self::collect($schema);
-        return $schema;
+        return [$schema, $contributors];
     }
 
     /**
@@ -93,65 +88,67 @@ final class Collector
 
     /**
      * Schema authors declare table names without the configured table_prefix
-     * (matching the convention M2's db_schema.xml uses). After all closures
-     * have populated the schema, rewrite every table name and every foreign
-     * key reference to include the prefix.
+     * (matching the convention M2's db_schema.xml uses).
+     *
+     * DBAL 4.x's Schema::renameTable only updates the legacy _name field and
+     * leaves the parsed-identifier API stale, so we can't mutate in place
+     * without depending on deprecated accessors. Instead we rebuild a fresh
+     * Schema with prefixed Tables and ForeignKeyConstraints, reusing the
+     * original columns / indexes / primary keys / options as-is.
      */
-    private static function applyTablePrefix(Schema $schema): void
+    private static function applyTablePrefix(Schema $schema): Schema
     {
         $prefix = (string) Mage::getConfig()->getTablePrefix();
         if ($prefix === '') {
-            return;
+            return $schema;
         }
 
-        $oldNames = [];
-        foreach ($schema->getTables() as $table) {
-            $oldNames[] = $table->getName();
-        }
+        $newTables = [];
+        foreach ($schema->getTables() as $old) {
+            $oldName = $old->getObjectName()->toString();
 
-        // Capture each table's foreign-key config before renaming, since
-        // dropForeignKey + addForeignKeyConstraint is the only way to mutate
-        // the referenced-table name on an existing constraint.
-        $fkPlan = [];
-        foreach ($schema->getTables() as $table) {
-            $tableName = $table->getName();
-            foreach ($table->getForeignKeys() as $fk) {
-                $fkPlan[] = [
-                    'table' => $tableName,
-                    'fkName' => $fk->getObjectName()?->toString(),
-                    'foreignTable' => $fk->getReferencedTableName()->toString(),
-                    'localColumns' => array_map(
+            $newFks = [];
+            foreach ($old->getForeignKeys() as $fk) {
+                $newFks[] = new ForeignKeyConstraint(
+                    array_map(
                         static fn (UnqualifiedName $n) => $n->toString(),
                         $fk->getReferencingColumnNames(),
                     ),
-                    'foreignColumns' => array_map(
+                    $prefix . $fk->getReferencedTableName()->toString(),
+                    array_map(
                         static fn (UnqualifiedName $n) => $n->toString(),
                         $fk->getReferencedColumnNames(),
                     ),
-                    'options' => [
+                    $fk->getObjectName()?->toString() ?? '',
+                    [
                         'onUpdate' => $fk->getOnUpdateAction()->value,
                         'onDelete' => $fk->getOnDeleteAction()->value,
                     ],
-                ];
+                );
             }
-        }
 
-        foreach ($oldNames as $oldName) {
-            $schema->renameTable($oldName, $prefix . $oldName);
-        }
-
-        foreach ($fkPlan as $entry) {
-            $table = $schema->getTable($prefix . $entry['table']);
-            if ($entry['fkName'] !== null) {
-                $table->dropForeignKey($entry['fkName']);
-            }
-            $table->addForeignKeyConstraint(
-                $prefix . $entry['foreignTable'],
-                $entry['localColumns'],
-                $entry['foreignColumns'],
-                $entry['options'],
-                $entry['fkName'],
+            // PrimaryKeyConstraint is rebuilt automatically by Table::_addIndex
+            // when it encounters a primary index in the $indexes array, so we
+            // pass null to avoid the constructor adding it a second time.
+            $newTable = new Table(
+                $prefix . $oldName,
+                $old->getColumns(),
+                $old->getIndexes(),
+                $old->getUniqueConstraints(),
+                $newFks,
+                $old->getOptions(),
+                null,
+                null,
             );
+
+            $comment = $old->getComment();
+            if ($comment !== null && $comment !== '') {
+                $newTable->setComment($comment);
+            }
+
+            $newTables[] = $newTable;
         }
+
+        return new Schema($newTables);
     }
 }
