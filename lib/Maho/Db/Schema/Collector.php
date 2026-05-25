@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace Maho\Db\Schema;
 
+use Doctrine\DBAL\Schema\Name\UnqualifiedName;
 use Doctrine\DBAL\Schema\Schema;
 use Mage;
 use Maho;
@@ -54,6 +55,8 @@ final class Collector
             $contributors[] = (string) $modName;
         }
 
+        self::applyTablePrefix($schema);
+
         return $contributors;
     }
 
@@ -65,5 +68,69 @@ final class Collector
         $schema = new Schema();
         self::collect($schema);
         return $schema;
+    }
+
+    /**
+     * Schema authors declare table names without the configured table_prefix
+     * (matching the convention M2's db_schema.xml uses). After all closures
+     * have populated the schema, rewrite every table name and every foreign
+     * key reference to include the prefix.
+     */
+    private static function applyTablePrefix(Schema $schema): void
+    {
+        $prefix = (string) Mage::getConfig()->getTablePrefix();
+        if ($prefix === '') {
+            return;
+        }
+
+        $oldNames = [];
+        foreach ($schema->getTables() as $table) {
+            $oldNames[] = $table->getObjectName()->toString();
+        }
+
+        // Capture each table's foreign-key config before renaming, since
+        // dropForeignKey + addForeignKeyConstraint is the only way to mutate
+        // the referenced-table name on an existing constraint.
+        $fkPlan = [];
+        foreach ($schema->getTables() as $table) {
+            $tableName = $table->getObjectName()->toString();
+            foreach ($table->getForeignKeys() as $fk) {
+                $fkPlan[] = [
+                    'table' => $tableName,
+                    'fkName' => $fk->getObjectName()?->toString(),
+                    'foreignTable' => $fk->getReferencedTableName()->toString(),
+                    'localColumns' => array_map(
+                        static fn (UnqualifiedName $n) => $n->toString(),
+                        $fk->getReferencingColumnNames(),
+                    ),
+                    'foreignColumns' => array_map(
+                        static fn (UnqualifiedName $n) => $n->toString(),
+                        $fk->getReferencedColumnNames(),
+                    ),
+                    'options' => [
+                        'onUpdate' => $fk->getOnUpdateAction()->value,
+                        'onDelete' => $fk->getOnDeleteAction()->value,
+                    ],
+                ];
+            }
+        }
+
+        foreach ($oldNames as $oldName) {
+            $schema->renameTable($oldName, $prefix . $oldName);
+        }
+
+        foreach ($fkPlan as $entry) {
+            $table = $schema->getTable($prefix . $entry['table']);
+            if ($entry['fkName'] !== null) {
+                $table->dropForeignKey($entry['fkName']);
+            }
+            $table->addForeignKeyConstraint(
+                $prefix . $entry['foreignTable'],
+                $entry['localColumns'],
+                $entry['foreignColumns'],
+                $entry['options'],
+                $entry['fkName'],
+            );
+        }
     }
 }
