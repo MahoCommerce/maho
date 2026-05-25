@@ -442,8 +442,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         $customerAddress = null;
         if ($customerAddressId) {
             $candidate = Mage::getModel('customer/address')->load($customerAddressId);
-            if ($candidate->getId() && (int) $candidate->getCustomerId() === (int) $quote->getCustomerId()
-            ) {
+            if ($candidate->getId() && (int) $candidate->getCustomerId() === (int) $quote->getCustomerId()) {
                 $customerAddress = $candidate;
             }
         }
