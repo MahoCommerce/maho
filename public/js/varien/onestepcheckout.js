@@ -93,7 +93,7 @@ class OneStepCheckout {
             this.saveBilling();
         }
 
-        // saveBilling only posts the billing payload — for a separate
+        // saveBilling only posts the billing payload. For a separate
         // shipping address, seed the shipping side too so rates load on
         // initial render instead of waiting for the customer to touch it.
         const useForShippingNo = document.getElementById('billing:use_for_shipping_no');
@@ -225,7 +225,7 @@ class OneStepCheckout {
 
         // Only require a region when the country actually demands one.
         // RegionUpdater toggles `required-entry` on the region field per the
-        // directory/general/region/state_required config — countries like DE
+        // directory/general/region/state_required config: countries like DE
         // have regions in the table but are not state-required, so options
         // alone aren't a reliable signal.
         const regionSelect = document.getElementById(`${prefix}:region_id`);
