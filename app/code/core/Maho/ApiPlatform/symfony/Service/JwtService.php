@@ -330,9 +330,13 @@ class JwtService
      */
     public function getIssuer(): string
     {
-        $base = (string) \Mage::getStoreConfig('web/secure/base_url');
+        // Pin issuer to the default-store base URL so issuance and verification
+        // produce the same iss regardless of which store the verifying request
+        // resolves to in multi-store installs (fix a16e02812).
+        $storeId = \Maho\ApiPlatform\Service\StoreContext::getDefaultStoreId();
+        $base = (string) \Mage::getStoreConfig('web/secure/base_url', $storeId);
         if ($base === '') {
-            $base = (string) \Mage::getStoreConfig('web/unsecure/base_url');
+            $base = (string) \Mage::getStoreConfig('web/unsecure/base_url', $storeId);
         }
         return rtrim($base, '/') . '/';
     }
