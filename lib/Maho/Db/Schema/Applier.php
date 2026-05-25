@@ -35,7 +35,11 @@ final class Applier
         $tablesToCreate = [];
         $tablesToAlter = [];
         foreach ($target->getTables() as $targetTable) {
-            $name = $targetTable->getObjectName()->toString();
+            // Use getName() (deprecated) instead of getObjectName()->toString():
+            // DBAL 4.x's Schema::renameTable() updates the legacy _name field but
+            // does not refresh the new parsed-identifier API, so the two diverge
+            // after a rename. getName() is the source of truth post-rename.
+            $name = $targetTable->getName();
             if ($schemaManager->tablesExist([$name])) {
                 $existingTables[] = $schemaManager->introspectTableByUnquotedName($name);
                 $tablesToAlter[] = $targetTable;

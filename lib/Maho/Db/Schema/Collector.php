@@ -56,6 +56,7 @@ final class Collector
         }
 
         self::applyTablePrefix($schema);
+        self::applyTableDefaults($schema);
 
         return $contributors;
     }
@@ -68,6 +69,26 @@ final class Collector
         $schema = new Schema();
         self::collect($schema);
         return $schema;
+    }
+
+    /**
+     * Apply the same table-level charset/collation Maho's legacy adapter emits
+     * (Maho\Db\Ddl\Table::$_options defaults to charset=utf8, collate=utf8_general_ci).
+     * Without this, MySQL refuses foreign keys between a declarative table
+     * (database-default charset, often utf8mb4) and a legacy table (utf8).
+     *
+     * Authors may still override per table via $table->addOption('charset', ...).
+     */
+    private static function applyTableDefaults(Schema $schema): void
+    {
+        foreach ($schema->getTables() as $table) {
+            if (!$table->hasOption('charset')) {
+                $table->addOption('charset', 'utf8');
+            }
+            if (!$table->hasOption('collation')) {
+                $table->addOption('collation', 'utf8_general_ci');
+            }
+        }
     }
 
     /**
@@ -85,7 +106,7 @@ final class Collector
 
         $oldNames = [];
         foreach ($schema->getTables() as $table) {
-            $oldNames[] = $table->getObjectName()->toString();
+            $oldNames[] = $table->getName();
         }
 
         // Capture each table's foreign-key config before renaming, since
@@ -93,7 +114,7 @@ final class Collector
         // the referenced-table name on an existing constraint.
         $fkPlan = [];
         foreach ($schema->getTables() as $table) {
-            $tableName = $table->getObjectName()->toString();
+            $tableName = $table->getName();
             foreach ($table->getForeignKeys() as $fk) {
                 $fkPlan[] = [
                     'table' => $tableName,
