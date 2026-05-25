@@ -181,7 +181,7 @@ return function (Schema $schema): void {
     $urlRewrite->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_url_rewrite_store');
     $urlRewrite->setComment('Url Rewrites');
 
-    $designChange = $schema->createTable('core_design_change');
+    $designChange = $schema->createTable('design_change');
     $designChange->addColumn('design_change_id', Types::INTEGER,  ['autoincrement' => true]);
     $designChange->addColumn('store_id',         Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $designChange->addColumn('design',           Types::STRING,   ['length' => 255, 'notnull' => false]);
@@ -190,8 +190,8 @@ return function (Schema $schema): void {
     $designChange->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('design_change_id')->create(),
     );
-    $designChange->addIndex(['store_id'], 'idx_core_design_change_store_id');
-    $designChange->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_design_change_store');
+    $designChange->addIndex(['store_id'], 'idx_design_change_store_id');
+    $designChange->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_design_change_store');
     $designChange->setComment('Design Changes');
 
     $variable = $schema->createTable('core_variable');
@@ -279,7 +279,7 @@ return function (Schema $schema): void {
     $emailQueue->addIndex(['entity_id', 'entity_type', 'event_type', 'message_body_hash'], 'idx_core_email_queue_entity_type_event_hash');
     $emailQueue->setComment('Email Queue');
 
-    $emailRecipients = $schema->createTable('core_email_recipients');
+    $emailRecipients = $schema->createTable('core_email_queue_recipients');
     $emailRecipients->addColumn('recipient_id',    Types::INTEGER,  ['unsigned' => true, 'autoincrement' => true]);
     $emailRecipients->addColumn('message_id',      Types::INTEGER,  ['unsigned' => true]);
     $emailRecipients->addColumn('recipient_email', Types::STRING,   ['length' => 128]);
@@ -288,10 +288,10 @@ return function (Schema $schema): void {
     $emailRecipients->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('recipient_id')->create(),
     );
-    $emailRecipients->addIndex(['recipient_email'], 'idx_core_email_recipients_email');
-    $emailRecipients->addIndex(['email_type'],      'idx_core_email_recipients_email_type');
-    $emailRecipients->addUniqueIndex(['message_id', 'recipient_email', 'email_type'], 'unq_core_email_recipients_message_email_type');
-    $emailRecipients->addForeignKeyConstraint('core_email_queue', ['message_id'], ['message_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_email_recipients_queue');
+    $emailRecipients->addIndex(['recipient_email'], 'idx_core_email_queue_recipients_email');
+    $emailRecipients->addIndex(['email_type'],      'idx_core_email_queue_recipients_email_type');
+    $emailRecipients->addUniqueIndex(['message_id', 'recipient_email', 'email_type'], 'unq_core_email_queue_recipients_message_email_type');
+    $emailRecipients->addForeignKeyConstraint('core_email_queue', ['message_id'], ['message_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_email_queue_recipients_queue');
     $emailRecipients->setComment('Email Queue');
 
     // Table added by maho-26.2.2.php
