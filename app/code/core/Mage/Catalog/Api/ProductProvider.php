@@ -228,7 +228,13 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // (and in the test runner) singletons retain state across requests,
         // so the previous request's category/query would leak into this one.
         if (!empty($search)) {
-            \Mage::helper('catalogsearch')->getQuery()->setQueryText($search);
+            // Fulltext prepareResult() reads the term from the catalogsearch
+            // helper's getQueryText() (request 'q'); feed it in and reset the
+            // FPM-persisted helper so a prior request's term can't leak in.
+            \Mage::unregister('_helper/catalogsearch');
+            $searchHelper = \Mage::helper('catalogsearch');
+            \Mage::app()->getRequest()->setParam($searchHelper->getQueryParamName(), $search);
+            $searchHelper->getQuery()->setStoreId((int) \Mage::app()->getStore()->getId());
             $layer = \Mage::getModel('catalogsearch/layer');
         } else {
             $layer = \Mage::getModel('catalog/layer');
