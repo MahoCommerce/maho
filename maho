@@ -43,7 +43,6 @@ $application->addCommand(new \MahoCLI\Commands\CustomerList());
 
 $application->addCommand(new \MahoCLI\Commands\DBConnect());
 $application->addCommand(new \MahoCLI\Commands\DBQuery());
-$application->addCommand(new \MahoCLI\Commands\DBSchemaUpgrade());
 
 $application->addCommand(new \MahoCLI\Commands\EmailConfigShow());
 $application->addCommand(new \MahoCLI\Commands\EmailQueueClear());
