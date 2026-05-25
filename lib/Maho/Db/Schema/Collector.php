@@ -20,7 +20,7 @@ use RuntimeException;
 final class Collector
 {
     /**
-     * Walk every active module, load its etc/db_schema.php closure if present,
+     * Walk every active module, load its sql/schema.php closure if present,
      * and let each closure contribute tables to a shared Schema instance.
      *
      * Module load order respects depends_on, so a later module can
@@ -37,8 +37,8 @@ final class Collector
                 continue;
             }
 
-            $etcDir = Mage::getConfig()->getModuleDir('etc', (string) $modName);
-            $file = Maho::findFile("$etcDir/db_schema.php");
+            $sqlDir = Mage::getConfig()->getModuleDir('sql', (string) $modName);
+            $file = Maho::findFile("$sqlDir/schema.php");
             if ($file === false) {
                 continue;
             }
