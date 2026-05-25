@@ -111,9 +111,10 @@ return function (Schema $schema): void {
         $aggr->addPrimaryKeyConstraint(
             PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create(),
         );
-        $aggr->addUniqueIndex(['period', 'store_id', 'code', 'percent', 'order_status'], "unq_{$tableName}_period_store_code_percent_status");
-        $aggr->addIndex(['store_id'], "idx_{$tableName}_store_id");
-        $aggr->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$tableName}_store");
+        $shortName = str_replace('tax_order_aggregated_', 'tax_aggr_', $tableName);
+        $aggr->addUniqueIndex(['period', 'store_id', 'code', 'percent', 'order_status'], "unq_{$shortName}_period_store_code_percent_status");
+        $aggr->addIndex(['store_id'], "idx_{$shortName}_store_id");
+        $aggr->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$shortName}_store");
         $aggr->setComment('Tax Order Aggregation');
     }
 
@@ -130,7 +131,8 @@ return function (Schema $schema): void {
     $taxItem->addIndex(['tax_id'], 'idx_sales_order_tax_item_tax_id');
     $taxItem->addIndex(['item_id'], 'idx_sales_order_tax_item_item_id');
     $taxItem->addUniqueIndex(['tax_id', 'item_id'], 'unq_sales_order_tax_item_tax_item');
-    $taxItem->addForeignKeyConstraint('sales_order_tax', ['tax_id'], ['tax_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_order_tax_item_tax');
-    $taxItem->addForeignKeyConstraint('sales_flat_order_item', ['item_id'], ['item_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_order_tax_item_order_item');
+    // FKs to sales_order_tax and sales_flat_order_item will be reinstated when
+    // Mage_Sales is converted to declarative schema (both tables are still
+    // owned by its legacy install scripts).
     $taxItem->setComment('Sales Order Tax Item');
 };

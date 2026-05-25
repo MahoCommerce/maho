@@ -32,9 +32,9 @@ return function (Schema $schema): void {
     $tax->addIndex(['country'], 'idx_weee_tax_country');
     $tax->addIndex(['attribute_id'], 'idx_weee_tax_attribute_id');
     $tax->addForeignKeyConstraint('directory_country', ['country'], ['country_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_weee_tax_country_directory_country');
-    $tax->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_weee_tax_entity_catalog_product');
     $tax->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_weee_tax_website_core_website');
-    $tax->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_weee_tax_attribute_eav_attribute');
+    // FKs to catalog_product_entity and eav_attribute will be added when
+    // Mage_Catalog and Mage_Eav are converted to declarative schema.
     $tax->setComment('Weee Tax');
 
     $discount = $schema->createTable('weee_discount');
@@ -45,8 +45,8 @@ return function (Schema $schema): void {
     $discount->addIndex(['website_id'], 'idx_weee_discount_website_id');
     $discount->addIndex(['entity_id'], 'idx_weee_discount_entity_id');
     $discount->addIndex(['customer_group_id'], 'idx_weee_discount_customer_group_id');
-    $discount->addForeignKeyConstraint('customer_group', ['customer_group_id'], ['customer_group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_weee_discount_customer_group');
-    $discount->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_weee_discount_entity_catalog_product');
     $discount->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_weee_discount_website_core_website');
+    // FKs to customer_group and catalog_product_entity will be added when
+    // Mage_Customer and Mage_Catalog are converted to declarative schema.
     $discount->setComment('Weee Discount');
 };
