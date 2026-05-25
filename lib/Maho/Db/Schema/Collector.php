@@ -12,8 +12,7 @@ declare(strict_types=1);
 
 namespace Maho\Db\Schema;
 
-use Doctrine\DBAL\Schema\ForeignKeyConstraint;
-use Doctrine\DBAL\Schema\Name\UnqualifiedName;
+use Doctrine\DBAL\Schema\Name\OptionallyQualifiedName;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
 use Mage;
@@ -109,22 +108,11 @@ final class Collector
 
             $newFks = [];
             foreach ($old->getForeignKeys() as $fk) {
-                $newFks[] = new ForeignKeyConstraint(
-                    array_map(
-                        static fn (UnqualifiedName $n) => $n->toString(),
-                        $fk->getReferencingColumnNames(),
-                    ),
-                    $prefix . $fk->getReferencedTableName()->toString(),
-                    array_map(
-                        static fn (UnqualifiedName $n) => $n->toString(),
-                        $fk->getReferencedColumnNames(),
-                    ),
-                    $fk->getObjectName()?->toString() ?? '',
-                    [
-                        'onUpdate' => $fk->getOnUpdateAction()->value,
-                        'onDelete' => $fk->getOnDeleteAction()->value,
-                    ],
-                );
+                $newFks[] = $fk->edit()
+                    ->setReferencedTableName(
+                        OptionallyQualifiedName::unquoted($prefix . $fk->getReferencedTableName()->toString()),
+                    )
+                    ->create();
             }
 
             // PrimaryKeyConstraint is rebuilt automatically by Table::_addIndex
@@ -137,8 +125,6 @@ final class Collector
                 $old->getUniqueConstraints(),
                 $newFks,
                 $old->getOptions(),
-                null,
-                null,
             );
 
             $comment = $old->getComment();
