@@ -438,13 +438,12 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
 
         // With an address-book selection the billing[*] payload is empty (the
         // new-address form is hidden). Resolve the customer address by id;
-        // posted fields layer on top below via addData().
+        // posted fields layer on top below via addData(). Lookup goes through
+        // the customer's own address collection (filtered by parent_id at the
+        // SQL layer), so a foreign id is never loaded into memory.
         $customerAddress = null;
-        if ($customerAddressId) {
-            $candidate = Mage::getModel('customer/address')->load($customerAddressId);
-            if ($candidate->getId() && (int) $candidate->getCustomerId() === (int) $quote->getCustomerId()) {
-                $customerAddress = $candidate;
-            }
+        if ($customerAddressId && $quote->getCustomerId()) {
+            $customerAddress = $quote->getCustomer()->getAddressItemById($customerAddressId);
         }
 
         // Save to billing address
