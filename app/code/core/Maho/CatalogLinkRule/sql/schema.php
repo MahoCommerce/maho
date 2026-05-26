@@ -1,0 +1,39 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package    Maho_CatalogLinkRule
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+declare(strict_types=1);
+
+use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
+use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Types\Types;
+
+return function (Schema $schema): void {
+    $rule = $schema->createTable('catalog_product_link_rule');
+    $rule->addColumn('rule_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
+    $rule->addColumn('name', Types::STRING, ['length' => 255]);
+    $rule->addColumn('description', Types::TEXT, ['length' => 65535, 'notnull' => false]);
+    $rule->addColumn('link_type_id', Types::SMALLINT, ['unsigned' => true]);
+    $rule->addColumn('is_active', Types::SMALLINT, ['default' => 0]);
+    $rule->addColumn('priority', Types::INTEGER, ['default' => 0]);
+    $rule->addColumn('sort_order', Types::STRING, ['length' => 50, 'default' => 'random']);
+    $rule->addColumn('max_links', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
+    $rule->addColumn('from_date', Types::DATE_MUTABLE, ['notnull' => false]);
+    $rule->addColumn('to_date', Types::DATE_MUTABLE, ['notnull' => false]);
+    $rule->addColumn('source_conditions_serialized', Types::TEXT, ['length' => 65535, 'notnull' => false]);
+    $rule->addColumn('target_conditions_serialized', Types::TEXT, ['length' => 65535, 'notnull' => false]);
+    $rule->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    // updated_at originally had ON UPDATE CURRENT_TIMESTAMP; dropped by maho-26.5.0 (issue #856).
+    $rule->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $rule->addPrimaryKeyConstraint(
+        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create(),
+    );
+    $rule->addIndex(['is_active', 'priority', 'link_type_id'], 'idx_catalog_product_link_rule_is_active_priority_link_type_id');
+    $rule->setComment('Catalog Product Link Rules');
+};

@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package    Maho_ContentVersion
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+declare(strict_types=1);
+
+use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
+use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Types\Types;
+
+return function (Schema $schema): void {
+    $version = $schema->createTable('content_version');
+    $version->addColumn('version_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
+    $version->addColumn('entity_type', Types::STRING, ['length' => 50]);
+    $version->addColumn('entity_id', Types::INTEGER, ['unsigned' => true]);
+    $version->addColumn('version_number', Types::INTEGER, ['unsigned' => true]);
+    $version->addColumn('content_data', Types::TEXT, ['length' => 16777215]);
+    $version->addColumn('editor', Types::STRING, ['length' => 100, 'notnull' => false]);
+    $version->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $version->addPrimaryKeyConstraint(
+        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('version_id')->create(),
+    );
+    $version->addUniqueIndex(
+        ['entity_type', 'entity_id', 'version_number'],
+        'unq_content_version_entity_type_entity_id_version_number',
+    );
+    $version->addIndex(['entity_type', 'entity_id'], 'idx_content_version_entity_type_entity_id');
+    $version->addIndex(['created_at'], 'idx_content_version_created_at');
+    $version->setComment('Content Version History');
+};
