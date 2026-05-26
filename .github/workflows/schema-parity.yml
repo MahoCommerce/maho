@@ -179,13 +179,37 @@ jobs:
                       } elseif (in_array($r['data_type'], ['numeric', 'decimal'], true) && $r['numeric_precision']) {
                           $type .= "({$r['numeric_precision']},{$r['numeric_scale']})";
                       }
+                      $default = $r['column_default'];
+                      $isIdentity = $r['is_identity'] === 'YES';
+                      // Treat SERIAL (nextval-based) defaults as IDENTITY: both encode
+                      // "autoincrement column", and the legacy install uses SERIAL
+                      // while the declarative schema uses GENERATED ... AS IDENTITY.
+                      if ($default !== null && preg_match("/^nextval\\('[^']+_seq'(::regclass)?\\)$/", $default)) {
+                          $default = null;
+                          $isIdentity = true;
+                      }
+                      // Strip postgres-style ::type casts from default literals.
+                      // Legacy install often emits "'0'::smallint" or "NULL::character varying";
+                      // declarative emits "0" or "NULL". Same value, different render.
+                      if ($default !== null) {
+                          $default = preg_replace("/::[a-zA-Z_ ]+(\\([^)]*\\))?/", '', $default);
+                          // Drop redundant quotes around numeric literals (e.g. "'0'" -> "0").
+                          if (preg_match("/^'(-?\\d+(?:\\.\\d+)?)'$/", $default, $m)) {
+                              $default = $m[1];
+                          }
+                      }
+                      // Treat a nullable column with DEFAULT NULL as having no default,
+                      // matching how Doctrine and most other engines render it.
+                      if ($r['is_nullable'] === 'YES' && $default === 'NULL') {
+                          $default = null;
+                      }
                       $out[] = sprintf(
                           '  COLUMN %s %s %s%s%s',
                           $r['column_name'],
                           $type,
                           $r['is_nullable'] === 'YES' ? 'NULL' : 'NOT NULL',
-                          $r['column_default'] !== null ? ' DEFAULT ' . $r['column_default'] : '',
-                          $r['is_identity'] === 'YES' ? ' [IDENTITY]' : '',
+                          $default !== null ? ' DEFAULT ' . $default : '',
+                          $isIdentity ? ' [IDENTITY]' : '',
                       );
                   }
               } else {

@@ -78,7 +78,7 @@ return function (Schema $schema): void {
     $user->addColumn('is_active', Types::SMALLINT, ['default' => 1]);
     $user->addColumn('extra', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     // added by upgrade-1.6.0.0-1.6.1.0
-    $user->addColumn('rp_token', Types::TEXT, ['length' => 256, 'notnull' => false]);
+    $user->addColumn('rp_token', Types::STRING, ['length' => 256, 'notnull' => false]);
     $user->addColumn('rp_token_created_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     // added by upgrade-1.6.1.4-1.6.1.5 (backend locale)
     $user->addColumn('backend_locale', Types::STRING, ['length' => 8, 'notnull' => false]);
