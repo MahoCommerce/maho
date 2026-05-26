@@ -298,15 +298,15 @@ return function (Schema $schema): void {
     $emailLog = $schema->createTable('core_email_log');
     $emailLog->addColumn('log_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $emailLog->addColumn('subject', Types::STRING, ['length' => 255, 'default' => '']);
-    $emailLog->addColumn('email_to', Types::TEXT, ['notnull' => true]);
+    $emailLog->addColumn('email_to', Types::TEXT, ['length' => 65535, 'notnull' => true]);
     $emailLog->addColumn('email_from', Types::STRING, ['length' => 255, 'default' => '']);
-    $emailLog->addColumn('email_cc', Types::TEXT, ['notnull' => false]);
-    $emailLog->addColumn('email_bcc', Types::TEXT, ['notnull' => false]);
+    $emailLog->addColumn('email_cc', Types::TEXT, ['length' => 65535, 'notnull' => false]);
+    $emailLog->addColumn('email_bcc', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $emailLog->addColumn('template', Types::STRING, ['length' => 255, 'notnull' => false]);
     $emailLog->addColumn('content_type', Types::STRING, ['length' => 4, 'default' => 'html']);
     $emailLog->addColumn('email_body', Types::TEXT, ['length' => 16777215]);
     $emailLog->addColumn('status', Types::STRING, ['length' => 10, 'default' => 'sent']);
-    $emailLog->addColumn('error_message', Types::TEXT, ['notnull' => false]);
+    $emailLog->addColumn('error_message', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $emailLog->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
     $emailLog->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('log_id')->create(),
