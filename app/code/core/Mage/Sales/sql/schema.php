@@ -1414,6 +1414,8 @@ return function (Schema $schema): void {
     $orderStatus = $schema->createTable('sales_order_status');
     $orderStatus->addColumn('status', Types::STRING, ['length' => 32]);
     $orderStatus->addColumn('label', Types::STRING, ['length' => 128]);
+    // Added by Mage_Admin's maho-24.12.1.php (cross-module schema add).
+    $orderStatus->addColumn('color', Types::STRING, ['length' => 20, 'notnull' => false, 'comment' => 'Status Color']);
     $orderStatus->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('status')->create(),
     );
