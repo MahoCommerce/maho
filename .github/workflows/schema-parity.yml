@@ -377,18 +377,21 @@ jobs:
         run: php /tmp/normalize.php > /tmp/pr.txt
 
       - name: Reset DB
+        env:
+          DB_USER: ${{ matrix.db_user }}
+          DB_PASS: ${{ matrix.db_pass }}
         run: |
-          DB_CONTAINER=$(docker ps -q | head -n1)
-          case "${{ matrix.db_engine }}" in
-            mysql)
-              docker exec "$DB_CONTAINER" \
-                sh -c "mysql -uroot -proot -e 'DROP DATABASE maho; CREATE DATABASE maho;'"
-              ;;
-            pgsql)
-              docker exec "$DB_CONTAINER" \
-                sh -c "psql -U postgres -d postgres -c 'DROP DATABASE maho;' && psql -U postgres -d postgres -c 'CREATE DATABASE maho;'"
-              ;;
-          esac
+          php -r '
+            $engine = getenv("DB_ENGINE");
+            $user = getenv("DB_USER");
+            $pass = getenv("DB_PASS");
+            $dsn = $engine === "pgsql"
+              ? "pgsql:host=127.0.0.1;dbname=postgres"
+              : "mysql:host=127.0.0.1";
+            $pdo = new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+            $pdo->exec("DROP DATABASE IF EXISTS maho");
+            $pdo->exec("CREATE DATABASE maho");
+          '
 
       - name: Install dependencies (main)
         working-directory: _main
