@@ -271,9 +271,7 @@ Customer account address book
         <!-- Mage_Customer -->
         <update handle="customer_account"/>
         <reference name="my.account.wrapper">
-            <block type="customer/address_book" name="address_book" template="customer/address/book.phtml">
-                <block type="customer/address_book_item_remove" name="customer.address.book.item.remove" template="customer/address/book/item/remove.phtml"/>
-            </block>
+            <block type="customer/address_book" name="address_book" template="customer/address/book.phtml"/>
         </reference>
     </customer_address_index>
 
