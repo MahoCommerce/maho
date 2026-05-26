@@ -30,7 +30,7 @@ return function (Schema $schema): void {
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_sitemap_store',
     );
     $sitemap->setComment('Google Sitemap');

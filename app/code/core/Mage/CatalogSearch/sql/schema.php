@@ -39,7 +39,7 @@ return function (Schema $schema): void {
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_catalogsearch_query_store',
     );
     $query->setComment('Catalog search query table');
@@ -57,14 +57,14 @@ return function (Schema $schema): void {
         'catalogsearch_query',
         ['query_id'],
         ['query_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_catalogsearch_result_query',
     );
     $result->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_catalogsearch_result_product',
     );
     $result->setComment('Catalog search result table');

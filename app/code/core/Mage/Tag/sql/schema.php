@@ -63,28 +63,28 @@ return function (Schema $schema): void {
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_tag_relation_customer',
     );
     $relation->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_tag_relation_product',
     );
     $relation->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_tag_relation_store',
     );
     $relation->addForeignKeyConstraint(
         'tag',
         ['tag_id'],
         ['tag_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_tag_relation_tag',
     );
     $relation->setComment('Tag Relation');
@@ -107,14 +107,14 @@ return function (Schema $schema): void {
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_tag_summary_store',
     );
     $summary->addForeignKeyConstraint(
         'tag',
         ['tag_id'],
         ['tag_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_tag_summary_tag',
     );
     $summary->setComment('Tag Summary');
@@ -131,14 +131,14 @@ return function (Schema $schema): void {
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_tag_properties_store',
     );
     $properties->addForeignKeyConstraint(
         'tag',
         ['tag_id'],
         ['tag_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_tag_properties_tag',
     );
     $properties->setComment('Tag Properties');

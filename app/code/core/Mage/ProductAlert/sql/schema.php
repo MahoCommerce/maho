@@ -36,21 +36,21 @@ return function (Schema $schema): void {
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_product_alert_price_customer',
     );
     $price->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_product_alert_price_product',
     );
     $price->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_product_alert_price_website',
     );
     $price->setComment('Product Alert Price');
@@ -75,21 +75,21 @@ return function (Schema $schema): void {
         'core_website',
         ['website_id'],
         ['website_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_product_alert_stock_website',
     );
     $stock->addForeignKeyConstraint(
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_product_alert_stock_customer',
     );
     $stock->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_product_alert_stock_product',
     );
     $stock->setComment('Product Alert Stock');

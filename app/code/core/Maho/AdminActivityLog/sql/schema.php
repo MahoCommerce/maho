@@ -42,7 +42,7 @@ return function (Schema $schema): void {
         'admin_user',
         ['user_id'],
         ['user_id'],
-        ['onDelete' => 'SET NULL'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
         'fk_adminactivitylog_activity_user',
     );
     $activity->setComment('Admin Activity Log Table');
@@ -67,7 +67,7 @@ return function (Schema $schema): void {
         'admin_user',
         ['user_id'],
         ['user_id'],
-        ['onDelete' => 'SET NULL'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
         'fk_adminactivitylog_login_user',
     );
     $login->setComment('Admin Login Activity Log Table');

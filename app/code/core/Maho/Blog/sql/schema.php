@@ -43,7 +43,7 @@ return function (Schema $schema): void {
         'eav_entity_type',
         ['entity_type_id'],
         ['entity_type_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_post_entity_entity_type',
     );
     $post->setComment('Blog Post Entity Table');
@@ -66,21 +66,21 @@ return function (Schema $schema): void {
         'eav_attribute',
         ['attribute_id'],
         ['attribute_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_post_entity_datetime_attribute',
     );
     $postDatetime->addForeignKeyConstraint(
         'blog_post_entity',
         ['entity_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_post_entity_datetime_entity',
     );
     $postDatetime->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_post_entity_datetime_store',
     );
     $postDatetime->setComment('Blog Post Datetime Attribute Backend Table');
@@ -103,21 +103,21 @@ return function (Schema $schema): void {
         'eav_attribute',
         ['attribute_id'],
         ['attribute_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_post_entity_int_attribute',
     );
     $postInt->addForeignKeyConstraint(
         'blog_post_entity',
         ['entity_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_post_entity_int_entity',
     );
     $postInt->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_post_entity_int_store',
     );
     $postInt->setComment('Blog Post Integer Attribute Backend Table');
@@ -140,21 +140,21 @@ return function (Schema $schema): void {
         'eav_attribute',
         ['attribute_id'],
         ['attribute_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_post_entity_text_attribute',
     );
     $postText->addForeignKeyConstraint(
         'blog_post_entity',
         ['entity_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_post_entity_text_entity',
     );
     $postText->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_post_entity_text_store',
     );
     $postText->setComment('Blog Post Text Attribute Backend Table');
@@ -177,21 +177,21 @@ return function (Schema $schema): void {
         'eav_attribute',
         ['attribute_id'],
         ['attribute_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_post_entity_varchar_attribute',
     );
     $postVarchar->addForeignKeyConstraint(
         'blog_post_entity',
         ['entity_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_post_entity_varchar_entity',
     );
     $postVarchar->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_post_entity_varchar_store',
     );
     $postVarchar->setComment('Blog Post Varchar Attribute Backend Table');
@@ -207,14 +207,14 @@ return function (Schema $schema): void {
         'blog_post_entity',
         ['post_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_post_store_post',
     );
     $postStore->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_post_store_store',
     );
     $postStore->setComment('Blog Post To Store Linkage Table');
@@ -231,7 +231,7 @@ return function (Schema $schema): void {
         'eav_attribute',
         ['attribute_id'],
         ['attribute_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_eav_attribute_attribute',
     );
     $eavAttribute->setComment('Blog EAV Attribute Table');
@@ -268,7 +268,7 @@ return function (Schema $schema): void {
         'eav_entity_type',
         ['entity_type_id'],
         ['entity_type_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_category_entity_entity_type',
     );
     $category->setComment('Blog Category Entity Table');
@@ -284,14 +284,14 @@ return function (Schema $schema): void {
         'blog_category_entity',
         ['category_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_category_store_category',
     );
     $categoryStore->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_category_store_store',
     );
     $categoryStore->setComment('Blog Category To Store Linkage Table');
@@ -308,14 +308,14 @@ return function (Schema $schema): void {
         'blog_post_entity',
         ['post_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_post_category_post',
     );
     $postCategory->addForeignKeyConstraint(
         'blog_category_entity',
         ['category_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_blog_post_category_category',
     );
     $postCategory->setComment('Blog Post To Category Linkage Table');

@@ -35,14 +35,14 @@ return function (Schema $schema): void {
         'admin_user',
         ['admin_id'],
         ['user_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_api2_acl_user_admin',
     );
     $user->addForeignKeyConstraint(
         'api2_acl_role',
         ['role_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_api2_acl_user_role',
     );
     $user->setComment('Api2 Global ACL Users');
@@ -60,7 +60,7 @@ return function (Schema $schema): void {
         'api2_acl_role',
         ['role_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_api2_acl_rule_role',
     );
     $rule->setComment('Api2 Global ACL Rules');

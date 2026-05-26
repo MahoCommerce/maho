@@ -39,14 +39,14 @@ return function (Schema $schema): void {
         'cms_block',
         ['block_id'],
         ['block_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_cms_block_store_block',
     );
     $blockStore->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_cms_block_store_store',
     );
     $blockStore->setComment('CMS Block To Store Linkage Table');
@@ -89,14 +89,14 @@ return function (Schema $schema): void {
         'cms_page',
         ['page_id'],
         ['page_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_cms_page_store_page',
     );
     $pageStore->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_cms_page_store_store',
     );
     $pageStore->setComment('CMS Page To Store Linkage Table');

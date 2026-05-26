@@ -56,7 +56,7 @@ return function (Schema $schema): void {
         'admin_role',
         ['role_id'],
         ['role_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_admin_rule_role',
     );
     $rule->setComment('Admin Rule Table');

@@ -29,7 +29,7 @@ return function (Schema $schema): void {
         'catalog_product_entity',
         ['parent_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_catalog_product_bundle_option_parent',
     );
     $option->setComment('Catalog Product Bundle Option');
@@ -47,7 +47,7 @@ return function (Schema $schema): void {
         'catalog_product_bundle_option',
         ['option_id'],
         ['option_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_catalog_product_bundle_option_value_option',
     );
     $optionValue->setComment('Catalog Product Bundle Option Value');
@@ -72,14 +72,14 @@ return function (Schema $schema): void {
         'catalog_product_bundle_option',
         ['option_id'],
         ['option_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_catalog_product_bundle_selection_option',
     );
     $selection->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_catalog_product_bundle_selection_product',
     );
     $selection->setComment('Catalog Product Bundle Selection');
@@ -97,14 +97,14 @@ return function (Schema $schema): void {
         'core_website',
         ['website_id'],
         ['website_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_catalog_product_bundle_selection_price_website',
     );
     $selectionPrice->addForeignKeyConstraint(
         'catalog_product_bundle_selection',
         ['selection_id'],
         ['selection_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_catalog_product_bundle_selection_price_selection',
     );
     $selectionPrice->setComment('Catalog Product Bundle Selection Price');
@@ -124,21 +124,21 @@ return function (Schema $schema): void {
         'customer_group',
         ['customer_group_id'],
         ['customer_group_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_catalog_product_bundle_price_index_customer_group',
     );
     $priceIndex->addForeignKeyConstraint(
         'catalog_product_entity',
         ['entity_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_catalog_product_bundle_price_index_entity',
     );
     $priceIndex->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_catalog_product_bundle_price_index_website',
     );
     $priceIndex->setComment('Catalog Product Bundle Price Index');

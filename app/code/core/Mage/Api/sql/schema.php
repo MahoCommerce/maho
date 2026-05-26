@@ -56,7 +56,7 @@ return function (Schema $schema): void {
         'api_role',
         ['role_id'],
         ['role_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_api_rule_role',
     );
     $rule->setComment('Api ACL Rules');
@@ -92,7 +92,7 @@ return function (Schema $schema): void {
         'api_user',
         ['user_id'],
         ['user_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_api_session_user',
     );
     $session->setComment('Api Sessions');

@@ -48,7 +48,7 @@ return function (Schema $schema): void {
         'review_entity',
         ['entity_id'],
         ['entity_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_review_entity',
     );
     $review->addForeignKeyConstraint(
@@ -78,21 +78,21 @@ return function (Schema $schema): void {
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
-        ['onDelete' => 'SET NULL'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
         'fk_review_detail_customer',
     );
     $detail->addForeignKeyConstraint(
         'review',
         ['review_id'],
         ['review_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_review_detail_review',
     );
     $detail->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onDelete' => 'SET NULL'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
         'fk_review_detail_store',
     );
     $detail->setComment('Review detail information');
@@ -113,7 +113,7 @@ return function (Schema $schema): void {
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_review_entity_summary_store',
     );
     $summary->setComment('Review aggregates');
@@ -129,14 +129,14 @@ return function (Schema $schema): void {
         'review',
         ['review_id'],
         ['review_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_review_store_review',
     );
     $store->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_review_store_store',
     );
     $store->setComment('Review Store');

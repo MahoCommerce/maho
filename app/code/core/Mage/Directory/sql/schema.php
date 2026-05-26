@@ -58,7 +58,7 @@ return function (Schema $schema): void {
         'directory_country_region',
         ['region_id'],
         ['region_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_directory_country_region_name_region_id_country_region',
     );
     $regionName->setComment('Directory Country Region Name');
@@ -75,7 +75,7 @@ return function (Schema $schema): void {
         'directory_country',
         ['country_id'],
         ['country_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_directory_country_name_country_id_country',
     );
     $countryName->setComment('Directory Country Name');
