@@ -30,13 +30,6 @@
                 </entities>
             </sitemap_resource>
         </models>
-        <resources>
-            <sitemap_setup>
-                <setup>
-                    <module>Mage_Sitemap</module>
-                </setup>
-            </sitemap_setup>
-        </resources>
         <template>
             <email>
                 <sitemap_generate_error_email_template translate="label" module="sitemap">

@@ -38,13 +38,6 @@
                 <class>Mage_ProductAlert_Helper</class>
             </productalert>
         </helpers>
-        <resources>
-            <productalert_setup>
-                <setup>
-                    <module>Mage_ProductAlert</module>
-                </setup>
-            </productalert_setup>
-        </resources>
         <blocks>
             <productalert>
                 <class>Mage_ProductAlert_Block</class>

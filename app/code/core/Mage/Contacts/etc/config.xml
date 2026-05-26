@@ -34,13 +34,6 @@
         </layout>
     </frontend>
     <global>
-        <resources>
-            <contacts_setup>
-                <setup>
-                    <module>Mage_Contacts</module>
-                </setup>
-            </contacts_setup>
-        </resources>
         <template>
             <email>
                 <contacts_email_email_template translate="label" module="contacts">

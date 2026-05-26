@@ -30,13 +30,6 @@
                 </entities>
             </shipping_resource>
         </models>
-        <resources>
-            <shipping_setup>
-                <setup>
-                    <module>Mage_Shipping</module>
-                </setup>
-            </shipping_setup>
-        </resources>
         <sales>
             <shipping>
                 <rule>

@@ -61,13 +61,6 @@
                 <class>Mage_Api_Helper</class>
             </api>
         </helpers>
-        <resources>
-            <api_setup>
-                <setup>
-                    <module>Mage_Api</module>
-                </setup>
-            </api_setup>
-        </resources>
         <request>
             <direct_front_name>
                 <api/>

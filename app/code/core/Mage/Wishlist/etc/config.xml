@@ -42,13 +42,6 @@
                 </entities>
             </wishlist_resource>
         </models>
-        <resources>
-            <wishlist_setup>
-                <setup>
-                    <module>Mage_Wishlist</module>
-                </setup>
-            </wishlist_setup>
-        </resources>
         <template>
             <email>
                 <wishlist_email_email_template translate="label" module="wishlist">

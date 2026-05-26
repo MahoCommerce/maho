@@ -39,13 +39,6 @@
                 </entities>
             </widget_resource>
         </models>
-        <resources>
-            <widget_setup>
-                <setup>
-                    <module>Mage_Widget</module>
-                </setup>
-            </widget_setup>
-        </resources>
         <blocks>
             <widget>
                 <class>Mage_Widget_Block</class>

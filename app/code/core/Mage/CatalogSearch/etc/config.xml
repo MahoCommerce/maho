@@ -44,13 +44,6 @@
                 <class>Mage_CatalogSearch_Helper</class>
             </catalogsearch>
         </helpers>
-        <resources>
-            <catalogsearch_setup>
-                <setup>
-                    <module>Mage_CatalogSearch</module>
-                </setup>
-            </catalogsearch_setup>
-        </resources>
         <blocks>
             <catalogsearch>
                 <class>Mage_CatalogSearch_Block</class>

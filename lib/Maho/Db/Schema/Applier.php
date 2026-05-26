@@ -44,11 +44,23 @@ final class Applier
             }
         }
 
-        $sql = [];
+        // CREATE TABLE statements run first; ALTER TABLE ADD CONSTRAINT
+        // (FK) statements run last. Doctrine's MySQL platform emits each
+        // table's FKs inline with that table's CREATE — fine for FKs to
+        // earlier tables, broken for FKs to later tables (or for grafts where
+        // a module adds an FK onto another module's table). Splitting the
+        // emission into two passes guarantees every referenced table exists
+        // by the time MySQL parses the FK.
+        $creates = [];
+        $alters  = [];
 
         foreach ($tablesToCreate as $table) {
             foreach ($platform->getCreateTableSQL($table) as $stmt) {
-                $sql[] = $stmt;
+                if (preg_match('/^\s*ALTER\s+TABLE\b/i', $stmt) === 1) {
+                    $alters[] = $stmt;
+                } else {
+                    $creates[] = $stmt;
+                }
             }
         }
 
@@ -58,11 +70,11 @@ final class Applier
             $comparator = $schemaManager->createComparator();
             $diff = $comparator->compareSchemas($current, $alterTarget);
             foreach ($platform->getAlterSchemaSQL($diff) as $stmt) {
-                $sql[] = $stmt;
+                $alters[] = $stmt;
             }
         }
 
-        return $sql;
+        return array_merge($creates, $alters);
     }
 
     /**

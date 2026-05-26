@@ -107,9 +107,9 @@ return function (Schema $schema): void {
     $visitorInfo->addColumn('http_user_agent', Types::STRING, ['length' => 255, 'notnull' => false]);
     $visitorInfo->addColumn('http_accept_charset', Types::STRING, ['length' => 255, 'notnull' => false]);
     $visitorInfo->addColumn('http_accept_language', Types::STRING, ['length' => 255, 'notnull' => false]);
-    // server_addr / remote_addr converted to VARBINARY(16) by upgrade-1.6.1.0-1.6.1.1.php (MySQL); PgSQL bytea.
-    $visitorInfo->addColumn('server_addr', Types::BLOB, ['length' => 16, 'notnull' => false]);
-    $visitorInfo->addColumn('remote_addr', Types::BLOB, ['length' => 16, 'notnull' => false]);
+    // server_addr / remote_addr stored as binary IP addresses (4 or 16 bytes). VARBINARY(16) on MySQL, bytea on PgSQL.
+    $visitorInfo->addColumn('server_addr', Types::BINARY, ['length' => 16, 'notnull' => false]);
+    $visitorInfo->addColumn('remote_addr', Types::BINARY, ['length' => 16, 'notnull' => false]);
     $visitorInfo->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('visitor_id')->create(),
     );
@@ -120,8 +120,8 @@ return function (Schema $schema): void {
     $visitorOnline = $schema->createTable('log_visitor_online');
     $visitorOnline->addColumn('visitor_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
     $visitorOnline->addColumn('visitor_type', Types::STRING, ['length' => 1]);
-    // remote_addr converted to VARBINARY(16) by upgrade-1.6.1.0-1.6.1.1.php.
-    $visitorOnline->addColumn('remote_addr', Types::BLOB, ['length' => 16]);
+    // remote_addr stored as binary IP. VARBINARY(16) on MySQL, bytea on PgSQL.
+    $visitorOnline->addColumn('remote_addr', Types::BINARY, ['length' => 16]);
     // Nullable defaults added by maho-26.5.0.php.
     $visitorOnline->addColumn('first_visit_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $visitorOnline->addColumn('last_visit_at', Types::DATETIME_MUTABLE, ['notnull' => false]);

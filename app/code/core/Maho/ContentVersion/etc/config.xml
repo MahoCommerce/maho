@@ -35,13 +35,6 @@
                 <class>Maho_ContentVersion_Helper</class>
             </contentversion>
         </helpers>
-        <resources>
-            <contentversion_setup>
-                <setup>
-                    <module>Maho_ContentVersion</module>
-                </setup>
-            </contentversion_setup>
-        </resources>
         <blocks>
             <contentversion>
                 <class>Maho_ContentVersion_Block</class>

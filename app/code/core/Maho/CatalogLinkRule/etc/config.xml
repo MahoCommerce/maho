@@ -32,15 +32,6 @@
             </cataloglinkrule_resource>
         </models>
 
-        <resources>
-            <cataloglinkrule_setup>
-                <setup>
-                    <module>Maho_CatalogLinkRule</module>
-                    <class>Mage_Core_Model_Resource_Setup</class>
-                </setup>
-            </cataloglinkrule_setup>
-        </resources>
-
         <helpers>
             <cataloglinkrule>
                 <class>Maho_CatalogLinkRule_Helper</class>

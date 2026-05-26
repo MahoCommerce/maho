@@ -53,16 +53,5 @@ foreach ($emails as $data) {
     }
 }
 
-/**
- * Add unique index for customer_entity table
- */
-$conn->addIndex(
-    $this->getTable('customer/entity'),
-    $this->getIdxName(
-        'customer/entity',
-        ['email', 'website_id'],
-        Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
-    ),
-    ['email', 'website_id'],
-    Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
-);
+// The matching unique index on (email, website_id) is now declared in
+// sql/schema.php; the schema applier creates/upgrades it ahead of this script.

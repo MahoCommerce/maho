@@ -47,13 +47,6 @@
                 <class>Mage_Tag_Model_Resource_Customer</class>
             </tag_customer_resource>
         </models>
-        <resources>
-            <tag_setup>
-                <setup>
-                    <module>Mage_Tag</module>
-                </setup>
-            </tag_setup>
-        </resources>
         <blocks>
             <tag>
                 <class>Mage_Tag_Block</class>

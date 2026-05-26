@@ -16,6 +16,7 @@
             <codePool>core</codePool>
             <depends>
                 <Mage_Cms/>
+                <Mage_Customer/>
                 <Mage_Dataflow/>
                 <Mage_Eav/>
                 <Mage_Index/>
