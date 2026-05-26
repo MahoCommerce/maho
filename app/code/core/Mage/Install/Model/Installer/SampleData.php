@@ -481,6 +481,11 @@ class Mage_Install_Model_Installer_SampleData
      */
     private function updatePostgresSequences(\PDO $pdo): void
     {
+        // Match both SERIAL columns (deptype='a' — auto-dependency) and
+        // GENERATED ... AS IDENTITY columns (deptype='i' — internal dependency).
+        // The declarative schema uses IDENTITY; modules still on legacy DDL
+        // use SERIAL. Either way the backing sequence needs bumping after a
+        // bulk insert that wrote explicit IDs.
         $stmt = $pdo->query("
             SELECT
                 seq.relname as sequence_name,
@@ -491,7 +496,7 @@ class Mage_Install_Model_Installer_SampleData
             JOIN pg_class tab ON dep.refobjid = tab.oid
             JOIN pg_attribute col ON col.attrelid = tab.oid AND col.attnum = dep.refobjsubid
             WHERE seq.relkind = 'S'
-            AND dep.deptype = 'a'
+            AND dep.deptype IN ('a', 'i')
             ORDER BY seq.relname
         ");
 

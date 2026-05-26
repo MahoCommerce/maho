@@ -174,7 +174,13 @@ jobs:
                   $st->execute([$table]);
                   foreach ($st as $r) {
                       $type = $r['data_type'];
-                      if ($r['character_maximum_length']) {
+                      // Normalize "character varying(1024)" -> "text". The legacy Postgres
+                      // adapter renders TYPE_TEXT without explicit length as varchar(1024)
+                      // (DEFAULT_TEXT_SIZE); the declarative schema uses Types::TEXT which
+                      // emits "text" on Postgres. Same semantics, different render.
+                      if ($r['data_type'] === 'character varying' && (int) $r['character_maximum_length'] === 1024) {
+                          $type = 'text';
+                      } elseif ($r['character_maximum_length']) {
                           $type .= "({$r['character_maximum_length']})";
                       } elseif (in_array($r['data_type'], ['numeric', 'decimal'], true) && $r['numeric_precision']) {
                           $type .= "({$r['numeric_precision']},{$r['numeric_scale']})";
@@ -369,14 +375,11 @@ jobs:
               echo "\n";
           }
 
-          if ($driver === 'pgsql') {
-              $seqs = $pdo->query("SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public' ORDER BY sequence_name")->fetchAll(PDO::FETCH_COLUMN);
-              foreach ($seqs as $seq) {
-                  $r = $pdo->query('SELECT last_value, is_called FROM ' . q('pgsql', $seq))->fetch(PDO::FETCH_ASSOC);
-                  $called = ($r['is_called'] === 't' || $r['is_called'] === true || $r['is_called'] === 1) ? 't' : 'f';
-                  echo "SEQUENCE $seq last_value={$r['last_value']} is_called=$called\n";
-              }
-          }
+          // SEQUENCE dumping intentionally omitted: SERIAL columns (legacy) own a
+          // sequence, GENERATED ... AS IDENTITY columns (declarative) do not show
+          // up in information_schema.sequences. The [IDENTITY] marker on the
+          // owning column already encodes "this is autoincrement", so SEQUENCE
+          // lines would add noise without information.
           NORMALIZE_PHP
 
       - name: Install dependencies (PR)

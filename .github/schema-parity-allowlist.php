@@ -46,7 +46,7 @@ $entries = [
     // ~7 significant digits.
     [
         'engines' => ['mysql'],
-        'table' => 'sales_order_tax_aggregated_created',
+        'table' => 'tax_order_aggregated_created',
         'replace' => [
             '  COLUMN percent float NULL' => '  COLUMN percent double NULL',
             '  COLUMN tax_base_amount_sum float NULL' => '  COLUMN tax_base_amount_sum double NULL',
@@ -54,7 +54,7 @@ $entries = [
     ],
     [
         'engines' => ['mysql'],
-        'table' => 'sales_order_tax_aggregated_updated',
+        'table' => 'tax_order_aggregated_updated',
         'replace' => [
             '  COLUMN percent float NULL' => '  COLUMN percent double NULL',
             '  COLUMN tax_base_amount_sum float NULL' => '  COLUMN tax_base_amount_sum double NULL',
@@ -65,6 +65,249 @@ $entries = [
         'table' => 'catalog_product_index_website',
         'replace' => [
             '  COLUMN rate float NULL DEFAULT 1' => '  COLUMN rate double NULL DEFAULT 1',
+        ],
+    ],
+
+    // admin_user.rp_token: legacy DDL declared this TYPE_TEXT(256). The Maho
+    // legacy MySQL adapter converts (length > 255) → text; Postgres keeps it
+    // as varchar(256). Declarative schema unifies on varchar(256) since the
+    // column never stores more than a 256-char token.
+    [
+        'engines' => ['mysql'],
+        'table' => 'admin_user',
+        'replace' => [
+            '  COLUMN rp_token text NULL' => '  COLUMN rp_token varchar(256) NULL',
+        ],
+    ],
+
+    // *_updated aggregation tables: legacy install clones structure via
+    // createTableByDdl() which on Postgres drops the SERIAL/IDENTITY property
+    // and leaves `id` as plain INTEGER. Declarative schema correctly emits
+    // IDENTITY, restoring auto-increment behavior.
+    [
+        'engines' => ['pgsql'],
+        'table' => 'coupon_aggregated_updated',
+        'replace' => [
+            '  COLUMN id integer NOT NULL' => '  COLUMN id integer NOT NULL [IDENTITY]',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'sales_order_aggregated_updated',
+        'replace' => [
+            '  COLUMN id integer NOT NULL' => '  COLUMN id integer NOT NULL [IDENTITY]',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'tax_order_aggregated_updated',
+        'replace' => [
+            '  COLUMN id integer NOT NULL' => '  COLUMN id integer NOT NULL [IDENTITY]',
+        ],
+    ],
+
+    // Postgres pgsql legacy adapter doesn't widen rating IP columns the way
+    // the MySQL adapter does. The relevant upgrade-1.6.0.0-1.6.0.1.php is wrapped
+    // in `if instanceof Mysql`, so Postgres keeps BIGINT for *_ip_long columns
+    // and VARCHAR(16) for remote_ip. Declarative schema unifies on
+    // VARBINARY/VARCHAR(50) across engines.
+    [
+        'engines' => ['pgsql'],
+        'table' => 'rating_option_vote',
+        'replace' => [
+            '  COLUMN remote_ip character varying(16) NOT NULL' => '  COLUMN remote_ip character varying(50) NULL',
+            '  COLUMN remote_ip_long bigint NOT NULL DEFAULT 0' => '  COLUMN remote_ip_long bytea NULL',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'log_visitor_info',
+        'replace' => [
+            '  COLUMN remote_addr bigint NULL' => '  COLUMN remote_addr bytea NULL',
+            '  COLUMN server_addr bigint NULL' => '  COLUMN server_addr bytea NULL',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'log_visitor_online',
+        'replace' => [
+            '  COLUMN remote_addr bigint NOT NULL' => '  COLUMN remote_addr bytea NULL',
+        ],
+    ],
+
+    // catalog_product_index_website.rate: legacy Postgres adapter emits "real"
+    // for TYPE_FLOAT; Doctrine emits "double precision" for Types::FLOAT on
+    // Postgres (matching the engine default 8-byte precision). Same justification
+    // as the MySQL float→double upgrade.
+    [
+        'engines' => ['pgsql'],
+        'table' => 'catalog_product_index_website',
+        'replace' => [
+            '  COLUMN rate real NULL DEFAULT 1' => '  COLUMN rate double precision NULL DEFAULT 1',
+        ],
+    ],
+
+    // tax_order_aggregated_*.percent / tax_base_amount_sum: same float→double
+    // intentional precision upgrade as MySQL, but pgsql renders it differently.
+    [
+        'engines' => ['pgsql'],
+        'table' => 'tax_order_aggregated_created',
+        'replace' => [
+            '  COLUMN percent real NULL' => '  COLUMN percent double precision NULL',
+            '  COLUMN tax_base_amount_sum real NULL' => '  COLUMN tax_base_amount_sum double precision NULL',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'tax_order_aggregated_updated',
+        'replace' => [
+            '  COLUMN percent real NULL' => '  COLUMN percent double precision NULL',
+            '  COLUMN tax_base_amount_sum real NULL' => '  COLUMN tax_base_amount_sum double precision NULL',
+        ],
+    ],
+
+    // permission_block / permission_variable on Postgres: legacy DDL emits
+    // boolean, declarative emits smallint (no cross-engine TINYINT exists,
+    // and smallint is the common ground). Same fix as the MySQL allowlist
+    // for tinyint(1) → smallint.
+    [
+        'engines' => ['pgsql'],
+        'table' => 'permission_block',
+        'replace' => [
+            '  COLUMN is_allowed boolean NOT NULL DEFAULT false' => '  COLUMN is_allowed smallint NOT NULL DEFAULT 0',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'permission_variable',
+        'replace' => [
+            '  COLUMN is_allowed boolean NOT NULL DEFAULT false' => '  COLUMN is_allowed smallint NOT NULL DEFAULT 0',
+            '  INDEX [PK] (variable_id,variable_name)' => '  INDEX [PK] (variable_id)',
+        ],
+    ],
+
+    // Postgres legacy adapter writes literal string 'NULL' as the default for
+    // some nullable VARCHAR columns; declarative schema omits the redundant
+    // default (nullable column already defaults to actual NULL).
+    [
+        'engines' => ['pgsql'],
+        'table' => 'newsletter_subscriber',
+        'replace' => [
+            "  COLUMN subscriber_confirm_code character varying(32) NULL DEFAULT 'NULL'" => '  COLUMN subscriber_confirm_code character varying(32) NULL',
+        ],
+    ],
+
+    // Postgres legacy adapter doesn't accept '0000-00-00 00:00:00' as a
+    // datetime sentinel; the SampleData install in the legacy world uses it
+    // anyway in VARCHAR-typed "date" columns. Declarative schema uses Postgres's
+    // valid epoch '1970-01-01 00:00:00' instead.
+    [
+        'engines' => ['pgsql'],
+        'table' => 'product_alert_price',
+        'replace' => [
+            "  COLUMN requested_date character varying(255) NOT NULL DEFAULT '0000-00-00 00:00:00'" => "  COLUMN requested_date character varying(255) NOT NULL DEFAULT '1970-01-01 00:00:00'",
+        ],
+    ],
+
+    // Customer vat_id / vat_request_id / vat_request_date on Postgres: legacy
+    // emits text, declarative emits varchar(255). Same justification as MySQL.
+    [
+        'engines' => ['pgsql'],
+        'table' => 'sales_flat_order_address',
+        'replace' => [
+            '  COLUMN vat_id text NULL' => '  COLUMN vat_id character varying(255) NULL',
+            '  COLUMN vat_request_id text NULL' => '  COLUMN vat_request_id character varying(255) NULL',
+            '  COLUMN vat_request_date text NULL' => '  COLUMN vat_request_date character varying(255) NULL',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'sales_flat_quote_address',
+        'replace' => [
+            '  COLUMN vat_id text NULL' => '  COLUMN vat_id character varying(255) NULL',
+            '  COLUMN vat_request_id text NULL' => '  COLUMN vat_request_id character varying(255) NULL',
+            '  COLUMN vat_request_date text NULL' => '  COLUMN vat_request_date character varying(255) NULL',
+        ],
+    ],
+
+    // sales_flat_shipment.packages: legacy install passes length=20000 to
+    // TYPE_TEXT, Postgres legacy adapter outputs varchar(20000). Declarative
+    // schema uses Types::TEXT length 65535 → text. Both fit the data.
+    [
+        'engines' => ['pgsql'],
+        'table' => 'sales_flat_shipment',
+        'replace' => [
+            '  COLUMN packages character varying(20000) NULL' => '  COLUMN packages text NULL',
+        ],
+    ],
+
+    // log_customer.logdate: legacy declares NOT NULL; declarative makes it
+    // nullable (it's set lazily on first login).
+    [
+        'engines' => ['pgsql'],
+        'table' => 'log_customer',
+        'replace' => [
+            '  COLUMN logdate timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN logdate timestamp without time zone NULL',
+        ],
+    ],
+
+    // log_summary.lognum: legacy declares smallint, declarative integer
+    // (matches MySQL int unsigned).
+    [
+        'engines' => ['pgsql'],
+        'table' => 'log_summary',
+        'replace' => [
+            '  COLUMN lognum smallint NOT NULL DEFAULT 0' => '  COLUMN lognum integer NOT NULL DEFAULT 0',
+        ],
+    ],
+
+    // catalog_product_link_attribute on Postgres: legacy creates a UNIQUE
+    // index that's logically a primary key; declarative makes it the PK
+    // directly, so the redundant UNIQ is gone.
+    [
+        'engines' => ['pgsql'],
+        'table' => 'catalog_product_link_attribute_int',
+        'remove' => [
+            '  INDEX [UNIQ] (product_link_attribute_id,link_id)',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'catalog_product_link_attribute_decimal',
+        'remove' => [
+            '  INDEX [UNIQ] (product_link_attribute_id,link_id)',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'catalog_product_link_attribute_varchar',
+        'remove' => [
+            '  INDEX [UNIQ] (product_link_attribute_id,link_id)',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'core_translate',
+        'remove' => [
+            '  INDEX [UNIQ] (store_id,locale,string)',
+        ],
+    ],
+
+    // PayPal trial_billing_amount: legacy text, declarative varchar(255).
+    [
+        'engines' => ['pgsql'],
+        'table' => 'sales_recurring_profile',
+        'replace' => [
+            '  COLUMN trial_billing_amount text NULL' => '  COLUMN trial_billing_amount character varying(255) NULL',
+        ],
+    ],
+
+    // numeric default formatting: declarative emits 0.0000, legacy emits 0.
+    [
+        'engines' => ['pgsql'],
+        'table' => 'salesrule_coupon_aggregated_order',
+        'replace' => [
+            '  COLUMN discount_amount numeric(12,4) NOT NULL DEFAULT 0' => '  COLUMN discount_amount numeric(12,4) NOT NULL DEFAULT 0.0000',
         ],
     ],
 
@@ -185,16 +428,9 @@ $entries = [
     // equivalent for these aggregation tables.
     [
         'engines' => ['mysql'],
-        'table' => 'sales_order_aggregated_created',
+        'table' => 'sales_invoiced_aggregated',
         'replace' => [
             '  COLUMN order_status varchar(50) NULL' => '  COLUMN order_status varchar(50) NOT NULL DEFAULT ',
-        ],
-    ],
-    [
-        'engines' => ['mysql'],
-        'table' => 'sales_order_aggregated_updated',
-        'replace' => [
-            '  COLUMN order_status varchar(50) NOT NULL' => '  COLUMN order_status varchar(50) NOT NULL DEFAULT ',
         ],
     ],
 
@@ -313,6 +549,26 @@ $entries = [
     ],
 ];
 
+/**
+ * Global regex transformations applied to every line, regardless of table.
+ * Each entry maps a regex (with delimiters) to its replacement; same engine
+ * filtering as table-scoped entries.
+ */
+$globalRegex = [
+    [
+        // Postgres legacy adapter doesn't translate TIMESTAMP_INIT to a
+        // DEFAULT CURRENT_TIMESTAMP clause; the declarative schema sets the
+        // default explicitly for all engines. Add CURRENT_TIMESTAMP to bare
+        // "timestamp NOT NULL" columns on main so they match the declarative
+        // output. Safe because every such column in legacy code is a
+        // created_at / updated_at / event-time field that was meant to default
+        // to now() but was silently dropped by the adapter.
+        'engines' => ['pgsql'],
+        'pattern' => '/^(  COLUMN \\S+ timestamp without time zone NOT NULL)$/',
+        'replacement' => '$1 DEFAULT CURRENT_TIMESTAMP',
+    ],
+];
+
 $engine = $argv[1] ?? '';
 if (!in_array($engine, ['mysql', 'pgsql', 'sqlite'], true)) {
     fwrite(STDERR, "Usage: php schema-parity-allowlist.php <mysql|pgsql|sqlite> < main.txt > main.normalized.txt\n");
@@ -328,6 +584,14 @@ foreach ($entries as $entry) {
     $ops[$table] ??= ['replace' => [], 'remove' => []];
     $ops[$table]['replace'] = array_merge($ops[$table]['replace'], $entry['replace'] ?? []);
     $ops[$table]['remove']  = array_merge($ops[$table]['remove'], $entry['remove']  ?? []);
+}
+
+$activeGlobalRegex = [];
+foreach ($globalRegex as $rule) {
+    if (!in_array($engine, $rule['engines'], true)) {
+        continue;
+    }
+    $activeGlobalRegex[] = $rule;
 }
 
 $input = stream_get_contents(STDIN);
@@ -353,6 +617,13 @@ foreach ($lines as $line) {
         if (isset($ops[$currentTable]['replace'][$line])) {
             $out[] = $ops[$currentTable]['replace'][$line];
             continue;
+        }
+    }
+    foreach ($activeGlobalRegex as $rule) {
+        $newLine = preg_replace($rule['pattern'], $rule['replacement'], $line);
+        if ($newLine !== null && $newLine !== $line) {
+            $line = $newLine;
+            break;
         }
     }
     $out[] = $line;
