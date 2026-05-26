@@ -94,6 +94,24 @@ $entries = [
             '  FK entity_id -> catalog_product_entity(entity_id) ON DELETE CASCADE ON UPDATE CASCADE',
         ],
     ],
+    [
+        'table' => 'customer_segment_customer',
+        'remove' => [
+            '  FK customer_id -> customer_entity(entity_id) ON DELETE CASCADE ON UPDATE CASCADE',
+        ],
+    ],
+    [
+        'table' => 'customer_segment_email_sequence',
+        'remove' => [
+            '  FK coupon_sales_rule_id -> salesrule(rule_id) ON DELETE SET NULL ON UPDATE CASCADE',
+        ],
+    ],
+    [
+        'table' => 'customer_segment_sequence_progress',
+        'remove' => [
+            '  FK customer_id -> customer_entity(entity_id) ON DELETE CASCADE ON UPDATE CASCADE',
+        ],
+    ],
 ];
 
 $engine = $argv[1] ?? '';
