@@ -77,7 +77,7 @@ return function (Schema $schema): void {
         'dataflow_profile',
         ['profile_id'],
         ['profile_id'],
-        ['onDelete' => 'CASCADE'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
         'fk_dataflow_profile_history_profile',
     );
     $history->setComment('Dataflow Profile History');
@@ -99,14 +99,14 @@ return function (Schema $schema): void {
         'dataflow_profile',
         ['profile_id'],
         ['profile_id'],
-        ['onDelete' => 'NO ACTION'],
+        ['onDelete' => 'CASCADE'],
         'fk_dataflow_batch_profile',
     );
     $batch->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onDelete' => 'NO ACTION'],
+        ['onDelete' => 'CASCADE'],
         'fk_dataflow_batch_store',
     );
     $batch->setComment('Dataflow Batch');
@@ -125,7 +125,7 @@ return function (Schema $schema): void {
         'dataflow_batch',
         ['batch_id'],
         ['batch_id'],
-        ['onDelete' => 'NO ACTION'],
+        ['onDelete' => 'CASCADE'],
         'fk_dataflow_batch_export_batch',
     );
     $batchExport->setComment('Dataflow Batch Export');
@@ -144,7 +144,7 @@ return function (Schema $schema): void {
         'dataflow_batch',
         ['batch_id'],
         ['batch_id'],
-        ['onDelete' => 'NO ACTION'],
+        ['onDelete' => 'CASCADE'],
         'fk_dataflow_batch_import_batch',
     );
     $batchImport->setComment('Dataflow Batch Import');

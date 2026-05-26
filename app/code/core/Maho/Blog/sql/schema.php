@@ -128,7 +128,7 @@ return function (Schema $schema): void {
     $postText->addColumn('attribute_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $postText->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $postText->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $postText->addColumn('value', Types::TEXT, ['length' => 65535]);
+    $postText->addColumn('value', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $postText->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );

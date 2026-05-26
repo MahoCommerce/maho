@@ -321,7 +321,15 @@ jobs:
 
           foreach (tables($pdo, $driver) as $table) {
               echo "TABLE $table\n";
-              foreach (columns($pdo, $driver, $table) as $line) {
+              // Sort columns alphabetically: ORDINAL_POSITION reflects the
+              // order in which install/upgrade scripts (or schema.php) added
+              // columns. The declarative schema may add cross-module grafted
+              // columns at different positions than the legacy install did,
+              // but the semantics are identical. Sorting eliminates this
+              // false-positive diff noise.
+              $cols = columns($pdo, $driver, $table);
+              sort($cols);
+              foreach ($cols as $line) {
                   echo "$line\n";
               }
               foreach (indexes($pdo, $driver, $table) as $line) {
@@ -511,15 +519,21 @@ jobs:
           foreach ($tables as $table) {
               echo "TABLE $table\n";
 
+              $colLines = [];
               foreach ($pdo->query('PRAGMA table_info(' . q($table) . ')') as $r) {
-                  echo sprintf(
-                      "  COLUMN %s %s %s%s%s\n",
+                  $colLines[] = sprintf(
+                      '  COLUMN %s %s %s%s%s',
                       $r['name'],
                       $r['type'],
                       $r['notnull'] ? 'NOT NULL' : 'NULL',
                       $r['dflt_value'] !== null ? ' DEFAULT ' . $r['dflt_value'] : '',
                       $r['pk'] ? ' [PK]' : '',
                   );
+              }
+              // Sort columns alphabetically (see comment in MySQL/PgSQL dumper).
+              sort($colLines);
+              foreach ($colLines as $line) {
+                  echo "$line\n";
               }
 
               $idxLines = [];

@@ -121,7 +121,7 @@ return function (Schema $schema): void {
     $visitorOnline->addColumn('visitor_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
     $visitorOnline->addColumn('visitor_type', Types::STRING, ['length' => 1]);
     // remote_addr stored as binary IP. VARBINARY(16) on MySQL, bytea on PgSQL.
-    $visitorOnline->addColumn('remote_addr', Types::BINARY, ['length' => 16]);
+    $visitorOnline->addColumn('remote_addr', Types::BINARY, ['length' => 16, 'notnull' => false]);
     // Nullable defaults added by maho-26.5.0.php.
     $visitorOnline->addColumn('first_visit_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $visitorOnline->addColumn('last_visit_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
