@@ -45,14 +45,14 @@ return function (Schema $schema): void {
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_report_event_store',
     );
     $event->addForeignKeyConstraint(
         'report_event_types',
         ['event_type_id'],
         ['event_type_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_report_event_event_type',
     );
     $event->setComment('Reports Event Table');
@@ -77,21 +77,21 @@ return function (Schema $schema): void {
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_report_compared_product_index_customer',
     );
     $compared->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_report_compared_product_index_product',
     );
     $compared->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
+        ['onDelete' => 'SET NULL'],
         'fk_report_compared_product_index_store',
     );
     $compared->setComment('Reports Compared Product Index Table');
@@ -116,21 +116,21 @@ return function (Schema $schema): void {
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_report_viewed_product_index_customer',
     );
     $viewed->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_report_viewed_product_index_product',
     );
     $viewed->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
+        ['onDelete' => 'SET NULL'],
         'fk_report_viewed_product_index_store',
     );
     $viewed->setComment('Reports Viewed Product Index Table');
@@ -163,14 +163,14 @@ return function (Schema $schema): void {
             'core_store',
             ['store_id'],
             ['store_id'],
-            ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+            ['onDelete' => 'CASCADE'],
             "fk_{$shortName}_store",
         );
         $aggr->addForeignKeyConstraint(
             'catalog_product_entity',
             ['product_id'],
             ['entity_id'],
-            ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+            ['onDelete' => 'CASCADE'],
             "fk_{$shortName}_product",
         );
         $aggr->setComment($tableComment);

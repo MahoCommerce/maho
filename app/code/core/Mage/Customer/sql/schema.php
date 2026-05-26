@@ -15,6 +15,10 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
 
 return function (Schema $schema): void {
+    // MySQL accepts '0000-00-00 00:00:00'; Postgres rejects it. Each adapter
+    // exposes its own valid "zero" default via getSuggestedZeroDate().
+    $zeroDate = Mage::getSingleton('core/resource')->getConnection('core_setup')->getSuggestedZeroDate();
+
     // created_at / updated_at defaults normalized to CURRENT_TIMESTAMP by
     // upgrade-1.6.2.0.7-1.6.2.0.8.php (MySQL TIMESTAMP_INIT).
     // disable_auto_group_change column added by upgrade-1.6.2.0-1.6.2.0.1.php.
@@ -39,8 +43,8 @@ return function (Schema $schema): void {
     $entity->addIndex(['entity_type_id'], 'idx_customer_entity_entity_type_id');
     $entity->addUniqueIndex(['email', 'website_id'], 'unq_customer_entity_email_website_id');
     $entity->addIndex(['website_id'], 'idx_customer_entity_website_id');
-    $entity->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_customer_entity_store');
-    $entity->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_customer_entity_website');
+    $entity->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'SET NULL'], 'fk_customer_entity_store');
+    $entity->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onDelete' => 'SET NULL'], 'fk_customer_entity_website');
     $entity->setComment('Customer Entity');
 
     // created_at / updated_at defaults normalized to CURRENT_TIMESTAMP by
@@ -58,19 +62,19 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
     $addrEntity->addIndex(['parent_id'], 'idx_customer_address_entity_parent_id');
-    $addrEntity->addForeignKeyConstraint('customer_entity', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_customer_address_entity_parent');
+    $addrEntity->addForeignKeyConstraint('customer_entity', ['parent_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_customer_address_entity_parent');
     $addrEntity->setComment('Customer Address Entity');
 
     // 10 structurally near-identical EAV value tables (5 typed per parent entity).
     // Each shares the FK set (parent entity, eav_attribute, eav_entity_type) and
     // the same index shape, with only the `value` column type differing per backend.
     $valueTables = [
-        'customer_address_entity_datetime' => ['parent' => 'customer_address_entity', 'type' => Types::DATETIME_MUTABLE, 'options' => ['default' => '0000-00-00 00:00:00'], 'hasValueIndex' => true],
+        'customer_address_entity_datetime' => ['parent' => 'customer_address_entity', 'type' => Types::DATETIME_MUTABLE, 'options' => ['default' => $zeroDate], 'hasValueIndex' => true],
         'customer_address_entity_decimal'  => ['parent' => 'customer_address_entity', 'type' => Types::DECIMAL,          'options' => ['precision' => 12, 'scale' => 4, 'default' => '0.0000'], 'hasValueIndex' => true],
         'customer_address_entity_int'      => ['parent' => 'customer_address_entity', 'type' => Types::INTEGER,          'options' => ['default' => 0], 'hasValueIndex' => true],
         'customer_address_entity_text'     => ['parent' => 'customer_address_entity', 'type' => Types::TEXT,             'options' => ['length' => 65535], 'hasValueIndex' => false],
         'customer_address_entity_varchar'  => ['parent' => 'customer_address_entity', 'type' => Types::STRING,           'options' => ['length' => 255, 'notnull' => false], 'hasValueIndex' => true],
-        'customer_entity_datetime'         => ['parent' => 'customer_entity',         'type' => Types::DATETIME_MUTABLE, 'options' => ['default' => '0000-00-00 00:00:00'], 'hasValueIndex' => true],
+        'customer_entity_datetime'         => ['parent' => 'customer_entity',         'type' => Types::DATETIME_MUTABLE, 'options' => ['default' => $zeroDate], 'hasValueIndex' => true],
         'customer_entity_decimal'          => ['parent' => 'customer_entity',         'type' => Types::DECIMAL,          'options' => ['precision' => 12, 'scale' => 4, 'default' => '0.0000'], 'hasValueIndex' => true],
         'customer_entity_int'              => ['parent' => 'customer_entity',         'type' => Types::INTEGER,          'options' => ['default' => 0], 'hasValueIndex' => true],
         'customer_entity_text'             => ['parent' => 'customer_entity',         'type' => Types::TEXT,             'options' => ['length' => 65535], 'hasValueIndex' => false],
@@ -94,9 +98,9 @@ return function (Schema $schema): void {
         if ($spec['hasValueIndex']) {
             $t->addIndex(['entity_id', 'attribute_id', 'value'], "idx_{$short}_entity_id_attribute_id_value");
         }
-        $t->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$short}_attribute");
-        $t->addForeignKeyConstraint($spec['parent'], ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$short}_entity");
-        $t->addForeignKeyConstraint('eav_entity_type', ['entity_type_id'], ['entity_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$short}_entity_type");
+        $t->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onDelete' => 'CASCADE'], "fk_{$short}_attribute");
+        $t->addForeignKeyConstraint($spec['parent'], ['entity_id'], ['entity_id'], ['onDelete' => 'CASCADE'], "fk_{$short}_entity");
+        $t->addForeignKeyConstraint('eav_entity_type', ['entity_type_id'], ['entity_type_id'], ['onDelete' => 'CASCADE'], "fk_{$short}_entity_type");
         $t->setComment(ucwords(str_replace('_', ' ', $tableName)));
     }
 
@@ -121,7 +125,7 @@ return function (Schema $schema): void {
     $eavAttr->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('attribute_id')->create(),
     );
-    $eavAttr->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_customer_eav_attribute_attribute');
+    $eavAttr->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onDelete' => 'CASCADE'], 'fk_customer_eav_attribute_attribute');
     $eavAttr->setComment('Customer Eav Attribute');
 
     $formAttr = $schema->createTable('customer_form_attribute');
@@ -131,7 +135,7 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('form_code', 'attribute_id')->create(),
     );
     $formAttr->addIndex(['attribute_id'], 'idx_customer_form_attribute_attribute_id');
-    $formAttr->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_customer_form_attribute_attribute');
+    $formAttr->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onDelete' => 'CASCADE'], 'fk_customer_form_attribute_attribute');
     $formAttr->setComment('Customer Form Attribute');
 
     $eavAttrWebsite = $schema->createTable('customer_eav_attribute_website');
@@ -145,8 +149,8 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('attribute_id', 'website_id')->create(),
     );
     $eavAttrWebsite->addIndex(['website_id'], 'idx_customer_eav_attribute_website_website_id');
-    $eavAttrWebsite->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_customer_eav_attribute_website_attribute');
-    $eavAttrWebsite->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_customer_eav_attribute_website_website');
+    $eavAttrWebsite->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onDelete' => 'CASCADE'], 'fk_customer_eav_attribute_website_attribute');
+    $eavAttrWebsite->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onDelete' => 'CASCADE'], 'fk_customer_eav_attribute_website_website');
     $eavAttrWebsite->setComment('Customer Eav Attribute Website');
 
     // Added by legacy upgrade-1.6.2.0.4-1.6.2.0.5.php
@@ -154,7 +158,7 @@ return function (Schema $schema): void {
     $flowPassword->addColumn('flowpassword_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $flowPassword->addColumn('ip', Types::STRING, ['length' => 50]);
     $flowPassword->addColumn('email', Types::STRING, ['length' => 255]);
-    $flowPassword->addColumn('requested_date', Types::STRING, ['length' => 255, 'default' => '0000-00-00 00:00:00']);
+    $flowPassword->addColumn('requested_date', Types::STRING, ['length' => 255, 'default' => $zeroDate]);
     $flowPassword->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('flowpassword_id')->create(),
     );

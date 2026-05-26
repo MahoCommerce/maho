@@ -71,28 +71,28 @@ return function (Schema $schema): void {
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_catalogrule_product_product',
     );
     $ruleProduct->addForeignKeyConstraint(
         'customer_group',
         ['customer_group_id'],
         ['customer_group_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_catalogrule_product_customer_group',
     );
     $ruleProduct->addForeignKeyConstraint(
         'catalogrule',
         ['rule_id'],
         ['rule_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_catalogrule_product_rule',
     );
     $ruleProduct->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_catalogrule_product_website',
     );
     $ruleProduct->setComment('CatalogRule Product');
@@ -120,21 +120,21 @@ return function (Schema $schema): void {
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_catalogrule_product_price_product',
     );
     $rulePrice->addForeignKeyConstraint(
         'customer_group',
         ['customer_group_id'],
         ['customer_group_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_catalogrule_product_price_customer_group',
     );
     $rulePrice->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_catalogrule_product_price_website',
     );
     $rulePrice->setComment('CatalogRule Product Price');
@@ -160,21 +160,21 @@ return function (Schema $schema): void {
         'customer_group',
         ['customer_group_id'],
         ['customer_group_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_catalogrule_group_website_customer_group',
     );
     $groupWebsite->addForeignKeyConstraint(
         'catalogrule',
         ['rule_id'],
         ['rule_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_catalogrule_group_website_rule',
     );
     $groupWebsite->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_catalogrule_group_website_website',
     );
     $groupWebsite->setComment('CatalogRule Group Website');
@@ -192,14 +192,14 @@ return function (Schema $schema): void {
         'catalogrule',
         ['rule_id'],
         ['rule_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_catalogrule_website_rule',
     );
     $ruleWebsite->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_catalogrule_website_website',
     );
     $ruleWebsite->setComment('Catalog Rules To Websites Relations');
@@ -217,14 +217,14 @@ return function (Schema $schema): void {
         'catalogrule',
         ['rule_id'],
         ['rule_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_catalogrule_customer_group_rule',
     );
     $ruleCustomerGroup->addForeignKeyConstraint(
         'customer_group',
         ['customer_group_id'],
         ['customer_group_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_catalogrule_customer_group_customer_group',
     );
     $ruleCustomerGroup->setComment('Catalog Rules To Customer Groups Relations');

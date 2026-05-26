@@ -59,14 +59,14 @@ return function (Schema $schema): void {
         'customer_segment',
         ['segment_id'],
         ['segment_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_csc_segment',
     );
     $member->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_csc_website',
     );
     // FK customer_id -> customer_entity(entity_id) is reinstated when
@@ -96,14 +96,14 @@ return function (Schema $schema): void {
         'customer_segment',
         ['segment_id'],
         ['segment_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_cses_segment',
     );
     $sequence->addForeignKeyConstraint(
         'newsletter_template',
         ['template_id'],
         ['template_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'RESTRICT'],
+        ['onDelete' => 'RESTRICT'],
         'fk_cses_template',
     );
     // FK coupon_sales_rule_id -> salesrule(rule_id) ON DELETE SET NULL is
@@ -133,21 +133,21 @@ return function (Schema $schema): void {
         'customer_segment',
         ['segment_id'],
         ['segment_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_cssp_segment',
     );
     $progress->addForeignKeyConstraint(
         'customer_segment_email_sequence',
         ['sequence_id'],
         ['sequence_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_cssp_sequence',
     );
     $progress->addForeignKeyConstraint(
         'newsletter_queue',
         ['queue_id'],
         ['queue_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
+        ['onDelete' => 'SET NULL'],
         'fk_cssp_queue',
     );
     // FK customer_id -> customer_entity(entity_id) ON DELETE CASCADE is

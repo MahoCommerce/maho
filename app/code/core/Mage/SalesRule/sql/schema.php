@@ -72,7 +72,7 @@ return function (Schema $schema): void {
         'salesrule',
         ['rule_id'],
         ['rule_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_salesrule_coupon_rule',
     );
     $coupon->setComment('Salesrule Coupon');
@@ -90,14 +90,14 @@ return function (Schema $schema): void {
         'salesrule_coupon',
         ['coupon_id'],
         ['coupon_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_salesrule_coupon_usage_coupon',
     );
     $couponUsage->addForeignKeyConstraint(
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_salesrule_coupon_usage_customer',
     );
     $couponUsage->setComment('Salesrule Coupon Usage');
@@ -116,14 +116,14 @@ return function (Schema $schema): void {
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_salesrule_customer_customer',
     );
     $ruleCustomer->addForeignKeyConstraint(
         'salesrule',
         ['rule_id'],
         ['rule_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_salesrule_customer_rule',
     );
     $ruleCustomer->setComment('Salesrule Customer');
@@ -143,14 +143,14 @@ return function (Schema $schema): void {
         'salesrule',
         ['rule_id'],
         ['rule_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_salesrule_label_rule',
     );
     $label->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_salesrule_label_store',
     );
     $label->setComment('Salesrule Label');
@@ -170,28 +170,28 @@ return function (Schema $schema): void {
         'eav_attribute',
         ['attribute_id'],
         ['attribute_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'NO ACTION'],
+        ['onDelete' => 'NO ACTION'],
         'fk_salesrule_product_attribute_attribute',
     );
     $productAttribute->addForeignKeyConstraint(
         'customer_group',
         ['customer_group_id'],
         ['customer_group_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'NO ACTION'],
+        ['onDelete' => 'NO ACTION'],
         'fk_salesrule_product_attribute_customer_group',
     );
     $productAttribute->addForeignKeyConstraint(
         'salesrule',
         ['rule_id'],
         ['rule_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'NO ACTION'],
+        ['onDelete' => 'NO ACTION'],
         'fk_salesrule_product_attribute_rule',
     );
     $productAttribute->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'NO ACTION'],
+        ['onDelete' => 'NO ACTION'],
         'fk_salesrule_product_attribute_website',
     );
     $productAttribute->setComment('Salesrule Product Attribute');
@@ -224,7 +224,7 @@ return function (Schema $schema): void {
             'core_store',
             ['store_id'],
             ['store_id'],
-            ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+            ['onDelete' => 'CASCADE'],
             "fk_{$tableName}_store",
         );
         $aggr->setComment('Coupon Aggregated');
@@ -252,7 +252,7 @@ return function (Schema $schema): void {
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_coupon_aggregated_order_store',
     );
     $aggrOrder->setComment('Coupon Aggregated Order');
@@ -271,14 +271,14 @@ return function (Schema $schema): void {
         'salesrule',
         ['rule_id'],
         ['rule_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_salesrule_website_rule',
     );
     $website->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_salesrule_website_website',
     );
     $website->setComment('Sales Rules To Websites Relations');
@@ -295,14 +295,14 @@ return function (Schema $schema): void {
         'salesrule',
         ['rule_id'],
         ['rule_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_salesrule_customer_group_rule',
     );
     $customerGroup->addForeignKeyConstraint(
         'customer_group',
         ['customer_group_id'],
         ['customer_group_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_salesrule_customer_group_customer_group',
     );
     $customerGroup->setComment('Sales Rules To Customer Groups Relations');

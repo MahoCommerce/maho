@@ -55,14 +55,14 @@ return function (Schema $schema): void {
         'index_event',
         ['event_id'],
         ['event_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_index_process_event_event',
     );
     $processEvent->addForeignKeyConstraint(
         'index_process',
         ['process_id'],
         ['process_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_index_process_event_process',
     );
     $processEvent->setComment('Index Process Event');

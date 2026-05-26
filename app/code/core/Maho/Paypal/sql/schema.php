@@ -58,7 +58,7 @@ return function (Schema $schema): void {
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_paypal_vault_token_customer',
     );
     $vault->setComment('PayPal Vault Tokens');

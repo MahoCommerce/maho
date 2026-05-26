@@ -17,6 +17,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
 use Mage;
 use Maho;
+use ReflectionClass;
 use RuntimeException;
 
 final class Collector
@@ -59,10 +60,41 @@ final class Collector
             $contributors[] = (string) $modName;
         }
 
+        self::stripImplicitForeignKeyIndexes($schema);
         $schema = self::applyTablePrefix($schema);
         self::applyTableDefaults($schema);
 
         return [$schema, $contributors];
+    }
+
+    /**
+     * Doctrine\DBAL auto-creates a single-column index on every FK's local
+     * columns when the existing indexes don't trivially cover them. InnoDB
+     * already maintains an implicit index per FK, and the legacy install
+     * scripts relied on that, so the parity-baseline schema doesn't carry
+     * these single-column indexes. Drop the implicit ones Doctrine added so
+     * the declarative schema produces the same DDL the legacy install did.
+     *
+     * The `implicitIndexNames` array on Table is private; use reflection.
+     */
+    private static function stripImplicitForeignKeyIndexes(Schema $schema): void
+    {
+        $tableReflection = new ReflectionClass(Table::class);
+        $implicitProperty = $tableReflection->getProperty('implicitIndexNames');
+        $indexesProperty  = $tableReflection->getProperty('_indexes');
+
+        foreach ($schema->getTables() as $table) {
+            $implicit = $implicitProperty->getValue($table);
+            if ($implicit === []) {
+                continue;
+            }
+            $indexes = $indexesProperty->getValue($table);
+            foreach (array_keys($implicit) as $implicitName) {
+                unset($indexes[$implicitName]);
+            }
+            $indexesProperty->setValue($table, $indexes);
+            $implicitProperty->setValue($table, []);
+        }
     }
 
     /**

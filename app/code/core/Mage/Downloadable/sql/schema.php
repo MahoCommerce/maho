@@ -36,7 +36,7 @@ return function (Schema $schema): void {
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_downloadable_link_product',
     );
     $link->setComment('Downloadable Link Table');
@@ -55,14 +55,14 @@ return function (Schema $schema): void {
         'downloadable_link',
         ['link_id'],
         ['link_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_downloadable_link_price_link',
     );
     $linkPrice->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_downloadable_link_price_website',
     );
     $linkPrice->setComment('Downloadable Link Price Table');
@@ -89,14 +89,14 @@ return function (Schema $schema): void {
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
+        ['onDelete' => 'SET NULL'],
         'fk_downloadable_link_purchased_customer',
     );
     $linkPurchased->addForeignKeyConstraint(
         'sales_flat_order',
         ['order_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
+        ['onDelete' => 'SET NULL'],
         'fk_downloadable_link_purchased_order',
     );
     $linkPurchased->setComment('Downloadable Link Purchased Table');
@@ -129,14 +129,14 @@ return function (Schema $schema): void {
         'downloadable_link_purchased',
         ['purchased_id'],
         ['purchased_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_downloadable_link_purchased_item_purchased',
     );
     $linkPurchasedItem->addForeignKeyConstraint(
         'sales_flat_order_item',
         ['order_item_id'],
         ['item_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
+        ['onDelete' => 'SET NULL'],
         'fk_downloadable_link_purchased_item_order_item',
     );
     $linkPurchasedItem->setComment('Downloadable Link Purchased Item Table');
@@ -156,14 +156,14 @@ return function (Schema $schema): void {
         'downloadable_link',
         ['link_id'],
         ['link_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_downloadable_link_title_link',
     );
     $linkTitle->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_downloadable_link_title_store',
     );
     $linkTitle->setComment('Link Title Table');
@@ -183,7 +183,7 @@ return function (Schema $schema): void {
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_downloadable_sample_product',
     );
     $sample->setComment('Downloadable Sample Table');
@@ -203,14 +203,14 @@ return function (Schema $schema): void {
         'downloadable_sample',
         ['sample_id'],
         ['sample_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_downloadable_sample_title_sample',
     );
     $sampleTitle->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_downloadable_sample_title_store',
     );
     $sampleTitle->setComment('Downloadable Sample Title Table');

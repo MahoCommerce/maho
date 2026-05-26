@@ -32,7 +32,7 @@ return function (Schema $schema): void {
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
+        ['onDelete' => 'SET NULL'],
         'fk_newsletter_subscriber_store',
     );
     $subscriber->setComment('Newsletter Subscriber');
@@ -78,7 +78,7 @@ return function (Schema $schema): void {
         'newsletter_template',
         ['template_id'],
         ['template_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_newsletter_queue_template',
     );
     $queue->setComment('Newsletter Queue');
@@ -98,14 +98,14 @@ return function (Schema $schema): void {
         'newsletter_queue',
         ['queue_id'],
         ['queue_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_newsletter_queue_link_queue',
     );
     $queueLink->addForeignKeyConstraint(
         'newsletter_subscriber',
         ['subscriber_id'],
         ['subscriber_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_newsletter_queue_link_subscriber',
     );
     $queueLink->setComment('Newsletter Queue Link');
@@ -121,14 +121,14 @@ return function (Schema $schema): void {
         'newsletter_queue',
         ['queue_id'],
         ['queue_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_newsletter_queue_store_link_queue',
     );
     $queueStoreLink->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_newsletter_queue_store_link_store',
     );
     $queueStoreLink->setComment('Newsletter Queue Store Link');
@@ -148,14 +148,14 @@ return function (Schema $schema): void {
         'newsletter_queue',
         ['queue_id'],
         ['queue_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_newsletter_problem_queue',
     );
     $problem->addForeignKeyConstraint(
         'newsletter_subscriber',
         ['subscriber_id'],
         ['subscriber_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_newsletter_problem_subscriber',
     );
     $problem->setComment('Newsletter Problems');

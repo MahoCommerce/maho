@@ -50,14 +50,14 @@ return function (Schema $schema): void {
         'catalog_product_link',
         ['link_id'],
         ['link_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_catalog_product_link_attribute_int_link',
     );
     $linkAttributeInt->addForeignKeyConstraint(
         'catalog_product_link_attribute',
         ['product_link_attribute_id'],
         ['product_link_attribute_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_catalog_product_link_attribute_int_attr',
     );
 };

@@ -62,14 +62,14 @@ return function (Schema $schema): void {
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_cataloginventory_stock_item_product',
     );
     $stockItem->addForeignKeyConstraint(
         'cataloginventory_stock',
         ['stock_id'],
         ['stock_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_cataloginventory_stock_item_stock',
     );
     $stockItem->setComment('Cataloginventory Stock Item');
@@ -89,21 +89,21 @@ return function (Schema $schema): void {
         'cataloginventory_stock',
         ['stock_id'],
         ['stock_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_cataloginventory_stock_status_stock',
     );
     $stockStatus->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_cataloginventory_stock_status_product',
     );
     $stockStatus->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_cataloginventory_stock_status_website',
     );
     $stockStatus->setComment('Cataloginventory Stock Status');

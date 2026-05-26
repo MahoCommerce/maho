@@ -167,8 +167,8 @@ return function (Schema $schema): void {
     $order->addIndex(['quote_id'], 'idx_sales_flat_order_quote_id');
     $order->addIndex(['updated_at'], 'idx_sales_flat_order_updated_at');
     $order->addIndex(['customer_email'], 'idx_sales_flat_order_customer_email');
-    $order->addForeignKeyConstraint('customer_entity', ['customer_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_sales_flat_order_customer');
-    $order->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_sales_flat_order_store');
+    $order->addForeignKeyConstraint('customer_entity', ['customer_id'], ['entity_id'], ['onDelete' => 'SET NULL'], 'fk_sales_flat_order_customer');
+    $order->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'SET NULL'], 'fk_sales_flat_order_store');
     $order->setComment('Sales Flat Order');
 
     // sales_flat_order_grid
@@ -204,9 +204,9 @@ return function (Schema $schema): void {
     $orderGrid->addIndex(['created_at'], 'idx_sales_flat_order_grid_created_at');
     $orderGrid->addIndex(['customer_id'], 'idx_sales_flat_order_grid_customer_id');
     $orderGrid->addIndex(['updated_at'], 'idx_sales_flat_order_grid_updated_at');
-    $orderGrid->addForeignKeyConstraint('customer_entity', ['customer_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_sales_flat_order_grid_customer');
-    $orderGrid->addForeignKeyConstraint('sales_flat_order', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_order_grid_order');
-    $orderGrid->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_sales_flat_order_grid_store');
+    $orderGrid->addForeignKeyConstraint('customer_entity', ['customer_id'], ['entity_id'], ['onDelete' => 'SET NULL'], 'fk_sales_flat_order_grid_customer');
+    $orderGrid->addForeignKeyConstraint('sales_flat_order', ['entity_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_order_grid_order');
+    $orderGrid->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'SET NULL'], 'fk_sales_flat_order_grid_store');
     $orderGrid->setComment('Sales Flat Order Grid');
 
     // sales_flat_order_address
@@ -242,7 +242,7 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
     $orderAddress->addIndex(['parent_id'], 'idx_sales_flat_order_address_parent_id');
-    $orderAddress->addForeignKeyConstraint('sales_flat_order', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_order_address_parent');
+    $orderAddress->addForeignKeyConstraint('sales_flat_order', ['parent_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_order_address_parent');
     $orderAddress->setComment('Sales Flat Order Address');
 
     // sales_flat_order_status_history
@@ -261,7 +261,7 @@ return function (Schema $schema): void {
     );
     $orderStatusHistory->addIndex(['parent_id'], 'idx_sales_flat_order_status_history_parent_id');
     $orderStatusHistory->addIndex(['created_at'], 'idx_sales_flat_order_status_history_created_at');
-    $orderStatusHistory->addForeignKeyConstraint('sales_flat_order', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_order_status_history_parent');
+    $orderStatusHistory->addForeignKeyConstraint('sales_flat_order', ['parent_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_order_status_history_parent');
     $orderStatusHistory->setComment('Sales Flat Order Status History');
 
     // sales_flat_order_item
@@ -345,8 +345,8 @@ return function (Schema $schema): void {
     $orderItem->addIndex(['order_id'], 'idx_sales_flat_order_item_order_id');
     $orderItem->addIndex(['store_id'], 'idx_sales_flat_order_item_store_id');
     $orderItem->addIndex(['product_id'], 'idx_sales_flat_order_item_product_id');
-    $orderItem->addForeignKeyConstraint('sales_flat_order', ['order_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_order_item_order');
-    $orderItem->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_sales_flat_order_item_store');
+    $orderItem->addForeignKeyConstraint('sales_flat_order', ['order_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_order_item_order');
+    $orderItem->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'SET NULL'], 'fk_sales_flat_order_item_store');
     $orderItem->setComment('Sales Flat Order Item');
 
     // sales_flat_order_payment
@@ -411,7 +411,7 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
     $orderPayment->addIndex(['parent_id'], 'idx_sales_flat_order_payment_parent_id');
-    $orderPayment->addForeignKeyConstraint('sales_flat_order', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_order_payment_parent');
+    $orderPayment->addForeignKeyConstraint('sales_flat_order', ['parent_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_order_payment_parent');
     $orderPayment->setComment('Sales Flat Order Payment');
 
     // sales_flat_shipment
@@ -442,8 +442,8 @@ return function (Schema $schema): void {
     $shipment->addIndex(['order_id'], 'idx_sales_flat_shipment_order_id');
     $shipment->addIndex(['created_at'], 'idx_sales_flat_shipment_created_at');
     $shipment->addIndex(['updated_at'], 'idx_sales_flat_shipment_updated_at');
-    $shipment->addForeignKeyConstraint('sales_flat_order', ['order_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_shipment_order');
-    $shipment->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_sales_flat_shipment_store');
+    $shipment->addForeignKeyConstraint('sales_flat_order', ['order_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_shipment_order');
+    $shipment->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'SET NULL'], 'fk_sales_flat_shipment_store');
     $shipment->setComment('Sales Flat Shipment');
 
     // sales_flat_shipment_grid
@@ -470,8 +470,8 @@ return function (Schema $schema): void {
     $shipmentGrid->addIndex(['created_at'], 'idx_sales_flat_shipment_grid_created_at');
     $shipmentGrid->addIndex(['order_created_at'], 'idx_sales_flat_shipment_grid_order_created_at');
     $shipmentGrid->addIndex(['shipping_name'], 'idx_sales_flat_shipment_grid_shipping_name');
-    $shipmentGrid->addForeignKeyConstraint('sales_flat_shipment', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_shipment_grid_shipment');
-    $shipmentGrid->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_sales_flat_shipment_grid_store');
+    $shipmentGrid->addForeignKeyConstraint('sales_flat_shipment', ['entity_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_shipment_grid_shipment');
+    $shipmentGrid->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'SET NULL'], 'fk_sales_flat_shipment_grid_store');
     $shipmentGrid->setComment('Sales Flat Shipment Grid');
 
     // sales_flat_shipment_item
@@ -492,7 +492,7 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
     $shipmentItem->addIndex(['parent_id'], 'idx_sales_flat_shipment_item_parent_id');
-    $shipmentItem->addForeignKeyConstraint('sales_flat_shipment', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_shipment_item_parent');
+    $shipmentItem->addForeignKeyConstraint('sales_flat_shipment', ['parent_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_shipment_item_parent');
     $shipmentItem->setComment('Sales Flat Shipment Item');
 
     // sales_flat_shipment_track
@@ -514,7 +514,7 @@ return function (Schema $schema): void {
     $shipmentTrack->addIndex(['parent_id'], 'idx_sales_flat_shipment_track_parent_id');
     $shipmentTrack->addIndex(['order_id'], 'idx_sales_flat_shipment_track_order_id');
     $shipmentTrack->addIndex(['created_at'], 'idx_sales_flat_shipment_track_created_at');
-    $shipmentTrack->addForeignKeyConstraint('sales_flat_shipment', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_shipment_track_parent');
+    $shipmentTrack->addForeignKeyConstraint('sales_flat_shipment', ['parent_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_shipment_track_parent');
     $shipmentTrack->setComment('Sales Flat Shipment Track');
 
     // sales_flat_shipment_comment
@@ -530,7 +530,7 @@ return function (Schema $schema): void {
     );
     $shipmentComment->addIndex(['created_at'], 'idx_sales_flat_shipment_comment_created_at');
     $shipmentComment->addIndex(['parent_id'], 'idx_sales_flat_shipment_comment_parent_id');
-    $shipmentComment->addForeignKeyConstraint('sales_flat_shipment', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_shipment_comment_parent');
+    $shipmentComment->addForeignKeyConstraint('sales_flat_shipment', ['parent_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_shipment_comment_parent');
     $shipmentComment->setComment('Sales Flat Shipment Comment');
 
     // sales_flat_invoice
@@ -590,8 +590,8 @@ return function (Schema $schema): void {
     $invoice->addIndex(['state'], 'idx_sales_flat_invoice_state');
     $invoice->addUniqueIndex(['increment_id'], 'unq_sales_flat_invoice_increment_id');
     $invoice->addIndex(['created_at'], 'idx_sales_flat_invoice_created_at');
-    $invoice->addForeignKeyConstraint('sales_flat_order', ['order_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_invoice_order');
-    $invoice->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_sales_flat_invoice_store');
+    $invoice->addForeignKeyConstraint('sales_flat_order', ['order_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_invoice_order');
+    $invoice->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'SET NULL'], 'fk_sales_flat_invoice_store');
     $invoice->setComment('Sales Flat Invoice');
 
     // sales_flat_invoice_grid
@@ -623,8 +623,8 @@ return function (Schema $schema): void {
     $invoiceGrid->addIndex(['created_at'], 'idx_sales_flat_invoice_grid_created_at');
     $invoiceGrid->addIndex(['order_created_at'], 'idx_sales_flat_invoice_grid_order_created_at');
     $invoiceGrid->addIndex(['billing_name'], 'idx_sales_flat_invoice_grid_billing_name');
-    $invoiceGrid->addForeignKeyConstraint('sales_flat_invoice', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_invoice_grid_invoice');
-    $invoiceGrid->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_sales_flat_invoice_grid_store');
+    $invoiceGrid->addForeignKeyConstraint('sales_flat_invoice', ['entity_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_invoice_grid_invoice');
+    $invoiceGrid->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'SET NULL'], 'fk_sales_flat_invoice_grid_store');
     $invoiceGrid->setComment('Sales Flat Invoice Grid');
 
     // sales_flat_invoice_item
@@ -657,7 +657,7 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
     $invoiceItem->addIndex(['parent_id'], 'idx_sales_flat_invoice_item_parent_id');
-    $invoiceItem->addForeignKeyConstraint('sales_flat_invoice', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_invoice_item_parent');
+    $invoiceItem->addForeignKeyConstraint('sales_flat_invoice', ['parent_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_invoice_item_parent');
     $invoiceItem->setComment('Sales Flat Invoice Item');
 
     // sales_flat_invoice_comment
@@ -673,7 +673,7 @@ return function (Schema $schema): void {
     );
     $invoiceComment->addIndex(['created_at'], 'idx_sales_flat_invoice_comment_created_at');
     $invoiceComment->addIndex(['parent_id'], 'idx_sales_flat_invoice_comment_parent_id');
-    $invoiceComment->addForeignKeyConstraint('sales_flat_invoice', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_invoice_comment_parent');
+    $invoiceComment->addForeignKeyConstraint('sales_flat_invoice', ['parent_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_invoice_comment_parent');
     $invoiceComment->setComment('Sales Flat Invoice Comment');
 
     // sales_flat_creditmemo
@@ -737,8 +737,8 @@ return function (Schema $schema): void {
     $creditmemo->addUniqueIndex(['increment_id'], 'unq_sales_flat_creditmemo_increment_id');
     $creditmemo->addIndex(['state'], 'idx_sales_flat_creditmemo_state');
     $creditmemo->addIndex(['created_at'], 'idx_sales_flat_creditmemo_created_at');
-    $creditmemo->addForeignKeyConstraint('sales_flat_order', ['order_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_creditmemo_order');
-    $creditmemo->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_sales_flat_creditmemo_store');
+    $creditmemo->addForeignKeyConstraint('sales_flat_order', ['order_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_creditmemo_order');
+    $creditmemo->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'SET NULL'], 'fk_sales_flat_creditmemo_store');
     $creditmemo->setComment('Sales Flat Creditmemo');
 
     // sales_flat_creditmemo_grid
@@ -778,8 +778,8 @@ return function (Schema $schema): void {
     $creditmemoGrid->addIndex(['created_at'], 'idx_sales_flat_creditmemo_grid_created_at');
     $creditmemoGrid->addIndex(['order_created_at'], 'idx_sales_flat_creditmemo_grid_order_created_at');
     $creditmemoGrid->addIndex(['billing_name'], 'idx_sales_flat_creditmemo_grid_billing_name');
-    $creditmemoGrid->addForeignKeyConstraint('sales_flat_creditmemo', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_creditmemo_grid_creditmemo');
-    $creditmemoGrid->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_sales_flat_creditmemo_grid_store');
+    $creditmemoGrid->addForeignKeyConstraint('sales_flat_creditmemo', ['entity_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_creditmemo_grid_creditmemo');
+    $creditmemoGrid->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'SET NULL'], 'fk_sales_flat_creditmemo_grid_store');
     $creditmemoGrid->setComment('Sales Flat Creditmemo Grid');
 
     // sales_flat_creditmemo_item
@@ -812,7 +812,7 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
     $creditmemoItem->addIndex(['parent_id'], 'idx_sales_flat_creditmemo_item_parent_id');
-    $creditmemoItem->addForeignKeyConstraint('sales_flat_creditmemo', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_creditmemo_item_parent');
+    $creditmemoItem->addForeignKeyConstraint('sales_flat_creditmemo', ['parent_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_creditmemo_item_parent');
     $creditmemoItem->setComment('Sales Flat Creditmemo Item');
 
     // sales_flat_creditmemo_comment
@@ -828,7 +828,7 @@ return function (Schema $schema): void {
     );
     $creditmemoComment->addIndex(['created_at'], 'idx_sales_flat_creditmemo_comment_created_at');
     $creditmemoComment->addIndex(['parent_id'], 'idx_sales_flat_creditmemo_comment_parent_id');
-    $creditmemoComment->addForeignKeyConstraint('sales_flat_creditmemo', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_creditmemo_comment_parent');
+    $creditmemoComment->addForeignKeyConstraint('sales_flat_creditmemo', ['parent_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_creditmemo_comment_parent');
     $creditmemoComment->setComment('Sales Flat Creditmemo Comment');
 
     // sales_flat_quote
@@ -889,7 +889,7 @@ return function (Schema $schema): void {
     );
     $quote->addIndex(['customer_id', 'store_id', 'is_active'], 'idx_sales_flat_quote_customer_id_store_id_is_active');
     $quote->addIndex(['store_id'], 'idx_sales_flat_quote_store_id');
-    $quote->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_quote_store');
+    $quote->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_quote_store');
     $quote->setComment('Sales Flat Quote');
 
     // sales_flat_quote_address
@@ -961,7 +961,7 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('address_id')->create(),
     );
     $quoteAddress->addIndex(['quote_id'], 'idx_sales_flat_quote_address_quote_id');
-    $quoteAddress->addForeignKeyConstraint('sales_flat_quote', ['quote_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_quote_address_quote');
+    $quoteAddress->addForeignKeyConstraint('sales_flat_quote', ['quote_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_quote_address_quote');
     $quoteAddress->setComment('Sales Flat Quote Address');
 
     // sales_flat_quote_item
@@ -1018,9 +1018,9 @@ return function (Schema $schema): void {
     $quoteItem->addIndex(['product_id'], 'idx_sales_flat_quote_item_product_id');
     $quoteItem->addIndex(['quote_id'], 'idx_sales_flat_quote_item_quote_id');
     $quoteItem->addIndex(['store_id'], 'idx_sales_flat_quote_item_store_id');
-    $quoteItem->addForeignKeyConstraint('sales_flat_quote_item', ['parent_item_id'], ['item_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_quote_item_parent');
-    $quoteItem->addForeignKeyConstraint('sales_flat_quote', ['quote_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_quote_item_quote');
-    $quoteItem->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_sales_flat_quote_item_store');
+    $quoteItem->addForeignKeyConstraint('sales_flat_quote_item', ['parent_item_id'], ['item_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_quote_item_parent');
+    $quoteItem->addForeignKeyConstraint('sales_flat_quote', ['quote_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_quote_item_quote');
+    $quoteItem->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'SET NULL'], 'fk_sales_flat_quote_item_store');
     $quoteItem->setComment('Sales Flat Quote Item');
 
     // sales_flat_quote_address_item
@@ -1071,9 +1071,9 @@ return function (Schema $schema): void {
     $quoteAddressItem->addIndex(['quote_address_id'], 'idx_sales_flat_quote_address_item_quote_address_id');
     $quoteAddressItem->addIndex(['parent_item_id'], 'idx_sales_flat_quote_address_item_parent_item_id');
     $quoteAddressItem->addIndex(['quote_item_id'], 'idx_sales_flat_quote_address_item_quote_item_id');
-    $quoteAddressItem->addForeignKeyConstraint('sales_flat_quote_address', ['quote_address_id'], ['address_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_quote_address_item_quote_address');
-    $quoteAddressItem->addForeignKeyConstraint('sales_flat_quote_address_item', ['parent_item_id'], ['address_item_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_quote_address_item_parent');
-    $quoteAddressItem->addForeignKeyConstraint('sales_flat_quote_item', ['quote_item_id'], ['item_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_quote_address_item_quote_item');
+    $quoteAddressItem->addForeignKeyConstraint('sales_flat_quote_address', ['quote_address_id'], ['address_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_quote_address_item_quote_address');
+    $quoteAddressItem->addForeignKeyConstraint('sales_flat_quote_address_item', ['parent_item_id'], ['address_item_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_quote_address_item_parent');
+    $quoteAddressItem->addForeignKeyConstraint('sales_flat_quote_item', ['quote_item_id'], ['item_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_quote_address_item_quote_item');
     $quoteAddressItem->setComment('Sales Flat Quote Address Item');
 
     // sales_flat_quote_item_option
@@ -1087,7 +1087,7 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_id')->create(),
     );
     $quoteItemOption->addIndex(['item_id'], 'idx_sales_flat_quote_item_option_item_id');
-    $quoteItemOption->addForeignKeyConstraint('sales_flat_quote_item', ['item_id'], ['item_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_quote_item_option_item');
+    $quoteItemOption->addForeignKeyConstraint('sales_flat_quote_item', ['item_id'], ['item_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_quote_item_option_item');
     $quoteItemOption->setComment('Sales Flat Quote Item Option');
 
     // sales_flat_quote_payment
@@ -1117,7 +1117,7 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('payment_id')->create(),
     );
     $quotePayment->addIndex(['quote_id'], 'idx_sales_flat_quote_payment_quote_id');
-    $quotePayment->addForeignKeyConstraint('sales_flat_quote', ['quote_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_quote_payment_quote');
+    $quotePayment->addForeignKeyConstraint('sales_flat_quote', ['quote_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_quote_payment_quote');
     $quotePayment->setComment('Sales Flat Quote Payment');
 
     // sales_flat_quote_shipping_rate (alias: quote_address_shipping_rate)
@@ -1139,7 +1139,7 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rate_id')->create(),
     );
     $quoteShippingRate->addIndex(['address_id'], 'idx_sales_flat_quote_shipping_rate_address_id');
-    $quoteShippingRate->addForeignKeyConstraint('sales_flat_quote_address', ['address_id'], ['address_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_quote_shipping_rate_address');
+    $quoteShippingRate->addForeignKeyConstraint('sales_flat_quote_address', ['address_id'], ['address_id'], ['onDelete' => 'CASCADE'], 'fk_sales_flat_quote_shipping_rate_address');
     $quoteShippingRate->setComment('Sales Flat Quote Shipping Rate');
 
     // Two structurally identical invoiced aggregation tables.
@@ -1160,7 +1160,7 @@ return function (Schema $schema): void {
         $short = str_replace('sales_invoiced_aggregated', 'sales_inv_aggr', $tableName);
         $aggr->addUniqueIndex(['period', 'store_id', 'order_status'], "unq_{$short}_period_store_status");
         $aggr->addIndex(['store_id'], "idx_{$short}_store_id");
-        $aggr->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], "fk_{$short}_store");
+        $aggr->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'SET NULL'], "fk_{$short}_store");
         $aggr->setComment('Sales Invoiced Aggregated');
     }
 
@@ -1194,7 +1194,7 @@ return function (Schema $schema): void {
         $short = str_replace('sales_order_aggregated_', 'sales_order_aggr_', $tableName);
         $aggr->addUniqueIndex(['period', 'store_id', 'order_status'], "unq_{$short}_period_store_status");
         $aggr->addIndex(['store_id'], "idx_{$short}_store_id");
-        $aggr->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], "fk_{$short}_store");
+        $aggr->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'SET NULL'], "fk_{$short}_store");
         $aggr->setComment('Sales Order Aggregated');
     }
 
@@ -1217,9 +1217,9 @@ return function (Schema $schema): void {
     $paymentTransaction->addIndex(['order_id'], 'idx_sales_payment_transaction_order_id');
     $paymentTransaction->addIndex(['parent_id'], 'idx_sales_payment_transaction_parent_id');
     $paymentTransaction->addIndex(['payment_id'], 'idx_sales_payment_transaction_payment_id');
-    $paymentTransaction->addForeignKeyConstraint('sales_flat_order', ['order_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_payment_transaction_order');
-    $paymentTransaction->addForeignKeyConstraint('sales_payment_transaction', ['parent_id'], ['transaction_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_payment_transaction_parent');
-    $paymentTransaction->addForeignKeyConstraint('sales_flat_order_payment', ['payment_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_payment_transaction_payment');
+    $paymentTransaction->addForeignKeyConstraint('sales_flat_order', ['order_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_payment_transaction_order');
+    $paymentTransaction->addForeignKeyConstraint('sales_payment_transaction', ['parent_id'], ['transaction_id'], ['onDelete' => 'CASCADE'], 'fk_sales_payment_transaction_parent');
+    $paymentTransaction->addForeignKeyConstraint('sales_flat_order_payment', ['payment_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_payment_transaction_payment');
     $paymentTransaction->setComment('Sales Payment Transaction');
 
     // Two structurally identical refunded aggregation tables.
@@ -1245,7 +1245,7 @@ return function (Schema $schema): void {
         $short = str_replace('sales_refunded_aggregated', 'sales_ref_aggr', $tableName);
         $aggr->addUniqueIndex(['period', 'store_id', 'order_status'], "unq_{$short}_period_store_status");
         $aggr->addIndex(['store_id'], "idx_{$short}_store_id");
-        $aggr->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], "fk_{$short}_store");
+        $aggr->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'SET NULL'], "fk_{$short}_store");
         $aggr->setComment('Sales Refunded Aggregated');
     }
 
@@ -1266,7 +1266,7 @@ return function (Schema $schema): void {
         $short = str_replace('sales_shipping_aggregated', 'sales_ship_aggr', $tableName);
         $aggr->addUniqueIndex(['period', 'store_id', 'order_status', 'shipping_description'], "unq_{$short}_period_store_status_desc");
         $aggr->addIndex(['store_id'], "idx_{$short}_store_id");
-        $aggr->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], "fk_{$short}_store");
+        $aggr->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'SET NULL'], "fk_{$short}_store");
         $aggr->setComment('Sales Shipping Aggregated');
     }
 
@@ -1292,7 +1292,7 @@ return function (Schema $schema): void {
         $aggr->addUniqueIndex(['period', 'store_id', 'product_id'], "unq_{$short}_period_store_product");
         $aggr->addIndex(['store_id'], "idx_{$short}_store_id");
         $aggr->addIndex(['product_id'], "idx_{$short}_product_id");
-        $aggr->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$short}_store");
+        $aggr->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'CASCADE'], "fk_{$short}_store");
         $aggr->setComment('Sales Bestsellers Aggregated ' . ucfirst($period));
     }
 
@@ -1313,8 +1313,8 @@ return function (Schema $schema): void {
     );
     $billingAgreement->addIndex(['customer_id'], 'idx_sales_billing_agreement_customer_id');
     $billingAgreement->addIndex(['store_id'], 'idx_sales_billing_agreement_store_id');
-    $billingAgreement->addForeignKeyConstraint('customer_entity', ['customer_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_billing_agreement_customer');
-    $billingAgreement->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_sales_billing_agreement_store');
+    $billingAgreement->addForeignKeyConstraint('customer_entity', ['customer_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_billing_agreement_customer');
+    $billingAgreement->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'SET NULL'], 'fk_sales_billing_agreement_store');
     $billingAgreement->setComment('Sales Billing Agreement');
 
     // sales_billing_agreement_order
@@ -1325,8 +1325,8 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('agreement_id', 'order_id')->create(),
     );
     $billingAgreementOrder->addIndex(['order_id'], 'idx_sales_billing_agreement_order_order_id');
-    $billingAgreementOrder->addForeignKeyConstraint('sales_billing_agreement', ['agreement_id'], ['agreement_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_billing_agreement_order_agreement');
-    $billingAgreementOrder->addForeignKeyConstraint('sales_flat_order', ['order_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_billing_agreement_order_order');
+    $billingAgreementOrder->addForeignKeyConstraint('sales_billing_agreement', ['agreement_id'], ['agreement_id'], ['onDelete' => 'CASCADE'], 'fk_sales_billing_agreement_order_agreement');
+    $billingAgreementOrder->addForeignKeyConstraint('sales_flat_order', ['order_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_billing_agreement_order_order');
     $billingAgreementOrder->setComment('Sales Billing Agreement Order');
 
     // sales_recurring_profile
@@ -1371,8 +1371,8 @@ return function (Schema $schema): void {
     $recurringProfile->addUniqueIndex(['internal_reference_id'], 'unq_sales_recurring_profile_internal_reference_id');
     $recurringProfile->addIndex(['customer_id'], 'idx_sales_recurring_profile_customer_id');
     $recurringProfile->addIndex(['store_id'], 'idx_sales_recurring_profile_store_id');
-    $recurringProfile->addForeignKeyConstraint('customer_entity', ['customer_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_sales_recurring_profile_customer');
-    $recurringProfile->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_sales_recurring_profile_store');
+    $recurringProfile->addForeignKeyConstraint('customer_entity', ['customer_id'], ['entity_id'], ['onDelete' => 'SET NULL'], 'fk_sales_recurring_profile_customer');
+    $recurringProfile->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'SET NULL'], 'fk_sales_recurring_profile_store');
     $recurringProfile->setComment('Sales Recurring Profile');
 
     // sales_recurring_profile_order
@@ -1385,8 +1385,8 @@ return function (Schema $schema): void {
     );
     $recurringProfileOrder->addUniqueIndex(['profile_id', 'order_id'], 'unq_sales_recurring_profile_order_profile_order');
     $recurringProfileOrder->addIndex(['order_id'], 'idx_sales_recurring_profile_order_order_id');
-    $recurringProfileOrder->addForeignKeyConstraint('sales_flat_order', ['order_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_recurring_profile_order_order');
-    $recurringProfileOrder->addForeignKeyConstraint('sales_recurring_profile', ['profile_id'], ['profile_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_recurring_profile_order_profile');
+    $recurringProfileOrder->addForeignKeyConstraint('sales_flat_order', ['order_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_sales_recurring_profile_order_order');
+    $recurringProfileOrder->addForeignKeyConstraint('sales_recurring_profile', ['profile_id'], ['profile_id'], ['onDelete' => 'CASCADE'], 'fk_sales_recurring_profile_order_profile');
     $recurringProfileOrder->setComment('Sales Recurring Profile Order');
 
     // sales_order_tax
@@ -1429,7 +1429,7 @@ return function (Schema $schema): void {
     $orderStatusState->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('status', 'state')->create(),
     );
-    $orderStatusState->addForeignKeyConstraint('sales_order_status', ['status'], ['status'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_order_status_state_status');
+    $orderStatusState->addForeignKeyConstraint('sales_order_status', ['status'], ['status'], ['onDelete' => 'CASCADE'], 'fk_sales_order_status_state_status');
     $orderStatusState->setComment('Sales Order Status State');
 
     // sales_order_status_label
@@ -1441,7 +1441,7 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('status', 'store_id')->create(),
     );
     $orderStatusLabel->addIndex(['store_id'], 'idx_sales_order_status_label_store_id');
-    $orderStatusLabel->addForeignKeyConstraint('sales_order_status', ['status'], ['status'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_order_status_label_status');
-    $orderStatusLabel->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_order_status_label_store');
+    $orderStatusLabel->addForeignKeyConstraint('sales_order_status', ['status'], ['status'], ['onDelete' => 'CASCADE'], 'fk_sales_order_status_label_status');
+    $orderStatusLabel->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'CASCADE'], 'fk_sales_order_status_label_store');
     $orderStatusLabel->setComment('Sales Order Status Label');
 };

@@ -30,7 +30,7 @@ return function (Schema $schema): void {
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_wishlist_customer',
     );
     $wishlist->setComment('Wishlist main Table');
@@ -53,21 +53,21 @@ return function (Schema $schema): void {
         'wishlist',
         ['wishlist_id'],
         ['wishlist_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_wishlist_item_wishlist',
     );
     $item->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_wishlist_item_product',
     );
     $item->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
+        ['onDelete' => 'SET NULL'],
         'fk_wishlist_item_store',
     );
     $item->setComment('Wishlist items');
@@ -85,7 +85,7 @@ return function (Schema $schema): void {
         'wishlist_item',
         ['wishlist_item_id'],
         ['wishlist_item_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_wishlist_item_option_item',
     );
     $itemOption->setComment('Wishlist Item Option Table');

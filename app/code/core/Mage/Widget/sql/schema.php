@@ -57,7 +57,7 @@ return function (Schema $schema): void {
         'widget_instance',
         ['instance_id'],
         ['instance_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_widget_instance_page_instance',
     );
     $instancePage->setComment('Instance of Widget on Page');
@@ -72,14 +72,14 @@ return function (Schema $schema): void {
         'widget_instance_page',
         ['page_id'],
         ['page_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_widget_instance_page_layout_page',
     );
     $instancePageLayout->addForeignKeyConstraint(
         'core_layout_update',
         ['layout_update_id'],
         ['layout_update_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_widget_instance_page_layout_update',
     );
     $instancePageLayout->setComment('Layout updates');

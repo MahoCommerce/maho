@@ -51,7 +51,7 @@ return function (Schema $schema): void {
     );
     $storeGroup->addIndex(['website_id'], 'idx_core_store_group_website_id');
     $storeGroup->addIndex(['default_store_id'], 'idx_core_store_group_default_store_id');
-    $storeGroup->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_store_group_website');
+    $storeGroup->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onDelete' => 'CASCADE'], 'fk_core_store_group_website');
     $storeGroup->setComment('Store Groups');
 
     $store = $schema->createTable('core_store');
@@ -69,8 +69,8 @@ return function (Schema $schema): void {
     $store->addIndex(['website_id'], 'idx_core_store_website_id');
     $store->addIndex(['is_active', 'sort_order'], 'idx_core_store_is_active_sort_order');
     $store->addIndex(['group_id'], 'idx_core_store_group_id');
-    $store->addForeignKeyConstraint('core_store_group', ['group_id'], ['group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_store_group');
-    $store->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_store_website');
+    $store->addForeignKeyConstraint('core_store_group', ['group_id'], ['group_id'], ['onDelete' => 'CASCADE'], 'fk_core_store_group');
+    $store->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onDelete' => 'CASCADE'], 'fk_core_store_website');
     $store->setComment('Stores');
 
     // updated_at added by legacy upgrade-1.6.0.8-1.6.0.9.php
@@ -131,8 +131,8 @@ return function (Schema $schema): void {
     );
     $layoutLink->addUniqueIndex(['store_id', 'package', 'theme', 'layout_update_id'], 'unq_core_layout_link_store_package_theme_update');
     $layoutLink->addIndex(['layout_update_id'], 'idx_core_layout_link_layout_update_id');
-    $layoutLink->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_layout_link_store');
-    $layoutLink->addForeignKeyConstraint('core_layout_update', ['layout_update_id'], ['layout_update_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_layout_link_update');
+    $layoutLink->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'CASCADE'], 'fk_core_layout_link_store');
+    $layoutLink->addForeignKeyConstraint('core_layout_update', ['layout_update_id'], ['layout_update_id'], ['onDelete' => 'CASCADE'], 'fk_core_layout_link_update');
     $layoutLink->setComment('Layout Link');
 
     $session = $schema->createTable('core_session');
@@ -158,7 +158,7 @@ return function (Schema $schema): void {
     );
     $translate->addUniqueIndex(['store_id', 'locale', 'crc_string', 'string'], 'unq_core_translate_store_locale_crc_string');
     $translate->addIndex(['store_id'], 'idx_core_translate_store_id');
-    $translate->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_translate_store');
+    $translate->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'CASCADE'], 'fk_core_translate_store');
     $translate->setComment('Translations');
 
     $urlRewrite = $schema->createTable('core_url_rewrite');
@@ -178,7 +178,7 @@ return function (Schema $schema): void {
     $urlRewrite->addIndex(['target_path', 'store_id'], 'idx_core_url_rewrite_target_path_store');
     $urlRewrite->addIndex(['id_path'], 'idx_core_url_rewrite_id_path');
     $urlRewrite->addIndex(['store_id'], 'idx_core_url_rewrite_store_id');
-    $urlRewrite->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_url_rewrite_store');
+    $urlRewrite->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'CASCADE'], 'fk_core_url_rewrite_store');
     $urlRewrite->setComment('Url Rewrites');
 
     $designChange = $schema->createTable('design_change');
@@ -191,7 +191,7 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('design_change_id')->create(),
     );
     $designChange->addIndex(['store_id'], 'idx_design_change_store_id');
-    $designChange->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_design_change_store');
+    $designChange->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'CASCADE'], 'fk_design_change_store');
     $designChange->setComment('Design Changes');
 
     $variable = $schema->createTable('core_variable');
@@ -216,8 +216,8 @@ return function (Schema $schema): void {
     $variableValue->addUniqueIndex(['variable_id', 'store_id'], 'unq_core_variable_value_variable_store');
     $variableValue->addIndex(['variable_id'], 'idx_core_variable_value_variable_id');
     $variableValue->addIndex(['store_id'], 'idx_core_variable_value_store_id');
-    $variableValue->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_variable_value_store');
-    $variableValue->addForeignKeyConstraint('core_variable', ['variable_id'], ['variable_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_variable_value_variable');
+    $variableValue->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onDelete' => 'CASCADE'], 'fk_core_variable_value_store');
+    $variableValue->addForeignKeyConstraint('core_variable', ['variable_id'], ['variable_id'], ['onDelete' => 'CASCADE'], 'fk_core_variable_value_variable');
     $variableValue->setComment('Variable Value');
 
     $cache = $schema->createTable('core_cache');
@@ -291,7 +291,7 @@ return function (Schema $schema): void {
     $emailRecipients->addIndex(['recipient_email'], 'idx_core_email_queue_recipients_email');
     $emailRecipients->addIndex(['email_type'], 'idx_core_email_queue_recipients_email_type');
     $emailRecipients->addUniqueIndex(['message_id', 'recipient_email', 'email_type'], 'unq_core_email_queue_recipients_message_email_type');
-    $emailRecipients->addForeignKeyConstraint('core_email_queue', ['message_id'], ['message_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_email_queue_recipients_queue');
+    $emailRecipients->addForeignKeyConstraint('core_email_queue', ['message_id'], ['message_id'], ['onDelete' => 'CASCADE'], 'fk_core_email_queue_recipients_queue');
     $emailRecipients->setComment('Email Queue');
 
     // Table added by maho-26.2.2.php

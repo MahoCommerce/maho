@@ -38,7 +38,7 @@ return function (Schema $schema): void {
         'rating_entity',
         ['entity_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_rating_entity',
     );
     $rating->setComment('Ratings');
@@ -57,7 +57,7 @@ return function (Schema $schema): void {
         'rating',
         ['rating_id'],
         ['rating_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_rating_option_rating',
     );
     $option->setComment('Rating options');
@@ -82,14 +82,14 @@ return function (Schema $schema): void {
         'rating_option',
         ['option_id'],
         ['option_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_rating_option_vote_option',
     );
     $vote->addForeignKeyConstraint(
         'review',
         ['review_id'],
         ['review_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_rating_option_vote_review',
     );
     $vote->setComment('Rating option values');
@@ -112,14 +112,14 @@ return function (Schema $schema): void {
         'rating',
         ['rating_id'],
         ['rating_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_rating_option_vote_aggregated_rating',
     );
     $aggregated->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_rating_option_vote_aggregated_store',
     );
     $aggregated->setComment('Rating vote aggregated');
@@ -135,14 +135,14 @@ return function (Schema $schema): void {
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_rating_store_store',
     );
     $ratingStore->addForeignKeyConstraint(
         'rating',
         ['rating_id'],
         ['rating_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'NO ACTION'],
+        ['onDelete' => 'NO ACTION'],
         'fk_rating_store_rating',
     );
     $ratingStore->setComment('Rating Store');
@@ -159,14 +159,14 @@ return function (Schema $schema): void {
         'rating',
         ['rating_id'],
         ['rating_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_rating_title_rating',
     );
     $ratingTitle->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_rating_title_store',
     );
     $ratingTitle->setComment('Rating Title');

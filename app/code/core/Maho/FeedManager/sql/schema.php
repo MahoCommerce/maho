@@ -93,14 +93,14 @@ return function (Schema $schema): void {
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_feedmanager_feed_store',
     );
     $feed->addForeignKeyConstraint(
         'feedmanager_destination',
         ['destination_id'],
         ['destination_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
+        ['onDelete' => 'SET NULL'],
         'fk_feedmanager_feed_destination',
     );
     $feed->setComment('Feed Manager - Feeds');
@@ -122,7 +122,7 @@ return function (Schema $schema): void {
         'feedmanager_feed',
         ['feed_id'],
         ['feed_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_feedmanager_attribute_mapping_feed',
     );
     $attributeMapping->setComment('Feed Manager - Attribute Mappings');
@@ -164,7 +164,7 @@ return function (Schema $schema): void {
         'feedmanager_feed',
         ['feed_id'],
         ['feed_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_feedmanager_log_feed',
     );
     $log->setComment('Feed Manager - Generation Logs');

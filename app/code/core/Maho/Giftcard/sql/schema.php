@@ -47,14 +47,14 @@ return function (Schema $schema): void {
         'core_website',
         ['website_id'],
         ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_giftcard_website',
     );
     $giftcard->addForeignKeyConstraint(
         'sales_flat_order',
         ['purchase_order_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
+        ['onDelete' => 'SET NULL'],
         'fk_giftcard_purchase_order',
     );
     $giftcard->setComment('Gift Card Table');
@@ -80,14 +80,14 @@ return function (Schema $schema): void {
         'giftcard',
         ['giftcard_id'],
         ['giftcard_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_giftcard_history_giftcard',
     );
     $history->addForeignKeyConstraint(
         'sales_flat_order',
         ['order_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
+        ['onDelete' => 'SET NULL'],
         'fk_giftcard_history_order',
     );
     $history->setComment('Gift Card History Table');

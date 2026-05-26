@@ -60,21 +60,21 @@ return function (Schema $schema): void {
         'admin_user',
         ['admin_id'],
         ['user_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_oauth_token_admin_user',
     );
     $token->addForeignKeyConstraint(
         'oauth_consumer',
         ['consumer_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_oauth_token_consumer',
     );
     $token->addForeignKeyConstraint(
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_oauth_token_customer',
     );
     $token->setComment('OAuth Tokens');

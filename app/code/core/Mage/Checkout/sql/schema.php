@@ -41,14 +41,14 @@ return function (Schema $schema): void {
         'checkout_agreement',
         ['agreement_id'],
         ['agreement_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_checkout_agreement_store_agreement',
     );
     $agreementStore->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+        ['onDelete' => 'CASCADE'],
         'fk_checkout_agreement_store_store',
     );
     $agreementStore->setComment('Checkout Agreement Store');
