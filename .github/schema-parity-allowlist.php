@@ -203,7 +203,7 @@ $entries = [
     // valid epoch '1970-01-01 00:00:00' instead.
     [
         'engines' => ['pgsql'],
-        'table' => 'product_alert_price',
+        'table' => 'customer_flowpassword',
         'replace' => [
             "  COLUMN requested_date character varying(255) NOT NULL DEFAULT '0000-00-00 00:00:00'" => "  COLUMN requested_date character varying(255) NOT NULL DEFAULT '1970-01-01 00:00:00'",
         ],
@@ -241,55 +241,110 @@ $entries = [
         ],
     ],
 
-    // log_customer.logdate: legacy declares NOT NULL; declarative makes it
-    // nullable (it's set lazily on first login).
+    // Tables where declarative schema chose nullable timestamps (event-time
+    // columns that aren't always known at insert time). The global regex
+    // above promotes bare "timestamp NOT NULL" on main to "...DEFAULT
+    // CURRENT_TIMESTAMP" since that's the right default for the bulk of
+    // legacy schemas, but for these specific columns the declarative is
+    // deliberately nullable, so we revert the regex's transformation here.
     [
         'engines' => ['pgsql'],
-        'table' => 'log_customer',
+        'table' => 'api_session',
         'replace' => [
             '  COLUMN logdate timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN logdate timestamp without time zone NULL',
         ],
     ],
-
-    // log_summary.lognum: legacy declares smallint, declarative integer
-    // (matches MySQL int unsigned).
+    [
+        'engines' => ['pgsql'],
+        'table' => 'log_customer',
+        'replace' => [
+            '  COLUMN login_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN login_at timestamp without time zone NULL',
+        ],
+    ],
     [
         'engines' => ['pgsql'],
         'table' => 'log_summary',
         'replace' => [
+            '  COLUMN add_date timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN add_date timestamp without time zone NULL',
+            // legacy declares smallint, declarative integer (matches MySQL int).
             '  COLUMN lognum smallint NOT NULL DEFAULT 0' => '  COLUMN lognum integer NOT NULL DEFAULT 0',
         ],
     ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'log_url',
+        'replace' => [
+            '  COLUMN visit_time timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN visit_time timestamp without time zone NULL',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'log_visitor',
+        'replace' => [
+            '  COLUMN last_visit_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN last_visit_at timestamp without time zone NULL',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'product_alert_price',
+        'replace' => [
+            '  COLUMN add_date timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN add_date timestamp without time zone NULL',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'product_alert_stock',
+        'replace' => [
+            '  COLUMN add_date timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN add_date timestamp without time zone NULL',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'report_event',
+        'replace' => [
+            '  COLUMN logged_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN logged_at timestamp without time zone NULL',
+        ],
+    ],
+    // feedmanager_log.started_at: declarative is NOT NULL (no default); legacy
+    // is also NOT NULL but the global regex added CURRENT_TIMESTAMP. Strip it.
+    [
+        'engines' => ['pgsql'],
+        'table' => 'feedmanager_log',
+        'replace' => [
+            '  COLUMN started_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN started_at timestamp without time zone NOT NULL',
+        ],
+    ],
 
-    // catalog_product_link_attribute on Postgres: legacy creates a UNIQUE
-    // index that's logically a primary key; declarative makes it the PK
-    // directly, so the redundant UNIQ is gone.
+    // sales_flat_order.created_at / updated_at: declarative is NOT NULL no
+    // default; legacy too, but the global regex added CURRENT_TIMESTAMP.
     [
         'engines' => ['pgsql'],
-        'table' => 'catalog_product_link_attribute_int',
-        'remove' => [
-            '  INDEX [UNIQ] (product_link_attribute_id,link_id)',
+        'table' => 'sales_flat_order',
+        'replace' => [
+            '  COLUMN created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN created_at timestamp without time zone NOT NULL',
+            '  COLUMN updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN updated_at timestamp without time zone NOT NULL',
         ],
     ],
-    [
-        'engines' => ['pgsql'],
-        'table' => 'catalog_product_link_attribute_decimal',
-        'remove' => [
-            '  INDEX [UNIQ] (product_link_attribute_id,link_id)',
-        ],
-    ],
-    [
-        'engines' => ['pgsql'],
-        'table' => 'catalog_product_link_attribute_varchar',
-        'remove' => [
-            '  INDEX [UNIQ] (product_link_attribute_id,link_id)',
-        ],
-    ],
+
+    // core_translate on Postgres: legacy creates a UNIQUE index that
+    // declarative makes the PK directly, so the redundant UNIQ is gone.
     [
         'engines' => ['pgsql'],
         'table' => 'core_translate',
         'remove' => [
             '  INDEX [UNIQ] (store_id,locale,string)',
+        ],
+    ],
+
+    // checkout_agreement_store on Postgres: declarative explicitly adds an
+    // index on store_id (needed for FK lookups since the column is the
+    // non-prefix half of the composite PK). The legacy pgsql install doesn't
+    // emit it, so add it to main to match.
+    [
+        'engines' => ['pgsql'],
+        'table' => 'checkout_agreement_store',
+        'add' => [
+            '  INDEX [IDX] (store_id)',
         ],
     ],
 
@@ -305,7 +360,7 @@ $entries = [
     // numeric default formatting: declarative emits 0.0000, legacy emits 0.
     [
         'engines' => ['pgsql'],
-        'table' => 'salesrule_coupon_aggregated_order',
+        'table' => 'catalogrule',
         'replace' => [
             '  COLUMN discount_amount numeric(12,4) NOT NULL DEFAULT 0' => '  COLUMN discount_amount numeric(12,4) NOT NULL DEFAULT 0.0000',
         ],
@@ -431,6 +486,20 @@ $entries = [
         'table' => 'sales_invoiced_aggregated',
         'replace' => [
             '  COLUMN order_status varchar(50) NULL' => '  COLUMN order_status varchar(50) NOT NULL DEFAULT ',
+        ],
+    ],
+    [
+        'engines' => ['mysql'],
+        'table' => 'sales_order_aggregated_updated',
+        'replace' => [
+            '  COLUMN order_status varchar(50) NOT NULL' => '  COLUMN order_status varchar(50) NOT NULL DEFAULT ',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'sales_invoiced_aggregated',
+        'replace' => [
+            '  COLUMN order_status character varying(50) NULL' => "  COLUMN order_status character varying(50) NOT NULL DEFAULT ''",
         ],
     ],
 
@@ -581,9 +650,10 @@ foreach ($entries as $entry) {
         continue;
     }
     $table = $entry['table'];
-    $ops[$table] ??= ['replace' => [], 'remove' => []];
+    $ops[$table] ??= ['replace' => [], 'remove' => [], 'add' => []];
     $ops[$table]['replace'] = array_merge($ops[$table]['replace'], $entry['replace'] ?? []);
     $ops[$table]['remove']  = array_merge($ops[$table]['remove'], $entry['remove']  ?? []);
+    $ops[$table]['add']     = array_merge($ops[$table]['add'], $entry['add'] ?? []);
 }
 
 $activeGlobalRegex = [];
@@ -603,11 +673,60 @@ if ($input === false) {
 $lines        = explode("\n", $input);
 $out          = [];
 $currentTable = null;
+$pendingAdds  = [];
+
+// When flushing pending "add" lines, splice them into the current table block
+// and re-sort only their respective category (COLUMN / INDEX / FK) so each
+// inserted line lands where it would have if the dumper had emitted it.
+$flushAdds = static function () use (&$out, &$pendingAdds): void {
+    if (count($pendingAdds) === 0) {
+        return;
+    }
+
+    $start = count($out) - 1;
+    while ($start > 0 && !str_starts_with($out[$start], 'TABLE ')) {
+        $start--;
+    }
+    $blockStart = $start + 1;
+    $block      = array_slice($out, $blockStart);
+
+    foreach ($pendingAdds as $addLine) {
+        $prefix = '';
+        if (str_starts_with($addLine, '  COLUMN ')) {
+            $prefix = '  COLUMN ';
+        } elseif (str_starts_with($addLine, '  INDEX ')) {
+            $prefix = '  INDEX ';
+        } elseif (str_starts_with($addLine, '  FK ')) {
+            $prefix = '  FK ';
+        } else {
+            $block[] = $addLine;
+            continue;
+        }
+
+        $insertAt = count($block);
+        foreach ($block as $i => $existing) {
+            if (!str_starts_with($existing, $prefix)) {
+                continue;
+            }
+            if (strcmp($addLine, $existing) < 0) {
+                $insertAt = $i;
+                break;
+            }
+            $insertAt = $i + 1;
+        }
+        array_splice($block, $insertAt, 0, [$addLine]);
+    }
+
+    $out = array_merge(array_slice($out, 0, $blockStart), $block);
+    $pendingAdds = [];
+};
 
 foreach ($lines as $line) {
     if (preg_match('/^TABLE (.+)$/', $line, $m)) {
+        $flushAdds();
         $currentTable = $m[1];
         $out[]        = $line;
+        $pendingAdds  = $ops[$currentTable]['add'] ?? [];
         continue;
     }
     if ($currentTable !== null && isset($ops[$currentTable])) {
@@ -628,5 +747,6 @@ foreach ($lines as $line) {
     }
     $out[] = $line;
 }
+$flushAdds();
 
 echo implode("\n", $out);

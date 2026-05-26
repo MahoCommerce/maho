@@ -477,34 +477,35 @@ class Mage_Install_Model_Installer_SampleData
     }
 
     /**
-     * Update PostgreSQL sequences after import
+     * Update PostgreSQL sequences after import.
+     *
+     * pg_get_serial_sequence is the source of truth here: it returns the
+     * backing sequence for both legacy SERIAL columns (default nextval)
+     * AND declarative GENERATED ... AS IDENTITY columns (sequence attached
+     * via internal pg_depend). The earlier pg_depend-based query missed
+     * IDENTITY columns on some Postgres versions.
      */
     private function updatePostgresSequences(\PDO $pdo): void
     {
-        // Match both SERIAL columns (deptype='a' — auto-dependency) and
-        // GENERATED ... AS IDENTITY columns (deptype='i' — internal dependency).
-        // The declarative schema uses IDENTITY; modules still on legacy DDL
-        // use SERIAL. Either way the backing sequence needs bumping after a
-        // bulk insert that wrote explicit IDs.
         $stmt = $pdo->query("
             SELECT
-                seq.relname as sequence_name,
-                tab.relname as table_name,
-                col.attname as column_name
-            FROM pg_class seq
-            JOIN pg_depend dep ON seq.oid = dep.objid
-            JOIN pg_class tab ON dep.refobjid = tab.oid
-            JOIN pg_attribute col ON col.attrelid = tab.oid AND col.attnum = dep.refobjsubid
-            WHERE seq.relkind = 'S'
-            AND dep.deptype IN ('a', 'i')
-            ORDER BY seq.relname
+                c.table_name,
+                c.column_name,
+                pg_get_serial_sequence(quote_ident(c.table_name), c.column_name) AS sequence_name
+            FROM information_schema.columns c
+            WHERE c.table_schema = 'public'
+              AND (c.column_default LIKE 'nextval(%' OR c.is_identity = 'YES')
+            ORDER BY c.table_name, c.column_name
         ");
 
         $sequences = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         foreach ($sequences as $seq) {
             $sequenceName = $seq['sequence_name'];
-            $tableName = $seq['table_name'];
+            if (!is_string($sequenceName) || $sequenceName === '') {
+                continue;
+            }
+            $tableName  = $seq['table_name'];
             $columnName = $seq['column_name'];
 
             try {
@@ -512,7 +513,9 @@ class Mage_Install_Model_Installer_SampleData
                 $maxId = (int) $maxStmt->fetchColumn();
 
                 if ($maxId > 0) {
-                    $pdo->exec("SELECT setval('\"{$sequenceName}\"', {$maxId}, true)");
+                    // pg_get_serial_sequence returns a schema-qualified identifier
+                    // already; embed it as-is in the FROM/setval call.
+                    $pdo->exec("SELECT setval('{$sequenceName}', {$maxId}, true)");
                 }
             } catch (\PDOException $e) {
                 continue;
