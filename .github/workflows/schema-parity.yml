@@ -1,0 +1,631 @@
+name: Schema Parity
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  parity-db:
+    name: Schema Parity (${{ matrix.name }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: mysql-8.4
+            db_engine: mysql
+            db_image: mysql:8.4
+            db_user: root
+            db_pass: root
+            health_cmd: mysqladmin ping
+            db_command: --log-bin --gtid-mode=ON --enforce-gtid-consistency=ON
+          - name: mysql-latest
+            db_engine: mysql
+            db_image: mysql:latest
+            db_user: root
+            db_pass: root
+            health_cmd: mysqladmin ping
+            db_command: --log-bin --gtid-mode=ON --enforce-gtid-consistency=ON
+          - name: mariadb-10.11
+            db_engine: mysql
+            db_image: mariadb:10.11
+            db_user: root
+            db_pass: root
+            health_cmd: healthcheck.sh --connect --innodb_initialized
+            db_command: --skip-name-resolve
+          - name: mariadb-latest
+            db_engine: mysql
+            db_image: mariadb:latest
+            db_user: root
+            db_pass: root
+            health_cmd: healthcheck.sh --connect --innodb_initialized
+            db_command: --skip-name-resolve
+          - name: pgsql-14
+            db_engine: pgsql
+            db_image: postgres:14
+            db_user: postgres
+            db_pass: postgres
+            health_cmd: pg_isready
+            db_command: postgres
+          - name: pgsql-latest
+            db_engine: pgsql
+            db_image: postgres:latest
+            db_user: postgres
+            db_pass: postgres
+            health_cmd: pg_isready
+            db_command: postgres
+
+    services:
+      db:
+        image: ${{ matrix.db_image }}
+        command: ${{ matrix.db_command }}
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: maho
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: maho
+        ports:
+          - ${{ contains(matrix.db_image, 'postgres') && '5432:5432' || '3306:3306' }}
+        options: >-
+          --health-cmd="${{ matrix.health_cmd }}"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DB_ENGINE: ${{ matrix.db_engine }}
+      DB_HOST: 127.0.0.1
+      DB_NAME: maho
+      DB_USER: ${{ matrix.db_user }}
+      DB_PASS: ${{ matrix.db_pass }}
+
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: ${{ matrix.db_engine == 'pgsql' && 'pdo_pgsql' || '' }}
+
+      - name: Checkout PR
+        uses: actions/checkout@v6
+
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          path: _main
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Write normalizer script
+        run: |
+          cat > /tmp/normalize.php <<'NORMALIZE_PHP'
+          <?php
+          /**
+           * Canonical schema dumper for cross-branch parity checks.
+           * Reads DB_ENGINE, DB_HOST, DB_NAME, DB_USER, DB_PASS from env.
+           * Emits deterministic text representation to STDOUT.
+           */
+          declare(strict_types=1);
+
+          $engine = getenv('DB_ENGINE');
+          $host   = getenv('DB_HOST') ?: '127.0.0.1';
+          $db     = getenv('DB_NAME') ?: 'maho';
+          $user   = getenv('DB_USER') ?: '';
+          $pass   = getenv('DB_PASS') ?: '';
+
+          $opts = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
+          [$pdo, $driver] = match ($engine) {
+              'mysql'  => [new PDO("mysql:host=$host;dbname=$db", $user, $pass, $opts), 'mysql'],
+              'pgsql'  => [new PDO("pgsql:host=$host;dbname=$db;user=$user;password=$pass", null, null, $opts), 'pgsql'],
+              'sqlite' => [new PDO("sqlite:$db", null, null, $opts), 'sqlite'],
+              default  => throw new RuntimeException("Unknown DB_ENGINE: $engine"),
+          };
+
+          // Tables known to be seed-populated by install — row counts compared.
+          const SEED_TABLES = [
+              'core_website', 'core_store', 'core_store_group',
+              'directory_country', 'directory_country_region',
+              'directory_currency_rate',
+              'eav_entity_type', 'eav_attribute_set', 'eav_attribute_group',
+              'tax_class',
+          ];
+
+          function q(string $driver, string $ident): string {
+              return $driver === 'mysql' ? "`$ident`" : '"' . $ident . '"';
+          }
+
+          function tables(PDO $pdo, string $driver): array {
+              return match ($driver) {
+                  'mysql'  => $pdo->query("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_TYPE = 'BASE TABLE' ORDER BY TABLE_NAME")->fetchAll(PDO::FETCH_COLUMN),
+                  'pgsql'  => $pdo->query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' ORDER BY table_name")->fetchAll(PDO::FETCH_COLUMN),
+                  'sqlite' => $pdo->query("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name")->fetchAll(PDO::FETCH_COLUMN),
+              };
+          }
+
+          function columns(PDO $pdo, string $driver, string $table): array {
+              $out = [];
+              if ($driver === 'mysql') {
+                  $st = $pdo->prepare("SELECT COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT, EXTRA FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION");
+                  $st->execute([$table]);
+                  foreach ($st as $r) {
+                      $out[] = sprintf(
+                          '  COLUMN %s %s %s%s%s',
+                          $r['COLUMN_NAME'],
+                          $r['COLUMN_TYPE'],
+                          $r['IS_NULLABLE'] === 'YES' ? 'NULL' : 'NOT NULL',
+                          $r['COLUMN_DEFAULT'] !== null ? ' DEFAULT ' . $r['COLUMN_DEFAULT'] : '',
+                          $r['EXTRA'] !== '' ? ' [' . $r['EXTRA'] . ']' : '',
+                      );
+                  }
+              } elseif ($driver === 'pgsql') {
+                  $st = $pdo->prepare("SELECT column_name, data_type, character_maximum_length, numeric_precision, numeric_scale, is_nullable, column_default, is_identity FROM information_schema.columns WHERE table_schema = 'public' AND table_name = ? ORDER BY ordinal_position");
+                  $st->execute([$table]);
+                  foreach ($st as $r) {
+                      $type = $r['data_type'];
+                      if ($r['character_maximum_length']) {
+                          $type .= "({$r['character_maximum_length']})";
+                      } elseif (in_array($r['data_type'], ['numeric', 'decimal'], true) && $r['numeric_precision']) {
+                          $type .= "({$r['numeric_precision']},{$r['numeric_scale']})";
+                      }
+                      $out[] = sprintf(
+                          '  COLUMN %s %s %s%s%s',
+                          $r['column_name'],
+                          $type,
+                          $r['is_nullable'] === 'YES' ? 'NULL' : 'NOT NULL',
+                          $r['column_default'] !== null ? ' DEFAULT ' . $r['column_default'] : '',
+                          $r['is_identity'] === 'YES' ? ' [IDENTITY]' : '',
+                      );
+                  }
+              } else {
+                  $st = $pdo->query('PRAGMA table_info(' . q('sqlite', $table) . ')');
+                  foreach ($st as $r) {
+                      $out[] = sprintf(
+                          '  COLUMN %s %s %s%s%s',
+                          $r['name'],
+                          $r['type'],
+                          $r['notnull'] ? 'NOT NULL' : 'NULL',
+                          $r['dflt_value'] !== null ? ' DEFAULT ' . $r['dflt_value'] : '',
+                          $r['pk'] ? ' [PK]' : '',
+                      );
+                  }
+              }
+              return $out;
+          }
+
+          function indexes(PDO $pdo, string $driver, string $table): array {
+              $out = [];
+              if ($driver === 'mysql') {
+                  $st = $pdo->prepare("SELECT INDEX_NAME, NON_UNIQUE, GROUP_CONCAT(COLUMN_NAME ORDER BY SEQ_IN_INDEX) AS cols FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? GROUP BY INDEX_NAME, NON_UNIQUE");
+                  $st->execute([$table]);
+                  foreach ($st as $r) {
+                      $type = $r['INDEX_NAME'] === 'PRIMARY' ? 'PK' : ($r['NON_UNIQUE'] ? 'IDX' : 'UNIQ');
+                      $out[] = sprintf('  INDEX [%s] (%s)', $type, $r['cols']);
+                  }
+              } elseif ($driver === 'pgsql') {
+                  $st = $pdo->prepare("
+                      SELECT i.relname AS name,
+                             ix.indisprimary AS is_pk,
+                             ix.indisunique AS is_unique,
+                             (
+                                 SELECT string_agg(att.attname, ',' ORDER BY ord)
+                                 FROM unnest(ix.indkey) WITH ORDINALITY AS u(attnum, ord)
+                                 JOIN pg_attribute att
+                                   ON att.attrelid = ix.indrelid AND att.attnum = u.attnum
+                             ) AS cols
+                      FROM pg_class t
+                      JOIN pg_index ix ON t.oid = ix.indrelid
+                      JOIN pg_class i ON i.oid = ix.indexrelid
+                      JOIN pg_namespace n ON n.oid = t.relnamespace
+                      WHERE t.relname = ? AND n.nspname = 'public'
+                  ");
+                  $st->execute([$table]);
+                  foreach ($st as $r) {
+                      $isPk     = $r['is_pk'] === 't' || $r['is_pk'] === true || $r['is_pk'] === 1;
+                      $isUnique = $r['is_unique'] === 't' || $r['is_unique'] === true || $r['is_unique'] === 1;
+                      $type     = $isPk ? 'PK' : ($isUnique ? 'UNIQ' : 'IDX');
+                      $out[]    = sprintf('  INDEX [%s] (%s)', $type, $r['cols']);
+                  }
+              } else {
+                  $st = $pdo->query('PRAGMA index_list(' . q('sqlite', $table) . ')');
+                  foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $idx) {
+                      $colsSt = $pdo->query('PRAGMA index_info(' . q('sqlite', $idx['name']) . ')');
+                      $cols = [];
+                      foreach ($colsSt as $c) {
+                          $cols[(int) $c['seqno']] = $c['name'];
+                      }
+                      ksort($cols);
+                      $type = $idx['unique'] ? 'UNIQ' : 'IDX';
+                      $out[] = sprintf('  INDEX [%s] (%s)', $type, implode(',', $cols));
+                  }
+              }
+              sort($out);
+              return $out;
+          }
+
+          function fks(PDO $pdo, string $driver, string $table): array {
+              $out = [];
+              if ($driver === 'mysql') {
+                  $st = $pdo->prepare("
+                      SELECT kcu.COLUMN_NAME, kcu.REFERENCED_TABLE_NAME, kcu.REFERENCED_COLUMN_NAME,
+                             rc.UPDATE_RULE, rc.DELETE_RULE
+                      FROM information_schema.KEY_COLUMN_USAGE kcu
+                      JOIN information_schema.REFERENTIAL_CONSTRAINTS rc
+                        ON rc.CONSTRAINT_SCHEMA = kcu.TABLE_SCHEMA
+                       AND rc.CONSTRAINT_NAME = kcu.CONSTRAINT_NAME
+                      WHERE kcu.TABLE_SCHEMA = DATABASE()
+                        AND kcu.TABLE_NAME = ?
+                        AND kcu.REFERENCED_TABLE_NAME IS NOT NULL
+                  ");
+                  $st->execute([$table]);
+                  foreach ($st as $r) {
+                      $out[] = sprintf(
+                          '  FK %s -> %s(%s) ON DELETE %s ON UPDATE %s',
+                          $r['COLUMN_NAME'], $r['REFERENCED_TABLE_NAME'], $r['REFERENCED_COLUMN_NAME'],
+                          $r['DELETE_RULE'], $r['UPDATE_RULE'],
+                      );
+                  }
+              } elseif ($driver === 'pgsql') {
+                  $st = $pdo->prepare("
+                      SELECT ku.column_name,
+                             ccu.table_name AS ref_table,
+                             ccu.column_name AS ref_column,
+                             rc.update_rule,
+                             rc.delete_rule
+                      FROM information_schema.table_constraints tc
+                      JOIN information_schema.key_column_usage ku
+                        ON tc.constraint_name = ku.constraint_name
+                       AND tc.table_schema = ku.table_schema
+                      JOIN information_schema.referential_constraints rc
+                        ON tc.constraint_name = rc.constraint_name
+                       AND tc.table_schema = rc.constraint_schema
+                      JOIN information_schema.constraint_column_usage ccu
+                        ON ccu.constraint_name = tc.constraint_name
+                       AND ccu.table_schema = tc.table_schema
+                      WHERE tc.constraint_type = 'FOREIGN KEY'
+                        AND tc.table_schema = 'public'
+                        AND tc.table_name = ?
+                  ");
+                  $st->execute([$table]);
+                  foreach ($st as $r) {
+                      $out[] = sprintf(
+                          '  FK %s -> %s(%s) ON DELETE %s ON UPDATE %s',
+                          $r['column_name'], $r['ref_table'], $r['ref_column'],
+                          $r['delete_rule'], $r['update_rule'],
+                      );
+                  }
+              } else {
+                  $st = $pdo->query('PRAGMA foreign_key_list(' . q('sqlite', $table) . ')');
+                  foreach ($st as $r) {
+                      $out[] = sprintf(
+                          '  FK %s -> %s(%s) ON DELETE %s ON UPDATE %s',
+                          $r['from'], $r['table'], $r['to'],
+                          $r['on_delete'], $r['on_update'],
+                      );
+                  }
+              }
+              sort($out);
+              return $out;
+          }
+
+          foreach (tables($pdo, $driver) as $table) {
+              echo "TABLE $table\n";
+              foreach (columns($pdo, $driver, $table) as $line) {
+                  echo "$line\n";
+              }
+              foreach (indexes($pdo, $driver, $table) as $line) {
+                  echo "$line\n";
+              }
+              foreach (fks($pdo, $driver, $table) as $line) {
+                  echo "$line\n";
+              }
+              if (in_array($table, SEED_TABLES, true)) {
+                  $count = (int) $pdo->query('SELECT COUNT(*) FROM ' . q($driver, $table))->fetchColumn();
+                  echo "  SEEDED_ROWS $count\n";
+              }
+              echo "\n";
+          }
+
+          if ($driver === 'pgsql') {
+              $seqs = $pdo->query("SELECT sequence_name FROM information_schema.sequences WHERE sequence_schema = 'public' ORDER BY sequence_name")->fetchAll(PDO::FETCH_COLUMN);
+              foreach ($seqs as $seq) {
+                  $r = $pdo->query('SELECT last_value, is_called FROM ' . q('pgsql', $seq))->fetch(PDO::FETCH_ASSOC);
+                  $called = ($r['is_called'] === 't' || $r['is_called'] === true || $r['is_called'] === 1) ? 't' : 'f';
+                  echo "SEQUENCE $seq last_value={$r['last_value']} is_called=$called\n";
+              }
+          }
+          NORMALIZE_PHP
+
+      - name: Install dependencies (PR)
+        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+
+      - name: Install Maho (PR)
+        run: |
+          ./maho install \
+            --license_agreement_accepted yes \
+            --locale en_US \
+            --timezone Europe/London \
+            --default_currency USD \
+            --db_host 127.0.0.1 \
+            --db_name maho \
+            --db_user ${{ matrix.db_user }} \
+            --db_pass ${{ matrix.db_pass }} \
+            --db_engine ${{ matrix.db_engine }} \
+            --url http://maho.test/ \
+            --secure_base_url http://maho.test/ \
+            --use_secure 0 \
+            --use_secure_admin 0 \
+            --admin_lastname admin \
+            --admin_firstname admin \
+            --admin_email admin@admin.com \
+            --admin_username admin \
+            --admin_password asdasdasd123123123 \
+            --sample_data 0
+
+      - name: Normalize PR schema
+        run: php /tmp/normalize.php > /tmp/pr.txt
+
+      - name: Reset DB
+        run: |
+          DB_CONTAINER=$(docker ps -q | head -n1)
+          case "${{ matrix.db_engine }}" in
+            mysql)
+              docker exec "$DB_CONTAINER" \
+                sh -c "mysql -uroot -proot -e 'DROP DATABASE maho; CREATE DATABASE maho;'"
+              ;;
+            pgsql)
+              docker exec "$DB_CONTAINER" \
+                sh -c "psql -U postgres -d postgres -c 'DROP DATABASE maho;' && psql -U postgres -d postgres -c 'CREATE DATABASE maho;'"
+              ;;
+          esac
+
+      - name: Install dependencies (main)
+        working-directory: _main
+        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+
+      - name: Install Maho (main)
+        working-directory: _main
+        run: |
+          ./maho install \
+            --license_agreement_accepted yes \
+            --locale en_US \
+            --timezone Europe/London \
+            --default_currency USD \
+            --db_host 127.0.0.1 \
+            --db_name maho \
+            --db_user ${{ matrix.db_user }} \
+            --db_pass ${{ matrix.db_pass }} \
+            --db_engine ${{ matrix.db_engine }} \
+            --url http://maho.test/ \
+            --secure_base_url http://maho.test/ \
+            --use_secure 0 \
+            --use_secure_admin 0 \
+            --admin_lastname admin \
+            --admin_firstname admin \
+            --admin_email admin@admin.com \
+            --admin_username admin \
+            --admin_password asdasdasd123123123 \
+            --sample_data 0
+
+      - name: Normalize main schema
+        working-directory: _main
+        run: php /tmp/normalize.php > /tmp/main.txt
+
+      - name: Diff
+        run: |
+          if ! diff -u /tmp/main.txt /tmp/pr.txt > /tmp/schema.diff; then
+            echo "::error::Schema parity check FAILED — PR schema differs from main."
+            echo "::group::diff -u main pr"
+            cat /tmp/schema.diff
+            echo "::endgroup::"
+            exit 1
+          fi
+          echo "Schema parity: OK"
+
+      - name: Upload artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: schema-parity-${{ matrix.name }}
+          path: |
+            /tmp/main.txt
+            /tmp/pr.txt
+            /tmp/schema.diff
+
+  parity-sqlite:
+    name: Schema Parity (sqlite)
+    runs-on: ubuntu-latest
+
+    env:
+      DB_ENGINE: sqlite
+
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: pdo_sqlite
+
+      - name: Checkout PR
+        uses: actions/checkout@v6
+
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          path: _main
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Write normalizer script
+        run: |
+          cat > /tmp/normalize.php <<'NORMALIZE_PHP'
+          <?php
+          declare(strict_types=1);
+
+          $engine = getenv('DB_ENGINE');
+          $db     = getenv('DB_NAME') ?: 'maho.sqlite';
+
+          $opts = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
+          $pdo    = new PDO("sqlite:$db", null, null, $opts);
+          $driver = 'sqlite';
+
+          const SEED_TABLES = [
+              'core_website', 'core_store', 'core_store_group',
+              'directory_country', 'directory_country_region',
+              'directory_currency_rate',
+              'eav_entity_type', 'eav_attribute_set', 'eav_attribute_group',
+              'tax_class',
+          ];
+
+          function q(string $ident): string { return '"' . $ident . '"'; }
+
+          $tables = $pdo->query("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name")->fetchAll(PDO::FETCH_COLUMN);
+          foreach ($tables as $table) {
+              echo "TABLE $table\n";
+
+              foreach ($pdo->query('PRAGMA table_info(' . q($table) . ')') as $r) {
+                  echo sprintf(
+                      "  COLUMN %s %s %s%s%s\n",
+                      $r['name'],
+                      $r['type'],
+                      $r['notnull'] ? 'NOT NULL' : 'NULL',
+                      $r['dflt_value'] !== null ? ' DEFAULT ' . $r['dflt_value'] : '',
+                      $r['pk'] ? ' [PK]' : '',
+                  );
+              }
+
+              $idxLines = [];
+              foreach ($pdo->query('PRAGMA index_list(' . q($table) . ')')->fetchAll(PDO::FETCH_ASSOC) as $idx) {
+                  $cols = [];
+                  foreach ($pdo->query('PRAGMA index_info(' . q($idx['name']) . ')') as $c) {
+                      $cols[(int) $c['seqno']] = $c['name'];
+                  }
+                  ksort($cols);
+                  $type      = $idx['unique'] ? 'UNIQ' : 'IDX';
+                  $idxLines[] = sprintf('  INDEX [%s] (%s)', $type, implode(',', $cols));
+              }
+              sort($idxLines);
+              foreach ($idxLines as $line) {
+                  echo "$line\n";
+              }
+
+              $fkLines = [];
+              foreach ($pdo->query('PRAGMA foreign_key_list(' . q($table) . ')') as $r) {
+                  $fkLines[] = sprintf(
+                      '  FK %s -> %s(%s) ON DELETE %s ON UPDATE %s',
+                      $r['from'], $r['table'], $r['to'],
+                      $r['on_delete'], $r['on_update'],
+                  );
+              }
+              sort($fkLines);
+              foreach ($fkLines as $line) {
+                  echo "$line\n";
+              }
+
+              if (in_array($table, SEED_TABLES, true)) {
+                  $count = (int) $pdo->query('SELECT COUNT(*) FROM ' . q($table))->fetchColumn();
+                  echo "  SEEDED_ROWS $count\n";
+              }
+              echo "\n";
+          }
+          NORMALIZE_PHP
+
+      - name: Install dependencies (PR)
+        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+
+      - name: Install Maho (PR)
+        run: |
+          ./maho install \
+            --license_agreement_accepted yes \
+            --locale en_US \
+            --timezone Europe/London \
+            --default_currency USD \
+            --db_name maho.sqlite \
+            --db_engine sqlite \
+            --url http://maho.test/ \
+            --secure_base_url http://maho.test/ \
+            --use_secure 0 \
+            --use_secure_admin 0 \
+            --admin_lastname admin \
+            --admin_firstname admin \
+            --admin_email admin@admin.com \
+            --admin_username admin \
+            --admin_password asdasdasd123123123 \
+            --sample_data 0
+
+      - name: Normalize PR schema
+        env:
+          DB_NAME: ${{ github.workspace }}/maho.sqlite
+        run: php /tmp/normalize.php > /tmp/pr.txt
+
+      - name: Install dependencies (main)
+        working-directory: _main
+        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+
+      - name: Install Maho (main)
+        working-directory: _main
+        run: |
+          ./maho install \
+            --license_agreement_accepted yes \
+            --locale en_US \
+            --timezone Europe/London \
+            --default_currency USD \
+            --db_name maho.sqlite \
+            --db_engine sqlite \
+            --url http://maho.test/ \
+            --secure_base_url http://maho.test/ \
+            --use_secure 0 \
+            --use_secure_admin 0 \
+            --admin_lastname admin \
+            --admin_firstname admin \
+            --admin_email admin@admin.com \
+            --admin_username admin \
+            --admin_password asdasdasd123123123 \
+            --sample_data 0
+
+      - name: Normalize main schema
+        env:
+          DB_NAME: ${{ github.workspace }}/_main/maho.sqlite
+        run: php /tmp/normalize.php > /tmp/main.txt
+
+      - name: Diff
+        run: |
+          if ! diff -u /tmp/main.txt /tmp/pr.txt > /tmp/schema.diff; then
+            echo "::error::Schema parity check FAILED — PR schema differs from main."
+            echo "::group::diff -u main pr"
+            cat /tmp/schema.diff
+            echo "::endgroup::"
+            exit 1
+          fi
+          echo "Schema parity: OK"
+
+      - name: Upload artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: schema-parity-sqlite
+          path: |
+            /tmp/main.txt
+            /tmp/pr.txt
+            /tmp/schema.diff
