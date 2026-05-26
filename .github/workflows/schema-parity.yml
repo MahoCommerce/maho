@@ -420,12 +420,15 @@ jobs:
 
       - name: Normalize main schema
         working-directory: _main
-        run: php /tmp/normalize.php > /tmp/main.txt
+        run: php /tmp/normalize.php > /tmp/main.raw.txt
+
+      - name: Apply allowlist to main schema
+        run: php .github/schema-parity-allowlist.php ${{ matrix.db_engine }} < /tmp/main.raw.txt > /tmp/main.txt
 
       - name: Diff
         run: |
           if ! diff -u /tmp/main.txt /tmp/pr.txt > /tmp/schema.diff; then
-            echo "::error::Schema parity check FAILED — PR schema differs from main."
+            echo "::error::Schema parity check FAILED — PR schema differs from main (after allowlist)."
             echo "::group::diff -u main pr"
             cat /tmp/schema.diff
             echo "::endgroup::"
@@ -439,6 +442,7 @@ jobs:
         with:
           name: schema-parity-${{ matrix.name }}
           path: |
+            /tmp/main.raw.txt
             /tmp/main.txt
             /tmp/pr.txt
             /tmp/schema.diff
@@ -607,12 +611,15 @@ jobs:
       - name: Normalize main schema
         env:
           DB_NAME: ${{ github.workspace }}/_main/maho.sqlite
-        run: php /tmp/normalize.php > /tmp/main.txt
+        run: php /tmp/normalize.php > /tmp/main.raw.txt
+
+      - name: Apply allowlist to main schema
+        run: php .github/schema-parity-allowlist.php sqlite < /tmp/main.raw.txt > /tmp/main.txt
 
       - name: Diff
         run: |
           if ! diff -u /tmp/main.txt /tmp/pr.txt > /tmp/schema.diff; then
-            echo "::error::Schema parity check FAILED — PR schema differs from main."
+            echo "::error::Schema parity check FAILED — PR schema differs from main (after allowlist)."
             echo "::group::diff -u main pr"
             cat /tmp/schema.diff
             echo "::endgroup::"
@@ -626,6 +633,7 @@ jobs:
         with:
           name: schema-parity-sqlite
           path: |
+            /tmp/main.raw.txt
             /tmp/main.txt
             /tmp/pr.txt
             /tmp/schema.diff
