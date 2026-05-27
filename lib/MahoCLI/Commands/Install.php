@@ -261,7 +261,7 @@ class Install extends BaseMahoCommand
                 if ($dbEngine === 'pgsql') {
                     $pdo->exec('SET session_replication_role = DEFAULT');
                     $output->writeln('<info>Updating PostgreSQL sequences...</info>');
-                    $this->updatePostgresSequences($pdo);
+                    \MahoCLI\Helper\SampleDataImporter::bumpPostgresSequences($pdo);
                 }
 
             } catch (\PDOException $e) {
@@ -446,59 +446,6 @@ class Install extends BaseMahoCommand
         Mage::getSingleton('eav/config')->clear();
         Mage::unregister('_singleton/eav/config');
         Mage::unregister('_helper/eav');
-    }
-
-    /**
-     * Update PostgreSQL sequences to be higher than the max ID in each table.
-     * Necessary after importing data with explicit IDs (sample-data INSERTs
-     * don't advance the sequence, so the next non-explicit insert collides).
-     *
-     * Probes pg_get_serial_sequence on every column of every base table to
-     * catch both legacy SERIAL columns and declarative GENERATED AS IDENTITY
-     * columns — the documented API that works across all Postgres versions.
-     */
-    private function updatePostgresSequences(\PDO $pdo): void
-    {
-        $stmt = $pdo->query("
-            SELECT
-                c.table_name,
-                c.column_name,
-                pg_get_serial_sequence(
-                    quote_ident(c.table_schema) || '.' || quote_ident(c.table_name),
-                    c.column_name
-                ) AS sequence_name
-            FROM information_schema.columns c
-            JOIN information_schema.tables t
-              ON t.table_schema = c.table_schema
-             AND t.table_name = c.table_name
-             AND t.table_type = 'BASE TABLE'
-            WHERE c.table_schema = 'public'
-            ORDER BY c.table_name, c.column_name
-        ");
-
-        $sequences = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        foreach ($sequences as $seq) {
-            $sequenceName = $seq['sequence_name'];
-            if (!is_string($sequenceName) || $sequenceName === '') {
-                continue;
-            }
-            $tableName  = $seq['table_name'];
-            $columnName = $seq['column_name'];
-
-            try {
-                $maxStmt = $pdo->query("SELECT COALESCE(MAX(\"{$columnName}\"), 0) as max_id FROM \"{$tableName}\"");
-                $maxId = (int) $maxStmt->fetchColumn();
-
-                if ($maxId > 0) {
-                    // pg_get_serial_sequence returns a schema-qualified identifier
-                    // (with double quotes only when needed) — embed as-is in setval.
-                    $pdo->exec("SELECT setval('{$sequenceName}', {$maxId}, true)");
-                }
-            } catch (\PDOException $e) {
-                continue;
-            }
-        }
     }
 
     private function importBlogPosts(string $sampleDataDir, OutputInterface $output): void

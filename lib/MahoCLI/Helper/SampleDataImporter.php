@@ -1280,4 +1280,59 @@ class SampleDataImporter
     {
         return $this->optionRemap;
     }
+
+    /**
+     * Reconcile every autoincrement sequence in the public schema with the
+     * MAX(column) value currently in its owning table.
+     *
+     * Sample-data INSERTs use explicit IDs which don't advance the underlying
+     * sequence, so the next non-explicit insert collides on the PK. This
+     * setval()'s each sequence to the max value present in its column.
+     *
+     * Probes pg_get_serial_sequence on every column of every base table:
+     * that's the documented API for resolving the backing sequence of either
+     * a legacy SERIAL column or a declarative GENERATED ... AS IDENTITY
+     * column, regardless of Postgres version or how the sequence was created.
+     */
+    public static function bumpPostgresSequences(PDO $pdo): void
+    {
+        $stmt = $pdo->query("
+            SELECT
+                c.table_name,
+                c.column_name,
+                pg_get_serial_sequence(
+                    quote_ident(c.table_schema) || '.' || quote_ident(c.table_name),
+                    c.column_name
+                ) AS sequence_name
+            FROM information_schema.columns c
+            JOIN information_schema.tables t
+              ON t.table_schema = c.table_schema
+             AND t.table_name = c.table_name
+             AND t.table_type = 'BASE TABLE'
+            WHERE c.table_schema = 'public'
+            ORDER BY c.table_name, c.column_name
+        ");
+
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $sequenceName = $row['sequence_name'];
+            if (!is_string($sequenceName) || $sequenceName === '') {
+                continue;
+            }
+            $tableName  = $row['table_name'];
+            $columnName = $row['column_name'];
+
+            try {
+                $maxStmt = $pdo->query("SELECT COALESCE(MAX(\"{$columnName}\"), 0) AS max_id FROM \"{$tableName}\"");
+                $maxId   = (int) $maxStmt->fetchColumn();
+
+                if ($maxId > 0) {
+                    // pg_get_serial_sequence returns a schema-qualified identifier
+                    // (double-quoted only when needed) — embed as-is in setval.
+                    $pdo->exec("SELECT setval('{$sequenceName}', {$maxId}, true)");
+                }
+            } catch (\PDOException) {
+                continue;
+            }
+        }
+    }
 }
