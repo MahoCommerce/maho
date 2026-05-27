@@ -487,40 +487,47 @@ class Mage_Install_Model_Installer_SampleData
      */
     private function updatePostgresSequences(\PDO $pdo): void
     {
-        // List every autoincrement-style column (legacy SERIAL or declarative
-        // IDENTITY) and resolve its backing sequence via pg_get_serial_sequence.
-        // Sample data INSERTs use explicit IDs which don't advance the sequence,
-        // so the next non-explicit insert collides on the PK; setval the
-        // sequence to MAX(column) to skip past every value sample data wrote.
+        // Walk pg_depend directly to find every sequence and its owning column.
+        // This catches both legacy SERIAL columns (deptype='a' — auto-dependency)
+        // and declarative GENERATED ... AS IDENTITY columns (deptype='i' —
+        // internal dependency). information_schema.columns.is_identity ought to
+        // flag the IDENTITY ones too, but in practice the column-side detection
+        // sometimes misses them; pg_depend is the source of truth.
+        //
+        // Sample data INSERTs explicit IDs that don't advance the sequence, so
+        // the next non-explicit insert collides on the PK. setval the sequence
+        // to MAX(column) so the next nextval() yields MAX+1.
         $stmt = $pdo->query("
             SELECT
-                c.table_name,
-                c.column_name,
-                pg_get_serial_sequence(c.table_schema || '.' || c.table_name, c.column_name) AS sequence_name
-            FROM information_schema.columns c
-            WHERE c.table_schema = 'public'
-              AND (c.column_default LIKE 'nextval(%' OR c.is_identity = 'YES')
-            ORDER BY c.table_name, c.column_name
+                tab_ns.nspname || '.' || tab.relname AS table_qualified,
+                tab.relname AS table_name,
+                col.attname AS column_name,
+                seq_ns.nspname || '.' || seq.relname AS sequence_qualified
+            FROM pg_class seq
+            JOIN pg_namespace seq_ns ON seq_ns.oid = seq.relnamespace
+            JOIN pg_depend dep
+              ON dep.objid = seq.oid AND dep.deptype IN ('a', 'i')
+            JOIN pg_class tab ON tab.oid = dep.refobjid
+            JOIN pg_namespace tab_ns ON tab_ns.oid = tab.relnamespace
+            JOIN pg_attribute col
+              ON col.attrelid = tab.oid AND col.attnum = dep.refobjsubid
+            WHERE seq.relkind = 'S' AND tab_ns.nspname = 'public'
+            ORDER BY tab.relname
         ");
 
         $sequences = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         foreach ($sequences as $seq) {
-            $sequenceName = $seq['sequence_name'];
-            if (!is_string($sequenceName) || $sequenceName === '') {
-                continue;
-            }
-            $tableName  = $seq['table_name'];
-            $columnName = $seq['column_name'];
+            $sequenceQualified = $seq['sequence_qualified'];
+            $tableName         = $seq['table_name'];
+            $columnName        = $seq['column_name'];
 
             try {
                 $maxStmt = $pdo->query("SELECT COALESCE(MAX(\"{$columnName}\"), 0) as max_id FROM \"{$tableName}\"");
                 $maxId = (int) $maxStmt->fetchColumn();
 
                 if ($maxId > 0) {
-                    // pg_get_serial_sequence returns a schema-qualified identifier
-                    // already; embed it as-is in the setval call.
-                    $pdo->exec("SELECT setval('{$sequenceName}', {$maxId}, true)");
+                    $pdo->exec("SELECT setval('{$sequenceQualified}', {$maxId}, true)");
                 }
             } catch (\PDOException $e) {
                 continue;

@@ -371,11 +371,17 @@ jobs:
                         AND tc.table_name = ?
                   ");
                   $st->execute([$table]);
+                  // Same normalization as MySQL: NO ACTION and RESTRICT are
+                  // semantically identical (both prevent the parent row from
+                  // being changed when a child row exists).
+                  $normalizeFkAction = static function (string $action): string {
+                      return $action === 'NO ACTION' ? 'RESTRICT' : $action;
+                  };
                   foreach ($st as $r) {
                       $out[] = sprintf(
                           '  FK %s -> %s(%s) ON DELETE %s ON UPDATE %s',
                           $r['column_name'], $r['ref_table'], $r['ref_column'],
-                          $r['delete_rule'], $r['update_rule'],
+                          $normalizeFkAction($r['delete_rule']), $normalizeFkAction($r['update_rule']),
                       );
                   }
               } else {

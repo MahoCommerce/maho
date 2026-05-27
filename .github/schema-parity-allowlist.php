@@ -270,6 +270,14 @@ $entries = [
             '  COLUMN lognum smallint NOT NULL DEFAULT 0' => '  COLUMN lognum integer NOT NULL DEFAULT 0',
         ],
     ],
+    // admin_user.lognum: same legacy smallint → declarative integer alignment.
+    [
+        'engines' => ['pgsql'],
+        'table' => 'admin_user',
+        'replace' => [
+            '  COLUMN lognum smallint NOT NULL DEFAULT 0' => '  COLUMN lognum integer NOT NULL DEFAULT 0',
+        ],
+    ],
     [
         'engines' => ['pgsql'],
         'table' => 'log_url',
@@ -390,14 +398,14 @@ $entries = [
         'engines' => ['mysql'],
         'table' => 'permission_block',
         'replace' => [
-            '  COLUMN is_allowed tinyint(1) NOT NULL DEFAULT 0' => '  COLUMN is_allowed smallint NOT NULL DEFAULT 0',
+            '  COLUMN is_allowed tinyint NOT NULL DEFAULT 0' => '  COLUMN is_allowed smallint NOT NULL DEFAULT 0',
         ],
     ],
     [
         'engines' => ['mysql'],
         'table' => 'permission_variable',
         'replace' => [
-            '  COLUMN is_allowed tinyint(1) NOT NULL DEFAULT 0' => '  COLUMN is_allowed smallint NOT NULL DEFAULT 0',
+            '  COLUMN is_allowed tinyint NOT NULL DEFAULT 0' => '  COLUMN is_allowed smallint NOT NULL DEFAULT 0',
             '  INDEX [PK] (variable_id,variable_name)' => '  INDEX [PK] (variable_id)',
         ],
     ],
