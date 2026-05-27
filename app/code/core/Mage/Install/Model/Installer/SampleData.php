@@ -516,14 +516,10 @@ class Mage_Install_Model_Installer_SampleData
         ");
 
         $sequences = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        $bumped    = 0;
-        $skipped   = 0;
-        $errors    = 0;
 
         foreach ($sequences as $seq) {
             $sequenceName = $seq['sequence_name'];
             if (!is_string($sequenceName) || $sequenceName === '') {
-                $skipped++;
                 continue;
             }
             $tableName  = $seq['table_name'];
@@ -537,13 +533,10 @@ class Mage_Install_Model_Installer_SampleData
                     // pg_get_serial_sequence returns a schema-qualified identifier
                     // (with double quotes only when needed) — embed as-is in setval.
                     $pdo->exec("SELECT setval('{$sequenceName}', {$maxId}, true)");
-                    $bumped++;
                 }
             } catch (\PDOException $e) {
-                $errors++;
                 continue;
             }
         }
-        fprintf(STDERR, "  Bumped %d sequences (skipped %d no-sequence cols, %d errors)\n", $bumped, $skipped, $errors);
     }
 }

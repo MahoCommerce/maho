@@ -449,44 +449,53 @@ class Install extends BaseMahoCommand
     }
 
     /**
-     * Update PostgreSQL sequences to be higher than the max ID in each table
-     * This is necessary after importing data with explicit IDs
+     * Update PostgreSQL sequences to be higher than the max ID in each table.
+     * Necessary after importing data with explicit IDs (sample-data INSERTs
+     * don't advance the sequence, so the next non-explicit insert collides).
+     *
+     * Probes pg_get_serial_sequence on every column of every base table to
+     * catch both legacy SERIAL columns and declarative GENERATED AS IDENTITY
+     * columns — the documented API that works across all Postgres versions.
      */
     private function updatePostgresSequences(\PDO $pdo): void
     {
-        // Get all sequences in the database
         $stmt = $pdo->query("
             SELECT
-                seq.relname as sequence_name,
-                tab.relname as table_name,
-                col.attname as column_name
-            FROM pg_class seq
-            JOIN pg_depend dep ON seq.oid = dep.objid
-            JOIN pg_class tab ON dep.refobjid = tab.oid
-            JOIN pg_attribute col ON col.attrelid = tab.oid AND col.attnum = dep.refobjsubid
-            WHERE seq.relkind = 'S'
-            AND dep.deptype = 'a'
-            ORDER BY seq.relname
+                c.table_name,
+                c.column_name,
+                pg_get_serial_sequence(
+                    quote_ident(c.table_schema) || '.' || quote_ident(c.table_name),
+                    c.column_name
+                ) AS sequence_name
+            FROM information_schema.columns c
+            JOIN information_schema.tables t
+              ON t.table_schema = c.table_schema
+             AND t.table_name = c.table_name
+             AND t.table_type = 'BASE TABLE'
+            WHERE c.table_schema = 'public'
+            ORDER BY c.table_name, c.column_name
         ");
 
         $sequences = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         foreach ($sequences as $seq) {
             $sequenceName = $seq['sequence_name'];
-            $tableName = $seq['table_name'];
+            if (!is_string($sequenceName) || $sequenceName === '') {
+                continue;
+            }
+            $tableName  = $seq['table_name'];
             $columnName = $seq['column_name'];
 
             try {
-                // Get the max ID from the table
                 $maxStmt = $pdo->query("SELECT COALESCE(MAX(\"{$columnName}\"), 0) as max_id FROM \"{$tableName}\"");
                 $maxId = (int) $maxStmt->fetchColumn();
 
                 if ($maxId > 0) {
-                    // Set the sequence to max_id + 1
-                    $pdo->exec("SELECT setval('\"{$sequenceName}\"', {$maxId}, true)");
+                    // pg_get_serial_sequence returns a schema-qualified identifier
+                    // (with double quotes only when needed) — embed as-is in setval.
+                    $pdo->exec("SELECT setval('{$sequenceName}', {$maxId}, true)");
                 }
             } catch (\PDOException $e) {
-                // Skip if table doesn't exist or other errors
                 continue;
             }
         }
