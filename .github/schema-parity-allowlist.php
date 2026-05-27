@@ -315,14 +315,29 @@ $entries = [
         ],
     ],
 
-    // sales_flat_order.created_at / updated_at: declarative is NOT NULL no
-    // default; legacy too, but the global regex added CURRENT_TIMESTAMP.
+    // Tables where declarative is NOT NULL without default; the global regex
+    // added CURRENT_TIMESTAMP to main, but PR doesn't have it. Strip it back.
     [
         'engines' => ['pgsql'],
         'table' => 'sales_flat_order',
         'replace' => [
             '  COLUMN created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN created_at timestamp without time zone NOT NULL',
             '  COLUMN updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN updated_at timestamp without time zone NOT NULL',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'giftcard',
+        'replace' => [
+            '  COLUMN created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN created_at timestamp without time zone NOT NULL',
+            '  COLUMN updated_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN updated_at timestamp without time zone NOT NULL',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'giftcard_history',
+        'replace' => [
+            '  COLUMN created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN created_at timestamp without time zone NOT NULL',
         ],
     ],
 
@@ -556,20 +571,20 @@ $entries = [
     [
         'table' => 'customer_segment_customer',
         'remove' => [
-            '  FK customer_id -> customer_entity(entity_id) ON DELETE CASCADE ON UPDATE NO ACTION',
+            '  FK customer_id -> customer_entity(entity_id) ON DELETE CASCADE ON UPDATE RESTRICT',
         ],
     ],
     [
         'table' => 'customer_segment_email_sequence',
         'remove' => [
             '  INDEX [IDX] (coupon_sales_rule_id)',
-            '  FK coupon_sales_rule_id -> salesrule(rule_id) ON DELETE SET NULL ON UPDATE NO ACTION',
+            '  FK coupon_sales_rule_id -> salesrule(rule_id) ON DELETE SET NULL ON UPDATE RESTRICT',
         ],
     ],
     [
         'table' => 'customer_segment_sequence_progress',
         'remove' => [
-            '  FK customer_id -> customer_entity(entity_id) ON DELETE CASCADE ON UPDATE NO ACTION',
+            '  FK customer_id -> customer_entity(entity_id) ON DELETE CASCADE ON UPDATE RESTRICT',
         ],
     ],
 
@@ -605,7 +620,7 @@ $entries = [
         'table' => 'feedmanager_category_mapping',
         'remove' => [
             '  INDEX [IDX] (category_id)',
-            '  FK category_id -> catalog_category_entity(entity_id) ON DELETE CASCADE ON UPDATE NO ACTION',
+            '  FK category_id -> catalog_category_entity(entity_id) ON DELETE CASCADE ON UPDATE RESTRICT',
         ],
     ],
     // customer_entity composite (email,website_id) index dropped because it
@@ -729,6 +744,16 @@ foreach ($lines as $line) {
         $pendingAdds  = $ops[$currentTable]['add'] ?? [];
         continue;
     }
+    // Apply global regex transforms first so per-table replace/remove
+    // entries can be written against the post-transform line (which is
+    // also what shows up in the diff output).
+    foreach ($activeGlobalRegex as $rule) {
+        $newLine = preg_replace($rule['pattern'], $rule['replacement'], $line);
+        if ($newLine !== null && $newLine !== $line) {
+            $line = $newLine;
+            break;
+        }
+    }
     if ($currentTable !== null && isset($ops[$currentTable])) {
         if (in_array($line, $ops[$currentTable]['remove'], true)) {
             continue;
@@ -736,13 +761,6 @@ foreach ($lines as $line) {
         if (isset($ops[$currentTable]['replace'][$line])) {
             $out[] = $ops[$currentTable]['replace'][$line];
             continue;
-        }
-    }
-    foreach ($activeGlobalRegex as $rule) {
-        $newLine = preg_replace($rule['pattern'], $rule['replacement'], $line);
-        if ($newLine !== null && $newLine !== $line) {
-            $line = $newLine;
-            break;
         }
     }
     $out[] = $line;

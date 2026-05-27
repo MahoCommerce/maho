@@ -160,12 +160,40 @@ jobs:
                   $st = $pdo->prepare("SELECT COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT, EXTRA FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION");
                   $st->execute([$table]);
                   foreach ($st as $r) {
+                      $type     = $r['COLUMN_TYPE'];
+                      $nullable = $r['IS_NULLABLE'] === 'YES';
+                      $default  = $r['COLUMN_DEFAULT'];
+                      // MariaDB renders integer types with the legacy display
+                      // width (e.g. "int(11)", "smallint(6)") while MySQL 8.4
+                      // dropped it after the deprecation. Strip the width on
+                      // all integer-family types so the dump renders the same
+                      // on both engines.
+                      $type = preg_replace(
+                          '/^(tinyint|smallint|mediumint|int|bigint)\(\d+\)/',
+                          '$1',
+                          $type,
+                      );
+                      // MariaDB renders a NULL default explicitly as "DEFAULT NULL"
+                      // on nullable columns; MySQL 8.4 omits it. Strip the
+                      // redundant default on nullable columns so the lines match.
+                      if ($nullable && $default === 'NULL') {
+                          $default = null;
+                      }
+                      // MariaDB returns string defaults wrapped in single quotes
+                      // (e.g. "''" for an empty-string default, "'0000-00-00'"
+                      // for a date sentinel). MySQL 8.4 returns the bare value.
+                      // Strip the surrounding quotes so both engines render the
+                      // same way.
+                      if ($default !== null && strlen($default) >= 2
+                          && $default[0] === "'" && $default[strlen($default) - 1] === "'") {
+                          $default = substr($default, 1, -1);
+                      }
                       $out[] = sprintf(
                           '  COLUMN %s %s %s%s%s',
                           $r['COLUMN_NAME'],
-                          $r['COLUMN_TYPE'],
-                          $r['IS_NULLABLE'] === 'YES' ? 'NULL' : 'NOT NULL',
-                          $r['COLUMN_DEFAULT'] !== null ? ' DEFAULT ' . $r['COLUMN_DEFAULT'] : '',
+                          $type,
+                          $nullable ? 'NULL' : 'NOT NULL',
+                          $default !== null ? ' DEFAULT ' . $default : '',
                           $r['EXTRA'] !== '' ? ' [' . $r['EXTRA'] . ']' : '',
                       );
                   }
@@ -280,6 +308,11 @@ jobs:
                       $out[] = sprintf('  INDEX [%s] (%s)', $type, implode(',', $cols));
                   }
               }
+              // Legacy installs sometimes declare the same index twice (once as
+              // addIndex, once as unique constraint) which produces two rows in
+              // information_schema. The declarative schema declares it once.
+              // Dedupe so the dump renders identically on both sides.
+              $out = array_values(array_unique($out));
               sort($out);
               return $out;
           }
@@ -299,11 +332,21 @@ jobs:
                         AND kcu.REFERENCED_TABLE_NAME IS NOT NULL
                   ");
                   $st->execute([$table]);
+                  // MariaDB and MySQL both store "RESTRICT" and "NO ACTION" but
+                  // they are semantically identical in the SQL standard: both
+                  // prevent the parent row from being deleted/updated when a
+                  // child row exists. The legacy install emits "ON UPDATE NO
+                  // ACTION" while Doctrine omits the clause (which MariaDB
+                  // stores as "RESTRICT"). Normalize both to RESTRICT so we
+                  // don't chase a spelling diff.
+                  $normalizeFkAction = static function (string $action): string {
+                      return $action === 'NO ACTION' ? 'RESTRICT' : $action;
+                  };
                   foreach ($st as $r) {
                       $out[] = sprintf(
                           '  FK %s -> %s(%s) ON DELETE %s ON UPDATE %s',
                           $r['COLUMN_NAME'], $r['REFERENCED_TABLE_NAME'], $r['REFERENCED_COLUMN_NAME'],
-                          $r['DELETE_RULE'], $r['UPDATE_RULE'],
+                          $normalizeFkAction($r['DELETE_RULE']), $normalizeFkAction($r['UPDATE_RULE']),
                       );
                   }
               } elseif ($driver === 'pgsql') {

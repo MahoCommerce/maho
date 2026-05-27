@@ -487,11 +487,16 @@ class Mage_Install_Model_Installer_SampleData
      */
     private function updatePostgresSequences(\PDO $pdo): void
     {
+        // List every autoincrement-style column (legacy SERIAL or declarative
+        // IDENTITY) and resolve its backing sequence via pg_get_serial_sequence.
+        // Sample data INSERTs use explicit IDs which don't advance the sequence,
+        // so the next non-explicit insert collides on the PK; setval the
+        // sequence to MAX(column) to skip past every value sample data wrote.
         $stmt = $pdo->query("
             SELECT
                 c.table_name,
                 c.column_name,
-                pg_get_serial_sequence(quote_ident(c.table_name), c.column_name) AS sequence_name
+                pg_get_serial_sequence(c.table_schema || '.' || c.table_name, c.column_name) AS sequence_name
             FROM information_schema.columns c
             WHERE c.table_schema = 'public'
               AND (c.column_default LIKE 'nextval(%' OR c.is_identity = 'YES')
@@ -514,7 +519,7 @@ class Mage_Install_Model_Installer_SampleData
 
                 if ($maxId > 0) {
                     // pg_get_serial_sequence returns a schema-qualified identifier
-                    // already; embed it as-is in the FROM/setval call.
+                    // already; embed it as-is in the setval call.
                     $pdo->exec("SELECT setval('{$sequenceName}', {$maxId}, true)");
                 }
             } catch (\PDOException $e) {
