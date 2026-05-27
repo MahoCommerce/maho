@@ -256,7 +256,10 @@ abstract class CrudResource extends Resource
         return preg_replace_callback(
             $pattern,
             static function (array $m) use ($storeId, $seen, $depth): string {
-                $identifier = $m[3] ?? $m[5] ?? '';
+                // PHP fills unmatched alternation captures with '' (not unset),
+                // so $m[3] and $m[5] are both always present — one has the id,
+                // the other is empty. Pick whichever is non-empty.
+                $identifier = ($m[3] ?? '') !== '' ? $m[3] : ($m[5] ?? '');
                 if ($identifier === '' || isset($seen[$identifier])) {
                     return '';
                 }
