@@ -487,51 +487,63 @@ class Mage_Install_Model_Installer_SampleData
      */
     private function updatePostgresSequences(\PDO $pdo): void
     {
-        // Walk pg_depend directly to find every sequence and its owning column.
-        // This catches both legacy SERIAL columns (deptype='a' — auto-dependency)
-        // and declarative GENERATED ... AS IDENTITY columns (deptype='i' —
-        // internal dependency). information_schema.columns.is_identity ought to
-        // flag the IDENTITY ones too, but in practice the column-side detection
-        // sometimes misses them; pg_depend is the source of truth.
+        // pg_get_serial_sequence is the only API documented to resolve the
+        // backing sequence for both SERIAL columns and GENERATED AS IDENTITY
+        // columns across all Postgres versions. Probe it on every column in
+        // every base table — cheap (Postgres caches the lookup) and reliably
+        // catches both flavors regardless of which pg_depend deptype the
+        // engine happens to use.
         //
         // Sample data INSERTs explicit IDs that don't advance the sequence, so
         // the next non-explicit insert collides on the PK. setval the sequence
         // to MAX(column) so the next nextval() yields MAX+1.
         $stmt = $pdo->query("
             SELECT
-                tab_ns.nspname || '.' || tab.relname AS table_qualified,
-                tab.relname AS table_name,
-                col.attname AS column_name,
-                seq_ns.nspname || '.' || seq.relname AS sequence_qualified
-            FROM pg_class seq
-            JOIN pg_namespace seq_ns ON seq_ns.oid = seq.relnamespace
-            JOIN pg_depend dep
-              ON dep.objid = seq.oid AND dep.deptype IN ('a', 'i')
-            JOIN pg_class tab ON tab.oid = dep.refobjid
-            JOIN pg_namespace tab_ns ON tab_ns.oid = tab.relnamespace
-            JOIN pg_attribute col
-              ON col.attrelid = tab.oid AND col.attnum = dep.refobjsubid
-            WHERE seq.relkind = 'S' AND tab_ns.nspname = 'public'
-            ORDER BY tab.relname
+                c.table_schema,
+                c.table_name,
+                c.column_name,
+                pg_get_serial_sequence(
+                    quote_ident(c.table_schema) || '.' || quote_ident(c.table_name),
+                    c.column_name
+                ) AS sequence_name
+            FROM information_schema.columns c
+            JOIN information_schema.tables t
+              ON t.table_schema = c.table_schema
+             AND t.table_name = c.table_name
+             AND t.table_type = 'BASE TABLE'
+            WHERE c.table_schema = 'public'
+            ORDER BY c.table_name, c.column_name
         ");
 
         $sequences = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $bumped    = 0;
+        $skipped   = 0;
+        $errors    = 0;
 
         foreach ($sequences as $seq) {
-            $sequenceQualified = $seq['sequence_qualified'];
-            $tableName         = $seq['table_name'];
-            $columnName        = $seq['column_name'];
+            $sequenceName = $seq['sequence_name'];
+            if (!is_string($sequenceName) || $sequenceName === '') {
+                $skipped++;
+                continue;
+            }
+            $tableName  = $seq['table_name'];
+            $columnName = $seq['column_name'];
 
             try {
                 $maxStmt = $pdo->query("SELECT COALESCE(MAX(\"{$columnName}\"), 0) as max_id FROM \"{$tableName}\"");
                 $maxId = (int) $maxStmt->fetchColumn();
 
                 if ($maxId > 0) {
-                    $pdo->exec("SELECT setval('{$sequenceQualified}', {$maxId}, true)");
+                    // pg_get_serial_sequence returns a schema-qualified identifier
+                    // (with double quotes only when needed) — embed as-is in setval.
+                    $pdo->exec("SELECT setval('{$sequenceName}', {$maxId}, true)");
+                    $bumped++;
                 }
             } catch (\PDOException $e) {
+                $errors++;
                 continue;
             }
         }
+        fprintf(STDERR, "  Bumped %d sequences (skipped %d no-sequence cols, %d errors)\n", $bumped, $skipped, $errors);
     }
 }
