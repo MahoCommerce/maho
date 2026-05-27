@@ -70,6 +70,26 @@ use Mage\Customer\Api\Address;
             security: 'true',
             description: 'Place order from guest cart',
         ),
+        new Get(
+            // Read an order by its human-readable increment id, authenticated
+            // by the one-time `guest_access_token` issued at placement
+            // (X-Order-Token header). Symmetric counterpart to the standard
+            // /orders/{id} Get which uses JWT customer/admin auth. Token is
+            // single-use: consumed (column cleared) on successful read.
+            //
+            // Headless clients (storefronts, mobile apps, kiosks, agents)
+            // call this to render an order-confirmation view without
+            // requiring the customer to be authenticated.
+            uriTemplate: '/orders/{incrementId}/details',
+            name: 'get_order_by_token',
+            uriVariables: [
+                'incrementId' => new Link(fromClass: Order::class, identifiers: []),
+            ],
+            requirements: ['incrementId' => '[a-zA-Z0-9_-]+'],
+            extraProperties: ['no_iri' => true],
+            security: 'true',
+            description: 'Read an order using the per-order one-time access token (X-Order-Token header)',
+        ),
     ],
     graphQlOperations: [
         new Query(

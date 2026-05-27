@@ -52,6 +52,56 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             return $this->getCollection($context);
         }
 
+        // Handle REST guest-order read via X-Order-Token header.
+        // Mirrors the GraphQL `guestOrder` query but consumes (clears) the
+        // token on a successful read so refreshing the page can't replay
+        // analytics or expose the order to a later viewer.
+        if ($operationName === 'get_order_by_token') {
+            $request = $context['request'] ?? null;
+            $token = '';
+            if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
+                $token = (string) $request->headers->get('X-Order-Token', '');
+                if ($token === '') {
+                    $token = (string) $request->query->get('token', '');
+                }
+            }
+            $incrementId = (string) ($uriVariables['incrementId'] ?? '');
+
+            if ($token === '' || $incrementId === '') {
+                return null;
+            }
+
+            $order = $this->orderService->getGuestOrder($incrementId, $token);
+            if (!$order) {
+                return null;
+            }
+
+            // One-time use: clear the token so refreshing the success page
+            // doesn't re-fire analytics or re-expose the order.
+            $resource = \Mage::getSingleton('core/resource');
+            $resource->getConnection('core_write')->update(
+                $resource->getTableName('sales/order'),
+                ['guest_access_token' => null],
+                ['entity_id = ?' => $order->getId()],
+            );
+
+            $dto = $this->mapToDto($order);
+
+            // Issue an account-creation token if no customer exists for this email
+            $orderEmail = $order->getCustomerEmail();
+            if ($orderEmail) {
+                $existingCustomer = \Mage::getModel('customer/customer')
+                    ->setWebsiteId(\Mage::app()->getStore($order->getStoreId())->getWebsiteId())
+                    ->loadByEmail($orderEmail);
+
+                if (!$existingCustomer->getId()) {
+                    $dto->accountToken = AccountTokenService::generate((int) $order->getId(), $orderEmail);
+                }
+            }
+
+            return $dto;
+        }
+
         // Handle guestOrder query - get order by increment ID and access token
         if ($operationName === 'guestOrder') {
             $incrementId = $context['args']['incrementId'] ?? null;
