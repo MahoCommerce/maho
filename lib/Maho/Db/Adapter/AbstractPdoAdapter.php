@@ -1128,15 +1128,6 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     }
 
     /**
-     * Returns date that fits into TYPE_DATETIME range and is suggested to act as default 'zero' value
-     */
-    #[\Override]
-    public function getSuggestedZeroDate(): string
-    {
-        return '1970-01-01 00:00:00';
-    }
-
-    /**
      * Converts fetched blob into raw binary PHP data.
      */
     #[\Override]

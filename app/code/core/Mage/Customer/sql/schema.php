@@ -15,10 +15,6 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
 
 return function (Schema $schema): void {
-    // MySQL accepts '0000-00-00 00:00:00'; Postgres rejects it. Each adapter
-    // exposes its own valid "zero" default via getSuggestedZeroDate().
-    $zeroDate = Mage::getSingleton('core/resource')->getConnection('core_setup')->getSuggestedZeroDate();
-
     // created_at / updated_at defaults normalized to CURRENT_TIMESTAMP by
     // upgrade-1.6.2.0.7-1.6.2.0.8.php (MySQL TIMESTAMP_INIT).
     // disable_auto_group_change column added by upgrade-1.6.2.0-1.6.2.0.1.php.
@@ -69,12 +65,12 @@ return function (Schema $schema): void {
     // Each shares the FK set (parent entity, eav_attribute, eav_entity_type) and
     // the same index shape, with only the `value` column type differing per backend.
     $valueTables = [
-        'customer_address_entity_datetime' => ['parent' => 'customer_address_entity', 'type' => Types::DATETIME_MUTABLE, 'options' => ['default' => $zeroDate], 'hasValueIndex' => true],
+        'customer_address_entity_datetime' => ['parent' => 'customer_address_entity', 'type' => Types::DATETIME_MUTABLE, 'options' => ['notnull' => false], 'hasValueIndex' => true],
         'customer_address_entity_decimal'  => ['parent' => 'customer_address_entity', 'type' => Types::DECIMAL,          'options' => ['precision' => 12, 'scale' => 4, 'default' => '0.0000'], 'hasValueIndex' => true],
         'customer_address_entity_int'      => ['parent' => 'customer_address_entity', 'type' => Types::INTEGER,          'options' => ['default' => 0], 'hasValueIndex' => true],
         'customer_address_entity_text'     => ['parent' => 'customer_address_entity', 'type' => Types::TEXT,             'options' => ['length' => 65535], 'hasValueIndex' => false],
         'customer_address_entity_varchar'  => ['parent' => 'customer_address_entity', 'type' => Types::STRING,           'options' => ['length' => 255, 'notnull' => false], 'hasValueIndex' => true],
-        'customer_entity_datetime'         => ['parent' => 'customer_entity',         'type' => Types::DATETIME_MUTABLE, 'options' => ['default' => $zeroDate], 'hasValueIndex' => true],
+        'customer_entity_datetime'         => ['parent' => 'customer_entity',         'type' => Types::DATETIME_MUTABLE, 'options' => ['notnull' => false], 'hasValueIndex' => true],
         'customer_entity_decimal'          => ['parent' => 'customer_entity',         'type' => Types::DECIMAL,          'options' => ['precision' => 12, 'scale' => 4, 'default' => '0.0000'], 'hasValueIndex' => true],
         'customer_entity_int'              => ['parent' => 'customer_entity',         'type' => Types::INTEGER,          'options' => ['default' => 0], 'hasValueIndex' => true],
         'customer_entity_text'             => ['parent' => 'customer_entity',         'type' => Types::TEXT,             'options' => ['length' => 65535], 'hasValueIndex' => false],
@@ -158,7 +154,9 @@ return function (Schema $schema): void {
     $flowPassword->addColumn('flowpassword_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $flowPassword->addColumn('ip', Types::STRING, ['length' => 50]);
     $flowPassword->addColumn('email', Types::STRING, ['length' => 255]);
-    $flowPassword->addColumn('requested_date', Types::STRING, ['length' => 255, 'default' => $zeroDate]);
+    // Model _beforeSave always populates requested_date with formatDateForDb('now');
+    // no DB-level default needed.
+    $flowPassword->addColumn('requested_date', Types::STRING, ['length' => 255]);
     $flowPassword->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('flowpassword_id')->create(),
     );

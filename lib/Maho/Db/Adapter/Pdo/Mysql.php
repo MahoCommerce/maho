@@ -4058,16 +4058,6 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
-     * Returns date that fits into TYPE_DATETIME range and is suggested to act as default 'zero' value
-     * for a column for current RDBMS.
-     */
-    #[\Override]
-    public function getSuggestedZeroDate(): string
-    {
-        return '0000-00-00 00:00:00';
-    }
-
-    /**
      * Drop trigger
      */
     #[\Override]

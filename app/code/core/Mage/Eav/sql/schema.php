@@ -15,9 +15,6 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
 
 return function (Schema $schema): void {
-    // MySQL accepts '0000-00-00 00:00:00'; Postgres rejects it. Each adapter
-    // exposes its own valid "zero" default via getSuggestedZeroDate().
-    $zeroDate = Mage::getSingleton('core/resource')->getConnection('core_setup')->getSuggestedZeroDate();
     $entityType = $schema->createTable('eav_entity_type');
     $entityType->addColumn('entity_type_id', Types::SMALLINT, ['unsigned' => true, 'autoincrement' => true]);
     $entityType->addColumn('entity_type_code', Types::STRING, ['length' => 50]);
@@ -66,7 +63,7 @@ return function (Schema $schema): void {
     // Each shares the FK set (entity, entity_type, store) and the same index
     // shape, with only the `value` column type differing per backend.
     $valueTables = [
-        'eav_entity_datetime' => ['type' => Types::DATETIME_MUTABLE, 'options' => ['default' => $zeroDate], 'hasValueIndex' => true],
+        'eav_entity_datetime' => ['type' => Types::DATETIME_MUTABLE, 'options' => ['notnull' => false], 'hasValueIndex' => true],
         'eav_entity_decimal'  => ['type' => Types::DECIMAL,          'options' => ['precision' => 12, 'scale' => 4, 'default' => '0.0000'], 'hasValueIndex' => true],
         'eav_entity_int'      => ['type' => Types::INTEGER,          'options' => ['default' => 0], 'hasValueIndex' => true],
         'eav_entity_text'     => ['type' => Types::TEXT,             'options' => ['length' => 65535], 'hasValueIndex' => false],

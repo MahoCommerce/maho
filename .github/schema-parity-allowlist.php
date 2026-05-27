@@ -197,15 +197,69 @@ $entries = [
         ],
     ],
 
-    // Postgres legacy adapter doesn't accept '0000-00-00 00:00:00' as a
-    // datetime sentinel; the SampleData install in the legacy world uses it
-    // anyway in VARCHAR-typed "date" columns. Declarative schema uses Postgres's
-    // valid epoch '1970-01-01 00:00:00' instead.
+    // ----- Zero-date sentinel removal -----
+    //
+    // Legacy install scripts seeded DATETIME columns with the MySQL-ism
+    // '0000-00-00 00:00:00' (rewritten to '1970-01-01 00:00:00' by the legacy
+    // Postgres adapter). MySQL 8 strict-mode rejects the sentinel on insert,
+    // and a "fake date" default is poor schema design anyway. The declarative
+    // schema drops the default — datetime value columns in EAV become NULL,
+    // and customer_flowpassword.requested_date keeps NOT NULL but relies on
+    // Mage_Customer_Model_Flowpassword::_beforeSave() to populate it.
+    [
+        'engines' => ['mysql'],
+        'table' => 'customer_flowpassword',
+        'replace' => [
+            '  COLUMN requested_date varchar(255) NOT NULL DEFAULT 0000-00-00 00:00:00' => '  COLUMN requested_date varchar(255) NOT NULL',
+        ],
+    ],
     [
         'engines' => ['pgsql'],
         'table' => 'customer_flowpassword',
         'replace' => [
-            "  COLUMN requested_date character varying(255) NOT NULL DEFAULT '0000-00-00 00:00:00'" => "  COLUMN requested_date character varying(255) NOT NULL DEFAULT '1970-01-01 00:00:00'",
+            "  COLUMN requested_date character varying(255) NOT NULL DEFAULT '0000-00-00 00:00:00'" => '  COLUMN requested_date character varying(255) NOT NULL',
+        ],
+    ],
+    [
+        'engines' => ['mysql'],
+        'table' => 'eav_entity_datetime',
+        'replace' => [
+            '  COLUMN value datetime NOT NULL DEFAULT 0000-00-00 00:00:00' => '  COLUMN value datetime NULL',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'eav_entity_datetime',
+        'replace' => [
+            "  COLUMN value timestamp without time zone NOT NULL DEFAULT '1970-01-01 00:00:00'" => '  COLUMN value timestamp without time zone NULL',
+        ],
+    ],
+    [
+        'engines' => ['mysql'],
+        'table' => 'customer_address_entity_datetime',
+        'replace' => [
+            '  COLUMN value datetime NOT NULL DEFAULT 0000-00-00 00:00:00' => '  COLUMN value datetime NULL',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'customer_address_entity_datetime',
+        'replace' => [
+            "  COLUMN value timestamp without time zone NOT NULL DEFAULT '1970-01-01 00:00:00'" => '  COLUMN value timestamp without time zone NULL',
+        ],
+    ],
+    [
+        'engines' => ['mysql'],
+        'table' => 'customer_entity_datetime',
+        'replace' => [
+            '  COLUMN value datetime NOT NULL DEFAULT 0000-00-00 00:00:00' => '  COLUMN value datetime NULL',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'customer_entity_datetime',
+        'replace' => [
+            "  COLUMN value timestamp without time zone NOT NULL DEFAULT '1970-01-01 00:00:00'" => '  COLUMN value timestamp without time zone NULL',
         ],
     ],
 
