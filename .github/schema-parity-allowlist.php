@@ -699,6 +699,142 @@ $entries = [
 ];
 
 /**
+ * Implicit single-column indexes DBAL adds on FK local columns.
+ *
+ * DBAL's Table::_addForeignKeyConstraint creates an index per FK because its
+ * Index::isFulfilledBy demands exact column count: a 2-col PK starting with
+ * the FK column does NOT count as covering a 1-col FK in DBAL's view. Real
+ * RDBMSes are smarter (InnoDB skips the auto-index when a covering composite
+ * exists; Postgres relies on user-declared indexes). The declarative schema
+ * intentionally keeps DBAL's extras: they're harmless on MySQL (redundant
+ * with InnoDB's own implicit index), genuinely useful on Postgres (legacy
+ * install creates none, leaving FK columns unindexed), and make the schema
+ * shape consistent across engines.
+ *
+ * Listed per engine because main's legacy install produces different gaps:
+ * MySQL's InnoDB silently creates indexes for some FKs, Postgres for none.
+ * The two arrays mirror the actual schema-parity diff against main. They
+ * will be removed wholesale when the legacy install paths are deleted.
+ */
+$dbalImplicitFkIndexes = [
+    'mysql' => [
+        'admin_rule' => ['role_id'],
+        'api2_acl_rule' => ['role_id'],
+        'api_rule' => ['role_id'],
+        'blog_category_store' => ['category_id'],
+        'blog_post_category' => ['post_id'],
+        'blog_post_store' => ['post_id'],
+        'catalog_category_product' => ['category_id'],
+        'catalog_category_product_index' => ['category_id', 'product_id', 'store_id'],
+        'catalog_product_bundle_option_value' => ['option_id'],
+        'catalog_product_bundle_price_index' => ['entity_id'],
+        'catalog_product_bundle_selection_price' => ['selection_id'],
+        'catalog_product_enabled_index' => ['product_id'],
+        'catalog_product_entity_media_gallery_value' => ['value_id'],
+        'catalog_product_index_group_price' => ['entity_id'],
+        'catalog_product_index_price' => ['entity_id'],
+        'catalog_product_index_tier_price' => ['entity_id'],
+        'catalog_product_relation' => ['parent_id'],
+        'catalog_product_website' => ['product_id'],
+        'cataloginventory_stock_status' => ['product_id'],
+        'checkout_agreement_store' => ['agreement_id'],
+        'cms_block_store' => ['block_id'],
+        'cms_page_store' => ['page_id'],
+        'core_email_queue_recipients' => ['message_id'],
+        'core_layout_link' => ['store_id'],
+        'customer_eav_attribute_website' => ['attribute_id'],
+        'customer_segment_customer' => ['segment_id'],
+        'customer_segment_email_sequence' => ['segment_id'],
+        'customer_segment_sequence_progress' => ['segment_id'],
+        'eav_attribute_group' => ['attribute_set_id'],
+        'eav_attribute_set' => ['entity_type_id'],
+        'eav_entity_attribute' => ['attribute_group_id'],
+        'eav_form_type_entity' => ['type_id'],
+        'feedmanager_attribute_mapping' => ['feed_id'],
+        'feedmanager_log' => ['feed_id'],
+        'index_process_event' => ['process_id'],
+        'newsletter_queue_store_link' => ['queue_id'],
+        'rating_store' => ['rating_id'],
+        'rating_title' => ['rating_id'],
+        'report_compared_product_index' => ['customer_id'],
+        'report_viewed_product_index' => ['customer_id'],
+        'review_store' => ['review_id'],
+        'sales_billing_agreement_order' => ['agreement_id'],
+        'sales_order_status_label' => ['status'],
+        'sales_order_status_state' => ['status'],
+        'sales_recurring_profile_order' => ['profile_id'],
+        'salesrule_customer' => ['customer_id', 'rule_id'],
+        'salesrule_product_attribute' => ['rule_id'],
+        'tag_properties' => ['tag_id'],
+    ],
+    'pgsql' => [
+        'admin_rule' => ['role_id'],
+        'api2_acl_rule' => ['role_id'],
+        'api2_acl_user' => ['role_id'],
+        'api_rule' => ['role_id'],
+        'blog_category_store' => ['category_id'],
+        'blog_post_category' => ['post_id'],
+        'blog_post_store' => ['post_id'],
+        'catalog_category_product' => ['category_id'],
+        'catalog_category_product_index' => ['category_id', 'product_id', 'store_id'],
+        'catalog_product_bundle_option_value' => ['option_id'],
+        'catalog_product_bundle_price_index' => ['entity_id'],
+        'catalog_product_bundle_selection_price' => ['selection_id'],
+        'catalog_product_enabled_index' => ['product_id'],
+        'catalog_product_entity_media_gallery_value' => ['value_id'],
+        'catalog_product_index_group_price' => ['entity_id'],
+        'catalog_product_index_price' => ['entity_id'],
+        'catalog_product_index_tier_price' => ['entity_id'],
+        'catalog_product_relation' => ['parent_id'],
+        'catalog_product_website' => ['product_id'],
+        'cataloginventory_stock_status' => ['product_id'],
+        'checkout_agreement_store' => ['agreement_id'],
+        'cms_block_store' => ['block_id'],
+        'cms_page_store' => ['page_id'],
+        'core_email_queue_recipients' => ['message_id'],
+        'core_layout_link' => ['store_id'],
+        'core_url_rewrite' => ['category_id', 'product_id'],
+        'customer_eav_attribute_website' => ['attribute_id'],
+        'customer_segment_customer' => ['segment_id'],
+        'customer_segment_email_sequence' => ['segment_id', 'template_id'],
+        'customer_segment_sequence_progress' => ['queue_id', 'segment_id'],
+        'eav_attribute_group' => ['attribute_set_id'],
+        'eav_attribute_set' => ['entity_type_id'],
+        'eav_entity_attribute' => ['attribute_group_id'],
+        'eav_form_type_entity' => ['type_id'],
+        'feedmanager_attribute_mapping' => ['feed_id'],
+        'feedmanager_log' => ['feed_id'],
+        'index_process_event' => ['process_id'],
+        'newsletter_queue_store_link' => ['queue_id'],
+        'oauth_token' => ['admin_id', 'customer_id'],
+        'rating_option_vote' => ['review_id'],
+        'rating_store' => ['rating_id'],
+        'rating_title' => ['rating_id'],
+        'report_compared_product_index' => ['customer_id'],
+        'report_viewed_product_index' => ['customer_id'],
+        'review_store' => ['review_id'],
+        'sales_billing_agreement_order' => ['agreement_id'],
+        'sales_order_status_label' => ['status'],
+        'sales_order_status_state' => ['status'],
+        'sales_recurring_profile_order' => ['profile_id'],
+        'salesrule_customer' => ['customer_id', 'rule_id'],
+        'salesrule_product_attribute' => ['rule_id'],
+        'tag' => ['first_customer_id', 'first_store_id'],
+        'tag_properties' => ['tag_id'],
+        'wishlist_item_option' => ['wishlist_item_id'],
+    ],
+];
+foreach ($dbalImplicitFkIndexes as $eng => $tables) {
+    foreach ($tables as $table => $columns) {
+        $entries[] = [
+            'engines' => [$eng],
+            'table' => $table,
+            'add' => array_map(static fn(string $c): string => "  INDEX [IDX] ({$c})", $columns),
+        ];
+    }
+}
+
+/**
  * Global regex transformations applied to every line, regardless of table.
  * Each entry maps a regex (with delimiters) to its replacement; same engine
  * filtering as table-scoped entries.

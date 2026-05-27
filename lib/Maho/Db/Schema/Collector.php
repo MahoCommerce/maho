@@ -14,10 +14,8 @@ namespace Maho\Db\Schema;
 
 use Doctrine\DBAL\Schema\Name\OptionallyQualifiedName;
 use Doctrine\DBAL\Schema\Schema;
-use Doctrine\DBAL\Schema\Table;
 use Mage;
 use Maho;
-use ReflectionClass;
 use RuntimeException;
 
 final class Collector
@@ -61,48 +59,20 @@ final class Collector
         }
 
         $schema = self::rebuildWithPrefix($schema);
-        self::stripImplicitForeignKeyIndexes($schema);
         self::applyTableDefaults($schema);
 
+        // The implicit single-column indexes DBAL adds on FK local columns
+        // (Table::_addForeignKeyConstraint) are kept. DBAL's Index::isFulfilledBy
+        // demands exact column count, so even when a multi-col PK starts with
+        // the FK column, DBAL adds a dedicated index. That matches Postgres'
+        // needs (no auto-indexing on FKs) and is harmless on MySQL (InnoDB
+        // already keeps one when nothing covers). Legacy installs lack these
+        // on Postgres and let InnoDB silently add them on MySQL; the
+        // declarative schema makes the indexes explicit on every engine,
+        // which is the more portable shape. Schema-parity allowlist absorbs
+        // the diff against main until the legacy install paths go away.
+
         return [$schema, $contributors];
-    }
-
-    /**
-     * Drop the single-column indexes DBAL auto-creates on FK local columns.
-     *
-     * DBAL's Table::_addForeignKeyConstraint generates an implicit index for
-     * every FK whose local columns aren't matched by an existing index of the
-     * *exact same column count* — Index::isFulfilledBy refuses to credit a
-     * 2-col PK starting with `foo` as covering a 1-col FK on `(foo)`. InnoDB
-     * already maintains an implicit index per FK and the legacy install
-     * scripts relied on that, so the parity baseline doesn't carry these
-     * auto-generated indexes.
-     *
-     * There is no public way to permanently strip them: Table::edit() filters
-     * implicitIndexNames out of the TableEditor's index list, but the editor's
-     * create() goes through Table::__construct which walks the FKs again and
-     * re-adds the implicit indexes. So we reach in via reflection. Apply this
-     * AFTER any rebuild (e.g. rebuildWithPrefix), otherwise the construction
-     * step would silently re-introduce the indexes we just removed.
-     */
-    private static function stripImplicitForeignKeyIndexes(Schema $schema): void
-    {
-        $tableReflection = new ReflectionClass(Table::class);
-        $implicitProperty = $tableReflection->getProperty('implicitIndexNames');
-        $indexesProperty  = $tableReflection->getProperty('_indexes');
-
-        foreach ($schema->getTables() as $table) {
-            $implicit = $implicitProperty->getValue($table);
-            if ($implicit === []) {
-                continue;
-            }
-            $indexes = $indexesProperty->getValue($table);
-            foreach (array_keys($implicit) as $implicitName) {
-                unset($indexes[$implicitName]);
-            }
-            $indexesProperty->setValue($table, $indexes);
-            $implicitProperty->setValue($table, []);
-        }
     }
 
     /**
