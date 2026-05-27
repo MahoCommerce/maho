@@ -87,6 +87,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             'removeCouponFromCart', 'remove_guest_coupon' => $this->removeCouponFromCart($context, $uriVariables),
             'setShippingAddressOnCart' => $this->setShippingAddressOnCart($context, $uriVariables),
             'setBillingAddressOnCart' => $this->setBillingAddressOnCart($context, $uriVariables),
+            'get_guest_shipping', 'get_my_shipping' => $this->getShippingMethodsForCart($context, $uriVariables),
             'setShippingMethodOnCart' => $this->setShippingMethodOnCart($context, $uriVariables),
             'setPaymentMethodOnCart' => $this->setPaymentMethodOnCart($context, $uriVariables),
             'assignCustomerToCart' => $this->assignCustomerToCart($context),
@@ -310,6 +311,54 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->cartService->setBillingAddress($quote, $addressData, $sameAsShipping);
 
         return $this->cartMapper->mapQuoteToCart($quote, false);
+    }
+
+    /**
+     * Get available shipping methods for the cart. Accepts an optional
+     * {address: {...}} body — when present, the address is applied to the
+     * cart first so the rate calculator has something to evaluate. Returns
+     * the cart (the mapper populates availableShippingMethods).
+     */
+    private function getShippingMethodsForCart(array $context, array $uriVariables): Cart
+    {
+        $args = $context['args']['input'] ?? [];
+        $address = $args['address'] ?? null;
+
+        $quote = $this->resolveAndVerify($context, $uriVariables);
+
+        if (is_array($address) && !empty($address)) {
+            $address = $this->resolveRegionIdFromText($address);
+            $quote = $this->cartService->setShippingAddress($quote, $this->mapInputToAddressData($address));
+        }
+
+        return $this->cartMapper->mapQuoteToCart($quote, false);
+    }
+
+    /**
+     * If the client sent a region as text (without a regionId), look up
+     * the matching directory_country_region row by code or name and fill in
+     * regionId. Also normalises region text to the canonical name. Mirrors
+     * the lookup the removed Symfony GuestCartController used to do.
+     */
+    private function resolveRegionIdFromText(array $address): array
+    {
+        $regionId = $address['regionId'] ?? null;
+        $regionText = $address['region'] ?? '';
+        $countryId = $address['countryId'] ?? '';
+
+        if ($regionId || !$regionText || !$countryId) {
+            return $address;
+        }
+
+        $region = \Mage::getModel('directory/region')->loadByCode($regionText, $countryId);
+        if (!$region->getId()) {
+            $region = \Mage::getModel('directory/region')->loadByName($regionText, $countryId);
+        }
+        if ($region->getId()) {
+            $address['regionId'] = (int) $region->getId();
+            $address['region'] = $region->getName();
+        }
+        return $address;
     }
 
     /**
