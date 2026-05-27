@@ -45,7 +45,7 @@ class Migrate extends BaseMahoCommand
             $adapter = Mage::getSingleton('core/resource')->getConnection('core_setup');
             $result = Applier::applyAll($adapter->getConnection());
             if ($result['contributors'] === []) {
-                $output->writeln('✓ Applied declarative schema (no modules declare etc/db_schema.php)');
+                $output->writeln('✓ Applied declarative schema (no modules declare sql/schema.php)');
             } elseif ($result['executed'] === []) {
                 $output->writeln(sprintf(
                     '✓ Applied declarative schema (%d module(s), already up to date)',

@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace Maho\Db\Schema;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Schema\Schema;
 use RuntimeException;
 
@@ -31,12 +32,21 @@ final class Applier
         $schemaManager = $connection->createSchemaManager();
         $platform = $connection->getDatabasePlatform();
 
+        // One round-trip to enumerate, then membership-test in PHP. A per-table
+        // tablesExist() call would mean N introspection queries before the
+        // comparator even runs (~200 on a fully-converted schema).
+        // introspectTableNames() returns OptionallyQualifiedName objects.
+        $existing = [];
+        foreach ($schemaManager->introspectTableNames() as $existingName) {
+            $existing[$existingName->toString()] = true;
+        }
+
         $existingTables = [];
         $tablesToCreate = [];
         $tablesToAlter = [];
         foreach ($target->getTables() as $targetTable) {
             $name = $targetTable->getObjectName()->toString();
-            if ($schemaManager->tablesExist([$name])) {
+            if (isset($existing[$name])) {
                 $existingTables[] = $schemaManager->introspectTableByUnquotedName($name);
                 $tablesToAlter[] = $targetTable;
             } else {
@@ -78,26 +88,55 @@ final class Applier
     }
 
     /**
-     * Statements considered destructive (drop column / table / index / FK).
+     * Statements considered destructive — data loss or app-visible breakage.
+     * Covers: DROP at top level, ALTER TABLE ... DROP <anything>, RENAME at
+     * top level (Postgres' ALTER TABLE ... RENAME TO is emitted as a separate
+     * RENAME stmt by some platforms), ALTER TABLE ... RENAME COLUMN (renames
+     * out from under app code), ALTER TABLE ... MODIFY/CHANGE/ALTER COLUMN
+     * (can coerce data or trip NOT NULL), and TRUNCATE.
      *
      * @param list<string> $sql
      * @return list<string>
      */
     public static function destructiveStatements(array $sql): array
     {
+        $pattern = '/^\s*('
+            . 'DROP\b'
+            . '|TRUNCATE\b'
+            . '|RENAME\b'
+            . '|ALTER\s+TABLE\s+\S+\s+(DROP|RENAME|MODIFY|CHANGE|ALTER)\b'
+            . ')/i';
         return array_values(array_filter(
             $sql,
-            static fn(string $s) => preg_match('/^\s*(DROP|ALTER\s+TABLE\s+\S+\s+DROP)/i', $s) === 1,
+            static fn(string $s) => preg_match($pattern, $s) === 1,
         ));
     }
 
     /**
      * Execute the given statements against the connection.
      *
+     * On Postgres the whole batch runs inside a transaction: pg DDL is
+     * transactional, so a mid-batch failure rolls back cleanly instead of
+     * leaving the schema half-migrated. MySQL/MariaDB DDL auto-commits per
+     * statement (no rollback possible), and SQLite supports transactional
+     * DDL but the legacy adapter's connection is single-writer enough that
+     * the extra ceremony buys nothing — both platforms run the loop bare.
+     *
      * @param list<string> $sql
      */
     public static function execute(Connection $connection, array $sql): void
     {
+        $platform = $connection->getDatabasePlatform();
+
+        if ($platform instanceof PostgreSQLPlatform) {
+            $connection->transactional(static function (Connection $c) use ($sql): void {
+                foreach ($sql as $stmt) {
+                    $c->executeStatement($stmt);
+                }
+            });
+            return;
+        }
+
         foreach ($sql as $stmt) {
             $connection->executeStatement($stmt);
         }

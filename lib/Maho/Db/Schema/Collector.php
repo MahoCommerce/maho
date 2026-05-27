@@ -14,10 +14,8 @@ namespace Maho\Db\Schema;
 
 use Doctrine\DBAL\Schema\Name\OptionallyQualifiedName;
 use Doctrine\DBAL\Schema\Schema;
-use Doctrine\DBAL\Schema\Table;
 use Mage;
 use Maho;
-use ReflectionClass;
 use RuntimeException;
 
 final class Collector
@@ -60,41 +58,10 @@ final class Collector
             $contributors[] = (string) $modName;
         }
 
-        self::stripImplicitForeignKeyIndexes($schema);
-        $schema = self::applyTablePrefix($schema);
+        $schema = self::rebuildWithPrefix($schema);
         self::applyTableDefaults($schema);
 
         return [$schema, $contributors];
-    }
-
-    /**
-     * Doctrine\DBAL auto-creates a single-column index on every FK's local
-     * columns when the existing indexes don't trivially cover them. InnoDB
-     * already maintains an implicit index per FK, and the legacy install
-     * scripts relied on that, so the parity-baseline schema doesn't carry
-     * these single-column indexes. Drop the implicit ones Doctrine added so
-     * the declarative schema produces the same DDL the legacy install did.
-     *
-     * The `implicitIndexNames` array on Table is private; use reflection.
-     */
-    private static function stripImplicitForeignKeyIndexes(Schema $schema): void
-    {
-        $tableReflection = new ReflectionClass(Table::class);
-        $implicitProperty = $tableReflection->getProperty('implicitIndexNames');
-        $indexesProperty  = $tableReflection->getProperty('_indexes');
-
-        foreach ($schema->getTables() as $table) {
-            $implicit = $implicitProperty->getValue($table);
-            if ($implicit === []) {
-                continue;
-            }
-            $indexes = $indexesProperty->getValue($table);
-            foreach (array_keys($implicit) as $implicitName) {
-                unset($indexes[$implicitName]);
-            }
-            $indexesProperty->setValue($table, $indexes);
-            $implicitProperty->setValue($table, []);
-        }
     }
 
     /**
@@ -118,53 +85,48 @@ final class Collector
     }
 
     /**
-     * Schema authors declare table names without the configured table_prefix
-     * (matching the convention M2's db_schema.xml uses).
+     * Rebuild every Table via DBAL's public Table::edit() pipeline. Two effects:
+     *
+     *  1. Strips implicit single-column FK indexes. Doctrine\DBAL auto-creates
+     *     these when existing indexes don't trivially cover the FK columns;
+     *     InnoDB already maintains an implicit index per FK and the legacy
+     *     install scripts relied on that, so the parity baseline doesn't
+     *     carry them. Table::edit() filters them out via array_diff_key on
+     *     the internal implicitIndexNames map.
+     *
+     *  2. Applies the configured table_prefix to table names and FK references.
+     *     Schema authors declare unprefixed names (matching M2's db_schema.xml
+     *     convention); the prefix lives in app/etc/local.xml.
      *
      * DBAL 4.x's Schema::renameTable only updates the legacy _name field and
-     * leaves the parsed-identifier API stale, so we can't mutate in place
-     * without depending on deprecated accessors. Instead we rebuild a fresh
-     * Schema with prefixed Tables and ForeignKeyConstraints, reusing the
-     * original columns / indexes / primary keys / options as-is.
+     * leaves the parsed-identifier API stale, so we rebuild a fresh Schema
+     * with prefixed Tables/ForeignKeyConstraints instead of mutating in place.
      */
-    private static function applyTablePrefix(Schema $schema): Schema
+    private static function rebuildWithPrefix(Schema $schema): Schema
     {
         $prefix = (string) Mage::getConfig()->getTablePrefix();
-        if ($prefix === '') {
-            return $schema;
-        }
 
         $newTables = [];
         foreach ($schema->getTables() as $old) {
-            $oldName = $old->getObjectName()->toString();
+            $editor = $old->edit();
 
-            $newFks = [];
-            foreach ($old->getForeignKeys() as $fk) {
-                $newFks[] = $fk->edit()
-                    ->setReferencedTableName(
-                        OptionallyQualifiedName::unquoted($prefix . $fk->getReferencedTableName()->toString()),
-                    )
-                    ->create();
+            if ($prefix !== '') {
+                $editor->setName(
+                    OptionallyQualifiedName::unquoted($prefix . $old->getObjectName()->toString()),
+                );
+
+                $newFks = [];
+                foreach ($old->getForeignKeys() as $fk) {
+                    $newFks[] = $fk->edit()
+                        ->setReferencedTableName(
+                            OptionallyQualifiedName::unquoted($prefix . $fk->getReferencedTableName()->toString()),
+                        )
+                        ->create();
+                }
+                $editor->setForeignKeyConstraints(...$newFks);
             }
 
-            // PrimaryKeyConstraint is rebuilt automatically by Table::_addIndex
-            // when it encounters a primary index in the $indexes array, so we
-            // pass null to avoid the constructor adding it a second time.
-            $newTable = new Table(
-                $prefix . $oldName,
-                $old->getColumns(),
-                $old->getIndexes(),
-                $old->getUniqueConstraints(),
-                $newFks,
-                $old->getOptions(),
-            );
-
-            $comment = $old->getComment();
-            if ($comment !== null && $comment !== '') {
-                $newTable->setComment($comment);
-            }
-
-            $newTables[] = $newTable;
+            $newTables[] = $editor->create();
         }
 
         return new Schema($newTables);

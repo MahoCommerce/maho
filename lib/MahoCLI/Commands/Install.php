@@ -261,7 +261,15 @@ class Install extends BaseMahoCommand
                 if ($dbEngine === 'pgsql') {
                     $pdo->exec('SET session_replication_role = DEFAULT');
                     $output->writeln('<info>Updating PostgreSQL sequences...</info>');
-                    \MahoCLI\Helper\SampleDataImporter::bumpPostgresSequences($pdo);
+                    $seqLog = function (string $message, string $level = 'info') use ($output) {
+                        $tag = match ($level) {
+                            'error' => 'error',
+                            'warning' => 'comment',
+                            default => 'info',
+                        };
+                        $output->writeln("  <{$tag}>{$message}</{$tag}>");
+                    };
+                    \MahoCLI\Helper\SampleDataImporter::bumpPostgresSequences($pdo, $seqLog);
                 }
 
             } catch (\PDOException $e) {
@@ -523,8 +531,14 @@ class Install extends BaseMahoCommand
             });
             $output->writeln('');
         } else {
-            // MySQL - direct execution
-            $pdo->exec($sql);
+            // MySQL - no dialect conversion needed, but still split + report
+            // progress so big imports don't look hung.
+            $converter->executeStatements($pdo, $sql, function ($current, $total) use ($output) {
+                if ($current === $total || $current % 500 === 0) {
+                    $output->write("\r<comment>  Progress: {$current}/{$total} statements...</comment>");
+                }
+            }, applyConflictHandling: false);
+            $output->writeln('');
         }
     }
 }

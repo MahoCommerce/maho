@@ -278,7 +278,10 @@ class Mage_Install_Model_Installer_SampleData
 
         // Update PostgreSQL sequences if needed
         if ($dbEngine === 'pgsql') {
-            \MahoCLI\Helper\SampleDataImporter::bumpPostgresSequences($pdo);
+            $seqLog = function (string $message, string $level): void {
+                Mage::log("[sample-data] {$message}", $level === 'warning' ? Mage::LOG_WARNING : Mage::LOG_INFO);
+            };
+            \MahoCLI\Helper\SampleDataImporter::bumpPostgresSequences($pdo, $seqLog);
         }
     }
 

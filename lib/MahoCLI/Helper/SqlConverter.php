@@ -551,9 +551,12 @@ class SqlConverter
     ];
 
     /**
-     * Execute SQL statements one by one
+     * Execute SQL statements one by one.
+     *
+     * $applyConflictHandling rewrites INSERTs to add Postgres-style ON CONFLICT
+     * clauses; MySQL/SQLite callers should disable it (their dialect differs).
      */
-    public function executeStatements(\PDO $pdo, string $sql, ?callable $progressCallback = null): void
+    public function executeStatements(\PDO $pdo, string $sql, ?callable $progressCallback = null, bool $applyConflictHandling = true): void
     {
         $statements = $this->splitStatements($sql);
         $total = count($statements);
@@ -566,7 +569,7 @@ class SqlConverter
             }
 
             // Add ON CONFLICT handling to INSERT statements
-            if (preg_match('/^\s*INSERT\s+INTO\s+/i', $statement)) {
+            if ($applyConflictHandling && preg_match('/^\s*INSERT\s+INTO\s+/i', $statement)) {
                 $statement = $this->addConflictHandling($statement);
             }
 

@@ -1294,7 +1294,7 @@ class SampleDataImporter
      * a legacy SERIAL column or a declarative GENERATED ... AS IDENTITY
      * column, regardless of Postgres version or how the sequence was created.
      */
-    public static function bumpPostgresSequences(PDO $pdo): void
+    public static function bumpPostgresSequences(PDO $pdo, ?callable $logCallback = null): void
     {
         $stmt = $pdo->query("
             SELECT
@@ -1313,6 +1313,8 @@ class SampleDataImporter
             ORDER BY c.table_name, c.column_name
         ");
 
+        $bumped = 0;
+        $failed = [];
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
             $sequenceName = $row['sequence_name'];
             if (!is_string($sequenceName) || $sequenceName === '') {
@@ -1329,9 +1331,17 @@ class SampleDataImporter
                     // pg_get_serial_sequence returns a schema-qualified identifier
                     // (double-quoted only when needed) — embed as-is in setval.
                     $pdo->exec("SELECT setval('{$sequenceName}', {$maxId}, true)");
+                    $bumped++;
                 }
-            } catch (\PDOException) {
-                continue;
+            } catch (\PDOException $e) {
+                $failed[] = "{$tableName}.{$columnName}: {$e->getMessage()}";
+            }
+        }
+
+        if ($logCallback !== null) {
+            $logCallback("Bumped {$bumped} Postgres sequence(s)", 'info');
+            foreach ($failed as $msg) {
+                $logCallback("Sequence bump failed for {$msg}", 'warning');
             }
         }
     }
