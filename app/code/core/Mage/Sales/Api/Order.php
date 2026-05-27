@@ -17,7 +17,9 @@ use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
+use Mage\Checkout\Api\Cart;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
@@ -55,8 +57,16 @@ use Mage\Customer\Api\Address;
             description: 'Place a new order from cart',
         ),
         new Post(
-            uriTemplate: '/guest-carts/{id}/place-order',
+            // The placeholder is named `maskedQuoteId` rather than `id` so
+            // API Platform's auto-identifier converter doesn't try to coerce
+            // the 32-char hex maskedId into Order.id (which is typed int and
+            // would silently truncate to the leading digits).
+            uriTemplate: '/guest-carts/{maskedQuoteId}/place-order',
             name: 'place_guest_order',
+            uriVariables: [
+                'maskedQuoteId' => new Link(fromClass: Cart::class, identifiers: []),
+            ],
+            requirements: ['maskedQuoteId' => '[a-f0-9]{32}'],
             security: 'true',
             description: 'Place order from guest cart',
         ),

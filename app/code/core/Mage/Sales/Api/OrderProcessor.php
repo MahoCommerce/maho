@@ -44,22 +44,58 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     {
         $operationName = $operation->getName();
 
+        // Bridge raw REST body → context args. API Platform deserialises POST
+        // bodies into the resource DTO (Order here), but the place-order
+        // endpoint receives a storefront-shaped payload (shippingAddress,
+        // billingAddress, paymentData, etc.) that doesn't map onto Order
+        // fields. Parse the raw body so the placeOrder handler can read it.
+        // GraphQL invocations already populate $context['args']['input'].
+        if (empty($context['args']['input'])) {
+            $context['args']['input'] = [];
+            $request = $context['request'] ?? null;
+            if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
+                $body = json_decode($request->getContent(), true);
+                if (is_array($body)) {
+                    $context['args']['input'] = $body;
+                }
+            }
+        }
+
         return match ($operationName) {
-            'placeOrder', '_api_/orders_post', 'place_guest_order' => $this->placeOrder($context),
+            'placeOrder', '_api_/orders_post', 'place_guest_order' => $this->placeOrder($context, $uriVariables),
             'cancelOrder' => $this->cancelOrder($context),
             default => $data instanceof Order ? $data : new Order(),
         };
     }
 
     /**
-     * Place order from cart
+     * Place order from cart. Accepts the cart identifier from the request body
+     * (cartId / maskedId) OR from the URI (e.g. /guest-carts/{id}/place-order).
+     * Also applies shipping/billing address, customer email, and payment-method
+     * additionalInformation from the request body — storefront callers send the
+     * full checkout state in one shot rather than pre-mutating the cart.
      */
-    private function placeOrder(array $context): Order
+    private function placeOrder(array $context, array $uriVariables = []): Order
     {
         $args = $context['args']['input'] ?? $context['request_data'] ?? [];
         $cartId = $args['cartId'] ?? null;
+        // Accept the masked-id from either the request body or from the URI.
+        // We pull from the Request path rather than $uriVariables because API
+        // Platform casts URI placeholders to the resource identifier's PHP
+        // type — Order.id is int, so a 32-char hex masked id gets silently
+        // truncated to its leading digit run via PHP (int) coercion. Parsing
+        // the path ourselves preserves the string verbatim.
         $maskedId = $args['maskedId'] ?? null;
-        $guestEmail = $args['guestEmail'] ?? null;
+        if (!$maskedId) {
+            $request = $context['request'] ?? null;
+            if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
+                $path = $request->getPathInfo();
+                if (preg_match('#/guest-carts/([a-f0-9]{32})/place-order#i', $path, $m)) {
+                    $maskedId = $m[1];
+                }
+            }
+        }
+        $guestEmail = $args['guestEmail'] ?? $args['email'] ?? null;
         $orderNote = $args['orderNote'] ?? null;
         $cashTendered = isset($args['cashTendered']) ? (float) $args['cashTendered'] : null;
         $employeeId = isset($args['employeeId']) ? (int) $args['employeeId'] : null;
@@ -79,21 +115,46 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // Verify cart ownership
         $this->verifyCartOwnership($quote, $maskedId !== null);
 
-        // Set payment method on quote if provided
-        if ($paymentMethod) {
-            $quote->getPayment()->setMethod($paymentMethod);
+        // Storefront callers send the full checkout state in the body — apply
+        // any provided addresses to the quote before order placement so the
+        // rate calculator and address validations see the right data.
+        if (isset($args['shippingAddress']) && is_array($args['shippingAddress'])) {
+            $this->cartService->setShippingAddress($quote, $this->mapPlaceOrderAddress($args['shippingAddress']));
+        }
+        if (isset($args['billingAddress']) && is_array($args['billingAddress'])) {
+            $this->cartService->setBillingAddress($quote, $this->mapPlaceOrderAddress($args['billingAddress']));
         }
 
-        // Set shipping method on quote if provided
+        // Set customer email from the body if provided (guest checkout)
+        if ($guestEmail && filter_var($guestEmail, FILTER_VALIDATE_EMAIL)) {
+            $quote->setCustomerEmail($guestEmail);
+        }
+
+        // Set payment method + carry payment-method extras (e.g. Stripe
+        // payment_intent_id) into the payment's additional_information so the
+        // payment-method module can finalise the charge at order placement.
+        if ($paymentMethod) {
+            $payment = $quote->getPayment();
+            $payment->setMethod($paymentMethod);
+            if (isset($args['paymentData']) && is_array($args['paymentData'])) {
+                foreach ($args['paymentData'] as $key => $value) {
+                    $payment->setAdditionalInformation((string) $key, $value);
+                }
+            }
+        }
+
+        // Set shipping method directly on the in-memory address — the storefront
+        // sends a composite carrier_method string in the body, and we want to
+        // preserve the in-memory quote state through to placeAdminOrder rather
+        // than save + reload through cartService->setShippingMethod.
         if ($shippingMethod && !$quote->isVirtual()) {
             $shippingAddress = $quote->getShippingAddress();
             $shippingAddress->setShippingMethod($shippingMethod);
-            $shippingAddress->setCollectShippingRates(1);
+            $shippingAddress->setCollectShippingRates(true);
         }
-
-        if ($paymentMethod || $shippingMethod) {
-            $quote->collectTotals()->save();
-        }
+        $quote->setTotalsCollectedFlag(false);
+        $quote->collectTotals();
+        $quote->save();
 
         // Allow modules to prepare the quote before order placement
         // (e.g. POS module sets default address, shipping, payment for admin orders)
@@ -158,6 +219,26 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $order = $this->orderService->cancelOrder($order, $reason);
 
         return $this->orderProvider->mapToDto($order);
+    }
+
+    /**
+     * Map a place-order address payload (camelCase, as sent by the storefront)
+     * into the snake_case keys the legacy quote address model expects.
+     */
+    private function mapPlaceOrderAddress(array $input): array
+    {
+        return [
+            'firstname' => $input['firstName'] ?? '',
+            'lastname' => $input['lastName'] ?? '',
+            'company' => $input['company'] ?? null,
+            'street' => $input['street'] ?? [],
+            'city' => $input['city'] ?? '',
+            'region' => $input['region'] ?? '',
+            'region_id' => $input['regionId'] ?? null,
+            'postcode' => $input['postcode'] ?? '',
+            'country_id' => $input['countryId'] ?? '',
+            'telephone' => $input['telephone'] ?? '',
+        ];
     }
 
     /**
