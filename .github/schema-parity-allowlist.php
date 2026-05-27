@@ -270,10 +270,13 @@ $entries = [
             '  COLUMN lognum smallint NOT NULL DEFAULT 0' => '  COLUMN lognum integer NOT NULL DEFAULT 0',
         ],
     ],
-    // admin_user.lognum: same legacy smallint → declarative integer alignment.
+    // api_user.lognum: legacy install declares it SMALLINT; an upgrade widens
+    // it to INTEGER via changeColumn, which works on MySQL but Maho's pgsql
+    // adapter's ALTER COLUMN TYPE leaves it at SMALLINT. The declarative
+    // schema reflects the intended post-upgrade INTEGER type.
     [
         'engines' => ['pgsql'],
-        'table' => 'admin_user',
+        'table' => 'api_user',
         'replace' => [
             '  COLUMN lognum smallint NOT NULL DEFAULT 0' => '  COLUMN lognum integer NOT NULL DEFAULT 0',
         ],
