@@ -96,7 +96,11 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
 
         $libXmlErrorsState = libxml_use_internal_errors(true);
         $dom = $this->_initDOMDocument();
-        if (!$dom->loadHTML($html)) {
+        // DOMDocument::loadHTML() defaults to ISO-8859-1 when no encoding hint
+        // is present, which mangles UTF-8 multi-byte sequences during the
+        // saveHTML() round-trip (e.g. "ö" becomes "&Atilde;&para;"). Prepend a
+        // <?xml encoding> processing instruction so libxml parses as UTF-8.
+        if (!$dom->loadHTML('<?xml encoding="UTF-8">' . $html)) {
             Mage::throwException(Mage::helper('core')->__('HTML filtration has failed.'));
         }
 
@@ -118,7 +122,10 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
         }
 
         if ($removeWrapper) {
-            $html = preg_replace('/<(?:!DOCTYPE|\/?(?:html|body))[^>]*>\s*/i', '', $html);
+            // Strip the wrapper tags libxml adds, plus the XML PI we injected
+            // above (libxml may emit it with or without a trailing question
+            // mark depending on version; [^>]* matches both forms).
+            $html = preg_replace('/<(?:!DOCTYPE|\?xml\b|\/?(?:html|body))[^>]*>\s*/i', '', $html);
         }
 
         libxml_use_internal_errors($libXmlErrorsState);
