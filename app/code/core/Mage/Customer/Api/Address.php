@@ -199,7 +199,16 @@ class Address extends CrudResource
     public string $city = '';
     public ?string $region = null;
 
-    /** @var int|null Region ID (accepts string from frontend, normalized to int in processor) */
+    /**
+     * Region ID. The native type is `mixed` so API Platform's serializer
+     * accepts BOTH int (e.g. from the backend itself) and string (which is
+     * what HTML <select> elements / JSON-encoded form values normally send).
+     * The processor normalises to int before persisting. Don't narrow the
+     * docblock to `int|null` — the serializer reads that and rejects the
+     * stringly-encoded form values.
+     *
+     * @var int|string|null
+     */
     public mixed $regionId = null;
 
     public string $postcode = '';
@@ -208,10 +217,18 @@ class Address extends CrudResource
 
     public string $telephone = '';
 
-    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    // `writable: true` because AddressProcessor::process() reads these on
+    // create/update to flip the customer's default_billing / default_shipping
+    // pointers — declaring the property writable: false silently dropped the
+    // input value, leaving the flag at its default `false` and the
+    // processor's "if ($data->isDefaultBilling)" branch unreachable.
+    // The `computed` extra still indicates that on READ the value is derived
+    // from the customer's default_billing column, not a column on the
+    // address itself.
+    #[ApiProperty(extraProperties: ['computed' => true])]
     public bool $isDefaultBilling = false;
 
-    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(extraProperties: ['computed' => true])]
     public bool $isDefaultShipping = false;
 
     public static function afterLoad(self $dto, object $model): void
