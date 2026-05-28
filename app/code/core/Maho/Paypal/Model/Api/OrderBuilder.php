@@ -196,7 +196,7 @@ class Maho_Paypal_Model_Api_OrderBuilder
     }
 
     /**
-     * @return array<array{name: string, quantity: string, unit_amount: array{currency_code: string, value: string}}>
+     * @return list<array{name: string, quantity: string, sku: string, unit_amount: array{currency_code: string, value: string}, category: 'DIGITAL_GOODS'|'PHYSICAL_GOODS'}>
      */
     protected function _buildLineItems(Mage_Sales_Model_Quote $quote, string $currency): array
     {
