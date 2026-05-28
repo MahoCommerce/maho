@@ -179,6 +179,9 @@ class Pgsql extends AbstractPdoAdapter
         // (libpq checks for Kerberos credentials after fork which causes SIGSEGV)
         $params['gssencmode'] = $this->_config['gssencmode'] ?? 'disable';
 
+        // Doctrine's Params shape doesn't list PG-specific keys (sslmode,
+        // gssencmode) even though their own PgSQL driver reads them at runtime.
+        // @phpstan-ignore argument.type
         $this->_connection = \Doctrine\DBAL\DriverManager::getConnection($params);
         $this->_debugStat(self::DEBUG_CONNECT, '');
 
