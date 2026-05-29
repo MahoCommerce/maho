@@ -36,8 +36,8 @@ return function (Schema $schema): void {
     $role->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('role_id')->create(),
     );
-    $role->addIndex(['parent_id', 'sort_order'], 'idx_admin_role_parent_id_sort_order');
-    $role->addIndex(['tree_level'], 'idx_admin_role_tree_level');
+    $role->addIndex(['parent_id', 'sort_order']);
+    $role->addIndex(['tree_level']);
     $role->setComment('Admin Role Table');
 
     $rule = $schema->createTable('admin_rule');
@@ -51,14 +51,13 @@ return function (Schema $schema): void {
     $rule->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create(),
     );
-    $rule->addIndex(['resource_id', 'role_id'], 'idx_admin_rule_resource_id_role_id');
-    $rule->addIndex(['role_id', 'resource_id'], 'idx_admin_rule_role_id_resource_id');
+    $rule->addIndex(['resource_id', 'role_id']);
+    $rule->addIndex(['role_id', 'resource_id']);
     $rule->addForeignKeyConstraint(
         'admin_role',
         ['role_id'],
         ['role_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_admin_rule_role',
     );
     $rule->setComment('Admin Rule Table');
 
@@ -87,7 +86,7 @@ return function (Schema $schema): void {
     $user->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('user_id')->create(),
     );
-    $user->addUniqueIndex(['username'], 'unq_admin_user_username');
+    $user->addUniqueIndex(['username']);
     $user->setComment('Admin User Table');
 
     $permVariable = $schema->createTable('permission_variable');
@@ -97,7 +96,7 @@ return function (Schema $schema): void {
     $permVariable->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('variable_id')->create(),
     );
-    $permVariable->addUniqueIndex(['variable_name'], 'unq_permission_variable_variable_name');
+    $permVariable->addUniqueIndex(['variable_name']);
     $permVariable->setComment('System variables that can be processed via content filter');
 
     $permBlock = $schema->createTable('permission_block');
@@ -107,6 +106,6 @@ return function (Schema $schema): void {
     $permBlock->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('block_id')->create(),
     );
-    $permBlock->addUniqueIndex(['block_name'], 'unq_permission_block_block_name');
+    $permBlock->addUniqueIndex(['block_name']);
     $permBlock->setComment('System blocks that can be processed via content filter');
 };

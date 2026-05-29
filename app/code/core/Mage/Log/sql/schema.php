@@ -26,7 +26,7 @@ return function (Schema $schema): void {
     $customer->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('log_id')->create(),
     );
-    $customer->addIndex(['visitor_id'], 'idx_log_customer_visitor_id');
+    $customer->addIndex(['visitor_id']);
     $customer->setComment('Log Customers Table');
 
     $quote = $schema->createTable('log_quote');
@@ -49,7 +49,7 @@ return function (Schema $schema): void {
     $summary->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('summary_id')->create(),
     );
-    $summary->addIndex(['add_date', 'store_id'], 'idx_log_summary_add_date_store_id');
+    $summary->addIndex(['add_date', 'store_id']);
     $summary->setComment('Log Summary Table');
 
     $summaryType = $schema->createTable('log_summary_type');
@@ -66,8 +66,8 @@ return function (Schema $schema): void {
     $url->addColumn('url_id', Types::BIGINT, ['unsigned' => true, 'default' => 0]);
     $url->addColumn('visitor_id', Types::BIGINT, ['unsigned' => true, 'notnull' => false]);
     $url->addColumn('visit_time', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $url->addIndex(['visitor_id'], 'idx_log_url_visitor_id');
-    $url->addIndex(['url_id'], 'idx_log_url_url_id');
+    $url->addIndex(['visitor_id']);
+    $url->addIndex(['url_id']);
     $url->setComment('Log URL Table');
 
     $urlInfo = $schema->createTable('log_url_info');
@@ -89,9 +89,9 @@ return function (Schema $schema): void {
     $visitor->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('visitor_id')->create(),
     );
-    $visitor->addIndex(['first_visit_at', 'store_id'], 'idx_log_visitor_first_visit_at_store_id');
-    $visitor->addIndex(['last_visit_at'], 'idx_log_visitor_last_visit_at');
-    $visitor->addIndex(['last_url_id'], 'idx_log_visitor_last_url_id');
+    $visitor->addIndex(['first_visit_at', 'store_id']);
+    $visitor->addIndex(['last_visit_at']);
+    $visitor->addIndex(['last_url_id']);
     $visitor->setComment('Log Visitors Table');
 
     $visitorInfo = $schema->createTable('log_visitor_info');
@@ -106,7 +106,7 @@ return function (Schema $schema): void {
     $visitorInfo->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('visitor_id')->create(),
     );
-    $visitorInfo->addIndex(['remote_addr'], 'idx_log_visitor_info_remote_addr');
+    $visitorInfo->addIndex(['remote_addr']);
     $visitorInfo->setComment('Log Visitor Info Table');
 
     $visitorOnline = $schema->createTable('log_visitor_online');
@@ -121,8 +121,8 @@ return function (Schema $schema): void {
     $visitorOnline->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('visitor_id')->create(),
     );
-    $visitorOnline->addIndex(['visitor_type'], 'idx_log_visitor_online_visitor_type');
-    $visitorOnline->addIndex(['first_visit_at', 'last_visit_at'], 'idx_log_visitor_online_first_visit_at_last_visit_at');
-    $visitorOnline->addIndex(['customer_id'], 'idx_log_visitor_online_customer_id');
+    $visitorOnline->addIndex(['visitor_type']);
+    $visitorOnline->addIndex(['first_visit_at', 'last_visit_at']);
+    $visitorOnline->addIndex(['customer_id']);
     $visitorOnline->setComment('Log Visitor Online Table');
 };

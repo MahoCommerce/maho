@@ -34,20 +34,18 @@ return function (Schema $schema): void {
     $blockStore->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('block_id', 'store_id')->create(),
     );
-    $blockStore->addIndex(['store_id'], 'idx_cms_block_store_store_id');
+    $blockStore->addIndex(['store_id']);
     $blockStore->addForeignKeyConstraint(
         'cms_block',
         ['block_id'],
         ['block_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_cms_block_store_block',
     );
     $blockStore->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_cms_block_store_store',
     );
     $blockStore->setComment('CMS Block To Store Linkage Table');
 
@@ -74,7 +72,7 @@ return function (Schema $schema): void {
     $page->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('page_id')->create(),
     );
-    $page->addIndex(['identifier'], 'idx_cms_page_identifier');
+    $page->addIndex(['identifier']);
     $page->setComment('CMS Page Table');
 
     $pageStore = $schema->createTable('cms_page_store');
@@ -83,20 +81,18 @@ return function (Schema $schema): void {
     $pageStore->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('page_id', 'store_id')->create(),
     );
-    $pageStore->addIndex(['store_id'], 'idx_cms_page_store_store_id');
+    $pageStore->addIndex(['store_id']);
     $pageStore->addForeignKeyConstraint(
         'cms_page',
         ['page_id'],
         ['page_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_cms_page_store_page',
     );
     $pageStore->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_cms_page_store_store',
     );
     $pageStore->setComment('CMS Page To Store Linkage Table');
 };

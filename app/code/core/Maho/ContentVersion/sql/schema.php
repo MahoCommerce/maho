@@ -29,9 +29,8 @@ return function (Schema $schema): void {
     );
     $version->addUniqueIndex(
         ['entity_type', 'entity_id', 'version_number'],
-        'unq_content_version_entity_type_entity_id_version_number',
     );
-    $version->addIndex(['entity_type', 'entity_id'], 'idx_content_version_entity_type_entity_id');
-    $version->addIndex(['created_at'], 'idx_content_version_created_at');
+    $version->addIndex(['entity_type', 'entity_id']);
+    $version->addIndex(['created_at']);
     $version->setComment('Content Version History');
 };

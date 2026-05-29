@@ -36,24 +36,22 @@ return function (Schema $schema): void {
     $event->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('event_id')->create(),
     );
-    $event->addIndex(['event_type_id'], 'idx_report_event_event_type_id');
-    $event->addIndex(['subject_id'], 'idx_report_event_subject_id');
-    $event->addIndex(['object_id'], 'idx_report_event_object_id');
-    $event->addIndex(['subtype'], 'idx_report_event_subtype');
-    $event->addIndex(['store_id'], 'idx_report_event_store_id');
+    $event->addIndex(['event_type_id']);
+    $event->addIndex(['subject_id']);
+    $event->addIndex(['object_id']);
+    $event->addIndex(['subtype']);
+    $event->addIndex(['store_id']);
     $event->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_report_event_store',
     );
     $event->addForeignKeyConstraint(
         'report_event_types',
         ['event_type_id'],
         ['event_type_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_report_event_event_type',
     );
     $event->setComment('Reports Event Table');
 
@@ -67,31 +65,28 @@ return function (Schema $schema): void {
     $compared->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('index_id')->create(),
     );
-    $compared->addIndex(['visitor_id', 'product_id'], 'idx_report_compared_product_index_visitor_product');
-    $compared->addIndex(['customer_id', 'product_id'], 'idx_report_compared_product_index_customer_product');
-    $compared->addIndex(['store_id'], 'idx_report_compared_product_index_store_id');
-    $compared->addIndex(['added_at'], 'idx_report_compared_product_index_added_at');
-    $compared->addIndex(['product_id'], 'idx_report_compared_product_index_product_id');
+    $compared->addIndex(['visitor_id', 'product_id']);
+    $compared->addIndex(['customer_id', 'product_id']);
+    $compared->addIndex(['store_id']);
+    $compared->addIndex(['added_at']);
+    $compared->addIndex(['product_id']);
     $compared->addForeignKeyConstraint(
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_report_compared_product_index_customer',
     );
     $compared->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_report_compared_product_index_product',
     );
     $compared->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-        'fk_report_compared_product_index_store',
     );
     $compared->setComment('Reports Compared Product Index Table');
 
@@ -105,31 +100,28 @@ return function (Schema $schema): void {
     $viewed->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('index_id')->create(),
     );
-    $viewed->addIndex(['visitor_id', 'product_id'], 'idx_report_viewed_product_index_visitor_product');
-    $viewed->addIndex(['customer_id', 'product_id'], 'idx_report_viewed_product_index_customer_product');
-    $viewed->addIndex(['store_id'], 'idx_report_viewed_product_index_store_id');
-    $viewed->addIndex(['added_at'], 'idx_report_viewed_product_index_added_at');
-    $viewed->addIndex(['product_id'], 'idx_report_viewed_product_index_product_id');
+    $viewed->addIndex(['visitor_id', 'product_id']);
+    $viewed->addIndex(['customer_id', 'product_id']);
+    $viewed->addIndex(['store_id']);
+    $viewed->addIndex(['added_at']);
+    $viewed->addIndex(['product_id']);
     $viewed->addForeignKeyConstraint(
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_report_viewed_product_index_customer',
     );
     $viewed->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_report_viewed_product_index_product',
     );
     $viewed->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-        'fk_report_viewed_product_index_store',
     );
     $viewed->setComment('Reports Viewed Product Index Table');
 
@@ -153,23 +145,20 @@ return function (Schema $schema): void {
             PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create(),
         );
         // Abbreviate to keep MySQL identifiers under 64 chars.
-        $shortName = str_replace('report_viewed_product_aggregated_', 'report_view_aggr_', $tableName);
-        $aggr->addUniqueIndex(['period', 'store_id', 'product_id'], "unq_{$shortName}_period_store_product");
-        $aggr->addIndex(['store_id'], "idx_{$shortName}_store_id");
-        $aggr->addIndex(['product_id'], "idx_{$shortName}_product_id");
+        $aggr->addUniqueIndex(['period', 'store_id', 'product_id']);
+        $aggr->addIndex(['store_id']);
+        $aggr->addIndex(['product_id']);
         $aggr->addForeignKeyConstraint(
             'core_store',
             ['store_id'],
             ['store_id'],
             ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-            "fk_{$shortName}_store",
         );
         $aggr->addForeignKeyConstraint(
             'catalog_product_entity',
             ['product_id'],
             ['entity_id'],
             ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-            "fk_{$shortName}_product",
         );
         $aggr->setComment($tableComment);
     }

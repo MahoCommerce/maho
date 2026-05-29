@@ -35,20 +35,18 @@ return function (Schema $schema): void {
     $agreementStore->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('agreement_id', 'store_id')->create(),
     );
-    $agreementStore->addIndex(['store_id'], 'idx_checkout_agreement_store_store_id');
+    $agreementStore->addIndex(['store_id']);
     $agreementStore->addForeignKeyConstraint(
         'checkout_agreement',
         ['agreement_id'],
         ['agreement_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_checkout_agreement_store_agreement',
     );
     $agreementStore->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_checkout_agreement_store_store',
     );
     $agreementStore->setComment('Checkout Agreement Store');
 };

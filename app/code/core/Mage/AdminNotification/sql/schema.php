@@ -30,9 +30,9 @@ return function (Schema $schema): void {
     $t->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('notification_id')->create(),
     );
-    $t->addIndex(['severity'], 'idx_adminnotification_inbox_severity');
-    $t->addIndex(['is_read'], 'idx_adminnotification_inbox_is_read');
-    $t->addIndex(['is_remove'], 'idx_adminnotification_inbox_is_remove');
+    $t->addIndex(['severity']);
+    $t->addIndex(['is_read']);
+    $t->addIndex(['is_remove']);
 
     $t->setComment('Adminnotification Inbox');
 };

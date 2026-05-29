@@ -28,29 +28,26 @@ return function (Schema $schema): void {
     $price->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('alert_price_id')->create(),
     );
-    $price->addIndex(['customer_id'], 'idx_product_alert_price_customer_id');
-    $price->addIndex(['product_id'], 'idx_product_alert_price_product_id');
-    $price->addIndex(['website_id'], 'idx_product_alert_price_website_id');
+    $price->addIndex(['customer_id']);
+    $price->addIndex(['product_id']);
+    $price->addIndex(['website_id']);
     $price->addForeignKeyConstraint(
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_product_alert_price_customer',
     );
     $price->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_product_alert_price_product',
     );
     $price->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_product_alert_price_website',
     );
     $price->setComment('Product Alert Price');
 
@@ -66,29 +63,26 @@ return function (Schema $schema): void {
     $stock->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('alert_stock_id')->create(),
     );
-    $stock->addIndex(['customer_id'], 'idx_product_alert_stock_customer_id');
-    $stock->addIndex(['product_id'], 'idx_product_alert_stock_product_id');
-    $stock->addIndex(['website_id'], 'idx_product_alert_stock_website_id');
+    $stock->addIndex(['customer_id']);
+    $stock->addIndex(['product_id']);
+    $stock->addIndex(['website_id']);
     $stock->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_product_alert_stock_website',
     );
     $stock->addForeignKeyConstraint(
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_product_alert_stock_customer',
     );
     $stock->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_product_alert_stock_product',
     );
     $stock->setComment('Product Alert Stock');
 };

@@ -31,9 +31,9 @@ return function (Schema $schema): void {
     $webhook->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('event_id')->create(),
     );
-    $webhook->addUniqueIndex(['paypal_event_id'], 'unq_paypal_webhook_event_paypal_event_id');
-    $webhook->addIndex(['event_type'], 'idx_paypal_webhook_event_event_type');
-    $webhook->addIndex(['status'], 'idx_paypal_webhook_event_status');
+    $webhook->addUniqueIndex(['paypal_event_id']);
+    $webhook->addIndex(['event_type']);
+    $webhook->addIndex(['status']);
     $webhook->setComment('PayPal Webhook Events');
 
     $vault = $schema->createTable('paypal_vault_token');
@@ -53,14 +53,13 @@ return function (Schema $schema): void {
     $vault->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('token_id')->create(),
     );
-    $vault->addUniqueIndex(['paypal_token_id_hash'], 'unq_paypal_vault_token_paypal_token_id_hash');
-    $vault->addIndex(['customer_id'], 'idx_paypal_vault_token_customer_id');
+    $vault->addUniqueIndex(['paypal_token_id_hash']);
+    $vault->addIndex(['customer_id']);
     $vault->addForeignKeyConstraint(
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_paypal_vault_token_customer',
     );
     $vault->setComment('PayPal Vault Tokens');
 
@@ -70,12 +69,12 @@ return function (Schema $schema): void {
         'length' => 64, 'notnull' => false,
         'comment' => 'PayPal Order ID',
     ]);
-    $quotePayment->addIndex(['paypal_order_id'], 'idx_sales_flat_quote_payment_paypal_order_id');
+    $quotePayment->addIndex(['paypal_order_id']);
 
     $orderPayment = $schema->getTable('sales_flat_order_payment');
     $orderPayment->addColumn('paypal_order_id', Types::STRING, [
         'length' => 64, 'notnull' => false,
         'comment' => 'PayPal Order ID',
     ]);
-    $orderPayment->addIndex(['paypal_order_id'], 'idx_sales_flat_order_payment_paypal_order_id');
+    $orderPayment->addIndex(['paypal_order_id']);
 };

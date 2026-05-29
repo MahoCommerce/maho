@@ -33,8 +33,8 @@ return function (Schema $schema): void {
     $restriction->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('restriction_id')->create(),
     );
-    $restriction->addIndex(['status'], 'idx_payment_restriction_status');
-    $restriction->addIndex(['from_date'], 'idx_payment_restriction_from_date');
-    $restriction->addIndex(['to_date'], 'idx_payment_restriction_to_date');
+    $restriction->addIndex(['status']);
+    $restriction->addIndex(['from_date']);
+    $restriction->addIndex(['to_date']);
     $restriction->setComment('Payment Method Restrictions');
 };

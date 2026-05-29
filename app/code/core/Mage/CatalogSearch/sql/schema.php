@@ -31,15 +31,14 @@ return function (Schema $schema): void {
     $query->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('query_id')->create(),
     );
-    $query->addIndex(['query_text', 'store_id', 'popularity'], 'idx_catalogsearch_query_query_text_store_id_popularity');
-    $query->addIndex(['store_id'], 'idx_catalogsearch_query_store_id');
-    $query->addIndex(['synonym_for'], 'idx_catalogsearch_query_synonym_for');
+    $query->addIndex(['query_text', 'store_id', 'popularity']);
+    $query->addIndex(['store_id']);
+    $query->addIndex(['synonym_for']);
     $query->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalogsearch_query_store',
     );
     $query->setComment('Catalog search query table');
 
@@ -50,21 +49,19 @@ return function (Schema $schema): void {
     $result->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('query_id', 'product_id')->create(),
     );
-    $result->addIndex(['query_id'], 'idx_catalogsearch_result_query_id');
-    $result->addIndex(['product_id'], 'idx_catalogsearch_result_product_id');
+    $result->addIndex(['query_id']);
+    $result->addIndex(['product_id']);
     $result->addForeignKeyConstraint(
         'catalogsearch_query',
         ['query_id'],
         ['query_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalogsearch_result_query',
     );
     $result->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalogsearch_result_product',
     );
     $result->setComment('Catalog search result table');
 
@@ -76,8 +73,8 @@ return function (Schema $schema): void {
     $fulltext->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('fulltext_id')->create(),
     );
-    $fulltext->addUniqueIndex(['product_id', 'store_id'], 'unq_catalogsearch_fulltext_product_id_store_id');
-    $fulltext->addIndex(['data_index'], 'idx_catalogsearch_fulltext_data_index', ['fulltext']);
+    $fulltext->addUniqueIndex(['product_id', 'store_id']);
+    $fulltext->addIndex(['data_index'], null, ['fulltext']);
     $fulltext->addOption('engine', 'MyISAM');
     $fulltext->setComment('Catalog search result table');
 };

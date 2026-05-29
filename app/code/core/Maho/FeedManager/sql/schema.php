@@ -29,8 +29,8 @@ return function (Schema $schema): void {
     $destination->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('destination_id')->create(),
     );
-    $destination->addIndex(['type'], 'idx_feedmanager_destination_type');
-    $destination->addIndex(['is_enabled'], 'idx_feedmanager_destination_is_enabled');
+    $destination->addIndex(['type']);
+    $destination->addIndex(['is_enabled']);
     $destination->setComment('Feed Manager - Upload Destinations');
 
     $feed = $schema->createTable('feedmanager_feed');
@@ -86,23 +86,21 @@ return function (Schema $schema): void {
     $feed->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('feed_id')->create(),
     );
-    $feed->addIndex(['platform'], 'idx_feedmanager_feed_platform');
-    $feed->addIndex(['is_enabled'], 'idx_feedmanager_feed_is_enabled');
-    $feed->addIndex(['store_id'], 'idx_feedmanager_feed_store_id');
-    $feed->addIndex(['destination_id'], 'idx_feedmanager_feed_destination_id');
+    $feed->addIndex(['platform']);
+    $feed->addIndex(['is_enabled']);
+    $feed->addIndex(['store_id']);
+    $feed->addIndex(['destination_id']);
     $feed->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_feedmanager_feed_store',
     );
     $feed->addForeignKeyConstraint(
         'feedmanager_destination',
         ['destination_id'],
         ['destination_id'],
         ['onDelete' => 'SET NULL'],
-        'fk_feedmanager_feed_destination',
     );
     $feed->setComment('Feed Manager - Feeds');
 
@@ -118,13 +116,12 @@ return function (Schema $schema): void {
     $attributeMapping->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('mapping_id')->create(),
     );
-    $attributeMapping->addIndex(['feed_id', 'platform_attribute'], 'idx_feedmanager_attribute_mapping_feed_id_platform_attribute');
+    $attributeMapping->addIndex(['feed_id', 'platform_attribute']);
     $attributeMapping->addForeignKeyConstraint(
         'feedmanager_feed',
         ['feed_id'],
         ['feed_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_feedmanager_attribute_mapping_feed',
     );
     $attributeMapping->setComment('Feed Manager - Attribute Mappings');
 
@@ -137,8 +134,8 @@ return function (Schema $schema): void {
     $categoryMapping->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('mapping_id')->create(),
     );
-    $categoryMapping->addUniqueIndex(['platform', 'category_id'], 'unq_feedmanager_category_mapping_platform_category_id');
-    $categoryMapping->addForeignKeyConstraint('catalog_category_entity', ['category_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_feedmanager_category_mapping_category');
+    $categoryMapping->addUniqueIndex(['platform', 'category_id']);
+    $categoryMapping->addForeignKeyConstraint('catalog_category_entity', ['category_id'], ['entity_id'], ['onDelete' => 'CASCADE']);
     $categoryMapping->setComment('Feed Manager - Category Mappings');
 
     $log = $schema->createTable('feedmanager_log');
@@ -159,13 +156,12 @@ return function (Schema $schema): void {
     $log->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('log_id')->create(),
     );
-    $log->addIndex(['feed_id', 'started_at'], 'idx_feedmanager_log_feed_id_started_at');
+    $log->addIndex(['feed_id', 'started_at']);
     $log->addForeignKeyConstraint(
         'feedmanager_feed',
         ['feed_id'],
         ['feed_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_feedmanager_log_feed',
     );
     $log->setComment('Feed Manager - Generation Logs');
 
@@ -183,7 +179,7 @@ return function (Schema $schema): void {
     $dynamicRule->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create(),
     );
-    $dynamicRule->addUniqueIndex(['code'], 'unq_feedmanager_dynamic_rule_code');
-    $dynamicRule->addIndex(['is_enabled', 'sort_order'], 'idx_feedmanager_dynamic_rule_is_enabled_sort_order');
+    $dynamicRule->addUniqueIndex(['code']);
+    $dynamicRule->addIndex(['is_enabled', 'sort_order']);
     $dynamicRule->setComment('FeedManager Dynamic Attribute Rules');
 };

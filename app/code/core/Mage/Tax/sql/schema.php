@@ -33,8 +33,8 @@ return function (Schema $schema): void {
     $rule->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tax_calculation_rule_id')->create(),
     );
-    $rule->addIndex(['priority', 'position', 'tax_calculation_rule_id'], 'idx_tax_calculation_rule_priority_position_id');
-    $rule->addIndex(['code'], 'idx_tax_calculation_rule_code');
+    $rule->addIndex(['priority', 'position', 'tax_calculation_rule_id']);
+    $rule->addIndex(['code']);
     $rule->setComment('Tax Calculation Rule');
 
     $rate = $schema->createTable('tax_calculation_rate');
@@ -50,11 +50,10 @@ return function (Schema $schema): void {
     $rate->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tax_calculation_rate_id')->create(),
     );
-    $rate->addIndex(['tax_country_id', 'tax_region_id', 'tax_postcode'], 'idx_tax_calculation_rate_country_region_postcode');
-    $rate->addIndex(['code'], 'idx_tax_calculation_rate_code');
+    $rate->addIndex(['tax_country_id', 'tax_region_id', 'tax_postcode']);
+    $rate->addIndex(['code']);
     $rate->addIndex(
         ['tax_calculation_rate_id', 'tax_country_id', 'tax_region_id', 'zip_is_range', 'tax_postcode'],
-        'idx_tax_calculation_rate_full',
     );
     $rate->setComment('Tax Calculation Rate');
 
@@ -67,18 +66,17 @@ return function (Schema $schema): void {
     $calc->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tax_calculation_id')->create(),
     );
-    $calc->addIndex(['tax_calculation_rule_id'], 'idx_tax_calculation_rule_id');
-    $calc->addIndex(['tax_calculation_rate_id'], 'idx_tax_calculation_rate_id');
-    $calc->addIndex(['customer_tax_class_id'], 'idx_tax_calculation_customer_class');
-    $calc->addIndex(['product_tax_class_id'], 'idx_tax_calculation_product_class');
+    $calc->addIndex(['tax_calculation_rule_id']);
+    $calc->addIndex(['tax_calculation_rate_id']);
+    $calc->addIndex(['customer_tax_class_id']);
+    $calc->addIndex(['product_tax_class_id']);
     $calc->addIndex(
         ['tax_calculation_rate_id', 'customer_tax_class_id', 'product_tax_class_id'],
-        'idx_tax_calculation_rate_customer_product',
     );
-    $calc->addForeignKeyConstraint('tax_class', ['product_tax_class_id'], ['class_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_tax_calculation_product_class');
-    $calc->addForeignKeyConstraint('tax_class', ['customer_tax_class_id'], ['class_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_tax_calculation_customer_class');
-    $calc->addForeignKeyConstraint('tax_calculation_rate', ['tax_calculation_rate_id'], ['tax_calculation_rate_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_tax_calculation_rate');
-    $calc->addForeignKeyConstraint('tax_calculation_rule', ['tax_calculation_rule_id'], ['tax_calculation_rule_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_tax_calculation_rule');
+    $calc->addForeignKeyConstraint('tax_class', ['product_tax_class_id'], ['class_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $calc->addForeignKeyConstraint('tax_class', ['customer_tax_class_id'], ['class_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $calc->addForeignKeyConstraint('tax_calculation_rate', ['tax_calculation_rate_id'], ['tax_calculation_rate_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $calc->addForeignKeyConstraint('tax_calculation_rule', ['tax_calculation_rule_id'], ['tax_calculation_rule_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $calc->setComment('Tax Calculation');
 
     $rateTitle = $schema->createTable('tax_calculation_rate_title');
@@ -89,11 +87,11 @@ return function (Schema $schema): void {
     $rateTitle->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tax_calculation_rate_title_id')->create(),
     );
-    $rateTitle->addIndex(['tax_calculation_rate_id', 'store_id'], 'idx_tax_calculation_rate_title_rate_store');
-    $rateTitle->addIndex(['tax_calculation_rate_id'], 'idx_tax_calculation_rate_title_rate');
-    $rateTitle->addIndex(['store_id'], 'idx_tax_calculation_rate_title_store');
-    $rateTitle->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_tax_calculation_rate_title_store');
-    $rateTitle->addForeignKeyConstraint('tax_calculation_rate', ['tax_calculation_rate_id'], ['tax_calculation_rate_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_tax_calculation_rate_title_rate');
+    $rateTitle->addIndex(['tax_calculation_rate_id', 'store_id']);
+    $rateTitle->addIndex(['tax_calculation_rate_id']);
+    $rateTitle->addIndex(['store_id']);
+    $rateTitle->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $rateTitle->addForeignKeyConstraint('tax_calculation_rate', ['tax_calculation_rate_id'], ['tax_calculation_rate_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $rateTitle->setComment('Tax Calculation Rate Title');
 
     // Two structurally identical aggregation tables.
@@ -110,10 +108,9 @@ return function (Schema $schema): void {
         $aggr->addPrimaryKeyConstraint(
             PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create(),
         );
-        $shortName = str_replace('tax_order_aggregated_', 'tax_aggr_', $tableName);
-        $aggr->addUniqueIndex(['period', 'store_id', 'code', 'percent', 'order_status'], "unq_{$shortName}_period_store_code_percent_status");
-        $aggr->addIndex(['store_id'], "idx_{$shortName}_store_id");
-        $aggr->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$shortName}_store");
+        $aggr->addUniqueIndex(['period', 'store_id', 'code', 'percent', 'order_status']);
+        $aggr->addIndex(['store_id']);
+        $aggr->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
         $aggr->setComment('Tax Order Aggregation');
     }
 
@@ -125,10 +122,10 @@ return function (Schema $schema): void {
     $taxItem->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tax_item_id')->create(),
     );
-    $taxItem->addIndex(['tax_id'], 'idx_sales_order_tax_item_tax_id');
-    $taxItem->addIndex(['item_id'], 'idx_sales_order_tax_item_item_id');
-    $taxItem->addUniqueIndex(['tax_id', 'item_id'], 'unq_sales_order_tax_item_tax_item');
-    $taxItem->addForeignKeyConstraint('sales_order_tax', ['tax_id'], ['tax_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_order_tax_item_tax');
-    $taxItem->addForeignKeyConstraint('sales_flat_order_item', ['item_id'], ['item_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_order_tax_item_item');
+    $taxItem->addIndex(['tax_id']);
+    $taxItem->addIndex(['item_id']);
+    $taxItem->addUniqueIndex(['tax_id', 'item_id']);
+    $taxItem->addForeignKeyConstraint('sales_order_tax', ['tax_id'], ['tax_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $taxItem->addForeignKeyConstraint('sales_flat_order_item', ['item_id'], ['item_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $taxItem->setComment('Sales Order Tax Item');
 };

@@ -24,14 +24,13 @@ return function (Schema $schema): void {
     $wishlist->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('wishlist_id')->create(),
     );
-    $wishlist->addIndex(['shared'], 'idx_wishlist_shared');
-    $wishlist->addUniqueIndex(['customer_id'], 'unq_wishlist_customer_id');
+    $wishlist->addIndex(['shared']);
+    $wishlist->addUniqueIndex(['customer_id']);
     $wishlist->addForeignKeyConstraint(
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_wishlist_customer',
     );
     $wishlist->setComment('Wishlist main Table');
 
@@ -46,29 +45,26 @@ return function (Schema $schema): void {
     $item->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('wishlist_item_id')->create(),
     );
-    $item->addIndex(['wishlist_id'], 'idx_wishlist_item_wishlist_id');
-    $item->addIndex(['product_id'], 'idx_wishlist_item_product_id');
-    $item->addIndex(['store_id'], 'idx_wishlist_item_store_id');
+    $item->addIndex(['wishlist_id']);
+    $item->addIndex(['product_id']);
+    $item->addIndex(['store_id']);
     $item->addForeignKeyConstraint(
         'wishlist',
         ['wishlist_id'],
         ['wishlist_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_wishlist_item_wishlist',
     );
     $item->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_wishlist_item_product',
     );
     $item->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-        'fk_wishlist_item_store',
     );
     $item->setComment('Wishlist items');
 
@@ -86,7 +82,6 @@ return function (Schema $schema): void {
         ['wishlist_item_id'],
         ['wishlist_item_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_wishlist_item_option_item',
     );
     $itemOption->setComment('Wishlist Item Option Table');
 };

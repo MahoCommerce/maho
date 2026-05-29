@@ -36,8 +36,8 @@ return function (Schema $schema): void {
     $role->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('role_id')->create(),
     );
-    $role->addIndex(['parent_id', 'sort_order'], 'idx_api_role_parent_id_sort_order');
-    $role->addIndex(['tree_level'], 'idx_api_role_tree_level');
+    $role->addIndex(['parent_id', 'sort_order']);
+    $role->addIndex(['tree_level']);
     $role->setComment('Api ACL Roles');
 
     $rule = $schema->createTable('api_rule');
@@ -51,14 +51,13 @@ return function (Schema $schema): void {
     $rule->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create(),
     );
-    $rule->addIndex(['resource_id', 'role_id'], 'idx_api_rule_resource_id_role_id');
-    $rule->addIndex(['role_id', 'resource_id'], 'idx_api_rule_role_id_resource_id');
+    $rule->addIndex(['resource_id', 'role_id']);
+    $rule->addIndex(['role_id', 'resource_id']);
     $rule->addForeignKeyConstraint(
         'api_role',
         ['role_id'],
         ['role_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_api_rule_role',
     );
     $rule->setComment('Api ACL Rules');
 
@@ -83,14 +82,13 @@ return function (Schema $schema): void {
     $session->addColumn('user_id', Types::INTEGER, ['unsigned' => true]);
     $session->addColumn('logdate', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $session->addColumn('sessid', Types::STRING, ['length' => 40, 'notnull' => false]);
-    $session->addIndex(['user_id'], 'idx_api_session_user_id');
-    $session->addIndex(['sessid'], 'idx_api_session_sessid');
+    $session->addIndex(['user_id']);
+    $session->addIndex(['sessid']);
     $session->addForeignKeyConstraint(
         'api_user',
         ['user_id'],
         ['user_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_api_session_user',
     );
     $session->setComment('Api Sessions');
 };

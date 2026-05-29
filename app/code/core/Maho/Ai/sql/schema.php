@@ -47,10 +47,10 @@ return function (Schema $schema): void {
     $task->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('task_id')->create(),
     );
-    $task->addIndex(['status', 'priority', 'created_at'], 'idx_maho_ai_task_status_priority_created_at');
-    $task->addIndex(['task_type'], 'idx_maho_ai_task_task_type');
-    $task->addIndex(['consumer', 'created_at'], 'idx_maho_ai_task_consumer_created_at');
-    $task->addIndex(['admin_user_id'], 'idx_maho_ai_task_admin_user_id');
+    $task->addIndex(['status', 'priority', 'created_at']);
+    $task->addIndex(['task_type']);
+    $task->addIndex(['consumer', 'created_at']);
+    $task->addIndex(['admin_user_id']);
     $task->setComment('Maho AI Task Queue');
 
     $usage = $schema->createTable('maho_ai_usage');
@@ -68,7 +68,6 @@ return function (Schema $schema): void {
     );
     $usage->addUniqueIndex(
         ['consumer', 'platform', 'model', 'store_id', 'period_date'],
-        'unq_maho_ai_usage_consumer_platform_model_store_id_period_date',
     );
     $usage->setComment('Maho AI Daily Usage Aggregation');
 
@@ -90,8 +89,7 @@ return function (Schema $schema): void {
     );
     $vector->addUniqueIndex(
         ['entity_type', 'entity_id', 'store_id'],
-        'unq_maho_ai_vector_entity_type_entity_id_store_id',
     );
-    $vector->addIndex(['entity_type', 'entity_id'], 'idx_maho_ai_vector_entity_type_entity_id');
+    $vector->addIndex(['entity_type', 'entity_id']);
     $vector->setComment('Maho AI - Entity Embedding Vectors');
 };

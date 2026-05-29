@@ -27,7 +27,7 @@ return function (Schema $schema): void {
     $event->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('event_id')->create(),
     );
-    $event->addUniqueIndex(['type', 'entity', 'entity_pk'], 'unq_index_event_type_entity_entity_pk');
+    $event->addUniqueIndex(['type', 'entity', 'entity_pk']);
     $event->setComment('Index Event');
 
     $process = $schema->createTable('index_process');
@@ -40,7 +40,7 @@ return function (Schema $schema): void {
     $process->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('process_id')->create(),
     );
-    $process->addUniqueIndex(['indexer_code'], 'unq_index_process_indexer_code');
+    $process->addUniqueIndex(['indexer_code']);
     $process->setComment('Index Process');
 
     $processEvent = $schema->createTable('index_process_event');
@@ -50,20 +50,18 @@ return function (Schema $schema): void {
     $processEvent->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('process_id', 'event_id')->create(),
     );
-    $processEvent->addIndex(['event_id'], 'idx_index_process_event_event_id');
+    $processEvent->addIndex(['event_id']);
     $processEvent->addForeignKeyConstraint(
         'index_event',
         ['event_id'],
         ['event_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_index_process_event_event',
     );
     $processEvent->addForeignKeyConstraint(
         'index_process',
         ['process_id'],
         ['process_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_index_process_event_process',
     );
     $processEvent->setComment('Index Process Event');
 };

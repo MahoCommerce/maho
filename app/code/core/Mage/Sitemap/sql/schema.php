@@ -25,13 +25,12 @@ return function (Schema $schema): void {
     $sitemap->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('sitemap_id')->create(),
     );
-    $sitemap->addIndex(['store_id'], 'idx_sitemap_store_id');
+    $sitemap->addIndex(['store_id']);
     $sitemap->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_sitemap_store',
     );
     $sitemap->setComment('Google Sitemap');
 };

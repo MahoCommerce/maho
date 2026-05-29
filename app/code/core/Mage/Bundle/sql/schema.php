@@ -24,13 +24,12 @@ return function (Schema $schema): void {
     $option->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_id')->create(),
     );
-    $option->addIndex(['parent_id'], 'idx_catalog_product_bundle_option_parent_id');
+    $option->addIndex(['parent_id']);
     $option->addForeignKeyConstraint(
         'catalog_product_entity',
         ['parent_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalog_product_bundle_option_parent',
     );
     $option->setComment('Catalog Product Bundle Option');
 
@@ -42,13 +41,12 @@ return function (Schema $schema): void {
     $optionValue->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $optionValue->addUniqueIndex(['option_id', 'store_id'], 'unq_catalog_product_bundle_option_value_option_store');
+    $optionValue->addUniqueIndex(['option_id', 'store_id']);
     $optionValue->addForeignKeyConstraint(
         'catalog_product_bundle_option',
         ['option_id'],
         ['option_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalog_product_bundle_option_value_option',
     );
     $optionValue->setComment('Catalog Product Bundle Option Value');
 
@@ -66,21 +64,19 @@ return function (Schema $schema): void {
     $selection->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('selection_id')->create(),
     );
-    $selection->addIndex(['option_id'], 'idx_catalog_product_bundle_selection_option_id');
-    $selection->addIndex(['product_id'], 'idx_catalog_product_bundle_selection_product_id');
+    $selection->addIndex(['option_id']);
+    $selection->addIndex(['product_id']);
     $selection->addForeignKeyConstraint(
         'catalog_product_bundle_option',
         ['option_id'],
         ['option_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalog_product_bundle_selection_option',
     );
     $selection->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalog_product_bundle_selection_product',
     );
     $selection->setComment('Catalog Product Bundle Selection');
 
@@ -92,20 +88,18 @@ return function (Schema $schema): void {
     $selectionPrice->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('selection_id', 'website_id')->create(),
     );
-    $selectionPrice->addIndex(['website_id'], 'idx_catalog_product_bundle_selection_price_website_id');
+    $selectionPrice->addIndex(['website_id']);
     $selectionPrice->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalog_product_bundle_selection_price_website',
     );
     $selectionPrice->addForeignKeyConstraint(
         'catalog_product_bundle_selection',
         ['selection_id'],
         ['selection_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalog_product_bundle_selection_price_selection',
     );
     $selectionPrice->setComment('Catalog Product Bundle Selection Price');
 
@@ -118,28 +112,25 @@ return function (Schema $schema): void {
     $priceIndex->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id', 'website_id', 'customer_group_id')->create(),
     );
-    $priceIndex->addIndex(['website_id'], 'idx_catalog_product_bundle_price_index_website_id');
-    $priceIndex->addIndex(['customer_group_id'], 'idx_catalog_product_bundle_price_index_customer_group_id');
+    $priceIndex->addIndex(['website_id']);
+    $priceIndex->addIndex(['customer_group_id']);
     $priceIndex->addForeignKeyConstraint(
         'customer_group',
         ['customer_group_id'],
         ['customer_group_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalog_product_bundle_price_index_customer_group',
     );
     $priceIndex->addForeignKeyConstraint(
         'catalog_product_entity',
         ['entity_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalog_product_bundle_price_index_entity',
     );
     $priceIndex->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalog_product_bundle_price_index_website',
     );
     $priceIndex->setComment('Catalog Product Bundle Price Index');
 

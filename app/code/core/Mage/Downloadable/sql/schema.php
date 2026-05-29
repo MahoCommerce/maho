@@ -31,14 +31,13 @@ return function (Schema $schema): void {
     $link->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('link_id')->create(),
     );
-    $link->addIndex(['product_id'], 'idx_downloadable_link_product_id');
-    $link->addIndex(['product_id', 'sort_order'], 'idx_downloadable_link_product_id_sort_order');
+    $link->addIndex(['product_id']);
+    $link->addIndex(['product_id', 'sort_order']);
     $link->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_downloadable_link_product',
     );
     $link->setComment('Downloadable Link Table');
 
@@ -50,21 +49,19 @@ return function (Schema $schema): void {
     $linkPrice->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('price_id')->create(),
     );
-    $linkPrice->addIndex(['link_id'], 'idx_downloadable_link_price_link_id');
-    $linkPrice->addIndex(['website_id'], 'idx_downloadable_link_price_website_id');
+    $linkPrice->addIndex(['link_id']);
+    $linkPrice->addIndex(['website_id']);
     $linkPrice->addForeignKeyConstraint(
         'downloadable_link',
         ['link_id'],
         ['link_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_downloadable_link_price_link',
     );
     $linkPrice->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_downloadable_link_price_website',
     );
     $linkPrice->setComment('Downloadable Link Price Table');
 
@@ -82,22 +79,20 @@ return function (Schema $schema): void {
     $linkPurchased->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('purchased_id')->create(),
     );
-    $linkPurchased->addIndex(['order_id'], 'idx_downloadable_link_purchased_order_id');
-    $linkPurchased->addIndex(['order_item_id'], 'idx_downloadable_link_purchased_order_item_id');
-    $linkPurchased->addIndex(['customer_id'], 'idx_downloadable_link_purchased_customer_id');
+    $linkPurchased->addIndex(['order_id']);
+    $linkPurchased->addIndex(['order_item_id']);
+    $linkPurchased->addIndex(['customer_id']);
     $linkPurchased->addForeignKeyConstraint(
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-        'fk_downloadable_link_purchased_customer',
     );
     $linkPurchased->addForeignKeyConstraint(
         'sales_flat_order',
         ['order_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-        'fk_downloadable_link_purchased_order',
     );
     $linkPurchased->setComment('Downloadable Link Purchased Table');
 
@@ -121,22 +116,20 @@ return function (Schema $schema): void {
     $linkPurchasedItem->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('item_id')->create(),
     );
-    $linkPurchasedItem->addIndex(['link_hash'], 'idx_downloadable_link_purchased_item_link_hash');
-    $linkPurchasedItem->addIndex(['order_item_id'], 'idx_downloadable_link_purchased_item_order_item_id');
-    $linkPurchasedItem->addIndex(['purchased_id'], 'idx_downloadable_link_purchased_item_purchased_id');
+    $linkPurchasedItem->addIndex(['link_hash']);
+    $linkPurchasedItem->addIndex(['order_item_id']);
+    $linkPurchasedItem->addIndex(['purchased_id']);
     $linkPurchasedItem->addForeignKeyConstraint(
         'downloadable_link_purchased',
         ['purchased_id'],
         ['purchased_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_downloadable_link_purchased_item_purchased',
     );
     $linkPurchasedItem->addForeignKeyConstraint(
         'sales_flat_order_item',
         ['order_item_id'],
         ['item_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-        'fk_downloadable_link_purchased_item_order_item',
     );
     $linkPurchasedItem->setComment('Downloadable Link Purchased Item Table');
 
@@ -148,22 +141,20 @@ return function (Schema $schema): void {
     $linkTitle->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('title_id')->create(),
     );
-    $linkTitle->addUniqueIndex(['link_id', 'store_id'], 'unq_downloadable_link_title_link_id_store_id');
-    $linkTitle->addIndex(['link_id'], 'idx_downloadable_link_title_link_id');
-    $linkTitle->addIndex(['store_id'], 'idx_downloadable_link_title_store_id');
+    $linkTitle->addUniqueIndex(['link_id', 'store_id']);
+    $linkTitle->addIndex(['link_id']);
+    $linkTitle->addIndex(['store_id']);
     $linkTitle->addForeignKeyConstraint(
         'downloadable_link',
         ['link_id'],
         ['link_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_downloadable_link_title_link',
     );
     $linkTitle->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_downloadable_link_title_store',
     );
     $linkTitle->setComment('Link Title Table');
 
@@ -177,13 +168,12 @@ return function (Schema $schema): void {
     $sample->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('sample_id')->create(),
     );
-    $sample->addIndex(['product_id'], 'idx_downloadable_sample_product_id');
+    $sample->addIndex(['product_id']);
     $sample->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_downloadable_sample_product',
     );
     $sample->setComment('Downloadable Sample Table');
 
@@ -195,22 +185,20 @@ return function (Schema $schema): void {
     $sampleTitle->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('title_id')->create(),
     );
-    $sampleTitle->addUniqueIndex(['sample_id', 'store_id'], 'unq_downloadable_sample_title_sample_id_store_id');
-    $sampleTitle->addIndex(['sample_id'], 'idx_downloadable_sample_title_sample_id');
-    $sampleTitle->addIndex(['store_id'], 'idx_downloadable_sample_title_store_id');
+    $sampleTitle->addUniqueIndex(['sample_id', 'store_id']);
+    $sampleTitle->addIndex(['sample_id']);
+    $sampleTitle->addIndex(['store_id']);
     $sampleTitle->addForeignKeyConstraint(
         'downloadable_sample',
         ['sample_id'],
         ['sample_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_downloadable_sample_title_sample',
     );
     $sampleTitle->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_downloadable_sample_title_store',
     );
     $sampleTitle->setComment('Downloadable Sample Title Table');
 

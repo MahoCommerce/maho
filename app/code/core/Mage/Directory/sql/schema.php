@@ -32,7 +32,7 @@ return function (Schema $schema): void {
     $countryFormat->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('country_format_id')->create(),
     );
-    $countryFormat->addUniqueIndex(['country_id', 'type'], 'unq_directory_country_format_country_id_type');
+    $countryFormat->addUniqueIndex(['country_id', 'type']);
     $countryFormat->setComment('Directory Country Format');
 
     $countryRegion = $schema->createTable('directory_country_region');
@@ -43,7 +43,7 @@ return function (Schema $schema): void {
     $countryRegion->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('region_id')->create(),
     );
-    $countryRegion->addIndex(['country_id'], 'idx_directory_country_region_country_id');
+    $countryRegion->addIndex(['country_id']);
     $countryRegion->setComment('Directory Country Region');
 
     $regionName = $schema->createTable('directory_country_region_name');
@@ -53,13 +53,12 @@ return function (Schema $schema): void {
     $regionName->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('locale', 'region_id')->create(),
     );
-    $regionName->addIndex(['region_id'], 'idx_directory_country_region_name_region_id');
+    $regionName->addIndex(['region_id']);
     $regionName->addForeignKeyConstraint(
         'directory_country_region',
         ['region_id'],
         ['region_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_directory_country_region_name_region_id_country_region',
     );
     $regionName->setComment('Directory Country Region Name');
 
@@ -70,13 +69,12 @@ return function (Schema $schema): void {
     $countryName->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('locale', 'country_id')->create(),
     );
-    $countryName->addIndex(['country_id'], 'idx_directory_country_name_country_id');
+    $countryName->addIndex(['country_id']);
     $countryName->addForeignKeyConstraint(
         'directory_country',
         ['country_id'],
         ['country_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_directory_country_name_country_id_country',
     );
     $countryName->setComment('Directory Country Name');
 
@@ -87,6 +85,6 @@ return function (Schema $schema): void {
     $currencyRate->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('currency_from', 'currency_to')->create(),
     );
-    $currencyRate->addIndex(['currency_to'], 'idx_directory_currency_rate_currency_to');
+    $currencyRate->addIndex(['currency_to']);
     $currencyRate->setComment('Directory Currency Rate');
 };

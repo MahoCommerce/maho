@@ -52,22 +52,20 @@ return function (Schema $schema): void {
     $stockItem->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('item_id')->create(),
     );
-    $stockItem->addUniqueIndex(['product_id', 'stock_id'], 'unq_cataloginventory_stock_item_product_stock');
-    $stockItem->addIndex(['product_id'], 'idx_cataloginventory_stock_item_product_id');
-    $stockItem->addIndex(['stock_id'], 'idx_cataloginventory_stock_item_stock_id');
+    $stockItem->addUniqueIndex(['product_id', 'stock_id']);
+    $stockItem->addIndex(['product_id']);
+    $stockItem->addIndex(['stock_id']);
     $stockItem->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_cataloginventory_stock_item_product',
     );
     $stockItem->addForeignKeyConstraint(
         'cataloginventory_stock',
         ['stock_id'],
         ['stock_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_cataloginventory_stock_item_stock',
     );
     $stockItem->setComment('Cataloginventory Stock Item');
 
@@ -80,28 +78,25 @@ return function (Schema $schema): void {
     $stockStatus->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('product_id', 'website_id', 'stock_id')->create(),
     );
-    $stockStatus->addIndex(['stock_id'], 'idx_cataloginventory_stock_status_stock_id');
-    $stockStatus->addIndex(['website_id'], 'idx_cataloginventory_stock_status_website_id');
+    $stockStatus->addIndex(['stock_id']);
+    $stockStatus->addIndex(['website_id']);
     $stockStatus->addForeignKeyConstraint(
         'cataloginventory_stock',
         ['stock_id'],
         ['stock_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_cataloginventory_stock_status_stock',
     );
     $stockStatus->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_cataloginventory_stock_status_product',
     );
     $stockStatus->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_cataloginventory_stock_status_website',
     );
     $stockStatus->setComment('Cataloginventory Stock Status');
 
@@ -115,8 +110,8 @@ return function (Schema $schema): void {
         $idx->addPrimaryKeyConstraint(
             PrimaryKeyConstraint::editor()->setUnquotedColumnNames('product_id', 'website_id', 'stock_id')->create(),
         );
-        $idx->addIndex(['stock_id'], "idx_{$tableName}_stock_id");
-        $idx->addIndex(['website_id'], "idx_{$tableName}_website_id");
+        $idx->addIndex(['stock_id']);
+        $idx->addIndex(['website_id']);
         $idx->setComment($tableName === 'cataloginventory_stock_status_idx'
             ? 'Cataloginventory Stock Status Indexer Idx'
             : 'Cataloginventory Stock Status Indexer Tmp');

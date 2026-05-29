@@ -34,7 +34,7 @@ return function (Schema $schema): void {
     $rule->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create(),
     );
-    $rule->addIndex(['is_active', 'sort_order', 'to_date', 'from_date'], 'idx_catalogrule_is_active_sort_order_to_date_from_date');
+    $rule->addIndex(['is_active', 'sort_order', 'to_date', 'from_date']);
     $rule->setComment('CatalogRule');
 
     $ruleProduct = $schema->createTable('catalogrule_product');
@@ -56,41 +56,36 @@ return function (Schema $schema): void {
     );
     $ruleProduct->addUniqueIndex(
         ['rule_id', 'from_time', 'to_time', 'website_id', 'customer_group_id', 'product_id', 'sort_order'],
-        'unq_catalogrule_product_rule_from_to_website_group_product_sort',
     );
-    $ruleProduct->addIndex(['rule_id'], 'idx_catalogrule_product_rule_id');
-    $ruleProduct->addIndex(['customer_group_id'], 'idx_catalogrule_product_customer_group_id');
-    $ruleProduct->addIndex(['website_id'], 'idx_catalogrule_product_website_id');
-    $ruleProduct->addIndex(['from_time'], 'idx_catalogrule_product_from_time');
-    $ruleProduct->addIndex(['to_time'], 'idx_catalogrule_product_to_time');
-    $ruleProduct->addIndex(['product_id'], 'idx_catalogrule_product_product_id');
+    $ruleProduct->addIndex(['rule_id']);
+    $ruleProduct->addIndex(['customer_group_id']);
+    $ruleProduct->addIndex(['website_id']);
+    $ruleProduct->addIndex(['from_time']);
+    $ruleProduct->addIndex(['to_time']);
+    $ruleProduct->addIndex(['product_id']);
     $ruleProduct->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalogrule_product_product',
     );
     $ruleProduct->addForeignKeyConstraint(
         'customer_group',
         ['customer_group_id'],
         ['customer_group_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalogrule_product_customer_group',
     );
     $ruleProduct->addForeignKeyConstraint(
         'catalogrule',
         ['rule_id'],
         ['rule_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalogrule_product_rule',
     );
     $ruleProduct->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalogrule_product_website',
     );
     $ruleProduct->setComment('CatalogRule Product');
 
@@ -108,31 +103,27 @@ return function (Schema $schema): void {
     );
     $rulePrice->addUniqueIndex(
         ['rule_date', 'website_id', 'customer_group_id', 'product_id'],
-        'unq_catalogrule_product_price_rule_date_website_group_product',
     );
-    $rulePrice->addIndex(['customer_group_id'], 'idx_catalogrule_product_price_customer_group_id');
-    $rulePrice->addIndex(['website_id'], 'idx_catalogrule_product_price_website_id');
-    $rulePrice->addIndex(['product_id'], 'idx_catalogrule_product_price_product_id');
+    $rulePrice->addIndex(['customer_group_id']);
+    $rulePrice->addIndex(['website_id']);
+    $rulePrice->addIndex(['product_id']);
     $rulePrice->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalogrule_product_price_product',
     );
     $rulePrice->addForeignKeyConstraint(
         'customer_group',
         ['customer_group_id'],
         ['customer_group_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalogrule_product_price_customer_group',
     );
     $rulePrice->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalogrule_product_price_website',
     );
     $rulePrice->setComment('CatalogRule Product Price');
 
@@ -150,29 +141,26 @@ return function (Schema $schema): void {
     $groupWebsite->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id', 'customer_group_id', 'website_id')->create(),
     );
-    $groupWebsite->addIndex(['rule_id'], 'idx_catalogrule_group_website_rule_id');
-    $groupWebsite->addIndex(['customer_group_id'], 'idx_catalogrule_group_website_customer_group_id');
-    $groupWebsite->addIndex(['website_id'], 'idx_catalogrule_group_website_website_id');
+    $groupWebsite->addIndex(['rule_id']);
+    $groupWebsite->addIndex(['customer_group_id']);
+    $groupWebsite->addIndex(['website_id']);
     $groupWebsite->addForeignKeyConstraint(
         'customer_group',
         ['customer_group_id'],
         ['customer_group_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalogrule_group_website_customer_group',
     );
     $groupWebsite->addForeignKeyConstraint(
         'catalogrule',
         ['rule_id'],
         ['rule_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalogrule_group_website_rule',
     );
     $groupWebsite->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalogrule_group_website_website',
     );
     $groupWebsite->setComment('CatalogRule Group Website');
 
@@ -182,21 +170,19 @@ return function (Schema $schema): void {
     $ruleWebsite->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id', 'website_id')->create(),
     );
-    $ruleWebsite->addIndex(['rule_id'], 'idx_catalogrule_website_rule_id');
-    $ruleWebsite->addIndex(['website_id'], 'idx_catalogrule_website_website_id');
+    $ruleWebsite->addIndex(['rule_id']);
+    $ruleWebsite->addIndex(['website_id']);
     $ruleWebsite->addForeignKeyConstraint(
         'catalogrule',
         ['rule_id'],
         ['rule_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalogrule_website_rule',
     );
     $ruleWebsite->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalogrule_website_website',
     );
     $ruleWebsite->setComment('Catalog Rules To Websites Relations');
 
@@ -206,21 +192,19 @@ return function (Schema $schema): void {
     $ruleCustomerGroup->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id', 'customer_group_id')->create(),
     );
-    $ruleCustomerGroup->addIndex(['rule_id'], 'idx_catalogrule_customer_group_rule_id');
-    $ruleCustomerGroup->addIndex(['customer_group_id'], 'idx_catalogrule_customer_group_customer_group_id');
+    $ruleCustomerGroup->addIndex(['rule_id']);
+    $ruleCustomerGroup->addIndex(['customer_group_id']);
     $ruleCustomerGroup->addForeignKeyConstraint(
         'catalogrule',
         ['rule_id'],
         ['rule_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalogrule_customer_group_rule',
     );
     $ruleCustomerGroup->addForeignKeyConstraint(
         'customer_group',
         ['customer_group_id'],
         ['customer_group_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalogrule_customer_group_customer_group',
     );
     $ruleCustomerGroup->setComment('Catalog Rules To Customer Groups Relations');
 };

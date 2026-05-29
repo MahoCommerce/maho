@@ -23,7 +23,7 @@ return function (Schema $schema): void {
     $widget->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('widget_id')->create(),
     );
-    $widget->addIndex(['widget_code'], 'idx_widget_widget_code');
+    $widget->addIndex(['widget_code']);
     $widget->setComment('Preconfigured Widgets');
 
     $instance = $schema->createTable('widget_instance');
@@ -51,35 +51,32 @@ return function (Schema $schema): void {
     $instancePage->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('page_id')->create(),
     );
-    $instancePage->addIndex(['instance_id'], 'idx_widget_instance_page_instance_id');
+    $instancePage->addIndex(['instance_id']);
     $instancePage->addForeignKeyConstraint(
         'widget_instance',
         ['instance_id'],
         ['instance_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_widget_instance_page_instance',
     );
     $instancePage->setComment('Instance of Widget on Page');
 
     $instancePageLayout = $schema->createTable('widget_instance_page_layout');
     $instancePageLayout->addColumn('page_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $instancePageLayout->addColumn('layout_update_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $instancePageLayout->addIndex(['page_id'], 'idx_widget_instance_page_layout_page_id');
-    $instancePageLayout->addIndex(['layout_update_id'], 'idx_widget_instance_page_layout_layout_update_id');
-    $instancePageLayout->addUniqueIndex(['layout_update_id', 'page_id'], 'unq_widget_instance_page_layout_update_page');
+    $instancePageLayout->addIndex(['page_id']);
+    $instancePageLayout->addIndex(['layout_update_id']);
+    $instancePageLayout->addUniqueIndex(['layout_update_id', 'page_id']);
     $instancePageLayout->addForeignKeyConstraint(
         'widget_instance_page',
         ['page_id'],
         ['page_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_widget_instance_page_layout_page',
     );
     $instancePageLayout->addForeignKeyConstraint(
         'core_layout_update',
         ['layout_update_id'],
         ['layout_update_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_widget_instance_page_layout_update',
     );
     $instancePageLayout->setComment('Layout updates');
 };

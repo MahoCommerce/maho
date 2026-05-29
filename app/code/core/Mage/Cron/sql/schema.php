@@ -30,8 +30,8 @@ return function (Schema $schema): void {
     $t->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('schedule_id')->create(),
     );
-    $t->addIndex(['job_code'], 'idx_cron_schedule_job_code');
-    $t->addIndex(['scheduled_at', 'status'], 'idx_cron_schedule_scheduled_at_status');
+    $t->addIndex(['job_code']);
+    $t->addIndex(['scheduled_at', 'status']);
 
     $t->setComment('Cron Schedule');
 };

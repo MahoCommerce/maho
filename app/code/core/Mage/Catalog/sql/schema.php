@@ -30,11 +30,11 @@ return function (Schema $schema): void {
     $product->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
-    $product->addIndex(['entity_type_id'], 'idx_catalog_product_entity_entity_type_id');
-    $product->addIndex(['attribute_set_id'], 'idx_catalog_product_entity_attribute_set_id');
-    $product->addIndex(['sku'], 'idx_catalog_product_entity_sku');
-    $product->addForeignKeyConstraint('eav_attribute_set', ['attribute_set_id'], ['attribute_set_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_entity_attribute_set');
-    $product->addForeignKeyConstraint('eav_entity_type', ['entity_type_id'], ['entity_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_entity_entity_type');
+    $product->addIndex(['entity_type_id']);
+    $product->addIndex(['attribute_set_id']);
+    $product->addIndex(['sku']);
+    $product->addForeignKeyConstraint('eav_attribute_set', ['attribute_set_id'], ['attribute_set_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $product->addForeignKeyConstraint('eav_entity_type', ['entity_type_id'], ['entity_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $product->setComment('Catalog Product Table');
 
     // Product value tables — one per backend type (datetime/decimal/int/text/varchar).
@@ -57,14 +57,13 @@ return function (Schema $schema): void {
         $t->addPrimaryKeyConstraint(
             PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
         );
-        $short = str_replace('catalog_product_entity_', 'cat_prod_ent_', $tableName);
-        $t->addUniqueIndex(['entity_id', 'attribute_id', 'store_id'], "unq_{$short}_entity_id_attribute_id_store_id");
-        $t->addIndex(['attribute_id'], "idx_{$short}_attribute_id");
-        $t->addIndex(['store_id'], "idx_{$short}_store_id");
-        $t->addIndex(['entity_id'], "idx_{$short}_entity_id");
-        $t->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$short}_attribute");
-        $t->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$short}_entity");
-        $t->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$short}_store");
+        $t->addUniqueIndex(['entity_id', 'attribute_id', 'store_id']);
+        $t->addIndex(['attribute_id']);
+        $t->addIndex(['store_id']);
+        $t->addIndex(['entity_id']);
+        $t->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+        $t->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+        $t->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
         $t->setComment($spec['comment']);
     }
 
@@ -80,13 +79,13 @@ return function (Schema $schema): void {
     $productGallery->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $productGallery->addUniqueIndex(['entity_type_id', 'entity_id', 'attribute_id', 'store_id'], 'unq_cat_prod_ent_gallery_entity_type_entity_attr_store');
-    $productGallery->addIndex(['entity_id'], 'idx_cat_prod_ent_gallery_entity_id');
-    $productGallery->addIndex(['attribute_id'], 'idx_cat_prod_ent_gallery_attribute_id');
-    $productGallery->addIndex(['store_id'], 'idx_cat_prod_ent_gallery_store_id');
-    $productGallery->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_cat_prod_ent_gallery_attribute');
-    $productGallery->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_cat_prod_ent_gallery_entity');
-    $productGallery->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_cat_prod_ent_gallery_store');
+    $productGallery->addUniqueIndex(['entity_type_id', 'entity_id', 'attribute_id', 'store_id']);
+    $productGallery->addIndex(['entity_id']);
+    $productGallery->addIndex(['attribute_id']);
+    $productGallery->addIndex(['store_id']);
+    $productGallery->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productGallery->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productGallery->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productGallery->setComment('Catalog Product Gallery Attribute Backend Table');
 
     // catalog_category_entity (alias catalog/category).
@@ -104,8 +103,8 @@ return function (Schema $schema): void {
     $category->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
-    $category->addIndex(['level'], 'idx_catalog_category_entity_level');
-    $category->addIndex(['path', 'entity_id'], 'idx_catalog_category_entity_path_entity_id');
+    $category->addIndex(['level']);
+    $category->addIndex(['path', 'entity_id']);
     $category->setComment('Catalog Category Table');
 
     // Category value tables (datetime/decimal/int/text/varchar).
@@ -127,14 +126,13 @@ return function (Schema $schema): void {
         $t->addPrimaryKeyConstraint(
             PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
         );
-        $short = str_replace('catalog_category_entity_', 'cat_cat_ent_', $tableName);
-        $t->addUniqueIndex(['entity_type_id', 'entity_id', 'attribute_id', 'store_id'], "unq_{$short}_entity_type_entity_attr_store");
-        $t->addIndex(['entity_id'], "idx_{$short}_entity_id");
-        $t->addIndex(['attribute_id'], "idx_{$short}_attribute_id");
-        $t->addIndex(['store_id'], "idx_{$short}_store_id");
-        $t->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$short}_attribute");
-        $t->addForeignKeyConstraint('catalog_category_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$short}_entity");
-        $t->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$short}_store");
+        $t->addUniqueIndex(['entity_type_id', 'entity_id', 'attribute_id', 'store_id']);
+        $t->addIndex(['entity_id']);
+        $t->addIndex(['attribute_id']);
+        $t->addIndex(['store_id']);
+        $t->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+        $t->addForeignKeyConstraint('catalog_category_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+        $t->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
         $t->setComment($spec['comment']);
     }
 
@@ -146,9 +144,9 @@ return function (Schema $schema): void {
     $categoryProduct->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('category_id', 'product_id')->create(),
     );
-    $categoryProduct->addIndex(['product_id'], 'idx_catalog_category_product_product_id');
-    $categoryProduct->addForeignKeyConstraint('catalog_category_entity', ['category_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_category_product_category');
-    $categoryProduct->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_category_product_product');
+    $categoryProduct->addIndex(['product_id']);
+    $categoryProduct->addForeignKeyConstraint('catalog_category_entity', ['category_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $categoryProduct->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $categoryProduct->setComment('Catalog Product To Category Linkage Table');
 
     $categoryProductIndex = $schema->createTable('catalog_category_product_index');
@@ -161,11 +159,11 @@ return function (Schema $schema): void {
     $categoryProductIndex->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('category_id', 'product_id', 'store_id')->create(),
     );
-    $categoryProductIndex->addIndex(['product_id', 'store_id', 'category_id', 'visibility'], 'idx_catalog_cat_prod_idx_product_store_category_visibility');
-    $categoryProductIndex->addIndex(['store_id', 'category_id', 'visibility', 'is_parent', 'position'], 'idx_catalog_cat_prod_idx_store_category_visibility_parent_pos');
-    $categoryProductIndex->addForeignKeyConstraint('catalog_category_entity', ['category_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_category_product_index_category');
-    $categoryProductIndex->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_category_product_index_product');
-    $categoryProductIndex->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_category_product_index_store');
+    $categoryProductIndex->addIndex(['product_id', 'store_id', 'category_id', 'visibility']);
+    $categoryProductIndex->addIndex(['store_id', 'category_id', 'visibility', 'is_parent', 'position']);
+    $categoryProductIndex->addForeignKeyConstraint('catalog_category_entity', ['category_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $categoryProductIndex->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $categoryProductIndex->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $categoryProductIndex->setComment('Catalog Category Product Index');
 
     // catalog_compare_item
@@ -178,14 +176,14 @@ return function (Schema $schema): void {
     $compareItem->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('catalog_compare_item_id')->create(),
     );
-    $compareItem->addIndex(['customer_id'], 'idx_catalog_compare_item_customer_id');
-    $compareItem->addIndex(['product_id'], 'idx_catalog_compare_item_product_id');
-    $compareItem->addIndex(['visitor_id', 'product_id'], 'idx_catalog_compare_item_visitor_id_product_id');
-    $compareItem->addIndex(['customer_id', 'product_id'], 'idx_catalog_compare_item_customer_id_product_id');
-    $compareItem->addIndex(['store_id'], 'idx_catalog_compare_item_store_id');
-    $compareItem->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_compare_item_product');
-    $compareItem->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_catalog_compare_item_store');
-    $compareItem->addForeignKeyConstraint('customer_entity', ['customer_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_compare_item_customer');
+    $compareItem->addIndex(['customer_id']);
+    $compareItem->addIndex(['product_id']);
+    $compareItem->addIndex(['visitor_id', 'product_id']);
+    $compareItem->addIndex(['customer_id', 'product_id']);
+    $compareItem->addIndex(['store_id']);
+    $compareItem->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $compareItem->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL']);
+    $compareItem->addForeignKeyConstraint('customer_entity', ['customer_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $compareItem->setComment('Catalog Compare Table');
 
     // catalog_product_website
@@ -195,9 +193,9 @@ return function (Schema $schema): void {
     $productWebsite->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('product_id', 'website_id')->create(),
     );
-    $productWebsite->addIndex(['website_id'], 'idx_catalog_product_website_website_id');
-    $productWebsite->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_website_website');
-    $productWebsite->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_website_product');
+    $productWebsite->addIndex(['website_id']);
+    $productWebsite->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productWebsite->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productWebsite->setComment('Catalog Product To Website Linkage Table');
 
     // catalog_product_enabled_index
@@ -208,9 +206,9 @@ return function (Schema $schema): void {
     $productEnabledIndex->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('product_id', 'store_id')->create(),
     );
-    $productEnabledIndex->addIndex(['store_id'], 'idx_catalog_product_enabled_index_store_id');
-    $productEnabledIndex->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_enabled_index_product');
-    $productEnabledIndex->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_enabled_index_store');
+    $productEnabledIndex->addIndex(['store_id']);
+    $productEnabledIndex->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productEnabledIndex->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productEnabledIndex->setComment('Catalog Product Visibility Index Table');
 
     // catalog_product_link_type
@@ -231,13 +229,13 @@ return function (Schema $schema): void {
     $productLink->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('link_id')->create(),
     );
-    $productLink->addUniqueIndex(['link_type_id', 'product_id', 'linked_product_id'], 'unq_catalog_product_link_type_product_linked');
-    $productLink->addIndex(['product_id'], 'idx_catalog_product_link_product_id');
-    $productLink->addIndex(['linked_product_id'], 'idx_catalog_product_link_linked_product_id');
-    $productLink->addIndex(['link_type_id'], 'idx_catalog_product_link_link_type_id');
-    $productLink->addForeignKeyConstraint('catalog_product_entity', ['linked_product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_link_linked_product');
-    $productLink->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_link_product');
-    $productLink->addForeignKeyConstraint('catalog_product_link_type', ['link_type_id'], ['link_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_link_link_type');
+    $productLink->addUniqueIndex(['link_type_id', 'product_id', 'linked_product_id']);
+    $productLink->addIndex(['product_id']);
+    $productLink->addIndex(['linked_product_id']);
+    $productLink->addIndex(['link_type_id']);
+    $productLink->addForeignKeyConstraint('catalog_product_entity', ['linked_product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productLink->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productLink->addForeignKeyConstraint('catalog_product_link_type', ['link_type_id'], ['link_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productLink->setComment('Catalog Product To Product Linkage Table');
 
     // catalog_product_link_attribute
@@ -249,8 +247,8 @@ return function (Schema $schema): void {
     $productLinkAttribute->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('product_link_attribute_id')->create(),
     );
-    $productLinkAttribute->addIndex(['link_type_id'], 'idx_catalog_product_link_attribute_link_type_id');
-    $productLinkAttribute->addForeignKeyConstraint('catalog_product_link_type', ['link_type_id'], ['link_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_link_attribute_link_type');
+    $productLinkAttribute->addIndex(['link_type_id']);
+    $productLinkAttribute->addForeignKeyConstraint('catalog_product_link_type', ['link_type_id'], ['link_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productLinkAttribute->setComment('Catalog Product Link Attribute Table');
 
     // catalog_product_link_attribute_decimal
@@ -262,11 +260,11 @@ return function (Schema $schema): void {
     $productLinkAttributeDecimal->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $productLinkAttributeDecimal->addIndex(['product_link_attribute_id'], 'idx_catalog_product_link_attribute_decimal_attr_id');
-    $productLinkAttributeDecimal->addIndex(['link_id'], 'idx_catalog_product_link_attribute_decimal_link_id');
-    $productLinkAttributeDecimal->addUniqueIndex(['product_link_attribute_id', 'link_id'], 'unq_catalog_product_link_attribute_decimal_attr_id_link_id');
-    $productLinkAttributeDecimal->addForeignKeyConstraint('catalog_product_link', ['link_id'], ['link_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_link_attribute_decimal_link');
-    $productLinkAttributeDecimal->addForeignKeyConstraint('catalog_product_link_attribute', ['product_link_attribute_id'], ['product_link_attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_link_attribute_decimal_attr');
+    $productLinkAttributeDecimal->addIndex(['product_link_attribute_id']);
+    $productLinkAttributeDecimal->addIndex(['link_id']);
+    $productLinkAttributeDecimal->addUniqueIndex(['product_link_attribute_id', 'link_id']);
+    $productLinkAttributeDecimal->addForeignKeyConstraint('catalog_product_link', ['link_id'], ['link_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productLinkAttributeDecimal->addForeignKeyConstraint('catalog_product_link_attribute', ['product_link_attribute_id'], ['product_link_attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productLinkAttributeDecimal->setComment('Catalog Product Link Decimal Attribute Table');
 
     // catalog_product_link_attribute_int.
@@ -281,8 +279,8 @@ return function (Schema $schema): void {
     $productLinkAttributeInt->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $productLinkAttributeInt->addIndex(['product_link_attribute_id'], 'idx_catalog_product_link_attribute_int_attr_id');
-    $productLinkAttributeInt->addIndex(['link_id'], 'idx_catalog_product_link_attribute_int_link_id');
+    $productLinkAttributeInt->addIndex(['product_link_attribute_id']);
+    $productLinkAttributeInt->addIndex(['link_id']);
     $productLinkAttributeInt->setComment('Catalog Product Link Integer Attribute Table');
 
     // catalog_product_link_attribute_varchar
@@ -294,11 +292,11 @@ return function (Schema $schema): void {
     $productLinkAttributeVarchar->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $productLinkAttributeVarchar->addIndex(['product_link_attribute_id'], 'idx_catalog_product_link_attribute_varchar_attr_id');
-    $productLinkAttributeVarchar->addIndex(['link_id'], 'idx_catalog_product_link_attribute_varchar_link_id');
-    $productLinkAttributeVarchar->addUniqueIndex(['product_link_attribute_id', 'link_id'], 'unq_catalog_product_link_attribute_varchar_attr_id_link_id');
-    $productLinkAttributeVarchar->addForeignKeyConstraint('catalog_product_link', ['link_id'], ['link_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_link_attribute_varchar_link');
-    $productLinkAttributeVarchar->addForeignKeyConstraint('catalog_product_link_attribute', ['product_link_attribute_id'], ['product_link_attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_link_attribute_varchar_attr');
+    $productLinkAttributeVarchar->addIndex(['product_link_attribute_id']);
+    $productLinkAttributeVarchar->addIndex(['link_id']);
+    $productLinkAttributeVarchar->addUniqueIndex(['product_link_attribute_id', 'link_id']);
+    $productLinkAttributeVarchar->addForeignKeyConstraint('catalog_product_link', ['link_id'], ['link_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productLinkAttributeVarchar->addForeignKeyConstraint('catalog_product_link_attribute', ['product_link_attribute_id'], ['product_link_attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productLinkAttributeVarchar->setComment('Catalog Product Link Varchar Attribute Table');
 
     // catalog_product_super_attribute.
@@ -311,8 +309,8 @@ return function (Schema $schema): void {
     $productSuperAttribute->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('product_super_attribute_id')->create(),
     );
-    $productSuperAttribute->addIndex(['product_id'], 'idx_catalog_product_super_attribute_product_id');
-    $productSuperAttribute->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_catalog_product_super_attribute_product');
+    $productSuperAttribute->addIndex(['product_id']);
+    $productSuperAttribute->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onDelete' => 'CASCADE']);
     $productSuperAttribute->setComment('Catalog Product Super Attribute Table');
 
     // catalog_product_super_attribute_label
@@ -325,11 +323,11 @@ return function (Schema $schema): void {
     $productSuperAttributeLabel->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $productSuperAttributeLabel->addUniqueIndex(['product_super_attribute_id', 'store_id'], 'unq_catalog_product_super_attribute_label_attr_store');
-    $productSuperAttributeLabel->addIndex(['product_super_attribute_id'], 'idx_catalog_product_super_attribute_label_attr_id');
-    $productSuperAttributeLabel->addIndex(['store_id'], 'idx_catalog_product_super_attribute_label_store_id');
-    $productSuperAttributeLabel->addForeignKeyConstraint('catalog_product_super_attribute', ['product_super_attribute_id'], ['product_super_attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_super_attribute_label_attr');
-    $productSuperAttributeLabel->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_super_attribute_label_store');
+    $productSuperAttributeLabel->addUniqueIndex(['product_super_attribute_id', 'store_id']);
+    $productSuperAttributeLabel->addIndex(['product_super_attribute_id']);
+    $productSuperAttributeLabel->addIndex(['store_id']);
+    $productSuperAttributeLabel->addForeignKeyConstraint('catalog_product_super_attribute', ['product_super_attribute_id'], ['product_super_attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productSuperAttributeLabel->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productSuperAttributeLabel->setComment('Catalog Product Super Attribute Label Table');
 
     // catalog_product_super_attribute_pricing.
@@ -345,10 +343,10 @@ return function (Schema $schema): void {
     $productSuperAttributePricing->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $productSuperAttributePricing->addIndex(['product_super_attribute_id'], 'idx_catalog_product_super_attr_pricing_attr_id');
-    $productSuperAttributePricing->addIndex(['website_id'], 'idx_catalog_product_super_attr_pricing_website_id');
-    $productSuperAttributePricing->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_super_attr_pricing_website');
-    $productSuperAttributePricing->addForeignKeyConstraint('catalog_product_super_attribute', ['product_super_attribute_id'], ['product_super_attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_super_attr_pricing_attr');
+    $productSuperAttributePricing->addIndex(['product_super_attribute_id']);
+    $productSuperAttributePricing->addIndex(['website_id']);
+    $productSuperAttributePricing->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productSuperAttributePricing->addForeignKeyConstraint('catalog_product_super_attribute', ['product_super_attribute_id'], ['product_super_attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productSuperAttributePricing->setComment('Catalog Product Super Attribute Pricing Table');
 
     // catalog_product_super_link.
@@ -360,10 +358,10 @@ return function (Schema $schema): void {
     $productSuperLink->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('link_id')->create(),
     );
-    $productSuperLink->addIndex(['parent_id'], 'idx_catalog_product_super_link_parent_id');
-    $productSuperLink->addIndex(['product_id'], 'idx_catalog_product_super_link_product_id');
-    $productSuperLink->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_super_link_product');
-    $productSuperLink->addForeignKeyConstraint('catalog_product_entity', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_super_link_parent');
+    $productSuperLink->addIndex(['parent_id']);
+    $productSuperLink->addIndex(['product_id']);
+    $productSuperLink->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productSuperLink->addForeignKeyConstraint('catalog_product_entity', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productSuperLink->setComment('Catalog Product Super Link Table');
 
     // catalog_product_entity_tier_price (alias catalog/product_attribute_tier_price)
@@ -378,13 +376,13 @@ return function (Schema $schema): void {
     $tierPrice->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $tierPrice->addUniqueIndex(['entity_id', 'all_groups', 'customer_group_id', 'qty', 'website_id'], 'unq_cat_prod_ent_tier_price_full');
-    $tierPrice->addIndex(['entity_id'], 'idx_cat_prod_ent_tier_price_entity_id');
-    $tierPrice->addIndex(['customer_group_id'], 'idx_cat_prod_ent_tier_price_customer_group_id');
-    $tierPrice->addIndex(['website_id'], 'idx_cat_prod_ent_tier_price_website_id');
-    $tierPrice->addForeignKeyConstraint('customer_group', ['customer_group_id'], ['customer_group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_cat_prod_ent_tier_price_customer_group');
-    $tierPrice->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_cat_prod_ent_tier_price_entity');
-    $tierPrice->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_cat_prod_ent_tier_price_website');
+    $tierPrice->addUniqueIndex(['entity_id', 'all_groups', 'customer_group_id', 'qty', 'website_id']);
+    $tierPrice->addIndex(['entity_id']);
+    $tierPrice->addIndex(['customer_group_id']);
+    $tierPrice->addIndex(['website_id']);
+    $tierPrice->addForeignKeyConstraint('customer_group', ['customer_group_id'], ['customer_group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $tierPrice->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $tierPrice->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $tierPrice->setComment('Catalog Product Tier Price Attribute Backend Table');
 
     $groupPrice = $schema->createTable('catalog_product_entity_group_price');
@@ -398,13 +396,13 @@ return function (Schema $schema): void {
     $groupPrice->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $groupPrice->addUniqueIndex(['entity_id', 'all_groups', 'customer_group_id', 'website_id'], 'unq_cat_prod_ent_group_price_full');
-    $groupPrice->addIndex(['entity_id'], 'idx_cat_prod_ent_group_price_entity_id');
-    $groupPrice->addIndex(['customer_group_id'], 'idx_cat_prod_ent_group_price_customer_group_id');
-    $groupPrice->addIndex(['website_id'], 'idx_cat_prod_ent_group_price_website_id');
-    $groupPrice->addForeignKeyConstraint('customer_group', ['customer_group_id'], ['customer_group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_cat_prod_ent_group_price_customer_group');
-    $groupPrice->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_cat_prod_ent_group_price_entity');
-    $groupPrice->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_cat_prod_ent_group_price_website');
+    $groupPrice->addUniqueIndex(['entity_id', 'all_groups', 'customer_group_id', 'website_id']);
+    $groupPrice->addIndex(['entity_id']);
+    $groupPrice->addIndex(['customer_group_id']);
+    $groupPrice->addIndex(['website_id']);
+    $groupPrice->addForeignKeyConstraint('customer_group', ['customer_group_id'], ['customer_group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $groupPrice->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $groupPrice->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $groupPrice->setComment('Catalog Product Group Price Attribute Backend Table');
 
     // catalog_product_entity_media_gallery
@@ -416,10 +414,10 @@ return function (Schema $schema): void {
     $mediaGallery->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $mediaGallery->addIndex(['attribute_id'], 'idx_cat_prod_ent_media_gallery_attribute_id');
-    $mediaGallery->addIndex(['entity_id'], 'idx_cat_prod_ent_media_gallery_entity_id');
-    $mediaGallery->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_cat_prod_ent_media_gallery_attribute');
-    $mediaGallery->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_cat_prod_ent_media_gallery_entity');
+    $mediaGallery->addIndex(['attribute_id']);
+    $mediaGallery->addIndex(['entity_id']);
+    $mediaGallery->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $mediaGallery->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $mediaGallery->setComment('Catalog Product Media Gallery Attribute Backend Table');
 
     // catalog_product_entity_media_gallery_value
@@ -432,9 +430,9 @@ return function (Schema $schema): void {
     $mediaGalleryValue->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id', 'store_id')->create(),
     );
-    $mediaGalleryValue->addIndex(['store_id'], 'idx_cat_prod_ent_media_gallery_value_store_id');
-    $mediaGalleryValue->addForeignKeyConstraint('catalog_product_entity_media_gallery', ['value_id'], ['value_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_cat_prod_ent_media_gallery_value_gallery');
-    $mediaGalleryValue->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_cat_prod_ent_media_gallery_value_store');
+    $mediaGalleryValue->addIndex(['store_id']);
+    $mediaGalleryValue->addForeignKeyConstraint('catalog_product_entity_media_gallery', ['value_id'], ['value_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $mediaGalleryValue->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $mediaGalleryValue->setComment('Catalog Product Media Gallery Attribute Value Table');
 
     // catalog_product_option
@@ -452,8 +450,8 @@ return function (Schema $schema): void {
     $productOption->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_id')->create(),
     );
-    $productOption->addIndex(['product_id'], 'idx_catalog_product_option_product_id');
-    $productOption->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_option_product');
+    $productOption->addIndex(['product_id']);
+    $productOption->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productOption->setComment('Catalog Product Option Table');
 
     // catalog_product_option_price
@@ -466,11 +464,11 @@ return function (Schema $schema): void {
     $productOptionPrice->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_price_id')->create(),
     );
-    $productOptionPrice->addUniqueIndex(['option_id', 'store_id'], 'unq_catalog_product_option_price_option_id_store_id');
-    $productOptionPrice->addIndex(['option_id'], 'idx_catalog_product_option_price_option_id');
-    $productOptionPrice->addIndex(['store_id'], 'idx_catalog_product_option_price_store_id');
-    $productOptionPrice->addForeignKeyConstraint('catalog_product_option', ['option_id'], ['option_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_option_price_option');
-    $productOptionPrice->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_option_price_store');
+    $productOptionPrice->addUniqueIndex(['option_id', 'store_id']);
+    $productOptionPrice->addIndex(['option_id']);
+    $productOptionPrice->addIndex(['store_id']);
+    $productOptionPrice->addForeignKeyConstraint('catalog_product_option', ['option_id'], ['option_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productOptionPrice->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productOptionPrice->setComment('Catalog Product Option Price Table');
 
     // catalog_product_option_title
@@ -482,11 +480,11 @@ return function (Schema $schema): void {
     $productOptionTitle->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_title_id')->create(),
     );
-    $productOptionTitle->addUniqueIndex(['option_id', 'store_id'], 'unq_catalog_product_option_title_option_id_store_id');
-    $productOptionTitle->addIndex(['option_id'], 'idx_catalog_product_option_title_option_id');
-    $productOptionTitle->addIndex(['store_id'], 'idx_catalog_product_option_title_store_id');
-    $productOptionTitle->addForeignKeyConstraint('catalog_product_option', ['option_id'], ['option_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_option_title_option');
-    $productOptionTitle->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_option_title_store');
+    $productOptionTitle->addUniqueIndex(['option_id', 'store_id']);
+    $productOptionTitle->addIndex(['option_id']);
+    $productOptionTitle->addIndex(['store_id']);
+    $productOptionTitle->addForeignKeyConstraint('catalog_product_option', ['option_id'], ['option_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productOptionTitle->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productOptionTitle->setComment('Catalog Product Option Title Table');
 
     // catalog_product_option_type_value
@@ -498,8 +496,8 @@ return function (Schema $schema): void {
     $productOptionTypeValue->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_type_id')->create(),
     );
-    $productOptionTypeValue->addIndex(['option_id'], 'idx_catalog_product_option_type_value_option_id');
-    $productOptionTypeValue->addForeignKeyConstraint('catalog_product_option', ['option_id'], ['option_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_option_type_value_option');
+    $productOptionTypeValue->addIndex(['option_id']);
+    $productOptionTypeValue->addForeignKeyConstraint('catalog_product_option', ['option_id'], ['option_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productOptionTypeValue->setComment('Catalog Product Option Type Value Table');
 
     // catalog_product_option_type_price
@@ -512,11 +510,11 @@ return function (Schema $schema): void {
     $productOptionTypePrice->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_type_price_id')->create(),
     );
-    $productOptionTypePrice->addUniqueIndex(['option_type_id', 'store_id'], 'unq_catalog_product_option_type_price_type_store');
-    $productOptionTypePrice->addIndex(['option_type_id'], 'idx_catalog_product_option_type_price_option_type_id');
-    $productOptionTypePrice->addIndex(['store_id'], 'idx_catalog_product_option_type_price_store_id');
-    $productOptionTypePrice->addForeignKeyConstraint('catalog_product_option_type_value', ['option_type_id'], ['option_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_option_type_price_type');
-    $productOptionTypePrice->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_option_type_price_store');
+    $productOptionTypePrice->addUniqueIndex(['option_type_id', 'store_id']);
+    $productOptionTypePrice->addIndex(['option_type_id']);
+    $productOptionTypePrice->addIndex(['store_id']);
+    $productOptionTypePrice->addForeignKeyConstraint('catalog_product_option_type_value', ['option_type_id'], ['option_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productOptionTypePrice->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productOptionTypePrice->setComment('Catalog Product Option Type Price Table');
 
     // catalog_product_option_type_title
@@ -528,11 +526,11 @@ return function (Schema $schema): void {
     $productOptionTypeTitle->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_type_title_id')->create(),
     );
-    $productOptionTypeTitle->addUniqueIndex(['option_type_id', 'store_id'], 'unq_catalog_product_option_type_title_type_store');
-    $productOptionTypeTitle->addIndex(['option_type_id'], 'idx_catalog_product_option_type_title_option_type_id');
-    $productOptionTypeTitle->addIndex(['store_id'], 'idx_catalog_product_option_type_title_store_id');
-    $productOptionTypeTitle->addForeignKeyConstraint('catalog_product_option_type_value', ['option_type_id'], ['option_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_option_type_title_type');
-    $productOptionTypeTitle->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_option_type_title_store');
+    $productOptionTypeTitle->addUniqueIndex(['option_type_id', 'store_id']);
+    $productOptionTypeTitle->addIndex(['option_type_id']);
+    $productOptionTypeTitle->addIndex(['store_id']);
+    $productOptionTypeTitle->addForeignKeyConstraint('catalog_product_option_type_value', ['option_type_id'], ['option_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productOptionTypeTitle->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productOptionTypeTitle->setComment('Catalog Product Option Type Title Table');
 
     // catalog_eav_attribute — catalog-specific attribute metadata.
@@ -559,9 +557,9 @@ return function (Schema $schema): void {
     $eavAttribute->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('attribute_id')->create(),
     );
-    $eavAttribute->addIndex(['used_for_sort_by'], 'idx_catalog_eav_attribute_used_for_sort_by');
-    $eavAttribute->addIndex(['used_in_product_listing'], 'idx_catalog_eav_attribute_used_in_product_listing');
-    $eavAttribute->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_eav_attribute_attribute');
+    $eavAttribute->addIndex(['used_for_sort_by']);
+    $eavAttribute->addIndex(['used_in_product_listing']);
+    $eavAttribute->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $eavAttribute->setComment('Catalog EAV Attribute Table');
 
     // catalog_product_relation
@@ -571,9 +569,9 @@ return function (Schema $schema): void {
     $productRelation->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('parent_id', 'child_id')->create(),
     );
-    $productRelation->addIndex(['child_id'], 'idx_catalog_product_relation_child_id');
-    $productRelation->addForeignKeyConstraint('catalog_product_entity', ['child_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_relation_child');
-    $productRelation->addForeignKeyConstraint('catalog_product_entity', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_relation_parent');
+    $productRelation->addIndex(['child_id']);
+    $productRelation->addForeignKeyConstraint('catalog_product_entity', ['child_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productRelation->addForeignKeyConstraint('catalog_product_entity', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productRelation->setComment('Catalog Product Relation Table');
 
     $productIndexEav = $schema->createTable('catalog_product_index_eav');
@@ -584,13 +582,13 @@ return function (Schema $schema): void {
     $productIndexEav->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id', 'value')->create(),
     );
-    $productIndexEav->addIndex(['entity_id'], 'idx_catalog_product_index_eav_entity_id');
-    $productIndexEav->addIndex(['attribute_id'], 'idx_catalog_product_index_eav_attribute_id');
-    $productIndexEav->addIndex(['store_id'], 'idx_catalog_product_index_eav_store_id');
-    $productIndexEav->addIndex(['value'], 'idx_catalog_product_index_eav_value');
-    $productIndexEav->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_eav_attribute');
-    $productIndexEav->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_eav_entity');
-    $productIndexEav->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_eav_store');
+    $productIndexEav->addIndex(['entity_id']);
+    $productIndexEav->addIndex(['attribute_id']);
+    $productIndexEav->addIndex(['store_id']);
+    $productIndexEav->addIndex(['value']);
+    $productIndexEav->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productIndexEav->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productIndexEav->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productIndexEav->setComment('Catalog Product EAV Index Table');
 
     $productIndexEavDecimal = $schema->createTable('catalog_product_index_eav_decimal');
@@ -601,13 +599,13 @@ return function (Schema $schema): void {
     $productIndexEavDecimal->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id')->create(),
     );
-    $productIndexEavDecimal->addIndex(['entity_id'], 'idx_catalog_product_index_eav_decimal_entity_id');
-    $productIndexEavDecimal->addIndex(['attribute_id'], 'idx_catalog_product_index_eav_decimal_attribute_id');
-    $productIndexEavDecimal->addIndex(['store_id'], 'idx_catalog_product_index_eav_decimal_store_id');
-    $productIndexEavDecimal->addIndex(['value'], 'idx_catalog_product_index_eav_decimal_value');
-    $productIndexEavDecimal->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_eav_decimal_attribute');
-    $productIndexEavDecimal->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_eav_decimal_entity');
-    $productIndexEavDecimal->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_eav_decimal_store');
+    $productIndexEavDecimal->addIndex(['entity_id']);
+    $productIndexEavDecimal->addIndex(['attribute_id']);
+    $productIndexEavDecimal->addIndex(['store_id']);
+    $productIndexEavDecimal->addIndex(['value']);
+    $productIndexEavDecimal->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productIndexEavDecimal->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productIndexEavDecimal->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productIndexEavDecimal->setComment('Catalog Product EAV Decimal Index Table');
 
     $productIndexPrice = $schema->createTable('catalog_product_index_price');
@@ -624,13 +622,13 @@ return function (Schema $schema): void {
     $productIndexPrice->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')->create(),
     );
-    $productIndexPrice->addIndex(['customer_group_id'], 'idx_catalog_product_index_price_customer_group_id');
-    $productIndexPrice->addIndex(['website_id'], 'idx_catalog_product_index_price_website_id');
-    $productIndexPrice->addIndex(['min_price'], 'idx_catalog_product_index_price_min_price');
-    $productIndexPrice->addIndex(['website_id', 'customer_group_id', 'min_price'], 'idx_catalog_product_index_price_website_group_min_price');
-    $productIndexPrice->addForeignKeyConstraint('customer_group', ['customer_group_id'], ['customer_group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_price_customer_group');
-    $productIndexPrice->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_price_entity');
-    $productIndexPrice->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_price_website');
+    $productIndexPrice->addIndex(['customer_group_id']);
+    $productIndexPrice->addIndex(['website_id']);
+    $productIndexPrice->addIndex(['min_price']);
+    $productIndexPrice->addIndex(['website_id', 'customer_group_id', 'min_price']);
+    $productIndexPrice->addForeignKeyConstraint('customer_group', ['customer_group_id'], ['customer_group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productIndexPrice->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productIndexPrice->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productIndexPrice->setComment('Catalog Product Price Index Table');
 
     // catalog_product_index_tier_price
@@ -642,11 +640,11 @@ return function (Schema $schema): void {
     $productIndexTierPrice->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')->create(),
     );
-    $productIndexTierPrice->addIndex(['customer_group_id'], 'idx_catalog_product_index_tier_price_customer_group_id');
-    $productIndexTierPrice->addIndex(['website_id'], 'idx_catalog_product_index_tier_price_website_id');
-    $productIndexTierPrice->addForeignKeyConstraint('customer_group', ['customer_group_id'], ['customer_group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_tier_price_customer_group');
-    $productIndexTierPrice->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_tier_price_entity');
-    $productIndexTierPrice->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_tier_price_website');
+    $productIndexTierPrice->addIndex(['customer_group_id']);
+    $productIndexTierPrice->addIndex(['website_id']);
+    $productIndexTierPrice->addForeignKeyConstraint('customer_group', ['customer_group_id'], ['customer_group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productIndexTierPrice->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productIndexTierPrice->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productIndexTierPrice->setComment('Catalog Product Tier Price Index Table');
 
     $productIndexGroupPrice = $schema->createTable('catalog_product_index_group_price');
@@ -657,11 +655,11 @@ return function (Schema $schema): void {
     $productIndexGroupPrice->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')->create(),
     );
-    $productIndexGroupPrice->addIndex(['customer_group_id'], 'idx_catalog_product_index_group_price_customer_group_id');
-    $productIndexGroupPrice->addIndex(['website_id'], 'idx_catalog_product_index_group_price_website_id');
-    $productIndexGroupPrice->addForeignKeyConstraint('customer_group', ['customer_group_id'], ['customer_group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_group_price_customer_group');
-    $productIndexGroupPrice->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_group_price_entity');
-    $productIndexGroupPrice->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_group_price_website');
+    $productIndexGroupPrice->addIndex(['customer_group_id']);
+    $productIndexGroupPrice->addIndex(['website_id']);
+    $productIndexGroupPrice->addForeignKeyConstraint('customer_group', ['customer_group_id'], ['customer_group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productIndexGroupPrice->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $productIndexGroupPrice->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productIndexGroupPrice->setComment('Catalog Product Group Price Index Table');
 
     // catalog_product_index_website
@@ -672,8 +670,8 @@ return function (Schema $schema): void {
     $productIndexWebsite->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('website_id')->create(),
     );
-    $productIndexWebsite->addIndex(['website_date'], 'idx_catalog_product_index_website_website_date');
-    $productIndexWebsite->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_website_website');
+    $productIndexWebsite->addIndex(['website_date']);
+    $productIndexWebsite->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $productIndexWebsite->setComment('Catalog Product Website Index Table');
 
     foreach (['catalog_product_index_price_cfg_opt_agr_idx', 'catalog_product_index_price_cfg_opt_agr_tmp'] as $tableName) {
@@ -772,10 +770,10 @@ return function (Schema $schema): void {
         $t->addPrimaryKeyConstraint(
             PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id', 'value')->create(),
         );
-        $t->addIndex(['entity_id'], "idx_{$tableName}_entity_id");
-        $t->addIndex(['attribute_id'], "idx_{$tableName}_attribute_id");
-        $t->addIndex(['store_id'], "idx_{$tableName}_store_id");
-        $t->addIndex(['value'], "idx_{$tableName}_value");
+        $t->addIndex(['entity_id']);
+        $t->addIndex(['attribute_id']);
+        $t->addIndex(['store_id']);
+        $t->addIndex(['value']);
         $suffix = str_ends_with($tableName, '_idx') ? 'Index' : 'Temp';
         $t->setComment("Catalog Product EAV Indexer {$suffix} Table");
     }
@@ -788,10 +786,10 @@ return function (Schema $schema): void {
     $eavDecIdx->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id', 'value')->create(),
     );
-    $eavDecIdx->addIndex(['entity_id'], 'idx_catalog_product_index_eav_decimal_idx_entity_id');
-    $eavDecIdx->addIndex(['attribute_id'], 'idx_catalog_product_index_eav_decimal_idx_attribute_id');
-    $eavDecIdx->addIndex(['store_id'], 'idx_catalog_product_index_eav_decimal_idx_store_id');
-    $eavDecIdx->addIndex(['value'], 'idx_catalog_product_index_eav_decimal_idx_value');
+    $eavDecIdx->addIndex(['entity_id']);
+    $eavDecIdx->addIndex(['attribute_id']);
+    $eavDecIdx->addIndex(['store_id']);
+    $eavDecIdx->addIndex(['value']);
     $eavDecIdx->setComment('Catalog Product EAV Decimal Indexer Index Table');
 
     $eavDecTmp = $schema->createTable('catalog_product_index_eav_decimal_tmp');
@@ -802,10 +800,10 @@ return function (Schema $schema): void {
     $eavDecTmp->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id', 'attribute_id', 'store_id')->create(),
     );
-    $eavDecTmp->addIndex(['entity_id'], 'idx_catalog_product_index_eav_decimal_tmp_entity_id');
-    $eavDecTmp->addIndex(['attribute_id'], 'idx_catalog_product_index_eav_decimal_tmp_attribute_id');
-    $eavDecTmp->addIndex(['store_id'], 'idx_catalog_product_index_eav_decimal_tmp_store_id');
-    $eavDecTmp->addIndex(['value'], 'idx_catalog_product_index_eav_decimal_tmp_value');
+    $eavDecTmp->addIndex(['entity_id']);
+    $eavDecTmp->addIndex(['attribute_id']);
+    $eavDecTmp->addIndex(['store_id']);
+    $eavDecTmp->addIndex(['value']);
     $eavDecTmp->setComment('Catalog Product EAV Decimal Indexer Temp Table');
 
     foreach (['catalog_product_index_price_idx', 'catalog_product_index_price_tmp'] as $tableName) {
@@ -823,9 +821,9 @@ return function (Schema $schema): void {
         $t->addPrimaryKeyConstraint(
             PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')->create(),
         );
-        $t->addIndex(['customer_group_id'], "idx_{$tableName}_customer_group_id");
-        $t->addIndex(['website_id'], "idx_{$tableName}_website_id");
-        $t->addIndex(['min_price'], "idx_{$tableName}_min_price");
+        $t->addIndex(['customer_group_id']);
+        $t->addIndex(['website_id']);
+        $t->addIndex(['min_price']);
         $suffix = str_ends_with($tableName, '_idx') ? 'Index' : 'Temp';
         $t->setComment("Catalog Product Price Indexer {$suffix} Table");
     }
@@ -838,7 +836,7 @@ return function (Schema $schema): void {
         $t->addColumn('is_parent', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
         $t->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
         $t->addColumn('visibility', Types::SMALLINT, ['unsigned' => true]);
-        $t->addIndex(['product_id', 'category_id', 'store_id'], "idx_{$tableName}_product_category_store");
+        $t->addIndex(['product_id', 'category_id', 'store_id']);
         $suffix = str_ends_with($tableName, '_idx') ? 'Index' : 'Temp';
         $t->setComment("Catalog Category Product Indexer {$suffix} Table");
     }
@@ -847,7 +845,7 @@ return function (Schema $schema): void {
         $t = $schema->createTable($tableName);
         $t->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
         $t->addColumn('visibility', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-        $t->addIndex(['product_id', 'visibility'], "idx_{$tableName}_product_visibility");
+        $t->addIndex(['product_id', 'visibility']);
         $suffix = str_ends_with($tableName, '_idx') ? 'Index' : 'Temp';
         $t->setComment("Catalog Category Product Enabled Indexer {$suffix} Table");
     }
@@ -856,8 +854,8 @@ return function (Schema $schema): void {
         $t = $schema->createTable($tableName);
         $t->addColumn('category_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
         $t->addColumn('path', Types::STRING, ['length' => 255, 'notnull' => false, 'default' => null]);
-        $t->addIndex(['category_id'], "idx_{$tableName}_category_id");
-        $t->addIndex(['path', 'category_id'], "idx_{$tableName}_path_category_id");
+        $t->addIndex(['category_id']);
+        $t->addIndex(['path', 'category_id']);
         $suffix = str_ends_with($tableName, '_idx') ? 'Index' : 'Temp';
         $t->setComment("Catalog Category Anchor Indexer {$suffix} Table");
     }
@@ -866,14 +864,14 @@ return function (Schema $schema): void {
     $ancProdIdx->addColumn('category_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $ancProdIdx->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $ancProdIdx->addColumn('position', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
-    $ancProdIdx->addIndex(['category_id', 'product_id', 'position'], 'idx_cat_cat_anc_prod_idx_category_product_position');
+    $ancProdIdx->addIndex(['category_id', 'product_id', 'position']);
     $ancProdIdx->setComment('Catalog Category Anchor Product Indexer Index Table');
 
     $ancProdTmp = $schema->createTable('catalog_category_anc_products_index_tmp');
     $ancProdTmp->addColumn('category_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $ancProdTmp->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $ancProdTmp->addColumn('position', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
-    $ancProdTmp->addIndex(['category_id', 'product_id', 'position'], 'idx_cat_cat_anc_prod_tmp_category_product_position');
+    $ancProdTmp->addIndex(['category_id', 'product_id', 'position']);
     $ancProdTmp->setComment('Catalog Category Anchor Product Indexer Temp Table');
 
     $categoryDynamicRule = $schema->createTable('catalog_category_dynamic_rule');
@@ -886,15 +884,15 @@ return function (Schema $schema): void {
     $categoryDynamicRule->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create(),
     );
-    $categoryDynamicRule->addIndex(['category_id'], 'idx_catalog_category_dynamic_rule_category_id');
-    $categoryDynamicRule->addIndex(['is_active'], 'idx_catalog_category_dynamic_rule_is_active');
-    $categoryDynamicRule->addForeignKeyConstraint('catalog_category_entity', ['category_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_category_dynamic_rule_category');
+    $categoryDynamicRule->addIndex(['category_id']);
+    $categoryDynamicRule->addIndex(['is_active']);
+    $categoryDynamicRule->addForeignKeyConstraint('catalog_category_entity', ['category_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $categoryDynamicRule->setComment('Catalog Category Dynamic Rules');
 
     // Catalog grafts category_id / product_id onto Mage_Core's core_url_rewrite so URL rewrite cleanup follows category/product deletion.
     $urlRewrite = $schema->getTable('core_url_rewrite');
     $urlRewrite->addColumn('category_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $urlRewrite->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
-    $urlRewrite->addForeignKeyConstraint('catalog_category_entity', ['category_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_url_rewrite_category');
-    $urlRewrite->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_url_rewrite_product');
+    $urlRewrite->addForeignKeyConstraint('catalog_category_entity', ['category_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $urlRewrite->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
 };

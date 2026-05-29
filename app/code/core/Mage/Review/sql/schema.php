@@ -41,22 +41,20 @@ return function (Schema $schema): void {
     $review->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('review_id')->create(),
     );
-    $review->addIndex(['entity_id'], 'idx_review_entity_id');
-    $review->addIndex(['status_id'], 'idx_review_status_id');
-    $review->addIndex(['entity_pk_value'], 'idx_review_entity_pk_value');
+    $review->addIndex(['entity_id']);
+    $review->addIndex(['status_id']);
+    $review->addIndex(['entity_pk_value']);
     $review->addForeignKeyConstraint(
         'review_entity',
         ['entity_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_review_entity',
     );
     $review->addForeignKeyConstraint(
         'review_status',
         ['status_id'],
         ['status_id'],
         ['onUpdate' => 'NO ACTION', 'onDelete' => 'NO ACTION'],
-        'fk_review_status',
     );
     $review->setComment('Review base information');
 
@@ -71,29 +69,26 @@ return function (Schema $schema): void {
     $detail->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('detail_id')->create(),
     );
-    $detail->addIndex(['review_id'], 'idx_review_detail_review_id');
-    $detail->addIndex(['store_id'], 'idx_review_detail_store_id');
-    $detail->addIndex(['customer_id'], 'idx_review_detail_customer_id');
+    $detail->addIndex(['review_id']);
+    $detail->addIndex(['store_id']);
+    $detail->addIndex(['customer_id']);
     $detail->addForeignKeyConstraint(
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-        'fk_review_detail_customer',
     );
     $detail->addForeignKeyConstraint(
         'review',
         ['review_id'],
         ['review_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_review_detail_review',
     );
     $detail->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-        'fk_review_detail_store',
     );
     $detail->setComment('Review detail information');
 
@@ -108,13 +103,12 @@ return function (Schema $schema): void {
     $summary->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('primary_id')->create(),
     );
-    $summary->addIndex(['store_id'], 'idx_review_entity_summary_store_id');
+    $summary->addIndex(['store_id']);
     $summary->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_review_entity_summary_store',
     );
     $summary->setComment('Review aggregates');
 
@@ -124,20 +118,18 @@ return function (Schema $schema): void {
     $store->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('review_id', 'store_id')->create(),
     );
-    $store->addIndex(['store_id'], 'idx_review_store_store_id');
+    $store->addIndex(['store_id']);
     $store->addForeignKeyConstraint(
         'review',
         ['review_id'],
         ['review_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_review_store_review',
     );
     $store->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_review_store_store',
     );
     $store->setComment('Review Store');
 };

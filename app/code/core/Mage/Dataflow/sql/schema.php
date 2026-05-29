@@ -37,13 +37,12 @@ return function (Schema $schema): void {
     $import->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('import_id')->create(),
     );
-    $import->addIndex(['session_id'], 'idx_dataflow_import_data_session_id');
+    $import->addIndex(['session_id']);
     $import->addForeignKeyConstraint(
         'dataflow_session',
         ['session_id'],
         ['session_id'],
         ['onUpdate' => 'NO ACTION', 'onDelete' => 'NO ACTION'],
-        'fk_dataflow_import_data_session',
     );
     $import->setComment('Dataflow Import Data');
 
@@ -72,13 +71,12 @@ return function (Schema $schema): void {
     $history->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('history_id')->create(),
     );
-    $history->addIndex(['profile_id'], 'idx_dataflow_profile_history_profile_id');
+    $history->addIndex(['profile_id']);
     $history->addForeignKeyConstraint(
         'dataflow_profile',
         ['profile_id'],
         ['profile_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_dataflow_profile_history_profile',
     );
     $history->setComment('Dataflow Profile History');
 
@@ -92,22 +90,20 @@ return function (Schema $schema): void {
     $batch->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('batch_id')->create(),
     );
-    $batch->addIndex(['profile_id'], 'idx_dataflow_batch_profile_id');
-    $batch->addIndex(['store_id'], 'idx_dataflow_batch_store_id');
-    $batch->addIndex(['created_at'], 'idx_dataflow_batch_created_at');
+    $batch->addIndex(['profile_id']);
+    $batch->addIndex(['store_id']);
+    $batch->addIndex(['created_at']);
     $batch->addForeignKeyConstraint(
         'dataflow_profile',
         ['profile_id'],
         ['profile_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_dataflow_batch_profile',
     );
     $batch->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_dataflow_batch_store',
     );
     $batch->setComment('Dataflow Batch');
 
@@ -119,13 +115,12 @@ return function (Schema $schema): void {
     $batchExport->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('batch_export_id')->create(),
     );
-    $batchExport->addIndex(['batch_id'], 'idx_dataflow_batch_export_batch_id');
+    $batchExport->addIndex(['batch_id']);
     $batchExport->addForeignKeyConstraint(
         'dataflow_batch',
         ['batch_id'],
         ['batch_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_dataflow_batch_export_batch',
     );
     $batchExport->setComment('Dataflow Batch Export');
 
@@ -137,13 +132,12 @@ return function (Schema $schema): void {
     $batchImport->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('batch_import_id')->create(),
     );
-    $batchImport->addIndex(['batch_id'], 'idx_dataflow_batch_import_batch_id');
+    $batchImport->addIndex(['batch_id']);
     $batchImport->addForeignKeyConstraint(
         'dataflow_batch',
         ['batch_id'],
         ['batch_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_dataflow_batch_import_batch',
     );
     $batchImport->setComment('Dataflow Batch Import');
 };

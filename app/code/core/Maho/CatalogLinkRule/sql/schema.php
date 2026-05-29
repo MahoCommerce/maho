@@ -34,6 +34,6 @@ return function (Schema $schema): void {
     $rule->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create(),
     );
-    $rule->addIndex(['is_active', 'priority', 'link_type_id'], 'idx_catalog_product_link_rule_is_active_priority_link_type_id');
+    $rule->addIndex(['is_active', 'priority', 'link_type_id']);
     $rule->setComment('Catalog Product Link Rules');
 };

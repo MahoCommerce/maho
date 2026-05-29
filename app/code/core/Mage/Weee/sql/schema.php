@@ -27,14 +27,14 @@ return function (Schema $schema): void {
     $tax->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $tax->addIndex(['website_id'], 'idx_weee_tax_website_id');
-    $tax->addIndex(['entity_id'], 'idx_weee_tax_entity_id');
-    $tax->addIndex(['country'], 'idx_weee_tax_country');
-    $tax->addIndex(['attribute_id'], 'idx_weee_tax_attribute_id');
-    $tax->addForeignKeyConstraint('directory_country', ['country'], ['country_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_weee_tax_country_directory_country');
-    $tax->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_weee_tax_website_core_website');
-    $tax->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_weee_tax_entity_catalog_product_entity');
-    $tax->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_weee_tax_attribute_eav_attribute');
+    $tax->addIndex(['website_id']);
+    $tax->addIndex(['entity_id']);
+    $tax->addIndex(['country']);
+    $tax->addIndex(['attribute_id']);
+    $tax->addForeignKeyConstraint('directory_country', ['country'], ['country_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $tax->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $tax->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $tax->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $tax->setComment('Weee Tax');
 
     $discount = $schema->createTable('weee_discount');
@@ -42,11 +42,11 @@ return function (Schema $schema): void {
     $discount->addColumn('website_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $discount->addColumn('customer_group_id', Types::SMALLINT, ['unsigned' => true]);
     $discount->addColumn('value', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
-    $discount->addIndex(['website_id'], 'idx_weee_discount_website_id');
-    $discount->addIndex(['entity_id'], 'idx_weee_discount_entity_id');
-    $discount->addIndex(['customer_group_id'], 'idx_weee_discount_customer_group_id');
-    $discount->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_weee_discount_website_core_website');
-    $discount->addForeignKeyConstraint('customer_group', ['customer_group_id'], ['customer_group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_weee_discount_customer_group');
-    $discount->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_weee_discount_entity_catalog_product_entity');
+    $discount->addIndex(['website_id']);
+    $discount->addIndex(['entity_id']);
+    $discount->addIndex(['customer_group_id']);
+    $discount->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $discount->addForeignKeyConstraint('customer_group', ['customer_group_id'], ['customer_group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $discount->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $discount->setComment('Weee Discount');
 };

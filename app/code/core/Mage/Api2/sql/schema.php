@@ -24,27 +24,25 @@ return function (Schema $schema): void {
     $role->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
-    $role->addIndex(['created_at'], 'idx_api2_acl_role_created_at');
-    $role->addIndex(['updated_at'], 'idx_api2_acl_role_updated_at');
+    $role->addIndex(['created_at']);
+    $role->addIndex(['updated_at']);
     $role->setComment('Api2 Global ACL Roles');
 
     $user = $schema->createTable('api2_acl_user');
     $user->addColumn('admin_id', Types::INTEGER, ['unsigned' => true]);
     $user->addColumn('role_id', Types::INTEGER, ['unsigned' => true]);
-    $user->addUniqueIndex(['admin_id'], 'unq_api2_acl_user_admin_id');
+    $user->addUniqueIndex(['admin_id']);
     $user->addForeignKeyConstraint(
         'admin_user',
         ['admin_id'],
         ['user_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_api2_acl_user_admin',
     );
     $user->addForeignKeyConstraint(
         'api2_acl_role',
         ['role_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_api2_acl_user_role',
     );
     $user->setComment('Api2 Global ACL Users');
 
@@ -56,13 +54,12 @@ return function (Schema $schema): void {
     $rule->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
-    $rule->addUniqueIndex(['role_id', 'resource_id', 'privilege'], 'unq_api2_acl_rule_role_id_resource_id_privilege');
+    $rule->addUniqueIndex(['role_id', 'resource_id', 'privilege']);
     $rule->addForeignKeyConstraint(
         'api2_acl_role',
         ['role_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_api2_acl_rule_role',
     );
     $rule->setComment('Api2 Global ACL Rules');
 
@@ -75,7 +72,7 @@ return function (Schema $schema): void {
     $attribute->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
-    $attribute->addIndex(['user_type'], 'idx_api2_acl_attribute_user_type');
-    $attribute->addUniqueIndex(['user_type', 'resource_id', 'operation'], 'unq_api2_acl_attribute_user_type_resource_id_operation');
+    $attribute->addIndex(['user_type']);
+    $attribute->addUniqueIndex(['user_type', 'resource_id', 'operation']);
     $attribute->setComment('Api2 Filter ACL Attributes');
 };

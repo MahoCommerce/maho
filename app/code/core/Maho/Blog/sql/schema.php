@@ -34,18 +34,17 @@ return function (Schema $schema): void {
     $post->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
-    $post->addIndex(['entity_type_id'], 'idx_blog_post_entity_entity_type_id');
-    $post->addIndex(['url_key'], 'idx_blog_post_entity_url_key');
-    $post->addIndex(['is_active'], 'idx_blog_post_entity_is_active');
-    $post->addIndex(['publish_date'], 'idx_blog_post_entity_publish_date');
-    $post->addIndex(['is_active', 'publish_date'], 'idx_blog_post_entity_is_active_publish_date');
-    $post->addIndex(['title'], 'idx_blog_post_entity_title');
+    $post->addIndex(['entity_type_id']);
+    $post->addIndex(['url_key']);
+    $post->addIndex(['is_active']);
+    $post->addIndex(['publish_date']);
+    $post->addIndex(['is_active', 'publish_date']);
+    $post->addIndex(['title']);
     $post->addForeignKeyConstraint(
         'eav_entity_type',
         ['entity_type_id'],
         ['entity_type_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_post_entity_entity_type',
     );
     $post->setComment('Blog Post Entity Table');
 
@@ -59,30 +58,27 @@ return function (Schema $schema): void {
     $postDatetime->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $postDatetime->addUniqueIndex(['entity_id', 'attribute_id', 'store_id'], 'unq_blog_post_entity_datetime_entity_attr_store');
-    $postDatetime->addIndex(['attribute_id'], 'idx_blog_post_entity_datetime_attribute_id');
-    $postDatetime->addIndex(['store_id'], 'idx_blog_post_entity_datetime_store_id');
-    $postDatetime->addIndex(['entity_id'], 'idx_blog_post_entity_datetime_entity_id');
+    $postDatetime->addUniqueIndex(['entity_id', 'attribute_id', 'store_id']);
+    $postDatetime->addIndex(['attribute_id']);
+    $postDatetime->addIndex(['store_id']);
+    $postDatetime->addIndex(['entity_id']);
     $postDatetime->addForeignKeyConstraint(
         'eav_attribute',
         ['attribute_id'],
         ['attribute_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_post_entity_datetime_attribute',
     );
     $postDatetime->addForeignKeyConstraint(
         'blog_post_entity',
         ['entity_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_post_entity_datetime_entity',
     );
     $postDatetime->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_post_entity_datetime_store',
     );
     $postDatetime->setComment('Blog Post Datetime Attribute Backend Table');
 
@@ -96,30 +92,27 @@ return function (Schema $schema): void {
     $postInt->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $postInt->addUniqueIndex(['entity_id', 'attribute_id', 'store_id'], 'unq_blog_post_entity_int_entity_attr_store');
-    $postInt->addIndex(['attribute_id'], 'idx_blog_post_entity_int_attribute_id');
-    $postInt->addIndex(['store_id'], 'idx_blog_post_entity_int_store_id');
-    $postInt->addIndex(['entity_id'], 'idx_blog_post_entity_int_entity_id');
+    $postInt->addUniqueIndex(['entity_id', 'attribute_id', 'store_id']);
+    $postInt->addIndex(['attribute_id']);
+    $postInt->addIndex(['store_id']);
+    $postInt->addIndex(['entity_id']);
     $postInt->addForeignKeyConstraint(
         'eav_attribute',
         ['attribute_id'],
         ['attribute_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_post_entity_int_attribute',
     );
     $postInt->addForeignKeyConstraint(
         'blog_post_entity',
         ['entity_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_post_entity_int_entity',
     );
     $postInt->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_post_entity_int_store',
     );
     $postInt->setComment('Blog Post Integer Attribute Backend Table');
 
@@ -133,30 +126,27 @@ return function (Schema $schema): void {
     $postText->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $postText->addUniqueIndex(['entity_id', 'attribute_id', 'store_id'], 'unq_blog_post_entity_text_entity_attr_store');
-    $postText->addIndex(['attribute_id'], 'idx_blog_post_entity_text_attribute_id');
-    $postText->addIndex(['store_id'], 'idx_blog_post_entity_text_store_id');
-    $postText->addIndex(['entity_id'], 'idx_blog_post_entity_text_entity_id');
+    $postText->addUniqueIndex(['entity_id', 'attribute_id', 'store_id']);
+    $postText->addIndex(['attribute_id']);
+    $postText->addIndex(['store_id']);
+    $postText->addIndex(['entity_id']);
     $postText->addForeignKeyConstraint(
         'eav_attribute',
         ['attribute_id'],
         ['attribute_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_post_entity_text_attribute',
     );
     $postText->addForeignKeyConstraint(
         'blog_post_entity',
         ['entity_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_post_entity_text_entity',
     );
     $postText->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_post_entity_text_store',
     );
     $postText->setComment('Blog Post Text Attribute Backend Table');
 
@@ -170,30 +160,27 @@ return function (Schema $schema): void {
     $postVarchar->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $postVarchar->addUniqueIndex(['entity_id', 'attribute_id', 'store_id'], 'unq_blog_post_entity_varchar_entity_attr_store');
-    $postVarchar->addIndex(['attribute_id'], 'idx_blog_post_entity_varchar_attribute_id');
-    $postVarchar->addIndex(['store_id'], 'idx_blog_post_entity_varchar_store_id');
-    $postVarchar->addIndex(['entity_id'], 'idx_blog_post_entity_varchar_entity_id');
+    $postVarchar->addUniqueIndex(['entity_id', 'attribute_id', 'store_id']);
+    $postVarchar->addIndex(['attribute_id']);
+    $postVarchar->addIndex(['store_id']);
+    $postVarchar->addIndex(['entity_id']);
     $postVarchar->addForeignKeyConstraint(
         'eav_attribute',
         ['attribute_id'],
         ['attribute_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_post_entity_varchar_attribute',
     );
     $postVarchar->addForeignKeyConstraint(
         'blog_post_entity',
         ['entity_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_post_entity_varchar_entity',
     );
     $postVarchar->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_post_entity_varchar_store',
     );
     $postVarchar->setComment('Blog Post Varchar Attribute Backend Table');
 
@@ -203,20 +190,18 @@ return function (Schema $schema): void {
     $postStore->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('post_id', 'store_id')->create(),
     );
-    $postStore->addIndex(['store_id'], 'idx_blog_post_store_store_id');
+    $postStore->addIndex(['store_id']);
     $postStore->addForeignKeyConstraint(
         'blog_post_entity',
         ['post_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_post_store_post',
     );
     $postStore->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_post_store_store',
     );
     $postStore->setComment('Blog Post To Store Linkage Table');
 
@@ -232,7 +217,6 @@ return function (Schema $schema): void {
         ['attribute_id'],
         ['attribute_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_eav_attribute_attribute',
     );
     $eavAttribute->setComment('Blog EAV Attribute Table');
 
@@ -256,19 +240,18 @@ return function (Schema $schema): void {
     $category->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
-    $category->addIndex(['entity_type_id'], 'idx_blog_category_entity_entity_type_id');
-    $category->addIndex(['parent_id'], 'idx_blog_category_entity_parent_id');
-    $category->addIndex(['path'], 'idx_blog_category_entity_path');
-    $category->addIndex(['url_key'], 'idx_blog_category_entity_url_key');
-    $category->addIndex(['is_active'], 'idx_blog_category_entity_is_active');
-    $category->addIndex(['level'], 'idx_blog_category_entity_level');
-    $category->addUniqueIndex(['url_key', 'parent_id'], 'unq_blog_category_entity_url_key_parent_id');
+    $category->addIndex(['entity_type_id']);
+    $category->addIndex(['parent_id']);
+    $category->addIndex(['path']);
+    $category->addIndex(['url_key']);
+    $category->addIndex(['is_active']);
+    $category->addIndex(['level']);
+    $category->addUniqueIndex(['url_key', 'parent_id']);
     $category->addForeignKeyConstraint(
         'eav_entity_type',
         ['entity_type_id'],
         ['entity_type_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_category_entity_entity_type',
     );
     $category->setComment('Blog Category Entity Table');
 
@@ -278,20 +261,18 @@ return function (Schema $schema): void {
     $categoryStore->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('category_id', 'store_id')->create(),
     );
-    $categoryStore->addIndex(['store_id'], 'idx_blog_category_store_store_id');
+    $categoryStore->addIndex(['store_id']);
     $categoryStore->addForeignKeyConstraint(
         'blog_category_entity',
         ['category_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_category_store_category',
     );
     $categoryStore->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_category_store_store',
     );
     $categoryStore->setComment('Blog Category To Store Linkage Table');
 
@@ -302,20 +283,18 @@ return function (Schema $schema): void {
     $postCategory->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('post_id', 'category_id')->create(),
     );
-    $postCategory->addIndex(['category_id'], 'idx_blog_post_category_category_id');
+    $postCategory->addIndex(['category_id']);
     $postCategory->addForeignKeyConstraint(
         'blog_post_entity',
         ['post_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_post_category_post',
     );
     $postCategory->addForeignKeyConstraint(
         'blog_category_entity',
         ['category_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_blog_post_category_category',
     );
     $postCategory->setComment('Blog Post To Category Linkage Table');
 };

@@ -37,25 +37,23 @@ return function (Schema $schema): void {
     $giftcard->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('giftcard_id')->create(),
     );
-    $giftcard->addUniqueIndex(['code'], 'unq_giftcard_code');
-    $giftcard->addIndex(['website_id'], 'idx_giftcard_website_id');
-    $giftcard->addIndex(['status'], 'idx_giftcard_status');
-    $giftcard->addIndex(['status', 'expires_at'], 'idx_giftcard_status_expires_at');
-    $giftcard->addIndex(['purchase_order_id'], 'idx_giftcard_purchase_order_id');
-    $giftcard->addIndex(['email_scheduled_at', 'email_sent_at'], 'idx_giftcard_email_scheduled_at_email_sent_at');
+    $giftcard->addUniqueIndex(['code']);
+    $giftcard->addIndex(['website_id']);
+    $giftcard->addIndex(['status']);
+    $giftcard->addIndex(['status', 'expires_at']);
+    $giftcard->addIndex(['purchase_order_id']);
+    $giftcard->addIndex(['email_scheduled_at', 'email_sent_at']);
     $giftcard->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_giftcard_website',
     );
     $giftcard->addForeignKeyConstraint(
         'sales_flat_order',
         ['purchase_order_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-        'fk_giftcard_purchase_order',
     );
     $giftcard->setComment('Gift Card Table');
 
@@ -73,22 +71,20 @@ return function (Schema $schema): void {
     $history->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('history_id')->create(),
     );
-    $history->addIndex(['giftcard_id'], 'idx_giftcard_history_giftcard_id');
-    $history->addIndex(['giftcard_id', 'created_at'], 'idx_giftcard_history_giftcard_id_created_at');
-    $history->addIndex(['order_id'], 'idx_giftcard_history_order_id');
+    $history->addIndex(['giftcard_id']);
+    $history->addIndex(['giftcard_id', 'created_at']);
+    $history->addIndex(['order_id']);
     $history->addForeignKeyConstraint(
         'giftcard',
         ['giftcard_id'],
         ['giftcard_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_giftcard_history_giftcard',
     );
     $history->addForeignKeyConstraint(
         'sales_flat_order',
         ['order_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-        'fk_giftcard_history_order',
     );
     $history->setComment('Gift Card History Table');
 

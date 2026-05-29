@@ -30,7 +30,6 @@ return function (Schema $schema): void {
     );
     $tablerate->addUniqueIndex(
         ['website_id', 'dest_country_id', 'dest_region_id', 'dest_zip', 'condition_name', 'condition_value'],
-        'unq_shipping_tablerate_dest_country_region_zip_cond',
     );
     $tablerate->setComment('Shipping Tablerate');
 };

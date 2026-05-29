@@ -36,7 +36,7 @@ return function (Schema $schema): void {
     $entityType->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_type_id')->create(),
     );
-    $entityType->addIndex(['entity_type_code'], 'idx_eav_entity_type_entity_type_code');
+    $entityType->addIndex(['entity_type_code']);
     $entityType->setComment('Eav Entity Type');
 
     $entity = $schema->createTable('eav_entity');
@@ -52,10 +52,10 @@ return function (Schema $schema): void {
     $entity->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
-    $entity->addIndex(['entity_type_id'], 'idx_eav_entity_entity_type_id');
-    $entity->addIndex(['store_id'], 'idx_eav_entity_store_id');
-    $entity->addForeignKeyConstraint('eav_entity_type', ['entity_type_id'], ['entity_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_entity_entity_type');
-    $entity->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_entity_store');
+    $entity->addIndex(['entity_type_id']);
+    $entity->addIndex(['store_id']);
+    $entity->addForeignKeyConstraint('eav_entity_type', ['entity_type_id'], ['entity_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $entity->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $entity->setComment('Eav Entity');
 
     // Five structurally near-identical value tables keyed by backend_type.
@@ -79,19 +79,18 @@ return function (Schema $schema): void {
         $t->addPrimaryKeyConstraint(
             PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
         );
-        $short = str_replace('eav_entity_', 'eav_ent_', $tableName);
-        $t->addIndex(['entity_type_id'], "idx_{$short}_entity_type_id");
-        $t->addIndex(['attribute_id'], "idx_{$short}_attribute_id");
-        $t->addIndex(['store_id'], "idx_{$short}_store_id");
-        $t->addIndex(['entity_id'], "idx_{$short}_entity_id");
+        $t->addIndex(['entity_type_id']);
+        $t->addIndex(['attribute_id']);
+        $t->addIndex(['store_id']);
+        $t->addIndex(['entity_id']);
         if ($spec['hasValueIndex']) {
-            $t->addIndex(['attribute_id', 'value'], "idx_{$short}_attribute_id_value");
-            $t->addIndex(['entity_type_id', 'value'], "idx_{$short}_entity_type_id_value");
+            $t->addIndex(['attribute_id', 'value']);
+            $t->addIndex(['entity_type_id', 'value']);
         }
-        $t->addUniqueIndex(['entity_id', 'attribute_id', 'store_id'], "unq_{$short}_entity_id_attribute_id_store_id");
-        $t->addForeignKeyConstraint('eav_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$short}_entity");
-        $t->addForeignKeyConstraint('eav_entity_type', ['entity_type_id'], ['entity_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$short}_entity_type");
-        $t->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$short}_store");
+        $t->addUniqueIndex(['entity_id', 'attribute_id', 'store_id']);
+        $t->addForeignKeyConstraint('eav_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+        $t->addForeignKeyConstraint('eav_entity_type', ['entity_type_id'], ['entity_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+        $t->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
         $t->setComment('Eav Entity Value Prefix');
     }
 
@@ -116,9 +115,9 @@ return function (Schema $schema): void {
     $attribute->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('attribute_id')->create(),
     );
-    $attribute->addUniqueIndex(['entity_type_id', 'attribute_code'], 'unq_eav_attribute_entity_type_id_attribute_code');
-    $attribute->addIndex(['entity_type_id'], 'idx_eav_attribute_entity_type_id');
-    $attribute->addForeignKeyConstraint('eav_entity_type', ['entity_type_id'], ['entity_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_attribute_entity_type');
+    $attribute->addUniqueIndex(['entity_type_id', 'attribute_code']);
+    $attribute->addIndex(['entity_type_id']);
+    $attribute->addForeignKeyConstraint('eav_entity_type', ['entity_type_id'], ['entity_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $attribute->setComment('Eav Attribute');
 
     $entityStore = $schema->createTable('eav_entity_store');
@@ -130,10 +129,10 @@ return function (Schema $schema): void {
     $entityStore->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_store_id')->create(),
     );
-    $entityStore->addIndex(['entity_type_id'], 'idx_eav_entity_store_entity_type_id');
-    $entityStore->addIndex(['store_id'], 'idx_eav_entity_store_store_id');
-    $entityStore->addForeignKeyConstraint('eav_entity_type', ['entity_type_id'], ['entity_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_entity_store_entity_type');
-    $entityStore->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_entity_store_store');
+    $entityStore->addIndex(['entity_type_id']);
+    $entityStore->addIndex(['store_id']);
+    $entityStore->addForeignKeyConstraint('eav_entity_type', ['entity_type_id'], ['entity_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $entityStore->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $entityStore->setComment('Eav Entity Store');
 
     $attrSet = $schema->createTable('eav_attribute_set');
@@ -144,9 +143,9 @@ return function (Schema $schema): void {
     $attrSet->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('attribute_set_id')->create(),
     );
-    $attrSet->addUniqueIndex(['entity_type_id', 'attribute_set_name'], 'unq_eav_attribute_set_entity_type_id_attribute_set_name');
-    $attrSet->addIndex(['entity_type_id', 'sort_order'], 'idx_eav_attribute_set_entity_type_id_sort_order');
-    $attrSet->addForeignKeyConstraint('eav_entity_type', ['entity_type_id'], ['entity_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_attribute_set_entity_type');
+    $attrSet->addUniqueIndex(['entity_type_id', 'attribute_set_name']);
+    $attrSet->addIndex(['entity_type_id', 'sort_order']);
+    $attrSet->addForeignKeyConstraint('eav_entity_type', ['entity_type_id'], ['entity_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $attrSet->setComment('Eav Attribute Set');
 
     $attrGroup = $schema->createTable('eav_attribute_group');
@@ -158,9 +157,9 @@ return function (Schema $schema): void {
     $attrGroup->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('attribute_group_id')->create(),
     );
-    $attrGroup->addUniqueIndex(['attribute_set_id', 'attribute_group_name'], 'unq_eav_attribute_group_attribute_set_id_attribute_group_name');
-    $attrGroup->addIndex(['attribute_set_id', 'sort_order'], 'idx_eav_attribute_group_attribute_set_id_sort_order');
-    $attrGroup->addForeignKeyConstraint('eav_attribute_set', ['attribute_set_id'], ['attribute_set_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_attribute_group_attribute_set');
+    $attrGroup->addUniqueIndex(['attribute_set_id', 'attribute_group_name']);
+    $attrGroup->addIndex(['attribute_set_id', 'sort_order']);
+    $attrGroup->addForeignKeyConstraint('eav_attribute_set', ['attribute_set_id'], ['attribute_set_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $attrGroup->setComment('Eav Attribute Group');
 
     $entityAttr = $schema->createTable('eav_entity_attribute');
@@ -173,12 +172,12 @@ return function (Schema $schema): void {
     $entityAttr->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_attribute_id')->create(),
     );
-    $entityAttr->addUniqueIndex(['attribute_set_id', 'attribute_id'], 'unq_eav_entity_attribute_attribute_set_id_attribute_id');
-    $entityAttr->addUniqueIndex(['attribute_group_id', 'attribute_id'], 'unq_eav_entity_attribute_attribute_group_id_attribute_id');
-    $entityAttr->addIndex(['attribute_set_id', 'sort_order'], 'idx_eav_entity_attribute_attribute_set_id_sort_order');
-    $entityAttr->addIndex(['attribute_id'], 'idx_eav_entity_attribute_attribute_id');
-    $entityAttr->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_entity_attribute_attribute');
-    $entityAttr->addForeignKeyConstraint('eav_attribute_group', ['attribute_group_id'], ['attribute_group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_entity_attribute_attribute_group');
+    $entityAttr->addUniqueIndex(['attribute_set_id', 'attribute_id']);
+    $entityAttr->addUniqueIndex(['attribute_group_id', 'attribute_id']);
+    $entityAttr->addIndex(['attribute_set_id', 'sort_order']);
+    $entityAttr->addIndex(['attribute_id']);
+    $entityAttr->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $entityAttr->addForeignKeyConstraint('eav_attribute_group', ['attribute_group_id'], ['attribute_group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $entityAttr->setComment('Eav Entity Attributes');
 
     $attrOption = $schema->createTable('eav_attribute_option');
@@ -188,8 +187,8 @@ return function (Schema $schema): void {
     $attrOption->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_id')->create(),
     );
-    $attrOption->addIndex(['attribute_id'], 'idx_eav_attribute_option_attribute_id');
-    $attrOption->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_attribute_option_attribute');
+    $attrOption->addIndex(['attribute_id']);
+    $attrOption->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $attrOption->setComment('Eav Attribute Option');
 
     $attrOptionValue = $schema->createTable('eav_attribute_option_value');
@@ -200,10 +199,10 @@ return function (Schema $schema): void {
     $attrOptionValue->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $attrOptionValue->addIndex(['option_id'], 'idx_eav_attribute_option_value_option_id');
-    $attrOptionValue->addIndex(['store_id'], 'idx_eav_attribute_option_value_store_id');
-    $attrOptionValue->addForeignKeyConstraint('eav_attribute_option', ['option_id'], ['option_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_attribute_option_value_option');
-    $attrOptionValue->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_attribute_option_value_store');
+    $attrOptionValue->addIndex(['option_id']);
+    $attrOptionValue->addIndex(['store_id']);
+    $attrOptionValue->addForeignKeyConstraint('eav_attribute_option', ['option_id'], ['option_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $attrOptionValue->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $attrOptionValue->setComment('Eav Attribute Option Value');
 
     $attrOptionSwatch = $schema->createTable('eav_attribute_option_swatch');
@@ -214,8 +213,8 @@ return function (Schema $schema): void {
     $attrOptionSwatch->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $attrOptionSwatch->addUniqueIndex(['option_id'], 'unq_eav_attribute_option_swatch_option_id');
-    $attrOptionSwatch->addForeignKeyConstraint('eav_attribute_option', ['option_id'], ['option_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_attribute_option_swatch_option');
+    $attrOptionSwatch->addUniqueIndex(['option_id']);
+    $attrOptionSwatch->addForeignKeyConstraint('eav_attribute_option', ['option_id'], ['option_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $attrOptionSwatch->setComment('Eav Attribute Option Swatch');
 
     $attrLabel = $schema->createTable('eav_attribute_label');
@@ -226,11 +225,11 @@ return function (Schema $schema): void {
     $attrLabel->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('attribute_label_id')->create(),
     );
-    $attrLabel->addIndex(['attribute_id'], 'idx_eav_attribute_label_attribute_id');
-    $attrLabel->addIndex(['store_id'], 'idx_eav_attribute_label_store_id');
-    $attrLabel->addIndex(['attribute_id', 'store_id'], 'idx_eav_attribute_label_attribute_id_store_id');
-    $attrLabel->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_attribute_label_attribute');
-    $attrLabel->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_attribute_label_store');
+    $attrLabel->addIndex(['attribute_id']);
+    $attrLabel->addIndex(['store_id']);
+    $attrLabel->addIndex(['attribute_id', 'store_id']);
+    $attrLabel->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $attrLabel->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $attrLabel->setComment('Eav Attribute Label');
 
     $formType = $schema->createTable('eav_form_type');
@@ -243,9 +242,9 @@ return function (Schema $schema): void {
     $formType->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('type_id')->create(),
     );
-    $formType->addUniqueIndex(['code', 'theme', 'store_id'], 'unq_eav_form_type_code_theme_store_id');
-    $formType->addIndex(['store_id'], 'idx_eav_form_type_store_id');
-    $formType->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_form_type_store');
+    $formType->addUniqueIndex(['code', 'theme', 'store_id']);
+    $formType->addIndex(['store_id']);
+    $formType->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $formType->setComment('Eav Form Type');
 
     $formTypeEntity = $schema->createTable('eav_form_type_entity');
@@ -254,9 +253,9 @@ return function (Schema $schema): void {
     $formTypeEntity->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('type_id', 'entity_type_id')->create(),
     );
-    $formTypeEntity->addIndex(['entity_type_id'], 'idx_eav_form_type_entity_entity_type_id');
-    $formTypeEntity->addForeignKeyConstraint('eav_entity_type', ['entity_type_id'], ['entity_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_form_type_entity_entity_type');
-    $formTypeEntity->addForeignKeyConstraint('eav_form_type', ['type_id'], ['type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_form_type_entity_type');
+    $formTypeEntity->addIndex(['entity_type_id']);
+    $formTypeEntity->addForeignKeyConstraint('eav_entity_type', ['entity_type_id'], ['entity_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $formTypeEntity->addForeignKeyConstraint('eav_form_type', ['type_id'], ['type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $formTypeEntity->setComment('Eav Form Type Entity');
 
     $formFieldset = $schema->createTable('eav_form_fieldset');
@@ -267,9 +266,9 @@ return function (Schema $schema): void {
     $formFieldset->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('fieldset_id')->create(),
     );
-    $formFieldset->addUniqueIndex(['type_id', 'code'], 'unq_eav_form_fieldset_type_id_code');
-    $formFieldset->addIndex(['type_id'], 'idx_eav_form_fieldset_type_id');
-    $formFieldset->addForeignKeyConstraint('eav_form_type', ['type_id'], ['type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_form_fieldset_type');
+    $formFieldset->addUniqueIndex(['type_id', 'code']);
+    $formFieldset->addIndex(['type_id']);
+    $formFieldset->addForeignKeyConstraint('eav_form_type', ['type_id'], ['type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $formFieldset->setComment('Eav Form Fieldset');
 
     $formFieldsetLabel = $schema->createTable('eav_form_fieldset_label');
@@ -279,10 +278,10 @@ return function (Schema $schema): void {
     $formFieldsetLabel->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('fieldset_id', 'store_id')->create(),
     );
-    $formFieldsetLabel->addIndex(['fieldset_id'], 'idx_eav_form_fieldset_label_fieldset_id');
-    $formFieldsetLabel->addIndex(['store_id'], 'idx_eav_form_fieldset_label_store_id');
-    $formFieldsetLabel->addForeignKeyConstraint('eav_form_fieldset', ['fieldset_id'], ['fieldset_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_form_fieldset_label_fieldset');
-    $formFieldsetLabel->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_form_fieldset_label_store');
+    $formFieldsetLabel->addIndex(['fieldset_id']);
+    $formFieldsetLabel->addIndex(['store_id']);
+    $formFieldsetLabel->addForeignKeyConstraint('eav_form_fieldset', ['fieldset_id'], ['fieldset_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $formFieldsetLabel->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $formFieldsetLabel->setComment('Eav Form Fieldset Label');
 
     $formElement = $schema->createTable('eav_form_element');
@@ -294,12 +293,12 @@ return function (Schema $schema): void {
     $formElement->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('element_id')->create(),
     );
-    $formElement->addUniqueIndex(['type_id', 'attribute_id'], 'unq_eav_form_element_type_id_attribute_id');
-    $formElement->addIndex(['type_id'], 'idx_eav_form_element_type_id');
-    $formElement->addIndex(['fieldset_id'], 'idx_eav_form_element_fieldset_id');
-    $formElement->addIndex(['attribute_id'], 'idx_eav_form_element_attribute_id');
-    $formElement->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_form_element_attribute');
-    $formElement->addForeignKeyConstraint('eav_form_fieldset', ['fieldset_id'], ['fieldset_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_eav_form_element_fieldset');
-    $formElement->addForeignKeyConstraint('eav_form_type', ['type_id'], ['type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_form_element_type');
+    $formElement->addUniqueIndex(['type_id', 'attribute_id']);
+    $formElement->addIndex(['type_id']);
+    $formElement->addIndex(['fieldset_id']);
+    $formElement->addIndex(['attribute_id']);
+    $formElement->addForeignKeyConstraint('eav_attribute', ['attribute_id'], ['attribute_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $formElement->addForeignKeyConstraint('eav_form_fieldset', ['fieldset_id'], ['fieldset_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL']);
+    $formElement->addForeignKeyConstraint('eav_form_type', ['type_id'], ['type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $formElement->setComment('Eav Form Element');
 };

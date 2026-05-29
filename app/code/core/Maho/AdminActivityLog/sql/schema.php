@@ -33,18 +33,17 @@ return function (Schema $schema): void {
     $activity->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('activity_id')->create(),
     );
-    $activity->addIndex(['user_id'], 'idx_adminactivitylog_activity_user_id');
-    $activity->addIndex(['action_group_id'], 'idx_adminactivitylog_activity_action_group_id');
-    $activity->addIndex(['action_type'], 'idx_adminactivitylog_activity_action_type');
-    $activity->addIndex(['entity_type'], 'idx_adminactivitylog_activity_entity_type');
-    $activity->addIndex(['entity_id'], 'idx_adminactivitylog_activity_entity_id');
-    $activity->addIndex(['created_at'], 'idx_adminactivitylog_activity_created_at');
+    $activity->addIndex(['user_id']);
+    $activity->addIndex(['action_group_id']);
+    $activity->addIndex(['action_type']);
+    $activity->addIndex(['entity_type']);
+    $activity->addIndex(['entity_id']);
+    $activity->addIndex(['created_at']);
     $activity->addForeignKeyConstraint(
         'admin_user',
         ['user_id'],
         ['user_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-        'fk_adminactivitylog_activity_user',
     );
     $activity->setComment('Admin Activity Log Table');
 
@@ -60,16 +59,15 @@ return function (Schema $schema): void {
     $login->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('login_id')->create(),
     );
-    $login->addIndex(['user_id'], 'idx_adminactivitylog_login_user_id');
-    $login->addIndex(['username'], 'idx_adminactivitylog_login_username');
-    $login->addIndex(['type'], 'idx_adminactivitylog_login_type');
-    $login->addIndex(['created_at'], 'idx_adminactivitylog_login_created_at');
+    $login->addIndex(['user_id']);
+    $login->addIndex(['username']);
+    $login->addIndex(['type']);
+    $login->addIndex(['created_at']);
     $login->addForeignKeyConstraint(
         'admin_user',
         ['user_id'],
         ['user_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-        'fk_adminactivitylog_login_user',
     );
     $login->setComment('Admin Login Activity Log Table');
 };

@@ -36,9 +36,9 @@ return function (Schema $schema): void {
     $website->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('website_id')->create(),
     );
-    $website->addUniqueIndex(['code'], 'unq_core_website_code');
-    $website->addIndex(['sort_order'], 'idx_core_website_sort_order');
-    $website->addIndex(['default_group_id'], 'idx_core_website_default_group_id');
+    $website->addUniqueIndex(['code']);
+    $website->addIndex(['sort_order']);
+    $website->addIndex(['default_group_id']);
     $website->setComment('Websites');
 
     $storeGroup = $schema->createTable('core_store_group');
@@ -50,9 +50,9 @@ return function (Schema $schema): void {
     $storeGroup->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('group_id')->create(),
     );
-    $storeGroup->addIndex(['website_id'], 'idx_core_store_group_website_id');
-    $storeGroup->addIndex(['default_store_id'], 'idx_core_store_group_default_store_id');
-    $storeGroup->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_store_group_website');
+    $storeGroup->addIndex(['website_id']);
+    $storeGroup->addIndex(['default_store_id']);
+    $storeGroup->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $storeGroup->setComment('Store Groups');
 
     $store = $schema->createTable('core_store');
@@ -66,12 +66,12 @@ return function (Schema $schema): void {
     $store->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('store_id')->create(),
     );
-    $store->addUniqueIndex(['code'], 'unq_core_store_code');
-    $store->addIndex(['website_id'], 'idx_core_store_website_id');
-    $store->addIndex(['is_active', 'sort_order'], 'idx_core_store_is_active_sort_order');
-    $store->addIndex(['group_id'], 'idx_core_store_group_id');
-    $store->addForeignKeyConstraint('core_store_group', ['group_id'], ['group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_store_group');
-    $store->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_store_website');
+    $store->addUniqueIndex(['code']);
+    $store->addIndex(['website_id']);
+    $store->addIndex(['is_active', 'sort_order']);
+    $store->addIndex(['group_id']);
+    $store->addForeignKeyConstraint('core_store_group', ['group_id'], ['group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $store->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $store->setComment('Stores');
 
     $config = $schema->createTable('core_config_data');
@@ -84,7 +84,7 @@ return function (Schema $schema): void {
     $config->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('config_id')->create(),
     );
-    $config->addUniqueIndex(['scope', 'scope_id', 'path'], 'unq_core_config_data_scope_id_path');
+    $config->addUniqueIndex(['scope', 'scope_id', 'path']);
     $config->setComment('Config Data');
 
     $emailTemplate = $schema->createTable('core_email_template');
@@ -103,9 +103,9 @@ return function (Schema $schema): void {
     $emailTemplate->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('template_id')->create(),
     );
-    $emailTemplate->addUniqueIndex(['template_code'], 'unq_core_email_template_template_code');
-    $emailTemplate->addIndex(['added_at'], 'idx_core_email_template_added_at');
-    $emailTemplate->addIndex(['modified_at'], 'idx_core_email_template_modified_at');
+    $emailTemplate->addUniqueIndex(['template_code']);
+    $emailTemplate->addIndex(['added_at']);
+    $emailTemplate->addIndex(['modified_at']);
     $emailTemplate->setComment('Email Templates');
 
     $layoutUpdate = $schema->createTable('core_layout_update');
@@ -116,7 +116,7 @@ return function (Schema $schema): void {
     $layoutUpdate->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('layout_update_id')->create(),
     );
-    $layoutUpdate->addIndex(['handle'], 'idx_core_layout_update_handle');
+    $layoutUpdate->addIndex(['handle']);
     $layoutUpdate->setComment('Layout Updates');
 
     $layoutLink = $schema->createTable('core_layout_link');
@@ -129,10 +129,10 @@ return function (Schema $schema): void {
     $layoutLink->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('layout_link_id')->create(),
     );
-    $layoutLink->addUniqueIndex(['store_id', 'package', 'theme', 'layout_update_id'], 'unq_core_layout_link_store_package_theme_update');
-    $layoutLink->addIndex(['layout_update_id'], 'idx_core_layout_link_layout_update_id');
-    $layoutLink->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_layout_link_store');
-    $layoutLink->addForeignKeyConstraint('core_layout_update', ['layout_update_id'], ['layout_update_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_layout_link_update');
+    $layoutLink->addUniqueIndex(['store_id', 'package', 'theme', 'layout_update_id']);
+    $layoutLink->addIndex(['layout_update_id']);
+    $layoutLink->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $layoutLink->addForeignKeyConstraint('core_layout_update', ['layout_update_id'], ['layout_update_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $layoutLink->setComment('Layout Link');
 
     $session = $schema->createTable('core_session');
@@ -154,9 +154,9 @@ return function (Schema $schema): void {
     $translate->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('key_id')->create(),
     );
-    $translate->addUniqueIndex(['store_id', 'locale', 'crc_string', 'string'], 'unq_core_translate_store_locale_crc_string');
-    $translate->addIndex(['store_id'], 'idx_core_translate_store_id');
-    $translate->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_translate_store');
+    $translate->addUniqueIndex(['store_id', 'locale', 'crc_string', 'string']);
+    $translate->addIndex(['store_id']);
+    $translate->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $translate->setComment('Translations');
 
     $urlRewrite = $schema->createTable('core_url_rewrite');
@@ -171,12 +171,12 @@ return function (Schema $schema): void {
     $urlRewrite->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('url_rewrite_id')->create(),
     );
-    $urlRewrite->addUniqueIndex(['request_path', 'store_id'], 'unq_core_url_rewrite_request_path_store');
-    $urlRewrite->addUniqueIndex(['id_path', 'is_system', 'store_id'], 'unq_core_url_rewrite_id_path_system_store');
-    $urlRewrite->addIndex(['target_path', 'store_id'], 'idx_core_url_rewrite_target_path_store');
-    $urlRewrite->addIndex(['id_path'], 'idx_core_url_rewrite_id_path');
-    $urlRewrite->addIndex(['store_id'], 'idx_core_url_rewrite_store_id');
-    $urlRewrite->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_url_rewrite_store');
+    $urlRewrite->addUniqueIndex(['request_path', 'store_id']);
+    $urlRewrite->addUniqueIndex(['id_path', 'is_system', 'store_id']);
+    $urlRewrite->addIndex(['target_path', 'store_id']);
+    $urlRewrite->addIndex(['id_path']);
+    $urlRewrite->addIndex(['store_id']);
+    $urlRewrite->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $urlRewrite->setComment('Url Rewrites');
 
     $designChange = $schema->createTable('design_change');
@@ -188,8 +188,8 @@ return function (Schema $schema): void {
     $designChange->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('design_change_id')->create(),
     );
-    $designChange->addIndex(['store_id'], 'idx_design_change_store_id');
-    $designChange->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_design_change_store');
+    $designChange->addIndex(['store_id']);
+    $designChange->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $designChange->setComment('Design Changes');
 
     $variable = $schema->createTable('core_variable');
@@ -199,7 +199,7 @@ return function (Schema $schema): void {
     $variable->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('variable_id')->create(),
     );
-    $variable->addUniqueIndex(['code'], 'unq_core_variable_code');
+    $variable->addUniqueIndex(['code']);
     $variable->setComment('Variables');
 
     $variableValue = $schema->createTable('core_variable_value');
@@ -211,11 +211,11 @@ return function (Schema $schema): void {
     $variableValue->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('value_id')->create(),
     );
-    $variableValue->addUniqueIndex(['variable_id', 'store_id'], 'unq_core_variable_value_variable_store');
-    $variableValue->addIndex(['variable_id'], 'idx_core_variable_value_variable_id');
-    $variableValue->addIndex(['store_id'], 'idx_core_variable_value_store_id');
-    $variableValue->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_variable_value_store');
-    $variableValue->addForeignKeyConstraint('core_variable', ['variable_id'], ['variable_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_variable_value_variable');
+    $variableValue->addUniqueIndex(['variable_id', 'store_id']);
+    $variableValue->addIndex(['variable_id']);
+    $variableValue->addIndex(['store_id']);
+    $variableValue->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
+    $variableValue->addForeignKeyConstraint('core_variable', ['variable_id'], ['variable_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $variableValue->setComment('Variable Value');
 
     $cache = $schema->createTable('core_cache');
@@ -227,7 +227,7 @@ return function (Schema $schema): void {
     $cache->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create(),
     );
-    $cache->addIndex(['expire_time'], 'idx_core_cache_expire_time');
+    $cache->addIndex(['expire_time']);
     $cache->setComment('Caches');
 
     $cacheTag = $schema->createTable('core_cache_tag');
@@ -236,7 +236,7 @@ return function (Schema $schema): void {
     $cacheTag->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tag', 'cache_id')->create(),
     );
-    $cacheTag->addIndex(['cache_id'], 'idx_core_cache_tag_cache_id');
+    $cacheTag->addIndex(['cache_id']);
     $cacheTag->setComment('Tag Caches');
 
     $cacheOption = $schema->createTable('core_cache_option');
@@ -256,7 +256,7 @@ return function (Schema $schema): void {
     $flag->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('flag_id')->create(),
     );
-    $flag->addIndex(['last_update'], 'idx_core_flag_last_update');
+    $flag->addIndex(['last_update']);
     $flag->setComment('Flag');
 
     $emailQueue = $schema->createTable('core_email_queue');
@@ -272,7 +272,7 @@ return function (Schema $schema): void {
     $emailQueue->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('message_id')->create(),
     );
-    $emailQueue->addIndex(['entity_id', 'entity_type', 'event_type', 'message_body_hash'], 'idx_core_email_queue_entity_type_event_hash');
+    $emailQueue->addIndex(['entity_id', 'entity_type', 'event_type', 'message_body_hash']);
     $emailQueue->setComment('Email Queue');
 
     $emailRecipients = $schema->createTable('core_email_queue_recipients');
@@ -284,10 +284,10 @@ return function (Schema $schema): void {
     $emailRecipients->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('recipient_id')->create(),
     );
-    $emailRecipients->addIndex(['recipient_email'], 'idx_core_email_queue_recipients_email');
-    $emailRecipients->addIndex(['email_type'], 'idx_core_email_queue_recipients_email_type');
-    $emailRecipients->addUniqueIndex(['message_id', 'recipient_email', 'email_type'], 'unq_core_email_queue_recipients_message_email_type');
-    $emailRecipients->addForeignKeyConstraint('core_email_queue', ['message_id'], ['message_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_email_queue_recipients_queue');
+    $emailRecipients->addIndex(['recipient_email']);
+    $emailRecipients->addIndex(['email_type']);
+    $emailRecipients->addUniqueIndex(['message_id', 'recipient_email', 'email_type']);
+    $emailRecipients->addForeignKeyConstraint('core_email_queue', ['message_id'], ['message_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $emailRecipients->setComment('Email Queue');
 
     $emailLog = $schema->createTable('core_email_log');
@@ -306,7 +306,7 @@ return function (Schema $schema): void {
     $emailLog->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('log_id')->create(),
     );
-    $emailLog->addIndex(['created_at'], 'idx_core_email_log_created_at');
-    $emailLog->addIndex(['status'], 'idx_core_email_log_status');
+    $emailLog->addIndex(['created_at']);
+    $emailLog->addIndex(['status']);
     $emailLog->setComment('Email Log');
 };

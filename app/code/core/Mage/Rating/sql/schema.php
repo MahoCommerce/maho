@@ -21,7 +21,7 @@ return function (Schema $schema): void {
     $entity->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
-    $entity->addUniqueIndex(['entity_code'], 'unq_rating_entity_entity_code');
+    $entity->addUniqueIndex(['entity_code']);
     $entity->setComment('Rating entities');
 
     $rating = $schema->createTable('rating');
@@ -32,14 +32,13 @@ return function (Schema $schema): void {
     $rating->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rating_id')->create(),
     );
-    $rating->addUniqueIndex(['rating_code'], 'unq_rating_rating_code');
-    $rating->addIndex(['entity_id'], 'idx_rating_entity_id');
+    $rating->addUniqueIndex(['rating_code']);
+    $rating->addIndex(['entity_id']);
     $rating->addForeignKeyConstraint(
         'rating_entity',
         ['entity_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_rating_entity',
     );
     $rating->setComment('Ratings');
 
@@ -52,13 +51,12 @@ return function (Schema $schema): void {
     $option->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('option_id')->create(),
     );
-    $option->addIndex(['rating_id'], 'idx_rating_option_rating_id');
+    $option->addIndex(['rating_id']);
     $option->addForeignKeyConstraint(
         'rating',
         ['rating_id'],
         ['rating_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_rating_option_rating',
     );
     $option->setComment('Rating options');
 
@@ -76,20 +74,18 @@ return function (Schema $schema): void {
     $vote->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('vote_id')->create(),
     );
-    $vote->addIndex(['option_id'], 'idx_rating_option_vote_option_id');
+    $vote->addIndex(['option_id']);
     $vote->addForeignKeyConstraint(
         'rating_option',
         ['option_id'],
         ['option_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_rating_option_vote_option',
     );
     $vote->addForeignKeyConstraint(
         'review',
         ['review_id'],
         ['review_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_rating_option_vote_review',
     );
     $vote->setComment('Rating option values');
 
@@ -105,21 +101,19 @@ return function (Schema $schema): void {
     $aggregated->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('primary_id')->create(),
     );
-    $aggregated->addIndex(['rating_id'], 'idx_rating_option_vote_aggregated_rating_id');
-    $aggregated->addIndex(['store_id'], 'idx_rating_option_vote_aggregated_store_id');
+    $aggregated->addIndex(['rating_id']);
+    $aggregated->addIndex(['store_id']);
     $aggregated->addForeignKeyConstraint(
         'rating',
         ['rating_id'],
         ['rating_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_rating_option_vote_aggregated_rating',
     );
     $aggregated->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_rating_option_vote_aggregated_store',
     );
     $aggregated->setComment('Rating vote aggregated');
 
@@ -129,20 +123,18 @@ return function (Schema $schema): void {
     $ratingStore->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rating_id', 'store_id')->create(),
     );
-    $ratingStore->addIndex(['store_id'], 'idx_rating_store_store_id');
+    $ratingStore->addIndex(['store_id']);
     $ratingStore->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_rating_store_store',
     );
     $ratingStore->addForeignKeyConstraint(
         'rating',
         ['rating_id'],
         ['rating_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_rating_store_rating',
     );
     $ratingStore->setComment('Rating Store');
 
@@ -153,20 +145,18 @@ return function (Schema $schema): void {
     $ratingTitle->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rating_id', 'store_id')->create(),
     );
-    $ratingTitle->addIndex(['store_id'], 'idx_rating_title_store_id');
+    $ratingTitle->addIndex(['store_id']);
     $ratingTitle->addForeignKeyConstraint(
         'rating',
         ['rating_id'],
         ['rating_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_rating_title_rating',
     );
     $ratingTitle->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_rating_title_store',
     );
     $ratingTitle->setComment('Rating Title');
 };

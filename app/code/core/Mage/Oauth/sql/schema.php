@@ -30,10 +30,10 @@ return function (Schema $schema): void {
     $consumer->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
-    $consumer->addUniqueIndex(['key'], 'unq_oauth_consumer_key');
-    $consumer->addUniqueIndex(['secret'], 'unq_oauth_consumer_secret');
-    $consumer->addIndex(['created_at'], 'idx_oauth_consumer_created_at');
-    $consumer->addIndex(['updated_at'], 'idx_oauth_consumer_updated_at');
+    $consumer->addUniqueIndex(['key']);
+    $consumer->addUniqueIndex(['secret']);
+    $consumer->addIndex(['created_at']);
+    $consumer->addIndex(['updated_at']);
     $consumer->setComment('OAuth Consumers');
 
     $token = $schema->createTable('oauth_token');
@@ -55,34 +55,31 @@ return function (Schema $schema): void {
     $token->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
-    $token->addIndex(['consumer_id'], 'idx_oauth_token_consumer_id');
-    $token->addUniqueIndex(['token'], 'unq_oauth_token_token');
+    $token->addIndex(['consumer_id']);
+    $token->addUniqueIndex(['token']);
     $token->addForeignKeyConstraint(
         'admin_user',
         ['admin_id'],
         ['user_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_oauth_token_admin_user',
     );
     $token->addForeignKeyConstraint(
         'oauth_consumer',
         ['consumer_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_oauth_token_consumer',
     );
     $token->addForeignKeyConstraint(
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_oauth_token_customer',
     );
     $token->setComment('OAuth Tokens');
 
     $nonce = $schema->createTable('oauth_nonce');
     $nonce->addColumn('nonce', Types::STRING, ['length' => 32]);
     $nonce->addColumn('timestamp', Types::INTEGER, ['unsigned' => true]);
-    $nonce->addUniqueIndex(['nonce'], 'unq_oauth_nonce_nonce');
+    $nonce->addUniqueIndex(['nonce']);
     $nonce->addOption('engine', 'MyISAM');
 };

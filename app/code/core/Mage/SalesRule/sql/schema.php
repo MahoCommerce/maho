@@ -44,7 +44,7 @@ return function (Schema $schema): void {
     $rule->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create(),
     );
-    $rule->addIndex(['is_active', 'sort_order', 'to_date', 'from_date'], 'idx_salesrule_is_active_sort_order_to_date_from_date');
+    $rule->addIndex(['is_active', 'sort_order', 'to_date', 'from_date']);
     $rule->setComment('Salesrule');
 
     $coupon = $schema->createTable('salesrule_coupon');
@@ -61,15 +61,14 @@ return function (Schema $schema): void {
     $coupon->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('coupon_id')->create(),
     );
-    $coupon->addUniqueIndex(['code'], 'unq_salesrule_coupon_code');
-    $coupon->addUniqueIndex(['rule_id', 'is_primary'], 'unq_salesrule_coupon_rule_id_is_primary');
-    $coupon->addIndex(['rule_id'], 'idx_salesrule_coupon_rule_id');
+    $coupon->addUniqueIndex(['code']);
+    $coupon->addUniqueIndex(['rule_id', 'is_primary']);
+    $coupon->addIndex(['rule_id']);
     $coupon->addForeignKeyConstraint(
         'salesrule',
         ['rule_id'],
         ['rule_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_salesrule_coupon_rule',
     );
     $coupon->setComment('Salesrule Coupon');
 
@@ -80,21 +79,19 @@ return function (Schema $schema): void {
     $couponUsage->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('coupon_id', 'customer_id')->create(),
     );
-    $couponUsage->addIndex(['coupon_id'], 'idx_salesrule_coupon_usage_coupon_id');
-    $couponUsage->addIndex(['customer_id'], 'idx_salesrule_coupon_usage_customer_id');
+    $couponUsage->addIndex(['coupon_id']);
+    $couponUsage->addIndex(['customer_id']);
     $couponUsage->addForeignKeyConstraint(
         'salesrule_coupon',
         ['coupon_id'],
         ['coupon_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_salesrule_coupon_usage_coupon',
     );
     $couponUsage->addForeignKeyConstraint(
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_salesrule_coupon_usage_customer',
     );
     $couponUsage->setComment('Salesrule Coupon Usage');
 
@@ -106,21 +103,19 @@ return function (Schema $schema): void {
     $ruleCustomer->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_customer_id')->create(),
     );
-    $ruleCustomer->addIndex(['rule_id', 'customer_id'], 'idx_salesrule_customer_rule_id_customer_id');
-    $ruleCustomer->addIndex(['customer_id', 'rule_id'], 'idx_salesrule_customer_customer_id_rule_id');
+    $ruleCustomer->addIndex(['rule_id', 'customer_id']);
+    $ruleCustomer->addIndex(['customer_id', 'rule_id']);
     $ruleCustomer->addForeignKeyConstraint(
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_salesrule_customer_customer',
     );
     $ruleCustomer->addForeignKeyConstraint(
         'salesrule',
         ['rule_id'],
         ['rule_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_salesrule_customer_rule',
     );
     $ruleCustomer->setComment('Salesrule Customer');
 
@@ -132,22 +127,20 @@ return function (Schema $schema): void {
     $label->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('label_id')->create(),
     );
-    $label->addUniqueIndex(['rule_id', 'store_id'], 'unq_salesrule_label_rule_id_store_id');
-    $label->addIndex(['store_id'], 'idx_salesrule_label_store_id');
-    $label->addIndex(['rule_id'], 'idx_salesrule_label_rule_id');
+    $label->addUniqueIndex(['rule_id', 'store_id']);
+    $label->addIndex(['store_id']);
+    $label->addIndex(['rule_id']);
     $label->addForeignKeyConstraint(
         'salesrule',
         ['rule_id'],
         ['rule_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_salesrule_label_rule',
     );
     $label->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_salesrule_label_store',
     );
     $label->setComment('Salesrule Label');
 
@@ -159,36 +152,32 @@ return function (Schema $schema): void {
     $productAttribute->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id', 'website_id', 'customer_group_id', 'attribute_id')->create(),
     );
-    $productAttribute->addIndex(['website_id'], 'idx_salesrule_product_attribute_website_id');
-    $productAttribute->addIndex(['customer_group_id'], 'idx_salesrule_product_attribute_customer_group_id');
-    $productAttribute->addIndex(['attribute_id'], 'idx_salesrule_product_attribute_attribute_id');
+    $productAttribute->addIndex(['website_id']);
+    $productAttribute->addIndex(['customer_group_id']);
+    $productAttribute->addIndex(['attribute_id']);
     $productAttribute->addForeignKeyConstraint(
         'eav_attribute',
         ['attribute_id'],
         ['attribute_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_salesrule_product_attribute_attribute',
     );
     $productAttribute->addForeignKeyConstraint(
         'customer_group',
         ['customer_group_id'],
         ['customer_group_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_salesrule_product_attribute_customer_group',
     );
     $productAttribute->addForeignKeyConstraint(
         'salesrule',
         ['rule_id'],
         ['rule_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_salesrule_product_attribute_rule',
     );
     $productAttribute->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_salesrule_product_attribute_website',
     );
     $productAttribute->setComment('Salesrule Product Attribute');
 
@@ -211,15 +200,14 @@ return function (Schema $schema): void {
         $aggr->addPrimaryKeyConstraint(
             PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create(),
         );
-        $aggr->addUniqueIndex(['period', 'store_id', 'order_status', 'coupon_code'], "unq_{$tableName}_period_store_status_code");
-        $aggr->addIndex(['store_id'], "idx_{$tableName}_store_id");
-        $aggr->addIndex(['rule_name'], "idx_{$tableName}_rule_name");
+        $aggr->addUniqueIndex(['period', 'store_id', 'order_status', 'coupon_code']);
+        $aggr->addIndex(['store_id']);
+        $aggr->addIndex(['rule_name']);
         $aggr->addForeignKeyConstraint(
             'core_store',
             ['store_id'],
             ['store_id'],
             ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-            "fk_{$tableName}_store",
         );
         $aggr->setComment('Coupon Aggregated');
     }
@@ -238,15 +226,14 @@ return function (Schema $schema): void {
     $aggrOrder->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create(),
     );
-    $aggrOrder->addUniqueIndex(['period', 'store_id', 'order_status', 'coupon_code'], 'unq_coupon_aggregated_order_period_store_status_code');
-    $aggrOrder->addIndex(['store_id'], 'idx_coupon_aggregated_order_store_id');
-    $aggrOrder->addIndex(['rule_name'], 'idx_coupon_aggregated_order_rule_name');
+    $aggrOrder->addUniqueIndex(['period', 'store_id', 'order_status', 'coupon_code']);
+    $aggrOrder->addIndex(['store_id']);
+    $aggrOrder->addIndex(['rule_name']);
     $aggrOrder->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_coupon_aggregated_order_store',
     );
     $aggrOrder->setComment('Coupon Aggregated Order');
 
@@ -256,21 +243,19 @@ return function (Schema $schema): void {
     $website->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id', 'website_id')->create(),
     );
-    $website->addIndex(['rule_id'], 'idx_salesrule_website_rule_id');
-    $website->addIndex(['website_id'], 'idx_salesrule_website_website_id');
+    $website->addIndex(['rule_id']);
+    $website->addIndex(['website_id']);
     $website->addForeignKeyConstraint(
         'salesrule',
         ['rule_id'],
         ['rule_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_salesrule_website_rule',
     );
     $website->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_salesrule_website_website',
     );
     $website->setComment('Sales Rules To Websites Relations');
 
@@ -280,21 +265,19 @@ return function (Schema $schema): void {
     $customerGroup->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id', 'customer_group_id')->create(),
     );
-    $customerGroup->addIndex(['rule_id'], 'idx_salesrule_customer_group_rule_id');
-    $customerGroup->addIndex(['customer_group_id'], 'idx_salesrule_customer_group_customer_group_id');
+    $customerGroup->addIndex(['rule_id']);
+    $customerGroup->addIndex(['customer_group_id']);
     $customerGroup->addForeignKeyConstraint(
         'salesrule',
         ['rule_id'],
         ['rule_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_salesrule_customer_group_rule',
     );
     $customerGroup->addForeignKeyConstraint(
         'customer_group',
         ['customer_group_id'],
         ['customer_group_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_salesrule_customer_group_customer_group',
     );
     $customerGroup->setComment('Sales Rules To Customer Groups Relations');
 };

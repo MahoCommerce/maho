@@ -27,34 +27,30 @@ return function (Schema $schema): void {
 
     // ImportExport grafts four unique indexes and two FKs onto Mage_Catalog tables (configurable product import relies on these), owned here rather than in Catalog.
     $superLink = $schema->getTable('catalog_product_super_link');
-    $superLink->addUniqueIndex(['product_id', 'parent_id'], 'unq_catalog_product_super_link_product_id_parent_id');
+    $superLink->addUniqueIndex(['product_id', 'parent_id']);
 
     $superAttribute = $schema->getTable('catalog_product_super_attribute');
-    $superAttribute->addUniqueIndex(['product_id', 'attribute_id'], 'unq_catalog_product_super_attribute_product_id_attribute_id');
+    $superAttribute->addUniqueIndex(['product_id', 'attribute_id']);
 
     $superAttributePricing = $schema->getTable('catalog_product_super_attribute_pricing');
     $superAttributePricing->addUniqueIndex(
         ['product_super_attribute_id', 'value_index', 'website_id'],
-        'unq_catalog_product_super_attribute_pricing_attr_value_website',
     );
 
     $linkAttributeInt = $schema->getTable('catalog_product_link_attribute_int');
     $linkAttributeInt->addUniqueIndex(
         ['product_link_attribute_id', 'link_id'],
-        'unq_catalog_product_link_attribute_int_attr_id_link_id',
     );
     $linkAttributeInt->addForeignKeyConstraint(
         'catalog_product_link',
         ['link_id'],
         ['link_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalog_product_link_attribute_int_link',
     );
     $linkAttributeInt->addForeignKeyConstraint(
         'catalog_product_link_attribute',
         ['product_link_attribute_id'],
         ['product_link_attribute_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_catalog_product_link_attribute_int_attr',
     );
 };

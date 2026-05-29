@@ -26,14 +26,13 @@ return function (Schema $schema): void {
     $subscriber->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('subscriber_id')->create(),
     );
-    $subscriber->addIndex(['customer_id'], 'idx_newsletter_subscriber_customer_id');
-    $subscriber->addIndex(['store_id'], 'idx_newsletter_subscriber_store_id');
+    $subscriber->addIndex(['customer_id']);
+    $subscriber->addIndex(['store_id']);
     $subscriber->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
-        'fk_newsletter_subscriber_store',
     );
     $subscriber->setComment('Newsletter Subscriber');
 
@@ -53,9 +52,9 @@ return function (Schema $schema): void {
     $template->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('template_id')->create(),
     );
-    $template->addIndex(['template_actual'], 'idx_newsletter_template_actual');
-    $template->addIndex(['added_at'], 'idx_newsletter_template_added_at');
-    $template->addIndex(['modified_at'], 'idx_newsletter_template_modified_at');
+    $template->addIndex(['template_actual']);
+    $template->addIndex(['added_at']);
+    $template->addIndex(['modified_at']);
     $template->setComment('Newsletter Template');
 
     $queue = $schema->createTable('newsletter_queue');
@@ -73,13 +72,12 @@ return function (Schema $schema): void {
     $queue->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('queue_id')->create(),
     );
-    $queue->addIndex(['template_id'], 'idx_newsletter_queue_template_id');
+    $queue->addIndex(['template_id']);
     $queue->addForeignKeyConstraint(
         'newsletter_template',
         ['template_id'],
         ['template_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_newsletter_queue_template',
     );
     $queue->setComment('Newsletter Queue');
 
@@ -91,22 +89,20 @@ return function (Schema $schema): void {
     $queueLink->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('queue_link_id')->create(),
     );
-    $queueLink->addIndex(['subscriber_id'], 'idx_newsletter_queue_link_subscriber_id');
-    $queueLink->addIndex(['queue_id'], 'idx_newsletter_queue_link_queue_id');
-    $queueLink->addIndex(['queue_id', 'letter_sent_at'], 'idx_newsletter_queue_link_queue_id_letter_sent_at');
+    $queueLink->addIndex(['subscriber_id']);
+    $queueLink->addIndex(['queue_id']);
+    $queueLink->addIndex(['queue_id', 'letter_sent_at']);
     $queueLink->addForeignKeyConstraint(
         'newsletter_queue',
         ['queue_id'],
         ['queue_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_newsletter_queue_link_queue',
     );
     $queueLink->addForeignKeyConstraint(
         'newsletter_subscriber',
         ['subscriber_id'],
         ['subscriber_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_newsletter_queue_link_subscriber',
     );
     $queueLink->setComment('Newsletter Queue Link');
 
@@ -116,20 +112,18 @@ return function (Schema $schema): void {
     $queueStoreLink->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('queue_id', 'store_id')->create(),
     );
-    $queueStoreLink->addIndex(['store_id'], 'idx_newsletter_queue_store_link_store_id');
+    $queueStoreLink->addIndex(['store_id']);
     $queueStoreLink->addForeignKeyConstraint(
         'newsletter_queue',
         ['queue_id'],
         ['queue_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_newsletter_queue_store_link_queue',
     );
     $queueStoreLink->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_newsletter_queue_store_link_store',
     );
     $queueStoreLink->setComment('Newsletter Queue Store Link');
 
@@ -142,21 +136,19 @@ return function (Schema $schema): void {
     $problem->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('problem_id')->create(),
     );
-    $problem->addIndex(['subscriber_id'], 'idx_newsletter_problem_subscriber_id');
-    $problem->addIndex(['queue_id'], 'idx_newsletter_problem_queue_id');
+    $problem->addIndex(['subscriber_id']);
+    $problem->addIndex(['queue_id']);
     $problem->addForeignKeyConstraint(
         'newsletter_queue',
         ['queue_id'],
         ['queue_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_newsletter_problem_queue',
     );
     $problem->addForeignKeyConstraint(
         'newsletter_subscriber',
         ['subscriber_id'],
         ['subscriber_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_newsletter_problem_subscriber',
     );
     $problem->setComment('Newsletter Problems');
 };

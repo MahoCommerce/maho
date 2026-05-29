@@ -29,14 +29,12 @@ return function (Schema $schema): void {
         ['first_customer_id'],
         ['entity_id'],
         ['onUpdate' => 'NO ACTION', 'onDelete' => 'SET NULL'],
-        'fk_tag_first_customer',
     );
     $tag->addForeignKeyConstraint(
         'core_store',
         ['first_store_id'],
         ['store_id'],
         ['onUpdate' => 'NO ACTION', 'onDelete' => 'SET NULL'],
-        'fk_tag_first_store',
     );
     $tag->setComment('Tag');
 
@@ -53,39 +51,34 @@ return function (Schema $schema): void {
     );
     $relation->addUniqueIndex(
         ['tag_id', 'customer_id', 'product_id', 'store_id'],
-        'unq_tag_relation_tag_id_customer_id_product_id_store_id',
     );
-    $relation->addIndex(['product_id'], 'idx_tag_relation_product_id');
-    $relation->addIndex(['tag_id'], 'idx_tag_relation_tag_id');
-    $relation->addIndex(['customer_id'], 'idx_tag_relation_customer_id');
-    $relation->addIndex(['store_id'], 'idx_tag_relation_store_id');
+    $relation->addIndex(['product_id']);
+    $relation->addIndex(['tag_id']);
+    $relation->addIndex(['customer_id']);
+    $relation->addIndex(['store_id']);
     $relation->addForeignKeyConstraint(
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_tag_relation_customer',
     );
     $relation->addForeignKeyConstraint(
         'catalog_product_entity',
         ['product_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_tag_relation_product',
     );
     $relation->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_tag_relation_store',
     );
     $relation->addForeignKeyConstraint(
         'tag',
         ['tag_id'],
         ['tag_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_tag_relation_tag',
     );
     $relation->setComment('Tag Relation');
 
@@ -101,21 +94,19 @@ return function (Schema $schema): void {
     $summary->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tag_id', 'store_id')->create(),
     );
-    $summary->addIndex(['store_id'], 'idx_tag_summary_store_id');
-    $summary->addIndex(['tag_id'], 'idx_tag_summary_tag_id');
+    $summary->addIndex(['store_id']);
+    $summary->addIndex(['tag_id']);
     $summary->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_tag_summary_store',
     );
     $summary->addForeignKeyConstraint(
         'tag',
         ['tag_id'],
         ['tag_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_tag_summary_tag',
     );
     $summary->setComment('Tag Summary');
 
@@ -126,20 +117,18 @@ return function (Schema $schema): void {
     $properties->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tag_id', 'store_id')->create(),
     );
-    $properties->addIndex(['store_id'], 'idx_tag_properties_store_id');
+    $properties->addIndex(['store_id']);
     $properties->addForeignKeyConstraint(
         'core_store',
         ['store_id'],
         ['store_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_tag_properties_store',
     );
     $properties->addForeignKeyConstraint(
         'tag',
         ['tag_id'],
         ['tag_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-        'fk_tag_properties_tag',
     );
     $properties->setComment('Tag Properties');
 };

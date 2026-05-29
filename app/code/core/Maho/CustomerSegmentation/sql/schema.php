@@ -36,9 +36,9 @@ return function (Schema $schema): void {
     $segment->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('segment_id')->create(),
     );
-    $segment->addIndex(['is_active'], 'idx_customer_segment_is_active');
-    $segment->addIndex(['refresh_status'], 'idx_customer_segment_refresh_status');
-    $segment->addIndex(['priority'], 'idx_customer_segment_priority');
+    $segment->addIndex(['is_active']);
+    $segment->addIndex(['refresh_status']);
+    $segment->addIndex(['priority']);
     $segment->setComment('Customer Segments');
 
     $member = $schema->createTable('customer_segment_customer');
@@ -50,32 +50,29 @@ return function (Schema $schema): void {
     $member->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('segment_id', 'customer_id')->create(),
     );
-    $member->addIndex(['segment_id', 'customer_id', 'website_id'], 'idx_csc_segment_customer_website');
-    $member->addIndex(['customer_id', 'website_id'], 'idx_csc_customer_website');
-    $member->addIndex(['segment_id', 'website_id'], 'idx_csc_segment_website');
-    $member->addIndex(['customer_id'], 'idx_csc_customer');
-    $member->addIndex(['website_id'], 'idx_csc_website');
-    $member->addIndex(['added_at'], 'idx_csc_added_at');
+    $member->addIndex(['segment_id', 'customer_id', 'website_id']);
+    $member->addIndex(['customer_id', 'website_id']);
+    $member->addIndex(['segment_id', 'website_id']);
+    $member->addIndex(['customer_id']);
+    $member->addIndex(['website_id']);
+    $member->addIndex(['added_at']);
     $member->addForeignKeyConstraint(
         'customer_segment',
         ['segment_id'],
         ['segment_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_csc_segment',
     );
     $member->addForeignKeyConstraint(
         'core_website',
         ['website_id'],
         ['website_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_csc_website',
     );
     $member->addForeignKeyConstraint(
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_csc_customer',
     );
     $member->setComment('Customer Segment Members');
 
@@ -97,27 +94,24 @@ return function (Schema $schema): void {
     $sequence->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('sequence_id')->create(),
     );
-    $sequence->addUniqueIndex(['segment_id', 'trigger_event', 'step_number'], 'unq_cses_segment_trigger_step');
+    $sequence->addUniqueIndex(['segment_id', 'trigger_event', 'step_number']);
     $sequence->addForeignKeyConstraint(
         'customer_segment',
         ['segment_id'],
         ['segment_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_cses_segment',
     );
     $sequence->addForeignKeyConstraint(
         'newsletter_template',
         ['template_id'],
         ['template_id'],
         ['onDelete' => 'RESTRICT'],
-        'fk_cses_template',
     );
     $sequence->addForeignKeyConstraint(
         'salesrule',
         ['coupon_sales_rule_id'],
         ['rule_id'],
         ['onDelete' => 'SET NULL'],
-        'fk_cses_sales_rule',
     );
     $sequence->setComment('Customer Segment Email Sequences');
 
@@ -136,37 +130,33 @@ return function (Schema $schema): void {
     $progress->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('progress_id')->create(),
     );
-    $progress->addIndex(['scheduled_at', 'status'], 'idx_cssp_scheduled_at_status');
-    $progress->addIndex(['customer_id', 'status'], 'idx_cssp_customer_status');
-    $progress->addIndex(['segment_id', 'trigger_type', 'status'], 'idx_cssp_segment_trigger_status');
-    $progress->addIndex(['sequence_id'], 'idx_cssp_sequence');
+    $progress->addIndex(['scheduled_at', 'status']);
+    $progress->addIndex(['customer_id', 'status']);
+    $progress->addIndex(['segment_id', 'trigger_type', 'status']);
+    $progress->addIndex(['sequence_id']);
     $progress->addForeignKeyConstraint(
         'customer_segment',
         ['segment_id'],
         ['segment_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_cssp_segment',
     );
     $progress->addForeignKeyConstraint(
         'customer_segment_email_sequence',
         ['sequence_id'],
         ['sequence_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_cssp_sequence',
     );
     $progress->addForeignKeyConstraint(
         'newsletter_queue',
         ['queue_id'],
         ['queue_id'],
         ['onDelete' => 'SET NULL'],
-        'fk_cssp_queue',
     );
     $progress->addForeignKeyConstraint(
         'customer_entity',
         ['customer_id'],
         ['entity_id'],
         ['onDelete' => 'CASCADE'],
-        'fk_cssp_customer',
     );
     $progress->setComment('Customer Segment Sequence Progress Tracking');
 
