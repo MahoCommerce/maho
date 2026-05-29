@@ -49,4 +49,32 @@ return function (Schema $schema): void {
     $discount->addForeignKeyConstraint('customer_group', ['customer_group_id'], ['customer_group_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $discount->addForeignKeyConstraint('catalog_product_entity', ['entity_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $discount->setComment('Weee Discount');
+
+    // Graft the WEEE tax columns onto the flat sales/quote item tables owned by
+    // Mage_Sales (depends_on guarantees those tables already exist). The legacy
+    // install added these via addAttribute() on the flat sales entities;
+    // declaring them keeps fresh installs complete and lets the migration
+    // recognise the existing columns instead of dropping them.
+    $decimalColumns = [
+        'weee_tax_applied_amount',
+        'weee_tax_applied_row_amount',
+        'base_weee_tax_applied_amount',
+        'base_weee_tax_applied_row_amnt',
+        'weee_tax_disposition',
+        'weee_tax_row_disposition',
+        'base_weee_tax_disposition',
+        'base_weee_tax_row_disposition',
+    ];
+    foreach ([
+        'sales_flat_quote_item',
+        'sales_flat_order_item',
+        'sales_flat_invoice_item',
+        'sales_flat_creditmemo_item',
+    ] as $tableName) {
+        $table = $schema->getTable($tableName);
+        $table->addColumn('weee_tax_applied', Types::TEXT, ['length' => 65535, 'notnull' => false]);
+        foreach ($decimalColumns as $column) {
+            $table->addColumn($column, Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'notnull' => false]);
+        }
+    }
 };

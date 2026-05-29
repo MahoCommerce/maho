@@ -27,4 +27,22 @@ return function (Schema $schema): void {
     );
 
     $message->setComment('Gift Message');
+
+    // Graft the gift_message_id reference onto the sales/quote tables owned by
+    // Mage_Sales (depends_on guarantees those tables already exist in the shared
+    // schema). The legacy install added these via addAttribute() on the flat
+    // sales entities; declaring them here keeps fresh installs complete and lets
+    // the migration recognise the existing columns instead of dropping them.
+    foreach ([
+        'sales_flat_quote',
+        'sales_flat_quote_address',
+        'sales_flat_quote_item',
+        'sales_flat_quote_address_item',
+        'sales_flat_order',
+        'sales_flat_order_item',
+    ] as $tableName) {
+        $schema->getTable($tableName)->addColumn('gift_message_id', Types::INTEGER, ['notnull' => false]);
+    }
+
+    $schema->getTable('sales_flat_order_item')->addColumn('gift_message_available', Types::INTEGER, ['notnull' => false]);
 };

@@ -13,9 +13,12 @@ declare(strict_types=1);
 namespace Maho\Db\Schema;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\Table;
 use Maho\Db\Adapter\AdapterInterface;
 
 final class Applier
@@ -55,7 +58,20 @@ final class Applier
         foreach ($target->getTables() as $targetTable) {
             $name = $targetTable->getObjectName()->getUnqualifiedName()->getValue();
             if (isset($existing[$name])) {
-                $existingTables[] = $schemaManager->introspectTableByUnquotedName($name);
+                $liveTable = $schemaManager->introspectTableByUnquotedName($name);
+                // Reduce the live table and its declarative target to
+                // parity-equivalent form, so the Comparator below emits only the
+                // genuine structural delta instead of ~1200 statements of
+                // representation churn (comments, CURRENT_TIMESTAMP defaults,
+                // index names, phantom FK indexes) that never converges. The
+                // physical index list distinguishes a real index from one DBAL
+                // synthesizes for a foreign key. See Canonicalizer.
+                $physicalIndexNames = [];
+                foreach ($schemaManager->introspectTableIndexesByUnquotedName($name) as $index) {
+                    $physicalIndexNames[] = $index->getObjectName()->toString();
+                }
+                Canonicalizer::reconcile($liveTable, $targetTable, $physicalIndexNames);
+                $existingTables[] = $liveTable;
                 $tablesToAlter[] = $targetTable;
             } else {
                 $tablesToCreate[] = $targetTable;
@@ -92,7 +108,82 @@ final class Applier
             }
         }
 
+        // Compensate for a DBAL/MySQL gap: when a primary key that includes an
+        // AUTO_INCREMENT column is rebuilt (a composite PK narrowed to a single
+        // column), MySQL forbids dropping the key while the column is still
+        // AUTO_INCREMENT, so DBAL first strips AUTO_INCREMENT — but it never
+        // restores it, leaving the column a plain INT and the migration forever
+        // re-planning the same change. Re-assert the target column's definition
+        // after every PK is in place. Runs last (all PKs settled).
+        $alters = array_merge($alters, self::autoIncrementRestores($platform, $existingTables, $tablesToAlter));
+
         return array_merge($creates, $alters);
+    }
+
+    /**
+     * Build the AUTO_INCREMENT-restoring ALTERs described in plan(). For each
+     * altered table whose primary-key columns changed and whose target declares
+     * an AUTO_INCREMENT column, emit a MODIFY that re-asserts that column.
+     *
+     * MySQL-only: on PostgreSQL and SQLite autoincrement is an identity/rowid
+     * property that survives a primary-key rebuild, so the gap does not arise
+     * and the MODIFY syntax would not apply.
+     *
+     * @param list<\Doctrine\DBAL\Schema\Table> $liveTables
+     * @param list<\Doctrine\DBAL\Schema\Table> $targetTables parallel to $liveTables
+     * @return list<string>
+     */
+    private static function autoIncrementRestores(AbstractPlatform $platform, array $liveTables, array $targetTables): array
+    {
+        if (!$platform instanceof AbstractMySQLPlatform) {
+            return [];
+        }
+
+        $restores = [];
+        foreach ($targetTables as $i => $target) {
+            $autoColumn = null;
+            foreach ($target->getColumns() as $column) {
+                if ($column->getAutoincrement()) {
+                    $autoColumn = $column;
+                    break;
+                }
+            }
+            if ($autoColumn === null || self::primaryKeyColumns($liveTables[$i]) === self::primaryKeyColumns($target)) {
+                continue;
+            }
+            // The column is, by the time this runs, already part of the rebuilt
+            // primary key, so a plain MODIFY re-asserting AUTO_INCREMENT is both
+            // valid and sufficient. The type SQL comes from the column's own
+            // type (public Type::getSQLDeclaration, e.g. "INT UNSIGNED").
+            $restores[] = sprintf(
+                'ALTER TABLE %s MODIFY %s %s AUTO_INCREMENT NOT NULL',
+                $target->getObjectName()->toString(),
+                $autoColumn->getObjectName()->toString(),
+                $autoColumn->getType()->getSQLDeclaration($autoColumn->toArray(), $platform),
+            );
+        }
+
+        return $restores;
+    }
+
+    /**
+     * Lower-cased, unquoted primary-key column names of a table, or [] when it
+     * has none. Introspection returns the names quoted; the declarative schema
+     * leaves them bare, so both are normalized for comparison.
+     *
+     * @return list<string>
+     */
+    private static function primaryKeyColumns(Table $table): array
+    {
+        $primaryKey = $table->getPrimaryKeyConstraint();
+        if ($primaryKey === null) {
+            return [];
+        }
+
+        return array_map(
+            static fn($name): string => strtolower(trim($name->toString(), '"`')),
+            $primaryKey->getColumnNames(),
+        );
     }
 
     /**
@@ -186,8 +277,8 @@ final class Applier
      * these as native ALTERs without rebuilding tables.
      *
      * The one exception is SQLite. It has no real column types, so reconciling
-     * a legacy install to the declarative schema means changing column types,
-     * which SQLite can only do by rebuilding the whole table — and DBAL's
+     * an existing database to the declarative schema can mean changing column
+     * types, which SQLite can only do by rebuilding the whole table — and DBAL's
      * SQLite rebuild silently drops foreign keys and indexes, so the result
      * never converges. Rather than corrupt the schema, we detect that a SQLite
      * apply would require destructive rebuilds and refuse with

@@ -1369,6 +1369,7 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tax_id')->create(),
     );
     $orderTax->addIndex(['order_id', 'priority', 'position']);
+    $orderTax->addForeignKeyConstraint('sales_flat_order', ['order_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE']);
     $orderTax->setComment('Sales Order Tax');
 
     // sales_order_status
