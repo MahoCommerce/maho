@@ -20,7 +20,6 @@ return function (Schema $schema): void {
     $customer->addColumn('log_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $customer->addColumn('visitor_id', Types::BIGINT, ['unsigned' => true, 'notnull' => false]);
     $customer->addColumn('customer_id', Types::INTEGER, ['default' => 0]);
-    // Timestamp defaults relaxed by maho-26.5.0.php (issue #857).
     $customer->addColumn('login_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $customer->addColumn('logout_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $customer->addColumn('store_id', Types::SMALLINT, ['unsigned' => true]);
@@ -33,7 +32,6 @@ return function (Schema $schema): void {
     $quote = $schema->createTable('log_quote');
     $quote->addColumn('quote_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $quote->addColumn('visitor_id', Types::BIGINT, ['unsigned' => true, 'notnull' => false]);
-    // created_at retains NOT NULL with CURRENT_TIMESTAMP default per maho-26.5.0.php.
     $quote->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $quote->addColumn('deleted_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $quote->addPrimaryKeyConstraint(
@@ -47,12 +45,10 @@ return function (Schema $schema): void {
     $summary->addColumn('type_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
     $summary->addColumn('visitor_count', Types::INTEGER, ['default' => 0]);
     $summary->addColumn('customer_count', Types::INTEGER, ['default' => 0]);
-    // Nullable default added by maho-26.5.0.php (issue #857).
     $summary->addColumn('add_date', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $summary->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('summary_id')->create(),
     );
-    // Index added by maho-25.11.0.php.
     $summary->addIndex(['add_date', 'store_id'], 'idx_log_summary_add_date_store_id');
     $summary->setComment('Log Summary Table');
 
@@ -66,11 +62,9 @@ return function (Schema $schema): void {
     );
     $summaryType->setComment('Log Summary Types Table');
 
-    // upgrade-1.6.0.0-1.6.1.0.php dropped the PRIMARY on log_url and replaced it with a plain index on url_id.
     $url = $schema->createTable('log_url');
     $url->addColumn('url_id', Types::BIGINT, ['unsigned' => true, 'default' => 0]);
     $url->addColumn('visitor_id', Types::BIGINT, ['unsigned' => true, 'notnull' => false]);
-    // Nullable default added by maho-26.5.0.php.
     $url->addColumn('visit_time', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $url->addIndex(['visitor_id'], 'idx_log_url_visitor_id');
     $url->addIndex(['url_id'], 'idx_log_url_url_id');
@@ -88,7 +82,6 @@ return function (Schema $schema): void {
     $visitor = $schema->createTable('log_visitor');
     $visitor->addColumn('visitor_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
     $visitor->addColumn('session_id', Types::STRING, ['length' => 64, 'notnull' => false]);
-    // Nullable defaults added by maho-26.5.0.php.
     $visitor->addColumn('first_visit_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $visitor->addColumn('last_visit_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $visitor->addColumn('last_url_id', Types::BIGINT, ['unsigned' => true, 'default' => 0]);
@@ -96,7 +89,6 @@ return function (Schema $schema): void {
     $visitor->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('visitor_id')->create(),
     );
-    // Indexes added by maho-25.11.0.php.
     $visitor->addIndex(['first_visit_at', 'store_id'], 'idx_log_visitor_first_visit_at_store_id');
     $visitor->addIndex(['last_visit_at'], 'idx_log_visitor_last_visit_at');
     $visitor->addIndex(['last_url_id'], 'idx_log_visitor_last_url_id');
@@ -114,7 +106,6 @@ return function (Schema $schema): void {
     $visitorInfo->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('visitor_id')->create(),
     );
-    // Index added by maho-25.11.0.php.
     $visitorInfo->addIndex(['remote_addr'], 'idx_log_visitor_info_remote_addr');
     $visitorInfo->setComment('Log Visitor Info Table');
 
@@ -123,7 +114,6 @@ return function (Schema $schema): void {
     $visitorOnline->addColumn('visitor_type', Types::STRING, ['length' => 1]);
     // remote_addr stored as binary IP. VARBINARY(16) on MySQL, bytea on PgSQL.
     $visitorOnline->addColumn('remote_addr', Types::BINARY, ['length' => 16, 'notnull' => false]);
-    // Nullable defaults added by maho-26.5.0.php.
     $visitorOnline->addColumn('first_visit_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $visitorOnline->addColumn('last_visit_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $visitorOnline->addColumn('customer_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);

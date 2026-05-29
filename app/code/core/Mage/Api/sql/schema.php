@@ -68,12 +68,9 @@ return function (Schema $schema): void {
     $user->addColumn('lastname', Types::STRING, ['length' => 32, 'notnull' => false]);
     $user->addColumn('email', Types::STRING, ['length' => 128, 'notnull' => false]);
     $user->addColumn('username', Types::STRING, ['length' => 40, 'notnull' => false]);
-    // Final length 255 after upgrade-1.6.0.1-1.6.0.2 (was 40, then 100, then 255).
     $user->addColumn('api_key', Types::STRING, ['length' => 255, 'notnull' => false]);
-    // Explicit CURRENT_TIMESTAMP default set by upgrade-1.6.0.3-1.6.0.4.
     $user->addColumn('created', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $user->addColumn('modified', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    // Widened from SMALLINT to INTEGER unsigned by upgrade-1.6.0.2-1.6.0.3.
     $user->addColumn('lognum', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $user->addColumn('reload_acl_flag', Types::SMALLINT, ['default' => 0]);
     $user->addColumn('is_active', Types::SMALLINT, ['default' => 1]);
@@ -84,7 +81,6 @@ return function (Schema $schema): void {
 
     $session = $schema->createTable('api_session');
     $session->addColumn('user_id', Types::INTEGER, ['unsigned' => true]);
-    // Nullable with NULL default after upgrade-1.6.0.3-1.6.0.4 (was NOT NULL TIMESTAMP).
     $session->addColumn('logdate', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $session->addColumn('sessid', Types::STRING, ['length' => 40, 'notnull' => false]);
     $session->addIndex(['user_id'], 'idx_api_session_user_id');

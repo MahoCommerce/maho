@@ -74,7 +74,6 @@ return function (Schema $schema): void {
     $store->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_store_website');
     $store->setComment('Stores');
 
-    // updated_at added by legacy upgrade-1.6.0.8-1.6.0.9.php
     $config = $schema->createTable('core_config_data');
     $config->addColumn('config_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $config->addColumn('scope', Types::STRING, ['length' => 8, 'default' => 'default']);
@@ -145,8 +144,6 @@ return function (Schema $schema): void {
     );
     $session->setComment('Database Sessions Storage');
 
-    // crc_string added by legacy upgrade-1.6.0.2-1.6.0.3.php; the original
-    // unique index (store_id, locale, string) was replaced by one keyed by crc.
     $translate = $schema->createTable('core_translate');
     $translate->addColumn('key_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $translate->addColumn('string', Types::STRING, ['length' => 255, 'default' => 'Translate String']);
@@ -233,7 +230,6 @@ return function (Schema $schema): void {
     $cache->addIndex(['expire_time'], 'idx_core_cache_expire_time');
     $cache->setComment('Caches');
 
-    // FK to core_cache was dropped by legacy upgrade-1.6.0.1-1.6.0.2.php
     $cacheTag = $schema->createTable('core_cache_tag');
     $cacheTag->addColumn('tag', Types::STRING, ['length' => 100]);
     $cacheTag->addColumn('cache_id', Types::STRING, ['length' => 200]);
@@ -263,7 +259,6 @@ return function (Schema $schema): void {
     $flag->addIndex(['last_update'], 'idx_core_flag_last_update');
     $flag->setComment('Flag');
 
-    // Tables added by legacy upgrade-1.6.0.5-1.6.0.6.php
     $emailQueue = $schema->createTable('core_email_queue');
     $emailQueue->addColumn('message_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $emailQueue->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
@@ -295,7 +290,6 @@ return function (Schema $schema): void {
     $emailRecipients->addForeignKeyConstraint('core_email_queue', ['message_id'], ['message_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_core_email_queue_recipients_queue');
     $emailRecipients->setComment('Email Queue');
 
-    // Table added by maho-26.2.2.php
     $emailLog = $schema->createTable('core_email_log');
     $emailLog->addColumn('log_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $emailLog->addColumn('subject', Types::STRING, ['length' => 255, 'default' => '']);

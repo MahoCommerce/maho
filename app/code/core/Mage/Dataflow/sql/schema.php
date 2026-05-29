@@ -114,7 +114,6 @@ return function (Schema $schema): void {
     $batchExport = $schema->createTable('dataflow_batch_export');
     $batchExport->addColumn('batch_export_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
     $batchExport->addColumn('batch_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    // Legacy used TYPE_TEXT '2G' which caps at MAX_TEXT_SIZE (2147483648), i.e. LONGTEXT.
     $batchExport->addColumn('batch_data', Types::TEXT, ['length' => 2147483648, 'notnull' => false]);
     $batchExport->addColumn('status', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $batchExport->addPrimaryKeyConstraint(
@@ -133,7 +132,6 @@ return function (Schema $schema): void {
     $batchImport = $schema->createTable('dataflow_batch_import');
     $batchImport->addColumn('batch_import_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
     $batchImport->addColumn('batch_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    // Legacy used TYPE_TEXT '2G' which caps at MAX_TEXT_SIZE (2147483648), i.e. LONGTEXT.
     $batchImport->addColumn('batch_data', Types::TEXT, ['length' => 2147483648, 'notnull' => false]);
     $batchImport->addColumn('status', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $batchImport->addPrimaryKeyConstraint(

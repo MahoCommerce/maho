@@ -68,9 +68,7 @@ return function (Schema $schema): void {
     $user->addColumn('lastname', Types::STRING, ['length' => 32, 'notnull' => false]);
     $user->addColumn('email', Types::STRING, ['length' => 128, 'notnull' => false]);
     $user->addColumn('username', Types::STRING, ['length' => 40, 'notnull' => false]);
-    // password length grown from 40 -> 100 (upgrade-1.6.1.0-1.6.1.1) -> 255 (upgrade-1.6.1.2-1.6.1.3)
     $user->addColumn('password', Types::STRING, ['length' => 255, 'notnull' => false]);
-    // maho-24.12.0 ensures DEFAULT CURRENT_TIMESTAMP without ON UPDATE
     $user->addColumn('created', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $user->addColumn('modified', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $user->addColumn('logdate', Types::DATETIME_MUTABLE, ['notnull' => false]);
@@ -78,15 +76,11 @@ return function (Schema $schema): void {
     $user->addColumn('reload_acl_flag', Types::SMALLINT, ['default' => 0]);
     $user->addColumn('is_active', Types::SMALLINT, ['default' => 1]);
     $user->addColumn('extra', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    // added by upgrade-1.6.0.0-1.6.1.0
     $user->addColumn('rp_token', Types::STRING, ['length' => 256, 'notnull' => false]);
     $user->addColumn('rp_token_created_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    // added by upgrade-1.6.1.4-1.6.1.5 (backend locale)
     $user->addColumn('backend_locale', Types::STRING, ['length' => 8, 'notnull' => false]);
-    // added by maho-24.12.1 (2FA)
     $user->addColumn('twofa_enabled', Types::SMALLINT, ['default' => 0]);
     $user->addColumn('twofa_secret', Types::STRING, ['length' => 255, 'notnull' => false]);
-    // added by maho-25.1.0 (Passkey)
     $user->addColumn('passkey_credential_id_hash', Types::STRING, ['length' => 255, 'notnull' => false]);
     $user->addColumn('passkey_public_key', Types::STRING, ['length' => 255, 'notnull' => false]);
     $user->addColumn('password_enabled', Types::SMALLINT, ['default' => 1]);
@@ -96,7 +90,6 @@ return function (Schema $schema): void {
     $user->addUniqueIndex(['username'], 'unq_admin_user_username');
     $user->setComment('Admin User Table');
 
-    // permission_variable added by upgrade-1.6.1.1-1.6.1.2
     $permVariable = $schema->createTable('permission_variable');
     $permVariable->addColumn('variable_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $permVariable->addColumn('variable_name', Types::STRING, ['length' => 255, 'default' => '']);
@@ -107,7 +100,6 @@ return function (Schema $schema): void {
     $permVariable->addUniqueIndex(['variable_name'], 'unq_permission_variable_variable_name');
     $permVariable->setComment('System variables that can be processed via content filter');
 
-    // permission_block added by upgrade-1.6.1.1-1.6.1.2
     $permBlock = $schema->createTable('permission_block');
     $permBlock->addColumn('block_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $permBlock->addColumn('block_name', Types::STRING, ['length' => 255, 'default' => '']);

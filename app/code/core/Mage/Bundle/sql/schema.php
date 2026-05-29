@@ -154,7 +154,6 @@ return function (Schema $schema): void {
     );
     $stockIndex->setComment('Catalog Product Bundle Stock Index');
 
-    // Legacy upgrade-1.6.0.0-1.6.0.0.1.php added group_price, base_group_price, group_price_percent.
     $priceIdx = $schema->createTable('catalog_product_index_price_bundle_idx');
     $priceIdx->addColumn('entity_id', Types::INTEGER, ['unsigned' => true]);
     $priceIdx->addColumn('customer_group_id', Types::SMALLINT, ['unsigned' => true]);
@@ -199,7 +198,6 @@ return function (Schema $schema): void {
     );
     $priceTmp->setComment('Catalog Product Index Price Bundle Tmp');
 
-    // Legacy upgrade-1.6.0.0-1.6.0.0.1.php added group_price.
     $selIdx = $schema->createTable('catalog_product_index_price_bundle_sel_idx');
     $selIdx->addColumn('entity_id', Types::INTEGER, ['unsigned' => true]);
     $selIdx->addColumn('customer_group_id', Types::SMALLINT, ['unsigned' => true]);
@@ -232,7 +230,6 @@ return function (Schema $schema): void {
     );
     $selTmp->setComment('Catalog Product Index Price Bundle Sel Tmp');
 
-    // Legacy upgrade-1.6.0.0-1.6.0.0.1.php added group_price and alt_group_price.
     $optIdx = $schema->createTable('catalog_product_index_price_bundle_opt_idx');
     $optIdx->addColumn('entity_id', Types::INTEGER, ['unsigned' => true]);
     $optIdx->addColumn('customer_group_id', Types::SMALLINT, ['unsigned' => true]);

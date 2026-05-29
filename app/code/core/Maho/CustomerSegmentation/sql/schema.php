@@ -70,8 +70,13 @@ return function (Schema $schema): void {
         ['onDelete' => 'CASCADE'],
         'fk_csc_website',
     );
-    // FK customer_id -> customer_entity(entity_id) is reinstated when
-    // Mage_Customer is converted to declarative schema.
+    $member->addForeignKeyConstraint(
+        'customer_entity',
+        ['customer_id'],
+        ['entity_id'],
+        ['onDelete' => 'CASCADE'],
+        'fk_csc_customer',
+    );
     $member->setComment('Customer Segment Members');
 
     $sequence = $schema->createTable('customer_segment_email_sequence');
@@ -107,8 +112,13 @@ return function (Schema $schema): void {
         ['onDelete' => 'RESTRICT'],
         'fk_cses_template',
     );
-    // FK coupon_sales_rule_id -> salesrule(rule_id) ON DELETE SET NULL is
-    // reinstated when Mage_SalesRule is converted to declarative schema.
+    $sequence->addForeignKeyConstraint(
+        'salesrule',
+        ['coupon_sales_rule_id'],
+        ['rule_id'],
+        ['onDelete' => 'SET NULL'],
+        'fk_cses_sales_rule',
+    );
     $sequence->setComment('Customer Segment Email Sequences');
 
     $progress = $schema->createTable('customer_segment_sequence_progress');
@@ -151,14 +161,16 @@ return function (Schema $schema): void {
         ['onDelete' => 'SET NULL'],
         'fk_cssp_queue',
     );
-    // FK customer_id -> customer_entity(entity_id) ON DELETE CASCADE is
-    // reinstated when Mage_Customer is converted to declarative schema.
+    $progress->addForeignKeyConstraint(
+        'customer_entity',
+        ['customer_id'],
+        ['entity_id'],
+        ['onDelete' => 'CASCADE'],
+        'fk_cssp_customer',
+    );
     $progress->setComment('Customer Segment Sequence Progress Tracking');
 
-    // Legacy install + upgrades grafted three CustomerSegmentation-owned
-    // columns onto Mage_Newsletter's queue table. Keep them here so removing
-    // the module is a single delete instead of leaking columns into
-    // Newsletter's schema.
+    // CustomerSegmentation columns grafted onto newsletter_queue, kept here so module removal stays one delete.
     $queue = $schema->getTable('newsletter_queue');
     $queue->addColumn('customer_segment_ids', Types::STRING, [
         'length' => 255, 'notnull' => false,

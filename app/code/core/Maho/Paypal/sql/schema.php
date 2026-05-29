@@ -64,9 +64,7 @@ return function (Schema $schema): void {
     );
     $vault->setComment('PayPal Vault Tokens');
 
-    // Legacy install grafted a paypal_order_id column + index onto
-    // Mage_Sales' quote/order payment tables. Keep them here so removing
-    // Maho_Paypal is a single delete instead of leaking columns into Sales.
+    // Paypal grafts a paypal_order_id column + index onto Mage_Sales' quote/order payment tables, kept here so module removal stays one delete.
     $quotePayment = $schema->getTable('sales_flat_quote_payment');
     $quotePayment->addColumn('paypal_order_id', Types::STRING, [
         'length' => 64, 'notnull' => false,

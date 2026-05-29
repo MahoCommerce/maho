@@ -23,7 +23,6 @@ return function (Schema $schema): void {
     $agreement->addColumn('checkbox_text', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $agreement->addColumn('is_active', Types::SMALLINT, ['default' => 0]);
     $agreement->addColumn('is_html', Types::SMALLINT, ['default' => 0]);
-    // Added by upgrade-1.6.0.0-1.6.0.1
     $agreement->addColumn('position', Types::SMALLINT, ['default' => 0]);
     $agreement->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('agreement_id')->create(),

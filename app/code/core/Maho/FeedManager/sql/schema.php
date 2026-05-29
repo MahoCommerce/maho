@@ -138,8 +138,7 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('mapping_id')->create(),
     );
     $categoryMapping->addUniqueIndex(['platform', 'category_id'], 'unq_feedmanager_category_mapping_platform_category_id');
-    // FK category_id -> catalog_category_entity(entity_id) ON DELETE CASCADE is
-    // reinstated when Mage_Catalog is converted to declarative schema.
+    $categoryMapping->addForeignKeyConstraint('catalog_category_entity', ['category_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_feedmanager_category_mapping_category');
     $categoryMapping->setComment('Feed Manager - Category Mappings');
 
     $log = $schema->createTable('feedmanager_log');

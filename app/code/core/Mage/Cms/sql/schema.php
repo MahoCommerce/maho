@@ -70,7 +70,6 @@ return function (Schema $schema): void {
     $page->addColumn('custom_layout_update_xml', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $page->addColumn('custom_theme_from', Types::DATE_MUTABLE, ['notnull' => false]);
     $page->addColumn('custom_theme_to', Types::DATE_MUTABLE, ['notnull' => false]);
-    // added by maho-25.8.0
     $page->addColumn('meta_robots', Types::STRING, ['length' => 50, 'notnull' => false]);
     $page->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('page_id')->create(),

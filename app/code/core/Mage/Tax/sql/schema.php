@@ -96,8 +96,7 @@ return function (Schema $schema): void {
     $rateTitle->addForeignKeyConstraint('tax_calculation_rate', ['tax_calculation_rate_id'], ['tax_calculation_rate_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_tax_calculation_rate_title_rate');
     $rateTitle->setComment('Tax Calculation Rate Title');
 
-    // Two structurally identical aggregation tables. The legacy upgrade script
-    // copied the second from the first; here we just declare both.
+    // Two structurally identical aggregation tables.
     foreach (['tax_order_aggregated_created', 'tax_order_aggregated_updated'] as $tableName) {
         $aggr = $schema->createTable($tableName);
         $aggr->addColumn('id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
@@ -118,12 +117,10 @@ return function (Schema $schema): void {
         $aggr->setComment('Tax Order Aggregation');
     }
 
-    // From legacy upgrade-1.6.0.1-1.6.0.2.php
     $taxItem = $schema->createTable('sales_order_tax_item');
     $taxItem->addColumn('tax_item_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $taxItem->addColumn('tax_id', Types::INTEGER, ['unsigned' => true]);
     $taxItem->addColumn('item_id', Types::INTEGER, ['unsigned' => true]);
-    // From legacy upgrade-1.6.0.2-1.6.0.3.php
     $taxItem->addColumn('tax_percent', Types::DECIMAL, ['precision' => 12, 'scale' => 4]);
     $taxItem->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('tax_item_id')->create(),
@@ -131,8 +128,7 @@ return function (Schema $schema): void {
     $taxItem->addIndex(['tax_id'], 'idx_sales_order_tax_item_tax_id');
     $taxItem->addIndex(['item_id'], 'idx_sales_order_tax_item_item_id');
     $taxItem->addUniqueIndex(['tax_id', 'item_id'], 'unq_sales_order_tax_item_tax_item');
-    // FKs to sales_order_tax and sales_flat_order_item will be reinstated when
-    // Mage_Sales is converted to declarative schema (both tables are still
-    // owned by its legacy install scripts).
+    $taxItem->addForeignKeyConstraint('sales_order_tax', ['tax_id'], ['tax_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_order_tax_item_tax');
+    $taxItem->addForeignKeyConstraint('sales_flat_order_item', ['item_id'], ['item_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_order_tax_item_item');
     $taxItem->setComment('Sales Order Tax Item');
 };

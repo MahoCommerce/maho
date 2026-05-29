@@ -38,8 +38,6 @@ return function (Schema $schema): void {
     $stockItem->addColumn('max_sale_qty', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
     $stockItem->addColumn('use_config_max_sale_qty', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
     $stockItem->addColumn('is_in_stock', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    // low_stock_date was originally declared without explicit nullable/default;
-    // upgrade-1.6.0.0.2-1.6.0.0.3 pinned it to nullable with default NULL.
     $stockItem->addColumn('low_stock_date', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $stockItem->addColumn('notify_stock_qty', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'notnull' => false]);
     $stockItem->addColumn('use_config_notify_stock_qty', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
@@ -50,7 +48,6 @@ return function (Schema $schema): void {
     $stockItem->addColumn('qty_increments', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
     $stockItem->addColumn('use_config_enable_qty_inc', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
     $stockItem->addColumn('enable_qty_increments', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    // Added by upgrade-1.6.0.0.1-1.6.0.0.2.
     $stockItem->addColumn('is_decimal_divided', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $stockItem->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('item_id')->create(),
@@ -108,12 +105,6 @@ return function (Schema $schema): void {
     );
     $stockStatus->setComment('Cataloginventory Stock Status');
 
-    // Indexer staging tables. Note the config.xml entity mapping renames
-    // stock_status_indexer_idx -> cataloginventory_stock_status_idx and
-    // stock_status_indexer_tmp -> cataloginventory_stock_status_tmp.
-    // The _tmp table was briefly switched to MEMORY engine in
-    // upgrade-1.6.0.0-1.6.0.0.1 and reverted back to InnoDB in
-    // upgrade-1.6.0.0.3-1.6.0.0.4, so the final state is plain InnoDB.
     foreach (['cataloginventory_stock_status_idx', 'cataloginventory_stock_status_tmp'] as $tableName) {
         $idx = $schema->createTable($tableName);
         $idx->addColumn('product_id', Types::INTEGER, ['unsigned' => true]);

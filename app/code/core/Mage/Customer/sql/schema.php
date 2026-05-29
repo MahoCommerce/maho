@@ -16,10 +16,6 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
 
 return function (Schema $schema): void {
-    // created_at / updated_at defaults normalized to CURRENT_TIMESTAMP by
-    // upgrade-1.6.2.0.7-1.6.2.0.8.php (MySQL TIMESTAMP_INIT).
-    // disable_auto_group_change column added by upgrade-1.6.2.0-1.6.2.0.1.php.
-    // email/website_id index promoted to UNIQUE by upgrade-1.6.2.0.1-1.6.2.0.2.php.
     $entity = $schema->createTable('customer_entity');
     $entity->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $entity->addColumn('entity_type_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
@@ -44,8 +40,6 @@ return function (Schema $schema): void {
     $entity->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_customer_entity_website');
     $entity->setComment('Customer Entity');
 
-    // created_at / updated_at defaults normalized to CURRENT_TIMESTAMP by
-    // upgrade-1.6.2.0.7-1.6.2.0.8.php (MySQL TIMESTAMP_INIT).
     $addrEntity = $schema->createTable('customer_address_entity');
     $addrEntity->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $addrEntity->addColumn('entity_type_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
@@ -150,7 +144,6 @@ return function (Schema $schema): void {
     $eavAttrWebsite->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_customer_eav_attribute_website_website');
     $eavAttrWebsite->setComment('Customer Eav Attribute Website');
 
-    // Added by legacy upgrade-1.6.2.0.4-1.6.2.0.5.php
     $flowPassword = $schema->createTable('customer_flowpassword');
     $flowPassword->addColumn('flowpassword_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $flowPassword->addColumn('ip', Types::STRING, ['length' => 50]);

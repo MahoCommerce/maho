@@ -21,7 +21,6 @@ return function (Schema $schema): void {
     $rule->addColumn('description', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $rule->addColumn('from_date', Types::DATE_MUTABLE, ['notnull' => false]);
     $rule->addColumn('to_date', Types::DATE_MUTABLE, ['notnull' => false]);
-    // website_ids and customer_group_ids dropped by upgrade-1.6.0.1-1.6.0.2
     $rule->addColumn('is_active', Types::SMALLINT, ['default' => 0]);
     $rule->addColumn('conditions_serialized', Types::TEXT, ['length' => 2097152, 'notnull' => false]);
     $rule->addColumn('actions_serialized', Types::TEXT, ['length' => 2097152, 'notnull' => false]);
@@ -29,7 +28,6 @@ return function (Schema $schema): void {
     $rule->addColumn('sort_order', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $rule->addColumn('simple_action', Types::STRING, ['length' => 32, 'notnull' => false]);
     $rule->addColumn('discount_amount', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
-    // Added by upgrade-1.6.0.0-1.6.0.1
     $rule->addColumn('sub_is_enable', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $rule->addColumn('sub_simple_action', Types::STRING, ['length' => 32, 'notnull' => false]);
     $rule->addColumn('sub_discount_amount', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
@@ -51,7 +49,6 @@ return function (Schema $schema): void {
     $ruleProduct->addColumn('action_stop', Types::SMALLINT, ['default' => 0]);
     $ruleProduct->addColumn('sort_order', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $ruleProduct->addColumn('website_id', Types::SMALLINT, ['unsigned' => true]);
-    // Added by upgrade-1.6.0.2-1.6.0.3
     $ruleProduct->addColumn('sub_simple_action', Types::STRING, ['length' => 32, 'notnull' => false]);
     $ruleProduct->addColumn('sub_discount_amount', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
     $ruleProduct->addPrimaryKeyConstraint(
@@ -179,7 +176,6 @@ return function (Schema $schema): void {
     );
     $groupWebsite->setComment('CatalogRule Group Website');
 
-    // Added by upgrade-1.6.0.1-1.6.0.2 (replaces catalogrule.website_ids column)
     $ruleWebsite = $schema->createTable('catalogrule_website');
     $ruleWebsite->addColumn('rule_id', Types::INTEGER, ['unsigned' => true]);
     $ruleWebsite->addColumn('website_id', Types::SMALLINT, ['unsigned' => true]);
@@ -204,7 +200,6 @@ return function (Schema $schema): void {
     );
     $ruleWebsite->setComment('Catalog Rules To Websites Relations');
 
-    // Added by upgrade-1.6.0.1-1.6.0.2 (replaces catalogrule.customer_group_ids column)
     $ruleCustomerGroup = $schema->createTable('catalogrule_customer_group');
     $ruleCustomerGroup->addColumn('rule_id', Types::INTEGER, ['unsigned' => true]);
     $ruleCustomerGroup->addColumn('customer_group_id', Types::SMALLINT, ['unsigned' => true]);

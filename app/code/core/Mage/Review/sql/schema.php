@@ -34,7 +34,6 @@ return function (Schema $schema): void {
 
     $review = $schema->createTable('review');
     $review->addColumn('review_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
-    // CURRENT_TIMESTAMP default added by upgrade-1.6.0.0-1.6.0.1.php
     $review->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $review->addColumn('entity_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $review->addColumn('entity_pk_value', Types::INTEGER, ['unsigned' => true, 'default' => 0]);

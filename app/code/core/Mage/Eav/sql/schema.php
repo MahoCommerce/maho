@@ -39,8 +39,6 @@ return function (Schema $schema): void {
     $entityType->addIndex(['entity_type_code'], 'idx_eav_entity_type_entity_type_code');
     $entityType->setComment('Eav Entity Type');
 
-    // created_at / updated_at defaults normalized to CURRENT_TIMESTAMP by
-    // upgrade-1.6.0.2-1.6.0.3.php (MySQL TIMESTAMP_INIT).
     $entity = $schema->createTable('eav_entity');
     $entity->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $entity->addColumn('entity_type_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
@@ -119,7 +117,6 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('attribute_id')->create(),
     );
     $attribute->addUniqueIndex(['entity_type_id', 'attribute_code'], 'unq_eav_attribute_entity_type_id_attribute_code');
-    // Legacy install declared idx_eav_attribute_entity_type_id twice; keep only one.
     $attribute->addIndex(['entity_type_id'], 'idx_eav_attribute_entity_type_id');
     $attribute->addForeignKeyConstraint('eav_entity_type', ['entity_type_id'], ['entity_type_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_attribute_entity_type');
     $attribute->setComment('Eav Attribute');
@@ -209,7 +206,6 @@ return function (Schema $schema): void {
     $attrOptionValue->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_eav_attribute_option_value_store');
     $attrOptionValue->setComment('Eav Attribute Option Value');
 
-    // Table added by legacy upgrade-1.6.0.1-1.6.0.2.php
     $attrOptionSwatch = $schema->createTable('eav_attribute_option_swatch');
     $attrOptionSwatch->addColumn('value_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $attrOptionSwatch->addColumn('option_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);

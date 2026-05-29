@@ -27,7 +27,6 @@ return function (Schema $schema): void {
 
     $event = $schema->createTable('report_event');
     $event->addColumn('event_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
-    // upgrade-1.6.0.0.1-1.6.0.0.2 made logged_at nullable with no default (MySQL only)
     $event->addColumn('logged_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $event->addColumn('event_type_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $event->addColumn('object_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
@@ -64,7 +63,6 @@ return function (Schema $schema): void {
     $compared->addColumn('customer_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $compared->addColumn('product_id', Types::INTEGER, ['unsigned' => true]);
     $compared->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
-    // upgrade-1.6.0.0.1-1.6.0.0.2 set added_at default to CURRENT_TIMESTAMP (MySQL only)
     $compared->addColumn('added_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $compared->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('index_id')->create(),
@@ -103,7 +101,6 @@ return function (Schema $schema): void {
     $viewed->addColumn('customer_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $viewed->addColumn('product_id', Types::INTEGER, ['unsigned' => true]);
     $viewed->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
-    // upgrade-1.6.0.0.1-1.6.0.0.2 set added_at default to CURRENT_TIMESTAMP (MySQL only)
     $viewed->addColumn('added_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $viewed->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('index_id')->create(),
@@ -136,7 +133,7 @@ return function (Schema $schema): void {
     );
     $viewed->setComment('Reports Viewed Product Index Table');
 
-    // Three structurally identical aggregation tables. Added by upgrade-1.6.0.0-1.6.0.0.1.
+    // Three structurally identical aggregation tables.
     $aggregationTables = [
         'report_viewed_product_aggregated_daily'   => 'Most Viewed Products Aggregated Daily',
         'report_viewed_product_aggregated_monthly' => 'Most Viewed Products Aggregated Monthly',

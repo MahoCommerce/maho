@@ -220,7 +220,6 @@ return function (Schema $schema): void {
     );
     $postStore->setComment('Blog Post To Store Linkage Table');
 
-    // Added by upgrade-1.0.0-1.0.1.php
     $eavAttribute = $schema->createTable('blog_eav_attribute');
     $eavAttribute->addColumn('attribute_id', Types::SMALLINT, ['unsigned' => true]);
     $eavAttribute->addColumn('is_global', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
@@ -237,7 +236,6 @@ return function (Schema $schema): void {
     );
     $eavAttribute->setComment('Blog EAV Attribute Table');
 
-    // Added by upgrade-1.0.1-2.0.0.php
     $category = $schema->createTable('blog_category_entity');
     $category->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $category->addColumn('entity_type_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);

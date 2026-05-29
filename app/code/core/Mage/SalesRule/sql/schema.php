@@ -20,11 +20,9 @@ return function (Schema $schema): void {
     $rule->addColumn('rule_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $rule->addColumn('name', Types::STRING, ['length' => 255, 'notnull' => false]);
     $rule->addColumn('description', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    // from_date / to_date relaxed to nullable default null by upgrade-1.6.0.2-1.6.0.3
     $rule->addColumn('from_date', Types::DATE_MUTABLE, ['notnull' => false, 'default' => null]);
     $rule->addColumn('to_date', Types::DATE_MUTABLE, ['notnull' => false, 'default' => null]);
     $rule->addColumn('uses_per_customer', Types::INTEGER, ['default' => 0]);
-    // website_ids / customer_group_ids columns dropped by upgrade-1.6.0.2-1.6.0.3
     $rule->addColumn('is_active', Types::SMALLINT, ['default' => 0]);
     $rule->addColumn('conditions_serialized', Types::TEXT, ['length' => 2097152, 'notnull' => false]);
     $rule->addColumn('actions_serialized', Types::TEXT, ['length' => 2097152, 'notnull' => false]);
@@ -41,7 +39,6 @@ return function (Schema $schema): void {
     $rule->addColumn('times_used', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $rule->addColumn('is_rss', Types::SMALLINT, ['default' => 0]);
     $rule->addColumn('coupon_type', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
-    // use_auto_generation / uses_per_coupon added by upgrade-1.6.0.1-1.6.0.2
     $rule->addColumn('use_auto_generation', Types::SMALLINT, ['default' => 0]);
     $rule->addColumn('uses_per_coupon', Types::INTEGER, ['default' => 0]);
     $rule->addPrimaryKeyConstraint(
@@ -57,10 +54,8 @@ return function (Schema $schema): void {
     $coupon->addColumn('usage_limit', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $coupon->addColumn('usage_per_customer', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $coupon->addColumn('times_used', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    // expiration_date made nullable / default null by upgrade-1.6.0.3-1.6.0.4
     $coupon->addColumn('expiration_date', Types::DATETIME_MUTABLE, ['notnull' => false, 'default' => null]);
     $coupon->addColumn('is_primary', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
-    // created_at / type added by upgrade-1.6.0.1-1.6.0.2
     $coupon->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $coupon->addColumn('type', Types::SMALLINT, ['notnull' => false, 'default' => 0]);
     $coupon->addPrimaryKeyConstraint(
@@ -197,9 +192,7 @@ return function (Schema $schema): void {
     );
     $productAttribute->setComment('Salesrule Product Attribute');
 
-    // Aggregation tables: structurally identical (coupon_aggregated_updated was
-    // cloned from coupon_aggregated in upgrade-1.6.0.0-1.6.0.1 via createTableByDdl).
-    // rule_name + index added to all three by upgrade-1.6.0.1-1.6.0.2.
+    // Structurally identical aggregation tables.
     foreach (['coupon_aggregated', 'coupon_aggregated_updated'] as $tableName) {
         $aggr = $schema->createTable($tableName);
         $aggr->addColumn('id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
@@ -241,7 +234,6 @@ return function (Schema $schema): void {
     $aggrOrder->addColumn('subtotal_amount', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
     $aggrOrder->addColumn('discount_amount', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
     $aggrOrder->addColumn('total_amount', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
-    // rule_name + index added by upgrade-1.6.0.1-1.6.0.2
     $aggrOrder->addColumn('rule_name', Types::STRING, ['length' => 255, 'notnull' => false]);
     $aggrOrder->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create(),
@@ -258,8 +250,6 @@ return function (Schema $schema): void {
     );
     $aggrOrder->setComment('Coupon Aggregated Order');
 
-    // salesrule_website and salesrule_customer_group introduced by
-    // upgrade-1.6.0.2-1.6.0.3 to replace website_ids / customer_group_ids columns.
     $website = $schema->createTable('salesrule_website');
     $website->addColumn('rule_id', Types::INTEGER, ['unsigned' => true]);
     $website->addColumn('website_id', Types::SMALLINT, ['unsigned' => true]);

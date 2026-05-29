@@ -68,7 +68,6 @@ return function (Schema $schema): void {
     );
     $linkPrice->setComment('Downloadable Link Price Table');
 
-    // upgrade-1.6.0.0.3-1.6.0.0.4 set created_at/updated_at to CURRENT_TIMESTAMP default (MySQL).
     $linkPurchased = $schema->createTable('downloadable_link_purchased');
     $linkPurchased->addColumn('purchased_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $linkPurchased->addColumn('order_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false, 'default' => 0]);
@@ -102,7 +101,6 @@ return function (Schema $schema): void {
     );
     $linkPurchased->setComment('Downloadable Link Purchased Table');
 
-    // upgrade-1.6.0.0.3-1.6.0.0.4 set created_at/updated_at to CURRENT_TIMESTAMP default (MySQL).
     $linkPurchasedItem = $schema->createTable('downloadable_link_purchased_item');
     $linkPurchasedItem->addColumn('item_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $linkPurchasedItem->addColumn('purchased_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
@@ -236,7 +234,6 @@ return function (Schema $schema): void {
     $priceTmp->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')->create(),
     );
-    // Legacy install used MEMORY engine for the tmp indexer table.
     $priceTmp->addOption('engine', 'MEMORY');
     $priceTmp->setComment('Temporary Indexer Table for price of downloadable products');
 };

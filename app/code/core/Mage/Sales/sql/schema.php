@@ -16,9 +16,6 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
 
 return function (Schema $schema): void {
-    // sales_flat_order
-    // upgrade-1.6.0.6-1.6.0.7: added coupon_rule_name
-    // upgrade-1.6.0.10-1.6.0.11: added IDX_SALES_FLAT_ORDER_CUSTOMER_EMAIL (prefix index on MySQL)
     $order = $schema->createTable('sales_flat_order');
     $order->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $order->addColumn('state', Types::STRING, ['length' => 32, 'notnull' => false]);
@@ -210,8 +207,6 @@ return function (Schema $schema): void {
     $orderGrid->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_sales_flat_order_grid_store');
     $orderGrid->setComment('Sales Flat Order Grid');
 
-    // sales_flat_order_address
-    // upgrade-1.6.0.5-1.6.0.6: added vat_id, vat_is_valid, vat_request_id, vat_request_date, vat_request_success
     $orderAddress = $schema->createTable('sales_flat_order_address');
     $orderAddress->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $orderAddress->addColumn('parent_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
@@ -246,8 +241,6 @@ return function (Schema $schema): void {
     $orderAddress->addForeignKeyConstraint('sales_flat_order', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_order_address_parent');
     $orderAddress->setComment('Sales Flat Order Address');
 
-    // sales_flat_order_status_history
-    // upgrade-1.6.0.0-1.6.0.1: added entity_name
     $orderStatusHistory = $schema->createTable('sales_flat_order_status_history');
     $orderStatusHistory->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $orderStatusHistory->addColumn('parent_id', Types::INTEGER, ['unsigned' => true]);
@@ -265,10 +258,6 @@ return function (Schema $schema): void {
     $orderStatusHistory->addForeignKeyConstraint('sales_flat_order', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_order_status_history_parent');
     $orderStatusHistory->setComment('Sales Flat Order Status History');
 
-    // sales_flat_order_item
-    // upgrade-1.6.0.4-1.6.0.5: added base_tax_refunded, discount_refunded, base_discount_refunded
-    // upgrade-1.6.0.10-1.6.0.11: added IDX_SALES_FLAT_ORDER_ITEM_PRODUCT_ID
-    // upgrade-1.6.0.11-1.6.0.12: created_at/updated_at default CURRENT_TIMESTAMP
     $orderItem = $schema->createTable('sales_flat_order_item');
     $orderItem->addColumn('item_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $orderItem->addColumn('order_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
@@ -416,8 +405,6 @@ return function (Schema $schema): void {
     $orderPayment->setComment('Sales Flat Order Payment');
 
     // sales_flat_shipment
-    // upgrade-1.6.0.1-1.6.0.2: added packages (TEXT length 20000)
-    // upgrade-1.6.0.2-1.6.0.3: added shipping_label (VARBINARY/BLOB length 2m)
     $shipment = $schema->createTable('sales_flat_shipment');
     $shipment->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $shipment->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
@@ -535,7 +522,6 @@ return function (Schema $schema): void {
     $shipmentComment->setComment('Sales Flat Shipment Comment');
 
     // sales_flat_invoice
-    // upgrade-1.6.0.7-1.6.0.8: added discount_description
     // Note: Maho_Giftcard grafts giftcard_amount + base_giftcard_amount columns on this table.
     $invoice = $schema->createTable('sales_flat_invoice');
     $invoice->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
@@ -678,7 +664,6 @@ return function (Schema $schema): void {
     $invoiceComment->setComment('Sales Flat Invoice Comment');
 
     // sales_flat_creditmemo
-    // upgrade-1.6.0.7-1.6.0.8: added discount_description
     // Note: Maho_Giftcard grafts giftcard_amount + base_giftcard_amount columns on this table.
     $creditmemo = $schema->createTable('sales_flat_creditmemo');
     $creditmemo->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
@@ -833,8 +818,6 @@ return function (Schema $schema): void {
     $creditmemoComment->setComment('Sales Flat Creditmemo Comment');
 
     // sales_flat_quote
-    // upgrade-1.6.0.8-1.6.0.9: remote_ip changed to varchar(255) nullable
-    // upgrade-1.6.0.11-1.6.0.12: created_at/updated_at default CURRENT_TIMESTAMP (MySQL)
     // Note: Maho_Giftcard grafts giftcard_codes / giftcard_amount / base_giftcard_amount on this table.
     $quote = $schema->createTable('sales_flat_quote');
     $quote->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
@@ -893,9 +876,6 @@ return function (Schema $schema): void {
     $quote->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_quote_store');
     $quote->setComment('Sales Flat Quote');
 
-    // sales_flat_quote_address
-    // upgrade-1.6.0.5-1.6.0.6: added vat_id, vat_is_valid, vat_request_id, vat_request_date, vat_request_success
-    // upgrade-1.6.0.11-1.6.0.12: created_at/updated_at default CURRENT_TIMESTAMP (MySQL)
     $quoteAddress = $schema->createTable('sales_flat_quote_address');
     $quoteAddress->addColumn('address_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $quoteAddress->addColumn('quote_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
@@ -965,9 +945,6 @@ return function (Schema $schema): void {
     $quoteAddress->addForeignKeyConstraint('sales_flat_quote', ['quote_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_quote_address_quote');
     $quoteAddress->setComment('Sales Flat Quote Address');
 
-    // sales_flat_quote_item
-    // upgrade-1.6.0.11-1.6.0.12: created_at/updated_at default CURRENT_TIMESTAMP (MySQL)
-    // FK to catalog_product_entity is deferred until Mage_Catalog is converted to declarative schema.
     $quoteItem = $schema->createTable('sales_flat_quote_item');
     $quoteItem->addColumn('item_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $quoteItem->addColumn('quote_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
@@ -1022,10 +999,9 @@ return function (Schema $schema): void {
     $quoteItem->addForeignKeyConstraint('sales_flat_quote_item', ['parent_item_id'], ['item_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_quote_item_parent');
     $quoteItem->addForeignKeyConstraint('sales_flat_quote', ['quote_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_quote_item_quote');
     $quoteItem->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'], 'fk_sales_flat_quote_item_store');
+    $quoteItem->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_quote_item_product');
     $quoteItem->setComment('Sales Flat Quote Item');
 
-    // sales_flat_quote_address_item
-    // upgrade-1.6.0.11-1.6.0.12: created_at/updated_at default CURRENT_TIMESTAMP (MySQL)
     $quoteAddressItem = $schema->createTable('sales_flat_quote_address_item');
     $quoteAddressItem->addColumn('address_item_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $quoteAddressItem->addColumn('parent_item_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
@@ -1092,7 +1068,6 @@ return function (Schema $schema): void {
     $quoteItemOption->setComment('Sales Flat Quote Item Option');
 
     // sales_flat_quote_payment
-    // upgrade-1.6.0.11-1.6.0.12: created_at/updated_at default CURRENT_TIMESTAMP (MySQL)
     // Note: Maho_Paypal grafts paypal_order_id column + index on this table.
     $quotePayment = $schema->createTable('sales_flat_quote_payment');
     $quotePayment->addColumn('payment_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
@@ -1121,8 +1096,6 @@ return function (Schema $schema): void {
     $quotePayment->addForeignKeyConstraint('sales_flat_quote', ['quote_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_flat_quote_payment_quote');
     $quotePayment->setComment('Sales Flat Quote Payment');
 
-    // sales_flat_quote_shipping_rate (alias: quote_address_shipping_rate)
-    // upgrade-1.6.0.11-1.6.0.12: created_at/updated_at default CURRENT_TIMESTAMP (MySQL)
     $quoteShippingRate = $schema->createTable('sales_flat_quote_shipping_rate');
     $quoteShippingRate->addColumn('rate_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $quoteShippingRate->addColumn('address_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
@@ -1166,7 +1139,6 @@ return function (Schema $schema): void {
     }
 
     // Two structurally identical order aggregation tables.
-    // sales_order_aggregated_updated added by upgrade-1.6.0.3-1.6.0.4.
     foreach (['sales_order_aggregated_created', 'sales_order_aggregated_updated'] as $tableName) {
         $aggr = $schema->createTable($tableName);
         $aggr->addColumn('id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
@@ -1229,8 +1201,6 @@ return function (Schema $schema): void {
         $aggr->addColumn('id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
         $aggr->addColumn('period', Types::DATE_MUTABLE, ['notnull' => false]);
         $aggr->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
-        // sales_refunded_aggregated has default ''; sales_refunded_aggregated_order is nullable. Match
-        // legacy install difference (order variant uses default null on order_status).
         if ($tableName === 'sales_refunded_aggregated_order') {
             $aggr->addColumn('order_status', Types::STRING, ['length' => 50, 'notnull' => false]);
         } else {
@@ -1272,8 +1242,6 @@ return function (Schema $schema): void {
     }
 
     // Three structurally identical bestsellers aggregation tables.
-    // upgrade-1.6.0.9-1.6.0.10: added product_type_id column on all three.
-    // FK to catalog_product_entity is deferred until Mage_Catalog is converted to declarative schema.
     foreach (['daily', 'monthly', 'yearly'] as $period) {
         $tableName = "sales_bestsellers_aggregated_{$period}";
         $aggr = $schema->createTable($tableName);
@@ -1294,11 +1262,10 @@ return function (Schema $schema): void {
         $aggr->addIndex(['store_id'], "idx_{$short}_store_id");
         $aggr->addIndex(['product_id'], "idx_{$short}_product_id");
         $aggr->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$short}_store");
+        $aggr->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], "fk_{$short}_product");
         $aggr->setComment('Sales Bestsellers Aggregated ' . ucfirst($period));
     }
 
-    // sales_billing_agreement
-    // upgrade-1.6.0.11-1.6.0.12: created_at default CURRENT_TIMESTAMP (MySQL)
     $billingAgreement = $schema->createTable('sales_billing_agreement');
     $billingAgreement->addColumn('agreement_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $billingAgreement->addColumn('customer_id', Types::INTEGER, ['unsigned' => true]);
@@ -1330,8 +1297,6 @@ return function (Schema $schema): void {
     $billingAgreementOrder->addForeignKeyConstraint('sales_flat_order', ['order_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_sales_billing_agreement_order_order');
     $billingAgreementOrder->setComment('Sales Billing Agreement Order');
 
-    // sales_recurring_profile
-    // upgrade-1.6.0.11-1.6.0.12: created_at + start_datetime default CURRENT_TIMESTAMP (MySQL)
     $recurringProfile = $schema->createTable('sales_recurring_profile');
     $recurringProfile->addColumn('profile_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $recurringProfile->addColumn('state', Types::STRING, ['length' => 20]);
@@ -1415,7 +1380,6 @@ return function (Schema $schema): void {
     $orderStatus = $schema->createTable('sales_order_status');
     $orderStatus->addColumn('status', Types::STRING, ['length' => 32]);
     $orderStatus->addColumn('label', Types::STRING, ['length' => 128]);
-    // Added by Mage_Admin's maho-24.12.1.php (cross-module schema add).
     $orderStatus->addColumn('color', Types::STRING, ['length' => 20, 'notnull' => false, 'comment' => 'Status Color']);
     $orderStatus->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('status')->create(),

@@ -16,8 +16,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
 
 return function (Schema $schema): void {
-    // payment_restriction created by maho-25.5.0; ON UPDATE CURRENT_TIMESTAMP on
-    // updated_at removed by maho-26.5.0 (now managed in PHP via _beforeSave()).
+    // updated_at is managed in PHP via _beforeSave(), not an ON UPDATE CURRENT_TIMESTAMP trigger.
     $restriction = $schema->createTable('payment_restriction');
     $restriction->addColumn('restriction_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $restriction->addColumn('name', Types::STRING, ['length' => 255]);

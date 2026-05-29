@@ -27,14 +27,12 @@ return function (Schema $schema): void {
     $query->addColumn('display_in_terms', Types::SMALLINT, ['default' => 1]);
     $query->addColumn('is_active', Types::SMALLINT, ['notnull' => false, 'default' => 1]);
     $query->addColumn('is_processed', Types::SMALLINT, ['notnull' => false, 'default' => 0]);
-    // Default CURRENT_TIMESTAMP enforced by upgrade-1.8.2.0-1.8.2.1 (issue #857).
     $query->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $query->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('query_id')->create(),
     );
     $query->addIndex(['query_text', 'store_id', 'popularity'], 'idx_catalogsearch_query_query_text_store_id_popularity');
     $query->addIndex(['store_id'], 'idx_catalogsearch_query_store_id');
-    // Added by legacy upgrade-1.6.0.0-1.8.2.0.
     $query->addIndex(['synonym_for'], 'idx_catalogsearch_query_synonym_for');
     $query->addForeignKeyConstraint(
         'core_store',
@@ -74,14 +72,12 @@ return function (Schema $schema): void {
     $fulltext->addColumn('fulltext_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $fulltext->addColumn('product_id', Types::INTEGER, ['unsigned' => true]);
     $fulltext->addColumn('store_id', Types::SMALLINT, ['unsigned' => true]);
-    // Legacy used TYPE_TEXT '4g' which caps at MAX_TEXT_SIZE (2147483648), i.e. LONGTEXT.
     $fulltext->addColumn('data_index', Types::TEXT, ['length' => 2147483648, 'notnull' => false]);
     $fulltext->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('fulltext_id')->create(),
     );
     $fulltext->addUniqueIndex(['product_id', 'store_id'], 'unq_catalogsearch_fulltext_product_id_store_id');
     $fulltext->addIndex(['data_index'], 'idx_catalogsearch_fulltext_data_index', ['fulltext']);
-    // Legacy install used MyISAM (required at the time for FULLTEXT indexes); preserved here.
     $fulltext->addOption('engine', 'MyISAM');
     $fulltext->setComment('Catalog search result table');
 };

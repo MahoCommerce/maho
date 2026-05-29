@@ -19,16 +19,13 @@ return function (Schema $schema): void {
     $importData->addColumn('id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $importData->addColumn('entity', Types::STRING, ['length' => 50]);
     $importData->addColumn('behavior', Types::STRING, ['length' => 10, 'default' => 'append']);
-    // upgrade-1.6.0.1-1.6.0.2 widened `data` from 64k to 4G (capped at MAX_TEXT_SIZE = 2147483648 → LONGTEXT on MySQL)
     $importData->addColumn('data', Types::TEXT, ['length' => 2147483648, 'notnull' => false, 'default' => '']);
     $importData->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create(),
     );
     $importData->setComment('Import Data Table');
 
-    // Legacy install grafted four unique indexes and two FKs onto Mage_Catalog
-    // tables (configurable product import relies on these). Keep them here so
-    // ImportExport owns the additions instead of leaking them into Catalog.
+    // ImportExport grafts four unique indexes and two FKs onto Mage_Catalog tables (configurable product import relies on these), owned here rather than in Catalog.
     $superLink = $schema->getTable('catalog_product_super_link');
     $superLink->addUniqueIndex(['product_id', 'parent_id'], 'unq_catalog_product_super_link_product_id_parent_id');
 

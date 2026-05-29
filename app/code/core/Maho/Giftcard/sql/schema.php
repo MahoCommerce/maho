@@ -92,9 +92,7 @@ return function (Schema $schema): void {
     );
     $history->setComment('Gift Card History Table');
 
-    // Legacy install grafted Giftcard-owned columns onto Mage_Sales tables.
-    // Keep them here so removing the module is a single delete instead of
-    // leaking columns into Sales' schema.
+    // Giftcard grafts its columns onto Mage_Sales tables, kept here so module removal stays one delete.
     $quote = $schema->getTable('sales_flat_quote');
     $quote->addColumn('giftcard_codes', Types::TEXT, [
         'length' => 65535, 'notnull' => false,

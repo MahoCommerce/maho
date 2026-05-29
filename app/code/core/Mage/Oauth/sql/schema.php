@@ -84,6 +84,5 @@ return function (Schema $schema): void {
     $nonce->addColumn('nonce', Types::STRING, ['length' => 32]);
     $nonce->addColumn('timestamp', Types::INTEGER, ['unsigned' => true]);
     $nonce->addUniqueIndex(['nonce'], 'unq_oauth_nonce_nonce');
-    // Legacy install used MyISAM; preserved here.
     $nonce->addOption('engine', 'MyISAM');
 };

@@ -21,7 +21,6 @@ return function (Schema $schema): void {
     $price->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $price->addColumn('price', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
     $price->addColumn('website_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    // TIMESTAMP columns made nullable with no default by upgrade-1.6.0.0-1.6.0.1.
     $price->addColumn('add_date', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $price->addColumn('last_send_date', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $price->addColumn('send_count', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
@@ -60,7 +59,6 @@ return function (Schema $schema): void {
     $stock->addColumn('customer_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $stock->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $stock->addColumn('website_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    // TIMESTAMP columns made nullable with no default by upgrade-1.6.0.0-1.6.0.1.
     $stock->addColumn('add_date', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $stock->addColumn('send_date', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $stock->addColumn('send_count', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);

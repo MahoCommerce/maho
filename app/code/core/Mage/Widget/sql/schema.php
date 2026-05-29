@@ -39,7 +39,6 @@ return function (Schema $schema): void {
     );
     $instance->setComment('Instances of Widget for Package Theme');
 
-    // page_group and page_for were widened from 25 to 255 by upgrade-1.6.0.0-1.6.0.1.php
     $instancePage = $schema->createTable('widget_instance_page');
     $instancePage->addColumn('page_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $instancePage->addColumn('instance_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);

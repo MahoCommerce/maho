@@ -38,8 +38,7 @@ return function (Schema $schema): void {
     $product->setComment('Catalog Product Table');
 
     // Product value tables — one per backend type (datetime/decimal/int/text/varchar).
-    // Legacy entity_type_id was declared SMALLINT for datetime/decimal/gallery but
-    // INTEGER for int/text/varchar (a historical accident); preserved as-is.
+    // entity_type_id is SMALLINT for datetime/decimal/gallery but INTEGER for int/text/varchar (a historical inconsistency, preserved).
     $productValueTables = [
         'catalog_product_entity_datetime' => ['type' => Types::DATETIME_MUTABLE, 'options' => ['notnull' => false], 'entityTypeIdType' => Types::SMALLINT, 'hasValueIndex' => false, 'comment' => 'Catalog Product Datetime Attribute Backend Table'],
         'catalog_product_entity_decimal'  => ['type' => Types::DECIMAL,          'options' => ['precision' => 12, 'scale' => 4, 'notnull' => false], 'entityTypeIdType' => Types::SMALLINT, 'hasValueIndex' => false, 'comment' => 'Catalog Product Decimal Attribute Backend Table'],
@@ -106,7 +105,6 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
     $category->addIndex(['level'], 'idx_catalog_category_entity_level');
-    // Added by upgrade-1.6.0.0.7-1.6.0.0.8.
     $category->addIndex(['path', 'entity_id'], 'idx_catalog_category_entity_path_entity_id');
     $category->setComment('Catalog Category Table');
 
@@ -153,8 +151,6 @@ return function (Schema $schema): void {
     $categoryProduct->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_category_product_product');
     $categoryProduct->setComment('Catalog Product To Category Linkage Table');
 
-    // catalog_category_product_index. Legacy install declared position INTEGER NOT
-    // NULL DEFAULT 0; upgrade-1.6.0.0.4-1.6.0.0.5 widened it to nullable signed INT.
     $categoryProductIndex = $schema->createTable('catalog_category_product_index');
     $categoryProductIndex->addColumn('category_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $categoryProductIndex->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
@@ -316,7 +312,6 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('product_super_attribute_id')->create(),
     );
     $productSuperAttribute->addIndex(['product_id'], 'idx_catalog_product_super_attribute_product_id');
-    // Legacy install used ACTION_NO_ACTION for onUpdate on this single FK.
     $productSuperAttribute->addForeignKeyConstraint('catalog_product_entity', ['product_id'], ['entity_id'], ['onDelete' => 'CASCADE'], 'fk_catalog_product_super_attribute_product');
     $productSuperAttribute->setComment('Catalog Product Super Attribute Table');
 
@@ -392,8 +387,6 @@ return function (Schema $schema): void {
     $tierPrice->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_cat_prod_ent_tier_price_website');
     $tierPrice->setComment('Catalog Product Tier Price Attribute Backend Table');
 
-    // catalog_product_entity_group_price — added by upgrade-1.6.0.0.9-1.6.0.0.10.
-    // is_percent column added by upgrade-1.6.0.0.19.1.4-1.6.0.0.19.1.5.
     $groupPrice = $schema->createTable('catalog_product_entity_group_price');
     $groupPrice->addColumn('value_id', Types::INTEGER, ['autoincrement' => true]);
     $groupPrice->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
@@ -583,8 +576,6 @@ return function (Schema $schema): void {
     $productRelation->addForeignKeyConstraint('catalog_product_entity', ['parent_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_relation_parent');
     $productRelation->setComment('Catalog Product Relation Table');
 
-    // catalog_product_index_eav — composite PK includes value (legacy install,
-    // never trimmed).
     $productIndexEav = $schema->createTable('catalog_product_index_eav');
     $productIndexEav->addColumn('entity_id', Types::INTEGER, ['unsigned' => true]);
     $productIndexEav->addColumn('attribute_id', Types::SMALLINT, ['unsigned' => true]);
@@ -602,8 +593,6 @@ return function (Schema $schema): void {
     $productIndexEav->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_eav_store');
     $productIndexEav->setComment('Catalog Product EAV Index Table');
 
-    // catalog_product_index_eav_decimal — PK trimmed by
-    // upgrade-1.6.0.0.2-1.6.0.0.3 to (entity_id, attribute_id, store_id).
     $productIndexEavDecimal = $schema->createTable('catalog_product_index_eav_decimal');
     $productIndexEavDecimal->addColumn('entity_id', Types::INTEGER, ['unsigned' => true]);
     $productIndexEavDecimal->addColumn('attribute_id', Types::SMALLINT, ['unsigned' => true]);
@@ -621,9 +610,6 @@ return function (Schema $schema): void {
     $productIndexEavDecimal->addForeignKeyConstraint('core_store', ['store_id'], ['store_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_eav_decimal_store');
     $productIndexEavDecimal->setComment('Catalog Product EAV Decimal Index Table');
 
-    // catalog_product_index_price.
-    // (website_id, customer_group_id, min_price) index added by
-    // upgrade-1.6.0.0.11-1.6.0.0.12.
     $productIndexPrice = $schema->createTable('catalog_product_index_price');
     $productIndexPrice->addColumn('entity_id', Types::INTEGER, ['unsigned' => true]);
     $productIndexPrice->addColumn('customer_group_id', Types::SMALLINT, ['unsigned' => true]);
@@ -634,7 +620,6 @@ return function (Schema $schema): void {
     $productIndexPrice->addColumn('min_price', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'notnull' => false]);
     $productIndexPrice->addColumn('max_price', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'notnull' => false]);
     $productIndexPrice->addColumn('tier_price', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'notnull' => false]);
-    // group_price added by upgrade-1.6.0.0.9-1.6.0.0.10.
     $productIndexPrice->addColumn('group_price', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'notnull' => false]);
     $productIndexPrice->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id', 'customer_group_id', 'website_id')->create(),
@@ -664,7 +649,6 @@ return function (Schema $schema): void {
     $productIndexTierPrice->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_tier_price_website');
     $productIndexTierPrice->setComment('Catalog Product Tier Price Index Table');
 
-    // catalog_product_index_group_price — added by upgrade-1.6.0.0.9-1.6.0.0.10.
     $productIndexGroupPrice = $schema->createTable('catalog_product_index_group_price');
     $productIndexGroupPrice->addColumn('entity_id', Types::INTEGER, ['unsigned' => true]);
     $productIndexGroupPrice->addColumn('customer_group_id', Types::SMALLINT, ['unsigned' => true]);
@@ -692,8 +676,6 @@ return function (Schema $schema): void {
     $productIndexWebsite->addForeignKeyConstraint('core_website', ['website_id'], ['website_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_product_index_website_website');
     $productIndexWebsite->setComment('Catalog Product Website Index Table');
 
-    // Configurable-option price aggregate indexer tables. group_price column on
-    // *_idx and *_tmp tables added by upgrade-1.6.0.0.9-1.6.0.0.10.
     foreach (['catalog_product_index_price_cfg_opt_agr_idx', 'catalog_product_index_price_cfg_opt_agr_tmp'] as $tableName) {
         $t = $schema->createTable($tableName);
         $t->addColumn('parent_id', Types::INTEGER, ['unsigned' => true]);
@@ -726,8 +708,6 @@ return function (Schema $schema): void {
         $t->setComment("Catalog Product Price Indexer Config Option {$suffix} Table");
     }
 
-    // Final price aggregate indexer tables. group_price + base_group_price added
-    // by upgrade-1.6.0.0.9-1.6.0.0.10.
     foreach (['catalog_product_index_price_final_idx', 'catalog_product_index_price_final_tmp'] as $tableName) {
         $t = $schema->createTable($tableName);
         $t->addColumn('entity_id', Types::INTEGER, ['unsigned' => true]);
@@ -800,8 +780,6 @@ return function (Schema $schema): void {
         $t->setComment("Catalog Product EAV Indexer {$suffix} Table");
     }
 
-    // EAV decimal indexer pair. PK on _tmp trimmed to (entity_id, attribute_id, store_id)
-    // by upgrade-1.6.0.0.2-1.6.0.0.3; _idx still has the original 4-col PK.
     $eavDecIdx = $schema->createTable('catalog_product_index_eav_decimal_idx');
     $eavDecIdx->addColumn('entity_id', Types::INTEGER, ['unsigned' => true]);
     $eavDecIdx->addColumn('attribute_id', Types::SMALLINT, ['unsigned' => true]);
@@ -830,9 +808,6 @@ return function (Schema $schema): void {
     $eavDecTmp->addIndex(['value'], 'idx_catalog_product_index_eav_decimal_tmp_value');
     $eavDecTmp->setComment('Catalog Product EAV Decimal Indexer Temp Table');
 
-    // Price indexer idx/tmp pair. (website_id, customer_group_id, min_price) index
-    // on _idx added by upgrade-1.6.0.0.11-1.6.0.0.12. group_price column added by
-    // upgrade-1.6.0.0.9-1.6.0.0.10 to both idx and tmp.
     foreach (['catalog_product_index_price_idx', 'catalog_product_index_price_tmp'] as $tableName) {
         $t = $schema->createTable($tableName);
         $t->addColumn('entity_id', Types::INTEGER, ['unsigned' => true]);
@@ -855,9 +830,6 @@ return function (Schema $schema): void {
         $t->setComment("Catalog Product Price Indexer {$suffix} Table");
     }
 
-    // Category-product indexer pair.
-    // (product_id, category_id, store_id) index on _tmp added by
-    // upgrade-1.6.0.0.7-1.6.0.0.8.
     foreach (['catalog_category_product_index_idx', 'catalog_category_product_index_tmp'] as $tableName) {
         $t = $schema->createTable($tableName);
         $t->addColumn('category_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
@@ -871,9 +843,6 @@ return function (Schema $schema): void {
         $t->setComment("Catalog Category Product Indexer {$suffix} Table");
     }
 
-    // Category-product-enabled indexer pair.
-    // Replaced the install's product_id index with (product_id, visibility) in
-    // upgrade-1.6.0.0.7-1.6.0.0.8.
     foreach (['catalog_category_product_index_enbl_idx', 'catalog_category_product_index_enbl_tmp'] as $tableName) {
         $t = $schema->createTable($tableName);
         $t->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
@@ -883,9 +852,6 @@ return function (Schema $schema): void {
         $t->setComment("Catalog Category Product Enabled Indexer {$suffix} Table");
     }
 
-    // Category-anchor indexer pair.
-    // (path, category_id) index on _idx and _tmp added by
-    // upgrade-1.6.0.0.7-1.6.0.0.8.
     foreach (['catalog_category_anc_categs_index_idx', 'catalog_category_anc_categs_index_tmp'] as $tableName) {
         $t = $schema->createTable($tableName);
         $t->addColumn('category_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
@@ -896,9 +862,6 @@ return function (Schema $schema): void {
         $t->setComment("Catalog Category Anchor Indexer {$suffix} Table");
     }
 
-    // Category-anchor-products indexer pair.
-    // (category_id, product_id, position) index added by upgrade-1.6.0.0.7-1.6.0.0.8.
-    // position column added to _tmp by upgrade-1.6.0.0.6-1.6.0.0.7.
     $ancProdIdx = $schema->createTable('catalog_category_anc_products_index_idx');
     $ancProdIdx->addColumn('category_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $ancProdIdx->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
@@ -913,8 +876,6 @@ return function (Schema $schema): void {
     $ancProdTmp->addIndex(['category_id', 'product_id', 'position'], 'idx_cat_cat_anc_prod_tmp_category_product_position');
     $ancProdTmp->setComment('Catalog Category Anchor Product Indexer Temp Table');
 
-    // catalog_category_dynamic_rule — added by maho-25.6.0. updated_at default
-    // normalized to CURRENT_TIMESTAMP (no ON UPDATE) by maho-26.5.0.
     $categoryDynamicRule = $schema->createTable('catalog_category_dynamic_rule');
     $categoryDynamicRule->addColumn('rule_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $categoryDynamicRule->addColumn('category_id', Types::INTEGER, ['unsigned' => true]);
@@ -930,9 +891,7 @@ return function (Schema $schema): void {
     $categoryDynamicRule->addForeignKeyConstraint('catalog_category_entity', ['category_id'], ['entity_id'], ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'], 'fk_catalog_category_dynamic_rule_category');
     $categoryDynamicRule->setComment('Catalog Category Dynamic Rules');
 
-    // Legacy install grafted category_id / product_id onto Mage_Core's
-    // core_url_rewrite. Keep them owned by Catalog so URL rewrite cleanup follows
-    // category/product deletion.
+    // Catalog grafts category_id / product_id onto Mage_Core's core_url_rewrite so URL rewrite cleanup follows category/product deletion.
     $urlRewrite = $schema->getTable('core_url_rewrite');
     $urlRewrite->addColumn('category_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $urlRewrite->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);

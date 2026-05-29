@@ -65,7 +65,6 @@ return function (Schema $schema): void {
     $vote = $schema->createTable('rating_option_vote');
     $vote->addColumn('vote_id', Types::BIGINT, ['unsigned' => true, 'autoincrement' => true]);
     $vote->addColumn('option_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    // remote_ip / remote_ip_long widened by upgrade-1.6.0.0-1.6.0.1.php
     $vote->addColumn('remote_ip', Types::STRING, ['length' => 50, 'notnull' => false]);
     $vote->addColumn('remote_ip_long', Types::BINARY, ['length' => 16, 'notnull' => false]);
     $vote->addColumn('customer_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false, 'default' => 0]);

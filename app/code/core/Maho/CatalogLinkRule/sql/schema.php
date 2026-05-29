@@ -30,7 +30,6 @@ return function (Schema $schema): void {
     $rule->addColumn('source_conditions_serialized', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $rule->addColumn('target_conditions_serialized', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $rule->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
-    // updated_at originally had ON UPDATE CURRENT_TIMESTAMP; dropped by maho-26.5.0 (issue #856).
     $rule->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $rule->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create(),

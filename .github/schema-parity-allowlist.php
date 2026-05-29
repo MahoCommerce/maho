@@ -605,89 +605,6 @@ $entries = [
         ],
     ],
 
-    // ----- Temporary FK drops while cross-module schemas remain legacy -----
-    //
-    // The schema applier creates all declarative tables up front; legacy
-    // install scripts run separately. FKs from a declarative table to a
-    // still-legacy table cannot be created at apply time (referenced table
-    // doesn't exist yet). These FKs are reinstated when the referenced
-    // module is converted to declarative schema.
-    [
-        'table' => 'sales_order_tax_item',
-        'remove' => [
-            '  FK item_id -> sales_flat_order_item(item_id) ON DELETE CASCADE ON UPDATE CASCADE',
-            '  FK tax_id -> sales_order_tax(tax_id) ON DELETE CASCADE ON UPDATE CASCADE',
-        ],
-    ],
-    [
-        'table' => 'weee_tax',
-        'remove' => [
-            '  FK attribute_id -> eav_attribute(attribute_id) ON DELETE CASCADE ON UPDATE CASCADE',
-            '  FK entity_id -> catalog_product_entity(entity_id) ON DELETE CASCADE ON UPDATE CASCADE',
-        ],
-    ],
-    [
-        'table' => 'weee_discount',
-        'remove' => [
-            '  FK customer_group_id -> customer_group(customer_group_id) ON DELETE CASCADE ON UPDATE CASCADE',
-            '  FK entity_id -> catalog_product_entity(entity_id) ON DELETE CASCADE ON UPDATE CASCADE',
-        ],
-    ],
-    [
-        'table' => 'customer_segment_customer',
-        'remove' => [
-            '  FK customer_id -> customer_entity(entity_id) ON DELETE CASCADE ON UPDATE RESTRICT',
-        ],
-    ],
-    [
-        'table' => 'customer_segment_email_sequence',
-        'remove' => [
-            '  INDEX [IDX] (coupon_sales_rule_id)',
-            '  FK coupon_sales_rule_id -> salesrule(rule_id) ON DELETE SET NULL ON UPDATE RESTRICT',
-        ],
-    ],
-    [
-        'table' => 'customer_segment_sequence_progress',
-        'remove' => [
-            '  FK customer_id -> customer_entity(entity_id) ON DELETE CASCADE ON UPDATE RESTRICT',
-        ],
-    ],
-
-    // Sales bestsellers FKs to catalog_product_entity dropped because the
-    // declarative schema is applied before catalog_product_entity (still legacy).
-    [
-        'table' => 'sales_bestsellers_aggregated_daily',
-        'remove' => [
-            '  FK product_id -> catalog_product_entity(entity_id) ON DELETE CASCADE ON UPDATE CASCADE',
-        ],
-    ],
-    [
-        'table' => 'sales_bestsellers_aggregated_monthly',
-        'remove' => [
-            '  FK product_id -> catalog_product_entity(entity_id) ON DELETE CASCADE ON UPDATE CASCADE',
-        ],
-    ],
-    [
-        'table' => 'sales_bestsellers_aggregated_yearly',
-        'remove' => [
-            '  FK product_id -> catalog_product_entity(entity_id) ON DELETE CASCADE ON UPDATE CASCADE',
-        ],
-    ],
-    // sales_flat_quote_item FK to catalog_product_entity: ordering reason.
-    [
-        'table' => 'sales_flat_quote_item',
-        'remove' => [
-            '  FK product_id -> catalog_product_entity(entity_id) ON DELETE CASCADE ON UPDATE CASCADE',
-        ],
-    ],
-    // FeedManager category mapping FK to catalog_category_entity: ordering reason.
-    [
-        'table' => 'feedmanager_category_mapping',
-        'remove' => [
-            '  INDEX [IDX] (category_id)',
-            '  FK category_id -> catalog_category_entity(entity_id) ON DELETE CASCADE ON UPDATE RESTRICT',
-        ],
-    ],
     // customer_entity composite (email,website_id) index dropped because it
     // duplicates the unique index already present on (email,website_id).
     [
@@ -796,13 +713,14 @@ $dbalImplicitFkIndexes = [
         'core_url_rewrite' => ['category_id', 'product_id'],
         'customer_eav_attribute_website' => ['attribute_id'],
         'customer_segment_customer' => ['segment_id'],
-        'customer_segment_email_sequence' => ['segment_id', 'template_id'],
+        'customer_segment_email_sequence' => ['coupon_sales_rule_id', 'segment_id', 'template_id'],
         'customer_segment_sequence_progress' => ['queue_id', 'segment_id'],
         'eav_attribute_group' => ['attribute_set_id'],
         'eav_attribute_set' => ['entity_type_id'],
         'eav_entity_attribute' => ['attribute_group_id'],
         'eav_form_type_entity' => ['type_id'],
         'feedmanager_attribute_mapping' => ['feed_id'],
+        'feedmanager_category_mapping' => ['category_id'],
         'feedmanager_log' => ['feed_id'],
         'index_process_event' => ['process_id'],
         'newsletter_queue_store_link' => ['queue_id'],

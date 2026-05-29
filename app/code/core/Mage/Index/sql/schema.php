@@ -34,7 +34,6 @@ return function (Schema $schema): void {
     $process->addColumn('process_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $process->addColumn('indexer_code', Types::STRING, ['length' => 32]);
     $process->addColumn('status', Types::STRING, ['length' => 15, 'default' => 'pending']);
-    // started_at / ended_at made nullable with no default by upgrade-1.6.0.0-1.6.0.1.php
     $process->addColumn('started_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $process->addColumn('ended_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $process->addColumn('mode', Types::STRING, ['length' => 9, 'default' => 'real_time']);
