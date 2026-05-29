@@ -13,8 +13,8 @@ declare(strict_types=1);
 /**
  * Repairs paypal_setup for shops that reached 6.0.0 without the schema.
  *
- * upgrade-1.6.0.0-6.0.0.php only matches when the recorded paypal_setup version
- * is <= 1.6.0.0 (the resolver requires the file's "from" >= the DB version), yet
+ * The 26.5.0 bridge upgrade only matched when the recorded paypal_setup version
+ * was <= 1.6.0.0 (the resolver requires the file's "from" >= the DB version), yet
  * legacy Mage_Paypal shipped up to 1.6.0.6. Those merchants had paypal_setup
  * bumped straight to 6.0.0 with no tables created, so the webhook/vault tables
  * and the paypal_order_id columns are missing and /checkout/onepage/ 500s.

@@ -11,9 +11,9 @@
 declare(strict_types=1);
 
 /**
- * Idempotent so it doubles as the body of upgrade-1.6.0.0-6.0.0.php (which just
- * requires this file). `addColumn` and `addIndex` are already idempotent in Maho's
- * adapter; only `createTable` needs guarding.
+ * Idempotent so it can be re-run as the shared body of install-6.0.1.php and
+ * upgrade-6.0.0-6.0.1.php. `addColumn` and `addIndex` are already idempotent in
+ * Maho's adapter; only `createTable` needs guarding.
  *
  * @var Mage_Core_Model_Resource_Setup $this
  */
