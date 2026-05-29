@@ -169,6 +169,13 @@ jobs:
       - name: Dump migrated schema
         run: php .github/schema-dump.php > /tmp/migrated.txt
 
+      # Flush the cache while the migrated DB is still live, so the fresh
+      # install below does not bootstrap against stale cached config (which
+      # would query tables on the freshly reset DB). The same checkout serves
+      # two installs only in this test; a real deployment never does both.
+      - name: Flush cache before fresh install
+        run: ./maho cache:flush
+
       - name: Reset DB
         run: |
           php -r '

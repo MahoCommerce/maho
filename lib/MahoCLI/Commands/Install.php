@@ -347,9 +347,25 @@ class Install extends BaseMahoCommand
     {
         $output->writeln('<comment>Force installation requested - clearing existing installation...</comment>');
 
-        // Remove local.xml if it exists (use hardcoded path since Mage isn't initialized yet)
         $localXmlPath = getcwd() . '/app/etc/local.xml';
         if (file_exists($localXmlPath)) {
+            // Flush the configured cache backend (could be Redis/Memcached, not
+            // just files on disk) using the existing installation's config,
+            // before local.xml is removed. The install bootstraps before
+            // installDb runs, so stale cached config would make it query tables
+            // on the now-empty database before they are recreated. Best-effort:
+            // a prior install too broken to boot must not block the reinstall.
+            // Mage::reset() then leaves a clean slate for the installer's own
+            // bootstrap.
+            try {
+                Mage::app()->getCache()->flush();
+                $output->writeln('<info>Flushed existing cache</info>');
+            } catch (\Throwable) {
+                // ignore: the prior install may be unbootable
+            } finally {
+                Mage::reset();
+            }
+
             if (is_writable($localXmlPath)) {
                 unlink($localXmlPath);
                 $output->writeln('<info>Removed existing local.xml</info>');
