@@ -11,7 +11,7 @@
 <config>
     <modules>
         <Maho_Paypal>
-            <version>6.0.0</version>
+            <version>6.0.1</version>
         </Maho_Paypal>
     </modules>
 
