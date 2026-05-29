@@ -21,6 +21,6 @@ declare(strict_types=1);
  *
  * A 6.0.0 -> 6.0.1 upgrade is the only file that can reach them: its "from" of
  * 6.0.0 is >= both the broken 6.0.0 state and any un-migrated 1.6.0.x version.
- * install-6.0.0.php is fully idempotent, so it is a no-op on healthy shops.
+ * install-6.0.1.php is fully idempotent, so it is a no-op on healthy shops.
  */
-require __DIR__ . '/install-6.0.0.php';
+require __DIR__ . '/install-6.0.1.php';
