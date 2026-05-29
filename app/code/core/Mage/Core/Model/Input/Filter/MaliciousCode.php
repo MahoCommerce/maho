@@ -100,6 +100,10 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
         // is present, which mangles UTF-8 multi-byte sequences during the
         // saveHTML() round-trip (e.g. "ö" becomes "&Atilde;&para;"). Prepend a
         // <?xml encoding> processing instruction so libxml parses as UTF-8.
+        // TODO: when the minimum PHP version reaches 8.4, replace this whole
+        // DOMDocument + XML-PI workaround with \DOM\HTMLDocument::createFromString(),
+        // which parses UTF-8 natively (and drop the <?xml ...> strip from the
+        // wrapper regex below).
         if (!$dom->loadHTML('<?xml encoding="UTF-8">' . $html)) {
             Mage::throwException(Mage::helper('core')->__('HTML filtration has failed.'));
         }
