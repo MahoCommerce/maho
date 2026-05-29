@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -60,7 +61,7 @@ return function (Schema $schema): void {
     $coupon->addColumn('expiration_date', Types::DATETIME_MUTABLE, ['notnull' => false, 'default' => null]);
     $coupon->addColumn('is_primary', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
     // created_at / type added by upgrade-1.6.0.1-1.6.0.2
-    $coupon->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $coupon->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $coupon->addColumn('type', Types::SMALLINT, ['notnull' => false, 'default' => 0]);
     $coupon->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('coupon_id')->create(),

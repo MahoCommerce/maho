@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -73,8 +74,8 @@ return function (Schema $schema): void {
     $linkPurchased->addColumn('order_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false, 'default' => 0]);
     $linkPurchased->addColumn('order_increment_id', Types::STRING, ['length' => 50, 'notnull' => false]);
     $linkPurchased->addColumn('order_item_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $linkPurchased->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $linkPurchased->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $linkPurchased->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $linkPurchased->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $linkPurchased->addColumn('customer_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false, 'default' => 0]);
     $linkPurchased->addColumn('product_name', Types::STRING, ['length' => 255, 'notnull' => false]);
     $linkPurchased->addColumn('product_sku', Types::STRING, ['length' => 255, 'notnull' => false]);
@@ -117,8 +118,8 @@ return function (Schema $schema): void {
     $linkPurchasedItem->addColumn('link_file', Types::STRING, ['length' => 255, 'notnull' => false]);
     $linkPurchasedItem->addColumn('link_type', Types::STRING, ['length' => 255, 'notnull' => false]);
     $linkPurchasedItem->addColumn('status', Types::STRING, ['length' => 50, 'notnull' => false]);
-    $linkPurchasedItem->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $linkPurchasedItem->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $linkPurchasedItem->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $linkPurchasedItem->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $linkPurchasedItem->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('item_id')->create(),
     );

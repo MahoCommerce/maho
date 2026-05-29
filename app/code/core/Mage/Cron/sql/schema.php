@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -21,7 +22,7 @@ return function (Schema $schema): void {
     $t->addColumn('job_code', Types::STRING, ['length' => 255, 'default' => '0']);
     $t->addColumn('status', Types::STRING, ['length' => 7,   'default' => 'pending']);
     $t->addColumn('messages', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $t->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $t->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $t->addColumn('scheduled_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $t->addColumn('executed_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $t->addColumn('finished_at', Types::DATETIME_MUTABLE, ['notnull' => false]);

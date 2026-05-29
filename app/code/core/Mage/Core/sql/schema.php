@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -255,7 +256,7 @@ return function (Schema $schema): void {
     $flag->addColumn('flag_code', Types::STRING, ['length' => 255]);
     $flag->addColumn('state', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $flag->addColumn('flag_data', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $flag->addColumn('last_update', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $flag->addColumn('last_update', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $flag->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('flag_id')->create(),
     );
@@ -307,7 +308,7 @@ return function (Schema $schema): void {
     $emailLog->addColumn('email_body', Types::TEXT, ['length' => 16777215]);
     $emailLog->addColumn('status', Types::STRING, ['length' => 10, 'default' => 'sent']);
     $emailLog->addColumn('error_message', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $emailLog->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $emailLog->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $emailLog->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('log_id')->create(),
     );

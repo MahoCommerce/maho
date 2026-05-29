@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -33,7 +34,7 @@ return function (Schema $schema): void {
     $quote->addColumn('quote_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $quote->addColumn('visitor_id', Types::BIGINT, ['unsigned' => true, 'notnull' => false]);
     // created_at retains NOT NULL with CURRENT_TIMESTAMP default per maho-26.5.0.php.
-    $quote->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $quote->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $quote->addColumn('deleted_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $quote->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('quote_id')->create(),

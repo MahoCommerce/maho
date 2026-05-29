@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -20,7 +21,7 @@ return function (Schema $schema): void {
     $event->addColumn('type', Types::STRING, ['length' => 64]);
     $event->addColumn('entity', Types::STRING, ['length' => 64]);
     $event->addColumn('entity_pk', Types::BIGINT, ['notnull' => false]);
-    $event->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $event->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $event->addColumn('old_data', Types::TEXT, ['length' => 2097152, 'notnull' => false]);
     $event->addColumn('new_data', Types::TEXT, ['length' => 2097152, 'notnull' => false]);
     $event->addPrimaryKeyConstraint(

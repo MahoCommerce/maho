@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -17,7 +18,7 @@ use Doctrine\DBAL\Types\Types;
 return function (Schema $schema): void {
     $consumer = $schema->createTable('oauth_consumer');
     $consumer->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $consumer->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $consumer->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $consumer->addColumn('updated_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $consumer->addColumn('name', Types::STRING, ['length' => 255]);
     // Mage_Oauth_Model_Consumer::KEY_LENGTH = 32
@@ -50,7 +51,7 @@ return function (Schema $schema): void {
     $token->addColumn('callback_url', Types::STRING, ['length' => 255]);
     $token->addColumn('revoked', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $token->addColumn('authorized', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $token->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $token->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $token->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );

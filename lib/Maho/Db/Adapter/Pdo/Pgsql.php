@@ -34,6 +34,15 @@ class Pgsql extends AbstractPdoAdapter
     protected string|int|null $_lastInsertedId = null;
 
     /**
+     * Cache of "table.column" => backing sequence name (or null when the column
+     * has no sequence). Lets bumpIdentitySequencesForBind() resolve each column
+     * once instead of issuing a pg_get_serial_sequence query on every insert.
+     *
+     * @var array<string, string|null>
+     */
+    private array $_serialSequenceCache = [];
+
+    /**
      * Log file name for SQL debug data (override parent's default)
      */
     protected string $_debugFile = 'pdo_pgsql.log';
@@ -964,8 +973,12 @@ class Pgsql extends AbstractPdoAdapter
      * `identity: true` → SERIAL). pg_get_serial_sequence is the source of
      * truth: it returns the backing sequence for both SERIAL columns (default
      * "nextval(...)") and IDENTITY columns (sequence attached via pg_depend),
-     * and NULL for everything else, so non-sequenced columns fall through
-     * cheaply.
+     * and NULL for everything else.
+     *
+     * insert() runs on the write hot path, so each (table, column) lookup is
+     * cached: the pg_get_serial_sequence probe happens once per column, and
+     * subsequent inserts only issue the setval for columns actually backed by
+     * a sequence (normally none, since auto-increment PKs aren't in $bind).
      */
     private function bumpIdentitySequencesForBind(string $table, array $bind): void
     {
@@ -974,11 +987,19 @@ class Pgsql extends AbstractPdoAdapter
                 continue;
             }
 
-            $sequenceName = $this->fetchOne(
-                'SELECT pg_get_serial_sequence(?, ?)',
-                [$table, $column],
-            );
-            if (!is_string($sequenceName) || $sequenceName === '') {
+            $cacheKey = $table . '.' . $column;
+            if (!array_key_exists($cacheKey, $this->_serialSequenceCache)) {
+                $resolved = $this->fetchOne(
+                    'SELECT pg_get_serial_sequence(?, ?)',
+                    [$table, $column],
+                );
+                $this->_serialSequenceCache[$cacheKey] = is_string($resolved) && $resolved !== ''
+                    ? $resolved
+                    : null;
+            }
+
+            $sequenceName = $this->_serialSequenceCache[$cacheKey];
+            if ($sequenceName === null) {
                 continue;
             }
 

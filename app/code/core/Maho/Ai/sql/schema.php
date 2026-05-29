@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -40,7 +41,7 @@ return function (Schema $schema): void {
     $task->addColumn('max_retries', Types::SMALLINT, ['unsigned' => true, 'default' => 3]);
     $task->addColumn('admin_user_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $task->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $task->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $task->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $task->addColumn('started_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $task->addColumn('completed_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $task->addPrimaryKeyConstraint(
@@ -80,10 +81,10 @@ return function (Schema $schema): void {
     $vector->addColumn('model', Types::STRING, ['length' => 128, 'notnull' => false]);
     $vector->addColumn('dimensions', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $vector->addColumn('vector', Types::TEXT, ['length' => 16777215]);
-    $vector->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $vector->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     // Model _beforeSave() keeps updated_at current; the on-update
     // auto-bump is cross-engine unsafe (PgSQL/SQLite downgrade silently).
-    $vector->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $vector->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $vector->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('vector_id')->create(),
     );

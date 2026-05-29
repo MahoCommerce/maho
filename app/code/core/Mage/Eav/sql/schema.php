@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -47,8 +48,8 @@ return function (Schema $schema): void {
     $entity->addColumn('increment_id', Types::STRING, ['length' => 50, 'notnull' => false]);
     $entity->addColumn('parent_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $entity->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $entity->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $entity->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $entity->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $entity->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $entity->addColumn('is_active', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
     $entity->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),

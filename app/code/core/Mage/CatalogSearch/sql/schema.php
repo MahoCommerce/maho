@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -27,7 +28,7 @@ return function (Schema $schema): void {
     $query->addColumn('is_active', Types::SMALLINT, ['notnull' => false, 'default' => 1]);
     $query->addColumn('is_processed', Types::SMALLINT, ['notnull' => false, 'default' => 0]);
     // Default CURRENT_TIMESTAMP enforced by upgrade-1.8.2.0-1.8.2.1 (issue #857).
-    $query->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $query->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $query->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('query_id')->create(),
     );

@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -23,8 +24,8 @@ return function (Schema $schema): void {
     $destination->addColumn('is_enabled', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
     $destination->addColumn('last_upload_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $destination->addColumn('last_upload_status', Types::STRING, ['length' => 20, 'notnull' => false]);
-    $destination->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $destination->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $destination->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $destination->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $destination->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('destination_id')->create(),
     );
@@ -80,8 +81,8 @@ return function (Schema $schema): void {
     $feed->addColumn('last_generated_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $feed->addColumn('last_product_count', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $feed->addColumn('last_file_size', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
-    $feed->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $feed->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $feed->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $feed->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $feed->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('feed_id')->create(),
     );
@@ -178,8 +179,8 @@ return function (Schema $schema): void {
     $dynamicRule->addColumn('is_enabled', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
     $dynamicRule->addColumn('cases', Types::TEXT, ['length' => 16777215, 'notnull' => false]);
     $dynamicRule->addColumn('sort_order', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $dynamicRule->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $dynamicRule->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $dynamicRule->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $dynamicRule->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $dynamicRule->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create(),
     );

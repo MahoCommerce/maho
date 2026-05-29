@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -919,8 +920,8 @@ return function (Schema $schema): void {
     $categoryDynamicRule->addColumn('category_id', Types::INTEGER, ['unsigned' => true]);
     $categoryDynamicRule->addColumn('conditions_serialized', Types::TEXT, ['length' => 2097152, 'notnull' => false]);
     $categoryDynamicRule->addColumn('is_active', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
-    $categoryDynamicRule->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $categoryDynamicRule->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $categoryDynamicRule->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $categoryDynamicRule->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $categoryDynamicRule->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create(),
     );

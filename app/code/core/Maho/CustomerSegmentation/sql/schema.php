@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -23,8 +24,8 @@ return function (Schema $schema): void {
     $segment->addColumn('conditions_serialized', Types::TEXT, ['length' => 2097152, 'notnull' => false]);
     $segment->addColumn('website_ids', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $segment->addColumn('customer_group_ids', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $segment->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $segment->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $segment->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $segment->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $segment->addColumn('matched_customers_count', Types::INTEGER, ['unsigned' => true, 'notnull' => false, 'default' => 0]);
     $segment->addColumn('last_refresh_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $segment->addColumn('refresh_status', Types::STRING, ['length' => 20, 'notnull' => false, 'default' => 'pending']);
@@ -44,8 +45,8 @@ return function (Schema $schema): void {
     $member->addColumn('segment_id', Types::INTEGER, ['unsigned' => true]);
     $member->addColumn('customer_id', Types::INTEGER, ['unsigned' => true]);
     $member->addColumn('website_id', Types::SMALLINT, ['unsigned' => true]);
-    $member->addColumn('added_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $member->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $member->addColumn('added_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $member->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $member->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('segment_id', 'customer_id')->create(),
     );
@@ -86,8 +87,8 @@ return function (Schema $schema): void {
     $sequence->addColumn('coupon_sales_rule_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $sequence->addColumn('coupon_prefix', Types::STRING, ['length' => 50, 'notnull' => false]);
     $sequence->addColumn('coupon_expires_days', Types::INTEGER, ['unsigned' => true, 'default' => 30]);
-    $sequence->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $sequence->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $sequence->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $sequence->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $sequence->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('sequence_id')->create(),
     );
@@ -119,7 +120,7 @@ return function (Schema $schema): void {
     $progress->addColumn('step_number', Types::INTEGER, ['unsigned' => true]);
     $progress->addColumn('trigger_type', Types::STRING, ['length' => 10]);
     $progress->addColumn('status', Types::STRING, ['length' => 20, 'default' => 'scheduled']);
-    $progress->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $progress->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $progress->addColumn('scheduled_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $progress->addColumn('sent_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $progress->addPrimaryKeyConstraint(

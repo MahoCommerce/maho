@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -25,7 +26,7 @@ return function (Schema $schema): void {
     $webhook->addColumn('status', Types::STRING, ['length' => 32, 'default' => 'received']);
     $webhook->addColumn('payload', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $webhook->addColumn('error_message', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $webhook->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $webhook->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $webhook->addColumn('processed_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $webhook->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('event_id')->create(),
@@ -47,8 +48,8 @@ return function (Schema $schema): void {
     $vault->addColumn('payer_email', Types::STRING, ['length' => 255, 'notnull' => false]);
     $vault->addColumn('label', Types::STRING, ['length' => 255, 'notnull' => false]);
     $vault->addColumn('is_active', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
-    $vault->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $vault->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $vault->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $vault->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $vault->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('token_id')->create(),
     );

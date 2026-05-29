@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -17,7 +18,7 @@ use Doctrine\DBAL\Types\Types;
 return function (Schema $schema): void {
     $role = $schema->createTable('api2_acl_role');
     $role->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $role->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $role->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $role->addColumn('updated_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $role->addColumn('role_name', Types::STRING, ['length' => 255]);
     $role->addPrimaryKeyConstraint(

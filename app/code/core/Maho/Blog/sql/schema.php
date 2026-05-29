@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -28,8 +29,8 @@ return function (Schema $schema): void {
     $post->addColumn('meta_keywords', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $post->addColumn('meta_title', Types::STRING, ['length' => 255, 'notnull' => false]);
     $post->addColumn('meta_robots', Types::STRING, ['length' => 50, 'notnull' => false]);
-    $post->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $post->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $post->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $post->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $post->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
@@ -252,8 +253,8 @@ return function (Schema $schema): void {
     $category->addColumn('meta_keywords', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $category->addColumn('meta_description', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $category->addColumn('meta_robots', Types::STRING, ['length' => 50, 'notnull' => false]);
-    $category->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $category->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $category->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $category->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $category->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );

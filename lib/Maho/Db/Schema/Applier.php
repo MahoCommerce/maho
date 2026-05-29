@@ -95,21 +95,32 @@ final class Applier
      * out from under app code), ALTER TABLE ... MODIFY/CHANGE/ALTER COLUMN
      * (can coerce data or trip NOT NULL), and TRUNCATE.
      *
+     * Doctrine's MySQL platform collapses multiple alterations into a single
+     * comma-separated `ALTER TABLE foo ADD ..., DROP ..., CHANGE ...` statement
+     * (AbstractMySQLPlatform::getAlterTableSQL), so a destructive clause can
+     * trail a benign leading ADD. We therefore scan the whole ALTER TABLE body
+     * for a destructive verb at any clause boundary (right after the table name
+     * or after a clause-separating comma), not just the first clause. The \b
+     * after each verb keeps comma-separated identifier lists inside parentheses
+     * (e.g. "ADD PRIMARY KEY (a, change_log)") from matching, since the word
+     * boundary fails against an identifier like "change_log".
+     *
      * @param list<string> $sql
      * @return list<string>
      */
     public static function destructiveStatements(array $sql): array
     {
-        $pattern = '/^\s*('
-            . 'DROP\b'
-            . '|TRUNCATE\b'
-            . '|RENAME\b'
-            . '|ALTER\s+TABLE\s+\S+\s+(DROP|RENAME|MODIFY|CHANGE|ALTER)\b'
-            . ')/i';
-        return array_values(array_filter(
-            $sql,
-            static fn(string $s) => preg_match($pattern, $s) === 1,
-        ));
+        return array_values(array_filter($sql, static function (string $s): bool {
+            if (preg_match('/^\s*(DROP|TRUNCATE|RENAME)\b/i', $s) === 1) {
+                return true;
+            }
+
+            return preg_match('/^\s*ALTER\s+TABLE\b/i', $s) === 1
+                && preg_match(
+                    '/(?:ALTER\s+TABLE\s+\S+\s+|,\s*)(DROP|RENAME|MODIFY|CHANGE|ALTER)\b/i',
+                    $s,
+                ) === 1;
+        }));
     }
 
     /**
@@ -143,9 +154,11 @@ final class Applier
     }
 
     /**
-     * Convenience: collect schema from all modules, plan and execute the diff
-     * without destructive guard. Intended for non-interactive contexts (the
-     * Migrate command, the installer bootstrap).
+     * Convenience: collect schema from all modules, plan and execute the diff.
+     * Intended for non-interactive contexts (the Migrate command, the installer
+     * bootstrap). The destructive-statement guard is enforced unless
+     * $allowDestructive is true, so a drifted live schema aborts loudly rather
+     * than silently dropping or rewriting columns.
      *
      * @return array{contributors: list<string>, executed: list<string>}
      */

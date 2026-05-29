@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -70,7 +71,7 @@ return function (Schema $schema): void {
     // password length grown from 40 -> 100 (upgrade-1.6.1.0-1.6.1.1) -> 255 (upgrade-1.6.1.2-1.6.1.3)
     $user->addColumn('password', Types::STRING, ['length' => 255, 'notnull' => false]);
     // maho-24.12.0 ensures DEFAULT CURRENT_TIMESTAMP without ON UPDATE
-    $user->addColumn('created', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $user->addColumn('created', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $user->addColumn('modified', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $user->addColumn('logdate', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $user->addColumn('lognum', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);

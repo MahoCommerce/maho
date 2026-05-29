@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -274,8 +275,8 @@ return function (Schema $schema): void {
     $orderItem->addColumn('parent_item_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $orderItem->addColumn('quote_item_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $orderItem->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
-    $orderItem->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $orderItem->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $orderItem->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $orderItem->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $orderItem->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $orderItem->addColumn('product_type', Types::STRING, ['length' => 255, 'notnull' => false]);
     $orderItem->addColumn('product_options', Types::TEXT, ['length' => 65535, 'notnull' => false]);
@@ -838,8 +839,8 @@ return function (Schema $schema): void {
     $quote = $schema->createTable('sales_flat_quote');
     $quote->addColumn('entity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $quote->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
-    $quote->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $quote->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $quote->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $quote->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $quote->addColumn('converted_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $quote->addColumn('is_active', Types::SMALLINT, ['unsigned' => true, 'notnull' => false, 'default' => 1]);
     $quote->addColumn('is_virtual', Types::SMALLINT, ['unsigned' => true, 'notnull' => false, 'default' => 0]);
@@ -898,8 +899,8 @@ return function (Schema $schema): void {
     $quoteAddress = $schema->createTable('sales_flat_quote_address');
     $quoteAddress->addColumn('address_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $quoteAddress->addColumn('quote_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $quoteAddress->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $quoteAddress->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $quoteAddress->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $quoteAddress->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $quoteAddress->addColumn('customer_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $quoteAddress->addColumn('save_in_address_book', Types::SMALLINT, ['notnull' => false, 'default' => 0]);
     $quoteAddress->addColumn('customer_address_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
@@ -970,8 +971,8 @@ return function (Schema $schema): void {
     $quoteItem = $schema->createTable('sales_flat_quote_item');
     $quoteItem->addColumn('item_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $quoteItem->addColumn('quote_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $quoteItem->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $quoteItem->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $quoteItem->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $quoteItem->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $quoteItem->addColumn('product_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $quoteItem->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
     $quoteItem->addColumn('parent_item_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
@@ -1030,8 +1031,8 @@ return function (Schema $schema): void {
     $quoteAddressItem->addColumn('parent_item_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $quoteAddressItem->addColumn('quote_address_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $quoteAddressItem->addColumn('quote_item_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $quoteAddressItem->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $quoteAddressItem->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $quoteAddressItem->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $quoteAddressItem->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $quoteAddressItem->addColumn('applied_rule_ids', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $quoteAddressItem->addColumn('additional_data', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $quoteAddressItem->addColumn('weight', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'notnull' => false, 'default' => '0.0000']);
@@ -1096,8 +1097,8 @@ return function (Schema $schema): void {
     $quotePayment = $schema->createTable('sales_flat_quote_payment');
     $quotePayment->addColumn('payment_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $quotePayment->addColumn('quote_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $quotePayment->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $quotePayment->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $quotePayment->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $quotePayment->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $quotePayment->addColumn('method', Types::STRING, ['length' => 255, 'notnull' => false]);
     $quotePayment->addColumn('cc_type', Types::STRING, ['length' => 255, 'notnull' => false]);
     $quotePayment->addColumn('cc_number_enc', Types::STRING, ['length' => 255, 'notnull' => false]);
@@ -1125,8 +1126,8 @@ return function (Schema $schema): void {
     $quoteShippingRate = $schema->createTable('sales_flat_quote_shipping_rate');
     $quoteShippingRate->addColumn('rate_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $quoteShippingRate->addColumn('address_id', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-    $quoteShippingRate->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $quoteShippingRate->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $quoteShippingRate->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $quoteShippingRate->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $quoteShippingRate->addColumn('carrier', Types::STRING, ['length' => 255, 'notnull' => false]);
     $quoteShippingRate->addColumn('carrier_title', Types::STRING, ['length' => 255, 'notnull' => false]);
     $quoteShippingRate->addColumn('code', Types::STRING, ['length' => 255, 'notnull' => false]);
@@ -1304,7 +1305,7 @@ return function (Schema $schema): void {
     $billingAgreement->addColumn('method_code', Types::STRING, ['length' => 32]);
     $billingAgreement->addColumn('reference_id', Types::STRING, ['length' => 32]);
     $billingAgreement->addColumn('status', Types::STRING, ['length' => 20]);
-    $billingAgreement->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $billingAgreement->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $billingAgreement->addColumn('updated_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $billingAgreement->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
     $billingAgreement->addColumn('agreement_label', Types::STRING, ['length' => 255, 'notnull' => false]);
@@ -1337,11 +1338,11 @@ return function (Schema $schema): void {
     $recurringProfile->addColumn('customer_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $recurringProfile->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
     $recurringProfile->addColumn('method_code', Types::STRING, ['length' => 32]);
-    $recurringProfile->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $recurringProfile->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $recurringProfile->addColumn('updated_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $recurringProfile->addColumn('reference_id', Types::STRING, ['length' => 32, 'notnull' => false]);
     $recurringProfile->addColumn('subscriber_name', Types::STRING, ['length' => 150, 'notnull' => false]);
-    $recurringProfile->addColumn('start_datetime', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $recurringProfile->addColumn('start_datetime', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $recurringProfile->addColumn('internal_reference_id', Types::STRING, ['length' => 42]);
     $recurringProfile->addColumn('schedule_description', Types::STRING, ['length' => 255]);
     $recurringProfile->addColumn('suspension_threshold', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);

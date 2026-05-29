@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -64,7 +65,7 @@ return function (Schema $schema): void {
     $compared->addColumn('product_id', Types::INTEGER, ['unsigned' => true]);
     $compared->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
     // upgrade-1.6.0.0.1-1.6.0.0.2 set added_at default to CURRENT_TIMESTAMP (MySQL only)
-    $compared->addColumn('added_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $compared->addColumn('added_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $compared->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('index_id')->create(),
     );
@@ -103,7 +104,7 @@ return function (Schema $schema): void {
     $viewed->addColumn('product_id', Types::INTEGER, ['unsigned' => true]);
     $viewed->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
     // upgrade-1.6.0.0.1-1.6.0.0.2 set added_at default to CURRENT_TIMESTAMP (MySQL only)
-    $viewed->addColumn('added_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $viewed->addColumn('added_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $viewed->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('index_id')->create(),
     );

@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -28,7 +29,7 @@ return function (Schema $schema): void {
     $activity->addColumn('ip_address', Types::STRING, ['length' => 45, 'notnull' => false]);
     $activity->addColumn('user_agent', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $activity->addColumn('request_url', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $activity->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $activity->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $activity->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('activity_id')->create(),
     );
@@ -55,7 +56,7 @@ return function (Schema $schema): void {
     $login->addColumn('ip_address', Types::STRING, ['length' => 45, 'notnull' => false]);
     $login->addColumn('user_agent', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $login->addColumn('failure_reason', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $login->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $login->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $login->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('login_id')->create(),
     );

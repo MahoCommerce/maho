@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -28,8 +29,8 @@ return function (Schema $schema): void {
     $entity->addColumn('group_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $entity->addColumn('increment_id', Types::STRING, ['length' => 50, 'notnull' => false]);
     $entity->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false, 'default' => 0]);
-    $entity->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $entity->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $entity->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $entity->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $entity->addColumn('is_active', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
     $entity->addColumn('disable_auto_group_change', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $entity->addPrimaryKeyConstraint(
@@ -51,8 +52,8 @@ return function (Schema $schema): void {
     $addrEntity->addColumn('attribute_set_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $addrEntity->addColumn('increment_id', Types::STRING, ['length' => 50, 'notnull' => false]);
     $addrEntity->addColumn('parent_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
-    $addrEntity->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
-    $addrEntity->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $addrEntity->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
+    $addrEntity->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $addrEntity->addColumn('is_active', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
     $addrEntity->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),

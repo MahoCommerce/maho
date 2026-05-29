@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -28,9 +29,9 @@ return function (Schema $schema): void {
     $rule->addColumn('to_date', Types::DATE_MUTABLE, ['notnull' => false]);
     $rule->addColumn('source_conditions_serialized', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $rule->addColumn('target_conditions_serialized', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $rule->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $rule->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     // updated_at originally had ON UPDATE CURRENT_TIMESTAMP; dropped by maho-26.5.0 (issue #856).
-    $rule->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $rule->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $rule->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('rule_id')->create(),
     );

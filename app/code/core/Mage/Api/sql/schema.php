@@ -10,6 +10,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Schema\DefaultExpression\CurrentTimestamp;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Types\Types;
@@ -70,7 +71,7 @@ return function (Schema $schema): void {
     // Final length 255 after upgrade-1.6.0.1-1.6.0.2 (was 40, then 100, then 255).
     $user->addColumn('api_key', Types::STRING, ['length' => 255, 'notnull' => false]);
     // Explicit CURRENT_TIMESTAMP default set by upgrade-1.6.0.3-1.6.0.4.
-    $user->addColumn('created', Types::DATETIME_MUTABLE, ['default' => 'CURRENT_TIMESTAMP']);
+    $user->addColumn('created', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $user->addColumn('modified', Types::DATETIME_MUTABLE, ['notnull' => false]);
     // Widened from SMALLINT to INTEGER unsigned by upgrade-1.6.0.2-1.6.0.3.
     $user->addColumn('lognum', Types::INTEGER, ['unsigned' => true, 'default' => 0]);

@@ -137,6 +137,12 @@ class SqlConverter
      * Convert numeric remote_ip_long values in rating_option_vote INSERTs to
      * Postgres bytea hex literals. Sample data ships values as bigints; the
      * declarative schema stores the column as bytea.
+     *
+     * The VALUES capture is lazy up to the first ";", so it assumes the
+     * rating_option_vote INSERT carries no semicolon inside a string literal.
+     * That holds for the shipped sample data (its only string column is
+     * remote_ip, an IP address); a dump with semicolons in string values would
+     * truncate the match and leave the tail unconverted.
      */
     private function convertRatingRemoteIpLong(string $sql): string
     {
