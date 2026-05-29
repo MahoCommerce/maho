@@ -14,8 +14,9 @@ namespace Maho\Db\Schema;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
+use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Doctrine\DBAL\Schema\Schema;
-use RuntimeException;
+use Maho\Db\Adapter\AdapterInterface;
 
 final class Applier
 {
@@ -35,17 +36,24 @@ final class Applier
         // One round-trip to enumerate, then membership-test in PHP. A per-table
         // tablesExist() call would mean N introspection queries before the
         // comparator even runs (~200 on a fully-converted schema).
-        // introspectTableNames() returns OptionallyQualifiedName objects.
+        // introspectTableNames() returns OptionallyQualifiedName objects. Key
+        // the map on the unqualified identifier value, not toString(): on
+        // SQLite, DBAL marks the introspected name as quoted, so toString()
+        // re-emits it as '"core_resource"' (DBAL 4.4 bug), which would never
+        // match the unquoted target name and queue every existing table for
+        // CREATE. getValue() yields the raw 'core_resource' on every engine,
+        // and dropping the qualifier is safe since all Maho tables share one
+        // schema and targets are declared unqualified.
         $existing = [];
         foreach ($schemaManager->introspectTableNames() as $existingName) {
-            $existing[$existingName->toString()] = true;
+            $existing[$existingName->getUnqualifiedName()->getValue()] = true;
         }
 
         $existingTables = [];
         $tablesToCreate = [];
         $tablesToAlter = [];
         foreach ($target->getTables() as $targetTable) {
-            $name = $targetTable->getObjectName()->toString();
+            $name = $targetTable->getObjectName()->getUnqualifiedName()->getValue();
             if (isset($existing[$name])) {
                 $existingTables[] = $schemaManager->introspectTableByUnquotedName($name);
                 $tablesToAlter[] = $targetTable;
@@ -124,67 +132,98 @@ final class Applier
     }
 
     /**
-     * Execute the given statements against the connection.
+     * Execute the given statements, suspending foreign-key enforcement for the
+     * whole batch via the adapter's startSetup()/endSetup().
      *
-     * On Postgres the whole batch runs inside a transaction: pg DDL is
+     * This is the single mechanism that makes the DBAL-generated diff applicable
+     * on every engine. The comparator emits FK-bearing rebuilds (SQLite recreates
+     * a table by copying to a temp table, dropping, recreating and re-inserting;
+     * MySQL drops/re-adds constraints) whose intermediate states violate the
+     * still-live foreign keys. startSetup() turns enforcement off the way each
+     * engine expects — MySQL FOREIGN_KEY_CHECKS=0, Postgres session_replication_role,
+     * SQLite PRAGMA foreign_keys=OFF — and endSetup() restores it. Same call,
+     * engine-specific implementation, so the applier stays platform-agnostic.
+     *
+     * On Postgres the batch also runs inside a transaction: pg DDL is
      * transactional, so a mid-batch failure rolls back cleanly instead of
      * leaving the schema half-migrated. MySQL/MariaDB DDL auto-commits per
-     * statement (no rollback possible), and SQLite supports transactional
-     * DDL but the legacy adapter's connection is single-writer enough that
-     * the extra ceremony buys nothing — both platforms run the loop bare.
+     * statement (no rollback possible), and SQLite needs the foreign_keys
+     * pragma to take effect outside any transaction — both run the loop bare.
      *
      * @param list<string> $sql
      */
-    public static function execute(Connection $connection, array $sql): void
+    public static function execute(AdapterInterface $adapter, array $sql): void
     {
+        $connection = $adapter->getConnection();
         $platform = $connection->getDatabasePlatform();
 
-        if ($platform instanceof PostgreSQLPlatform) {
-            $connection->transactional(static function (Connection $c) use ($sql): void {
+        $adapter->startSetup();
+        try {
+            if ($platform instanceof PostgreSQLPlatform) {
+                $connection->transactional(static function (Connection $c) use ($sql): void {
+                    foreach ($sql as $stmt) {
+                        $c->executeStatement($stmt);
+                    }
+                });
+            } else {
                 foreach ($sql as $stmt) {
-                    $c->executeStatement($stmt);
+                    $connection->executeStatement($stmt);
                 }
-            });
-            return;
-        }
-
-        foreach ($sql as $stmt) {
-            $connection->executeStatement($stmt);
+            }
+        } finally {
+            $adapter->endSetup();
         }
     }
 
     /**
      * Convenience: collect schema from all modules, plan and execute the diff.
      * Intended for non-interactive contexts (the Migrate command, the installer
-     * bootstrap). The destructive-statement guard is enforced unless
-     * $allowDestructive is true, so a drifted live schema aborts loudly rather
-     * than silently dropping or rewriting columns.
+     * bootstrap).
+     *
+     * The plan is applied as-is on every engine: a migration that needs an
+     * in-place ALTER (rename, type change, column/index/FK drop) just runs it,
+     * because that is the migration's job. MySQL/MariaDB and Postgres perform
+     * these as native ALTERs without rebuilding tables.
+     *
+     * The one exception is SQLite. It has no real column types, so reconciling
+     * a legacy install to the declarative schema means changing column types,
+     * which SQLite can only do by rebuilding the whole table — and DBAL's
+     * SQLite rebuild silently drops foreign keys and indexes, so the result
+     * never converges. Rather than corrupt the schema, we detect that a SQLite
+     * apply would require destructive rebuilds and refuse with
+     * UnsupportedMigrationException, directing the operator to reinstall.
+     * Fresh SQLite installs (all CREATE TABLE) and purely additive SQLite
+     * migrations (ADD COLUMN / CREATE INDEX / CREATE TABLE) carry no
+     * destructive statements and apply normally.
      *
      * @return array{contributors: list<string>, executed: list<string>}
      */
-    public static function applyAll(Connection $connection, bool $allowDestructive = false): array
+    public static function applyAll(AdapterInterface $adapter): array
     {
         [$target, $contributors] = Collector::collect();
         if ($contributors === []) {
             return ['contributors' => [], 'executed' => []];
         }
 
+        $connection = $adapter->getConnection();
         $sql = self::plan($connection, $target);
         if ($sql === []) {
             return ['contributors' => $contributors, 'executed' => []];
         }
 
-        if (!$allowDestructive) {
-            $destructive = self::destructiveStatements($sql);
-            if ($destructive !== []) {
-                throw new RuntimeException(
-                    "Refusing to apply declarative schema with destructive statements:\n  "
-                    . implode("\n  ", $destructive),
-                );
-            }
+        if ($connection->getDatabasePlatform() instanceof SQLitePlatform
+            && self::destructiveStatements($sql) !== []
+        ) {
+            throw new UnsupportedMigrationException(
+                "This SQLite database can't be upgraded to the current schema in place: the upgrade "
+                . 'changes column types, which SQLite can only apply by rebuilding tables, and DBAL\'s '
+                . 'SQLite rebuild drops foreign keys and indexes. In-place schema upgrades are not '
+                . 'supported on SQLite. Use MySQL/MariaDB or PostgreSQL if you need in-place upgrades, '
+                . 'or start from a fresh install (./maho install ...).',
+            );
         }
 
-        self::execute($connection, $sql);
+        self::execute($adapter, $sql);
         return ['contributors' => $contributors, 'executed' => $sql];
     }
 }

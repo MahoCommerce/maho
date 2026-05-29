@@ -43,7 +43,12 @@ class Migrate extends BaseMahoCommand
 
             /** @var \Maho\Db\Adapter\AdapterInterface $adapter */
             $adapter = Mage::getSingleton('core/resource')->getConnection('core_setup');
-            $result = Applier::applyAll($adapter->getConnection());
+            try {
+                $result = Applier::applyAll($adapter);
+            } catch (\Maho\Db\Schema\UnsupportedMigrationException $e) {
+                $output->writeln('<error>' . $e->getMessage() . '</error>');
+                return Command::FAILURE;
+            }
             if ($result['contributors'] === []) {
                 $output->writeln('✓ Applied declarative schema (no modules declare sql/schema.php)');
             } elseif ($result['executed'] === []) {
