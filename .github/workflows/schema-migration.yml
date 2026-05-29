@@ -169,15 +169,21 @@ jobs:
       - name: Dump migrated schema
         run: php .github/schema-dump.php > /tmp/migrated.txt
 
-      # Flush the cache while the migrated DB is still live, so the fresh
-      # install below does not bootstrap against stale cached config (which
-      # would query tables on the freshly reset DB). The same checkout serves
-      # two installs only in this test; a real deployment never does both.
+      # Flush the cache while the migrated DB is still live, so nothing carries
+      # stale compiled config into the fresh install below. The same checkout
+      # serves two installs only in this test; a real deployment never does both.
       - name: Flush cache before fresh install
         run: ./maho cache:flush
 
+      # A fresh install must start from a clean slate: an empty database AND no
+      # local.xml (the installer is what writes local.xml). This checkout still
+      # carries the local.xml copied in for the migrate phase, which points at
+      # the database dropped below — leaving it would make every CLI command
+      # bootstrap Mage against a non-existent install. Drop the DB and remove
+      # the install marker together.
       - name: Reset DB
         run: |
+          rm -f app/etc/local.xml
           php -r '
             $engine = getenv("DB_ENGINE");
             $user = getenv("DB_USER");
