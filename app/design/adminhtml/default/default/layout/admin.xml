@@ -128,7 +128,7 @@
 
     <adminhtml_system_email_log_grid>
         <remove name="root"/>
-        <block type="core/adminhtml_email_log_grid" name="adminhtml.email.log.grid"/>
+        <block type="core/adminhtml_email_log_grid" name="adminhtml.email.log.grid" output="toHtml"/>
     </adminhtml_system_email_log_grid>
 
     <adminhtml_system_email_log_view>

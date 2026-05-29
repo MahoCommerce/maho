@@ -57,7 +57,7 @@ class Maho_Ai_Model_Resource_Vector extends Mage_Core_Model_Resource_Db_Abstract
     /**
      * Fetch vector data for an entity.
      *
-     * @return array{vector: float[], model: string, platform: string, dimensions: int}|null
+     * @return array{vector: float[], model: string, platform: string, dimensions: int, updated_at: string}|null
      */
     public function getForEntity(string $entityType, int $entityId, int $storeId): ?array
     {
@@ -74,12 +74,15 @@ class Maho_Ai_Model_Resource_Vector extends Mage_Core_Model_Resource_Db_Abstract
             return null;
         }
 
+        $decoded = Mage::helper('core')->jsonDecode((string) $row['vector']);
+        $vector = is_array($decoded) ? array_map('floatval', array_values($decoded)) : [];
+
         return [
-            'vector'     => Mage::helper('core')->jsonDecode($row['vector']) ?? [],
-            'model'      => $row['model'],
-            'platform'   => $row['platform'],
+            'vector'     => $vector,
+            'model'      => (string) $row['model'],
+            'platform'   => (string) $row['platform'],
             'dimensions' => (int) $row['dimensions'],
-            'updated_at' => $row['updated_at'],
+            'updated_at' => (string) $row['updated_at'],
         ];
     }
 }

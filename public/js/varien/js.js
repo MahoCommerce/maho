@@ -176,6 +176,9 @@ function generateRandomString(length) {
  * @param {Object} params - key value pairs to add, update, or remove
  */
 function setRouteParams(url, params = {}) {
+    if (!url) {
+        return url;
+    }
     url = new URL(url);
 
     const noTrailingSlash = !url.pathname.endsWith('/');
@@ -205,6 +208,9 @@ function setRouteParams(url, params = {}) {
  * @param {Object} params - key value pairs to add, update, or remove
  */
 function setQueryParams(url, params = {}) {
+    if (!url) {
+        return url;
+    }
     url = new URL(url);
     for (const [ key, val ] of Object.entries(params)) {
         if (val === null || val === false) {
