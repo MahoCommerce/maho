@@ -382,8 +382,10 @@ class Mage_Catalog_Model_Product_Type_Price
 
         if ($rulePrice === false) {
             $storeDateTime = Mage::app()->getLocale()->utcToStore($sId, 'now');
-            $rulePrice = Mage::getResourceModel('catalogrule/rule')
-                ->getRulePrice($storeDateTime, $wId, $gId, $productId);
+            if (Mage::helper('core')->isModuleEnabled('Mage_CatalogRule')) {
+                $rulePrice = Mage::getResourceModel('catalogrule/rule')
+                    ->getRulePrice($storeDateTime, $wId, $gId, $productId);
+            }
         }
 
         if ($rulePrice !== null && $rulePrice !== false) {
