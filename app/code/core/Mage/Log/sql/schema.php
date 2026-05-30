@@ -66,8 +66,10 @@ return function (Schema $schema): void {
     $url->addColumn('url_id', Types::BIGINT, ['unsigned' => true, 'default' => 0]);
     $url->addColumn('visitor_id', Types::BIGINT, ['unsigned' => true, 'notnull' => false]);
     $url->addColumn('visit_time', Types::DATETIME_MUTABLE, ['notnull' => false]);
+    $url->addPrimaryKeyConstraint(
+        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('url_id')->create(),
+    );
     $url->addIndex(['visitor_id']);
-    $url->addIndex(['url_id']);
     $url->setComment('Log URL Table');
 
     $urlInfo = $schema->createTable('log_url_info');
