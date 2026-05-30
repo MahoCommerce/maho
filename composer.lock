@@ -5085,16 +5085,16 @@
         },
         {
             "name": "mahocommerce/maho-phpstan-plugin",
-            "version": "v4.2.0",
+            "version": "v4.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-phpstan-plugin.git",
-                "reference": "f430bf4f18844ef79067f2f87c87fabb908fbdf6"
+                "reference": "99314b979dddbc4aa0188fc9d8a2805f1ec7670f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/f430bf4f18844ef79067f2f87c87fabb908fbdf6",
-                "reference": "f430bf4f18844ef79067f2f87c87fabb908fbdf6",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-phpstan-plugin/zipball/99314b979dddbc4aa0188fc9d8a2805f1ec7670f",
+                "reference": "99314b979dddbc4aa0188fc9d8a2805f1ec7670f",
                 "shasum": ""
             },
             "require": {
@@ -5124,9 +5124,9 @@
             ],
             "description": "Extension for PHPStan to allow static analysis of Maho projects.",
             "support": {
-                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v4.2.0"
+                "source": "https://github.com/MahoCommerce/maho-phpstan-plugin/tree/v4.2.1"
             },
-            "time": "2026-01-31T18:37:15+00:00"
+            "time": "2026-05-30T22:42:12+00:00"
         },
         {
             "name": "myclabs/deep-copy",
