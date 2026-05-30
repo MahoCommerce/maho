@@ -12,6 +12,12 @@ declare(strict_types=1);
 
 /** @var Mage_Catalog_Model_Resource_Setup $this */
 $installer = $this;
+
+// Postgres cannot store the legacy zero-date sentinel, so there is nothing to clean.
+if ($installer->getConnection() instanceof \Maho\Db\Adapter\Pdo\Pgsql) {
+    return;
+}
+
 $installer->startSetup();
 
 // Clear legacy zero-date sentinels left by the old Magento1/OpenMage schema; these columns are now nullable.
