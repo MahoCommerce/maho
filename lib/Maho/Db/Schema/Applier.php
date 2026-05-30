@@ -19,6 +19,7 @@ use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
+use Doctrine\DBAL\Types\BooleanType;
 use Maho\Db\Adapter\AdapterInterface;
 
 final class Applier
@@ -63,7 +64,7 @@ final class Applier
                 // parity-equivalent form, so the Comparator below emits only the
                 // genuine structural delta instead of ~1200 statements of
                 // representation churn (comments, CURRENT_TIMESTAMP defaults,
-                // index names, phantom FK indexes) that never converges. The
+                // float precision, phantom FK indexes) that never converges. The
                 // physical index list distinguishes a real index from one DBAL
                 // synthesizes for a foreign key. See Canonicalizer.
                 $physicalIndexNames = [];
@@ -106,6 +107,12 @@ final class Applier
             foreach ($platform->getAlterSchemaSQL($diff) as $stmt) {
                 $alters[] = $stmt;
             }
+        }
+
+        if ($platform instanceof PostgreSQLPlatform) {
+            $alters = self::rewritePostgresUniqueConstraintDrops($connection, $platform, $alters);
+            $alters = self::quotePostgresRenameIndexNames($platform, $alters);
+            $alters = self::fixPostgresColumnTypeChanges($existingTables, $alters);
         }
 
         // Compensate for a DBAL/MySQL gap: when a primary key that includes an
@@ -164,6 +171,144 @@ final class Applier
         }
 
         return $restores;
+    }
+
+    /**
+     * Rewrite `DROP INDEX` into `ALTER TABLE ... DROP CONSTRAINT` for any index
+     * Postgres backs with a UNIQUE constraint.
+     *
+     * Postgres implements every UNIQUE/PRIMARY constraint with an index of the
+     * same name, and refuses `DROP INDEX` on it ("cannot drop index ... because
+     * constraint ... requires it") — the owning constraint must be dropped
+     * instead. DBAL introspects these as ordinary unique indexes, so when the
+     * target no longer keeps one (e.g. an install left a unique key behind under
+     * an older column set that a later upgrade replaced) the comparator emits a
+     * plain `DROP INDEX` that Postgres will not execute. DBAL already special-
+     * cases the primary key this way but not other unique constraints, because
+     * the index name alone does not say whether a constraint owns it; the
+     * catalog does. Look up the owning constraints once and rewrite the drops.
+     *
+     * @param list<string> $statements
+     * @return list<string>
+     */
+    private static function rewritePostgresUniqueConstraintDrops(Connection $connection, AbstractPlatform $platform, array $statements): array
+    {
+        $constraintTable = [];
+        $rows = $connection->fetchAllAssociative(
+            "SELECT c.conname, t.relname
+               FROM pg_constraint c
+               JOIN pg_class t ON t.oid = c.conrelid
+               JOIN pg_namespace n ON n.oid = t.relnamespace
+              WHERE c.contype = 'u'
+                AND n.nspname = ANY (current_schemas(false))",
+        );
+        foreach ($rows as $row) {
+            $constraintTable[$row['conname']] = $row['relname'];
+        }
+        if ($constraintTable === []) {
+            return $statements;
+        }
+
+        return array_map(static function (string $stmt) use ($constraintTable, $platform): string {
+            if (preg_match('/^\s*DROP\s+INDEX\s+(?:CONCURRENTLY\s+)?(?:IF\s+EXISTS\s+)?"?([^"\s;]+)"?\s*;?\s*$/i', $stmt, $m) !== 1) {
+                return $stmt;
+            }
+            $name = $m[1];
+            if (!isset($constraintTable[$name])) {
+                return $stmt;
+            }
+
+            return sprintf(
+                'ALTER TABLE %s DROP CONSTRAINT %s',
+                $platform->quoteSingleIdentifier($constraintTable[$name]),
+                $platform->quoteSingleIdentifier($name),
+            );
+        }, $statements);
+    }
+
+    /**
+     * Quote the old index name in `ALTER INDEX <old> RENAME TO <new>` on
+     * Postgres.
+     *
+     * DBAL's PostgreSQLPlatform::getRenameIndexSQL interpolates the old name
+     * verbatim while quoting only the new one, so when the rename detection
+     * matches an index a legacy install named as a bare hash (the old adapter
+     * hashed index names to hex, which can begin with a digit) the statement
+     * `ALTER INDEX 0abc... RENAME TO ...` is a syntax error: an unquoted
+     * identifier may not start with a digit. Re-quote the old name so the
+     * rename Postgres would otherwise reject executes; the new name is already
+     * quoted by DBAL.
+     *
+     * @param list<string> $statements
+     * @return list<string>
+     */
+    private static function quotePostgresRenameIndexNames(AbstractPlatform $platform, array $statements): array
+    {
+        return array_map(static function (string $stmt) use ($platform): string {
+            if (preg_match('/^(\s*ALTER\s+INDEX\s+)(\S+)(\s+RENAME\s+TO\s+.+)$/i', $stmt, $m) !== 1) {
+                return $stmt;
+            }
+
+            return $m[1] . $platform->quoteSingleIdentifier(trim($m[2], '"')) . $m[3];
+        }, $statements);
+    }
+
+    /**
+     * Make each Postgres `ALTER ... TYPE` survive a type the old column has no
+     * implicit cast to, by dropping the stale default first and adding a `USING`
+     * clause for the data.
+     *
+     * Postgres changes a column's type without help only when an implicit cast
+     * exists (e.g. smallint to integer); otherwise it refuses the column data
+     * ("column ... cannot be cast automatically") and, separately, the existing
+     * default ("default for column ... cannot be cast"). The declarative schema
+     * deliberately stores some legacy boolean flags as smallint (the app filters
+     * them with `= 1`, which a Postgres boolean column rejects), and boolean has
+     * no implicit cast to a numeric type. DBAL emits a bare `ALTER ... TYPE`
+     * (followed by its own `SET DEFAULT` for the new default) with no hook for
+     * either problem, so:
+     *   - drop the old default before the type change (DBAL re-sets the target
+     *     default in a later statement), and
+     *   - add `USING` for the data — a boolean source through an explicit integer
+     *     cast, anything else cast to the target type.
+     * Both additions are no-ops when an implicit cast already exists.
+     *
+     * @param list<\Doctrine\DBAL\Schema\Table> $liveTables canonicalized live tables
+     * @param list<string> $statements
+     * @return list<string>
+     */
+    private static function fixPostgresColumnTypeChanges(array $liveTables, array $statements): array
+    {
+        $liveColumnTypes = [];
+        foreach ($liveTables as $table) {
+            $tableName = strtolower(trim($table->getObjectName()->toString(), '"'));
+            foreach ($table->getColumns() as $column) {
+                $columnName = strtolower(trim($column->getObjectName()->toString(), '"'));
+                $liveColumnTypes[$tableName][$columnName] = $column->getType();
+            }
+        }
+
+        $result = [];
+        foreach ($statements as $stmt) {
+            if (preg_match('/^ALTER\s+TABLE\s+(\S+)\s+ALTER\s+(\S+)\s+TYPE\s+(\S+)/i', $stmt, $m) !== 1
+                || stripos($stmt, ' USING ') !== false
+            ) {
+                $result[] = $stmt;
+                continue;
+            }
+            $table = $m[1];
+            $column = $m[2];
+            $liveType = $liveColumnTypes[strtolower(trim($table, '"'))][strtolower(trim($column, '"'))] ?? null;
+
+            $cast = $liveType instanceof BooleanType
+                ? $column . '::integer'
+                : $column . '::' . preg_replace('/\(.*$/', '', $m[3]);
+
+            $result[] = "ALTER TABLE {$table} ALTER {$column} DROP DEFAULT";
+            $result[] = $stmt . ' USING ' . $cast;
+        }
+
+        return $result;
     }
 
     /**
