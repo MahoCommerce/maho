@@ -66,10 +66,10 @@ return function (Schema $schema): void {
     $url->addColumn('url_id', Types::BIGINT, ['unsigned' => true, 'default' => 0]);
     $url->addColumn('visitor_id', Types::BIGINT, ['unsigned' => true, 'notnull' => false]);
     $url->addColumn('visit_time', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    $url->addPrimaryKeyConstraint(
-        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('url_id')->create(),
-    );
+    // No primary key: upgrade-1.6.0.0-1.6.1.0 dropped the PRIMARY on url_id and
+    // replaced it with a plain index (log_url is a high-write append log).
     $url->addIndex(['visitor_id']);
+    $url->addIndex(['url_id']);
     $url->setComment('Log URL Table');
 
     $urlInfo = $schema->createTable('log_url_info');

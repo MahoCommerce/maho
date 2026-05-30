@@ -829,16 +829,19 @@ $entries = [
         ],
     ],
     [
+        // log_url.url_id: upgrade-1.6.0.0-1.6.1.0 drops the PRIMARY key, but the
+        // legacy SQLite adapter's dropIndex('PRIMARY') is a no-op (SQLite can't
+        // drop a PK without a table rebuild), so legacy SQLite keeps the PK while
+        // MySQL/Postgres lose it. The declarative schema matches the intended
+        // post-upgrade state (a plain index, no PK), so strip the stale [PK].
         'engines' => ['sqlite'],
         'table' => 'log_url',
         'replace' => [
             '  COLUMN visit_time TEXT NOT NULL' => '  COLUMN visit_time TEXT NULL',
-        ],
-        'add' => [
-            '  INDEX [UNIQ] (url_id)',
+            '  COLUMN url_id INTEGER NOT NULL DEFAULT 0 [PK]' => '  COLUMN url_id INTEGER NOT NULL DEFAULT 0',
         ],
         'remove' => [
-            '  INDEX [IDX] (url_id)',
+            '  INDEX [PK] (url_id)',
         ],
     ],
     [
