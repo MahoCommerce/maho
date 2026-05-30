@@ -17,6 +17,7 @@ use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SQLitePlatform;
+use Doctrine\DBAL\Schema\Comparator;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\BooleanType;
@@ -100,12 +101,24 @@ final class Applier
         }
 
         if ($tablesToAlter !== []) {
-            $current = new Schema($existingTables);
-            $alterTarget = new Schema($tablesToAlter);
             $comparator = $schemaManager->createComparator();
-            $diff = $comparator->compareSchemas($current, $alterTarget);
-            foreach ($platform->getAlterSchemaSQL($diff) as $stmt) {
-                $alters[] = $stmt;
+            if ($platform instanceof SQLitePlatform) {
+                // SQLite can't reconcile a table through the comparator: its
+                // ALTER TABLE only does ADD COLUMN / RENAME, and DBAL's own
+                // rebuild re-derives indexes and foreign keys from the diff and
+                // silently drops any it can't resolve, so the result loses
+                // indexes/FKs and never converges (see applyAll() docs). Drive
+                // SQLite per table instead — native ADD COLUMN / CREATE INDEX
+                // when the change is purely additive, otherwise a full rebuild
+                // straight to the declarative target.
+                $alters = array_merge($alters, self::sqliteAlters($platform, $comparator, $existingTables, $tablesToAlter));
+            } else {
+                $current = new Schema($existingTables);
+                $alterTarget = new Schema($tablesToAlter);
+                $diff = $comparator->compareSchemas($current, $alterTarget);
+                foreach ($platform->getAlterSchemaSQL($diff) as $stmt) {
+                    $alters[] = $stmt;
+                }
             }
         }
 
@@ -125,6 +138,120 @@ final class Applier
         $alters = array_merge($alters, self::autoIncrementRestores($platform, $existingTables, $tablesToAlter));
 
         return array_merge($creates, $alters);
+    }
+
+    /**
+     * Reconcile SQLite tables, one at a time.
+     *
+     * SQLite's ALTER TABLE only does ADD COLUMN / RENAME — it can't change a
+     * column type, drop a column, or add/drop a foreign key — and DBAL's own
+     * rebuild re-derives indexes and foreign keys from the diff and silently
+     * drops any it can't resolve, so a comparator-driven ALTER loses indexes/FKs
+     * and never converges (see applyAll() docs). So any table whose canonicalized
+     * live form differs from its target is rebuilt straight to the target
+     * (sqliteRebuildTable); a table that already matches emits nothing, keeping a
+     * born-declarative database a no-op.
+     *
+     * Rebuilding even for a purely additive change means a full-table copy, but
+     * on SQLite (small-shop installs, schema changes only at module-upgrade
+     * time) that buys one provably-convergent path instead of a fragile
+     * additive-vs-rebuild classifier sitting on DBAL's most bug-prone surface.
+     *
+     * @param list<Table> $liveTables   canonicalized live tables
+     * @param list<Table> $targetTables declarative targets, parallel to $liveTables
+     * @return list<string>
+     */
+    private static function sqliteAlters(SQLitePlatform $platform, Comparator $comparator, array $liveTables, array $targetTables): array
+    {
+        $sql = [];
+        foreach ($targetTables as $i => $target) {
+            if ($comparator->compareTables($liveTables[$i], $target)->isEmpty()) {
+                continue;
+            }
+            $sql = array_merge($sql, self::sqliteRebuildTable($platform, $liveTables[$i], $target));
+        }
+
+        return $sql;
+    }
+
+    /**
+     * Rebuild a SQLite table to its declarative target, preserving the data of
+     * every column the live table and the target share.
+     *
+     * SQLite can only change a table by recreating it, so this snapshots the
+     * shared columns into a temporary table, drops the original (which frees its
+     * globally-named indexes), recreates the table from the full target —
+     * getCreateTableSQL emits the primary key and foreign keys inline plus a
+     * CREATE INDEX per declared index — copies the data back, and drops the
+     * snapshot. Building from the full target rather than a diff is what keeps
+     * the migrated table identical to a fresh install and makes a re-run a
+     * no-op. The batch runs with foreign keys disabled (execute() → startSetup),
+     * so dropping and recreating a referenced table mid-batch is safe.
+     *
+     * @return list<string>
+     */
+    private static function sqliteRebuildTable(SQLitePlatform $platform, Table $live, Table $target): array
+    {
+        $tableName = self::unquote($target->getObjectName()->toString());
+        $quoted = $platform->quoteSingleIdentifier($tableName);
+        $temp = $platform->quoteSingleIdentifier('__maho_tmp_' . $tableName);
+
+        $targetColumns = [];
+        foreach ($target->getColumns() as $column) {
+            $targetColumns[strtolower(self::unquote($column->getObjectName()->toString()))] = true;
+        }
+
+        $liveColumns = [];
+        $shared = [];
+        foreach ($live->getColumns() as $column) {
+            $name = self::unquote($column->getObjectName()->toString());
+            $liveColumns[strtolower($name)] = true;
+            if (isset($targetColumns[strtolower($name)])) {
+                $shared[] = $platform->quoteSingleIdentifier($name);
+            }
+        }
+
+        // A new NOT NULL column with no default can't be backfilled for existing
+        // rows; refuse with guidance rather than emit an INSERT that fails.
+        foreach ($target->getColumns() as $column) {
+            $name = self::unquote($column->getObjectName()->toString());
+            if (!isset($liveColumns[strtolower($name)]) && $column->getNotnull()
+                && $column->getDefault() === null && !$column->getAutoincrement()
+            ) {
+                throw new UnsupportedMigrationException(sprintf(
+                    'Cannot add NOT NULL column "%s" to "%s" without a default: existing rows have no value for it. '
+                    . 'Give the column a default or make it nullable.',
+                    $name,
+                    $tableName,
+                ));
+            }
+        }
+
+        $columnList = implode(', ', $shared);
+
+        $sql = [];
+        if ($shared !== []) {
+            $sql[] = sprintf('CREATE TEMPORARY TABLE %s AS SELECT %s FROM %s', $temp, $columnList, $quoted);
+        }
+        $sql[] = 'DROP TABLE ' . $quoted;
+        foreach ($platform->getCreateTableSQL($target) as $stmt) {
+            $sql[] = $stmt;
+        }
+        if ($shared !== []) {
+            $sql[] = sprintf('INSERT INTO %s (%s) SELECT %s FROM %s', $quoted, $columnList, $columnList, $temp);
+            $sql[] = 'DROP TABLE ' . $temp;
+        }
+
+        return $sql;
+    }
+
+    /**
+     * Strip surrounding identifier quotes (introspection quotes names; the
+     * declarative schema leaves them bare).
+     */
+    private static function unquote(string $identifier): string
+    {
+        return trim($identifier, '"`');
     }
 
     /**
@@ -361,42 +488,6 @@ final class Applier
     }
 
     /**
-     * Statements considered destructive — data loss or app-visible breakage.
-     * Covers: DROP at top level, ALTER TABLE ... DROP <anything>, RENAME at
-     * top level (Postgres' ALTER TABLE ... RENAME TO is emitted as a separate
-     * RENAME stmt by some platforms), ALTER TABLE ... RENAME COLUMN (renames
-     * out from under app code), ALTER TABLE ... MODIFY/CHANGE/ALTER COLUMN
-     * (can coerce data or trip NOT NULL), and TRUNCATE.
-     *
-     * Doctrine's MySQL platform collapses multiple alterations into a single
-     * comma-separated `ALTER TABLE foo ADD ..., DROP ..., CHANGE ...` statement
-     * (AbstractMySQLPlatform::getAlterTableSQL), so a destructive clause can
-     * trail a benign leading ADD. We therefore scan the whole ALTER TABLE body
-     * for a destructive verb at any clause boundary (right after the table name
-     * or after a clause-separating comma), not just the first clause. The \b
-     * after each verb keeps comma-separated identifier lists inside parentheses
-     * (e.g. "ADD PRIMARY KEY (a, change_log)") from matching, since the word
-     * boundary fails against an identifier like "change_log".
-     *
-     * @param list<string> $sql
-     * @return list<string>
-     */
-    public static function destructiveStatements(array $sql): array
-    {
-        return array_values(array_filter($sql, static function (string $s): bool {
-            if (preg_match('/^\s*(DROP|TRUNCATE|RENAME)\b/i', $s) === 1) {
-                return true;
-            }
-
-            return preg_match('/^\s*ALTER\s+TABLE\b/i', $s) === 1
-                && preg_match(
-                    '/(?:ALTER\s+TABLE\s+\S+\s+|,\s*)(DROP|RENAME|MODIFY|CHANGE|ALTER)\b/i',
-                    $s,
-                ) === 1;
-        }));
-    }
-
-    /**
      * Execute the given statements, suspending foreign-key enforcement for the
      * whole batch via the adapter's startSetup()/endSetup().
      *
@@ -445,21 +536,13 @@ final class Applier
      * Intended for non-interactive contexts (the Migrate command, the installer
      * bootstrap).
      *
-     * The plan is applied as-is on every engine: a migration that needs an
-     * in-place ALTER (rename, type change, column/index/FK drop) just runs it,
-     * because that is the migration's job. MySQL/MariaDB and Postgres perform
-     * these as native ALTERs without rebuilding tables.
-     *
-     * The one exception is SQLite. It has no real column types, so reconciling
-     * an existing database to the declarative schema can mean changing column
-     * types, which SQLite can only do by rebuilding the whole table — and DBAL's
-     * SQLite rebuild silently drops foreign keys and indexes, so the result
-     * never converges. Rather than corrupt the schema, we detect that a SQLite
-     * apply would require destructive rebuilds and refuse with
-     * UnsupportedMigrationException, directing the operator to reinstall.
-     * Fresh SQLite installs (all CREATE TABLE) and purely additive SQLite
-     * migrations (ADD COLUMN / CREATE INDEX / CREATE TABLE) carry no
-     * destructive statements and apply normally.
+     * The plan is applied as-is on every engine, including SQLite. MySQL/MariaDB
+     * and Postgres reconcile with native in-place ALTERs (rename, type change,
+     * column/index/FK drop). SQLite can't ALTER columns or foreign keys, so
+     * plan() reconciles each changed SQLite table by recreating it to the
+     * declarative target (see sqliteRebuildTable); the only refusal is a new
+     * NOT NULL column with no default on a table that already holds rows, which
+     * no engine can backfill — that surfaces as UnsupportedMigrationException.
      *
      * @return array{contributors: list<string>, executed: list<string>}
      */
@@ -474,18 +557,6 @@ final class Applier
         $sql = self::plan($connection, $target);
         if ($sql === []) {
             return ['contributors' => $contributors, 'executed' => []];
-        }
-
-        if ($connection->getDatabasePlatform() instanceof SQLitePlatform
-            && self::destructiveStatements($sql) !== []
-        ) {
-            throw new UnsupportedMigrationException(
-                "This SQLite database can't be upgraded to the current schema in place: the upgrade "
-                . 'changes column types, which SQLite can only apply by rebuilding tables, and DBAL\'s '
-                . 'SQLite rebuild drops foreign keys and indexes. In-place schema upgrades are not '
-                . 'supported on SQLite. Use MySQL/MariaDB or PostgreSQL if you need in-place upgrades, '
-                . 'or start from a fresh install (./maho install ...).',
-            );
         }
 
         self::execute($adapter, $sql);

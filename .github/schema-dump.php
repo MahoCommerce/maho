@@ -59,7 +59,11 @@ function tables(PDO $pdo, string $driver): array
     return match ($driver) {
         'mysql'  => $pdo->query("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_TYPE = 'BASE TABLE' ORDER BY TABLE_NAME")->fetchAll(PDO::FETCH_COLUMN),
         'pgsql'  => $pdo->query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' ORDER BY table_name")->fetchAll(PDO::FETCH_COLUMN),
-        'sqlite' => $pdo->query("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name")->fetchAll(PDO::FETCH_COLUMN),
+        // maho_advisory_locks is the SQLite adapter's runtime lock table
+        // (CREATE TABLE IF NOT EXISTS on first lock, the GET_LOCK() stand-in);
+        // it's not declaratively managed and appears only after a lock is taken,
+        // so exclude it from the schema comparison.
+        'sqlite' => $pdo->query("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' AND name != 'maho_advisory_locks' ORDER BY name")->fetchAll(PDO::FETCH_COLUMN),
     };
 }
 
@@ -152,19 +156,79 @@ function columns(PDO $pdo, string $driver, string $table): array
             );
         }
     } else {
-        $st = $pdo->query('PRAGMA table_info(' . q('sqlite', $table) . ')');
-        foreach ($st as $r) {
+        $rows = $pdo->query('PRAGMA table_info(' . q('sqlite', $table) . ')')->fetchAll(PDO::FETCH_ASSOC);
+        // A single-column INTEGER PRIMARY KEY is an alias for the rowid, which
+        // SQLite treats as NOT NULL even when the column was declared without
+        // the keyword (an inserted NULL becomes the next rowid). The legacy DDL
+        // omitted NOT NULL on these; the declarative schema includes it. Both
+        // behave identically, so render them the same.
+        $pkColumns = 0;
+        foreach ($rows as $r) {
+            if ((int) $r['pk'] > 0) {
+                $pkColumns++;
+            }
+        }
+        foreach ($rows as $r) {
+            $affinity = sqliteAffinity($r['type']);
+            $rowidPk = $pkColumns === 1 && (int) $r['pk'] === 1 && $affinity === 'INTEGER';
+            $default = normalizeSqliteDefault($r['dflt_value']);
             $out[] = sprintf(
                 '  COLUMN %s %s %s%s%s',
                 $r['name'],
-                $r['type'],
-                $r['notnull'] ? 'NOT NULL' : 'NULL',
-                $r['dflt_value'] !== null ? ' DEFAULT ' . $r['dflt_value'] : '',
+                $affinity,
+                $r['notnull'] || $rowidPk ? 'NOT NULL' : 'NULL',
+                $default !== null ? ' DEFAULT ' . $default : '',
                 $r['pk'] ? ' [PK]' : '',
             );
         }
     }
     return $out;
+}
+
+/**
+ * SQLite stores no real column types: every declared type resolves to one of
+ * five type affinities by the substring rules in
+ * https://www.sqlite.org/datatype3.html section 3.1. The legacy DDL adapter and
+ * the declarative/DBAL DDL spell the same affinity differently (TEXT vs CLOB,
+ * INTEGER vs "INTEGER UNSIGNED" vs SMALLINT, VARCHAR(n) vs TEXT), so reducing
+ * each declared type to its affinity makes behaviourally identical columns dump
+ * identically while still surfacing a genuine affinity change as a difference.
+ */
+function sqliteAffinity(string $type): string
+{
+    $type = strtoupper($type);
+    if (str_contains($type, 'INT')) {
+        return 'INTEGER';
+    }
+    if (str_contains($type, 'CHAR') || str_contains($type, 'CLOB') || str_contains($type, 'TEXT')) {
+        return 'TEXT';
+    }
+    if ($type === '' || str_contains($type, 'BLOB')) {
+        return 'BLOB';
+    }
+    if (str_contains($type, 'REAL') || str_contains($type, 'FLOA') || str_contains($type, 'DOUB')) {
+        return 'REAL';
+    }
+    return 'NUMERIC';
+}
+
+/**
+ * Normalize a SQLite column default to a canonical form. A literal NULL default
+ * is the same as no default; SQLite enforces no column types, so a quoted and
+ * an unquoted scalar ('0' vs 0) are equivalent, as are numeric trailing zeros.
+ */
+function normalizeSqliteDefault(?string $default): ?string
+{
+    if ($default === null || strtoupper($default) === 'NULL') {
+        return null;
+    }
+    if (strlen($default) >= 2 && $default[0] === "'" && $default[strlen($default) - 1] === "'") {
+        $default = substr($default, 1, -1);
+    }
+    if (preg_match('/^-?\d+\.\d+$/', $default)) {
+        $default = rtrim(rtrim($default, '0'), '.');
+    }
+    return $default;
 }
 
 function indexes(PDO $pdo, string $driver, string $table): array

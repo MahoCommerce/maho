@@ -15,16 +15,14 @@ namespace Maho\Db\Schema;
 use RuntimeException;
 
 /**
- * Thrown when the declarative schema cannot be reconciled in place on the
- * current platform and the only safe remedy is a fresh install.
+ * Thrown when a declared change can't be applied to an existing database
+ * without losing or inventing data, so it needs the author's intervention
+ * rather than an automatic migration.
  *
- * In practice this is SQLite-only: it has no real column types (everything is
- * INTEGER/TEXT affinity), so bringing an older install up to the declarative
- * schema means changing column types, which SQLite can only do by rebuilding
- * the whole table. DBAL's SQLite rebuild silently drops foreign keys and
- * indexes, so the migration never converges. SQLite is a fully supported
- * engine for running Maho, but in-place schema upgrades on it are not
- * supported: the remedy is a fresh install, or running on MySQL/MariaDB or
- * PostgreSQL, where these are ordinary in-place ALTERs.
+ * The case that arises in practice is adding a NOT NULL column with no default
+ * to a table that already holds rows: no engine can backfill a value, so the
+ * fix is to give the column a default or make it nullable. (SQLite reaches this
+ * via the table-rebuild path in Applier::sqliteRebuildTable; MySQL/MariaDB and
+ * Postgres reject the equivalent ALTER directly.)
  */
 final class UnsupportedMigrationException extends RuntimeException {}

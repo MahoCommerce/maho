@@ -315,34 +315,99 @@ jobs:
       - name: Point PR code at the main-installed database
         run: cp _main/app/etc/local.xml app/etc/local.xml
 
-      # SQLite has no real column types, so reconciling an older install to the
-      # declarative schema means changing column types — which SQLite can only
-      # do by rebuilding tables, and DBAL's SQLite rebuild loses foreign keys
-      # and indexes. In-place schema upgrades on SQLite are therefore
-      # intentionally unsupported: `migrate` must refuse with actionable
-      # guidance rather than crash or silently half-migrate. (SQLite is fully
-      # supported for running Maho; only the in-place upgrade isn't. MySQL/
-      # MariaDB/Postgres upgrade in place — the migrate-db matrix above proves
-      # it.) This job asserts the refusal is clean (non-zero exit + message).
-      - name: Assert in-place SQLite migration is refused
+      # SQLite can't ALTER column types or foreign keys in place, so plan()
+      # reconciles each changed SQLite table by recreating it to the declarative
+      # target (Applier::sqliteRebuildTable), preserving the data of every shared
+      # column. The migration must therefore succeed, be idempotent, and land
+      # byte-identical to a fresh declarative install — same invariant as the
+      # other engines.
+      - name: Migrate (PR code, timed)
+        id: migrate
         env:
           DB_NAME: /tmp/migrate.sqlite
         run: |
-          if ./maho migrate > /tmp/migrate.out 2>&1; then
-            echo "::error::Expected ./maho migrate to refuse on SQLite, but it exited 0."
-            cat /tmp/migrate.out
+          start=$(date +%s)
+          ./maho migrate
+          end=$(date +%s)
+          echo "seconds=$((end - start))" >> $GITHUB_OUTPUT
+
+      - name: Assert migration is idempotent
+        env:
+          DB_NAME: /tmp/migrate.sqlite
+        run: |
+          out=$(./maho migrate)
+          echo "$out"
+          if ! echo "$out" | grep -q "already up to date"; then
+            echo "::error::Migration is not idempotent — a second run still applied statements."
             exit 1
           fi
-          cat /tmp/migrate.out
-          if ! grep -q "In-place schema upgrades are not supported on SQLite" /tmp/migrate.out; then
-            echo "::error::SQLite migrate failed without the expected guidance message."
+
+      - name: Dump migrated schema
+        env:
+          DB_NAME: /tmp/migrate.sqlite
+        run: php .github/schema-dump.php > /tmp/migrated.txt
+
+      - name: Flush cache before fresh install
+        env:
+          DB_NAME: /tmp/migrate.sqlite
+        run: ./maho cache:flush
+
+      # A fresh install must start from a clean slate: no leftover database file
+      # and no local.xml (the installer writes it). The local.xml copied in for
+      # the migrate phase points at the database file removed here.
+      - name: Reset DB
+        run: |
+          rm -f app/etc/local.xml
+          rm -f /tmp/migrate.sqlite
+
+      - name: Install Maho fresh on PR (declarative schema)
+        run: |
+          ./maho install \
+            --license_agreement_accepted yes \
+            --locale en_US \
+            --timezone Europe/London \
+            --default_currency USD \
+            --db_name /tmp/fresh.sqlite \
+            --db_engine sqlite \
+            --url http://maho.test/ \
+            --secure_base_url http://maho.test/ \
+            --use_secure 0 \
+            --use_secure_admin 0 \
+            --admin_lastname admin \
+            --admin_firstname admin \
+            --admin_email admin@admin.com \
+            --admin_username admin \
+            --admin_password asdasdasd123123123 \
+            --sample_data 0
+
+      - name: Dump fresh schema
+        env:
+          DB_NAME: /tmp/fresh.sqlite
+        run: php .github/schema-dump.php > /tmp/fresh.txt
+
+      - name: Compare migrated vs fresh
+        run: |
+          if ! diff -u /tmp/fresh.txt /tmp/migrated.txt > /tmp/schema.diff; then
+            echo "::error::Migrated schema differs from a fresh declarative install."
+            echo "::group::diff -u fresh migrated"
+            cat /tmp/schema.diff
+            echo "::endgroup::"
             exit 1
           fi
-          echo "SQLite in-place upgrade correctly refused with actionable guidance."
+          echo "Migration parity: OK"
+
+      - name: Record timing
+        if: always()
+        run: |
+          echo "### Migration timing — sqlite" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`./maho migrate\` wall-clock: **${{ steps.migrate.outputs.seconds || 'n/a' }}s**" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: schema-migration-sqlite
-          path: /tmp/migrate.out
+          path: |
+            /tmp/migrated.txt
+            /tmp/fresh.txt
