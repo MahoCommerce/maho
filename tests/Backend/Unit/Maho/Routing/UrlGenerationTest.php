@@ -103,6 +103,12 @@ describe('Mage::getUrl() home and fallback', function () {
         expect(urlPath('paypaluk/express/start'))->toBe('/paypaluk/express/start/');
     });
 
+    it('does not collapse the CMS no-route URL to its legacy aliases', function () {
+        // norouteAction declares the canonical /cms/index/noroute last, so getUrl()
+        // resolves to it rather than the /cms or /cms/index inbound traps.
+        expect(urlPath('cms/index/noroute'))->toBe('/cms/index/noroute/');
+    });
+
     it('resolves the module whose route frontName differs from module key (PaypalUk → payflow)', function () {
         expect(urlPath('payflow/express/start'))->toBe('/payflow/express/start/');
     });

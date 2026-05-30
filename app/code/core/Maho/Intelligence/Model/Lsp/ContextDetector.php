@@ -177,7 +177,7 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
     /**
      * Detect what context the cursor is in for completion.
      *
-     * @return array{context: string, prefix: string, prefixStart: int}
+     * @return array{context: string, prefix: string, prefixStart: int, suggestions?: list<string>}
      */
     public function detect(string $text, int $line, int $character, string $uri = ''): array
     {
@@ -200,6 +200,9 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
         return $this->detectPhpAtCursor($text, $line, $character);
     }
 
+    /**
+     * @return array{context: string, prefix: string, prefixStart: int}
+     */
     private function detectPhp(string $text, int $line, int $character): array
     {
         $lines = explode("\n", $text);
@@ -254,6 +257,9 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
         return null;
     }
 
+    /**
+     * @return array{context: string, prefix: string, prefixStart: int, suggestions?: list<string>}
+     */
     private function detectXml(string $text, int $line, int $character, string $uri = ''): array
     {
         $none = ['context' => self::CONTEXT_NONE, 'prefix' => '', 'prefixStart' => $character];

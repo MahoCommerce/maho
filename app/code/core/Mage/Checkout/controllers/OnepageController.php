@@ -220,7 +220,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
      *
      * @return string|null
      */
-    #[Maho\Config\Route('/checkout/onepage/progress', name: 'checkout.onepage.progress', methods: ['POST'])]
+    #[Maho\Config\Route('/checkout/onepage/progress', name: 'checkout.onepage.progress', methods: ['GET'])]
     public function progressAction()
     {
         // previous step should never be null. We always start with billing and go forward
