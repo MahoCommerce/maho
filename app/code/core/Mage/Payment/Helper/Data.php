@@ -267,6 +267,12 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
         return $methods;
     }
 
+    public function paymentMethodExists(Mage_Sales_Model_Order_Payment $payment): bool
+    {
+        return ($method = $payment->getMethod()) !== null
+            && Mage::getStoreConfig(self::XML_PATH_PAYMENT_METHODS . '/' . $method . '/title') !== null;
+    }
+
     /**
      * Retrieve all billing agreement methods (code and label)
      *
