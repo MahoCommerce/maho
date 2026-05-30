@@ -18,10 +18,12 @@
  *     DB_ENGINE=mysql DB_NAME=maho ... php .github/schema-dump.php > dump.txt
  *
  * The engine-specific renderings are normalized so the same logical schema
- * dumps identically across MySQL/MariaDB (display widths, quoted defaults) and
- * Postgres (varchar(1024) text, SERIAL-vs-IDENTITY, ::type casts). The same
- * normalizer is the one the Schema Parity workflow uses; keeping it in one
- * committed file lets both the parity and migration workflows share it.
+ * dumps identically across MySQL/MariaDB (display widths, quoted defaults),
+ * Postgres (varchar(1024) text, SERIAL-vs-IDENTITY, ::type casts) and SQLite
+ * (type affinity, rowid primary keys). Used by the schema-migration workflow
+ * (all engines) and the SQLite schema-parity job. The MySQL/Postgres parity
+ * jobs still inline an equivalent copy; consolidating them here is a pending
+ * cleanup.
  */
 
 declare(strict_types=1);
@@ -197,6 +199,15 @@ function columns(PDO $pdo, string $driver, string $table): array
 function sqliteAffinity(string $type): string
 {
     $type = strtoupper($type);
+    // Maho stores dates as 'Y-m-d H:i:s' text. The legacy SQLite adapter
+    // declared TYPE_DATETIME as TEXT, while DBAL renders it as DATETIME, which
+    // SQLite's generic rules would bucket as NUMERIC affinity. The stored value
+    // is text on both, so canonicalize the datetime family to TEXT to match the
+    // actual storage and the legacy declaration. Checked before the INTEGER
+    // rule because none of these names contain "INT".
+    if (str_contains($type, 'DATE') || str_contains($type, 'TIME')) {
+        return 'TEXT';
+    }
     if (str_contains($type, 'INT')) {
         return 'INTEGER';
     }

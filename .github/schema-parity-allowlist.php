@@ -613,6 +613,425 @@ $entries = [
             '  INDEX [IDX] (email,website_id)',
         ],
     ],
+
+    // ===== SQLite: legacy install vs declarative schema =====
+    //
+    // The legacy SQLite adapter created fewer indexes/FKs than the declarative
+    // schema and left datetime columns without the CURRENT_TIMESTAMP defaults
+    // and nullability the declarative schema sets (the same intentional drift
+    // already allowlisted for MySQL/Postgres above). Each entry rewrites a main
+    // (legacy) line into its declarative form, or adds an index/FK the legacy
+    // install never created. Generated from the schema-parity diff; will shrink
+    // as the legacy install paths are removed. Single-column FK indexes live in
+    // $dbalImplicitFkIndexes['sqlite'] below.
+    [
+        'engines' => ['sqlite'],
+        'table' => 'adminnotification_inbox',
+        'replace' => [
+            '  COLUMN date_added TEXT NOT NULL' => '  COLUMN date_added TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'api_session',
+        'replace' => [
+            '  COLUMN logdate TEXT NOT NULL' => '  COLUMN logdate TEXT NULL',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'api_user',
+        'replace' => [
+            '  COLUMN created TEXT NOT NULL' => '  COLUMN created TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'blog_eav_attribute',
+        'add' => [
+            '  INDEX [UNIQ] (attribute_id)',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'catalog_category_product_index',
+        'replace' => [
+            '  COLUMN category_id INTEGER NOT NULL DEFAULT 0' => '  COLUMN category_id INTEGER NOT NULL DEFAULT 0 [PK]',
+            '  COLUMN product_id INTEGER NOT NULL DEFAULT 0' => '  COLUMN product_id INTEGER NOT NULL DEFAULT 0 [PK]',
+            '  COLUMN store_id INTEGER NOT NULL DEFAULT 0' => '  COLUMN store_id INTEGER NOT NULL DEFAULT 0 [PK]',
+        ],
+        'add' => [
+            '  INDEX [UNIQ] (category_id,product_id,store_id)',
+            '  FK category_id -> catalog_category_entity(entity_id) ON DELETE CASCADE ON UPDATE CASCADE',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'catalog_eav_attribute',
+        'add' => [
+            '  INDEX [UNIQ] (attribute_id)',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'catalog_product_index_eav_decimal',
+        'add' => [
+            '  FK attribute_id -> eav_attribute(attribute_id) ON DELETE CASCADE ON UPDATE CASCADE',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'catalog_product_index_website',
+        'add' => [
+            '  INDEX [UNIQ] (website_id)',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'catalog_product_link_attribute_int',
+        'add' => [
+            '  FK link_id -> catalog_product_link(link_id) ON DELETE CASCADE ON UPDATE CASCADE',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'catalogrule_affected_product',
+        'add' => [
+            '  INDEX [UNIQ] (product_id)',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'catalogsearch_query',
+        'replace' => [
+            '  COLUMN updated_at TEXT NOT NULL' => '  COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'core_url_rewrite',
+        'add' => [
+            '  FK category_id -> catalog_category_entity(entity_id) ON DELETE CASCADE ON UPDATE CASCADE',
+            '  FK store_id -> core_store(store_id) ON DELETE CASCADE ON UPDATE CASCADE',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'cron_schedule',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'customer_address_entity',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+            '  COLUMN updated_at TEXT NOT NULL' => '  COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'customer_address_entity_datetime',
+        'replace' => [
+            '  COLUMN value TEXT NOT NULL DEFAULT 1970-01-01 00:00:00' => '  COLUMN value TEXT NULL',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'customer_eav_attribute',
+        'add' => [
+            '  INDEX [UNIQ] (attribute_id)',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'customer_entity',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+            '  COLUMN updated_at TEXT NOT NULL' => '  COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'customer_entity_datetime',
+        'replace' => [
+            '  COLUMN value TEXT NOT NULL DEFAULT 1970-01-01 00:00:00' => '  COLUMN value TEXT NULL',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'customer_flowpassword',
+        'replace' => [
+            '  COLUMN requested_date TEXT NOT NULL DEFAULT 0000-00-00 00:00:00' => '  COLUMN requested_date TEXT NOT NULL',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'downloadable_link_purchased',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+            '  COLUMN updated_at TEXT NOT NULL' => '  COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'downloadable_link_purchased_item',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+            '  COLUMN updated_at TEXT NOT NULL' => '  COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'eav_entity',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+            '  COLUMN updated_at TEXT NOT NULL' => '  COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'eav_entity_datetime',
+        'replace' => [
+            '  COLUMN value TEXT NOT NULL DEFAULT 1970-01-01 00:00:00' => '  COLUMN value TEXT NULL',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'index_event',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'log_customer',
+        'replace' => [
+            '  COLUMN login_at TEXT NOT NULL' => '  COLUMN login_at TEXT NULL',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'log_quote',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+        'add' => [
+            '  INDEX [UNIQ] (quote_id)',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'log_summary',
+        'replace' => [
+            '  COLUMN add_date TEXT NOT NULL' => '  COLUMN add_date TEXT NULL',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'log_url',
+        'replace' => [
+            '  COLUMN visit_time TEXT NOT NULL' => '  COLUMN visit_time TEXT NULL',
+        ],
+        'add' => [
+            '  INDEX [UNIQ] (url_id)',
+        ],
+        'remove' => [
+            '  INDEX [IDX] (url_id)',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'log_visitor',
+        'replace' => [
+            '  COLUMN last_visit_at TEXT NOT NULL' => '  COLUMN last_visit_at TEXT NULL',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'log_visitor_info',
+        'replace' => [
+            '  COLUMN remote_addr INTEGER NULL' => '  COLUMN remote_addr BLOB NULL',
+            '  COLUMN server_addr INTEGER NULL' => '  COLUMN server_addr BLOB NULL',
+        ],
+        'add' => [
+            '  INDEX [UNIQ] (visitor_id)',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'log_visitor_online',
+        'replace' => [
+            '  COLUMN remote_addr INTEGER NOT NULL' => '  COLUMN remote_addr BLOB NULL',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'newsletter_subscriber',
+        'replace' => [
+            '  COLUMN subscriber_confirm_code TEXT NULL DEFAULT NULL' => '  COLUMN subscriber_confirm_code TEXT NULL',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'product_alert_price',
+        'replace' => [
+            '  COLUMN add_date TEXT NOT NULL' => '  COLUMN add_date TEXT NULL',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'product_alert_stock',
+        'replace' => [
+            '  COLUMN add_date TEXT NOT NULL' => '  COLUMN add_date TEXT NULL',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'rating_option_vote',
+        'replace' => [
+            '  COLUMN remote_ip TEXT NOT NULL' => '  COLUMN remote_ip TEXT NULL',
+            '  COLUMN remote_ip_long INTEGER NOT NULL DEFAULT 0' => '  COLUMN remote_ip_long BLOB NULL',
+        ],
+        'add' => [
+            '  FK option_id -> rating_option(option_id) ON DELETE CASCADE ON UPDATE CASCADE',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'report_compared_product_index',
+        'replace' => [
+            '  COLUMN added_at TEXT NOT NULL' => '  COLUMN added_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'report_event',
+        'replace' => [
+            '  COLUMN logged_at TEXT NOT NULL' => '  COLUMN logged_at TEXT NULL',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'report_viewed_product_index',
+        'replace' => [
+            '  COLUMN added_at TEXT NOT NULL' => '  COLUMN added_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'review',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'sales_billing_agreement',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'sales_flat_creditmemo_grid',
+        'add' => [
+            '  INDEX [UNIQ] (entity_id)',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'sales_flat_invoice_grid',
+        'add' => [
+            '  INDEX [UNIQ] (entity_id)',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'sales_flat_order_grid',
+        'add' => [
+            '  INDEX [UNIQ] (entity_id)',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'sales_flat_order_item',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+            '  COLUMN updated_at TEXT NOT NULL' => '  COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'sales_flat_quote',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+            '  COLUMN updated_at TEXT NOT NULL' => '  COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'sales_flat_quote_address',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+            '  COLUMN updated_at TEXT NOT NULL' => '  COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'sales_flat_quote_address_item',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+            '  COLUMN updated_at TEXT NOT NULL' => '  COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'sales_flat_quote_item',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+            '  COLUMN updated_at TEXT NOT NULL' => '  COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'sales_flat_quote_payment',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+            '  COLUMN updated_at TEXT NOT NULL' => '  COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'sales_flat_quote_shipping_rate',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+            '  COLUMN updated_at TEXT NOT NULL' => '  COLUMN updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'sales_flat_shipment_grid',
+        'add' => [
+            '  INDEX [UNIQ] (entity_id)',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'sales_invoiced_aggregated',
+        'replace' => [
+            '  COLUMN order_status TEXT NULL' => '  COLUMN order_status TEXT NOT NULL DEFAULT ',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'sales_recurring_profile',
+        'replace' => [
+            '  COLUMN created_at TEXT NOT NULL' => '  COLUMN created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+            '  COLUMN start_datetime TEXT NOT NULL' => '  COLUMN start_datetime TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP',
+        ],
+    ],
 ];
 
 /**
@@ -743,6 +1162,61 @@ $dbalImplicitFkIndexes = [
         'tag_properties' => ['tag_id'],
         'wishlist_item_option' => ['wishlist_item_id'],
     ],
+    'sqlite' => [
+        'admin_rule' => ['role_id'],
+        'api2_acl_rule' => ['role_id'],
+        'api2_acl_user' => ['role_id'],
+        'api_rule' => ['role_id'],
+        'blog_category_store' => ['category_id'],
+        'blog_post_category' => ['post_id'],
+        'blog_post_store' => ['post_id'],
+        'catalog_category_product' => ['category_id'],
+        'catalog_category_product_index' => ['product_id', 'store_id'],
+        'catalog_product_bundle_option_value' => ['option_id'],
+        'catalog_product_bundle_price_index' => ['entity_id'],
+        'catalog_product_bundle_selection_price' => ['selection_id'],
+        'catalog_product_enabled_index' => ['product_id'],
+        'catalog_product_entity_media_gallery_value' => ['value_id'],
+        'catalog_product_index_group_price' => ['entity_id'],
+        'catalog_product_index_price' => ['entity_id'],
+        'catalog_product_index_tier_price' => ['entity_id'],
+        'catalog_product_relation' => ['parent_id'],
+        'catalog_product_website' => ['product_id'],
+        'cataloginventory_stock_status' => ['product_id'],
+        'checkout_agreement_store' => ['agreement_id', 'store_id'],
+        'cms_block_store' => ['block_id'],
+        'cms_page_store' => ['page_id'],
+        'core_email_queue_recipients' => ['message_id'],
+        'core_layout_link' => ['store_id'],
+        'customer_eav_attribute_website' => ['attribute_id'],
+        'customer_segment_customer' => ['segment_id'],
+        'customer_segment_email_sequence' => ['coupon_sales_rule_id', 'segment_id', 'template_id'],
+        'customer_segment_sequence_progress' => ['customer_id', 'queue_id', 'segment_id'],
+        'eav_attribute_group' => ['attribute_set_id'],
+        'eav_attribute_set' => ['entity_type_id'],
+        'eav_entity_attribute' => ['attribute_group_id'],
+        'eav_form_type_entity' => ['type_id'],
+        'feedmanager_attribute_mapping' => ['feed_id'],
+        'feedmanager_category_mapping' => ['category_id'],
+        'feedmanager_log' => ['feed_id'],
+        'index_process_event' => ['process_id'],
+        'newsletter_queue_store_link' => ['queue_id'],
+        'oauth_token' => ['admin_id', 'customer_id'],
+        'rating_store' => ['rating_id'],
+        'rating_title' => ['rating_id'],
+        'report_compared_product_index' => ['customer_id'],
+        'report_viewed_product_index' => ['customer_id'],
+        'review_store' => ['review_id'],
+        'sales_billing_agreement_order' => ['agreement_id'],
+        'sales_order_status_label' => ['status'],
+        'sales_order_status_state' => ['status'],
+        'sales_recurring_profile_order' => ['profile_id'],
+        'salesrule_customer' => ['customer_id', 'rule_id'],
+        'salesrule_product_attribute' => ['rule_id'],
+        'tag' => ['first_customer_id', 'first_store_id'],
+        'tag_properties' => ['tag_id'],
+        'wishlist_item_option' => ['wishlist_item_id'],
+    ],
 ];
 foreach ($dbalImplicitFkIndexes as $eng => $tables) {
     foreach ($tables as $table => $columns) {
@@ -826,29 +1300,41 @@ $flushAdds = static function () use (&$out, &$pendingAdds): void {
     $blockStart = $start + 1;
     $block      = array_slice($out, $blockStart);
 
-    foreach ($pendingAdds as $addLine) {
-        $prefix = '';
-        if (str_starts_with($addLine, '  COLUMN ')) {
-            $prefix = '  COLUMN ';
-        } elseif (str_starts_with($addLine, '  INDEX ')) {
-            $prefix = '  INDEX ';
-        } elseif (str_starts_with($addLine, '  FK ')) {
-            $prefix = '  FK ';
-        } else {
-            $block[] = $addLine;
-            continue;
+    // Category rank mirrors the dumper's emission order: COLUMN, then INDEX,
+    // then FK. A line that doesn't match any category sorts after them all.
+    $rank = static function (string $line): int {
+        if (str_starts_with($line, '  COLUMN ')) {
+            return 0;
         }
+        if (str_starts_with($line, '  INDEX ')) {
+            return 1;
+        }
+        if (str_starts_with($line, '  FK ')) {
+            return 2;
+        }
+        return 3;
+    };
 
-        $insertAt = count($block);
+    foreach ($pendingAdds as $addLine) {
+        $addRank = $rank($addLine);
+
+        // Walk to the position where this line belongs: after every line of an
+        // earlier category and every same-category line that sorts before it.
+        // When no same-category line exists (e.g. a legacy SQLite table with no
+        // indexes), this still lands the line at the category boundary rather
+        // than appending it after a later category or a trailing blank line.
+        $insertAt = 0;
         foreach ($block as $i => $existing) {
-            if (!str_starts_with($existing, $prefix)) {
+            $existingRank = $rank($existing);
+            if ($existingRank < $addRank) {
+                $insertAt = $i + 1;
                 continue;
             }
-            if (strcmp($addLine, $existing) < 0) {
-                $insertAt = $i;
-                break;
+            if ($existingRank === $addRank && strcmp($existing, $addLine) < 0) {
+                $insertAt = $i + 1;
+                continue;
             }
-            $insertAt = $i + 1;
+            break;
         }
         array_splice($block, $insertAt, 0, [$addLine]);
     }

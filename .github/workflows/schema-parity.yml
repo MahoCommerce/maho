@@ -568,86 +568,6 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      - name: Write normalizer script
-        run: |
-          cat > /tmp/normalize.php <<'NORMALIZE_PHP'
-          <?php
-          declare(strict_types=1);
-
-          $engine = getenv('DB_ENGINE');
-          $db     = getenv('DB_NAME') ?: 'maho.sqlite';
-
-          $opts = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
-          $pdo    = new PDO("sqlite:$db", null, null, $opts);
-          $driver = 'sqlite';
-
-          const SEED_TABLES = [
-              'core_website', 'core_store', 'core_store_group',
-              'directory_country', 'directory_country_region',
-              'directory_currency_rate',
-              'eav_entity_type', 'eav_attribute_set', 'eav_attribute_group',
-              'tax_class',
-          ];
-
-          function q(string $ident): string { return '"' . $ident . '"'; }
-
-          $tables = $pdo->query("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name")->fetchAll(PDO::FETCH_COLUMN);
-          foreach ($tables as $table) {
-              echo "TABLE $table\n";
-
-              $colLines = [];
-              foreach ($pdo->query('PRAGMA table_info(' . q($table) . ')') as $r) {
-                  $colLines[] = sprintf(
-                      '  COLUMN %s %s %s%s%s',
-                      $r['name'],
-                      $r['type'],
-                      $r['notnull'] ? 'NOT NULL' : 'NULL',
-                      $r['dflt_value'] !== null ? ' DEFAULT ' . $r['dflt_value'] : '',
-                      $r['pk'] ? ' [PK]' : '',
-                  );
-              }
-              // Sort columns alphabetically (see comment in MySQL/PgSQL dumper).
-              sort($colLines);
-              foreach ($colLines as $line) {
-                  echo "$line\n";
-              }
-
-              $idxLines = [];
-              foreach ($pdo->query('PRAGMA index_list(' . q($table) . ')')->fetchAll(PDO::FETCH_ASSOC) as $idx) {
-                  $cols = [];
-                  foreach ($pdo->query('PRAGMA index_info(' . q($idx['name']) . ')') as $c) {
-                      $cols[(int) $c['seqno']] = $c['name'];
-                  }
-                  ksort($cols);
-                  $type      = $idx['unique'] ? 'UNIQ' : 'IDX';
-                  $idxLines[] = sprintf('  INDEX [%s] (%s)', $type, implode(',', $cols));
-              }
-              sort($idxLines);
-              foreach ($idxLines as $line) {
-                  echo "$line\n";
-              }
-
-              $fkLines = [];
-              foreach ($pdo->query('PRAGMA foreign_key_list(' . q($table) . ')') as $r) {
-                  $fkLines[] = sprintf(
-                      '  FK %s -> %s(%s) ON DELETE %s ON UPDATE %s',
-                      $r['from'], $r['table'], $r['to'],
-                      $r['on_delete'], $r['on_update'],
-                  );
-              }
-              sort($fkLines);
-              foreach ($fkLines as $line) {
-                  echo "$line\n";
-              }
-
-              if (in_array($table, SEED_TABLES, true)) {
-                  $count = (int) $pdo->query('SELECT COUNT(*) FROM ' . q($table))->fetchColumn();
-                  echo "  SEEDED_ROWS $count\n";
-              }
-              echo "\n";
-          }
-          NORMALIZE_PHP
-
       - name: Install dependencies (PR)
         run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
 
@@ -674,7 +594,7 @@ jobs:
       - name: Normalize PR schema
         env:
           DB_NAME: ${{ github.workspace }}/maho.sqlite
-        run: php /tmp/normalize.php > /tmp/pr.txt
+        run: php .github/schema-dump.php > /tmp/pr.txt
 
       - name: Install dependencies (main)
         working-directory: _main
@@ -701,10 +621,12 @@ jobs:
             --admin_password asdasdasd123123123 \
             --sample_data 0
 
+      # Dump main's schema with the PR's dumper (run from the PR checkout, reading
+      # the DB the main code installed) so both sides normalize identically.
       - name: Normalize main schema
         env:
           DB_NAME: ${{ github.workspace }}/_main/maho.sqlite
-        run: php /tmp/normalize.php > /tmp/main.raw.txt
+        run: php .github/schema-dump.php > /tmp/main.raw.txt
 
       - name: Apply allowlist to main schema
         run: php .github/schema-parity-allowlist.php sqlite < /tmp/main.raw.txt > /tmp/main.txt
