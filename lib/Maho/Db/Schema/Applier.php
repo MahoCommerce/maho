@@ -112,7 +112,7 @@ final class Applier
         if ($platform instanceof PostgreSQLPlatform) {
             $alters = self::rewritePostgresUniqueConstraintDrops($connection, $platform, $alters);
             $alters = self::quotePostgresRenameIndexNames($platform, $alters);
-            $alters = self::fixPostgresColumnTypeChanges($existingTables, $alters);
+            $alters = self::fixPostgresColumnTypeChanges($existingTables, $tablesToAlter, $alters);
         }
 
         // Compensate for a DBAL/MySQL gap: when a primary key that includes an
@@ -254,30 +254,39 @@ final class Applier
     }
 
     /**
-     * Make each Postgres `ALTER ... TYPE` survive a type the old column has no
-     * implicit cast to, by dropping the stale default first and adding a `USING`
-     * clause for the data.
+     * Make a Postgres `ALTER ... TYPE` succeed when the old column has no
+     * implicit cast to the new type.
      *
-     * Postgres changes a column's type without help only when an implicit cast
-     * exists (e.g. smallint to integer); otherwise it refuses the column data
-     * ("column ... cannot be cast automatically") and, separately, the existing
-     * default ("default for column ... cannot be cast"). The declarative schema
-     * deliberately stores some legacy boolean flags as smallint (the app filters
-     * them with `= 1`, which a Postgres boolean column rejects), and boolean has
-     * no implicit cast to a numeric type. DBAL emits a bare `ALTER ... TYPE`
-     * (followed by its own `SET DEFAULT` for the new default) with no hook for
-     * either problem, so:
-     *   - drop the old default before the type change (DBAL re-sets the target
-     *     default in a later statement), and
-     *   - add `USING` for the data — a boolean source through an explicit integer
-     *     cast, anything else cast to the target type.
-     * Both additions are no-ops when an implicit cast already exists.
+     * Postgres changes a column's type unaided only when an implicit cast exists
+     * (e.g. real to double precision); without one it refuses both the data
+     * ("column ... cannot be cast automatically") and the existing default
+     * ("default for column ... cannot be cast"). DBAL emits a bare `ALTER ...
+     * TYPE` (plus its own later `SET DEFAULT`) with no hook for either, so this
+     * supplies the missing `USING` clause for the two legacy-to-declarative
+     * conversions that need it, and drops the stale default first (DBAL re-sets
+     * the target default afterwards):
+     *
+     *   - boolean to a numeric type: some legacy boolean flags become smallint
+     *     (the app filters them with `= 1`, which a Postgres boolean rejects).
+     *     Convert through an explicit integer cast, preserving 0/1.
+     *   - a legacy bigint IP column (ip2long) to binary: the integer encoding has
+     *     no faithful reinterpretation as the new binary format, so the values
+     *     are discarded (`USING NULL`). The columns are nullable IP-tracking
+     *     fields; a fresh install has no such data either.
+     *
+     * The default is dropped before the type change and re-set from the target
+     * afterwards rather than left to DBAL: DBAL treats a boolean `false` and a
+     * smallint `0` as the same default and so never emits the `SET DEFAULT`,
+     * which would otherwise leave the migrated column without its target default.
+     *
+     * Other type changes pass through: DBAL relies on their implicit cast.
      *
      * @param list<\Doctrine\DBAL\Schema\Table> $liveTables canonicalized live tables
+     * @param list<\Doctrine\DBAL\Schema\Table> $targetTables declarative target tables
      * @param list<string> $statements
      * @return list<string>
      */
-    private static function fixPostgresColumnTypeChanges(array $liveTables, array $statements): array
+    private static function fixPostgresColumnTypeChanges(array $liveTables, array $targetTables, array $statements): array
     {
         $liveColumnTypes = [];
         foreach ($liveTables as $table) {
@@ -287,25 +296,45 @@ final class Applier
                 $liveColumnTypes[$tableName][$columnName] = $column->getType();
             }
         }
+        $targetDefaults = [];
+        foreach ($targetTables as $table) {
+            $tableName = strtolower(trim($table->getObjectName()->toString(), '"'));
+            foreach ($table->getColumns() as $column) {
+                $columnName = strtolower(trim($column->getObjectName()->toString(), '"'));
+                $targetDefaults[$tableName][$columnName] = $column->getDefault();
+            }
+        }
 
         $result = [];
         foreach ($statements as $stmt) {
-            if (preg_match('/^ALTER\s+TABLE\s+(\S+)\s+ALTER\s+(\S+)\s+TYPE\s+(\S+)/i', $stmt, $m) !== 1
-                || stripos($stmt, ' USING ') !== false
-            ) {
+            if (preg_match('/^ALTER\s+TABLE\s+(\S+)\s+ALTER\s+(\S+)\s+TYPE\s+(.+?)\s*$/i', $stmt, $m) !== 1) {
                 $result[] = $stmt;
                 continue;
             }
             $table = $m[1];
             $column = $m[2];
-            $liveType = $liveColumnTypes[strtolower(trim($table, '"'))][strtolower(trim($column, '"'))] ?? null;
+            $newType = strtoupper(trim($m[3]));
+            $tableKey = strtolower(trim($table, '"'));
+            $columnKey = strtolower(trim($column, '"'));
+            $liveType = $liveColumnTypes[$tableKey][$columnKey] ?? null;
 
-            $cast = $liveType instanceof BooleanType
-                ? $column . '::integer'
-                : $column . '::' . preg_replace('/\(.*$/', '', $m[3]);
+            if ($newType === 'BYTEA') {
+                $using = 'NULL';
+            } elseif ($liveType instanceof BooleanType) {
+                $using = "{$column}::integer";
+            } else {
+                $result[] = $stmt;
+                continue;
+            }
 
             $result[] = "ALTER TABLE {$table} ALTER {$column} DROP DEFAULT";
-            $result[] = $stmt . ' USING ' . $cast;
+            $result[] = $stmt . " USING {$using}";
+
+            $default = $targetDefaults[$tableKey][$columnKey] ?? null;
+            if ($default !== null) {
+                $literal = is_numeric($default) ? (string) $default : "'" . str_replace("'", "''", (string) $default) . "'";
+                $result[] = "ALTER TABLE {$table} ALTER {$column} SET DEFAULT {$literal}";
+            }
         }
 
         return $result;
