@@ -130,6 +130,14 @@ function columns(PDO $pdo, string $driver, string $table): array
                 if (preg_match("/^'(-?\\d+(?:\\.\\d+)?)'$/", $default, $m)) {
                     $default = $m[1];
                 }
+                // A numeric default's trailing zeros carry no meaning: the legacy
+                // adapter rendered some as '0'::numeric and others as 0.0000 for
+                // the same value, which is also why the migration's Comparator
+                // emits no change between them. Normalize so the dump's notion of
+                // equivalence matches the migration's.
+                if (preg_match('/^-?\\d+\\.\\d+$/', $default)) {
+                    $default = rtrim(rtrim($default, '0'), '.');
+                }
             }
             if ($r['is_nullable'] === 'YES' && $default === 'NULL') {
                 $default = null;
