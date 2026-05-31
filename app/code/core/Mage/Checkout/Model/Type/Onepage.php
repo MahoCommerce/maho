@@ -153,6 +153,8 @@ class Mage_Checkout_Model_Type_Onepage
         if ($customer) {
             $this->getQuote()->assignCustomer($customer);
 
+            // Single saved address used for both: default the shipping radio to
+            // "same as billing". Render-scoped flag, the quote is not re-saved here.
             $defaultBilling = $customer->getDefaultBilling();
             if ($defaultBilling && $defaultBilling == $customer->getDefaultShipping()) {
                 $this->getQuote()->getShippingAddress()->setSameAsBilling(1);

@@ -93,13 +93,11 @@ class OneStepCheckout {
             this.saveBilling();
         }
 
-        // saveBilling only posts the billing payload. For a separate
-        // shipping address, seed the shipping side too so rates load on
-        // initial render instead of waiting for the customer to touch it.
-        const useForShippingNo = document.getElementById('billing:use_for_shipping_no');
-        if (useForShippingNo && useForShippingNo.checked && this.hasMinimumAddressData('shipping')) {
-            this.saveShippingEstimate();
-        }
+        // saveBilling only posts the billing payload. For a separate shipping
+        // address, seed the shipping side too so rates load on initial render
+        // instead of waiting for the customer to touch it. saveShippingEstimate
+        // self-guards on use_for_shipping and minimum address data.
+        this.saveShippingEstimate();
     }
 
     initPlaceholders() {
