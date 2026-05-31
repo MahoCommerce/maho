@@ -102,9 +102,9 @@ return function (Schema $schema): void {
         $aggr->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
         $aggr->addColumn('code', Types::STRING, ['length' => 255]);
         $aggr->addColumn('order_status', Types::STRING, ['length' => 50]);
-        $aggr->addColumn('percent', Types::FLOAT, ['notnull' => false]);
+        $aggr->addColumn('percent', Types::SMALLFLOAT, ['notnull' => false]);
         $aggr->addColumn('orders_count', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
-        $aggr->addColumn('tax_base_amount_sum', Types::FLOAT, ['notnull' => false]);
+        $aggr->addColumn('tax_base_amount_sum', Types::SMALLFLOAT, ['notnull' => false]);
         $aggr->addPrimaryKeyConstraint(
             PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create(),
         );

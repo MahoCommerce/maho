@@ -187,7 +187,7 @@ return function (Schema $schema): void {
         $aggr->addColumn('id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
         $aggr->addColumn('period', Types::DATE_MUTABLE);
         $aggr->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
-        $aggr->addColumn('order_status', Types::STRING, ['length' => 50, 'notnull' => false]);
+        $aggr->addColumn('order_status', Types::STRING, ['length' => 50, 'default' => '']);
         $aggr->addColumn('coupon_code', Types::STRING, ['length' => 50, 'notnull' => false]);
         $aggr->addColumn('coupon_uses', Types::INTEGER, ['default' => 0]);
         $aggr->addColumn('subtotal_amount', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
@@ -216,7 +216,7 @@ return function (Schema $schema): void {
     $aggrOrder->addColumn('id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $aggrOrder->addColumn('period', Types::DATE_MUTABLE);
     $aggrOrder->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
-    $aggrOrder->addColumn('order_status', Types::STRING, ['length' => 50, 'notnull' => false]);
+    $aggrOrder->addColumn('order_status', Types::STRING, ['length' => 50, 'default' => '']);
     $aggrOrder->addColumn('coupon_code', Types::STRING, ['length' => 50, 'notnull' => false]);
     $aggrOrder->addColumn('coupon_uses', Types::INTEGER, ['default' => 0]);
     $aggrOrder->addColumn('subtotal_amount', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);

@@ -75,7 +75,7 @@ return function (Schema $schema): void {
     $user->addColumn('reload_acl_flag', Types::SMALLINT, ['default' => 0]);
     $user->addColumn('is_active', Types::SMALLINT, ['default' => 1]);
     $user->addColumn('extra', Types::TEXT, ['length' => 65535, 'notnull' => false]);
-    $user->addColumn('rp_token', Types::STRING, ['length' => 256, 'notnull' => false]);
+    $user->addColumn('rp_token', Types::STRING, ['length' => 255, 'notnull' => false]);
     $user->addColumn('rp_token_created_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $user->addColumn('backend_locale', Types::STRING, ['length' => 8, 'notnull' => false]);
     $user->addColumn('twofa_enabled', Types::SMALLINT, ['default' => 0]);

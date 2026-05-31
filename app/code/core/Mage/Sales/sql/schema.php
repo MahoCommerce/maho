@@ -229,10 +229,10 @@ return function (Schema $schema): void {
     $orderAddress->addColumn('middlename', Types::STRING, ['length' => 255, 'notnull' => false]);
     $orderAddress->addColumn('suffix', Types::STRING, ['length' => 255, 'notnull' => false]);
     $orderAddress->addColumn('company', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $orderAddress->addColumn('vat_id', Types::STRING, ['length' => 255, 'notnull' => false]);
+    $orderAddress->addColumn('vat_id', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $orderAddress->addColumn('vat_is_valid', Types::SMALLINT, ['notnull' => false]);
-    $orderAddress->addColumn('vat_request_id', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $orderAddress->addColumn('vat_request_date', Types::STRING, ['length' => 255, 'notnull' => false]);
+    $orderAddress->addColumn('vat_request_id', Types::TEXT, ['length' => 65535, 'notnull' => false]);
+    $orderAddress->addColumn('vat_request_date', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $orderAddress->addColumn('vat_request_success', Types::SMALLINT, ['notnull' => false]);
     $orderAddress->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
@@ -933,10 +933,10 @@ return function (Schema $schema): void {
     $quoteAddress->addColumn('base_shipping_hidden_tax_amnt', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'notnull' => false]);
     $quoteAddress->addColumn('shipping_incl_tax', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'notnull' => false]);
     $quoteAddress->addColumn('base_shipping_incl_tax', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'notnull' => false]);
-    $quoteAddress->addColumn('vat_id', Types::STRING, ['length' => 255, 'notnull' => false]);
+    $quoteAddress->addColumn('vat_id', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $quoteAddress->addColumn('vat_is_valid', Types::SMALLINT, ['notnull' => false]);
-    $quoteAddress->addColumn('vat_request_id', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $quoteAddress->addColumn('vat_request_date', Types::STRING, ['length' => 255, 'notnull' => false]);
+    $quoteAddress->addColumn('vat_request_id', Types::TEXT, ['length' => 65535, 'notnull' => false]);
+    $quoteAddress->addColumn('vat_request_date', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $quoteAddress->addColumn('vat_request_success', Types::SMALLINT, ['notnull' => false]);
     $quoteAddress->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('address_id')->create(),
@@ -1199,11 +1199,7 @@ return function (Schema $schema): void {
         $aggr->addColumn('id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
         $aggr->addColumn('period', Types::DATE_MUTABLE, ['notnull' => false]);
         $aggr->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
-        if ($tableName === 'sales_refunded_aggregated_order') {
-            $aggr->addColumn('order_status', Types::STRING, ['length' => 50, 'notnull' => false]);
-        } else {
-            $aggr->addColumn('order_status', Types::STRING, ['length' => 50, 'default' => '']);
-        }
+        $aggr->addColumn('order_status', Types::STRING, ['length' => 50, 'default' => '']);
         $aggr->addColumn('orders_count', Types::INTEGER, ['default' => 0]);
         $aggr->addColumn('refunded', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'notnull' => false]);
         $aggr->addColumn('online_refunded', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'notnull' => false]);
@@ -1223,7 +1219,7 @@ return function (Schema $schema): void {
         $aggr->addColumn('id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
         $aggr->addColumn('period', Types::DATE_MUTABLE, ['notnull' => false]);
         $aggr->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
-        $aggr->addColumn('order_status', Types::STRING, ['length' => 50, 'notnull' => false]);
+        $aggr->addColumn('order_status', Types::STRING, ['length' => 50, 'default' => '']);
         $aggr->addColumn('shipping_description', Types::STRING, ['length' => 255, 'notnull' => false]);
         $aggr->addColumn('orders_count', Types::INTEGER, ['default' => 0]);
         $aggr->addColumn('total_shipping', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'notnull' => false]);
@@ -1314,7 +1310,7 @@ return function (Schema $schema): void {
     $recurringProfile->addColumn('trial_period_unit', Types::STRING, ['length' => 20, 'notnull' => false]);
     $recurringProfile->addColumn('trial_period_frequency', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
     $recurringProfile->addColumn('trial_period_max_cycles', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
-    $recurringProfile->addColumn('trial_billing_amount', Types::STRING, ['length' => 255, 'notnull' => false]);
+    $recurringProfile->addColumn('trial_billing_amount', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $recurringProfile->addColumn('currency_code', Types::STRING, ['length' => 3]);
     $recurringProfile->addColumn('shipping_amount', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'notnull' => false]);
     $recurringProfile->addColumn('tax_amount', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'notnull' => false]);

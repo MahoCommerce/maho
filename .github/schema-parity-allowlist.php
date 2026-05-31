@@ -35,48 +35,23 @@
 declare(strict_types=1);
 
 $entries = [
-    // ----- Intentional precision upgrade -----
-    //
-    // Doctrine DBAL maps Types::FLOAT to DOUBLE on MySQL (and DOUBLE PRECISION
-    // on Postgres) by design: most RDBMS default to 8-byte floats, MySQL is
-    // the odd one out. The declarative schema therefore emits 'double' where
-    // the legacy DDL emitted 'float'. Double is also a better engineering
-    // choice for these aggregation columns, where sums of many small tax
-    // amounts can accumulate enough rounding error to chew through float's
-    // ~7 significant digits.
-    [
-        'engines' => ['mysql'],
-        'table' => 'tax_order_aggregated_created',
-        'replace' => [
-            '  COLUMN percent float NULL' => '  COLUMN percent double NULL',
-            '  COLUMN tax_base_amount_sum float NULL' => '  COLUMN tax_base_amount_sum double NULL',
-        ],
-    ],
-    [
-        'engines' => ['mysql'],
-        'table' => 'tax_order_aggregated_updated',
-        'replace' => [
-            '  COLUMN percent float NULL' => '  COLUMN percent double NULL',
-            '  COLUMN tax_base_amount_sum float NULL' => '  COLUMN tax_base_amount_sum double NULL',
-        ],
-    ],
-    [
-        'engines' => ['mysql'],
-        'table' => 'catalog_product_index_website',
-        'replace' => [
-            '  COLUMN rate float NULL DEFAULT 1' => '  COLUMN rate double NULL DEFAULT 1',
-        ],
-    ],
-
-    // admin_user.rp_token: legacy DDL declared this TYPE_TEXT(256). The Maho
-    // legacy MySQL adapter converts (length > 255) → text; Postgres keeps it
-    // as varchar(256). Declarative schema unifies on varchar(256) since the
-    // column never stores more than a 256-char token.
+    // admin_user.rp_token: legacy DDL declared this TYPE_TEXT(256), which the
+    // legacy MySQL adapter rendered as text and the Postgres adapter as
+    // varchar(256). The declarative schema unifies on varchar(255) (uniform
+    // across engines; a reset-password token never exceeds it), so both engines
+    // diverge from legacy and are normalized here.
     [
         'engines' => ['mysql'],
         'table' => 'admin_user',
         'replace' => [
-            '  COLUMN rp_token text NULL' => '  COLUMN rp_token varchar(256) NULL',
+            '  COLUMN rp_token text NULL' => '  COLUMN rp_token varchar(255) NULL',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'admin_user',
+        'replace' => [
+            '  COLUMN rp_token character varying(256) NULL' => '  COLUMN rp_token character varying(255) NULL',
         ],
     ],
 
@@ -132,37 +107,6 @@ $entries = [
         'table' => 'log_visitor_online',
         'replace' => [
             '  COLUMN remote_addr bigint NOT NULL' => '  COLUMN remote_addr bytea NULL',
-        ],
-    ],
-
-    // catalog_product_index_website.rate: legacy Postgres adapter emits "real"
-    // for TYPE_FLOAT; Doctrine emits "double precision" for Types::FLOAT on
-    // Postgres (matching the engine default 8-byte precision). Same justification
-    // as the MySQL float→double upgrade.
-    [
-        'engines' => ['pgsql'],
-        'table' => 'catalog_product_index_website',
-        'replace' => [
-            '  COLUMN rate real NULL DEFAULT 1' => '  COLUMN rate double precision NULL DEFAULT 1',
-        ],
-    ],
-
-    // tax_order_aggregated_*.percent / tax_base_amount_sum: same float→double
-    // intentional precision upgrade as MySQL, but pgsql renders it differently.
-    [
-        'engines' => ['pgsql'],
-        'table' => 'tax_order_aggregated_created',
-        'replace' => [
-            '  COLUMN percent real NULL' => '  COLUMN percent double precision NULL',
-            '  COLUMN tax_base_amount_sum real NULL' => '  COLUMN tax_base_amount_sum double precision NULL',
-        ],
-    ],
-    [
-        'engines' => ['pgsql'],
-        'table' => 'tax_order_aggregated_updated',
-        'replace' => [
-            '  COLUMN percent real NULL' => '  COLUMN percent double precision NULL',
-            '  COLUMN tax_base_amount_sum real NULL' => '  COLUMN tax_base_amount_sum double precision NULL',
         ],
     ],
 
@@ -260,27 +204,6 @@ $entries = [
         'table' => 'customer_entity_datetime',
         'replace' => [
             "  COLUMN value timestamp without time zone NOT NULL DEFAULT '1970-01-01 00:00:00'" => '  COLUMN value timestamp without time zone NULL',
-        ],
-    ],
-
-    // Customer vat_id / vat_request_id / vat_request_date on Postgres: legacy
-    // emits text, declarative emits varchar(255). Same justification as MySQL.
-    [
-        'engines' => ['pgsql'],
-        'table' => 'sales_flat_order_address',
-        'replace' => [
-            '  COLUMN vat_id text NULL' => '  COLUMN vat_id character varying(255) NULL',
-            '  COLUMN vat_request_id text NULL' => '  COLUMN vat_request_id character varying(255) NULL',
-            '  COLUMN vat_request_date text NULL' => '  COLUMN vat_request_date character varying(255) NULL',
-        ],
-    ],
-    [
-        'engines' => ['pgsql'],
-        'table' => 'sales_flat_quote_address',
-        'replace' => [
-            '  COLUMN vat_id text NULL' => '  COLUMN vat_id character varying(255) NULL',
-            '  COLUMN vat_request_id text NULL' => '  COLUMN vat_request_id character varying(255) NULL',
-            '  COLUMN vat_request_date text NULL' => '  COLUMN vat_request_date character varying(255) NULL',
         ],
     ],
 
@@ -428,15 +351,6 @@ $entries = [
         ],
     ],
 
-    // PayPal trial_billing_amount: legacy text, declarative varchar(255).
-    [
-        'engines' => ['pgsql'],
-        'table' => 'sales_recurring_profile',
-        'replace' => [
-            '  COLUMN trial_billing_amount text NULL' => '  COLUMN trial_billing_amount character varying(255) NULL',
-        ],
-    ],
-
     // numeric default formatting: declarative emits 0.0000, legacy emits 0.
     [
         'engines' => ['pgsql'],
@@ -527,40 +441,14 @@ $entries = [
         ],
     ],
 
-    // Customer vat_id / vat_request_id / vat_request_date: legacy DDL stored as
-    // TEXT, declarative uses VARCHAR(255) (sufficient for any VAT identifier).
-    [
-        'engines' => ['mysql'],
-        'table' => 'sales_flat_order_address',
-        'replace' => [
-            '  COLUMN vat_id text NULL' => '  COLUMN vat_id varchar(255) NULL',
-            '  COLUMN vat_request_id text NULL' => '  COLUMN vat_request_id varchar(255) NULL',
-            '  COLUMN vat_request_date text NULL' => '  COLUMN vat_request_date varchar(255) NULL',
-        ],
-    ],
-    [
-        'engines' => ['mysql'],
-        'table' => 'sales_flat_quote_address',
-        'replace' => [
-            '  COLUMN vat_id text NULL' => '  COLUMN vat_id varchar(255) NULL',
-            '  COLUMN vat_request_id text NULL' => '  COLUMN vat_request_id varchar(255) NULL',
-            '  COLUMN vat_request_date text NULL' => '  COLUMN vat_request_date varchar(255) NULL',
-        ],
-    ],
-
-    // PayPal trial_billing_amount: legacy DDL stored as TEXT, declarative uses
-    // VARCHAR(255). It's a money string ("X.YY"), no need for TEXT.
-    [
-        'engines' => ['mysql'],
-        'table' => 'sales_recurring_profile',
-        'replace' => [
-            '  COLUMN trial_billing_amount text NULL' => '  COLUMN trial_billing_amount varchar(255) NULL',
-        ],
-    ],
-
-    // Sales order aggregated tables: declarative explicitly sets default '' on
-    // order_status; legacy DDL has it nullable / no default. Functionally
-    // equivalent for these aggregation tables.
+    // Sales aggregation tables: order_status is NOT NULL DEFAULT '' in the
+    // declarative schema. An order always has a status, and the report
+    // aggregators COALESCE a NULL source status to '' (the existing sentinel),
+    // so the aggregate never carries a meaningful NULL. Legacy left several of
+    // these columns nullable. NOTE for existing stores: the declarative migrate
+    // tightens these to NOT NULL, so a store that already holds legacy NULL
+    // order_status rows must clear the affected aggregation table and reindex
+    // reports (these are derived tables, rebuilt from orders).
     [
         'engines' => ['mysql'],
         'table' => 'sales_invoiced_aggregated',
@@ -576,10 +464,118 @@ $entries = [
         ],
     ],
     [
+        'engines' => ['mysql'],
+        'table' => 'sales_shipping_aggregated',
+        'replace' => [
+            '  COLUMN order_status varchar(50) NULL' => '  COLUMN order_status varchar(50) NOT NULL DEFAULT ',
+        ],
+    ],
+    [
+        'engines' => ['mysql'],
+        'table' => 'sales_shipping_aggregated_order',
+        'replace' => [
+            '  COLUMN order_status varchar(50) NULL' => '  COLUMN order_status varchar(50) NOT NULL DEFAULT ',
+        ],
+    ],
+    [
+        'engines' => ['mysql'],
+        'table' => 'sales_refunded_aggregated_order',
+        'replace' => [
+            '  COLUMN order_status varchar(50) NULL' => '  COLUMN order_status varchar(50) NOT NULL DEFAULT ',
+        ],
+    ],
+    [
         'engines' => ['pgsql'],
         'table' => 'sales_invoiced_aggregated',
         'replace' => [
             '  COLUMN order_status character varying(50) NULL' => "  COLUMN order_status character varying(50) NOT NULL DEFAULT ''",
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'sales_shipping_aggregated',
+        'replace' => [
+            '  COLUMN order_status character varying(50) NULL' => "  COLUMN order_status character varying(50) NOT NULL DEFAULT ''",
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'sales_shipping_aggregated_order',
+        'replace' => [
+            '  COLUMN order_status character varying(50) NULL' => "  COLUMN order_status character varying(50) NOT NULL DEFAULT ''",
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'sales_refunded_aggregated_order',
+        'replace' => [
+            '  COLUMN order_status character varying(50) NULL' => "  COLUMN order_status character varying(50) NOT NULL DEFAULT ''",
+        ],
+    ],
+
+    // SalesRule coupon aggregation tables: same NOT NULL DEFAULT '' treatment
+    // as the sales aggregation tables above (legacy left order_status nullable).
+    [
+        'engines' => ['mysql'],
+        'table' => 'coupon_aggregated',
+        'replace' => [
+            '  COLUMN order_status varchar(50) NULL' => '  COLUMN order_status varchar(50) NOT NULL DEFAULT ',
+        ],
+    ],
+    [
+        'engines' => ['mysql'],
+        'table' => 'coupon_aggregated_updated',
+        'replace' => [
+            '  COLUMN order_status varchar(50) NULL' => '  COLUMN order_status varchar(50) NOT NULL DEFAULT ',
+        ],
+    ],
+    [
+        'engines' => ['mysql'],
+        'table' => 'coupon_aggregated_order',
+        'replace' => [
+            '  COLUMN order_status varchar(50) NULL' => '  COLUMN order_status varchar(50) NOT NULL DEFAULT ',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'coupon_aggregated',
+        'replace' => [
+            '  COLUMN order_status character varying(50) NULL' => "  COLUMN order_status character varying(50) NOT NULL DEFAULT ''",
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'coupon_aggregated_updated',
+        'replace' => [
+            '  COLUMN order_status character varying(50) NULL' => "  COLUMN order_status character varying(50) NOT NULL DEFAULT ''",
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'coupon_aggregated_order',
+        'replace' => [
+            '  COLUMN order_status character varying(50) NULL' => "  COLUMN order_status character varying(50) NOT NULL DEFAULT ''",
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'coupon_aggregated',
+        'replace' => [
+            '  COLUMN order_status TEXT NULL' => '  COLUMN order_status TEXT NOT NULL DEFAULT ',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'coupon_aggregated_updated',
+        'replace' => [
+            '  COLUMN order_status TEXT NULL' => '  COLUMN order_status TEXT NOT NULL DEFAULT ',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'coupon_aggregated_order',
+        'replace' => [
+            '  COLUMN order_status TEXT NULL' => '  COLUMN order_status TEXT NOT NULL DEFAULT ',
         ],
     ],
 
@@ -1023,6 +1019,27 @@ $entries = [
     [
         'engines' => ['sqlite'],
         'table' => 'sales_invoiced_aggregated',
+        'replace' => [
+            '  COLUMN order_status TEXT NULL' => '  COLUMN order_status TEXT NOT NULL DEFAULT ',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'sales_shipping_aggregated',
+        'replace' => [
+            '  COLUMN order_status TEXT NULL' => '  COLUMN order_status TEXT NOT NULL DEFAULT ',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'sales_shipping_aggregated_order',
+        'replace' => [
+            '  COLUMN order_status TEXT NULL' => '  COLUMN order_status TEXT NOT NULL DEFAULT ',
+        ],
+    ],
+    [
+        'engines' => ['sqlite'],
+        'table' => 'sales_refunded_aggregated_order',
         'replace' => [
             '  COLUMN order_status TEXT NULL' => '  COLUMN order_status TEXT NOT NULL DEFAULT ',
         ],

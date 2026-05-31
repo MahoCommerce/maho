@@ -666,7 +666,7 @@ return function (Schema $schema): void {
     $productIndexWebsite = $schema->createTable('catalog_product_index_website');
     $productIndexWebsite->addColumn('website_id', Types::SMALLINT, ['unsigned' => true]);
     $productIndexWebsite->addColumn('website_date', Types::DATE_MUTABLE, ['notnull' => false]);
-    $productIndexWebsite->addColumn('rate', Types::FLOAT, ['notnull' => false, 'default' => 1.0]);
+    $productIndexWebsite->addColumn('rate', Types::SMALLFLOAT, ['notnull' => false, 'default' => 1.0]);
     $productIndexWebsite->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('website_id')->create(),
     );
