@@ -67,7 +67,6 @@ class Mage_Reports_Block_Product_Widget_Bestsellers extends Mage_Catalog_Block_P
         $resource = Mage::getSingleton('core/resource');
         $adapter = $resource->getConnection('core_read');
 
-        // Only product ids are needed here; the displayed product collection is built below.
         $select = $adapter->select()
             ->from(['oi' => $resource->getTableName('sales/order_item')], ['product_id'])
             ->joinInner(
