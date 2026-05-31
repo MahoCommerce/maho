@@ -129,20 +129,21 @@ class Mage_Reports_Block_Product_Widget_Bestsellers extends Mage_Catalog_Block_P
             return [null, null];
         }
 
-        $utc = new DateTimeZone('UTC');
-        $nowStore = Mage::app()->getLocale()->utcToStore();
+        $locale = Mage::app()->getLocale();
+        $nowStore = $locale->utcToStore();
 
+        // Boundaries are computed in store TZ so month/year align to the merchant's calendar,
+        // then converted to UTC for the (UTC) sales_order.created_at column.
         $fromStore = match ($period) {
             'last_7_days' => $nowStore->modify('-7 days'),
             'last_30_days' => $nowStore->modify('-30 days'),
             'month' => $nowStore->modify('first day of this month')->setTime(0, 0, 0),
-            'year' => $nowStore->modify('first day of January ' . $nowStore->format('Y'))->setTime(0, 0, 0),
+            'year' => $nowStore->modify('first day of January')->setTime(0, 0, 0),
             default => $nowStore->modify('-30 days'),
         };
 
-        $from = $fromStore->setTimezone($utc)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
-        $to = $nowStore->setTimezone($utc)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+        $from = $fromStore->setTimezone(new DateTimeZone('UTC'))->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
 
-        return [$from, $to];
+        return [$from, $locale->nowUtc()];
     }
 }
