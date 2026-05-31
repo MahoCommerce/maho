@@ -103,11 +103,19 @@ class Mage_CatalogRule_Block_Product_Widget_OnSale extends Mage_Catalog_Block_Pr
      */
     protected function _sortByBestselling(array $productIds): array
     {
-        $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
         $select = $adapter->select()
-            ->from(['oi' => Mage::getSingleton('core/resource')->getTableName('sales/order_item')], ['product_id'])
+            ->from(['oi' => $resource->getTableName('sales/order_item')], ['product_id'])
+            ->joinInner(
+                ['o' => $resource->getTableName('sales/order')],
+                'o.entity_id = oi.order_id',
+                [],
+            )
             ->where('oi.product_id IN (?)', $productIds)
+            ->where('o.state <> ?', Mage_Sales_Model_Order::STATE_CANCELED)
             ->where('oi.parent_item_id IS NULL')
+            ->where('oi.store_id = ?', (int) Mage::app()->getStore()->getId())
             ->group('oi.product_id')
             ->order(new Maho\Db\Expr('SUM(oi.qty_ordered) DESC'));
         $sold = array_map('intval', $adapter->fetchCol($select));

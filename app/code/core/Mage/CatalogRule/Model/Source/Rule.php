@@ -24,6 +24,7 @@ class Mage_CatalogRule_Model_Source_Rule
         /** @var Mage_CatalogRule_Model_Resource_Rule_Collection $collection */
         $collection = Mage::getResourceModel('catalogrule/rule_collection');
         $collection->addFieldToSelect(['rule_id', 'name'])
+            ->addFieldToFilter('is_active', 1)
             ->setOrder('name', Maho\Db\Select::SQL_ASC);
 
         foreach ($collection as $rule) {
