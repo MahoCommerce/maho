@@ -20,26 +20,12 @@ class Mage_Reports_Block_Product_Widget_Bestsellers extends Mage_Catalog_Block_P
     protected $_pageVarName = 'bs';
     protected $_cacheKeyPrefix = 'REPORTS_PRODUCT_WIDGET_BESTSELLERS';
 
-    /**
-     * @return string
-     */
-    public function getPeriod()
+    public function getPeriod(): string
     {
         if (!$this->hasData('period')) {
             $this->setData('period', self::DEFAULT_PERIOD);
         }
         return (string) $this->getData('period');
-    }
-
-    /**
-     * @return bool
-     */
-    public function onlyInStock()
-    {
-        if (!$this->hasData('only_in_stock')) {
-            $this->setData('only_in_stock', true);
-        }
-        return (bool) $this->getData('only_in_stock');
     }
 
     #[\Override]
@@ -53,35 +39,17 @@ class Mage_Reports_Block_Product_Widget_Bestsellers extends Mage_Catalog_Block_P
 
     /**
      * Build the product collection ordered by quantity sold for the selected period.
-     *
-     * @return Mage_Catalog_Model_Resource_Product_Collection
      */
     #[\Override]
-    protected function _getProductCollection()
+    protected function _getProductCollection(): Mage_Catalog_Model_Resource_Product_Collection
     {
         $orderedIds = $this->_getBestsellerProductIds();
 
-        /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
-        $collection = Mage::getResourceModel('catalog/product_collection');
-        $collection->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds());
-
-        if (empty($orderedIds)) {
-            // No sales data yet: render nothing, but keep a valid, empty collection.
-            $collection->getSelect()->where('1 = 0');
-            return $collection;
+        $collection = $this->_prepareStorefrontCollection($orderedIds);
+        if (!empty($orderedIds)) {
+            $collection->getSelect()->order($this->_getOrderByIdsExpr($orderedIds));
+            $collection->setPageSize($this->getProductsCount())->setCurPage(1);
         }
-
-        $this->_addProductAttributesAndPrices($collection)
-            ->addStoreFilter()
-            ->addIdFilter($orderedIds)
-            ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
-
-        if ($this->onlyInStock()) {
-            Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($collection);
-        }
-
-        $collection->getSelect()->order($this->_getOrderByIdsExpr($orderedIds));
-        $collection->setPageSize($this->getProductsCount())->setCurPage(1);
 
         return $collection;
     }

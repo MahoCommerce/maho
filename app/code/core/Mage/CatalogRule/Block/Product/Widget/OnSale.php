@@ -23,35 +23,19 @@ class Mage_CatalogRule_Block_Product_Widget_OnSale extends Mage_Catalog_Block_Pr
 
     /**
      * Optional catalog price rule id to restrict the list to. Empty = all active rules.
-     *
-     * @return int|null
      */
-    public function getRuleId()
+    public function getRuleId(): ?int
     {
         $ruleId = $this->getData('rule_id');
         return $ruleId ? (int) $ruleId : null;
     }
 
-    /**
-     * @return string
-     */
-    public function getOrderMode()
+    public function getOrderMode(): string
     {
         if (!$this->hasData('order')) {
             $this->setData('order', self::DEFAULT_ORDER);
         }
         return (string) $this->getData('order');
-    }
-
-    /**
-     * @return bool
-     */
-    public function onlyInStock()
-    {
-        if (!$this->hasData('only_in_stock')) {
-            $this->setData('only_in_stock', true);
-        }
-        return (bool) $this->getData('only_in_stock');
     }
 
     #[\Override]
@@ -66,11 +50,9 @@ class Mage_CatalogRule_Block_Product_Widget_OnSale extends Mage_Catalog_Block_Pr
 
     /**
      * Build the product collection of items with an active rule price today.
-     *
-     * @return Mage_Catalog_Model_Resource_Product_Collection
      */
     #[\Override]
-    protected function _getProductCollection()
+    protected function _getProductCollection(): Mage_Catalog_Model_Resource_Product_Collection
     {
         $store = Mage::app()->getStore();
         $websiteId = $store->getWebsiteId();
@@ -88,27 +70,11 @@ class Mage_CatalogRule_Block_Product_Widget_OnSale extends Mage_Catalog_Block_Pr
 
         $productIds = array_map('intval', array_keys($rulePrices));
 
-        /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
-        $collection = Mage::getResourceModel('catalog/product_collection');
-        $collection->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds());
-
-        if (empty($productIds)) {
-            // No active rule prices for this store/group today: render nothing.
-            $collection->getSelect()->where('1 = 0');
-            return $collection;
+        $collection = $this->_prepareStorefrontCollection($productIds);
+        if (!empty($productIds)) {
+            $this->_applyOrder($collection, $productIds, $rulePrices);
+            $collection->setPageSize($this->getProductsCount())->setCurPage(1);
         }
-
-        $this->_addProductAttributesAndPrices($collection)
-            ->addStoreFilter()
-            ->addIdFilter($productIds)
-            ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
-
-        if ($this->onlyInStock()) {
-            Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($collection);
-        }
-
-        $this->_applyOrder($collection, $productIds, $rulePrices);
-        $collection->setPageSize($this->getProductsCount())->setCurPage(1);
 
         return $collection;
     }
@@ -116,11 +82,10 @@ class Mage_CatalogRule_Block_Product_Widget_OnSale extends Mage_Catalog_Block_Pr
     /**
      * Apply the configured ordering to the collection.
      *
-     * @param Mage_Catalog_Model_Resource_Product_Collection $collection
      * @param int[] $productIds
      * @param array<int, float> $rulePrices product_id => rule_price
      */
-    protected function _applyOrder($collection, array $productIds, array $rulePrices): void
+    protected function _applyOrder(Mage_Catalog_Model_Resource_Product_Collection $collection, array $productIds, array $rulePrices): void
     {
         match ($this->getOrderMode()) {
             'random' => $collection->getSelect()->orderRand(),
@@ -160,9 +125,9 @@ class Mage_CatalogRule_Block_Product_Widget_OnSale extends Mage_Catalog_Block_Pr
     protected function _sortByDiscount(array $productIds, array $rulePrices): array
     {
         $basePrices = [];
-        $collection = Mage::getResourceModel('catalog/product_collection')
-            ->addAttributeToSelect('price')
-            ->addIdFilter($productIds);
+        /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
+        $collection = Mage::getResourceModel('catalog/product_collection');
+        $collection->addAttributeToSelect('price')->addIdFilter($productIds);
         foreach ($collection as $product) {
             $basePrices[(int) $product->getId()] = (float) $product->getPrice();
         }

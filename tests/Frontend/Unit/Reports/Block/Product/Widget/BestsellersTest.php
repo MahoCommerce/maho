@@ -35,6 +35,11 @@ describe('Bestsellers widget block', function () {
         expect($this->block->getCacheKeyInfo())->toContain('year');
     });
 
+    it('keys the cache by store date so rolling periods refresh daily', function () {
+        $today = Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT);
+        expect($this->block->getCacheKeyInfo())->toContain($today);
+    });
+
     it('renders an empty, error-free collection when there is no sales data', function () {
         $method = new ReflectionMethod($this->block, '_getProductCollection');
         $method->setAccessible(true);

@@ -43,6 +43,11 @@ describe('On Sale widget block', function () {
         expect($info)->toContain('biggest_discount');
     });
 
+    it('keys the cache by store date so it refreshes after the daily catalog-rule reindex', function () {
+        $today = Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT);
+        expect($this->block->getCacheKeyInfo())->toContain($today);
+    });
+
     it('renders an empty, error-free collection when no rule prices are active', function () {
         $method = new ReflectionMethod($this->block, '_getProductCollection');
         $method->setAccessible(true);

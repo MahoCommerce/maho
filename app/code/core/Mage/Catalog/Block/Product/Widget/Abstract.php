@@ -55,10 +55,8 @@ abstract class Mage_Catalog_Block_Product_Widget_Abstract extends Mage_Catalog_B
 
     /**
      * Prepare the product collection rendered by the widget templates.
-     *
-     * @return Mage_Catalog_Model_Resource_Product_Collection|\Maho\Data\Collection
      */
-    abstract protected function _getProductCollection();
+    abstract protected function _getProductCollection(): Mage_Catalog_Model_Resource_Product_Collection;
 
     /**
      * Portable "ORDER BY" expression that sorts rows to match an explicit id list.
@@ -95,13 +93,53 @@ abstract class Mage_Catalog_Block_Product_Widget_Abstract extends Mage_Catalog_B
             $this->getProductsCount(),
             Mage::app()->getStore()->getCurrentCurrencyCode(),
             (int) $this->getRequest()->getParam($this->_pageVarName),
+            // Refresh daily: these lists are time-sensitive (rolling periods, daily catalog-rule reindex).
+            Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT),
         ];
     }
 
     /**
-     * @return int
+     * Whether to restrict the list to in-stock products. Defaults to true.
      */
-    public function getProductsCount()
+    public function onlyInStock(): bool
+    {
+        if (!$this->hasData('only_in_stock')) {
+            $this->setData('only_in_stock', true);
+        }
+        return (bool) $this->getData('only_in_stock');
+    }
+
+    /**
+     * Build a storefront-safe product collection limited to the given ids: visible in catalog,
+     * enabled, in the current store, and (when onlyInStock) in stock. Callers add their own
+     * ordering and pagination. Returns an empty (never null) collection for an empty id list.
+     *
+     * @param int[] $productIds
+     */
+    protected function _prepareStorefrontCollection(array $productIds): Mage_Catalog_Model_Resource_Product_Collection
+    {
+        /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
+        $collection = Mage::getResourceModel('catalog/product_collection');
+        $collection->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds());
+
+        if (empty($productIds)) {
+            $collection->getSelect()->where('1 = 0');
+            return $collection;
+        }
+
+        $this->_addProductAttributesAndPrices($collection)
+            ->addStoreFilter()
+            ->addIdFilter($productIds)
+            ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
+
+        if ($this->onlyInStock()) {
+            Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($collection);
+        }
+
+        return $collection;
+    }
+
+    public function getProductsCount(): int
     {
         if (!$this->hasData('products_count')) {
             $this->setData('products_count', self::DEFAULT_PRODUCTS_COUNT);
@@ -109,10 +147,7 @@ abstract class Mage_Catalog_Block_Product_Widget_Abstract extends Mage_Catalog_B
         return (int) $this->getData('products_count');
     }
 
-    /**
-     * @return int
-     */
-    public function getProductsPerPage()
+    public function getProductsPerPage(): int
     {
         if (!$this->hasData('products_per_page')) {
             $this->setData('products_per_page', self::DEFAULT_PRODUCTS_PER_PAGE);
@@ -120,10 +155,7 @@ abstract class Mage_Catalog_Block_Product_Widget_Abstract extends Mage_Catalog_B
         return (int) $this->getData('products_per_page');
     }
 
-    /**
-     * @return bool
-     */
-    public function showPager()
+    public function showPager(): bool
     {
         if (!$this->hasData('show_pager')) {
             $this->setData('show_pager', self::DEFAULT_SHOW_PAGER);
@@ -131,10 +163,7 @@ abstract class Mage_Catalog_Block_Product_Widget_Abstract extends Mage_Catalog_B
         return (bool) $this->getData('show_pager');
     }
 
-    /**
-     * @return string
-     */
-    public function getPagerHtml()
+    public function getPagerHtml(): string
     {
         if (!$this->showPager()) {
             return '';
