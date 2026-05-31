@@ -38,7 +38,10 @@ if ($connection instanceof Maho\Db\Adapter\Pdo\Mysql) {
     ];
 
     foreach ($tables as $table) {
-        $connection->changeTableEngine($installer->getTable($table), 'InnoDB');
+        $tableName = $installer->getTable($table);
+        if ($connection->isTableExists($tableName)) {
+            $connection->changeTableEngine($tableName, 'InnoDB');
+        }
     }
 }
 
