@@ -64,24 +64,31 @@ class Mage_Reports_Block_Product_Widget_Bestsellers extends Mage_Catalog_Block_P
     {
         [$from, $to] = $this->_getDateRange();
 
-        /** @var Mage_Reports_Model_Resource_Product_Sold_Collection $sold */
-        $sold = Mage::getResourceModel('reports/product_sold_collection');
-        if ($from !== null) {
-            $sold->setDateRange($from, $to);
-        } else {
-            $sold->addOrderedQty()->setOrder('ordered_qty', Maho\Data\Collection::SORT_ORDER_DESC);
-        }
-        $sold->setStoreIds([Mage::app()->getStore()->getId()]);
-        $sold->setPageSize($this->getProductsCount() * 4)->setCurPage(1);
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
 
-        $ids = [];
-        foreach ($sold as $item) {
-            $id = (int) $item->getEntityId();
-            if ($id) {
-                $ids[] = $id;
-            }
+        // Select only the grouped product_id and order by the aggregate so the query is valid
+        // under strict GROUP BY (PostgreSQL), unlike reports/product_sold_collection.
+        $select = $adapter->select()
+            ->from(['oi' => $resource->getTableName('sales/order_item')], ['product_id'])
+            ->joinInner(
+                ['o' => $resource->getTableName('sales/order')],
+                'o.entity_id = oi.order_id',
+                [],
+            )
+            ->where('o.state <> ?', Mage_Sales_Model_Order::STATE_CANCELED)
+            ->where('oi.parent_item_id IS NULL')
+            ->where('oi.store_id = ?', (int) Mage::app()->getStore()->getId())
+            ->group('oi.product_id')
+            ->order(new Maho\Db\Expr('SUM(oi.qty_ordered) DESC'))
+            ->limit($this->getProductsCount() * 4);
+
+        if ($from !== null) {
+            $select->where('o.created_at >= ?', $from)
+                ->where('o.created_at <= ?', $to);
         }
-        return $ids;
+
+        return array_map('intval', $adapter->fetchCol($select));
     }
 
     /**
