@@ -66,6 +66,9 @@ abstract class Mage_Catalog_Block_Product_Widget_Abstract extends Mage_Catalog_B
      */
     protected function _getOrderByIdsExpr(array $ids, string $field = 'e.entity_id'): Maho\Db\Expr
     {
+        if (empty($ids)) {
+            return new Maho\Db\Expr('NULL');
+        }
         $cases = '';
         foreach (array_values($ids) as $position => $id) {
             $cases .= ' WHEN ' . (int) $id . ' THEN ' . $position;
