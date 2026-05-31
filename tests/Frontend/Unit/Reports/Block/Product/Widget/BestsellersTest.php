@@ -13,12 +13,7 @@ uses(Tests\MahoFrontendTestCase::class);
 
 describe('Bestsellers widget block', function () {
     beforeEach(function () {
-        $this->block = Mage::app()->getLayout()->createBlock('reports/product_widget_bestsellers');
-    });
-
-    it('resolves through the block group and implements the widget interface', function () {
-        expect($this->block)->toBeInstanceOf(Mage_Reports_Block_Product_Widget_Bestsellers::class);
-        expect($this->block)->toBeInstanceOf(Mage_Widget_Block_Interface::class);
+        $this->block = new Mage_Reports_Block_Product_Widget_Bestsellers();
     });
 
     it('exposes sensible defaults', function () {

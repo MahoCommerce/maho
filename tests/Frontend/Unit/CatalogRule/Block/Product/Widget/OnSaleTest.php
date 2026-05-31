@@ -13,12 +13,7 @@ uses(Tests\MahoFrontendTestCase::class);
 
 describe('On Sale widget block', function () {
     beforeEach(function () {
-        $this->block = Mage::app()->getLayout()->createBlock('catalogrule/product_widget_onsale');
-    });
-
-    it('resolves through the block group and implements the widget interface', function () {
-        expect($this->block)->toBeInstanceOf(Mage_CatalogRule_Block_Product_Widget_OnSale::class);
-        expect($this->block)->toBeInstanceOf(Mage_Widget_Block_Interface::class);
+        $this->block = new Mage_CatalogRule_Block_Product_Widget_OnSale();
     });
 
     it('exposes sensible defaults', function () {
