@@ -301,6 +301,113 @@ class Mage_Core_Model_Resource_Setup
     }
 
     /**
+     * Enumerate pending schema/data/maho scripts across all setup resources
+     * without running them. Powers `migrate --dry-run`.
+     *
+     * @return array<string, list<array{type: string, toVersion: string, fileName: string}>>
+     *         keyed by resource name; only resources with pending scripts appear
+     */
+    public static function getAllPendingUpdates(): array
+    {
+        $pending = [];
+        $resources = Mage::getConfig()->getNode('global/resources')->children();
+        foreach ($resources as $resName => $resource) {
+            if (!$resource->setup) {
+                continue;
+            }
+            $className = self::class;
+            if (isset($resource->setup->class)) {
+                $className = $resource->setup->getClassName();
+            }
+            /** @var Mage_Core_Model_Resource_Setup $setupClass */
+            $setupClass = new $className($resName);
+            $updates = $setupClass->getPendingUpdates();
+            if ($updates !== []) {
+                $pending[$resName] = $updates;
+            }
+        }
+        return $pending;
+    }
+
+    /**
+     * Pending install/upgrade scripts for this resource, in apply order, without
+     * running them. Mirrors the version comparison applyUpdates()/
+     * applyDataUpdates()/applyMahoUpdates() use to pick scripts, but only
+     * enumerates the files: the SQL an imperative script emits is unknowable
+     * without executing it.
+     *
+     * @return list<array{type: string, toVersion: string, fileName: string}>
+     */
+    public function getPendingUpdates(): array
+    {
+        $configVer = (string) $this->_moduleConfig->version;
+        $updates = [];
+
+        $dbVer = $this->_getResource()->getDbVersion($this->_resourceName);
+        if ($dbVer === false && $configVer) {
+            $install = $this->_getAvailableDbFiles(self::TYPE_DB_INSTALL, '', $configVer);
+            $from = $install === [] ? '' : $install[array_key_last($install)]['toVersion'];
+            $updates = array_merge(
+                $updates,
+                $this->_labelPendingFiles('schema', $install),
+                $this->_labelPendingFiles('schema', $this->_getAvailableDbFiles(self::TYPE_DB_UPGRADE, $from, $configVer)),
+            );
+        } elseif ($dbVer !== false && version_compare($configVer, $dbVer) === self::VERSION_COMPARE_GREATER) {
+            $updates = array_merge(
+                $updates,
+                $this->_labelPendingFiles('schema', $this->_getAvailableDbFiles(self::TYPE_DB_UPGRADE, $dbVer, $configVer)),
+            );
+        }
+
+        $dataVer = $this->_getResource()->getDataVersion($this->_resourceName);
+        if ($dataVer === false && $configVer) {
+            $install = $this->_getAvailableDataFiles(self::TYPE_DATA_INSTALL, '', $configVer);
+            $from = $install === [] ? '' : $install[array_key_last($install)]['toVersion'];
+            $updates = array_merge(
+                $updates,
+                $this->_labelPendingFiles('data', $install),
+                $this->_labelPendingFiles('data', $this->_getAvailableDataFiles(self::TYPE_DATA_UPGRADE, $from, $configVer)),
+            );
+        } elseif ($dataVer !== false && version_compare($configVer, $dataVer) === self::VERSION_COMPARE_GREATER) {
+            $updates = array_merge(
+                $updates,
+                $this->_labelPendingFiles('data', $this->_getAvailableDataFiles(self::TYPE_DATA_UPGRADE, $dataVer, $configVer)),
+            );
+        }
+
+        $mahoVer = $this->_getResource()->getMahoVersion($this->_resourceName);
+        $mahoConfigVer = Mage::getVersion();
+        $mahoFrom = $mahoVer === false ? '' : $mahoVer;
+        if ($mahoVer === false || version_compare($mahoConfigVer, $mahoVer) === self::VERSION_COMPARE_GREATER) {
+            $updates = array_merge(
+                $updates,
+                $this->_labelPendingFiles('maho', $this->_getAvailableMahoFiles(self::TYPE_MAHO, $mahoFrom, $mahoConfigVer)),
+            );
+        }
+
+        return $updates;
+    }
+
+    /**
+     * Tag each enumerated file with its script type for the dry-run report.
+     *
+     * @param list<array{toVersion: string, fileName: string}> $files
+     * @return list<array{type: string, toVersion: string, fileName: string}>
+     */
+    protected function _labelPendingFiles(string $type, array $files): array
+    {
+        $labeled = [];
+        foreach ($files as $file) {
+            $labeled[] = [
+                'type'      => $type,
+                'toVersion' => $file['toVersion'],
+                'fileName'  => $file['fileName'],
+            ];
+        }
+        return $labeled;
+    }
+
+    /**
      * Apply module resource install, upgrade and data scripts
      *
      * @return $this|true
