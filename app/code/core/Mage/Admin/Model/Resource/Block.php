@@ -52,11 +52,9 @@ class Mage_Admin_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstra
     }
 
     /**
-     * Regenerate cache
-     *
-     * @return array Newly built allowlist, indexed by block name.
+     * Regenerate cache and return the freshly built allowlist, indexed by block name.
      */
-    protected function _generateCache()
+    protected function _generateCache(): array
     {
         /** @var Mage_Admin_Model_Resource_Block_Collection $collection */
         $collection = Mage::getResourceModel('admin/block_collection');
