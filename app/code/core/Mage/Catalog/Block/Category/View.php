@@ -48,6 +48,15 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
                 $title = $this->helper('rss')->__('%s RSS Feed', $this->getCurrentCategory()->getName());
                 $headBlock->addItem('rss', $this->getRssLink(), 'title="' . $title . '"');
             }
+
+            // Suppress indexing of filtered/paginated layered-navigation pages to avoid
+            // duplicate content and preserve crawl budget (see catalog/seo configuration).
+            // The canonical tag already points these pages back to the base category URL.
+            if (($this->hasActiveFilters() && $helper->canUseNoindexForFilteredPages())
+                || ($this->isPaginated() && $helper->canUseNoindexForPaginatedPages())
+            ) {
+                $headBlock->setRobots('NOINDEX,FOLLOW');
+            }
         }
 
         /** @var Mage_Page_Block_Html_Head */
@@ -66,6 +75,34 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
         }
 
         return $this;
+    }
+
+    /**
+     * Whether any layered-navigation filter other than the category (subcategory)
+     * filter is currently active. The category filter is excluded because drilling
+     * into a subcategory is legitimate, indexable navigation rather than a facet.
+     *
+     * @return bool
+     */
+    public function hasActiveFilters()
+    {
+        $state = Mage::getSingleton('catalog/layer')->getState();
+        foreach ($state->getFilters() as $filter) {
+            if ($filter->getFilter()->getRequestVar() !== 'cat') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether the current request is a paginated category page (p > 1).
+     *
+     * @return bool
+     */
+    public function isPaginated()
+    {
+        return (int) $this->getRequest()->getParam('p', 1) > 1;
     }
 
     /**

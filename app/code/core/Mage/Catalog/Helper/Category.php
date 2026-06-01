@@ -14,6 +14,9 @@ class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
     public const XML_PATH_CATEGORY_URL_SUFFIX          = 'catalog/seo/category_url_suffix';
     public const XML_PATH_USE_CATEGORY_CANONICAL_TAG   = 'catalog/seo/category_canonical_tag';
     public const XML_PATH_CATEGORY_ROOT_ID             = 'catalog/category/root_id';
+    public const XML_PATH_LN_NOINDEX_FILTERED          = 'catalog/seo/layered_navigation_noindex_filtered';
+    public const XML_PATH_LN_NOINDEX_PAGINATED         = 'catalog/seo/layered_navigation_noindex_paginated';
+    public const XML_PATH_LN_NOFOLLOW_FILTER_LINKS     = 'catalog/seo/layered_navigation_nofollow_filter_links';
 
     protected $_moduleName = 'Mage_Catalog';
 
@@ -162,5 +165,38 @@ class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
     public function canUseCanonicalTag($store = null)
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_USE_CATEGORY_CANONICAL_TAG, $store);
+    }
+
+    /**
+     * Check if filtered layered-navigation pages should be marked NOINDEX,FOLLOW
+     *
+     * @param null|string|bool|int|Mage_Core_Model_Store $store
+     * @return bool
+     */
+    public function canUseNoindexForFilteredPages($store = null)
+    {
+        return Mage::getStoreConfigFlag(self::XML_PATH_LN_NOINDEX_FILTERED, $store);
+    }
+
+    /**
+     * Check if paginated category pages (p > 1) should be marked NOINDEX,FOLLOW
+     *
+     * @param null|string|bool|int|Mage_Core_Model_Store $store
+     * @return bool
+     */
+    public function canUseNoindexForPaginatedPages($store = null)
+    {
+        return Mage::getStoreConfigFlag(self::XML_PATH_LN_NOINDEX_PAGINATED, $store);
+    }
+
+    /**
+     * Check if layered-navigation filter links should carry rel="nofollow"
+     *
+     * @param null|string|bool|int|Mage_Core_Model_Store $store
+     * @return bool
+     */
+    public function canUseNofollowForFilterLinks($store = null)
+    {
+        return Mage::getStoreConfigFlag(self::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, $store);
     }
 }
