@@ -65,9 +65,9 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     }
 
     #[\Override]
-    public function getConditionsInstance(): Mage_CatalogRule_Model_Rule_Condition_Combine
+    public function getConditionsInstance(): Mage_Catalog_Model_Rule_Condition_Combine
     {
-        return Mage::getModel('catalogrule/rule_condition_combine');
+        return Mage::getModel('catalog/rule_condition_combine');
     }
 
     #[\Override]
