@@ -20,6 +20,13 @@ $installer->startSetup();
 $connection = $installer->getConnection();
 $table = $installer->getTable('catalog/category_dynamic_rule');
 
+// The table is created by a later maho_setup script; on a fresh install it may not exist yet,
+// and there is nothing to migrate in that case.
+if (!$connection->isTableExists($table)) {
+    $installer->endSetup();
+    return;
+}
+
 $rows = $connection->fetchPairs(
     $connection->select()->from($table, ['rule_id', 'conditions_serialized']),
 );
