@@ -22,10 +22,19 @@ class LayeredNavigationSeoFilterStub extends Mage_Catalog_Block_Layer_Filter_Att
     /** @var array */
     public $stubItems = [];
 
+    /** @var string|null */
+    public $stubRequestVar = null;
+
     #[\Override]
     public function getItems()
     {
         return $this->stubItems;
+    }
+
+    #[\Override]
+    public function getRequestVar()
+    {
+        return $this->stubRequestVar;
     }
 
     #[\Override]
@@ -42,11 +51,12 @@ function layeredNavMakeFilterItem(string $requestVar): Mage_Catalog_Model_Layer_
     return $item;
 }
 
-function layeredNavRenderFilterHtml(): string
+function layeredNavRenderFilterHtml(?string $requestVar = null): string
 {
     Mage::getDesign()->setArea('frontend');
     $block = new LayeredNavigationSeoFilterStub();
     $block->setLayout(Mage::app()->getLayout());
+    $block->stubRequestVar = $requestVar;
     $block->stubItems = [
         new DataObject(['count' => 3, 'url' => 'http://example.com/shoes.html?color=red', 'label' => 'Red']),
     ];
@@ -103,6 +113,104 @@ describe('Layered Navigation SEO', function () {
         });
     });
 
+    describe('forced robots directive', function () {
+        beforeEach(function () {
+            // Inject a category with no explicit Meta Robots by default.
+            $this->block->setData('current_category', new DataObject());
+            Mage::getSingleton('catalog/layer')->getState()->setFilters([]);
+            Mage::app()->getRequest()->setParam('p', null);
+        });
+
+        test('a base category page forces no robots directive', function () {
+            expect($this->block->getForcedRobots())->toBeNull();
+        });
+
+        test('a filtered page forces NOINDEX,FOLLOW', function () {
+            Mage::getSingleton('catalog/layer')->getState()
+                ->setFilters([layeredNavMakeFilterItem('color')]);
+            expect($this->block->getForcedRobots())->toBe('NOINDEX,FOLLOW');
+        });
+
+        test('a paginated page forces NOINDEX,FOLLOW', function () {
+            Mage::app()->getRequest()->setParam('p', 2);
+            expect($this->block->getForcedRobots())->toBe('NOINDEX,FOLLOW');
+        });
+
+        test('an explicit category Meta Robots value is never overridden', function () {
+            $this->block->setData('current_category', new DataObject(['meta_robots' => 'INDEX,FOLLOW']));
+            Mage::getSingleton('catalog/layer')->getState()
+                ->setFilters([layeredNavMakeFilterItem('color')]);
+            Mage::app()->getRequest()->setParam('p', 2);
+            expect($this->block->getForcedRobots())->toBeNull();
+        });
+
+        test('the filtered-page toggle is honored', function () {
+            Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOINDEX_FILTERED, '0');
+            Mage::getSingleton('catalog/layer')->getState()
+                ->setFilters([layeredNavMakeFilterItem('color')]);
+            expect($this->block->getForcedRobots())->toBeNull();
+        });
+
+        test('an indexable facet landing page (#971) forces no robots even when filtered/paginated', function () {
+            Mage::register(Mage_Catalog_Helper_Category::REGISTRY_LN_LANDING_PAGE, true);
+            Mage::getSingleton('catalog/layer')->getState()
+                ->setFilters([layeredNavMakeFilterItem('color')]);
+            Mage::app()->getRequest()->setParam('p', 2);
+            expect($this->block->getForcedRobots())->toBeNull();
+        });
+    });
+
+    describe('canonical decision', function () {
+        beforeEach(function () {
+            // Inject a category with no explicit Meta Robots by default.
+            $this->block->setData('current_category', new DataObject());
+            Mage::getSingleton('catalog/layer')->getState()->setFilters([]);
+            Mage::app()->getRequest()->setParam('p', null);
+        });
+
+        test('an indexable base category advertises a canonical', function () {
+            expect($this->block->shouldUseCanonicalTag())->toBeTrue();
+        });
+
+        test('a filtered page suppresses the canonical, mutually exclusive with NOINDEX', function () {
+            Mage::getSingleton('catalog/layer')->getState()
+                ->setFilters([layeredNavMakeFilterItem('color')]);
+            // The two signals never co-occur: NOINDEX is forced and the canonical is dropped.
+            expect($this->block->getForcedRobots())->toBe('NOINDEX,FOLLOW');
+            expect($this->block->shouldUseCanonicalTag())->toBeFalse();
+        });
+
+        test('a paginated page suppresses the canonical', function () {
+            Mage::app()->getRequest()->setParam('p', 2);
+            expect($this->block->shouldUseCanonicalTag())->toBeFalse();
+        });
+
+        test('the canonical follows the category_canonical_tag flag', function () {
+            Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_USE_CATEGORY_CANONICAL_TAG, '0');
+            expect($this->block->shouldUseCanonicalTag())->toBeFalse();
+        });
+
+        test('a facet landing page (#971) manages its own canonical', function () {
+            Mage::register(Mage_Catalog_Helper_Category::REGISTRY_LN_LANDING_PAGE, true);
+            expect($this->block->shouldUseCanonicalTag())->toBeFalse();
+        });
+
+        test('a category with its own NOINDEX Meta Robots also suppresses the canonical', function () {
+            $this->block->setData('current_category', new DataObject(['meta_robots' => 'NOINDEX,FOLLOW']));
+            Mage::getSingleton('catalog/layer')->getState()
+                ->setFilters([layeredNavMakeFilterItem('color')]);
+            // getForcedRobots() surfaces the category's own noindex, so the canonical is
+            // suppressed to keep robots and canonical mutually exclusive.
+            expect($this->block->getForcedRobots())->toBe('NOINDEX,FOLLOW');
+            expect($this->block->shouldUseCanonicalTag())->toBeFalse();
+        });
+
+        test('a category with an explicit INDEX Meta Robots still advertises a canonical', function () {
+            $this->block->setData('current_category', new DataObject(['meta_robots' => 'INDEX,FOLLOW']));
+            expect($this->block->shouldUseCanonicalTag())->toBeTrue();
+        });
+    });
+
     describe('configuration defaults', function () {
         test('the category canonical tag is enabled by default', function () {
             expect($this->helper->canUseCanonicalTag())->toBeTrue();
@@ -141,6 +249,22 @@ describe('Layered Navigation SEO', function () {
         test('filter links omit rel="nofollow" when the control is disabled', function () {
             Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, '0');
             expect(layeredNavRenderFilterHtml())->not->toContain('rel="nofollow"');
+        });
+
+        test('an attribute filter carries rel="nofollow" when the control is enabled', function () {
+            Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, '1');
+            expect(layeredNavRenderFilterHtml('color'))->toContain('rel="nofollow"');
+        });
+
+        test('subcategory (cat) filter links omit rel="nofollow" even when enabled', function () {
+            Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, '1');
+            expect(layeredNavRenderFilterHtml('cat'))->not->toContain('rel="nofollow"');
+        });
+
+        test('filter links omit rel="nofollow" on an indexable facet landing page (#971)', function () {
+            Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, '1');
+            Mage::register(Mage_Catalog_Helper_Category::REGISTRY_LN_LANDING_PAGE, true);
+            expect(layeredNavRenderFilterHtml('color'))->not->toContain('rel="nofollow"');
         });
     });
 });

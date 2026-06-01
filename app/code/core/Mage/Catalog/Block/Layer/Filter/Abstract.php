@@ -97,6 +97,17 @@ abstract class Mage_Catalog_Block_Layer_Filter_Abstract extends Mage_Core_Block_
     }
 
     /**
+     * Retrieve the request variable of the underlying filter (e.g. 'cat', 'color').
+     * Null-safe so templates can call it before the filter model is initialized.
+     *
+     * @return string|null
+     */
+    public function getRequestVar()
+    {
+        return $this->_filter ? $this->_filter->getRequestVar() : null;
+    }
+
+    /**
      * Retrieve filter items
      *
      * @return array

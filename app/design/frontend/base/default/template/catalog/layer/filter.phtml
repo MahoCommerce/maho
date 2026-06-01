@@ -11,7 +11,12 @@
 
 /** @var Mage_Catalog_Block_Layer_Filter_Attribute $this */
 ?>
-<?php $addNofollow = $this->helper('catalog/category')->canUseNofollowForFilterLinks(); ?>
+<?php
+$_seoHelper = $this->helper('catalog/category');
+$addNofollow = $_seoHelper->canUseNofollowForFilterLinks()
+    && $this->getRequestVar() !== 'cat'
+    && !$_seoHelper->isLayeredNavigationLandingPage();
+?>
 <ol>
 <?php foreach ($this->getItems() as $_item): ?>
     <li>
