@@ -15481,18 +15481,6 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Resource/Product/Sold/Collection.php
 
 		-
-			rawMessage: 'Parameter #1 $from of method Mage_Reports_Model_Resource_Product_Collection::addOrderedQty() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Product/Sold/Collection.php
-
-		-
-			rawMessage: 'Parameter #2 $to of method Mage_Reports_Model_Resource_Product_Collection::addOrderedQty() expects string, int given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Product/Sold/Collection.php
-
-		-
 			rawMessage: Property Mage_Reports_Model_Resource_Quote_Collection::$_selectCountSqlType has no type specified.
 			identifier: missingType.property
 			count: 1

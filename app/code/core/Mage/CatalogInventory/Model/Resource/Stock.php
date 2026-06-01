@@ -170,7 +170,7 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
     /**
      * add join to select only in stock products
      *
-     * @param Mage_Catalog_Model_Resource_Product_Link_Product_Collection $collection
+     * @param Mage_Catalog_Model_Resource_Product_Collection $collection
      * @return $this
      */
     public function setInStockFilterToCollection($collection)

@@ -16,6 +16,11 @@
         </Mage_CatalogRule>
     </modules>
     <global>
+        <blocks>
+            <catalogrule>
+                <class>Mage_CatalogRule_Block</class>
+            </catalogrule>
+        </blocks>
         <helpers>
             <catalogrule>
                 <class>Mage_CatalogRule_Helper</class>
