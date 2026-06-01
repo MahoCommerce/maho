@@ -646,6 +646,31 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     }
 
     /**
+     * Retrieve all products with an active catalog rule price for a date, website and customer group.
+     * Collect data with product Id => rule_price pairs.
+     *
+     * @param int|string|DateTimeInterface $date
+     * @param int $websiteId
+     * @param int $customerGroupId
+     * @param array|null $productIds optional product id whitelist
+     *
+     * @return array<int, float>
+     */
+    public function getActiveRuleProductPrices($date, $websiteId, $customerGroupId, ?array $productIds = null)
+    {
+        $adapter = $this->_getReadAdapter();
+        $select  = $adapter->select()
+            ->from($this->getTable('catalogrule/rule_product_price'), ['product_id', 'rule_price'])
+            ->where('rule_date = ?', Mage::app()->getLocale()->formatDateForDb($date, withTime: false))
+            ->where('website_id = ?', $websiteId)
+            ->where('customer_group_id = ?', $customerGroupId);
+        if ($productIds !== null) {
+            $select->where('product_id IN (?)', $productIds);
+        }
+        return $adapter->fetchPairs($select);
+    }
+
+    /**
      * Get active rule data based on few filters
      *
      * @param int|string|DateTimeInterface $date

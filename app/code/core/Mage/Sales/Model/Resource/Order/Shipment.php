@@ -13,6 +13,15 @@
 class Mage_Sales_Model_Resource_Order_Shipment extends Mage_Sales_Model_Resource_Order_Abstract
 {
     /**
+     * Serializeable field: packages
+     *
+     * @var array
+     */
+    protected $_serializableFields = [
+        'packages' => [null, []],
+    ];
+
+    /**
      * @var string
      */
     protected $_eventPrefix                  = 'sales_order_shipment_resource';

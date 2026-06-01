@@ -39,16 +39,22 @@ class Mage_Admin_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstra
     {
         $data = Mage::app()->getCache()->load(self::CACHE_ID);
         if ($data === false) {
-            $this->_generateCache();
+            $types = $this->_generateCache();
             $data = Mage::app()->getCache()->load(self::CACHE_ID);
+            if ($data === false) {
+                // Cache backend is disabled or could not persist the entry;
+                // fall back to the freshly built data instead of dropping it.
+                return $types;
+            }
         }
-        return Mage::helper('core')->jsonDecode($data);
+        $decoded = Mage::helper('core')->jsonDecode($data);
+        return is_array($decoded) ? $decoded : [];
     }
 
     /**
-     * Regenerate cache
+     * Regenerate cache and return the freshly built allowlist, indexed by block name.
      */
-    protected function _generateCache()
+    protected function _generateCache(): array
     {
         /** @var Mage_Admin_Model_Resource_Block_Collection $collection */
         $collection = Mage::getResourceModel('admin/block_collection');
@@ -64,6 +70,7 @@ class Mage_Admin_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstra
             self::CACHE_ID,
             [Mage_Core_Model_Resource_Db_Collection_Abstract::CACHE_TAG],
         );
+        return $data;
     }
 
     #[\Override]

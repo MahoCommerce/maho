@@ -30,8 +30,6 @@ $apiAlias = Mage::app()->getRequest()->getParam('type');
 
 // check request could be processed by API2
 if (in_array($apiAlias, Mage_Api2_Model_Server::getApiTypes())) {
-    // emulate index.php entry point for correct URLs generation in API
-    Mage::register('custom_entry_point', true);
     /** @var Mage_Api2_Model_Server $server */
     $server = Mage::getSingleton('api2/server');
     $server->run();
@@ -53,8 +51,6 @@ if ($adapterCode === null) {
 
 try {
     $server->initialize($adapterCode);
-    // emulate index.php entry point for correct URLs generation in API
-    Mage::register('custom_entry_point', true);
     $server->run();
     Mage::app()->getResponse()->sendResponse();
 } catch (Exception $e) {

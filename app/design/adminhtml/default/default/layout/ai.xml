@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @package    Maho_Ai
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<layout>
+    <adminhtml_ai_tasks>
+        <reference name="content">
+            <block type="ai/adminhtml_task" name="ai.tasks"/>
+        </reference>
+    </adminhtml_ai_tasks>
+
+    <adminhtml_ai_view>
+        <reference name="content">
+            <block type="ai/adminhtml_task_view" name="ai.task.view" template="maho/ai/task/view.phtml"/>
+        </reference>
+    </adminhtml_ai_view>
+
+    <adminhtml_ai_usage>
+        <reference name="content">
+            <block type="ai/adminhtml_usage" name="ai.usage"/>
+        </reference>
+    </adminhtml_ai_usage>
+
+    <adminhtml_ai_reindex>
+        <reference name="content">
+            <block type="ai/adminhtml_reindex" name="ai.reindex" template="maho/ai/reindex.phtml"/>
+        </reference>
+    </adminhtml_ai_reindex>
+</layout>

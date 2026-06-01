@@ -1,14 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Maho
  *
- * @package    Maho
  * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+declare(strict_types=1);
 
 namespace Maho\Routing;
 
@@ -72,9 +71,14 @@ class ControllerDispatcher
             return false;
         }
 
-        // Set routeName for event dispatching (controller_action_predispatch_<routeName>)
+        // Set routeName for event dispatching (controller_action_predispatch_<routeName>).
+        // Map frontName to routeName so the admin frontName resolves to 'adminhtml', matching
+        // what setAdminRequestNames() does for Symfony-matched routes. Without this, legacy
+        // admin URLs (no #[Route] attribute, dispatched via the fallback path) end up with
+        // routeName='admin', which breaks getFullActionName() (yields 'admin_*' instead of
+        // 'adminhtml_*'), causing layout handles and predispatch observers to miss.
         if (!$request->getRouteName()) {
-            $request->setRouteName($moduleName);
+            $request->setRouteName(RouteCollectionBuilder::getRouteByFrontName($moduleName) ?? $moduleName);
         }
         $request->setDispatched(true);
         $controllerInstance->dispatch($actionName);

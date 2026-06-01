@@ -24,11 +24,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Strip SPDX lines from PHP source
+        run: find app lib -name "*.php" -exec sed -i '/ \* SPDX-/d' {} +
+
       - name: Generate phpDoc
         run: phpdoc -c .github/phpdoc.xml
 
       - name: Publish to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

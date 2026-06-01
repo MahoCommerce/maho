@@ -87,7 +87,10 @@ class Checkout
 
     async reloadReviewBlock() {
         try {
-            const response = await fetch(this.reviewUrl);
+            const response = await fetch(this.reviewUrl, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            });
             if (!response.ok) {
                 throw new Error(`Server returned status ${response.status}`);
             }

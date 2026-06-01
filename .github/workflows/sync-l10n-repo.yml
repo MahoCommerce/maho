@@ -12,7 +12,7 @@ jobs:
         id: generate_token
         uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ secrets.SYNC_L10N_APP_ID }}
+          client-id: ${{ secrets.SYNC_L10N_APP_CLIENT_ID }}
           private-key: ${{ secrets.SYNC_L10N_APP_PRIVATE_KEY }}
           owner: MahoCommerce
       - name: Set date

@@ -214,7 +214,7 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
     /**
      * Adds filtering for collection to return only in stock products
      *
-     * @param Mage_Catalog_Model_Resource_Product_Link_Product_Collection $collection
+     * @param Mage_Catalog_Model_Resource_Product_Collection $collection
      * @return $this $this
      */
     public function addInStockFilterToCollection($collection)

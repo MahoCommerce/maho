@@ -11,9 +11,14 @@
 declare(strict_types=1);
 
 /**
- * Idempotent so it doubles as the body of upgrade-1.6.0.0-6.0.0.php (which just
- * requires this file). `addColumn` and `addIndex` are already idempotent in Maho's
- * adapter; only `createTable` needs guarding.
+ * Fresh installs resolve to the highest install file <= the module version, so
+ * they run this directly and record 6.0.1, with no post-install upgrade firing.
+ * Existing shops that reached 6.0.0 without the schema re-run this same body
+ * through upgrade-6.0.0-6.0.1.php.
+ *
+ * Idempotent so the repeat run is safe: `createTable` is guarded by
+ * isTableExists, and `addColumn` / `addIndex` are already idempotent in Maho's
+ * adapter (addColumn no-ops when present, addIndex does DROP+ADD).
  *
  * @var Mage_Core_Model_Resource_Setup $this
  */

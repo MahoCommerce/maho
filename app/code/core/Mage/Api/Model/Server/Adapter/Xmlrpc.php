@@ -91,6 +91,7 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends \Maho\DataObject implements M
         $this->_xmlRpc = new Laminas\XmlRpc\Server();
         $this->_xmlRpc->setEncoding($apiConfigCharset)
             ->setClass($this->getHandler());
+        $this->_xmlRpc->setReturnResponse();
         $this->getController()->getResponse()
             ->clearHeaders()
             ->setHeader('Content-Type', 'text/xml; charset=' . $apiConfigCharset)

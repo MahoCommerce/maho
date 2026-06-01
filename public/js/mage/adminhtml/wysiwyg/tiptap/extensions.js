@@ -6,13 +6,13 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import { Editor, Node, Mark, Extension, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.22.2';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.22.2';
-import Image from 'https://esm.sh/@tiptap/extension-image@3.22.2';
-import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.22.2';
-import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.22.2';
-import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.22.2';
-import DragHandle from 'https://esm.sh/@tiptap/extension-drag-handle@3.22.2';
+import { Editor, Node, Mark, Extension, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.23.4';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.23.4';
+import Image from 'https://esm.sh/@tiptap/extension-image@3.23.4';
+import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.23.4';
+import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.23.4';
+import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.23.4';
+import DragHandle from 'https://esm.sh/@tiptap/extension-drag-handle@3.23.4';
 import { MahoColumns, MahoColumn, COLUMN_PRESETS } from './extensions/columns.js';
 import { MahoBentoGrid, MahoBentoCell, BENTO_PRESETS } from './extensions/bento.js';
 
