@@ -32,7 +32,7 @@ declare(strict_types=1);
  */
 
 /**
- * @deprecated since 26.5 Use Maho_ApiPlatform instead.
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
 class Mage_Api_Model_Role extends Mage_Core_Model_Abstract
 {

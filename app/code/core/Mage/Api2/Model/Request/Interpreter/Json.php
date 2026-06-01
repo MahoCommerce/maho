@@ -11,7 +11,7 @@
  */
 
 /**
- * @deprecated since 26.5 Use Maho_ApiPlatform instead.
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
 class Mage_Api2_Model_Request_Interpreter_Json implements Mage_Api2_Model_Request_Interpreter_Interface
 {

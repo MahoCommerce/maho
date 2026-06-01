@@ -11,7 +11,7 @@
  */
 
 /**
- * @deprecated since 26.5 Use Maho_ApiPlatform instead.
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
 abstract class Mage_Api2_Model_Route_Abstract extends Mage_Api2_Model_Route_Base
 {

@@ -13,7 +13,7 @@
 declare(strict_types=1);
 
 /**
- * @deprecated since 26.5 Use Maho_ApiPlatform instead.
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
 interface Mage_Api_Model_Server_Adapter_Interface
 {

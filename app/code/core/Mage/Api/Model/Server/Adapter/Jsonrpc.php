@@ -11,7 +11,7 @@
  */
 
 /**
- * @deprecated since 26.5 Use Maho_ApiPlatform instead.
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
 class Mage_Api_Model_Server_Adapter_Jsonrpc extends \Maho\DataObject implements Mage_Api_Model_Server_Adapter_Interface
 {
