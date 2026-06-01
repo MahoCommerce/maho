@@ -109,12 +109,6 @@ parameters:
 			path: app/code/core/Mage/Admin/Model/Resource/Block.php
 
 		-
-			rawMessage: 'Method Mage_Admin_Model_Resource_Block::_generateCache() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Resource/Block.php
-
-		-
 			rawMessage: 'Method Mage_Admin_Model_Resource_Role::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
