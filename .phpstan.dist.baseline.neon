@@ -109,12 +109,6 @@ parameters:
 			path: app/code/core/Mage/Admin/Model/Resource/Block.php
 
 		-
-			rawMessage: 'Method Mage_Admin_Model_Resource_Block::_generateCache() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Admin/Model/Resource/Block.php
-
-		-
 			rawMessage: 'Method Mage_Admin_Model_Resource_Role::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -9587,12 +9581,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogRule/Model/Rule.php
-
-		-
-			rawMessage: 'Method Mage_CatalogRule_Model_Rule_Condition_Product::_restoreOldAttrValue() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogRule/Model/Rule/Condition/Product.php
 
 		-
 			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 1 parameter, 0 required.'
