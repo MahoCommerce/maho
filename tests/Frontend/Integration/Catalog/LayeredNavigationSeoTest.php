@@ -47,7 +47,11 @@ function layeredNavRenderFilterHtml(): string
 
 describe('Layered Navigation SEO', function () {
     beforeEach(function () {
-        $this->block = Mage::app()->getLayout()->createBlock('catalog/category_view');
+        // Instantiate directly rather than through the shared layout: these tests only
+        // call the block's logic methods, and createBlock() would trigger a full
+        // _prepareLayout() (breadcrumbs/head/title blocks) whose block<->layout cycles
+        // accumulate across the suite and crash the in-process sqlite runner.
+        $this->block = new Mage_Catalog_Block_Category_View();
         $this->helper = Mage::helper('catalog/category');
     });
 
