@@ -18,11 +18,12 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
     protected string|false|null $_forcedRobots = false;
 
     /**
-     * Memoized list of request vars a layered-navigation filter can occupy.
+     * Cached list of request vars a layered-navigation filter can occupy. The filterable
+     * set is the same for every request, so it is cached per process.
      *
      * @var string[]|null
      */
-    protected ?array $_filterableRequestVars = null;
+    protected static ?array $_filterableRequestVars = null;
 
     /**
      * @return $this|Mage_Core_Block_Template
@@ -158,22 +159,22 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
     /**
      * Request vars a layered-navigation filter can occupy: the category (cat) filter
      * plus every globally filterable product attribute (price and select/decimal
-     * attributes). Memoized for the render.
+     * attributes). Cached per process.
      *
      * @return string[]
      */
     public function getFilterableRequestVars(): array
     {
-        if ($this->_filterableRequestVars === null) {
+        if (self::$_filterableRequestVars === null) {
             $vars = ['cat'];
             $attributes = Mage::getResourceModel('catalog/product_attribute_collection')
                 ->addIsFilterableFilter();
             foreach ($attributes as $attribute) {
                 $vars[] = $attribute->getAttributeCode();
             }
-            $this->_filterableRequestVars = $vars;
+            self::$_filterableRequestVars = $vars;
         }
-        return $this->_filterableRequestVars;
+        return self::$_filterableRequestVars;
     }
 
     /**
