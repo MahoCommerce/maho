@@ -18,6 +18,13 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
     protected string|false|null $_forcedRobots = false;
 
     /**
+     * Memoized list of request vars a layered-navigation filter can occupy.
+     *
+     * @var string[]|null
+     */
+    protected ?array $_filterableRequestVars = null;
+
+    /**
      * @return $this|Mage_Core_Block_Template
      * @throws Mage_Core_Model_Store_Exception
      */
@@ -78,12 +85,14 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
     }
 
     /**
-     * The noindex directive applying to this view, or null when it is indexable.
-     * Filtered and paginated layered-navigation pages are forced to NOINDEX,FOLLOW. An
-     * explicit category Meta Robots value takes precedence: a noindex one is surfaced
-     * here (so the canonical is suppressed), while an index one yields null and is left
-     * for the head block to render. Facet landing pages are never force-noindexed.
-     * This is the single source of truth for "is this view noindexed?". Memoized.
+     * The noindex directive for this view, or null when indexable. Single source of
+     * truth for "is this view noindexed?", memoized for the render.
+     *
+     * Precedence: an explicit category noindex always wins (and suppresses the
+     * canonical). Otherwise filtered and paginated layered-navigation views are forced
+     * to NOINDEX,FOLLOW as duplicates, even when the category is explicitly indexable;
+     * facet landing pages opt out. A base view with no noindex yields null, leaving the
+     * head block to render the category's own robots.
      */
     public function getForcedRobots(): ?string
     {
@@ -91,14 +100,15 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
             return $this->_forcedRobots;
         }
 
-        // An explicit category Meta Robots value wins; surface it only when it is a
-        // noindex, so the canonical is suppressed. An INDEX value is rendered by the head
-        // block from the category itself and leaves the canonical free.
+        // An explicit category noindex wins everywhere, so the admin directive is never
+        // weakened and the canonical is suppressed.
         $categoryRobots = (string) $this->getCurrentCategory()->getMetaRobots();
-        if ($categoryRobots !== '') {
-            return $this->_forcedRobots = stripos($categoryRobots, 'noindex') !== false ? $categoryRobots : null;
+        if ($categoryRobots !== '' && stripos($categoryRobots, 'noindex') !== false) {
+            return $this->_forcedRobots = $categoryRobots;
         }
 
+        // Filtered and paginated views are duplicates regardless of the base category's
+        // robots, so they are noindexed even when the category is explicitly indexable.
         /** @var Mage_Catalog_Helper_Category $helper */
         $helper = $this->helper('catalog/category');
         if (!$helper->isLayeredNavigationLandingPage()
@@ -129,29 +139,53 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
     }
 
     /**
-     * Whether any layered-navigation filter is active. The category (cat) filter is
-     * treated like any other facet: its links resolve to ?cat=<id> query views that
-     * duplicate the parent category rather than the subcategory's own canonical URL,
-     * so they get the same noindex treatment. Subcategories remain crawlable through
-     * their own clean URLs in the category children listing.
-     *
-     * Reads the layer state, which is populated when the layered-navigation block
-     * applies the layer (Mage_Catalog_Block_Layer_View::_prepareLayout calls
-     * getLayer()->apply()). The stock catalog_category_layered layout renders that
-     * block (left_first) before this one (content), so the state is ready here.
+     * Whether any layered-navigation filter is active, detected straight from the
+     * request so the result does not depend on the leftnav block having applied the
+     * layer first (render-order independent).
      */
     public function hasActiveFilters(): bool
     {
-        return (bool) Mage::getSingleton('catalog/layer')->getState()->getFilters();
+        $request = $this->getRequest();
+        foreach ($this->getFilterableRequestVars() as $requestVar) {
+            $value = $request->getParam($requestVar);
+            if ($value !== null && $value !== '') {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
-     * Whether the current request is a paginated category page (page > 1). Detection uses
-     * the default 'p' page var, the same one Maho's layered navigation assumes.
+     * Request vars a layered-navigation filter can occupy: the category (cat) filter
+     * plus every globally filterable product attribute (price and select/decimal
+     * attributes). Memoized for the render.
+     *
+     * @return string[]
+     */
+    public function getFilterableRequestVars(): array
+    {
+        if ($this->_filterableRequestVars === null) {
+            $vars = ['cat'];
+            $attributes = Mage::getResourceModel('catalog/product_attribute_collection')
+                ->addIsFilterableFilter();
+            foreach ($attributes as $attribute) {
+                $vars[] = $attribute->getAttributeCode();
+            }
+            $this->_filterableRequestVars = $vars;
+        }
+        return $this->_filterableRequestVars;
+    }
+
+    /**
+     * Whether the current request is a paginated category page (page > 1), using the
+     * pager's configured page var (falling back to the default) so detection tracks any
+     * toolbar customisation.
      */
     public function isPaginated(): bool
     {
-        return (int) $this->getRequest()->getParam('p', 1) > 1;
+        $pager = Mage::getBlockSingleton('page/html_pager');
+        $pageVar = $pager ? $pager->getPageVarName() : 'p';
+        return (int) $this->getRequest()->getParam($pageVar, 1) > 1;
     }
 
     /**
