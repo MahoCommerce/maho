@@ -129,19 +129,15 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
     }
 
     /**
-     * Whether a layered-navigation filter other than the subcategory (cat) filter is
-     * active. Subcategory drill-down is legitimate, indexable navigation, not a facet.
+     * Whether any layered-navigation filter is active. The category (cat) filter is
+     * treated like any other facet: its links resolve to ?cat=<id> query views that
+     * duplicate the parent category rather than the subcategory's own canonical URL,
+     * so they get the same noindex treatment. Subcategories remain crawlable through
+     * their own clean URLs in the category children listing.
      */
     public function hasActiveFilters(): bool
     {
-        $state = Mage::getSingleton('catalog/layer')->getState();
-        foreach ($state->getFilters() as $item) {
-            $filter = $item->getData('filter');
-            if ($filter && $filter->getRequestVar() !== 'cat') {
-                return true;
-            }
-        }
-        return false;
+        return (bool) Mage::getSingleton('catalog/layer')->getState()->getFilters();
     }
 
     /**

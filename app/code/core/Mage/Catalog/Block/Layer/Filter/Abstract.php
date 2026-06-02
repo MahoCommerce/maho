@@ -6,7 +6,6 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -95,15 +94,6 @@ abstract class Mage_Catalog_Block_Layer_Filter_Abstract extends Mage_Core_Block_
     public function getName()
     {
         return $this->_filter->getName();
-    }
-
-    /**
-     * Retrieve the request variable of the underlying filter (e.g. 'cat', 'color').
-     * Null-safe so templates can call it before the filter model is initialized.
-     */
-    public function getRequestVar(): ?string
-    {
-        return $this->_filter ? $this->_filter->getRequestVar() : null;
     }
 
     /**

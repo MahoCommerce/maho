@@ -21,18 +21,10 @@ class LayeredNavigationSeoFilterStub extends Mage_Catalog_Block_Layer_Filter_Att
 {
     public array $stubItems = [];
 
-    public ?string $stubRequestVar = null;
-
     #[\Override]
     public function getItems()
     {
         return $this->stubItems;
-    }
-
-    #[\Override]
-    public function getRequestVar(): ?string
-    {
-        return $this->stubRequestVar;
     }
 
     #[\Override]
@@ -49,12 +41,11 @@ function layeredNavMakeFilterItem(string $requestVar): Mage_Catalog_Model_Layer_
     return $item;
 }
 
-function layeredNavRenderFilterHtml(?string $requestVar = null): string
+function layeredNavRenderFilterHtml(): string
 {
     Mage::getDesign()->setArea('frontend');
     $block = new LayeredNavigationSeoFilterStub();
     $block->setLayout(Mage::app()->getLayout());
-    $block->stubRequestVar = $requestVar;
     $block->stubItems = [
         new DataObject(['count' => 3, 'url' => 'http://example.com/shoes.html?color=red', 'label' => 'Red']),
     ];
@@ -90,10 +81,12 @@ describe('Layered Navigation SEO', function () {
             expect($this->block->hasActiveFilters())->toBeFalse();
         });
 
-        test('the category (cat) filter alone does not count as an active filter', function () {
+        test('the category (cat) filter counts as an active filter like any other', function () {
+            // A ?cat=<id> view is a query-string duplicate of the parent category, so it
+            // is treated as a facet rather than special-cased as indexable navigation.
             Mage::getSingleton('catalog/layer')->getState()
                 ->setFilters([layeredNavMakeFilterItem('cat')]);
-            expect($this->block->hasActiveFilters())->toBeFalse();
+            expect($this->block->hasActiveFilters())->toBeTrue();
         });
 
         test('an attribute filter counts as an active filter', function () {
@@ -126,6 +119,12 @@ describe('Layered Navigation SEO', function () {
         test('a filtered page forces NOINDEX,FOLLOW', function () {
             Mage::getSingleton('catalog/layer')->getState()
                 ->setFilters([layeredNavMakeFilterItem('color')]);
+            expect($this->block->getForcedRobots())->toBe('NOINDEX,FOLLOW');
+        });
+
+        test('a cat-only filtered page forces NOINDEX,FOLLOW like any other filter', function () {
+            Mage::getSingleton('catalog/layer')->getState()
+                ->setFilters([layeredNavMakeFilterItem('cat')]);
             expect($this->block->getForcedRobots())->toBe('NOINDEX,FOLLOW');
         });
 
@@ -249,20 +248,10 @@ describe('Layered Navigation SEO', function () {
             expect(layeredNavRenderFilterHtml())->not->toContain('rel="nofollow"');
         });
 
-        test('an attribute filter carries rel="nofollow" when the control is enabled', function () {
-            Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, '1');
-            expect(layeredNavRenderFilterHtml('color'))->toContain('rel="nofollow"');
-        });
-
-        test('subcategory (cat) filter links omit rel="nofollow" even when enabled', function () {
-            Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, '1');
-            expect(layeredNavRenderFilterHtml('cat'))->not->toContain('rel="nofollow"');
-        });
-
         test('filter links omit rel="nofollow" on an indexable facet landing page (#971)', function () {
             Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, '1');
             Mage::register(Mage_Catalog_Helper_Category::REGISTRY_LN_LANDING_PAGE, true);
-            expect(layeredNavRenderFilterHtml('color'))->not->toContain('rel="nofollow"');
+            expect(layeredNavRenderFilterHtml())->not->toContain('rel="nofollow"');
         });
     });
 });

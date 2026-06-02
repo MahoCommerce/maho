@@ -13,8 +13,10 @@
 ?>
 <?php
 $_seoHelper = $this->helper('catalog/category');
+// The category (cat) filter is treated like any other facet: its links point to
+// ?cat=<id> duplicate views, not the subcategory's canonical URL, so they get the
+// same nofollow treatment. Subcategories stay crawlable via their own clean URLs.
 $addNofollow = $_seoHelper->canUseNofollowForFilterLinks()
-    && $this->getRequestVar() !== 'cat'
     && !$_seoHelper->isLayeredNavigationLandingPage();
 ?>
 <ol>
