@@ -117,7 +117,7 @@ final class Mage
      */
     public static function getVersion(): string
     {
-        return '26.5.0';
+        return '26.7.0';
     }
 
     /**
@@ -580,9 +580,8 @@ final class Mage
      * @param string $code
      * @param string $type
      * @param string|array $options
-     * @return Mage_Core_Model_App
      */
-    public static function app($code = '', $type = 'store', $options = [])
+    public static function app($code = '', $type = 'store', $options = []): Mage_Core_Model_App
     {
         if (self::$_app === null) {
             self::$_app = new Mage_Core_Model_App();

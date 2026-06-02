@@ -21,6 +21,10 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
     #[\Override]
     public function isAvailable($quote = null): bool
     {
+        if (!parent::isAvailable($quote)) {
+            return false;
+        }
+
         $customerId = $quote?->getCustomerId()
             ?: Mage::getSingleton('customer/session')->getCustomerId();
 
@@ -30,13 +34,10 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
 
         /** @var Maho_Paypal_Model_Resource_Vault_Token_Collection $tokens */
         $tokens = Mage::getResourceModel('paypal/vault_token_collection');
-        $tokens->addCustomerFilter((int) $customerId)->addActiveFilter();
-
-        if ($tokens->getSize() === 0) {
-            return false;
-        }
-
-        return parent::isAvailable($quote);
+        return $tokens
+            ->addCustomerFilter((int) $customerId)
+            ->addActiveFilter()
+            ->getSize() > 0;
     }
 
     #[\Override]

@@ -129,7 +129,15 @@
     "scripts": {
         "test": "php tests/pest-with-test-db.php",
         "test:pgsql": "MAHO_DB_TYPE=pgsql php tests/pest-with-test-db.php",
-        "test:sqlite": "MAHO_DB_TYPE=sqlite php tests/pest-with-test-db.php"
+        "test:sqlite": "MAHO_DB_TYPE=sqlite php tests/pest-with-test-db.php",
+        "lint": [
+            "@lint:cs-fixer",
+            "@lint:rector",
+            "@lint:phpstan"
+        ],
+        "lint:cs-fixer": "php vendor/bin/php-cs-fixer fix --diff --dry-run",
+        "lint:phpstan": "XDEBUG_MODE=off php vendor/bin/phpstan analyze",
+        "lint:rector": "php vendor/bin/rector -c .rector.php --dry-run"
     },
     "config": {
         "allow-plugins": {

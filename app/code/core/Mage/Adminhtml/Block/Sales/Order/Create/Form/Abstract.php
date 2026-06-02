@@ -132,7 +132,7 @@ abstract class Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract extends Mag
             if ($inputType) {
                 $element = $form->addField($attribute->getAttributeCode(), $inputType, [
                     'name'      => $attribute->getAttributeCode(),
-                    'label'     => $this->__($attribute->getStoreLabel()),
+                    'label'     => $this->__($attribute->getFrontendLabel() ?? $attribute->getStoreLabel()),
                     'class'     => $attribute->getFrontend()->getClass(),
                     'required'  => $attribute->getIsRequired(),
                     'note'      => $this->escapeHtml($this->__($attribute->getNote())),

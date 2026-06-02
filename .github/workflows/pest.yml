@@ -27,40 +27,47 @@ jobs:
             db_user: root
             db_pass: root
             health_cmd: mysqladmin ping
+            db_command: --log-bin --gtid-mode=ON --enforce-gtid-consistency=ON
           - name: mysql-latest
             db_engine: mysql
             db_image: mysql:latest
             db_user: root
             db_pass: root
             health_cmd: mysqladmin ping
+            db_command: --log-bin --gtid-mode=ON --enforce-gtid-consistency=ON
           - name: mariadb-10.11
             db_engine: mysql
             db_image: mariadb:10.11
             db_user: root
             db_pass: root
             health_cmd: healthcheck.sh --connect --innodb_initialized
+            db_command: --skip-name-resolve
           - name: mariadb-latest
             db_engine: mysql
             db_image: mariadb:latest
             db_user: root
             db_pass: root
             health_cmd: healthcheck.sh --connect --innodb_initialized
+            db_command: --skip-name-resolve
           - name: pgsql-14
             db_engine: pgsql
             db_image: postgres:14
             db_user: postgres
             db_pass: postgres
             health_cmd: pg_isready
+            db_command: postgres
           - name: pgsql-latest
             db_engine: pgsql
             db_image: postgres:latest
             db_user: postgres
             db_pass: postgres
             health_cmd: pg_isready
+            db_command: postgres
 
     services:
       db:
         image: ${{ matrix.db_image }}
+        command: ${{ matrix.db_command }}
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: maho

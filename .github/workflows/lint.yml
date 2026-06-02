@@ -1,4 +1,4 @@
-name: PHP-CS-Fixer
+name: Lint
 
 on:
   push:
@@ -13,8 +13,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  php-cs-fixer:
-    name: Validation
+  lint:
+    name: PHP-CS-Fixer + Rector
     runs-on: [ubuntu-latest]
 
     steps:
@@ -41,4 +41,7 @@ jobs:
         run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
 
       - name: PHP-CS-Fixer
-        run: php vendor/bin/php-cs-fixer fix --diff --dry-run
+        run: composer lint:cs-fixer
+
+      - name: Rector
+        run: composer lint:rector

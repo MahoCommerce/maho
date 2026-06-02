@@ -154,9 +154,9 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
      */
     protected function _addSpecialAttributes(array &$attributes)
     {
-        $attributes['attribute_set_id'] = Mage::helper('catalogrule')->__('Attribute Set');
-        $attributes['category_ids'] = Mage::helper('catalogrule')->__('Category');
-        $attributes['type_id'] = Mage::helper('catalogrule')->__('Product Type');
+        $attributes['attribute_set_id'] = Mage::helper('catalog')->__('Attribute Set');
+        $attributes['category_ids'] = Mage::helper('catalog')->__('Category');
+        $attributes['type_id'] = Mage::helper('catalog')->__('Product Type');
     }
 
     /**

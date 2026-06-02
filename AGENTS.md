@@ -9,9 +9,12 @@ Maho is an open-source ecommerce platform forked from OpenMage, designed for med
 ## Essential Commands
 
 ```bash
-vendor/bin/php-cs-fixer fix        # Fix code style (lint)
-vendor/bin/phpstan analyze         # Run static analysis (level 6)
-vendor/bin/rector -c .rector.php
+composer lint                      # Run all linters (cs-fixer, rector, phpstan)
+composer lint:cs-fixer             # Code style only (dry-run)
+composer lint:rector               # Rector only (dry-run)
+composer lint:phpstan              # PHPStan only (level 6)
+vendor/bin/php-cs-fixer fix        # Apply code style fixes (writes changes)
+vendor/bin/rector -c .rector.php   # Apply rector fixes (writes changes)
 ./maho cache:flush                 # Flush all caches
 composer test                        # Run all tests (Install → Backend → Frontend)
 composer test -- --testsuite=Frontend # Run frontend tests only
@@ -163,7 +166,7 @@ All Zend Framework and Varien components have been completely removed. **NEVER**
 
 ### Adding New Features
 - New modules: `app/code/core/Maho/` namespace, declared in `app/etc/modules/`
-- Follow existing module patterns; use `declare(strict_types=1)` and PHP 8.3+ features
+- Follow existing module patterns; use `declare(strict_types=1)` (placed *after* the file-level docblock, not before) and PHP 8.3+ features
 - Use `#[\Override]` attribute for overridden methods
 - When overriding admin routes in Maho modules, use `before="Mage_Adminhtml"` pattern
 

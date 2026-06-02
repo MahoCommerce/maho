@@ -55,7 +55,7 @@ jobs:
             phpstan-result-cache-${{ matrix.php-versions }}-main
 
       - name: PHPStan Static Analysis
-        run: XDEBUG_MODE=off php vendor/bin/phpstan.phar analyze -vvv
+        run: composer lint:phpstan -- -vvv
 
       - name: Save result cache
         uses: actions/cache/save@v5
