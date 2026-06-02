@@ -147,8 +147,8 @@ class Mage_SalesRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Reso
                     ),
                     [],
                 )
-                ->where("$fromDate is null or $fromDate <= ?", $now)
-                ->where("$toDate is null or $toDate >= ?", $now);
+                ->where("$fromDate IS NULL OR $fromDate <= ?", $now)
+                ->where("$toDate IS NULL OR $toDate >= ?", $now);
 
             $this->addIsActiveFilter();
 
