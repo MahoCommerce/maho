@@ -44,8 +44,8 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
             }
 
             // A view is either indexable (canonical to the clean URL) or suppressed
-            // (NOINDEX,FOLLOW, no canonical) — never both, since a noindex plus a
-            // cross-URL canonical is contradictory and can deindex the canonical target.
+            // (NOINDEX,FOLLOW, no canonical), never both: a noindex plus a cross-URL
+            // canonical is contradictory and can deindex the canonical target.
             if ($robots = $this->getForcedRobots()) {
                 $headBlock->setRobots($robots);
             } elseif ($this->shouldUseCanonicalTag()) {
@@ -134,6 +134,11 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
      * duplicate the parent category rather than the subcategory's own canonical URL,
      * so they get the same noindex treatment. Subcategories remain crawlable through
      * their own clean URLs in the category children listing.
+     *
+     * Reads the layer state, which is populated when the layered-navigation block
+     * applies the layer (Mage_Catalog_Block_Layer_View::_prepareLayout calls
+     * getLayer()->apply()). The stock catalog_category_layered layout renders that
+     * block (left_first) before this one (content), so the state is ready here.
      */
     public function hasActiveFilters(): bool
     {
