@@ -14,10 +14,8 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
 {
     /**
      * Memoized getForcedRobots() result for the render; false until resolved.
-     *
-     * @var string|null|false
      */
-    protected $_forcedRobots = false;
+    protected string|false|null $_forcedRobots = false;
 
     /**
      * @return $this|Mage_Core_Block_Template
@@ -86,10 +84,8 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
      * here (so the canonical is suppressed), while an index one yields null and is left
      * for the head block to render. Facet landing pages are never force-noindexed.
      * This is the single source of truth for "is this view noindexed?". Memoized.
-     *
-     * @return string|null
      */
-    public function getForcedRobots()
+    public function getForcedRobots(): ?string
     {
         if ($this->_forcedRobots !== false) {
             return $this->_forcedRobots;
@@ -119,10 +115,8 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
      * Whether to advertise a canonical URL for this view. Suppressed on a noindexed view
      * (canonical and noindex are mutually exclusive) and on facet landing pages, which
      * manage their own canonical.
-     *
-     * @return bool
      */
-    public function shouldUseCanonicalTag()
+    public function shouldUseCanonicalTag(): bool
     {
         if ($this->getForcedRobots()) {
             return false;
@@ -137,10 +131,8 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
     /**
      * Whether a layered-navigation filter other than the subcategory (cat) filter is
      * active. Subcategory drill-down is legitimate, indexable navigation, not a facet.
-     *
-     * @return bool
      */
-    public function hasActiveFilters()
+    public function hasActiveFilters(): bool
     {
         $state = Mage::getSingleton('catalog/layer')->getState();
         foreach ($state->getFilters() as $item) {
@@ -155,10 +147,8 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
     /**
      * Whether the current request is a paginated category page (page > 1). Detection uses
      * the default 'p' page var, the same one Maho's layered navigation assumes.
-     *
-     * @return bool
      */
-    public function isPaginated()
+    public function isPaginated(): bool
     {
         return (int) $this->getRequest()->getParam('p', 1) > 1;
     }

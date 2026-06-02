@@ -19,11 +19,9 @@ uses(Tests\MahoFrontendTestCase::class);
  */
 class LayeredNavigationSeoFilterStub extends Mage_Catalog_Block_Layer_Filter_Attribute
 {
-    /** @var array */
-    public $stubItems = [];
+    public array $stubItems = [];
 
-    /** @var string|null */
-    public $stubRequestVar = null;
+    public ?string $stubRequestVar = null;
 
     #[\Override]
     public function getItems()
@@ -32,7 +30,7 @@ class LayeredNavigationSeoFilterStub extends Mage_Catalog_Block_Layer_Filter_Att
     }
 
     #[\Override]
-    public function getRequestVar()
+    public function getRequestVar(): ?string
     {
         return $this->stubRequestVar;
     }

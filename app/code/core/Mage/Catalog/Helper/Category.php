@@ -173,9 +173,8 @@ class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
      * Check if filtered layered-navigation pages should be marked NOINDEX,FOLLOW
      *
      * @param null|string|bool|int|Mage_Core_Model_Store $store
-     * @return bool
      */
-    public function canUseNoindexForFilteredPages($store = null)
+    public function canUseNoindexForFilteredPages($store = null): bool
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_LN_NOINDEX_FILTERED, $store);
     }
@@ -184,9 +183,8 @@ class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
      * Check if paginated category pages (p > 1) should be marked NOINDEX,FOLLOW
      *
      * @param null|string|bool|int|Mage_Core_Model_Store $store
-     * @return bool
      */
-    public function canUseNoindexForPaginatedPages($store = null)
+    public function canUseNoindexForPaginatedPages($store = null): bool
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_LN_NOINDEX_PAGINATED, $store);
     }
@@ -195,9 +193,8 @@ class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
      * Check if layered-navigation filter links should carry rel="nofollow"
      *
      * @param null|string|bool|int|Mage_Core_Model_Store $store
-     * @return bool
      */
-    public function canUseNofollowForFilterLinks($store = null)
+    public function canUseNofollowForFilterLinks($store = null): bool
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, $store);
     }
@@ -207,10 +204,8 @@ class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
      * page. A future facet-landing-page feature (see discussion #971) registers
      * REGISTRY_LN_LANDING_PAGE to opt the view out of the layered-navigation
      * crawl controls (NOINDEX, canonical-to-base, nofollow filter links).
-     *
-     * @return bool
      */
-    public function isLayeredNavigationLandingPage()
+    public function isLayeredNavigationLandingPage(): bool
     {
         return (bool) Mage::registry(self::REGISTRY_LN_LANDING_PAGE);
     }
