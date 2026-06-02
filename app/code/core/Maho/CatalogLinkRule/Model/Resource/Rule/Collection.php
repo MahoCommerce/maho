@@ -29,9 +29,14 @@ class Maho_CatalogLinkRule_Model_Resource_Rule_Collection extends Mage_Core_Mode
         // from_date/to_date are admin-entered as store-local — compare in store TZ
         $now = Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
 
+        // Quote from_date/to_date: newer MariaDB reserves them as date functions, so
+        // unquoted column references fail to parse.
+        $connection = $this->getConnection();
+        $fromDate = $connection->quoteIdentifier('from_date');
+        $toDate = $connection->quoteIdentifier('to_date');
         $this->getSelect()
-            ->where('from_date IS NULL OR from_date <= ?', $now)
-            ->where('to_date IS NULL OR to_date >= ?', $now);
+            ->where("$fromDate IS NULL OR $fromDate <= ?", $now)
+            ->where("$toDate IS NULL OR $toDate >= ?", $now);
 
         return $this;
     }
