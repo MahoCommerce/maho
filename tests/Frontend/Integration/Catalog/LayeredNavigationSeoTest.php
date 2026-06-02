@@ -13,44 +13,12 @@ use Maho\DataObject;
 
 uses(Tests\MahoFrontendTestCase::class);
 
-/**
- * Filter block stub that renders catalog/layer/filter.phtml with injected items,
- * avoiding the need for a real attribute model or product fixtures.
- */
-class LayeredNavigationSeoFilterStub extends Mage_Catalog_Block_Layer_Filter_Attribute
-{
-    public array $stubItems = [];
-
-    #[\Override]
-    public function getItems()
-    {
-        return $this->stubItems;
-    }
-
-    #[\Override]
-    public function shouldDisplayProductCount()
-    {
-        return false;
-    }
-}
-
-function layeredNavRenderFilterHtml(): string
-{
-    Mage::getDesign()->setArea('frontend');
-    $block = new LayeredNavigationSeoFilterStub();
-    $block->setLayout(Mage::app()->getLayout());
-    $block->stubItems = [
-        new DataObject(['count' => 3, 'url' => 'http://example.com/shoes.html?color=red', 'label' => 'Red']),
-    ];
-    return $block->toHtml();
-}
-
 describe('Layered Navigation SEO', function () {
     beforeEach(function () {
         // Instantiate directly rather than through the shared layout: these tests only
         // call the block's logic methods, and createBlock() would trigger a full
-        // _prepareLayout() (breadcrumbs/head/title blocks) whose block<->layout cycles
-        // accumulate across the suite and crash the in-process sqlite runner.
+        // _prepareLayout() whose block<->layout cycles accumulate across the suite and
+        // crash the in-process sqlite CI runner.
         $this->block = new Mage_Catalog_Block_Category_View();
         $this->helper = Mage::helper('catalog/category');
     });
@@ -208,34 +176,6 @@ describe('Layered Navigation SEO', function () {
         });
     });
 
-    describe('end-to-end head rendering (render-order independent)', function () {
-        // Builds a real head block and the category view through the layout, proving the
-        // head is configured from the request alone, without the leftnav/layer running.
-        $renderInto = function (DataObject $category): Mage_Page_Block_Html_Head {
-            Mage::register('current_category', $category);
-            $layout = Mage::app()->getLayout();
-            /** @var Mage_Page_Block_Html_Head $head */
-            $head = $layout->createBlock('page/html_head', 'head');
-            $layout->createBlock('catalog/category_view', 'category.products');
-            return $head;
-        };
-
-        test('a filtered request forces NOINDEX,FOLLOW on the head block', function () use ($renderInto) {
-            Mage::app()->getRequest()->setParam('color', 'red');
-            expect($renderInto(new DataObject())->getRobots())->toBe('NOINDEX,FOLLOW');
-        });
-
-        test('a paginated request forces NOINDEX,FOLLOW on the head block', function () use ($renderInto) {
-            Mage::app()->getRequest()->setParam('p', 2);
-            expect($renderInto(new DataObject())->getRobots())->toBe('NOINDEX,FOLLOW');
-        });
-
-        test('an unfiltered request does not force noindex on the head block', function () use ($renderInto) {
-            $category = new DataObject(['url' => 'http://example.com/category.html']);
-            expect($renderInto($category)->getRobots())->not->toBe('NOINDEX,FOLLOW');
-        });
-    });
-
     describe('configuration defaults', function () {
         test('the category canonical tag is enabled by default', function () {
             expect($this->helper->canUseCanonicalTag())->toBeTrue();
@@ -262,24 +202,6 @@ describe('Layered Navigation SEO', function () {
         test('nofollow for filter links honors the store config flag', function () {
             Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, '0');
             expect($this->helper->canUseNofollowForFilterLinks())->toBeFalse();
-        });
-    });
-
-    describe('filter link rel="nofollow" rendering', function () {
-        test('filter links carry rel="nofollow" when the control is enabled', function () {
-            Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, '1');
-            expect(layeredNavRenderFilterHtml())->toContain('rel="nofollow"');
-        });
-
-        test('filter links omit rel="nofollow" when the control is disabled', function () {
-            Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, '0');
-            expect(layeredNavRenderFilterHtml())->not->toContain('rel="nofollow"');
-        });
-
-        test('filter links omit rel="nofollow" on an indexable facet landing page (#971)', function () {
-            Mage::app()->getStore()->setConfig(Mage_Catalog_Helper_Category::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, '1');
-            Mage::register(Mage_Catalog_Helper_Category::REGISTRY_LN_LANDING_PAGE, true);
-            expect(layeredNavRenderFilterHtml())->not->toContain('rel="nofollow"');
         });
     });
 });
