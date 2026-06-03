@@ -288,6 +288,52 @@ describe('Legacy serialized data conversion via core/string helper', function ()
     });
 });
 
+describe('unserialize tolerates non-serialized input (issue #980)', function () {
+    beforeEach(function () {
+        $this->helper = Mage::helper('core/string');
+    });
+
+    it('returns null for null', function () {
+        expect($this->helper->unserialize(null))->toBeNull();
+    });
+
+    it('passes a plain non-serialized string through unchanged', function () {
+        expect($this->helper->unserialize('just a string'))->toBe('just a string');
+    });
+
+    it('does not emit a reportable warning for a plain non-serialized string', function () {
+        // Mirror Maho's error handler (Mage/Core/functions.php): a warning is only
+        // logged/displayed when it survives the active error_reporting() mask. The @ in
+        // the helper zeroes that mask, so a suppressed warning must not count here.
+        $warned = false;
+        set_error_handler(function (int $errno) use (&$warned) {
+            if ($errno & error_reporting()) {
+                $warned = true;
+            }
+            return false;
+        });
+        try {
+            $this->helper->unserialize('option text value');
+        } finally {
+            restore_error_handler();
+        }
+        expect($warned)->toBeFalse();
+    });
+
+    it('passes an empty string through unchanged', function () {
+        expect($this->helper->unserialize(''))->toBe('');
+    });
+
+    it('decodes a legacy serialized scalar', function () {
+        expect($this->helper->unserialize('i:5;'))->toBe(5);
+        expect($this->helper->unserialize(serialize('hello')))->toBe('hello');
+    });
+
+    it('returns false for legacy serialized false', function () {
+        expect($this->helper->unserialize(serialize(false)))->toBeFalse();
+    });
+});
+
 describe('isSerializedArrayOrObject detects both JSON and legacy formats', function () {
     beforeEach(function () {
         $this->helper = Mage::helper('core/string');
