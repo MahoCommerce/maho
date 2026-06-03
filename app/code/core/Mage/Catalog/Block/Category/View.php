@@ -113,8 +113,8 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
         /** @var Mage_Catalog_Helper_Category $helper */
         $helper = $this->helper('catalog/category');
         if (!$helper->isLayeredNavigationLandingPage()
-            && (($this->hasActiveFilters() && $helper->canUseNoindexForFilteredPages())
-                || ($this->isPaginated() && $helper->canUseNoindexForPaginatedPages()))
+            && (($helper->canUseNoindexForFilteredPages() && $this->hasActiveFilters())
+                || ($helper->canUseNoindexForPaginatedPages() && $this->isPaginated()))
         ) {
             return $this->_forcedRobots = 'NOINDEX,FOLLOW';
         }
@@ -179,13 +179,14 @@ class Mage_Catalog_Block_Category_View extends Mage_Core_Block_Template
 
     /**
      * Whether the current request is a paginated category page (page > 1), using the
-     * pager's configured page var (falling back to the default) so detection tracks any
-     * toolbar customisation.
+     * catalog product-list toolbar's configured page var (falling back to the default)
+     * so detection tracks a rewritten toolbar's page var.
      */
     public function isPaginated(): bool
     {
-        $pager = Mage::getBlockSingleton('page/html_pager');
-        $pageVar = $pager ? $pager->getPageVarName() : 'p';
+        /** @var Mage_Catalog_Block_Product_List_Toolbar $toolbar */
+        $toolbar = Mage::getBlockSingleton('catalog/product_list_toolbar');
+        $pageVar = $toolbar ? $toolbar->getPageVarName() : 'p';
         return (int) $this->getRequest()->getParam($pageVar, 1) > 1;
     }
 
