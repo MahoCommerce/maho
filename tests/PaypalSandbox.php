@@ -11,8 +11,6 @@ declare(strict_types=1);
 
 namespace Tests;
 
-use Mage;
-
 /**
  * Loads PayPal sandbox credentials for E2E tests and applies them to the test store.
  *
@@ -64,26 +62,5 @@ final class PaypalSandbox
     public static function isConfigured(): bool
     {
         return self::clientId() !== '' && self::clientSecret() !== '';
-    }
-
-    /**
-     * Set a non-base display currency on the test store (base USD, display EUR), the
-     * scenario issue #985 is about. PayPal sandbox credentials are injected globally at
-     * install time (see PestTestRunner::injectPaypalSandboxConfig), so they are not set
-     * here. The cache is flushed so the served storefront picks up the change.
-     */
-    public static function configureDisplayCurrency(string $displayCurrency = 'EUR', float $baseToDisplayRate = 0.9): void
-    {
-        $base = (string) Mage::app()->getStore()->getBaseCurrencyCode() ?: 'USD';
-
-        $config = Mage::getModel('core/config');
-        $config->saveConfig('currency/options/allow', implode(',', array_unique([$base, $displayCurrency])));
-        $config->saveConfig('currency/options/default', $displayCurrency);
-        Mage::getModel('directory/currency')->saveRates([
-            $base => [$base => 1.0, $displayCurrency => $baseToDisplayRate],
-        ]);
-
-        Mage::app()->getStore()->resetConfig();
-        Mage::app()->cleanCache();
     }
 }
