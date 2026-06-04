@@ -1,0 +1,57 @@
+name: Browser Net Diagnostic
+
+# Temporary: figure out why Playwright's run-server Chromium can't reach a local
+# server in GitHub Actions (ERR_NAME_NOT_RESOLVED). Delete once resolved.
+on:
+  push:
+    branches:
+      - fix/checkout-quote-currency-985
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Playwright
+        run: |
+          npm install playwright@^1.60.0
+          npx playwright install --with-deps chromium
+
+      - name: Probe loopback vs real IP, launch vs connect
+        run: |
+          echo '<title>probe-ok</title>ok' > index.html
+          # Bind to all interfaces so every candidate address is reachable.
+          python3 -m http.server 8901 --bind 0.0.0.0 >/tmp/srv.log 2>&1 &
+          sleep 2
+          IP=$(hostname -I | awk '{print $1}')
+          echo "=== runner primary IP: $IP ==="
+          echo "=== shell reachability (curl) ==="
+          curl -s -o /dev/null -w "curl 127.0.0.1 => %{http_code}\n" http://127.0.0.1:8901/ || echo "curl 127.0.0.1 failed"
+          curl -s -o /dev/null -w "curl localhost => %{http_code}\n" http://localhost:8901/ || echo "curl localhost failed"
+          curl -s -o /dev/null -w "curl $IP    => %{http_code}\n" http://$IP:8901/ || echo "curl IP failed"
+          cat > probe.cjs <<'JS'
+          const { chromium } = require('playwright');
+          (async () => {
+            const hosts = process.argv.slice(2);
+            async function probe(mode, browser, host) {
+              const page = await browser.newPage();
+              try { await page.goto(`http://${host}:8901/`, { timeout: 8000 }); console.log(`${mode.padEnd(8)} ${host.padEnd(15)} => OK`); }
+              catch (e) { console.log(`${mode.padEnd(8)} ${host.padEnd(15)} => FAIL: ${e.message.split('\n')[0]}`); }
+              await page.close();
+            }
+            const b1 = await chromium.launch({ headless: true });
+            for (const h of hosts) await probe('launch', b1, h);
+            await b1.close();
+            const server = await chromium.launchServer({ headless: true });
+            const b2 = await chromium.connect(server.wsEndpoint());
+            for (const h of hosts) await probe('connect', b2, h);
+            await b2.close(); await server.close();
+          })();
+          JS
+          echo "=== Playwright Chromium reachability ==="
+          node probe.cjs 127.0.0.1 localhost "$IP"
