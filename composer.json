@@ -89,7 +89,8 @@
         "rector/rector": "^2",
         "pestphp/pest": "^4",
         "psy/psysh": "^0.12.10",
-        "react/stream": "^1.4"
+        "react/stream": "^1.4",
+        "pestphp/pest-plugin-browser": "^4.3"
     },
     "suggest": {
         "ext-pdo_pgsql": "Required for PostgreSQL database support",

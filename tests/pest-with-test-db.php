@@ -29,6 +29,7 @@ class PestTestRunner
 {
     private const LOCAL_XML_PATH = 'app/etc/local.xml';
     private const LOCAL_XML_BACKUP = 'app/etc/local.xml.backup';
+    private const LOCAL_XML_TEST = 'app/etc/local.xml.test';
 
     private array $dbConfig = [];
     private string $testDbName;
@@ -41,13 +42,86 @@ class PestTestRunner
         $this->testDbName = $this->dbConfig['name'] . '_test';
     }
 
+    /**
+     * Canonical base URL the test store is installed with. Browser tests serve the
+     * app on this exact host:port (see Tests\Browser\MahoServer), so there is no
+     * runtime base_url rewrite — all suites share one configuration. 127.0.0.1 is
+     * used because Chromium under Playwright ignores /etc/hosts.
+     */
+    public static function testBaseUrl(): string
+    {
+        $port = (int) (getenv('MAHO_BROWSER_PORT') ?: 8901);
+        return "http://127.0.0.1:{$port}/";
+    }
+
+    /**
+     * Read a value from the environment, falling back to a gitignored .env.testing
+     * file so local runs and CI (secrets) share the same variable names.
+     */
+    private static function envValue(string $key): string
+    {
+        $value = getenv($key);
+        if ($value !== false && $value !== '') {
+            return $value;
+        }
+        $file = __DIR__ . '/../.env.testing';
+        if (is_file($file)) {
+            foreach (file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+                $line = trim($line);
+                if ($line === '' || $line[0] === '#' || !str_contains($line, '=')) {
+                    continue;
+                }
+                [$k, $v] = explode('=', $line, 2);
+                if (trim($k) === $key) {
+                    return trim($v);
+                }
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Inject PayPal sandbox credentials into the test store right after install, so
+     * every suite shares one configuration (matching how a real store is set up).
+     * Skipped silently when no credentials are available. Credentials are stored
+     * encrypted (--encrypt) exactly as the admin would, and never echoed to the log.
+     */
+    private function injectPaypalSandboxConfig(): void
+    {
+        $clientId = self::envValue('PAYPAL_SANDBOX_CLIENT_ID');
+        $clientSecret = self::envValue('PAYPAL_SANDBOX_CLIENT_SECRET');
+        if ($clientId === '' || $clientSecret === '') {
+            return;
+        }
+
+        echo "Injecting PayPal sandbox configuration...\n";
+        $set = function (string $path, string $value, bool $encrypt = false) {
+            $cmd = './maho config:set ' . escapeshellarg($path) . ' ' . escapeshellarg($value)
+                . ' --scope default --scope-id 0 --silent' . ($encrypt ? ' --encrypt' : '');
+            // shell_exec (not the echoing executeCommand) so secrets never reach the log.
+            shell_exec($cmd);
+        };
+        $set('paypal/credentials/client_id', $clientId, true);
+        $set('paypal/credentials/client_secret', $clientSecret, true);
+        $set('paypal/credentials/sandbox', '1');
+        $set('payment/paypal_standard_checkout/active', '1');
+        echo "✓ PayPal sandbox configured\n";
+    }
+
     public function run(array $pestArgs = []): int
     {
-        echo "Setting up fresh test database for local testing ({$this->dbType})...\n";
+        $reuse = getenv('MAHO_REUSE_TEST_DB') && $this->canReuseTestDatabase();
 
         try {
             $this->backupLocalXml();
-            $this->setupTestDatabase();
+            if ($reuse) {
+                echo "Reusing existing test database ({$this->dbType})...\n";
+                copy(self::LOCAL_XML_TEST, self::LOCAL_XML_PATH);
+            } else {
+                echo "Setting up fresh test database for local testing ({$this->dbType})...\n";
+                $this->setupTestDatabase();
+            }
+            $this->injectPaypalSandboxConfig();
             $exitCode = $this->runPest($pestArgs);
 
             // Flush cache after tests complete
@@ -155,6 +229,24 @@ class PestTestRunner
         }
     }
 
+    private function canReuseTestDatabase(): bool
+    {
+        if (!file_exists(self::LOCAL_XML_TEST)) {
+            return false;
+        }
+        if ($this->dbType === 'sqlite') {
+            return file_exists($this->getSqliteTestDbPath());
+        }
+        if ($this->dbType === 'pgsql') {
+            $sql = "SELECT 1 FROM pg_database WHERE datname = '{$this->testDbName}';";
+            $out = shell_exec($this->getPsqlCommand($sql, 'postgres') . ' 2>/dev/null');
+        } else {
+            $sql = "SHOW DATABASES LIKE '{$this->testDbName}';";
+            $out = shell_exec($this->getMysqlCommand($sql) . ' 2>/dev/null');
+        }
+        return is_string($out) && str_contains($out, $this->dbType === 'pgsql' ? '1' : $this->testDbName);
+    }
+
     private function setupTestDatabase(): void
     {
         echo 'Creating fresh test database: ' . $this->testDbName . "\n";
@@ -251,8 +343,8 @@ class PestTestRunner
             ' --timezone Europe/London' .
             ' --default_currency USD' .
             ' --db_engine ' . escapeshellarg($dbEngine) .
-            ' --url http://maho.test/' .
-            ' --secure_base_url http://maho.test/' .
+            ' --url ' . escapeshellarg(self::testBaseUrl()) .
+            ' --secure_base_url ' . escapeshellarg(self::testBaseUrl()) .
             ' --use_secure 0' .
             ' --use_secure_admin 0' .
             ' --admin_lastname admin' .
@@ -277,6 +369,11 @@ class PestTestRunner
             echo 'Installing Maho' . ($sampleData ? ' with sample data' : '') . "...\n";
             $this->executeCommand($installCmd);
             echo "✓ Installed Maho\n";
+
+            // Keep a copy of the test local.xml so MAHO_REUSE_TEST_DB can skip reinstall
+            if (file_exists(self::LOCAL_XML_PATH)) {
+                copy(self::LOCAL_XML_PATH, self::LOCAL_XML_TEST);
+            }
 
             // Reindex and flush cache
             echo "Reindexing and flushing cache...\n";
