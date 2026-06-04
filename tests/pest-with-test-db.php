@@ -116,7 +116,11 @@ class PestTestRunner
 
     public function run(array $pestArgs = []): int
     {
-        $reuse = getenv('MAHO_REUSE_TEST_DB') && $this->canReuseTestDatabase();
+        // Reuse the existing test database whenever one is available — there is no point
+        // reinstalling it from scratch on every local run. Force a fresh rebuild with
+        // MAHO_FRESH_TEST_DB=1 after changing install/upgrade scripts or sample data. (On a
+        // fresh CI runner there is no snapshot, so this falls through to a clean install.)
+        $reuse = !getenv('MAHO_FRESH_TEST_DB') && $this->canReuseTestDatabase();
 
         try {
             $this->backupLocalXml();
@@ -376,7 +380,7 @@ class PestTestRunner
             $this->executeCommand($installCmd);
             echo "✓ Installed Maho\n";
 
-            // Keep a copy of the test local.xml so MAHO_REUSE_TEST_DB can skip reinstall
+            // Keep a copy of the test local.xml so later runs can reuse the DB (skip reinstall)
             if (file_exists(self::LOCAL_XML_PATH)) {
                 copy(self::LOCAL_XML_PATH, self::LOCAL_XML_TEST);
             }
