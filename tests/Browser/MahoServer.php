@@ -16,10 +16,12 @@ use Symfony\Component\Process\Process;
 /**
  * Boots `./maho serve` for browser tests.
  *
- * The Pest runner installs the test database with base_url http://127.0.0.1:<port>/
+ * The Pest runner installs the test database with base_url http://<host>:<port>/
  * (PestTestRunner::testBaseUrl), and this serves the app on that exact host:port — so
- * there is no runtime base_url rewrite and every suite shares one configuration.
- * 127.0.0.1 is used because Chromium under Playwright ignores /etc/hosts.
+ * there is no runtime base_url rewrite and every suite shares one configuration. The host
+ * is 127.0.0.1 because Playwright's Chromium ignores /etc/hosts (its built-in DNS resolver
+ * bypasses the hosts file), so .test names don't resolve in-browser; the port must match
+ * base_url or Maho's redirect_to_base bounces the browser to an unserved origin.
  */
 final class MahoServer
 {
@@ -32,8 +34,9 @@ final class MahoServer
             return self::$baseUrl;
         }
 
+        $host = getenv('MAHO_BROWSER_HOST') ?: '127.0.0.1';
         $port ??= (int) (getenv('MAHO_BROWSER_PORT') ?: 8901);
-        self::$baseUrl = "http://127.0.0.1:{$port}";
+        self::$baseUrl = "http://{$host}:{$port}";
 
         // The PHP built-in server is single-threaded; a browser's parallel asset
         // requests would serialize and stall. Spawn workers so requests run concurrently.

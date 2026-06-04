@@ -11,15 +11,19 @@ declare(strict_types=1);
 
 use Tests\Browser\MahoServer;
 use Tests\MahoFrontendTestCase;
-use Tests\PaypalSandbox;
 
 uses(MahoFrontendTestCase::class)->group('browser', 'paypal');
 
 afterAll(fn() => MahoServer::stop());
 
 beforeEach(function () {
-    if (!PaypalSandbox::isConfigured()) {
-        test()->markTestSkipped('PayPal sandbox credentials not set');
+    if (!browserTestsReady()) {
+        test()->markTestSkipped('Playwright is not installed');
+    }
+    // Needs the store actually configured with PayPal credentials (the test harness or CI
+    // injects them at install time); without them the real checkout can't run.
+    if (!Mage::getModel('paypal/config')->hasCredentials()) {
+        test()->markTestSkipped('PayPal sandbox credentials not configured on the store');
     }
     // Maho is already bootstrapped by MahoFrontendTestCase::setUp(). Each test sets its
     // own display currency, then (re)starts the server so it serves the configured DB.
@@ -84,16 +88,20 @@ function configureStoreCurrency(string $display, float $rate): void
 /**
  * Give the order entity a unique increment id for this run. The reserved order id becomes
  * the PayPal invoice_id, and the sandbox account blocks duplicate invoice ids across
- * transactions; reused runs would otherwise collide. time() is unique and monotonic per run.
+ * transactions; reused or concurrent runs would otherwise collide. A time base plus a
+ * random suffix keeps it unique even across overlapping CI runs on the same sandbox.
  */
 function bumpOrderIncrementId(): void
 {
     $resource = Mage::getSingleton('core/resource');
     $write = $resource->getConnection('core_write');
     $orderType = Mage::getModel('eav/entity_type')->loadByCode('order');
+    // Millisecond base + random suffix: unique across concurrent CI jobs hitting the same
+    // sandbox (which would otherwise collide and trip PayPal's duplicate-invoice block).
+    $unique = (int) round(microtime(true) * 1000) * 100_000 + random_int(0, 99_999);
     $write->update(
         $resource->getTableName('eav/entity_store'),
-        ['increment_last_id' => time()],
+        ['increment_last_id' => $unique],
         ['entity_type_id = ?' => (int) $orderType->getId()],
     );
 }

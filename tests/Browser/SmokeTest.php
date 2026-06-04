@@ -13,8 +13,14 @@ use Tests\Browser\MahoServer;
 
 uses()->group('browser');
 
-beforeAll(fn() => MahoServer::start());
 afterAll(fn() => MahoServer::stop());
+
+beforeEach(function () {
+    if (!browserTestsReady()) {
+        test()->markTestSkipped('Playwright is not installed');
+    }
+    MahoServer::start();
+});
 
 it('renders the storefront homepage in a real browser', function () {
     visit(MahoServer::baseUrl() . '/')

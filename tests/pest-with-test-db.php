@@ -43,15 +43,20 @@ class PestTestRunner
     }
 
     /**
-     * Canonical base URL the test store is installed with. Browser tests serve the
-     * app on this exact host:port (see Tests\Browser\MahoServer), so there is no
-     * runtime base_url rewrite — all suites share one configuration. 127.0.0.1 is
-     * used because Chromium under Playwright ignores /etc/hosts.
+     * Canonical base URL the test store is installed with. Browser tests serve the app on
+     * this exact host:port (see Tests\Browser\MahoServer), so there is no runtime base_url
+     * rewrite — all suites share one configuration. The host is 127.0.0.1, not a hostname:
+     * Playwright's bundled Chromium resolves DNS with Chromium's built-in resolver, which
+     * does NOT read /etc/hosts (verified: a .test host in /etc/hosts times out in-browser
+     * while 127.0.0.1 connects). The port must match the dev server or Maho's
+     * redirect_to_base bounces the browser to an unserved origin. Override the host only if
+     * you have configured Chromium --host-resolver-rules to map your hostname.
      */
     public static function testBaseUrl(): string
     {
+        $host = getenv('MAHO_BROWSER_HOST') ?: '127.0.0.1';
         $port = (int) (getenv('MAHO_BROWSER_PORT') ?: 8901);
-        return "http://127.0.0.1:{$port}/";
+        return "http://{$host}:{$port}/";
     }
 
     /**
@@ -457,6 +462,21 @@ class PestTestRunner
         $pestCmd = './vendor/bin/pest --colors=always';
         if (!empty($args)) {
             $pestCmd .= ' ' . implode(' ', array_map('escapeshellarg', $args));
+        }
+
+        // The Browser suite needs Playwright; the plugin aborts the whole run when it isn't
+        // installed, even just from loading the browser test files. So when Playwright is
+        // absent and the caller didn't pick a suite explicitly, run only the non-browser
+        // suites — keeping the default run working for contributors without the toolchain.
+        $explicitSuite = false;
+        foreach ($args as $arg) {
+            if (str_contains($arg, 'testsuite')) {
+                $explicitSuite = true;
+                break;
+            }
+        }
+        if (!$explicitSuite && !is_file(__DIR__ . '/../node_modules/.bin/playwright')) {
+            $pestCmd .= ' --testsuite ' . escapeshellarg('Install,Backend,Frontend');
         }
 
         echo "\nRunning Pest tests...\n";
