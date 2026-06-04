@@ -49,3 +49,14 @@ it('renders the product in EUR with a working PayPal button (no clientToken 405)
         ->assertDontSee('Server returned status')
         ->screenshot(true, 'paypal-1-product');
 });
+
+it('adds a product to the cart and shows the cart total in EUR', function () {
+    $id = aProductId();
+
+    visit(MahoServer::baseUrl() . "/catalog/product/view/id/{$id}/")
+        ->click('Add to Cart')
+        ->assertSee('Cart Subtotal')
+        ->assertSee('€')
+        ->assertDontSee('Server returned status')
+        ->screenshot(true, 'paypal-2-cart');
+});
