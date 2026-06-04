@@ -374,7 +374,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             $quote->save();
 
             // Build response in PayPal's expected format
-            $currency = $quote->getBaseCurrencyCode();
+            $currency = $quote->getQuoteCurrencyCode();
 
             /** @var Maho_Paypal_Model_Api_OrderBuilder $builder */
             $builder = Mage::getModel('paypal/api_orderBuilder');
@@ -382,7 +382,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 
             $amount = [
                 'currency_code' => $currency,
-                'value' => $this->_formatAmount((float) $quote->getBaseGrandTotal()),
+                'value' => $this->_formatAmount((float) $quote->getGrandTotal()),
             ];
             if ($breakdown !== null) {
                 $amount['breakdown'] = $breakdown;
@@ -463,7 +463,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             Mage::throwException(Mage::helper('paypal')->__('PayPal order does not belong to this cart.'));
         }
 
-        $expectedCurrency = (string) $quote->getBaseCurrencyCode();
+        $expectedCurrency = (string) $quote->getQuoteCurrencyCode();
         $actualCurrency = (string) ($purchaseUnit['amount']['currency_code'] ?? '');
         if ($actualCurrency !== $expectedCurrency) {
             Mage::log(
@@ -480,7 +480,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             Mage::throwException(Mage::helper('paypal')->__('PayPal order currency does not match this cart.'));
         }
 
-        $expectedAmount = (float) $quote->getBaseGrandTotal();
+        $expectedAmount = (float) $quote->getGrandTotal();
         $actualAmount = (float) ($purchaseUnit['amount']['value'] ?? 0);
         // 1-cent tolerance absorbs rounding drift between Maho and PayPal
         if (abs($expectedAmount - $actualAmount) > 0.01) {

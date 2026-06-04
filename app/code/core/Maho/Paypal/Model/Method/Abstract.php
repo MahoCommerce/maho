@@ -113,12 +113,20 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
         $paypalOrderId = $payment->getAdditionalInformation('paypal_order_id');
 
         if ($authId) {
+            $order = $payment->getOrder();
             $body = [];
-            if ($amount != $payment->getOrder()->getBaseGrandTotal()) {
+            // PayPal authorized in the order (quote/display) currency, so a partial
+            // capture must be sent in that currency too. Magento passes $amount in
+            // base currency, so convert it back via the order's base->order rate.
+            if ($amount != $order->getBaseGrandTotal()) {
+                $rate = (float) $order->getBaseToOrderRate() ?: 1.0;
+                $orderAmount = $order->getBaseCurrencyCode() === $order->getOrderCurrencyCode()
+                    ? (float) $amount
+                    : round((float) $amount * $rate, 2);
                 $body = [
                     'amount' => [
-                        'value' => number_format((float) $amount, 2, '.', ''),
-                        'currency_code' => $payment->getOrder()->getBaseCurrencyCode(),
+                        'value' => number_format($orderAmount, 2, '.', ''),
+                        'currency_code' => $order->getOrderCurrencyCode(),
                     ],
                     'final_capture' => true,
                 ];

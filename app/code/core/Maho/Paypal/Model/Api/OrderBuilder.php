@@ -25,8 +25,8 @@ class Maho_Paypal_Model_Api_OrderBuilder
         ?string $vaultSourceType = null,
         ?string $shippingCallbackUrl = null,
     ): array {
-        $currency = $quote->getBaseCurrencyCode();
-        $grandTotal = $this->_formatAmount((float) $quote->getBaseGrandTotal());
+        $currency = $quote->getQuoteCurrencyCode();
+        $grandTotal = $this->_formatAmount((float) $quote->getGrandTotal());
 
         $orderRequest = [
             'intent' => strtoupper($intent),
@@ -157,22 +157,22 @@ class Maho_Paypal_Model_Api_OrderBuilder
         $items = $quote->getAllVisibleItems();
         foreach ($items as $item) {
             $qty = (int) $item->getTotalQty();
-            $price = (float) $item->getBaseCalculationPrice();
+            $price = (float) $item->getCalculationPrice();
             if ($this->_hasPrecisionIssue($price)
-                || round($price * $qty, 2) !== round((float) $item->getBaseRowTotal(), 2)
+                || round($price * $qty, 2) !== round((float) $item->getRowTotal(), 2)
             ) {
-                $subtotal += round((float) $item->getBaseRowTotal(), 2);
+                $subtotal += round((float) $item->getRowTotal(), 2);
             } else {
                 $subtotal += round($price, 2) * $qty;
             }
         }
 
-        $tax = (float) $address->getBaseTaxAmount();
-        $shipping = (float) $address->getBaseShippingAmount();
-        $discount = abs((float) $address->getBaseDiscountAmount());
+        $tax = (float) $address->getTaxAmount();
+        $shipping = (float) $address->getShippingAmount();
+        $discount = abs((float) $address->getDiscountAmount());
 
         $calculated = round($subtotal + $tax + $shipping - $discount, 2);
-        $grandTotal = round((float) $quote->getBaseGrandTotal(), 2);
+        $grandTotal = round((float) $quote->getGrandTotal(), 2);
 
         if (sprintf('%.2F', $calculated) !== sprintf('%.2F', $grandTotal)) {
             // Rounding mismatch — omit line items and send only total
@@ -203,16 +203,16 @@ class Maho_Paypal_Model_Api_OrderBuilder
         $items = [];
         foreach ($quote->getAllVisibleItems() as $quoteItem) {
             $qty = (int) $quoteItem->getTotalQty();
-            $price = (float) $quoteItem->getBaseCalculationPrice();
+            $price = (float) $quoteItem->getCalculationPrice();
 
             // Float prices like 12.345 round to a different total when multiplied by qty
             // (12.345 × 3 = 37.035) than when summed (37.04). Fall back to row total in
             // those cases so PayPal's line-item check matches the cart total to the cent.
             if ($this->_hasPrecisionIssue($price)) {
-                $price = (float) $quoteItem->getBaseRowTotal();
+                $price = (float) $quoteItem->getRowTotal();
                 $qty = 1;
-            } elseif (round($price * $qty, 2) !== round((float) $quoteItem->getBaseRowTotal(), 2)) {
-                $price = (float) $quoteItem->getBaseRowTotal();
+            } elseif (round($price * $qty, 2) !== round((float) $quoteItem->getRowTotal(), 2)) {
+                $price = (float) $quoteItem->getRowTotal();
                 $qty = 1;
             }
 
