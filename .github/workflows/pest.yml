@@ -129,8 +129,8 @@ jobs:
             --db_user ${{ matrix.db_user }} \
             --db_pass ${{ matrix.db_pass }} \
             --db_engine ${{ matrix.db_engine }} \
-            --url http://127.0.0.1:8901/ \
-            --secure_base_url http://127.0.0.1:8901/ \
+            --url http://localhost:8901/ \
+            --secure_base_url http://localhost:8901/ \
             --use_secure 0 \
             --use_secure_admin 0 \
             --admin_lastname admin \
@@ -207,8 +207,8 @@ jobs:
             --default_currency USD \
             --db_name maho.sqlite \
             --db_engine sqlite \
-            --url http://127.0.0.1:8901/ \
-            --secure_base_url http://127.0.0.1:8901/ \
+            --url http://localhost:8901/ \
+            --secure_base_url http://localhost:8901/ \
             --use_secure 0 \
             --use_secure_admin 0 \
             --admin_lastname admin \

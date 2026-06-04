@@ -19,9 +19,10 @@ use Symfony\Component\Process\Process;
  * The Pest runner installs the test database with base_url http://<host>:<port>/
  * (PestTestRunner::testBaseUrl), and this serves the app on that exact host:port — so
  * there is no runtime base_url rewrite and every suite shares one configuration. The host
- * is 127.0.0.1 because Playwright's Chromium ignores /etc/hosts (its built-in DNS resolver
- * bypasses the hosts file), so .test names don't resolve in-browser; the port must match
- * base_url or Maho's redirect_to_base bounces the browser to an unserved origin.
+ * is `localhost`: Playwright's Chromium ignores /etc/hosts and, on CI runners, even fails
+ * to resolve the bare loopback IP 127.0.0.1 (ERR_NAME_NOT_RESOLVED), but it resolves
+ * `localhost` via its built-in rule. `./maho serve` binds 127.0.0.1, which localhost maps
+ * to; the port must match base_url or redirect_to_base bounces to an unserved origin.
  */
 final class MahoServer
 {
@@ -34,7 +35,7 @@ final class MahoServer
             return self::$baseUrl;
         }
 
-        $host = getenv('MAHO_BROWSER_HOST') ?: '127.0.0.1';
+        $host = getenv('MAHO_BROWSER_HOST') ?: 'localhost';
         $port ??= (int) (getenv('MAHO_BROWSER_PORT') ?: 8901);
         self::$baseUrl = "http://{$host}:{$port}";
 

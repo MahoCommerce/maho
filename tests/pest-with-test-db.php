@@ -45,16 +45,16 @@ class PestTestRunner
     /**
      * Canonical base URL the test store is installed with. Browser tests serve the app on
      * this exact host:port (see Tests\Browser\MahoServer), so there is no runtime base_url
-     * rewrite — all suites share one configuration. The host is 127.0.0.1, not a hostname:
-     * Playwright's bundled Chromium resolves DNS with Chromium's built-in resolver, which
-     * does NOT read /etc/hosts (verified: a .test host in /etc/hosts times out in-browser
-     * while 127.0.0.1 connects). The port must match the dev server or Maho's
-     * redirect_to_base bounces the browser to an unserved origin. Override the host only if
-     * you have configured Chromium --host-resolver-rules to map your hostname.
+     * rewrite — all suites share one configuration. The host is `localhost`, deliberately:
+     * Playwright's bundled Chromium uses Chromium's built-in DNS resolver, which ignores
+     * /etc/hosts (so .test names don't resolve in-browser) and, on CI Linux runners, even
+     * reports ERR_NAME_NOT_RESOLVED for the bare loopback IP `127.0.0.1`. It does resolve
+     * `localhost` via its built-in RFC 6761 rule. The port must match the dev server or
+     * Maho's redirect_to_base bounces the browser to an unserved origin.
      */
     public static function testBaseUrl(): string
     {
-        $host = getenv('MAHO_BROWSER_HOST') ?: '127.0.0.1';
+        $host = getenv('MAHO_BROWSER_HOST') ?: 'localhost';
         $port = (int) (getenv('MAHO_BROWSER_PORT') ?: 8901);
         return "http://{$host}:{$port}/";
     }
