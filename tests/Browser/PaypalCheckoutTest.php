@@ -199,6 +199,25 @@ function gotoCardFields(): object
 }
 
 /**
+ * Poll the page URL until it contains $needle or the timeout elapses. A real card
+ * authorization can lag several seconds under load before redirecting to the success page;
+ * a declined one never redirects. Polling (instead of a fixed wait) returns as soon as the
+ * redirect lands and lets the caller tell "slow success" from "declined, retry".
+ */
+function waitForUrlContains(object $page, string $needle, int $timeoutSeconds): bool
+{
+    $deadline = time() + $timeoutSeconds;
+    do {
+        if (str_contains($page->url(), $needle)) {
+            return true;
+        }
+        $page->wait(1);
+    } while (time() < $deadline);
+
+    return str_contains($page->url(), $needle);
+}
+
+/**
  * Ask PayPal what it actually has on record for a placed order, via the stored
  * paypal_order_id. This is the source-of-truth cross-check: PayPal's own record (status,
  * invoice_id, order amount, and the authorization/capture it will settle) must match what
@@ -239,22 +258,39 @@ it('renders inline PayPal card fields at checkout (Advanced Checkout, no popup)'
 });
 
 it('completes a full card order through to the success page with reconciled totals', function (string $display, float $rate) {
-    // A unique invoice id per run (sandbox blocks duplicates) and the display currency.
-    bumpOrderIncrementId();
     configureStoreCurrency($display, $rate);
 
-    $page = gotoCardFields()->wait(2);
+    // The 7 CI matrix jobs hit the one shared PayPal sandbox account concurrently, so a card
+    // authorization is occasionally declined or slow-walked under that load. Retry the whole
+    // card flow a few times, reserving a fresh invoice id each attempt (the sandbox blocks
+    // duplicate invoice ids, so a retried order needs a new one). Most runs succeed first try.
+    $attempts = (int) (getenv('MAHO_PAYPAL_CARD_ATTEMPTS') ?: 3);
+    $page = null;
+    for ($attempt = 1; $attempt <= $attempts; $attempt++) {
+        bumpOrderIncrementId();
 
-    // Type the sandbox test card into the hosted fields. Do NOT click into the billing
-    // form afterwards: that fires the checkout auto-save, which re-renders the payment
-    // block and drops the card session. Click Place Order directly instead.
-    typeInFrame($page, '#paypal-card-fields-number iframe', '4111111111111111');
-    typeInFrame($page, '#paypal-card-fields-expiry iframe', '12/2030');
-    typeInFrame($page, '#paypal-card-fields-cvv iframe', '123');
+        $page = gotoCardFields()->wait(2);
 
-    $page->click('Place Order')->wait(15)->screenshot(true, "paypal-success-{$display}");
+        // Type the sandbox test card into the hosted fields. Do NOT click into the billing
+        // form afterwards: that fires the checkout auto-save, which re-renders the payment
+        // block and drops the card session. Click Place Order directly instead.
+        typeInFrame($page, '#paypal-card-fields-number iframe', '4111111111111111');
+        typeInFrame($page, '#paypal-card-fields-expiry iframe', '12/2030');
+        typeInFrame($page, '#paypal-card-fields-cvv iframe', '123');
 
-    // The card payment must land on the order success page.
+        $page->click('Place Order');
+
+        // A successful auth redirects to the success page (possibly after a few seconds); a
+        // declined one stays on the checkout. Either way, stop polling and decide below.
+        if (waitForUrlContains($page, 'checkout/onepage/success', 30)) {
+            break;
+        }
+    }
+
+    $page->screenshot(true, "paypal-success-{$display}");
+
+    // The card payment must land on the order success page (asserting the URL surfaces the
+    // actual landing page in the failure message if every attempt was declined).
     expect($page->url())->toContain('checkout/onepage/success');
 
     // The placed order must charge the customer in the display currency, record the base
