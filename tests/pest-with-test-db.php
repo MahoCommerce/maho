@@ -105,6 +105,7 @@ class PestTestRunner
         $set('paypal/credentials/client_secret', $clientSecret, true);
         $set('paypal/credentials/sandbox', '1');
         $set('payment/paypal_standard_checkout/active', '1');
+        $set('payment/paypal_advanced_checkout/active', '1');
         echo "✓ PayPal sandbox configured\n";
     }
 
