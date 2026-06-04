@@ -1103,6 +1103,12 @@ class AdminOrder
         }
         const data = {};
         for (const field of container.querySelectorAll('input, select, textarea')) {
+            // Skip unchecked radios/checkboxes: otherwise the last radio in DOM order
+            // overwrites the selected one (e.g. payment[method] on any billing_method
+            // reload always became the last payment method, ignoring the user's choice).
+            if ((field.type === 'radio' || field.type === 'checkbox') && !field.checked) {
+                continue;
+            }
             data[field.name] = field.value;
         }
         return data;
