@@ -79,3 +79,9 @@ jobs:
           })();
           JS
           node probe.cjs http://localhost:8901/ http://localhost:8901/catalog/product/view/id/337/ http://127.0.0.1:8901/catalog/product/view/id/337/
+          # Stop this manual server; the pest run starts its own via MahoServer.
+          pkill -f "maho serve" 2>/dev/null || true
+          sleep 1
+
+      - name: Reproduce via the real pest-plugin-browser + MahoServer
+        run: ./vendor/bin/pest tests/Browser/SmokeTest.php --display-errors --display-warnings || true
