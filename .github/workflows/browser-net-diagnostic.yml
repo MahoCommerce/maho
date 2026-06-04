@@ -21,6 +21,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Playwright
+        run: |
+          npm install playwright@^1.60.0
+          npx playwright install --with-deps chromium
+
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
 
@@ -51,3 +61,21 @@ jobs:
           curl -is http://localhost:8901/catalog/product/view/id/337/ | head -25
           echo "=== follow redirects (-L) final effective url for homepage ==="
           curl -s -o /dev/null -L -w "final: %{url_effective} (http %{http_code}, redirects %{num_redirects})\n" http://localhost:8901/
+          echo "=== Playwright connect() -> REAL Maho ==="
+          cat > probe.cjs <<'JS'
+          const { chromium } = require('playwright');
+          (async () => {
+            const server = await chromium.launchServer({ headless: true });
+            const browser = await chromium.connect(server.wsEndpoint());
+            for (const url of process.argv.slice(2)) {
+              const page = await browser.newPage();
+              try {
+                const resp = await page.goto(url, { timeout: 12000, waitUntil: 'domcontentloaded' });
+                console.log(`connect ${url} => OK http ${resp && resp.status()} final ${page.url()}`);
+              } catch (e) { console.log(`connect ${url} => FAIL: ${e.message.split('\n')[0]}`); }
+              await page.close();
+            }
+            await browser.close(); await server.close();
+          })();
+          JS
+          node probe.cjs http://localhost:8901/ http://localhost:8901/catalog/product/view/id/337/ http://127.0.0.1:8901/catalog/product/view/id/337/
