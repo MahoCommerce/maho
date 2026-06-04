@@ -22,36 +22,47 @@ jobs:
           npm install playwright@^1.60.0
           npx playwright install --with-deps chromium
 
-      - name: Probe loopback vs real IP, launch vs connect
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+
+      - name: Probe different servers (python vs php -S, bind variants)
         run: |
           echo '<title>probe-ok</title>ok' > index.html
-          # Bind to all interfaces so every candidate address is reachable.
-          python3 -m http.server 8901 --bind 0.0.0.0 >/tmp/srv.log 2>&1 &
-          sleep 2
-          IP=$(hostname -I | awk '{print $1}')
-          echo "=== runner primary IP: $IP ==="
-          echo "=== shell reachability (curl) ==="
-          curl -s -o /dev/null -w "curl 127.0.0.1 => %{http_code}\n" http://127.0.0.1:8901/ || echo "curl 127.0.0.1 failed"
-          curl -s -o /dev/null -w "curl localhost => %{http_code}\n" http://localhost:8901/ || echo "curl localhost failed"
-          curl -s -o /dev/null -w "curl $IP    => %{http_code}\n" http://$IP:8901/ || echo "curl IP failed"
+          echo "php version: $(php -v | head -1)"
+          # A: python on 0.0.0.0 (known good control)
+          python3 -m http.server 8901 --bind 0.0.0.0 >/tmp/a.log 2>&1 &
+          # B: php -S on 127.0.0.1 WITH workers (exactly what ./maho serve does)
+          PHP_CLI_SERVER_WORKERS=8 php -S 127.0.0.1:8902 -t . >/tmp/b.log 2>&1 &
+          # C: php -S on 127.0.0.1 WITHOUT workers
+          php -S 127.0.0.1:8903 -t . >/tmp/c.log 2>&1 &
+          # D: php -S on 0.0.0.0 WITH workers
+          PHP_CLI_SERVER_WORKERS=8 php -S 0.0.0.0:8904 -t . >/tmp/d.log 2>&1 &
+          sleep 3
+          echo "=== shell curl ==="
+          for p in 8901 8902 8903 8904; do
+            curl -s -o /dev/null -w "curl localhost:$p => %{http_code}\n" http://localhost:$p/ || echo "curl $p failed"
+          done
           cat > probe.cjs <<'JS'
           const { chromium } = require('playwright');
           (async () => {
-            const hosts = process.argv.slice(2);
-            async function probe(mode, browser, host) {
+            const urls = process.argv.slice(2);
+            const server = await chromium.launchServer({ headless: true });
+            const browser = await chromium.connect(server.wsEndpoint());
+            for (const url of urls) {
               const page = await browser.newPage();
-              try { await page.goto(`http://${host}:8901/`, { timeout: 8000 }); console.log(`${mode.padEnd(8)} ${host.padEnd(15)} => OK`); }
-              catch (e) { console.log(`${mode.padEnd(8)} ${host.padEnd(15)} => FAIL: ${e.message.split('\n')[0]}`); }
+              try { await page.goto(url, { timeout: 8000 }); console.log(`connect ${url.padEnd(28)} => OK`); }
+              catch (e) { console.log(`connect ${url.padEnd(28)} => FAIL: ${e.message.split('\n')[0]}`); }
               await page.close();
             }
-            const b1 = await chromium.launch({ headless: true });
-            for (const h of hosts) await probe('launch', b1, h);
-            await b1.close();
-            const server = await chromium.launchServer({ headless: true });
-            const b2 = await chromium.connect(server.wsEndpoint());
-            for (const h of hosts) await probe('connect', b2, h);
-            await b2.close(); await server.close();
+            await browser.close(); await server.close();
           })();
           JS
-          echo "=== Playwright Chromium reachability ==="
-          node probe.cjs 127.0.0.1 localhost "$IP"
+          echo "=== Playwright connect() reachability (A=py0.0.0.0:8901 B=php127+workers:8902 C=php127:8903 D=php0.0.0.0+workers:8904) ==="
+          node probe.cjs \
+            http://localhost:8901/ http://127.0.0.1:8901/ \
+            http://localhost:8902/ http://127.0.0.1:8902/ \
+            http://localhost:8903/ http://127.0.0.1:8903/ \
+            http://localhost:8904/ http://127.0.0.1:8904/
+          echo "=== php -S workers log (B) ==="; cat /tmp/b.log | head
