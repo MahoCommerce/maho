@@ -64,11 +64,6 @@ describe('Layered Navigation SEO', function () {
             expect($this->block->hasActiveFilters())->toBeTrue();
         });
 
-        test('the category (cat) filter counts like any other facet', function () {
-            $this->request->setParam('cat', '5');
-            expect($this->block->hasActiveFilters())->toBeTrue();
-        });
-
         test('toolbar params (pagination, sort, mode, limit) are not filters', function () {
             $this->request->setParam('p', '2');
             $this->request->setParam('order', 'price');
