@@ -1,6 +1,6 @@
 name: Browser Net Diagnostic
 
-# Temporary: figure out why Playwright's run-server Chromium can't reach a local
+# Temporary: figure out why Playwright's run-server Chromium can't reach the Maho
 # server in GitHub Actions (ERR_NAME_NOT_RESOLVED). Delete once resolved.
 on:
   push:
@@ -12,57 +12,42 @@ jobs:
   diag:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install Playwright
-        run: |
-          npm install playwright@^1.60.0
-          npx playwright install --with-deps chromium
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
+          extensions: pdo_sqlite
 
-      - name: Probe different servers (python vs php -S, bind variants)
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+
+      - name: Install Maho (sqlite, localhost:8901)
         run: |
-          echo '<title>probe-ok</title>ok' > index.html
-          echo "php version: $(php -v | head -1)"
-          # A: python on 0.0.0.0 (known good control)
-          python3 -m http.server 8901 --bind 0.0.0.0 >/tmp/a.log 2>&1 &
-          # B: php -S on 127.0.0.1 WITH workers (exactly what ./maho serve does)
-          PHP_CLI_SERVER_WORKERS=8 php -S 127.0.0.1:8902 -t . >/tmp/b.log 2>&1 &
-          # C: php -S on 127.0.0.1 WITHOUT workers
-          php -S 127.0.0.1:8903 -t . >/tmp/c.log 2>&1 &
-          # D: php -S on 0.0.0.0 WITH workers
-          PHP_CLI_SERVER_WORKERS=8 php -S 0.0.0.0:8904 -t . >/tmp/d.log 2>&1 &
-          sleep 3
-          echo "=== shell curl ==="
-          for p in 8901 8902 8903 8904; do
-            curl -s -o /dev/null -w "curl localhost:$p => %{http_code}\n" http://localhost:$p/ || echo "curl $p failed"
-          done
-          cat > probe.cjs <<'JS'
-          const { chromium } = require('playwright');
-          (async () => {
-            const urls = process.argv.slice(2);
-            const server = await chromium.launchServer({ headless: true });
-            const browser = await chromium.connect(server.wsEndpoint());
-            for (const url of urls) {
-              const page = await browser.newPage();
-              try { await page.goto(url, { timeout: 8000 }); console.log(`connect ${url.padEnd(28)} => OK`); }
-              catch (e) { console.log(`connect ${url.padEnd(28)} => FAIL: ${e.message.split('\n')[0]}`); }
-              await page.close();
-            }
-            await browser.close(); await server.close();
-          })();
-          JS
-          echo "=== Playwright connect() reachability (A=py0.0.0.0:8901 B=php127+workers:8902 C=php127:8903 D=php0.0.0.0+workers:8904) ==="
-          node probe.cjs \
-            http://localhost:8901/ http://127.0.0.1:8901/ \
-            http://localhost:8902/ http://127.0.0.1:8902/ \
-            http://localhost:8903/ http://127.0.0.1:8903/ \
-            http://localhost:8904/ http://127.0.0.1:8904/
-          echo "=== php -S workers log (B) ==="; cat /tmp/b.log | head
+          ./maho install \
+            --license_agreement_accepted yes \
+            --locale en_US --timezone Europe/London --default_currency USD \
+            --db_name maho.sqlite --db_engine sqlite \
+            --url http://localhost:8901/ --secure_base_url http://localhost:8901/ \
+            --use_secure 0 --use_secure_admin 0 \
+            --admin_lastname admin --admin_firstname admin --admin_email admin@admin.com \
+            --admin_username admin --admin_password asdasdasd123123123 --sample_data 1
+          ./maho index:reindex:all
+          ./maho cache:flush
+
+      - name: Serve and curl what Maho returns
+        run: |
+          PHP_CLI_SERVER_WORKERS=8 ./maho serve 8901 >/tmp/serve.log 2>&1 &
+          until (echo > /dev/tcp/127.0.0.1/8901) 2>/dev/null; do sleep 0.3; done
+          echo "server up. configured base urls:"
+          ./maho config:get web/unsecure/base_url 2>/dev/null || true
+          ./maho config:get web/secure/base_url 2>/dev/null || true
+          PID=$(./maho db:query "SELECT entity_id FROM catalog_product_entity LIMIT 1" 2>/dev/null | tail -1)
+          echo "=== GET / (homepage) headers ==="
+          curl -is http://localhost:8901/ | head -25
+          echo "=== GET /catalog/product/view/id/337/ headers ==="
+          curl -is http://localhost:8901/catalog/product/view/id/337/ | head -25
+          echo "=== follow redirects (-L) final effective url for homepage ==="
+          curl -s -o /dev/null -L -w "final: %{url_effective} (http %{http_code}, redirects %{num_redirects})\n" http://localhost:8901/
