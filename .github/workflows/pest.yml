@@ -117,6 +117,9 @@ jobs:
       - name: Print DB version
         run: docker exec $(docker ps -q) sh -c "mysql --version 2>/dev/null || psql --version 2>/dev/null || mariadb --version 2>/dev/null"
 
+      - name: Detect runner IP (browser host)
+        run: echo "MAHO_BROWSER_HOST=$(hostname -I | awk '{print $1}')" >> "$GITHUB_ENV"
+
       - name: Install Maho
         run: |
           ./maho install \
@@ -129,8 +132,8 @@ jobs:
             --db_user ${{ matrix.db_user }} \
             --db_pass ${{ matrix.db_pass }} \
             --db_engine ${{ matrix.db_engine }} \
-            --url http://localhost:8901/ \
-            --secure_base_url http://localhost:8901/ \
+            --url "http://$MAHO_BROWSER_HOST:8901/" \
+            --secure_base_url "http://$MAHO_BROWSER_HOST:8901/" \
             --use_secure 0 \
             --use_secure_admin 0 \
             --admin_lastname admin \
@@ -198,6 +201,9 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
 
+      - name: Detect runner IP (browser host)
+        run: echo "MAHO_BROWSER_HOST=$(hostname -I | awk '{print $1}')" >> "$GITHUB_ENV"
+
       - name: Install Maho
         run: |
           ./maho install \
@@ -207,8 +213,8 @@ jobs:
             --default_currency USD \
             --db_name maho.sqlite \
             --db_engine sqlite \
-            --url http://localhost:8901/ \
-            --secure_base_url http://localhost:8901/ \
+            --url "http://$MAHO_BROWSER_HOST:8901/" \
+            --secure_base_url "http://$MAHO_BROWSER_HOST:8901/" \
             --use_secure 0 \
             --use_secure_admin 0 \
             --admin_lastname admin \

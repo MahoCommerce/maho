@@ -16,13 +16,14 @@ use Symfony\Component\Process\Process;
 /**
  * Boots `./maho serve` for browser tests.
  *
- * The Pest runner installs the test database with base_url http://<host>:<port>/
- * (PestTestRunner::testBaseUrl), and this serves the app on that exact host:port — so
- * there is no runtime base_url rewrite and every suite shares one configuration. The host
- * is `localhost`: Playwright's Chromium ignores /etc/hosts and, on CI runners, even fails
- * to resolve the bare loopback IP 127.0.0.1 (ERR_NAME_NOT_RESOLVED), but it resolves
- * `localhost` via its built-in rule. `./maho serve` binds 127.0.0.1, which localhost maps
- * to; the port must match base_url or redirect_to_base bounces to an unserved origin.
+ * The app is installed with base_url http://<host>:<port>/ and served on that exact
+ * host:port — no runtime base_url rewrite, every suite shares one configuration. The host
+ * comes from MAHO_BROWSER_HOST: CI sets it to the runner's real IP (detected before
+ * install), so the browser hits a routable address and sidesteps every loopback caveat
+ * (Playwright's Chromium ignores /etc/hosts and is unreliable with bare 127.0.0.1 on CI).
+ * Locally it defaults to `localhost`, served on 127.0.0.1 which localhost maps to. The
+ * server binds the same host it's addressed by; the port must match base_url or
+ * redirect_to_base bounces the browser to an unserved origin.
  */
 final class MahoServer
 {
@@ -35,21 +36,25 @@ final class MahoServer
             return self::$baseUrl;
         }
 
-        $host = getenv('MAHO_BROWSER_HOST') ?: 'localhost';
+        // Address host (what the browser navigates to) vs bind host (what the server binds).
+        // They differ only in the local default: navigate `localhost`, bind 127.0.0.1.
+        $envHost = getenv('MAHO_BROWSER_HOST') ?: '';
+        $addressHost = $envHost !== '' ? $envHost : 'localhost';
+        $bindHost = $envHost !== '' ? $envHost : '127.0.0.1';
         $port ??= (int) (getenv('MAHO_BROWSER_PORT') ?: 8901);
-        self::$baseUrl = "http://{$host}:{$port}";
+        self::$baseUrl = "http://{$addressHost}:{$port}";
 
         // The PHP built-in server is single-threaded; a browser's parallel asset
         // requests would serialize and stall. Spawn workers so requests run concurrently.
         self::$process = new Process(
-            ['./maho', 'serve', (string) $port],
+            ['./maho', 'serve', (string) $port, '--host', $bindHost],
             null,
             ['PHP_CLI_SERVER_WORKERS' => (string) (getenv('MAHO_BROWSER_WORKERS') ?: 8)],
         );
         self::$process->setTimeout(null);
         self::$process->start();
 
-        self::waitUntilReady($port);
+        self::waitUntilReady($bindHost, $port);
 
         return self::$baseUrl;
     }
@@ -65,17 +70,17 @@ final class MahoServer
         self::$process = null;
     }
 
-    private static function waitUntilReady(int $port, int $timeoutSeconds = 30): void
+    private static function waitUntilReady(string $host, int $port, int $timeoutSeconds = 30): void
     {
         $deadline = time() + $timeoutSeconds;
         while (time() < $deadline) {
-            $conn = @fsockopen('127.0.0.1', $port, $errno, $errstr, 1);
+            $conn = @fsockopen($host, $port, $errno, $errstr, 1);
             if ($conn) {
                 fclose($conn);
                 return;
             }
             usleep(200_000);
         }
-        throw new \RuntimeException("Maho dev server did not start on port {$port} within {$timeoutSeconds}s");
+        throw new \RuntimeException("Maho dev server did not start on {$host}:{$port} within {$timeoutSeconds}s");
     }
 }
