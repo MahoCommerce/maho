@@ -62,7 +62,14 @@ class Minicart {
         if (!this.pageshowBound) {
             this.pageshowBound = true;
             window.addEventListener('pageshow', (event) => {
-                if (event.persisted) {
+                if (!event.persisted) {
+                    return;
+                }
+                // On a bfcache restore the cart grid can be stale too, so reload the
+                // whole cart page; elsewhere just refresh the minicart sidebar.
+                if (document.body.classList.contains('checkout-cart-index')) {
+                    window.location.reload();
+                } else {
                     this.refresh();
                 }
             });
