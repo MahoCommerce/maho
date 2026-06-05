@@ -1065,11 +1065,13 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     public function ajaxContentAction(): void
     {
         $this->loadLayout();
-        $this->getResponse()->setBodyJson([
-            'success' => 1,
-            'qty' => $this->_getCart()->getSummaryQty(),
-            'content' => $this->getLayout()->getBlock('minicart_content')->toHtml(),
-        ]);
+        $this->getResponse()
+            ->setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate', true)
+            ->setBodyJson([
+                'success' => 1,
+                'qty' => $this->_getCart()->getSummaryQty(),
+                'content' => $this->getLayout()->getBlock('minicart_content')->toHtml(),
+            ]);
     }
 
     /**

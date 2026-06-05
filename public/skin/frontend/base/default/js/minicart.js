@@ -67,9 +67,7 @@ class Minicart {
                 }
                 // On a bfcache restore the cart grid can be stale too, so reload the
                 // whole cart page; elsewhere just refresh the minicart sidebar.
-                if (document.body.classList.contains('checkout-cart-index')) {
-                    window.location.reload();
-                } else {
+                if (!this.refreshIfOnCartPage()) {
                     this.refresh();
                 }
             });
@@ -302,7 +300,9 @@ class Minicart {
     refreshIfOnCartPage() {
         if (document.body.classList.contains("checkout-cart-index")) {
             window.location.reload(true);
+            return true;
         }
+        return false;
     }
 
     openOffcanvas() {
