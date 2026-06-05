@@ -11,6 +11,7 @@
 class Minicart {
     constructor(options) {
         this.formKey = options.formKey;
+        this.contentUrl = options.contentUrl;
         this.previousVal = null;
         this.defaultErrorMessage = 'Error occurred. Try to refresh page.';
         this.selectors = {
@@ -57,6 +58,15 @@ class Minicart {
             el.removeEventListener('click', this.quantityButtonHandler);
             el.addEventListener('click', () => this.processUpdateQuantity(el));
         });
+
+        if (!this.pageshowBound) {
+            this.pageshowBound = true;
+            window.addEventListener('pageshow', (event) => {
+                if (event.persisted) {
+                    this.refresh();
+                }
+            });
+        }
 
         for (const [, event] of Object.entries(this.initAfterEvents)) {
             if (typeof event === "function") {
@@ -217,6 +227,25 @@ class Minicart {
             el.textContent = qty;
             el.className = el.className.replace(/count-\d+/, 'count-' + qty);
         }
+    }
+
+    refresh() {
+        if (!this.contentUrl) {
+            return;
+        }
+        fetch(this.contentUrl, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    this.updateCartQty(result.qty);
+                    this.updateContent(result);
+                    this.init();
+                    if (typeof truncateOptions === 'function') truncateOptions();
+                }
+            })
+            .catch(() => {});
     }
 
     isValidQty(val) {
