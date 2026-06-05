@@ -229,23 +229,21 @@ class Minicart {
         }
     }
 
-    refresh() {
+    async refresh() {
         if (!this.contentUrl) {
             return;
         }
-        fetch(this.contentUrl, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    this.updateCartQty(result.qty);
-                    this.updateContent(result);
-                    this.init();
-                    if (typeof truncateOptions === 'function') truncateOptions();
-                }
-            })
-            .catch(() => {});
+        try {
+            const result = await mahoFetch(this.contentUrl, { loaderArea: false });
+            if (result.success) {
+                this.updateCartQty(result.qty);
+                this.updateContent(result);
+                this.init();
+                if (typeof truncateOptions === 'function') truncateOptions();
+            }
+        } catch {
+            // Stale minicart is non-critical; ignore refresh failures
+        }
     }
 
     isValidQty(val) {
