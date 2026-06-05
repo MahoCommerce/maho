@@ -27,7 +27,8 @@
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof window.minicart === 'undefined') {
             window.minicart = new Minicart({
-                formKey: "<?= $this->getFormKey() ?>"
+                formKey: "<?= $this->getFormKey() ?>",
+                contentUrl: "<?= $this->getUrl('checkout/cart/ajaxContent') ?>"
             });
             minicart.init();
         }
