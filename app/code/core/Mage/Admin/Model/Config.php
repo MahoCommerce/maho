@@ -138,7 +138,10 @@ class Mage_Admin_Model_Config extends \Maho\Simplexml\Config
     {
         $moduleName = 'adminhtml';
         $menuNode = $this->getAdminhtmlConfig()->getNode('menu/' . str_replace('/', '/children/', trim($path, '/')));
-        if ($menuNode !== false && $menuNode->getAttribute('module')) {
+        if ($menuNode === false) {
+            return '';
+        }
+        if ($menuNode->getAttribute('module')) {
             $moduleName = (string) $menuNode->getAttribute('module');
         }
         return Mage::helper($moduleName)->__((string) $menuNode->title);
