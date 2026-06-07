@@ -35,7 +35,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         return $this;
     }
 
-    #[Maho\Config\Route('/paypal/checkout/clientToken', methods: ['POST'])]
+    #[Maho\Config\Route('/paypal/checkout/clientToken', methods: ['GET'])]
     public function clientTokenAction(): void
     {
         $result = ['success' => false];
