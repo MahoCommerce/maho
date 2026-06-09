@@ -190,6 +190,13 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
         $session = $this->_getSession();
 
+        // A failed login must stay on the login form, not follow a stale
+        // beforeAuthUrl (e.g. checkout). The URL is kept for the next attempt.
+        if (!$session->isLoggedIn()) {
+            $this->_redirectUrl($helper->getLoginUrl());
+            return;
+        }
+
         if (!$session->getBeforeAuthUrl() || $session->getBeforeAuthUrl() === Mage::getBaseUrl()) {
             // Set default URL to redirect customer to
             $session->setBeforeAuthUrl($helper->getAccountUrl());
