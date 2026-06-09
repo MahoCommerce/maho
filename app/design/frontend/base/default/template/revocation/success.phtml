@@ -1,0 +1,33 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Maho_Revocation
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Maho_Revocation_Block_Success $this */
+$helper = Mage::helper('revocation');
+?>
+<div class="revocation-success page-title">
+    <h1><?= $helper->__('Your revocation has been received') ?></h1>
+</div>
+<p><?= $helper->__('We have received your revocation declaration. Please note that this confirms receipt only; the validity of the revocation will be assessed and we will contact you separately.') ?></p>
+<div class="revocation-receipt">
+    <?php if ($this->getRequestId()): ?>
+        <p class="revocation-reference"><strong><?= $helper->__('Reference number') ?>:</strong> #<?= (int) $this->getRequestId() ?></p>
+    <?php endif ?>
+    <?php if ($this->getReceivedAtStore()): ?>
+        <p class="revocation-timestamp"><strong><?= $helper->__('Received at') ?>:</strong> <?= $this->escapeHtml($this->getReceivedAtStore()) ?></p>
+        <p class="revocation-timestamp-utc"><?= $this->escapeHtml($this->getReceivedAtUtc()) ?> (UTC)</p>
+    <?php endif ?>
+</div>
+<p><?= $helper->__('A confirmation email is on its way to you.') ?>
+<?php if ($this->getMerchantContactEmail()): ?>
+    <?= $helper->__('If you do not receive a confirmation email within a few minutes, please contact us at %s and quote your reference number.', '<a href="mailto:' . $this->escapeHtml($this->getMerchantContactEmail()) . '">' . $this->escapeHtml($this->getMerchantContactEmail()) . '</a>') ?>
+<?php endif ?>
+</p>
+<div class="buttons-set">
+    <a href="<?= Mage::getBaseUrl() ?>" class="button"><?= $helper->__('Continue shopping') ?></a>
+</div>
