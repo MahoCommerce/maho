@@ -38,7 +38,7 @@ class MahoPaypalSdk {
     static async _doInit(sdkUrl, clientTokenUrl) {
         await this._loadScript(sdkUrl);
 
-        const response = await mahoFetch(clientTokenUrl, { method: 'GET', loaderArea: false });
+        const response = await mahoFetch(clientTokenUrl, { method: 'POST', loaderArea: false });
         if (!response.success) {
             throw new Error(response.message || 'Failed to get client token');
         }

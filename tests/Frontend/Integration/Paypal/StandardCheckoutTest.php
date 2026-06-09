@@ -49,5 +49,9 @@ it('provides JS SDK URL for correct environment', function () {
 
 it('reports no credentials when not configured', function () {
     $config = Mage::getModel('paypal/config');
+    // The test harness may inject sandbox credentials globally at install time; clear them
+    // in-memory so this verifies the genuine "not configured" path.
+    Mage::app()->getStore()->setConfig('paypal/credentials/client_id', '');
+    Mage::app()->getStore()->setConfig('paypal/credentials/client_secret', '');
     expect($config->hasCredentials())->toBeFalse();
 });
