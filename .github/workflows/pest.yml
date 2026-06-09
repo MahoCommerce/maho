@@ -147,6 +147,10 @@ jobs:
 
       - name: Configure PayPal sandbox credentials
         run: |
+          if [ -z "$PAYPAL_SANDBOX_CLIENT_ID" ] || [ -z "$PAYPAL_SANDBOX_CLIENT_SECRET" ]; then
+            echo "PayPal sandbox credentials unavailable (e.g. a fork PR); leaving PayPal unconfigured so its tests skip."
+            exit 0
+          fi
           ./maho config:set paypal/credentials/client_id "$PAYPAL_SANDBOX_CLIENT_ID" --encrypt --scope default --scope-id 0 --silent >/dev/null
           ./maho config:set paypal/credentials/client_secret "$PAYPAL_SANDBOX_CLIENT_SECRET" --encrypt --scope default --scope-id 0 --silent >/dev/null
           ./maho config:set paypal/credentials/sandbox 1 --scope default --scope-id 0 --silent
@@ -228,6 +232,10 @@ jobs:
 
       - name: Configure PayPal sandbox credentials
         run: |
+          if [ -z "$PAYPAL_SANDBOX_CLIENT_ID" ] || [ -z "$PAYPAL_SANDBOX_CLIENT_SECRET" ]; then
+            echo "PayPal sandbox credentials unavailable (e.g. a fork PR); leaving PayPal unconfigured so its tests skip."
+            exit 0
+          fi
           ./maho config:set paypal/credentials/client_id "$PAYPAL_SANDBOX_CLIENT_ID" --encrypt --scope default --scope-id 0 --silent >/dev/null
           ./maho config:set paypal/credentials/client_secret "$PAYPAL_SANDBOX_CLIENT_SECRET" --encrypt --scope default --scope-id 0 --silent >/dev/null
           ./maho config:set paypal/credentials/sandbox 1 --scope default --scope-id 0 --silent
