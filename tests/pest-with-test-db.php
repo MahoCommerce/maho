@@ -29,7 +29,6 @@ class PestTestRunner
 {
     private const LOCAL_XML_PATH = 'app/etc/local.xml';
     private const LOCAL_XML_BACKUP = 'app/etc/local.xml.backup';
-    private const LOCAL_XML_TEST = 'app/etc/local.xml.test';
 
     private array $dbConfig = [];
     private string $testDbName;
@@ -116,21 +115,10 @@ class PestTestRunner
 
     public function run(array $pestArgs = []): int
     {
-        // Reuse the existing test database whenever one is available — there is no point
-        // reinstalling it from scratch on every local run. Force a fresh rebuild with
-        // MAHO_FRESH_TEST_DB=1 after changing install/upgrade scripts or sample data. (On a
-        // fresh CI runner there is no snapshot, so this falls through to a clean install.)
-        $reuse = !getenv('MAHO_FRESH_TEST_DB') && $this->canReuseTestDatabase();
-
         try {
             $this->backupLocalXml();
-            if ($reuse) {
-                echo "Reusing existing test database ({$this->dbType})...\n";
-                copy(self::LOCAL_XML_TEST, self::LOCAL_XML_PATH);
-            } else {
-                echo "Setting up fresh test database for local testing ({$this->dbType})...\n";
-                $this->setupTestDatabase();
-            }
+            echo "Setting up fresh test database for local testing ({$this->dbType})...\n";
+            $this->setupTestDatabase();
             $this->injectPaypalSandboxConfig();
             $exitCode = $this->runPest($pestArgs);
 
@@ -237,24 +225,6 @@ class PestTestRunner
             unlink(self::LOCAL_XML_BACKUP);
             echo "✓ Restored original local.xml\n";
         }
-    }
-
-    private function canReuseTestDatabase(): bool
-    {
-        if (!file_exists(self::LOCAL_XML_TEST)) {
-            return false;
-        }
-        if ($this->dbType === 'sqlite') {
-            return file_exists($this->getSqliteTestDbPath());
-        }
-        if ($this->dbType === 'pgsql') {
-            $sql = "SELECT 1 FROM pg_database WHERE datname = '{$this->testDbName}';";
-            $out = shell_exec($this->getPsqlCommand($sql, 'postgres') . ' 2>/dev/null');
-        } else {
-            $sql = "SHOW DATABASES LIKE '{$this->testDbName}';";
-            $out = shell_exec($this->getMysqlCommand($sql) . ' 2>/dev/null');
-        }
-        return is_string($out) && str_contains($out, $this->dbType === 'pgsql' ? '1' : $this->testDbName);
     }
 
     private function setupTestDatabase(): void
@@ -379,11 +349,6 @@ class PestTestRunner
             echo 'Installing Maho' . ($sampleData ? ' with sample data' : '') . "...\n";
             $this->executeCommand($installCmd);
             echo "✓ Installed Maho\n";
-
-            // Keep a copy of the test local.xml so later runs can reuse the DB (skip reinstall)
-            if (file_exists(self::LOCAL_XML_PATH)) {
-                copy(self::LOCAL_XML_PATH, self::LOCAL_XML_TEST);
-            }
 
             // Reindex and flush cache
             echo "Reindexing and flushing cache...\n";
