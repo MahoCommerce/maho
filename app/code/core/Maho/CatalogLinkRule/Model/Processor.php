@@ -91,7 +91,8 @@ class Maho_CatalogLinkRule_Model_Processor
         // for products no longer covered by any rule so they don't accumulate; manual links
         // (rule_id IS NULL) are left intact. Matched products keep their current rule links until
         // their batch transaction rewrites them atomically below, so a mid-run failure never
-        // strands a matched product with only its manual links.
+        // strands a matched product with only its manual links. Replace mode skips this on purpose:
+        // it only rewrites currently-matched products, preserving the legacy default behaviour.
         if ($mergeMode === self::MODE_MERGE) {
             $this->purgeOrphanRuleLinks($adapter, $linkTable, $linkTypeId, array_keys($productRuleMap));
         }

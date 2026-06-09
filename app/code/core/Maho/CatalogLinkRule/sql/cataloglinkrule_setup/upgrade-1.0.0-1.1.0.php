@@ -30,6 +30,8 @@ $installer->getConnection()->addColumn(
     ],
 );
 
+// Index only, no foreign key: rule deletion is handled in Rule::_afterDelete() and the
+// processor self-heals orphan rule links, so an FK with cascade would be redundant.
 $installer->getConnection()->addIndex(
     $installer->getTable('catalog/product_link'),
     $installer->getIdxName('catalog/product_link', ['rule_id']),
