@@ -153,7 +153,7 @@ abstract class AbstractElement extends AbstractForm
     }
 
     #[\Override]
-    public function removeField($elementId)
+    public function removeField(?string $elementId): self
     {
         $this->getForm()->removeField($elementId);
         return parent::removeField($elementId);

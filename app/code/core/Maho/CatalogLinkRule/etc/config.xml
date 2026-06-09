@@ -12,7 +12,7 @@
 <config>
     <modules>
         <Maho_CatalogLinkRule>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
         </Maho_CatalogLinkRule>
     </modules>
 
@@ -68,6 +68,7 @@
         <catalog>
             <linkrule>
                 <schedule>0 3 * * *</schedule>
+                <merge_mode>replace</merge_mode>
             </linkrule>
         </catalog>
     </default>

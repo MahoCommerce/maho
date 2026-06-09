@@ -40,6 +40,36 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
         return $this;
     }
 
+    #[\Override]
+    protected function _afterSave()
+    {
+        // A deactivated rule should no longer contribute links: drop the ones it generated so
+        // they don't linger (the processor only refreshes active rules). Manual links untouched.
+        if (!$this->getIsActive()) {
+            $this->deleteGeneratedLinks();
+        }
+        return parent::_afterSave();
+    }
+
+    #[\Override]
+    protected function _afterDelete()
+    {
+        $this->deleteGeneratedLinks();
+        return parent::_afterDelete();
+    }
+
+    /**
+     * Remove the catalog links this rule generated (rule_id tag); manual links are untouched.
+     */
+    protected function deleteGeneratedLinks(): void
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $resource->getConnection('core_write')->delete(
+            $resource->getTableName('catalog/product_link'),
+            ['rule_id = ?' => (int) $this->getId()],
+        );
+    }
+
     public function hasConditionsSerialized(): bool
     {
         return $this->hasData('source_conditions_serialized');

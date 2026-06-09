@@ -75,7 +75,8 @@ if(empty($_cartQty)) {
     if (typeof truncateOptions === 'function') truncateOptions();
     document.addEventListener('DOMContentLoaded', function() {
         window.minicart = new Minicart({
-            formKey: "<?= $this->getFormKey() ?>"
+            formKey: "<?= $this->getFormKey() ?>",
+            contentUrl: "<?= $this->getUrl('checkout/cart/ajaxContent') ?>"
         });
         minicart.init();
     });
