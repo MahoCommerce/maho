@@ -17,7 +17,7 @@ use Symfony\Component\Process\Process;
  * Boots `./maho serve` for browser tests.
  *
  * The app is installed with base_url http://<host>:<port>/ and served on that exact
- * host:port — no runtime base_url rewrite, every suite shares one configuration. The host
+ * host:port (no runtime base_url rewrite), so every suite shares one configuration. The host
  * comes from MAHO_BROWSER_HOST: CI sets it to the runner's real IP (detected before
  * install), so the browser hits a routable address and sidesteps every loopback caveat
  * (Playwright's Chromium ignores /etc/hosts and is unreliable with bare 127.0.0.1 on CI).

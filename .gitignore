@@ -39,7 +39,7 @@
 phpstan*.neon
 !.phpstan.dist*.neon
 
-# Node / Playwright (browser tests) — generated locally and in CI, never committed
+# Node / Playwright (browser tests): generated locally and in CI, never committed
 /node_modules
 /package.json
 /package-lock.json
@@ -48,7 +48,7 @@ phpstan*.neon
 /test-results
 /tests/Browser/Screenshots
 
-# Local secrets (e.g. PayPal sandbox creds for browser tests) — never commit
+# Local secrets (e.g. PayPal sandbox creds for browser tests), never commit
 .env
 .env.*
 !.env.testing.dist

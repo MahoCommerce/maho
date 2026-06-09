@@ -44,7 +44,7 @@ class PestTestRunner
     /**
      * Canonical base URL the test store is installed with. Browser tests serve the app on
      * this exact host:port (see Tests\Browser\MahoServer), so there is no runtime base_url
-     * rewrite — all suites share one configuration. The host is `localhost`, deliberately:
+     * rewrite, so all suites share one configuration. The host is `localhost`, deliberately:
      * Playwright's bundled Chromium uses Chromium's built-in DNS resolver, which ignores
      * /etc/hosts (so .test names don't resolve in-browser) and, on CI Linux runners, even
      * reports ERR_NAME_NOT_RESOLVED for the bare loopback IP `127.0.0.1`. It does resolve
@@ -436,7 +436,7 @@ class PestTestRunner
         // The Browser suite needs Playwright; the plugin aborts the whole run when it isn't
         // installed, even just from loading the browser test files. So when Playwright is
         // absent and the caller didn't pick a suite explicitly, run only the non-browser
-        // suites — keeping the default run working for contributors without the toolchain.
+        // suites, keeping the default run working for contributors without the toolchain.
         $explicitSuite = false;
         foreach ($args as $arg) {
             if (str_contains($arg, 'testsuite')) {
