@@ -14,15 +14,7 @@ use Tests\MahoFrontendTestCase;
 
 uses(MahoFrontendTestCase::class)->group('browser');
 
-afterAll(function () {
-    // Restore the single-currency default so the two-currency config doesn't leak
-    // into other suites sharing the test database.
-    $config = Mage::getModel('core/config');
-    $config->saveConfig('currency/options/allow', 'USD');
-    $config->saveConfig('currency/options/default', 'USD');
-    Mage::app()->cleanCache();
-    MahoServer::stop();
-});
+afterAll(fn() => MahoServer::stop());
 
 beforeEach(function () {
     if (!browserTestsReady()) {
