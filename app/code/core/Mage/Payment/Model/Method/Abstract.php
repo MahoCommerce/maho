@@ -324,6 +324,17 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
     }
 
     /**
+     * Whether the customer is charged in the order's display (quote) currency rather
+     * than the store base currency. Base-charging methods (the default) surface a
+     * separate "amount charged in base currency" disclosure at checkout; presentment
+     * methods (e.g. PayPal) charge exactly the displayed total, so it is suppressed.
+     */
+    public function chargesInDisplayCurrency(): bool
+    {
+        return false;
+    }
+
+    /**
      * Check manage billing agreements availability
      *
      * @return bool

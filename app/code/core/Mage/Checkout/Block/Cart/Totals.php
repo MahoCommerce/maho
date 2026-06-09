@@ -107,11 +107,18 @@ class Mage_Checkout_Block_Cart_Totals extends Mage_Checkout_Block_Cart_Abstract
      */
     public function needDisplayBaseGrandtotal()
     {
-        $quote  = $this->getQuote();
-        if ($quote->getBaseCurrencyCode() != $quote->getQuoteCurrencyCode()) {
-            return true;
+        $quote = $this->getQuote();
+        if ($quote->getBaseCurrencyCode() == $quote->getQuoteCurrencyCode()) {
+            return false;
         }
-        return false;
+        // Suppress for methods that charge in the displayed currency (e.g. PayPal): the
+        // displayed grand total already is the amount charged, so a separate base-currency
+        // "amount charged" row would be redundant and contradict the actual charge.
+        $payment = $quote->getPayment();
+        if ($payment->getMethod() && $payment->getMethodInstance()->chargesInDisplayCurrency()) {
+            return false;
+        }
+        return true;
     }
 
     /**

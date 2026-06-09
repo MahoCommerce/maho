@@ -129,9 +129,14 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
         ]);
 
         /**
-         * Base grandtotal
+         * Base grandtotal — shown only when the order was actually charged in the base
+         * currency. Methods that charge in the display currency (e.g. PayPal) charged the
+         * displayed grand total, so a base-currency "to be charged" row would contradict it.
          */
-        if ($this->getOrder()->isCurrencyDifferent()) {
+        $payment = $this->getOrder()->getPayment();
+        $chargedInDisplayCurrency = $payment && $payment->getMethod()
+            && $payment->getMethodInstance()->chargesInDisplayCurrency();
+        if ($this->getOrder()->isCurrencyDifferent() && !$chargedInDisplayCurrency) {
             $this->_totals['base_grandtotal'] = new \Maho\DataObject([
                 'code'  => 'base_grandtotal',
                 'value' => $this->getOrder()->formatBasePrice($source->getBaseGrandTotal()),

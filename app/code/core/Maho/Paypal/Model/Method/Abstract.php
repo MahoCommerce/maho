@@ -30,6 +30,12 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
     protected ?Maho_Paypal_Model_Config $_config = null;
 
     #[\Override]
+    public function chargesInDisplayCurrency(): bool
+    {
+        return true;
+    }
+
+    #[\Override]
     public function isAvailable($quote = null): bool
     {
         $config = $this->_getConfig();
