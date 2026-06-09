@@ -75,16 +75,6 @@ class Maho_CatalogLinkRule_Model_Processor
 
         $mergeMode = $this->getMergeMode();
 
-        // Merge mode recomputes its own output on every run: drop all previously rule-generated
-        // links of this type up front (manual links, rule_id IS NULL, are left intact). This keeps
-        // stale links from earlier runs or no-longer-matched products from accumulating.
-        if ($mergeMode === self::MODE_MERGE) {
-            $adapter->delete($linkTable, [
-                'link_type_id = ?' => $linkTypeId,
-                'rule_id IS NOT NULL',
-            ]);
-        }
-
         // Step 1: Build product → rule map (highest priority wins)
         $productRuleMap = [];
         foreach ($rules as $rule) {
@@ -95,6 +85,15 @@ class Maho_CatalogLinkRule_Model_Processor
                     $productRuleMap[$productId] = $rule;
                 }
             }
+        }
+
+        // Merge mode recomputes its own output every run. Drop rule-generated links of this type
+        // for products no longer covered by any rule so they don't accumulate; manual links
+        // (rule_id IS NULL) are left intact. Matched products keep their current rule links until
+        // their batch transaction rewrites them atomically below, so a mid-run failure never
+        // strands a matched product with only its manual links.
+        if ($mergeMode === self::MODE_MERGE) {
+            $this->purgeOrphanRuleLinks($adapter, $linkTable, $linkTypeId, array_keys($productRuleMap));
         }
 
         if (empty($productRuleMap)) {
@@ -111,8 +110,8 @@ class Maho_CatalogLinkRule_Model_Processor
         foreach ($batches as $batchProductIds) {
             $adapter->beginTransaction();
             try {
-                // Replace mode wipes all existing links for these products; merge keeps the
-                // manual links that survived the rule-generated cleanup above.
+                // Replace mode wipes all existing links for these products; merge drops only this
+                // batch's prior rule output (atomic with the re-insert) and keeps manual links.
                 $existingLinks = [];
                 if ($mergeMode === self::MODE_REPLACE) {
                     $adapter->delete($linkTable, [
@@ -120,6 +119,11 @@ class Maho_CatalogLinkRule_Model_Processor
                         'link_type_id = ?' => $linkTypeId,
                     ]);
                 } else {
+                    $adapter->delete($linkTable, [
+                        'product_id IN (?)' => $batchProductIds,
+                        'link_type_id = ?' => $linkTypeId,
+                        'rule_id IS NOT NULL',
+                    ]);
                     $existingLinks = $this->getExistingLinks(
                         $adapter,
                         $linkTable,
@@ -153,6 +157,36 @@ class Maho_CatalogLinkRule_Model_Processor
                 Mage::logException($e);
                 throw $e;
             }
+        }
+    }
+
+    /**
+     * Remove rule-generated links of this type for products no longer covered by any rule.
+     * Manual links (rule_id IS NULL) are never touched. Each delete is a standalone atomic
+     * statement, so a failure here cannot strand a matched product mid-recompute.
+     *
+     * @param Maho\Db\Adapter\AdapterInterface $adapter
+     * @param int[] $coveredProductIds
+     */
+    protected function purgeOrphanRuleLinks($adapter, string $linkTable, int $linkTypeId, array $coveredProductIds): void
+    {
+        $withRuleLinks = $adapter->fetchCol(
+            $adapter->select()
+                ->distinct()
+                ->from($linkTable, ['product_id'])
+                ->where('link_type_id = ?', $linkTypeId)
+                ->where('rule_id IS NOT NULL'),
+        );
+
+        $covered = array_map('intval', $coveredProductIds);
+        $orphans = array_diff(array_map('intval', $withRuleLinks), $covered);
+
+        foreach (array_chunk($orphans, self::BATCH_SIZE) as $orphanBatch) {
+            $adapter->delete($linkTable, [
+                'product_id IN (?)' => $orphanBatch,
+                'link_type_id = ?' => $linkTypeId,
+                'rule_id IS NOT NULL',
+            ]);
         }
     }
 
@@ -228,7 +262,9 @@ class Maho_CatalogLinkRule_Model_Processor
             $linked[(int) $existingTargetId] = true;
         }
 
-        $position = $startPosition + 1;
+        // Append after both the highest existing position and the existing count, so rule links
+        // never share a position with an existing link that carried no position row (value 0).
+        $position = max($startPosition, count($linked)) + 1;
         $linkCount = count($linked);
 
         foreach ($targetProductIds as $targetId) {

@@ -250,4 +250,60 @@ describe('CatalogLinkRule processor merge modes', function () {
         expect($links)->toHaveKey($manual);
         expect($links)->not->toHaveKey($ruleTarget);
     });
+
+    test('deactivating a rule removes its generated links but keeps manual ones', function () use ($linkType) {
+        $source = clrCreateProduct('clr-src-' . uniqid());
+        $manual = clrCreateProduct('clr-man-' . uniqid());
+        $ruleTarget = clrCreateProduct('clr-tgt-' . uniqid());
+
+        $rule = Mage::getModel('cataloglinkrule/rule');
+        $rule->setName('clr-deact-' . uniqid());
+        $rule->setLinkTypeId($linkType);
+        $rule->setIsActive(1);
+        $rule->setPriority(0);
+        $rule->setSortOrder('random');
+        $rule->save();
+        $ruleId = (int) $rule->getId();
+
+        clrInsertLink($source, $manual, $linkType, 1);                  // manual (rule_id NULL)
+        clrInsertLink($source, $ruleTarget, $linkType, 2, $ruleId);     // rule-generated
+
+        expect(clrReadLinks($source, $linkType))->toHaveKeys([$manual, $ruleTarget]);
+
+        $rule->setIsActive(0)->save();
+
+        $links = clrReadLinks($source, $linkType);
+        expect($links)->toHaveKey($manual);
+        expect($links)->not->toHaveKey($ruleTarget);
+    });
+
+    test('merge mode removes rule links for products no longer matched, keeping manual links', function () use ($linkType) {
+        $source = clrCreateProduct('clr-src-' . uniqid());
+        $manual = clrCreateProduct('clr-man-' . uniqid());
+        $target = clrCreateProduct('clr-tgt-' . uniqid());
+
+        clrInsertLink($source, $manual, $linkType, 1); // manual link, must always survive
+
+        clrSetMergeMode(Maho_CatalogLinkRule_Model_Processor::MODE_MERGE);
+
+        // First run: the rule matches the source and links it to $target.
+        $rule = new Maho_CatalogLinkRule_Test_StubRule();
+        $rule->setId(900200);
+        $rule->sourceIds = [$source];
+        $rule->targetIds = [$target];
+        (new Maho_CatalogLinkRule_Test_Processor())->runLinkType($linkType, [$rule]);
+        expect(clrReadLinks($source, $linkType))->toHaveKeys([$manual, $target]);
+
+        // Second run: the rule no longer matches the source at all; its generated link must be
+        // purged as an orphan while the manual link survives.
+        $rule2 = new Maho_CatalogLinkRule_Test_StubRule();
+        $rule2->setId(900200);
+        $rule2->sourceIds = [];
+        $rule2->targetIds = [$target];
+        (new Maho_CatalogLinkRule_Test_Processor())->runLinkType($linkType, [$rule2]);
+
+        $links = clrReadLinks($source, $linkType);
+        expect($links)->toHaveKey($manual);
+        expect($links)->not->toHaveKey($target);
+    });
 });
