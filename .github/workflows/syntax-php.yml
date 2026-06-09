@@ -42,7 +42,7 @@ jobs:
 
       - name: Setup PHP
         if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@2.37.1
         with:
           php-version: ${{ matrix.php-versions }}
           ini-values: error_reporting=E_ALL, short_open_tag=Off
