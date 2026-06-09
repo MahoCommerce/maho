@@ -109,10 +109,6 @@ class Mage_Core_Controller_Response_Http implements \Stringable
         $this->canSendHeaders(true);
         $name = $this->_normalizeHeader($name);
 
-        // Strip CR/LF to prevent HTTP response splitting / header injection from
-        // untrusted values (e.g. a malformed redirect URL decoded from a request param).
-        $value = str_replace(["\r", "\n"], '', $value);
-
         if ($replace) {
             foreach ($this->_headers as $key => $header) {
                 if ($name == $header['name']) {
