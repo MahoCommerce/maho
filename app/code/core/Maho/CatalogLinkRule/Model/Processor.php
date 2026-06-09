@@ -21,6 +21,21 @@ class Maho_CatalogLinkRule_Model_Processor
 {
     public const BATCH_SIZE = 100;
 
+    public const MODE_REPLACE = 'replace';
+    public const MODE_MERGE   = 'merge';
+
+    public const CONFIG_MERGE_MODE = 'catalog/linkrule/merge_mode';
+
+    /**
+     * Resolve the configured merge mode (how rule results combine with existing links)
+     */
+    public function getMergeMode(): string
+    {
+        return Mage::getStoreConfig(self::CONFIG_MERGE_MODE) === self::MODE_MERGE
+            ? self::MODE_MERGE
+            : self::MODE_REPLACE;
+    }
+
     /**
      * Process all active rules (called by cron)
      */
@@ -58,6 +73,18 @@ class Maho_CatalogLinkRule_Model_Processor
         $linkTable = $resource->getTableName('catalog/product_link');
         $linkAttrTable = $resource->getTableName('catalog/product_link_attribute_int');
 
+        $mergeMode = $this->getMergeMode();
+
+        // Merge mode recomputes its own output on every run: drop all previously rule-generated
+        // links of this type up front (manual links, rule_id IS NULL, are left intact). This keeps
+        // stale links from earlier runs or no-longer-matched products from accumulating.
+        if ($mergeMode === self::MODE_MERGE) {
+            $adapter->delete($linkTable, [
+                'link_type_id = ?' => $linkTypeId,
+                'rule_id IS NOT NULL',
+            ]);
+        }
+
         // Step 1: Build product → rule map (highest priority wins)
         $productRuleMap = [];
         foreach ($rules as $rule) {
@@ -84,14 +111,28 @@ class Maho_CatalogLinkRule_Model_Processor
         foreach ($batches as $batchProductIds) {
             $adapter->beginTransaction();
             try {
-                // Delete existing links for this batch
-                $adapter->delete($linkTable, [
-                    'product_id IN (?)' => $batchProductIds,
-                    'link_type_id = ?' => $linkTypeId,
-                ]);
+                // Replace mode wipes all existing links for these products; merge keeps the
+                // manual links that survived the rule-generated cleanup above.
+                $existingLinks = [];
+                if ($mergeMode === self::MODE_REPLACE) {
+                    $adapter->delete($linkTable, [
+                        'product_id IN (?)' => $batchProductIds,
+                        'link_type_id = ?' => $linkTypeId,
+                    ]);
+                } else {
+                    $existingLinks = $this->getExistingLinks(
+                        $adapter,
+                        $linkTable,
+                        $linkAttrTable,
+                        $batchProductIds,
+                        $linkTypeId,
+                        $positionAttrId,
+                    );
+                }
 
                 // Process each product in batch
                 foreach ($batchProductIds as $productId) {
+                    $existing = $existingLinks[$productId] ?? ['targets' => [], 'max_position' => 0];
                     $rule = $productRuleMap[$productId];
                     $this->applyRuleToProduct(
                         $productId,
@@ -101,6 +142,8 @@ class Maho_CatalogLinkRule_Model_Processor
                         $adapter,
                         $linkTable,
                         $linkAttrTable,
+                        $existing['targets'],
+                        $existing['max_position'],
                     );
                 }
 
@@ -111,6 +154,47 @@ class Maho_CatalogLinkRule_Model_Processor
                 throw $e;
             }
         }
+    }
+
+    /**
+     * Load existing links for a batch of products, keyed by product ID.
+     * Returns ['targets' => int[], 'max_position' => int] per product.
+     *
+     * @param Maho\Db\Adapter\AdapterInterface $adapter
+     */
+    protected function getExistingLinks(
+        $adapter,
+        string $linkTable,
+        string $linkAttrTable,
+        array $productIds,
+        int $linkTypeId,
+        int $positionAttrId,
+    ): array {
+        $select = $adapter->select()
+            ->from(['l' => $linkTable], ['product_id', 'linked_product_id'])
+            ->joinLeft(
+                ['p' => $linkAttrTable],
+                'p.link_id = l.link_id AND p.product_link_attribute_id = ' . $positionAttrId,
+                ['position' => 'value'],
+            )
+            ->where('l.product_id IN (?)', $productIds)
+            ->where('l.link_type_id = ?', $linkTypeId)
+            ->where('l.rule_id IS NULL'); // manual links only
+
+        $existing = [];
+        foreach ($adapter->fetchAll($select) as $row) {
+            $productId = (int) $row['product_id'];
+            if (!isset($existing[$productId])) {
+                $existing[$productId] = ['targets' => [], 'max_position' => 0];
+            }
+            $existing[$productId]['targets'][] = (int) $row['linked_product_id'];
+            $position = (int) $row['position'];
+            if ($position > $existing[$productId]['max_position']) {
+                $existing[$productId]['max_position'] = $position;
+            }
+        }
+
+        return $existing;
     }
 
     /**
@@ -126,6 +210,8 @@ class Maho_CatalogLinkRule_Model_Processor
         $adapter,
         string $linkTable,
         string $linkAttrTable,
+        array $existingTargetIds = [],
+        int $startPosition = 0,
     ): void {
         // Load the source product with all attributes
         $sourceProduct = Mage::getModel('catalog/product')->load($productId);
@@ -133,25 +219,40 @@ class Maho_CatalogLinkRule_Model_Processor
         // Get matching target products, passing the source product for matching conditions
         $targetProductIds = $rule->getMatchingTargetProductIds($sourceProduct);
         $maxLinks = $rule->getMaxLinks();
+        $ruleId = $rule->getId() !== null ? (int) $rule->getId() : null;
 
-        $position = 1;
-        $linkCount = 0;
+        // Existing links keep their positions and count toward max_links (merge mode);
+        // rule results are appended after them, skipping duplicate source→target pairs.
+        $linked = [];
+        foreach ($existingTargetIds as $existingTargetId) {
+            $linked[(int) $existingTargetId] = true;
+        }
+
+        $position = $startPosition + 1;
+        $linkCount = count($linked);
 
         foreach ($targetProductIds as $targetId) {
-            if ($targetId == $productId) {
+            $targetId = (int) $targetId;
+
+            if ($targetId === $productId) {
                 continue; // Don't link to self
             }
 
-            // Check max links limit
+            if (isset($linked[$targetId])) {
+                continue; // No duplicate source→target pairs
+            }
+
+            // Check max links limit (combined set in merge mode)
             if ($maxLinks && $linkCount >= $maxLinks) {
                 break;
             }
 
-            // Insert link
+            // Insert link, tagged with the rule that generated it
             $adapter->insert($linkTable, [
                 'product_id' => $productId,
                 'linked_product_id' => $targetId,
                 'link_type_id' => $linkTypeId,
+                'rule_id' => $ruleId,
             ]);
 
             $linkId = $adapter->lastInsertId();
@@ -163,6 +264,7 @@ class Maho_CatalogLinkRule_Model_Processor
                 'value' => $position++,
             ]);
 
+            $linked[$targetId] = true;
             $linkCount++;
         }
     }

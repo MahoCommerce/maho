@@ -40,6 +40,18 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
         return $this;
     }
 
+    #[\Override]
+    protected function _afterDelete()
+    {
+        // Remove the links this rule generated (rule_id tag); manual links are untouched.
+        $resource = Mage::getSingleton('core/resource');
+        $resource->getConnection('core_write')->delete(
+            $resource->getTableName('catalog/product_link'),
+            ['rule_id = ?' => (int) $this->getId()],
+        );
+        return parent::_afterDelete();
+    }
+
     public function hasConditionsSerialized(): bool
     {
         return $this->hasData('source_conditions_serialized');
