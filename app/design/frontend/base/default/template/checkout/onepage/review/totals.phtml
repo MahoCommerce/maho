@@ -22,7 +22,7 @@
     <?php if ($this->needDisplayBaseGrandtotal()): ?>
     <tr>
         <td class="a-right" colspan="<?= $_colspan ?>">
-            <small><?= $this->helper('sales')->__('Amount charged in %s (your bank may convert at its own rate)', $this->getQuote()->getBaseCurrencyCode()) ?></small>
+            <small><?= $this->helper('sales')->__('Displayed prices are for reference. Your order will be charged in %s, the store currency (your bank may apply its own conversion rate).', $this->getQuote()->getBaseCurrencyCode()) ?></small>
         </td>
         <td class="a-right">
             <small><?= $this->displayBaseGrandtotal() ?></small>

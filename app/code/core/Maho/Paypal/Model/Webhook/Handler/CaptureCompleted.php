@@ -56,21 +56,16 @@ class Maho_Paypal_Model_Webhook_Handler_CaptureCompleted extends Maho_Paypal_Mod
     }
 
     /**
-     * Convert a PayPal-reported amount (order/display currency) to base currency.
-     *
-     * Avoids rate math on the realistic path: when PayPal captured the full order
-     * amount we return the exact stored base grand total, so there is no rounding
-     * drift. Only a genuine partial out-of-band capture falls back to the order's
-     * base->order rate, where a sub-cent difference is unavoidable.
+     * Convert a PayPal-reported amount (order/display currency) to base currency,
+     * since registerCaptureNotification() expects base.
      */
     protected function _toBaseAmount(Mage_Sales_Model_Order $order, float $orderAmount): float
     {
-        if ($order->getBaseCurrencyCode() === $order->getOrderCurrencyCode()) {
-            return $orderAmount;
-        }
+        // Full capture: use the exact stored base total, avoiding any rounding drift.
         if (abs($orderAmount - (float) $order->getGrandTotal()) <= 0.01) {
             return (float) $order->getBaseGrandTotal();
         }
+        // Partial out-of-band capture: convert at the order rate (1.0 for single currency).
         $rate = (float) $order->getBaseToOrderRate() ?: 1.0;
         return round($orderAmount / $rate, 2);
     }
