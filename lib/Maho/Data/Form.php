@@ -150,10 +150,7 @@ class Form extends AbstractForm
 
     public function getElement(?string $elementId): ?Form\Element\AbstractElement
     {
-        if ($this->_elementIdExists($elementId)) {
-            return $this->_elementsIndex[(string) $elementId];
-        }
-        return null;
+        return $this->_elementsIndex[(string) $elementId] ?? null;
     }
 
     /**
@@ -233,9 +230,7 @@ class Form extends AbstractForm
     #[\Override]
     public function removeField(?string $elementId): self
     {
-        if ($this->_elementIdExists($elementId)) {
-            unset($this->_elementsIndex[(string) $elementId]);
-        }
+        unset($this->_elementsIndex[(string) $elementId]);
         return $this;
     }
 
