@@ -222,6 +222,7 @@
 "Discount","Discount"
 "Discount (%s)","Discount (%s)"
 "Discount Amount","Discount Amount"
+"Displayed prices are for reference. Your order will be charged in %s, the store currency (your bank may apply its own conversion rate).","Displayed prices are for reference. Your order will be charged in %s, the store currency (your bank may apply its own conversion rate)."
 "Edit","Edit"
 "Edit Order #%s","Edit Order #%s"
 "Edit Order %s %s Address","Edit Order %s %s Address"
