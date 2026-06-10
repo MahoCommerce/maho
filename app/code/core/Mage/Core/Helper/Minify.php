@@ -152,14 +152,11 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
         try {
             $this->ensureCacheDirectory($type);
 
-            $lockFile = $cachedFile . '.lock';
-            $lockHandle = fopen($lockFile, 'c');
+            $lockName = 'minify_' . md5($absolutePath);
+            $lock = Mage::getSingleton('core/lock');
 
-            if (!$lockHandle || !flock($lockHandle, LOCK_EX | LOCK_NB)) {
+            if (!$lock->acquire($lockName)) {
                 // If we can't get a lock, return original file (another process is minifying)
-                if ($lockHandle) {
-                    fclose($lockHandle);
-                }
                 return $filePath;
             }
 
@@ -177,9 +174,7 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
                 }
                 return $cachedUrl;
             } finally {
-                flock($lockHandle, LOCK_UN);
-                fclose($lockHandle);
-                @unlink($lockFile);
+                $lock->release($lockName);
             }
 
         } catch (Exception $e) {

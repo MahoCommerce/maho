@@ -14,6 +14,20 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
 {
     protected $_moduleName = 'Maho_Paypal';
 
+    /**
+     * Per-order lock preventing the webhook and the JS controller from
+     * placing the same order concurrently.
+     */
+    public function acquireOrderLock(string $paypalOrderId, bool $blocking = false): bool
+    {
+        return Mage::getSingleton('core/lock')->acquire('paypal_order_' . $paypalOrderId, $blocking);
+    }
+
+    public function releaseOrderLock(string $paypalOrderId): void
+    {
+        Mage::getSingleton('core/lock')->release('paypal_order_' . $paypalOrderId);
+    }
+
     public function importPaypalAddress(array $paypalResult, Mage_Sales_Model_Quote $quote): void
     {
         $payer = $paypalResult['payer'] ?? [];

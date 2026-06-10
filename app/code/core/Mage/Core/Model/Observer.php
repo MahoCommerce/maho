@@ -52,6 +52,15 @@ class Mage_Core_Model_Observer
     }
 
     /**
+     * Remove stale lock files left behind by short-lived names (cron job)
+     */
+    #[Maho\Config\CronJob('core_lock_cleanup', schedule: '17 3 * * *')]
+    public function cleanupStaleLockFiles(Mage_Cron_Model_Schedule $schedule): void
+    {
+        Mage::getSingleton('core/lock')->cleanupStaleLockFiles();
+    }
+
+    /**
      * Checks method availability for processing in variable
      *
      * @throws Exception
