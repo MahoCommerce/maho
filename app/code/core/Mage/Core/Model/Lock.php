@@ -137,14 +137,14 @@ class Mage_Core_Model_Lock
      * Returns the number of files removed. Operates on the filesystem regardless
      * of the configured backend, so leftovers from a prior file-backend run are
      * still reclaimed after a switch to db.
-     *
-     * @throws Mage_Core_Exception when the lock directory cannot be created
      */
     public function cleanupStaleLockFiles(int $olderThanSeconds = 86400): int
     {
-        $lockDir = Mage::getConfig()->getVarDir('locks');
-        if ($lockDir === false) {
-            throw new Mage_Core_Exception('Unable to create lock directory in var/locks');
+        // Resolve without getVarDir(): a cleanup pass must not create the directory
+        // it is meant to clean, and a db-backend host may not even have one.
+        $lockDir = Mage::getBaseDir('var') . DS . 'locks';
+        if (!is_dir($lockDir)) {
+            return 0;
         }
 
         $cutoff = time() - $olderThanSeconds;
