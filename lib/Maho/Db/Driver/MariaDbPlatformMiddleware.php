@@ -16,14 +16,23 @@ use Doctrine\DBAL\Driver;
 use Doctrine\DBAL\Driver\Middleware;
 use Doctrine\DBAL\Driver\Middleware\AbstractDriverMiddleware;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Platforms\Keywords\KeywordList;
+use Doctrine\DBAL\Platforms\Keywords\MariaDB117Keywords;
 use Doctrine\DBAL\Platforms\MariaDB110700Platform;
 use Doctrine\DBAL\ServerVersionProvider;
-use Maho\Db\Platform\MariaDbPlatform;
 
 /**
- * Substitutes Maho's MariaDB platform, whose keyword list knows the words
- * newer MariaDB releases reserve but DBAL does not (see MariaDbKeywords),
- * so DBAL quotes them in generated DDL.
+ * Extends the MariaDB keyword list with reserved words DBAL does not know yet.
+ *
+ * MariaDB 12.3 implements the Oracle-compatible TO_DATE() function as a
+ * parser-level keyword (MDEV-19683), so a bare to_date column identifier is a
+ * syntax error there. DBAL quotes an identifier only when the platform keyword
+ * list knows it, so listing the word here makes every DDL emission site
+ * backtick-quote it, on every MariaDB version that resolves to this platform.
+ *
+ * The KeywordList feature is deprecated upstream because DBAL 5 will quote
+ * every identifier unconditionally, which subsumes this fix; until then it is
+ * the only extension point (see the scoped exceptions in .phpstan.dist.neon).
  */
 class MariaDbPlatformMiddleware implements Middleware
 {
@@ -35,8 +44,23 @@ class MariaDbPlatformMiddleware implements Middleware
             public function getDatabasePlatform(ServerVersionProvider $versionProvider): AbstractPlatform
             {
                 $platform = parent::getDatabasePlatform($versionProvider);
+                if (!$platform instanceof MariaDB110700Platform) {
+                    return $platform;
+                }
 
-                return $platform instanceof MariaDB110700Platform ? new MariaDbPlatform() : $platform;
+                return new class extends MariaDB110700Platform {
+                    #[\Override]
+                    protected function createReservedKeywordsList(): KeywordList
+                    {
+                        return new class extends MariaDB117Keywords {
+                            #[\Override]
+                            protected function getKeywords(): array
+                            {
+                                return array_merge(parent::getKeywords(), ['TO_DATE']);
+                            }
+                        };
+                    }
+                };
             }
         };
     }
