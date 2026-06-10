@@ -7,8 +7,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Maho_Revocation_Block_Footer $this */
+/** @var Maho_Revocation_Block_Widget_Button $this */
 ?>
-<div class="revocation-footer-button">
-    <a href="<?= $this->getRevocationUrl() ?>"><?= $this->escapeHtml($this->getButtonLabel()) ?></a>
-</div>
+<a class="revocation-button" href="<?= $this->getRevocationUrl() ?>"><?= $this->escapeHtml($this->getButtonLabel()) ?></a>

@@ -14,7 +14,6 @@ class Maho_Revocation_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_ENABLED = 'revocation/general/enabled';
     public const XML_PATH_BUTTON_LABEL = 'revocation/general/button_label';
-    public const XML_PATH_SHOW_IN_FOOTER = 'revocation/general/show_in_footer';
     public const XML_PATH_NOTIFY_EMAIL = 'revocation/general/notify_email';
     public const XML_PATH_COOLING_OFF_DAYS = 'revocation/general/cooling_off_days';
     public const XML_PATH_EMAIL_IDENTITY = 'revocation/email/identity';
@@ -34,11 +33,6 @@ class Maho_Revocation_Helper_Data extends Mage_Core_Helper_Abstract
         return $this->isModuleEnabled()
             && $this->isModuleOutputEnabled()
             && Mage::getStoreConfigFlag(self::XML_PATH_ENABLED, $store);
-    }
-
-    public function showFooterButton(mixed $store = null): bool
-    {
-        return $this->isEnabled($store) && Mage::getStoreConfigFlag(self::XML_PATH_SHOW_IN_FOOTER, $store);
     }
 
     public function getButtonLabel(mixed $store = null): string

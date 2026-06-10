@@ -21,7 +21,7 @@
             <groups>
                 <general translate="label comment" module="revocation">
                     <label>General</label>
-                    <comment><![CDATA[EU Directive 2023/2673 (in Germany: &sect;356a BGB) requires B2C shops selling into the EU to provide a revocation button from 19 June 2026. This module provides the legally required channel; the existing withdrawal information page and PDF withdrawal form remain mandatory and unchanged.]]></comment>
+                    <comment><![CDATA[EU Directive 2023/2673 (in Germany: &sect;356a BGB) requires B2C shops selling into the EU to provide a revocation button from 19 June 2026. This module provides the legally required channel; the existing withdrawal information page and PDF withdrawal form remain mandatory and unchanged.<br/><br/>To display the button on the storefront, insert the <strong>Revocation Button</strong> widget into your footer (or any block that stays visible throughout the withdrawal period).]]></comment>
                     <frontend_type>text</frontend_type>
                     <sort_order>10</sort_order>
                     <show_in_default>1</show_in_default>
@@ -46,16 +46,6 @@
                             <show_in_store>1</show_in_store>
                             <depends><enabled>1</enabled></depends>
                         </button_label>
-                        <show_in_footer translate="label">
-                            <label>Show Button in Footer</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>30</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </show_in_footer>
                         <notify_email translate="label comment">
                             <label>Merchant Notification Email</label>
                             <comment>Leave empty to use the General Contact email address.</comment>

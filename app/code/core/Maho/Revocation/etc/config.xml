@@ -102,7 +102,6 @@
         <revocation>
             <general>
                 <enabled>0</enabled>
-                <show_in_footer>1</show_in_footer>
                 <cooling_off_days>14</cooling_off_days>
             </general>
             <email>

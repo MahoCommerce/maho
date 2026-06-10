@@ -11,56 +11,46 @@ declare(strict_types=1);
 
 uses(Tests\MahoFrontendTestCase::class);
 
-describe('Revocation footer button', function () {
-    it('renders the persistent footer button when enabled', function () {
-        $store = Mage::app()->getStore();
-        $store->setConfig('revocation/general/enabled', '1');
-        $store->setConfig('revocation/general/show_in_footer', '1');
+describe('Revocation button widget', function () {
+    it('renders the revocation link when enabled', function () {
+        Mage::app()->getStore()->setConfig('revocation/general/enabled', '1');
 
         $html = Mage::app()->getLayout()
-            ->createBlock('revocation/footer')
-            ->setTemplate('revocation/button.phtml')
+            ->createBlock('revocation/widget_button')
             ->toHtml();
 
-        expect($html)->toContain('revocation-footer-button');
         expect($html)->toContain('/revocation');
         expect($html)->toContain('Revoke contract');
     });
 
-    it('uses the configured button label when set', function () {
+    it('uses the configured button label by default', function () {
         $store = Mage::app()->getStore();
         $store->setConfig('revocation/general/enabled', '1');
-        $store->setConfig('revocation/general/show_in_footer', '1');
         $store->setConfig('revocation/general/button_label', 'Vertrag widerrufen');
 
         $html = Mage::app()->getLayout()
-            ->createBlock('revocation/footer')
-            ->setTemplate('revocation/button.phtml')
+            ->createBlock('revocation/widget_button')
             ->toHtml();
 
         expect($html)->toContain('Vertrag widerrufen');
     });
 
-    it('does not render the button when the feature is disabled for the current store', function () {
-        $store = Mage::app()->getStore();
-        $store->setConfig('revocation/general/enabled', '0');
+    it('honors a custom label set on the widget instance', function () {
+        Mage::app()->getStore()->setConfig('revocation/general/enabled', '1');
 
         $html = Mage::app()->getLayout()
-            ->createBlock('revocation/footer')
-            ->setTemplate('revocation/button.phtml')
+            ->createBlock('revocation/widget_button')
+            ->setData('label', 'Withdraw from contract')
             ->toHtml();
 
-        expect($html)->toBe('');
+        expect($html)->toContain('Withdraw from contract');
     });
 
-    it('does not render the button when show_in_footer is off', function () {
-        $store = Mage::app()->getStore();
-        $store->setConfig('revocation/general/enabled', '1');
-        $store->setConfig('revocation/general/show_in_footer', '0');
+    it('renders nothing when the feature is disabled for the current store', function () {
+        Mage::app()->getStore()->setConfig('revocation/general/enabled', '0');
 
         $html = Mage::app()->getLayout()
-            ->createBlock('revocation/footer')
-            ->setTemplate('revocation/button.phtml')
+            ->createBlock('revocation/widget_button')
             ->toHtml();
 
         expect($html)->toBe('');
