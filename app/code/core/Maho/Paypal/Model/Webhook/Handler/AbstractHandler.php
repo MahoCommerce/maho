@@ -128,14 +128,14 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
     {
         /** @var Maho_Paypal_Helper_Data $helper */
         $helper = Mage::helper('paypal');
-        return $helper->getOrderLock($paypalOrderId)->acquire();
+        return $helper->acquireOrderLock($paypalOrderId);
     }
 
     protected function _releaseLock(string $paypalOrderId): void
     {
         /** @var Maho_Paypal_Helper_Data $helper */
         $helper = Mage::helper('paypal');
-        $helper->getOrderLock($paypalOrderId)->release();
+        $helper->releaseOrderLock($paypalOrderId);
     }
 
     protected function _placeOrderFromPaypalResult(

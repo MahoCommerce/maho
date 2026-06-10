@@ -26,8 +26,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class CronRun extends BaseMahoCommand
 {
-    protected ?\Maho\Lock\FileLock $lock = null;
-
     #[\Override]
     protected function configure(): void
     {
@@ -44,7 +42,8 @@ class CronRun extends BaseMahoCommand
         $mode = $modeOrJobCode;
         $availableModes = ['default', 'always'];
         if (in_array($mode, $availableModes)) {
-            if (!$this->acquireLock("cron.{$mode}")) {
+            // Held until this process exits; the core/lock singleton keeps it alive
+            if (!Mage::getSingleton('core/lock')->acquire("cron.{$mode}")) {
                 $output->writeln("<error>{$mode} is already running</error>");
                 return Command::INVALID;
             }
@@ -146,20 +145,4 @@ class CronRun extends BaseMahoCommand
         return false;
     }
 
-    /**
-     * Acquire an exclusive, non-blocking lock for the given name,
-     * held until this process exits.
-     *
-     * @throws \RuntimeException when the lock file cannot be created
-     */
-    protected function acquireLock(string $name): bool
-    {
-        $lockDir = Mage::getConfig()->getVarDir('locks');
-        if ($lockDir === false) {
-            throw new \RuntimeException('Unable to create lock directory in var/locks');
-        }
-
-        $this->lock = new \Maho\Lock\FileLock($lockDir . DS . $name . '.lock');
-        return $this->lock->acquire();
-    }
 }

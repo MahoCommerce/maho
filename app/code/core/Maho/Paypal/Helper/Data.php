@@ -15,24 +15,17 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
     protected $_moduleName = 'Maho_Paypal';
 
     /**
-     * Per-order locks preventing the webhook and the JS controller from
-     * placing the same order concurrently. Cached so acquire and release
-     * operate on the same lock instance within a request.
-     *
-     * @var array<string, \Maho\Lock\FileLock>
+     * Per-order lock preventing the webhook and the JS controller from
+     * placing the same order concurrently.
      */
-    protected static array $orderLocks = [];
-
-    public function getOrderLock(string $paypalOrderId): \Maho\Lock\FileLock
+    public function acquireOrderLock(string $paypalOrderId, bool $blocking = false): bool
     {
-        if (!isset(self::$orderLocks[$paypalOrderId])) {
-            $lockDir = Mage::getConfig()->getVarDir('locks');
-            if ($lockDir === false) {
-                Mage::throwException('Unable to create lock directory in var/locks');
-            }
-            self::$orderLocks[$paypalOrderId] = new \Maho\Lock\FileLock($lockDir . DS . 'paypal_order_' . $paypalOrderId . '.lock');
-        }
-        return self::$orderLocks[$paypalOrderId];
+        return Mage::getSingleton('core/lock')->acquire('paypal_order_' . $paypalOrderId, $blocking);
+    }
+
+    public function releaseOrderLock(string $paypalOrderId): void
+    {
+        Mage::getSingleton('core/lock')->release('paypal_order_' . $paypalOrderId);
     }
 
     public function importPaypalAddress(array $paypalResult, Mage_Sales_Model_Quote $quote): void

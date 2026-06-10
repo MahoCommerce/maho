@@ -232,8 +232,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             // Acquire lock to prevent concurrent order placement with webhook handlers
             /** @var Maho_Paypal_Helper_Data $paypalHelper */
             $paypalHelper = Mage::helper('paypal');
-            $lock = $paypalHelper->getOrderLock($paypalOrderId);
-            if (!$lock->acquire(blocking: true)) {
+            if (!$paypalHelper->acquireOrderLock($paypalOrderId, blocking: true)) {
                 Mage::throwException(Mage::helper('paypal')->__('Could not acquire order lock.'));
             }
 
@@ -318,7 +317,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                     $result['redirect_url'] = Mage::getUrl('checkout/onepage/success', ['_secure' => true]);
                 }
             } finally {
-                $lock->release();
+                $paypalHelper->releaseOrderLock($paypalOrderId);
             }
         } catch (\Throwable $e) {
             $result['message'] = $e->getMessage();

@@ -13,52 +13,35 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * Tests the flock-based concurrency guard of cron:run (issue #993).
- * The lock must reject a second holder while held and be released
- * when the owning command is destroyed (the kernel guarantees the
- * same on process exit or crash).
+ * Tests the cron:run concurrency guard (issue #993): one cron.{mode} lock
+ * per mode through the core/lock service, rejected while held, released
+ * when the holder goes away (the kernel guarantees the same on process
+ * exit or crash).
  */
 
-function acquireCronLock(\MahoCLI\Commands\CronRun $command, string $name): bool
-{
-    $method = new ReflectionMethod($command, 'acquireLock');
-    return $method->invoke($command, $name);
-}
+it('rejects a second holder of the cron lock while held', function () {
+    /** @var Mage_Core_Model_Lock $manager */
+    $manager = Mage::getModel('core/lock');
+    expect($manager->acquire('cron.default'))->toBeTrue();
 
-function cronLockFile(string $name): string
-{
-    return Mage::getConfig()->getVarDir('locks') . DS . $name . '.lock';
-}
+    /** @var Mage_Core_Model_Lock $contender */
+    $contender = Mage::getModel('core/lock');
+    expect($contender->acquire('cron.default'))->toBeFalse();
 
-it('rejects a second lock holder while the lock is held', function () {
-    $command = new \MahoCLI\Commands\CronRun();
-    expect(acquireCronLock($command, 'cron.test'))->toBeTrue();
-
-    $contender = fopen(cronLockFile('cron.test'), 'c');
-    expect(flock($contender, LOCK_EX | LOCK_NB))->toBeFalse();
-
-    fclose($contender);
-    unset($command);
-});
-
-it('releases the lock when the command is destroyed', function () {
-    $command = new \MahoCLI\Commands\CronRun();
-    expect(acquireCronLock($command, 'cron.test'))->toBeTrue();
-    unset($command);
-
-    $contender = fopen(cronLockFile('cron.test'), 'c');
-    expect(flock($contender, LOCK_EX | LOCK_NB))->toBeTrue();
-
-    flock($contender, LOCK_UN);
-    fclose($contender);
+    $manager->release('cron.default');
+    expect($contender->acquire('cron.default'))->toBeTrue();
+    $contender->release('cron.default');
 });
 
 it('uses independent locks per mode', function () {
-    $default = new \MahoCLI\Commands\CronRun();
-    $always = new \MahoCLI\Commands\CronRun();
+    /** @var Mage_Core_Model_Lock $default */
+    $default = Mage::getModel('core/lock');
+    /** @var Mage_Core_Model_Lock $always */
+    $always = Mage::getModel('core/lock');
 
-    expect(acquireCronLock($default, 'cron.default'))->toBeTrue();
-    expect(acquireCronLock($always, 'cron.always'))->toBeTrue();
+    expect($default->acquire('cron.default'))->toBeTrue();
+    expect($always->acquire('cron.always'))->toBeTrue();
 
-    unset($default, $always);
+    $default->release('cron.default');
+    $always->release('cron.always');
 });
