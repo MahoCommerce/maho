@@ -15,33 +15,50 @@ uses(Tests\MahoBackendTestCase::class);
 /**
  * Tests the cron:run concurrency guard (issue #993): one cron.{mode} lock
  * per mode through the core/lock service, rejected while held, released
- * when the holder goes away (the kernel guarantees the same on process
- * exit or crash).
+ * on process exit (simulated here at kernel level via a FileLock contender,
+ * which contends like a separate process would).
  */
+
+function cronContender(string $mode): \Maho\Lock\FileLock
+{
+    return new \Maho\Lock\FileLock(
+        Mage::getConfig()->getVarDir('locks') . DS . "cron.{$mode}.lock",
+    );
+}
 
 it('rejects a second holder of the cron lock while held', function () {
     /** @var Mage_Core_Model_Lock $manager */
     $manager = Mage::getModel('core/lock');
     expect($manager->acquire('cron.default'))->toBeTrue();
 
-    /** @var Mage_Core_Model_Lock $contender */
-    $contender = Mage::getModel('core/lock');
-    expect($contender->acquire('cron.default'))->toBeFalse();
+    $contender = cronContender('default');
+    expect($contender->acquire())->toBeFalse();
 
     $manager->release('cron.default');
-    expect($contender->acquire('cron.default'))->toBeTrue();
-    $contender->release('cron.default');
+    expect($contender->acquire())->toBeTrue();
+    $contender->release();
+});
+
+it('keeps the lock held even if the acquiring model instance is destroyed', function () {
+    $manager = Mage::getModel('core/lock');
+    expect($manager->acquire('cron.always'))->toBeTrue();
+    unset($manager);
+
+    $contender = cronContender('always');
+    expect($contender->acquire())->toBeFalse();
+
+    Mage::getModel('core/lock')->release('cron.always');
+    expect($contender->acquire())->toBeTrue();
+    $contender->release();
 });
 
 it('uses independent locks per mode', function () {
-    /** @var Mage_Core_Model_Lock $default */
-    $default = Mage::getModel('core/lock');
-    /** @var Mage_Core_Model_Lock $always */
-    $always = Mage::getModel('core/lock');
+    /** @var Mage_Core_Model_Lock $manager */
+    $manager = Mage::getModel('core/lock');
 
-    expect($default->acquire('cron.default'))->toBeTrue();
-    expect($always->acquire('cron.always'))->toBeTrue();
+    expect($manager->acquire('cron.default'))->toBeTrue();
+    expect($manager->acquire('cron.always'))->toBeTrue();
 
-    $default->release('cron.default');
-    $always->release('cron.always');
+    $manager->release('cron.default');
+    $manager->release('cron.always');
 });

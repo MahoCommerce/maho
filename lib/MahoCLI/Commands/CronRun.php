@@ -42,7 +42,7 @@ class CronRun extends BaseMahoCommand
         $mode = $modeOrJobCode;
         $availableModes = ['default', 'always'];
         if (in_array($mode, $availableModes)) {
-            // Held until this process exits; the core/lock singleton keeps it alive
+            // Held until this process exits
             if (!Mage::getSingleton('core/lock')->acquire("cron.{$mode}")) {
                 $output->writeln("<error>{$mode} is already running</error>");
                 return Command::INVALID;

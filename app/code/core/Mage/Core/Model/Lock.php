@@ -21,8 +21,9 @@ declare(strict_types=1);
  *   Galera-style clusters, and the SQLite implementation falls back to a lock table
  *   with expiry, so only switch when the deployment actually needs cross-server locks.
  *
- * Use via Mage::getSingleton('core/lock'): the singleton keeps file locks alive,
- * so an acquired lock is held until released or until the process ends.
+ * Acquired file locks are stored statically, so they are held until released
+ * or until the process ends, regardless of how this model is instantiated.
+ * Like DB advisory locks, they are re-entrant within the owning process.
  */
 class Mage_Core_Model_Lock
 {
@@ -34,11 +35,12 @@ class Mage_Core_Model_Lock
     public const DB_LOCK_TIMEOUT = 5;
 
     /**
-     * File lock instances, kept alive so locks stay held until release or process exit
+     * File lock instances, held statically so acquired locks stay held until
+     * release or process exit even if the acquiring model instance is destroyed
      *
      * @var array<string, \Maho\Lock\FileLock>
      */
-    protected array $_fileLocks = [];
+    protected static array $_fileLocks = [];
 
     protected ?bool $_useDb = null;
 
@@ -80,14 +82,14 @@ class Mage_Core_Model_Lock
 
     protected function _getFileLock(string $name): \Maho\Lock\FileLock
     {
-        if (!isset($this->_fileLocks[$name])) {
+        if (!isset(self::$_fileLocks[$name])) {
             $lockDir = Mage::getConfig()->getVarDir('locks');
             if ($lockDir === false) {
                 throw new Mage_Core_Exception('Unable to create lock directory in var/locks');
             }
-            $this->_fileLocks[$name] = new \Maho\Lock\FileLock($lockDir . DS . $name . '.lock');
+            self::$_fileLocks[$name] = new \Maho\Lock\FileLock($lockDir . DS . $name . '.lock');
         }
-        return $this->_fileLocks[$name];
+        return self::$_fileLocks[$name];
     }
 
     protected function _getConnection(): \Maho\Db\Adapter\AdapterInterface
