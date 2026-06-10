@@ -16,11 +16,12 @@ declare(strict_types=1);
  * The backend ("file" default, or "db") is selected via <global><lock><backend>;
  * see local.xml.template for when to use each and their caveats.
  *
- * Both backends share the same contract: re-entrant within the owning process,
- * a single release() frees the lock (so a name must have one logical owner per
- * process), and a blocking acquire() waits until the lock is obtained. Acquired
- * locks are tracked statically, so they stay held until released or until the
- * process ends, regardless of how this model is instantiated.
+ * Both backends share the same contract: a lock this process already holds
+ * cannot be taken again, so a second acquire() returns false just as it would
+ * for a separate process; release() frees it. A blocking acquire() waits until
+ * the lock is obtained. Acquired locks are tracked statically, so they stay
+ * held until released or until the process ends, regardless of how this model
+ * is instantiated.
  */
 class Mage_Core_Model_Lock
 {
@@ -34,10 +35,10 @@ class Mage_Core_Model_Lock
     /**
      * Held locks (SplFileObject for the file backend, true for the db backend);
      * static so acquired locks stay held until release or process exit even if
-     * the acquiring model instance is destroyed. Tracking held names is also
-     * what makes both backends re-entrant with a single release(): a held name
-     * never reaches the backend again (MySQL counts re-acquires, SQLite would
-     * reject them).
+     * the acquiring model instance is destroyed. Tracking held names also keeps
+     * the backends consistent: a name we already hold is reported as taken
+     * without reaching the backend, where MySQL would count the re-acquire and
+     * SQLite would error on it.
      *
      * @var array<string, \SplFileObject|true>
      */
@@ -47,20 +48,32 @@ class Mage_Core_Model_Lock
 
     public function acquire(string $name, bool $blocking = false): bool
     {
+        // Already held by this process: not re-entrant, fail like a separate process would
         if (isset(self::$_locks[$name])) {
-            return true;
+            return false;
         }
 
         if ($this->_useDbBackend()) {
             $connection = $this->_getConnection();
             $dbLockName = $this->_prepareDbLockName($name);
-            // Retry in DB_LOCK_TIMEOUT slices so blocking waits indefinitely, like flock
-            do {
-                $acquired = $connection->getLock($dbLockName, $blocking ? self::DB_LOCK_TIMEOUT : 0);
-            } while ($blocking && !$acquired);
-            if (!$acquired) {
-                return false;
+            if (!$blocking) {
+                if (!$connection->getLock($dbLockName, 0)) {
+                    return false;
+                }
+                self::$_locks[$name] = true;
+                return true;
             }
+            // Retry in DB_LOCK_TIMEOUT slices so blocking waits indefinitely, like flock.
+            // A contended GET_LOCK blocks for the full timeout before returning false; an
+            // error (GET_LOCK returns NULL, not 0) returns near-instantly. Treat a fast
+            // failure as an error and abort, otherwise we would spin tightly forever.
+            do {
+                $startedAt = microtime(true);
+                $acquired = $connection->getLock($dbLockName, self::DB_LOCK_TIMEOUT);
+                if (!$acquired && microtime(true) - $startedAt < self::DB_LOCK_TIMEOUT - 1) {
+                    return false;
+                }
+            } while (!$acquired);
             self::$_locks[$name] = true;
             return true;
         }
@@ -102,6 +115,11 @@ class Mage_Core_Model_Lock
             return $this->_getConnection()->isLocked($this->_prepareDbLockName($name));
         }
 
+        // No file means nobody has ever taken this lock; don't create one just to probe
+        if (!is_file($this->_lockFilePath($name))) {
+            return false;
+        }
+
         $handle = $this->_openLockFile($name);
         if (!$handle->flock(LOCK_EX | LOCK_NB)) {
             return true;
@@ -119,9 +137,9 @@ class Mage_Core_Model_Lock
     }
 
     /**
-     * @throws Mage_Core_Exception when the lock file cannot be created
+     * @throws Mage_Core_Exception when the lock directory cannot be created
      */
-    protected function _openLockFile(string $name): SplFileObject
+    protected function _lockFilePath(string $name): string
     {
         $lockDir = Mage::getConfig()->getVarDir('locks');
         if ($lockDir === false) {
@@ -129,7 +147,15 @@ class Mage_Core_Model_Lock
         }
 
         // Lock names may embed external input (e.g. payment provider order ids)
-        $file = $lockDir . DS . preg_replace('/[^A-Za-z0-9._-]/', '_', $name) . '.lock';
+        return $lockDir . DS . preg_replace('/[^A-Za-z0-9._-]/', '_', $name) . '.lock';
+    }
+
+    /**
+     * @throws Mage_Core_Exception when the lock file cannot be created
+     */
+    protected function _openLockFile(string $name): SplFileObject
+    {
+        $file = $this->_lockFilePath($name);
         try {
             return new SplFileObject($file, 'c');
         } catch (RuntimeException $e) {

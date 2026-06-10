@@ -33,13 +33,17 @@ it('defaults to the file backend and contends at kernel level', function () {
     fclose($contender);
 });
 
-it('is re-entrant within the process', function () {
+it('rejects re-acquiring a lock the process already holds', function () {
     /** @var Mage_Core_Model_Lock $manager */
     $manager = Mage::getModel('core/lock');
     expect($manager->acquire('core_lock_test'))->toBeTrue();
-    expect($manager->acquire('core_lock_test'))->toBeTrue();
-    expect(Mage::getModel('core/lock')->acquire('core_lock_test'))->toBeTrue();
+    // Already held by this process: a second acquire fails, even from a fresh instance
+    expect($manager->acquire('core_lock_test'))->toBeFalse();
+    expect(Mage::getModel('core/lock')->acquire('core_lock_test'))->toBeFalse();
+    // A single release frees it
+    expect($manager->isHeld('core_lock_test'))->toBeTrue();
     $manager->release('core_lock_test');
+    expect($manager->isHeld('core_lock_test'))->toBeFalse();
 });
 
 it('sanitizes lock names containing external input', function () {
@@ -68,14 +72,14 @@ it('uses db advisory locks when configured in local.xml', function () {
     expect(file_exists(Mage::getConfig()->getVarDir('locks') . DS . 'core_lock_db_test.lock'))->toBeFalse();
 });
 
-it('is re-entrant with a single release on the db backend too', function () {
+it('rejects re-acquiring a held lock on the db backend too', function () {
     Mage::getConfig()->setNode(Mage_Core_Model_Lock::XML_PATH_BACKEND, 'db');
 
     /** @var Mage_Core_Model_Lock $manager */
     $manager = Mage::getModel('core/lock');
     expect($manager->acquire('core_lock_db_reentrant'))->toBeTrue();
-    expect($manager->acquire('core_lock_db_reentrant'))->toBeTrue();
-    expect(Mage::getModel('core/lock')->acquire('core_lock_db_reentrant'))->toBeTrue();
+    expect($manager->acquire('core_lock_db_reentrant'))->toBeFalse();
+    expect(Mage::getModel('core/lock')->acquire('core_lock_db_reentrant'))->toBeFalse();
     expect($manager->release('core_lock_db_reentrant'))->toBeTrue();
     expect($manager->isHeld('core_lock_db_reentrant'))->toBeFalse();
 });
