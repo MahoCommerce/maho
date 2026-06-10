@@ -6,13 +6,13 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import { Editor, Node, Mark, Extension, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.23.4';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.23.4';
-import Image from 'https://esm.sh/@tiptap/extension-image@3.23.4';
-import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.23.4';
-import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.23.4';
-import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.23.4';
-import DragHandle from 'https://esm.sh/@tiptap/extension-drag-handle@3.23.4';
+import { Editor, Node, Mark, Extension, mergeAttributes, ResizableNodeView } from 'https://esm.sh/@tiptap/core@3.26.0';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.26.0';
+import Image from 'https://esm.sh/@tiptap/extension-image@3.26.0';
+import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.26.0';
+import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.26.0';
+import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.26.0';
+import DragHandle from 'https://esm.sh/@tiptap/extension-drag-handle@3.26.0';
 import { MahoColumns, MahoColumn, COLUMN_PRESETS } from './extensions/columns.js';
 import { MahoBentoGrid, MahoBentoCell, BENTO_PRESETS } from './extensions/bento.js';
 
@@ -382,17 +382,13 @@ export const MahoImage = Image.extend({
 
     addNodeView() {
         return ({ node, editor, HTMLAttributes, getPos }) => {
-            const container = document.createElement('div');
-            container.className = 'image-container';
-            container.title = editor.options.wysiwygSetup.translate('Double-click to edit');
-
             const img = document.createElement('img');
-            container.appendChild(img);
 
             for (const [key, value] of Object.entries(HTMLAttributes)) {
                 if (key === 'src') {
                     img.src = renderDirectiveImageUrl(value, node.attrs.directiveObj, this.options.directivesUrl);
-                } else if (value !== null) {
+                } else if (key !== 'width' && key !== 'height' && value !== null) {
+                    // width/height are applied as styles by ResizableNodeView from node attrs
                     img.setAttribute(key, value);
                 }
             }
@@ -406,63 +402,33 @@ export const MahoImage = Image.extend({
                 editor.commands.insertMahoImage(node);
             });
 
-            // Create resize handles
-            for (const position of ['nw', 'ne', 'sw', 'se']) {
-                const handle = document.createElement('div');
-                handle.className = `resize-handle resize-handle-${position}`;
-                container.appendChild(handle);
+            const view = new ResizableNodeView({
+                element: img,
+                editor,
+                node,
+                getPos,
+                onResize: (width, height) => {
+                    img.style.width = `${width}px`;
+                    img.style.height = `${height}px`;
+                },
+                onCommit: (width, height) => {
+                    const pos = getPos();
+                    if (pos !== undefined) {
+                        editor.chain().setNodeSelection(pos).updateAttributes(this.name, { width, height }).run();
+                    }
+                },
+                onUpdate: (updatedNode) => updatedNode.type === node.type,
+                options: {
+                    min: { width: 50, height: 50 },
+                    preserveAspectRatio: true,
+                    className: { container: 'image-container', handle: 'resize-handle' },
+                },
+            });
 
-                handle.addEventListener('mousedown', (event) => {
-                    // Select the image when resizing
-                    editor.commands.setNodeSelection(getPos());
-                    event.preventDefault();
+            // Tooltip lives on the container so the styled .image-container[title] hint applies
+            view.dom.title = editor.options.wysiwygSetup.translate('Double-click to edit');
 
-                    const startX = event.clientX;
-                    const startY = event.clientY;
-                    const startWidth = img.offsetWidth;
-                    const startHeight = img.offsetHeight;
-                    const aspectRatio = startWidth / startHeight;
-
-                    const handleMouseMove = (event) => {
-                        const deltaX = event.clientX - startX;
-                        const deltaY = event.clientY - startY;
-
-                        let newWidth = startWidth + deltaX;
-                        let newHeight = startHeight + deltaY;
-
-                        // Maintain aspect ratio
-                        if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                            newHeight = newWidth / aspectRatio;
-                        } else {
-                            newWidth = newHeight * aspectRatio;
-                        }
-
-                        // Minimum size
-                        newWidth = Math.max(50, newWidth);
-                        newHeight = Math.max(50, newHeight);
-
-                        img.width = Math.round(newWidth);
-                        img.height = Math.round(newHeight);
-                    };
-
-                    const handleMouseUp = () => {
-                        document.removeEventListener('mousemove', handleMouseMove);
-                        document.removeEventListener('mouseup', handleMouseUp);
-
-                        editor.commands.updateAttributes(this.name, {
-                            width: img.width,
-                            height: img.height,
-                        });
-                    };
-
-                    document.addEventListener('mousemove', handleMouseMove);
-                    document.addEventListener('mouseup', handleMouseUp);
-                });
-            }
-
-            return {
-                dom: container,
-            };
+            return view;
         };
     },
 
