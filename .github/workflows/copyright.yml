@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Skip OM commits
         if: github.event_name == 'push'
@@ -27,7 +27,7 @@ jobs:
       - name: Get changed files
         id: changed-files
         if: github.event_name == 'pull_request' || steps.skip_check.outputs.skip != 'true'
-        uses: tj-actions/changed-files@v47
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
 
       - name: Check copyright in modified files
         if: github.event_name == 'pull_request' || steps.skip_check.outputs.skip != 'true'
