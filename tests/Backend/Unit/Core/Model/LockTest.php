@@ -67,3 +67,27 @@ it('uses db advisory locks when configured in local.xml', function () {
     // No lock file must be created by the db backend
     expect(file_exists(Mage::getConfig()->getVarDir('locks') . DS . 'core_lock_db_test.lock'))->toBeFalse();
 });
+
+it('is re-entrant with a single release on the db backend too', function () {
+    Mage::getConfig()->setNode(Mage_Core_Model_Lock::XML_PATH_BACKEND, 'db');
+
+    /** @var Mage_Core_Model_Lock $manager */
+    $manager = Mage::getModel('core/lock');
+    expect($manager->acquire('core_lock_db_reentrant'))->toBeTrue();
+    expect($manager->acquire('core_lock_db_reentrant'))->toBeTrue();
+    expect(Mage::getModel('core/lock')->acquire('core_lock_db_reentrant'))->toBeTrue();
+    expect($manager->release('core_lock_db_reentrant'))->toBeTrue();
+    expect($manager->isHeld('core_lock_db_reentrant'))->toBeFalse();
+});
+
+it('handles db lock names exceeding the MySQL 64-character limit', function () {
+    Mage::getConfig()->setNode(Mage_Core_Model_Lock::XML_PATH_BACKEND, 'db');
+
+    /** @var Mage_Core_Model_Lock $manager */
+    $manager = Mage::getModel('core/lock');
+    $name = 'paypal_order_' . str_repeat('X', 80);
+    expect($manager->acquire($name))->toBeTrue();
+    expect($manager->isHeld($name))->toBeTrue();
+    expect($manager->release($name))->toBeTrue();
+    expect($manager->isHeld($name))->toBeFalse();
+});

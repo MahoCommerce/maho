@@ -14,62 +14,85 @@ declare(strict_types=1);
  * Named locks for mutual exclusion (cron dispatch, reindexing, order placement, ...).
  *
  * The backend is selected via <global><lock><backend> in local.xml:
- * - "file" (default): kernel flock in var/locks, the most robust option for
- *   single-server setups; released instantly when the holding process exits or crashes.
- * - "db": the adapter's advisory locks (MySQL GET_LOCK, PostgreSQL advisory locks),
- *   for multi-frontend setups sharing a single database server. Not supported on
- *   Galera-style clusters, and the SQLite implementation falls back to a lock table
- *   with expiry, so only switch when the deployment actually needs cross-server locks.
+ * - "file" (default): kernel flock in var/locks; released instantly when the
+ *   holding process exits or crashes. Use this unless multiple servers need
+ *   to share locks.
+ * - "db": the adapter's advisory locks (MySQL GET_LOCK, PostgreSQL advisory
+ *   locks), for multi-frontend setups sharing one database server. Do not use
+ *   it on Galera-style clusters (no advisory lock support) or on SQLite (only
+ *   emulated via an expiring lock table). Caveat: advisory locks belong to the
+ *   DB session, so if the connection drops during a long run (e.g. wait_timeout),
+ *   the server releases the lock while the holding PHP process is still running.
  *
- * Acquired file locks are stored statically, so they are held until released
- * or until the process ends, regardless of how this model is instantiated.
- * Like DB advisory locks, they are re-entrant within the owning process.
+ * Both backends share the same contract: re-entrant within the owning process,
+ * a single release() frees the lock, and a blocking acquire() waits until the
+ * lock is obtained. Acquired locks are tracked statically, so they stay held
+ * until released or until the process ends, regardless of how this model is
+ * instantiated.
  */
 class Mage_Core_Model_Lock
 {
     public const XML_PATH_BACKEND = 'global/lock/backend';
 
     /**
-     * Seconds to wait for a DB lock when blocking
+     * Seconds per acquisition attempt when blocking on the db backend
      */
     public const DB_LOCK_TIMEOUT = 5;
 
     /**
-     * Held file locks; static so acquired locks stay held until release or
-     * process exit even if the acquiring model instance is destroyed
+     * Held locks (SplFileObject for the file backend, true for the db backend);
+     * static so acquired locks stay held until release or process exit even if
+     * the acquiring model instance is destroyed. Tracking held names is also
+     * what makes both backends re-entrant with a single release(): a held name
+     * never reaches the backend again (MySQL counts re-acquires, SQLite would
+     * reject them).
      *
-     * @var array<string, \SplFileObject>
+     * @var array<string, \SplFileObject|true>
      */
-    protected static array $_fileLocks = [];
+    protected static array $_locks = [];
 
     protected ?bool $_useDb = null;
 
     public function acquire(string $name, bool $blocking = false): bool
     {
-        if ($this->_useDbBackend()) {
-            return $this->_getConnection()->getLock($this->_prepareDbLockName($name), $blocking ? self::DB_LOCK_TIMEOUT : 0);
-        }
-
-        if (isset(self::$_fileLocks[$name])) {
+        if (isset(self::$_locks[$name])) {
             return true;
         }
+
+        if ($this->_useDbBackend()) {
+            $connection = $this->_getConnection();
+            $dbLockName = $this->_prepareDbLockName($name);
+            // Retry in DB_LOCK_TIMEOUT slices so blocking waits indefinitely, like flock
+            do {
+                $acquired = $connection->getLock($dbLockName, $blocking ? self::DB_LOCK_TIMEOUT : 0);
+            } while ($blocking && !$acquired);
+            if (!$acquired) {
+                return false;
+            }
+            self::$_locks[$name] = true;
+            return true;
+        }
+
         $handle = $this->_openLockFile($name);
         if (!$handle->flock($blocking ? LOCK_EX : LOCK_EX | LOCK_NB)) {
             return false;
         }
-        self::$_fileLocks[$name] = $handle;
+        self::$_locks[$name] = $handle;
         return true;
     }
 
     public function release(string $name): bool
     {
-        if ($this->_useDbBackend()) {
-            return $this->_getConnection()->releaseLock($this->_prepareDbLockName($name));
+        if (!isset(self::$_locks[$name])) {
+            return true;
         }
 
-        if (isset(self::$_fileLocks[$name])) {
-            self::$_fileLocks[$name]->flock(LOCK_UN);
-            unset(self::$_fileLocks[$name]);
+        $lock = self::$_locks[$name];
+        unset(self::$_locks[$name]);
+        if ($lock instanceof SplFileObject) {
+            $lock->flock(LOCK_UN);
+        } else {
+            $this->_getConnection()->releaseLock($this->_prepareDbLockName($name));
         }
         return true;
     }
@@ -79,13 +102,14 @@ class Mage_Core_Model_Lock
      */
     public function isHeld(string $name): bool
     {
+        if (isset(self::$_locks[$name])) {
+            return true;
+        }
+
         if ($this->_useDbBackend()) {
             return $this->_getConnection()->isLocked($this->_prepareDbLockName($name));
         }
 
-        if (isset(self::$_fileLocks[$name])) {
-            return true;
-        }
         $handle = $this->_openLockFile($name);
         if (!$handle->flock(LOCK_EX | LOCK_NB)) {
             return true;
@@ -132,6 +156,8 @@ class Mage_Core_Model_Lock
     protected function _prepareDbLockName(string $name): string
     {
         $config = $this->_getConnection()->getConfig();
-        return ($config['dbname'] ?? '') . '.' . $name;
+        $lockName = ($config['dbname'] ?? '') . '.' . $name;
+        // MySQL rejects user-level lock names longer than 64 characters
+        return strlen($lockName) > 64 ? md5($lockName) : $lockName;
     }
 }
