@@ -26,7 +26,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class CronRun extends BaseMahoCommand
 {
-    protected ?\SplFileObject $lockHandle = null;
+    protected ?\Maho\Lock\FileLock $lock = null;
 
     #[\Override]
     protected function configure(): void
@@ -147,9 +147,8 @@ class CronRun extends BaseMahoCommand
     }
 
     /**
-     * Acquire an exclusive, non-blocking lock for the given name.
-     * The lock is tied to this process's file handle: the kernel releases it
-     * automatically on exit or crash, so stale locks are impossible.
+     * Acquire an exclusive, non-blocking lock for the given name,
+     * held until this process exits.
      *
      * @throws \RuntimeException when the lock file cannot be created
      */
@@ -160,18 +159,7 @@ class CronRun extends BaseMahoCommand
             throw new \RuntimeException('Unable to create lock directory in var/locks');
         }
 
-        $file = $lockDir . DS . $name . '.lock';
-        try {
-            $handle = new \SplFileObject($file, 'c');
-        } catch (\RuntimeException $e) {
-            throw new \RuntimeException("Unable to create lock file {$file}", 0, $e);
-        }
-
-        if (!$handle->flock(LOCK_EX | LOCK_NB)) {
-            return false;
-        }
-
-        $this->lockHandle = $handle;
-        return true;
+        $this->lock = new \Maho\Lock\FileLock($lockDir . DS . $name . '.lock');
+        return $this->lock->acquire();
     }
 }
