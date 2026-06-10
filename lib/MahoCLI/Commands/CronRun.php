@@ -26,13 +26,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class CronRun extends BaseMahoCommand
 {
-    protected bool $isShellAvailable;
-
     #[\Override]
     protected function configure(): void
     {
         $this->addArgument('mode', InputArgument::REQUIRED, '"default" or "always"');
-        $this->setShellAvailable();
     }
 
     #[\Override]
@@ -45,7 +42,15 @@ class CronRun extends BaseMahoCommand
         $mode = $modeOrJobCode;
         $availableModes = ['default', 'always'];
         if (in_array($mode, $availableModes)) {
-            if ($this->isProcessRunning("maho cron:run $mode")) {
+            try {
+                // Held until this process exits
+                $acquired = Mage::getSingleton('core/lock')->acquire("cron.{$mode}");
+            } catch (\Throwable $e) {
+                // Lock could not be created: abort instead of running unguarded
+                $output->writeln("<error>{$e->getMessage()}</error>");
+                return Command::FAILURE;
+            }
+            if (!$acquired) {
                 $output->writeln("<error>{$mode} is already running</error>");
                 return Command::INVALID;
             }
@@ -147,26 +152,4 @@ class CronRun extends BaseMahoCommand
         return false;
     }
 
-    protected function setShellAvailable(): void
-    {
-        $disabledFuncs = array_map('trim', preg_split("/,|\s+/", strtolower(ini_get('disable_functions'))));
-        $isWinOS = !str_contains(strtolower(PHP_OS), 'darwin') && str_contains(strtolower(PHP_OS), 'win');
-        $isShellDisabled = in_array('shell_exec', $disabledFuncs) || $isWinOS
-            || !shell_exec('which expr 2>/dev/null')
-            || !shell_exec('which ps 2>/dev/null')
-            || !shell_exec('which sed 2>/dev/null');
-
-        $this->isShellAvailable = !$isShellDisabled;
-    }
-
-    protected function isProcessRunning(string $command): bool
-    {
-        if (!$this->isShellAvailable) {
-            return false;
-        }
-
-        $output = [];
-        exec("ps auxwww | grep \"$command\" | grep -v grep | grep -v cron.php", $output);
-        return count($output) > 1;
-    }
 }
