@@ -17,8 +17,7 @@
         </Mage_Core>
     </modules>
     <global>
-        <!-- Named lock backend: "file" (default) or "db" for multi-frontend
-             setups sharing a single database server; override in local.xml -->
+        <!-- Named lock backend: "file" or "db" (see local.xml.template) -->
         <lock>
             <backend>file</backend>
         </lock>

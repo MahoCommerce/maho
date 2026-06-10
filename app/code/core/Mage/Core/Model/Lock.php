@@ -13,22 +13,14 @@ declare(strict_types=1);
 /**
  * Named locks for mutual exclusion (cron dispatch, reindexing, order placement, ...).
  *
- * The backend is selected via <global><lock><backend> in local.xml:
- * - "file" (default): kernel flock in var/locks; released instantly when the
- *   holding process exits or crashes. Use this unless multiple servers need
- *   to share locks.
- * - "db": the adapter's advisory locks (MySQL GET_LOCK, PostgreSQL advisory
- *   locks), for multi-frontend setups sharing one database server. Do not use
- *   it on Galera-style clusters (no advisory lock support) or on SQLite (only
- *   emulated via an expiring lock table). Caveat: advisory locks belong to the
- *   DB session, so if the connection drops during a long run (e.g. wait_timeout),
- *   the server releases the lock while the holding PHP process is still running.
+ * The backend ("file" default, or "db") is selected via <global><lock><backend>;
+ * see local.xml.template for when to use each and their caveats.
  *
  * Both backends share the same contract: re-entrant within the owning process,
- * a single release() frees the lock, and a blocking acquire() waits until the
- * lock is obtained. Acquired locks are tracked statically, so they stay held
- * until released or until the process ends, regardless of how this model is
- * instantiated.
+ * a single release() frees the lock (so a name must have one logical owner per
+ * process), and a blocking acquire() waits until the lock is obtained. Acquired
+ * locks are tracked statically, so they stay held until released or until the
+ * process ends, regardless of how this model is instantiated.
  */
 class Mage_Core_Model_Lock
 {
