@@ -26,13 +26,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class CronRun extends BaseMahoCommand
 {
-    protected bool $isShellAvailable;
+    protected ?\SplFileObject $lockHandle = null;
 
     #[\Override]
     protected function configure(): void
     {
         $this->addArgument('mode', InputArgument::REQUIRED, '"default" or "always"');
-        $this->setShellAvailable();
     }
 
     #[\Override]
@@ -45,7 +44,7 @@ class CronRun extends BaseMahoCommand
         $mode = $modeOrJobCode;
         $availableModes = ['default', 'always'];
         if (in_array($mode, $availableModes)) {
-            if ($this->isProcessRunning("maho cron:run $mode")) {
+            if (!$this->acquireLock("cron.{$mode}")) {
                 $output->writeln("<error>{$mode} is already running</error>");
                 return Command::INVALID;
             }
@@ -147,26 +146,32 @@ class CronRun extends BaseMahoCommand
         return false;
     }
 
-    protected function setShellAvailable(): void
+    /**
+     * Acquire an exclusive, non-blocking lock for the given name.
+     * The lock is tied to this process's file handle: the kernel releases it
+     * automatically on exit or crash, so stale locks are impossible.
+     *
+     * @throws \RuntimeException when the lock file cannot be created
+     */
+    protected function acquireLock(string $name): bool
     {
-        $disabledFuncs = array_map('trim', preg_split("/,|\s+/", strtolower(ini_get('disable_functions'))));
-        $isWinOS = !str_contains(strtolower(PHP_OS), 'darwin') && str_contains(strtolower(PHP_OS), 'win');
-        $isShellDisabled = in_array('shell_exec', $disabledFuncs) || $isWinOS
-            || !shell_exec('which expr 2>/dev/null')
-            || !shell_exec('which ps 2>/dev/null')
-            || !shell_exec('which sed 2>/dev/null');
+        $lockDir = Mage::getConfig()->getVarDir('locks');
+        if ($lockDir === false) {
+            throw new \RuntimeException('Unable to create lock directory in var/locks');
+        }
 
-        $this->isShellAvailable = !$isShellDisabled;
-    }
+        $file = $lockDir . DS . $name . '.lock';
+        try {
+            $handle = new \SplFileObject($file, 'c');
+        } catch (\RuntimeException $e) {
+            throw new \RuntimeException("Unable to create lock file {$file}", 0, $e);
+        }
 
-    protected function isProcessRunning(string $command): bool
-    {
-        if (!$this->isShellAvailable) {
+        if (!$handle->flock(LOCK_EX | LOCK_NB)) {
             return false;
         }
 
-        $output = [];
-        exec("ps auxwww | grep \"$command\" | grep -v grep | grep -v cron.php", $output);
-        return count($output) > 1;
+        $this->lockHandle = $handle;
+        return true;
     }
 }
