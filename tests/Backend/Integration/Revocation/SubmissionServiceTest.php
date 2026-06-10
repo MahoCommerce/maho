@@ -77,6 +77,8 @@ describe('Revocation submission service', function () {
         $store->setConfig('revocation/general/enabled', '1');
         $store->setConfig('trans_email/ident_general/email', 'shop@example.com');
         $store->setConfig('trans_email/ident_general/name', 'Test Shop');
+        // No MTA on CI runners: disable the transport so send() reports success without dispatching.
+        $store->setConfig('system/smtp/enabled', '');
         $this->service = Mage::getModel('revocation/service');
         $this->createdRequests = [];
         $this->createdOrders = [];
