@@ -21,9 +21,7 @@
  * dumps identically across MySQL/MariaDB (display widths, quoted defaults),
  * Postgres (varchar(1024) text, SERIAL-vs-IDENTITY, ::type casts) and SQLite
  * (type affinity, rowid primary keys). Used by the schema-migration workflow
- * (all engines) and the SQLite schema-parity job. The MySQL/Postgres parity
- * jobs still inline an equivalent copy; consolidating them here is a pending
- * cleanup.
+ * and the schema-parity workflow (all engines).
  */
 
 declare(strict_types=1);
@@ -380,6 +378,8 @@ foreach (tables($pdo, $driver) as $table) {
     // Sort columns alphabetically: the declarative schema may add cross-module
     // grafted columns at different positions than the legacy install did, but
     // the semantics are identical. Sorting eliminates that false-positive.
+    // Trade-off: ordinal position is discarded entirely, so a column declared
+    // at the wrong position in a schema.php cannot be caught by these checks.
     $cols = columns($pdo, $driver, $table);
     sort($cols);
     foreach ($cols as $line) {

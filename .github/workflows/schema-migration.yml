@@ -90,7 +90,7 @@ jobs:
 
     steps:
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@2.37.1
         with:
           php-version: 8.3
           extensions: ${{ matrix.db_engine == 'pgsql' && 'pdo_pgsql' || '' }}
@@ -157,11 +157,13 @@ jobs:
           end=$(date +%s)
           echo "seconds=$((end - start))" >> $GITHUB_OUTPUT
 
+      # Assert positively that the second run applied nothing, rather than
+      # matching the "already up to date" wording one specific code path emits.
       - name: Assert migration is idempotent
         run: |
           out=$(./maho migrate)
           echo "$out"
-          if ! echo "$out" | grep -q "already up to date"; then
+          if echo "$out" | grep -q "statement(s) executed"; then
             echo "::error::Migration is not idempotent — a second run still applied statements."
             exit 1
           fi
@@ -259,7 +261,7 @@ jobs:
 
     steps:
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@2.37.1
         with:
           php-version: 8.3
           extensions: pdo_sqlite
@@ -331,13 +333,15 @@ jobs:
           end=$(date +%s)
           echo "seconds=$((end - start))" >> $GITHUB_OUTPUT
 
+      # Assert positively that the second run applied nothing, rather than
+      # matching the "already up to date" wording one specific code path emits.
       - name: Assert migration is idempotent
         env:
           DB_NAME: /tmp/migrate.sqlite
         run: |
           out=$(./maho migrate)
           echo "$out"
-          if ! echo "$out" | grep -q "already up to date"; then
+          if echo "$out" | grep -q "statement(s) executed"; then
             echo "::error::Migration is not idempotent — a second run still applied statements."
             exit 1
           fi

@@ -351,15 +351,6 @@ $entries = [
         ],
     ],
 
-    // numeric default formatting: declarative emits 0.0000, legacy emits 0.
-    [
-        'engines' => ['pgsql'],
-        'table' => 'catalogrule',
-        'replace' => [
-            '  COLUMN discount_amount numeric(12,4) NOT NULL DEFAULT 0' => '  COLUMN discount_amount numeric(12,4) NOT NULL DEFAULT 0.0000',
-        ],
-    ],
-
     // permission_block / permission_variable: legacy DDL declared is_allowed
     // as TINYINT(1); declarative schema uses SMALLINT for cross-engine parity
     // (no native TINYINT on PgSQL). permission_variable's PK was a redundant
