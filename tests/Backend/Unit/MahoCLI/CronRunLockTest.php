@@ -15,15 +15,16 @@ uses(Tests\MahoBackendTestCase::class);
 /**
  * Tests the cron:run concurrency guard (issue #993): one cron.{mode} lock
  * per mode through the core/lock service, rejected while held, released
- * on process exit (simulated here at kernel level via a FileLock contender,
- * which contends like a separate process would).
+ * on process exit. Contention is simulated with a raw flock on the lock
+ * file, which contends at kernel level like a separate process would.
  */
 
-function cronContender(string $mode): \Maho\Lock\FileLock
+/** @return resource */
+function cronLockContender(string $mode)
 {
-    return new \Maho\Lock\FileLock(
-        Mage::getConfig()->getVarDir('locks') . DS . "cron.{$mode}.lock",
-    );
+    $handle = fopen(Mage::getConfig()->getVarDir('locks') . DS . "cron.{$mode}.lock", 'c');
+    expect($handle)->not->toBeFalse();
+    return $handle;
 }
 
 it('rejects a second holder of the cron lock while held', function () {
@@ -31,12 +32,13 @@ it('rejects a second holder of the cron lock while held', function () {
     $manager = Mage::getModel('core/lock');
     expect($manager->acquire('cron.default'))->toBeTrue();
 
-    $contender = cronContender('default');
-    expect($contender->acquire())->toBeFalse();
+    $contender = cronLockContender('default');
+    expect(flock($contender, LOCK_EX | LOCK_NB))->toBeFalse();
 
     $manager->release('cron.default');
-    expect($contender->acquire())->toBeTrue();
-    $contender->release();
+    expect(flock($contender, LOCK_EX | LOCK_NB))->toBeTrue();
+    flock($contender, LOCK_UN);
+    fclose($contender);
 });
 
 it('keeps the lock held even if the acquiring model instance is destroyed', function () {
@@ -44,12 +46,13 @@ it('keeps the lock held even if the acquiring model instance is destroyed', func
     expect($manager->acquire('cron.always'))->toBeTrue();
     unset($manager);
 
-    $contender = cronContender('always');
-    expect($contender->acquire())->toBeFalse();
+    $contender = cronLockContender('always');
+    expect(flock($contender, LOCK_EX | LOCK_NB))->toBeFalse();
 
     Mage::getModel('core/lock')->release('cron.always');
-    expect($contender->acquire())->toBeTrue();
-    $contender->release();
+    expect(flock($contender, LOCK_EX | LOCK_NB))->toBeTrue();
+    flock($contender, LOCK_UN);
+    fclose($contender);
 });
 
 it('uses independent locks per mode', function () {

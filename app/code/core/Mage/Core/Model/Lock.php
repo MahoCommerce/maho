@@ -35,10 +35,10 @@ class Mage_Core_Model_Lock
     public const DB_LOCK_TIMEOUT = 5;
 
     /**
-     * File lock instances, held statically so acquired locks stay held until
-     * release or process exit even if the acquiring model instance is destroyed
+     * Held file locks; static so acquired locks stay held until release or
+     * process exit even if the acquiring model instance is destroyed
      *
-     * @var array<string, \Maho\Lock\FileLock>
+     * @var array<string, \SplFileObject>
      */
     protected static array $_fileLocks = [];
 
@@ -49,7 +49,16 @@ class Mage_Core_Model_Lock
         if ($this->_useDbBackend()) {
             return $this->_getConnection()->getLock($this->_prepareDbLockName($name), $blocking ? self::DB_LOCK_TIMEOUT : 0);
         }
-        return $this->_getFileLock($name)->acquire($blocking);
+
+        if (isset(self::$_fileLocks[$name])) {
+            return true;
+        }
+        $handle = $this->_openLockFile($name);
+        if (!$handle->flock($blocking ? LOCK_EX : LOCK_EX | LOCK_NB)) {
+            return false;
+        }
+        self::$_fileLocks[$name] = $handle;
+        return true;
     }
 
     public function release(string $name): bool
@@ -57,7 +66,11 @@ class Mage_Core_Model_Lock
         if ($this->_useDbBackend()) {
             return $this->_getConnection()->releaseLock($this->_prepareDbLockName($name));
         }
-        $this->_getFileLock($name)->release();
+
+        if (isset(self::$_fileLocks[$name])) {
+            self::$_fileLocks[$name]->flock(LOCK_UN);
+            unset(self::$_fileLocks[$name]);
+        }
         return true;
     }
 
@@ -69,7 +82,16 @@ class Mage_Core_Model_Lock
         if ($this->_useDbBackend()) {
             return $this->_getConnection()->isLocked($this->_prepareDbLockName($name));
         }
-        return $this->_getFileLock($name)->isHeld();
+
+        if (isset(self::$_fileLocks[$name])) {
+            return true;
+        }
+        $handle = $this->_openLockFile($name);
+        if (!$handle->flock(LOCK_EX | LOCK_NB)) {
+            return true;
+        }
+        $handle->flock(LOCK_UN);
+        return false;
     }
 
     protected function _useDbBackend(): bool
@@ -80,16 +102,23 @@ class Mage_Core_Model_Lock
         return $this->_useDb;
     }
 
-    protected function _getFileLock(string $name): \Maho\Lock\FileLock
+    /**
+     * @throws Mage_Core_Exception when the lock file cannot be created
+     */
+    protected function _openLockFile(string $name): SplFileObject
     {
-        if (!isset(self::$_fileLocks[$name])) {
-            $lockDir = Mage::getConfig()->getVarDir('locks');
-            if ($lockDir === false) {
-                throw new Mage_Core_Exception('Unable to create lock directory in var/locks');
-            }
-            self::$_fileLocks[$name] = new \Maho\Lock\FileLock($lockDir . DS . $name . '.lock');
+        $lockDir = Mage::getConfig()->getVarDir('locks');
+        if ($lockDir === false) {
+            throw new Mage_Core_Exception('Unable to create lock directory in var/locks');
         }
-        return self::$_fileLocks[$name];
+
+        // Lock names may embed external input (e.g. payment provider order ids)
+        $file = $lockDir . DS . preg_replace('/[^A-Za-z0-9._-]/', '_', $name) . '.lock';
+        try {
+            return new SplFileObject($file, 'c');
+        } catch (RuntimeException $e) {
+            throw new Mage_Core_Exception("Unable to create lock file {$file}", 0, $e);
+        }
     }
 
     protected function _getConnection(): \Maho\Db\Adapter\AdapterInterface

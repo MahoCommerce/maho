@@ -16,19 +16,42 @@ afterEach(function () {
     Mage::getConfig()->setNode(Mage_Core_Model_Lock::XML_PATH_BACKEND, 'file');
 });
 
-it('defaults to the file backend and contends across instances', function () {
+it('defaults to the file backend and contends at kernel level', function () {
     /** @var Mage_Core_Model_Lock $manager */
     $manager = Mage::getModel('core/lock');
     expect($manager->acquire('core_lock_test'))->toBeTrue();
     expect($manager->isHeld('core_lock_test'))->toBeTrue();
 
-    $contender = new \Maho\Lock\FileLock(
-        Mage::getConfig()->getVarDir('locks') . DS . 'core_lock_test.lock',
-    );
-    expect($contender->acquire())->toBeFalse();
+    // Raw flock contends like a separate process would
+    $contender = fopen(Mage::getConfig()->getVarDir('locks') . DS . 'core_lock_test.lock', 'c');
+    expect(flock($contender, LOCK_EX | LOCK_NB))->toBeFalse();
 
     expect($manager->release('core_lock_test'))->toBeTrue();
     expect($manager->isHeld('core_lock_test'))->toBeFalse();
+    expect(flock($contender, LOCK_EX | LOCK_NB))->toBeTrue();
+    flock($contender, LOCK_UN);
+    fclose($contender);
+});
+
+it('is re-entrant within the process', function () {
+    /** @var Mage_Core_Model_Lock $manager */
+    $manager = Mage::getModel('core/lock');
+    expect($manager->acquire('core_lock_test'))->toBeTrue();
+    expect($manager->acquire('core_lock_test'))->toBeTrue();
+    expect(Mage::getModel('core/lock')->acquire('core_lock_test'))->toBeTrue();
+    $manager->release('core_lock_test');
+});
+
+it('sanitizes lock names containing external input', function () {
+    /** @var Mage_Core_Model_Lock $manager */
+    $manager = Mage::getModel('core/lock');
+    expect($manager->acquire('paypal_order_../../evil'))->toBeTrue();
+
+    $lockDir = Mage::getConfig()->getVarDir('locks');
+    expect(file_exists($lockDir . DS . 'paypal_order_.._.._evil.lock'))->toBeTrue();
+    expect(file_exists(dirname($lockDir) . DS . 'evil.lock'))->toBeFalse();
+
+    $manager->release('paypal_order_../../evil');
 });
 
 it('uses db advisory locks when configured in local.xml', function () {
