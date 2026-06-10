@@ -222,7 +222,9 @@ class Mysql extends AbstractPdoAdapter
             $params['driverOptions'] = $driverOptions;
         }
 
-        $this->_connection = \Doctrine\DBAL\DriverManager::getConnection($params);
+        $configuration = new \Doctrine\DBAL\Configuration();
+        $configuration->setMiddlewares([new \Maho\Db\Driver\MariaDbPlatformMiddleware()]);
+        $this->_connection = \Doctrine\DBAL\DriverManager::getConnection($params, $configuration);
         $this->_debugStat(self::DEBUG_CONNECT, '');
 
         /** @link http://bugs.mysql.com/bug.php?id=18551 */
