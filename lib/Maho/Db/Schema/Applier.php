@@ -372,7 +372,9 @@ final class Applier
     private static function quotePostgresRenameIndexNames(AbstractPlatform $platform, array $statements): array
     {
         return array_map(static function (string $stmt) use ($platform): string {
-            if (preg_match('/^(\s*ALTER\s+INDEX\s+)(\S+)(\s+RENAME\s+TO\s+.+)$/i', $stmt, $m) !== 1) {
+            // DBAL interpolates the old name verbatim (unquoted), so capture
+            // everything between the keywords rather than assuming its shape.
+            if (preg_match('/^(\s*ALTER\s+INDEX\s+)(.+?)(\s+RENAME\s+TO\s+.+)$/i', $stmt, $m) !== 1) {
                 return $stmt;
             }
 
@@ -416,11 +418,13 @@ final class Applier
     private static function fixPostgresColumnTypeChanges(array $liveTables, array $targetTables, array $statements): array
     {
         $liveColumnTypes = [];
+        $liveDefaults = [];
         foreach ($liveTables as $table) {
             $tableName = strtolower(trim($table->getObjectName()->toString(), '"'));
             foreach ($table->getColumns() as $column) {
                 $columnName = strtolower(trim($column->getObjectName()->toString(), '"'));
                 $liveColumnTypes[$tableName][$columnName] = $column->getType();
+                $liveDefaults[$tableName][$columnName] = $column->getDefault();
             }
         }
         $targetDefaults = [];
@@ -454,7 +458,9 @@ final class Applier
                 continue;
             }
 
-            $result[] = "ALTER TABLE {$table} ALTER {$column} DROP DEFAULT";
+            if (($liveDefaults[$tableKey][$columnKey] ?? null) !== null) {
+                $result[] = "ALTER TABLE {$table} ALTER {$column} DROP DEFAULT";
+            }
             $result[] = $stmt . " USING {$using}";
 
             $default = $targetDefaults[$tableKey][$columnKey] ?? null;
@@ -500,11 +506,15 @@ final class Applier
      * SQLite PRAGMA foreign_keys=OFF — and endSetup() restores it. Same call,
      * engine-specific implementation, so the applier stays platform-agnostic.
      *
-     * On Postgres the batch also runs inside a transaction: pg DDL is
-     * transactional, so a mid-batch failure rolls back cleanly instead of
-     * leaving the schema half-migrated. MySQL/MariaDB DDL auto-commits per
-     * statement (no rollback possible), and SQLite needs the foreign_keys
-     * pragma to take effect outside any transaction — both run the loop bare.
+     * On Postgres and SQLite the batch also runs inside a transaction: DDL is
+     * transactional on both, so a mid-batch failure rolls back cleanly instead
+     * of leaving the schema half-migrated. On SQLite this also makes the table
+     * rebuilds atomic — without it a failure between the DROP and the copy-back
+     * INSERT would lose the table's rows, since the snapshot is a TEMPORARY
+     * table that dies with the connection. The foreign_keys pragma is issued by
+     * startSetup() before the transaction begins (PRAGMA foreign_keys is a
+     * no-op inside one). MySQL/MariaDB DDL auto-commits per statement (no
+     * rollback possible), so it runs the loop bare.
      *
      * @param list<string> $sql
      */
@@ -515,7 +525,7 @@ final class Applier
 
         $adapter->startSetup();
         try {
-            if ($platform instanceof PostgreSQLPlatform) {
+            if ($platform instanceof PostgreSQLPlatform || $platform instanceof SQLitePlatform) {
                 $connection->transactional(static function (Connection $c) use ($sql): void {
                     foreach ($sql as $stmt) {
                         $c->executeStatement($stmt);

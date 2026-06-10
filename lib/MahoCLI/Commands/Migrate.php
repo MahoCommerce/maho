@@ -60,12 +60,7 @@ class Migrate extends BaseMahoCommand
 
             /** @var \Maho\Db\Adapter\AdapterInterface $adapter */
             $adapter = Mage::getSingleton('core/resource')->getConnection('core_setup');
-            try {
-                $result = Applier::applyAll($adapter);
-            } catch (\Maho\Db\Schema\UnsupportedMigrationException $e) {
-                $output->writeln('<error>' . $e->getMessage() . '</error>');
-                return Command::FAILURE;
-            }
+            $result = Applier::applyAll($adapter);
             if ($result['contributors'] === []) {
                 $output->writeln('✓ Applied declarative schema (no modules declare sql/schema.php)');
             } elseif ($result['executed'] === []) {
@@ -93,7 +88,11 @@ class Migrate extends BaseMahoCommand
             Mage::app()->getCache()->unbanUse('config');
             Mage::getConfig()->saveCache();
             $output->writeln('✓ Saved cache configuration');
+        } catch (\Exception $e) {
+            $output->writeln('<error>' . $e->getMessage() . '</error>');
+            return Command::FAILURE;
         } finally {
+            Mage::app()->getCache()->unbanUse('config');
             Mage::getConfig()->releaseCacheSaveLock();
         }
 
