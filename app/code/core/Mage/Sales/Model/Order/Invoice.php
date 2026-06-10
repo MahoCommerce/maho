@@ -339,7 +339,8 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
              * If we not retrieve negative answer from payment yet
              */
             if (is_null($canVoid)) {
-                $canVoid = $this->getOrder()->getPayment()->canVoid($this);
+                $payment = $this->getOrder()->getPayment();
+                $canVoid = $payment !== false ? $payment->canVoid($this) : false;
                 if ($canVoid === false) {
                     $this->setCanVoidFlag(false);
                     $this->_saveBeforeDestruct = true;
