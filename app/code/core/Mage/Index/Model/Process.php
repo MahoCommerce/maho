@@ -62,13 +62,6 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
     protected $_indexer = null;
 
     /**
-     * Locker Object
-     *
-     * @var Mage_Index_Model_Lock|null
-     */
-    protected $_lockInstance = null;
-
-    /**
      * Initialize resource
      */
     #[\Override]
@@ -392,16 +385,13 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Returns Lock object.
+     * Returns the named-lock service.
      *
-     * @return Mage_Index_Model_Lock|null
+     * @return Mage_Core_Model_Lock
      */
     protected function _getLockInstance()
     {
-        if (is_null($this->_lockInstance)) {
-            $this->_lockInstance = Mage_Index_Model_Lock::getInstance();
-        }
-        return $this->_lockInstance;
+        return Mage::getSingleton('core/lock');
     }
 
     /**
@@ -412,7 +402,7 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
      */
     public function lock()
     {
-        $this->_getLockInstance()->setLock($this->getProcessLockName(), true);
+        $this->_getLockInstance()->acquire($this->getProcessLockName());
         return $this;
     }
 
@@ -425,7 +415,7 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
      */
     public function lockAndBlock()
     {
-        $this->_getLockInstance()->setLock($this->getProcessLockName(), true, true);
+        $this->_getLockInstance()->acquire($this->getProcessLockName(), true);
         return $this;
     }
 
@@ -436,7 +426,7 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
      */
     public function unlock()
     {
-        $this->_getLockInstance()->releaseLock($this->getProcessLockName(), true);
+        $this->_getLockInstance()->release($this->getProcessLockName());
         return $this;
     }
 
@@ -447,7 +437,7 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
      */
     public function isLocked()
     {
-        return $this->_getLockInstance()->isLockExists($this->getProcessLockName(), true);
+        return $this->_getLockInstance()->isHeld($this->getProcessLockName());
     }
 
     /**
