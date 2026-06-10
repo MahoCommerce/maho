@@ -965,7 +965,9 @@ class Pgsql extends AbstractPdoAdapter
 
     /**
      * Advance the sequence backing every auto-incrementing column in $bind we
-     * wrote an explicit numeric value to. Used by both insert() and insertForce().
+     * wrote an explicit numeric value to. Used by every insert variant that
+     * can carry explicit values: insert(), insertForce(), insertOnDuplicate(),
+     * insertIgnore() and insertArray()/insertMultiple().
      *
      * We do NOT gate on describeTable()'s IDENTITY flag: DBAL 4 only sets
      * autoincrement=true for GENERATED ... AS IDENTITY columns and skips
@@ -1114,6 +1116,16 @@ class Pgsql extends AbstractPdoAdapter
             }
         }
 
+        // Explicit values bypass the sequence; bump it so the next
+        // auto-increment insert does not collide (see insert()).
+        if (is_array(reset($data))) {
+            foreach ($data as $dataRow) {
+                $this->bumpIdentitySequencesForBind($tableName, $dataRow);
+            }
+        } else {
+            $this->bumpIdentitySequencesForBind($tableName, $data);
+        }
+
         return $stmt->rowCount() ?: 1;
     }
 
@@ -1255,6 +1267,23 @@ class Pgsql extends AbstractPdoAdapter
         $insertQuery = $this->_getInsertSqlQuery($table, $columns, $values);
 
         $stmt = $this->query($insertQuery, $bind);
+
+        // Explicit values bypass the sequence; bump it once per column with
+        // the highest value written (see insert()).
+        $maxValues = [];
+        $columnNames = array_values($columns);
+        foreach ($data as $row) {
+            foreach (array_values($row) as $i => $value) {
+                $column = $columnNames[$i];
+                if (is_numeric($value) && (!isset($maxValues[$column]) || $value > $maxValues[$column])) {
+                    $maxValues[$column] = $value;
+                }
+            }
+        }
+        if ($maxValues !== []) {
+            $this->bumpIdentitySequencesForBind($table, $maxValues);
+        }
+
         return $stmt->rowCount();
     }
 
@@ -1298,8 +1327,7 @@ class Pgsql extends AbstractPdoAdapter
             $sql .= sprintf(' RETURNING %s', $this->quoteIdentifier($returningColumn));
         }
 
-        $bind = array_values($bind);
-        $stmt = $this->query($sql, $bind);
+        $stmt = $this->query($sql, array_values($bind));
 
         // Capture the returned ID if available (only returns a row if insert succeeded)
         if ($returningColumn !== null) {
@@ -1308,6 +1336,10 @@ class Pgsql extends AbstractPdoAdapter
                 $this->_lastInsertedId = $row[$returningColumn];
             }
         }
+
+        // Explicit values bypass the sequence; bump it so the next
+        // auto-increment insert does not collide (see insert()).
+        $this->bumpIdentitySequencesForBind($tableName, $bind);
 
         return $stmt->rowCount();
     }
