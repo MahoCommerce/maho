@@ -153,13 +153,10 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
             $this->ensureCacheDirectory($type);
 
             $lockFile = $cachedFile . '.lock';
-            $lockHandle = fopen($lockFile, 'c');
+            $lock = new \Maho\Lock\FileLock($lockFile);
 
-            if (!$lockHandle || !flock($lockHandle, LOCK_EX | LOCK_NB)) {
+            if (!$lock->acquire()) {
                 // If we can't get a lock, return original file (another process is minifying)
-                if ($lockHandle) {
-                    fclose($lockHandle);
-                }
                 return $filePath;
             }
 
@@ -177,8 +174,7 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
                 }
                 return $cachedUrl;
             } finally {
-                flock($lockHandle, LOCK_UN);
-                fclose($lockHandle);
+                $lock->release();
                 @unlink($lockFile);
             }
 

@@ -60,4 +60,19 @@ class FileLock
     {
         return $this->handle !== null;
     }
+
+    /**
+     * Whether anyone (including this instance) holds the lock.
+     */
+    public function isHeld(): bool
+    {
+        if ($this->handle !== null) {
+            return true;
+        }
+        if (!$this->acquire()) {
+            return true;
+        }
+        $this->release();
+        return false;
+    }
 }
