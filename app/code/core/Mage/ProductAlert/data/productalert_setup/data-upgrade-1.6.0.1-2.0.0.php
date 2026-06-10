@@ -28,6 +28,7 @@ $columns = [
 
 $connection = $installer->getConnection();
 foreach ($columns as $table => $tableColumns) {
+    $table = $installer->getTable($table);
     if (!$connection->isTableExists($table)) {
         continue;
     }
