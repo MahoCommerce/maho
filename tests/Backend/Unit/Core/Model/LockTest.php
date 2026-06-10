@@ -95,3 +95,28 @@ it('handles db lock names exceeding the MySQL 64-character limit', function () {
     expect($manager->release($name))->toBeTrue();
     expect($manager->isHeld($name))->toBeFalse();
 });
+
+it('cleans up only stale, unheld lock files', function () {
+    /** @var Mage_Core_Model_Lock $manager */
+    $manager = Mage::getModel('core/lock');
+    $lockDir = Mage::getConfig()->getVarDir('locks');
+
+    $old = $lockDir . DS . 'paypal_order_stale.lock';
+    $recent = $lockDir . DS . 'paypal_order_recent.lock';
+    touch($old, time() - 100000);   // older than the 86400s default cutoff
+    touch($recent, time() - 100);   // well within the cutoff
+
+    // An old file that is currently held must survive
+    expect($manager->acquire('cron.default'))->toBeTrue();
+    touch($lockDir . DS . 'cron.default.lock', time() - 100000);
+
+    $removed = $manager->cleanupStaleLockFiles();
+
+    expect(file_exists($old))->toBeFalse();                       // stale + unheld -> gone
+    expect($removed)->toBeGreaterThanOrEqual(1);
+    expect(file_exists($recent))->toBeTrue();                     // too recent -> kept
+    expect(file_exists($lockDir . DS . 'cron.default.lock'))->toBeTrue(); // held -> kept
+
+    $manager->release('cron.default');
+    @unlink($recent);
+});

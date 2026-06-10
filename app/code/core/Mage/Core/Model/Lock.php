@@ -128,6 +128,48 @@ class Mage_Core_Model_Lock
         return false;
     }
 
+    /**
+     * Remove stale lock files left behind by short-lived names (notably the
+     * per-order paypal_order_<id> locks, one of which is created per checkout).
+     * release() never unlinks, since unlinking a live lock would let two
+     * processes hold the same name; only files older than $olderThanSeconds
+     * that nobody currently holds are removed, so there is no live lock to race.
+     * Returns the number of files removed. Operates on the filesystem regardless
+     * of the configured backend, so leftovers from a prior file-backend run are
+     * still reclaimed after a switch to db.
+     *
+     * @throws Mage_Core_Exception when the lock directory cannot be created
+     */
+    public function cleanupStaleLockFiles(int $olderThanSeconds = 86400): int
+    {
+        $lockDir = Mage::getConfig()->getVarDir('locks');
+        if ($lockDir === false) {
+            throw new Mage_Core_Exception('Unable to create lock directory in var/locks');
+        }
+
+        $cutoff = time() - $olderThanSeconds;
+        $removed = 0;
+        foreach (glob($lockDir . DS . '*.lock') ?: [] as $file) {
+            $mtime = @filemtime($file);
+            if ($mtime === false || $mtime > $cutoff) {
+                continue;
+            }
+            $handle = @fopen($file, 'c');
+            if ($handle === false) {
+                continue;
+            }
+            // Only remove a lock nobody holds, so no process is parked on it to orphan
+            if (flock($handle, LOCK_EX | LOCK_NB)) {
+                if (@unlink($file)) {
+                    $removed++;
+                }
+                flock($handle, LOCK_UN);
+            }
+            fclose($handle);
+        }
+        return $removed;
+    }
+
     protected function _useDbBackend(): bool
     {
         if ($this->_useDb === null) {
