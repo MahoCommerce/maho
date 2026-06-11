@@ -238,7 +238,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $this->getResponse()->setBodyJson([
                     'success' => true,
                     'message' => $message,
-                    'qty' => $this->_getCart()->getSummaryQty(),
+                    'qty' => $this->_getCart()->getSummaryQty() ?? 0,
                     'content' => $this->getLayout()->getBlock('minicart_content')->toHtml(),
                 ]);
                 return;
@@ -432,7 +432,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $this->getResponse()->setBodyJson([
                     'success' => true,
                     'message' => $message,
-                    'qty' => $this->_getCart()->getSummaryQty(),
+                    'qty' => $this->_getCart()->getSummaryQty() ?? 0,
                     'content' => $this->getLayout()->getBlock('minicart_content')->toHtml(),
                 ]);
                 return;
@@ -1069,7 +1069,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             ->setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate', true)
             ->setBodyJson([
                 'success' => 1,
-                'qty' => $this->_getCart()->getSummaryQty(),
+                'qty' => $this->_getCart()->getSummaryQty() ?? 0,
                 'content' => $this->getLayout()->getBlock('minicart_content')->toHtml(),
             ]);
     }
