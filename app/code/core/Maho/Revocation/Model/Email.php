@@ -46,6 +46,10 @@ class Maho_Revocation_Model_Email
             return false;
         }
 
+        // Reply-To is the submitter's address so the merchant can respond directly. On
+        // the public path it is unverified, but it is isValidEmail()-validated upstream
+        // (no header-injection risk); a spoofed address only means a reply may reach the
+        // wrong inbox, which triage handles.
         $mailTemplate = Mage::getModel('core/email_template');
         $mailTemplate->setDesignConfig(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND, 'store' => $storeId])
             ->setReplyTo($request->getEmail())

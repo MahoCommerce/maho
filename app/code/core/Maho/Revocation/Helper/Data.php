@@ -126,6 +126,10 @@ class Maho_Revocation_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Rolling-window limiter on the cache backend. Records the hit unless the limit
      * is already exceeded. A limit of 0 disables the check.
+     *
+     * The read-modify-write is not atomic, so concurrent submissions can race and
+     * slightly under-count hits. That is acceptable for abuse mitigation: this is a
+     * soft throttle, not a hard guarantee.
      */
     protected function _isRateLimited(string $cacheKey, int $limit, int $windowSeconds): bool
     {

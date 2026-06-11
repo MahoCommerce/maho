@@ -15,7 +15,7 @@
                 <revocation translate="title" module="revocation">
                     <title>Revocation Requests</title>
                     <action>adminhtml/sales_revocation/index</action>
-                    <sort_order>250</sort_order>
+                    <sort_order>52</sort_order>
                 </revocation>
             </children>
         </sales>

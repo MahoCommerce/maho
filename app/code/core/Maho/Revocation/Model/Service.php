@@ -47,7 +47,7 @@ class Maho_Revocation_Model_Service
             ->setOrderReference(mb_substr($orderReference, 0, 64))
             ->setCustomerName(mb_substr($customerName, 0, 255))
             ->setEmail(mb_substr($email, 0, 255))
-            ->setReason(trim((string) $input->getReason()) !== '' ? trim((string) $input->getReason()) : null)
+            ->setReason(trim((string) $input->getReason()) !== '' ? mb_substr(trim((string) $input->getReason()), 0, 2000) : null)
             ->setVerified($verified)
             ->setReceivedAt((string) Mage::app()->getLocale()->formatDateForDb((int) $receivedMicrotime))
             ->setIp(mb_substr((string) $input->getIp(), 0, 45) ?: null)

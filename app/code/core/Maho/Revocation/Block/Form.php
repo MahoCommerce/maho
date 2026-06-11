@@ -18,7 +18,10 @@ class Maho_Revocation_Block_Form extends Mage_Core_Block_Template
     }
 
     /**
-     * Encrypted render timestamp for the submit-time bot check.
+     * Encrypted render timestamp for the submit-time bot check. Note that under full
+     * page cache a stale token only ever inflates the measured elapsed time, so the
+     * timing gate degrades open (never blocks a legitimate user); the form key stays
+     * dynamic via getBlockHtml('formkey') in the template.
      */
     public function getRenderToken(): string
     {
