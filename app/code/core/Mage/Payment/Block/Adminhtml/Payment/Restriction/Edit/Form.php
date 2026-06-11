@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Payment
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Payment
  */
 
 class Mage_Payment_Block_Adminhtml_Payment_Restriction_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
