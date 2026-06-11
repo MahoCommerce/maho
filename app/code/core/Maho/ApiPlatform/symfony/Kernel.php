@@ -44,17 +44,9 @@ class Kernel extends BaseKernel
     private function resolveEnvironmentVars(): void
     {
         if (!isset($_ENV['APP_SECRET'])) {
-            $secret = \Mage::getStoreConfig('apiplatform/oauth2/secret')
-                ?: \Mage::getStoreConfig('maho_api/settings/jwt_secret');
-            if (empty($secret)) {
-                // First boot: generate and persist a strong random secret rather
-                // than deriving one from the encryption key (which would compound
-                // local.xml exposure into a JWT-forgery primitive).
-                $secret = bin2hex(random_bytes(32));
-                \Mage::getConfig()->saveConfig('apiplatform/oauth2/secret', $secret);
-                \Mage::app()->getCache()->cleanType('config');
-            }
-            $_ENV['APP_SECRET'] = $secret;
+            // Shared with JwtService so the admin/token path and the kernel
+            // generate-and-persist the same secret regardless of which boots first.
+            $_ENV['APP_SECRET'] = \Maho\ApiPlatform\Service\JwtService::resolveSecret();
         }
 
         if (!isset($_ENV['CORS_ALLOW_ORIGIN'])) {
@@ -354,7 +346,7 @@ class Kernel extends BaseKernel
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $routes->import('.', 'api_platform')->prefix('/api');
-        $routes->import('%kernel.project_dir%/Controller/', 'attribute');
+        $routes->import($this->getProjectDir() . '/Controller/', 'attribute');
     }
 
     /**

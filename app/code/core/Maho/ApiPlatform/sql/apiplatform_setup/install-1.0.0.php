@@ -17,6 +17,15 @@ $installer->startSetup();
 $connection = $installer->getConnection();
 $tableName = $installer->getTable('api/user');
 
+// Widen api_key: the core column is varchar(40), but the salted hash produced
+// by Mage_Api_Model_User exceeds 40 chars (Postgres hard-errors SQLSTATE 22001,
+// MySQL silently truncates and corrupts the key).
+$connection->modifyColumn($tableName, 'api_key', [
+    'type'    => Maho\Db\Ddl\Table::TYPE_TEXT,
+    'length'  => 255,
+    'comment' => 'Api key',
+]);
+
 // Add client_id column if it doesn't exist
 if (!$connection->tableColumnExists($tableName, 'client_id')) {
     $connection->addColumn($tableName, 'client_id', [

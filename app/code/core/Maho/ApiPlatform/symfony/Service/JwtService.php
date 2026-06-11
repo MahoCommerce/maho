@@ -29,7 +29,6 @@ use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
 class JwtService
 {
     private const CONFIG_PATH_SECRET = 'apiplatform/oauth2/secret';
-    private const CONFIG_PATH_LEGACY = 'maho_api/settings/jwt_secret';
     private const CONFIG_PATH_TOKEN_LIFETIME = 'apiplatform/oauth2/token_lifetime';
     private const DEFAULT_TOKEN_EXPIRY_SECONDS = 86400; // 24 hours
     private const AUDIENCE = 'maho-api';
@@ -279,7 +278,7 @@ class JwtService
      * Get JWT secret from Maho configuration
      *
      * @return string The JWT secret
-     * @throws \RuntimeException If secret is not configured or too short
+     * @throws \RuntimeException If secret is configured but too short
      */
     public function getSecret(): string
     {
@@ -287,28 +286,37 @@ class JwtService
             return $this->cachedSecret;
         }
 
-        // Try API Platform specific secret first
-        $secret = \Mage::getStoreConfig(self::CONFIG_PATH_SECRET);
-
-        // Fall back to legacy API JWT secret
-        if (empty($secret)) {
-            $secret = \Mage::getStoreConfig(self::CONFIG_PATH_LEGACY);
-        }
-
-        // No fallback to the crypt key: that key encrypts data at rest in the
-        // DB, so deriving the JWT signing key from it would let anyone with
-        // local.xml access forge admin tokens. The kernel auto-generates and
-        // persists a random secret on first boot, so reaching this point in a
-        // long-running app is a misconfiguration.
-        if (empty($secret)) {
-            throw new \RuntimeException('JWT secret not configured. Please set apiplatform/oauth2/secret in configuration.');
-        }
+        $secret = self::resolveSecret();
 
         if (strlen($secret) < 32) {
             throw new \RuntimeException('JWT secret must be at least 32 characters. Configure in System > Configuration > API > JWT.');
         }
 
         $this->cachedSecret = $secret;
+        return $secret;
+    }
+
+    /**
+     * Resolve the JWT signing secret, generating and persisting a strong
+     * random one on first use. Single source of truth shared with the API
+     * kernel's env-var resolution, so the admin/token path self-heals instead
+     * of relying on the kernel having booted first (saveConfig only writes the
+     * DB, not the in-memory config tree, so a stale read can't be avoided by
+     * generating elsewhere).
+     */
+    public static function resolveSecret(): string
+    {
+        $secret = (string) \Mage::getStoreConfig(self::CONFIG_PATH_SECRET);
+
+        // First boot: generate and persist a strong random secret rather than
+        // deriving one from the encryption key (which would compound local.xml
+        // exposure into a JWT-forgery primitive). No fallback to the crypt key.
+        if ($secret === '') {
+            $secret = bin2hex(random_bytes(32));
+            \Mage::getConfig()->saveConfig(self::CONFIG_PATH_SECRET, $secret);
+            \Mage::app()->getCache()->cleanType('config');
+        }
+
         return $secret;
     }
 
