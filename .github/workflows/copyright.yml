@@ -29,10 +29,13 @@ jobs:
         if: github.event_name == 'pull_request' || steps.skip_check.outputs.skip != 'true'
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
 
-      - name: Check SPDX header in modified files
+      - name: Check copyright in modified files
         if: github.event_name == 'pull_request' || steps.skip_check.outputs.skip != 'true'
         shell: bash
         run: |
+          # Get current year
+          CURRENT_YEAR=$(date +%Y)
+
           # Initialize error flag
           ERROR=0
 
@@ -42,6 +45,24 @@ jobs:
           .php-cs-fixer.php
           .rector.php
           "
+
+          # Build regex pattern with valid years
+          NEXT_YEAR=$((CURRENT_YEAR + 1))
+          MIN_YEAR=2024
+
+          # Build list of valid start years (2024|2025|...|CURRENT_YEAR)
+          VALID_START_YEARS=""
+          for year in $(seq $MIN_YEAR $CURRENT_YEAR); do
+            if [ -n "$VALID_START_YEARS" ]; then
+              VALID_START_YEARS="${VALID_START_YEARS}|"
+            fi
+            VALID_START_YEARS="${VALID_START_YEARS}${year}"
+          done
+
+          # Build pattern that matches the SPDX Maho copyright line:
+          # - Year ranges: (2024|2025|...)-(CURRENT_YEAR|NEXT_YEAR)
+          # - Single year: CURRENT_YEAR|NEXT_YEAR
+          PATTERN="SPDX-FileCopyrightText: ((${VALID_START_YEARS})-(${CURRENT_YEAR}|${NEXT_YEAR})|(${CURRENT_YEAR}|${NEXT_YEAR})) Maho <https://mahocommerce\.com>"
 
           # Loop through each modified file
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
@@ -61,20 +82,18 @@ jobs:
                 continue;
             fi
 
-            # Each source file must carry a well-formed SPDX header.
-            # We don't claim Maho copyright on existing files (git history is the
-            # attribution log), so only the header's presence is enforced here.
-            if ! grep -q "SPDX-FileCopyrightText:" "$file" || ! grep -q "SPDX-License-Identifier:" "$file"; then
-              echo "❌ Missing SPDX header in: $file"
-              echo "   Expected an 'SPDX-FileCopyrightText:' line and an 'SPDX-License-Identifier:' line."
+            # Check if file contains valid copyright pattern
+            if ! grep -E -q "$PATTERN" "$file"; then
+              echo "❌ Invalid or missing copyright notice in: $file"
+              echo "   Expected: SPDX-FileCopyrightText: [2024-${CURRENT_YEAR}]-(${CURRENT_YEAR}|${NEXT_YEAR}) or (${CURRENT_YEAR}|${NEXT_YEAR}) Maho <https://mahocommerce.com>"
               ERROR=1
             fi
           done
 
-          # Exit with error if any file is missing its SPDX header
+          # Exit with error if any file is missing copyright
           if [ $ERROR -eq 1 ]; then
-            echo "❌ Error: Some files are missing the required SPDX header"
+            echo "❌ Error: Some files are missing the required copyright notice"
             exit 1
           fi
 
-          echo "✅ Success: All modified files contain a valid SPDX header"
+          echo "✅ Success: All modified files contain the required copyright notice"
