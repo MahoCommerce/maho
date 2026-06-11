@@ -24,9 +24,6 @@ class Maho_Revocation_Model_Request extends Mage_Core_Model_Abstract
 
     public const SUPPRESSED_REASON_RATE_LIMIT = 'rate_limit_recipient';
 
-    public const ORDER_STATUS_ACCEPTED = 'revocation_accepted';
-    public const ORDER_STATUS_REJECTED = 'revocation_rejected';
-
     #[\Override]
     protected function _construct(): void
     {
@@ -96,6 +93,15 @@ class Maho_Revocation_Model_Request extends Mage_Core_Model_Abstract
         return $this->setData('reason', $value);
     }
 
+    /**
+     * 1 only when the request was submitted by a logged-in customer through the
+     * "Revoke this contract" link on their own order page (the my-account entry
+     * point), with order ownership re-checked server-side in
+     * Maho_Revocation_Model_Service::_resolveOrder(). Public-form submissions are
+     * always 0, even when order reference + name + email all match — an unverified
+     * self-assertion must never elevate itself, because a verified+linked request
+     * is what lets an admin apply order-level changes.
+     */
     public function getVerified(): int
     {
         return (int) $this->_getData('verified');

@@ -9,43 +9,60 @@
 
 declare(strict_types=1);
 
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Revocation order statuses', function () {
-    it('seeds revocation_accepted and revocation_rejected under the complete state', function () {
-        $statuses = Mage::getResourceModel('sales/order_status_collection')->toOptionHash();
-        expect($statuses)->toHaveKey(Maho_Revocation_Model_Request::ORDER_STATUS_ACCEPTED);
-        expect($statuses)->toHaveKey(Maho_Revocation_Model_Request::ORDER_STATUS_REJECTED);
-
-        $completeStatuses = Mage::getSingleton('sales/order_config')
-            ->getStateStatuses(Mage_Sales_Model_Order::STATE_COMPLETE, false);
-        expect($completeStatuses)->toContain(Maho_Revocation_Model_Request::ORDER_STATUS_ACCEPTED);
-        expect($completeStatuses)->toContain(Maho_Revocation_Model_Request::ORDER_STATUS_REJECTED);
-    });
-
-    it('applies the revocation_accepted status without changing the order state', function () {
+describe('Revocation processing', function () {
+    it('records the decision and notes the order without changing its status or state', function () {
         $order = Mage::getModel('sales/order');
         $order->setIncrementId((string) random_int(900000000, 999999999));
         $order->setStoreId(1);
-        $order->setData('state', Mage_Sales_Model_Order::STATE_COMPLETE);
-        $order->setStatus('complete');
-        $order->setCustomerEmail('status-test-' . uniqid() . '@example.com');
+        $order->setData('state', Mage_Sales_Model_Order::STATE_PROCESSING);
+        $order->setStatus('processing');
+        $order->setCustomerEmail('proc-' . uniqid() . '@example.com');
         $order->setCustomerIsGuest(1);
         $order->setBaseToGlobalRate(1);
         $order->setBaseToOrderRate(1);
         $order->save();
 
-        $history = $order->addStatusHistoryComment(
-            'Revocation request #42 accepted.',
-            Maho_Revocation_Model_Request::ORDER_STATUS_ACCEPTED,
+        $request = Mage::getModel('revocation/request');
+        $request->setStoreId(1)
+            ->setOrderId((int) $order->getId())
+            ->setOrderReference($order->getIncrementId())
+            ->setCustomerName('Max Mustermann')
+            ->setEmail($order->getCustomerEmail())
+            ->setVerified(0)
+            ->setReceivedAt(Mage::app()->getLocale()->formatDateForDb('now'))
+            ->save();
+
+        $httpRequest = new Mage_Core_Controller_Request_Http(
+            SymfonyRequest::create('http://localhost/admin/sales_revocation/process', 'POST', [
+                'id' => $request->getId(),
+                'decision' => 'accept',
+            ]),
         );
-        $history->setIsCustomerNotified(false);
-        $order->save();
+        (new Maho_Revocation_Adminhtml_Sales_RevocationController(
+            $httpRequest,
+            new Mage_Core_Controller_Response_Http(),
+        ))->processAction();
 
-        $reloaded = Mage::getModel('sales/order')->load($order->getId());
-        expect($reloaded->getStatus())->toBe(Maho_Revocation_Model_Request::ORDER_STATUS_ACCEPTED);
-        expect($reloaded->getState())->toBe(Mage_Sales_Model_Order::STATE_COMPLETE);
+        $reloadedRequest = Mage::getModel('revocation/request')->load($request->getId());
+        expect($reloadedRequest->getProcessedStatus())->toBe(Maho_Revocation_Model_Request::PROCESSED_STATUS_ACCEPTED);
 
+        // The outcome lives on the request; the order must never be pushed into a
+        // revocation_* status or state (the coupling we deliberately removed).
+        $reloadedOrder = Mage::getModel('sales/order')->load($order->getId());
+        expect($reloadedOrder->getStatus())->not->toBe('revocation_accepted');
+        expect($reloadedOrder->getState())->not->toBe('revocation_accepted');
+
+        $comments = [];
+        foreach ($reloadedOrder->getStatusHistoryCollection() as $history) {
+            $comments[] = (string) $history->getComment();
+        }
+        expect(implode("\n", $comments))->toContain('accepted');
+
+        $request->delete();
         $order->delete();
     });
 });

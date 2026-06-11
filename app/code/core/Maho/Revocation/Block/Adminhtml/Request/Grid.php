@@ -148,13 +148,13 @@ class Maho_Revocation_Block_Adminhtml_Request_Grid extends Mage_Adminhtml_Block_
         $this->getMassactionBlock()->addItem('accept', [
             'label' => $helper->__('Mark as Accepted'),
             'url' => $this->getUrl('*/*/massAccept'),
-            'confirm' => $helper->__('Mark the selected requests as accepted? Order statuses are not changed by this action.'),
+            'confirm' => $helper->__('Mark the selected requests as accepted? The matched orders are not modified.'),
         ]);
 
         $this->getMassactionBlock()->addItem('reject', [
             'label' => $helper->__('Mark as Rejected'),
             'url' => $this->getUrl('*/*/massReject'),
-            'confirm' => $helper->__('Mark the selected requests as rejected? Order statuses are not changed by this action.'),
+            'confirm' => $helper->__('Mark the selected requests as rejected? The matched orders are not modified.'),
         ]);
 
         return $this;

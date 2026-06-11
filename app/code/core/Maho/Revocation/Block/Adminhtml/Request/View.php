@@ -90,6 +90,11 @@ class Maho_Revocation_Block_Adminhtml_Request_View extends Mage_Adminhtml_Block_
         return $this->getUrl('*/sales_order/view', ['order_id' => $order->getId()]);
     }
 
+    public function getCreditmemoUrl(Mage_Sales_Model_Order $order): string
+    {
+        return $this->getUrl('*/sales_order_creditmemo/start', ['order_id' => $order->getId()]);
+    }
+
     public function getProcessedStatusLabel(): ?string
     {
         $status = $this->getRevocationRequest()?->getProcessedStatus();

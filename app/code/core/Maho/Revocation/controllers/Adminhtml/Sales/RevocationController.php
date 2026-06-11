@@ -137,14 +137,15 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
             $model->setProcessedAt(Mage::app()->getLocale()->formatDateForDb('now'));
             $model->save();
 
+            // Audit note only: the revocation outcome lives on the request, never on the
+            // order's status/state. A revocation can target an order in any state, and the
+            // refund (when accepted) is handled through the normal credit memo flow, which
+            // the detail view links to.
             if ($order) {
                 $history = $order->addStatusHistoryComment(
                     $accepted
                         ? $this->__('Revocation request #%s accepted.', $model->getId())
                         : $this->__('Revocation request #%s rejected.', $model->getId()),
-                    $accepted
-                        ? Maho_Revocation_Model_Request::ORDER_STATUS_ACCEPTED
-                        : Maho_Revocation_Model_Request::ORDER_STATUS_REJECTED,
                 );
                 $history->setIsCustomerNotified(false);
                 $order->save();
@@ -155,13 +156,6 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
                 : $this->__('The revocation has been marked as rejected.'));
         } catch (Exception $e) {
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-            $this->_redirect('*/*/view', ['id' => $model->getId()]);
-            return;
-        }
-
-        if ($accepted && $order && $order->canCreditmemo()) {
-            $this->_redirect('*/sales_order_creditmemo/start', ['order_id' => $order->getId()]);
-            return;
         }
 
         $this->_redirect('*/*/view', ['id' => $model->getId()]);

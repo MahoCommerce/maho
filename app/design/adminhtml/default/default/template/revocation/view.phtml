@@ -93,7 +93,16 @@ $order = $request->getOrder();
                 <a href="<?= $this->getOrderViewUrl($order) ?>"><strong>#<?= $this->escapeHtml($order->getIncrementId()) ?></strong></a>
                 (<?= $this->escapeHtml($order->getStatusLabel()) ?>)
             </p>
-            <p class="note"><?= $helper->__('"Accept Revocation" applies the revocation_accepted order status and opens the credit memo page. "Reject Revocation" applies the revocation_rejected status. Neither changes the order state, and no refund happens automatically.') ?></p>
+            <p class="note"><?= $helper->__('Accepting or rejecting only records the decision and adds a note to this order. The order status, state, and any refund are left unchanged.') ?></p>
+            <?php if ($request->getProcessedStatus() === Maho_Revocation_Model_Request::PROCESSED_STATUS_ACCEPTED && $order->canCreditmemo()): ?>
+            <ul class="messages">
+                <li class="notice-msg">
+                    <ul>
+                        <li><?= $helper->__('This revocation was accepted. To refund the customer, %s for order %s.', '<a href="' . $this->escapeHtml($this->getCreditmemoUrl($order)) . '">' . $helper->__('create a credit memo') . '</a>', '#' . $this->escapeHtml($order->getIncrementId())) ?></li>
+                    </ul>
+                </li>
+            </ul>
+            <?php endif ?>
         <?php else: ?>
             <p><?= $helper->__('No order could be matched to this request. The customer typed "%s".', $this->escapeHtml($request->getOrderReference())) ?></p>
             <?php if ($this->getRevocationRequest() && Mage::getSingleton('admin/session')->isAllowed('sales/revocation/process')): ?>
@@ -146,8 +155,8 @@ $order = $request->getOrder();
     const revocationProcess = {
         submit(decision) {
             const messages = {
-                accept: '<?= $this->jsQuoteEscape($helper->__('Accept this revocation? The matched order (if any) will be set to the revocation_accepted status.')) ?>',
-                reject: '<?= $this->jsQuoteEscape($helper->__('Reject this revocation? The matched order (if any) will be set to the revocation_rejected status.')) ?>'
+                accept: '<?= $this->jsQuoteEscape($helper->__('Accept this revocation? This records the decision and adds a note to the matched order. No order status or refund changes automatically.')) ?>',
+                reject: '<?= $this->jsQuoteEscape($helper->__('Reject this revocation? This records the decision and adds a note to the matched order. No order status changes automatically.')) ?>'
             };
             if (confirm(messages[decision])) {
                 document.getElementById('revocation-process-decision').value = decision;
