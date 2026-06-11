@@ -227,11 +227,13 @@ class Minicart {
     }
 
     updateCartQty(qty) {
-        if (typeof qty !== 'undefined') {
-            const el = document.querySelector(this.selectors.qty);
-            el.textContent = qty;
-            el.className = el.className.replace(/count-\d+/, 'count-' + qty);
+        if (typeof qty === 'undefined') {
+            return;
         }
+        qty = Number(qty) || 0;
+        const el = document.querySelector(this.selectors.qty);
+        el.textContent = qty;
+        el.className = el.className.replace(/count-\S+/, 'count-' + qty);
     }
 
     async refresh() {

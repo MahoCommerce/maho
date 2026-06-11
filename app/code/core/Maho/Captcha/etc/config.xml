@@ -73,7 +73,8 @@
 #newsletter-validate-detail
 .catalog-product-view #review-form
 .review-product-list #review-form
-.wishlist-index-share #form-validate</selectors>
+.wishlist-index-share #form-validate
+.revocation-index-index #revocation-form</selectors>
             </captcha>
         </admin>
     </default>

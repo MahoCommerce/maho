@@ -46,9 +46,6 @@ class Mage_Catalog_ProductController extends Mage_Core_Controller_Front_Action
         // Render page
         try {
             $viewHelper->prepareAndRender($productId, $this, $params);
-            $this->getResponse()
-                ->setHeader('Pragma', 'public', true)
-                ->setHeader('Cache-Control', 'private max-age=60', true);
         } catch (Exception $e) {
             if ($e->getCode() == $viewHelper->ERR_NO_PRODUCT_LOADED) {
                 if (isset($_GET['store'])  && !$this->getResponse()->isRedirect()) {
