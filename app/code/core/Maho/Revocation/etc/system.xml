@@ -109,7 +109,7 @@
                 </email>
                 <abuse translate="label comment" module="revocation">
                     <label>Abuse Protection</label>
-                    <comment><![CDATA[Only invisible background measures are used (honeypot, submit timing, invisible captcha, rate limits). Manual CAPTCHAs and email verification links are legally inadmissible for the revocation form. Do not tune these limits so strictly that legitimate customers are blocked.]]></comment>
+                    <comment><![CDATA[Only invisible background measures are used (honeypot, submit timing, invisible captcha, rate limits).<br>Manual CAPTCHAs and email verification links are legally inadmissible for the revocation form. Do not tune these limits so strictly that legitimate customers are blocked.]]></comment>
                     <frontend_type>text</frontend_type>
                     <sort_order>30</sort_order>
                     <show_in_default>1</show_in_default>
