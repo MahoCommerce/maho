@@ -74,6 +74,12 @@ class Mage_Core_Controller_Response_Http implements \Stringable
      */
     public bool $headersSentThrowsException = false;
 
+    /**
+     * Whether headers have been emitted; Symfony sends with replace=false,
+     * so a second emission would duplicate headers instead of replacing them
+     */
+    protected bool $_headersSent = false;
+
     public function __construct(array|SymfonyResponse|null $args = null)
     {
         // Handle both array (Mage factory) and SymfonyResponse (direct instantiation) arguments
@@ -302,6 +308,9 @@ class Mage_Core_Controller_Response_Http implements \Stringable
      */
     public function sendHeaders(): self
     {
+        if ($this->_headersSent) {
+            return $this;
+        }
         if (!$this->canSendHeaders()) {
             Mage::log('HEADERS ALREADY SENT: ' . mageDebugBacktrace(true, true, true));
             return $this;
@@ -310,11 +319,12 @@ class Mage_Core_Controller_Response_Http implements \Stringable
         foreach ($this->_headersRaw as $rawHeader) {
             header($rawHeader);
             if (($pos = strpos($rawHeader, ':')) !== false) {
-                $this->symfonyResponse->headers->remove(substr($rawHeader, 0, $pos));
+                $this->symfonyResponse->headers->remove(trim(substr($rawHeader, 0, $pos)));
             }
         }
 
         $this->symfonyResponse->sendHeaders();
+        $this->_headersSent = true;
 
         return $this;
     }

@@ -410,6 +410,15 @@ describe('Mage_Core_Controller_Response_Http', function () {
             $this->response->sendHeaders();
             expect($this->response->getSymfonyResponse()->headers->has('Cache-Control'))->toBeFalse();
         });
+
+        it('is a no-op on a second sendHeaders call', function () {
+            $this->response->sendHeaders();
+            $this->response->setRawHeader('X-Test: raw');
+            $this->response->setHeader('X-Test', 'bag');
+            $this->response->sendHeaders();
+            // raw-header shadowing did not run, proving the second call was skipped
+            expect($this->response->getSymfonyResponse()->headers->has('X-Test'))->toBeTrue();
+        });
     });
 
     describe('Content Type Management', function () {
