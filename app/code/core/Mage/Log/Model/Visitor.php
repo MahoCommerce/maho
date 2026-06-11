@@ -212,7 +212,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('controller_action_predispatch', area: 'frontend')]
+    #[Maho\Config\Observer('controller_action_predispatch', area: 'frontend', type: 'singleton')]
     public function initByRequest($observer)
     {
         if ($this->_skipRequestLogging || $this->isModuleIgnored($observer)) {
@@ -257,7 +257,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('controller_action_postdispatch', area: 'frontend')]
+    #[Maho\Config\Observer('controller_action_postdispatch', area: 'frontend', type: 'singleton')]
     public function saveByRequest($observer)
     {
         if ($this->_skipRequestLogging || $this->isModuleIgnored($observer)) {
@@ -283,7 +283,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('customer_login', area: 'frontend')]
+    #[Maho\Config\Observer('customer_login', area: 'frontend', type: 'singleton')]
     public function bindCustomerLogin($observer)
     {
         /** @var Mage_Customer_Model_Customer $customer */
@@ -311,7 +311,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('customer_logout', area: 'frontend')]
+    #[Maho\Config\Observer('customer_logout', area: 'frontend', type: 'singleton')]
     public function bindCustomerLogout($observer)
     {
         if ($this->getCustomerId() && $customer = $observer->getEvent()->getCustomer()) {
@@ -324,7 +324,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
-    #[Maho\Config\Observer('sales_quote_save_after', area: 'frontend')]
+    #[Maho\Config\Observer('sales_quote_save_after', area: 'frontend', type: 'singleton')]
     public function bindQuoteCreate($observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */
@@ -342,7 +342,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
-    #[Maho\Config\Observer('checkout_quote_destroy', area: 'frontend')]
+    #[Maho\Config\Observer('checkout_quote_destroy', area: 'frontend', type: 'singleton')]
     public function bindQuoteDestroy($observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */
