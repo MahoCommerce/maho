@@ -17,6 +17,10 @@
         </Mage_Core>
     </modules>
     <global>
+        <!-- Named lock backend: "file" or "db" (see local.xml.template) -->
+        <lock>
+            <backend>file</backend>
+        </lock>
         <models>
             <core>
                 <class>Mage_Core_Model</class>

@@ -22,8 +22,27 @@ uses(Tests\MahoBackendTestCase::class);
  * config tree reflects a real deployment, not a patched XML node.
  */
 
+/**
+ * Original base URLs captured before this file mutates them, so the reset restores the
+ * real installed values instead of a hardcoded guess. Persisted config leaks across the
+ * shared test DB, so a wrong reset (e.g. a host the browser can't resolve) breaks the
+ * browser suite that runs later.
+ */
+function httpsOriginalBaseUrls(): array
+{
+    static $orig = null;
+    if ($orig === null) {
+        $orig = [
+            'unsecure' => (string) Mage::getStoreConfig('web/unsecure/base_url'),
+            'secure' => (string) Mage::getStoreConfig('web/secure/base_url'),
+        ];
+    }
+    return $orig;
+}
+
 function httpsConfig(string $unsecure, string $secure, string $useInAdmin, string $useInFrontend): void
 {
+    httpsOriginalBaseUrls(); // capture pristine values before the first mutation
     $config = Mage::getConfig();
     $config->saveConfig('web/unsecure/base_url', $unsecure);
     $config->saveConfig('web/secure/base_url', $secure);
@@ -50,9 +69,10 @@ function httpsConfig(string $unsecure, string $secure, string $useInAdmin, strin
 
 function httpsResetConfig(): void
 {
+    $orig = httpsOriginalBaseUrls();
     $config = Mage::getConfig();
-    $config->saveConfig('web/unsecure/base_url', 'http://maho.test/');
-    $config->saveConfig('web/secure/base_url', 'http://maho.test/');
+    $config->saveConfig('web/unsecure/base_url', $orig['unsecure']);
+    $config->saveConfig('web/secure/base_url', $orig['secure']);
     $config->saveConfig('web/secure/use_in_adminhtml', '0');
     $config->saveConfig('web/secure/use_in_frontend', '0');
     $config->deleteConfig('web/url/redirect_to_base');

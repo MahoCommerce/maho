@@ -132,6 +132,10 @@ class Mage_SalesRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Reso
 
             $entityInfo = $this->_getAssociatedEntityInfo('customer_group');
             $connection = $this->getConnection();
+            // Quote from_date/to_date: newer MariaDB reserves them as date functions, so
+            // unquoted column references fail to parse.
+            $fromDate = $connection->quoteIdentifier('from_date');
+            $toDate = $connection->quoteIdentifier('to_date');
             $this->getSelect()
                 ->joinInner(
                     ['customer_group_ids' => $this->getTable($entityInfo['associations_table'])],
@@ -143,8 +147,8 @@ class Mage_SalesRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Reso
                     ),
                     [],
                 )
-                ->where('from_date is null or from_date <= ?', $now)
-                ->where('to_date is null or to_date >= ?', $now);
+                ->where("$fromDate IS NULL OR $fromDate <= ?", $now)
+                ->where("$toDate IS NULL OR $toDate >= ?", $now);
 
             $this->addIsActiveFilter();
 

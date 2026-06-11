@@ -80,20 +80,32 @@ jobs:
 
     steps:
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: 8.3
           extensions: ${{ matrix.db_engine == 'pgsql' && 'pdo_pgsql' || '' }}
 
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      # Browser tests (tests/Browser) need Playwright; the plugin aborts the whole run if it
+      # is missing, so install it up front in every job.
+      - name: Setup Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: lts/*
+
+      - name: Install Playwright
+        run: |
+          npm install playwright@^1.60.0
+          npx playwright install --with-deps chromium
 
       - name: Get composer cache directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -104,6 +116,9 @@ jobs:
 
       - name: Print DB version
         run: docker exec $(docker ps -q) sh -c "mysql --version 2>/dev/null || psql --version 2>/dev/null || mariadb --version 2>/dev/null"
+
+      - name: Detect runner IP (browser host)
+        run: echo "MAHO_BROWSER_HOST=$(hostname -I | awk '{print $1}')" >> "$GITHUB_ENV"
 
       - name: Install Maho
         run: |
@@ -117,8 +132,8 @@ jobs:
             --db_user ${{ matrix.db_user }} \
             --db_pass ${{ matrix.db_pass }} \
             --db_engine ${{ matrix.db_engine }} \
-            --url http://maho.test/ \
-            --secure_base_url http://maho.test/ \
+            --url "http://$MAHO_BROWSER_HOST:8901/" \
+            --secure_base_url "http://$MAHO_BROWSER_HOST:8901/" \
             --use_secure 0 \
             --use_secure_admin 0 \
             --admin_lastname admin \
@@ -130,8 +145,27 @@ jobs:
           ./maho index:reindex:all
           ./maho cache:flush
 
+      - name: Configure PayPal sandbox credentials
+        run: |
+          if [ -z "$PAYPAL_SANDBOX_CLIENT_ID" ] || [ -z "$PAYPAL_SANDBOX_CLIENT_SECRET" ]; then
+            echo "PayPal sandbox credentials unavailable (e.g. a fork PR); leaving PayPal unconfigured so its tests skip."
+            exit 0
+          fi
+          ./maho config:set paypal/credentials/client_id "$PAYPAL_SANDBOX_CLIENT_ID" --encrypt --scope default --scope-id 0 --silent >/dev/null
+          ./maho config:set paypal/credentials/client_secret "$PAYPAL_SANDBOX_CLIENT_SECRET" --encrypt --scope default --scope-id 0 --silent >/dev/null
+          ./maho config:set paypal/credentials/sandbox 1 --scope default --scope-id 0 --silent
+          ./maho config:set payment/paypal_standard_checkout/active 1 --scope default --scope-id 0 --silent
+          ./maho config:set payment/paypal_advanced_checkout/active 1 --scope default --scope-id 0 --silent
+          ./maho cache:flush
+        env:
+          PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
+          PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
+
       - name: Run Pest Tests
         run: ./vendor/bin/pest --display-errors --display-warnings
+        env:
+          PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
+          PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
 
   pest-sqlite:
     name: Test Suite (sqlite)
@@ -139,20 +173,30 @@ jobs:
 
     steps:
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: 8.3
           extensions: pdo_sqlite
 
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Setup Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: lts/*
+
+      - name: Install Playwright
+        run: |
+          npm install playwright@^1.60.0
+          npx playwright install --with-deps chromium
 
       - name: Get composer cache directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: Cache dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -160,6 +204,9 @@ jobs:
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+
+      - name: Detect runner IP (browser host)
+        run: echo "MAHO_BROWSER_HOST=$(hostname -I | awk '{print $1}')" >> "$GITHUB_ENV"
 
       - name: Install Maho
         run: |
@@ -170,8 +217,8 @@ jobs:
             --default_currency USD \
             --db_name maho.sqlite \
             --db_engine sqlite \
-            --url http://maho.test/ \
-            --secure_base_url http://maho.test/ \
+            --url "http://$MAHO_BROWSER_HOST:8901/" \
+            --secure_base_url "http://$MAHO_BROWSER_HOST:8901/" \
             --use_secure 0 \
             --use_secure_admin 0 \
             --admin_lastname admin \
@@ -183,5 +230,24 @@ jobs:
           ./maho index:reindex:all
           ./maho cache:flush
 
+      - name: Configure PayPal sandbox credentials
+        run: |
+          if [ -z "$PAYPAL_SANDBOX_CLIENT_ID" ] || [ -z "$PAYPAL_SANDBOX_CLIENT_SECRET" ]; then
+            echo "PayPal sandbox credentials unavailable (e.g. a fork PR); leaving PayPal unconfigured so its tests skip."
+            exit 0
+          fi
+          ./maho config:set paypal/credentials/client_id "$PAYPAL_SANDBOX_CLIENT_ID" --encrypt --scope default --scope-id 0 --silent >/dev/null
+          ./maho config:set paypal/credentials/client_secret "$PAYPAL_SANDBOX_CLIENT_SECRET" --encrypt --scope default --scope-id 0 --silent >/dev/null
+          ./maho config:set paypal/credentials/sandbox 1 --scope default --scope-id 0 --silent
+          ./maho config:set payment/paypal_standard_checkout/active 1 --scope default --scope-id 0 --silent
+          ./maho config:set payment/paypal_advanced_checkout/active 1 --scope default --scope-id 0 --silent
+          ./maho cache:flush
+        env:
+          PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
+          PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
+
       - name: Run Pest Tests
         run: ./vendor/bin/pest --display-errors --display-warnings
+        env:
+          PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
+          PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}

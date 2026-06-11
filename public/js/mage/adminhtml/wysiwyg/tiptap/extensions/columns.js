@@ -6,7 +6,7 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.22.2';
+import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.26.0';
 import { findParentNodeOfType, createGridNodeView } from './grid-utils.js';
 
 /**

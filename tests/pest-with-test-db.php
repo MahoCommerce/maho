@@ -41,13 +41,85 @@ class PestTestRunner
         $this->testDbName = $this->dbConfig['name'] . '_test';
     }
 
+    /**
+     * Canonical base URL the test store is installed with. Browser tests serve the app on
+     * this exact host:port (see Tests\Browser\MahoServer), so there is no runtime base_url
+     * rewrite, so all suites share one configuration. The host is `localhost`, deliberately:
+     * Playwright's bundled Chromium uses Chromium's built-in DNS resolver, which ignores
+     * /etc/hosts (so .test names don't resolve in-browser) and, on CI Linux runners, even
+     * reports ERR_NAME_NOT_RESOLVED for the bare loopback IP `127.0.0.1`. It does resolve
+     * `localhost` via its built-in RFC 6761 rule. The port must match the dev server or
+     * Maho's redirect_to_base bounces the browser to an unserved origin.
+     */
+    public static function testBaseUrl(): string
+    {
+        $host = getenv('MAHO_BROWSER_HOST') ?: 'localhost';
+        $port = (int) (getenv('MAHO_BROWSER_PORT') ?: 8901);
+        return "http://{$host}:{$port}/";
+    }
+
+    /**
+     * Read a value from the environment, falling back to a gitignored .env.testing
+     * file so local runs and CI (secrets) share the same variable names.
+     */
+    private static function envValue(string $key): string
+    {
+        $value = getenv($key);
+        if ($value !== false && $value !== '') {
+            return $value;
+        }
+        $file = __DIR__ . '/../.env.testing';
+        if (is_file($file)) {
+            foreach (file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+                $line = trim($line);
+                if ($line === '' || $line[0] === '#' || !str_contains($line, '=')) {
+                    continue;
+                }
+                [$k, $v] = explode('=', $line, 2);
+                if (trim($k) === $key) {
+                    return trim($v);
+                }
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Inject PayPal sandbox credentials into the test store right after install, so
+     * every suite shares one configuration (matching how a real store is set up).
+     * Skipped silently when no credentials are available. Credentials are stored
+     * encrypted (--encrypt) exactly as the admin would, and never echoed to the log.
+     */
+    private function injectPaypalSandboxConfig(): void
+    {
+        $clientId = self::envValue('PAYPAL_SANDBOX_CLIENT_ID');
+        $clientSecret = self::envValue('PAYPAL_SANDBOX_CLIENT_SECRET');
+        if ($clientId === '' || $clientSecret === '') {
+            return;
+        }
+
+        echo "Injecting PayPal sandbox configuration...\n";
+        $set = function (string $path, string $value, bool $encrypt = false) {
+            $cmd = './maho config:set ' . escapeshellarg($path) . ' ' . escapeshellarg($value)
+                . ' --scope default --scope-id 0 --silent' . ($encrypt ? ' --encrypt' : '');
+            // shell_exec (not the echoing executeCommand) so secrets never reach the log.
+            shell_exec($cmd);
+        };
+        $set('paypal/credentials/client_id', $clientId, true);
+        $set('paypal/credentials/client_secret', $clientSecret, true);
+        $set('paypal/credentials/sandbox', '1');
+        $set('payment/paypal_standard_checkout/active', '1');
+        $set('payment/paypal_advanced_checkout/active', '1');
+        echo "✓ PayPal sandbox configured\n";
+    }
+
     public function run(array $pestArgs = []): int
     {
-        echo "Setting up fresh test database for local testing ({$this->dbType})...\n";
-
         try {
             $this->backupLocalXml();
+            echo "Setting up fresh test database for local testing ({$this->dbType})...\n";
             $this->setupTestDatabase();
+            $this->injectPaypalSandboxConfig();
             $exitCode = $this->runPest($pestArgs);
 
             // Flush cache after tests complete
@@ -251,8 +323,8 @@ class PestTestRunner
             ' --timezone Europe/London' .
             ' --default_currency USD' .
             ' --db_engine ' . escapeshellarg($dbEngine) .
-            ' --url http://maho.test/' .
-            ' --secure_base_url http://maho.test/' .
+            ' --url ' . escapeshellarg(self::testBaseUrl()) .
+            ' --secure_base_url ' . escapeshellarg(self::testBaseUrl()) .
             ' --use_secure 0' .
             ' --use_secure_admin 0' .
             ' --admin_lastname admin' .
@@ -359,6 +431,21 @@ class PestTestRunner
         $pestCmd = './vendor/bin/pest --colors=always';
         if (!empty($args)) {
             $pestCmd .= ' ' . implode(' ', array_map('escapeshellarg', $args));
+        }
+
+        // The Browser suite needs Playwright; the plugin aborts the whole run when it isn't
+        // installed, even just from loading the browser test files. So when Playwright is
+        // absent and the caller didn't pick a suite explicitly, run only the non-browser
+        // suites, keeping the default run working for contributors without the toolchain.
+        $explicitSuite = false;
+        foreach ($args as $arg) {
+            if (str_contains($arg, 'testsuite')) {
+                $explicitSuite = true;
+                break;
+            }
+        }
+        if (!$explicitSuite && !is_file(__DIR__ . '/../node_modules/.bin/playwright')) {
+            $pestCmd .= ' --testsuite ' . escapeshellarg('Install,Backend,Frontend');
         }
 
         echo "\nRunning Pest tests...\n";

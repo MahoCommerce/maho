@@ -126,14 +126,16 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
      */
     protected function _acquireLock(string $paypalOrderId): bool
     {
-        $lock = Mage_Index_Model_Lock::getInstance();
-        return $lock->setLock('paypal_order_' . $paypalOrderId, file: true, block: false);
+        /** @var Maho_Paypal_Helper_Data $helper */
+        $helper = Mage::helper('paypal');
+        return $helper->acquireOrderLock($paypalOrderId);
     }
 
     protected function _releaseLock(string $paypalOrderId): void
     {
-        $lock = Mage_Index_Model_Lock::getInstance();
-        $lock->releaseLock('paypal_order_' . $paypalOrderId, file: true);
+        /** @var Maho_Paypal_Helper_Data $helper */
+        $helper = Mage::helper('paypal');
+        $helper->releaseOrderLock($paypalOrderId);
     }
 
     protected function _placeOrderFromPaypalResult(
