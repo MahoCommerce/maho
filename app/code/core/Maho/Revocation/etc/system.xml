@@ -21,15 +21,16 @@
             <groups>
                 <general translate="label comment" module="revocation">
                     <label>General</label>
-                    <comment><![CDATA[EU Directive 2023/2673 (in Germany: &sect;356a BGB) requires B2C shops selling into the EU to provide a revocation button from 19 June 2026. This module provides the legally required channel; the existing withdrawal information page and PDF withdrawal form remain mandatory and unchanged.<br/><br/>To display the button on the storefront, insert the <strong>Revocation Button</strong> widget into your footer (or any block that stays visible throughout the withdrawal period).]]></comment>
+                    <comment><![CDATA[EU Directive 2023/2673 (in Germany: &sect;356a BGB) requires B2C shops selling into the EU to provide a revocation button from 19 June 2026.<br>This module provides the legally required channel; the existing withdrawal information page and PDF withdrawal form remain mandatory and unchanged.]]></comment>
                     <frontend_type>text</frontend_type>
                     <sort_order>10</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <fields>
-                        <enabled translate="label">
+                        <enabled translate="label comment">
                             <label>Enabled</label>
+                            <comment><![CDATA[<strong>Enabling this alone does not display the button.</strong> The law requires the revocation button to stay permanently visible during the withdrawal period, but only your theme knows where that is. After enabling, you must place the <strong>Revocation Button</strong> widget in a block shown on every storefront page (typically the footer). Until you do, the form exists at <em>/revocation</em> but nothing links to it.]]></comment>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>10</sort_order>
