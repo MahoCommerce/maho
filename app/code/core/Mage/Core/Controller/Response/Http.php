@@ -30,19 +30,9 @@ class Mage_Core_Controller_Response_Http implements \Stringable
     protected static ?\Maho\DataObject $_transportObject = null;
 
     /**
-     * Array of headers
-     */
-    protected array $_headers = [];
-
-    /**
      * Array of raw headers
      */
     protected array $_headersRaw = [];
-
-    /**
-     * HTTP response code
-     */
-    protected int $_httpResponseCode = 200;
 
     /**
      * Flag; is this response a redirect?
@@ -74,22 +64,23 @@ class Mage_Core_Controller_Response_Http implements \Stringable
      */
     public bool $headersSentThrowsException = false;
 
+    /**
+     * Whether headers have been emitted; Symfony sends with replace=false,
+     * so a second emission would duplicate headers instead of replacing them
+     */
+    protected bool $_headersSent = false;
+
     public function __construct(array|SymfonyResponse|null $args = null)
     {
         // Handle both array (Mage factory) and SymfonyResponse (direct instantiation) arguments
         if ($args instanceof SymfonyResponse) {
             $this->symfonyResponse = $args;
-            // Sync content and code
             $this->setBody($args->getContent() ?: '');
-            $this->_httpResponseCode = $args->getStatusCode();
         } elseif (is_array($args) && isset($args[0]) && $args[0] instanceof SymfonyResponse) {
             $this->symfonyResponse = $args[0];
             $this->setBody($args[0]->getContent() ?: '');
-            $this->_httpResponseCode = $args[0]->getStatusCode();
         } else {
             $this->symfonyResponse = new SymfonyResponse();
-            // Set default protocol version to 1.1
-            $this->symfonyResponse->setProtocolVersion('1.1');
         }
     }
 
@@ -107,24 +98,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
     public function setHeader(string $name, string $value, bool $replace = true): self
     {
         $this->canSendHeaders(true);
-        $name = $this->_normalizeHeader($name);
-
-        if ($replace) {
-            foreach ($this->_headers as $key => $header) {
-                if ($name == $header['name']) {
-                    unset($this->_headers[$key]);
-                }
-            }
-        }
-
-        $this->_headers[] = [
-            'name' => $name,
-            'value' => $value,
-            'replace' => $replace,
-        ];
-
-        $this->symfonyResponse->headers->set($name, $value, $replace);
-
+        $this->symfonyResponse->headers->set($this->_normalizeHeader($name), $value, $replace);
         return $this;
     }
 
@@ -150,10 +124,16 @@ class Mage_Core_Controller_Response_Http implements \Stringable
         );
 
         $this->canSendHeaders(true);
+        $code = self::$_transportObject->getCode();
         $this->setHeader('Location', self::$_transportObject->getUrl(), true)
-             ->setHttpResponseCode(self::$_transportObject->getCode());
+             ->setHttpResponseCode($code);
 
-        $this->symfonyResponse->setStatusCode(self::$_transportObject->getCode());
+        // Keep permanent redirects browser-cacheable; the header bag default
+        // (no-cache, private) would force a re-request of the old URL every visit
+        if ($code === 301 || $code === 308) {
+            $this->setHeader('Cache-Control', 'max-age=86400', true);
+        }
+
         $this->_isRedirect = true;
 
         return $this;
@@ -178,11 +158,30 @@ class Mage_Core_Controller_Response_Http implements \Stringable
     }
 
     /**
-     * Return array of headers; see {@link $_headers} for format
+     * Return headers as [['name' => ..., 'value' => ..., 'replace' => ...], ...]
+     * (legacy M1 format, derived from the Symfony header bag)
      */
     public function getHeaders(): array
     {
-        return $this->_headers;
+        $headers = [];
+        foreach ($this->symfonyResponse->headers->allPreserveCase() as $name => $values) {
+            foreach ($values as $value) {
+                $headers[] = [
+                    'name' => $name,
+                    'value' => $value,
+                    'replace' => true,
+                ];
+            }
+        }
+        return $headers;
+    }
+
+    /**
+     * Whether a header is present
+     */
+    public function hasHeader(string $name): bool
+    {
+        return $this->symfonyResponse->headers->has($name);
     }
 
     /**
@@ -190,7 +189,6 @@ class Mage_Core_Controller_Response_Http implements \Stringable
      */
     public function clearHeaders(): self
     {
-        $this->_headers = [];
         $this->symfonyResponse->headers = new \Symfony\Component\HttpFoundation\ResponseHeaderBag();
         return $this;
     }
@@ -200,12 +198,6 @@ class Mage_Core_Controller_Response_Http implements \Stringable
      */
     public function clearHeader(string $name): self
     {
-        $name = $this->_normalizeHeader($name);
-        foreach ($this->_headers as $key => $header) {
-            if ($name == $header['name']) {
-                unset($this->_headers[$key]);
-            }
-        }
         $this->symfonyResponse->headers->remove($name);
         return $this;
     }
@@ -263,11 +255,6 @@ class Mage_Core_Controller_Response_Http implements \Stringable
      */
     public function setHttpResponseCode(int $code): self
     {
-        if ((100 > $code) || (599 < $code)) {
-            throw new Exception('Invalid HTTP response code');
-        }
-
-        $this->_httpResponseCode = $code;
         $this->symfonyResponse->setStatusCode($code);
         return $this;
     }
@@ -277,7 +264,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
      */
     public function getHttpResponseCode(): int
     {
-        return $this->_httpResponseCode;
+        return $this->symfonyResponse->getStatusCode();
     }
 
     /**
@@ -296,61 +283,37 @@ class Mage_Core_Controller_Response_Http implements \Stringable
     /**
      * Send all headers
      *
-     * Sends any headers specified. If an {@link setHttpResponseCode() HTTP response code}
-     * has been specified, it is sent with the first header.
+     * Emission is delegated to the wrapped Symfony response, so ResponseHeaderBag
+     * defaults (conservative Cache-Control, Date) apply. The response is prepared
+     * against the current request first (RFC compliance: Content-Type charset,
+     * HEAD/304 body stripping, protocol version, secure cookies). Raw headers are
+     * sent after preparation and suppress any same-named header from the bag.
      */
     public function sendHeaders(): self
     {
+        if ($this->_headersSent) {
+            return $this;
+        }
         if (!$this->canSendHeaders()) {
             Mage::log('HEADERS ALREADY SENT: ' . mageDebugBacktrace(true, true, true));
             return $this;
         }
 
-        if (str_starts_with(php_sapi_name(), 'cgi')) {
-            $statusSent = false;
-            foreach ($this->_headersRaw as $i => $header) {
-                if (stripos($header, 'status:') === 0) {
-                    if ($statusSent) {
-                        unset($this->_headersRaw[$i]);
-                    } else {
-                        $statusSent = true;
-                    }
-                }
-            }
-            foreach ($this->_headers as $i => $header) {
-                if (strcasecmp($header['name'], 'status') === 0) {
-                    if ($statusSent) {
-                        unset($this->_headers[$i]);
-                    } else {
-                        $statusSent = true;
-                    }
+        $this->symfonyResponse->prepare(Mage::app()->getRequest()->getSymfonyRequest());
+
+        foreach ($this->_headersRaw as $rawHeader) {
+            header($rawHeader);
+            if (($pos = strpos($rawHeader, ':')) !== false) {
+                $name = trim(substr($rawHeader, 0, $pos));
+                // Set-Cookie is multi-valued; removing it would wipe every bag cookie
+                if (strcasecmp($name, 'Set-Cookie') !== 0) {
+                    $this->symfonyResponse->headers->remove($name);
                 }
             }
         }
 
-        $httpCodeSent = false;
-
-        foreach ($this->_headersRaw as $header) {
-            if (!$httpCodeSent && $this->_httpResponseCode) {
-                header($header, true, $this->_httpResponseCode);
-                $httpCodeSent = true;
-            } else {
-                header($header);
-            }
-        }
-
-        foreach ($this->_headers as $header) {
-            if (!$httpCodeSent && $this->_httpResponseCode) {
-                header($header['name'] . ': ' . $header['value'], $header['replace'], $this->_httpResponseCode);
-                $httpCodeSent = true;
-            } else {
-                header($header['name'] . ': ' . $header['value'], $header['replace']);
-            }
-        }
-
-        if (!$httpCodeSent) {
-            header('HTTP/1.1 ' . $this->_httpResponseCode);
-        }
+        $this->symfonyResponse->sendHeaders();
+        $this->_headersSent = true;
 
         return $this;
     }
@@ -512,6 +475,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
     public function setOutputOrder(array $order): self
     {
         $this->_bodyOrder = $order;
+        $this->symfonyResponse->setContent($this->outputBody());
         return $this;
     }
 
@@ -699,8 +663,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
         }
 
         $this->sendHeaders();
-
-        echo $this->outputBody();
+        $this->symfonyResponse->sendContent();
     }
 
     /**
@@ -737,32 +700,17 @@ class Mage_Core_Controller_Response_Http implements \Stringable
         bool $secure = false,
         bool $httponly = false,
     ): self {
-        // Set expiry time
-        if ($lifetime > 0) {
-            $expire = time() + $lifetime;
-        } else {
-            $expire = 0;
-        }
-
-        // Build cookie header
-        $cookieHeader = $name . '=' . urlencode($value);
-        if ($expire > 0) {
-            $cookieHeader .= '; expires=' . gmdate('D, d-M-Y H:i:s', $expire) . ' GMT';
-        }
-        if (!empty($path)) {
-            $cookieHeader .= '; path=' . $path;
-        }
-        if (!empty($domain)) {
-            $cookieHeader .= '; domain=' . $domain;
-        }
-        if ($secure) {
-            $cookieHeader .= '; Secure';
-        }
-        if ($httponly) {
-            $cookieHeader .= '; HttpOnly';
-        }
-
-        $this->setHeader('Set-Cookie', $cookieHeader, false);
+        $this->symfonyResponse->headers->setCookie(new \Symfony\Component\HttpFoundation\Cookie(
+            $name,
+            $value,
+            $lifetime > 0 ? time() + $lifetime : 0,
+            $path ?: '/',
+            $domain ?: null,
+            $secure,
+            $httponly,
+            false,
+            null,
+        ));
 
         return $this;
     }
@@ -772,18 +720,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
      */
     public function clearCookie(string $name, string $path = '/', string|null $domain = null): self
     {
-        // Set cookie with past expiry time
-        $cookieHeader = $name . '=deleted';
-        $cookieHeader .= '; expires=' . gmdate('D, d-M-Y H:i:s', time() - 3600) . ' GMT';
-        if (!empty($path)) {
-            $cookieHeader .= '; path=' . $path;
-        }
-        if (!empty($domain)) {
-            $cookieHeader .= '; domain=' . $domain;
-        }
-
-        $this->setHeader('Set-Cookie', $cookieHeader, false);
-
+        $this->symfonyResponse->headers->clearCookie($name, $path ?: '/', $domain ?: null, false, false);
         return $this;
     }
 
@@ -851,13 +788,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
         }
 
         // Skip for non-HTML responses
-        $contentType = '';
-        foreach ($this->_headers as $header) {
-            if (strcasecmp($header['name'], 'Content-Type') === 0) {
-                $contentType = $header['value'];
-                break;
-            }
-        }
+        $contentType = (string) $this->symfonyResponse->headers->get('Content-Type');
 
         // If no content type is set, check if body contains HTML
         if (empty($contentType)) {
