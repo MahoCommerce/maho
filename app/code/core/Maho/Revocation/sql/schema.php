@@ -22,7 +22,7 @@ return function (Schema $schema): void {
     $request->addColumn('order_reference', Types::STRING, ['length' => 64]);
     $request->addColumn('customer_name', Types::STRING, ['length' => 255]);
     $request->addColumn('email', Types::STRING, ['length' => 255]);
-    $request->addColumn('reason', Types::TEXT, ['notnull' => false]);
+    $request->addColumn('reason', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $request->addColumn('verified', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $request->addColumn('received_at', Types::DATETIME_MUTABLE);
     $request->addColumn('ip', Types::STRING, ['length' => 45, 'notnull' => false]);
@@ -30,7 +30,7 @@ return function (Schema $schema): void {
     $request->addColumn('locale', Types::STRING, ['length' => 16, 'notnull' => false]);
     $request->addColumn('processed_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $request->addColumn('processed_status', Types::STRING, ['length' => 32, 'notnull' => false]);
-    $request->addColumn('admin_note', Types::TEXT, ['notnull' => false]);
+    $request->addColumn('admin_note', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $request->addColumn('suppressed_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $request->addColumn('suppressed_reason', Types::STRING, ['length' => 64, 'notnull' => false]);
     $request->addPrimaryKeyConstraint(
@@ -48,7 +48,7 @@ return function (Schema $schema): void {
         ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
     );
     $request->addForeignKeyConstraint(
-        'sales_order',
+        'sales_flat_order',
         ['order_id'],
         ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],

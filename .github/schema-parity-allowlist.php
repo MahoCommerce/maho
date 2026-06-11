@@ -398,6 +398,20 @@ $entries = [
         ],
     ],
 
+    // revocation_request: legacy DDL declared received_at as a bare NOT NULL
+    // datetime (MySQL fills in the 0000-00-00 sentinel) and verified as TINYINT.
+    // Declarative schema drops the sentinel default and uses SMALLINT for
+    // cross-engine parity (no native TINYINT on PgSQL). PgSQL needs neither:
+    // its legacy adapter already maps TINYINT to smallint and emits no sentinel.
+    [
+        'engines' => ['mysql'],
+        'table' => 'revocation_request',
+        'replace' => [
+            '  COLUMN received_at datetime NOT NULL DEFAULT 0000-00-00 00:00:00' => '  COLUMN received_at datetime NOT NULL',
+            '  COLUMN verified tinyint unsigned NOT NULL DEFAULT 0' => '  COLUMN verified smallint unsigned NOT NULL DEFAULT 0',
+        ],
+    ],
+
     // Legacy DDL declared FeedManager varchar(500) columns as TYPE_VARCHAR which
     // legacy Maho converts to TEXT when length > 255; declarative schema uses
     // VARCHAR(500). Same for cases column which legacy declared as TYPE_TEXT
@@ -1105,6 +1119,7 @@ $dbalImplicitFkIndexes = [
         'rating_title' => ['rating_id'],
         'report_compared_product_index' => ['customer_id'],
         'report_viewed_product_index' => ['customer_id'],
+        'revocation_request' => ['store_id'],
         'review_store' => ['review_id'],
         'sales_billing_agreement_order' => ['agreement_id'],
         'sales_order_status_label' => ['status'],
@@ -1161,6 +1176,7 @@ $dbalImplicitFkIndexes = [
         'rating_title' => ['rating_id'],
         'report_compared_product_index' => ['customer_id'],
         'report_viewed_product_index' => ['customer_id'],
+        'revocation_request' => ['store_id'],
         'review_store' => ['review_id'],
         'sales_billing_agreement_order' => ['agreement_id'],
         'sales_order_status_label' => ['status'],
