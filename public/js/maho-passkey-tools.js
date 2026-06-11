@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
-// SPDX-FileCopyrightText: 2018 Thomas Bleeker (CBOR & ByteBuffer part)
 // SPDX-FileCopyrightText: 2022 Lukas Buchs
+// SPDX-FileCopyrightText: 2018 Thomas Bleeker (CBOR & ByteBuffer part)
 // SPDX-License-Identifier: MIT
 
 /**

@@ -165,7 +165,7 @@ All Zend Framework and Varien components have been completely removed. **NEVER**
 - The SPDX block is tight (no blank lines inside); `@package` follows it with no blank line above. The phpDocumentor CI workflow strips ` * SPDX-` lines before generating docs, leaving the canonical summary/blank/tags docblock.
 - Non-PHP new files: XML/HTML use an `<!-- ... -->` comment block, JS uses `//` line comments, CSS uses a `/* ... */` block comment (not `//`), each with `SPDX-FileCopyrightText:` and `SPDX-License-Identifier:` lines.
 - Existing files: preserve inherited Magento/OpenMage copyright lines verbatim; don't add yourself (git history is the attribution log). Update the Maho year range only on files you're already modifying. Translate an existing `@license` URL to its SPDX identifier (`osl-3.0` → `OSL-3.0`, `afl-3.0` → `AFL-3.0`) rather than reassigning by extension.
-- When a file has multiple `SPDX-FileCopyrightText` holders, order them newest-maintainer-first: Maho, then OpenMage, then Magento, then any other third-party authors (kept in their original relative order). Not every holder appears in every file; just keep the priority among those present.
+- When a file has multiple `SPDX-FileCopyrightText` holders, order them newest-maintainer-first: Maho, then OpenMage, then Magento, then any other third-party authors (ordered by copyright year, newest first). Not every holder appears in every file; just keep the priority among those present.
 - To migrate a file's header (or a whole directory) from the legacy `@copyright`/`@license` format, use the `spdx-headers` skill.
 - Before committing, ensure translatable strings (`$this->__()` or `Mage::helper()->__()`) are in `app/locale/en_US/`
 
