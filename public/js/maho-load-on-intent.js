@@ -1,10 +1,5 @@
-/**
- * Maho
- *
- * @package     js
- * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/license/mit  MIT
- */
+// SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+// SPDX-License-Identifier: MIT
 
 (function() {
     "use strict";

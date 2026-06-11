@@ -1,10 +1,5 @@
-/**
- * Maho
- *
- * @package     Mage_Adminhtml
- * @copyright   Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+// SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+// SPDX-License-Identifier: AFL-3.0
 
 const MODEL_ID = 'onnx-community/BEN2-ONNX';
 const MODEL_DTYPE = 'fp16';
