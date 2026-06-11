@@ -23,6 +23,6 @@ class Mage_Cms_PageController extends Mage_Core_Controller_Front_Action
 
         $this->getResponse()
             ->setHeader('Pragma', 'public', true)
-            ->setHeader('Cache-Control', 'private max-age=60', true);
+            ->setHeader('Cache-Control', 'private, max-age=60', true);
     }
 }

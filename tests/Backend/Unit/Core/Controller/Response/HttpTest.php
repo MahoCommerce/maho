@@ -380,6 +380,38 @@ describe('Mage_Core_Controller_Response_Http', function () {
         });
     });
 
+    describe('Default Cache-Control', function () {
+        it('defaults to no-cache, private when no caching headers are set', function () {
+            expect($this->response->getSymfonyResponse()->headers->get('Cache-Control'))
+                ->toBe('no-cache, private');
+        });
+
+        it('switches to private, must-revalidate when Last-Modified is set', function () {
+            $this->response->setHeader('Last-Modified', gmdate('D, d M Y H:i:s') . ' GMT');
+            expect($this->response->getSymfonyResponse()->headers->get('Cache-Control'))
+                ->toBe('private, must-revalidate');
+        });
+
+        it('switches to private, must-revalidate when Expires is set', function () {
+            $this->response->setHeader('Expires', 'Thu, 01 Jan 1970 00:00:00 GMT');
+            expect($this->response->getSymfonyResponse()->headers->get('Cache-Control'))
+                ->toBe('private, must-revalidate');
+        });
+
+        it('keeps an explicitly set Cache-Control header', function () {
+            $this->response->setHeader('Cache-Control', 'public, max-age=3600');
+            // Symfony normalizes directive order
+            expect($this->response->getSymfonyResponse()->headers->get('Cache-Control'))
+                ->toBe('max-age=3600, public');
+        });
+
+        it('removes a bag header shadowed by a raw header on send', function () {
+            $this->response->setRawHeader('Cache-Control: no-store');
+            $this->response->sendHeaders();
+            expect($this->response->getSymfonyResponse()->headers->has('Cache-Control'))->toBeFalse();
+        });
+    });
+
     describe('Content Type Management', function () {
         it('sets content type header', function () {
             $this->response->setHeader('Content-Type', 'application/json');

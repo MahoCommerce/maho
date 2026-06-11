@@ -296,8 +296,9 @@ class Mage_Core_Controller_Response_Http implements \Stringable
     /**
      * Send all headers
      *
-     * Sends any headers specified. If an {@link setHttpResponseCode() HTTP response code}
-     * has been specified, it is sent with the first header.
+     * Emission is delegated to the wrapped Symfony response, so ResponseHeaderBag
+     * defaults (conservative Cache-Control, Date) apply. Raw headers are sent
+     * first and suppress any same-named header from the bag.
      */
     public function sendHeaders(): self
     {
@@ -306,51 +307,14 @@ class Mage_Core_Controller_Response_Http implements \Stringable
             return $this;
         }
 
-        if (str_starts_with(php_sapi_name(), 'cgi')) {
-            $statusSent = false;
-            foreach ($this->_headersRaw as $i => $header) {
-                if (stripos($header, 'status:') === 0) {
-                    if ($statusSent) {
-                        unset($this->_headersRaw[$i]);
-                    } else {
-                        $statusSent = true;
-                    }
-                }
-            }
-            foreach ($this->_headers as $i => $header) {
-                if (strcasecmp($header['name'], 'status') === 0) {
-                    if ($statusSent) {
-                        unset($this->_headers[$i]);
-                    } else {
-                        $statusSent = true;
-                    }
-                }
+        foreach ($this->_headersRaw as $rawHeader) {
+            header($rawHeader);
+            if (($pos = strpos($rawHeader, ':')) !== false) {
+                $this->symfonyResponse->headers->remove(substr($rawHeader, 0, $pos));
             }
         }
 
-        $httpCodeSent = false;
-
-        foreach ($this->_headersRaw as $header) {
-            if (!$httpCodeSent && $this->_httpResponseCode) {
-                header($header, true, $this->_httpResponseCode);
-                $httpCodeSent = true;
-            } else {
-                header($header);
-            }
-        }
-
-        foreach ($this->_headers as $header) {
-            if (!$httpCodeSent && $this->_httpResponseCode) {
-                header($header['name'] . ': ' . $header['value'], $header['replace'], $this->_httpResponseCode);
-                $httpCodeSent = true;
-            } else {
-                header($header['name'] . ': ' . $header['value'], $header['replace']);
-            }
-        }
-
-        if (!$httpCodeSent) {
-            header('HTTP/1.1 ' . $this->_httpResponseCode);
-        }
+        $this->symfonyResponse->sendHeaders();
 
         return $this;
     }

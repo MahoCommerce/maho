@@ -111,7 +111,7 @@ class Mage_Catalog_CategoryController extends Mage_Core_Controller_Front_Action
 
             $this->getResponse()
                 ->setHeader('Pragma', 'public', true)
-                ->setHeader('Cache-Control', 'private max-age=60', true);
+                ->setHeader('Cache-Control', 'private, max-age=60', true);
         } elseif (!$this->getResponse()->isRedirect()) {
             $this->_forward('noRoute');
         }
