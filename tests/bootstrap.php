@@ -1,12 +1,12 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Tests
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Tests
  */
+
+declare(strict_types=1);
 
 /**
  * Test Bootstrap
@@ -14,7 +14,6 @@
  * Loads Composer autoloader and registers test case classes.
  */
 
-declare(strict_types=1);
 
 // Load Composer autoloader
 require_once dirname(__DIR__) . '/vendor/autoload.php';
