@@ -16,8 +16,7 @@ $helper = Mage::helper('revocation');
 <p><?= $helper->__('We have received your revocation declaration. Please note that this confirms receipt only; the validity of the revocation will be assessed and we will contact you separately.') ?></p>
 
 <?php if ($this->getRequestId() || $this->getReceivedAtStore()): ?>
-<div class="fieldset">
-    <h2 class="legend"><?= $helper->__('Receipt') ?></h2>
+<div class="fieldset" style="margin-top:1rem">
     <ul class="form-list">
         <?php if ($this->getRequestId()): ?>
         <li>
@@ -27,8 +26,7 @@ $helper = Mage::helper('revocation');
         <?php if ($this->getReceivedAtStore()): ?>
         <li>
             <strong><?= $helper->__('Received at') ?>:</strong>
-            <?= $this->escapeHtml($this->getReceivedAtStore()) ?><br>
-            <?= $this->escapeHtml($this->getReceivedAtUtc()) ?> (UTC)
+            <?= $this->escapeHtml($this->getReceivedAtStore()) ?>
         </li>
         <?php endif ?>
     </ul>
