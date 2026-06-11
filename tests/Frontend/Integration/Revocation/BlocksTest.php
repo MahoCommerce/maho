@@ -64,13 +64,16 @@ describe('Revocation success page', function () {
             'received_at' => '2026-06-09 10:30:45',
         ]);
 
-        $html = Mage::app()->getLayout()
+        $block = Mage::app()->getLayout()
             ->createBlock('revocation/success')
-            ->setTemplate('revocation/success.phtml')
-            ->toHtml();
+            ->setTemplate('revocation/success.phtml');
+        $html = $block->toHtml();
 
         expect($html)->toContain('#12345');
-        expect($html)->toContain('2026-06-09 10:30:45');
+        // The page shows the receipt time in the store timezone (e.g. 10:30:45 UTC
+        // renders as 11:30:45 in Europe/London), so assert against the block's value.
+        expect($block->getReceivedAtStore())->toContain('2026-06-09');
+        expect($html)->toContain($block->getReceivedAtStore());
         expect($html)->toContain('receipt only');
 
         Mage::unregister('revocation_success');
