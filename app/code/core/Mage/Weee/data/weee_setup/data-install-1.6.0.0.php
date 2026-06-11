@@ -3,11 +3,9 @@
 declare(strict_types=1);
 
 /**
- * Maho
- *
- * @package    Mage_Weee
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Weee
  */
 
 /** @var Mage_Weee_Model_Resource_Setup $this */
