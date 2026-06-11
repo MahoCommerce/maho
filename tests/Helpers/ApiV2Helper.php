@@ -137,6 +137,17 @@ class ApiV2Helper
             }
         }
 
+        // Delete revocation requests
+        if (!empty(self::$createdEntities['revocation_request'])) {
+            $ids = self::$createdEntities['revocation_request'];
+            $idList = implode(',', array_map('intval', $ids));
+            try {
+                $write->query("DELETE FROM revocation_request WHERE request_id IN ({$idList})");
+            } catch (\Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
+
         // Delete orders and related records
         if (!empty(self::$createdEntities['order'])) {
             $ids = self::$createdEntities['order'];

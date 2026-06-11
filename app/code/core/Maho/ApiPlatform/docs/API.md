@@ -30,6 +30,7 @@
   - [Blog](#blog)
   - [Media](#media)
   - [Reviews](#reviews)
+  - [Revocation (EU)](#revocation-eu)
   - [Newsletter](#newsletter)
   - [Contact](#contact)
   - [Directory](#directory)
@@ -783,6 +784,46 @@ Balance lookups and adjustments are exposed via GraphQL only (`checkGiftcardBala
 | GET | `/products/{productId}/reviews` | None | List reviews for product |
 | POST | `/products/{productId}/reviews` | Customer/API | Submit a review (requires authentication) |
 | GET | `/customers/me/reviews` | Customer/API | List own reviews |
+
+---
+
+### Revocation (EU)
+
+Contract revocation declarations under EU Directive 2023/2673 (the "revocation button"). The API exposes the **authenticated** channel: a logged-in customer revokes one of their own orders, and admins list and process the declarations. The public, unauthenticated web form remains at `/revocation` and is not part of the API.
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/customers/me/revocation-requests` | Customer/API | Submit a revocation against your own order |
+| GET | `/customers/me/revocation-requests` | Customer/API | List your own declarations |
+| GET | `/revocation-requests` | Admin/API | List all declarations |
+| GET | `/revocation-requests/{id}` | Customer/Admin/API | Get one declaration (own request for customers, any for admins) |
+| PUT | `/revocation-requests/{id}` | Admin/API | Set the processing status and internal note |
+
+**Submit body:**
+```bash
+curl -X POST /api/rest/v2/customers/me/revocation-requests \
+  -H 'Authorization: Bearer <customer_jwt>' \
+  -H 'Content-Type: application/json' \
+  -d '{"orderId": 1234, "reason": "I changed my mind"}'
+```
+- `orderId` (int) or `orderReference` (order increment ID) identifies the order; one is required.
+- Ownership is re-checked server-side: an order that isn't the authenticated customer's returns `404`.
+- Because the customer is authenticated and owns the order, the recorded declaration is **verified** (`verified: true`) — the same trust level as the my-account web link. The declaration row is the legal receipt and is always written, even if the receipt/notification emails are suppressed.
+- The submission is gated by the store's cooling-off window; an order past it returns `422`.
+- Disabled revocation (`revocation/general/enabled = 0`) returns `404`.
+
+**Response fields:** `id`, `orderId`, `orderReference`, `reason`, `customerName`, `email`, `verified`, `storeId`, `receivedAt`, `processedStatus`, `processedAt`, `suppressedAt`, `suppressedReason`. The internal-only fields `adminNote`, `ip`, and `userAgent` are returned **only** to admins.
+
+**Admin processing:**
+```bash
+curl -X PUT /api/rest/v2/revocation-requests/1234 \
+  -H 'Authorization: Bearer <admin_jwt>' \
+  -H 'Content-Type: application/json' \
+  -d '{"processedStatus": "accepted", "adminNote": "Refund issued"}'
+```
+- `processedStatus` must be one of `accepted`, `rejected`, `info_requested`; anything else returns `422`. Setting it stamps `processedAt`.
+
+**GraphQL:** `myRevocationRequests` (customer's own declarations), `submitRevocation(orderId / orderReference, reason)` mutation, plus the standard `revocationRequest` item / collection queries.
 
 ---
 

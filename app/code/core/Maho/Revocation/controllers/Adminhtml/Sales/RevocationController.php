@@ -88,10 +88,10 @@ class Maho_Revocation_Adminhtml_Sales_RevocationController extends Mage_Adminhtm
             $note = trim((string) $this->getRequest()->getParam('admin_note'));
             $model->setAdminNote($note !== '' ? $note : null);
 
+            $service = Mage::getModel('revocation/service');
             $processedStatus = (string) $this->getRequest()->getParam('processed_status');
-            if ($processedStatus !== '' && array_key_exists($processedStatus, Mage::getModel('revocation/source_processedStatus')->toOptionHash())) {
-                $model->setProcessedStatus($processedStatus);
-                $model->setProcessedAt(Mage::app()->getLocale()->formatDateForDb('now'));
+            if ($processedStatus !== '' && $service->isValidProcessedStatus($processedStatus)) {
+                $service->applyProcessedStatus($model, $processedStatus);
             }
 
             $model->save();
