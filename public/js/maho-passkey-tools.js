@@ -1,12 +1,7 @@
-/**
- * Maho
- *
- * @package     js
- * @copyright   Copyright (c) 2018 Thomas Bleeker (CBOR & ByteBuffer part)
- * @copyright   Copyright (c) 2022 Lukas Buchs
- * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/license/mit  MIT
- */
+// SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+// SPDX-FileCopyrightText: 2022 Lukas Buchs
+// SPDX-FileCopyrightText: 2018 Thomas Bleeker (CBOR & ByteBuffer part)
+// SPDX-License-Identifier: MIT
 
 /**
  * convert RFC 1342-like base64 strings to array buffer

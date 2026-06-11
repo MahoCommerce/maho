@@ -1,14 +1,10 @@
-/**
- * Maho
- *
- * Gift Card PDF Styles
- * Override this file in your theme to customize gift card appearance
- *
- * @category   design
- * @package    base_default
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- */
+/*
+Gift Card PDF Styles
+Override this file in your theme to customize gift card appearance
+
+SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: OSL-3.0
+*/
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: Helvetica, sans-serif; font-size: 10pt; color: #333; }
