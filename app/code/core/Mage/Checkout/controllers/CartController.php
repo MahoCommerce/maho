@@ -238,7 +238,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $this->getResponse()->setBodyJson([
                     'success' => true,
                     'message' => $message,
-                    'qty' => $this->_getCart()->getSummaryQty(),
+                    'qty' => $this->_getCart()->getSummaryQty() ?? 0,
                     'content' => $this->getLayout()->getBlock('minicart_content')->toHtml(),
                 ]);
                 return;
@@ -432,7 +432,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $this->getResponse()->setBodyJson([
                     'success' => true,
                     'message' => $message,
-                    'qty' => $this->_getCart()->getSummaryQty(),
+                    'qty' => $this->_getCart()->getSummaryQty() ?? 0,
                     'content' => $this->getLayout()->getBlock('minicart_content')->toHtml(),
                 ]);
                 return;
@@ -1056,6 +1056,22 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         }
 
         $this->getResponse()->setBodyJson($result);
+    }
+
+    /**
+     * Return current minicart content, used to refresh stale data (e.g. after a bfcache restore)
+     */
+    #[Maho\Config\Route('/checkout/cart/ajaxContent', name: 'checkout.cart.ajaxContent', methods: ['GET'])]
+    public function ajaxContentAction(): void
+    {
+        $this->loadLayout();
+        $this->getResponse()
+            ->setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate', true)
+            ->setBodyJson([
+                'success' => 1,
+                'qty' => $this->_getCart()->getSummaryQty() ?? 0,
+                'content' => $this->getLayout()->getBlock('minicart_content')->toHtml(),
+            ]);
     }
 
     /**

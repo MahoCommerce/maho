@@ -144,10 +144,9 @@ abstract class AbstractForm extends \Maho\DataObject
     }
 
     /**
-     * @param string $elementId
      * @return $this
      */
-    public function removeField($elementId)
+    public function removeField(?string $elementId): self
     {
         $this->getElements()->remove($elementId);
         return $this;

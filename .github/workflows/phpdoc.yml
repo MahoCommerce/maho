@@ -20,13 +20,13 @@ jobs:
 
     steps:
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: 8.3
           tools: phpdoc
 
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Strip SPDX lines from PHP source
         run: find app lib -name "*.php" -exec sed -i '/ \* SPDX-/d' {} +
@@ -35,7 +35,7 @@ jobs:
         run: phpdoc -c .github/phpdoc.xml
 
       - name: Publish to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v4
+        uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4.0.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

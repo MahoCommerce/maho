@@ -17,6 +17,9 @@
         <testsuite name="Api">
             <directory suffix="Test.php">./tests/Api</directory>
         </testsuite>
+        <testsuite name="Browser">
+            <directory suffix="Test.php">./tests/Browser</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

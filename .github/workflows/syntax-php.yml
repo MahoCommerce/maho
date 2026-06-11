@@ -24,13 +24,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
 
       - name: Get last successful commit
         id: last-successful-commit
-        uses: SamhammerAG/last-successful-build-action@v7
+        uses: SamhammerAG/last-successful-build-action@c32fe86b51dd1479ea281d29767d09288458d120 # v7
         with:
           branch: main
           workflow: ${{ github.workflow }}
@@ -38,7 +38,7 @@ jobs:
 
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v47
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         with:
           base_sha: ${{ steps.last-successful-commit.outputs.sha }}
           files: |
@@ -46,7 +46,7 @@ jobs:
 
       - name: Setup PHP
         if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: ${{ matrix.php-versions }}
           ini-values: error_reporting=E_ALL, short_open_tag=Off

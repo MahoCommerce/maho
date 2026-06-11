@@ -116,32 +116,23 @@ class Form extends AbstractForm
 
     /**
      * Check existing element
-     *
-     * @param   string $elementId
-     * @return  bool
      */
-    protected function _elementIdExists($elementId)
+    protected function _elementIdExists(?string $elementId): bool
     {
-        return isset($this->_elementsIndex[$elementId]);
+        return isset($this->_elementsIndex[(string) $elementId]);
     }
 
-    /**
-     * @param Form\Element\AbstractElement $element
-     * @return $this
-     */
-    public function addElementToCollection($element)
+    public function addElementToCollection(Form\Element\AbstractElement $element): self
     {
-        $this->_elementsIndex[$element->getId()] = $element;
+        $this->_elementsIndex[(string) $element->getId()] = $element;
         $this->_allElements->add($element);
         return $this;
     }
 
     /**
-     * @param string $elementId
-     * @return bool
      * @throws \Exception
      */
-    public function checkElementId($elementId)
+    public function checkElementId(?string $elementId): bool
     {
         if ($this->_elementIdExists($elementId)) {
             throw new \Exception('Element with id "' . $elementId . '" already exists');
@@ -157,16 +148,9 @@ class Form extends AbstractForm
         return $this;
     }
 
-    /**
-     * @param string $elementId
-     * @return Form\Element\AbstractElement|null
-     */
-    public function getElement($elementId)
+    public function getElement(?string $elementId): ?Form\Element\AbstractElement
     {
-        if ($this->_elementIdExists($elementId)) {
-            return $this->_elementsIndex[$elementId];
-        }
-        return null;
+        return $this->_elementsIndex[(string) $elementId] ?? null;
     }
 
     /**
@@ -241,15 +225,12 @@ class Form extends AbstractForm
     }
 
     /**
-     * @param string $elementId
-     * @return $this|AbstractForm
+     * @return $this
      */
     #[\Override]
-    public function removeField($elementId)
+    public function removeField(?string $elementId): self
     {
-        if ($this->_elementIdExists($elementId)) {
-            unset($this->_elementsIndex[$elementId]);
-        }
+        unset($this->_elementsIndex[(string) $elementId]);
         return $this;
     }
 

@@ -28,11 +28,12 @@ describe('Flag model handles null and empty flag_data', function () {
         expect($flag->getFlagData())->toBeNull();
     });
 
-    it('returns false when flag_data is empty string', function () {
-        // Empty string passes hasFlagData() but unserialize('') returns false
+    it('returns the empty string when flag_data is empty string', function () {
+        // Empty string passes hasFlagData() and is not serialized data, so the
+        // core/string helper passes it through unchanged (still falsy for callers).
         $flag = Mage::getModel('core/flag');
         $flag->setData('flag_data', '');
-        expect($flag->getFlagData())->toBeFalse();
+        expect($flag->getFlagData())->toBe('');
     });
 });
 

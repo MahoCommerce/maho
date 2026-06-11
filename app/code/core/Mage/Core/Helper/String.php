@@ -543,7 +543,14 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
             return Mage::helper('core')->jsonDecode($str);
         }
 
-        return unserialize($str, ['allowed_classes' => false]);
+        // Tolerate never-serialized input (e.g. plain custom-option values): pass it through
+        // unchanged instead of warning. serialize(false) is the one input that legitimately
+        // unserializes to false, so it must not be treated as a decode failure.
+        $result = @unserialize($str, ['allowed_classes' => false]);
+        if ($result === false && $str !== 'b:0;') {
+            return $str;
+        }
+        return $result;
     }
 
     /**

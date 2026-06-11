@@ -14365,18 +14365,6 @@ parameters:
 			path: app/code/core/Mage/Index/Model/Indexer/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Index_Model_Lock::shutdownReleaseLocks() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Index/Model/Lock.php
-
-		-
-			rawMessage: 'Parameter #3 ...$values of function sprintf expects bool|float|int|string|null, array<string, int|string>|null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Index/Model/Lock.php
-
-		-
 			rawMessage: 'Method Mage_Index_Model_Observer::processConfigDataSave() has no return type specified.'
 			identifier: missingType.return
 			count: 1

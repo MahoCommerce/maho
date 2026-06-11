@@ -219,3 +219,14 @@ expect()->extend('toBeNotFound', function () {
 expect()->extend('toBeSuccessful', function () {
     return $this->toBeGreaterThanOrEqual(200)->toBeLessThan(300);
 });
+
+/**
+ * Whether the real-browser (Pest browser plugin / Playwright) toolchain is available.
+ * The browser test suite runs as part of the normal pest run, but skips cleanly anywhere
+ * Playwright isn't installed (e.g. CI matrix jobs that don't provision it), so it never
+ * fails those environments. The plugin launches ./node_modules/.bin/playwright.
+ */
+function browserTestsReady(): bool
+{
+    return is_file(dirname(__DIR__) . '/node_modules/.bin/playwright');
+}

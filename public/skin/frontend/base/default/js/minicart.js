@@ -11,6 +11,7 @@
 class Minicart {
     constructor(options) {
         this.formKey = options.formKey;
+        this.contentUrl = options.contentUrl;
         this.previousVal = null;
         this.defaultErrorMessage = 'Error occurred. Try to refresh page.';
         this.selectors = {
@@ -57,6 +58,20 @@ class Minicart {
             el.removeEventListener('click', this.quantityButtonHandler);
             el.addEventListener('click', () => this.processUpdateQuantity(el));
         });
+
+        if (!this.pageshowBound) {
+            this.pageshowBound = true;
+            window.addEventListener('pageshow', (event) => {
+                if (!event.persisted) {
+                    return;
+                }
+                // On a bfcache restore the cart grid can be stale too, so reload the
+                // whole cart page; elsewhere just refresh the minicart sidebar.
+                if (!this.refreshIfOnCartPage()) {
+                    this.refresh();
+                }
+            });
+        }
 
         for (const [, event] of Object.entries(this.initAfterEvents)) {
             if (typeof event === "function") {
@@ -212,10 +227,29 @@ class Minicart {
     }
 
     updateCartQty(qty) {
-        if (typeof qty !== 'undefined') {
-            const el = document.querySelector(this.selectors.qty);
-            el.textContent = qty;
-            el.className = el.className.replace(/count-\d+/, 'count-' + qty);
+        if (typeof qty === 'undefined') {
+            return;
+        }
+        qty = Number(qty) || 0;
+        const el = document.querySelector(this.selectors.qty);
+        el.textContent = qty;
+        el.className = el.className.replace(/count-\S+/, 'count-' + qty);
+    }
+
+    async refresh() {
+        if (!this.contentUrl) {
+            return;
+        }
+        try {
+            const result = await mahoFetch(this.contentUrl, { loaderArea: false });
+            if (result.success) {
+                this.updateCartQty(result.qty);
+                this.updateContent(result);
+                this.init();
+                if (typeof truncateOptions === 'function') truncateOptions();
+            }
+        } catch {
+            // Stale minicart is non-critical; ignore refresh failures
         }
     }
 
@@ -268,7 +302,9 @@ class Minicart {
     refreshIfOnCartPage() {
         if (document.body.classList.contains("checkout-cart-index")) {
             window.location.reload(true);
+            return true;
         }
+        return false;
     }
 
     openOffcanvas() {

@@ -32,7 +32,6 @@ class Mage_Oauth_Model_Observer
             $url = Mage::helper('oauth')->getAuthorizeUrl();
             Mage::app()->getResponse()
                 ->setRedirect($url)
-                ->sendHeaders()
                 ->sendResponse();
             exit();
         }
@@ -52,7 +51,6 @@ class Mage_Oauth_Model_Observer
             $url = Mage::helper('oauth')->getAuthorizeUrl();
             Mage::app()->getResponse()
                 ->setRedirect($url)
-                ->sendHeaders()
                 ->sendResponse();
             exit();
         }
