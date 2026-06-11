@@ -21,7 +21,7 @@
 "Email Settings","Email Settings"
 "Email Suppressed","Email Suppressed"
 "Enabled","Enabled"
-"EU Directive 2023/2673 (in Germany: &sect;356a BGB) requires B2C shops selling into the EU to provide a revocation button from 19 June 2026.<br>This module provides the legally required channel; the existing withdrawal information page and PDF withdrawal form remain mandatory and unchanged.","EU Directive 2023/2673 (in Germany: &sect;356a BGB) requires B2C shops selling into the EU to provide a revocation button from 19 June 2026.<br>This module provides the legally required channel; the existing withdrawal information page and PDF withdrawal form remain mandatory and unchanged."
+"EU Directive 2023/2673 (in Germany: &sect;356a BGB) requires B2C shops selling into the EU to provide a revocation button from 19 June 2026. This module provides that channel.","EU Directive 2023/2673 (in Germany: &sect;356a BGB) requires B2C shops selling into the EU to provide a revocation button from 19 June 2026. This module provides that channel."
 "Further requests are still recorded, but the customer receipt email is suppressed (visible and resendable in the admin grid). Defeats email-bombing of third parties. 0 disables the limit.","Further requests are still recorded, but the customer receipt email is suppressed (visible and resendable in the admin grid). Defeats email-bombing of third parties. 0 disables the limit."
 "General","General"
 "ID","ID"

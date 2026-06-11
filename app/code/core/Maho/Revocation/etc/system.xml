@@ -21,7 +21,7 @@
             <groups>
                 <general translate="label comment" module="revocation">
                     <label>General</label>
-                    <comment><![CDATA[EU Directive 2023/2673 (in Germany: &sect;356a BGB) requires B2C shops selling into the EU to provide a revocation button from 19 June 2026.<br>This module provides the legally required channel; the existing withdrawal information page and PDF withdrawal form remain mandatory and unchanged.]]></comment>
+                    <comment><![CDATA[EU Directive 2023/2673 (in Germany: &sect;356a BGB) requires B2C shops selling into the EU to provide a revocation button from 19 June 2026. This module provides that channel.]]></comment>
                     <frontend_type>text</frontend_type>
                     <sort_order>10</sort_order>
                     <show_in_default>1</show_in_default>
