@@ -1,12 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_CatalogLinkRule
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_CatalogLinkRule
  */
 
 declare(strict_types=1);
@@ -16,7 +13,6 @@ declare(strict_types=1);
  *
  * Allows matching target products based on source product attributes
  *
- * @category   Maho
  * @package    Maho_CatalogLinkRule
  */
 class Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch extends Mage_Rule_Model_Condition_Abstract

@@ -59,10 +59,10 @@ jobs:
             VALID_START_YEARS="${VALID_START_YEARS}${year}"
           done
 
-          # Build pattern that matches:
+          # Build pattern that matches the SPDX Maho copyright line:
           # - Year ranges: (2024|2025|...)-(CURRENT_YEAR|NEXT_YEAR)
           # - Single year: CURRENT_YEAR|NEXT_YEAR
-          PATTERN="Copyright \(c\) ((${VALID_START_YEARS})-(${CURRENT_YEAR}|${NEXT_YEAR})|(${CURRENT_YEAR}|${NEXT_YEAR})) Maho \(https://mahocommerce\.com\)"
+          PATTERN="SPDX-FileCopyrightText: ((${VALID_START_YEARS})-(${CURRENT_YEAR}|${NEXT_YEAR})|(${CURRENT_YEAR}|${NEXT_YEAR})) Maho <https://mahocommerce\.com>"
 
           # Loop through each modified file
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
@@ -85,7 +85,7 @@ jobs:
             # Check if file contains valid copyright pattern
             if ! grep -E -q "$PATTERN" "$file"; then
               echo "❌ Invalid or missing copyright notice in: $file"
-              echo "   Expected: Copyright (c) [2024-${CURRENT_YEAR}]-(${CURRENT_YEAR}|${NEXT_YEAR}) or (${CURRENT_YEAR}|${NEXT_YEAR}) Maho (https://mahocommerce.com)"
+              echo "   Expected: SPDX-FileCopyrightText: [2024-${CURRENT_YEAR}]-(${CURRENT_YEAR}|${NEXT_YEAR}) or (${CURRENT_YEAR}|${NEXT_YEAR}) Maho <https://mahocommerce.com>"
               ERROR=1
             fi
           done

@@ -1,12 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @category   Mage
- * @package    Mage_Page
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Page
  */
 
 class Mage_Page_Model_Source_Robots extends Mage_Eav_Model_Entity_Attribute_Source_Abstract
