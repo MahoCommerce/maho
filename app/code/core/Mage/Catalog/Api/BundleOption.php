@@ -83,7 +83,7 @@ class BundleOption extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Sort order')]
     public int $position = 0;
 
-    /** @var array<array{productId: int, sku: string, name: string, price: float, priceType: string, qty: float, canChangeQty: bool, isDefault: bool, position: int}> */
+    /** @var array<array{selectionId?: int, productId: int, sku: string, name: string, price: float, priceType: string, qty: float, canChangeQty: bool, isDefault: bool, position: int}> */
     #[ApiProperty(description: 'Bundle selections')]
     public array $selections = [];
 }

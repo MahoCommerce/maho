@@ -240,6 +240,8 @@ class CartMapper
 
     /**
      * Map Maho quote to prices array
+     *
+     * @return array{subtotal: float, subtotalInclTax: float, subtotalWithDiscount: float, discountAmount: ?float, shippingAmount: ?float, shippingAmountInclTax: ?float, taxAmount: float, grandTotal: float, giftcardAmount: ?float}
      */
     public function mapPricesToArray(\Mage_Sales_Model_Quote $quote): array
     {

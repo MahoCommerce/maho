@@ -35,10 +35,6 @@ class Maho_ApiPlatform_Model_Observer
     public function addDeprecationHeaders(\Maho\Event\Observer $_observer): void
     {
         $app = Mage::app();
-        if (!$app) {
-            return;
-        }
-
         $request = $app->getRequest();
         $response = $app->getResponse();
 

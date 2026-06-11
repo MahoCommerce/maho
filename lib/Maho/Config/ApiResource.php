@@ -222,17 +222,23 @@ class ApiResource extends BaseApiResource
         ?bool $map = null,
         ?array $mcp = null,
     ) {
-        // Forward every locally-defined non-maho parameter to the parent
-        // constructor. Using compact() keeps the call site automatically in
-        // sync with the parameter list above — adding/removing a parent arg
-        // only requires editing the signature, not the forward call.
-        $localVars = get_defined_vars();
-        $parentArgs = [];
-        foreach ($localVars as $name => $value) {
-            if (!str_starts_with($name, 'maho')) {
-                $parentArgs[$name] = $value;
-            }
-        }
+        // Forward every locally-defined parameter except the maho-specific ones
+        // to the parent constructor. get_defined_vars() keeps the parent forward
+        // automatically in sync with the parameter list above — adding/removing a
+        // parent arg only requires editing the signature, not the forward call.
+        // The maho fields are unset explicitly so the spread maps cleanly to the
+        // parent's named parameters.
+        $parentArgs = get_defined_vars();
+        unset(
+            $parentArgs['mahoId'],
+            $parentArgs['mahoLabel'],
+            $parentArgs['mahoSection'],
+            $parentArgs['mahoOperations'],
+            $parentArgs['mahoPublicRead'],
+            $parentArgs['mahoCustomerScoped'],
+            $parentArgs['mahoRestSegments'],
+            $parentArgs['mahoGraphQlFields'],
+        );
         parent::__construct(...$parentArgs);
     }
 }

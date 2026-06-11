@@ -150,7 +150,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         if ($shippingMethod && !$quote->isVirtual()) {
             $shippingAddress = $quote->getShippingAddress();
             $shippingAddress->setShippingMethod($shippingMethod);
-            $shippingAddress->setCollectShippingRates(true);
+            $shippingAddress->setCollectShippingRates(1);
         }
         $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals();
