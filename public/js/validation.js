@@ -1,8 +1,6 @@
-/*
- * @copyright  Copyright (c) 2007 Andrew Tetlaw
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/license/mit.php
- */
+// SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+// SPDX-FileCopyrightText: 2007 Andrew Tetlaw
+// SPDX-License-Identifier: MIT
 
 class Validator {
     constructor(className, error, test, options = {}) {
