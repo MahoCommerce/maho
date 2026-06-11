@@ -20,9 +20,5 @@ class Mage_Cms_PageController extends Mage_Core_Controller_Front_Action
         if (!Mage::helper('cms/page')->renderPage($this, $pageId)) {
             return $this->_forward('noRoute');
         }
-
-        $this->getResponse()
-            ->setHeader('Pragma', 'public', true)
-            ->setHeader('Cache-Control', 'private max-age=60', true);
     }
 }

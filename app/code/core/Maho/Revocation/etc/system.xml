@@ -1,0 +1,160 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @package    Maho_Revocation
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<config>
+    <sections>
+        <revocation translate="label" module="revocation">
+            <label>Revocation Button</label>
+            <tab>sales</tab>
+            <frontend_type>text</frontend_type>
+            <sort_order>360</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <groups>
+                <general translate="label comment" module="revocation">
+                    <label>General</label>
+                    <comment><![CDATA[EU Directive 2023/2673 (in Germany: &sect;356a BGB) requires B2C shops selling into the EU to provide a revocation button from 19 June 2026. This module provides that channel.]]></comment>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>10</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label comment">
+                            <label>Enabled</label>
+                            <comment><![CDATA[<strong>Enabling this alone does not display the button.</strong> The law requires the revocation button to stay permanently visible during the withdrawal period, but only your theme knows where that is. After enabling, you must place the <strong>Revocation Button</strong> widget in a block shown on every storefront page (typically the footer). Until you do, the form exists at <em>/revocation</em> but nothing links to it.]]></comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+                        <button_label translate="label comment">
+                            <label>Button Label</label>
+                            <comment>Leave empty to use the translated default ("Revoke contract" / "Vertrag widerrufen").</comment>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </button_label>
+                        <notify_email translate="label comment">
+                            <label>Merchant Notification Email</label>
+                            <comment>Leave empty to use the General Contact email address.</comment>
+                            <validate>validate-email</validate>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </notify_email>
+                        <cooling_off_days translate="label comment">
+                            <label>Cooling-Off Period (Days)</label>
+                            <comment>Used to gate the my-account entry point. The statutory period is 14 days.</comment>
+                            <validate>validate-digits</validate>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </cooling_off_days>
+                    </fields>
+                </general>
+                <email translate="label" module="revocation">
+                    <label>Email Settings</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>20</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <identity translate="label">
+                            <label>Email Sender</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_identity</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </identity>
+                        <received_template translate="label comment">
+                            <label>Customer Receipt Template</label>
+                            <comment>Must only acknowledge receipt of the declaration, never acceptance.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_template</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </received_template>
+                        <merchant_template translate="label">
+                            <label>Merchant Notification Template</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_template</source_model>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </merchant_template>
+                    </fields>
+                </email>
+                <abuse translate="label comment" module="revocation">
+                    <label>Abuse Protection</label>
+                    <comment><![CDATA[Only invisible background measures are used (honeypot, submit timing, invisible captcha, rate limits).<br>Manual CAPTCHAs and email verification links are legally inadmissible for the revocation form. Do not tune these limits so strictly that legitimate customers are blocked.]]></comment>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>30</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <min_submit_seconds translate="label comment">
+                            <label>Minimum Submit Time (Seconds)</label>
+                            <comment>Submissions faster than this after page render are silently dropped as bot traffic. 0 disables the check.</comment>
+                            <validate>validate-digits</validate>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </min_submit_seconds>
+                        <ip_rate_limit_per_hour translate="label comment">
+                            <label>Submissions per IP per Hour</label>
+                            <comment>0 disables the limit.</comment>
+                            <validate>validate-digits</validate>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </ip_rate_limit_per_hour>
+                        <recipient_rate_limit_per_day translate="label comment">
+                            <label>Receipt Emails per Recipient per Day</label>
+                            <comment>Further requests are still recorded, but the customer receipt email is suppressed (visible and resendable in the admin grid). Defeats email-bombing of third parties. 0 disables the limit.</comment>
+                            <validate>validate-digits</validate>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </recipient_rate_limit_per_day>
+                        <merchant_notification_rate_limit_per_hour translate="label comment">
+                            <label>Merchant Notifications per Store per Hour</label>
+                            <comment>0 disables the limit.</comment>
+                            <validate>validate-digits</validate>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </merchant_notification_rate_limit_per_hour>
+                    </fields>
+                </abuse>
+            </groups>
+        </revocation>
+    </sections>
+</config>

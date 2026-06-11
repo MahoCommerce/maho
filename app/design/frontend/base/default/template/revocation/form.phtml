@@ -1,0 +1,63 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Maho_Revocation
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Maho_Revocation_Block_Form $this */
+$helper = Mage::helper('revocation');
+$formData = $this->getFormData();
+?>
+<div class="page-title">
+    <h1><?= $helper->__('Revoke contract') ?></h1>
+</div>
+<p><?= $helper->__('You can revoke your contract within the statutory withdrawal period using this form.<br>After submitting, you will receive a confirmation that your declaration has been received.') ?></p>
+
+<form action="<?= $this->getFormActionUrl() ?>" id="revocation-form" method="post" class="scaffold-form" autocomplete="on">
+    <?= $this->getBlockHtml('formkey') ?>
+    <input type="hidden" name="frt" value="<?= $this->escapeHtml($this->getRenderToken()) ?>">
+    <?php if ($formData->getSessionOrderId()): ?>
+        <input type="hidden" name="session_order_id" value="<?= (int) $formData->getSessionOrderId() ?>">
+    <?php endif ?>
+    <div class="revocation-hp" aria-hidden="true" style="position:absolute;left:-9999px;height:0;overflow:hidden;">
+        <label for="comment_body"><?= $helper->__('Leave this field empty') ?></label>
+        <input name="comment_body" id="comment_body" value="" type="text" tabindex="-1" autocomplete="off">
+    </div>
+    <div class="fieldset" style="margin-top:1.5rem;">
+        <ul class="form-list">
+            <li class="fields">
+                <div class="field">
+                    <label for="customer_name" class="required"><?= $helper->__('Name') ?></label>
+                    <div class="input-box">
+                        <input name="customer_name" id="customer_name" title="<?= $this->quoteEscape($helper->__('Name')) ?>" value="<?= $this->escapeHtml($formData->getCustomerName()) ?>" class="input-text required-entry" type="text" autocomplete="name" autofocus>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="email" class="required"><?= $helper->__('Email') ?></label>
+                    <div class="input-box">
+                        <input name="email" id="email" title="<?= $this->quoteEscape($helper->__('Email')) ?>" value="<?= $this->escapeHtml($formData->getEmail()) ?>" class="input-text required-entry validate-email" type="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false">
+                    </div>
+                </div>
+            </li>
+            <li>
+                <label for="order_reference" class="required"><?= $helper->__('Order Number') ?></label>
+                <div class="input-box">
+                    <input name="order_reference" id="order_reference" title="<?= $this->quoteEscape($helper->__('Order Number')) ?>" value="<?= $this->escapeHtml($formData->getOrderReference()) ?>" class="input-text required-entry" type="text" <?= $this->isPrefilled() ? 'readonly' : '' ?>>
+                </div>
+            </li>
+            <li class="wide">
+                <label for="reason"><?= $helper->__('Reason (optional)') ?></label>
+                <div class="input-box">
+                    <textarea name="reason" id="reason" title="<?= $this->quoteEscape($helper->__('Reason (optional)')) ?>" class="input-text" cols="5" rows="3" maxlength="2000"><?= $this->escapeHtml($formData->getReason()) ?></textarea>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="buttons-set">
+        <button type="submit" title="<?= $this->quoteEscape($helper->__('I hereby revoke this contract')) ?>" class="button"><?= $helper->__('I hereby revoke this contract') ?></button>
+    </div>
+</form>
+<script>new VarienForm('revocation-form')</script>

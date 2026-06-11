@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @package    Maho_Revocation
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<config>
+    <modules>
+        <Maho_Revocation>
+            <version>1.0.0</version>
+        </Maho_Revocation>
+    </modules>
+    <global>
+        <models>
+            <revocation>
+                <class>Maho_Revocation_Model</class>
+                <resourceModel>revocation_resource</resourceModel>
+            </revocation>
+            <revocation_resource>
+                <class>Maho_Revocation_Model_Resource</class>
+                <entities>
+                    <request>
+                        <table>revocation_request</table>
+                    </request>
+                </entities>
+            </revocation_resource>
+        </models>
+        <blocks>
+            <revocation>
+                <class>Maho_Revocation_Block</class>
+            </revocation>
+        </blocks>
+        <helpers>
+            <revocation>
+                <class>Maho_Revocation_Helper</class>
+            </revocation>
+        </helpers>
+        <resources>
+            <revocation_setup>
+                <setup>
+                    <module>Maho_Revocation</module>
+                    <class>Mage_Core_Model_Resource_Setup</class>
+                </setup>
+            </revocation_setup>
+        </resources>
+        <template>
+            <email>
+                <revocation_email_received translate="label" module="revocation">
+                    <label>Revocation Receipt Confirmation</label>
+                    <file>revocation_received.html</file>
+                    <type>html</type>
+                </revocation_email_received>
+                <revocation_email_merchant translate="label" module="revocation">
+                    <label>Revocation Merchant Notification</label>
+                    <file>revocation_merchant_notification.html</file>
+                    <type>html</type>
+                </revocation_email_merchant>
+            </email>
+        </template>
+    </global>
+    <frontend>
+        <layout>
+            <updates>
+                <revocation>
+                    <file>revocation.xml</file>
+                </revocation>
+            </updates>
+        </layout>
+        <translate>
+            <modules>
+                <Maho_Revocation>
+                    <files>
+                        <default>Maho_Revocation.csv</default>
+                    </files>
+                </Maho_Revocation>
+            </modules>
+        </translate>
+    </frontend>
+    <adminhtml>
+        <layout>
+            <updates>
+                <revocation>
+                    <file>revocation.xml</file>
+                </revocation>
+            </updates>
+        </layout>
+        <translate>
+            <modules>
+                <Maho_Revocation>
+                    <files>
+                        <default>Maho_Revocation.csv</default>
+                    </files>
+                </Maho_Revocation>
+            </modules>
+        </translate>
+    </adminhtml>
+    <default>
+        <revocation>
+            <general>
+                <enabled>0</enabled>
+                <cooling_off_days>14</cooling_off_days>
+            </general>
+            <email>
+                <received_template>revocation_email_received</received_template>
+                <merchant_template>revocation_email_merchant</merchant_template>
+                <identity>general</identity>
+            </email>
+            <abuse>
+                <min_submit_seconds>3</min_submit_seconds>
+                <ip_rate_limit_per_hour>5</ip_rate_limit_per_hour>
+                <recipient_rate_limit_per_day>1</recipient_rate_limit_per_day>
+                <merchant_notification_rate_limit_per_hour>100</merchant_notification_rate_limit_per_hour>
+            </abuse>
+        </revocation>
+    </default>
+</config>
