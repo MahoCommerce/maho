@@ -29,4 +29,8 @@ SPDX-License-Identifier: AFL-3.0
             <block type="payment/adminhtml_payment_restriction_edit" name="payment_restriction_edit"></block>
         </reference>
     </adminhtml_payment_restriction_edit>
+
+    <adminhtml_payment_restriction_grid>
+        <block type="payment/adminhtml_payment_restriction_grid" name="root" output="toHtml" />
+    </adminhtml_payment_restriction_grid>
 </layout>

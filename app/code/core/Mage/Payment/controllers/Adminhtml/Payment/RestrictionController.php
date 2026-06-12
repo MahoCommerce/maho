@@ -37,6 +37,13 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
             ->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/payment_restriction/grid')]
+    public function gridAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
     #[Maho\Config\Route('/admin/payment_restriction/new')]
     public function newAction(): void
     {

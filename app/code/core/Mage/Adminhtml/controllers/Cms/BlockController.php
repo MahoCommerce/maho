@@ -56,6 +56,13 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/cms_block/grid')]
+    public function gridAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
     /**
      * Create new CMS block
      */

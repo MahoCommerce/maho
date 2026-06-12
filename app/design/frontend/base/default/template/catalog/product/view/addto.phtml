@@ -25,7 +25,7 @@
         <?php if ($_compareUrl) : ?>
             <?php $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])) ?>
             <a href="#" class="link-compare" title="<?= $this->__('Add to Compare') ?>"
-               onclick="customFormSubmit('<?= $_compareUrl ?>', '<?= $_params ?>', 'post')">
+               onclick="customFormSubmit('<?= $_compareUrl ?>', '<?= $_params ?>', 'post'); return false;">
                 <?= $this->getIconSvg('scale') ?>
             </a>
         <?php endif ?>
