@@ -95,6 +95,8 @@ SPDX-License-Identifier: AFL-3.0
 
 #nav ul a.active {
     font-weight: 600;
+    background: var(--maho-chartreuse);
+    color: #15170e;
 }
 
 #nav ul li.parent > a::after {
