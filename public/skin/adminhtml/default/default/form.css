@@ -168,7 +168,7 @@ select[size] {
 .form-list td.label label {
   padding: 0 15px 0 0; }
 .form-list td.scope-label {
-  color: var(--maho-ink-faint);
+  color: var(--maho-ink-muted);
   font-size: 11px; }
 .form-list td.value {
   padding-left: 0 !important; }

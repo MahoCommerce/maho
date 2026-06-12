@@ -11,14 +11,14 @@ SPDX-License-Identifier: AFL-3.0
     /* Pure neutral graphite; chartreuse is the only color in the chrome */
     --maho-ink: light-dark(#1c1c1c, #ececec);
     --maho-ink-soft: light-dark(#404040, #c6c6c6);
-    --maho-ink-muted: light-dark(#6e6e6e, #959595);
+    --maho-ink-muted: light-dark(#666, #959595);
     --maho-ink-faint: light-dark(#9e9e9e, #6d6d6d);
 
     --maho-chartreuse: #d7df22;
-    --maho-chartreuse-deep: light-dark(#6b7508, #c5cd31);
+    --maho-chartreuse-deep: light-dark(#647004, #c5cd31);
     --maho-night: light-dark(#121212, #0c0c0c);
     --maho-night-soft: light-dark(#2e2e2e, #d4d4d4);
-    --maho-link: light-dark(#6b7508, #c5cd31);
+    --maho-link: light-dark(#647004, #c5cd31);
 
     --maho-surface-page: light-dark(#f2f2f2, #161616);
     --maho-surface: light-dark(#fff, #1d1d1d);
@@ -35,7 +35,7 @@ SPDX-License-Identifier: AFL-3.0
     --maho-control-border: light-dark(rgba(0, 0, 0, .26), rgba(255, 255, 255, .22));
     --maho-control-ink: light-dark(#1c1c1c, #ececec);
     --maho-control-placeholder: light-dark(#9e9e9e, #6d6d6d);
-    --maho-accent: light-dark(#6b7508, #c5cd31);
+    --maho-accent: light-dark(#647004, #c5cd31);
     --maho-accent-strong: light-dark(#4c5405, #d7df22);
     --maho-focus-ring: light-dark(#8a920f, #d7df22);
 

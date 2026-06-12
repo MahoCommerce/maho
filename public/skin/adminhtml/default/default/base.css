@@ -712,7 +712,7 @@ dl.accordion dt a:after,div.collapseable a:after {
     top: 50%;
     margin-top: -3px;
     border: 5px solid transparent;
-    border-top-color: var(--maho-ink-faint);
+    border-top-color: var(--maho-ink-muted);
     border-bottom: 0
 }
 
@@ -735,7 +735,7 @@ dl.accordion dt a:hover,div.collapseable a:hover {
 
 dl.accordion dt.open a:after,div.collapseable a.open:after {
     border-top: 0;
-    border-bottom: 5px solid var(--maho-ink-faint)
+    border-bottom: 5px solid var(--maho-ink-muted)
 }
 
 dl.accordion dd {
@@ -1055,7 +1055,7 @@ table.form-edit {
 
 .entry-edit fieldset span.form_row,.entry-edit .fieldset span.form_row {
     float: left;
-    color: var(--maho-ink-faint);
+    color: var(--maho-ink-muted);
     padding-left: 12em
 }
 
