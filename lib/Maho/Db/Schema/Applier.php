@@ -15,6 +15,7 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Platforms\SQLitePlatform;
 use Doctrine\DBAL\Schema\Comparator;
+use Doctrine\DBAL\Schema\DefaultExpression;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\BooleanType;
@@ -122,7 +123,7 @@ final class Applier
         if ($platform instanceof PostgreSQLPlatform) {
             $alters = self::rewritePostgresUniqueConstraintDrops($connection, $platform, $alters);
             $alters = self::quotePostgresRenameIndexNames($platform, $alters);
-            $alters = self::fixPostgresColumnTypeChanges($existingTables, $tablesToAlter, $alters);
+            $alters = self::fixPostgresColumnTypeChanges($platform, $existingTables, $tablesToAlter, $alters);
         }
 
         // Compensate for a DBAL/MySQL gap: when a primary key that includes an
@@ -208,6 +209,17 @@ final class Applier
             }
         }
 
+        // Unreachable via plan() (the Canonicalizer merges undeclared live
+        // columns into the target), but a rebuild that can carry nothing over
+        // must refuse rather than silently discard the table's rows.
+        if ($shared === []) {
+            throw new UnsupportedMigrationException(sprintf(
+                'Cannot rebuild "%s": the live table shares no columns with the declarative target, '
+                . 'so its rows cannot be preserved.',
+                $tableName,
+            ));
+        }
+
         // A new NOT NULL column with no default can't be backfilled for existing
         // rows; refuse with guidance rather than emit an INSERT that fails.
         foreach ($target->getColumns() as $column) {
@@ -227,17 +239,13 @@ final class Applier
         $columnList = implode(', ', $shared);
 
         $sql = [];
-        if ($shared !== []) {
-            $sql[] = sprintf('CREATE TEMPORARY TABLE %s AS SELECT %s FROM %s', $temp, $columnList, $quoted);
-        }
+        $sql[] = sprintf('CREATE TEMPORARY TABLE %s AS SELECT %s FROM %s', $temp, $columnList, $quoted);
         $sql[] = 'DROP TABLE ' . $quoted;
         foreach ($platform->getCreateTableSQL($target) as $stmt) {
             $sql[] = $stmt;
         }
-        if ($shared !== []) {
-            $sql[] = sprintf('INSERT INTO %s (%s) SELECT %s FROM %s', $quoted, $columnList, $columnList, $temp);
-            $sql[] = 'DROP TABLE ' . $temp;
-        }
+        $sql[] = sprintf('INSERT INTO %s (%s) SELECT %s FROM %s', $quoted, $columnList, $columnList, $temp);
+        $sql[] = 'DROP TABLE ' . $temp;
 
         return $sql;
     }
@@ -412,7 +420,7 @@ final class Applier
      * @param list<string> $statements
      * @return list<string>
      */
-    private static function fixPostgresColumnTypeChanges(array $liveTables, array $targetTables, array $statements): array
+    private static function fixPostgresColumnTypeChanges(PostgreSQLPlatform $platform, array $liveTables, array $targetTables, array $statements): array
     {
         $liveColumnTypes = [];
         $liveDefaults = [];
@@ -462,7 +470,13 @@ final class Applier
 
             $default = $targetDefaults[$tableKey][$columnKey] ?? null;
             if ($default !== null) {
-                $literal = is_numeric($default) ? (string) $default : "'" . str_replace("'", "''", (string) $default) . "'";
+                if ($default instanceof DefaultExpression) {
+                    $literal = $default->toSQL($platform);
+                } elseif (is_numeric($default)) {
+                    $literal = (string) $default;
+                } else {
+                    $literal = "'" . str_replace("'", "''", (string) $default) . "'";
+                }
                 $result[] = "ALTER TABLE {$table} ALTER {$column} SET DEFAULT {$literal}";
             }
         }

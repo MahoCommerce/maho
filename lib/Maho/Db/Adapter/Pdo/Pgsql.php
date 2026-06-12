@@ -1470,10 +1470,14 @@ class Pgsql extends AbstractPdoAdapter
         }
 
         // Explicit values bypass the sequence; bump it so the next
-        // auto-increment insert does not collide (see insert()).
-        $this->bumpIdentitySequencesForBind($tableName, $bind);
+        // auto-increment insert does not collide (see insert()). A conflict
+        // inserted nothing, so there is no written value to cover.
+        $rowCount = $stmt->rowCount();
+        if ($rowCount > 0) {
+            $this->bumpIdentitySequencesForBind($tableName, $bind);
+        }
 
-        return $stmt->rowCount();
+        return $rowCount;
     }
 
     /**

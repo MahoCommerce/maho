@@ -159,12 +159,14 @@ jobs:
 
       # Assert positively that the second run applied nothing, rather than
       # matching the "already up to date" wording one specific code path emits.
+      # Covers both the declarative layer ("N statement(s) executed") and the
+      # legacy/data/maho setup phases ("N script(s)").
       - name: Assert migration is idempotent
         run: |
           out=$(./maho migrate)
           echo "$out"
-          if echo "$out" | grep -q "statement(s) executed"; then
-            echo "::error::Migration is not idempotent — a second run still applied statements."
+          if echo "$out" | grep -qE '[1-9][0-9]* (statement\(s\) executed|script\(s\))'; then
+            echo "::error::Migration is not idempotent: a second run still applied statements or scripts."
             exit 1
           fi
 
@@ -335,14 +337,16 @@ jobs:
 
       # Assert positively that the second run applied nothing, rather than
       # matching the "already up to date" wording one specific code path emits.
+      # Covers both the declarative layer ("N statement(s) executed") and the
+      # legacy/data/maho setup phases ("N script(s)").
       - name: Assert migration is idempotent
         env:
           DB_NAME: /tmp/migrate.sqlite
         run: |
           out=$(./maho migrate)
           echo "$out"
-          if echo "$out" | grep -q "statement(s) executed"; then
-            echo "::error::Migration is not idempotent — a second run still applied statements."
+          if echo "$out" | grep -qE '[1-9][0-9]* (statement\(s\) executed|script\(s\))'; then
+            echo "::error::Migration is not idempotent: a second run still applied statements or scripts."
             exit 1
           fi
 

@@ -114,15 +114,17 @@ final class Collector
         foreach ($schema->getTables() as $old) {
             $newFks = [];
             foreach ($old->getForeignKeys() as $fk) {
+                // getValue() rather than toString(): the latter wraps quoted
+                // identifiers in quotes, which would corrupt the concatenation.
                 $newFks[] = $fk->edit()
                     ->setReferencedTableName(
-                        OptionallyQualifiedName::unquoted($prefix . $fk->getReferencedTableName()->toString()),
+                        OptionallyQualifiedName::unquoted($prefix . $fk->getReferencedTableName()->getUnqualifiedName()->getValue()),
                     )
                     ->create();
             }
 
             $newTables[] = $old->edit()
-                ->setName(OptionallyQualifiedName::unquoted($prefix . $old->getObjectName()->toString()))
+                ->setName(OptionallyQualifiedName::unquoted($prefix . $old->getObjectName()->getUnqualifiedName()->getValue()))
                 ->setForeignKeyConstraints(...$newFks)
                 ->create();
         }

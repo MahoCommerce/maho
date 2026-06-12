@@ -31,7 +31,7 @@ foreach ($columns as $table => $tableColumns) {
         continue;
     }
     foreach ($tableColumns as $column) {
-        $connection->update($table, [$column => null], "`{$column}` LIKE '0000-00-00%'");
+        $connection->update($table, [$column => null], $connection->quoteIdentifier($column) . " LIKE '0000-00-00%'");
     }
 }
 
