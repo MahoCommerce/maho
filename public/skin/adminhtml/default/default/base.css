@@ -460,9 +460,6 @@ table.actions td {
 }
 
 .grid tr.headings th a.sort-arrow-desc,.grid tr.headings th a.sort-arrow-asc {
-    background: url(images/sort_on_bg.gif)0 0 no-repeat;
-    border-bottom: 1px solid var(--maho-surface);
-    border-right: 1px solid var(--maho-surface);
     padding-bottom: 2px
 }
 
@@ -473,17 +470,7 @@ table.actions td {
 }
 
 .grid tr.headings th a.sort-arrow-desc span.sort-title,.grid tr.headings th a.sort-arrow-asc span.sort-title {
-    background-position: right 50%;
-    background-repeat: no-repeat;
     padding: 3px 12px 2px 8px
-}
-
-.grid tr.headings th a.sort-arrow-desc span.sort-title {
-    background-image: url(images/grid_sort_desc.gif)
-}
-
-.grid tr.headings th a.sort-arrow-asc span.sort-title {
-    background-image: url(images/grid_sort_asc.gif)
 }
 
 .massaction {
@@ -776,13 +763,8 @@ ul.tabs a,ul.tabs a:hover {
     color: var(--maho-ink)
 }
 
-ul.tabs,ul.tabs a {
-    background: url(images/tabs_link_bg.gif)repeat-y 100%var(--maho-surface-sunken)
-}
-
 ul.tabs a:hover {
-    background-color: var(--maho-surface-sunken);
-    background-image: url(images/tabs_link_over_bg.gif)
+    background-color: var(--maho-surface-sunken)
 }
 
 ul.tabs a.active {
@@ -796,8 +778,6 @@ ul.tabs a:hover.active {
 }
 
 ul.tabs span {
-    background: url(images/tabs_span_bg.gif)repeat-x 0 100%;
-    padding: .3em .5em .28em 1.5em;
     cursor: pointer
 }
 
@@ -850,7 +830,6 @@ ul.tabs a.changed {
 
 ul.tabs-horiz {
     margin: 0 0 18px 0;
-    background: url(images/horiz_tabs_ul_bg.gif)repeat-x 0 100%var(--maho-surface-raised);
     padding: 8px 0 0 5px
 }
 
@@ -875,7 +854,7 @@ ul.tabs-horiz li a.active {
 
 .notification-global {
     padding: 5px 27px 5px 47px;
-    background: var(--maho-warning-bg) url(images/error_msg_icon.gif)27px 5px no-repeat;
+    background: var(--maho-warning-bg);
     border-bottom: 1px solid var(--maho-warning-border);
     border-top: 1px solid var(--maho-warning-border);
     font-size: 11px;
@@ -982,27 +961,6 @@ ul.tabs-horiz li a.active {
 input.validation-failed,textarea.validation-failed {
     background: var(--maho-error-bg);
     border: 1px dashed var(--maho-error-strong)
-}
-
-.noscript {
-    border: 1px solid var(--maho-ink);
-    border-width: 0 0 1px;
-    background: var(--maho-warning-bg);
-    font-size: 12px;
-    line-height: 1.25;
-    text-align: center;
-    color: var(--maho-ink)
-}
-
-.noscript .noscript-inner {
-    width: 900px;
-    margin: 0 auto;
-    padding: 12px 0 12px;
-    background: url(images/i_notice.gif)20px 50%no-repeat
-}
-
-.noscript p {
-    margin: 0
 }
 
 .demo-notice {
@@ -1224,7 +1182,6 @@ select.multiselect option {
 }
 
 .form-list td.note {
-    background: url(images/note_cell_bg.gif)6px 10px no-repeat!important;
     padding-left: 18px
 }
 
@@ -1370,7 +1327,6 @@ button.grid-nav-btn {
 .sub-btn-set {
     border: 1px solid var(--maho-border-soft);
     border-width: 0 1px;
-    background: url(images/sub_button_bg.gif);
     padding: 3px 10px;
     text-align: right
 }
@@ -1378,11 +1334,6 @@ button.grid-nav-btn {
 button::-moz-focus-inner {
     padding: 0;
     border: 0
-}
-
-button.loading>span {
-    padding-left: 20px;
-    background-image: url(images/btn_loading-icon.gif)!important
 }
 
 button.icon-btn {
@@ -1437,32 +1388,9 @@ button.icon-btn span {
     display: block
 }
 
-.side-col .switcher .link-store-scope {
-    float: right;
-    margin-right: -19px;
-    margin-left: 3px
-}
-
 .side-col .switcher select {
     width: 100%;
     float: left
-}
-
-.link-store-scope {
-    display: inline-block;
-    vertical-align: middle;
-    margin: 0 0 1px;
-    width: 16px;
-    height: 16px;
-    background: url(images/i_question-mark.png)0 0 no-repeat;
-    text-decoration: none!important;
-    text-indent: -999em;
-    overflow: hidden
-}
-
-.store-scope .link-store-scope {
-    float: left;
-    margin-right: 10px
 }
 
 .store-scope .tree-store-scope {
@@ -1478,13 +1406,6 @@ button.icon-btn span {
 
 .form-list td.value .store-scope {
     white-space: nowrap
-}
-
-.form-list td.value .link-store-scope {
-    float: none;
-    margin-right: 0;
-    vertical-align: top;
-    margin-top: 6px
 }
 
 .box-left,.box-right {
@@ -1531,16 +1452,6 @@ td.divider {
 .box,.entry-edit fieldset,.entry-edit .fieldset {
     border: 1px solid var(--maho-border);
     background: var(--maho-surface-raised)
-}
-
-.scroll-cont {
-    position: absolute;
-    top: -25px;
-    left: 503px;
-    width: 16px;
-    height: 265px;
-    background: url(images/db-scroll-bg.gif)no-repeat top;
-    z-index: 10000
 }
 
 .auto-scroll {
@@ -1658,24 +1569,12 @@ td.divider {
 
 .middle {
     min-height: 450px;
-    background: url(images/simple_container_bg.gif)repeat-x var(--maho-surface);
     padding: 23px 27px 0 27px
-}
-
-.middle-popup {
-    border-bottom: 3px solid var(--maho-surface);
-    background: url(images/middle_bg.gif)repeat-x 0 100%var(--maho-surface);
-    padding: 0 0 0 0;
-
 }
 
 .container-collapsed {
     padding: 1.8em 2.2em 1.8em 2em;
     padding-top: 0
-}
-
-.columns {
-    background: url(images/side_col_bg.gif)repeat-y 217px 0
 }
 
 div.side-col {
@@ -1698,16 +1597,9 @@ div.main-col-inner {
 
 .footer {
     clear: both;
-    background: url(images/footer_bg.gif)repeat-x var(--maho-surface-page);
     padding: 105px 2.8em 2.8em 2.8em;
     font-size: .95em;
     text-align: center
-}
-
-.simple-container-popup {
-    min-height: 50px!important;
-    padding: 1.8em 2.3em 6em 2.3em;
-    background: url(images/simple_container_bg.gif)repeat-x
 }
 
 .page-popup {
@@ -2272,7 +2164,6 @@ ul.item-options li {
 }
 
 #popup-window-mask,.popup-window-mask {
-    background: url(images/bg_window_mask.png)0 0;
     background: rgba(239,239,239,.5);
     position: absolute;
     top: 0;
@@ -2746,16 +2637,6 @@ ul.item-options li {
     width: 96%!important
 }
 
-.giftmessage-single-item .action-link {
-    padding-right: 10px;
-    background: url(images/gift-message-expand.gif)100% 50%no-repeat;
-    cursor: pointer
-}
-
-.giftmessage-single-item .open {
-    background: url(images/gift-message-collapse.gif)100% 50%no-repeat
-}
-
 .giftmessage-whole-order-container .entry-edit input.input-text {
     width: 280px!important
 }
@@ -2789,7 +2670,6 @@ ul.item-options li {
 }
 
 #popup-window-mask,.popup-window-mask {
-    background: url(images/bg_window_mask.png)0 0;
     background: rgba(239,239,239,.5);
     position: absolute;
     top: 0;
@@ -3600,7 +3480,7 @@ ul.config-tabs {
 
 ul.config-tabs dt {
     border-top: 1px solid var(--maho-border);
-    background: var(--maho-surface-sunken) url(images/config_tab_dt_bg.gif)no-repeat 0 50%;
+    background: var(--maho-surface-sunken);
     padding: 2px 0 2px 1.5em;
     font-weight: 700;
     text-transform: uppercase;
@@ -3690,12 +3570,7 @@ ul.config-tabs a.last span {
 }
 
 .section-config .section-config>.entry-edit-head>a {
-    color: var(--maho-ink);
-    background: url(images/bkg_config-nested.png)100% 5px no-repeat
-}
-
-.section-config .section-config>.entry-edit-head>a.open {
-    background-position: 100% -195px
+    color: var(--maho-ink)
 }
 
 .with-button {
@@ -3709,7 +3584,6 @@ ul.config-tabs a.last span {
 }
 
 .with-button.active:after {
-    background: url(images/bkg_config-shaddow.png)repeat-x 0 0;
     height: 5px;
     overflow: hidden;
     position: relative;
@@ -5532,10 +5406,6 @@ div.autocomplete ul li.selected {
     margin: 4px 0
 }
 
-.side-col .switcher .link-store-scope {
-    margin: 9px -19px 0 3px
-}
-
 dl.accordion dt {
     margin-top: 10px
 }
@@ -5693,10 +5563,6 @@ img.rule-param-add {
     width: 19px;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='%2356af45' d='M23,12L19,8V11H10V13H19V16M1,18V6C1,4.89 1.9,4 3,4H15A2,2 0 0,1 17,6V9H15V6H3V18H15V15H17V18A2,2 0 0,1 15,20H3A2,2 0 0,1 1,18Z' /%3E%3C/svg%3E")no-repeat;
     height: 19px
-}
-
-.link-store-scope {
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='%2300a9ff' d='M15.07,11.25L14.17,12.17C13.45,12.89 13,13.5 13,15H11V14.5C11,13.39 11.45,12.39 12.17,11.67L13.41,10.41C13.78,10.05 14,9.55 14,9C14,7.89 13.1,7 12,7A2,2 0 0,0 10,9H8A4,4 0 0,1 12,5A4,4 0 0,1 16,9C16,9.88 15.64,10.67 15.07,11.25M13,19H11V17H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12C22,6.47 17.5,2 12,2Z' /%3E%3C/svg%3E")
 }
 
 .emph,.accent {
