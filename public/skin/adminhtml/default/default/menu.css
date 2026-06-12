@@ -31,7 +31,7 @@ SPDX-License-Identifier: AFL-3.0
     align-items: center;
     height: 44px;
     padding: 0 14px;
-    color: rgba(236, 237, 227, .82);
+    color: rgba(255, 255, 255, .8);
     font-size: 13px;
     font-weight: 500;
     transition: color .15s ease, background-color .15s ease;
@@ -95,8 +95,8 @@ SPDX-License-Identifier: AFL-3.0
 
 #nav ul a.active {
     font-weight: 600;
-    background: var(--maho-chartreuse);
-    color: #15170e;
+    background: var(--maho-surface-sunken);
+    color: var(--maho-ink);
 }
 
 #nav ul li.parent > a::after {

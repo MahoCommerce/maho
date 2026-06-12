@@ -8,33 +8,33 @@ SPDX-License-Identifier: AFL-3.0
 
     --maho-font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
-    /* Warm ink with the green undertone of the brand chartreuse */
-    --maho-ink: light-dark(#21241a, #ecede3);
-    --maho-ink-soft: light-dark(#3c4033, #c9cbbc);
-    --maho-ink-muted: light-dark(#6b7060, #989b8a);
-    --maho-ink-faint: light-dark(#9b9f90, #6f7263);
+    /* Pure neutral graphite; chartreuse is the only color in the chrome */
+    --maho-ink: light-dark(#1c1c1c, #ececec);
+    --maho-ink-soft: light-dark(#404040, #c6c6c6);
+    --maho-ink-muted: light-dark(#6e6e6e, #959595);
+    --maho-ink-faint: light-dark(#9e9e9e, #6d6d6d);
 
     --maho-chartreuse: #d7df22;
     --maho-chartreuse-deep: light-dark(#6b7508, #c5cd31);
-    --maho-night: light-dark(#15170e, #0e0f09);
-    --maho-night-soft: light-dark(#2c3020, #d6d8c8);
+    --maho-night: light-dark(#121212, #0c0c0c);
+    --maho-night-soft: light-dark(#2e2e2e, #d4d4d4);
     --maho-link: light-dark(#6b7508, #c5cd31);
 
-    --maho-surface-page: light-dark(#f0f0eb, #181a12);
-    --maho-surface: light-dark(#fbfbf9, #1f2218);
-    --maho-surface-raised: light-dark(#fff, #262a1d);
-    --maho-surface-sunken: light-dark(#f1f1ea, #15170e);
-    --maho-surface-overlay: light-dark(#fff, #2a2e20);
+    --maho-surface-page: light-dark(#f2f2f2, #161616);
+    --maho-surface: light-dark(#fff, #1d1d1d);
+    --maho-surface-raised: light-dark(#fff, #242424);
+    --maho-surface-sunken: light-dark(#f1f1f1, #111);
+    --maho-surface-overlay: light-dark(#fff, #292929);
 
-    --maho-border-strong: light-dark(rgba(33, 36, 26, .34), rgba(236, 237, 227, .28));
-    --maho-border: light-dark(rgba(33, 36, 26, .2), rgba(236, 237, 227, .16));
-    --maho-border-soft: light-dark(rgba(33, 36, 26, .12), rgba(236, 237, 227, .1));
-    --maho-hairline: light-dark(rgba(33, 36, 26, .07), rgba(236, 237, 227, .06));
+    --maho-border-strong: light-dark(rgba(0, 0, 0, .32), rgba(255, 255, 255, .26));
+    --maho-border: light-dark(rgba(0, 0, 0, .19), rgba(255, 255, 255, .15));
+    --maho-border-soft: light-dark(rgba(0, 0, 0, .12), rgba(255, 255, 255, .1));
+    --maho-hairline: light-dark(rgba(0, 0, 0, .07), rgba(255, 255, 255, .06));
 
-    --maho-control-bg: light-dark(#fff, #15170e);
-    --maho-control-border: light-dark(rgba(33, 36, 26, .28), rgba(236, 237, 227, .22));
-    --maho-control-ink: light-dark(#21241a, #ecede3);
-    --maho-control-placeholder: light-dark(#9b9f90, #6f7263);
+    --maho-control-bg: light-dark(#fff, #111);
+    --maho-control-border: light-dark(rgba(0, 0, 0, .26), rgba(255, 255, 255, .22));
+    --maho-control-ink: light-dark(#1c1c1c, #ececec);
+    --maho-control-placeholder: light-dark(#9e9e9e, #6d6d6d);
     --maho-accent: light-dark(#6b7508, #c5cd31);
     --maho-accent-strong: light-dark(#4c5405, #d7df22);
     --maho-focus-ring: light-dark(#8a920f, #d7df22);
@@ -56,13 +56,13 @@ SPDX-License-Identifier: AFL-3.0
     --maho-row-hover: light-dark(rgba(215, 223, 34, .14), rgba(215, 223, 34, .07));
     --maho-row-selected: light-dark(rgba(215, 223, 34, .24), rgba(215, 223, 34, .13));
 
-    --maho-btn-bg: light-dark(#21241a, #d7df22);
-    --maho-btn-bg-hover: light-dark(#383d2c, #e3ea56);
-    --maho-btn-ink: light-dark(#fff, #15170e);
-    --maho-btn2-bg: light-dark(#fff, #262a1d);
-    --maho-btn2-bg-hover: light-dark(#f1f1ea, #313625);
-    --maho-btn2-border: light-dark(rgba(33, 36, 26, .3), rgba(236, 237, 227, .25));
-    --maho-btn2-ink: light-dark(#21241a, #ecede3);
+    --maho-btn-bg: light-dark(#1c1c1c, #d7df22);
+    --maho-btn-bg-hover: light-dark(#363636, #e3ea56);
+    --maho-btn-ink: light-dark(#fff, #121212);
+    --maho-btn2-bg: light-dark(#fff, #242424);
+    --maho-btn2-bg-hover: light-dark(#f1f1f1, #303030);
+    --maho-btn2-border: light-dark(rgba(0, 0, 0, .28), rgba(255, 255, 255, .24));
+    --maho-btn2-ink: light-dark(#1c1c1c, #ececec);
 
     --maho-space-1: 4px;
     --maho-space-2: 8px;
@@ -84,7 +84,7 @@ SPDX-License-Identifier: AFL-3.0
     --maho-text-lg: 15px;
     --maho-text-xl: 20px;
 
-    --maho-shadow-float: 0 8px 24px light-dark(rgba(21, 23, 14, .13), rgba(0, 0, 0, .5)), 0 1px 3px light-dark(rgba(21, 23, 14, .08), rgba(0, 0, 0, .4));
+    --maho-shadow-float: 0 8px 24px light-dark(rgba(0, 0, 0, .12), rgba(0, 0, 0, .5)), 0 1px 3px light-dark(rgba(0, 0, 0, .07), rgba(0, 0, 0, .4));
 }
 
 /* Manual override from the header scheme selector; default follows the OS */

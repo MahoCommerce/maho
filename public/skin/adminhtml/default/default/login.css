@@ -14,7 +14,7 @@ SPDX-License-Identifier: AFL-3.0
 }
 
 body#page-login {
-    background: #15170e;
+    background: #121212;
     color: var(--maho-ink);
     font: 13px/1.5 var(--maho-font-sans);
 }
@@ -40,20 +40,20 @@ body#page-login {
     max-width: 400px;
 
     /* The card stays light in both schemes so the full-color wordmark always reads */
-    --maho-surface: #fbfbf9;
-    --maho-ink: #21241a;
-    --maho-ink-soft: #3c4033;
-    --maho-ink-muted: #6b7060;
-    --maho-ink-faint: #9b9f90;
-    --maho-border-soft: rgba(33, 36, 26, .12);
+    --maho-surface: #fff;
+    --maho-ink: #1c1c1c;
+    --maho-ink-soft: #404040;
+    --maho-ink-muted: #6e6e6e;
+    --maho-ink-faint: #9e9e9e;
+    --maho-border-soft: rgba(0, 0, 0, .12);
     --maho-control-bg: #fff;
-    --maho-control-ink: #21241a;
-    --maho-control-border: rgba(33, 36, 26, .28);
+    --maho-control-ink: #1c1c1c;
+    --maho-control-border: rgba(0, 0, 0, .26);
     --maho-focus-ring: #8a920f;
     --maho-btn2-bg: #fff;
-    --maho-btn2-bg-hover: #f1f1ea;
-    --maho-btn2-border: rgba(33, 36, 26, .3);
-    --maho-btn2-ink: #21241a;
+    --maho-btn2-bg-hover: #f1f1f1;
+    --maho-btn2-border: rgba(0, 0, 0, .28);
+    --maho-btn2-ink: #1c1c1c;
     --maho-error: #c8401e;
     --maho-error-strong: #a23218;
     --maho-error-bg: #faece6;
@@ -190,7 +190,7 @@ body#page-login {
 input.form-button {
     background: #d7df22;
     border-color: transparent;
-    color: #15170e;
+    color: #121212;
 }
 
 input.form-button:hover {
