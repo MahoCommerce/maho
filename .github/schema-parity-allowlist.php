@@ -216,6 +216,28 @@ $entries = [
         ],
     ],
 
+    // revocation_request: this Maho-native table declared user_agent as
+    // VARCHAR(512) and received_at as a plain NOT NULL datetime. The legacy
+    // MySQL adapter promoted any varchar > 255 to text, and the legacy Postgres
+    // adapter injected DEFAULT CURRENT_TIMESTAMP on NOT NULL timestamps. The
+    // declarative schema keeps the intended varchar(512) and omits the spurious
+    // default (received_at is always set explicitly by the request model), so
+    // each engine's legacy artifact is normalized here.
+    [
+        'engines' => ['mysql'],
+        'table' => 'revocation_request',
+        'replace' => [
+            '  COLUMN user_agent text NULL' => '  COLUMN user_agent varchar(512) NULL',
+        ],
+    ],
+    [
+        'engines' => ['pgsql'],
+        'table' => 'revocation_request',
+        'replace' => [
+            '  COLUMN received_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP' => '  COLUMN received_at timestamp without time zone NOT NULL',
+        ],
+    ],
+
     // Tables where declarative schema chose nullable timestamps (event-time
     // columns that aren't always known at insert time). The global regex
     // above promotes bare "timestamp NOT NULL" on main to "...DEFAULT
