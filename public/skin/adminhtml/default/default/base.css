@@ -13,7 +13,7 @@ SPDX-License-Identifier: AFL-3.0
 body {
     background: var(--maho-surface-page);
     color: var(--maho-ink);
-    font: 12px/1.5em ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"
+    font: 13px/1.5 ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"
 }
 
 a {
@@ -4892,7 +4892,7 @@ small {
     border: 0;
     border-bottom: 1px solid var(--maho-hairline);
     background: var(--maho-surface);
-    padding: 7px 6px
+    padding: 8px
 }
 
 .grid table tfoot tr td {
@@ -4977,17 +4977,17 @@ small {
 }
 
 .grid tr.headings th {
-    padding: 7px 6px;
+    padding: 8px;
     font-size: var(--maho-text-xs);
     vertical-align: middle;
-    color: var(--maho-ink-muted);
+    color: var(--maho-ink-soft);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .04em
 }
 
 .grid tr.headings th a {
-    color: var(--maho-ink-muted);
+    color: var(--maho-ink-soft);
     font-weight: 600
 }
 
@@ -5018,8 +5018,8 @@ small {
 }
 
 .grid tr.headings th.no-link {
-    color: var(--maho-ink-muted);
-    padding: 7px 6px
+    color: var(--maho-ink-soft);
+    padding: 8px
 }
 
 .grid tr.even td {

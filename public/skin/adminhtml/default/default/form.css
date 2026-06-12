@@ -6,7 +6,7 @@ SPDX-License-Identifier: AFL-3.0
 */
 
 input.input-text, textarea, select {
-  font: 400 12px/1.33 ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font: 400 13px/1.33 ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   display: inline-block;
   padding: 1px 6px;
   margin: 0;
