@@ -92,6 +92,12 @@ SPDX-License-Identifier: AFL-3.0
         </translate>
     </adminhtml>
     <default>
+        <system>
+            <rate_limit>
+                <auth_token_ip>20</auth_token_ip>
+                <customer_login>5</customer_login>
+            </rate_limit>
+        </system>
         <api>
             <config>
                 <charset>UTF-8</charset>

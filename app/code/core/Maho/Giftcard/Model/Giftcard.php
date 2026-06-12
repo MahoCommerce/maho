@@ -58,6 +58,57 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         $this->_init('giftcard/giftcard');
     }
 
+    #[\Override]
+    protected function _beforeSave()
+    {
+        // Mage_Core_Model_Abstract sets _isObjectNew=true on first save and never
+        // resets it, so isObjectNew() keeps returning true on subsequent saves. Use
+        // !getId() instead so the creation defaults below run exactly once.
+        if (!$this->getId()) {
+            $helper = Mage::helper('giftcard');
+
+            if (!$this->getCode()) {
+                $this->setCode($helper->generateCode());
+            }
+
+            if (!$this->getWebsiteId()) {
+                $this->setWebsiteId((int) Mage::app()->getStore()->getWebsiteId());
+            }
+
+            // Only fill a default when the field wasn't provided. Explicit null
+            // means "never expires" — both the admin form note ("Leave empty
+            // for no expiration") and API callers depend on that semantic.
+            if (!$this->hasData('expires_at')) {
+                $this->setExpiresAt($helper->calculateExpirationDate());
+            }
+
+            // Mirror one field to the other when only one is provided, but treat
+            // an explicit 0 as set — a fully-used card created for a refund has
+            // balance=0 and must not be overwritten with initial_balance. Form
+            // posts surface unfilled fields as '' (not null), so check both.
+            $balance = $this->getData('balance');
+            $initialBalance = $this->getData('initial_balance');
+            $hasBalance = $balance !== null && $balance !== '';
+            $hasInitialBalance = $initialBalance !== null && $initialBalance !== '';
+
+            if (!$hasInitialBalance && $hasBalance) {
+                $this->setInitialBalance((float) $balance);
+            } elseif (!$hasBalance && $hasInitialBalance) {
+                $this->setBalance((float) $initialBalance);
+            }
+
+            if (!$this->getStatus()) {
+                $this->setStatus(self::STATUS_ACTIVE);
+            }
+
+            $this->setData('created_at', Mage::app()->getLocale()->formatDateForDb('now'));
+        }
+
+        $this->setData('updated_at', Mage::app()->getLocale()->formatDateForDb('now'));
+
+        return parent::_beforeSave();
+    }
+
     /**
      * Load gift card by code
      *
@@ -166,22 +217,46 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             throw new Mage_Core_Exception('Amount must be greater than zero.');
         }
 
+        // Optimistic pre-check so callers get a clear "exceeds balance"
+        // message when the model state is fresh. The atomic UPDATE below is
+        // still the source of truth and will reject concurrent
+        // double-decrements that race past this check.
         if ($baseAmount > $this->getBalance()) {
             throw new Mage_Core_Exception('Amount exceeds gift card balance.');
         }
 
-        $balanceBefore = (float) $this->getBalance();
-        $balanceAfter = $balanceBefore - $baseAmount;
+        $resource = $this->getResource();
+        $write = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $table = $resource->getMainTable();
 
-        // Update balance
-        $this->setBalance($balanceAfter);
+        // Atomic decrement: WHERE balance >= ? guarantees no double-spend
+        // when two carts try to consume the same card concurrently. Without
+        // this, the read-modify-write sequence can pass `> 0` checks in two
+        // requests and let both decrement off the same balance.
+        $rowsAffected = $write->update(
+            $table,
+            [
+                'balance' => new \Maho\Db\Expr('balance - ' . $write->quote($baseAmount)),
+                'status' => new \Maho\Db\Expr(
+                    'CASE WHEN balance - ' . $write->quote($baseAmount) . ' <= 0 '
+                    . 'THEN ' . $write->quote(self::STATUS_USED) . ' '
+                    . 'ELSE status END',
+                ),
+            ],
+            [
+                'giftcard_id = ?' => (int) $this->getId(),
+                'balance >= ?' => $baseAmount,
+            ],
+        );
 
-        // Update status if fully used
-        if ($balanceAfter <= 0) {
-            $this->setStatus(self::STATUS_USED);
+        if ($rowsAffected === 0) {
+            throw new Mage_Core_Exception('Gift card balance changed concurrently or is insufficient.');
         }
 
-        $this->save();
+        // Refresh model state from the row we just mutated
+        $balanceBefore = (float) $this->getBalance();
+        $this->load((int) $this->getId());
+        $balanceAfter = (float) $this->getBalance();
 
         // Record history
         $this->_addHistory(

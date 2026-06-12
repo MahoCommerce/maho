@@ -36,6 +36,18 @@ function callBuildAdminModuleChain(ControllerDispatcher $dispatcher): array
 }
 
 describe('ControllerDispatcher::buildAdminModuleChain()', function () {
+    // Core modules (e.g. Maho_ApiPlatform) register themselves in this node via
+    // config.xml; clear it so each scenario starts from a known baseline.
+    beforeEach(function () {
+        $modulesNode = Mage::getConfig()->getNode('admin/routers/adminhtml/args/modules');
+        if ($modulesNode) {
+            $dom = dom_import_simplexml($modulesNode);
+            while ($dom->firstChild) {
+                $dom->removeChild($dom->firstChild);
+            }
+        }
+    });
+
     it('returns only Mage_Adminhtml when no custom modules are registered', function () {
         expect(callBuildAdminModuleChain(new ControllerDispatcher()))
             ->toBe(['Mage_Adminhtml']);

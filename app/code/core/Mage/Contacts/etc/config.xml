@@ -7,7 +7,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Contacts>
-            <version>1.6.0.0</version>
+            <version>1.6.0.2</version>
         </Mage_Contacts>
     </modules>
     <frontend>
@@ -63,10 +63,19 @@ SPDX-License-Identifier: AFL-3.0
         </translate>
     </adminhtml>
     <default>
+        <system>
+            <rate_limit>
+                <contact>3</contact>
+            </rate_limit>
+        </system>
         <contacts>
             <contacts>
                 <enabled>1</enabled>
             </contacts>
+            <api>
+                <enabled>1</enabled>
+                <honeypot_enabled>1</honeypot_enabled>
+            </api>
             <email>
                 <recipient_email><![CDATA[hello@example.com]]></recipient_email>
                 <sender_email_identity>custom2</sender_email_identity>

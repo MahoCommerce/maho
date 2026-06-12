@@ -86,6 +86,11 @@ SPDX-License-Identifier: AFL-3.0
         </secure_url>
     </frontend>
     <default>
+        <system>
+            <rate_limit>
+                <review_submit>5</review_submit>
+            </rate_limit>
+        </system>
         <catalog>
             <review>
                 <allow_guest>1</allow_guest>

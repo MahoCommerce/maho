@@ -19,9 +19,10 @@ class Mage_CatalogSearch_Model_Resource_Helper_Sqlite extends Mage_Eav_Model_Res
      */
     public function chooseFulltext($table, $alias, $select)
     {
-        // SQLite doesn't have native MATCH AGAINST like MySQL
-        // Use a simple LIKE-based relevance score
-        $field = new Maho\Db\Expr('CASE WHEN ' . $alias . '.data_index LIKE :query THEN 1 ELSE 0 END');
+        // SQLite has no MATCH AGAINST. Wrap the bound :query with % wildcards
+        // so LIKE matches the term anywhere inside data_index — without the
+        // wildcards LIKE requires an exact full-string match and never hits.
+        $field = new Maho\Db\Expr('CASE WHEN ' . $alias . ".data_index LIKE '%' || :query || '%' THEN 1 ELSE 0 END");
         $select->columns(['relevance' => $field]);
         return $field;
     }
@@ -59,8 +60,10 @@ class Mage_CatalogSearch_Model_Resource_Helper_Sqlite extends Mage_Eav_Model_Res
                 $isBool = in_array(strtoupper($word), $boolWords);
                 $isBracket = in_array($word, $brackets);
                 if (!$isBool && !$isBracket) {
+                    // SQLite uses LIKE, not MySQL boolean-mode MATCH AGAINST,
+                    // so don't quote-wrap the word — quotes would become
+                    // literal characters in the LIKE comparison.
                     $terms[$word] = $word;
-                    $word = '"' . $word . '"';
                     $words[] = $word;
                 } elseif ($isBracket) {
                     if ($word === '(') {

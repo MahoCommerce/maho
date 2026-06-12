@@ -23,6 +23,13 @@ Mage::init('admin');
 Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
 Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_ADMINHTML, Mage_Core_Model_App_Area::PART_EVENTS);
 
+// Legacy Magento 1 REST is opt-in via apiplatform/protocols/legacy_rest.
+// Disabled by default; operators must enable it consciously.
+if (!Mage::helper('apiplatform')->isProtocolEnabled(Maho_ApiPlatform_Helper_Data::PROTOCOL_LEGACY_REST)) {
+    http_response_code(404);
+    exit;
+}
+
 // query parameter "type" is set by .htaccess rewrite rule
 $apiAlias = Mage::app()->getRequest()->getParam('type');
 

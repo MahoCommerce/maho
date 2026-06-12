@@ -1,0 +1,144 @@
+<?xml version="1.0"?>
+<config>
+    <sections>
+        <apiplatform translate="label" module="apiplatform">
+            <label>API Platform</label>
+            <tab>service</tab>
+            <sort_order>100</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <groups>
+                <protocols translate="label comment">
+                    <label>API Protocols</label>
+                    <comment><![CDATA[All API protocols are <strong>disabled by default</strong>. Enable only the ones you actually use — anything off returns 404 at the entry point.]]></comment>
+                    <sort_order>5</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <fields>
+                        <rest_v2 translate="label comment">
+                            <label>REST v2 (new)</label>
+                            <comment>Modern REST API at /api/rest/v2/*</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </rest_v2>
+                        <graphql translate="label comment">
+                            <label>GraphQL — public</label>
+                            <comment>Storefront/customer-facing GraphQL at /api/graphql</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </graphql>
+                        <admin_graphql translate="label comment">
+                            <label>GraphQL — admin</label>
+                            <comment>Admin GraphQL at /api/admin/graphql (requires admin auth)</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </admin_graphql>
+                        <legacy_rest translate="label comment">
+                            <label>Legacy REST (Magento 1)</label>
+                            <comment>Original Magento 1 REST API at /api/rest/*</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </legacy_rest>
+                        <soap translate="label comment">
+                            <label>Legacy SOAP v1</label>
+                            <comment>Original Magento 1 SOAP at /api/soap</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </soap>
+                        <v2_soap translate="label comment">
+                            <label>Legacy SOAP v2</label>
+                            <comment>Original Magento 1 SOAP v2 at /api/v2_soap</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </v2_soap>
+                        <xmlrpc translate="label comment">
+                            <label>Legacy XML-RPC</label>
+                            <comment>Original Magento 1 XML-RPC at /api/xmlrpc</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </xmlrpc>
+                        <jsonrpc translate="label comment">
+                            <label>Legacy JSON-RPC</label>
+                            <comment>Original Magento 1 JSON-RPC at /api/jsonrpc</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </jsonrpc>
+                    </fields>
+                </protocols>
+                <general translate="label">
+                    <label>General Settings</label>
+                    <sort_order>10</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <fields>
+                        <cors_origins translate="label comment">
+                            <label>CORS Allowed Origins</label>
+                            <comment>Comma-separated list of allowed origins. Defaults to store base URL if empty.</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>15</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </cors_origins>
+                    </fields>
+                </general>
+                <cache translate="label">
+                    <label>API Cache</label>
+                    <sort_order>18</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <fields>
+                        <ttl translate="label comment">
+                            <label>Cache TTL (seconds)</label>
+                            <comment>How long API responses are cached. Default: 300 (5 minutes). Set to 0 to disable caching.</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </ttl>
+                    </fields>
+                </cache>
+                <oauth2 translate="label">
+                    <label>OAuth2 Settings</label>
+                    <sort_order>20</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <fields>
+                        <secret translate="label comment">
+                            <label>Symfony App Secret</label>
+                            <comment>Used for CSRF and session signing. Auto-derived from crypt key if empty.</comment>
+                            <frontend_type>obscure</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </secret>
+                        <token_lifetime translate="label comment">
+                            <label>Access Token Lifetime</label>
+                            <comment>In seconds (default: 3600 = 1 hour)</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </token_lifetime>
+                        <refresh_token_lifetime translate="label comment">
+                            <label>Refresh Token Lifetime</label>
+                            <comment>In seconds (default: 86400 = 24 hours)</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </refresh_token_lifetime>
+                    </fields>
+                </oauth2>
+            </groups>
+        </apiplatform>
+    </sections>
+</config>
