@@ -1653,28 +1653,32 @@ div.autocomplete {
     z-index: 10000;
     position: absolute;
     width: 250px;
-    background-color: var(--maho-surface);
-    border: 1px solid var(--maho-control-placeholder);
+    background-color: var(--maho-surface-overlay);
+    border: 1px solid var(--maho-border-soft);
+    border-radius: var(--maho-radius-md);
+    box-shadow: var(--maho-shadow-float);
     margin: 0;
-    padding: 0
+    padding: 4px
 }
 
 div.autocomplete ul {
     margin: 0;
-    padding: 0
+    padding: 0;
+    list-style: none
 }
 
-div.autocomplete ul li.selected {
+div.autocomplete ul li.selected,
+div.autocomplete ul li:hover {
     background-color: var(--maho-surface-sunken)
 }
 
 div.autocomplete ul li {
-    padding: .5em .7em;
-    min-height: 32px;
+    padding: 8px 10px;
     cursor: pointer;
     text-align: left;
     color: var(--maho-ink);
-    line-height: 1.3em
+    border-radius: var(--maho-radius-sm);
+    line-height: 1.35
 }
 
 .order-summary .side-col {
@@ -4977,7 +4981,8 @@ small {
 }
 
 .header-right fieldset {
-    display: inline;
+    display: inline-block;
+    position: relative;
     line-height: 44px
 }
 
@@ -5131,19 +5136,6 @@ div.collapseable a {
 
 div.collapseable a.open {
     background: 0 0
-}
-
-div.autocomplete {
-    border: 0;
-    box-shadow: 0 3px 3px rgba(50,50,50,.15)
-}
-
-div.autocomplete ul li {
-    color: var(--maho-ink)
-}
-
-div.autocomplete ul li.selected {
-    background: var(--maho-surface-page)
 }
 
 .section-config .section-config>.config {
@@ -5826,4 +5818,39 @@ img.rule-param-add {
 
 .dashboard-container .grid table :is(th, td):last-child {
     padding-right: 15px
+}
+
+#global_search_autocomplete {
+    width: 340px;
+    right: 0;
+    top: calc(100% - 2px)
+}
+
+#global_search_autocomplete ul li .type {
+    float: right;
+    margin-left: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    line-height: 16px;
+    padding: 0 7px;
+    border: 1px solid var(--maho-border-soft);
+    border-radius: var(--maho-radius-pill);
+    color: var(--maho-ink-muted)
+}
+
+#global_search_autocomplete ul li strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 600
+}
+
+#global_search_autocomplete ul li .informal {
+    display: block;
+    font-size: 12px;
+    color: var(--maho-ink-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis
 }
