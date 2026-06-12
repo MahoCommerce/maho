@@ -4789,17 +4789,17 @@ a:visited {
 }
 
 a:focus {
-    color: var(--maho-info);
+    color: var(--maho-accent-strong);
     text-decoration: none
 }
 
 a:hover {
-    color: var(--maho-info);
+    color: var(--maho-accent-strong);
     text-decoration: none
 }
 
 a:active {
-    color: var(--maho-info);
+    color: var(--maho-accent-strong);
     text-decoration: none
 }
 
