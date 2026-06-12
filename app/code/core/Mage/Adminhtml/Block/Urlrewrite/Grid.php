@@ -17,6 +17,13 @@ class Mage_Adminhtml_Block_Urlrewrite_Grid extends Mage_Adminhtml_Block_Widget_G
         parent::__construct();
         $this->setId('urlrewriteGrid');
         $this->setDefaultSort('url_rewrite_id');
+        $this->setUseAjax(true);
+    }
+
+    #[\Override]
+    public function getGridUrl()
+    {
+        return $this->getUrl('*/*/grid', ['_current' => true]);
     }
 
     #[\Override]

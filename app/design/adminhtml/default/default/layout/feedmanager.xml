@@ -120,4 +120,17 @@ SPDX-License-Identifier: OSL-3.0
             </block>
         </reference>
     </adminhtml_feedmanager_dynamicrule_edit>
+
+    <!-- AJAX grid reload handles -->
+    <adminhtml_feedmanager_feed_grid>
+        <block type="feedmanager/adminhtml_feed_grid" name="root" output="toHtml" />
+    </adminhtml_feedmanager_feed_grid>
+
+    <adminhtml_feedmanager_destination_grid>
+        <block type="feedmanager/adminhtml_destination_grid" name="root" output="toHtml" />
+    </adminhtml_feedmanager_destination_grid>
+
+    <adminhtml_feedmanager_dynamicrule_grid>
+        <block type="feedmanager/adminhtml_dynamicrule_grid" name="root" output="toHtml" />
+    </adminhtml_feedmanager_dynamicrule_grid>
 </layout>

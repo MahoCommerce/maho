@@ -39,6 +39,14 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/checkout_agreement/grid')]
+    public function gridAction(): void
+    {
+        $this->getResponse()->setBody(
+            $this->getLayout()->createBlock('adminhtml/checkout_agreement_grid')->toHtml(),
+        );
+    }
+
     #[Maho\Config\Route('/admin/checkout_agreement/new')]
     public function newAction(): void
     {

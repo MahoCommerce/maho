@@ -40,6 +40,13 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/cms_page/grid')]
+    public function gridAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
     /**
      * Create new CMS page
      */

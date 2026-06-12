@@ -54,6 +54,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_feed/grid')]
+    public function gridAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
     #[Maho\Config\Route('/admin/feedmanager_feed/new')]
     public function newAction(): void
     {

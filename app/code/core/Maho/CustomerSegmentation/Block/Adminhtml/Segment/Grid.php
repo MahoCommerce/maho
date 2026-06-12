@@ -17,6 +17,13 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Grid extends Mage_Adminh
         $this->setDefaultSort('segment_id');
         $this->setDefaultDir('ASC');
         $this->setSaveParametersInSession(true);
+        $this->setUseAjax(true);
+    }
+
+    #[\Override]
+    public function getGridUrl(): string
+    {
+        return $this->getUrl('*/*/grid', ['_current' => true]);
     }
 
     #[\Override]

@@ -66,6 +66,14 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/urlrewrite/grid')]
+    public function gridAction(): void
+    {
+        $this->getResponse()->setBody(
+            $this->getLayout()->createBlock('adminhtml/urlrewrite_grid')->toHtml(),
+        );
+    }
+
     /**
      * Show urlrewrite edit/create page
      */

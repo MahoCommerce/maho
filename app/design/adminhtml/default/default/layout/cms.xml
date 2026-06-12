@@ -13,6 +13,10 @@ SPDX-License-Identifier: AFL-3.0
         </reference>
     </adminhtml_cms_page_index>
 
+    <adminhtml_cms_page_grid>
+        <block type="adminhtml/cms_page_grid" name="root" output="toHtml" />
+    </adminhtml_cms_page_grid>
+
     <adminhtml_cms_page_new>
         <update handle="adminhtml_cms_page_edit" />
     </adminhtml_cms_page_new>
@@ -41,6 +45,10 @@ SPDX-License-Identifier: AFL-3.0
             <block type="adminhtml/cms_block" name="cms_block"></block>
         </reference>
     </adminhtml_cms_block_index>
+
+    <adminhtml_cms_block_grid>
+        <block type="adminhtml/cms_block_grid" name="root" output="toHtml" />
+    </adminhtml_cms_block_grid>
 
     <adminhtml_cms_block_new>
         <update handle="adminhtml_cms_block_edit" />

@@ -54,6 +54,13 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/customer_group/grid')]
+    public function gridAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
     /**
      * Edit or create customer group.
      */
