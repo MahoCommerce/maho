@@ -15,6 +15,8 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Grid extends Mage_Adminhtml_Bl
         parent::__construct();
         $this->setId('convertProfileGrid');
         $this->setDefaultSort('profile_id');
+        $this->setSaveParametersInSession(true);
+        $this->setUseAjax(true);
     }
 
     #[\Override]

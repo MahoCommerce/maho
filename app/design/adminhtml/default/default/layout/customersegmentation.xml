@@ -39,4 +39,8 @@ SPDX-License-Identifier: AFL-3.0
             </block>
         </reference>
     </adminhtml_customersegmentation_index_editsequence>
+
+    <adminhtml_customersegmentation_index_grid>
+        <block type="customersegmentation/adminhtml_segment_grid" name="root" output="toHtml" />
+    </adminhtml_customersegmentation_index_grid>
 </layout>

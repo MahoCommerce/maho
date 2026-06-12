@@ -16,6 +16,13 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Grid extends Mage_Adminhtml_Block_Wi
         $this->setId('feedmanagerFeedGrid');
         $this->setDefaultSort('feed_id');
         $this->setSaveParametersInSession(true);
+        $this->setUseAjax(true);
+    }
+
+    #[\Override]
+    public function getGridUrl(): string
+    {
+        return $this->getUrl('*/*/grid', ['_current' => true]);
     }
 
     #[\Override]

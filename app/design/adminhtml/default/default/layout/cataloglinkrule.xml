@@ -33,4 +33,8 @@ SPDX-License-Identifier: AFL-3.0
             </block>
         </reference>
     </adminhtml_cataloglinkrule_rule_edit>
+
+    <adminhtml_cataloglinkrule_rule_grid>
+        <block type="cataloglinkrule/adminhtml_rule_grid" name="root" output="toHtml" />
+    </adminhtml_cataloglinkrule_rule_grid>
 </layout>
