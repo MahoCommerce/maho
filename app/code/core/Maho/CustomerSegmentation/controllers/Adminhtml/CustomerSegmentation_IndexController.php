@@ -35,6 +35,13 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
             ->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/customersegmentation_index/grid')]
+    public function gridAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
     #[Maho\Config\Route('/admin/customersegmentation_index/new')]
     public function newAction(): void
     {

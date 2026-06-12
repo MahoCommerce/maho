@@ -39,6 +39,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/grid')]
+    public function gridAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
     #[Maho\Config\Route('/admin/feedmanager_dynamicrule/new')]
     public function newAction(): void
     {

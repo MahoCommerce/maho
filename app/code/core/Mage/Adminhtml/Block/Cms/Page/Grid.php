@@ -16,6 +16,14 @@ class Mage_Adminhtml_Block_Cms_Page_Grid extends Mage_Adminhtml_Block_Widget_Gri
         $this->setId('cmsPageGrid');
         $this->setDefaultSort('title');
         $this->setDefaultDir('ASC');
+        $this->setSaveParametersInSession(true);
+        $this->setUseAjax(true);
+    }
+
+    #[\Override]
+    public function getGridUrl()
+    {
+        return $this->getUrl('*/*/grid', ['_current' => true]);
     }
 
     #[\Override]

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<layout>
+    <adminhtml_mediacleaner_index>
+        <reference name="content">
+            <block type="mediacleaner/adminhtml_mediacleaner" name="mediacleaner" />
+        </reference>
+    </adminhtml_mediacleaner_index>
+
+    <adminhtml_mediacleaner_grid>
+        <block type="mediacleaner/adminhtml_mediacleaner_grid" name="root" output="toHtml" />
+    </adminhtml_mediacleaner_grid>
+</layout>

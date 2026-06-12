@@ -22,6 +22,13 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
             ->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/grid')]
+    public function gridAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
     #[Maho\Config\Route('/admin/cataloglinkrule_rule/new')]
     public function newAction(): void
     {

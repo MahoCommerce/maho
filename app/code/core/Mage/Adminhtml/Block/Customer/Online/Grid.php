@@ -19,6 +19,7 @@ class Mage_Adminhtml_Block_Customer_Online_Grid extends Mage_Adminhtml_Block_Wid
         $this->setId('onlineGrid');
         $this->setSaveParametersInSession(true);
         $this->setDefaultSort('last_activity');
+        $this->setUseAjax(true);
     }
 
     /**
