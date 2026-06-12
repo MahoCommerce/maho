@@ -279,9 +279,19 @@ big {
 }
 
 .message-popup .message-popup-content .read-more a {
-    background: url(images/more_arrow.gif)0 50%no-repeat;
-    padding-left: 14px;
     text-decoration: underline
+}
+
+.message-popup .message-popup-content .read-more a:after {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    margin-left: 5px;
+    border: 0 solid currentColor;
+    border-width: 2px 2px 0 0;
+    transform: rotate(45deg);
+    vertical-align: middle
 }
 
 .message-popup .message-popup-content .read-more a:hover {
@@ -2506,14 +2516,27 @@ ul.item-options li {
 
 .summary-total .summary-collapse {
     float: right;
-    padding-left: 20px;
-    background: url(images/bg_collapse.gif)0 4px no-repeat;
+    padding-left: 18px;
+    position: relative;
     text-align: right;
     cursor: pointer
 }
 
-.show-details .summary-collapse {
-    background-position: 0-52px
+.summary-total .summary-collapse:before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: calc(50% - 5px);
+    width: 6px;
+    height: 6px;
+    border: 0 solid var(--maho-ink-muted);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg)
+}
+
+.show-details .summary-collapse:before {
+    top: calc(50% - 2px);
+    transform: rotate(-135deg)
 }
 
 .show-details td {
@@ -2695,11 +2718,12 @@ ul.item-options li {
 
 .packaging-window .messages {
     border: 1px solid var(--maho-error-border);
+    border-radius: var(--maho-radius-sm);
     color: var(--maho-error-strong);
-    background: var(--maho-error-bg) url(images/error_msg_icon.gif)no-repeat 10px 10px;
+    background: var(--maho-error-bg);
     font-weight: 700;
     margin-bottom: 10px;
-    padding: 10px 10px 10px 35px
+    padding: 10px 12px
 }
 
 .packaging-window .validation-failed {
@@ -3014,18 +3038,19 @@ ul.item-options li {
 .rating-box {
     float: left;
     position: relative;
-    width: 69px;
-    height: 16px;
+    width: 70px;
+    height: 14px;
     margin: 0 5px 3px 0;
-    background: url(images/product_rating_blank_star.gif)repeat-x
+    background: var(--maho-border);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M8.243 7.34l-6.38 .925l-.113 .023a1 1 0 0 0 -.44 1.684l4.622 4.499l-1.09 6.355l-.013 .11a1 1 0 0 0 1.464 .944l5.706 -3l5.693 3l.1 .046a1 1 0 0 0 1.352 -1.1l-1.091 -6.355l4.624 -4.5l.078 -.085a1 1 0 0 0 -.633 -1.62l-6.38 -.926l-2.852 -5.78a1 1 0 0 0 -1.794 0l-2.853 5.78z'/%3E%3C/svg%3E") repeat-x left center / 14px 14px
 }
 
 .rating-box .rating {
     position: absolute;
     top: 0;
     left: 0;
-    height: 16px;
-    background: url(images/product_rating_full_star.gif)repeat-x
+    height: 14px;
+    background: var(--maho-warning)
 }
 
 .field-row .ratings {
@@ -3354,12 +3379,13 @@ input.downloads {
     position: relative;
     padding: 12px 14px;
     cursor: pointer;
-    border-top: 1px solid var(--maho-surface-page);
-    background: url(images/address_list_li.gif)
+    border-top: 1px solid var(--maho-hairline);
+    background: var(--maho-surface)
 }
 
 .address-list li.on {
-    background: var(--maho-surface-sunken)
+    background: var(--maho-zebra);
+    box-shadow: inset 3px 0 0 var(--maho-chartreuse-deep)
 }
 
 .address-list li.over {
@@ -3450,26 +3476,6 @@ input.downloads {
 
 .sync-indicator img,.sync-indicator span {
     vertical-align: middle
-}
-
-div.tree_item,div.tree_item_last {
-    background-position: left;
-    background-repeat: no-repeat;
-    padding-left: 20px
-}
-
-div.tree_item {
-    background-image: url(images/tree_icons/join.gif)
-}
-
-div.tree_item_last {
-    background-image: url(images/tree_icons/joinbottom.gif)
-}
-
-div.tree_line {
-    position: absolute;
-    left: 0;
-    background-image: url(images/tree_icons/line.gif)
 }
 
 img.attribute-global {
@@ -3708,10 +3714,11 @@ td.label label.enabled {
 
 .section-config .config-advanced>.entry-edit-head a:after {
     content: "";
-    width: 7px;
+    width: 5px;
     height: 5px;
-    background: url(images/bkg_config-advanced.png)no-repeat 0 0;
-    overflow: hidden;
+    border: 0 solid currentColor;
+    border-width: 0 2px 2px 0;
+    transform: translateY(-2px) rotate(45deg);
     display: inline-block;
     vertical-align: middle;
     margin-right: -13px;
@@ -3719,7 +3726,7 @@ td.label label.enabled {
 }
 
 .section-config .config-advanced>.entry-edit-head a.open:after {
-    background-position: 0-5px
+    transform: translateY(1px) rotate(-135deg)
 }
 
 .section-config .config-advanced>.config {
@@ -3754,13 +3761,20 @@ td.label label.enabled {
 
 .field-tooltip {
     display: inline-block;
-    width: 15px;
-    height: 15px;
+    width: 16px;
+    height: 16px;
     position: relative;
     z-index: 1;
-    background: url(images/icon-tooltip.png)no-repeat 0 0;
     cursor: help;
     vertical-align: middle
+}
+
+.field-tooltip:before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--maho-ink-muted);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0'/%3E%3Cpath d='M12 16v.01'/%3E%3Cpath d='M12 13a2 2 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483'/%3E%3C/svg%3E") no-repeat center / contain
 }
 
 .field-tooltip:hover {
@@ -3773,51 +3787,26 @@ td.label label.enabled {
 
 .field-tooltip:hover>div:hover,.field-tooltip>div {
     width: 301px;
-    background: var(--maho-surface-sunken) url(images/bkg_tooltip.png)repeat-y 100%;
+    box-sizing: border-box;
+    background: var(--maho-surface-overlay);
+    border: 1px solid var(--maho-border-soft);
+    border-radius: var(--maho-radius-md);
+    box-shadow: var(--maho-shadow-float);
     opacity: 0;
     position: absolute;
     z-index: 999;
-    left: -296px;
-    bottom: 28px;
-    padding: 0 12px;
+    left: -290px;
+    bottom: 26px;
+    padding: 10px 12px;
     color: var(--maho-ink-soft);
+    font-size: 12px;
+    line-height: 1.45;
     visibility: hidden
 }
 
-.field-tooltip>div:before {
-    position: absolute;
-    top: -5px;
-    left: 0;
-    content: "";
-    width: 325px;
-    height: 5px;
-    overflow: hidden;
-    background: url(images/bkg_tooltip.png)no-repeat 0 0
-}
-
-.field-tooltip>div:after {
-    position: absolute;
-    bottom: -14px;
-    left: -1px;
-    content: "";
-    width: 325px;
-    height: 14px;
-    overflow: hidden;
-    background: url(images/bkg_tooltip.png)no-repeat -325px 0
-}
-
 .field-tooltip:hover>div {
     opacity: 1;
-    width: 301px;
-    visibility: visible;
-    bottom: 30px
-}
-
-.field-tooltip:hover>div {
-    opacity: 1;
-    width: 301px;
-    visibility: visible;
-    bottom: 30px
+    visibility: visible
 }
 
 #profile-generator select {
@@ -4077,8 +4066,19 @@ ul.super-product-attributes {
 }
 
 .link-feed {
-    background: url(images/icon_feed.gif)no-repeat left 2px;
+    position: relative;
     padding-left: 18px
+}
+
+.link-feed:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: calc(50% - 7px);
+    width: 14px;
+    height: 14px;
+    background: currentColor;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19a1 1 0 1 0 2 0a1 1 0 1 0 -2 0'/%3E%3Cpath d='M4 4a16 16 0 0 1 16 16'/%3E%3Cpath d='M4 11a9 9 0 0 1 9 9'/%3E%3C/svg%3E") no-repeat center / contain
 }
 
 .breadcrumbs {
@@ -5170,18 +5170,6 @@ div.collapseable a.open {
     box-shadow: none
 }
 
-.section-config .config-advanced>.entry-edit-head.collapseable a:after {
-    border: 0
-}
-
-.section-config .config-advanced>.entry-edit-head.collapseable a.open:after {
-    border: 0
-}
-
-.section-config .config-advanced>.entry-edit-head a:after {
-    top: 5px
-}
-
 .section-config .config-advanced>.config {
     padding: 10px
 }
@@ -5979,4 +5967,119 @@ img.rule-param-add {
     border-top: 1px solid var(--maho-hairline);
     border-radius: 0;
     background: var(--maho-surface)
+}
+
+.address-list .sub-btn-set {
+    background: none;
+    border: 0;
+    margin: 0 0 12px;
+    padding: 0;
+    text-align: left
+}
+
+#address_list {
+    background: var(--maho-surface);
+    border: 1px solid var(--maho-border-soft);
+    border-radius: var(--maho-radius-md);
+    margin: 0;
+    overflow: hidden
+}
+
+#address_list li:first-child {
+    border-top: 0
+}
+
+#address_list:not(:has(li)) {
+    display: none
+}
+
+dl.accordion {
+    background: var(--maho-surface);
+    border: 1px solid var(--maho-border-soft);
+    border-radius: var(--maho-radius-md);
+    overflow: hidden
+}
+
+dl.accordion dt {
+    background: none;
+    border: 0;
+    border-top: 1px solid var(--maho-hairline);
+    border-radius: 0;
+    margin: 0;
+    padding: 0
+}
+
+dl.accordion > dt:first-of-type {
+    border-top: 0
+}
+
+dl.accordion dt a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+    transition: background-color .15s ease
+}
+
+dl.accordion dt a:hover,
+dl.accordion dt.open a:hover {
+    background: color-mix(in srgb, var(--maho-ink) 4%, transparent);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3
+}
+
+dl.accordion dt.open a {
+    background: var(--maho-zebra);
+    box-shadow: inset 3px 0 0 var(--maho-chartreuse-deep);
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.3
+}
+
+dl.accordion dt.open a:hover {
+    background: var(--maho-zebra)
+}
+
+dl.accordion dt a:after,
+dl.accordion dt.open a:after {
+    content: "";
+    position: static;
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border: 0 solid var(--maho-ink-muted);
+    border-width: 0 2px 2px 0;
+    transition: transform .15s ease
+}
+
+dl.accordion dt a:after {
+    transform: translateY(-2px) rotate(45deg)
+}
+
+dl.accordion dt.open a:after {
+    transform: translateY(2px) rotate(-135deg)
+}
+
+dl.accordion dd {
+    border-top: 1px solid var(--maho-hairline);
+    background: var(--maho-surface)
+}
+
+.icon-link svg {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle
+}
+
+table.actions td.export svg,
+table.actions td.a-right > svg {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    margin-right: 2px
 }
