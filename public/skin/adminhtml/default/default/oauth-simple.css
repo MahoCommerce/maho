@@ -164,7 +164,9 @@ button, .form-button {
 button:hover, .form-button:hover,
 button:active, .form-button:active {
     background: var(--maho-btn-bg-hover);
+    color: var(--maho-btn-ink-hover);
 }
+
 
 *, html {text-align: left;}
 

@@ -58,8 +58,9 @@ SPDX-License-Identifier: AFL-3.0
     --maho-row-selected: light-dark(rgba(215, 223, 34, .24), rgba(215, 223, 34, .13));
 
     --maho-btn-bg: light-dark(#1c1c1c, #d7df22);
-    --maho-btn-bg-hover: light-dark(#363636, #e3ea56);
+    --maho-btn-bg-hover: light-dark(#d7df22, #e3ea56);
     --maho-btn-ink: light-dark(#fff, #121212);
+    --maho-btn-ink-hover: #121212;
     --maho-btn2-bg: light-dark(#fff, #242424);
     --maho-btn2-bg-hover: light-dark(#f1f1f1, #303030);
     --maho-btn2-border: light-dark(rgba(0, 0, 0, .28), rgba(255, 255, 255, .24));

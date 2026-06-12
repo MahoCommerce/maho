@@ -77,7 +77,7 @@ button.save:hover, button.ok_button:hover, button.add:hover, .form-button.ok_but
 button.save:active, button.ok_button:active, button.add:active, .form-button.ok_button:active {
   background-color: var(--maho-btn-bg-hover);
   border-color: transparent;
-  color: var(--maho-btn-ink); }
+  color: var(--maho-btn-ink-hover); }
 
 button.cancel, button.delete, button.fail, button.cancel_button {
   background: var(--maho-btn2-bg);
