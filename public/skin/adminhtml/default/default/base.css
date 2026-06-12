@@ -4168,9 +4168,7 @@ ul.super-product-attributes {
 }
 
 .media-library-content #contents-uploader {
-    margin-bottom: 10px;
-    background: var(--maho-info-border);
-    padding: 5px 10px
+    margin-bottom: 10px
 }
 
 .media-library-content #contents-uploader .flex {
@@ -5853,4 +5851,46 @@ img.rule-param-add {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis
+}
+
+#content_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between
+}
+
+#content_header h3 {
+    float: none;
+    margin: 0
+}
+
+#content_header .content-buttons {
+    margin: 0
+}
+
+#content_header:after {
+    content: none
+}
+
+#widget_window .entry-edit-head:has(+ #base_fieldset) {
+    display: none
+}
+
+#widget_window #base_fieldset {
+    border: 0;
+    background: none;
+    margin: 0;
+    padding: 0
+}
+
+#widget_window #base_fieldset td.label {
+    width: 140px
+}
+
+#widget_window #base_fieldset select {
+    width: 420px
+}
+
+#widget_window #base_fieldset .nm {
+    display: none
 }
