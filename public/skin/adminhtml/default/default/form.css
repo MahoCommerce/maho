@@ -8,211 +8,157 @@ SPDX-License-Identifier: AFL-3.0
 input.input-text, textarea, select {
   font: 400 12px/1.33 ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   display: inline-block;
-  padding: 1px 3px;
+  padding: 1px 6px;
   margin: 0;
-  background-color: #fff;
-  height: 26px;
-  color: #202856;
-  border: 1px solid #c8c8c8;
-  box-sizing: border-box; }
+  background-color: var(--maho-control-bg);
+  height: 28px;
+  color: var(--maho-control-ink);
+  border: 1px solid var(--maho-control-border);
+  border-radius: var(--maho-radius-sm);
+  box-sizing: border-box;
+  transition: border-color .15s ease, box-shadow .15s ease; }
+
+input.input-text:focus, textarea:focus, select:focus {
+  border-color: var(--maho-focus-ring);
+  outline: 0;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--maho-focus-ring) 25%, transparent); }
+
+input.input-text::placeholder, textarea::placeholder {
+  color: var(--maho-control-placeholder); }
+
+input[type=checkbox], input[type=radio] {
+  accent-color: var(--maho-accent); }
 
 .form-list td.label, .form-list td.label label {
   font-size: 12px;
   font-weight: 400;
-  color: #202856; }
+  color: var(--maho-ink-soft); }
 
 button, .form-button {
   background-image: none;
-  background-color: #71798e;
-  padding: 0 13px;
-  color: #fff;
-  border: 0;
+  background-color: var(--maho-btn2-bg);
+  padding: 0 14px;
+  color: var(--maho-btn2-ink);
+  border: 1px solid var(--maho-btn2-border);
+  border-radius: var(--maho-radius-sm);
   cursor: pointer;
   display: inline-block;
   font-size: 13px;
-  font-weight: 400;
+  font-weight: 500;
   line-height: 26px;
   box-sizing: border-box;
   margin: 0;
-  vertical-align: middle; }
+  vertical-align: middle;
+  transition: background-color .15s ease, border-color .15s ease; }
 
-button:focus, button:active, .form-button:focus, .form-button:active {
-  background: #888;
-  border: 0;
-  outline: thin dotted;
-  outline-offset: -2px; }
+button:hover, .form-button:hover {
+  background-color: var(--maho-btn2-bg-hover);
+  border-color: var(--maho-border-strong); }
 
-button.disabled, .form-button.disabled, button[disabled], .form-button[disabled] fieldset[disabled] button {
+button:focus-visible, .form-button:focus-visible {
+  outline: 2px solid var(--maho-focus-ring);
+  outline-offset: 1px; }
+
+button:active, .form-button:active {
+  background-color: var(--maho-btn2-bg-hover); }
+
+button.disabled, .form-button.disabled, button[disabled], .form-button[disabled], fieldset[disabled] button {
   cursor: default;
   pointer-events: none;
   opacity: 0.5; }
 
 button.save, button.ok_button, button.add, .form-button.ok_button {
-  background-image: none;
-  background-color: #0090FF;
-  padding: 0 13px;
-  color: #fff;
-  border: 0;
-  cursor: pointer;
-  display: inline-block;
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 26px;
-  box-sizing: border-box;
-  vertical-align: middle; }
+  background-color: var(--maho-btn-bg);
+  color: var(--maho-btn-ink);
+  border-color: transparent;
+  font-weight: 600; }
 
-button.save:focus, button.save:active, button.ok_button:focus, button.ok_button:active, button.add:focus, button.add:active, .form-button.ok_button:focus, .form-button.ok_button:active {
-  background-color: #026294;
-  outline: thin dotted;
-  outline-offset: -2px;
-  color: #fff; }
+button.save:hover, button.ok_button:hover, button.add:hover, .form-button.ok_button:hover,
+button.save:active, button.ok_button:active, button.add:active, .form-button.ok_button:active {
+  background-color: var(--maho-btn-bg-hover);
+  border-color: transparent;
+  color: var(--maho-btn-ink); }
 
-button.save.disabled, button.ok_button.disabled, button.add.disabled, button.save[disabled], button.add[disabled], button.ok_button[disabled], fieldset[disabled] button.save, fieldset[disabled] button.add, fieldset[disabled] button.ok_button {
-  cursor: default;
-  pointer-events: none;
-  opacity: 0.5; }
+button.cancel, button.delete, button.fail, button.cancel_button {
+  background: var(--maho-btn2-bg);
+  border-color: color-mix(in srgb, var(--maho-error) 55%, transparent);
+  color: var(--maho-error); }
+
+button.cancel:hover, button.delete:hover, button.fail:hover, button.cancel_button:hover {
+  background: var(--maho-error-bg);
+  border-color: var(--maho-error);
+  color: var(--maho-error); }
+
+button span {
+  padding: 0;
+  background: none; }
+
+button.back {
+  background: none;
+  border-color: transparent; }
+  button.back:before {
+    content: "«";
+    padding-right: 4px; }
+
+button.icon-btn {
+  width: auto !important; }
+  button.icon-btn span {
+    text-indent: 0;
+    width: auto;
+    display: inline; }
+
+button.large, .form-button.large {
+  font-size: 18px;
+  font-weight: 600;
+  padding: 12px 22px;
+  line-height: 1.2;
+  border-radius: var(--maho-radius-md); }
+
+button {
+  text-transform: none; }
 
 .field-100 textarea, .field-100 input.input-text {
   float: none;
-  border: 1px solid #c8c8c8 !important;
-  padding: 1px 3px !important; }
+  border: 1px solid var(--maho-control-border) !important;
+  padding: 1px 6px !important; }
 
 input {
   vertical-align: middle; }
 
 textarea {
-  margin: 0; }
+  margin: 0;
+  height: auto; }
   textarea:disabled {
-    background: #f6f6f6; }
+    background: var(--maho-surface-sunken); }
   textarea.disabled {
-    background: #f6f6f6; }
+    background: var(--maho-surface-sunken); }
 
 select {
-  height: 26px;
-  border: 1px solid #c8c8c8;
+  height: 28px;
+  border: 1px solid var(--maho-control-border);
+  border-radius: var(--maho-radius-sm);
+  background-color: var(--maho-control-bg);
+  color: var(--maho-control-ink);
   box-sizing: border-box;
   text-transform: none;
   margin: 0; }
   select.disabled {
-    background: #f6f6f6; }
+    background: var(--maho-surface-sunken); }
   select:disabled {
-    background: #f6f6f6; }
+    background: var(--maho-surface-sunken); }
   select optgroup {
     font-weight: 600; }
 
 input[type=text].disabled {
-  background: #f6f6f6; }
+  background: var(--maho-surface-sunken); }
 input[type=text]:disabled {
-  background: #f6f6f6; }
+  background: var(--maho-surface-sunken); }
 
 select[multiple] {
   height: auto; }
 
 select[size] {
   height: auto; }
-
-button {
-  text-transform: none; }
-  button span {
-    padding: 0; }
-  button.cancel {
-    background: #e63a3a;
-    color: #fff;
-    padding: 0 13px; }
-    button.cancel span {
-      background: none;
-      padding: 0; }
-    button.cancel:hover {
-      background: #fa4545; }
-  button.delete {
-    background: #e63a3a;
-    color: #fff;
-    padding: 0 13px; }
-    button.delete span {
-      background: none;
-      padding: 0; }
-    button.delete:hover {
-      background: #fa4545; }
-  button.save {
-    padding: 0 13px; }
-    button.save span {
-      background: none;
-      padding: 0; }
-    button.save:hover {
-      background-color: #0090FF; }
-  button.ok_button {
-    padding: 0 13px; }
-    button.ok_button span {
-      background: none;
-      padding: 0; }
-    button.ok_button:hover {
-      background-color: #0090FF; }
-  button.add {
-    padding: 0 13px; }
-    button.add span {
-      background: none;
-      padding: 0; }
-    button.add:hover {
-      background-color: #0090FF; }
-    button.add.disabled span {
-      background: none; }
-  button.back {
-    background: none; }
-    button.back span {
-      background: none;
-      padding: 0; }
-    button.back:before {
-      content: "«";
-      padding-right: 4px; }
-  button:hover {
-    background: #888; }
-  button.disabled {
-    background: #888; }
-    button.disabled:hover {
-      background: #888; }
-    button.disabled:active {
-      background: #888; }
-  button.fail {
-    background: #e63a3a;
-    color: #fff;
-    padding: 0 13px; }
-    button.fail:hover {
-      background: #fa4545; }
-  button.cancel_button {
-    background: #e63a3a;
-    color: #fff;
-    padding: 0 13px; }
-    button.cancel_button:hover {
-      background: #fa4545; }
-  button.icon-btn {
-    width: auto !important; }
-    button.icon-btn span {
-      text-indent: 0;
-      width: auto;
-      display: inline; }
-  button.large {
-    font-size: 22px;
-    padding: 14px 22px 16px; }
-  button.add-image span {
-    background: none;
-    padding: 0; }
-  button.add-widget span {
-    background: none;
-    padding: 0; }
-  button.go span {
-    background: none;
-    padding: 0; }
-  button.add-variable span {
-    background: none;
-    padding: 0; }
-
-.form-button:hover {
-  background: #888; }
-.form-button.ok_button:hover {
-  background-color: #0090FF; }
-.form-button.large {
-  font-size: 22px;
-  padding: 14px 22px 16px; }
 
 .field-100 {
   background: none;
@@ -222,14 +168,14 @@ button {
 .form-list td.label label {
   padding: 0 15px 0 0; }
 .form-list td.scope-label {
-  color: #999;
+  color: var(--maho-ink-faint);
   font-size: 11px; }
 .form-list td.value {
   padding-left: 0 !important; }
   .form-list td.value input.input-text, .form-list td.value textarea, .form-list td.value select {
     width: 330px; }
   .form-list td.value p.note {
-    color: #202856;
+    color: var(--maho-ink-muted);
     font-size: 11px;
     font-weight: 400; }
 
@@ -247,8 +193,8 @@ td:has(input.swatch-option) {
     display: flex;
     justify-content: center;
     font-size: 10px;
-    background: #e63a3a;
-    color: #fff;
+    background: var(--maho-error);
+    color: var(--maho-surface);
     border-radius: 4px; }
   td .swatch-delete svg {height: 14px}
   td:has(input.swatch-option) .swatch-option {
@@ -258,8 +204,8 @@ td:has(input.swatch-option) {
 td:has(input.swatch-disabled) {
   background-image: url('data:image/svg+xml,<svg id="e5490f2e-3f54-4acd-9496-57eed667c240" data-name="Livello 1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 28.41093 28.29249"><title>placeholder</title><rect x="1.20546" y="1.08375" width="26" height="26" fill="%23fff" stroke="%23ccc" stroke-miterlimit="10"/><line x1="0.70546" y1="27.58375" x2="27.70546" y2="0.70875" fill="none" stroke="%23ff003a" stroke-miterlimit="10" stroke-width="2"/></svg>');
   background-repeat: no-repeat;
-  outline: 1px solid #c8c8c8;
-  border: 1px solid #fff;
+  outline: 1px solid var(--maho-control-border);
+  border: 1px solid var(--maho-surface);
   padding: 0;
   margin: 2px;
   width: 24px;

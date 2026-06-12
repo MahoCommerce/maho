@@ -5,18 +5,20 @@ SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 SPDX-License-Identifier: AFL-3.0
 */
 
- /* Reset ================================================================================= */
+@import url(tokens.css);
+
 * { margin:0; padding:0; }
-body          { background:#496778 50% 0 repeat-y; font:12px/1.55 ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; color:#2f2f2f; text-align:center; }
+body          { background: var(--maho-surface-page); font:12px/1.55 var(--maho-font-sans); color: var(--maho-ink); text-align:center; }
 img           { border:0; vertical-align:top; }
-a             { color:#1e7ec8; text-decoration:underline; }
+a             { color: var(--maho-link); text-decoration:underline; }
 a:hover       { text-decoration:none; }
 :focus        { outline:0; }
+:focus-visible { outline: 2px solid var(--maho-focus-ring); outline-offset: 1px; }
 
 /* Headings */
 h1,h2,h3,
-h4,h5,h6      { margin:0 0 5px; line-height:1.35; color:#0a263c; }
-h1            { font-size:20px; font-weight:normal; }
+h4,h5,h6      { margin:0 0 5px; line-height:1.35; color: var(--maho-ink); }
+h1            { font-size:20px; font-weight:600; }
 h2            { font-size:18px; font-weight:normal; }
 h3            { font-size:16px; font-weight:bold; }
 h4            { font-size:14px; font-weight:bold; }
@@ -29,7 +31,7 @@ fieldset      { border:0; }
 legend        { display:none; }
 
 /* Table */
-table         { border:0; /*border-collapse:collapse;*/ border-spacing:0; empty-cells:show; font-size:100%; }
+table         { border:0; border-spacing:0; empty-cells:show; font-size:100%; }
 caption,th,td { vertical-align:top; text-align:left; font-weight:normal; }
 
 /* Content */
@@ -42,7 +44,6 @@ blockquote    { quotes:none; }
 q:before,
 q:after       { content:''; }
 small,big     { font-size:1em; }
-/*sup           { font-size:1em; vertical-align:top; }*/
 
 /* Lists */
 ul,ol         { list-style:none; }
@@ -66,42 +67,36 @@ ul,ol         { list-style:none; }
 .no-margin    { margin:0 !important; }
 .no-padding   { padding:0 !important; }
 .no-bg        { background:none !important; }
-/* ======================================================================================= */
 
-/* Default styles ======================================================================== */
-/* boxes.css*/
 .notification-global {
-    background: url("./images/error_msg_icon.gif") no-repeat scroll 27px 5px #FFF9E9;
-    border-bottom: 1px solid #EEE2BE;
-    border-top: 1px solid #EEE2BE;
-    color: #444444;
+    background: var(--maho-warning-bg);
+    border-bottom: 1px solid var(--maho-warning-border);
+    border-top: 1px solid var(--maho-warning-border);
+    color: var(--maho-ink-soft);
     font-size: 11px;
     line-height: 16px;
     margin: 0 0 -3px;
-    padding: 5px 27px 5px 47px;
+    padding: 5px 27px;
     position: relative;
 }
-.notification-global-notice {
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-name="bulb" data-variant="outline"><path d="M9 21h6"/><path d="M12 3a7 7 0 0 1 7 7c0 2.8-2 5.2-2 7h-10c0-1.8-2-4.2-2-7a7 7 0 0 1 7-7z"/><path d="M12.5 17h-1a2 2 0 0 1-2-2v-.5a1.5 1.5 0 0 1 1.5-1.5h2a1.5 1.5 0 0 1 1.5 1.5v.5a2 2 0 0 1-2 2z"/></svg>');
-}
 .notification-global .label {
-    color: #EB5E00;
+    color: var(--maho-warning);
 }
 .notification-global .clickable {
     cursor: pointer;
 }
 .notification-global span.critical {
-    color: #D20000;
+    color: var(--maho-error-strong);
 }
 .notification-global a:hover {
     text-decoration: none;
 }
 .error, a.error span, .required, .validation-advice {
-    color: #D40707 !important;
+    color: var(--maho-error) !important;
     font-weight: bold !important;
 }
 .notice {
-    color: #EA7601;
+    color: var(--maho-warning);
 }
 .messages ul {
     border: 0 none !important;
@@ -112,6 +107,7 @@ ul,ol         { list-style:none; }
     margin-bottom: 11px !important;
     min-height: 23px !important;
     padding: 8px 8px 2px 32px !important;
+    border-radius: var(--maho-radius-md);
 }
 .messages ul li {
     border: 0 none !important;
@@ -119,72 +115,69 @@ ul,ol         { list-style:none; }
     padding: 0 !important;
 }
 .error-msg {
-    background: url("./images/error_msg_icon.gif") no-repeat scroll 10px 10px #FAEBE7 !important;
-    border: 1px solid #F16048 !important;
-    color: #DF280A !important;
+    background: var(--maho-error-bg) !important;
+    border: 1px solid var(--maho-error-border) !important;
+    color: var(--maho-error-strong) !important;
 }
 .success-msg {
-    background: url("./images/success_msg_icon.gif") no-repeat scroll 10px 10px #EFF5EA !important;
-    border: 1px solid #95A486 !important;
-    color: #3D6611 !important;
+    background: var(--maho-success-bg) !important;
+    border: 1px solid var(--maho-success-border) !important;
+    color: var(--maho-success) !important;
 }
 .notice-msg {
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-name="bulb" data-variant="outline"><path d="M9 21h6"/><path d="M12 3a7 7 0 0 1 7 7c0 2.8-2 5.2-2 7h-10c0-1.8-2-4.2-2-7a7 7 0 0 1 7-7z"/><path d="M12.5 17h-1a2 2 0 0 1-2-2v-.5a1.5 1.5 0 0 1 1.5-1.5h2a1.5 1.5 0 0 1 1.5 1.5v.5a2 2 0 0 1-2 2z"/></svg>') no-repeat scroll 10px 10px #FFFBF0 !important;
-    border: 1px solid #FFD967 !important;
-    color: #3D6611 !important;
+    background: var(--maho-warning-bg) !important;
+    border: 1px solid var(--maho-warning-border) !important;
+    color: var(--maho-ink) !important;
 }
 .warning-msg {
-    background: url("./images/warning_msg_icon.gif") no-repeat scroll 10px 10px #E6E6E6 !important;
-    border: 1px solid #666E73 !important;
-    color: #000000 !important;
+    background: var(--maho-warning-bg) !important;
+    border: 1px solid var(--maho-warning-border) !important;
+    color: var(--maho-ink) !important;
 }
-
-button:hover, .form-button:hover {
-    background: url("./images/btn_over_bg.gif") repeat-x scroll 0 0 #F77C16;
-}
-button:active, .form-button:active {
-    background: url("./images/btn_on_bg.gif") repeat-x scroll 0 0 #F77C16;
-}
-
 
 input.input-text, textarea, select {
-    background: none repeat scroll 0 0 #FFFFFF;
-    border-color: #AAAAAA #C8C8C8 #C8C8C8 #AAAAAA;
-    border-style: solid;
-    border-width: 1px;
+    background: var(--maho-control-bg);
+    border: 1px solid var(--maho-control-border);
+    border-radius: var(--maho-radius-sm);
+    color: var(--maho-control-ink);
     font-size: 12px;
 }
 input.input-text, textarea {
-    padding: 2px;
+    padding: 4px 6px;
+}
+input.input-text:focus, textarea:focus, select:focus {
+    border-color: var(--maho-focus-ring);
+    outline: 0;
 }
 button, .form-button {
-    background: url("./images/btn_bg.gif") repeat-x scroll 0 100% #FFAC47;
-    border-color: #ED6502 #A04300 #A04300 #ED6502;
-    border-style: solid;
-    border-width: 1px;
-    color: #FFFFFF;
+    background: var(--maho-btn-bg);
+    border: 1px solid transparent;
+    border-radius: var(--maho-radius-sm);
+    color: var(--maho-btn-ink);
     cursor: pointer;
     font-size: 12px;
-    font-weight: bold;
-    padding: 0 7px 1px;
+    font-weight: 600;
+    padding: 4px 14px;
     text-align: center !important;
     white-space: nowrap;
 }
-/* ======================================================================================= */
-
+button:hover, .form-button:hover,
+button:active, .form-button:active {
+    background: var(--maho-btn-bg-hover);
+}
 
 *, html {text-align: left;}
 
 h1 {
-    color: #D12C01;
+    color: var(--maho-ink);
     font-size: 22px;
-    font-weight: normal;
+    font-weight: 600;
     margin: 0;
     text-align: left;
 }
 
 h2 {
-    color: #444444;
+    color: var(--maho-ink-soft);
     font-size: 16px;
     margin: 0 0 5px;
     text-align: left;
@@ -192,20 +185,20 @@ h2 {
 
 body,
 .main-container,
-.header-container {background: none;}
+.header-container {background: var(--maho-surface-page);}
 
-.header-simple {height: 60px; text-align: left; padding: 10px 10px 0 10px; border-bottom: 1px solid #CFCFCF;}
+.header-simple {height: 60px; text-align: left; padding: 10px 10px 0 10px; border-bottom: 1px solid var(--maho-border-soft);}
 .header-top img {height: 60px;}
 
 .login-box > div {padding: 10px;}
-.page-title {margin-bottom: 0; border-bottom: 1px solid #CFCFCF;}
+.page-title {margin-bottom: 0; border-bottom: 1px solid var(--maho-border-soft);}
 
-.form-box {border-bottom: 1px solid #CFCFCF;}
+.form-box {border-bottom: 1px solid var(--maho-border-soft);}
 .form-box .fieldset, .form-box fieldset {width: 320px; margin: 0 auto;}
 
 .input-box {margin-bottom: 10px;}
 .input-box label {width: 95px; font-weight: bold; display: block; float: left; text-align: right; padding-right: 10px;}
 .input-box input {width: 209px;}
 
-.required {font-weight: normal; color: #D40707 !important; font-size: 11px;}
+.required {font-weight: normal; color: var(--maho-error) !important; font-size: 11px;}
 .form-buttons {text-align: right;}

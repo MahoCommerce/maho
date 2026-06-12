@@ -20,8 +20,7 @@
             <span id="global_search_indicator" class="autocomplete-indicator" style="display: none">
                 <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Loading...')) ?>">
             </span>
-            <?php $defSearch = $this->__('Global Record Search') ?>
-            <input id="global_search" name="query" type="text" class="input-text" value="<?php if(!empty($query)): ?><?= $query ?><?php else: ?><?= $this->quoteEscape($defSearch) ?><?php endif ?>" onfocus="if(this.value=='<?= $this->quoteEscape($defSearch, true) ?>')this.value=''; " onblur="if(this.value=='')this.value='<?= $defSearch ?>';" autocomplete="off">
+            <input id="global_search" name="query" type="text" class="input-text" value="<?= !empty($query) ? $this->escapeHtml($query) : '' ?>" placeholder="<?= $this->quoteEscape($this->__('Global Record Search')) ?>" autocomplete="off">
             <div id="global_search_autocomplete" class="autocomplete" style="display:none"></div>
             <script>
                 document.getElementById('global_search').addEventListener('input', function() {
@@ -64,6 +63,35 @@
         </fieldset>
         <?php endif ?>
         <div class="user-menu-icons">
+            <button type="button" id="scheme-toggle">
+                <span class="scheme-system"><?= $this->getIconSvg('device-desktop') ?></span>
+                <span class="scheme-dark"><?= $this->getIconSvg('moon') ?></span>
+                <span class="scheme-light"><?= $this->getIconSvg('sun') ?></span>
+            </button>
+            <script>
+                (() => {
+                    const titles = {
+                        system: '<?= $this->jsQuoteEscape($this->__('Color scheme: follow system')) ?>',
+                        dark: '<?= $this->jsQuoteEscape($this->__('Color scheme: dark')) ?>',
+                        light: '<?= $this->jsQuoteEscape($this->__('Color scheme: light')) ?>',
+                    };
+                    const toggle = document.getElementById('scheme-toggle');
+                    const current = () => document.documentElement.dataset.scheme ?? 'system';
+                    toggle.title = titles[current()];
+                    toggle.addEventListener('click', () => {
+                        const order = ['system', 'dark', 'light'];
+                        const next = order[(order.indexOf(current()) + 1) % order.length];
+                        if (next === 'system') {
+                            delete document.documentElement.dataset.scheme;
+                            localStorage.removeItem('maho-admin-scheme');
+                        } else {
+                            document.documentElement.dataset.scheme = next;
+                            localStorage.setItem('maho-admin-scheme', next);
+                        }
+                        toggle.title = titles[next];
+                    });
+                })();
+            </script>
             <?php if (Mage::getSingleton('admin/session')->isAllowed('admin/system/myaccount')): ?>
             <a href="<?= Mage::helper("adminhtml")->getUrl("adminhtml/system_account") ?>" class="user-icon" title="<?= $this->__("My Account") ?>">
                 <?= $this->getIconSvg('user') ?>

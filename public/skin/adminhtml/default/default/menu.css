@@ -5,230 +5,170 @@ SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 SPDX-License-Identifier: AFL-3.0
 */
 
-#nav ul li.active, #nav ul li {
-  float: none;
-  height: auto;
-  background: none;
-  margin: 0;
-}
-
-.user-menu-icons {
-  display: inline-flex;
-  gap: 8px;
-  vertical-align: middle;
-  margin-inline: 8px;
-}
-
-.user-menu-icons a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.9;
-  transition: opacity 0.2s ease;
-  height: 40px;
-}
-
-.user-menu-icons a svg {
-  stroke: #fff;
-  width: 24px;
-  height: 24px;
-}
-
-.user-menu-icons a:hover {
-  opacity: 1;
-}
-
 .nav-bar {
-  background: black;
-  padding: 0 350px 0 55px;
+    background: var(--maho-night);
+    padding: 0 350px 0 55px;
 }
 
 #nav {
-  padding-left: 0;
+    display: flex;
+    align-items: stretch;
+    padding-left: 0;
 }
+
 #nav li {
-  position: relative;
-  text-align: left;
-  float: left;
+    position: relative;
+    text-align: left;
 }
-#nav li:hover {
-  z-index: 999;
-}
-#nav li:hover a {
-  color: #d6e2e5;
-}
-#nav li:hover ul {
-  left: 0;
-}
-#nav li:hover ul ul {
-  left: -10000px;
-}
-#nav li:hover ul a {
-  color: #202856;
-  font-size: 12px;
-}
-#nav li:hover ul li:hover ul {
-  left: 100px;
-}
-#nav li:hover ul li:hover ul ul {
-  left: -10000px;
-}
-#nav li:hover ul li:hover ul li:hover ul {
-  left: 100px;
-}
-#nav li.active {
-  margin-left: -1px;
-  color: #fff;
-  font-weight: bold;
-}
-#nav li.active em {
-  display: block;
-  position: absolute;
-  top: 0;
-  right: -1px;
-  width: 3px;
-  height: 27px;
-}
-#nav li.active li {
-  font-weight: normal;
-}
-#nav li.level0 > a {
-  text-transform: none;
-  font-weight: 400;
-  color: #fff;
-  height: 38px;
-  line-height: 38px;
-}
-#nav li.level0 > a:hover {
-  background: #2c3878;
-  color: #fff;
-}
-#nav li.level0 li.parent > a:after {
-  content: "";
-  position: absolute;
-  right: 12px;
-  bottom: 9px;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 5px 0 5px 6px;
-  border-color: transparent transparent transparent #c8c8c8;
-}
-#nav li.level0:hover > a {
-  background: #293470;
-  color: #fff;
-}
-#nav li.parent a {
-  cursor: default;
-}
-#nav li.parent li.parent a {
-  cursor: default;
-}
-#nav li.parent li.parent li.parent a {
-  cursor: default;
-}
-#nav li.parent li.parent li.parent li a {
-  cursor: pointer;
-}
-#nav li.parent li.parent li a {
-  cursor: pointer;
-}
-#nav li.parent li a {
-  cursor: pointer;
-}
-#nav li#bubblelauncher-status a {
-  background-position: center 8px;
-  line-height: 38px;
-  height: 38px;
-}
-#nav li#bubblelauncher-status.on a {
-  background-position: center -32px;
-}
+
 #nav a {
-  display: block;
-  text-decoration: none;
-  float: left;
-  padding: 0 12px;
-  color: #fff;
-  cursor: pointer;
+    text-decoration: none;
+    cursor: pointer;
 }
-#nav a:hover {
-  display: block;
-  text-decoration: none;
+
+#nav li.level0 > a {
+    display: flex;
+    align-items: center;
+    height: 44px;
+    padding: 0 14px;
+    color: rgba(236, 237, 227, .82);
+    font-size: 13px;
+    font-weight: 500;
+    transition: color .15s ease, background-color .15s ease;
 }
+
+#nav li.level0 > a:hover,
+#nav li.level0:focus-within > a {
+    color: #fff;
+    background: rgba(255, 255, 255, .07);
+}
+
+#nav li.level0.active > a {
+    color: #fff;
+    font-weight: 600;
+    box-shadow: inset 0 -3px 0 var(--maho-chartreuse);
+}
+
 #nav ul {
-  position: absolute;
-  width: 189px;
-  top: 38px;
-  left: -10000px;
-  box-shadow: rgba(0, 0, 0, 0.180392) 1px 3px 4px;
+    position: absolute;
+    top: 100%;
+    left: -10000px;
+    z-index: 999;
+    min-width: 220px;
+    padding: 6px;
+    background: var(--maho-surface-overlay);
+    border: 1px solid var(--maho-border-soft);
+    border-radius: var(--maho-radius-md);
+    box-shadow: var(--maho-shadow-float);
 }
-#nav ul li {
-  padding: 0;
+
+#nav li:hover > ul,
+#nav li:focus-within > ul {
+    left: 0;
 }
-#nav ul li.active a {
-  color: #202856;
-  font-size: 12px;
-}
-#nav ul li a {
-  background: #fff;
-  padding: 9px 12px;
-  color: #202856;
-  font-size: 12px;
-}
-#nav ul li a.active {
-  text-decoration: underline;
-}
-#nav ul li a:hover {
-  background: #202856;
-  color: #fff;
-}
-#nav ul li.parent a {
-  background-position: 100% 100%;
-  background-repeat: no-repeat;
-}
-#nav ul li.parent li.parent a {
-  background-position: 100% 100%;
-  background-repeat: no-repeat;
-}
-#nav ul li.parent li.parent li a {
-  background-image: none;
-}
-#nav ul li.parent li a {
-  background-image: none;
-}
-#nav ul li:hover a {
-  font-weight: normal;
-}
-#nav ul li:hover a:hover {
-  font-weight: normal;
-}
-#nav ul a {
-  float: none;
-  line-height: 1.3em;
-  font-weight: normal;
-}
-#nav ul a:hover {
-  float: none;
-  line-height: 1.3em;
-}
+
 #nav ul ul {
-  border-top: 0;
-  padding-top: 2px;
-  left: 100px;
-  top: 13px;
+    top: -7px;
+    left: -10000px;
 }
-#nav ul ul ul {
-  left: -10000px;
+
+#nav ul li:hover > ul,
+#nav ul li:focus-within > ul {
+    left: calc(100% - 4px);
 }
-#nav .level0 > a:after {
-  content: "";
-  display: block;
-  margin-top: 10px;
-  height: 3px;
-  font-size: 0;
+
+#nav ul a {
+    display: block;
+    padding: 8px 26px 8px 10px;
+    border-radius: var(--maho-radius-sm);
+    color: var(--maho-ink);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.35;
 }
-#nav .level0.active > a {
-  font-weight: 600;
-  background: #273169;
+
+#nav ul a:hover,
+#nav ul a:focus-visible {
+    background: var(--maho-surface-sunken);
+    color: var(--maho-ink);
+}
+
+#nav ul a.active {
+    font-weight: 600;
+}
+
+#nav ul li.parent > a::after {
+    content: "";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    margin-top: -4px;
+    border: 4px solid transparent;
+    border-left-color: var(--maho-ink-faint);
+    border-right: 0;
+}
+
+.user-menu-icons {
+    display: inline-flex;
+    gap: 8px;
+    vertical-align: middle;
+    margin-inline: 8px;
+}
+
+.user-menu-icons a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    opacity: .8;
+    transition: opacity .15s ease;
+}
+
+.user-menu-icons a svg {
+    stroke: #fff;
+    width: 22px;
+    height: 22px;
+}
+
+.user-menu-icons a:hover,
+.user-menu-icons a:focus-visible {
+    opacity: 1;
+}
+
+#scheme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #fff;
+    cursor: pointer;
+    opacity: .8;
+    transition: opacity .15s ease;
+}
+
+#scheme-toggle:hover,
+#scheme-toggle:focus-visible {
+    opacity: 1;
+    background: none;
+    border: 0;
+}
+
+#scheme-toggle svg {
+    stroke: #fff;
+    width: 22px;
+    height: 22px;
+}
+
+#scheme-toggle span {
+    display: none;
+    line-height: 0;
+}
+
+:root:not([data-scheme]) #scheme-toggle .scheme-system,
+:root[data-scheme="dark"] #scheme-toggle .scheme-dark,
+:root[data-scheme="light"] #scheme-toggle .scheme-light {
+    display: block;
 }

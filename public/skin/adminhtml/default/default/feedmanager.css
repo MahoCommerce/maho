@@ -12,40 +12,40 @@
 .fm-preview-panel,
 .fm-panels-container {
     /* Status colors */
-    --fm-success-bg: #d4edda;
-    --fm-success-border: #c3e6cb;
-    --fm-success-text: #155724;
+    --fm-success-bg: var(--maho-success-bg);
+    --fm-success-border: var(--maho-success-border);
+    --fm-success-text: var(--maho-success);
 
-    --fm-error-bg: #f8d7da;
-    --fm-error-border: #f5c6cb;
-    --fm-error-text: #721c24;
+    --fm-error-bg: var(--maho-error-bg);
+    --fm-error-border: var(--maho-error-border);
+    --fm-error-text: var(--maho-error-strong);
 
-    --fm-warning-bg: #fff3cd;
-    --fm-warning-border: #ffc107;
-    --fm-warning-text: #856404;
+    --fm-warning-bg: var(--maho-warning-bg);
+    --fm-warning-border: var(--maho-warning-border);
+    --fm-warning-text: var(--maho-warning);
 
-    --fm-info-bg: #e3f2fd;
-    --fm-info-border: #90caf9;
-    --fm-info-text: #1565c0;
+    --fm-info-bg: var(--maho-info-bg);
+    --fm-info-border: var(--maho-info-border);
+    --fm-info-text: var(--maho-info);
 
     /* Neutral colors */
-    --fm-border: #ccc;
-    --fm-border-light: #ddd;
-    --fm-border-lighter: #e0e0e0;
-    --fm-border-lightest: #eee;
+    --fm-border: var(--maho-border);
+    --fm-border-light: var(--maho-border-soft);
+    --fm-border-lighter: var(--maho-border-soft);
+    --fm-border-lightest: var(--maho-hairline);
 
-    --fm-bg-white: #fff;
-    --fm-bg-light: #fafafa;
-    --fm-bg-lighter: #f5f5f5;
-    --fm-bg-header: #f0f0f0;
+    --fm-bg-white: var(--maho-surface);
+    --fm-bg-light: var(--maho-surface-raised);
+    --fm-bg-lighter: var(--maho-surface-sunken);
+    --fm-bg-header: var(--maho-surface-sunken);
 
-    --fm-text-muted: #666;
-    --fm-text-light: #888;
-    --fm-text-lighter: #999;
+    --fm-text-muted: var(--maho-ink-muted);
+    --fm-text-light: var(--maho-ink-faint);
+    --fm-text-lighter: var(--maho-ink-faint);
 
     /* Accent colors */
-    --fm-primary: #1979c3;
-    --fm-primary-hover: #006bb4;
+    --fm-primary: var(--maho-accent);
+    --fm-primary-hover: var(--maho-accent-strong);
 
     /* Spacing */
     --fm-spacing-xs: 4px;
@@ -55,8 +55,8 @@
     --fm-spacing-xl: 20px;
 
     /* Border radius */
-    --fm-radius-sm: 3px;
-    --fm-radius-md: 4px;
+    --fm-radius-sm: var(--maho-radius-sm);
+    --fm-radius-md: var(--maho-radius-sm);
 }
 
 /* ============================================
