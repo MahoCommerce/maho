@@ -259,7 +259,7 @@ class Pgsql extends AbstractPdoAdapter
      * @throws \RuntimeException To re-throw PDOException.
      */
     #[\Override]
-    public function query(string|\Maho\Db\Select $sql, array|int|string|float $bind = [], array $types = []): \Maho\Db\Statement\Pdo\Pgsql
+    public function query(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): \Maho\Db\Statement\Pdo\Pgsql
     {
         $this->_debugTimer();
         try {
@@ -269,13 +269,9 @@ class Pgsql extends AbstractPdoAdapter
             // Connect if not already connected
             $this->_connect();
 
-            // Execute query using Doctrine DBAL. $types tags binary (bytea)
-            // parameters so PDO binds them as PARAM_LOB; otherwise raw bytes
-            // (e.g. a packed IP) would be sent as a UTF-8-validated text
-            // parameter and Postgres would reject any byte that is not valid
-            // UTF-8. See getBinaryBindTypes().
+            // Execute query using Doctrine DBAL
             if (!empty($bind)) {
-                $result = $this->_connection->executeQuery($sql, $bind, $types);
+                $result = $this->_connection->executeQuery($sql, $bind);
             } else {
                 $result = $this->_connection->executeQuery($sql);
             }
@@ -906,9 +902,12 @@ class Pgsql extends AbstractPdoAdapter
     /**
      * Lowercased set of bytea columns for $tableName (value `true` per column).
      *
-     * describeTable() is itself cached, so after the first call this is an
-     * in-memory lookup. Almost every table has no binary columns and returns an
-     * empty set, which lets the write methods skip binary binding entirely.
+     * describeTable() reports a column's DATA_TYPE as the Doctrine type name,
+     * and DBAL introspects a PostgreSQL bytea as BlobType, so the marker is
+     * 'blob' (not 'bytea'); 'binary' is matched too for safety. describeTable()
+     * is itself cached, so after the first call this is an in-memory lookup, and
+     * almost every table returns an empty set, letting the write methods skip
+     * binary handling entirely.
      *
      * @return array<string, true>
      */
@@ -918,7 +917,7 @@ class Pgsql extends AbstractPdoAdapter
         if (!isset($this->_binaryColumns[$key])) {
             $binary = [];
             foreach ($this->describeTable($tableName) as $column => $info) {
-                if (strtolower((string) ($info['DATA_TYPE'] ?? '')) === 'bytea') {
+                if (in_array(strtolower((string) ($info['DATA_TYPE'] ?? '')), ['blob', 'binary', 'bytea'], true)) {
                     $binary[strtolower((string) $column)] = true;
                 }
             }
@@ -928,28 +927,30 @@ class Pgsql extends AbstractPdoAdapter
     }
 
     /**
-     * Positional ParameterType map for a bound write, tagging bytea columns as
-     * BINARY so PDO binds them as PARAM_LOB. Without it a packed IP (raw bytes
-     * from inet_pton) is sent as a text parameter and Postgres rejects any byte
-     * that is not valid UTF-8. Returns [] when $tableName has no binary columns,
-     * so the common path keeps the default string binding.
+     * Hex-encode bytea parameter values as PostgreSQL `\x...` literals so they
+     * bind as ordinary text. pdo_pgsql sends bound parameters in text format,
+     * so a raw packed IP (bytes from inet_pton) would be UTF-8-validated and
+     * Postgres would reject any byte >= 0x80. The hex form is pure ASCII and
+     * bytea_in decodes it back to the original bytes on insert. Returns $params
+     * unchanged when $tableName has no binary columns, so the common write path
+     * is untouched.
      *
-     * @param list<string> $boundColumns column name for each positional ?, in order
-     * @return array<int, \Doctrine\DBAL\ParameterType>
+     * @param list<string> $boundColumns column name for each positional value, in order
+     * @param list<mixed> $params positional bound values aligned to $boundColumns
+     * @return list<mixed>
      */
-    protected function getBinaryBindTypes(string $tableName, array $boundColumns): array
+    protected function _encodeBinaryBindValues(string $tableName, array $boundColumns, array $params): array
     {
         $binary = $this->getBinaryColumns($tableName);
         if ($binary === []) {
-            return [];
+            return $params;
         }
-        $types = [];
         foreach ($boundColumns as $position => $column) {
-            if (isset($binary[strtolower($column)])) {
-                $types[$position] = \Doctrine\DBAL\ParameterType::BINARY;
+            if (isset($binary[strtolower($column)], $params[$position]) && is_string($params[$position])) {
+                $params[$position] = '\x' . bin2hex($params[$position]);
             }
         }
-        return $types;
+        return $params;
     }
 
     /**
@@ -1022,7 +1023,8 @@ class Pgsql extends AbstractPdoAdapter
         }
 
         // Execute the statement
-        $stmt = $this->query($sql, $params, $this->getBinaryBindTypes($tableName, $boundColumns));
+        $params = $this->_encodeBinaryBindValues($tableName, $boundColumns, $params);
+        $stmt = $this->query($sql, $params);
 
         // Capture the returned ID if available
         if ($returningColumn !== null) {
@@ -1073,7 +1075,8 @@ class Pgsql extends AbstractPdoAdapter
         );
 
         $tableName = is_array($table) ? (string) reset($table) : (string) $table;
-        $stmt = $this->query($sql, $params, $this->getBinaryBindTypes($tableName, $boundColumns));
+        $params = $this->_encodeBinaryBindValues($tableName, $boundColumns, $params);
+        $stmt = $this->query($sql, $params);
         return $stmt->rowCount();
     }
 
@@ -1223,7 +1226,8 @@ class Pgsql extends AbstractPdoAdapter
             $insertSql .= sprintf(' RETURNING %s', $this->quoteIdentifier($returningColumn));
         }
 
-        $stmt = $this->query($insertSql, array_values($bind), $this->getBinaryBindTypes($tableName, $boundColumns));
+        $params = $this->_encodeBinaryBindValues($tableName, $boundColumns, array_values($bind));
+        $stmt = $this->query($insertSql, $params);
 
         // Capture the returned ID if available
         if ($returningColumn !== null) {
@@ -1390,7 +1394,8 @@ class Pgsql extends AbstractPdoAdapter
 
         $insertQuery = $this->_getInsertSqlQuery($table, $columns, $values);
 
-        $stmt = $this->query($insertQuery, $bind, $this->getBinaryBindTypes($table, $boundColumns));
+        $bind = $this->_encodeBinaryBindValues($table, $boundColumns, $bind);
+        $stmt = $this->query($insertQuery, $bind);
 
         // Explicit values bypass the sequence; bump it once per column with
         // the highest value written (see insert()).
@@ -1453,7 +1458,8 @@ class Pgsql extends AbstractPdoAdapter
         // $bind keys still align with their placeholders here (Expr entries were
         // unset above), so column names map positionally to array_values($bind).
         $boundColumns = array_map('strval', array_keys($bind));
-        $stmt = $this->query($sql, array_values($bind), $this->getBinaryBindTypes($tableName, $boundColumns));
+        $params = $this->_encodeBinaryBindValues($tableName, $boundColumns, array_values($bind));
+        $stmt = $this->query($sql, $params);
 
         // Capture the returned ID if available (only returns a row if insert succeeded)
         if ($returningColumn !== null) {
