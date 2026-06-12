@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <modules>
+        <Maho_MediaCleaner>
+            <active>true</active>
+            <codePool>core</codePool>
+            <depends>
+                <Mage_Admin/>
+                <Mage_Adminhtml/>
+                <Mage_Catalog/>
+                <Mage_Cms/>
+            </depends>
+        </Maho_MediaCleaner>
+    </modules>
+</config>
