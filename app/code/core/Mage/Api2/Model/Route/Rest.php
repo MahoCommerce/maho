@@ -9,4 +9,7 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api2_Model_Route_Rest extends Mage_Api2_Model_Route_Abstract implements Mage_Api2_Model_Route_Interface {}

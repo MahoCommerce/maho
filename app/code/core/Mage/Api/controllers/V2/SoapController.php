@@ -8,6 +8,9 @@
  * @package Mage_Api
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_V2_SoapController extends Mage_Api_Controller_Action
 {
     #[Maho\Config\Route('/api/v2_soap', name: 'api.v2_soap')]

@@ -10,6 +10,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_Model_Acl_Assert_Time implements Mage_Api_Model_Acl_Assert_Interface
 {
     /**
