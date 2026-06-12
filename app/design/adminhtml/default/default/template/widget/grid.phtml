@@ -18,7 +18,7 @@ $numColumns = count($this->getColumns());
         </div>
         <?php endif ?>
 
-        <div id="<?= $this->getId() ?>">
+        <div id="<?= $this->getId() ?>" class="grid-widget">
     <?php else: ?>
         <?= $this->getMessagesBlock()->toHtml() ?>
     <?php endif ?>

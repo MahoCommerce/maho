@@ -1405,6 +1405,23 @@ button.icon-btn span {
     margin-right: 5px
 }
 
+.buttons-set:has(+ textarea) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 4px
+}
+
+.buttons-set:has(+ textarea) button {
+    margin-right: 0
+}
+
+.buttons-set + textarea {
+    margin-top: 0;
+    width: 100%!important;
+    box-sizing: border-box
+}
+
 .switcher {
     margin-bottom: 10px;
     border: 1px solid var(--maho-border-soft);
@@ -5535,11 +5552,47 @@ dl.accordion dt.open a {
 table.actions {
     padding: 15px;
     background: var(--maho-surface);
-    border: 1px solid var(--maho-border)
+    border: 1px solid var(--maho-border-soft)
 }
 
 table.actions td {
     vertical-align: middle
+}
+
+.grid-widget {
+    background: var(--maho-surface);
+    border: 1px solid var(--maho-border-soft);
+    border-radius: var(--maho-radius-md);
+    overflow: hidden
+}
+
+.grid-widget table.actions {
+    margin: 0;
+    padding: 10px 15px;
+    border: 0;
+    border-bottom: 1px solid var(--maho-hairline)
+}
+
+.grid-widget .massaction {
+    height: auto;
+    margin: 0;
+    padding: 6px 15px;
+    border: 0;
+    border-bottom: 1px solid var(--maho-hairline);
+    background: var(--maho-surface)
+}
+
+.grid-widget .massaction td {
+    padding: 3px 0;
+    vertical-align: middle
+}
+
+.grid-widget .grid {
+    padding-bottom: 0
+}
+
+.grid-widget .grid table.data {
+    border: 0
 }
 
 .dialog table.table_window {

@@ -160,6 +160,20 @@ select[multiple] {
 select[size] {
   height: auto; }
 
+select[multiple], select[size] {
+  padding: 4px; }
+  select[multiple] option, select[size] option {
+    padding: 5px 8px; }
+  select[multiple] option:checked, select[size] option:checked {
+    background: linear-gradient(var(--maho-surface-sunken), var(--maho-surface-sunken));
+    color: var(--maho-ink);
+    font-weight: 600; }
+  select[multiple] optgroup, select[size] optgroup {
+    padding: 5px 0 0 4px;
+    font-weight: 600;
+    font-style: normal;
+    color: var(--maho-ink-muted); }
+
 .field-100 {
   background: none;
   border: 0;
