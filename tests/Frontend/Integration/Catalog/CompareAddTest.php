@@ -50,7 +50,7 @@ it('populates the shared log/visitor singleton on controller_action_predispatch'
 
     $request = Mage::app()->getRequest();
     $request->setRouteName('catalog');
-    $controllerAction = new class($request, new Mage_Core_Controller_Response_Http()) extends Mage_Core_Controller_Front_Action {};
+    $controllerAction = new class ($request, new Mage_Core_Controller_Response_Http()) extends Mage_Core_Controller_Front_Action {};
 
     // Same event the front controller fires before dispatching any frontend action.
     Mage::dispatchEvent('controller_action_predispatch', ['controller_action' => $controllerAction]);
