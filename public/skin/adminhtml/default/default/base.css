@@ -308,7 +308,7 @@ big {
 }
 
 .grid tr.even,.grid tr.even tr {
-    background: var(--maho-surface-sunken)
+    background: var(--maho-zebra)
 }
 
 .grid tr.on-mouse {
@@ -371,8 +371,11 @@ big {
     text-align: right
 }
 
-.grid table td.empty-text {
-    padding: 15px
+.grid table tr td.empty-text {
+    padding: 24px 15px;
+    text-align: center;
+    color: var(--maho-ink-muted);
+    background: var(--maho-surface)
 }
 
 .grid table td .action-select {
@@ -389,7 +392,7 @@ big {
 }
 
 .grid tbody.even tr {
-    background: var(--maho-surface-sunken)!important
+    background: var(--maho-zebra)!important
 }
 
 .grid tbody.odd tr td,.grid tbody.even tr td {
@@ -545,7 +548,7 @@ table.actions td {
 }
 
 .grid tr.filter {
-    background: var(--maho-surface-sunken);
+    background: var(--maho-surface);
     cursor: default
 }
 
@@ -2020,8 +2023,26 @@ div.autocomplete ul li {
     border-right: 0;
 }
 
-.dashboard-diagrams-box {
-    border: 1px solid var(--maho-border);
+.dashboard-diagrams-box,.dashboard-grids-box {
+    background: var(--maho-surface);
+    border: 1px solid var(--maho-border-soft);
+    border-radius: var(--maho-radius-md);
+    overflow: hidden;
+}
+
+.dashboard-diagrams-box ul.tabs-horiz,.dashboard-grids-box ul.tabs-horiz {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 2px 1px 0;
+    border-bottom: 1px solid var(--maho-hairline);
+}
+
+#grid_tab_content .grid table,#diagram_tab_content .grid table {
+    border: 0;
+}
+
+#grid_tab_content .grid {
+    padding-bottom: 0;
 }
 
 .dashboard-totals-wrapper {
@@ -4562,9 +4583,9 @@ input[type=date]:focus,input[type=time]:focus,input[type=datetime-local]:focus {
 dl.accordion dt,.entry-edit .entry-edit-head {
     background: var(--maho-surface);
     color: var(--maho-ink);
-    padding: 6px 16px;
+    padding: 10px 15px 0;
     border: 1px solid var(--maho-border-soft);
-    border-bottom: 1px solid var(--maho-hairline);
+    border-bottom: 0;
     border-radius: var(--maho-radius-md) var(--maho-radius-md) 0 0
 }
 
@@ -4893,7 +4914,7 @@ small {
 }
 
 .grid tr.filter {
-    background: var(--maho-surface-sunken)!important
+    background: var(--maho-surface)!important
 }
 
 .grid tr.filter th {
@@ -4950,7 +4971,7 @@ small {
 }
 
 .grid tr.headings {
-    background: var(--maho-surface);
+    background: var(--maho-surface-sunken);
     border: 0;
     border-bottom: 2px solid var(--maho-border-strong)
 }
@@ -5002,19 +5023,19 @@ small {
 }
 
 .grid tr.even td {
-    background: var(--maho-surface-page)
+    background: var(--maho-zebra)
 }
 
 .grid tr.even tr td {
-    background: var(--maho-surface-page)
+    background: var(--maho-zebra)
 }
 
 .grid tbody.even tr td {
-    background: var(--maho-surface-page)!important
+    background: var(--maho-zebra)!important
 }
 
 .grid tbody.odd tr td {
-    background: var(--maho-surface-sunken)!important
+    background: var(--maho-surface)!important
 }
 
 .grid td input.input-text {
@@ -5864,4 +5885,12 @@ img.rule-param-add {
     height: 18px;
     stroke: var(--maho-ink-soft);
     vertical-align: middle
+}
+
+.dashboard-container .grid table :is(th, td):first-child {
+    padding-left: 15px
+}
+
+.dashboard-container .grid table :is(th, td):last-child {
+    padding-right: 15px
 }

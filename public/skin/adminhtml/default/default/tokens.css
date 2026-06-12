@@ -53,6 +53,7 @@ SPDX-License-Identifier: AFL-3.0
     --maho-info-bg: light-dark(#edf4f7, #16242c);
     --maho-info-border: light-dark(#b9d2de, #2e4d5e);
 
+    --maho-zebra: light-dark(#f8f8f8, #252525);
     --maho-row-hover: light-dark(rgba(215, 223, 34, .14), rgba(215, 223, 34, .07));
     --maho-row-selected: light-dark(rgba(215, 223, 34, .24), rgba(215, 223, 34, .13));
 
