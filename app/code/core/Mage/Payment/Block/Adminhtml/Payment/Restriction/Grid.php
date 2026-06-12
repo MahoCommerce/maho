@@ -15,6 +15,13 @@ class Mage_Payment_Block_Adminhtml_Payment_Restriction_Grid extends Mage_Adminht
         $this->setDefaultSort('restriction_id');
         $this->setDefaultDir('ASC');
         $this->setSaveParametersInSession(true);
+        $this->setUseAjax(true);
+    }
+
+    #[\Override]
+    public function getGridUrl(): string
+    {
+        return $this->getUrl('*/*/grid', ['_current' => true]);
     }
 
     #[\Override]

@@ -37,4 +37,12 @@ class Mage_Adminhtml_Customer_OnlineController extends Mage_Adminhtml_Controller
 
         $this->renderLayout();
     }
+
+    #[Maho\Config\Route('/admin/customer_online/grid')]
+    public function gridAction(): void
+    {
+        $this->getResponse()->setBody(
+            $this->getLayout()->createBlock('adminhtml/customer_online_grid', 'customer.grid')->toHtml(),
+        );
+    }
 }

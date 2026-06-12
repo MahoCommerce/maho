@@ -1897,6 +1897,39 @@ div.autocomplete ul li {
     margin: 0 0 0 5px
 }
 
+/* Button with a hover/focus dropdown menu, for grouping related header actions.
+   The toggle is a plain button and inherits the default button styling; these
+   rules only add the popover (position + show on hover) and the menu rows. */
+.btn-dropdown {
+    position: relative;
+    display: inline-block;
+}
+.btn-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    background: #fff;
+    border: 1px solid #b3b3b3;
+    box-shadow: 0 2px 6px rgba(0,0,0,.2);
+    white-space: nowrap;
+}
+.btn-dropdown:hover .btn-dropdown-menu,
+.btn-dropdown:focus-within .btn-dropdown-menu {
+    display: block;
+}
+.btn-dropdown-menu a {
+    display: block;
+    padding: 4px 16px;
+    color: #2f2f2f;
+    font-size: 12px;
+    text-decoration: none;
+}
+.btn-dropdown-menu a:hover {
+    background: #f0f0f0;
+}
+
 .side-col .content-header {
     border-bottom: 0;
     margin-right: 12px;

@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <sections>
+        <admin>
+            <groups>
+                <mediacleaner translate="label">
+                    <tab>advanced</tab>
+                    <label>Media Cleaner</label>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <sort_order>90</sort_order>
+                    <fields>
+                        <thumbnail_max_width translate="label comment">
+                            <label>Thumbnail size</label>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>Used in the admin preview grid.</comment>
+                        </thumbnail_max_width>
+                        <enable_image_click translate="label">
+                            <label>Enable click on preview image to zoom it</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </enable_image_click>
+                        <blacklist translate="label comment">
+                            <frontend_type>textarea</frontend_type>
+                            <label>Files/folders blacklist</label>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>Never identify or delete files and folders in this list (wildcards allowed), one per line. Root dir is "media". Eg: "wysiwyg/landing*/*.jpg" or "wysiwyg/images2021" etc.</comment>
+                        </blacklist>
+                    </fields>
+                </mediacleaner>
+            </groups>
+        </admin>
+    </sections>
+</config>
