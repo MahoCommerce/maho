@@ -75,5 +75,24 @@
 
 <?= $this->getChildHtml('before_body_end') ?>
 
+<script>
+    // Toggle .is-stuck on the sticky content-header while it's pinned to the top,
+    // so it can gain a little vertical padding only when stuck.
+    (() => {
+        const header = document.querySelector('.middle .content-header');
+        if (!header || getComputedStyle(header).position !== 'sticky') {
+            return;
+        }
+        const sentinel = document.createElement('div');
+        sentinel.setAttribute('aria-hidden', 'true');
+        sentinel.style.height = '0';
+        header.parentNode.insertBefore(sentinel, header);
+        new IntersectionObserver(
+            ([entry]) => header.classList.toggle('is-stuck', !entry.isIntersecting),
+            { threshold: 0 },
+        ).observe(sentinel);
+    })();
+</script>
+
 </body>
 </html>

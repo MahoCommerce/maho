@@ -4853,33 +4853,39 @@ small {
 /* Title left, action buttons pushed to the right, vertically centered together.
    margin-left:auto (rather than justify-content) keeps the buttons flush right
    regardless of any extra header elements such as a store switcher. */
-.content-header:has(.content-buttons) {
+.content-header:has(.content-buttons, .form-buttons) {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 8px 12px;
-    margin-top: -10px;
-    padding-top: 10px;
-    padding-bottom: 10px
+    gap: 8px 12px
 }
 
-.content-header:has(.content-buttons) > h3 {
+/* Only pad the sticky header once it's pinned to the top (class toggled in JS) */
+.content-header.is-stuck {
+    padding-top: 5px;
+    padding-bottom: 5px
+}
+
+.content-header:has(.content-buttons, .form-buttons) > h3 {
     margin: 0
 }
 
-.content-header:has(.content-buttons) .content-buttons {
+.content-header:has(.content-buttons, .form-buttons) .content-buttons,
+.content-header:has(.content-buttons, .form-buttons) .form-buttons {
     display: flex;
     align-items: center;
+    gap: 6px;
     margin: 0 0 0 auto;
     float: none
 }
 
-.content-header:has(.content-buttons) .content-buttons button {
-    margin-bottom: 0
+.content-header:has(.content-buttons, .form-buttons) .content-buttons button,
+.content-header:has(.content-buttons, .form-buttons) .form-buttons button {
+    margin: 0
 }
 
 /* No clearfix needed once it's a flex row (and it would count as a stray item) */
-.content-header:has(.content-buttons):after {
+.content-header:has(.content-buttons, .form-buttons):after {
     content: none
 }
 
