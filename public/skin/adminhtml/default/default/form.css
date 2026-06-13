@@ -135,6 +135,7 @@ textarea {
 
 select {
   height: 28px;
+  padding: 1px 22px 1px 8px;
   border: 1px solid var(--maho-control-border);
   border-radius: var(--maho-radius-sm);
   background-color: var(--maho-control-bg);

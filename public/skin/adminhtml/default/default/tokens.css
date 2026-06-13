@@ -17,6 +17,7 @@ SPDX-License-Identifier: AFL-3.0
     --maho-chartreuse: #d7df22;
     --maho-chartreuse-deep: light-dark(#647004, #c5cd31);
     --maho-night: light-dark(#121212, #0c0c0c);
+    --maho-night-raised: light-dark(#242424, #1e1e1e);
     --maho-night-soft: light-dark(#2e2e2e, #d4d4d4);
     --maho-link: light-dark(#647004, #c5cd31);
 

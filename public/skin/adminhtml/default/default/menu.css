@@ -7,7 +7,7 @@ SPDX-License-Identifier: AFL-3.0
 
 .nav-bar {
     background: var(--maho-night);
-    padding: 0 350px 0 55px;
+    padding: 0 160px 0 55px;
 }
 
 #nav {
@@ -112,18 +112,27 @@ SPDX-License-Identifier: AFL-3.0
 
 .user-menu-icons {
     display: inline-flex;
-    gap: 8px;
+    align-items: center;
+    gap: 2px;
     vertical-align: middle;
-    margin-inline: 8px;
+    margin-inline: 2px;
 }
 
-.user-menu-icons a {
+.user-menu-icons a,
+#scheme-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 44px;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--maho-radius-md);
+    background: none;
+    color: #fff;
+    cursor: pointer;
     opacity: .8;
-    transition: opacity .15s ease;
+    transition: opacity .15s ease, background-color .15s ease;
 }
 
 .user-menu-icons a svg {
@@ -133,29 +142,11 @@ SPDX-License-Identifier: AFL-3.0
 }
 
 .user-menu-icons a:hover,
-.user-menu-icons a:focus-visible {
-    opacity: 1;
-}
-
-#scheme-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 44px;
-    padding: 0;
-    border: 0;
-    background: none;
-    color: #fff;
-    cursor: pointer;
-    opacity: .8;
-    transition: opacity .15s ease;
-}
-
+.user-menu-icons a:focus-visible,
 #scheme-toggle:hover,
 #scheme-toggle:focus-visible {
     opacity: 1;
-    background: none;
-    border: 0;
+    background-color: rgba(255, 255, 255, .12);
 }
 
 #scheme-toggle svg {
@@ -173,4 +164,18 @@ SPDX-License-Identifier: AFL-3.0
 :root[data-scheme="dark"] #scheme-toggle .scheme-dark,
 :root[data-scheme="light"] #scheme-toggle .scheme-light {
     display: block;
+}
+
+/* The global search collapses to a magnifier icon at all widths (see base.css), so
+   the bar only needs to reserve the icon + user-menu footprint. Tighten the nav at
+   narrow widths so it never runs under the search/icons. */
+@media (max-width: 900px) {
+    .nav-bar {
+        padding: 0 120px 0 50px;
+    }
+
+    #nav li.level0 > a {
+        padding: 0 7px;
+        font-size: 12px;
+    }
 }

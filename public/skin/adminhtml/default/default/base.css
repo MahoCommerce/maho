@@ -1039,6 +1039,10 @@ table.form-edit {
     margin: 2px -3px 2px 0
 }
 
+.entry-edit .form-buttons button + button {
+    margin-left: 5px
+}
+
 label.inline {
     float: none!important;
     width: auto!important
@@ -4972,6 +4976,8 @@ small {
     position: absolute;
     top: 0;
     right: 0;
+    display: flex;
+    align-items: center;
     padding: 0;
     color: inherit;
     z-index: 200;
@@ -4979,27 +4985,61 @@ small {
 }
 
 .header-right fieldset {
-    display: inline-block;
+    display: flex;
+    align-items: center;
     position: relative;
+    margin: 0;
+    padding: 0;
+    border: 0;
     line-height: 44px
 }
 
+/* Collapsed to a bare magnifier icon (matching the adjacent header icons) at all
+   widths; expands into a field on focus. The night bar is always dark in both
+   schemes, so colors here use fixed white-alpha (not the scheme-aware ink/surface
+   tokens) to stay legible on the dark chrome. */
 .header-right fieldset input.input-text {
-    width: 250px;
-    min-width: 250px;
-    height: 28px;
-    padding: 0 12px;
-    border: 1px solid rgba(255, 255, 255, .14);
-    border-radius: var(--maho-radius-pill);
-    background-color: rgba(255, 255, 255, .09);
-    color: #fff;
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--maho-radius-md);
+    background-color: transparent;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 22px 22px;
+    color: transparent;
     font-size: 12px;
-    vertical-align: middle;
-    margin-top: -3px;
-    transition: background-color .15s ease, border-color .15s ease
+    opacity: .8;
+    cursor: pointer;
+    transition: width .15s ease, opacity .15s ease, background-color .15s ease
+}
+
+.header-right fieldset input.input-text:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, .12)
 }
 
 .header-right fieldset input.input-text::placeholder {
+    color: transparent
+}
+
+.header-right fieldset input.input-text:focus {
+    width: 240px;
+    min-width: 240px;
+    padding: 0 12px;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: var(--maho-radius-pill);
+    background-color: var(--maho-night-raised);
+    background-image: none;
+    color: #fff;
+    opacity: 1;
+    cursor: text
+}
+
+.header-right fieldset input.input-text:focus::placeholder {
     color: rgba(255, 255, 255, .55)
 }
 
