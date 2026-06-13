@@ -1339,7 +1339,6 @@ span.delete-file {
 .grid-nav {
     float: left;
     margin: 3px 0 0 8px;
-    background: var(--maho-surface);
     display: flex;
     place-items: center;
 }
