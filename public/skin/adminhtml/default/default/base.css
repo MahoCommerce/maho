@@ -2251,8 +2251,7 @@ ul.item-options li {
 
 .order-save-in-address-book {
     margin: 0 0 0 0;
-    padding: 8px 15px;
-    background: var(--maho-surface-sunken)
+    padding: 8px 15px
 }
 
 .entry-edit .content .form-list {
@@ -5447,10 +5446,6 @@ div.collapseable a.open {
 }
 
 .order-choose-address {
-    background: var(--maho-surface)
-}
-
-.order-save-in-address-book {
     background: var(--maho-surface)
 }
 
