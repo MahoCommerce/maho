@@ -222,6 +222,9 @@ big {
 }
 
 .message-popup .message-popup-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 1px 0
 }
 
@@ -233,7 +236,6 @@ big {
 }
 
 .message-popup .message-popup-head a {
-    float: right;
     border: 1px solid var(--maho-btn2-border);
     border-radius: var(--maho-radius-sm);
     padding: 0 8px;
@@ -245,10 +247,6 @@ big {
 
 .message-popup .message-popup-head a:hover {
     background: var(--maho-surface-sunken)
-}
-
-.message-popup .message-popup-head a span {
-    float: left
 }
 
 .message-popup .message-popup-content {
@@ -845,7 +843,6 @@ ul.tabs-horiz {
 }
 
 ul.tabs-horiz li {
-    float: left;
     margin: 0 4px
 }
 
@@ -1044,23 +1041,24 @@ table.form-edit {
     margin-left: 5px
 }
 
-/* Title left, buttons right, vertically centered (mirrors the content-header) */
-.entry-edit .entry-edit-head:has(.form-buttons) {
+/* Title left, buttons/tools right, vertically centered (mirrors the content-header) */
+.entry-edit .entry-edit-head:has(.form-buttons, .tools) {
     display: flex;
     align-items: center;
     gap: 8px 12px;
     padding-bottom: 10px
 }
 
-.entry-edit .entry-edit-head:has(.form-buttons):after {
+.entry-edit .entry-edit-head:has(.form-buttons, .tools):after {
     content: none
 }
 
-.entry-edit .entry-edit-head:has(.form-buttons) > h4 {
+.entry-edit .entry-edit-head:has(.form-buttons, .tools) > h4 {
     float: none
 }
 
-.entry-edit .entry-edit-head:has(.form-buttons) .form-buttons {
+.entry-edit .entry-edit-head:has(.form-buttons) .form-buttons,
+.entry-edit .entry-edit-head:has(.tools) .tools {
     display: flex;
     align-items: center;
     float: none;
@@ -1415,7 +1413,6 @@ button.icon-btn span {
     margin-bottom: 10px;
     border: 1px solid var(--maho-border-soft);
     background: var(--maho-surface-sunken);
-    padding: 10px
 }
 
 .side-col .switcher {
@@ -1891,16 +1888,6 @@ div.autocomplete ul li {
     float: right;
     display: inline;
     white-space: nowrap
-}
-
-.box-head {
-    margin-bottom: .6em;
-    text-align: right
-}
-
-.box-head h4 {
-    float: left;
-    margin-bottom: 0
 }
 
 #page-login {
@@ -2793,11 +2780,6 @@ ul.item-options li {
     width: 121px
 }
 
-:is(.pp-general-uk,.pp-method-payflow,.pp-method-express,.pp-method-general)>.config-heading .heading strong::before {
-    content: "PayPal";
-    margin-right: 4px
-}
-
 .payflow-settings-notice {
     padding-bottom: 1em;
     max-width: 660px
@@ -3374,24 +3356,31 @@ ul.item-options li {
     border-bottom: 1px solid var(--maho-surface-sunken)!important
 }
 
+/* Row: label + field on the left, action button pushed right (order:1 places the
+   button last even when it appears first in the source, as in the widget layout). */
+.option-title {
+    display: flex;
+    align-items: center;
+    gap: 8px
+}
+
+.option-title button {
+    order: 1;
+    margin-left: auto
+}
+
 .bundle .option-title {
     padding: 0 0 10px;
     border-bottom: 1px solid var(--maho-border-soft)
 }
 
-.bundle .option-title button {
-    float: right
-}
-
 .bundle .option-title label {
     font-weight: 700;
     line-height: 21px;
-    padding-right: 1em;
-    float: left
+    padding-right: 1em
 }
 
 .bundle .option-title .input-text {
-    float: left;
     width: 260px;
     vertical-align: middle
 }
@@ -3728,81 +3717,6 @@ tr:last-child .with-button.active:after {
     display: none
 }
 
-.config-heading {
-    padding: 10px 10px 10px 26px;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-name="circle-check" data-variant="outline"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M9 12l2 2l4 -4"/></svg>')no-repeat -999em -999em;
-    border: 1px solid var(--maho-border-soft);
-    margin: -1px 0 0
-}
-
-.enabled .config-heading {
-    background-position: 5px 10px
-}
-
-.config-heading .button-container {
-    float: right;
-    text-align: right
-}
-
-.config-heading .button span {
-    font-size: 14px;
-    font-weight: 700;
-    display: block;
-    text-shadow: 0 1px 1px var(--maho-ink-muted);
-    text-transform: capitalize
-}
-
-.config-heading .button .state-closed {
-    height: auto
-}
-
-.config-heading .button .state-opened {
-    height: 0;
-    overflow: hidden
-}
-
-.config-heading .button.open .state-closed {
-    height: 0;
-    overflow: hidden
-}
-
-.config-heading .button.open .state-opened {
-    height: auto
-}
-
-.config-heading .button:active,.config-heading .button:active span {
-    outline: 0!important
-}
-
-.config-heading .heading {
-    float: left
-}
-
-.config-heading .heading strong {
-    font-size: 12px;
-    display: inline-block
-}
-
-.config-heading .heading a {
-    margin-left: 8px;
-    font-size: 11px;
-    color: var(--maho-control-placeholder);
-    font-weight: 400
-}
-
-.config-heading .heading a.link-demo:before {
-    content: "|";
-    display: inline-block;
-    margin-right: 8px;
-    color: var(--maho-control-placeholder);
-    font-size: 12px
-}
-
-.config-heading .heading .heading-intro {
-    display: block;
-    font-size: 11px
-}
-
 td.label label.enabled {
     background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-name="circle-check" data-variant="outline"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M9 12l2 2l4 -4"/></svg>')no-repeat 100% 1px;
     min-height: 16px
@@ -4122,7 +4036,8 @@ ul.super-product-attributes {
 }
 
 .configurable-simple-product div.values-container,.configurable-simple-product .attribute-values-container,.configurable-simple-product .attribute-values-container-main {
-    display: block
+    display: block;
+    float: none
 }
 
 .super-attributes li.attribute-value .attribute-price,.configurable-simple-product .attribute-price {
@@ -4237,19 +4152,13 @@ ul.super-product-attributes {
     border-bottom: 1px solid var(--maho-border-soft)
 }
 
-.options-box .option-title button {
-    float: right
-}
-
 .options-box .option-title label {
     font-weight: 700;
     line-height: 21px;
-    padding-right: 1em;
-    float: left
+    padding-right: 1em
 }
 
 .options-box .option-title select {
-    float: left;
     width: 260px;
     vertical-align: middle
 }
@@ -4462,14 +4371,6 @@ ul.super-product-attributes {
     padding-top: 4px
 }
 
-.f-left,.left {
-    float: left
-}
-
-.f-right,.right {
-    float: right
-}
-
 .v-top {
     vertical-align: top
 }
@@ -4522,10 +4423,6 @@ ul.super-product-attributes {
     white-space: normal!important
 }
 
-.no-float {
-    float: none!important
-}
-
 .pointer {
     cursor: pointer
 }
@@ -4554,7 +4451,7 @@ ul.super-product-attributes {
     text-decoration: line-through
 }
 
-.config-heading:after,.side-col .switcher:after,.message-popup .message-popup-head:after,.message-popup .message-popup-content .message:after,.login-form .form-buttons:after,.wrapper:after,.option-title:after,.columns:after,.main-col:after,.entry-edit .entry-edit-head:after,.content-header:after,.login-box .button-set:after,ul.tabs-horiz:after,.header-top:after,dl.accordion dt:after,.field-100:after,.entry-edit fieldset li:after,.entry-edit fieldset span.field-row:after,.content:after,#topnav:after,.main:after,.container:after,.footer:after,.middle:after,.header:after,.box-head:after,div.actions:after,.tier-container:after,.clear:after,.notification-global:after,.files .row:after,.files-wide .row:after,.grid tr.filter .range .range-line:after,.store-scope:after {
+.side-col .switcher:after,.message-popup .message-popup-content .message:after,.login-form .form-buttons:after,.wrapper:after,.columns:after,.main-col:after,.entry-edit .entry-edit-head:after,.content-header:after,.login-box .button-set:after,.header-top:after,dl.accordion dt:after,.field-100:after,.entry-edit fieldset li:after,.entry-edit fieldset span.field-row:after,.content:after,#topnav:after,.main:after,.container:after,.footer:after,.middle:after,.header:after,div.actions:after,.tier-container:after,.clear:after,.notification-global:after,.files .row:after,.files-wide .row:after,.grid tr.filter .range .range-line:after,.store-scope:after {
     display: block;
     clear: both;
     content: ".";
@@ -4862,6 +4759,7 @@ small {
     align-items: center;
     flex-wrap: wrap;
     gap: 8px 12px;
+    padding-bottom: 10px;
     container-type: scroll-state
 }
 
@@ -4904,7 +4802,6 @@ small {
 
 .switcher {
     background: 0 0;
-    padding: 0 0 10px;
     border: 0
 }
 
@@ -5222,6 +5119,8 @@ small {
 }
 
 ul.tabs-horiz {
+    display: flex;
+    flex-wrap: wrap;
     background: 0 0;
     margin: 0;
     padding: 0
@@ -5511,19 +5410,6 @@ div.collapseable a.open {
 
 .login-container .legal {
     background: var(--maho-hairline)
-}
-
-.config-heading {
-    background-color: var(--maho-surface);
-    border: 0;
-    margin: 4px 0 0
-}
-
-.config-heading .button span {
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 28px;
-    text-shadow: none
 }
 
 #payment_pphs_settings_advanced-head {
@@ -6289,4 +6175,46 @@ table.actions td.a-right > svg {
     height: 16px;
     vertical-align: middle;
     margin-right: 2px
+}
+
+/* Flex replacements for the removed float utilities (.left/.right/.f-left/.f-right) */
+.massaction-actions {
+    display: flex;
+    justify-content: flex-end
+}
+
+.order-comment-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 8px
+}
+
+.report-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 16px
+}
+
+.product-configure-cell {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px
+}
+
+/* Notification bar with a right-aligned action (e.g. "Ignore"/"Go to inbox") */
+.notification-global:has(.notification-action) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 12px;
+    row-gap: 4px
+}
+
+.notification-global .notification-action {
+    margin-left: auto;
+    white-space: nowrap
 }

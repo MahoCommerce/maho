@@ -57,12 +57,6 @@ ul,ol         { list-style:none; }
 .a-right      { text-align:right !important; }
 .v-top        { vertical-align:top; }
 .v-middle     { vertical-align:middle; }
-.f-left,
-.left         { float:left !important; }
-.f-right,
-.right        { float:right !important; }
-.f-none       { float:none !important; }
-.f-fix        { float:left; width:100%; }
 .no-display   { display:none; }
 .no-margin    { margin:0 !important; }
 .no-padding   { padding:0 !important; }
@@ -198,8 +192,8 @@ body,
 .form-box {border-bottom: 1px solid var(--maho-border-soft);}
 .form-box .fieldset, .form-box fieldset {width: 320px; margin: 0 auto;}
 
-.input-box {margin-bottom: 10px;}
-.input-box label {width: 95px; font-weight: bold; display: block; float: left; text-align: right; padding-right: 10px;}
+.input-box {margin-bottom: 10px; display: flex; align-items: center; gap: 10px;}
+.input-box label {width: 95px; font-weight: bold; text-align: right; flex: none;}
 .input-box input {width: 209px;}
 
 .required {font-weight: normal; color: var(--maho-error) !important; font-size: 11px;}
