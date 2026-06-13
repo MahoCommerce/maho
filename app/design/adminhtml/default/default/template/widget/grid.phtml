@@ -47,13 +47,13 @@ $numColumns = count($this->getColumns());
 
             <?= $this->__('of %s', $this->getCollection()->getLastPageNumber()) ?>
             <span class="separator">|</span>
-            <select name="<?= $this->getVarNameLimit() ?>" onchange="<?= $this->getJsObjectName() ?>.loadByElement(this)">
+            <select name="<?= $this->getVarNameLimit() ?>" aria-label="<?= $this->quoteEscape($this->__('Items per page')) ?>" onchange="<?= $this->getJsObjectName() ?>.loadByElement(this)">
                 <?php foreach ($this->getLimitOptions() as $pageSize): ?>
                     <option value="<?= $pageSize ?>"<?php if($this->getCollection()->getPageSize() == $pageSize): ?> selected="selected"<?php endif ?>><?= $pageSize ?></option>
                 <?php endforeach ?>
             </select>
             <?= $this->__('per page') ?><span class="separator">|</span>
-            <?= $this->__('%d records', $this->getCollection()->getSize()) ?>
+            <?= $this->__('%d items', $this->getCollection()->getSize()) ?>
             <span id="<?= $this->getHtmlId() ?>-total-count" class="no-display"><?= $this->getCollection()->getSize() ?></span>
             <?php if($this->getRssLists()): ?>
                 <?php foreach ($this->getRssLists() as $_rss): ?>
