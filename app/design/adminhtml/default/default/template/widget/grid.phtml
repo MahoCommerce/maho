@@ -65,7 +65,7 @@ $numColumns = count($this->getColumns());
     <?php endif ?>
     <?php if($this->getExportTypes()): ?>
         <td class="export a-right">
-            <?= $this->getIconSvg('file-export') ?> <?= $this->__('Export to:') ?>
+            <?= $this->__('Export to:') ?>
             <select name="<?= $this->getId() ?>_export" id="<?= $this->getId() ?>_export" style="width:8em;">
             <?php foreach ($this->getExportTypes() as $_type): ?>
                 <option value="<?= $_type->getUrl() ?>"><?= $_type->getLabel() ?></option>

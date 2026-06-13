@@ -501,7 +501,8 @@ table.actions td {
 
 .massaction .entry-edit fieldset .select {
     width: auto;
-    display: inline
+    display: inline;
+    margin-right: 5px
 }
 
 .massaction .entry-edit fieldset select.validation-failed {
