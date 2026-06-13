@@ -28,6 +28,13 @@
  * IMPORTANT: only list drift that is *intentional* and *documented*. Bugs
  * in the declarative schema should be fixed in the schema.php files, not
  * hidden here.
+ *
+ * Self-audit: a 'replace' that maps a line to itself fails immediately (dead
+ * weight). Engine-scoped 'replace'/'remove' lines and global regex rules that
+ * never match a dump line are reported to STDERR as possible rot; this is
+ * non-fatal by default (one engine key spans several matrix variants whose
+ * dumps can differ), but SCHEMA_ALLOWLIST_STRICT=1 turns it into a hard
+ * failure for a single-dump local cleanup pass.
  */
 
 declare(strict_types=1);
@@ -1301,7 +1308,27 @@ if (!in_array($engine, ['mysql', 'pgsql', 'sqlite'], true)) {
     exit(1);
 }
 
+// Static rot guard: a replace that maps a line to itself can never have an
+// effect and is dead weight. It needs no dump to detect, so fail hard on it.
+foreach ($entries as $entry) {
+    foreach ($entry['replace'] ?? [] as $from => $to) {
+        if ($from === $to) {
+            fwrite(STDERR, sprintf(
+                "Allowlist error: table '%s' has a replace mapping a line to itself:\n  %s\n",
+                $entry['table'],
+                $from,
+            ));
+            exit(1);
+        }
+    }
+}
+
 $ops = [];
+// Engine-scoped replace/remove lines we expect to match a dump line on this
+// engine. Used for the unmatched-entry audit after processing. Entries with no
+// 'engines' key may legitimately miss on some engines, and 'add' entries
+// self-police (a stale add surfaces as a brand-new diff), so neither is tracked.
+$strict = [];
 foreach ($entries as $entry) {
     if (isset($entry['engines']) && !in_array($engine, $entry['engines'], true)) {
         continue;
@@ -1311,6 +1338,15 @@ foreach ($entries as $entry) {
     $ops[$table]['replace'] = array_merge($ops[$table]['replace'], $entry['replace'] ?? []);
     $ops[$table]['remove']  = array_merge($ops[$table]['remove'], $entry['remove']  ?? []);
     $ops[$table]['add']     = array_merge($ops[$table]['add'], $entry['add'] ?? []);
+
+    if (isset($entry['engines'])) {
+        foreach (array_keys($entry['replace'] ?? []) as $line) {
+            $strict[$table]['replace'][$line] = true;
+        }
+        foreach ($entry['remove'] ?? [] as $line) {
+            $strict[$table]['remove'][$line] = true;
+        }
+    }
 }
 
 $activeGlobalRegex = [];
@@ -1320,6 +1356,7 @@ foreach ($globalRegex as $rule) {
     }
     $activeGlobalRegex[] = $rule;
 }
+$globalFired = array_fill(0, count($activeGlobalRegex), false);
 
 $input = stream_get_contents(STDIN);
 if ($input === false) {
@@ -1331,6 +1368,8 @@ $lines        = explode("\n", $input);
 $out          = [];
 $currentTable = null;
 $pendingAdds  = [];
+$usedReplace  = [];
+$usedRemove   = [];
 
 // When flushing pending "add" lines, splice them into the current table block
 // and re-sort only their respective category (COLUMN / INDEX / FK) so each
@@ -1401,18 +1440,21 @@ foreach ($lines as $line) {
     // Apply global regex transforms first so per-table replace/remove
     // entries can be written against the post-transform line (which is
     // also what shows up in the diff output).
-    foreach ($activeGlobalRegex as $rule) {
+    foreach ($activeGlobalRegex as $gi => $rule) {
         $newLine = preg_replace($rule['pattern'], $rule['replacement'], $line);
         if ($newLine !== null && $newLine !== $line) {
             $line = $newLine;
+            $globalFired[$gi] = true;
             break;
         }
     }
     if ($currentTable !== null && isset($ops[$currentTable])) {
         if (in_array($line, $ops[$currentTable]['remove'], true)) {
+            $usedRemove[$currentTable][$line] = true;
             continue;
         }
         if (isset($ops[$currentTable]['replace'][$line])) {
+            $usedReplace[$currentTable][$line] = true;
             $out[] = $ops[$currentTable]['replace'][$line];
             continue;
         }
@@ -1422,3 +1464,44 @@ foreach ($lines as $line) {
 $flushAdds();
 
 echo implode("\n", $out);
+
+// Unmatched-entry audit. An engine-scoped replace/remove line that never
+// matched a dump line is stale: the schema moved on, or the entry was redundant
+// from the start. It doesn't corrupt the current diff (a redundant entry is a
+// no-op), but it rots silently, so surface it. Non-fatal by default: one engine
+// key spans several matrix variants (mysql-8.4 / mariadb / ...) whose dumps can
+// render a line differently, so an entry needed on one variant may legitimately
+// miss on another. Set SCHEMA_ALLOWLIST_STRICT=1 for a single-dump local audit
+// to fail instead.
+$unmatched = [];
+foreach ($strict as $table => $kinds) {
+    foreach (array_keys($kinds['replace'] ?? []) as $line) {
+        if (!isset($usedReplace[$table][$line])) {
+            $unmatched[] = "  {$table}: replace never matched: {$line}";
+        }
+    }
+    foreach (array_keys($kinds['remove'] ?? []) as $line) {
+        if (!isset($usedRemove[$table][$line])) {
+            $unmatched[] = "  {$table}: remove never matched: {$line}";
+        }
+    }
+}
+foreach ($activeGlobalRegex as $gi => $rule) {
+    if (!$globalFired[$gi]) {
+        $unmatched[] = "  global regex never fired: {$rule['pattern']}";
+    }
+}
+
+if ($unmatched !== []) {
+    fwrite(STDERR, sprintf(
+        "schema-parity allowlist: %d %s entr%s never matched the %s dump (possible rot):\n%s\n",
+        count($unmatched),
+        $engine,
+        count($unmatched) === 1 ? 'y' : 'ies',
+        $engine,
+        implode("\n", $unmatched),
+    ));
+    if (getenv('SCHEMA_ALLOWLIST_STRICT') === '1') {
+        exit(1);
+    }
+}
