@@ -4852,6 +4852,10 @@ small {
     float: none
 }
 
+.content-header:has(.content-buttons) .content-buttons button {
+    margin-bottom: 0
+}
+
 /* No clearfix needed once it's a flex row (and it would count as a stray item) */
 .content-header:has(.content-buttons):after {
     content: none
