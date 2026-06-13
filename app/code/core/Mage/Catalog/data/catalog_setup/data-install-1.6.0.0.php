@@ -11,6 +11,9 @@
 /** @var Mage_Catalog_Model_Resource_Setup $this */
 $installer = $this;
 
+// Install entity types and EAV attributes defined in Mage_Catalog_Model_Resource_Setup.
+$installer->installEntities();
+
 // Create Root Catalog Node
 Mage::getModel('catalog/category')
     ->load(1)

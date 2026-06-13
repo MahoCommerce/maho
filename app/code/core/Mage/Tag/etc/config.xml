@@ -8,7 +8,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Tag>
-            <version>1.6.0.0</version>
+            <version>2.0.0</version>
         </Mage_Tag>
     </modules>
     <global>
@@ -42,13 +42,6 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Mage_Tag_Model_Resource_Customer</class>
             </tag_customer_resource>
         </models>
-        <resources>
-            <tag_setup>
-                <setup>
-                    <module>Mage_Tag</module>
-                </setup>
-            </tag_setup>
-        </resources>
         <blocks>
             <tag>
                 <class>Mage_Tag_Block</class>

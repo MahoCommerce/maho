@@ -1,0 +1,332 @@
+name: Schema Parity
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  parity-db:
+    name: Schema Parity (${{ matrix.name }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: mysql-8.4
+            db_engine: mysql
+            db_image: mysql:8.4
+            db_user: root
+            db_pass: root
+            health_cmd: mysqladmin ping
+            db_command: --log-bin --gtid-mode=ON --enforce-gtid-consistency=ON
+          - name: mysql-latest
+            db_engine: mysql
+            db_image: mysql:latest
+            db_user: root
+            db_pass: root
+            health_cmd: mysqladmin ping
+            db_command: --log-bin --gtid-mode=ON --enforce-gtid-consistency=ON
+          - name: mariadb-10.11
+            db_engine: mysql
+            db_image: mariadb:10.11
+            db_user: root
+            db_pass: root
+            health_cmd: healthcheck.sh --connect --innodb_initialized
+            db_command: --skip-name-resolve
+          - name: mariadb-latest
+            db_engine: mysql
+            db_image: mariadb:latest
+            db_user: root
+            db_pass: root
+            health_cmd: healthcheck.sh --connect --innodb_initialized
+            db_command: --skip-name-resolve
+          - name: pgsql-14
+            db_engine: pgsql
+            db_image: postgres:14
+            db_user: postgres
+            db_pass: postgres
+            health_cmd: pg_isready
+            db_command: postgres
+          - name: pgsql-latest
+            db_engine: pgsql
+            db_image: postgres:latest
+            db_user: postgres
+            db_pass: postgres
+            health_cmd: pg_isready
+            db_command: postgres
+
+    services:
+      db:
+        image: ${{ matrix.db_image }}
+        command: ${{ matrix.db_command }}
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: maho
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: maho
+        ports:
+          - ${{ contains(matrix.db_image, 'postgres') && '5432:5432' || '3306:3306' }}
+        options: >-
+          --health-cmd="${{ matrix.health_cmd }}"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DB_ENGINE: ${{ matrix.db_engine }}
+      DB_HOST: 127.0.0.1
+      DB_NAME: maho
+      DB_USER: ${{ matrix.db_user }}
+      DB_PASS: ${{ matrix.db_pass }}
+
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@2.37.1
+        with:
+          php-version: 8.3
+          extensions: ${{ matrix.db_engine == 'pgsql' && 'pdo_pgsql' || '' }}
+
+      - name: Checkout PR
+        uses: actions/checkout@v6
+
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          path: _main
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies (PR)
+        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+
+      - name: Install Maho (PR)
+        run: |
+          ./maho install \
+            --license_agreement_accepted yes \
+            --locale en_US \
+            --timezone Europe/London \
+            --default_currency USD \
+            --db_host 127.0.0.1 \
+            --db_name maho \
+            --db_user ${{ matrix.db_user }} \
+            --db_pass ${{ matrix.db_pass }} \
+            --db_engine ${{ matrix.db_engine }} \
+            --url http://maho.test/ \
+            --secure_base_url http://maho.test/ \
+            --use_secure 0 \
+            --use_secure_admin 0 \
+            --admin_lastname admin \
+            --admin_firstname admin \
+            --admin_email admin@admin.com \
+            --admin_username admin \
+            --admin_password asdasdasd123123123 \
+            --sample_data 0
+
+      - name: Normalize PR schema
+        run: php .github/schema-dump.php > /tmp/pr.txt
+
+      - name: Reset DB
+        env:
+          DB_USER: ${{ matrix.db_user }}
+          DB_PASS: ${{ matrix.db_pass }}
+        run: |
+          php -r '
+            $engine = getenv("DB_ENGINE");
+            $user = getenv("DB_USER");
+            $pass = getenv("DB_PASS");
+            $dsn = $engine === "pgsql"
+              ? "pgsql:host=127.0.0.1;dbname=postgres"
+              : "mysql:host=127.0.0.1";
+            $pdo = new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+            $pdo->exec("DROP DATABASE IF EXISTS maho");
+            $pdo->exec("CREATE DATABASE maho");
+          '
+
+      - name: Install dependencies (main)
+        working-directory: _main
+        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+
+      - name: Install Maho (main)
+        working-directory: _main
+        run: |
+          ./maho install \
+            --license_agreement_accepted yes \
+            --locale en_US \
+            --timezone Europe/London \
+            --default_currency USD \
+            --db_host 127.0.0.1 \
+            --db_name maho \
+            --db_user ${{ matrix.db_user }} \
+            --db_pass ${{ matrix.db_pass }} \
+            --db_engine ${{ matrix.db_engine }} \
+            --url http://maho.test/ \
+            --secure_base_url http://maho.test/ \
+            --use_secure 0 \
+            --use_secure_admin 0 \
+            --admin_lastname admin \
+            --admin_firstname admin \
+            --admin_email admin@admin.com \
+            --admin_username admin \
+            --admin_password asdasdasd123123123 \
+            --sample_data 0
+
+      # Dump main's schema with the PR's dumper (the script connects to the
+      # live DB main just installed) so both sides normalize identically.
+      - name: Normalize main schema
+        run: php .github/schema-dump.php > /tmp/main.raw.txt
+
+      - name: Apply allowlist to main schema
+        run: php .github/schema-parity-allowlist.php ${{ matrix.db_engine }} < /tmp/main.raw.txt > /tmp/main.txt
+
+      - name: Diff
+        run: |
+          if ! diff -u /tmp/main.txt /tmp/pr.txt > /tmp/schema.diff; then
+            echo "::error::Schema parity check FAILED — PR schema differs from main (after allowlist)."
+            echo "::group::diff -u main pr"
+            cat /tmp/schema.diff
+            echo "::endgroup::"
+            exit 1
+          fi
+          echo "Schema parity: OK"
+
+      - name: Upload artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: schema-parity-${{ matrix.name }}
+          path: |
+            /tmp/main.raw.txt
+            /tmp/main.txt
+            /tmp/pr.txt
+            /tmp/schema.diff
+
+  parity-sqlite:
+    name: Schema Parity (sqlite)
+    runs-on: ubuntu-latest
+
+    env:
+      DB_ENGINE: sqlite
+
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@2.37.1
+        with:
+          php-version: 8.3
+          extensions: pdo_sqlite
+
+      - name: Checkout PR
+        uses: actions/checkout@v6
+
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          path: _main
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies (PR)
+        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+
+      - name: Install Maho (PR)
+        run: |
+          ./maho install \
+            --license_agreement_accepted yes \
+            --locale en_US \
+            --timezone Europe/London \
+            --default_currency USD \
+            --db_name maho.sqlite \
+            --db_engine sqlite \
+            --url http://maho.test/ \
+            --secure_base_url http://maho.test/ \
+            --use_secure 0 \
+            --use_secure_admin 0 \
+            --admin_lastname admin \
+            --admin_firstname admin \
+            --admin_email admin@admin.com \
+            --admin_username admin \
+            --admin_password asdasdasd123123123 \
+            --sample_data 0
+
+      - name: Normalize PR schema
+        env:
+          DB_NAME: ${{ github.workspace }}/maho.sqlite
+        run: php .github/schema-dump.php > /tmp/pr.txt
+
+      - name: Install dependencies (main)
+        working-directory: _main
+        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+
+      - name: Install Maho (main)
+        working-directory: _main
+        run: |
+          ./maho install \
+            --license_agreement_accepted yes \
+            --locale en_US \
+            --timezone Europe/London \
+            --default_currency USD \
+            --db_name maho.sqlite \
+            --db_engine sqlite \
+            --url http://maho.test/ \
+            --secure_base_url http://maho.test/ \
+            --use_secure 0 \
+            --use_secure_admin 0 \
+            --admin_lastname admin \
+            --admin_firstname admin \
+            --admin_email admin@admin.com \
+            --admin_username admin \
+            --admin_password asdasdasd123123123 \
+            --sample_data 0
+
+      # Dump main's schema with the PR's dumper (run from the PR checkout, reading
+      # the DB the main code installed) so both sides normalize identically.
+      - name: Normalize main schema
+        env:
+          DB_NAME: ${{ github.workspace }}/_main/maho.sqlite
+        run: php .github/schema-dump.php > /tmp/main.raw.txt
+
+      - name: Apply allowlist to main schema
+        run: php .github/schema-parity-allowlist.php sqlite < /tmp/main.raw.txt > /tmp/main.txt
+
+      - name: Diff
+        run: |
+          if ! diff -u /tmp/main.txt /tmp/pr.txt > /tmp/schema.diff; then
+            echo "::error::Schema parity check FAILED — PR schema differs from main (after allowlist)."
+            echo "::group::diff -u main pr"
+            cat /tmp/schema.diff
+            echo "::endgroup::"
+            exit 1
+          fi
+          echo "Schema parity: OK"
+
+      - name: Upload artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: schema-parity-sqlite
+          path: |
+            /tmp/main.raw.txt
+            /tmp/main.txt
+            /tmp/pr.txt
+            /tmp/schema.diff

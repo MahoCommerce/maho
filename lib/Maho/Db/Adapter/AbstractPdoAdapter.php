@@ -520,6 +520,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     {
         $set = [];
         $params = [];
+        $boundColumns = [];
         foreach ($bind as $col => $value) {
             if ($value instanceof Expr) {
                 // Expr values are included directly in SQL, not as bound parameters
@@ -527,6 +528,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             } else {
                 $set[] = $this->quoteIdentifier($col) . ' = ?';
                 $params[] = $value;
+                $boundColumns[] = (string) $col;
             }
         }
 
@@ -539,8 +541,26 @@ abstract class AbstractPdoAdapter implements AdapterInterface
             ($where) ? " WHERE $where" : '',
         );
 
+        $tableName = is_array($table) ? (string) reset($table) : (string) $table;
+        $params = $this->_prepareBoundParams($tableName, $boundColumns, $params);
         $stmt = $this->query($sql, $params);
         return $stmt->rowCount();
+    }
+
+    /**
+     * Hook for a subclass to transform the positional bound parameters of an
+     * insert/update before they are sent to the driver, given the column name
+     * for each value. Default: no transformation. PostgreSQL overrides this to
+     * hex-encode bytea values so they bind as text rather than being UTF-8
+     * validated.
+     *
+     * @param list<string> $boundColumns column name for each positional value, in order
+     * @param list<mixed> $params positional bound values aligned to $boundColumns
+     * @return list<mixed>
+     */
+    protected function _prepareBoundParams(string $tableName, array $boundColumns, array $params): array
+    {
+        return $params;
     }
 
     #[\Override]
@@ -1123,15 +1143,6 @@ abstract class AbstractPdoAdapter implements AdapterInterface
                 throw new Exception(AdapterInterface::ERROR_DDL_MESSAGE);
             }
         }
-    }
-
-    /**
-     * Returns date that fits into TYPE_DATETIME range and is suggested to act as default 'zero' value
-     */
-    #[\Override]
-    public function getSuggestedZeroDate(): string
-    {
-        return '1970-01-01 00:00:00';
     }
 
     /**

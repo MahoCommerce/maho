@@ -12,6 +12,37 @@
 $installer = $this;
 
 /**
+ * Install eav entity types to the eav/entity_type table
+ */
+$installer->addEntityType('order', [
+    'entity_model'          => 'sales/order',
+    'table'                 => 'sales/order',
+    'increment_model'       => 'eav/entity_increment_numeric',
+    'increment_per_store'   => true,
+]);
+
+$installer->addEntityType('invoice', [
+    'entity_model'          => 'sales/order_invoice',
+    'table'                 => 'sales/invoice',
+    'increment_model'       => 'eav/entity_increment_numeric',
+    'increment_per_store'   => true,
+]);
+
+$installer->addEntityType('creditmemo', [
+    'entity_model'          => 'sales/order_creditmemo',
+    'table'                 => 'sales/creditmemo',
+    'increment_model'       => 'eav/entity_increment_numeric',
+    'increment_per_store'   => true,
+]);
+
+$installer->addEntityType('shipment', [
+    'entity_model'          => 'sales/order_shipment',
+    'table'                 => 'sales/shipment',
+    'increment_model'       => 'eav/entity_increment_numeric',
+    'increment_per_store'   => true,
+]);
+
+/**
  * Install order statuses from config
  */
 $data     = [];

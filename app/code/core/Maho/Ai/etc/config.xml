@@ -40,15 +40,6 @@
             </ai>
         </blocks>
 
-        <resources>
-            <maho_ai_setup>
-                <setup>
-                    <module>Maho_Ai</module>
-                    <class>Mage_Core_Model_Resource_Setup</class>
-                </setup>
-            </maho_ai_setup>
-        </resources>
-
         <ai>
             <consumers>
                 <!-- Consumer modules register here in their config.xml -->

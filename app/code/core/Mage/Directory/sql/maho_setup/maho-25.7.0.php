@@ -11,41 +11,8 @@ $installer = $this;
 $installer->startSetup();
 
 /**
- * Create table 'directory/country_region_name'
- */
-$table = $installer->getConnection()
-    ->newTable($installer->getTable('directory/country_name'))
-    ->addColumn('locale', Maho\Db\Ddl\Table::TYPE_TEXT, 8, [
-        'nullable'  => false,
-        'primary'   => true,
-        'default'   => '',
-    ], 'Locale')
-    ->addColumn('country_id', Maho\Db\Ddl\Table::TYPE_TEXT, 2, [
-        'nullable'  => false,
-        'primary'   => true,
-        'default'   => '',
-    ], 'Country Id')
-    ->addColumn('name', Maho\Db\Ddl\Table::TYPE_TEXT, 255, [
-        'nullable'  => true,
-        'default'   => null,
-    ], 'Country Name')
-    ->addIndex(
-        $installer->getIdxName('directory/country_name', ['country_id']),
-        ['country_id'],
-    )
-    ->addForeignKey(
-        $installer->getFkName('directory/country_name', 'country_id', 'directory/country', 'country_id'),
-        'country_id',
-        $installer->getTable('directory/country'),
-        'country_id',
-        Maho\Db\Ddl\Table::ACTION_CASCADE,
-        Maho\Db\Ddl\Table::ACTION_CASCADE,
-    )
-    ->setComment('Directory Country Name');
-$installer->getConnection()->createTable($table);
-
-/**
- * Fill table directory/country_name for en_US locale
+ * Fill table directory/country_name for en_US locale.
+ * Schema for directory_country_name lives in etc/db_schema.php (declarative).
  */
 $data = [
     ['AC', 'Ascension Island'], ['AD', 'Andorra'], ['AE', 'United Arab Emirates'],
