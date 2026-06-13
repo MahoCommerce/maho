@@ -5438,7 +5438,12 @@ div.collapseable a.open {
 .order-totals {
     background: var(--maho-surface);
     border: 1px solid var(--maho-border-soft)!important;
+    border-top: 0!important;
     border-radius: 0 0 var(--maho-radius-md) var(--maho-radius-md)
+}
+
+.order-totals .divider {
+    display: none
 }
 
 .order-choose-address {
