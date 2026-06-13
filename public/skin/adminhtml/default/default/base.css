@@ -2254,6 +2254,11 @@ ul.item-options li {
     padding: 8px 15px
 }
 
+#order-shipping-method-info button,
+#order-shipping-method-summary button {
+    margin-top: 8px
+}
+
 .entry-edit .content .form-list {
     width: 100%
 }
