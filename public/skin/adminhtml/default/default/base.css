@@ -4828,11 +4828,12 @@ small {
     line-height: 32px
 }
 
-/* Title left, action buttons right, vertically centered together */
+/* Title left, action buttons pushed to the right, vertically centered together.
+   margin-left:auto (rather than justify-content) keeps the buttons flush right
+   regardless of any extra header elements such as a store switcher. */
 .content-header:has(.content-buttons) {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     flex-wrap: wrap;
     gap: 8px 12px
 }
@@ -4842,8 +4843,13 @@ small {
 }
 
 .content-header:has(.content-buttons) .content-buttons {
-    margin: 0;
+    margin: 0 0 0 auto;
     float: none
+}
+
+/* No clearfix needed once it's a flex row (and it would count as a stray item) */
+.content-header:has(.content-buttons):after {
+    content: none
 }
 
 .columns {
