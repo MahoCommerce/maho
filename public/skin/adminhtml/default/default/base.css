@@ -4835,7 +4835,8 @@ small {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 8px 12px
+    gap: 8px 12px;
+    padding-bottom: 14px
 }
 
 .content-header:has(.content-buttons) > h3 {
