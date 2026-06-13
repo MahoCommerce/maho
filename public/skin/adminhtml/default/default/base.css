@@ -817,7 +817,6 @@ ul.tabs a.subitem {
 }
 
 ul.tabs span.changed,ul.tabs span.error,ul.tabs-horiz span.changed,ul.tabs-horiz span.error {
-    order: 1;
     background: 0;
     padding: 0;
     display: none;
