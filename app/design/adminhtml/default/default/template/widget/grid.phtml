@@ -47,7 +47,6 @@ $numColumns = count($this->getColumns());
 
             <?= $this->__('of %s pages', $this->getCollection()->getLastPageNumber()) ?>
             <span class="separator">|</span>
-            <?= $this->__('View') ?>
             <select name="<?= $this->getVarNameLimit() ?>" onchange="<?= $this->getJsObjectName() ?>.loadByElement(this)">
                 <?php foreach ($this->getLimitOptions() as $pageSize): ?>
                     <option value="<?= $pageSize ?>"<?php if($this->getCollection()->getPageSize() == $pageSize): ?> selected="selected"<?php endif ?>><?= $pageSize ?></option>
