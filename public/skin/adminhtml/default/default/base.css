@@ -4861,11 +4861,11 @@ small {
 }
 
 .grid tr.filter .range div.date {
-    min-width: 170px
+    min-width: 140px
 }
 
 .grid tr.filter .range input[type=date],.grid tr.filter .range input[type=datetime-local] {
-    width: 130px!important
+    width: 116px!important
 }
 
 .grid tr.filter .range input,.grid tr.filter .range select {
