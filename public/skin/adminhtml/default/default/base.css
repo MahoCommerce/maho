@@ -4849,8 +4849,11 @@ small {
 
 .grid tr.filter .range .label {
     font-weight: 400;
-    width: 40px;
-    padding: 4px
+    width: 16px;
+    padding: 4px 6px 0 0;
+    font-size: 15px;
+    text-align: center;
+    color: var(--maho-ink-muted)
 }
 
 .grid tr.filter .range.filter-range .label {
