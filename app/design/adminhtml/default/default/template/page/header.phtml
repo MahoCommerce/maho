@@ -63,7 +63,7 @@
         </fieldset>
         <?php endif ?>
         <div class="user-menu-icons">
-            <button type="button" id="scheme-toggle">
+            <button type="button" id="scheme-toggle" aria-label="<?= $this->quoteEscape($this->__('Color scheme')) ?>">
                 <span class="scheme-system"><?= $this->getIconSvg('device-desktop') ?></span>
                 <span class="scheme-dark"><?= $this->getIconSvg('moon') ?></span>
                 <span class="scheme-light"><?= $this->getIconSvg('sun') ?></span>
@@ -77,7 +77,11 @@
                     };
                     const toggle = document.getElementById('scheme-toggle');
                     const current = () => document.documentElement.dataset.scheme ?? 'system';
-                    toggle.title = titles[current()];
+                    const setLabel = (scheme) => {
+                        toggle.title = titles[scheme];
+                        toggle.setAttribute('aria-label', titles[scheme]);
+                    };
+                    setLabel(current());
                     toggle.addEventListener('click', () => {
                         const order = ['system', 'dark', 'light'];
                         const next = order[(order.indexOf(current()) + 1) % order.length];
@@ -88,7 +92,7 @@
                             document.documentElement.dataset.scheme = next;
                             localStorage.setItem('maho-admin-scheme', next);
                         }
-                        toggle.title = titles[next];
+                        setLabel(next);
                     });
                 })();
             </script>
