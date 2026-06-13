@@ -1428,6 +1428,16 @@ button.icon-btn span {
     color: var(--maho-ink)
 }
 
+/* Hide the website name when there's only one website, and a store-group name
+   when its website has only one store group. */
+.order-store-select:not(:has(.store-website ~ .store-website)) .store-website-name {
+    display: none
+}
+
+.order-store-select .store-website:not(:has(.store-group ~ .store-group)) .store-group-name {
+    display: none
+}
+
 .order-store-select .store-group + .store-group {
     margin-top: 16px
 }
@@ -1442,8 +1452,8 @@ button.icon-btn span {
 }
 
 .order-store-select .store-view-cards {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
     gap: 8px
 }
 
@@ -1452,14 +1462,14 @@ button.icon-btn span {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 120px;
-    min-height: 46px;
-    padding: 10px 18px;
+    min-height: 52px;
+    padding: 10px 14px;
     border: 1px solid var(--maho-border);
     border-radius: var(--maho-radius-md);
     background: var(--maho-surface);
     color: var(--maho-ink);
     font-weight: 500;
+    line-height: 1.35;
     text-align: center;
     cursor: pointer;
     transition: border-color .15s ease, background-color .15s ease
@@ -4816,6 +4826,24 @@ small {
 .content-header h3 {
     margin: 0 0 .3em;
     line-height: 32px
+}
+
+/* Title left, action buttons right, vertically centered together */
+.content-header:has(.content-buttons) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 12px
+}
+
+.content-header:has(.content-buttons) > h3 {
+    margin: 0
+}
+
+.content-header:has(.content-buttons) .content-buttons {
+    margin: 0;
+    float: none
 }
 
 .columns {
