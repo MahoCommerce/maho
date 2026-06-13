@@ -61,6 +61,11 @@ final class Canonicalizer
         self::stripColumnComments($target);
         self::reconcileColumns($live, $target);
         self::preserveUndeclaredColumns($live, $target);
+        // Only columns are preserved, not indexes/FKs. An undeclared index or FK
+        // on a managed table is legacy cruft the migration normalizes away (the
+        // declarative target is the canonical structure); declare it in a
+        // schema.php to keep it. Columns differ: they hold data, so dropping one
+        // is irreversible loss.
     }
 
     /**

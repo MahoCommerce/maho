@@ -58,20 +58,25 @@ class Migrate extends BaseMahoCommand
 
             /** @var \Maho\Db\Adapter\AdapterInterface $adapter */
             $adapter = Mage::getSingleton('core/resource')->getConnection('core_setup');
-            $result = Applier::applyAll($adapter);
-            if ($result['contributors'] === []) {
+            [$target, $contributors] = Collector::collect();
+            if ($contributors === []) {
                 $output->writeln('✓ Applied declarative schema (no modules declare sql/schema.php)');
-            } elseif ($result['executed'] === []) {
-                $output->writeln(sprintf(
-                    '✓ Applied declarative schema (%d module(s), already up to date)',
-                    count($result['contributors']),
-                ));
             } else {
-                $output->writeln(sprintf(
-                    '✓ Applied declarative schema (%d module(s), %d statement(s) executed)',
-                    count($result['contributors']),
-                    count($result['executed']),
-                ));
+                $sql = Applier::plan($adapter->getConnection(), $target);
+                if ($sql === []) {
+                    $output->writeln(sprintf(
+                        '✓ Applied declarative schema (%d module(s), already up to date)',
+                        count($contributors),
+                    ));
+                } else {
+                    $this->warnDestructive($output, $sql);
+                    Applier::execute($adapter, $sql);
+                    $output->writeln(sprintf(
+                        '✓ Applied declarative schema (%d module(s), %d statement(s) executed)',
+                        count($contributors),
+                        count($sql),
+                    ));
+                }
             }
 
             // Enumerated before applying: the per-phase counts below let the CI
@@ -205,6 +210,38 @@ class Migrate extends BaseMahoCommand
         }
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Print a warning for each destructive statement in the plan: a dropped
+     * index or foreign key on a managed table no module declares. That removal
+     * is intended cleanup (the declarative target is canonical) but irreversible
+     * in the same run, so it is surfaced before it executes. The migration
+     * always proceeds, Maho upgrades run unattended (CLI deploys, the backend),
+     * so this never blocks; run with --dry-run first to review.
+     *
+     * @param list<string> $sql
+     */
+    private function warnDestructive(OutputInterface $output, array $sql): void
+    {
+        $destructive = array_values(array_filter(
+            $this->compactPlan($sql),
+            static fn(array $line): bool => $line['destructive'],
+        ));
+        if ($destructive === []) {
+            return;
+        }
+
+        $output->writeln('');
+        $output->writeln(sprintf('<comment>%d destructive statement(s):</comment>', count($destructive)));
+        foreach ($destructive as $line) {
+            $output->writeln('  <comment>' . $line['text'] . '</comment>');
+        }
+        $output->writeln(
+            'An index or foreign key on a managed table that no module declares in sql/schema.php is removed'
+            . ' on convergence. To keep a custom one, declare it in a module\'s sql/schema.php.',
+        );
+        $output->writeln('');
     }
 
     /**

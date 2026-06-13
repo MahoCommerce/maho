@@ -30,6 +30,9 @@ use Doctrine\DBAL\ServerVersionProvider;
  * The KeywordList feature is deprecated upstream because DBAL 5 will quote
  * every identifier unconditionally, which subsumes this fix; until then it is
  * the only extension point (see the scoped exceptions in .phpstan.dist.neon).
+ *
+ * @todo Remove this middleware once https://github.com/doctrine/dbal/pull/7391
+ *       is merged and released (the upstream fix subsumes it).
  */
 class MariaDbPlatformMiddleware implements Middleware
 {

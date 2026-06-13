@@ -1045,39 +1045,15 @@ class Pgsql extends AbstractPdoAdapter
     }
 
     /**
-     * Same as the base update(), but tags bytea columns so their values bind as
-     * BINARY (PARAM_LOB) instead of UTF-8-validated text. Only SET values are
-     * bound; WHERE terms are inlined by _whereExpr(), so positions map to $bind.
+     * Hex-encode bytea values for the base update()/insert() bound-param path so
+     * they bind as text rather than being UTF-8 validated. See
+     * _encodeBinaryBindValues(); only SET values reach here, WHERE terms are
+     * inlined by _whereExpr().
      */
     #[\Override]
-    public function update(string|array|\Maho\Db\Select $table, array $bind, string|array $where = ''): int
+    protected function _prepareBoundParams(string $tableName, array $boundColumns, array $params): array
     {
-        $set = [];
-        $params = [];
-        $boundColumns = [];
-        foreach ($bind as $col => $value) {
-            if ($value instanceof \Maho\Db\Expr) {
-                $set[] = $this->quoteIdentifier($col) . ' = ' . $value->__toString();
-            } else {
-                $set[] = $this->quoteIdentifier($col) . ' = ?';
-                $params[] = $value;
-                $boundColumns[] = (string) $col;
-            }
-        }
-
-        $where = $this->_whereExpr($where);
-
-        $sql = sprintf(
-            'UPDATE %s SET %s%s',
-            $this->quoteIdentifier($table),
-            implode(', ', $set),
-            ($where) ? " WHERE $where" : '',
-        );
-
-        $tableName = is_array($table) ? (string) reset($table) : (string) $table;
-        $params = $this->_encodeBinaryBindValues($tableName, $boundColumns, $params);
-        $stmt = $this->query($sql, $params);
-        return $stmt->rowCount();
+        return $this->_encodeBinaryBindValues($tableName, $boundColumns, $params);
     }
 
     /**

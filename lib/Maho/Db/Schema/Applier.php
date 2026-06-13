@@ -155,6 +155,11 @@ final class Applier
      * time) that buys one provably-convergent path instead of a fragile
      * additive-vs-rebuild classifier sitting on DBAL's most bug-prone surface.
      *
+     * @todo Revisit once https://github.com/doctrine/dbal/pull/7392 (upstream
+     *       fix for DBAL's SQLite rebuild dropping indexes/FKs) is merged and
+     *       released. We likely keep this path anyway: a single convergent
+     *       rebuild beats DBAL's diff-driven ALTER on SQLite.
+     *
      * @param list<Table> $liveTables   canonicalized live tables
      * @param list<Table> $targetTables declarative targets, parallel to $liveTables
      * @return list<string>
