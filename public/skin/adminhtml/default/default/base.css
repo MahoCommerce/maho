@@ -254,9 +254,13 @@ big {
     padding: 21px 21px 10px
 }
 
+.message-popup .message-popup-content .message {
+    display: flex;
+    align-items: flex-start
+}
+
 .message-popup .message-popup-content .message-icon {
-    float: left;
-    width: 50px;
+    flex: 0 0 50px;
     font-size: 10px;
     line-height: 12px;
     text-transform: uppercase;
@@ -264,8 +268,7 @@ big {
 }
 
 .message-popup .message-popup-content .message-text {
-    float: right;
-    width: 295px;
+    flex: 1;
     min-height: 4.5em;
     overflow: hidden;
     color: var(--maho-ink)
@@ -509,6 +512,8 @@ table.actions td {
 }
 
 .massaction .entry-edit fieldset {
+    display: flex;
+    align-items: center;
     margin: 0;
     padding: 0;
     background: 0 0;
@@ -539,15 +544,14 @@ table.actions td {
 }
 
 .massaction .entry-edit fieldset span.form_row,.massaction .entry-edit fieldset span.field-row {
-    clear: none!important;
-    display: inline;
-    float: left!important;
+    display: flex;
+    align-items: center;
     margin: 0;
     padding: 0 5px 0 0
 }
 
 .massaction .entry-edit .outer-span {
-    float: left
+    display: flex
 }
 
 .grid tr.filter {
@@ -594,15 +598,18 @@ table.actions td {
 }
 
 .grid tr.filter .range select {
-    float: right;
     width: 65px!important;
     margin-top: 0
+}
+
+.grid tr.filter .range .range-line {
+    display: flex;
+    align-items: center
 }
 
 .grid tr.filter .range .label {
     display: block;
     width: 30px;
-    float: left;
     padding-right: 3px;
     text-align: right
 }
@@ -750,8 +757,8 @@ dl.accordion dd.open {
 }
 
 img.accordion-btn {
-    float: right;
     margin-top: 1px;
+    margin-left: auto;
     margin-right: 5px
 }
 
@@ -790,8 +797,14 @@ ul.tabs span {
     cursor: pointer
 }
 
+ul.tabs a > span,ul.tabs-horiz a > span {
+    display: flex;
+    align-items: center
+}
+
 ul.tabs span em {
-    float: right
+    order: 1;
+    margin-left: auto
 }
 
 ul.tabs a.active span,ul.tabs a:hover.active span {
@@ -804,11 +817,11 @@ ul.tabs a.subitem {
 }
 
 ul.tabs span.changed,ul.tabs span.error,ul.tabs-horiz span.changed,ul.tabs-horiz span.error {
-    float: right;
+    order: 1;
     background: 0;
     padding: 0;
     display: none;
-    margin-left: 8px
+    margin-left: auto
 }
 
 ul.tabs a.changed span.changed,ul.tabs-horiz a.changed span.changed {
@@ -995,7 +1008,6 @@ table.form-edit {
 }
 
 .entry-edit .entry-edit-head h4 {
-    float: left;
     padding: 0;
     background: 0 0;
     margin: 0;
@@ -1006,7 +1018,7 @@ table.form-edit {
 }
 
 .entry-edit .entry-edit-head .tools {
-    float: right
+    margin-left: auto
 }
 
 .entry-edit .entry-edit-head strong,.entry-edit .entry-edit-head a {
@@ -1027,14 +1039,12 @@ table.form-edit {
 }
 
 .entry-edit fieldset span.form_row,.entry-edit .fieldset span.form_row {
-    float: left;
     color: var(--maho-ink-muted);
     padding-left: 12em
 }
 
 .entry-edit .form-buttons {
-    float: right;
-    margin: 2px -3px 2px 0
+    margin: 2px -3px 2px auto
 }
 
 .entry-edit .form-buttons button + button {
@@ -1154,7 +1164,7 @@ select.multiselect option {
 }
 
 .field-100 textarea,.field-100 input.input-text {
-    float: left;
+    display: block;
     width: 100%!important;
     border: 0!important;
     padding: 0!important
@@ -1328,7 +1338,8 @@ span.delete-file {
 }
 
 .entry-edit .field-row label {
-    float: left;
+    display: inline-block;
+    vertical-align: top;
     width: 150px
 }
 
@@ -1337,7 +1348,6 @@ span.delete-file {
 }
 
 .grid-nav {
-    float: left;
     margin: 3px 0 0 8px;
     display: flex;
     place-items: center;
@@ -1423,12 +1433,11 @@ button.icon-btn span {
 }
 
 .side-col .switcher select {
-    width: 100%;
-    float: left
+    width: 100%
 }
 
 .store-scope .tree-store-scope {
-    float: left;
+    display: inline-block;
     padding: 7px 10px;
     border: 1px dotted var(--maho-border-soft)
 }
@@ -1519,7 +1528,6 @@ button.icon-btn span {
 }
 
 .store-scope table.stores-tree {
-    float: left;
     width: auto!important
 }
 
@@ -1527,16 +1535,22 @@ button.icon-btn span {
     white-space: nowrap
 }
 
+/* Two-column box rows. The container also holds full-width sections and clearfix
+   divs between the pairs, so flex it and force every non-box child onto its own
+   row; space-between reproduces the edge-aligned columns with a centered gutter. */
+div:has(> .box-left) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between
+}
+
+div:has(> .box-left) > :not(.box-left):not(.box-right) {
+    flex-basis: 100%
+}
+
 .box-left,.box-right {
     width: 48.5%
-}
-
-.box-left {
-    float: left
-}
-
-.box-right {
-    float: right
 }
 
 .box-left .content,.box-right .content {
@@ -1696,21 +1710,26 @@ td.divider {
     padding-top: 0
 }
 
+/* Two-column edit layout: side column + main column. Grid replaces the legacy
+   negative-margin float trick; `auto 1fr` lets the side column keep its own width
+   (220px default, 260px on order-create) without a paired main-col margin. */
+.columns:has(> .side-col) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start
+}
+
 div.side-col {
-    float: left;
     width: 220px;
-    margin-right: -220px;
     padding-bottom: 25px
 }
 
 div.main-col {
-    margin-left: 220px;
     min-height: 450px;
     padding: 0 0 25px 25px
 }
 
 div.main-col-inner {
-    float: left;
     width: 100%
 }
 
@@ -1726,7 +1745,6 @@ div.main-col-inner {
 }
 
 .logo {
-    float: left;
     margin: 7px 20px 5px 32px;
     height: 30px
 }
@@ -1755,7 +1773,6 @@ div.main-col-inner {
 }
 
 .header-right .super {
-    float: right;
     line-height: 1.8em;
     margin-bottom: 14px;
     margin-left: 1.3em
@@ -1815,7 +1832,6 @@ div.autocomplete ul li {
 }
 
 .content-header h3 {
-    float: left;
     margin: .3em .5em 0 0;
     color: var(--maho-link);
     font-size: 1.25em;
@@ -1884,8 +1900,7 @@ div.autocomplete ul li {
 
 .content-buttons {
     margin-bottom: 5px;
-    float: right;
-    display: inline;
+    margin-left: auto;
     white-space: nowrap
 }
 
@@ -1917,14 +1932,6 @@ div.autocomplete ul li {
     border-radius: var(--maho-radius-lg);
     box-shadow: var(--maho-shadow-float);
     text-align: left
-}
-
-.login-form .input-left {
-    float: left
-}
-
-.login-form .input-right {
-    float: right
 }
 
 .login-form .input-box input.input-text {
@@ -2086,7 +2093,8 @@ div.autocomplete ul li {
 }
 
 .adminhtml-system-store-deletestore .content-footer .content-buttons,.adminhtml-system-store-deletegroup .content-footer .content-buttons,.adminhtml-system-store-deletewebsite .content-footer .content-buttons {
-    float: left
+    margin-left: 0;
+    margin-right: auto
 }
 
 .overlay {
@@ -2198,6 +2206,10 @@ ul.item-options li {
 }
 
 .create-order-sidebar-block .head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
     border-top: 1px solid var(--maho-border-soft);
     background: var(--maho-hairline);
     padding: 2px 6px 1px;
@@ -2206,7 +2218,6 @@ ul.item-options li {
 }
 
 .create-order-sidebar-block .head h5 {
-    float: left;
     margin: 0;
     color: var(--maho-ink-soft);
     text-align: left
@@ -2372,7 +2383,6 @@ ul.item-options li {
 }
 
 .giftcard-form label {
-    float: left;
     width: 25%
 }
 
@@ -2400,7 +2410,6 @@ ul.item-options li {
 }
 
 .giftcard-amount-form .form-list .input-box {
-    float: left;
     width: 75%
 }
 
@@ -2430,7 +2439,6 @@ ul.item-options li {
 }
 
 .giftcard-send-form .form-list .input-box {
-    float: left;
     width: 75%
 }
 
@@ -2448,8 +2456,14 @@ ul.item-options li {
     font-size: 12px
 }
 
+.product-options dt {
+    display: flex;
+    align-items: baseline;
+    gap: 8px
+}
+
 .product-options dt .qty-holder {
-    float: right
+    margin-left: auto
 }
 
 .product-options dt .qty-holder label {
@@ -2520,25 +2534,21 @@ ul.item-options li {
 }
 
 .product-options .options-list li {
-    vertical-align: middle;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
     margin: 0;
     padding: 2px 0;
     line-height: 1.315
 }
 
-.product-options .options-list input.radio {
-    float: left;
-    margin: 2px -18px 0 0
-}
-
-.product-options .options-list input.checkbox {
-    float: left;
-    margin: 2px -20px 0 0
+.product-options .options-list input.radio,.product-options .options-list input.checkbox {
+    margin: 2px 0 0
 }
 
 .product-options .options-list .label {
     display: block;
-    margin-left: 20px
+    margin-left: 0
 }
 
 .product-options li {
@@ -2617,7 +2627,7 @@ ul.item-options li {
 }
 
 .summary-total .summary-collapse {
-    float: right;
+    display: inline-block;
     padding-left: 18px;
     position: relative;
     text-align: right;
@@ -2693,7 +2703,6 @@ ul.item-options li {
 
 .giftmessage-order-create .single {
     width: 100%;
-    float: left;
     padding: 1.2em 1.5em
 }
 
@@ -2806,11 +2815,14 @@ ul.item-options li {
 }
 
 .packaging-window .entry-edit-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     padding: 3px 5px
 }
 
 .packaging-window .entry-edit-head button {
-    float: right
+    margin-left: auto
 }
 
 .packaging-window .messages {
@@ -2910,6 +2922,7 @@ ul.item-options li {
 }
 
 .packed-window .package {
+    position: relative;
     background: var(--maho-surface-raised);
     border: 7px solid var(--maho-border-soft);
     margin-bottom: 10px;
@@ -2920,12 +2933,12 @@ ul.item-options li {
     background: var(--maho-surface-raised);
     border: solid var(--maho-border);
     border-width: 0 0 1px 1px;
-    float: right;
+    position: absolute;
+    top: 0;
+    right: 0;
     color: var(--maho-ink);
     font-size: 12px;
-    margin: -10px -10px 0 0;
     padding: 5px 10px;
-    position: relative;
     z-index: 100
 }
 
@@ -3021,7 +3034,8 @@ ul.item-options li {
 }
 
 .bundle-option-row table tbody td label {
-    float: left
+    display: inline-block;
+    vertical-align: middle
 }
 
 .bundle-option-row input.option-label {
@@ -3047,11 +3061,13 @@ ul.item-options li {
 
 .tier-price-input .tier-container {
     position: relative;
-    clear: both
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap
 }
 
 .tier-price-input .tier-container div {
-    float: left
+    flex: none
 }
 
 .tier-price-input .tier-container label {
@@ -3083,7 +3099,7 @@ ul.item-options li {
 }
 
 .btn-remove-tier-group {
-    float: right;
+    margin-left: auto;
     right: 24px;
     top: 5px
 }
@@ -3133,7 +3149,8 @@ ul.item-options li {
 }
 
 .rating-box {
-    float: left;
+    display: inline-block;
+    vertical-align: middle;
     position: relative;
     width: 70px;
     height: 14px;
@@ -3152,13 +3169,14 @@ ul.item-options li {
 
 .field-row .ratings {
     width: 120px;
-    float: left;
-    clear: right
+    display: inline-block;
+    vertical-align: top
 }
 
 .field-row .ratings-container {
     width: 250px;
-    float: left
+    display: inline-block;
+    vertical-align: top
 }
 
 .product-review-box {
@@ -3398,7 +3416,6 @@ ul.item-options li {
 }
 
 .files input.input-text {
-    float: left;
     width: 134px!important
 }
 
@@ -3407,26 +3424,30 @@ ul.item-options li {
 }
 
 .files-wide input.input-text {
-    float: left;
     width: 294px!important
 }
 
 .files label,.files-wide label {
-    float: left;
+    flex: 0 0 55px;
     width: 55px
 }
 
 .files .row,.files-wide .row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     margin-bottom: 5px
 }
 
 .files .flex,.files-wide .flex {
-    float: right!important;
-    position: static!important
+    position: static!important;
+    margin-left: auto
 }
 
 .files .uploader,.files-wide .uploader {
-    float: left;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     overflow: hidden
 }
 
@@ -3501,7 +3522,6 @@ input.downloads {
 }
 
 .delete-address {
-    float: right;
     margin: 0 0 10px 10px
 }
 
@@ -3774,7 +3794,6 @@ td.label label.enabled {
 
 .pp-buttons-container {
     white-space: nowrap;
-    float: left;
     position: relative;
     z-index: 1;
     margin-right: -200px
@@ -3890,6 +3909,9 @@ ul.super-product-attributes {
 }
 
 .uploader .file-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     width: 600px;
     padding: .5em .6em;
     margin: .5em .6em;
@@ -3903,7 +3925,8 @@ ul.super-product-attributes {
 }
 
 .uploader .file-row .file-info {
-    float: left
+    flex: 1;
+    min-width: 0
 }
 
 .uploader .file-row-info {
@@ -3915,12 +3938,11 @@ ul.super-product-attributes {
 }
 
 .uploader .file-row .progress-text {
-    float: right;
     font-weight: 700
 }
 
 .uploader .file-row .delete-button {
-    float: right
+    flex: none
 }
 
 .uploader .progress {
@@ -4202,7 +4224,8 @@ ul.super-product-attributes {
 }
 
 .media-library-content #contents-alt-text {
-    float: left
+    display: inline-block;
+    vertical-align: top
 }
 
 .media-library-content #contents {
@@ -5904,9 +5927,14 @@ img.rule-param-add {
     top: calc(100% - 2px)
 }
 
+#global_search_autocomplete ul li {
+    position: relative
+}
+
 #global_search_autocomplete ul li .type {
-    float: right;
-    margin-left: 10px;
+    position: absolute;
+    top: 8px;
+    right: 10px;
     font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
