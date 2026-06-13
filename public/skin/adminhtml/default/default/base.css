@@ -4849,11 +4849,8 @@ small {
 
 .grid tr.filter .range .label {
     font-weight: 400;
-    width: 16px;
-    padding: 4px 6px 0 0;
-    font-size: 15px;
-    text-align: center;
-    color: var(--maho-ink-muted)
+    width: 40px;
+    padding: 4px
 }
 
 .grid tr.filter .range.filter-range .label {
@@ -4861,7 +4858,21 @@ small {
 }
 
 .grid tr.filter .range div.date {
-    min-width: 140px
+    min-width: 140px;
+    display: flex;
+    align-items: center
+}
+
+.grid tr.filter .range div.date .label {
+    width: auto;
+    padding: 0 5px 0 0;
+    color: var(--maho-ink-muted)
+}
+
+.grid tr.filter .range div.date .label svg {
+    display: block;
+    width: 15px;
+    height: 15px
 }
 
 .grid tr.filter .range input[type=date],.grid tr.filter .range input[type=datetime-local] {

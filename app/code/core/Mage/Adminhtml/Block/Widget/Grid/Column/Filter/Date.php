@@ -45,13 +45,13 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Date extends Mage_Adminhtml
         }
 
         $html = '<div class="range"><div class="range-line date">'
-            . '<span class="label" aria-hidden="true" title="' . $this->quoteEscape($fromLabel) . '">&ge;</span>'
+            . '<span class="label" aria-hidden="true" title="' . $this->quoteEscape($fromLabel) . '">' . $this->getIconSvg('arrow-bar-to-left') . '</span>'
             . '<input type="date" name="' . $this->_getHtmlName() . '[from]" id="' . $htmlId . '_from"'
                 . ' aria-label="' . $this->quoteEscape($fromLabel) . '" title="' . $this->quoteEscape($fromLabel) . '"'
                 . ' value="' . $this->escapeHtml($fromValue) . '" class="input-text no-changes">'
             . '</div>';
         $html .= '<div class="range-line date">'
-            . '<span class="label" aria-hidden="true" title="' . $this->quoteEscape($toLabel) . '">&le;</span>'
+            . '<span class="label" aria-hidden="true" title="' . $this->quoteEscape($toLabel) . '">' . $this->getIconSvg('arrow-bar-to-right') . '</span>'
             . '<input type="date" name="' . $this->_getHtmlName() . '[to]" id="' . $htmlId . '_to"'
                 . ' aria-label="' . $this->quoteEscape($toLabel) . '" title="' . $this->quoteEscape($toLabel) . '"'
                 . ' value="' . $this->escapeHtml($toValue) . '" class="input-text no-changes">'
