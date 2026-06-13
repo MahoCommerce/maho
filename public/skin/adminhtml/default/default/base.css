@@ -5437,7 +5437,8 @@ div.collapseable a.open {
 
 .order-totals {
     background: var(--maho-surface);
-    border: 1px solid var(--maho-border)!important
+    border: 1px solid var(--maho-border-soft)!important;
+    border-radius: 0 0 var(--maho-radius-md) var(--maho-radius-md)
 }
 
 .order-choose-address {
