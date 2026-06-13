@@ -45,13 +45,6 @@ SPDX-License-Identifier: AFL-3.0
                 <class>Mage_Admin_Helper</class>
             </admin>
         </helpers>
-        <resources>
-            <admin_setup>
-                <setup>
-                    <module>Mage_Admin</module>
-                </setup>
-            </admin_setup>
-        </resources>
         <blocks>
             <admin>
                 <class>Mage_Admin_Block</class>

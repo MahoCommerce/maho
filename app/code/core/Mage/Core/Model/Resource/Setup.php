@@ -101,8 +101,11 @@ class Mage_Core_Model_Resource_Setup
      * Initialize resource configurations, setup connection, etc
      *
      * @param string $resourceName the setup resource name
+     * @param string|null $moduleName owning module, for resources discovered by
+     *        convention (a sql/data <name>_setup directory with no <resources>
+     *        declaration). Ignored when the resource is declared in config.
      */
-    public function __construct($resourceName)
+    public function __construct($resourceName, ?string $moduleName = null)
     {
         $config = Mage::getConfig();
         $this->_resourceName = $resourceName;
@@ -114,7 +117,13 @@ class Mage_Core_Model_Resource_Setup
             $this->_connectionConfig = $config->getResourceConnectionConfig(self::DEFAULT_SETUP_CONNECTION);
         }
 
-        $modName = (string) $this->_resourceConfig->setup->module;
+        $modName = '';
+        if ($this->_resourceConfig && $this->_resourceConfig->setup) {
+            $modName = (string) $this->_resourceConfig->setup->module;
+        }
+        if ($modName === '') {
+            $modName = (string) $moduleName;
+        }
         $this->_moduleConfig = $config->getModuleConfig($modName);
         $connection = Mage::getSingleton('core/resource')->getConnection($this->_resourceName);
         /**
@@ -189,6 +198,59 @@ class Mage_Core_Model_Resource_Setup
     }
 
     /**
+     * Every setup resource to run, keyed by resource name, as
+     * ['module' => owning module, 'class' => setup class].
+     *
+     * Two sources, merged:
+     *  - resources declared in config under global/resources (the only place a
+     *    custom setup <class> or a non-default connection can live);
+     *  - convention: any module shipping a sql/<name>_setup or data/<name>_setup
+     *    directory whose name is not already a declared resource. These run with
+     *    the base setup class, so a module needing only the default setup needs
+     *    no <resources> XML at all. The directory name is the resource name (and
+     *    the core_resource version key), so existing installs keep their history.
+     *
+     * Declared resources come first, preserving their depends_on-respecting
+     * config order; convention resources are appended. Anything order-sensitive
+     * relative to another module must therefore stay declared.
+     *
+     * @return array<string, array{module: string, class: string}>
+     */
+    public static function getAllSetupResources(): array
+    {
+        $resources = [];
+
+        foreach (Mage::getConfig()->getNode('global/resources')->children() as $resName => $resource) {
+            if (!$resource->setup) {
+                continue;
+            }
+            $resources[(string) $resName] = [
+                'module' => (string) $resource->setup->module,
+                'class'  => isset($resource->setup->class) ? $resource->setup->getClassName() : self::class,
+            ];
+        }
+
+        foreach (Mage::getConfig()->getNode('modules')->children() as $modName => $module) {
+            if (!$module->is('active')) {
+                continue;
+            }
+            foreach (['sql', 'data'] as $type) {
+                $dir = Mage::getModuleDir($type, (string) $modName);
+                foreach (Maho::listDirectories($dir) as $subDir) {
+                    // maho_setup is not a resource: it's the hardcoded subdir
+                    // _getAvailableMahoFiles scans for every resource's own
+                    // module, so it runs via that module's regular resource.
+                    if (str_ends_with($subDir, '_setup') && $subDir !== 'maho_setup' && !isset($resources[$subDir])) {
+                        $resources[$subDir] = ['module' => (string) $modName, 'class' => self::class];
+                    }
+                }
+            }
+        }
+
+        return $resources;
+    }
+
+    /**
      * @return bool
      */
     public static function applyAllUpdates()
@@ -196,18 +258,10 @@ class Mage_Core_Model_Resource_Setup
         Mage::app()->setUpdateMode(true);
         self::$_hadUpdates = false;
 
-        $resources = Mage::getConfig()->getNode('global/resources')->children();
         $afterApplyUpdates = [];
-        foreach ($resources as $resName => $resource) {
-            if (!$resource->setup) {
-                continue;
-            }
-            $className = self::class;
-            if (isset($resource->setup->class)) {
-                $className = $resource->setup->getClassName();
-            }
+        foreach (self::getAllSetupResources() as $resName => $resource) {
             /** @var Mage_Core_Model_Resource_Setup $setupClass */
-            $setupClass = new $className($resName);
+            $setupClass = new $resource['class']($resName, $resource['module']);
             $setupClass->applyUpdates();
             if ($setupClass->getCallAfterApplyAllUpdates()) {
                 $afterApplyUpdates[] = $setupClass;
@@ -228,17 +282,9 @@ class Mage_Core_Model_Resource_Setup
         if (!self::$_schemaUpdatesChecked) {
             return;
         }
-        $resources = Mage::getConfig()->getNode('global/resources')->children();
-        foreach ($resources as $resName => $resource) {
-            if (!$resource->setup) {
-                continue;
-            }
-            $className = self::class;
-            if (isset($resource->setup->class)) {
-                $className = $resource->setup->getClassName();
-            }
+        foreach (self::getAllSetupResources() as $resName => $resource) {
             /** @var Mage_Core_Model_Resource_Setup $setupClass */
-            $setupClass = new $className($resName);
+            $setupClass = new $resource['class']($resName, $resource['module']);
             $setupClass->applyDataUpdates();
         }
     }
@@ -268,17 +314,9 @@ class Mage_Core_Model_Resource_Setup
         if (!self::$_schemaUpdatesChecked) {
             return;
         }
-        $resources = Mage::getConfig()->getNode('global/resources')->children();
-        foreach ($resources as $resName => $resource) {
-            if (!$resource->setup) {
-                continue;
-            }
-            $className = self::class;
-            if (isset($resource->setup->class)) {
-                $className = $resource->setup->getClassName();
-            }
+        foreach (self::getAllSetupResources() as $resName => $resource) {
             /** @var Mage_Core_Model_Resource_Setup $setupClass */
-            $setupClass = new $className($resName);
+            $setupClass = new $resource['class']($resName, $resource['module']);
             $setupClass->applyMahoUpdates();
         }
     }
@@ -308,17 +346,9 @@ class Mage_Core_Model_Resource_Setup
     public static function getAllPendingUpdates(): array
     {
         $pending = [];
-        $resources = Mage::getConfig()->getNode('global/resources')->children();
-        foreach ($resources as $resName => $resource) {
-            if (!$resource->setup) {
-                continue;
-            }
-            $className = self::class;
-            if (isset($resource->setup->class)) {
-                $className = $resource->setup->getClassName();
-            }
+        foreach (self::getAllSetupResources() as $resName => $resource) {
             /** @var Mage_Core_Model_Resource_Setup $setupClass */
-            $setupClass = new $className($resName);
+            $setupClass = new $resource['class']($resName, $resource['module']);
             $updates = $setupClass->getPendingUpdates();
             if ($updates !== []) {
                 $pending[$resName] = $updates;

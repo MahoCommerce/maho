@@ -44,13 +44,6 @@ SPDX-License-Identifier: AFL-3.0
                 </entities>
             </reports_resource>
         </models>
-        <resources>
-            <reports_setup>
-                <setup>
-                    <module>Mage_Reports</module>
-                </setup>
-            </reports_setup>
-        </resources>
     </global>
     <adminhtml>
         <translate>

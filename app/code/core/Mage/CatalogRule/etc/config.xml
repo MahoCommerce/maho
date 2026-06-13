@@ -56,13 +56,6 @@ SPDX-License-Identifier: AFL-3.0
                 </entities>
             </catalogrule_resource>
         </models>
-        <resources>
-            <catalogrule_setup>
-                <setup>
-                    <module>Mage_CatalogRule</module>
-                </setup>
-            </catalogrule_setup>
-        </resources>
         <catalogrule>
             <related_cache_types>
                 <block_html/>

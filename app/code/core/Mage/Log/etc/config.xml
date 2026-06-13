@@ -90,13 +90,6 @@ SPDX-License-Identifier: AFL-3.0
                 </entities>
             </log_resource>
         </models>
-        <resources>
-            <log_setup>
-                <setup>
-                    <module>Mage_Log</module>
-                </setup>
-            </log_setup>
-        </resources>
         <template>
             <email>
                 <system_log_error_email_template translate="label" module="log">

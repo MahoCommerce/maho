@@ -115,13 +115,6 @@ SPDX-License-Identifier: AFL-3.0
                 </entities>
             </cms_resource>
         </models>
-        <resources>
-            <cms_setup>
-                <setup>
-                    <module>Mage_Cms</module>
-                </setup>
-            </cms_setup>
-        </resources>
         <blocks>
             <cms>
                 <class>Mage_Cms_Block</class>

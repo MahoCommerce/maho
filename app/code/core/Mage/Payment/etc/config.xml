@@ -25,13 +25,6 @@ SPDX-License-Identifier: AFL-3.0
                 </entities>
             </payment_resource>
         </models>
-        <resources>
-            <payment_setup>
-                <setup>
-                    <module>Mage_Payment</module>
-                </setup>
-            </payment_setup>
-        </resources>
         <blocks>
             <payment>
                 <class>Mage_Payment_Block</class>

@@ -291,7 +291,7 @@ return function (Schema $schema): void {
     $emailLog = $schema->createTable('core_email_log');
     $emailLog->addColumn('log_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $emailLog->addColumn('subject', Types::STRING, ['length' => 255, 'default' => '']);
-    $emailLog->addColumn('email_to', Types::TEXT, ['length' => 65535, 'notnull' => true]);
+    $emailLog->addColumn('email_to', Types::TEXT, ['length' => 65535]);
     $emailLog->addColumn('email_from', Types::STRING, ['length' => 255, 'default' => '']);
     $emailLog->addColumn('email_cc', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $emailLog->addColumn('email_bcc', Types::TEXT, ['length' => 65535, 'notnull' => false]);
