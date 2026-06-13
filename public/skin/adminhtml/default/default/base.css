@@ -4836,6 +4836,8 @@ small {
     align-items: center;
     flex-wrap: wrap;
     gap: 8px 12px;
+    margin-top: -10px;
+    padding-top: 10px;
     padding-bottom: 10px
 }
 
