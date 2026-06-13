@@ -503,7 +503,7 @@ table.actions td {
 .massaction .entry-edit fieldset .select {
     width: auto;
     display: inline;
-    margin-right: 5px
+    margin: 0 5px
 }
 
 .massaction .entry-edit fieldset select.validation-failed {
@@ -5531,15 +5531,13 @@ table.actions td {
 .grid-widget table.actions {
     margin: 0;
     padding: 10px 15px;
-    border: 0;
-    border-bottom: 1px solid var(--maho-hairline)
+    border: 0
 }
 
 .grid-widget .massaction {
     height: auto;
     margin: 0;
-    padding: 6px 15px;
-    border: 0;
+    padding: 0 15px 6px;
     border-bottom: 1px solid var(--maho-hairline);
     background: var(--maho-surface)
 }
