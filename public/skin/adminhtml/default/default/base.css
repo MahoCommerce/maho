@@ -870,7 +870,7 @@ ul.tabs-horiz li a.active {
     border-top: 1px solid var(--maho-warning-border);
     font-size: 11px;
     line-height: 16px;
-    margin: 0 0-3px;
+    margin: 0;
     color: var(--maho-ink-soft);
     position: relative
 }
