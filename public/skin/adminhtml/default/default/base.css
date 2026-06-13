@@ -4857,13 +4857,18 @@ small {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 8px 12px
+    gap: 8px 12px;
+    container-type: scroll-state
 }
 
-/* Only pad the sticky header once it's pinned to the top (class toggled in JS) */
-.content-header.is-stuck {
-    padding-top: 5px;
-    padding-bottom: 5px
+/* Give the sticky header a little vertical breathing room only once it's pinned
+   to the top. Scroll-state queries style descendants (not the container itself),
+   so the padding is applied as margin on the header's children, which grows the
+   flex row symmetrically. */
+@container scroll-state(stuck: top) {
+    .content-header > * {
+        margin-block: 5px
+    }
 }
 
 .content-header:has(.content-buttons, .form-buttons) > h3 {
