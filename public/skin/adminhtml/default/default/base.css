@@ -5436,7 +5436,7 @@ div.collapseable a.open {
 }
 
 .order-totals {
-    background: var(--maho-surface-page);
+    background: var(--maho-surface);
     border: 1px solid var(--maho-border)!important
 }
 
