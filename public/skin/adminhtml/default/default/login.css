@@ -139,13 +139,31 @@ body#page-login {
     list-style: none;
 }
 
-#messages li {
+#messages > ul > li {
     padding: 8px 10px;
     margin-bottom: 8px;
     border-radius: var(--maho-radius-sm);
     background: var(--maho-error-bg);
     border: 1px solid var(--maho-error-border);
     color: var(--maho-error-strong);
+}
+
+#messages > ul > li.success-msg {
+    background: var(--maho-success-bg);
+    border-color: var(--maho-success-border);
+    color: var(--maho-success);
+}
+
+#messages > ul > li.warning-msg {
+    background: var(--maho-warning-bg);
+    border-color: var(--maho-warning-border);
+    color: var(--maho-warning);
+}
+
+#messages > ul > li.notice-msg {
+    background: var(--maho-info-bg);
+    border-color: var(--maho-info-border);
+    color: var(--maho-info);
 }
 
 .form-buttons {
