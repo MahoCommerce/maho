@@ -165,16 +165,3 @@ SPDX-License-Identifier: AFL-3.0
 :root[data-scheme="light"] #scheme-toggle .scheme-light {
     display: block;
 }
-
-/* The global search collapses to a magnifier icon at all widths (see base.css), so
-   the bar only needs to reserve the icon + user-menu footprint. Tighten the nav at
-   narrow widths so it never runs under the search/icons. */
-@media (max-width: 900px) {
-    .nav-bar {
-        padding: 0 120px 0 50px;
-    }
-
-    #nav li.level0 > a {
-        padding: 0 7px;
-    }
-}
