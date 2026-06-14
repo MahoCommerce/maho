@@ -49,6 +49,7 @@ Default layout, loads most of the pages
                 <action method="addJs"><script>mage/adminhtml/product.js</script></action>
 
 
+                <action method="addItem"><type>skin_css</type><name>tokens.css</name></action>
                 <action method="addItem"><type>skin_css</type><name>base.css</name></action>
                 <action method="addItem"><type>skin_css</type><name>form.css</name></action>
                 <action method="addItem"><type>skin_css</type><name>menu.css</name><params>media="screen, projection"</params></action>

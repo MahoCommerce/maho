@@ -8,29 +8,40 @@
  */
 ?>
 <?php /** @var Mage_Adminhtml_Block_Sales_Order_Create_Store_Select $this */ ?>
-<div class="store-scope">
-    <div class="tree-store-scope">
-    <?php foreach ($this->getWebsiteCollection() as $_website): ?>
-        <?php $showWebsite=false; ?>
-        <?php foreach ($this->getGroupCollection($_website) as $_group): ?>
-            <?php $showGroup=false; ?>
-            <?php foreach ($this->getStoreCollection($_group) as $_store): ?>
-                <?php if ($showWebsite == false): ?>
-                    <?php $showWebsite = true; ?>
-                    <h3><?= $this->escapeHtml($_website->getName()) ?></h3>
-                <?php endif ?>
-                <?php if ($showGroup == false): ?>
-                    <?php $showGroup = true; ?>
-                    <h4 style="margin-left:12px;"><?= $this->escapeHtml($_group->getName()) ?></h4>
-                <?php endif ?>
-                <span class="field-row" style="margin-left:28px;">
-                    <input type="radio" id="store_<?= $_store->getId() ?>" class="radio" onclick="order.setStoreId('<?= $_store->getId() ?>')">
-                    <label for="store_<?= $_store->getId() ?>" class="inline"><?= $this->escapeHtml($_store->getName()) ?></label>
-                </span>
-            <?php endforeach ?>
-            <?php if ($showGroup): ?>
-            <?php endif ?>
+<?php
+// Build the hierarchy first, skipping empty websites/groups. Whether the website
+// and store-group names are shown (hidden when there's only one) is handled in CSS.
+$_websites = [];
+foreach ($this->getWebsiteCollection() as $_website) {
+    $_groups = [];
+    foreach ($this->getGroupCollection($_website) as $_group) {
+        $_stores = $this->getStoreCollection($_group);
+        if (count($_stores) > 0) {
+            $_groups[] = [$_group, $_stores];
+        }
+    }
+    if (count($_groups) > 0) {
+        $_websites[] = [$_website, $_groups];
+    }
+}
+?>
+<div class="store-scope order-store-select">
+<?php foreach ($_websites as [$_website, $_groups]): ?>
+    <div class="store-website">
+        <h3 class="store-website-name"><?= $this->escapeHtml($_website->getName()) ?></h3>
+        <?php foreach ($_groups as [$_group, $_stores]): ?>
+            <div class="store-group">
+                <h4 class="store-group-name"><?= $this->escapeHtml($_group->getName()) ?></h4>
+                <div class="store-view-cards">
+                    <?php foreach ($_stores as $_store): ?>
+                        <label class="store-view-card" for="store_<?= $_store->getId() ?>">
+                            <input type="radio" name="store_select" id="store_<?= $_store->getId() ?>" class="radio" onclick="order.setStoreId('<?= $_store->getId() ?>')">
+                            <span class="store-view-name"><?= $this->escapeHtml($_store->getName()) ?></span>
+                        </label>
+                    <?php endforeach ?>
+                </div>
+            </div>
         <?php endforeach ?>
-    <?php endforeach ?>
     </div>
+<?php endforeach ?>
 </div>

@@ -13,10 +13,10 @@
     --tt-color-bg-active: #d1d5db;
     --tt-color-bg-subtle: #fafafa;
     --tt-color-bg-code: #f3f4f6;
-    --tt-color-primary: #3b82f6;
-    --tt-color-primary-dark: #1d4ed8;
-    --tt-color-link: #2563eb;
-    --tt-color-danger: #dc3545;
+    --tt-color-primary: var(--maho-accent, #3b82f6);
+    --tt-color-primary-dark: var(--maho-accent-strong, #1d4ed8);
+    --tt-color-link: var(--maho-link, #2563eb);
+    --tt-color-danger: var(--maho-error, #dc3545);
 
     /* Shadows */
     --tt-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);

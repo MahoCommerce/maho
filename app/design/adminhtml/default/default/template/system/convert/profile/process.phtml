@@ -11,7 +11,7 @@
 ?>
 <style type="text/css" >
     ul { list-style-type:none; padding:0; margin:0; }
-    li { margin-left:0; border:1px solid #ccc; margin:2px; padding:2px 2px 2px 2px; font:normal 12px sans-serif; display: flex; align-items: center; }
+    li { margin-left:0; border:1px solid var(--maho-border); margin:2px; padding:2px 2px 2px 2px; font:normal 12px sans-serif; display: flex; align-items: center; }
     img { margin-right:5px; }
     svg { margin-right:5px; }
 </style>
@@ -24,7 +24,7 @@
             <?= $this->getIconSvg('bulb') ?>
             <?= $this->__("Starting profile execution, please wait...") ?>
             </li>
-            <li style="background-color:#FFD;">
+            <li style="background-color:var(--maho-warning-bg);">
             <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' data-name='alert-triangle' data-variant='outline'><path d='M12 9v4'/><path d='M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z'/><path d='M12 16h.01'/></svg>" class="v-middle" style="margin-right:5px">
             <?= $this->__("Warning: Please do not close the window during importing/exporting data") ?>
         <?php else: ?>
@@ -46,10 +46,10 @@
             </li>
         <?php endforeach ?>
         <?php if($this->getProfile()->getEntityType() == 'product' && $this->getProfile()->getDirection() == 'import'):?>
-            <li id="liBeforeFinish" style="background-color:#FFD; display:none;">
+            <li id="liBeforeFinish" style="background-color:var(--maho-warning-bg); display:none;">
                 <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' data-name='alert-triangle' data-variant='outline'><path d='M12 9v4'/><path d='M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z'/><path d='M12 16h.01'/></svg>" class="v-middle" style="margin-right:5px">
                 <?php echo $this->__("Please wait while the indexes are being refreshed.");?>
-                <img id="before-finish-wait-img" src="<?php echo $this->getSkinUrl('images/rule-ajax-loader.gif');?>" class="v-middle" style="margin-right:5px">
+                <img id="before-finish-wait-img" src="<?php echo $this->getSkinUrl('images/loading.svg');?>" class="v-middle" width="16" height="16" style="margin-right:5px">
             </li>
         <?php endif ?>
             <li id="liFinished" style="display:none;">
@@ -148,7 +148,7 @@
                         if (!document.getElementById("updatedRows")) {
                             const liFinished = document.getElementById("liFinished");
                             liFinished.insertAdjacentHTML('beforebegin', config.tpl.evaluate({
-                                style: "background-color: #FFD;",
+                                style: "background-color: var(--maho-warning-bg);",
                                 image: config.styles.loader,
                                 text: config.tplTxt.evaluate({updated:countOfUpdated, percent:getPercent()}),
                                 id: "updatedRows"

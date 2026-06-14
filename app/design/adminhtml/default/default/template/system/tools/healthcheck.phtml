@@ -24,15 +24,15 @@ $checks = $this->getHealthChecks();
         grid-template-columns: 1fr 1fr;
     }
     .healthcheck-section {
-        background: #fff;
-        border: 1px solid #d6d6d6;
+        background: var(--maho-surface);
+        border: 1px solid var(--maho-border-soft);
         border-radius: 4px;
     }
     .healthcheck-section h3 {
         margin: 0;
         padding: 10px 15px;
-        background: #f5f5f5;
-        border-bottom: 1px solid #d6d6d6;
+        background: var(--maho-surface-sunken);
+        border-bottom: 1px solid var(--maho-border-soft);
         font-size: 13px;
     }
     .healthcheck-section table {
@@ -41,7 +41,7 @@ $checks = $this->getHealthChecks();
     }
     .healthcheck-section table td {
         padding: 6px 15px;
-        border-bottom: 1px solid #ededed;
+        border-bottom: 1px solid var(--maho-surface-sunken);
         font-size: 12px;
         vertical-align: top;
     }
@@ -51,7 +51,7 @@ $checks = $this->getHealthChecks();
     .healthcheck-section table td:first-child {
         font-weight: 600;
         width: 45%;
-        color: #555;
+        color: var(--maho-ink-muted);
     }
     .ext-grid {
         display: grid;
@@ -64,11 +64,11 @@ $checks = $this->getHealthChecks();
         padding: 3px 8px;
         border-radius: 3px;
     }
-    .ext-ok { background: #e6f9e6; color: #2a7a2a; }
-    .ext-missing { background: #fce4e4; color: #c00; }
-    .check-ok { color: #2a7a2a; }
-    .check-warning { color: #e68a00; }
-    .check-error { color: #c00; }
+    .ext-ok { background: var(--maho-success-bg); color: var(--maho-success); }
+    .ext-missing { background: var(--maho-error-bg); color: var(--maho-error-strong); }
+    .check-ok { color: var(--maho-success); }
+    .check-warning { color: var(--maho-warning); }
+    .check-error { color: var(--maho-error-strong); }
 </style>
 
 <div class="content-header">
@@ -216,7 +216,7 @@ $checks = $this->getHealthChecks();
             <tr>
                 <td colspan="2" style="padding: 0;">
                     <details>
-                        <summary style="padding: 8px 15px; cursor: pointer; font-weight: 600; color: #555; user-select: none;">All Directives</summary>
+                        <summary style="padding: 8px 15px; cursor: pointer; font-weight: 600; color: var(--maho-ink-muted); user-select: none;">All Directives</summary>
                         <table style="width: 100%;">
                             <?php foreach ($opcache['directives'] as $key => $value): ?>
                             <tr>
