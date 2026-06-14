@@ -61,9 +61,9 @@
                 <?php endif ?>
                 <td class="a-center">
                     <?php if ($_item->getTypeId() == Mage_Catalog_Model_Product_Type_Grouped::TYPE_CODE && $this->getDataId() == 'wishlist'): ?>
-                        <a href="#" onclick="order.sidebarConfigureProduct('<?= 'sidebar_wishlist' ?>', <?= $this->getProductId($_item) ?>, <?= $this->getItemId($_item) ?>); return false;"><img src="<?= $this->getSkinUrl('images/grouped_to_order_icon.png') ?>" class="v-middle" alt="<?= Mage::helper('sales')->__('Configure and Add to Order') ?>" title="<?= Mage::helper('sales')->__('Configure and Add to Order') ?>" width="16" height="16"></a>
+                        <a href="#" class="icon-link" title="<?= $this->quoteEscape(Mage::helper('sales')->__('Configure and Add to Order')) ?>" onclick="order.sidebarConfigureProduct('<?= 'sidebar_wishlist' ?>', <?= $this->getProductId($_item) ?>, <?= $this->getItemId($_item) ?>); return false;"><?= $this->getIconSvg('adjustments') ?></a>
                     <?php elseif ($_item->getTypeId() == Mage_Catalog_Model_Product_Type_Grouped::TYPE_CODE): ?>
-                        <a href="#" onclick="order.sidebarConfigureProduct('<?= 'sidebar' ?>', <?= $this->getProductId($_item) ?>); return false;"><img src="<?= $this->getSkinUrl('images/grouped_to_order_icon.png') ?>" class="v-middle" alt="<?= Mage::helper('sales')->__('Configure and Add to Order') ?>" title="<?= Mage::helper('sales')->__('Configure and Add to Order') ?>" width="16" height="16"></a>
+                        <a href="#" class="icon-link" title="<?= $this->quoteEscape(Mage::helper('sales')->__('Configure and Add to Order')) ?>" onclick="order.sidebarConfigureProduct('<?= 'sidebar' ?>', <?= $this->getProductId($_item) ?>); return false;"><?= $this->getIconSvg('adjustments') ?></a>
                     <?php else: ?>
                         <input type="checkbox" name="sidebar[<?= $this->getSidebarStorageAction() ?>][<?= $this->getIdentifierId($_item) ?>]" value="<?= $this->canDisplayItemQty() ? $_item->getQty()*1 : 1 ?>" title="<?= Mage::helper('sales')->__('Add To Order') ?>">
                     <?php endif ?>

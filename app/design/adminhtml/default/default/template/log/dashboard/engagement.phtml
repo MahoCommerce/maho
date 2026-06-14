@@ -70,7 +70,7 @@ $returningPercent = $this->calculatePercentage($newReturning['returning'] ?? 0, 
     margin: 0 0 12px 0;
     font-size: 13px;
     font-weight: 600;
-    color: #333;
+    color: var(--maho-ink);
 }
 .dashboard-engagement .engagement-container {
     display: flex;
@@ -92,11 +92,11 @@ $returningPercent = $this->calculatePercentage($newReturning['returning'] ?? 0, 
 .dashboard-engagement .rate-value {
     font-size: 24px;
     font-weight: bold;
-    color: #4a90d9;
+    color: var(--maho-info);
 }
 .dashboard-engagement .rate-label {
     font-size: 12px;
-    color: #666;
+    color: var(--maho-ink-muted);
 }
 .dashboard-engagement .conversion-numbers {
     display: flex;
@@ -109,11 +109,11 @@ $returningPercent = $this->calculatePercentage($newReturning['returning'] ?? 0, 
 .dashboard-engagement .number-value {
     font-size: 16px;
     font-weight: 600;
-    color: #333;
+    color: var(--maho-ink);
 }
 .dashboard-engagement .number-label {
     font-size: 10px;
-    color: #999;
+    color: var(--maho-ink-faint);
     text-transform: uppercase;
 }
 .dashboard-engagement .visitors-bar {
@@ -121,15 +121,15 @@ $returningPercent = $this->calculatePercentage($newReturning['returning'] ?? 0, 
     height: 12px;
     border-radius: 6px;
     overflow: hidden;
-    background: #f0f0f0;
+    background: var(--maho-surface-sunken);
     margin-bottom: 12px;
 }
 .dashboard-engagement .visitors-new {
-    background: #67b26f;
+    background: var(--maho-success);
     transition: width 0.3s ease;
 }
 .dashboard-engagement .visitors-returning {
-    background: #4a90d9;
+    background: var(--maho-info);
     transition: width 0.3s ease;
 }
 .dashboard-engagement .visitors-legend {
@@ -149,20 +149,20 @@ $returningPercent = $this->calculatePercentage($newReturning['returning'] ?? 0, 
     border-radius: 50%;
 }
 .dashboard-engagement .legend-new {
-    background: #67b26f;
+    background: var(--maho-success);
 }
 .dashboard-engagement .legend-returning {
-    background: #4a90d9;
+    background: var(--maho-info);
 }
 .dashboard-engagement .legend-label {
-    color: #333;
+    color: var(--maho-ink);
 }
 .dashboard-engagement .legend-value {
-    color: #666;
+    color: var(--maho-ink-muted);
     margin-left: auto;
 }
 .dashboard-engagement .no-data {
-    color: #999;
+    color: var(--maho-ink-faint);
     font-size: 12px;
     padding: 10px 0;
 }

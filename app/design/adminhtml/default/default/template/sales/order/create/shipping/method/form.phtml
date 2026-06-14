@@ -62,9 +62,9 @@
                 <?php endif ?>
             </strong>
             <br>
-            <a href="#" onclick="document.getElementById('order-shipping-method-info').style.display = 'none';document.getElementById('order-shipping-method-choose').style.display = 'block';return false">
+            <button type="button" class="scalable" onclick="document.getElementById('order-shipping-method-info').style.display = 'none';document.getElementById('order-shipping-method-choose').style.display = 'block';return false">
                 <?= Mage::helper('sales')->__('Click to change shipping method') ?>
-            </a>
+            </button>
         </div>
     <?php else: ?>
         <script>document.getElementById('order-shipping-method-choose').style.display = 'block';</script>
@@ -73,9 +73,9 @@
     <strong><?= Mage::helper('sales')->__('Sorry, no quotes are available for this order at this time.') ?></strong>
 <?php else: ?>
     <div id="order-shipping-method-summary">
-        <a href="#" onclick="order.loadShippingRates();return false">
+        <button type="button" class="scalable" onclick="order.loadShippingRates();return false">
             <?= Mage::helper('sales')->__('Get shipping methods and rates') ?>
-        </a>
+        </button>
         <input type="hidden" name="order[has_shipping]" value="" class="required-entry">
     </div>
 <?php endif ?>

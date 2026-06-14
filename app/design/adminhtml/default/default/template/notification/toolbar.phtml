@@ -39,16 +39,13 @@
         $latestNoticeUrl = $this->getLatestNoticeUrl();
     ?>
     <?php /*
-    <span class="f-right"><?= $this->__('You have %s unread message(s). <a href="%s">Go to messages inbox</a>.', $msgStats, $this->getNoticesInboxUrl()) ?></span>
+    <span class="notification-action"><?= $this->__('You have %s unread message(s). <a href="%s">Go to messages inbox</a>.', $msgStats, $this->getNoticesInboxUrl()) ?></span>
     */?>
 
-    <span class="f-right">
-        <?php $goToBoxMessage = (!empty($latestNoticeUrl)) ? $this->__('Go to messages inbox') : $this->__('Go to notifications') ?>
-        <?= $this->__('You have %s unread message(s).', $msgStats) ?> <a href="<?= $this->getNoticesInboxUrl() ?>"><?= $goToBoxMessage ?></a>
-    </span>
 <?php /* ********** temporary commented
-    <span class="f-right"><?= $this->__('You have %s, %s and %s unread messages. <a href="%s">Go to messages inbox</a>.', '<span class="critical"><strong>'.$this->getCriticalCount().'</strong> '.$this->__('critical').'</span>', '<strong>'.$this->getMajorCount().'</strong> '.$this->__('major'), '<strong>'.$this->getMinorCount().'</strong> '.$this->__('minor'), $this->getNoticesInboxUrl()) ?></span>
+    <span class="notification-action"><?= $this->__('You have %s, %s and %s unread messages. <a href="%s">Go to messages inbox</a>.', '<span class="critical"><strong>'.$this->getCriticalCount().'</strong> '.$this->__('critical').'</span>', '<strong>'.$this->getMajorCount().'</strong> '.$this->__('major'), '<strong>'.$this->getMinorCount().'</strong> '.$this->__('minor'), $this->getNoticesInboxUrl()) ?></span>
 ******** */?>
+    <span class="notification-body">
     <?php if ($this->isMessageWindowAvailable()): ?>
         <strong class="label clickable" onclick="openMessagePopup()">
     <?php else: ?>
@@ -59,5 +56,10 @@
     <?php if (!empty($latestNoticeUrl)): ?>
         <a href="<?= $latestNoticeUrl ?>" onclick="this.target='_blank';"><?= $this->__('Read details') ?></a>
     <?php endif ?>
+    </span>
+    <span class="notification-action">
+        <?php $goToBoxMessage = (!empty($latestNoticeUrl)) ? $this->__('Go to messages inbox') : $this->__('Go to notifications') ?>
+        <?= $this->__('You have %s unread message(s).', $msgStats) ?> <a href="<?= $this->getNoticesInboxUrl() ?>"><?= $goToBoxMessage ?></a>
+    </span>
 </div>
 <?php endif ?>

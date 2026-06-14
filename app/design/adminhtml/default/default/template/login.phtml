@@ -42,7 +42,7 @@
                         <?= $this->getChildHtml('form.additional.info') ?>
                         <div class="clear"></div>
                         <div class="form-buttons">
-                            <a class="left" href="<?= Mage::helper('adminhtml')->getUrl('adminhtml/index/forgotpassword', ['_nosecret' => true]) ?>"><?= Mage::helper('adminhtml')->__('Forgot your password?') ?></a>
+                            <a href="<?= Mage::helper('adminhtml')->getUrl('adminhtml/index/forgotpassword', ['_nosecret' => true]) ?>"><?= Mage::helper('adminhtml')->__('Forgot your password?') ?></a>
                             <input type="submit" class="form-button" value="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" title="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>">
 
                             <button type="button" id="passkey-login-button" class="form-button">
@@ -57,7 +57,7 @@
                         </div>
                         <div class="clear"></div>
                         <div class="form-buttons">
-                            <a id="back-button" class="left" href="#"><?= Mage::helper('adminhtml')->__('Back') ?></a>
+                            <a id="back-button" href="#"><?= Mage::helper('adminhtml')->__('Back') ?></a>
                             <input type="submit" class="form-button" value="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" title="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>">
                         </div>
                     </div>

@@ -11,6 +11,8 @@
 ?>
 <meta http-equiv="Content-Type" content="<?= $this->getContentType() ?>">
 <meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light dark">
+<script>(() => { const s = localStorage.getItem('maho-admin-scheme'); if (s === 'light' || s === 'dark') document.documentElement.dataset.scheme = s; })()</script>
 <title><?= htmlspecialchars(html_entity_decode($this->getTitle())) ?></title>
 <?= Mage::helper('page')->getFaviconHtml() ?>
 

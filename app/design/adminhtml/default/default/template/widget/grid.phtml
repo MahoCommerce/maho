@@ -18,7 +18,7 @@ $numColumns = count($this->getColumns());
         </div>
         <?php endif ?>
 
-        <div id="<?= $this->getId() ?>">
+        <div id="<?= $this->getId() ?>" class="grid-widget">
     <?php else: ?>
         <?= $this->getMessagesBlock()->toHtml() ?>
     <?php endif ?>
@@ -45,16 +45,15 @@ $numColumns = count($this->getColumns());
                 <span class="pager-arrow disabled" aria-label="<?= $this->quoteEscape($this->__('Go to Next page')) ?>"><?= $this->getIconSvg('circle-arrow-right') ?></span>
             <?php endif ?>
 
-            <?= $this->__('of %s pages', $this->getCollection()->getLastPageNumber()) ?>
+            <?= $this->__('of %s', $this->getCollection()->getLastPageNumber()) ?>
             <span class="separator">|</span>
-            <?= $this->__('View') ?>
-            <select name="<?= $this->getVarNameLimit() ?>" onchange="<?= $this->getJsObjectName() ?>.loadByElement(this)">
+            <select name="<?= $this->getVarNameLimit() ?>" aria-label="<?= $this->quoteEscape($this->__('Items per page')) ?>" onchange="<?= $this->getJsObjectName() ?>.loadByElement(this)">
                 <?php foreach ($this->getLimitOptions() as $pageSize): ?>
                     <option value="<?= $pageSize ?>"<?php if($this->getCollection()->getPageSize() == $pageSize): ?> selected="selected"<?php endif ?>><?= $pageSize ?></option>
                 <?php endforeach ?>
             </select>
             <?= $this->__('per page') ?><span class="separator">|</span>
-            <?= $this->__('Total %d records found', $this->getCollection()->getSize()) ?>
+            <?= $this->__('%d items', $this->getCollection()->getSize()) ?>
             <span id="<?= $this->getHtmlId() ?>-total-count" class="no-display"><?= $this->getCollection()->getSize() ?></span>
             <?php if($this->getRssLists()): ?>
                 <?php foreach ($this->getRssLists() as $_rss): ?>
@@ -65,7 +64,7 @@ $numColumns = count($this->getColumns());
     <?php endif ?>
     <?php if($this->getExportTypes()): ?>
         <td class="export a-right">
-            <img src="<?= $this->getSkinUrl('images/icon_export.gif') ?>" alt="" class="v-middle">&nbsp; <?= $this->__('Export to:') ?>
+            <?= $this->__('Export to:') ?>
             <select name="<?= $this->getId() ?>_export" id="<?= $this->getId() ?>_export" style="width:8em;">
             <?php foreach ($this->getExportTypes() as $_type): ?>
                 <option value="<?= $_type->getUrl() ?>"><?= $_type->getLabel() ?></option>
