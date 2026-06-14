@@ -66,7 +66,7 @@ $browserTotal = array_sum($browsers);
     margin: 0 0 10px 0;
     font-size: 13px;
     font-weight: 600;
-    color: #333;
+    color: var(--maho-ink);
 }
 .devices-browsers-container {
     display: flex;
@@ -81,7 +81,7 @@ $browserTotal = array_sum($browsers);
     justify-content: space-between;
     align-items: center;
     padding: 6px 0;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--maho-surface-sunken);
     font-size: 12px;
 }
 .dashboard-devices .device-row:last-child,
@@ -102,15 +102,15 @@ $browserTotal = array_sum($browsers);
 .dashboard-devices .device-label,
 .dashboard-devices .browser-label {
     flex: 1;
-    color: #333;
+    color: var(--maho-ink);
 }
 .dashboard-devices .device-value,
 .dashboard-devices .browser-value {
     font-weight: 600;
-    color: #666;
+    color: var(--maho-ink-muted);
 }
 .dashboard-devices .no-data {
-    color: #999;
+    color: var(--maho-ink-faint);
     font-size: 12px;
     padding: 10px 0;
 }

@@ -20,50 +20,155 @@
             <span id="global_search_indicator" class="autocomplete-indicator" style="display: none">
                 <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Loading...')) ?>">
             </span>
-            <?php $defSearch = $this->__('Global Record Search') ?>
-            <input id="global_search" name="query" type="text" class="input-text" value="<?php if(!empty($query)): ?><?= $query ?><?php else: ?><?= $this->quoteEscape($defSearch) ?><?php endif ?>" onfocus="if(this.value=='<?= $this->quoteEscape($defSearch, true) ?>')this.value=''; " onblur="if(this.value=='')this.value='<?= $defSearch ?>';" autocomplete="off">
-            <div id="global_search_autocomplete" class="autocomplete" style="display:none"></div>
+            <input id="global_search" name="query" type="text" class="input-text" value="<?= !empty($query) ? $this->escapeHtml($query) : '' ?>" placeholder="<?= $this->quoteEscape($this->__('Search')) ?>" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="global_search_autocomplete">
+            <div id="global_search_autocomplete" class="autocomplete" role="listbox" aria-label="<?= $this->quoteEscape($this->__('Search results')) ?>" style="display:none"></div>
             <script>
-                document.getElementById('global_search').addEventListener('input', function() {
-                    let query = this.value;
-                    if (query.length < 2) {
-                        document.getElementById('global_search_autocomplete').style.display = 'none';
-                        return;
+                (() => {
+                    const input = document.getElementById('global_search');
+                    const box = document.getElementById('global_search_autocomplete');
+                    const indicator = document.getElementById('global_search_indicator');
+                    const searchUrl = '<?= $this->getUrl('adminhtml/index/globalSearch') ?>?isAjax=true';
+                    let active = -1;
+
+                    const options = () => Array.from(box.querySelectorAll('li'));
+
+                    function close() {
+                        box.style.display = 'none';
+                        box.innerHTML = '';
+                        input.setAttribute('aria-expanded', 'false');
+                        input.removeAttribute('aria-activedescendant');
+                        active = -1;
                     }
 
-                    document.getElementById('global_search_indicator').style.display = 'inline-block';
-                    fetch('<?= $this->getUrl('adminhtml/index/globalSearch') ?>?isAjax=true', {
-                        method: 'POST',
-                        headers:{
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: new URLSearchParams({
-                            'query': query,
-                            'form_key': FORM_KEY
-                        })
-                    })
-                    .then(response => {
-                        return response.text();
-                    })
-                    .then(htmlString => {
-                        let autocomplete = document.getElementById('global_search_autocomplete');
-                        autocomplete.style.display = 'block';
-                        autocomplete.innerHTML = htmlString;
-                        Array.from(document.querySelectorAll('#global_search_autocomplete li')).forEach(li => {
-                            li.addEventListener('click', function() {
-                                location.href = this.getAttribute('url');
-                            });
+                    function setActive(index) {
+                        const opts = options();
+                        if (!opts.length) {
+                            return;
+                        }
+                        if (index < 0) {
+                            index = opts.length - 1;
+                        } else if (index >= opts.length) {
+                            index = 0;
+                        }
+                        opts.forEach((li, i) => {
+                            const on = i === index;
+                            li.classList.toggle('selected', on);
+                            li.setAttribute('aria-selected', on ? 'true' : 'false');
                         });
-                        document.getElementById('global_search_indicator').style.display = 'none';
-                    })
-                    .catch(error => {
-                        alert(error);
+                        active = index;
+                        input.setAttribute('aria-activedescendant', opts[index].id);
+                        opts[index].scrollIntoView({ block: 'nearest' });
+                    }
+
+                    function render(html) {
+                        box.innerHTML = html;
+                        box.style.display = 'block';
+                        input.setAttribute('aria-expanded', 'true');
+                        input.removeAttribute('aria-activedescendant');
+                        active = -1;
+                        options().forEach((li, i) => {
+                            li.id = 'global_search_option_' + i;
+                            li.setAttribute('role', 'option');
+                            li.setAttribute('aria-selected', 'false');
+                            li.addEventListener('click', () => { location.href = li.getAttribute('url'); });
+                            li.addEventListener('mousemove', () => setActive(i));
+                        });
+                    }
+
+                    input.addEventListener('input', function() {
+                        const query = this.value;
+                        if (query.length < 2) {
+                            close();
+                            return;
+                        }
+                        indicator.style.display = 'inline-block';
+                        fetch(searchUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: new URLSearchParams({ query: query, form_key: FORM_KEY })
+                        })
+                        .then(response => response.text())
+                        .then(html => {
+                            render(html);
+                            indicator.style.display = 'none';
+                        })
+                        .catch(error => {
+                            indicator.style.display = 'none';
+                            console.error(error);
+                        });
                     });
-                });
+
+                    input.addEventListener('keydown', function(e) {
+                        if (box.style.display === 'none') {
+                            return;
+                        }
+                        switch (e.key) {
+                            case 'ArrowDown':
+                                e.preventDefault();
+                                setActive(active + 1);
+                                break;
+                            case 'ArrowUp':
+                                e.preventDefault();
+                                setActive(active - 1);
+                                break;
+                            case 'Enter': {
+                                const opts = options();
+                                const target = opts[active >= 0 ? active : 0];
+                                if (target) {
+                                    e.preventDefault();
+                                    location.href = target.getAttribute('url');
+                                }
+                                break;
+                            }
+                            case 'Escape':
+                                close();
+                                break;
+                        }
+                    });
+
+                    document.addEventListener('click', function(e) {
+                        if (!input.contains(e.target) && !box.contains(e.target)) {
+                            close();
+                        }
+                    });
+                })();
             </script>
         </fieldset>
         <?php endif ?>
         <div class="user-menu-icons">
+            <button type="button" id="scheme-toggle" aria-label="<?= $this->quoteEscape($this->__('Color scheme')) ?>">
+                <span class="scheme-system"><?= $this->getIconSvg('device-desktop') ?></span>
+                <span class="scheme-dark"><?= $this->getIconSvg('moon') ?></span>
+                <span class="scheme-light"><?= $this->getIconSvg('sun') ?></span>
+            </button>
+            <script>
+                (() => {
+                    const titles = {
+                        system: '<?= $this->jsQuoteEscape($this->__('Color scheme: follow system')) ?>',
+                        dark: '<?= $this->jsQuoteEscape($this->__('Color scheme: dark')) ?>',
+                        light: '<?= $this->jsQuoteEscape($this->__('Color scheme: light')) ?>',
+                    };
+                    const toggle = document.getElementById('scheme-toggle');
+                    const current = () => document.documentElement.dataset.scheme ?? 'system';
+                    const setLabel = (scheme) => {
+                        toggle.title = titles[scheme];
+                        toggle.setAttribute('aria-label', titles[scheme]);
+                    };
+                    setLabel(current());
+                    toggle.addEventListener('click', () => {
+                        const order = ['system', 'dark', 'light'];
+                        const next = order[(order.indexOf(current()) + 1) % order.length];
+                        if (next === 'system') {
+                            delete document.documentElement.dataset.scheme;
+                            localStorage.removeItem('maho-admin-scheme');
+                        } else {
+                            document.documentElement.dataset.scheme = next;
+                            localStorage.setItem('maho-admin-scheme', next);
+                        }
+                        setLabel(next);
+                    });
+                })();
+            </script>
             <?php if (Mage::getSingleton('admin/session')->isAllowed('admin/system/myaccount')): ?>
             <a href="<?= Mage::helper("adminhtml")->getUrl("adminhtml/system_account") ?>" class="user-icon" title="<?= $this->__("My Account") ?>">
                 <?= $this->getIconSvg('user') ?>
