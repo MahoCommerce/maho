@@ -29,30 +29,32 @@ $numColumns = count($this->getColumns());
             <tr>
         <?php if($this->getDateFilterVisibility()): ?>
             <td class="a-left filter">
-                <div class="f-left">
-                    <div><?= $this->__('From') ?>:&nbsp;<input class="input-text no-changes required-entry" type="date" id="period_date_from" name="report_from" value="<?= $this->getFilter('report_from') ?>" style="width:auto">&nbsp;&nbsp;</div>
-                    <div id="period_date_from_advaice"></div>
-                </div>
+                <div class="report-filter-row">
+                    <div>
+                        <div><?= $this->__('From') ?>:&nbsp;<input class="input-text no-changes required-entry" type="date" id="period_date_from" name="report_from" value="<?= $this->getFilter('report_from') ?>" style="width:auto">&nbsp;&nbsp;</div>
+                        <div id="period_date_from_advaice"></div>
+                    </div>
 
-                <div class="f-left">
-                    <div><?= $this->__('To') ?>:&nbsp;<input  class="input-text no-changes required-entry" type="date" id="period_date_to" name="report_to"  value="<?= $this->getFilter('report_to') ?>" style="width:auto">&nbsp;&nbsp;</div>
-                    <div id="period_date_to_advaice"></div>
-                </div>
+                    <div>
+                        <div><?= $this->__('To') ?>:&nbsp;<input  class="input-text no-changes required-entry" type="date" id="period_date_to" name="report_to"  value="<?= $this->getFilter('report_to') ?>" style="width:auto">&nbsp;&nbsp;</div>
+                        <div id="period_date_to_advaice"></div>
+                    </div>
 
-                <div class="f-left">
-                    <?= $this->__('Show By') ?>:
-                    <select name="report_period" id="report_period" style="width:6em;">
-                    <?php foreach ($this->getPeriods() as $_value=>$_label): ?>
-                        <option value="<?= $_value ?>" <?php if($this->getFilter('report_period')==$_value): ?> selected<?php endif ?>><?= $_label ?></option>
-                    <?php endforeach ?>
-                    </select>
-                    <?= $this->getRefreshButtonHtml() ?>
+                    <div>
+                        <?= $this->__('Show By') ?>:
+                        <select name="report_period" id="report_period" style="width:6em;">
+                        <?php foreach ($this->getPeriods() as $_value=>$_label): ?>
+                            <option value="<?= $_value ?>" <?php if($this->getFilter('report_period')==$_value): ?> selected<?php endif ?>><?= $_label ?></option>
+                        <?php endforeach ?>
+                        </select>
+                        <?= $this->getRefreshButtonHtml() ?>
+                    </div>
                 </div>
             </td>
         <?php endif ?>
         <?php if($this->getExportVisibility()): ?>
             <td class="a-right">
-                <img src="<?= $this->getSkinUrl('images/icon_export.gif') ?>" alt="" class="v-middle">&nbsp; <?= $this->__('Export to:') ?>
+                <?= $this->__('Export to:') ?>
                 <select name="<?= $this->getId() ?>_export" id="<?= $this->getId() ?>_export" style="width:8em;">
                 <?php foreach ($this->getExportTypes() as $_type): ?>
                     <option value="<?= $_type->getUrl() ?>"><?= $_type->getLabel() ?></option>

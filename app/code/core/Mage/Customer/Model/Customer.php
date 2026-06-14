@@ -1471,7 +1471,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 
         $liStyle = 'background-color: #FDD; ';
         echo '<li style="' . $liStyle . '">';
-        echo '<img src="' . Mage::getDesign()->getSkinUrl('images/error_msg_icon.gif') . '" class="v-middle">';
+        echo Mage::helper('core')->getIconSvg('alert-circle');
         echo $error;
         if ($line) {
             echo '<small>, Line: <b>' . $line . '</b></small>';

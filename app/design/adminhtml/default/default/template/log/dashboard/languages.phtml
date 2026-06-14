@@ -53,18 +53,18 @@ $total = $data['total'] ?? 0;
 }
 .dashboard-languages .language-name {
     width: 80px;
-    color: #333;
+    color: var(--maho-ink);
 }
 .dashboard-languages .language-bar-container {
     flex: 1;
     height: 8px;
-    background: #f0f0f0;
+    background: var(--maho-surface-sunken);
     border-radius: 4px;
     overflow: hidden;
 }
 .dashboard-languages .language-bar {
     height: 100%;
-    background: linear-gradient(90deg, #4a90d9, #67b26f);
+    background: linear-gradient(90deg, var(--maho-info), var(--maho-success));
     border-radius: 4px;
     transition: width 0.3s ease;
 }
@@ -72,10 +72,10 @@ $total = $data['total'] ?? 0;
     width: 45px;
     text-align: right;
     font-weight: 600;
-    color: #666;
+    color: var(--maho-ink-muted);
 }
 .dashboard-languages .no-data {
-    color: #999;
+    color: var(--maho-ink-faint);
     font-size: 12px;
     text-align: center;
     padding: 20px 0;

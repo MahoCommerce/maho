@@ -22,10 +22,10 @@
         <span class="separator">|</span>
         <a href="#" onclick="return <?= $this->getJsObjectName() ?>.unselectVisible()"><?= $this->__('Unselect Visible') ?></a>
         <span class="separator">|</span>
-        <strong id="<?= $this->getHtmlId() ?>-count">0</strong> <?= $this->__('items selected') ?>
+        <span id="<?= $this->getHtmlId() ?>-count">0</span> <?= $this->__('selected') ?>
     </td>
     <td>
-        <div class="right">
+        <div class="massaction-actions">
             <div class="entry-edit">
                 <?php if ($this->getHideFormElement() !== true):?>
                 <form action="" id="<?= $this->getHtmlId() ?>-form" method="post">

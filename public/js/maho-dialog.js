@@ -23,9 +23,11 @@
             background: rgba(0, 0, 0, 0.7);
         }
         dialog {
-            border: none;
+            background: var(--maho-surface-overlay, #fff);
+            color: var(--maho-ink, #2f2f2f);
+            border: 1px solid var(--maho-border-soft, transparent);
             border-radius: 6px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--maho-shadow-float, 0 0 10px rgba(0, 0, 0, 0.3));
             padding: 0;
             position: fixed;
             top: 50%;
@@ -42,7 +44,7 @@
             display: flex;
             align-items: center;
             padding: 15px 20px;
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid var(--maho-border-soft, #e0e0e0);
         }
         .dialog-header h2 {
             flex-grow: 1;
@@ -62,10 +64,21 @@
             justify-content: flex-end;
             gap: 10px;
             padding: 15px 20px;
-            border-top: 1px solid #e0e0e0;
+            border-top: 1px solid var(--maho-border-soft, #e0e0e0);
         }
         .dialog-buttons:empty {
             display: none;
+        }
+        .dialog-buttons button.ok {
+            background: var(--maho-btn-bg, #1c1c1c);
+            color: var(--maho-btn-ink, #fff);
+            border-color: transparent;
+            font-weight: 600;
+        }
+        .dialog-buttons button.ok:hover,
+        .dialog-buttons button.ok:active {
+            background: var(--maho-btn-bg-hover, #363636);
+            color: var(--maho-btn-ink-hover, #fff);
         }
     `;
     document.head.appendChild(style);
