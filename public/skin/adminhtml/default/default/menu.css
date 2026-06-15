@@ -7,7 +7,7 @@ SPDX-License-Identifier: AFL-3.0
 
 .nav-bar {
     background: var(--maho-night);
-    padding: 0 160px 0 55px;
+    padding: 0 10rem 0 3.4375rem;
 }
 
 #nav {
@@ -30,11 +30,10 @@ SPDX-License-Identifier: AFL-3.0
     display: flex;
     align-items: center;
     height: 44px;
-    padding: 0 10px;
+    padding: 0 var(--maho-space-3);
     color: rgba(255, 255, 255, .8);
-    font-size: 13px;
     font-weight: 500;
-    transition: color .15s ease, background-color .15s ease;
+    transition: color var(--maho-duration-fast) var(--maho-ease), background-color var(--maho-duration-fast) var(--maho-ease);
 }
 
 #nav li.level0 > a:hover,
@@ -55,7 +54,7 @@ SPDX-License-Identifier: AFL-3.0
     left: -10000px;
     z-index: 999;
     min-width: 220px;
-    padding: 6px;
+    padding: var(--maho-space-2);
     background: var(--maho-surface-overlay);
     border: 1px solid var(--maho-border-soft);
     border-radius: var(--maho-radius-md);
@@ -79,10 +78,9 @@ SPDX-License-Identifier: AFL-3.0
 
 #nav ul a {
     display: block;
-    padding: 8px 26px 8px 10px;
+    padding: var(--maho-space-3) var(--maho-space-6) var(--maho-space-3) var(--maho-space-3);
     border-radius: var(--maho-radius-sm);
     color: var(--maho-ink);
-    font-size: 13px;
     font-weight: 400;
     line-height: 1.35;
 }
@@ -104,7 +102,7 @@ SPDX-License-Identifier: AFL-3.0
     position: absolute;
     right: 10px;
     top: 50%;
-    margin-top: -4px;
+    margin-top: -0.25rem;
     border: 4px solid transparent;
     border-left-color: var(--maho-ink-muted);
     border-right: 0;
@@ -113,9 +111,9 @@ SPDX-License-Identifier: AFL-3.0
 .user-menu-icons {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
+    gap: var(--maho-space-1);
     vertical-align: middle;
-    margin-inline: 2px;
+    margin-inline: var(--maho-space-1);
 }
 
 .user-menu-icons a,
@@ -132,7 +130,7 @@ SPDX-License-Identifier: AFL-3.0
     color: #fff;
     cursor: pointer;
     opacity: .8;
-    transition: opacity .15s ease, background-color .15s ease;
+    transition: opacity var(--maho-duration-fast) var(--maho-ease), background-color var(--maho-duration-fast) var(--maho-ease);
 }
 
 .user-menu-icons a svg {

@@ -54,7 +54,6 @@ const Variables = {
             id: this.dialogWindowId,
             title: 'Insert Variable...',
             className: 'magento',
-            windowClassName: 'popup-window',
             width: 700,
             ok: true,
             okLabel: 'Insert',

@@ -37,7 +37,6 @@ const catalogWysiwygEditor = {
             id: 'catalog-wysiwyg-editor',
             title: 'WYSIWYG Editor',
             className: 'magento',
-            windowClassName: 'popup-window',
             ok: true,
             okLabel: 'Submit',
             onOk: this.okDialogWindow.bind(this),

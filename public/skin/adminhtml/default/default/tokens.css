@@ -67,27 +67,35 @@ SPDX-License-Identifier: AFL-3.0
     --maho-btn2-border: light-dark(rgba(0, 0, 0, .28), rgba(255, 255, 255, .24));
     --maho-btn2-ink: light-dark(#1c1c1c, #ececec);
 
-    --maho-space-1: 4px;
-    --maho-space-2: 8px;
-    --maho-space-3: 12px;
-    --maho-space-4: 16px;
-    --maho-space-5: 20px;
-    --maho-space-6: 24px;
-    --maho-space-7: 32px;
-    --maho-space-8: 40px;
+    --maho-space-1: 0.125rem;   /* 2px */
+    --maho-space-2: 0.3125rem;  /* 5px */
+    --maho-space-3: 0.625rem;   /* 10px */
+    --maho-space-4: 0.9375rem;  /* 15px */
+    --maho-space-5: 1.25rem;    /* 20px */
+    --maho-space-6: 1.5625rem;  /* 25px */
+    --maho-space-7: 1.875rem;   /* 30px */
+    --maho-space-8: 2.5rem;     /* 40px */
+    --maho-space-9: 3.125rem;   /* 50px */
 
     --maho-radius-sm: 4px;
     --maho-radius-md: 6px;
     --maho-radius-lg: 10px;
     --maho-radius-pill: 999px;
 
-    --maho-text-xs: 11px;
-    --maho-text-sm: 12px;
-    --maho-text-md: 13px;
-    --maho-text-lg: 15px;
-    --maho-text-xl: 20px;
+    --maho-text-xs: 0.6875rem;  /* 11px */
+    --maho-text-sm: 0.75rem;    /* 12px */
+    --maho-text-md: 0.8125rem;  /* 13px */
+    --maho-text-lg: 0.875rem;   /* 14px */
+    --maho-text-xl: 1rem;       /* 16px */
+    --maho-text-2xl: 1.125rem;  /* 18px */
+    --maho-text-3xl: 1.25rem;   /* 20px */
+    --maho-text-4xl: 1.375rem;  /* 22px */
 
     --maho-shadow-float: 0 8px 24px light-dark(rgba(0, 0, 0, .12), rgba(0, 0, 0, .5)), 0 1px 3px light-dark(rgba(0, 0, 0, .07), rgba(0, 0, 0, .4));
+
+    --maho-duration-fast: .15s;
+    --maho-duration-slow: .3s;
+    --maho-ease: ease;
 }
 
 /* Manual override from the header scheme selector; default follows the OS */
