@@ -658,6 +658,14 @@ table.actions td {
     text-decoration: none
 }
 
+.massaction-label {
+    margin-right: var(--maho-space-1)
+}
+
+.massaction .separator {
+    margin: 0 var(--maho-space-2)
+}
+
 .massaction .entry-edit fieldset span.form_row,.massaction .entry-edit fieldset span.field-row {
     display: flex;
     align-items: center;
@@ -5640,7 +5648,7 @@ table.actions td {
 
 .grid-widget table.actions {
     margin: 0;
-    padding: var(--maho-space-3) var(--maho-space-4);
+    padding: var(--maho-space-3) var(--maho-space-4) var(--maho-space-2);
     border: 0
 }
 
@@ -5653,7 +5661,7 @@ table.actions td {
 }
 
 .grid-widget .massaction td {
-    padding: var(--maho-space-1) 0;
+    padding: 0;
     vertical-align: middle
 }
 
