@@ -432,7 +432,7 @@ big {
         width: 100%;
         height: 1.75rem;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between;
         gap: var(--maho-space-2);
         padding: var(--maho-space-1) var(--maho-space-2);
         border: 1px solid var(--maho-control-border);
@@ -475,9 +475,18 @@ big {
         justify-content: center
     }
 
-    /* No chevron, to match the rest of the admin's chevron-less grid filters */
     .grid-icon-filter::picker-icon {
-        display: none
+        content: "";
+        width: 9px;
+        height: 9px;
+        margin: 0;
+        background: var(--maho-ink-muted);
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M2 3.5 5 6.5 8 3.5'/%3E%3C/svg%3E") center / contain no-repeat;
+        transition: transform var(--maho-duration-fast) var(--maho-ease)
+    }
+
+    .grid-icon-filter:open::picker-icon {
+        transform: rotate(180deg)
     }
 
     .grid-icon-filter::picker(select) {
@@ -702,6 +711,16 @@ table.actions td {
     width: 100%
 }
 
+/* Native filter selects lose form.css's chevron on grid pages (form.css isn't loaded there), so define it here */
+.grid tr.filter select:not(.grid-icon-filter) {
+    appearance: none;
+    padding-right: var(--maho-space-5);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10' fill='none' stroke='%23888888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 3.5 5 6.5 8 3.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--maho-space-2) center;
+    background-size: 10px
+}
+
 .grid tr.filter .range .range-line {
     margin-bottom: var(--maho-space-1);
     width: 100px
@@ -798,24 +817,21 @@ tr.dynamic-grid input.input-text {
 
 .icon-copy {
     display: inline-block;
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 111.07 122.88"><path d="M97.67 20.81h0l.01.02a13.38 13.38 0 0 1 9.46 3.93 13.32 13.32 0 0 1 3.9 9.42h.02v.02 75.28.01h-.02c-.01 3.68-1.51 7.03-3.93 9.46a13.32 13.32 0 0 1-9.42 3.9v.02h-.02-59.19-.01v-.02c-3.69-.01-7.04-1.5-9.46-3.93a13.37 13.37 0 0 1-3.91-9.42h0V34.2v-.01h.02c.01-3.69 1.52-7.04 3.94-9.46 2.41-2.4 5.73-3.9 9.42-3.91v-.02h.02l59.17.01h0zM.02 75.38L0 13.39v-.01h.02a13.44 13.44 0 0 1 3.93-9.46A13.37 13.37 0 0 1 13.37.01V0h.02 59.19c7.69 0 8.9 9.96.01 10.16H13.4h-.02v-.02c-.88 0-1.68.37-2.27.97-.59.58-.96 1.4-.96 2.27h.02v.01 3.17 58.81c0 8.26-10.15 8.72-10.15.01h0zm100.89 34.11V34.2v-.02h.02c0-.87-.37-1.68-.97-2.27-.59-.58-1.4-.96-2.28-.96v.02h-.01-59.19-.02v-.02c-.88 0-1.68.38-2.27.97-.59.58-.96 1.4-.96 2.27h.02v.01 75.28.02h-.02c0 .88.38 1.68.97 2.27s1.4.96 2.27.96v-.02h.01 59.19.02v.02c.87 0 1.68-.38 2.27-.97.59-.58.96-1.4.96-2.27h-.01 0 0 0z" fill-rule="evenodd"/></svg>');
-    background-repeat: no-repeat;
-    background-size: contain;
+    width: 15px;
+    height: 15px;
+    margin-left: var(--maho-space-1);
     cursor: pointer;
-    width: 12px;
-    height: 12px;
-    margin: var(--maho-space-1) 0 0 var(--maho-space-1)
+    vertical-align: -2px;
+    background-color: currentColor;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h3m9 -9v-5a2 2 0 0 0 -2 -2h-2'/%3E%3Cpath d='M13 17v-1a1 1 0 0 1 1 -1h1m3 0h1a1 1 0 0 1 1 1v1m0 3v1a1 1 0 0 1 -1 1h-1m-3 0h-1a1 1 0 0 1 -1 -1v-1'/%3E%3Cpath d='M9 5a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2'/%3E%3C/svg%3E") center / contain no-repeat
 }
 
 .entry-edit-head .icon-copy {
-    width: 11px;
-    height: 11px;
-    margin: 0 0 0 var(--maho-space-2);
-    filter: hue-rotate(0) brightness(0) contrast(1) saturate(0) invert(1)
+    margin-left: var(--maho-space-2)
 }
 
 .icon-copy-copied {
-    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 30 30"><path d="M26.98 5.99a1 1 0 0 0-.687.303L11 21.586l-6.293-6.293a1 1 0 1 0-1.414 1.414l7 7a1 1 0 0 0 1.414 0l16-16a1 1 0 0 0-.727-1.717z"/></svg>')
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5l10 -10'/%3E%3C/svg%3E")
 }
 
 dl.accordion .grid {
