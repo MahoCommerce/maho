@@ -30,10 +30,10 @@ SPDX-License-Identifier: AFL-3.0
     display: flex;
     align-items: center;
     height: 44px;
-    padding: 0 0.625rem;
+    padding: 0 var(--maho-space-3);
     color: rgba(255, 255, 255, .8);
     font-weight: 500;
-    transition: color .15s ease, background-color .15s ease;
+    transition: color var(--maho-duration-fast) var(--maho-ease), background-color var(--maho-duration-fast) var(--maho-ease);
 }
 
 #nav li.level0 > a:hover,
@@ -54,7 +54,7 @@ SPDX-License-Identifier: AFL-3.0
     left: -10000px;
     z-index: 999;
     min-width: 220px;
-    padding: 0.375rem;
+    padding: var(--maho-space-2);
     background: var(--maho-surface-overlay);
     border: 1px solid var(--maho-border-soft);
     border-radius: var(--maho-radius-md);
@@ -78,7 +78,7 @@ SPDX-License-Identifier: AFL-3.0
 
 #nav ul a {
     display: block;
-    padding: 0.5rem 1.625rem 0.5rem 0.625rem;
+    padding: var(--maho-space-3) var(--maho-space-6) var(--maho-space-3) var(--maho-space-3);
     border-radius: var(--maho-radius-sm);
     color: var(--maho-ink);
     font-weight: 400;
@@ -111,9 +111,9 @@ SPDX-License-Identifier: AFL-3.0
 .user-menu-icons {
     display: inline-flex;
     align-items: center;
-    gap: 0.125rem;
+    gap: var(--maho-space-1);
     vertical-align: middle;
-    margin-inline: 0.125rem;
+    margin-inline: var(--maho-space-1);
 }
 
 .user-menu-icons a,
@@ -130,7 +130,7 @@ SPDX-License-Identifier: AFL-3.0
     color: #fff;
     cursor: pointer;
     opacity: .8;
-    transition: opacity .15s ease, background-color .15s ease;
+    transition: opacity var(--maho-duration-fast) var(--maho-ease), background-color var(--maho-duration-fast) var(--maho-ease);
 }
 
 .user-menu-icons a svg {

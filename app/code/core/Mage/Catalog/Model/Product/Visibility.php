@@ -99,10 +99,10 @@ class Mage_Catalog_Model_Product_Visibility extends \Maho\DataObject
     public static function getOptionArray()
     {
         return [
-            self::VISIBILITY_NOT_VISIBLE => Mage::helper('catalog')->__('Not Visible Individually'),
+            self::VISIBILITY_NOT_VISIBLE => Mage::helper('catalog')->__('Not Individually'),
             self::VISIBILITY_IN_CATALOG => Mage::helper('catalog')->__('Catalog'),
             self::VISIBILITY_IN_SEARCH  => Mage::helper('catalog')->__('Search'),
-            self::VISIBILITY_BOTH       => Mage::helper('catalog')->__('Catalog, Search'),
+            self::VISIBILITY_BOTH       => Mage::helper('catalog')->__('Catalog + Search'),
         ];
     }
 

@@ -75,7 +75,7 @@ SPDX-License-Identifier: AFL-3.0
             <product>
                 <type>
                     <bundle translate="label" module="bundle">
-                        <label>Bundle Product</label>
+                        <label>Bundle</label>
                         <model>bundle/product_type</model>
                         <composite>1</composite>
                         <allowed_selection_types>

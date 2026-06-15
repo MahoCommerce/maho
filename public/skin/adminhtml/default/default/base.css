@@ -156,7 +156,7 @@ big {
     border: 1px solid var(--maho-border-soft);
     border-radius: var(--maho-radius-lg);
     box-shadow: var(--maho-shadow-float);
-    padding: 0.9375rem 3.75rem;
+    padding: var(--maho-space-4) 3.75rem;
     background: var(--maho-surface-overlay);
     color: var(--maho-ink);
     font-size: var(--maho-text-lg);
@@ -178,7 +178,7 @@ big {
     left: 50%;
     width: 150px;
     margin-left: -6.5625rem;
-    padding: 0.9375rem 1.875rem;
+    padding: var(--maho-space-4) var(--maho-space-7);
     background: var(--maho-surface-overlay);
     border: 1px solid var(--maho-border-soft);
     border-radius: var(--maho-radius-lg);
@@ -213,7 +213,7 @@ big {
     border: 1px solid var(--maho-border-soft);
     border-radius: var(--maho-radius-lg);
     box-shadow: var(--maho-shadow-float);
-    padding: 0.5rem;
+    padding: var(--maho-space-3);
     overflow: hidden
 }
 
@@ -225,11 +225,11 @@ big {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.0625rem 0
+    padding: var(--maho-space-1) 0
 }
 
 .message-popup .message-popup-head h2 {
-    padding: 0 0.625rem;
+    padding: 0 var(--maho-space-3);
     margin: 0;
     font: 700 var(--maho-text-sm)/19px var(--maho-font-sans);
     color: var(--maho-ink)
@@ -238,7 +238,7 @@ big {
 .message-popup .message-popup-head a {
     border: 1px solid var(--maho-btn2-border);
     border-radius: var(--maho-radius-sm);
-    padding: 0 0.5rem;
+    padding: 0 var(--maho-space-3);
     font: var(--maho-text-sm)/19px var(--maho-font-sans);
     color: var(--maho-ink);
     text-decoration: none!important;
@@ -251,7 +251,7 @@ big {
 
 .message-popup .message-popup-content {
     background: var(--maho-warning-bg);
-    padding: 1.3125rem 1.3125rem 0.625rem
+    padding: var(--maho-space-5) var(--maho-space-5) var(--maho-space-3)
 }
 
 .message-popup .message-popup-content .message {
@@ -275,7 +275,7 @@ big {
 }
 
 .message-popup .message-popup-content .read-more {
-    margin: 0.4375rem 0 0;
+    margin: var(--maho-space-2) 0 0;
     text-align: right
 }
 
@@ -288,7 +288,7 @@ big {
     display: inline-block;
     width: 5px;
     height: 5px;
-    margin-left: 0.3125rem;
+    margin-left: var(--maho-space-2);
     border: 0 solid currentColor;
     border-width: 2px 2px 0 0;
     transform: rotate(45deg);
@@ -332,7 +332,7 @@ big {
 }
 
 .grid th,.grid td {
-    padding: 0.125rem 0.25rem 0.125rem 0.25rem
+    padding: var(--maho-space-1) var(--maho-space-2) var(--maho-space-1) var(--maho-space-2)
 }
 
 .grid th {
@@ -341,7 +341,7 @@ big {
 
 .grid td.editable input.input-text {
     width: 50px!important;
-    margin-left: 0.25rem!important
+    margin-left: var(--maho-space-2)!important
 }
 
 .grid td input.input-text {
@@ -383,7 +383,7 @@ big {
 }
 
 .grid table tr td.empty-text {
-    padding: 1.5rem 0.9375rem;
+    padding: var(--maho-space-6) var(--maho-space-4);
     text-align: center;
     color: var(--maho-ink-muted);
     background: var(--maho-surface)
@@ -393,11 +393,126 @@ big {
     width: 100%
 }
 
+.grid-icon-value {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--maho-space-1);
+    color: var(--maho-ink-soft)
+}
+
+.grid-icon-value svg {
+    width: 18px;
+    height: 18px
+}
+
+.grid-icon-value--on {
+    color: var(--maho-success)
+}
+
+.grid-icon-value--off {
+    color: var(--maho-ink-faint)
+}
+
+/* Fallback (no base-select): cap the width so the native select can't size to its
+   longest option and widen the column past the header. base-select restores 100% below. */
+.grid .filter .grid-icon-filter {
+    width: 70px
+}
+
+/* Customizable select: icon-only when closed, icon + label when open.
+   Guarded so browsers without base-select keep a plain native select showing the labels. */
+@supports (appearance: base-select) {
+    select.grid-icon-filter:not([multiple]):not([size]),
+    .grid-icon-filter::picker(select) {
+        appearance: base-select
+    }
+
+    select.grid-icon-filter:not([multiple]):not([size]) {
+        display: inline-flex;
+        width: 100%;
+        height: 1.75rem;
+        align-items: center;
+        justify-content: center;
+        gap: var(--maho-space-2);
+        padding: var(--maho-space-1) var(--maho-space-2);
+        border: 1px solid var(--maho-control-border);
+        border-radius: var(--maho-radius-sm);
+        background: var(--maho-control-bg);
+        background-image: none;
+        color: var(--maho-control-ink);
+        cursor: pointer
+    }
+
+    .grid-icon-filter button {
+        appearance: none;
+        display: inline-flex;
+        align-items: center;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        cursor: pointer
+    }
+
+    .grid-icon-filter selectedcontent {
+        display: inline-flex;
+        align-items: center
+    }
+
+    .grid-icon-filter selectedcontent:has(svg) .grid-icon-filter-label {
+        display: none
+    }
+
+    .grid-icon-filter selectedcontent .grid-icon-value:empty {
+        display: none
+    }
+
+    .grid-icon-filter option .grid-icon-value {
+        min-width: 18px;
+        height: 18px;
+        justify-content: center
+    }
+
+    /* No chevron, to match the rest of the admin's chevron-less grid filters */
+    .grid-icon-filter::picker-icon {
+        display: none
+    }
+
+    .grid-icon-filter::picker(select) {
+        border: 1px solid var(--maho-border);
+        border-radius: var(--maho-radius-md);
+        background: var(--maho-surface-overlay);
+        box-shadow: var(--maho-shadow-float);
+        padding: var(--maho-space-1)
+    }
+
+    .grid-icon-filter option {
+        display: flex;
+        align-items: center;
+        gap: var(--maho-space-3);
+        padding: var(--maho-space-2) var(--maho-space-3);
+        border-radius: var(--maho-radius-sm);
+        cursor: pointer
+    }
+
+    .grid-icon-filter option::checkmark {
+        display: none
+    }
+
+    .grid-icon-filter option:hover,
+    .grid-icon-filter option:focus,
+    .grid-icon-filter option:checked {
+        background: var(--maho-surface-sunken)
+    }
+}
+
 .grid .separator {
     display: inline-block;
     width: 1px;
     height: 14px;
-    margin: 0 0.625rem;
+    margin: 0 var(--maho-space-3);
     padding: 0;
     vertical-align: middle;
     background: var(--maho-border-soft);
@@ -432,7 +547,7 @@ table.actions td {
 
 .pager select {
     width: 4em!important;
-    margin: 0 0.25rem
+    margin: 0 var(--maho-space-2)
 }
 
 .pager input.page {
@@ -442,7 +557,7 @@ table.actions td {
 
 .grid tr.headings th {
     border: 0;
-    padding-top: 0.0625rem;
+    padding-top: var(--maho-space-1);
     padding-bottom: 0;
     font-size: var(--maho-text-sm);
     white-space: nowrap
@@ -453,14 +568,14 @@ table.actions td {
 }
 
 .grid tr.headings th.no-link {
-    padding-top: 0.125rem;
-    padding-bottom: 0.0625rem;
+    padding-top: var(--maho-space-1);
+    padding-bottom: var(--maho-space-1);
     color: var(--maho-ink-soft)
 }
 
 .grid tr.headings th a {
     display: block;
-    padding: 0.125rem 0.25rem 0.0625rem 0;
+    padding: var(--maho-space-1) var(--maho-space-2) var(--maho-space-1) 0;
     color: var(--maho-ink-soft);
     text-decoration: none
 }
@@ -471,17 +586,17 @@ table.actions td {
 }
 
 .grid tr.headings th a.sort-arrow-desc,.grid tr.headings th a.sort-arrow-asc {
-    padding-bottom: 0.125rem
+    padding-bottom: var(--maho-space-1)
 }
 
 .grid tr.headings th span.sort-title {
     display: block;
-    padding: 0.1875rem 0.75rem 0.25rem 0;
+    padding: var(--maho-space-1) var(--maho-space-3) var(--maho-space-2) 0;
     line-height: 1
 }
 
 .grid tr.headings th a.sort-arrow-desc span.sort-title,.grid tr.headings th a.sort-arrow-asc span.sort-title {
-    padding: 0.1875rem 0.75rem 0.125rem 0.5rem
+    padding: var(--maho-space-1) var(--maho-space-3) var(--maho-space-2) 0
 }
 
 .massaction {
@@ -496,14 +611,14 @@ table.actions td {
 .massaction td {
     width: auto;
     border-top: 0;
-    padding: 0.1875rem 0.5rem;
+    padding: var(--maho-space-1) var(--maho-space-3);
     vertical-align: middle
 }
 
 .massaction .entry-edit fieldset .select {
     width: auto;
     display: inline;
-    margin: 0 0.3125rem
+    margin: 0 var(--maho-space-2)
 }
 
 .massaction .entry-edit fieldset select.validation-failed {
@@ -527,7 +642,7 @@ table.actions td {
 .massaction .entry-edit .field-row label {
     float: none;
     width: auto;
-    margin-left: 0.8125rem
+    margin-left: var(--maho-space-4)
 }
 
 .massaction .entry-edit {
@@ -547,7 +662,7 @@ table.actions td {
     display: flex;
     align-items: center;
     margin: 0;
-    padding: 0 0.3125rem 0 0
+    padding: 0 var(--maho-space-2) 0 0
 }
 
 .massaction .entry-edit .outer-span {
@@ -560,8 +675,8 @@ table.actions td {
 }
 
 .grid tr.filter th {
-    padding-top: 0.375rem;
-    padding-bottom: 0.375rem;
+    padding-top: var(--maho-space-2);
+    padding-bottom: var(--maho-space-2);
     border: 0;
     border-bottom: 1px solid var(--maho-border-soft);
     white-space: normal
@@ -580,7 +695,7 @@ table.actions td {
 }
 
 .grid tr.filter .range .range-line {
-    margin-bottom: 0.1875rem;
+    margin-bottom: var(--maho-space-1);
     width: 100px
 }
 
@@ -610,7 +725,7 @@ table.actions td {
 .grid tr.filter .range .label {
     display: block;
     width: 30px;
-    padding-right: 0.1875rem;
+    padding-right: var(--maho-space-1);
     text-align: right
 }
 
@@ -619,7 +734,7 @@ table.actions td {
     height: 15px;
     cursor: pointer;
     vertical-align: middle;
-    padding-left: 0.1875rem
+    padding-left: var(--maho-space-1)
 }
 
 .grid .head-massaction select {
@@ -647,16 +762,16 @@ table.actions td {
 }
 
 .dynamic-grid th {
-    padding: 0.125rem;
+    padding: var(--maho-space-1);
     width: 100px
 }
 
 .dynamic-grid td {
-    padding: 0.125rem
+    padding: var(--maho-space-1)
 }
 
 tr.dynamic-grid td,tr.dynamic-grid th {
-    padding: 0.125rem 0.625rem 0.125rem 0;
+    padding: var(--maho-space-1) var(--maho-space-3) var(--maho-space-1) 0;
     width: auto
 }
 
@@ -681,13 +796,13 @@ tr.dynamic-grid input.input-text {
     cursor: pointer;
     width: 12px;
     height: 12px;
-    margin: 0.125rem 0 0 0.125rem
+    margin: var(--maho-space-1) 0 0 var(--maho-space-1)
 }
 
 .entry-edit-head .icon-copy {
     width: 11px;
     height: 11px;
-    margin: 0 0 0 0.3125rem;
+    margin: 0 0 0 var(--maho-space-2);
     filter: hue-rotate(0) brightness(0) contrast(1) saturate(0) invert(1)
 }
 
@@ -700,11 +815,11 @@ dl.accordion .grid {
 }
 
 dl.accordion dt,.entry-edit .entry-edit-head {
-    padding: 0.125rem 0.625rem
+    padding: var(--maho-space-1) var(--maho-space-3)
 }
 
 dl.accordion dt,div.collapseable {
-    margin-top: 0.0625rem
+    margin-top: var(--maho-space-1)
 }
 
 dl.accordion dt a,div.collapseable a {
@@ -735,7 +850,7 @@ div.disabled a {
 }
 
 .entry-edit fieldset.collapseable {
-    margin-bottom: 0.625rem
+    margin-bottom: var(--maho-space-3)
 }
 
 dl.accordion dt a:hover,div.collapseable a:hover {
@@ -757,9 +872,9 @@ dl.accordion dd.open {
 }
 
 img.accordion-btn {
-    margin-top: 0.0625rem;
+    margin-top: var(--maho-space-1);
     margin-left: auto;
-    margin-right: 0.3125rem
+    margin-right: var(--maho-space-2)
 }
 
 ul.tabs {
@@ -850,19 +965,19 @@ ul.tabs a.changed {
 }
 
 ul.tabs-horiz {
-    margin: 0 0 1.125rem 0;
-    padding: 0.5rem 0 0 0.3125rem
+    margin: 0 0 var(--maho-space-5) 0;
+    padding: var(--maho-space-3) 0 0 var(--maho-space-2)
 }
 
 ul.tabs-horiz li {
-    margin: 0 0.25rem
+    margin: 0 var(--maho-space-2)
 }
 
 ul.tabs-horiz li a {
     display: block;
     background: var(--maho-hairline);
     border: 1px solid var(--maho-border);
-    padding: 0.125rem 0.625rem;
+    padding: var(--maho-space-1) var(--maho-space-3);
     color: var(--maho-ink-soft)!important;
     text-decoration: none!important
 }
@@ -873,7 +988,7 @@ ul.tabs-horiz li a.active {
 }
 
 .notification-global {
-    padding: 0.3125rem 1.6875rem 0.3125rem 2.9375rem;
+    padding: var(--maho-space-2) var(--maho-space-6) var(--maho-space-2) var(--maho-space-9);
     background: var(--maho-warning-bg);
     border-bottom: 1px solid var(--maho-warning-border);
     border-top: 1px solid var(--maho-warning-border);
@@ -914,8 +1029,8 @@ ul.tabs-horiz li a.active {
 }
 
 .messages li {
-    margin-bottom: 0.6875rem!important;
-    padding: 0.625rem 1.625rem 0.625rem 2.1875rem!important;
+    margin-bottom: var(--maho-space-3)!important;
+    padding: var(--maho-space-3) var(--maho-space-6) var(--maho-space-3) var(--maho-space-7)!important;
     font-size: var(--maho-text-sm)!important;
     border-radius: var(--maho-radius-md)
 }
@@ -969,8 +1084,8 @@ ul.tabs-horiz li a.active {
 .validation-advice {
     clear: both;
     min-height: 15px;
-    margin-top: 0.1875rem;
-    padding-left: 1.25rem;
+    margin-top: var(--maho-space-1);
+    padding-left: var(--maho-space-5);
     font-size: var(--maho-text-sm);
     font-weight: 700;
     line-height: 1.25em;
@@ -986,7 +1101,7 @@ input.validation-failed,textarea.validation-failed {
 .demo-notice {
     margin: 0;
     background: var(--maho-chartreuse);
-    padding: 0.3125rem 0.625rem 0.375rem 0.625rem;
+    padding: var(--maho-space-2) var(--maho-space-3) var(--maho-space-2) var(--maho-space-3);
     color: #121212;
     font-weight: 500;
     line-height: 1em;
@@ -1002,8 +1117,8 @@ table.form-edit {
 }
 
 .box,.entry-edit fieldset,.entry-edit .fieldset {
-    padding: 0.625rem 0.9375rem;
-    margin-bottom: 0.9375rem
+    padding: var(--maho-space-3) var(--maho-space-4);
+    margin-bottom: var(--maho-space-4)
 }
 
 .entry-edit .entry-edit-head h4 {
@@ -1030,11 +1145,11 @@ table.form-edit {
 
 .entry-edit .content {
     margin-left: 0!important;
-    padding: 0.625rem 0.9375rem
+    padding: var(--maho-space-3) var(--maho-space-4)
 }
 
 .entry-edit fieldset li,.entry-edit .fieldset li {
-    margin: 0.25rem 0
+    margin: var(--maho-space-2) 0
 }
 
 .entry-edit fieldset span.form_row,.entry-edit .fieldset span.form_row {
@@ -1043,19 +1158,19 @@ table.form-edit {
 }
 
 .entry-edit .form-buttons {
-    margin: 0.125rem -0.1875rem 0.125rem auto
+    margin: var(--maho-space-1) -0.1875rem var(--maho-space-1) auto
 }
 
 .entry-edit .form-buttons button + button {
-    margin-left: 0.3125rem
+    margin-left: var(--maho-space-2)
 }
 
 /* Title left, buttons/tools right, vertically centered (mirrors the content-header) */
 .entry-edit .entry-edit-head:has(.form-buttons, .tools) {
     display: flex;
     align-items: center;
-    gap: 0.5rem 0.75rem;
-    padding-bottom: 0.625rem
+    gap: var(--maho-space-3) var(--maho-space-3);
+    padding-bottom: var(--maho-space-3)
 }
 
 .entry-edit .entry-edit-head:has(.form-buttons, .tools):after {
@@ -1104,11 +1219,11 @@ select {
 }
 
 input.input-text,textarea {
-    padding: 0.125rem
+    padding: var(--maho-space-1)
 }
 
 input.input-color {
-    padding: 0.125rem;
+    padding: var(--maho-space-1);
     width: 222px!important
 }
 
@@ -1138,7 +1253,7 @@ select optgroup {
 }
 
 select optgroup option {
-    padding-left: 0.625rem
+    padding-left: var(--maho-space-3)
 }
 
 select optgroup option.even {
@@ -1146,12 +1261,12 @@ select optgroup option.even {
 }
 
 select.multiselect option {
-    padding: 0.1875rem 0.25rem;
+    padding: var(--maho-space-1) var(--maho-space-2);
     border-bottom: 1px solid var(--maho-border-soft)
 }
 
 .checkboxes li {
-    margin: 0 0 0.3125rem!important
+    margin: 0 0 var(--maho-space-2)!important
 }
 
 .field-100 {
@@ -1159,7 +1274,7 @@ select.multiselect option {
     border-width: 1px;
     border-style: solid;
     border-color: var(--maho-border-strong) var(--maho-control-border) var(--maho-control-border) var(--maho-border-strong);
-    padding: 0.125rem
+    padding: var(--maho-space-1)
 }
 
 .field-100 textarea,.field-100 input.input-text {
@@ -1182,9 +1297,9 @@ select.multiselect option {
 
 .form-list td.label,.form-list td.value,.form-list td.value2,.form-list td.note,.form-list td.scope-label,.form-list td.use-default {
     border: 0!important;
-    padding-top: 0.3125rem!important;
-    padding-bottom: 0.3125rem!important;
-    padding-left: 0.3125rem!important;
+    padding-top: var(--maho-space-2)!important;
+    padding-bottom: var(--maho-space-2)!important;
+    padding-left: var(--maho-space-2)!important;
     background: 0!important
 }
 
@@ -1201,13 +1316,13 @@ select.multiselect option {
 .form-list td.use-default label {
     display: inline-block;
     vertical-align: middle;
-    padding: 0 0.1875rem
+    padding: 0 var(--maho-space-1)
 }
 
 .form-list td.label label {
     display: block;
-    padding-right: 0.9375rem;
-    padding-top: 0.0625rem
+    padding-right: var(--maho-space-4);
+    padding-top: var(--maho-space-1)
 }
 
 .form-list td.value input.input-text,.form-list td.value textarea {
@@ -1227,11 +1342,11 @@ select.multiselect option {
 }
 
 .form-list td.note {
-    padding-left: 1.125rem
+    padding-left: var(--maho-space-5)
 }
 
 .form-list td.scope-label {
-    padding-left: 0.3125rem;
+    padding-left: var(--maho-space-2);
     color: var(--maho-ink-muted);
     font-size: var(--maho-text-sm)
 }
@@ -1251,13 +1366,13 @@ select.multiselect option {
 
 .columns .form-list td.value {
     width: 300px;
-    padding-right: 0.3125rem!important
+    padding-right: var(--maho-space-2)!important
 }
 
 .columns .form-list td.value .next-toinput {
     width: 75px;
     display: inline;
-    margin-right: 0.3125rem
+    margin-right: var(--maho-space-2)
 }
 
 .columns .form-list td.value .next-toselect input.input-text {
@@ -1266,14 +1381,14 @@ select.multiselect option {
 }
 
 .columns .form-list td.value input[type=checkbox][id*=use_] {
-    margin: 0.25rem 0.625rem 0 0;
+    margin: var(--maho-space-2) var(--maho-space-3) 0 0;
     vertical-align: top
 }
 
 .columns .form-list td.value input[type=checkbox][id*=use_]+label {
     display: inline-block;
     vertical-align: top;
-    margin: 0.125rem 0 0-0.4375rem
+    margin: var(--maho-space-1) 0 0-0.4375rem
 }
 
 .fieldset-wide .form-list {
@@ -1298,7 +1413,7 @@ select.multiselect option {
 }
 
 .multi-input {
-    margin-bottom: 0.5rem
+    margin-bottom: var(--maho-space-3)
 }
 
 .grid tr .form-list tr {
@@ -1314,18 +1429,18 @@ select.multiselect option {
 }
 
 .grid tr .form-list {
-    margin: 0.5rem 0
+    margin: var(--maho-space-3) 0
 }
 
 .field-row {
     display: block;
-    margin-bottom: 0.3125rem
+    margin-bottom: var(--maho-space-2)
 }
 
 span.delete-image,span.delete-file {
     display: block;
     white-space: nowrap;
-    padding-left: 1.5625rem
+    padding-left: var(--maho-space-6)
 }
 
 span.delete-file {
@@ -1347,7 +1462,7 @@ span.delete-file {
 }
 
 .grid-nav {
-    margin: 0.1875rem 0 0 0.5rem;
+    margin: var(--maho-space-1) 0 0 var(--maho-space-3);
     display: flex;
     place-items: center;
 }
@@ -1356,22 +1471,22 @@ button.grid-nav-btn {
     margin: 0 !important;
     background: var(--maho-surface);
     color: var(--maho-ink-muted);
-    padding: 0 0.5rem;
+    padding: 0 var(--maho-space-3);
 }
 
 .grid-nav-position {
     font-size: var(--maho-text-xs);
-    margin-inline: 0.3125rem;
+    margin-inline: var(--maho-space-2);
 }
 
 .content-header .form-buttons button {
-    margin-bottom: 0.1875rem
+    margin-bottom: var(--maho-space-1)
 }
 
 .sub-btn-set {
     border: 1px solid var(--maho-border-soft);
     border-width: 0 1px;
-    padding: 0.1875rem 0.625rem;
+    padding: var(--maho-space-1) var(--maho-space-3);
     text-align: right
 }
 
@@ -1393,18 +1508,18 @@ button.icon-btn span {
 }
 
 .buttons-set {
-    margin: 0 0 0.625rem
+    margin: 0 0 var(--maho-space-3)
 }
 
 .buttons-set button {
-    margin-right: 0.3125rem
+    margin-right: var(--maho-space-2)
 }
 
 .buttons-set:has(+ textarea) {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.375rem;
-    margin: 0 0 0.25rem
+    gap: var(--maho-space-2);
+    margin: 0 0 var(--maho-space-2)
 }
 
 .buttons-set:has(+ textarea) button {
@@ -1418,13 +1533,13 @@ button.icon-btn span {
 }
 
 .switcher {
-    margin-bottom: 0.625rem;
+    margin-bottom: var(--maho-space-3);
     border: 1px solid var(--maho-border-soft);
     background: var(--maho-surface-sunken);
 }
 
 .side-col .switcher {
-    padding-right: 1.625rem
+    padding-right: var(--maho-space-6)
 }
 
 .side-col .switcher label {
@@ -1437,18 +1552,18 @@ button.icon-btn span {
 
 .store-scope .tree-store-scope {
     display: inline-block;
-    padding: 0.4375rem 0.625rem;
+    padding: var(--maho-space-2) var(--maho-space-3);
     border: 1px dotted var(--maho-border-soft)
 }
 
 /* Order-create store picker: Website > Store group > Store view (selectable cards) */
 .order-store-select .store-website + .store-website {
-    margin-top: 1.375rem
+    margin-top: var(--maho-space-5)
 }
 
 .order-store-select .store-website-name {
-    margin: 0 0 0.75rem;
-    padding-bottom: 0.375rem;
+    margin: 0 0 var(--maho-space-3);
+    padding-bottom: var(--maho-space-2);
     border-bottom: 1px solid var(--maho-border-soft);
     font-size: var(--maho-text-lg);
     font-weight: 600;
@@ -1466,11 +1581,11 @@ button.icon-btn span {
 }
 
 .order-store-select .store-group + .store-group {
-    margin-top: 1rem
+    margin-top: var(--maho-space-4)
 }
 
 .order-store-select .store-group-name {
-    margin: 0 0 0.5rem;
+    margin: 0 0 var(--maho-space-3);
     font-size: var(--maho-text-xs);
     font-weight: 600;
     text-transform: uppercase;
@@ -1481,7 +1596,7 @@ button.icon-btn span {
 .order-store-select .store-view-cards {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-    gap: 0.5rem
+    gap: var(--maho-space-3)
 }
 
 .order-store-select .store-view-card {
@@ -1490,7 +1605,7 @@ button.icon-btn span {
     align-items: center;
     justify-content: center;
     min-height: 52px;
-    padding: 0.625rem 0.875rem;
+    padding: var(--maho-space-3) var(--maho-space-4);
     border: 1px solid var(--maho-border);
     border-radius: var(--maho-radius-md);
     background: var(--maho-surface);
@@ -1499,7 +1614,7 @@ button.icon-btn span {
     line-height: 1.35;
     text-align: center;
     cursor: pointer;
-    transition: border-color .15s ease, background-color .15s ease
+    transition: border-color var(--maho-duration-fast) var(--maho-ease), background-color var(--maho-duration-fast) var(--maho-ease)
 }
 
 .order-store-select .store-view-card:hover {
@@ -1553,14 +1668,14 @@ div:has(> .box-left) > :not(.box-left):not(.box-right) {
 }
 
 .box-left .content,.box-right .content {
-    padding: 0.375rem 0.875rem
+    padding: var(--maho-space-2) var(--maho-space-4)
 }
 
 .separator,.pipe {
     display: inline-block;
     width: 1px;
     height: 14px;
-    margin: 0 0.625rem;
+    margin: 0 var(--maho-space-3);
     padding: 0;
     vertical-align: middle;
     background: var(--maho-border-soft);
@@ -1571,7 +1686,7 @@ div:has(> .box-left) > :not(.box-left):not(.box-right) {
 .divider {
     display: block;
     height: 1px;
-    margin: 0.5rem 0;
+    margin: var(--maho-space-3) 0;
     background: var(--maho-border-soft);
     overflow: hidden
 }
@@ -1643,7 +1758,7 @@ td.divider {
 .hor-scroll {
     width: 100%;
     overflow: auto;
-    padding-bottom: 0.25rem;
+    padding-bottom: var(--maho-space-2);
     margin-bottom: -0.25rem
 }
 
@@ -1654,7 +1769,7 @@ td.divider {
 
 .note-list li {
     border-top: 1px solid var(--maho-hairline);
-    padding-block: 0.75rem 0.5625rem
+    padding-block: var(--maho-space-3) var(--maho-space-3)
 }
 
 .note-list li:first-child {
@@ -1664,13 +1779,13 @@ td.divider {
 .note-list .note-header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--maho-space-3);
     flex-wrap: wrap
 }
 
 .note-list .note-header > *:not(:last-child):after {
     content: "|";
-    margin-left: 0.5rem;
+    margin-left: var(--maho-space-3);
     color: var(--maho-border-strong);
     font-size: var(--maho-text-sm)
 }
@@ -1701,7 +1816,7 @@ td.divider {
 
 .middle {
     min-height: 450px;
-    padding: 1.4375rem 1.6875rem 0 1.6875rem
+    padding: var(--maho-space-6) var(--maho-space-6) 0 var(--maho-space-6)
 }
 
 .container-collapsed {
@@ -1720,12 +1835,12 @@ td.divider {
 
 div.side-col {
     width: 220px;
-    padding-bottom: 1.5625rem
+    padding-bottom: var(--maho-space-6)
 }
 
 div.main-col {
     min-height: 450px;
-    padding: 0 0 1.5625rem 1.5625rem
+    padding: 0 0 var(--maho-space-6) var(--maho-space-6)
 }
 
 div.main-col-inner {
@@ -1744,12 +1859,12 @@ div.main-col-inner {
 }
 
 .logo {
-    margin: 0.4375rem 1.25rem 0.3125rem 2rem;
+    margin: var(--maho-space-2) var(--maho-space-5) var(--maho-space-2) var(--maho-space-7);
     height: 30px
 }
 
 .header-right {
-    padding: 0.625rem 1.5625rem 0 0.9375rem;
+    padding: var(--maho-space-3) var(--maho-space-6) 0 var(--maho-space-4);
     font-size: var(--maho-text-sm);
     color: var(--maho-surface)
 }
@@ -1764,7 +1879,7 @@ div.main-col-inner {
 
 .header-right fieldset {
     display: inline;
-    padding-left: 0.625rem
+    padding-left: var(--maho-space-3)
 }
 
 .header-right fieldset input.input-text {
@@ -1773,7 +1888,7 @@ div.main-col-inner {
 
 .header-right .super {
     line-height: 1.8em;
-    margin-bottom: 0.875rem;
+    margin-bottom: var(--maho-space-4);
     margin-left: 1.3em
 }
 
@@ -1793,7 +1908,7 @@ div.autocomplete {
     border-radius: var(--maho-radius-md);
     box-shadow: var(--maho-shadow-float);
     margin: 0;
-    padding: 0.25rem
+    padding: var(--maho-space-2)
 }
 
 div.autocomplete ul {
@@ -1808,7 +1923,7 @@ div.autocomplete ul li:hover {
 }
 
 div.autocomplete ul li {
-    padding: 0.5rem 0.625rem;
+    padding: var(--maho-space-3) var(--maho-space-3);
     cursor: pointer;
     text-align: left;
     color: var(--maho-ink);
@@ -1817,15 +1932,15 @@ div.autocomplete ul li {
 }
 
 .order-summary .side-col {
-    padding-right: 1.5625rem
+    padding-right: var(--maho-space-6)
 }
 
 .order-summary .main-col {
-    padding-left: 1.5625rem
+    padding-left: var(--maho-space-6)
 }
 
 .content-header {
-    margin-bottom: 1.125rem;
+    margin-bottom: var(--maho-space-5);
     border-bottom: 4px solid var(--maho-border-soft);
     padding-bottom: .25em
 }
@@ -1851,7 +1966,7 @@ div.autocomplete ul li {
 }
 
 .content-buttons button,.content-header button,.filter-actions button {
-    margin: 0 0 0 0.3125rem
+    margin: 0 0 0 var(--maho-space-2)
 }
 
 /* Button with a hover/focus dropdown menu, for grouping related header actions.
@@ -1867,8 +1982,8 @@ div.autocomplete ul li {
     top: 100%;
     left: 0;
     z-index: 1000;
-    background: #fff;
-    border: 1px solid #b3b3b3;
+    background: var(--maho-surface);
+    border: 1px solid var(--maho-border);
     box-shadow: 0 2px 6px rgba(0,0,0,.2);
     white-space: nowrap;
 }
@@ -1878,18 +1993,18 @@ div.autocomplete ul li {
 }
 .btn-dropdown-menu a {
     display: block;
-    padding: 0.25rem 1rem;
-    color: #2f2f2f;
+    padding: var(--maho-space-2) var(--maho-space-4);
+    color: var(--maho-ink);
     font-size: var(--maho-text-sm);
     text-decoration: none;
 }
 .btn-dropdown-menu a:hover {
-    background: #f0f0f0;
+    background: var(--maho-surface-sunken);
 }
 
 .side-col .content-header {
     border-bottom: 0;
-    margin-right: 0.75rem;
+    margin-right: var(--maho-space-3);
     margin-bottom: .6em
 }
 
@@ -1898,7 +2013,7 @@ div.autocomplete ul li {
 }
 
 .content-buttons {
-    margin-bottom: 0.3125rem;
+    margin-bottom: var(--maho-space-2);
     margin-left: auto;
     white-space: nowrap
 }
@@ -1919,13 +2034,13 @@ div.autocomplete ul li {
     display: block;
     width: 150px;
     height: 41px;
-    margin: 0 auto 1.25rem;
+    margin: 0 auto var(--maho-space-5);
     background: url(images/logo.svg)0 0 no-repeat;
     background-size: contain
 }
 
 .login-form {
-    padding: 1.875rem 2.25rem;
+    padding: var(--maho-space-7) var(--maho-space-8);
     background: var(--maho-surface);
     border: 1px solid var(--maho-border-soft);
     border-radius: var(--maho-radius-lg);
@@ -1947,7 +2062,7 @@ div.autocomplete ul li {
 }
 
 .login-form .form-buttons {
-    margin: 0.75rem 0 0 0;
+    margin: var(--maho-space-3) 0 0 0;
     clear: both;
     text-align: right
 }
@@ -1957,23 +2072,23 @@ div.autocomplete ul li {
 }
 
 .login-container .legal {
-    margin: 0.75rem 0 0;
+    margin: var(--maho-space-3) 0 0;
     color: var(--maho-ink-muted);
-    padding: 0.5rem 0.5rem 0.3125rem 0.5rem;
+    padding: var(--maho-space-3) var(--maho-space-3) var(--maho-space-2) var(--maho-space-3);
     font-size: var(--maho-text-sm)
 }
 
 .login-form .validation-advice {
-    margin: 0.1875rem 0 0 0
+    margin: var(--maho-space-1) 0 0 0
 }
 
 .login-form .forgot-link {
-    margin: 0 1.0625rem 0 0;
+    margin: 0 var(--maho-space-4) 0 0;
     text-align: right
 }
 
 .login-form .captcha {
-    padding: 0.625rem 0 0
+    padding: var(--maho-space-3) 0 0
 }
 
 .login-form .captcha-image {
@@ -2030,13 +2145,13 @@ div.autocomplete ul li {
 }
 
 .dashboard-container .switcher {
-    margin-bottom: 0.625rem;
+    margin-bottom: var(--maho-space-3);
 }
 
 .dashboard-grid {
     display: grid;
     grid-template-columns: minmax(400px, 30%) 1fr;
-    gap: 1.25rem;
+    gap: var(--maho-space-5);
 }
 
 .dashboard-grid .entry-edit,
@@ -2048,7 +2163,7 @@ div.autocomplete ul li {
 .dashboard-col-right {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: var(--maho-space-5);
 }
 
 .dashboard-grid .entry-edit table tr:first-child th,
@@ -2074,7 +2189,7 @@ div.autocomplete ul li {
 .dashboard-diagrams-box ul.tabs-horiz,.dashboard-grids-box ul.tabs-horiz {
     display: flex;
     flex-wrap: wrap;
-    padding: 0.125rem 0.0625rem 0;
+    padding: var(--maho-space-1) var(--maho-space-1) 0;
     border-bottom: 1px solid var(--maho-hairline);
 }
 
@@ -2087,7 +2202,7 @@ div.autocomplete ul li {
 }
 
 .dashboard-totals-wrapper {
-    margin: 1.25rem;
+    margin: var(--maho-space-5);
 }
 
 .adminhtml-system-store-deletestore .content-footer .content-buttons,.adminhtml-system-store-deletegroup .content-footer .content-buttons,.adminhtml-system-store-deletewebsite .content-footer .content-buttons {
@@ -2153,7 +2268,7 @@ div.autocomplete ul li {
 }
 
 .order-tables td .option-value {
-    padding-left: 0.625rem
+    padding-left: var(--maho-space-3)
 }
 
 .order-tables td .qty-table {
@@ -2163,7 +2278,7 @@ div.autocomplete ul li {
 
 .order-tables td .qty-table td {
     border: 0!important;
-    padding: 0 0.25rem!important
+    padding: 0 var(--maho-space-2)!important
 }
 
 dl.item-options dt {
@@ -2172,7 +2287,7 @@ dl.item-options dt {
 }
 
 dl.item-options dd {
-    padding-left: 0.625rem
+    padding-left: var(--maho-space-3)
 }
 
 ul.item-options li {
@@ -2186,7 +2301,7 @@ ul.item-options li {
 }
 
 .page-create-order .main-col {
-    padding-left: 1.75rem
+    padding-left: var(--maho-space-7)
 }
 
 .page-create-order .switcher {
@@ -2200,17 +2315,17 @@ ul.item-options li {
 
 .create-order-sidebar-block .content {
     margin: 0!important;
-    padding: 0.25rem 0.375rem
+    padding: var(--maho-space-2) var(--maho-space-2)
 }
 
 .create-order-sidebar-block .head {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    gap: 0.5rem;
+    gap: var(--maho-space-3);
     border-top: 1px solid var(--maho-border-soft);
     background: var(--maho-hairline);
-    padding: 0.125rem 0.375rem 0.0625rem;
+    padding: var(--maho-space-1) var(--maho-space-2) var(--maho-space-1);
     font-size: var(--maho-text-sm);
     text-align: right
 }
@@ -2222,7 +2337,7 @@ ul.item-options li {
 }
 
 .create-order-sidebar-block .content table td,.create-order-sidebar-block table th {
-    padding: 0 0.1875rem 0 0
+    padding: 0 var(--maho-space-1) 0 0
 }
 
 .create-order-sidebar-block select {
@@ -2230,7 +2345,7 @@ ul.item-options li {
 }
 
 .create-order-sidebar-block ul {
-    margin-left: 1.25rem
+    margin-left: var(--maho-space-5)
 }
 
 .create-order-sidebar-block svg {
@@ -2239,18 +2354,18 @@ ul.item-options li {
 }
 
 .order-choose-address {
-    margin: 0 0 0.625rem 0;
-    padding: 0.5rem 0.9375rem;
+    margin: 0 0 var(--maho-space-3) 0;
+    padding: var(--maho-space-3) var(--maho-space-4);
     background: var(--maho-surface-sunken)
 }
 
 .order-save-in-address-book {
     margin: 0 0 0 0;
-    padding: 0.5rem 0.9375rem
+    padding: var(--maho-space-3) var(--maho-space-4)
 }
 
 #order-shipping-method-info button {
-    margin-top: 0.5rem
+    margin-top: var(--maho-space-3)
 }
 
 .entry-edit .content .form-list {
@@ -2271,7 +2386,7 @@ ul.item-options li {
 
 .entry-edit .order-address div.validate-vat {
     text-align: right;
-    padding: 0.625rem 0 0;
+    padding: var(--maho-space-3) 0 0;
     width: 96%
 }
 
@@ -2317,7 +2432,7 @@ ul.item-options li {
 
 #product_composite_configure_messages {
     margin-left: 0!important;
-    padding: 0.625rem 0.9375rem
+    padding: var(--maho-space-3) var(--maho-space-4)
 }
 
 .product-configure-popup .content {
@@ -2335,8 +2450,8 @@ ul.item-options li {
 
 .product-configure-popup .product-options {
     border-bottom: 1px solid var(--maho-hairline);
-    margin: 0 0 0.9375rem;
-    padding: 0 0 0.75rem
+    margin: 0 0 var(--maho-space-4);
+    padding: 0 0 var(--maho-space-3)
 }
 
 .product-configure-popup .product-options .required {
@@ -2356,11 +2471,11 @@ ul.item-options li {
 
 .product-configure-popup .buttons-set {
     margin: 0;
-    padding: 0.625rem
+    padding: var(--maho-space-3)
 }
 
 .product-configure-popup .buttons-set button {
-    margin: 0 0 0 0.3125rem
+    margin: 0 0 0 var(--maho-space-2)
 }
 
 .giftcard-form .availability {
@@ -2385,7 +2500,7 @@ ul.item-options li {
 }
 
 .giftcard-amount-form {
-    margin: 0 0 0.625rem
+    margin: 0 0 var(--maho-space-3)
 }
 
 .giftcard-amount-form li {
@@ -2395,7 +2510,7 @@ ul.item-options li {
 
 .giftcard-amount-form .field {
     overflow: hidden;
-    margin-bottom: 0.625rem;
+    margin-bottom: var(--maho-space-3);
     width: 100%
 }
 
@@ -2416,19 +2531,19 @@ ul.item-options li {
 }
 
 .giftcard-amount-form .form-list .input-box p.notice {
-    margin: 0.3125rem 0 0;
+    margin: var(--maho-space-2) 0 0;
     font-size: var(--maho-text-xs);
     white-space: nowrap
 }
 
 .giftcard-amount-form .form-list .input-box p.notice span {
     display: block;
-    margin-right: 0.3125rem
+    margin-right: var(--maho-space-2)
 }
 
 .giftcard-send-form .field {
     overflow: hidden;
-    margin-bottom: 0.625rem;
+    margin-bottom: var(--maho-space-3);
     width: 100%
 }
 
@@ -2446,7 +2561,7 @@ ul.item-options li {
 }
 
 .product-options {
-    margin: 0.625rem 0 0
+    margin: var(--maho-space-3) 0 0
 }
 
 .product-options dt label {
@@ -2457,7 +2572,7 @@ ul.item-options li {
 .product-options dt {
     display: flex;
     align-items: baseline;
-    gap: 0.5rem
+    gap: var(--maho-space-3)
 }
 
 .product-options dt .qty-holder {
@@ -2471,13 +2586,13 @@ ul.item-options li {
 .product-options dt .qty-disabled {
     background: 0 0;
     border: 0;
-    padding: 0.1875rem;
+    padding: var(--maho-space-1);
     color: var(--maho-ink)
 }
 
 .product-options dd {
-    margin: 0.3125rem 0 0.9375rem;
-    padding: 0 0 0.75rem;
+    margin: var(--maho-space-2) 0 var(--maho-space-4);
+    padding: 0 0 var(--maho-space-3);
     border-bottom: 1px solid var(--maho-hairline)
 }
 
@@ -2498,7 +2613,7 @@ ul.item-options li {
 .product-options dd input[type=date],.product-options dd input[type=time],.product-options dd input[type=datetime-local],.product-options dd input.datetime-picker {
     width: auto;
     min-width: 150px;
-    padding: 0.1875rem 0.375rem;
+    padding: var(--maho-space-1) var(--maho-space-2);
     border: 1px solid var(--maho-border-strong);
     border-radius: 2px;
     font-family: inherit;
@@ -2508,13 +2623,13 @@ ul.item-options li {
 .product-options dd input[type=date]:focus,.product-options dd input[type=time]:focus,.product-options dd input[type=datetime-local]:focus {
     border-color: var(--maho-link);
     outline: 0;
-    box-shadow: 0 0 2px rgba(234,118,1,.3)
+    box-shadow: 0 0 2px color-mix(in srgb, var(--maho-focus-ring) 30%, transparent)
 }
 
 .product-options dd .time-picker {
     display: -moz-inline-box;
     display: inline-block;
-    padding: 0.125rem 0;
+    padding: var(--maho-space-1) 0;
     vertical-align: middle
 }
 
@@ -2534,14 +2649,14 @@ ul.item-options li {
 .product-options .options-list li {
     display: flex;
     align-items: baseline;
-    gap: 0.375rem;
+    gap: var(--maho-space-2);
     margin: 0;
-    padding: 0.125rem 0;
+    padding: var(--maho-space-1) 0;
     line-height: 1.315
 }
 
 .product-options .options-list input.radio,.product-options .options-list input.checkbox {
-    margin: 0.125rem 0 0
+    margin: var(--maho-space-1) 0 0
 }
 
 .product-options .options-list .label {
@@ -2550,15 +2665,15 @@ ul.item-options li {
 }
 
 .product-options li {
-    margin: 0.1875rem 0
+    margin: var(--maho-space-1) 0
 }
 
 .bundle-product-options {
-    padding: 0.3125rem 0 0 0.8125rem
+    padding: var(--maho-space-2) 0 0 var(--maho-space-4)
 }
 
 .bundle-product-options dl {
-    padding: 0.3125rem 0 0 0.9375rem
+    padding: var(--maho-space-2) 0 0 var(--maho-space-4)
 }
 
 .bundle-product-options dt {
@@ -2567,13 +2682,13 @@ ul.item-options li {
 
 .bundle-product-options dd {
     color: var(--maho-ink-muted);
-    margin-bottom: 0.625rem
+    margin-bottom: var(--maho-space-3)
 }
 
 .order-totals {
     margin-left: auto;
     border: 1px solid var(--maho-warning-border)!important;
-    padding: 0.75rem 0;
+    padding: var(--maho-space-3) 0;
     background: var(--maho-surface-sunken);
     text-align: right
 }
@@ -2585,27 +2700,27 @@ ul.item-options li {
 }
 
 .order-totals table td {
-    padding: 0.1875rem 1.25rem 0.1875rem 0.625rem
+    padding: var(--maho-space-1) var(--maho-space-5) var(--maho-space-1) var(--maho-space-3)
 }
 
 .order-totals table td.label {
     white-space: normal;
-    padding: 0.1875rem 0.625rem 0.1875rem 1.25rem
+    padding: var(--maho-space-1) var(--maho-space-3) var(--maho-space-1) var(--maho-space-5)
 }
 
 .order-totals table td.last {
-    padding: 0.125rem 0.375rem
+    padding: var(--maho-space-1) var(--maho-space-2)
 }
 
 .order-totals-bottom {
-    padding: 0 1.25rem
+    padding: 0 var(--maho-space-5)
 }
 
 .order-totals table .validation-advice {
     text-align: right;
     white-space: nowrap;
     background-position: 100% 1px;
-    padding-right: 0.875rem;
+    padding-right: var(--maho-space-4);
     padding-left: 0
 }
 
@@ -2620,13 +2735,13 @@ ul.item-options li {
 }
 
 .summary-total td {
-    padding-top: 0.3125rem!important;
-    padding-bottom: 0.3125rem!important
+    padding-top: var(--maho-space-2)!important;
+    padding-bottom: var(--maho-space-2)!important
 }
 
 .summary-total .summary-collapse {
     display: inline-block;
-    padding-left: 1.125rem;
+    padding-left: var(--maho-space-5);
     position: relative;
     text-align: right;
     cursor: pointer
@@ -2663,23 +2778,23 @@ ul.item-options li {
 }
 
 .payment-methods dt {
-    margin-bottom: 0.1875rem
+    margin-bottom: var(--maho-space-1)
 }
 
 .payment-methods dd {
-    margin-left: 1.25rem
+    margin-left: var(--maho-space-5)
 }
 
 .payment-methods .validation-advice {
-    margin-left: 0.125rem
+    margin-left: var(--maho-space-1)
 }
 
 .cards-list .offset {
-    margin-left: 0.625rem
+    margin-left: var(--maho-space-3)
 }
 
 .cards-list .info-table td {
-    padding: 0.125rem 0.4375rem 0.125rem 0;
+    padding: var(--maho-space-1) var(--maho-space-2) var(--maho-space-1) 0;
     text-align: left;
     vertical-align: top
 }
@@ -2690,7 +2805,7 @@ ul.item-options li {
 
 .giftmessage-order-create .entire-order,.giftmessage-order-create .each-order-item {
     background-color: var(--maho-surface-page);
-    padding: 0.375rem 0.875rem;
+    padding: var(--maho-space-2) var(--maho-space-4);
     height: 275px
 }
 
@@ -2708,7 +2823,7 @@ ul.item-options li {
     font-size: var(--maho-text-sm);
     font-weight: 400;
     line-height: 1.5;
-    margin-bottom: 0.625rem
+    margin-bottom: var(--maho-space-3)
 }
 
 .giftmessage-order-create h6 {
@@ -2716,8 +2831,8 @@ ul.item-options li {
     font-weight: 400;
     line-height: 1.55;
     background-color: var(--maho-border);
-    margin-bottom: 0.625rem;
-    padding: 0.125rem 0.375rem;
+    margin-bottom: var(--maho-space-3);
+    padding: var(--maho-space-1) var(--maho-space-2);
     width: 95%
 }
 
@@ -2746,11 +2861,11 @@ ul.item-options li {
 }
 
 .giftmessage-single-item .item-text {
-    padding: 0.125rem 0.25rem
+    padding: var(--maho-space-1) var(--maho-space-2)
 }
 
 .giftmessage-single-item .gift-form {
-    margin-top: 0.1875rem;
+    margin-top: var(--maho-space-1);
     background: var(--maho-surface-sunken)
 }
 
@@ -2758,7 +2873,7 @@ ul.item-options li {
     border: 0!important;
     margin-bottom: 0;
     background: 0 0!important;
-    padding: 0.9375rem
+    padding: var(--maho-space-4)
 }
 
 .giftmessage-single-item .gift-form .entry-edit fieldset .last {
@@ -2779,7 +2894,7 @@ ul.item-options li {
 
 .giftmessage-whole-order-container .entry-edit textarea {
     width: 99%!important;
-    padding: 0.125rem 0.1875rem
+    padding: var(--maho-space-1) var(--maho-space-1)
 }
 
 .giftmessage-whole-order-container .entry-edit label {
@@ -2815,8 +2930,8 @@ ul.item-options li {
 .packaging-window .entry-edit-head {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.1875rem 0.3125rem
+    gap: var(--maho-space-3);
+    padding: var(--maho-space-1) var(--maho-space-2)
 }
 
 .packaging-window .entry-edit-head button {
@@ -2829,8 +2944,8 @@ ul.item-options li {
     color: var(--maho-error-strong);
     background: var(--maho-error-bg);
     font-weight: 700;
-    margin-bottom: 0.625rem;
-    padding: 0.625rem 0.75rem
+    margin-bottom: var(--maho-space-3);
+    padding: var(--maho-space-3) var(--maho-space-3)
 }
 
 .packaging-window .validation-failed {
@@ -2841,8 +2956,8 @@ ul.item-options li {
 .packaging-window .package-options {
     width: 100%;
     border-top: 1px solid var(--maho-border);
-    padding: 0.625rem 0 0;
-    margin: 0.1875rem 0 0
+    padding: var(--maho-space-3) 0 0;
+    margin: var(--maho-space-1) 0 0
 }
 
 .packaging-window .package-options td {
@@ -2858,7 +2973,7 @@ ul.item-options li {
 }
 
 .packaging-window .package_prepare {
-    margin-bottom: 0.9375rem
+    margin-bottom: var(--maho-space-4)
 }
 
 .packaging-window .package-options .customs-value {
@@ -2895,8 +3010,8 @@ ul.item-options li {
 
 .packaging-window .package-add-products {
     border-top: 1px solid var(--maho-border);
-    padding: 0.625rem 0 0;
-    margin: 0.625rem 0 0
+    padding: var(--maho-space-3) 0 0;
+    margin: var(--maho-space-3) 0 0
 }
 
 .packaging-window .package-add-products .grid {
@@ -2912,19 +3027,19 @@ ul.item-options li {
 }
 
 .packaging-window .package-number span {
-    margin-left: 0.3125rem
+    margin-left: var(--maho-space-2)
 }
 
 .packed-window .entry-edit-head {
-    padding: 0.1875rem 0.3125rem
+    padding: var(--maho-space-1) var(--maho-space-2)
 }
 
 .packed-window .package {
     position: relative;
     background: var(--maho-surface-raised);
     border: 7px solid var(--maho-border-soft);
-    margin-bottom: 0.625rem;
-    padding: 0.625rem
+    margin-bottom: var(--maho-space-3);
+    padding: var(--maho-space-3)
 }
 
 .packed-window .package h4 {
@@ -2936,13 +3051,13 @@ ul.item-options li {
     right: 0;
     color: var(--maho-ink);
     font-size: var(--maho-text-sm);
-    padding: 0.3125rem 0.625rem;
+    padding: var(--maho-space-2) var(--maho-space-3);
     z-index: 100
 }
 
 .packed-window .package strong {
     display: block;
-    padding: 0 0 0.1875rem
+    padding: 0 0 var(--maho-space-1)
 }
 
 .packed-window .package .grid {
@@ -2952,8 +3067,8 @@ ul.item-options li {
 .packed-window .package-info {
     background: var(--maho-hairline);
     border-bottom: 1px solid var(--maho-border);
-    margin: -0.625rem -0.625rem 0.625rem;
-    padding: 0.3125rem 0.625rem;
+    margin: -0.625rem -0.625rem var(--maho-space-3);
+    padding: var(--maho-space-2) var(--maho-space-3);
     position: relative
 }
 
@@ -2962,11 +3077,11 @@ ul.item-options li {
 }
 
 .packed-window .package-options td,.packed-window .package-options th {
-    padding: 0.0625rem 0
+    padding: var(--maho-space-1) 0
 }
 
 .packed-window .buttons-set {
-    padding-right: 0.3125rem
+    padding-right: var(--maho-space-2)
 }
 
 .categories-side-col .content-header {
@@ -2978,19 +3093,19 @@ ul.item-options li {
 }
 
 .categories-side-col .content-header button {
-    margin: 0.3125rem 0 0
+    margin: var(--maho-space-2) 0 0
 }
 
 .categories-side-col .switcher {
-    margin: 0.625rem 1.25rem 0 0
+    margin: var(--maho-space-3) var(--maho-space-5) 0 0
 }
 
 .categories-side-col .tree-actions {
     text-align: center;
-    margin: 0.625rem 1.25rem 0.625rem 0;
+    margin: var(--maho-space-3) var(--maho-space-5) var(--maho-space-3) 0;
     display: flex;
     justify-content: center;
-    gap: 1rem
+    gap: var(--maho-space-4)
 }
 
 .categories-side-col .tree-actions.tree-label-options {
@@ -3002,12 +3117,12 @@ ul.item-options li {
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: var(--maho-space-2);
     vertical-align: middle
 }
 
 .categories-side-col .tree-holder {
-    margin-right: 1.25rem
+    margin-right: var(--maho-space-5)
 }
 
 .no-active-category a span {
@@ -3016,15 +3131,15 @@ ul.item-options li {
 
 .website-name .checkbox {
     vertical-align: top;
-    margin-top: 0.125rem
+    margin-top: var(--maho-space-1)
 }
 
 .webiste-groups {
-    padding: 0.625rem 1.25rem
+    padding: var(--maho-space-3) var(--maho-space-5)
 }
 
 .group-stores {
-    padding: 0.125rem 0.625rem
+    padding: var(--maho-space-1) var(--maho-space-3)
 }
 
 .bundle-option-row table tbody td {
@@ -3045,12 +3160,12 @@ ul.item-options li {
 }
 
 .tier-price-input {
-    margin-bottom: 0.5rem
+    margin-bottom: var(--maho-space-3)
 }
 
 .tier-price-input input.price {
     width: 80px;
-    margin-right: 0.625rem
+    margin-right: var(--maho-space-3)
 }
 
 .tier-price-input input.qty {
@@ -3085,11 +3200,11 @@ ul.item-options li {
 }
 
 .tier-price-input .qty-div {
-    padding-left: 1.25rem
+    padding-left: var(--maho-space-5)
 }
 
 .tier-price-input .price-div {
-    padding-left: 1.25rem
+    padding-left: var(--maho-space-5)
 }
 
 .tier-price-input .price-div .validation-advice {
@@ -3109,7 +3224,7 @@ ul.item-options li {
 
 .edit-attribute-set {
     display: flex;
-    gap: 1.75rem;
+    gap: var(--maho-space-7);
     height: 800px
 }
 
@@ -3121,7 +3236,7 @@ ul.item-options li {
     display: flex;
     flex-direction: column;
     width: 320px;
-    padding-left: 1.6875rem;
+    padding-left: var(--maho-space-6);
     border-left: 1px solid var(--maho-border-soft)
 }
 
@@ -3152,7 +3267,7 @@ ul.item-options li {
     position: relative;
     width: 70px;
     height: 14px;
-    margin: 0 0.3125rem 0.1875rem 0;
+    margin: 0 var(--maho-space-2) var(--maho-space-1) 0;
     background: var(--maho-border);
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M8.243 7.34l-6.38 .925l-.113 .023a1 1 0 0 0 -.44 1.684l4.622 4.499l-1.09 6.355l-.013 .11a1 1 0 0 0 1.464 .944l5.706 -3l5.693 3l.1 .046a1 1 0 0 0 1.352 -1.1l-1.091 -6.355l4.624 -4.5l.078 -.085a1 1 0 0 0 -.633 -1.62l-6.38 -.926l-2.852 -5.78a1 1 0 0 0 -1.794 0l-2.853 5.78z'/%3E%3C/svg%3E") repeat-x left center / 14px 14px
 }
@@ -3187,7 +3302,7 @@ ul.item-options li {
 
 .product-review-box td,.product-review-box th {
     text-align: center;
-    padding-right: 0.3125rem
+    padding-right: var(--maho-space-2)
 }
 
 .product-review-box td.label {
@@ -3196,7 +3311,7 @@ ul.item-options li {
 }
 
 .rule-tree ul {
-    padding-left: 1rem!important;
+    padding-left: var(--maho-space-4)!important;
     border-left: dotted 1px var(--maho-control-placeholder)
 }
 
@@ -3248,13 +3363,13 @@ ul.item-options li {
 
 .rule-chooser {
     border: solid 1px var(--maho-border);
-    margin: 0.3125rem;
-    padding: 0.3125rem;
+    margin: var(--maho-space-2);
+    padding: var(--maho-space-2);
     display: none
 }
 
 .rule-param-wait {
-    padding-left: 1.25rem;
+    padding-left: var(--maho-space-5);
     background-image: url(images/loading.svg);
     background-repeat: no-repeat;
     background-position: 0 50%
@@ -3283,11 +3398,11 @@ ul.item-options li {
 }
 
 .custom-options .option-header th {
-    padding: 0.125rem
+    padding: var(--maho-space-1)
 }
 
 .custom-options .option-header td {
-    padding: 0.3125rem 0.125rem
+    padding: var(--maho-space-2) var(--maho-space-1)
 }
 
 .custom-options .opt-title {
@@ -3376,7 +3491,7 @@ ul.item-options li {
 .option-title {
     display: flex;
     align-items: center;
-    gap: 0.5rem
+    gap: var(--maho-space-3)
 }
 
 .option-title button {
@@ -3385,7 +3500,7 @@ ul.item-options li {
 }
 
 .bundle .option-title {
-    padding: 0 0 0.625rem;
+    padding: 0 0 var(--maho-space-3);
     border-bottom: 1px solid var(--maho-border-soft)
 }
 
@@ -3402,7 +3517,7 @@ ul.item-options li {
 
 .bundle .option-header {
     clear: both;
-    margin-top: 0.3125rem
+    margin-top: var(--maho-space-2)
 }
 
 .bundle .border .last {
@@ -3433,8 +3548,8 @@ ul.item-options li {
 .files .row,.files-wide .row {
     display: flex;
     align-items: center;
-    gap: 0.375rem;
-    margin-bottom: 0.3125rem
+    gap: var(--maho-space-2);
+    margin-bottom: var(--maho-space-2)
 }
 
 .files .flex,.files-wide .flex {
@@ -3483,7 +3598,7 @@ input.downloads {
 
 .address-list {
     width: 28em;
-    padding-right: 1.375rem
+    padding-right: var(--maho-space-5)
 }
 
 .address-list address {
@@ -3500,7 +3615,7 @@ input.downloads {
 
 .address-list li {
     position: relative;
-    padding: 0.75rem 0.875rem;
+    padding: var(--maho-space-3) var(--maho-space-4);
     cursor: pointer;
     border-top: 1px solid var(--maho-hairline);
     background: var(--maho-surface)
@@ -3520,16 +3635,16 @@ input.downloads {
 }
 
 .delete-address {
-    margin: 0 0 0.625rem 0.625rem
+    margin: 0 0 var(--maho-space-3) var(--maho-space-3)
 }
 
 .address-type .address-type-line {
     display: block;
-    margin: 0.125rem 0
+    margin: var(--maho-space-1) 0
 }
 
 .address-type .address-type-line input {
-    margin-right: 0.1875rem
+    margin-right: var(--maho-space-1)
 }
 
 .template-preview {
@@ -3539,14 +3654,14 @@ input.downloads {
 }
 
 .stores-tree td {
-    padding-top: 0.1875rem!important;
-    padding-bottom: 0.1875rem!important
+    padding-top: var(--maho-space-1)!important;
+    padding-bottom: var(--maho-space-1)!important
 }
 
 .stores-tree td.label label {
     display: inline;
     width: auto;
-    padding-right: 0.625rem
+    padding-right: var(--maho-space-3)
 }
 
 .stores-tree td.website-label label {
@@ -3555,22 +3670,22 @@ input.downloads {
 
 .stores-tree td.store-group-label label {
     font-weight: 700;
-    padding-left: 0.9375rem
+    padding-left: var(--maho-space-4)
 }
 
 .stores-tree td.store-label label {
-    padding-left: 1.875rem
+    padding-left: var(--maho-space-7)
 }
 
 .stores-tree .buttons-set {
-    margin: 0.625rem 0
+    margin: var(--maho-space-3) 0
 }
 
 .log-details {
     border: 1px solid var(--maho-border);
-    padding: 0.9375rem;
+    padding: var(--maho-space-4);
     background: var(--maho-surface-raised);
-    margin: 0 0 0.9375rem
+    margin: 0 0 var(--maho-space-4)
 }
 
 .log-details table {
@@ -3578,20 +3693,20 @@ input.downloads {
 }
 
 .log-details table th,.log-details table td {
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
+    padding-top: var(--maho-space-2);
+    padding-bottom: var(--maho-space-2);
     vertical-align: middle
 }
 
 .log-details table th {
     font-weight: 700;
-    padding-right: 1.875rem;
+    padding-right: var(--maho-space-7);
     white-space: nowrap
 }
 
 .sync-indicator {
-    margin-left: 0.3125rem;
-    margin-right: 0.3125rem;
+    margin-left: var(--maho-space-2);
+    margin-right: var(--maho-space-2);
     position: absolute;
     white-space: nowrap
 }
@@ -3613,14 +3728,14 @@ ul.config-tabs {
 ul.config-tabs dt {
     border-top: 1px solid var(--maho-border);
     background: var(--maho-surface-sunken);
-    padding: 0.125rem 0 0.125rem 1.5em;
+    padding: var(--maho-space-1) 0 var(--maho-space-1) 1.5em;
     font-weight: 700;
     text-transform: uppercase;
     color: var(--maho-ink-soft)
 }
 
 ul.config-tabs dl {
-    margin-bottom: 1rem
+    margin-bottom: var(--maho-space-4)
 }
 
 ul.config-tabs a.last span {
@@ -3633,15 +3748,15 @@ ul.config-tabs a.last span {
 
 .inline-table td {
     border: 0!important;
-    padding: 0 0.3125rem 0.3125rem!important
+    padding: 0 var(--maho-space-2) var(--maho-space-2)!important
 }
 
 .system-fieldset-sub-head td {
-    padding: 1.25rem 0.3125rem 0.3125rem 0.3125rem
+    padding: var(--maho-space-5) var(--maho-space-2) var(--maho-space-2) var(--maho-space-2)
 }
 
 .system-fieldset-sub-head:first-child td {
-    padding: 0.3125rem 0.3125rem 0.3125rem 0.3125rem
+    padding: var(--maho-space-2) var(--maho-space-2) var(--maho-space-2) var(--maho-space-2)
 }
 
 .system-fieldset-sub-head h4 {
@@ -3650,17 +3765,17 @@ ul.config-tabs a.last span {
 }
 
 .comment {
-    padding: 0.3125rem
+    padding: var(--maho-space-2)
 }
 
 .comment a {
     color: var(--maho-control-placeholder);
-    margin-left: 0.1875rem
+    margin-left: var(--maho-space-1)
 }
 
 .payment-group-title {
     border: 0;
-    padding: 0.625rem 0.3125rem 0.625rem
+    padding: var(--maho-space-3) var(--maho-space-2) var(--maho-space-3)
 }
 
 .payment-group-title strong {
@@ -3670,7 +3785,7 @@ ul.config-tabs a.last span {
 }
 
 .complex>.config {
-    padding: 0.8125rem 0.75rem 0.75rem
+    padding: var(--maho-space-4) var(--maho-space-3) var(--maho-space-3)
 }
 
 .section-config.complex table.form-list {
@@ -3690,7 +3805,7 @@ ul.config-tabs a.last span {
     border: 1px solid var(--maho-border);
     border-top: 0;
     margin: 0;
-    padding: 0.9375rem 0.75rem 1.25rem;
+    padding: var(--maho-space-4) var(--maho-space-3) var(--maho-space-5);
     background: var(--maho-surface)
 }
 
@@ -3698,7 +3813,7 @@ ul.config-tabs a.last span {
     background: var(--maho-surface-page);
     border: 1px solid var(--maho-border);
     margin: -0.0625rem 0 0;
-    padding: 0.25rem 0.75rem
+    padding: var(--maho-space-2) var(--maho-space-3)
 }
 
 .section-config .section-config>.entry-edit-head>a {
@@ -3720,7 +3835,7 @@ ul.config-tabs a.last span {
     overflow: hidden;
     position: relative;
     left: 0;
-    margin: 0 0.0625rem -0.3125rem;
+    margin: 0 var(--maho-space-1) -0.3125rem;
     z-index: 2;
     display: block;
     content: ""
@@ -3769,7 +3884,7 @@ td.label label.enabled {
     display: inline-block;
     vertical-align: middle;
     margin-right: -0.8125rem;
-    margin-left: 0.3125rem
+    margin-left: var(--maho-space-2)
 }
 
 .section-config .config-advanced>.entry-edit-head a.open:after {
@@ -3778,16 +3893,16 @@ td.label label.enabled {
 
 .section-config .config-advanced>.config {
     border: 0;
-    padding: 0.9375rem 0 0
+    padding: var(--maho-space-4) 0 0
 }
 
 .complex tr.nested+tr[id]>td {
-    padding-top: 0.9375rem!important;
-    padding-bottom: 1.875rem!important
+    padding-top: var(--maho-space-4)!important;
+    padding-bottom: var(--maho-space-7)!important
 }
 
 .complex tr[id]+tr.nested>td {
-    padding-top: 0.9375rem!important
+    padding-top: var(--maho-space-4)!important
 }
 
 .pp-buttons-container {
@@ -3843,7 +3958,7 @@ td.label label.enabled {
     z-index: 999;
     left: -290px;
     bottom: 26px;
-    padding: 0.625rem 0.75rem;
+    padding: var(--maho-space-3) var(--maho-space-3);
     color: var(--maho-ink-soft);
     font-size: var(--maho-text-sm);
     line-height: 1.45;
@@ -3874,7 +3989,7 @@ td.label label.enabled {
 
 .field-row .with-tip small {
     display: block;
-    padding-top: 0.125rem
+    padding-top: var(--maho-space-1)
 }
 
 #profile-generator .field-row button.delete {
@@ -3889,27 +4004,27 @@ td.label label.enabled {
 .attribute-change-checkbox {
     white-space: nowrap;
     clear: none;
-    margin-left: 0.3125rem
+    margin-left: var(--maho-space-2)
 }
 
 .attribute-change-checkbox label {
-    margin-left: 0.3125rem;
+    margin-left: var(--maho-space-2);
     float: none!important
 }
 
 .order-history {
     width: 70%;
-    margin-right: 1.6875rem
+    margin-right: var(--maho-space-6)
 }
 
 ul.super-product-attributes {
-    padding-left: 0.9375rem
+    padding-left: var(--maho-space-4)
 }
 
 .uploader .file-row {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--maho-space-3);
     width: 600px;
     padding: .5em .6em;
     margin: .5em .6em;
@@ -3919,7 +4034,7 @@ ul.super-product-attributes {
 
 .uploader .file-row-narrow {
     width: auto;
-    margin: 0 0 0.125rem 2.5rem
+    margin: 0 0 var(--maho-space-1) var(--maho-space-8)
 }
 
 .uploader .file-row .file-info {
@@ -3928,7 +4043,7 @@ ul.super-product-attributes {
 }
 
 .uploader .file-row-info {
-    margin: 0 0 0 0.625rem
+    margin: 0 0 0 var(--maho-space-3)
 }
 
 .uploader .file-row-info .file-info-name {
@@ -3954,7 +4069,7 @@ ul.super-product-attributes {
 }
 
 .uploader .error .progress-text {
-    padding-right: 0.625rem
+    padding-right: var(--maho-space-3)
 }
 
 .uploader .complete {
@@ -3985,14 +4100,14 @@ ul.super-product-attributes {
     border: 1px solid var(--maho-border-soft);
     border-radius: var(--maho-radius-md);
     background: var(--maho-surface);
-    margin: 0 0 0.625rem;
+    margin: 0 0 var(--maho-space-3);
     overflow: hidden
 }
 
 .super-attributes div.attribute-name-container {
     float: none;
     margin: 0;
-    padding: 0.5rem 0.75rem 0.5rem 1.75rem;
+    padding: var(--maho-space-3) var(--maho-space-3) var(--maho-space-3) var(--maho-space-7);
     background: var(--maho-surface-sunken) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='16' viewBox='0 0 10 16'%3E%3Cg fill='%239e9e9e'%3E%3Ccircle cx='2.5' cy='3' r='1.4'/%3E%3Ccircle cx='7.5' cy='3' r='1.4'/%3E%3Ccircle cx='2.5' cy='8' r='1.4'/%3E%3Ccircle cx='7.5' cy='8' r='1.4'/%3E%3Ccircle cx='2.5' cy='13' r='1.4'/%3E%3Ccircle cx='7.5' cy='13' r='1.4'/%3E%3C/g%3E%3C/svg%3E") 10px 50% no-repeat;
     border-bottom: 1px solid var(--maho-hairline);
     font-weight: 600;
@@ -4003,16 +4118,16 @@ ul.super-product-attributes {
     float: none;
     width: auto;
     margin: 0;
-    padding: 0.625rem 0.75rem;
+    padding: var(--maho-space-3) var(--maho-space-3);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem
+    gap: var(--maho-space-3)
 }
 
 .super-attributes li.attribute ul.attribute-values {
     flex-basis: 100%;
-    margin: 0.25rem 0 0;
+    margin: var(--maho-space-2) 0 0;
     padding: 0
 }
 
@@ -4020,9 +4135,9 @@ ul.super-product-attributes {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--maho-space-3);
     margin: 0;
-    padding: 0.4375rem 0;
+    padding: var(--maho-space-2) 0;
     border-top: 1px solid var(--maho-hairline)
 }
 
@@ -4043,14 +4158,14 @@ ul.super-product-attributes {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem
+    gap: var(--maho-space-3)
 }
 
 .super-attributes li.attribute-value .attribute-values-container {
     float: none;
     display: flex;
     align-items: center;
-    gap: 0.375rem;
+    gap: var(--maho-space-2);
     margin: 0
 }
 
@@ -4075,7 +4190,7 @@ ul.super-product-attributes {
 }
 
 .preview .cell-image .place-holder span {
-    margin-top: 1.875rem;
+    margin-top: var(--maho-space-7);
     display: block
 }
 
@@ -4117,7 +4232,7 @@ ul.super-product-attributes {
 
 .link-feed {
     position: relative;
-    padding-left: 1.125rem
+    padding-left: var(--maho-space-5)
 }
 
 .link-feed:before {
@@ -4132,7 +4247,7 @@ ul.super-product-attributes {
 }
 
 .breadcrumbs {
-    margin: 0 0 0.625rem;
+    margin: 0 0 var(--maho-space-3);
     color: var(--maho-ink-muted);
     font-size: var(--maho-text-sm)
 }
@@ -4146,7 +4261,7 @@ ul.super-product-attributes {
 }
 
 .breadcrumbs li span {
-    margin: 0 0.125rem
+    margin: 0 var(--maho-space-1)
 }
 
 .cms-revision-preview {
@@ -4167,7 +4282,7 @@ ul.super-product-attributes {
 }
 
 .options-box .option-title {
-    padding: 0 0 0.625rem;
+    padding: 0 0 var(--maho-space-3);
     border-bottom: 1px solid var(--maho-border-soft)
 }
 
@@ -4183,7 +4298,7 @@ ul.super-product-attributes {
 }
 
 .options-box .option-header {
-    margin: 0.3125rem 0 0;
+    margin: var(--maho-space-2) 0 0;
     width: 100%;
     border: 0;
     background: var(--maho-surface-sunken);
@@ -4195,24 +4310,24 @@ ul.super-product-attributes {
 }
 
 .options-box .option-header th {
-    padding: 0.125rem
+    padding: var(--maho-space-1)
 }
 
 .options-box .option-header td {
-    padding: 0.3125rem 0.125rem
+    padding: var(--maho-space-2) var(--maho-space-1)
 }
 
 .options-box .option-header .tree {
-    margin: 0.3125rem 0 0
+    margin: var(--maho-space-2) 0 0
 }
 
 .media-library-content .uploader .file-row {
-    margin: 1rem 0;
+    margin: var(--maho-space-4) 0;
     width: auto
 }
 
 .media-library-content #contents-uploader {
-    margin-bottom: 0.625rem
+    margin-bottom: var(--maho-space-3)
 }
 
 .media-library-content #contents-uploader .flex {
@@ -4236,8 +4351,8 @@ ul.super-product-attributes {
 .media-library-content #contents .filecnt {
     border: 1px solid var(--maho-border);
     cursor: pointer;
-    padding: 0.1875rem;
-    margin: 0 0 0.9375rem 0.25rem;
+    padding: var(--maho-space-1);
+    margin: 0 0 var(--maho-space-4) var(--maho-space-2);
     overflow: hidden;
     width: 100px
 }
@@ -4259,7 +4374,7 @@ ul.super-product-attributes {
 .media-library-content {
     border: 1px solid var(--maho-border);
     background: var(--maho-surface);
-    padding: 0.625rem
+    padding: var(--maho-space-3)
 }
 
 #widget_window .magento_content {
@@ -4272,16 +4387,16 @@ ul.super-product-attributes {
 }
 
 #widget-chooser .magento_message {
-    padding: 0.625rem 1.125rem
+    padding: var(--maho-space-3) var(--maho-space-5)
 }
 
 #widget-chooser .grid th,#widget-chooser .grid td {
-    padding: 0.125rem 0.25rem 0.125rem 0.25rem
+    padding: var(--maho-space-1) var(--maho-space-2) var(--maho-space-1) var(--maho-space-2)
 }
 
 #widget-chooser .grid tr.filter th {
-    padding-top: 0.3125rem;
-    padding-bottom: 0.3125rem
+    padding-top: var(--maho-space-2);
+    padding-bottom: var(--maho-space-2)
 }
 
 #widget-chooser .side-col {
@@ -4289,7 +4404,7 @@ ul.super-product-attributes {
 }
 
 #widget-chooser .main-col {
-    padding-right: 0.25rem
+    padding-right: var(--maho-space-2)
 }
 
 #variables-chooser .dialog-content {
@@ -4297,15 +4412,15 @@ ul.super-product-attributes {
 }
 
 #variables-chooser .dialog-content li+li {
-    margin-top: 0.25rem
+    margin-top: var(--maho-space-2)
 }
 
 #variables-chooser .dialog-content ul+h3 {
-    margin-top: 1rem
+    margin-top: var(--maho-space-4)
 }
 
 #catalog-wysiwyg-editor .buttons-set {
-    margin-top: 0.625rem
+    margin-top: var(--maho-space-3)
 }
 
 #catalog-wysiwyg-editor .magento_content {
@@ -4314,12 +4429,12 @@ ul.super-product-attributes {
 }
 
 #catalog-wysiwyg-editor .magento_message {
-    padding: 0 0.4375rem
+    padding: 0 var(--maho-space-2)
 }
 
 #catalog-wysiwyg-editor .magento_buttons {
-    padding-left: 0.4375rem;
-    padding-right: 0.4375rem
+    padding-left: var(--maho-space-2);
+    padding-right: var(--maho-space-2)
 }
 
 .backup-dialog {
@@ -4331,7 +4446,7 @@ ul.super-product-attributes {
     position: fixed;
     top: 50%;
     width: 470px;
-    padding: 0.5rem;
+    padding: var(--maho-space-3);
     z-index: 400;
     -moz-box-shadow: 0 0 100px var(--maho-border);
     -webkit-box-shadow: 0 0 100px var(--maho-border);
@@ -4350,7 +4465,7 @@ ul.super-product-attributes {
 }
 
 .backup-dialog .question {
-    margin-top: 0.9375rem
+    margin-top: var(--maho-space-4)
 }
 
 .backup-dialog .buttons-set {
@@ -4358,20 +4473,20 @@ ul.super-product-attributes {
     background: var(--maho-surface-page);
     margin: 0;
     overflow: hidden;
-    padding: 0.4375rem 0.625rem 0.5rem;
+    padding: var(--maho-space-2) var(--maho-space-3) var(--maho-space-3);
     width: 448px
 }
 
 .backup-dialog .buttons-set button {
-    margin: 0 0 0 0.3125rem
+    margin: 0 0 0 var(--maho-space-2)
 }
 
 .backup-dialog #ftp-credentials-container {
-    margin-top: 1.5625rem
+    margin-top: var(--maho-space-6)
 }
 
 .backup-dialog .password-box-container {
-    margin-top: 0.9375rem
+    margin-top: var(--maho-space-4)
 }
 
 .backup-dialog #ftp-credentials-container fieldset {
@@ -4383,12 +4498,12 @@ ul.super-product-attributes {
 }
 
 .backup-dialog .exclude-media-checkbox-container {
-    margin-top: 0.9375rem
+    margin-top: var(--maho-space-4)
 }
 
 .backup-dialog td.maintenance-checkbox-container {
     margin-top: 0;
-    padding-top: 0.25rem
+    padding-top: var(--maho-space-2)
 }
 
 .v-top {
@@ -4484,7 +4599,7 @@ ul.super-product-attributes {
 input[type=date],input[type=time],input[type=datetime-local] {
     font-family: "Lucida Grande",Verdana,Arial,Helvetica,sans-serif;
     font-size: var(--maho-text-xs);
-    padding: 0.1875rem 0.375rem;
+    padding: var(--maho-space-1) var(--maho-space-2);
     border: 1px solid var(--maho-border-strong);
     border-radius: 2px;
     background: var(--maho-surface)
@@ -4493,15 +4608,15 @@ input[type=date],input[type=time],input[type=datetime-local] {
 input[type=date]:focus,input[type=time]:focus,input[type=datetime-local]:focus {
     border-color: var(--maho-link);
     outline: 0;
-    box-shadow: 0 0 2px rgba(234,118,1,.3)
+    box-shadow: 0 0 2px color-mix(in srgb, var(--maho-focus-ring) 30%, transparent)
 }
 
 .middle {
-    padding-top: 0.625rem
+    padding-top: var(--maho-space-3)
 }
 
 .footer-content,.middle,#nav,.header-top {
-    padding-inline: 0.625rem;
+    padding-inline: var(--maho-space-3);
     box-sizing: border-box;
     width: 100%
 }
@@ -4517,7 +4632,7 @@ input[type=date]:focus,input[type=time]:focus,input[type=datetime-local]:focus {
 dl.accordion dt,.entry-edit .entry-edit-head {
     background: var(--maho-surface);
     color: var(--maho-ink);
-    padding: 0.625rem 0.9375rem 0;
+    padding: var(--maho-space-3) var(--maho-space-4) 0;
     border: 1px solid var(--maho-border-soft);
     border-bottom: 0;
     border-radius: var(--maho-radius-md) var(--maho-radius-md) 0 0
@@ -4536,14 +4651,14 @@ dl.accordion dt,.entry-edit .entry-edit-head {
 
 .dashboard-totals-stats {
     display: flex;
-    gap: 0.9375rem;
-    padding: 0.625rem;
+    gap: var(--maho-space-4);
+    padding: var(--maho-space-3);
 }
 
 .dashboard-totals-stats .stat-col {
     flex: 1;
     text-align: center;
-    padding: 0.5rem;
+    padding: var(--maho-space-3);
     background: var(--maho-surface-raised);
     border-radius: 4px;
     min-width: 0;
@@ -4553,7 +4668,7 @@ dl.accordion dt,.entry-edit .entry-edit-head {
     font-size: var(--maho-text-2xl);
     font-weight: bold;
     color: var(--maho-link);
-    margin-bottom: 0.25rem;
+    margin-bottom: var(--maho-space-2);
 }
 
 .dashboard-totals-stats .stat-decimals {
@@ -4581,7 +4696,9 @@ dl.accordion dt,.entry-edit .entry-edit-head {
     display: block;
     position: absolute;
     right: 6px;
-    bottom: 8px;
+    /* center on the label glyph; -1.5px offsets the title's extra bottom padding */
+    top: 50%;
+    transform: translateY(calc(-50% - 1.5px));
     width: 0;
     height: 0;
     border-style: solid
@@ -4590,7 +4707,7 @@ dl.accordion dt,.entry-edit .entry-edit-head {
 ul.tabs a:hover,ul.tabs a.active {
     background: var(--maho-hairline);
     color: var(--maho-ink);
-    transition: background .3s ease-in-out
+    transition: background var(--maho-duration-slow) var(--maho-ease)-in-out
 }
 
 dl.accordion dt.open a,dl.accordion dt a:hover,dl.accordion dt a,div.collapseable a.open,div.collapseable a:hover,div.collapseable a,.entry-edit .entry-edit-head a,.entry-edit .entry-edit-head strong {
@@ -4628,8 +4745,8 @@ dl.accordion dt.open a:after,div.collapseable a.open:after {
 
 .warning-msg,.success-msg,.error-msg,.notice-msg {
     border-radius: 5px;
-    margin: 1.25rem 0;
-    padding: 0.625rem 1.625rem 0.625rem 2.1875rem;
+    margin: var(--maho-space-5) 0;
+    padding: var(--maho-space-3) var(--maho-space-6) var(--maho-space-3) var(--maho-space-7);
     position: relative;
     text-shadow: none
 }
@@ -4642,7 +4759,7 @@ dl.accordion dt.open a:after,div.collapseable a.open:after {
 
 .grid-severity-minor span,.grid-severity-major span,.grid-severity-critical span,.grid-severity-notice span {
     font: 400 var(--maho-text-sm)/1.33 var(--maho-font-sans);
-    padding: 0.125rem 0.625rem;
+    padding: var(--maho-space-1) var(--maho-space-3);
     white-space: nowrap
 }
 
@@ -4772,8 +4889,8 @@ small {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 0.5rem 0.75rem;
-    padding-bottom: 0.625rem;
+    gap: var(--maho-space-3) var(--maho-space-3);
+    padding-bottom: var(--maho-space-3);
     container-type: scroll-state
 }
 
@@ -4783,7 +4900,7 @@ small {
    flex row symmetrically. */
 @container scroll-state(stuck: top) {
     .content-header > * {
-        margin-block: 0.3125rem
+        margin-block: var(--maho-space-2)
     }
 }
 
@@ -4795,7 +4912,7 @@ small {
 .content-header:has(.content-buttons, .form-buttons) .form-buttons {
     display: flex;
     align-items: center;
-    gap: 0.375rem;
+    gap: var(--maho-space-2);
     margin: 0 0 0 auto;
     float: none
 }
@@ -4827,7 +4944,7 @@ small {
 }
 
 .entry-edit {
-    margin-top: 0.625rem
+    margin-top: var(--maho-space-3)
 }
 
 .entry-edit .entry-edit-head h4 {
@@ -4848,7 +4965,7 @@ small {
 .entry-edit .entry-edit-head .icon-copy {
     width: 16px;
     height: 16px;
-    margin: 0.5rem 0 0 0.3125rem;
+    margin: var(--maho-space-3) 0 0 var(--maho-space-2);
     filter: revert
 }
 
@@ -4870,7 +4987,7 @@ small {
     border: 0;
     border-bottom: 1px solid var(--maho-hairline);
     background: var(--maho-surface);
-    padding: 0.5rem
+    padding: var(--maho-space-3)
 }
 
 .grid table tfoot tr td {
@@ -4916,7 +5033,7 @@ small {
 .grid tr.filter .range .label {
     font-weight: 400;
     width: 40px;
-    padding: 0.25rem
+    padding: var(--maho-space-2)
 }
 
 .grid tr.filter .range.filter-range .label {
@@ -4931,7 +5048,7 @@ small {
 
 .grid tr.filter .range div.date .label {
     width: auto;
-    padding: 0 0.3125rem 0 0;
+    padding: 0 var(--maho-space-2) 0 0;
     font-size: var(--maho-text-lg);
     color: var(--maho-ink-muted)
 }
@@ -4949,12 +5066,12 @@ small {
 }
 
 .grid tr.filter .date img {
-    padding-left: 1.0625rem;
+    padding-left: var(--maho-space-4);
     box-sizing: border-box;
     width: 17px;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='%236b7508' d='M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z' /%3E%3C/svg%3E")no-repeat;
     height: 17px;
-    margin-top: 0.3125rem
+    margin-top: var(--maho-space-2)
 }
 
 .grid tr.headings {
@@ -4964,7 +5081,7 @@ small {
 }
 
 .grid tr.headings th {
-    padding: 0.5rem;
+    padding: var(--maho-space-3);
     font-size: var(--maho-text-xs);
     vertical-align: middle;
     color: var(--maho-ink-soft);
@@ -5006,7 +5123,7 @@ small {
 
 .grid tr.headings th.no-link {
     color: var(--maho-ink-soft);
-    padding: 0.5rem
+    padding: var(--maho-space-3)
 }
 
 .grid tr.even td {
@@ -5040,7 +5157,7 @@ small {
     top: 6px;
     left: 0;
     margin: 0;
-    padding-left: 0.875rem
+    padding-left: var(--maho-space-4)
 }
 
 .header-top .logo svg {
@@ -5077,7 +5194,7 @@ small {
 .header-right fieldset input.input-text {
     width: 34px;
     min-width: 34px;
-    height: 34px;
+    height: 2.125rem;
     padding: 0;
     border: 0;
     border-radius: var(--maho-radius-md);
@@ -5090,7 +5207,7 @@ small {
     font-size: var(--maho-text-sm);
     opacity: .8;
     cursor: pointer;
-    transition: width .15s ease, opacity .15s ease, background-color .15s ease
+    transition: width var(--maho-duration-fast) var(--maho-ease), opacity var(--maho-duration-fast) var(--maho-ease), background-color var(--maho-duration-fast) var(--maho-ease)
 }
 
 .header-right fieldset input.input-text:hover {
@@ -5105,7 +5222,7 @@ small {
 .header-right fieldset input.input-text:focus {
     width: 240px;
     min-width: 240px;
-    padding: 0 0.75rem;
+    padding: 0 var(--maho-space-3);
     border: 1px solid rgba(255, 255, 255, .18);
     border-radius: var(--maho-radius-pill);
     background-color: var(--maho-night-raised);
@@ -5121,8 +5238,8 @@ small {
 
 .footer {
     background: 0 0;
-    padding: 1rem;
-    margin-top: 1.875rem;
+    padding: var(--maho-space-4);
+    margin-top: var(--maho-space-7);
     border-top: 1px solid var(--maho-hairline);
     color: var(--maho-ink-muted);
     font-size: var(--maho-text-sm);
@@ -5142,7 +5259,7 @@ ul.tabs-horiz {
 
 ul.tabs-horiz li {
     border: 0;
-    margin: 0 0.125rem 0 0
+    margin: 0 var(--maho-space-1) 0 0
 }
 
 ul.tabs-horiz li a {
@@ -5150,10 +5267,10 @@ ul.tabs-horiz li a {
     color: var(--maho-ink-muted)!important;
     font-size: var(--maho-text-md);
     font-weight: 500;
-    padding: 0.5rem 0.875rem;
+    padding: var(--maho-space-3) var(--maho-space-4);
     border: 0;
     box-shadow: inset 0 -2px 0 transparent;
-    transition: color .15s ease, box-shadow .15s ease
+    transition: color var(--maho-duration-fast) var(--maho-ease), box-shadow var(--maho-duration-fast) var(--maho-ease)
 }
 
 ul.tabs-horiz li a:hover {
@@ -5182,7 +5299,7 @@ ul.tabs dl {
 ul.tabs a {
     background: 0 0;
     color: var(--maho-ink-soft);
-    padding: 0.5rem 0.875rem;
+    padding: var(--maho-space-3) var(--maho-space-4);
     border: 0;
     border-left: 3px solid transparent;
     border-radius: 0 var(--maho-radius-sm) var(--maho-radius-sm) 0
@@ -5197,7 +5314,7 @@ ul.tabs a.active {
     border-left: 3px solid var(--maho-chartreuse-deep);
     background: var(--maho-surface);
     color: var(--maho-ink);
-    padding: 0.5rem 0.875rem;
+    padding: var(--maho-space-3) var(--maho-space-4);
     font-weight: 600
 }
 
@@ -5208,7 +5325,7 @@ ul.tabs a.active span {
 }
 
 ul.tabs a:hover.active {
-    padding: 0.5rem 1.125rem
+    padding: var(--maho-space-3) var(--maho-space-5)
 }
 
 ul.tabs a:hover.active span {
@@ -5227,7 +5344,7 @@ ul.config-tabs dt {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .05em;
-    padding: 0.875rem 0.625rem 0.3125rem;
+    padding: var(--maho-space-4) var(--maho-space-3) var(--maho-space-2);
     font-size: var(--maho-text-xs);
     background: 0 0;
     color: var(--maho-ink-muted)
@@ -5242,7 +5359,7 @@ ul.config-tabs dt {
 }
 
 div.collapseable {
-    margin-top: 0.625rem
+    margin-top: var(--maho-space-3)
 }
 
 div.collapseable a {
@@ -5289,7 +5406,7 @@ div.collapseable a.open {
 }
 
 .section-config .config-advanced>.config {
-    padding: 0.625rem
+    padding: var(--maho-space-3)
 }
 
 .massaction {
@@ -5300,7 +5417,7 @@ div.collapseable a.open {
 
 .massaction td {
     border-top: 0;
-    padding: 0.625rem 0
+    padding: var(--maho-space-3) 0
 }
 
 .massaction .entry-edit fieldset span.form_row,.massaction .entry-edit fieldset span.field-row {
@@ -5378,11 +5495,11 @@ div.collapseable a.open {
 }
 
 .links-feed {
-    margin-top: 0.625rem
+    margin-top: var(--maho-space-3)
 }
 
 .link-feed {
-    margin-right: 1.25rem;
+    margin-right: var(--maho-space-5);
     font-size: var(--maho-text-sm);
     text-decoration: none
 }
@@ -5427,15 +5544,15 @@ div.collapseable a.open {
 }
 
 #payment_pphs_settings_advanced-head {
-    margin-bottom: 0.625rem
+    margin-bottom: var(--maho-space-3)
 }
 
 #payment_settings_payments_standart_advanced-head {
-    margin-bottom: 0.625rem
+    margin-bottom: var(--maho-space-3)
 }
 
 #payment_settings_ec_advanced-head {
-    margin-bottom: 0.625rem
+    margin-bottom: var(--maho-space-3)
 }
 
 .grid-severity-notice span {
@@ -5478,7 +5595,7 @@ div.collapseable a.open {
 
 .sub-btn-set {
     border: 0;
-    padding: 0.375rem 0.625rem;
+    padding: var(--maho-space-2) var(--maho-space-3);
     background: var(--maho-surface-page);
     border-top: 1px solid var(--maho-border)
 }
@@ -5488,11 +5605,11 @@ div.collapseable a.open {
 }
 
 .side-col .switcher select {
-    margin: 0.25rem 0
+    margin: var(--maho-space-2) 0
 }
 
 dl.accordion dt {
-    margin-top: 0.625rem
+    margin-top: var(--maho-space-3)
 }
 
 dl.accordion dt a {
@@ -5505,7 +5622,7 @@ dl.accordion dt.open a {
 }
 
 table.actions {
-    padding: 0.9375rem;
+    padding: var(--maho-space-4);
     background: var(--maho-surface);
     border: 1px solid var(--maho-border-soft)
 }
@@ -5523,20 +5640,20 @@ table.actions td {
 
 .grid-widget table.actions {
     margin: 0;
-    padding: 0.625rem 0.9375rem;
+    padding: var(--maho-space-3) var(--maho-space-4);
     border: 0
 }
 
 .grid-widget .massaction {
     height: auto;
     margin: 0;
-    padding: 0 0.9375rem 0.375rem;
+    padding: 0 var(--maho-space-4) var(--maho-space-2);
     border-bottom: 1px solid var(--maho-hairline);
     background: var(--maho-surface)
 }
 
 .grid-widget .massaction td {
-    padding: 0.1875rem 0;
+    padding: var(--maho-space-1) 0;
     vertical-align: middle
 }
 
@@ -5554,12 +5671,12 @@ table.actions td {
 }
 
 .dialog table.table_window td {
-    padding: 0.375rem 0;
+    padding: var(--maho-space-2) 0;
     vertical-align: middle
 }
 
 .dialog table.table_window th {
-    padding: 0.375rem 0;
+    padding: var(--maho-space-2) 0;
     vertical-align: middle
 }
 
@@ -5585,7 +5702,7 @@ table.actions td {
 }
 
 a.rule-param-remove img {
-    padding-left: 0.8125rem;
+    padding-left: var(--maho-space-4);
     box-sizing: border-box;
     width: 13px;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='%23d50000' d='M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z' /%3E%3C/svg%3E")no-repeat;
@@ -5593,7 +5710,7 @@ a.rule-param-remove img {
 }
 
 img.rule-param-add {
-    padding-left: 0.8125rem;
+    padding-left: var(--maho-space-4);
     box-sizing: border-box;
     width: 13px;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='%2356af45' d='M17,13H13V17H11V13H7V11H11V7H13V11H17M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z' /%3E%3C/svg%3E")no-repeat;
@@ -5626,7 +5743,7 @@ img.rule-param-add {
     display: inline-flex;
     align-items: center;
     vertical-align: middle;
-    margin: 0 0.1875rem;
+    margin: 0 var(--maho-space-1);
     color: var(--maho-control-placeholder)
 }
 
@@ -5641,7 +5758,7 @@ img.rule-param-add {
 }
 
 .export img {
-    padding-left: 1.1875rem;
+    padding-left: var(--maho-space-5);
     box-sizing: border-box;
     width: 19px;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='%2356af45' d='M23,12L19,8V11H10V13H19V16M1,18V6C1,4.89 1.9,4 3,4H15A2,2 0 0,1 17,6V9H15V6H3V18H15V15H17V18A2,2 0 0,1 15,20H3A2,2 0 0,1 1,18Z' /%3E%3C/svg%3E")no-repeat;
@@ -5665,7 +5782,7 @@ img.rule-param-add {
     --outline-style: 2px solid var(--maho-accent);
     --marker-size: 10px;
     --icon-size: 16px;
-    --label-gap: 0.25rem;
+    --label-gap: var(--maho-space-2);
     --disabled-color: var(--maho-ink-faint);
     --drop-color: var(--maho-border)
 }
@@ -5771,8 +5888,8 @@ img.rule-param-add {
 }
 
 .maho-tree.hide-checkbox {
-    padding-right: 0.1875rem;
-    padding-bottom: 0.1875rem
+    padding-right: var(--maho-space-1);
+    padding-bottom: var(--maho-space-1)
 }
 
 .maho-tree.hide-checkbox .label:has(input:is([type=checkbox],[type=radio])) {
@@ -5904,11 +6021,11 @@ img.rule-param-add {
 }
 
 .dashboard-container .grid table :is(th, td):first-child {
-    padding-left: 0.9375rem
+    padding-left: var(--maho-space-4)
 }
 
 .dashboard-container .grid table :is(th, td):last-child {
-    padding-right: 0.9375rem
+    padding-right: var(--maho-space-4)
 }
 
 #global_search_autocomplete {
@@ -5930,7 +6047,7 @@ img.rule-param-add {
     text-transform: uppercase;
     letter-spacing: .04em;
     line-height: 1.45;
-    padding: 0 0.4375rem;
+    padding: 0 var(--maho-space-2);
     border: 1px solid var(--maho-border-soft);
     border-radius: var(--maho-radius-pill);
     color: var(--maho-ink-muted)
@@ -6033,12 +6150,12 @@ img.rule-param-add {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.75rem;
-    padding: 0.8125rem 1rem;
+    gap: var(--maho-space-3);
+    padding: var(--maho-space-4) var(--maho-space-4);
     font-size: var(--maho-text-lg);
     font-weight: 600;
     line-height: 1.3;
-    transition: background-color .15s ease
+    transition: background-color var(--maho-duration-fast) var(--maho-ease)
 }
 
 #config_edit_form .section-config:not(.config-advanced) > .entry-edit-head > a:hover {
@@ -6060,7 +6177,7 @@ img.rule-param-add {
     border: 0 solid var(--maho-ink-muted);
     border-width: 0 2px 2px 0;
     background: none;
-    transition: transform .15s ease
+    transition: transform var(--maho-duration-fast) var(--maho-ease)
 }
 
 #config_edit_form .section-config:not(.config-advanced) > .entry-edit-head > a:after {
@@ -6082,7 +6199,7 @@ img.rule-param-add {
 .address-list .sub-btn-set {
     background: none;
     border: 0;
-    margin: 0 0 0.75rem;
+    margin: 0 0 var(--maho-space-3);
     padding: 0;
     text-align: left
 }
@@ -6127,12 +6244,12 @@ dl.accordion dt a {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.75rem;
-    padding: 0.8125rem 1rem;
+    gap: var(--maho-space-3);
+    padding: var(--maho-space-4) var(--maho-space-4);
     font-size: var(--maho-text-lg);
     font-weight: 600;
     line-height: 1.3;
-    transition: background-color .15s ease
+    transition: background-color var(--maho-duration-fast) var(--maho-ease)
 }
 
 dl.accordion dt a:hover,
@@ -6164,7 +6281,7 @@ dl.accordion dt.open a:after {
     height: 7px;
     border: 0 solid var(--maho-ink-muted);
     border-width: 0 2px 2px 0;
-    transition: transform .15s ease
+    transition: transform var(--maho-duration-fast) var(--maho-ease)
 }
 
 dl.accordion dt a:after {
@@ -6191,7 +6308,7 @@ table.actions td.a-right > svg {
     width: 16px;
     height: 16px;
     vertical-align: middle;
-    margin-right: 0.125rem
+    margin-right: var(--maho-space-1)
 }
 
 /* Flex replacements for the removed float utilities (.left/.right/.f-left/.f-right) */
@@ -6204,22 +6321,22 @@ table.actions td.a-right > svg {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 0.75rem;
-    margin-top: 0.5rem
+    gap: var(--maho-space-3);
+    margin-top: var(--maho-space-3)
 }
 
 .report-filter-row {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
-    gap: 1rem
+    gap: var(--maho-space-4)
 }
 
 .product-configure-cell {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 0.5rem
+    gap: var(--maho-space-3)
 }
 
 /* Notification bar with a right-aligned action (e.g. "Ignore"/"Go to inbox") */
@@ -6227,11 +6344,20 @@ table.actions td.a-right > svg {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    column-gap: 0.75rem;
-    row-gap: 0.25rem
+    column-gap: var(--maho-space-3);
+    row-gap: var(--maho-space-2)
 }
 
 .notification-global .notification-action {
     margin-left: auto;
     white-space: nowrap
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
