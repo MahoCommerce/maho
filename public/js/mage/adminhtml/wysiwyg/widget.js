@@ -28,7 +28,6 @@ const widgetTools = {
                 id: this.dialogWindowId,
                 title: 'Insert Widget...',
                 className: 'magento',
-                windowClassName: 'popup-window',
                 width: 950,
                 ...opts, // TipTap options come first
             };
@@ -322,7 +321,6 @@ WysiwygWidget.chooser = class {
             id: 'widget-chooser',
             title: this.config.buttons.open,
             className: 'magento',
-            windowClassName: 'popup-window',
             width:950,
             onClose: this.closeDialogWindow.bind(this)
         });

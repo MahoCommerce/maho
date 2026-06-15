@@ -2,47 +2,6 @@
  * Maho FeedManager Admin Styles
  */
 /* ============================================
-   CSS Custom Properties (Design Tokens)
-   ============================================ */
-#dynamicrule-cases-container,
-.category-mapping-container,
-.feedmanager-grid,
-.fm-panels-container,
-.fm-preview-panel {
-  --fm-success-bg: var(--maho-success-bg);
-  --fm-success-border: var(--maho-success-border);
-  --fm-success-text: var(--maho-success);
-  --fm-error-bg: var(--maho-error-bg);
-  --fm-error-border: var(--maho-error-border);
-  --fm-error-text: var(--maho-error-strong);
-  --fm-warning-bg: var(--maho-warning-bg);
-  --fm-warning-border: var(--maho-warning-border);
-  --fm-warning-text: var(--maho-warning);
-  --fm-info-bg: var(--maho-info-bg);
-  --fm-info-border: var(--maho-info-border);
-  --fm-info-text: var(--maho-info);
-  --fm-border: var(--maho-border);
-  --fm-border-light: var(--maho-border-soft);
-  --fm-border-lighter: var(--maho-border-soft);
-  --fm-border-lightest: var(--maho-hairline);
-  --fm-bg-white: var(--maho-surface);
-  --fm-bg-light: var(--maho-surface-raised);
-  --fm-bg-lighter: var(--maho-surface-sunken);
-  --fm-bg-header: var(--maho-surface-sunken);
-  --fm-text-muted: var(--maho-ink-muted);
-  --fm-text-light: var(--maho-ink-faint);
-  --fm-text-lighter: var(--maho-ink-faint);
-  --fm-primary: var(--maho-accent);
-  --fm-primary-hover: var(--maho-accent-strong);
-  --fm-spacing-xs: 4px;
-  --fm-spacing-sm: 8px;
-  --fm-spacing-md: 12px;
-  --fm-spacing-lg: 15px;
-  --fm-spacing-xl: 20px;
-  --fm-radius-sm: var(--maho-radius-sm);
-  --fm-radius-md: var(--maho-radius-sm);
-}
-/* ============================================
    Feed Grid
    ============================================ */
 /* ============================================
@@ -50,31 +9,31 @@
    ============================================ */
 .feedmanager-mapping-container {
   display: flex;
-  gap: var(--fm-spacing-xl);
+  gap: var(--maho-space-5);
 }
 .feedmanager-mapping-source,
 .feedmanager-mapping-target {
   flex: 1;
-  border: 1px solid var(--fm-border-lighter);
-  border-radius: var(--fm-radius-md);
-  padding: var(--fm-spacing-lg);
-  background: var(--fm-bg-light);
+  border: 1px solid var(--maho-border-soft);
+  border-radius: var(--maho-radius-sm);
+  padding: var(--maho-space-4);
+  background: var(--maho-surface-raised);
 }
 /* ============================================
    Drag and Drop
    ============================================ */
 .feedmanager-draggable {
-  padding: var(--fm-spacing-sm) var(--fm-spacing-md);
+  padding: var(--maho-space-3) var(--maho-space-3);
   margin: 5px 0;
-  background: var(--fm-bg-white);
-  border: 1px solid var(--fm-border-light);
-  border-radius: var(--fm-radius-sm);
+  background: var(--maho-surface);
+  border: 1px solid var(--maho-border-soft);
+  border-radius: var(--maho-radius-sm);
   cursor: move;
 }
 .feedmanager-drop-zone {
   min-height: 100px;
-  border: 2px dashed var(--fm-border);
-  border-radius: var(--fm-radius-md);
+  border: 2px dashed var(--maho-border);
+  border-radius: var(--maho-radius-sm);
   padding: 10px;
 }
 /* ============================================
@@ -83,25 +42,24 @@
 .feedmanager-status {
   display: inline-block;
   padding: 3px 8px;
-  border-radius: var(--fm-radius-sm);
-  font-size: 12px;
+  border-radius: var(--maho-radius-sm);
   font-weight: 600;
 }
 /* ============================================
    Filter Conditions (legacy)
    ============================================ */
 .feedmanager-conditions {
-  padding: var(--fm-spacing-lg);
-  background: var(--fm-bg-light);
-  border: 1px solid var(--fm-border-lightest);
-  border-radius: var(--fm-radius-md);
+  padding: var(--maho-space-4);
+  background: var(--maho-surface-raised);
+  border: 1px solid var(--maho-hairline);
+  border-radius: var(--maho-radius-sm);
 }
 .feedmanager-condition-group {
   margin-bottom: 10px;
   padding: 10px;
-  background: var(--fm-bg-white);
-  border: 1px solid var(--fm-border-light);
-  border-radius: var(--fm-radius-sm);
+  background: var(--maho-surface);
+  border: 1px solid var(--maho-border-soft);
+  border-radius: var(--maho-radius-sm);
 }
 /* ============================================
    Preview Tab
@@ -110,7 +68,7 @@
   display: none;
   max-height: 500px;
   overflow: auto;
-  border-radius: var(--fm-radius-md);
+  border-radius: var(--maho-radius-sm);
 }
 .feed-preview-dialog .dialog-content,
 .fm-preview-panel {
@@ -124,11 +82,11 @@
 .fm-preview-header {
   display: flex;
   align-items: center;
-  gap: var(--fm-spacing-sm);
-  padding: var(--fm-spacing-sm) var(--fm-spacing-md);
+  gap: var(--maho-space-3);
+  padding: var(--maho-space-3) var(--maho-space-3);
   background: #2d2d2d;
   border-bottom: 1px solid #3d3d3d;
-  border-radius: var(--fm-radius-md) var(--fm-radius-md) 0 0;
+  border-radius: var(--maho-radius-sm) var(--maho-radius-sm) 0 0;
   color: #e0e0e0;
 }
 .fm-preview-count {
@@ -136,7 +94,6 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
 }
 .fm-preview-title {
   font-weight: 600;
@@ -151,15 +108,13 @@
   align-items: center;
   gap: 6px;
   color: #e0e0e0;
-  font-size: 13px;
   cursor: pointer;
 }
 .fm-preview-content {
   margin: 0;
-  padding: var(--fm-spacing-lg);
+  padding: var(--maho-space-4);
   color: #d4d4d4;
   font-family: monospace;
-  font-size: 13px;
   line-height: 1.5;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -173,10 +128,10 @@
 .feedmanager-upload-status {
   padding: 10px;
   margin-top: 10px;
-  border-radius: var(--fm-radius-md);
+  border-radius: var(--maho-radius-sm);
 }
 .fm-upload-status {
-  margin-top: var(--fm-spacing-sm);
+  margin-top: var(--maho-space-3);
 }
 /* ============================================
    Category Tree (legacy)
@@ -184,9 +139,9 @@
 .feedmanager-category-tree {
   max-height: 300px;
   overflow-y: auto;
-  border: 1px solid var(--fm-border-light);
+  border: 1px solid var(--maho-border-soft);
   padding: 10px;
-  background: var(--fm-bg-white);
+  background: var(--maho-surface);
 }
 .feedmanager-category-item {
   padding: 5px 0;
@@ -203,11 +158,11 @@
 .feedmanager-actions {
   display: flex;
   gap: 10px;
-  margin: var(--fm-spacing-lg) 0;
+  margin: var(--maho-space-4) 0;
 }
 .feedmanager-btn {
-  padding: var(--fm-spacing-sm) 16px;
-  border-radius: var(--fm-radius-md);
+  padding: var(--maho-space-3) 16px;
+  border-radius: var(--maho-radius-sm);
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s;
@@ -251,7 +206,6 @@
    ============================================ */
 .fm-no-options {
   color: #adb5bd;
-  font-size: 12px;
   font-style: italic;
   margin: 0;
 }
@@ -265,16 +219,16 @@
    Category Mapping
    ============================================ */
 .category-mapping-container {
-  margin-top: var(--fm-spacing-xl);
+  margin-top: var(--maho-space-5);
 }
 /* Bulk Mode Bar */
 .bulk-mode-bar {
   display: none;
   background: #1e88e5;
   color: #fff;
-  padding: var(--fm-spacing-md) var(--fm-spacing-xl);
-  margin-bottom: var(--fm-spacing-xl);
-  border-radius: var(--fm-radius-md);
+  padding: var(--maho-space-3) var(--maho-space-5);
+  margin-bottom: var(--maho-space-5);
+  border-radius: var(--maho-radius-sm);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -298,7 +252,6 @@
   padding: 7px 14px;
   color: #333;
   text-decoration: none;
-  font-size: 13px;
   line-height: 1.4;
   white-space: nowrap;
 }
@@ -310,7 +263,7 @@
 .xml-node {
   padding: 5px 10px;
   cursor: pointer;
-  border-radius: var(--fm-radius-sm);
+  border-radius: var(--maho-radius-sm);
   margin: 2px 0;
   display: flex;
   align-items: center;
@@ -323,10 +276,10 @@
   gap: 2px;
 }
 .json-node.selected {
-  background: var(--fm-info-bg);
+  background: var(--maho-info-bg);
 }
 .xml-node.selected {
-  background: var(--fm-success-bg);
+  background: var(--maho-success-bg);
 }
 .json-key,
 .xml-tag {
@@ -339,24 +292,24 @@
   color: #2e7d32;
 }
 .json-type {
-  color: var(--fm-text-muted);
-  font-size: 11px;
+  color: var(--maho-ink-muted);
+  font-size: var(--maho-text-xs);
 }
 .json-toggle,
 .xml-toggle {
   cursor: pointer;
-  color: var(--fm-text-muted);
+  color: var(--maho-ink-muted);
 }
 .json-children,
 .xml-children {
   margin-left: 10px;
 }
 .xml-badge {
-  font-size: 10px;
+  font-size: var(--maho-text-xs);
   padding: 2px 5px;
-  background: var(--fm-border-lighter);
-  border-radius: var(--fm-radius-sm);
-  color: var(--fm-text-muted);
+  background: var(--maho-border-soft);
+  border-radius: var(--maho-radius-sm);
+  color: var(--maho-ink-muted);
 }
 /* ============================================
    Builder Panels (side-by-side tree + properties)
@@ -373,15 +326,15 @@
 .fm-panels-container {
   display: flex;
   gap: 0;
-  border: 1px solid var(--fm-border-light);
-  border-radius: var(--fm-radius-md);
+  border: 1px solid var(--maho-border-soft);
+  border-radius: var(--maho-radius-sm);
   overflow: hidden;
 }
 .fm-panel {
   min-height: 300px;
 }
 .fm-panel-main {
-  border-right: 1px solid var(--fm-border-light);
+  border-right: 1px solid var(--maho-border-soft);
 }
 .fm-panel-main,
 .fm-panel-sidebar {
@@ -392,17 +345,16 @@
 .fm-panel-header {
   display: flex;
   align-items: center;
-  gap: var(--fm-spacing-sm);
+  gap: var(--maho-space-3);
   font-weight: 600;
-  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--fm-text-muted);
-  padding: var(--fm-spacing-sm) var(--fm-spacing-md);
+  letter-spacing: 0.045em;
+  color: var(--maho-ink-muted);
+  padding: var(--maho-space-3) var(--maho-space-3);
   height: 46px;
   box-sizing: border-box;
-  background: var(--fm-bg-lighter);
-  border-bottom: 1px solid var(--fm-border-light);
+  background: var(--maho-surface-sunken);
+  border-bottom: 1px solid var(--maho-border-soft);
 }
 .fm-panel-header-actions {
   display: flex;
@@ -417,23 +369,22 @@
   z-index: 1;
 }
 .fm-panel-content {
-  padding: var(--fm-spacing-md);
+  padding: var(--maho-space-3);
 }
 .fm-tree {
-  padding: var(--fm-spacing-sm);
+  padding: var(--maho-space-3);
 }
 .fm-panel-footer {
-  padding: var(--fm-spacing-sm) var(--fm-spacing-md);
-  border-top: 1px solid var(--fm-border-light);
-  background: var(--fm-bg-lighter);
+  padding: var(--maho-space-3) var(--maho-space-3);
+  border-top: 1px solid var(--maho-border-soft);
+  background: var(--maho-surface-sunken);
   position: sticky;
   bottom: 0;
   display: flex;
-  gap: var(--fm-spacing-sm);
+  gap: var(--maho-space-3);
 }
 .fm-status-muted {
-  color: var(--fm-text-muted);
-  font-size: 12px;
+  color: var(--maho-ink-muted);
 }
 /* ============================================
    Modals
@@ -466,7 +417,6 @@
   height: 100%;
   box-sizing: border-box;
   font-family: "SF Mono", "Monaco", "Menlo", "Consolas", monospace;
-  font-size: 13px;
   line-height: 1.6;
   padding: 12px 16px;
   background: #1e1e2e;
@@ -483,7 +433,7 @@
    Field Editor
    ============================================ */
 #field-editor-container {
-  margin-top: var(--fm-spacing-lg);
+  margin-top: var(--maho-space-4);
 }
 /* Editor mode states */
 .editor-mode-insert #editor_insert_btn {
@@ -509,7 +459,7 @@
   margin-bottom: 12px;
 }
 .transformer-item {
-  background: var(--fm-bg-white);
+  background: var(--maho-surface);
   border: 1px solid #dee2e6;
   border-radius: 6px;
   overflow: hidden;
@@ -523,15 +473,15 @@
   cursor: pointer;
 }
 .transformer-item-number {
-  background: var(--fm-primary);
-  color: var(--fm-bg-white);
+  background: var(--maho-accent);
+  color: var(--maho-surface);
   width: 22px;
   height: 22px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: var(--maho-text-xs);
   font-weight: 600;
   margin-right: 10px;
   flex-shrink: 0;
@@ -539,7 +489,6 @@
 .transformer-item-name {
   flex: 1;
   font-weight: 600;
-  font-size: 13px;
 }
 .transformer-item-actions {
   display: flex;
@@ -569,5 +518,4 @@
   padding: 0 10px;
   border: 1px solid #ced4da;
   border-radius: 3px;
-  font-size: 13px;
 }
