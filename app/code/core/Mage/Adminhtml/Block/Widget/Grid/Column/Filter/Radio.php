@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Radio extends Mage_Adminhtm
     {
         return [
             [
-                'label' => Mage::helper('adminhtml')->__('Any'),
+                'label' => '',
                 'value' => '',
             ],
             [

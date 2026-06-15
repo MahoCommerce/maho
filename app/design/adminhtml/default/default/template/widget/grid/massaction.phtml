@@ -12,15 +12,14 @@
 <div id="<?= $this->getHtmlId() ?>">
 <table cellspacing="0" cellpadding="0" class="massaction">
 <tr>
-    <td><?php if ($this->getUseSelectAll()):?>
-        <a href="#" onclick="return <?= $this->getJsObjectName() ?>.selectAll()"><?= $this->__('Select All') ?></a>
-        <span class="separator">|</span>
-        <a href="#" onclick="return <?= $this->getJsObjectName() ?>.unselectAll()"><?= $this->__('Unselect All') ?></a>
+    <td><span class="massaction-label"><?= $this->__('Select') ?>:</span>
+        <?php if ($this->getUseSelectAll()):?>
+        <a href="#" onclick="return <?= $this->getJsObjectName() ?>.selectAll()"><?= $this->__('All') ?></a>
         <span class="separator">|</span>
         <?php endif ?>
-        <a href="#" onclick="return <?= $this->getJsObjectName() ?>.selectVisible()"><?= $this->__('Select Visible') ?></a>
+        <a href="#" onclick="return <?= $this->getJsObjectName() ?>.selectVisible()"><?= $this->__('Visible') ?></a>
         <span class="separator">|</span>
-        <a href="#" onclick="return <?= $this->getJsObjectName() ?>.unselectVisible()"><?= $this->__('Unselect Visible') ?></a>
+        <a href="#" onclick="return <?= $this->getJsObjectName() ?>.unselectAll()"><?= $this->__('None') ?></a>
         <span class="separator">|</span>
         <span id="<?= $this->getHtmlId() ?>-count">0</span> <?= $this->__('selected') ?>
     </td>

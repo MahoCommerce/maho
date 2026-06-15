@@ -215,7 +215,9 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
     #[Maho\Config\Observer('controller_action_predispatch', area: 'frontend', type: 'singleton')]
     public function initByRequest($observer)
     {
-        if ($this->_skipRequestLogging || $this->isModuleIgnored($observer)) {
+        if ($this->_skipRequestLogging || $this->isModuleIgnored($observer)
+            || $this->_session->getSessionId() === false
+        ) {
             return $this;
         }
 
@@ -260,7 +262,9 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
     #[Maho\Config\Observer('controller_action_postdispatch', area: 'frontend', type: 'singleton')]
     public function saveByRequest($observer)
     {
-        if ($this->_skipRequestLogging || $this->isModuleIgnored($observer)) {
+        if ($this->_skipRequestLogging || $this->isModuleIgnored($observer)
+            || $this->_session->getSessionId() === false
+        ) {
             return $this;
         }
 
