@@ -91,7 +91,7 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
         if ($setId === null && $this->_attributes !== null) {
             return $this->_attributes;
         }
-        if (isset($this->_attributesBySet[$setId])) {
+        if ($setId !== null && isset($this->_attributesBySet[$setId])) {
             return $this->_attributesBySet[$setId];
         }
 
