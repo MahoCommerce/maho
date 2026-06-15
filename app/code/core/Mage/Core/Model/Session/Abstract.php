@@ -340,12 +340,12 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
      */
     public function getSessionId()
     {
-        return $this->getSymfonySession()->getId();
+        return $this->getSymfonySession()?->getId() ?? false;
     }
 
     public function getSessionName(): string
     {
-        return $this->getSymfonySession()->getName();
+        return $this->getSymfonySession()?->getName() ?? '';
     }
 
     public function setSessionName(string $name): self
