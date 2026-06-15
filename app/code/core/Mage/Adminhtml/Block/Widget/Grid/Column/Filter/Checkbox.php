@@ -27,7 +27,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Checkbox extends Mage_Admin
     {
         return [
             [
-                'label' => Mage::helper('adminhtml')->__('Any'),
+                'label' => '',
                 'value' => '',
             ],
             [

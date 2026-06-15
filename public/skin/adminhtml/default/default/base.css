@@ -711,16 +711,6 @@ table.actions td {
     width: 100%
 }
 
-/* Native filter selects lose form.css's chevron on grid pages (form.css isn't loaded there), so define it here */
-.grid tr.filter select:not(.grid-icon-filter) {
-    appearance: none;
-    padding-right: var(--maho-space-5);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10' fill='none' stroke='%23888888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 3.5 5 6.5 8 3.5'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right var(--maho-space-2) center;
-    background-size: 10px
-}
-
 .grid tr.filter .range .range-line {
     margin-bottom: var(--maho-space-1);
     width: 100px
