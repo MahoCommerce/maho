@@ -6,7 +6,7 @@ SPDX-License-Identifier: AFL-3.0
 */
 
 input.input-text, textarea, select {
-  font: 400 13px/1.33 ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font: 400 var(--maho-text-md)/1.33 var(--maho-font-sans);
   display: inline-block;
   padding: 1px 6px;
   margin: 0;
@@ -30,7 +30,6 @@ input[type=checkbox], input[type=radio] {
   accent-color: var(--maho-accent); }
 
 .form-list td.label, .form-list td.label label {
-  font-size: 12px;
   font-weight: 400;
   color: var(--maho-ink-soft); }
 
@@ -43,7 +42,6 @@ button, .form-button {
   border-radius: var(--maho-radius-sm);
   cursor: pointer;
   display: inline-block;
-  font-size: 13px;
   font-weight: 500;
   line-height: 26px;
   box-sizing: border-box;
@@ -108,7 +106,7 @@ button.icon-btn {
     display: inline; }
 
 button.large, .form-button.large {
-  font-size: 18px;
+  font-size: var(--maho-text-2xl);
   font-weight: 600;
   padding: 12px 22px;
   line-height: 1.2;
@@ -184,19 +182,19 @@ select[multiple], select[size] {
   padding: 0 15px 0 0; }
 .form-list td.scope-label {
   color: var(--maho-ink-muted);
-  font-size: 11px; }
+  font-size: var(--maho-text-xs); }
 .form-list td.value {
   padding-left: 0 !important; }
   .form-list td.value input.input-text, .form-list td.value textarea, .form-list td.value select {
     width: 330px; }
   .form-list td.value p.note {
     color: var(--maho-ink-muted);
-    font-size: 11px;
+    font-size: var(--maho-text-xs);
     font-weight: 400; }
 
 .input-text.large {
   padding: 12px 12px 14px;
-  font-size: 18px; }
+  font-size: var(--maho-text-2xl); }
 
 td:has(input.swatch-option) {
   display: flex;
@@ -207,7 +205,7 @@ td:has(input.swatch-option) {
     height: 14px;
     display: flex;
     justify-content: center;
-    font-size: 10px;
+    font-size: var(--maho-text-xs);
     background: var(--maho-error);
     color: var(--maho-surface);
     border-radius: 4px; }

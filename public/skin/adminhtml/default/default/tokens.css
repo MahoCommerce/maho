@@ -81,11 +81,14 @@ SPDX-License-Identifier: AFL-3.0
     --maho-radius-lg: 10px;
     --maho-radius-pill: 999px;
 
-    --maho-text-xs: 11px;
-    --maho-text-sm: 12px;
-    --maho-text-md: 13px;
-    --maho-text-lg: 15px;
-    --maho-text-xl: 20px;
+    --maho-text-xs: 0.6875rem;  /* 11px */
+    --maho-text-sm: 0.75rem;    /* 12px */
+    --maho-text-md: 0.8125rem;  /* 13px */
+    --maho-text-lg: 0.875rem;   /* 14px */
+    --maho-text-xl: 1rem;       /* 16px */
+    --maho-text-2xl: 1.125rem;  /* 18px */
+    --maho-text-3xl: 1.25rem;   /* 20px */
+    --maho-text-4xl: 1.375rem;  /* 22px */
 
     --maho-shadow-float: 0 8px 24px light-dark(rgba(0, 0, 0, .12), rgba(0, 0, 0, .5)), 0 1px 3px light-dark(rgba(0, 0, 0, .07), rgba(0, 0, 0, .4));
 }

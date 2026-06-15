@@ -32,7 +32,6 @@ SPDX-License-Identifier: AFL-3.0
     height: 44px;
     padding: 0 10px;
     color: rgba(255, 255, 255, .8);
-    font-size: 13px;
     font-weight: 500;
     transition: color .15s ease, background-color .15s ease;
 }
@@ -82,7 +81,6 @@ SPDX-License-Identifier: AFL-3.0
     padding: 8px 26px 8px 10px;
     border-radius: var(--maho-radius-sm);
     color: var(--maho-ink);
-    font-size: 13px;
     font-weight: 400;
     line-height: 1.35;
 }

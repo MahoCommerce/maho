@@ -13,7 +13,7 @@ SPDX-License-Identifier: AFL-3.0
 body {
     background: var(--maho-surface-page);
     color: var(--maho-ink);
-    font: 13px/1.5 ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"
+    font: var(--maho-text-md)/1.5 var(--maho-font-sans)
 }
 
 a {
@@ -45,27 +45,27 @@ h1,h2,h3,h4 {
 }
 
 h2 {
-    font-size: 1.7em
+    font-size: var(--maho-text-4xl)
 }
 
 h3 {
     margin-bottom: .5em;
     color: var(--maho-ink-soft);
-    font-size: 1.25em
+    font-size: var(--maho-text-xl)
 }
 
 h4 {
     margin-bottom: .6em;
     color: var(--maho-ink-soft);
-    font-size: 1.05em
+    font-size: var(--maho-text-lg)
 }
 
 h5 {
-    font-size: 1.05em
+    font-size: var(--maho-text-lg)
 }
 
 h6 {
-    font-size: 1em
+    font-size: var(--maho-text-md)
 }
 
 h1 a,h1 a:hover,h2 a,h2 a:hover,h3 a,h3 a:hover,h4 a,h4 a:hover {
@@ -93,7 +93,7 @@ address {
 
 cite {
     font-style: normal;
-    font-size: 10px
+    font-size: var(--maho-text-xs)
 }
 
 q:before,q:after {
@@ -141,11 +141,11 @@ dt {
 }
 
 small {
-    font-size: .9em
+    font-size: var(--maho-text-sm)
 }
 
 big {
-    font-size: 1.25em
+    font-size: var(--maho-text-xl)
 }
 
 #loading-process {
@@ -159,7 +159,7 @@ big {
     padding: 15px 60px;
     background: var(--maho-surface-overlay);
     color: var(--maho-ink);
-    font-size: 1.1em;
+    font-size: var(--maho-text-lg);
     font-weight: 600;
     text-align: center;
     z-index: 501
@@ -231,7 +231,7 @@ big {
 .message-popup .message-popup-head h2 {
     padding: 0 10px;
     margin: 0;
-    font: 700 12px/19px ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    font: 700 var(--maho-text-sm)/19px var(--maho-font-sans);
     color: var(--maho-ink)
 }
 
@@ -239,7 +239,7 @@ big {
     border: 1px solid var(--maho-btn2-border);
     border-radius: var(--maho-radius-sm);
     padding: 0 8px;
-    font: 12px/19px ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    font: var(--maho-text-sm)/19px var(--maho-font-sans);
     color: var(--maho-ink);
     text-decoration: none!important;
     cursor: pointer
@@ -261,7 +261,7 @@ big {
 
 .message-popup .message-popup-content .message-icon {
     flex: 0 0 50px;
-    font-size: 10px;
+    font-size: var(--maho-text-xs);
     line-height: 12px;
     text-transform: uppercase;
     text-align: center
@@ -444,7 +444,7 @@ table.actions td {
     border: 0;
     padding-top: 1px;
     padding-bottom: 0;
-    font-size: .9em;
+    font-size: var(--maho-text-sm);
     white-space: nowrap
 }
 
@@ -490,7 +490,7 @@ table.actions td {
     border: 1px solid var(--maho-border-soft);
     border-bottom: none;
     background: var(--maho-surface-sunken);
-    font-size: .9em
+    font-size: var(--maho-text-sm)
 }
 
 .massaction td {
@@ -877,7 +877,7 @@ ul.tabs-horiz li a.active {
     background: var(--maho-warning-bg);
     border-bottom: 1px solid var(--maho-warning-border);
     border-top: 1px solid var(--maho-warning-border);
-    font-size: 11px;
+    font-size: var(--maho-text-xs);
     line-height: 16px;
     margin: 0;
     color: var(--maho-ink-soft);
@@ -916,7 +916,7 @@ ul.tabs-horiz li a.active {
 .messages li {
     margin-bottom: 11px!important;
     padding: 10px 26px 10px 35px!important;
-    font-size: .95em!important;
+    font-size: var(--maho-text-sm)!important;
     border-radius: var(--maho-radius-md)
 }
 
@@ -971,7 +971,7 @@ ul.tabs-horiz li a.active {
     min-height: 15px;
     margin-top: 3px;
     padding-left: 20px;
-    font-size: .95em;
+    font-size: var(--maho-text-sm);
     font-weight: 700;
     line-height: 1.25em;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23eb5202' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5l0 14'/%3E%3Cpath d='M18 11l-6 -6'/%3E%3Cpath d='M6 11l6 -6'/%3E%3C/svg%3E") no-repeat 0 1px;
@@ -1011,7 +1011,7 @@ table.form-edit {
     background: 0 0;
     margin: 0;
     color: var(--maho-surface);
-    font-size: 1em;
+    font-size: var(--maho-text-md);
     line-height: 18px;
     min-height: 0
 }
@@ -1022,7 +1022,7 @@ table.form-edit {
 
 .entry-edit .entry-edit-head strong,.entry-edit .entry-edit-head a {
     color: var(--maho-surface);
-    font-size: 1em;
+    font-size: var(--maho-text-md);
     line-height: 18px;
     min-height: 0;
     font-weight: 700
@@ -1096,7 +1096,7 @@ input.input-text,input.input-color,textarea,select {
     border-style: solid;
     border-color: var(--maho-border-strong) var(--maho-control-border) var(--maho-control-border) var(--maho-border-strong);
     background: var(--maho-surface);
-    font-size: 12px
+    font-size: var(--maho-text-sm)
 }
 
 select {
@@ -1195,7 +1195,7 @@ select.multiselect option {
 }
 
 .form-list td.label {
-    width: 200px
+    width: 220px
 }
 
 .form-list td.use-default label {
@@ -1233,12 +1233,12 @@ select.multiselect option {
 .form-list td.scope-label {
     padding-left: 5px;
     color: var(--maho-ink-muted);
-    font-size: .9em
+    font-size: var(--maho-text-sm)
 }
 
 .form-list p.note {
     margin: 0;
-    font-size: 11px
+    font-size: var(--maho-text-xs)
 }
 
 .form-list td.value p.note {
@@ -1360,7 +1360,7 @@ button.grid-nav-btn {
 }
 
 .grid-nav-position {
-    font-size: 11px;
+    font-size: var(--maho-text-xs);
     margin-inline: 5px;
 }
 
@@ -1450,7 +1450,7 @@ button.icon-btn span {
     margin: 0 0 12px;
     padding-bottom: 6px;
     border-bottom: 1px solid var(--maho-border-soft);
-    font-size: 14px;
+    font-size: var(--maho-text-lg);
     font-weight: 600;
     color: var(--maho-ink)
 }
@@ -1471,7 +1471,7 @@ button.icon-btn span {
 
 .order-store-select .store-group-name {
     margin: 0 0 8px;
-    font-size: 11px;
+    font-size: var(--maho-text-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .05em;
@@ -1672,7 +1672,7 @@ td.divider {
     content: "|";
     margin-left: 8px;
     color: var(--maho-border-strong);
-    font-size: .9em
+    font-size: var(--maho-text-sm)
 }
 
 .note-list .icon {
@@ -1735,7 +1735,7 @@ div.main-col-inner {
 .footer {
     clear: both;
     padding: 105px 2.8em 2.8em 2.8em;
-    font-size: .95em;
+    font-size: var(--maho-text-sm);
     text-align: center
 }
 
@@ -1750,7 +1750,7 @@ div.main-col-inner {
 
 .header-right {
     padding: 10px 25px 0 15px;
-    font-size: .95em;
+    font-size: var(--maho-text-sm);
     color: var(--maho-surface)
 }
 
@@ -1833,7 +1833,7 @@ div.autocomplete ul li {
 .content-header h3 {
     margin: .3em .5em 0 0;
     color: var(--maho-link);
-    font-size: 1.25em;
+    font-size: var(--maho-text-xl);
     line-height: 1.2em
 }
 
@@ -1880,7 +1880,7 @@ div.autocomplete ul li {
     display: block;
     padding: 4px 16px;
     color: #2f2f2f;
-    font-size: 12px;
+    font-size: var(--maho-text-sm);
     text-decoration: none;
 }
 .btn-dropdown-menu a:hover {
@@ -1938,7 +1938,7 @@ div.autocomplete ul li {
 }
 
 .login-form h2 {
-    font-size: 1.5em;
+    font-size: var(--maho-text-3xl);
     font-weight: 600
 }
 
@@ -1960,7 +1960,7 @@ div.autocomplete ul li {
     margin: 12px 0 0;
     color: var(--maho-ink-muted);
     padding: 8px 8px 5px 8px;
-    font-size: .95em
+    font-size: var(--maho-text-sm)
 }
 
 .login-form .validation-advice {
@@ -2143,7 +2143,7 @@ div.autocomplete ul li {
 }
 
 .order-tables td h5.title {
-    font-size: 1em;
+    font-size: var(--maho-text-md);
     font-weight: 700
 }
 
@@ -2211,7 +2211,7 @@ ul.item-options li {
     border-top: 1px solid var(--maho-border-soft);
     background: var(--maho-hairline);
     padding: 2px 6px 1px;
-    font-size: .9em;
+    font-size: var(--maho-text-sm);
     text-align: right
 }
 
@@ -2417,7 +2417,7 @@ ul.item-options li {
 
 .giftcard-amount-form .form-list .input-box p.notice {
     margin: 5px 0 0;
-    font-size: 11px;
+    font-size: var(--maho-text-xs);
     white-space: nowrap
 }
 
@@ -2451,7 +2451,7 @@ ul.item-options li {
 
 .product-options dt label {
     font-weight: 700;
-    font-size: 12px
+    font-size: var(--maho-text-sm)
 }
 
 .product-options dt {
@@ -2502,7 +2502,7 @@ ul.item-options li {
     border: 1px solid var(--maho-border-strong);
     border-radius: 2px;
     font-family: inherit;
-    font-size: 11px
+    font-size: var(--maho-text-xs)
 }
 
 .product-options dd input[type=date]:focus,.product-options dd input[type=time]:focus,.product-options dd input[type=datetime-local]:focus {
@@ -2610,7 +2610,7 @@ ul.item-options li {
 }
 
 .grand-total,.grand_total {
-    font-size: 1.2em;
+    font-size: var(--maho-text-xl);
     font-weight: 700;
     color: var(--maho-link)!important
 }
@@ -2654,7 +2654,7 @@ ul.item-options li {
 }
 
 .summary-details td {
-    font-size: 11px;
+    font-size: var(--maho-text-xs);
     background-color: var(--maho-warning-bg)
 }
 
@@ -2705,14 +2705,14 @@ ul.item-options li {
 }
 
 .giftmessage-order-create h5 {
-    font-size: 12px;
+    font-size: var(--maho-text-sm);
     font-weight: 400;
     line-height: 1.5;
     margin-bottom: 10px
 }
 
 .giftmessage-order-create h6 {
-    font-size: 11px;
+    font-size: var(--maho-text-xs);
     font-weight: 400;
     line-height: 1.55;
     background-color: var(--maho-border);
@@ -2935,7 +2935,7 @@ ul.item-options li {
     top: 0;
     right: 0;
     color: var(--maho-ink);
-    font-size: 12px;
+    font-size: var(--maho-text-sm);
     padding: 5px 10px;
     z-index: 100
 }
@@ -2995,7 +2995,7 @@ ul.item-options li {
 
 .categories-side-col .tree-actions.tree-label-options {
     margin-top: -4px;
-    font-size: 11px
+    font-size: var(--maho-text-xs)
 }
 
 .categories-side-col .tree-actions.tree-label-options label {
@@ -3665,7 +3665,7 @@ ul.config-tabs a.last span {
 
 .payment-group-title strong {
     display: inline;
-    font-size: 14px;
+    font-size: var(--maho-text-lg);
     border: 0
 }
 
@@ -3845,7 +3845,7 @@ td.label label.enabled {
     bottom: 26px;
     padding: 10px 12px;
     color: var(--maho-ink-soft);
-    font-size: 12px;
+    font-size: var(--maho-text-sm);
     line-height: 1.45;
     visibility: hidden
 }
@@ -4293,7 +4293,7 @@ ul.super-product-attributes {
 }
 
 #variables-chooser .dialog-content {
-    font-size: 14px
+    font-size: var(--maho-text-lg)
 }
 
 #variables-chooser .dialog-content li+li {
@@ -4483,7 +4483,7 @@ ul.super-product-attributes {
 
 input[type=date],input[type=time],input[type=datetime-local] {
     font-family: "Lucida Grande",Verdana,Arial,Helvetica,sans-serif;
-    font-size: 11px;
+    font-size: var(--maho-text-xs);
     padding: 3px 6px;
     border: 1px solid var(--maho-border-strong);
     border-radius: 2px;
@@ -4494,12 +4494,6 @@ input[type=date]:focus,input[type=time]:focus,input[type=datetime-local]:focus {
     border-color: var(--maho-link);
     outline: 0;
     box-shadow: 0 0 2px rgba(234,118,1,.3)
-}
-
-.popup-window .content-header,body {
-    color: var(--maho-ink);
-    font: 400 12px/1.33 ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
-    background: var(--maho-surface-sunken)
 }
 
 .middle {
@@ -4515,7 +4509,7 @@ input[type=date]:focus,input[type=time]:focus,input[type=datetime-local]:focus {
 .content-header h3,.content-header {
     border: 0;
     color: var(--maho-ink);
-    font-size: 21px;
+    font-size: var(--maho-text-3xl);
     font-weight: 600;
     letter-spacing: -.01em
 }
@@ -4556,20 +4550,20 @@ dl.accordion dt,.entry-edit .entry-edit-head {
 }
 
 .dashboard-totals-stats .stat-value {
-    font-size: 18px;
+    font-size: var(--maho-text-2xl);
     font-weight: bold;
     color: var(--maho-link);
     margin-bottom: 4px;
 }
 
 .dashboard-totals-stats .stat-decimals {
-    font-size: 14px;
+    font-size: var(--maho-text-lg);
     color: var(--maho-link);
 }
 
 .dashboard-totals-stats .stat-label {
     color: var(--maho-ink-muted);
-    font-size: 11px;
+    font-size: var(--maho-text-xs);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -4602,7 +4596,7 @@ ul.tabs a:hover,ul.tabs a.active {
 dl.accordion dt.open a,dl.accordion dt a:hover,dl.accordion dt a,div.collapseable a.open,div.collapseable a:hover,div.collapseable a,.entry-edit .entry-edit-head a,.entry-edit .entry-edit-head strong {
     color: var(--maho-ink);
     font-weight: 300;
-    font-size: 18px;
+    font-size: var(--maho-text-2xl);
     line-height: 32px
 }
 
@@ -4647,7 +4641,7 @@ dl.accordion dt.open a:after,div.collapseable a.open:after {
 }
 
 .grid-severity-minor span,.grid-severity-major span,.grid-severity-critical span,.grid-severity-notice span {
-    font: 400 12px/1.33 ui-sans-serif,system-ui,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    font: 400 var(--maho-text-sm)/1.33 var(--maho-font-sans);
     padding: 2px 10px;
     white-space: nowrap
 }
@@ -4742,7 +4736,7 @@ b {
 }
 
 small {
-    font-size: 12px;
+    font-size: var(--maho-text-sm);
     color: var(--maho-ink)
 }
 
@@ -4839,7 +4833,7 @@ small {
 .entry-edit .entry-edit-head h4 {
     color: var(--maho-ink);
     line-height: 32px;
-    font-size: 14px;
+    font-size: var(--maho-text-lg);
     font-weight: 600
 }
 
@@ -4938,7 +4932,7 @@ small {
 .grid tr.filter .range div.date .label {
     width: auto;
     padding: 0 5px 0 0;
-    font-size: 15px;
+    font-size: var(--maho-text-lg);
     color: var(--maho-ink-muted)
 }
 
@@ -5093,7 +5087,7 @@ small {
     background-position: center;
     background-size: 22px 22px;
     color: transparent;
-    font-size: 12px;
+    font-size: var(--maho-text-sm);
     opacity: .8;
     cursor: pointer;
     transition: width .15s ease, opacity .15s ease, background-color .15s ease
@@ -5131,7 +5125,7 @@ small {
     margin-top: 30px;
     border-top: 1px solid var(--maho-hairline);
     color: var(--maho-ink-muted);
-    font-size: 12px;
+    font-size: var(--maho-text-sm);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -5154,7 +5148,7 @@ ul.tabs-horiz li {
 ul.tabs-horiz li a {
     background: 0 0;
     color: var(--maho-ink-muted)!important;
-    font-size: 13px;
+    font-size: var(--maho-text-md);
     font-weight: 500;
     padding: 8px 14px;
     border: 0;
@@ -5271,7 +5265,7 @@ div.collapseable a.open {
 .section-config .section-config>.entry-edit-head>a {
     background: 0 0;
     color: var(--maho-ink);
-    font-size: 14px;
+    font-size: var(--maho-text-lg);
     font-weight: 400;
     border: 0
 }
@@ -5290,7 +5284,7 @@ div.collapseable a.open {
 
 .section-config .config-advanced>.entry-edit-head {
     border: 0;
-    font-size: 14px;
+    font-size: var(--maho-text-lg);
     box-shadow: none
 }
 
@@ -5301,7 +5295,7 @@ div.collapseable a.open {
 .massaction {
     background: 0 0;
     border: 0;
-    font-size: 12px
+    font-size: var(--maho-text-sm)
 }
 
 .massaction td {
@@ -5350,7 +5344,7 @@ div.collapseable a.open {
     opacity: .95;
     color: var(--maho-ink);
     background: var(--maho-surface);
-    font-size: 18px;
+    font-size: var(--maho-text-2xl);
     font-weight: 400
 }
 
@@ -5364,7 +5358,7 @@ div.collapseable a.open {
 
 .validation-advice {
     color: var(--maho-error)!important;
-    font-size: 12px;
+    font-size: var(--maho-text-sm);
     font-weight: 600!important
 }
 
@@ -5389,7 +5383,7 @@ div.collapseable a.open {
 
 .link-feed {
     margin-right: 20px;
-    font-size: .9em;
+    font-size: var(--maho-text-sm);
     text-decoration: none
 }
 
@@ -5678,7 +5672,7 @@ img.rule-param-add {
 
 .maho-tree .maho-tree-meta {
     color: var(--maho-ink-muted);
-    font-size: 0.85em;
+    font-size: var(--maho-text-xs);
     font-weight: normal
 }
 
@@ -5931,7 +5925,7 @@ img.rule-param-add {
     position: absolute;
     top: 8px;
     right: 10px;
-    font-size: 10px;
+    font-size: var(--maho-text-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .04em;
@@ -5944,13 +5938,13 @@ img.rule-param-add {
 
 #global_search_autocomplete ul li strong {
     display: block;
-    font-size: 13px;
+    font-size: var(--maho-text-md);
     font-weight: 600
 }
 
 #global_search_autocomplete ul li .informal {
     display: block;
-    font-size: 12px;
+    font-size: var(--maho-text-sm);
     color: var(--maho-ink-muted);
     white-space: nowrap;
     overflow: hidden;
@@ -6041,7 +6035,7 @@ img.rule-param-add {
     justify-content: space-between;
     gap: 12px;
     padding: 13px 16px;
-    font-size: 14px;
+    font-size: var(--maho-text-lg);
     font-weight: 600;
     line-height: 1.3;
     transition: background-color .15s ease
@@ -6135,7 +6129,7 @@ dl.accordion dt a {
     justify-content: space-between;
     gap: 12px;
     padding: 13px 16px;
-    font-size: 14px;
+    font-size: var(--maho-text-lg);
     font-weight: 600;
     line-height: 1.3;
     transition: background-color .15s ease
@@ -6144,7 +6138,7 @@ dl.accordion dt a {
 dl.accordion dt a:hover,
 dl.accordion dt.open a:hover {
     background: color-mix(in srgb, var(--maho-ink) 4%, transparent);
-    font-size: 14px;
+    font-size: var(--maho-text-lg);
     font-weight: 600;
     line-height: 1.3
 }
@@ -6153,7 +6147,7 @@ dl.accordion dt.open a {
     background: var(--maho-zebra);
     box-shadow: inset 3px 0 0 var(--maho-chartreuse-deep);
     font-weight: 600;
-    font-size: 14px;
+    font-size: var(--maho-text-lg);
     line-height: 1.3
 }
 

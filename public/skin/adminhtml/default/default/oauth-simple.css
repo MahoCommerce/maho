@@ -8,7 +8,8 @@ SPDX-License-Identifier: AFL-3.0
 @import url(tokens.css);
 
 * { margin:0; padding:0; }
-body          { background: var(--maho-surface-page); font:12px/1.55 var(--maho-font-sans); color: var(--maho-ink); text-align:center; }
+body          { background: var(--maho-surface-page); font:var(--maho-text-md)/1.55 var(--maho-font-sans); color: var(--maho-ink); text-align:center; }
+button, input, optgroup, select, textarea { font-family:inherit; font-size:inherit; }
 img           { border:0; vertical-align:top; }
 a             { color: var(--maho-link); text-decoration:underline; }
 a:hover       { text-decoration:none; }
@@ -18,12 +19,12 @@ a:hover       { text-decoration:none; }
 /* Headings */
 h1,h2,h3,
 h4,h5,h6      { margin:0 0 5px; line-height:1.35; color: var(--maho-ink); }
-h1            { font-size:20px; font-weight:600; }
-h2            { font-size:18px; font-weight:normal; }
-h3            { font-size:16px; font-weight:bold; }
-h4            { font-size:14px; font-weight:bold; }
-h5            { font-size:12px; font-weight:bold; }
-h6            { font-size:11px; font-weight:bold; }
+h1            { font-size:var(--maho-text-3xl); font-weight:600; }
+h2            { font-size:var(--maho-text-2xl); font-weight:normal; }
+h3            { font-size:var(--maho-text-xl); font-weight:bold; }
+h4            { font-size:var(--maho-text-lg); font-weight:bold; }
+h5            { font-size:var(--maho-text-md); font-weight:bold; }
+h6            { font-size:var(--maho-text-xs); font-weight:bold; }
 
 /* Forms */
 form          { display:inline; }
@@ -43,7 +44,7 @@ q,
 blockquote    { quotes:none; }
 q:before,
 q:after       { content:''; }
-small,big     { font-size:1em; }
+small,big     { font-size:var(--maho-text-md); }
 
 /* Lists */
 ul,ol         { list-style:none; }
@@ -67,7 +68,7 @@ ul,ol         { list-style:none; }
     border-bottom: 1px solid var(--maho-warning-border);
     border-top: 1px solid var(--maho-warning-border);
     color: var(--maho-ink-soft);
-    font-size: 11px;
+    font-size: var(--maho-text-xs);
     line-height: 16px;
     margin: 0 0 -3px;
     padding: 5px 27px;
@@ -96,7 +97,7 @@ ul,ol         { list-style:none; }
     border: 0 none !important;
 }
 .messages li {
-    font-size: 0.95em !important;
+    font-size: var(--maho-text-sm) !important;
     font-weight: bold !important;
     margin-bottom: 11px !important;
     min-height: 23px !important;
@@ -134,7 +135,6 @@ input.input-text, textarea, select {
     border: 1px solid var(--maho-control-border);
     border-radius: var(--maho-radius-sm);
     color: var(--maho-control-ink);
-    font-size: 12px;
 }
 input.input-text, textarea {
     padding: 4px 6px;
@@ -149,7 +149,6 @@ button, .form-button {
     border-radius: var(--maho-radius-sm);
     color: var(--maho-btn-ink);
     cursor: pointer;
-    font-size: 12px;
     font-weight: 600;
     padding: 4px 14px;
     text-align: center !important;
@@ -166,7 +165,7 @@ button:active, .form-button:active {
 
 h1 {
     color: var(--maho-ink);
-    font-size: 22px;
+    font-size: var(--maho-text-4xl);
     font-weight: 600;
     margin: 0;
     text-align: left;
@@ -174,7 +173,7 @@ h1 {
 
 h2 {
     color: var(--maho-ink-soft);
-    font-size: 16px;
+    font-size: var(--maho-text-xl);
     margin: 0 0 5px;
     text-align: left;
 }
@@ -196,5 +195,5 @@ body,
 .input-box label {width: 95px; font-weight: bold; text-align: right; flex: none;}
 .input-box input {width: 209px;}
 
-.required {font-weight: normal; color: var(--maho-error) !important; font-size: 11px;}
+.required {font-weight: normal; color: var(--maho-error) !important; font-size: var(--maho-text-xs);}
 .form-buttons {text-align: right;}
