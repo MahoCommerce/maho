@@ -18,7 +18,7 @@ a:hover       { text-decoration:none; }
 
 /* Headings */
 h1,h2,h3,
-h4,h5,h6      { margin:0 0 5px; line-height:1.35; color: var(--maho-ink); }
+h4,h5,h6      { margin:0 0 0.3125rem; line-height:1.35; color: var(--maho-ink); }
 h1            { font-size:var(--maho-text-3xl); font-weight:600; }
 h2            { font-size:var(--maho-text-2xl); font-weight:normal; }
 h3            { font-size:var(--maho-text-xl); font-weight:bold; }
@@ -36,7 +36,7 @@ table         { border:0; border-spacing:0; empty-cells:show; font-size:100%; }
 caption,th,td { vertical-align:top; text-align:left; font-weight:normal; }
 
 /* Content */
-p             { margin:0 0 10px; }
+p             { margin:0 0 0.625rem; }
 strong        { font-weight:bold; }
 address       { font-style:normal; line-height:1.35; }
 cite          { font-style:normal; }
@@ -69,9 +69,9 @@ ul,ol         { list-style:none; }
     border-top: 1px solid var(--maho-warning-border);
     color: var(--maho-ink-soft);
     font-size: var(--maho-text-xs);
-    line-height: 16px;
-    margin: 0 0 -3px;
-    padding: 5px 27px;
+    line-height: 1.45;
+    margin: 0 0 -0.1875rem;
+    padding: 0.3125rem 1.6875rem;
     position: relative;
 }
 .notification-global .label {
@@ -99,14 +99,14 @@ ul,ol         { list-style:none; }
 .messages li {
     font-size: var(--maho-text-sm) !important;
     font-weight: bold !important;
-    margin-bottom: 11px !important;
+    margin-bottom: 0.6875rem !important;
     min-height: 23px !important;
-    padding: 8px 8px 2px 32px !important;
+    padding: 0.5rem 0.5rem 0.125rem 2rem !important;
     border-radius: var(--maho-radius-md);
 }
 .messages ul li {
     border: 0 none !important;
-    margin: 0 0 3px !important;
+    margin: 0 0 0.1875rem !important;
     padding: 0 !important;
 }
 .error-msg {
@@ -137,7 +137,7 @@ input.input-text, textarea, select {
     color: var(--maho-control-ink);
 }
 input.input-text, textarea {
-    padding: 4px 6px;
+    padding: 0.25rem 0.375rem;
 }
 input.input-text:focus, textarea:focus, select:focus {
     border-color: var(--maho-focus-ring);
@@ -150,7 +150,7 @@ button, .form-button {
     color: var(--maho-btn-ink);
     cursor: pointer;
     font-weight: 600;
-    padding: 4px 14px;
+    padding: 0.25rem 0.875rem;
     text-align: center !important;
     white-space: nowrap;
 }
@@ -174,7 +174,7 @@ h1 {
 h2 {
     color: var(--maho-ink-soft);
     font-size: var(--maho-text-xl);
-    margin: 0 0 5px;
+    margin: 0 0 0.3125rem;
     text-align: left;
 }
 
@@ -182,16 +182,16 @@ body,
 .main-container,
 .header-container {background: var(--maho-surface-page);}
 
-.header-simple {height: 60px; text-align: left; padding: 10px 10px 0 10px; border-bottom: 1px solid var(--maho-border-soft);}
+.header-simple {height: 60px; text-align: left; padding: 0.625rem 0.625rem 0 0.625rem; border-bottom: 1px solid var(--maho-border-soft);}
 .header-top img {height: 60px;}
 
-.login-box > div {padding: 10px;}
+.login-box > div {padding: 0.625rem;}
 .page-title {margin-bottom: 0; border-bottom: 1px solid var(--maho-border-soft);}
 
 .form-box {border-bottom: 1px solid var(--maho-border-soft);}
 .form-box .fieldset, .form-box fieldset {width: 320px; margin: 0 auto;}
 
-.input-box {margin-bottom: 10px; display: flex; align-items: center; gap: 10px;}
+.input-box {margin-bottom: 0.625rem; display: flex; align-items: center; gap: 0.625rem;}
 .input-box label {width: 95px; font-weight: bold; text-align: right; flex: none;}
 .input-box input {width: 209px;}
 

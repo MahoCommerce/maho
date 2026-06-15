@@ -8,7 +8,7 @@ SPDX-License-Identifier: AFL-3.0
 input.input-text, textarea, select {
   font: 400 var(--maho-text-md)/1.33 var(--maho-font-sans);
   display: inline-block;
-  padding: 1px 6px;
+  padding: 0.0625rem 0.375rem;
   margin: 0;
   background-color: var(--maho-control-bg);
   height: 28px;
@@ -36,7 +36,7 @@ input[type=checkbox], input[type=radio] {
 button, .form-button {
   background-image: none;
   background-color: var(--maho-btn2-bg);
-  padding: 0 14px;
+  padding: 0 0.875rem;
   color: var(--maho-btn2-ink);
   border: 1px solid var(--maho-btn2-border);
   border-radius: var(--maho-radius-sm);
@@ -96,7 +96,7 @@ button.back {
   border-color: transparent; }
   button.back:before {
     content: "«";
-    padding-right: 4px; }
+    padding-right: 0.25rem; }
 
 button.icon-btn {
   width: auto !important; }
@@ -108,7 +108,7 @@ button.icon-btn {
 button.large, .form-button.large {
   font-size: var(--maho-text-2xl);
   font-weight: 600;
-  padding: 12px 22px;
+  padding: 0.75rem 1.375rem;
   line-height: 1.2;
   border-radius: var(--maho-radius-md); }
 
@@ -118,7 +118,7 @@ button {
 .field-100 textarea, .field-100 input.input-text {
   float: none;
   border: 1px solid var(--maho-control-border) !important;
-  padding: 1px 6px !important; }
+  padding: 0.0625rem 0.375rem !important; }
 
 input {
   vertical-align: middle; }
@@ -133,7 +133,7 @@ textarea {
 
 select {
   height: 28px;
-  padding: 1px 22px 1px 8px;
+  padding: 0.0625rem 1.375rem 0.0625rem 0.5rem;
   border: 1px solid var(--maho-control-border);
   border-radius: var(--maho-radius-sm);
   background-color: var(--maho-control-bg);
@@ -160,15 +160,15 @@ select[size] {
   height: auto; }
 
 select[multiple], select[size] {
-  padding: 4px; }
+  padding: 0.25rem; }
   select[multiple] option, select[size] option {
-    padding: 5px 8px; }
+    padding: 0.3125rem 0.5rem; }
   select[multiple] option:checked, select[size] option:checked {
     background: linear-gradient(var(--maho-surface-sunken), var(--maho-surface-sunken));
     color: var(--maho-ink);
     font-weight: 600; }
   select[multiple] optgroup, select[size] optgroup {
-    padding: 5px 0 0 4px;
+    padding: 0.3125rem 0 0 0.25rem;
     font-weight: 600;
     font-style: normal;
     color: var(--maho-ink-muted); }
@@ -179,7 +179,7 @@ select[multiple], select[size] {
   padding: 0; }
 
 .form-list td.label label {
-  padding: 0 15px 0 0; }
+  padding: 0 0.9375rem 0 0; }
 .form-list td.scope-label {
   color: var(--maho-ink-muted);
   font-size: var(--maho-text-xs); }
@@ -193,12 +193,12 @@ select[multiple], select[size] {
     font-weight: 400; }
 
 .input-text.large {
-  padding: 12px 12px 14px;
+  padding: 0.75rem 0.75rem 0.875rem;
   font-size: var(--maho-text-2xl); }
 
 td:has(input.swatch-option) {
   display: flex;
-  gap: 2px; }
+  gap: 0.125rem; }
   td:has(input.swatch-option) .swatch-delete {
     cursor: pointer;
     width: 14px;
@@ -220,7 +220,7 @@ td:has(input.swatch-disabled) {
   outline: 1px solid var(--maho-control-border);
   border: 1px solid var(--maho-surface);
   padding: 0;
-  margin: 2px;
+  margin: 0.125rem;
   width: 24px;
   height: 24px;
   display: block;

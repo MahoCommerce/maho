@@ -389,7 +389,7 @@
   gap: var(--fm-spacing-sm);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.045em;
   color: var(--fm-text-muted);
   padding: var(--fm-spacing-sm) var(--fm-spacing-md);
   height: 46px;
