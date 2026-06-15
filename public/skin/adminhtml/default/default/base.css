@@ -5655,7 +5655,7 @@ table.actions td {
 .grid-widget .massaction {
     height: auto;
     margin: 0;
-    padding: 0 var(--maho-space-4) var(--maho-space-2);
+    padding: 0 var(--maho-space-4) var(--maho-space-3);
     border-bottom: 1px solid var(--maho-hairline);
     background: var(--maho-surface)
 }
@@ -5663,6 +5663,10 @@ table.actions td {
 .grid-widget .massaction td {
     padding: 0;
     vertical-align: middle
+}
+
+.grid-widget .massaction td:first-child {
+    vertical-align: bottom
 }
 
 .grid-widget .grid {
