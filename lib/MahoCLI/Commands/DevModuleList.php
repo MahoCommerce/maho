@@ -73,7 +73,6 @@ class DevModuleList extends BaseMahoCommand
                     '—',
                     '—',
                     '—',
-                    '—',
                 ];
                 continue;
             }
@@ -81,7 +80,6 @@ class DevModuleList extends BaseMahoCommand
             foreach ($resources as $resName) {
                 $dbVer = $resourceModel->getDbVersion($resName);
                 $dataVer = $resourceModel->getDataVersion($resName);
-                $mahoVer = $resourceModel->getMahoVersion($resName);
 
                 $rows[] = [
                     $moduleName,
@@ -91,7 +89,6 @@ class DevModuleList extends BaseMahoCommand
                     $resName,
                     $dbVer === false ? '<fg=yellow>not installed</>' : (string) $dbVer,
                     $dataVer === false ? '—' : (string) $dataVer,
-                    $mahoVer === false ? '—' : (string) $mahoVer,
                 ];
             }
         }
@@ -104,7 +101,7 @@ class DevModuleList extends BaseMahoCommand
         usort($rows, fn(array $a, array $b): int => strcmp($a[0] . $a[4], $b[0] . $b[4]));
 
         $table = new Table($output);
-        $table->setHeaders(['module', 'status', 'codePool', 'declared', 'resource', 'db', 'data', 'maho']);
+        $table->setHeaders(['module', 'status', 'codePool', 'declared', 'resource', 'db', 'data']);
         $table->setRows($rows);
         $table->render();
 

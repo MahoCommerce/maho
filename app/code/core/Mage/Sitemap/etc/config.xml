@@ -7,7 +7,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Sitemap>
-            <version>1.6.0.1</version>
+            <version>2.0.0</version>
         </Mage_Sitemap>
     </modules>
     <global>
@@ -25,13 +25,6 @@ SPDX-License-Identifier: AFL-3.0
                 </entities>
             </sitemap_resource>
         </models>
-        <resources>
-            <sitemap_setup>
-                <setup>
-                    <module>Mage_Sitemap</module>
-                </setup>
-            </sitemap_setup>
-        </resources>
         <template>
             <email>
                 <sitemap_generate_error_email_template translate="label" module="sitemap">

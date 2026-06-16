@@ -13,22 +13,9 @@ $installer = $this;
 $connection = $installer->getConnection();
 $installer->startSetup();
 
-// MySQL-specific migration: convert IP address columns to varbinary format
+// MySQL-specific data migration: re-encode legacy numeric IPs into varbinary form
+// (column type change is now handled by sql/schema.php).
 if ($connection instanceof Maho\Db\Adapter\Pdo\Mysql) {
-    $connection->changeColumn(
-        $installer->getTable('rating/rating_option_vote'),
-        'remote_ip_long',
-        'remote_ip_long',
-        'varbinary(16)',
-    );
-
-    $connection->changeColumn(
-        $installer->getTable('rating/rating_option_vote'),
-        'remote_ip',
-        'remote_ip',
-        'varchar(50)',
-    );
-
     $connection->update(
         $installer->getTable('rating/rating_option_vote'),
         [

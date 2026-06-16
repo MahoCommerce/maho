@@ -10195,18 +10195,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/controllers/OnepageController.php
 
 		-
-			rawMessage: 'Parameter #2 $value of method Mage_Core_Model_Resource_Setup::setConfigData() expects string, bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/sql/maho_setup/maho-24.10.0.php
-
-		-
-			rawMessage: 'Parameter #2 $value of method Mage_Core_Model_Resource_Setup::setConfigData() expects string, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/sql/maho_setup/maho-24.10.0.php
-
-		-
 			rawMessage: 'Method Mage_Cms_Controller_Router::initControllerRouters() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -12190,13 +12178,13 @@ parameters:
 			rawMessage: Result of && is always false.
 			identifier: booleanAnd.alwaysFalse
 			count: 1
-			path: app/code/core/Mage/Customer/sql/customer_setup/data-upgrade-1.4.0.0.7-1.4.0.0.8.php
+			path: app/code/core/Mage/Customer/data/customer_setup/data-upgrade-1.4.0.0.7-1.4.0.0.8.php
 
 		-
 			rawMessage: 'Strict comparison using === between false and false will always evaluate to true.'
 			identifier: identical.alwaysTrue
 			count: 1
-			path: app/code/core/Mage/Customer/sql/customer_setup/data-upgrade-1.4.0.0.7-1.4.0.0.8.php
+			path: app/code/core/Mage/Customer/data/customer_setup/data-upgrade-1.4.0.0.7-1.4.0.0.8.php
 
 		-
 			rawMessage: 'Method Mage_Dataflow_Model_Batch::beforeFinish() has no return type specified.'
@@ -14147,12 +14135,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/GiftMessage/Model/Resource/Message.php
-
-		-
-			rawMessage: 'Parameter #2 $arguments of static method Mage::getResourceModel() expects array, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/GiftMessage/sql/giftmessage_setup/install-1.6.0.0.php
 
 		-
 			rawMessage: 'Method Mage_GoogleAnalytics_Helper_Data::isDebugModeEnabled() has parameter $store with no type specified.'
@@ -18127,7 +18109,13 @@ parameters:
 			rawMessage: 'Parameter #2 $arguments of static method Mage::getResourceModel() expects array, string given.'
 			identifier: argument.type
 			count: 1
-			path: app/code/core/Mage/Tax/sql/tax_setup/install-1.6.0.0.php
+			path: app/code/core/Mage/GiftMessage/data/giftmessage_setup/data-install-1.6.0.0.php
+
+		-
+			rawMessage: 'Parameter #2 $arguments of static method Mage::getResourceModel() expects array, string given.'
+			identifier: argument.type
+			count: 1
+			path: app/code/core/Mage/Tax/data/tax_setup/data-install-1.6.0.0.php
 
 		-
 			rawMessage: 'Method Mage_Usa_Helper_Data::getMeasureDimensionName() has parameter $key with no type specified.'

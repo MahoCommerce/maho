@@ -23,7 +23,6 @@ const MediabrowserUtility = {
                 id: this.dialogWindowId,
                 title: title || 'Insert File...',
                 className: 'magento',
-                windowClassName: 'popup-window',
                 width: width || 950,
                 height: height || 600,
                 onClose: this.closeDialog.bind(this),

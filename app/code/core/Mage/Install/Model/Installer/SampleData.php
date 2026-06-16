@@ -276,7 +276,10 @@ class Mage_Install_Model_Installer_SampleData
 
         // Update PostgreSQL sequences if needed
         if ($dbEngine === 'pgsql') {
-            $this->updatePostgresSequences($pdo);
+            $seqLog = function (string $message, string $level): void {
+                Mage::log("[sample-data] {$message}", $level === 'warning' ? Mage::LOG_WARNING : Mage::LOG_INFO);
+            };
+            \MahoCLI\Helper\SampleDataImporter::bumpPostgresSequences($pdo, $seqLog);
         }
     }
 
@@ -474,42 +477,4 @@ class Mage_Install_Model_Installer_SampleData
         }
     }
 
-    /**
-     * Update PostgreSQL sequences after import
-     */
-    private function updatePostgresSequences(\PDO $pdo): void
-    {
-        $stmt = $pdo->query("
-            SELECT
-                seq.relname as sequence_name,
-                tab.relname as table_name,
-                col.attname as column_name
-            FROM pg_class seq
-            JOIN pg_depend dep ON seq.oid = dep.objid
-            JOIN pg_class tab ON dep.refobjid = tab.oid
-            JOIN pg_attribute col ON col.attrelid = tab.oid AND col.attnum = dep.refobjsubid
-            WHERE seq.relkind = 'S'
-            AND dep.deptype = 'a'
-            ORDER BY seq.relname
-        ");
-
-        $sequences = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        foreach ($sequences as $seq) {
-            $sequenceName = $seq['sequence_name'];
-            $tableName = $seq['table_name'];
-            $columnName = $seq['column_name'];
-
-            try {
-                $maxStmt = $pdo->query("SELECT COALESCE(MAX(\"{$columnName}\"), 0) as max_id FROM \"{$tableName}\"");
-                $maxId = (int) $maxStmt->fetchColumn();
-
-                if ($maxId > 0) {
-                    $pdo->exec("SELECT setval('\"{$sequenceName}\"', {$maxId}, true)");
-                }
-            } catch (\PDOException $e) {
-                continue;
-            }
-        }
-    }
 }

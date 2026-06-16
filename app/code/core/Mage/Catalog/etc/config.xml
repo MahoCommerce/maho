@@ -8,7 +8,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Catalog>
-            <version>1.6.0.0.19.1.9</version>
+            <version>2.0.0</version>
         </Mage_Catalog>
     </modules>
     <admin>
@@ -436,13 +436,13 @@ SPDX-License-Identifier: AFL-3.0
             <product>
                 <type>
                     <simple translate="label" module="catalog">
-                        <label>Simple Product</label>
+                        <label>Simple</label>
                         <model>catalog/product_type_simple</model>
                         <composite>0</composite>
                         <index_priority>10</index_priority>
                     </simple>
                     <grouped translate="label" module="catalog">
-                        <label>Grouped Product</label>
+                        <label>Grouped</label>
                         <model>catalog/product_type_grouped</model>
                         <price_model>catalog/product_type_grouped_price</price_model>
                         <composite>1</composite>
@@ -454,7 +454,7 @@ SPDX-License-Identifier: AFL-3.0
                         <price_indexer>catalog/product_indexer_price_grouped</price_indexer>
                     </grouped>
                     <configurable translate="label" module="catalog">
-                        <label>Configurable Product</label>
+                        <label>Configurable</label>
                         <model>catalog/product_type_configurable</model>
                         <price_model>catalog/product_type_configurable_price</price_model>
                         <composite>1</composite>
@@ -466,7 +466,7 @@ SPDX-License-Identifier: AFL-3.0
                         <price_indexer>catalog/product_indexer_price_configurable</price_indexer>
                     </configurable>
                     <virtual translate="label" module="catalog">
-                        <label>Virtual Product</label>
+                        <label>Virtual</label>
                         <model>catalog/product_type_virtual</model>
                         <composite>0</composite>
                         <index_priority>20</index_priority>

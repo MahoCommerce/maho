@@ -832,12 +832,6 @@ interface AdapterInterface
     public function decodeVarbinary(mixed $value): mixed;
 
     /**
-     * Returns date that fits into TYPE_DATETIME range and is suggested to act as default 'zero' value
-     * for a column for current RDBMS.
-     */
-    public function getSuggestedZeroDate(): string;
-
-    /**
      * Drop trigger
      */
     public function dropTrigger(string $triggerName): self;

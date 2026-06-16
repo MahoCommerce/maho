@@ -19,127 +19,10 @@ $rulesWebsitesTable  = $installer->getTable('catalogrule/website');
 $rulesCustomerGroupsTable  = $installer->getTable('catalogrule/customer_group');
 
 $installer->startSetup();
-/**
- * Create table 'catalogrule/website' if not exists. This table will be used instead of
- * column website_ids of main catalog rules table
- */
-if (!$connection->isTableExists($rulesWebsitesTable)) {
-    $table = $connection->newTable($rulesWebsitesTable)
-        ->addColumn(
-            'rule_id',
-            Maho\Db\Ddl\Table::TYPE_INTEGER,
-            null,
-            [
-                'unsigned'  => true,
-                'nullable'  => false,
-                'primary'   => true,
-            ],
-            'Rule Id',
-        )
-        ->addColumn(
-            'website_id',
-            Maho\Db\Ddl\Table::TYPE_SMALLINT,
-            null,
-            [
-                'unsigned'  => true,
-                'nullable'  => false,
-                'primary'   => true,
-            ],
-            'Website Id',
-        )
-        ->addIndex(
-            $installer->getIdxName('catalogrule/website', ['rule_id']),
-            ['rule_id'],
-        )
-        ->addIndex(
-            $installer->getIdxName('catalogrule/website', ['website_id']),
-            ['website_id'],
-        )
-        ->addForeignKey(
-            $installer->getFkName('catalogrule/website', 'rule_id', 'catalogrule/rule', 'rule_id'),
-            'rule_id',
-            $rulesTable,
-            'rule_id',
-            Maho\Db\Ddl\Table::ACTION_CASCADE,
-            Maho\Db\Ddl\Table::ACTION_CASCADE,
-        )
-        ->addForeignKey(
-            $installer->getFkName('catalogrule/website', 'website_id', 'core/website', 'website_id'),
-            'website_id',
-            $websitesTable,
-            'website_id',
-            Maho\Db\Ddl\Table::ACTION_CASCADE,
-            Maho\Db\Ddl\Table::ACTION_CASCADE,
-        )
-        ->setComment('Catalog Rules To Websites Relations');
-
-    $connection->createTable($table);
-}
 
 /**
- * Create table 'catalogrule/customer_group' if not exists. This table will be used instead of
- * column customer_group_ids of main catalog rules table
- */
-if (!$connection->isTableExists($rulesCustomerGroupsTable)) {
-    $table = $connection->newTable($rulesCustomerGroupsTable)
-        ->addColumn(
-            'rule_id',
-            Maho\Db\Ddl\Table::TYPE_INTEGER,
-            null,
-            [
-                'unsigned'  => true,
-                'nullable'  => false,
-                'primary'   => true,
-            ],
-            'Rule Id',
-        )
-        ->addColumn(
-            'customer_group_id',
-            Maho\Db\Ddl\Table::TYPE_SMALLINT,
-            null,
-            [
-                'unsigned'  => true,
-                'nullable'  => false,
-                'primary'   => true,
-            ],
-            'Customer Group Id',
-        )
-        ->addIndex(
-            $installer->getIdxName('catalogrule/customer_group', ['rule_id']),
-            ['rule_id'],
-        )
-        ->addIndex(
-            $installer->getIdxName('catalogrule/customer_group', ['customer_group_id']),
-            ['customer_group_id'],
-        )
-        ->addForeignKey(
-            $installer->getFkName('catalogrule/customer_group', 'rule_id', 'catalogrule/rule', 'rule_id'),
-            'rule_id',
-            $rulesTable,
-            'rule_id',
-            Maho\Db\Ddl\Table::ACTION_CASCADE,
-            Maho\Db\Ddl\Table::ACTION_CASCADE,
-        )
-        ->addForeignKey(
-            $installer->getFkName(
-                'catalogrule/customer_group',
-                'customer_group_id',
-                'customer/customer_group',
-                'customer_group_id',
-            ),
-            'customer_group_id',
-            $customerGroupsTable,
-            'customer_group_id',
-            Maho\Db\Ddl\Table::ACTION_CASCADE,
-            Maho\Db\Ddl\Table::ACTION_CASCADE,
-        )
-        ->setComment('Catalog Rules To Customer Groups Relations');
-
-    $connection->createTable($table);
-}
-
-/**
- * Fill out relation table 'catalogrule/website' with website Ids
+ * Fill out relation table 'catalogrule/website' with website Ids previously
+ * stored in catalogrule.website_ids (column removed by the declarative schema).
  */
 if ($connection->tableColumnExists($rulesTable, 'website_ids')) {
     $select = $connection->select()
@@ -158,6 +41,8 @@ if ($connection->tableColumnExists($rulesTable, 'website_ids')) {
 
 /**
  * Fill out relation table 'catalogrule/customer_group' with customer group Ids
+ * previously stored in catalogrule.customer_group_ids (column removed by the
+ * declarative schema).
  */
 if ($connection->tableColumnExists($rulesTable, 'customer_group_ids')) {
     $select = $connection->select()
@@ -173,11 +58,5 @@ if ($connection->tableColumnExists($rulesTable, 'customer_group_ids')) {
     $query = $select->insertFromSelect($rulesCustomerGroupsTable, ['rule_id', 'customer_group_id']);
     $connection->query($query);
 }
-
-/**
- * Eliminate obsolete columns
- */
-$connection->dropColumn($rulesTable, 'website_ids');
-$connection->dropColumn($rulesTable, 'customer_group_ids');
 
 $installer->endSetup();

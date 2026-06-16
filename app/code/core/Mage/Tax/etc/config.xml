@@ -7,7 +7,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Tax>
-            <version>1.6.0.5</version>
+            <version>2.0.0</version>
         </Mage_Tax>
     </modules>
     <global>

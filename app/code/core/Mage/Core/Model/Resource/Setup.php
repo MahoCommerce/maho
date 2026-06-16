@@ -21,7 +21,6 @@ class Mage_Core_Model_Resource_Setup
     public const TYPE_DB_UNINSTALL         = 'uninstall';
     public const TYPE_DATA_INSTALL         = 'data-install';
     public const TYPE_DATA_UPGRADE         = 'data-upgrade';
-    public const TYPE_MAHO                 = 'maho';
 
     /**
      * Setup resource name
@@ -101,8 +100,11 @@ class Mage_Core_Model_Resource_Setup
      * Initialize resource configurations, setup connection, etc
      *
      * @param string $resourceName the setup resource name
+     * @param string|null $moduleName owning module, for resources discovered by
+     *        convention (a sql/data <name>_setup directory with no <resources>
+     *        declaration). Ignored when the resource is declared in config.
      */
-    public function __construct($resourceName)
+    public function __construct($resourceName, ?string $moduleName = null)
     {
         $config = Mage::getConfig();
         $this->_resourceName = $resourceName;
@@ -114,7 +116,13 @@ class Mage_Core_Model_Resource_Setup
             $this->_connectionConfig = $config->getResourceConnectionConfig(self::DEFAULT_SETUP_CONNECTION);
         }
 
-        $modName = (string) $this->_resourceConfig->setup->module;
+        $modName = '';
+        if ($this->_resourceConfig && $this->_resourceConfig->setup) {
+            $modName = (string) $this->_resourceConfig->setup->module;
+        }
+        if ($modName === '') {
+            $modName = (string) $moduleName;
+        }
         $this->_moduleConfig = $config->getModuleConfig($modName);
         $connection = Mage::getSingleton('core/resource')->getConnection($this->_resourceName);
         /**
@@ -189,6 +197,56 @@ class Mage_Core_Model_Resource_Setup
     }
 
     /**
+     * Every setup resource to run, keyed by resource name, as
+     * ['module' => owning module, 'class' => setup class].
+     *
+     * Two sources, merged:
+     *  - resources declared in config under global/resources (the only place a
+     *    custom setup <class> or a non-default connection can live);
+     *  - convention: any module shipping a sql/<name>_setup or data/<name>_setup
+     *    directory whose name is not already a declared resource. These run with
+     *    the base setup class, so a module needing only the default setup needs
+     *    no <resources> XML at all. The directory name is the resource name (and
+     *    the core_resource version key), so existing installs keep their history.
+     *
+     * Declared resources come first, preserving their depends_on-respecting
+     * config order; convention resources are appended. Anything order-sensitive
+     * relative to another module must therefore stay declared.
+     *
+     * @return array<string, array{module: string, class: string}>
+     */
+    public static function getAllSetupResources(): array
+    {
+        $resources = [];
+
+        foreach (Mage::getConfig()->getNode('global/resources')->children() as $resName => $resource) {
+            if (!$resource->setup) {
+                continue;
+            }
+            $resources[(string) $resName] = [
+                'module' => (string) $resource->setup->module,
+                'class'  => isset($resource->setup->class) ? $resource->setup->getClassName() : self::class,
+            ];
+        }
+
+        foreach (Mage::getConfig()->getNode('modules')->children() as $modName => $module) {
+            if (!$module->is('active')) {
+                continue;
+            }
+            foreach (['sql', 'data'] as $type) {
+                $dir = Mage::getModuleDir($type, (string) $modName);
+                foreach (Maho::listDirectories($dir) as $subDir) {
+                    if (str_ends_with($subDir, '_setup') && !isset($resources[$subDir])) {
+                        $resources[$subDir] = ['module' => (string) $modName, 'class' => self::class];
+                    }
+                }
+            }
+        }
+
+        return $resources;
+    }
+
+    /**
      * @return bool
      */
     public static function applyAllUpdates()
@@ -196,18 +254,10 @@ class Mage_Core_Model_Resource_Setup
         Mage::app()->setUpdateMode(true);
         self::$_hadUpdates = false;
 
-        $resources = Mage::getConfig()->getNode('global/resources')->children();
         $afterApplyUpdates = [];
-        foreach ($resources as $resName => $resource) {
-            if (!$resource->setup) {
-                continue;
-            }
-            $className = self::class;
-            if (isset($resource->setup->class)) {
-                $className = $resource->setup->getClassName();
-            }
+        foreach (self::getAllSetupResources() as $resName => $resource) {
             /** @var Mage_Core_Model_Resource_Setup $setupClass */
-            $setupClass = new $className($resName);
+            $setupClass = new $resource['class']($resName, $resource['module']);
             $setupClass->applyUpdates();
             if ($setupClass->getCallAfterApplyAllUpdates()) {
                 $afterApplyUpdates[] = $setupClass;
@@ -228,17 +278,9 @@ class Mage_Core_Model_Resource_Setup
         if (!self::$_schemaUpdatesChecked) {
             return;
         }
-        $resources = Mage::getConfig()->getNode('global/resources')->children();
-        foreach ($resources as $resName => $resource) {
-            if (!$resource->setup) {
-                continue;
-            }
-            $className = self::class;
-            if (isset($resource->setup->class)) {
-                $className = $resource->setup->getClassName();
-            }
+        foreach (self::getAllSetupResources() as $resName => $resource) {
             /** @var Mage_Core_Model_Resource_Setup $setupClass */
-            $setupClass = new $className($resName);
+            $setupClass = new $resource['class']($resName, $resource['module']);
             $setupClass->applyDataUpdates();
         }
     }
@@ -263,39 +305,93 @@ class Mage_Core_Model_Resource_Setup
         return $this;
     }
 
-    public static function applyAllMahoUpdates(): void
+    /**
+     * Enumerate pending schema/data scripts across all setup resources
+     * without running them. Powers `migrate --dry-run`.
+     *
+     * @return array<string, list<array{type: string, toVersion: string, fileName: string}>>
+     *         keyed by resource name; only resources with pending scripts appear
+     */
+    public static function getAllPendingUpdates(): array
     {
-        if (!self::$_schemaUpdatesChecked) {
-            return;
-        }
-        $resources = Mage::getConfig()->getNode('global/resources')->children();
-        foreach ($resources as $resName => $resource) {
-            if (!$resource->setup) {
-                continue;
-            }
-            $className = self::class;
-            if (isset($resource->setup->class)) {
-                $className = $resource->setup->getClassName();
-            }
+        $pending = [];
+        foreach (self::getAllSetupResources() as $resName => $resource) {
             /** @var Mage_Core_Model_Resource_Setup $setupClass */
-            $setupClass = new $className($resName);
-            $setupClass->applyMahoUpdates();
+            $setupClass = new $resource['class']($resName, $resource['module']);
+            $updates = $setupClass->getPendingUpdates();
+            if ($updates !== []) {
+                $pending[$resName] = $updates;
+            }
         }
+        return $pending;
     }
 
-    public function applyMahoUpdates(): self
+    /**
+     * Pending install/upgrade scripts for this resource, in apply order, without
+     * running them. Mirrors the version comparison applyUpdates()/
+     * applyDataUpdates() use to pick scripts, but only
+     * enumerates the files: the SQL an imperative script emits is unknowable
+     * without executing it.
+     *
+     * @return list<array{type: string, toVersion: string, fileName: string}>
+     */
+    public function getPendingUpdates(): array
     {
-        $dataVer = $this->_getResource()->getMahoVersion($this->_resourceName);
-        $configVer = Mage::getVersion();
-        if ($dataVer !== false) {
-            $status = version_compare($configVer, $dataVer);
-            if ($status == self::VERSION_COMPARE_GREATER) {
-                $this->_upgradeMaho($dataVer, $configVer);
-            }
-        } elseif ($configVer) {
-            $this->_installMaho($configVer);
+        $configVer = (string) $this->_moduleConfig->version;
+        $updates = [];
+
+        $dbVer = $this->_getResource()->getDbVersion($this->_resourceName);
+        if ($dbVer === false && $configVer) {
+            $install = $this->_getAvailableDbFiles(self::TYPE_DB_INSTALL, '', $configVer);
+            $from = $install === [] ? '' : $install[array_key_last($install)]['toVersion'];
+            $updates = array_merge(
+                $updates,
+                $this->_labelPendingFiles('schema', $install),
+                $this->_labelPendingFiles('schema', $this->_getAvailableDbFiles(self::TYPE_DB_UPGRADE, $from, $configVer)),
+            );
+        } elseif ($dbVer !== false && version_compare($configVer, $dbVer) === self::VERSION_COMPARE_GREATER) {
+            $updates = array_merge(
+                $updates,
+                $this->_labelPendingFiles('schema', $this->_getAvailableDbFiles(self::TYPE_DB_UPGRADE, $dbVer, $configVer)),
+            );
         }
-        return $this;
+
+        $dataVer = $this->_getResource()->getDataVersion($this->_resourceName);
+        if ($dataVer === false && $configVer) {
+            $install = $this->_getAvailableDataFiles(self::TYPE_DATA_INSTALL, '', $configVer);
+            $from = $install === [] ? '' : $install[array_key_last($install)]['toVersion'];
+            $updates = array_merge(
+                $updates,
+                $this->_labelPendingFiles('data', $install),
+                $this->_labelPendingFiles('data', $this->_getAvailableDataFiles(self::TYPE_DATA_UPGRADE, $from, $configVer)),
+            );
+        } elseif ($dataVer !== false && version_compare($configVer, $dataVer) === self::VERSION_COMPARE_GREATER) {
+            $updates = array_merge(
+                $updates,
+                $this->_labelPendingFiles('data', $this->_getAvailableDataFiles(self::TYPE_DATA_UPGRADE, $dataVer, $configVer)),
+            );
+        }
+
+        return $updates;
+    }
+
+    /**
+     * Tag each enumerated file with its script type for the dry-run report.
+     *
+     * @param list<array{toVersion: string, fileName: string}> $files
+     * @return list<array{type: string, toVersion: string, fileName: string}>
+     */
+    protected function _labelPendingFiles(string $type, array $files): array
+    {
+        $labeled = [];
+        foreach ($files as $file) {
+            $labeled[] = [
+                'type'      => $type,
+                'toVersion' => $file['toVersion'],
+                'fileName'  => $file['fileName'],
+            ];
+        }
+        return $labeled;
     }
 
     /**
@@ -404,26 +500,6 @@ class Mage_Core_Model_Resource_Setup
     {
         $this->_modifyResourceDb('data-upgrade', $oldVersion, $newVersion);
         $this->_getResource()->setDataVersion($this->_resourceName, $newVersion);
-
-        return $this;
-    }
-
-    /**
-     * Run Maho install scripts
-     */
-    protected function _installMaho(string $newVersion): self
-    {
-        $this->_modifyResourceDb(self::TYPE_MAHO, '', $newVersion);
-
-        return $this;
-    }
-
-    /**
-     * Run Maho upgrade scripts
-     */
-    protected function _upgradeMaho(string $oldVersion, string $newVersion): self
-    {
-        $this->_modifyResourceDb(self::TYPE_MAHO, $oldVersion, $newVersion);
 
         return $this;
     }
@@ -591,47 +667,15 @@ class Mage_Core_Model_Resource_Setup
     }
 
     /**
-     * Retrieve available Maho install/upgrade files for current module
-     */
-    protected function _getAvailableMahoFiles(string $actionType, string $fromVersion, string $toVersion): array
-    {
-        $modName    = (string) $this->_moduleConfig[0]->getName();
-        $files      = [];
-
-        $regExp     = sprintf('#^%s-(.*)\.php$#i', $actionType);
-
-        $filesDir   = Mage::getModuleDir('sql', $modName) . DS . 'maho_setup';
-        foreach (Maho::globPackages("$filesDir/*") as $file) {
-            $matches = [];
-            if (preg_match($regExp, basename($file), $matches) === 1) {
-                $files[$matches[1]] = $file;
-            }
-        }
-
-        if (empty($files)) {
-            return [];
-        }
-
-        return $this->_getModifySqlFiles($actionType, $fromVersion, $toVersion, $files);
-    }
-
-    /**
      * Save resource version
      */
     protected function _setResourceVersion(string $actionType, string $version): self
     {
-        switch ($actionType) {
-            case self::TYPE_DB_INSTALL:
-            case self::TYPE_DB_UPGRADE:
-                $this->_getResource()->setDbVersion($this->_resourceName, $version);
-                break;
-            case self::TYPE_DATA_INSTALL:
-            case self::TYPE_DATA_UPGRADE:
-                $this->_getResource()->setDataVersion($this->_resourceName, $version);
-                break;
-            case self::TYPE_MAHO:
-                $this->_getResource()->setMahoVersion($this->_resourceName, $version);
-        }
+        match ($actionType) {
+            self::TYPE_DB_INSTALL, self::TYPE_DB_UPGRADE => $this->_getResource()->setDbVersion($this->_resourceName, $version),
+            self::TYPE_DATA_INSTALL, self::TYPE_DATA_UPGRADE => $this->_getResource()->setDataVersion($this->_resourceName, $version),
+            default => $this,
+        };
 
         return $this;
     }
@@ -651,7 +695,6 @@ class Mage_Core_Model_Resource_Setup
         $files = match ($actionType) {
             self::TYPE_DB_INSTALL, self::TYPE_DB_UPGRADE => $this->_getAvailableDbFiles($actionType, $fromVersion, $toVersion),
             self::TYPE_DATA_INSTALL, self::TYPE_DATA_UPGRADE => $this->_getAvailableDataFiles($actionType, $fromVersion, $toVersion),
-            self::TYPE_MAHO => $this->_getAvailableMahoFiles($actionType, $fromVersion, $toVersion),
             default => [],
         };
         if (empty($files) || !$this->getConnection()) {
@@ -739,20 +782,6 @@ class Mage_Core_Model_Resource_Setup
                     ) {
                         $arrRes[] = [
                             'toVersion' => $infoTo,
-                            'fileName'  => $file,
-                        ];
-                    }
-                }
-                break;
-
-            case self::TYPE_MAHO:
-                uksort($arrFiles, 'version_compare');
-                foreach ($arrFiles as $version => $file) {
-                    if (version_compare($version, $fromVersion) === self::VERSION_COMPARE_GREATER
-                        && version_compare($version, $toVersion) !== self::VERSION_COMPARE_GREATER
-                    ) {
-                        $arrRes[] = [
-                            'toVersion' => $version,
                             'fileName'  => $file,
                         ];
                     }
