@@ -23,7 +23,7 @@ foreach (Mage::app()->getWebsites(true) as $website) {
         $defaultConfigValue = $configValue;
         $installer->setConfigData($redirectRegister, (string) (int) $configValue);
     } elseif ($configValue !== $defaultConfigValue) {
-        $installer->setConfigData($redirectRegister, '1', 'websites', $website->getId());
+        $installer->setConfigData($redirectRegister, (string) (int) $configValue, 'websites', $website->getId());
     }
 }
 
