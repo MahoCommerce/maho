@@ -13,7 +13,7 @@ SPDX-License-Identifier: AFL-3.0
                     <system>
                         <children>
                             <api translate="title" module="api">
-                                <title>Web Services</title>
+                                <title>API</title>
                                 <sort_order>0</sort_order>
                                 <children>
                                     <users translate="title">
@@ -47,21 +47,30 @@ SPDX-License-Identifier: AFL-3.0
         <system>
             <children>
                 <api translate="title" module="api">
-                    <title>Web Services</title>
-                    <sort_order>25</sort_order>
+                    <title>API</title>
+                    <sort_order>18</sort_order>
                     <children>
-                        <users translate="title">
-                            <title>SOAP/XML-RPC - Users</title>
-                            <action>adminhtml/api_user</action>
-                            <sort_order>10</sort_order>
-                        </users>
-                        <roles translate="title">
-                            <title>SOAP/XML-RPC - Roles</title>
-                            <action>adminhtml/api_role</action>
-                            <sort_order>20</sort_order>
-                        </roles>
-                        <orphaned_resources translate="title">
-                            <title>Orphaned API Role Resources</title>
+                        <soap translate="title" module="adminhtml">
+                            <title>SOAP / XML-RPC (legacy)</title>
+                            <resource>system/api</resource>
+                            <sort_order>30</sort_order>
+                            <children>
+                                <users translate="title" module="api">
+                                    <title>Users</title>
+                                    <resource>system/api/users</resource>
+                                    <action>adminhtml/api_user</action>
+                                    <sort_order>10</sort_order>
+                                </users>
+                                <roles translate="title" module="api">
+                                    <title>Roles</title>
+                                    <resource>system/api/roles</resource>
+                                    <action>adminhtml/api_role</action>
+                                    <sort_order>20</sort_order>
+                                </roles>
+                            </children>
+                        </soap>
+                        <orphaned_resources translate="title" module="api">
+                            <title>Orphaned API Resources</title>
                             <action>adminhtml/api_orphanedResource</action>
                             <sort_order>99</sort_order>
                         </orphaned_resources>

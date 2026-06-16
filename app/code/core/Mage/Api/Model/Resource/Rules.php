@@ -71,13 +71,34 @@ class Mage_Api_Model_Resource_Rules extends Mage_Core_Model_Resource_Db_Abstract
     }
 
     /**
-     * Get collection of orphaned resources (in database but no longer defined in API ACL)
+     * Valid resource IDs across every stack that stores rules in api_rule.
+     *
+     * The table is shared: Mage_Api (SOAP/XML-RPC) declares its resources in the
+     * api.xml ACL tree, while Maho_ApiPlatform (REST/GraphQL) declares its own in
+     * the permission registry. Orphan detection must consider both, or it would
+     * flag (and offer to delete) every API Platform rule. The registry is only
+     * unioned in when that module is installed, keeping Mage_Api decoupled.
+     *
+     * @return list<string>
+     */
+    protected function getValidResourceIds(): array
+    {
+        $valid = Mage::getModel('api/roles')->getResourcesList2D();
+
+        if (class_exists(\Maho\ApiPlatform\Security\ApiPermissionRegistry::class)) {
+            $valid = array_merge($valid, (new \Maho\ApiPlatform\Security\ApiPermissionRegistry())->getPermissionIds());
+        }
+
+        return $valid;
+    }
+
+    /**
+     * Get collection of orphaned resources (in database but no longer defined in any API ACL)
      */
     public function getOrphanedResourcesCollection(): Mage_Core_Model_Resource_Db_Collection_Abstract
     {
-        $validResources = Mage::getModel('api/roles')->getResourcesList2D();
         $collection = Mage::getResourceModel('api/rules_collection')
-            ->addFieldToFilter('resource_id', ['nin' => $validResources])
+            ->addFieldToFilter('resource_id', ['nin' => $this->getValidResourceIds()])
             ->addFieldToSelect('resource_id');
         $collection->getSelect()->group('resource_id');
         return $collection;
@@ -94,8 +115,7 @@ class Mage_Api_Model_Resource_Rules extends Mage_Core_Model_Resource_Db_Abstract
             return 0;
         }
 
-        $resourceIds = Mage::getModel('api/roles')->getResourcesList2D();
-        $validIds = array_intersect($orphanedIds, $resourceIds);
+        $validIds = array_intersect($orphanedIds, $this->getValidResourceIds());
         if ($validIds !== []) {
             throw new Mage_Core_Exception(
                 Mage::helper('adminhtml')->__(

@@ -123,7 +123,7 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Edit_Form extends Mage_Adminhtml
             'label' => Mage::helper('oauth')->__('API Role'),
             'values' => $roles,
             'value' => $model->getData('api_role_id'),
-            'note' => Mage::helper('oauth')->__('Assign an API role to grant permissions. Manage roles at System > Web Services > REST/GraphQL - Roles.'),
+            'note' => Mage::helper('oauth')->__('Assign an API role to grant permissions. Manage roles at System > API > Roles.'),
         ]);
 
         $adminFieldset->addField('store_ids', 'multiselect', [

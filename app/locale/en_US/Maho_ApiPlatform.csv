@@ -9,7 +9,6 @@
 "All API protocols are <strong>disabled by default</strong>. Enable only the ones you actually use — anything off returns 404 at the entry point.","All API protocols are <strong>disabled by default</strong>. Enable only the ones you actually use — anything off returns 404 at the entry point."
 "API Cache","API Cache"
 "API Key","API Key"
-"API Platform","API Platform"
 "API Protocols","API Protocols"
 "API Role","API Role"
 "API user has been deleted.","API user has been deleted."
@@ -103,3 +102,4 @@
 "User Info","User Info"
 "Username","Username"
 "User Role","User Role"
+"API Platform","API Platform"

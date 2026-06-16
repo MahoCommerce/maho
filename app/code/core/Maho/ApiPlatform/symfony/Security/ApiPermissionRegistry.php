@@ -115,6 +115,24 @@ class ApiPermissionRegistry
     }
 
     /**
+     * Flat list of valid permission IDs, one per resource/operation pair.
+     * Format: "resource/operation" e.g. "products/read", "orders/write".
+     * Single source of truth for the role editor and orphaned-rule cleanup.
+     *
+     * @return list<string>
+     */
+    public function getPermissionIds(): array
+    {
+        $ids = [];
+        foreach (self::load()['resources'] as $resourceId => $config) {
+            foreach (array_keys($config['operations']) as $operation) {
+                $ids[] = $resourceId . '/' . $operation;
+            }
+        }
+        return $ids;
+    }
+
+    /**
      * Get resources that have public read access (no auth required).
      *
      * @return array<string, string> resource ID => label

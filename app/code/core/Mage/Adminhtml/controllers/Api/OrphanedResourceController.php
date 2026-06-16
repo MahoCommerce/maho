@@ -24,7 +24,7 @@ class Mage_Adminhtml_Api_OrphanedResourceController extends Mage_Adminhtml_Contr
         $this->loadLayout()
             ->_setActiveMenu('system/api/orphaned_resources')
             ->_addBreadcrumb($this->__('System'), $this->__('System'))
-            ->_addBreadcrumb($this->__('Web Services'), $this->__('Web Services'))
+            ->_addBreadcrumb($this->__('API'), $this->__('API'))
             ->_addBreadcrumb($this->__('Orphaned Resources'), $this->__('Orphaned API Role Resources'));
         return $this;
     }
@@ -36,7 +36,7 @@ class Mage_Adminhtml_Api_OrphanedResourceController extends Mage_Adminhtml_Contr
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
-            ->_title($this->__('Web Services'))
+            ->_title($this->__('API'))
             ->_title($this->__('Orphaned API Role Resources'));
 
         /** @var Mage_Adminhtml_Block_Api_OrphanedResource $block */

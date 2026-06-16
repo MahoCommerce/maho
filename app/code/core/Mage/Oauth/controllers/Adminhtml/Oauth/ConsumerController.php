@@ -50,7 +50,7 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
     {
         $this
             ->loadLayout()
-            ->_setActiveMenu('system/api/oauth_consumer')
+            ->_setActiveMenu('system/api/rest_legacy/oauth_consumer')
             ->renderLayout();
     }
 
@@ -89,7 +89,7 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
 
         $this
             ->loadLayout()
-            ->_setActiveMenu('system/api/oauth_consumer')
+            ->_setActiveMenu('system/api/rest_legacy/oauth_consumer')
             ->renderLayout();
     }
 
@@ -122,7 +122,7 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
 
         $this
             ->loadLayout()
-            ->_setActiveMenu('system/api/oauth_consumer')
+            ->_setActiveMenu('system/api/rest_legacy/oauth_consumer')
             ->renderLayout();
     }
 

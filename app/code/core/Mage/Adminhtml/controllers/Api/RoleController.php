@@ -31,7 +31,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
     protected function _initAction()
     {
         $this->loadLayout();
-        $this->_setActiveMenu('system/api/roles');
+        $this->_setActiveMenu('system/api/soap/roles');
         $this->_addBreadcrumb($this->__('Web services'), $this->__('Web services'));
         $this->_addBreadcrumb($this->__('Permissions'), $this->__('Permissions'));
         $this->_addBreadcrumb($this->__('Roles'), $this->__('Roles'));
@@ -42,7 +42,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
-             ->_title($this->__('Web Services'))
+             ->_title($this->__('API'))
              ->_title($this->__('Roles'));
 
         $this->_initAction();
@@ -65,7 +65,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
     public function editRoleAction(): void
     {
         $this->_title($this->__('System'))
-             ->_title($this->__('Web Services'))
+             ->_title($this->__('API'))
              ->_title($this->__('Roles'));
 
         $this->_initAction();

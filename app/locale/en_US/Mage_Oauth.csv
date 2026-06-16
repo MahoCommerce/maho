@@ -14,7 +14,6 @@
 "An error occurred while deleting the consumer.","An error occurred while deleting the consumer."
 "API Role","API Role"
 "Application Name","Application Name"
-"Assign an API role to grant permissions. Manage roles at System > Web Services > REST/GraphQL - Roles.","Assign an API role to grant permissions. Manage roles at System > Web Services > REST/GraphQL - Roles."
 "Authorization confirmed","Authorization confirmed"
 "Authorization confirmed.","Authorization confirmed."
 "Authorize","Authorize"
@@ -104,3 +103,5 @@
 "User Name","User Name"
 "User Type","User Type"
 "Verifier code: %s","Verifier code: %s"
+"My Apps","My Apps"
+"Assign an API role to grant permissions. Manage roles at System > API > Roles.","Assign an API role to grant permissions. Manage roles at System > API > Roles."
