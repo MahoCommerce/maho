@@ -191,7 +191,7 @@ class Product extends CrudResource
 
     #[Groups(['product:read'])]
     #[ApiProperty(description: 'Visibility: not_visible, catalog, search, catalog_search', writable: false, extraProperties: ['computed' => true])]
-    public string $visibility = 'catalog_search';
+    public ?string $visibility = null;
 
     #[Groups(['product:read'])]
     #[ApiProperty(description: 'Stock status: in_stock or out_of_stock', writable: false, extraProperties: ['computed' => true])]
@@ -336,7 +336,7 @@ class Product extends CrudResource
     public ?array $websiteIds = null;
 
     #[ApiProperty(description: 'Whether product is enabled', writable: false, extraProperties: ['computed' => true])]
-    public bool $isActive = true;
+    public ?bool $isActive = null;
 
     /** @var array|null Stock data: {qty: float, is_in_stock: bool} */
     #[ApiProperty(description: 'Stock data for write operations', readable: false)]

@@ -32,7 +32,7 @@ trait ModelPersistenceTrait
         try {
             $model->save();
         } catch (\Throwable $e) {
-            throw new UnprocessableEntityHttpException("Failed to {$entityLabel}: " . $e->getMessage());
+            throw $this->persistenceError($e, $entityLabel);
         }
     }
 
@@ -44,8 +44,20 @@ trait ModelPersistenceTrait
         try {
             $model->delete();
         } catch (\Throwable $e) {
-            throw new UnprocessableEntityHttpException("Failed to {$entityLabel}: " . $e->getMessage());
+            throw $this->persistenceError($e, $entityLabel);
         }
+    }
+
+    /**
+     * Log the original failure and build a client-safe 422. Only messages from
+     * our own Mage_Core_Exception (validation-style, deliberately user-facing)
+     * are surfaced; raw DB/driver text is never leaked to the response body.
+     */
+    private function persistenceError(\Throwable $e, string $entityLabel): UnprocessableEntityHttpException
+    {
+        Mage::logException($e instanceof \Exception ? $e : new \Exception($e->getMessage(), 0, $e));
+        $detail = $e instanceof \Mage_Core_Exception ? ': ' . $e->getMessage() : '';
+        return new UnprocessableEntityHttpException("Failed to {$entityLabel}{$detail}");
     }
 
     /**

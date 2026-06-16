@@ -292,7 +292,11 @@ class OrderService
         }
 
         if ($since) {
-            $collection->addFieldToFilter('updated_at', ['gteq' => $since]);
+            // updated_at is stored in UTC; normalize the client-supplied value
+            // so a local-offset ISO string doesn't skew the filter boundary.
+            $collection->addFieldToFilter('updated_at', [
+                'gteq' => \Mage::app()->getLocale()->formatDateForDb($since),
+            ]);
         }
 
         $resource = \Mage::getSingleton('core/resource');

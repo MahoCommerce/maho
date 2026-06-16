@@ -84,12 +84,10 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             }
         }
 
-        $product = \Mage::getModel('catalog/product')->load($id);
-        if (!$product->getId()) {
+        $dto = $this->loadVisibleProductDto($id);
+        if ($dto === null) {
             return null;
         }
-
-        $dto = $this->toDto($product);
 
         \Mage::app()->getCache()->save(
             (string) json_encode($dto->toArray()),
@@ -115,8 +113,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // returns empty and getMediaGalleryImages() is null. Re-load by ID to
         // get the full product surface (custom options, media gallery, type
         // instance data) the detail DTO needs.
-        $product = \Mage::getModel('catalog/product')->load((int) $product->getId());
-        return $this->toDto($product);
+        return $this->loadVisibleProductDto((int) $product->getId());
     }
 
     /**
@@ -133,7 +130,26 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
         // Same as getProductBySku: collection->getFirstItem() doesn't load
         // custom options or media gallery. Do a full load by id.
-        $product = \Mage::getModel('catalog/product')->load((int) $row->getId());
+        return $this->loadVisibleProductDto((int) $row->getId());
+    }
+
+    /**
+     * Full-load a product scoped to the current store and return its detail
+     * DTO, or null when it isn't enabled. Single-item lookups (by id, sku,
+     * barcode) are public reads, so they must apply the same STATUS_ENABLED
+     * filter the collection paths do — otherwise a disabled product the
+     * listing hides could be fetched by guessing its identifier.
+     */
+    private function loadVisibleProductDto(int $id): ?Product
+    {
+        $product = \Mage::getModel('catalog/product')
+            ->setStoreId(StoreContext::getStoreId())
+            ->load($id);
+        if (!$product->getId()
+            || (int) $product->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED
+        ) {
+            return null;
+        }
         return $this->toDto($product);
     }
 

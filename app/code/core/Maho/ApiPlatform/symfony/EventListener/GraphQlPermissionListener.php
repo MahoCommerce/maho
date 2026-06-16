@@ -22,7 +22,13 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  * Enforces granular API permissions for GraphQL requests.
  *
  * Runs after authentication (priority 8) but before API Platform routing.
- * Only applies to ROLE_API_USER tokens — customers and admins bypass.
+ * ROLE_API_USER tokens are checked against their granular permissions.
+ * Admin tokens may read (parity with REST), but write/create mutations are
+ * rejected here: the storefront GraphQL entrypoint is a single request with no
+ * per-operation resource, so AdminAclListener (which gates admin REST calls via
+ * ADMIN_RESOURCE) can't fire — without this gate a restricted admin could issue
+ * ROLE_API_USER mutations (refunds, shipments, stock) the admin ACL forbids.
+ * Customer tokens bypass and are gated by the per-operation security expressions.
  */
 #[AsEventListener(event: KernelEvents::REQUEST, priority: 7)]
 class GraphQlPermissionListener
@@ -47,12 +53,19 @@ class GraphQlPermissionListener
         }
 
         $user = $token->getUser();
-        if (!$user instanceof ApiUser || !$user->isApiUser()) {
+        if (!$user instanceof ApiUser) {
             return;
         }
 
-        // 'all' permission grants unrestricted access
-        if ($user->hasPermission('all')) {
+        $isAdmin = $user->getAdminId() !== null;
+        if (!$isAdmin && !$user->isApiUser()) {
+            // Customer tokens are gated by the per-operation security expressions.
+            return;
+        }
+
+        // 'all' permission grants API users unrestricted access. Admin tokens are
+        // never short-circuited here — their mutations are rejected below.
+        if (!$isAdmin && $user->hasPermission('all')) {
             return;
         }
 
@@ -73,6 +86,21 @@ class GraphQlPermissionListener
 
         $requiredPermissions = $this->registry->resolveGraphQlPermissions($query);
         if ($requiredPermissions === []) {
+            return;
+        }
+
+        if ($isAdmin) {
+            // Reads are allowed; any write/create mutation must go through
+            // /api/admin/graphql, where AdminAcl::checkResource() applies the
+            // admin's ADMIN_RESOURCE ACL per operation.
+            foreach ($requiredPermissions as $permission) {
+                $operation = explode('/', $permission)[1] ?? 'access';
+                if ($operation !== 'read') {
+                    throw new AccessDeniedHttpException(
+                        'Admin tokens must use the /api/admin/graphql endpoint for write operations.',
+                    );
+                }
+            }
             return;
         }
 

@@ -211,8 +211,13 @@ class JwtService
         $payload->aud = $claims->get('aud');
         $payload->jti = $claims->get('jti');
         $payload->sub = $claims->get('sub');
-        $payload->iat = $claims->get('iat');
-        $payload->exp = $claims->get('exp');
+        // lcobucci hydrates registered date claims (iat/exp/nbf) as
+        // DateTimeImmutable; expose them as unix timestamps so callers can treat
+        // them as ints — casting the object to int throws \Error.
+        $iat = $claims->get('iat');
+        $exp = $claims->get('exp');
+        $payload->iat = $iat instanceof \DateTimeInterface ? $iat->getTimestamp() : $iat;
+        $payload->exp = $exp instanceof \DateTimeInterface ? $exp->getTimestamp() : $exp;
 
         foreach (['customer_id', 'admin_id', 'api_user_id', 'email', 'username', 'type', 'roles', 'permissions', 'allowed_store_ids'] as $claim) {
             if ($claims->has($claim)) {

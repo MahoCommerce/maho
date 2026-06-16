@@ -93,10 +93,12 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             'name' => $data->name,
             'type_id' => $data->type ?: Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
             'attribute_set_id' => (int) Mage::getModel('catalog/product')->getDefaultAttributeSetId(),
-            'status' => $data->isActive
+            'status' => ($data->isActive ?? true)
                 ? Mage_Catalog_Model_Product_Status::STATUS_ENABLED
                 : Mage_Catalog_Model_Product_Status::STATUS_DISABLED,
-            'visibility' => self::VISIBILITY_MAP[$data->visibility] ?? Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH,
+            'visibility' => $data->visibility !== null
+                ? (self::VISIBILITY_MAP[$data->visibility] ?? Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+                : Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH,
             'tax_class_id' => 0,
         ]);
 
@@ -145,13 +147,15 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             $product->setSku($data->sku);
         }
 
-        $product->setStatus(
-            $data->isActive
-                ? Mage_Catalog_Model_Product_Status::STATUS_ENABLED
-                : Mage_Catalog_Model_Product_Status::STATUS_DISABLED,
-        );
+        if ($data->isActive !== null) {
+            $product->setStatus(
+                $data->isActive
+                    ? Mage_Catalog_Model_Product_Status::STATUS_ENABLED
+                    : Mage_Catalog_Model_Product_Status::STATUS_DISABLED,
+            );
+        }
 
-        if ($data->visibility !== 'catalog_search' || isset($oldData['visibility'])) {
+        if ($data->visibility !== null) {
             $product->setVisibility(
                 self::VISIBILITY_MAP[$data->visibility] ?? (int) $oldData['visibility'],
             );
@@ -232,12 +236,14 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         if ($data->metaKeywords !== null) {
             $attrData['meta_keyword'] = $data->metaKeywords;
         }
-        if ($data->visibility !== 'catalog_search' || isset($oldData['visibility'])) {
+        if ($data->visibility !== null) {
             $attrData['visibility'] = self::VISIBILITY_MAP[$data->visibility] ?? (int) $oldData['visibility'];
         }
-        $attrData['status'] = $data->isActive
-            ? Mage_Catalog_Model_Product_Status::STATUS_ENABLED
-            : Mage_Catalog_Model_Product_Status::STATUS_DISABLED;
+        if ($data->isActive !== null) {
+            $attrData['status'] = $data->isActive
+                ? Mage_Catalog_Model_Product_Status::STATUS_ENABLED
+                : Mage_Catalog_Model_Product_Status::STATUS_DISABLED;
+        }
 
         if ($data->barcode !== null) {
             $attrData['barcode'] = $data->barcode;
@@ -349,12 +355,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
     {
         $categoryIds = array_map('intval', $categoryIds);
         $product->setCategoryIds($categoryIds);
-
-        try {
-            $product->save();
-        } catch (\Exception $e) {
-            Mage::logException($e);
-        }
+        $this->safeSave($product, 'assign categories');
     }
 
     private function updateStockData(Mage_Catalog_Model_Product $product, Product $data): void
@@ -398,12 +399,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $stockItem->setManageStock(1);
-
-        try {
-            $stockItem->save();
-        } catch (\Exception $e) {
-            Mage::logException($e);
-        }
+        $this->safeSave($stockItem, 'update stock');
     }
 
     /**
@@ -515,6 +511,11 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $data->id = (int) $product->getId();
         $data->status = $product->getStatus() == Mage_Catalog_Model_Product_Status::STATUS_ENABLED
             ? 'enabled' : 'disabled';
+        // Reflect the persisted state back: the input fields are nullable (a
+        // partial update may omit them), so the response must echo the product,
+        // not whatever the client did or didn't send.
+        $data->isActive = $data->status === 'enabled';
+        $data->visibility = array_search((int) $product->getVisibility(), self::VISIBILITY_MAP, true) ?: 'catalog_search';
         $data->createdAt = $product->getCreatedAt();
         $data->updatedAt = $product->getUpdatedAt();
         return $data;
