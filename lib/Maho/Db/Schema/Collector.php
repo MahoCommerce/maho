@@ -66,8 +66,7 @@ final class Collector
         // already keeps one when nothing covers). Legacy installs lack these
         // on Postgres and let InnoDB silently add them on MySQL; the
         // declarative schema makes the indexes explicit on every engine,
-        // which is the more portable shape. Schema-parity allowlist absorbs
-        // the diff against main until the legacy install paths go away.
+        // which is the more portable shape.
 
         return [$schema, $contributors];
     }
