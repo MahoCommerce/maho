@@ -118,4 +118,46 @@ describe('Idempotency listener', function (): void {
         expect(apiHeader($second, 'X-Idempotency-Replayed'))->toBeNull();
     });
 
+    it('does not replay a failed (4xx) response so a corrected retry can run', function (): void {
+        $token = serviceToken(['all']);
+        $key = 'pest-4xx-' . substr(uniqid(), -10);
+
+        // First attempt: invalid body (missing identifier) → expect a 4xx.
+        $bad = apiPost(
+            '/api/rest/v2/cms-pages',
+            ['title' => 'No identifier'],
+            $token,
+            ['X-Idempotency-Key' => $key],
+        );
+
+        if ($bad['status'] < 400 || $bad['status'] >= 500) {
+            $this->markTestSkipped('cms-pages validation returned ' . $bad['status']);
+            return;
+        }
+
+        // Retry with the SAME key but a corrected body. The 4xx must not have
+        // been stored, so this executes fresh rather than replaying the failure.
+        $identifier = 'idem-4xx-' . substr(uniqid(), -8);
+        $good = apiPost(
+            '/api/rest/v2/cms-pages',
+            [
+                'identifier' => $identifier,
+                'title' => 'Corrected',
+                'content' => '<p>ok</p>',
+                'isActive' => true,
+                'stores' => ['all'],
+            ],
+            $token,
+            ['X-Idempotency-Key' => $key],
+        );
+
+        expect(apiHeader($good, 'X-Idempotency-Replayed'))->toBeNull();
+        expect(in_array($good['status'], [200, 201], true))->toBeTrue();
+
+        $createdId = $good['json']['id'] ?? null;
+        if ($createdId !== null) {
+            trackCreated('cms_page', (int) $createdId);
+        }
+    });
+
 });

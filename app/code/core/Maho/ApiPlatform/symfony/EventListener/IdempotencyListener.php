@@ -157,8 +157,11 @@ class IdempotencyListener
         $scope = $request->attributes->get('_idempotency_scope');
         $response = $event->getResponse();
 
-        // Do not store server errors, transient failures should be retryable
-        if ($response->getStatusCode() >= 500) {
+        // Only store successful responses. Replaying a 4xx (validation error,
+        // conflict) would return the stale failure after the client corrected
+        // the request; 5xx is transient. Both must stay retryable.
+        $statusCode = $response->getStatusCode();
+        if ($statusCode < 200 || $statusCode >= 300) {
             return;
         }
 

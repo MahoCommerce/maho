@@ -14,12 +14,16 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\StoreContext;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Product State Provider - Fetches product data for API Platform
  */
 final class ProductProvider extends \Maho\ApiPlatform\Provider
 {
+    /** Whitelist of fields the client may sort by; everything else is rejected to keep ORDER BY injection-safe. */
+    private const SORTABLE_FIELDS = ['name', 'price', 'special_price', 'created_at', 'updated_at', 'position', 'sku', 'entity_id'];
+
     private ?\Mage_Catalog_Model_Product_Media_Config $mediaConfig = null;
 
     private function getMediaConfig(): \Mage_Catalog_Model_Product_Media_Config
@@ -315,8 +319,12 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         if (!empty($requestFilters['sortBy'])) {
+            $sortBy = (string) $requestFilters['sortBy'];
+            if (!in_array($sortBy, self::SORTABLE_FIELDS, true)) {
+                throw new BadRequestHttpException('Invalid sortBy field. Allowed: ' . implode(', ', self::SORTABLE_FIELDS));
+            }
             $sortDir = ($requestFilters['sortDir'] ?? 'asc') === 'desc' ? 'DESC' : 'ASC';
-            $collection->setOrder($requestFilters['sortBy'], $sortDir);
+            $collection->setOrder($sortBy, $sortDir);
         } else {
             $collection->setOrder('name', 'ASC');
         }

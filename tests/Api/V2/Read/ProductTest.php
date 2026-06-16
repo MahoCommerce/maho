@@ -368,4 +368,14 @@ describe('GET /api/rest/v2/products - Price Filtering', function (): void {
         }
     });
 
+    it('rejects a sortBy field that is not allowlisted', function (): void {
+        $response = apiGet('/api/rest/v2/products?sortBy=' . urlencode('(SELECT 1)'));
+        expect($response['status'])->toBe(400);
+    });
+
+    it('accepts an allowlisted sortBy field', function (): void {
+        $response = apiGet('/api/rest/v2/products?pageSize=5&sortBy=name&sortDir=asc');
+        expect($response['status'])->toBe(200);
+    });
+
 });
