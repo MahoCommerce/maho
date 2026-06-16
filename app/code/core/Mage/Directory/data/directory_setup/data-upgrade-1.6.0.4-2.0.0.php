@@ -6,13 +6,17 @@
  * @package Mage_Directory
  */
 
+declare(strict_types=1);
+
 /** @var Mage_Core_Model_Resource_Setup $this */
 $installer = $this;
 $installer->startSetup();
 
 /**
  * Fill table directory/country_name for en_US locale.
- * Schema for directory_country_name lives in etc/db_schema.php (declarative).
+ * Schema for directory_country_name lives in sql/schema.php (declarative).
+ * insertOnDuplicate keeps this re-runnable on stores already seeded by the
+ * retired maho_setup script.
  */
 $data = [
     ['AC', 'Ascension Island'], ['AD', 'Andorra'], ['AE', 'United Arab Emirates'],
@@ -104,13 +108,13 @@ $data = [
     ['ZW', 'Zimbabwe'], ['ZZ', 'Unknown Region'],
 ];
 
+$table = $installer->getTable('directory/country_name');
 foreach ($data as $row) {
-    $bind = [
+    $installer->getConnection()->insertOnDuplicate($table, [
         'locale'     => 'en_US',
         'country_id' => $row[0],
         'name'       => $row[1],
-    ];
-    $installer->getConnection()->insert($installer->getTable('directory/country_name'), $bind);
+    ], ['name']);
 }
 
 $installer->endSetup();
