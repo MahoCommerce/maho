@@ -220,7 +220,9 @@ class Mysql extends AbstractPdoAdapter
             $params['driverOptions'] = $driverOptions;
         }
 
-        $this->_connection = \Doctrine\DBAL\DriverManager::getConnection($params);
+        $configuration = new \Doctrine\DBAL\Configuration();
+        $configuration->setMiddlewares([new \Maho\Db\Driver\MariaDbPlatformMiddleware()]);
+        $this->_connection = \Doctrine\DBAL\DriverManager::getConnection($params, $configuration);
         $this->_debugStat(self::DEBUG_CONNECT, '');
 
         /** @link http://bugs.mysql.com/bug.php?id=18551 */
@@ -4053,16 +4055,6 @@ class Mysql extends AbstractPdoAdapter
     public function decodeVarbinary(mixed $value): mixed
     {
         return $value;
-    }
-
-    /**
-     * Returns date that fits into TYPE_DATETIME range and is suggested to act as default 'zero' value
-     * for a column for current RDBMS.
-     */
-    #[\Override]
-    public function getSuggestedZeroDate(): string
-    {
-        return '0000-00-00 00:00:00';
     }
 
     /**

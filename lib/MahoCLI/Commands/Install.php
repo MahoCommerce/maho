@@ -259,7 +259,15 @@ class Install extends BaseMahoCommand
                 if ($dbEngine === 'pgsql') {
                     $pdo->exec('SET session_replication_role = DEFAULT');
                     $output->writeln('<info>Updating PostgreSQL sequences...</info>');
-                    $this->updatePostgresSequences($pdo);
+                    $seqLog = function (string $message, string $level = 'info') use ($output) {
+                        $tag = match ($level) {
+                            'error' => 'error',
+                            'warning' => 'comment',
+                            default => 'info',
+                        };
+                        $output->writeln("  <{$tag}>{$message}</{$tag}>");
+                    };
+                    \MahoCLI\Helper\SampleDataImporter::bumpPostgresSequences($pdo, $seqLog);
                 }
 
             } catch (\PDOException $e) {
@@ -337,9 +345,25 @@ class Install extends BaseMahoCommand
     {
         $output->writeln('<comment>Force installation requested - clearing existing installation...</comment>');
 
-        // Remove local.xml if it exists (use hardcoded path since Mage isn't initialized yet)
         $localXmlPath = getcwd() . '/app/etc/local.xml';
         if (file_exists($localXmlPath)) {
+            // Flush the configured cache backend (could be Redis/Memcached, not
+            // just files on disk) using the existing installation's config,
+            // before local.xml is removed. The install bootstraps before
+            // installDb runs, so stale cached config would make it query tables
+            // on the now-empty database before they are recreated. Best-effort:
+            // a prior install too broken to boot must not block the reinstall.
+            // Mage::reset() then leaves a clean slate for the installer's own
+            // bootstrap.
+            try {
+                Mage::app()->getCache()->flush();
+                $output->writeln('<info>Flushed existing cache</info>');
+            } catch (\Throwable) {
+                // ignore: the prior install may be unbootable
+            } finally {
+                Mage::reset();
+            }
+
             if (is_writable($localXmlPath)) {
                 unlink($localXmlPath);
                 $output->writeln('<info>Removed existing local.xml</info>');
@@ -446,50 +470,6 @@ class Install extends BaseMahoCommand
         Mage::unregister('_helper/eav');
     }
 
-    /**
-     * Update PostgreSQL sequences to be higher than the max ID in each table
-     * This is necessary after importing data with explicit IDs
-     */
-    private function updatePostgresSequences(\PDO $pdo): void
-    {
-        // Get all sequences in the database
-        $stmt = $pdo->query("
-            SELECT
-                seq.relname as sequence_name,
-                tab.relname as table_name,
-                col.attname as column_name
-            FROM pg_class seq
-            JOIN pg_depend dep ON seq.oid = dep.objid
-            JOIN pg_class tab ON dep.refobjid = tab.oid
-            JOIN pg_attribute col ON col.attrelid = tab.oid AND col.attnum = dep.refobjsubid
-            WHERE seq.relkind = 'S'
-            AND dep.deptype = 'a'
-            ORDER BY seq.relname
-        ");
-
-        $sequences = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        foreach ($sequences as $seq) {
-            $sequenceName = $seq['sequence_name'];
-            $tableName = $seq['table_name'];
-            $columnName = $seq['column_name'];
-
-            try {
-                // Get the max ID from the table
-                $maxStmt = $pdo->query("SELECT COALESCE(MAX(\"{$columnName}\"), 0) as max_id FROM \"{$tableName}\"");
-                $maxId = (int) $maxStmt->fetchColumn();
-
-                if ($maxId > 0) {
-                    // Set the sequence to max_id + 1
-                    $pdo->exec("SELECT setval('\"{$sequenceName}\"', {$maxId}, true)");
-                }
-            } catch (\PDOException $e) {
-                // Skip if table doesn't exist or other errors
-                continue;
-            }
-        }
-    }
-
     private function importBlogPosts(string $sampleDataDir, OutputInterface $output): void
     {
         if (!Mage::getConfig()->getModuleConfig('Maho_Blog') || !Mage::helper('core')->isModuleEnabled('Maho_Blog')) {
@@ -565,8 +545,14 @@ class Install extends BaseMahoCommand
             });
             $output->writeln('');
         } else {
-            // MySQL - direct execution
-            $pdo->exec($sql);
+            // MySQL - no dialect conversion needed, but still split + report
+            // progress so big imports don't look hung.
+            $converter->executeStatements($pdo, $sql, function ($current, $total) use ($output) {
+                if ($current === $total || $current % 500 === 0) {
+                    $output->write("\r<comment>  Progress: {$current}/{$total} statements...</comment>");
+                }
+            }, applyConflictHandling: false);
+            $output->writeln('');
         }
     }
 }

@@ -7,17 +7,10 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Usa>
-            <version>1.6.0.3</version>
+            <version>2.0.0</version>
         </Mage_Usa>
     </modules>
     <global>
-        <resources>
-            <usa_setup>
-                <setup>
-                    <module>Mage_Usa</module>
-                </setup>
-            </usa_setup>
-        </resources>
         <models>
             <usa>
                 <class>Mage_Usa_Model</class>

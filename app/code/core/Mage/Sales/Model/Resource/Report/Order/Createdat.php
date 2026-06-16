@@ -72,7 +72,7 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
                 // convert dates from UTC to current admin timezone
                 'period'                         => $periodExpr,
                 'store_id'                       => 'o.store_id',
-                'order_status'                   => 'o.status',
+                'order_status'                   => $adapter->getIfNullSql('o.status', "''"),
                 'orders_count'                   => new Maho\Db\Expr('COUNT(o.entity_id)'),
                 'total_qty_ordered'              => new Maho\Db\Expr('SUM(oi.total_qty_ordered)'),
                 'total_qty_invoiced'             => new Maho\Db\Expr('SUM(oi.total_qty_invoiced)'),

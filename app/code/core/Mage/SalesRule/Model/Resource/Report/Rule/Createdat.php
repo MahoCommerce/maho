@@ -69,7 +69,7 @@ class Mage_SalesRule_Model_Resource_Report_Rule_Createdat extends Mage_Reports_M
             $columns = [
                 'period'                  => $periodExpr,
                 'store_id'                => 'store_id',
-                'order_status'            => 'status',
+                'order_status'            => $adapter->getIfNullSql('status', "''"),
                 'coupon_code'             => 'coupon_code',
                 'rule_name'               => 'coupon_rule_name',
                 'coupon_uses'             => 'COUNT(entity_id)',
