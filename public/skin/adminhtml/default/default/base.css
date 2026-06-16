@@ -5037,42 +5037,34 @@ small {
 }
 
 .grid tr.filter .range .range-line {
-    width: 125px
-}
-
-.grid tr.filter .range.filter-range .range-line {
-    width: initial
+    display: flex;
+    align-items: center;
+    width: auto
 }
 
 .grid tr.filter .range .label {
+    flex: 0 0 auto;
     font-weight: 400;
-    width: 40px;
-    padding: var(--maho-space-2)
-}
-
-.grid tr.filter .range.filter-range .label {
-    display: none
+    width: 0.625rem;
+    padding: 0 var(--maho-space-2);
+    font-size: var(--maho-text-lg);
+    color: var(--maho-ink-muted);
+    text-align: left
 }
 
 .grid tr.filter .range div.date {
-    min-width: 140px;
     display: flex;
     align-items: center
 }
 
-.grid tr.filter .range div.date .label {
-    width: auto;
-    padding: 0 var(--maho-space-2) 0 0;
-    font-size: var(--maho-text-lg);
-    color: var(--maho-ink-muted)
+.grid tr.filter .range input,.grid tr.filter .range select {
+    flex: 1 1 auto;
+    width: 0!important;
+    min-width: 3.5rem
 }
 
 .grid tr.filter .range input[type=date],.grid tr.filter .range input[type=datetime-local] {
-    width: 116px!important
-}
-
-.grid tr.filter .range input,.grid tr.filter .range select {
-    width: 75px!important
+    min-width: 8rem
 }
 
 .grid tr.filter .range select {
