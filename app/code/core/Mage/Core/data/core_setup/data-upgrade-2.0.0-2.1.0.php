@@ -1,13 +1,13 @@
 <?php
 
 /**
- * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Core
  */
 
 /**
- * Convert remaining PHP-serialized data in various tables to JSON format
+ * Config and data normalization: log level rename and PHP serialize → JSON conversions.
  */
 
 /** @var Mage_Core_Model_Resource_Setup $this */
@@ -16,6 +16,103 @@ $installer->startSetup();
 
 $connection = $installer->getConnection();
 $coreHelper = Mage::helper('core');
+$configTable = $installer->getTable('core/config_data');
+
+// 1. Migrate dev/log/max_level (Zend_Log levels 0-7) to dev/log/min_level (Monolog levels).
+$select = $connection->select()
+    ->from($configTable)
+    ->where('path = ?', 'dev/log/max_level');
+
+foreach ($connection->fetchAll($select) as $config) {
+    $oldValue = (int) $config['value'];
+    $newValue = match ($oldValue) {
+        0 => 600, // Emergency (was EMERG)
+        1 => 550, // Alert
+        2 => 500, // Critical (was CRIT)
+        3 => 400, // Error (was ERR)
+        4 => 300, // Warning (was WARN)
+        5 => 250, // Notice
+        6 => 200, // Info
+        7 => 100, // Debug
+        default => 100, // Default to Debug
+    };
+
+    $connection->insertOnDuplicate(
+        $configTable,
+        [
+            'scope' => $config['scope'],
+            'scope_id' => $config['scope_id'],
+            'path' => 'dev/log/min_level',
+            'value' => $newValue,
+        ],
+        ['value'],
+    );
+}
+
+$connection->delete($configTable, ['path = ?' => 'dev/log/max_level']);
+
+// 2. Convert rule conditions/actions from PHP serialize to JSON.
+$ruleTables = [
+    ['table' => 'salesrule/rule',                'pk' => 'rule_id',        'columns' => ['conditions_serialized', 'actions_serialized']],
+    ['table' => 'catalogrule/rule',              'pk' => 'rule_id',        'columns' => ['conditions_serialized', 'actions_serialized']],
+    ['table' => 'catalog/category_dynamic_rule', 'pk' => 'rule_id',        'columns' => ['conditions_serialized']],
+    ['table' => 'cataloglinkrule/rule',          'pk' => 'rule_id',        'columns' => ['source_conditions_serialized', 'target_conditions_serialized']],
+    ['table' => 'customersegmentation/segment',  'pk' => 'segment_id',     'columns' => ['conditions_serialized']],
+    ['table' => 'payment/restriction',           'pk' => 'restriction_id', 'columns' => ['conditions_serialized']],
+];
+
+$connection->beginTransaction();
+try {
+    foreach ($ruleTables as $tableConfig) {
+        try {
+            $tableName = $installer->getTable($tableConfig['table']);
+        } catch (Exception $e) {
+            continue;
+        }
+
+        if (!$connection->isTableExists($tableName)) {
+            continue;
+        }
+
+        $pk = $tableConfig['pk'];
+        $select = $connection->select()->from($tableName, array_merge([$pk], $tableConfig['columns']));
+        $rows = $connection->fetchAll($select);
+
+        foreach ($rows as $row) {
+            $updates = [];
+            foreach ($tableConfig['columns'] as $column) {
+                $value = $row[$column];
+                if (empty($value)) {
+                    continue;
+                }
+
+                // Skip if already valid JSON
+                if (json_validate($value)) {
+                    continue;
+                }
+
+                $data = @unserialize($value, ['allowed_classes' => false]);
+                if (is_array($data)) {
+                    $updates[$column] = $coreHelper->jsonEncode($data);
+                } else {
+                    throw new RuntimeException(
+                        "Could not unserialize {$column} in {$tableName} row {$row[$pk]}",
+                    );
+                }
+            }
+
+            if (!empty($updates)) {
+                $connection->update($tableName, $updates, [$pk . ' = ?' => $row[$pk]]);
+            }
+        }
+    }
+    $connection->commit();
+} catch (Exception $e) {
+    $connection->rollBack();
+    throw $e;
+}
+
+// 3. Convert remaining PHP-serialized data in various tables to JSON.
 $batchSize = 1000;
 
 /**

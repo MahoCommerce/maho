@@ -82,7 +82,7 @@ class Migrate extends BaseMahoCommand
             // Enumerated before applying: the per-phase counts below let the CI
             // idempotency check assert a second run applies zero scripts, not
             // just zero declarative statements.
-            $pendingScripts = ['schema' => 0, 'data' => 0, 'maho' => 0];
+            $pendingScripts = ['schema' => 0, 'data' => 0];
             foreach (Mage_Core_Model_Resource_Setup::getAllPendingUpdates() as $updates) {
                 foreach ($updates as $update) {
                     $pendingScripts[$update['type']]++;
@@ -94,9 +94,6 @@ class Migrate extends BaseMahoCommand
 
             Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
             $output->writeln(sprintf('✓ Applied data updates (%d script(s))', $pendingScripts['data']));
-
-            Mage_Core_Model_Resource_Setup::applyAllMahoUpdates();
-            $output->writeln(sprintf('✓ Applied Maho updates (%d script(s))', $pendingScripts['maho']));
 
             // unbanUse must precede saveCache(): saveCache() is a no-op while
             // config cache use is banned. The finally covers the error path.

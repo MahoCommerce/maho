@@ -1,7 +1,7 @@
 <?php
 
 /**
- * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Core
  */
@@ -13,6 +13,15 @@ $installer = $this;
 $installer->startSetup();
 
 $connection = $installer->getConnection();
+
+// Drop the legacy persistent-cart table and quote flag (both safe if already absent).
+$connection->dropTable($installer->getTable('persistent_session'));
+$connection->dropColumn($installer->getTable('sales/quote'), 'is_persistent');
+
+// Drop the orphaned maho_version column left by the retired maho_setup mechanism.
+// Absent on fresh installs (no longer declared in sql/schema.php), present on
+// migrated stores; dropColumn is a no-op when it doesn't exist, so both converge.
+$connection->dropColumn($installer->getTable('core/resource'), 'maho_version');
 
 // Convert every physical TIMESTAMP column to DATETIME for cross-engine consistency and to
 // unblock surgical modifyColumn via DBAL (Doctrine's column model conflates TIMESTAMP and
@@ -26,23 +35,28 @@ $connection = $installer->getConnection();
 //     Detected without regex: a leading "'" can't appear in a real datetime expression, so
 //     "doesn't start with quote" + "contains current_timestamp" identifies it on both
 //     MariaDB ("current_timestamp()") and MySQL 8 ("CURRENT_TIMESTAMP").
-//   - Every other default is dropped (column becomes NULL DEFAULT NULL). That covers
-//     legacy '0000-00-00 00:00:00' sentinels which modern sql_mode rejects as DATETIME
-//     defaults, plus rare literal datetime defaults — Mage_Core_Model_Abstract::_beforeSave
-//     populates timestamp fields anyway, so the DB-level default is redundant for those.
-//     Existing row values are preserved by ALTER regardless.
+//   - Original nullability is preserved. A NOT NULL column stays NOT NULL with no DEFAULT
+//     (modern sql_mode rejects legacy '0000-00-00 00:00:00' sentinels as DATETIME defaults,
+//     and Mage_Core_Model_Abstract::_beforeSave populates timestamp fields anyway). Forcing
+//     it nullable would fight a NOT NULL declarative target.
+//   - A nullable column with any other default becomes NULL DEFAULT NULL.
 //   - ON UPDATE CURRENT_TIMESTAMP is preserved where present.
 //
 // PgSQL/SQLite have no TIMESTAMP/DATETIME distinction, so this is a MySQL-only conversion.
-// Generated columns can't be retyped via plain MODIFY COLUMN — would require dropping and
-// recomputing the GENERATED expression, which we can't do generically here. Skip them; the
-// surgical modifyColumn path also refuses them via _assertColumnIsSafeToModify.
+// Virtual/stored generated columns can't be retyped via plain MODIFY COLUMN — would require
+// dropping and recomputing the GENERATED expression, which we can't do generically here. Skip
+// them; the surgical modifyColumn path also refuses them via _assertColumnIsSafeToModify. The
+// filter targets only real generated columns ("VIRTUAL GENERATED"/"STORED GENERATED"); MySQL 8
+// also tags any expression default (e.g. DEFAULT CURRENT_TIMESTAMP) as "DEFAULT_GENERATED",
+// and those must still be converted, so a blanket "%GENERATED%" exclusion would wrongly skip
+// every created_at-style column.
 if ($connection instanceof \Maho\Db\Adapter\Pdo\Mysql) {
     $columns = $connection->fetchAll(
         'SELECT TABLE_NAME, COLUMN_NAME, IS_NULLABLE, COLUMN_DEFAULT, COLUMN_COMMENT, EXTRA '
         . 'FROM INFORMATION_SCHEMA.COLUMNS '
         . 'WHERE TABLE_SCHEMA = DATABASE() AND DATA_TYPE = \'timestamp\' '
-        . 'AND EXTRA NOT LIKE \'%GENERATED%\' '
+        . 'AND EXTRA NOT LIKE \'%VIRTUAL GENERATED%\' '
+        . 'AND EXTRA NOT LIKE \'%STORED GENERATED%\' '
         . 'ORDER BY TABLE_NAME, ORDINAL_POSITION',
     );
 
@@ -52,11 +66,14 @@ if ($connection instanceof \Maho\Db\Adapter\Pdo\Mysql) {
             && $rawDefault !== ''
             && $rawDefault[0] !== "'"
             && stripos($rawDefault, 'current_timestamp') !== false;
+        $notNull = strtoupper((string) $col['IS_NULLABLE']) === 'NO';
 
         $clauses = ['DATETIME'];
         if ($isCurrentTimestamp) {
-            $clauses[] = strtoupper((string) $col['IS_NULLABLE']) === 'NO' ? 'NOT NULL' : 'NULL';
+            $clauses[] = $notNull ? 'NOT NULL' : 'NULL';
             $clauses[] = 'DEFAULT CURRENT_TIMESTAMP';
+        } elseif ($notNull) {
+            $clauses[] = 'NOT NULL';
         } else {
             $clauses[] = 'NULL DEFAULT NULL';
         }

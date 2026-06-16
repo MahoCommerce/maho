@@ -10195,18 +10195,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/controllers/OnepageController.php
 
 		-
-			rawMessage: 'Parameter #2 $value of method Mage_Core_Model_Resource_Setup::setConfigData() expects string, bool given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/sql/maho_setup/maho-24.10.0.php
-
-		-
-			rawMessage: 'Parameter #2 $value of method Mage_Core_Model_Resource_Setup::setConfigData() expects string, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/sql/maho_setup/maho-24.10.0.php
-
-		-
 			rawMessage: 'Method Mage_Cms_Controller_Router::initControllerRouters() has no return type specified.'
 			identifier: missingType.return
 			count: 1

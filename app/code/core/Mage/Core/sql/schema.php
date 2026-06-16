@@ -18,7 +18,6 @@ return function (Schema $schema): void {
     $resource->addColumn('code', Types::STRING, ['length' => 50]);
     $resource->addColumn('version', Types::STRING, ['length' => 50, 'notnull' => false]);
     $resource->addColumn('data_version', Types::STRING, ['length' => 50, 'notnull' => false]);
-    $resource->addColumn('maho_version', Types::STRING, ['length' => 50, 'notnull' => false]);
     $resource->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('code')->create(),
     );

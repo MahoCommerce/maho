@@ -6,12 +6,27 @@
  * @package Mage_Catalog
  */
 
+declare(strict_types=1);
+
 /** @var Mage_Catalog_Model_Resource_Setup $this */
 $installer = $this;
-
 $installer->startSetup();
 
-// Add meta_robots attribute for categories
+// Dynamic category flag (catalog_category_dynamic_rule table lives in sql/schema.php)
+$installer->addAttribute('catalog_category', 'is_dynamic', [
+    'type'                       => 'int',
+    'group'                      => 'Dynamic Category',
+    'label'                      => 'Is Dynamic Category',
+    'input'                      => 'select',
+    'source'                     => 'eav/entity_attribute_source_boolean',
+    'global'                     => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL,
+    'visible'                    => true,
+    'required'                   => false,
+    'user_defined'               => true,
+    'default'                    => '0',
+]);
+
+// meta_robots for categories
 $installer->addAttribute(Mage_Catalog_Model_Category::ENTITY, 'meta_robots', [
     'type'              => 'varchar',
     'backend'           => '',
@@ -33,7 +48,7 @@ $installer->addAttribute(Mage_Catalog_Model_Category::ENTITY, 'meta_robots', [
     'group'             => 'General Information',
 ]);
 
-// Add meta_robots attribute for products
+// meta_robots for products
 $installer->addAttribute(Mage_Catalog_Model_Product::ENTITY, 'meta_robots', [
     'type'              => 'varchar',
     'backend'           => '',
@@ -57,7 +72,7 @@ $installer->addAttribute(Mage_Catalog_Model_Product::ENTITY, 'meta_robots', [
     'group'             => 'Meta Information',
 ]);
 
-// Add meta_robots attribute to all existing product attribute sets
+// Add meta_robots to every existing product attribute set
 $attributeSetCollection = Mage::getResourceModel('eav/entity_attribute_set_collection')
     ->setEntityTypeFilter($installer->getEntityTypeId('catalog_product'));
 
@@ -77,5 +92,39 @@ foreach ($attributeSetCollection as $attributeSet) {
         );
     }
 }
+
+// GTIN (Global Trade Item Number - encompasses UPC, EAN, ISBN, ITF-14)
+$installer->addAttribute('catalog_product', 'gtin', [
+    'type'                       => 'varchar',
+    'label'                      => 'GTIN/UPC/EAN/Barcode',
+    'input'                      => 'text',
+    'required'                   => false,
+    'sort_order'                 => 4,
+    'global'                     => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL,
+    'searchable'                 => true,
+    'visible_in_advanced_search' => true,
+    'comparable'                 => false,
+    'used_in_product_listing'    => false,
+    'unique'                     => false,
+    'apply_to'                   => '',
+    'group'                      => 'General',
+]);
+
+// MPN (Manufacturer Part Number)
+$installer->addAttribute('catalog_product', 'mpn', [
+    'type'                       => 'varchar',
+    'label'                      => 'MPN (Manufacturer Part Number)',
+    'input'                      => 'text',
+    'required'                   => false,
+    'sort_order'                 => 4,
+    'global'                     => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL,
+    'searchable'                 => true,
+    'visible_in_advanced_search' => true,
+    'comparable'                 => false,
+    'used_in_product_listing'    => false,
+    'unique'                     => false,
+    'apply_to'                   => '',
+    'group'                      => 'General',
+]);
 
 $installer->endSetup();
