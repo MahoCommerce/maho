@@ -299,7 +299,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
      */
     private function assertImageFile(string $path): void
     {
-        $info = @getimagesize($path);
+        $info = @\Maho\Io::getImageSize($path);
         $allowed = [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF, IMAGETYPE_WEBP];
         if ($info === false || !in_array($info[2], $allowed, true)) {
             @unlink($path);

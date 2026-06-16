@@ -56,10 +56,10 @@ class Kernel extends BaseKernel
                 // cross-origin access) is safer than trusting a fabricated one.
                 $baseUrl = (string) \Mage::getStoreConfig('web/secure/base_url');
                 $parsed = parse_url($baseUrl);
-                $corsOrigins = !empty($parsed['host'])
-                    ? ($parsed['scheme'] ?? 'https') . '://' . $parsed['host']
-                        . (isset($parsed['port']) ? ':' . $parsed['port'] : '')
-                    : '';
+                $corsOrigins = empty($parsed['host'])
+                    ? ''
+                    : ($parsed['scheme'] ?? 'https') . '://' . $parsed['host']
+                        . (isset($parsed['port']) ? ':' . $parsed['port'] : '');
             }
             // NelmioCors expects an array of origins. Encode as JSON so the
             // env() resolver can split a comma-separated config value into
