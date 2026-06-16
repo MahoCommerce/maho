@@ -57,6 +57,15 @@ class HttpCacheListener
             return;
         }
 
+        // Admin reads must always be fresh. Never cache them, not even with a
+        // 304 against a privately-cached copy, an admin acting on stale data
+        // is worse than the round-trip saved.
+        if ($this->security->getUser() !== null && $this->security->isGranted('ROLE_ADMIN')) {
+            $response->headers->set('Cache-Control', 'no-store');
+            $response->headers->set('Vary', 'Authorization, Accept, X-Store-Code');
+            return;
+        }
+
         // Generate ETag from response content
         $content = $response->getContent();
         if ($content === false || $content === '') {
