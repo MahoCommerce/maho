@@ -260,9 +260,9 @@ class Migrate extends BaseMahoCommand
         $created = [];
         $droppedReal = [];
         foreach ($sql as $stmt) {
-            if (preg_match('/^\s*CREATE\s+TABLE\s+"?([^"\s(]+)/i', $stmt, $m)) {
+            if (preg_match('/^\s*CREATE\s+TABLE\s+[`"]?([^`"\s(]+)/i', $stmt, $m)) {
                 $created[$m[1]] = true;
-            } elseif (preg_match('/^\s*DROP\s+TABLE\s+"?([^"\s;]+)/i', $stmt, $m)
+            } elseif (preg_match('/^\s*DROP\s+TABLE\s+[`"]?([^`"\s;]+)/i', $stmt, $m)
                 && !str_starts_with($m[1], '__maho_tmp_')
             ) {
                 $droppedReal[$m[1]] = true;
@@ -293,13 +293,13 @@ class Migrate extends BaseMahoCommand
      */
     private function statementTable(string $stmt): ?string
     {
-        if (preg_match('/__maho_tmp_([^"\s;(]+)/i', $stmt, $m)) {
+        if (preg_match('/__maho_tmp_([^`"\s;(]+)/i', $stmt, $m)) {
             return $m[1];
         }
-        if (preg_match('/^\s*(?:CREATE\s+(?:TEMPORARY\s+)?TABLE|DROP\s+TABLE|INSERT\s+INTO|ALTER\s+TABLE)\s+"?([^"\s;(]+)/i', $stmt, $m)) {
+        if (preg_match('/^\s*(?:CREATE\s+(?:TEMPORARY\s+)?TABLE|DROP\s+TABLE|INSERT\s+INTO|ALTER\s+TABLE)\s+[`"]?([^`"\s;(]+)/i', $stmt, $m)) {
             return $m[1];
         }
-        if (preg_match('/^\s*(?:CREATE\s+(?:UNIQUE\s+)?INDEX\s+\S+|DROP\s+INDEX\s+\S+)\s+ON\s+"?([^"\s;(]+)/i', $stmt, $m)) {
+        if (preg_match('/^\s*(?:CREATE\s+(?:UNIQUE\s+)?INDEX\s+\S+|DROP\s+INDEX\s+\S+)\s+ON\s+[`"]?([^`"\s;(]+)/i', $stmt, $m)) {
             return $m[1];
         }
         return null;
@@ -317,18 +317,18 @@ class Migrate extends BaseMahoCommand
         $stmt = trim($stmt);
         $destructive = preg_match('/\bDROP\s+(INDEX|FOREIGN\s+KEY|CONSTRAINT|COLUMN|PRIMARY\s+KEY)\b/i', $stmt) === 1;
 
-        if (preg_match('/^CREATE\s+TABLE\s+"?([^"\s(]+)/i', $stmt, $m)) {
+        if (preg_match('/^CREATE\s+TABLE\s+[`"]?([^`"\s(]+)/i', $stmt, $m)) {
             return ['text' => "create table {$m[1]}", 'destructive' => false];
         }
-        if (preg_match('/^CREATE\s+(UNIQUE\s+)?INDEX\s+"?([^"\s]+?)"?\s+ON\s+"?([^"\s(]+)"?\s*\(([^)]*)\)/i', $stmt, $m)) {
+        if (preg_match('/^CREATE\s+(UNIQUE\s+)?INDEX\s+[`"]?([^`"\s]+?)[`"]?\s+ON\s+[`"]?([^`"\s(]+)[`"]?\s*\(([^)]*)\)/i', $stmt, $m)) {
             $kind = $m[1] !== '' ? 'unique index' : 'index';
             return ['text' => "add {$kind} {$m[2]} on {$m[3]} ({$m[4]})", 'destructive' => false];
         }
-        if (preg_match('/^DROP\s+INDEX\s+"?([^"\s;]+?)"?(?:\s+ON\s+"?([^"\s;]+))?/i', $stmt, $m)) {
+        if (preg_match('/^DROP\s+INDEX\s+[`"]?([^`"\s;]+)[`"]?(?:\s+ON\s+[`"]?([^`"\s;]+))?/i', $stmt, $m)) {
             $on = isset($m[2]) ? " on {$m[2]}" : '';
             return ['text' => "drop index {$m[1]}{$on}", 'destructive' => true];
         }
-        if (preg_match('/^ALTER\s+TABLE\s+"?([^"\s(]+)"?\s+(.+)$/is', $stmt, $m)) {
+        if (preg_match('/^ALTER\s+TABLE\s+[`"]?([^`"\s(]+)[`"]?\s+(.+)$/is', $stmt, $m)) {
             $body = $this->truncate((string) preg_replace('/\s+/', ' ', trim($m[2])), 120);
             return ['text' => "alter {$m[1]}: {$body}", 'destructive' => $destructive];
         }
