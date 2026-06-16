@@ -26,7 +26,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  * Admin tokens may read (parity with REST), but write/create mutations are
  * rejected here: the storefront GraphQL entrypoint is a single request with no
  * per-operation resource, so AdminAclListener (which gates admin REST calls via
- * ADMIN_RESOURCE) can't fire — without this gate a restricted admin could issue
+ * ADMIN_RESOURCE) can't fire, without this gate a restricted admin could issue
  * ROLE_API_USER mutations (refunds, shipments, stock) the admin ACL forbids.
  * Customer tokens bypass and are gated by the per-operation security expressions.
  */
@@ -64,7 +64,7 @@ class GraphQlPermissionListener
         }
 
         // 'all' permission grants API users unrestricted access. Admin tokens are
-        // never short-circuited here — their mutations are rejected below.
+        // never short-circuited here, their mutations are rejected below.
         if (!$isAdmin && $user->hasPermission('all')) {
             return;
         }

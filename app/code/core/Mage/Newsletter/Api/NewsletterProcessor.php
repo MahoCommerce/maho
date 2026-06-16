@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
- * Newsletter Processor — handles subscribe/unsubscribe operations.
+ * Newsletter Processor, handles subscribe/unsubscribe operations.
  *
  * Newsletter has custom subscribe/unsubscribe flows that don't map to standard CRUD,
  * so this extends the base Processor. It uses CrudResource::fromModel() for responses

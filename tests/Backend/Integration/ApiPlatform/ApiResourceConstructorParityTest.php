@@ -14,7 +14,7 @@ uses(MahoBackendTestCase::class);
 // Maho\Config\ApiResource subclasses ApiPlatform\Metadata\ApiResource and
 // re-declares every parent constructor parameter so attribute callers can pass
 // any of them through. PHP attributes can't inherit constructors, so this
-// mirror is manual — and silently goes out of sync if API Platform adds a new
+// mirror is manual, and silently goes out of sync if API Platform adds a new
 // parameter we don't pick up. This test fails loudly when that happens, telling
 // the upgrader exactly which parameter to add.
 it('mirrors every ApiPlatform\\Metadata\\ApiResource constructor parameter', function (): void {

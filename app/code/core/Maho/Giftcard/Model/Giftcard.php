@@ -76,14 +76,14 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             }
 
             // Only fill a default when the field wasn't provided. Explicit null
-            // means "never expires" — both the admin form note ("Leave empty
+            // means "never expires", both the admin form note ("Leave empty
             // for no expiration") and API callers depend on that semantic.
             if (!$this->hasData('expires_at')) {
                 $this->setExpiresAt($helper->calculateExpirationDate());
             }
 
             // Mirror one field to the other when only one is provided, but treat
-            // an explicit 0 as set — a fully-used card created for a refund has
+            // an explicit 0 as set, a fully-used card created for a refund has
             // balance=0 and must not be overwritten with initial_balance. Form
             // posts surface unfilled fields as '' (not null), so check both.
             $balance = $this->getData('balance');

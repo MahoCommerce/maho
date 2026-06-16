@@ -89,7 +89,7 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
 
         $this->safeSave($option, 'create bundle option');
 
-        // Register product in Mage registry — Selection::_afterSave() requires it
+        // Register product in Mage registry, Selection::_afterSave() requires it
 
         if (!Mage::registry('product')) {
             Mage::register('product', $product);

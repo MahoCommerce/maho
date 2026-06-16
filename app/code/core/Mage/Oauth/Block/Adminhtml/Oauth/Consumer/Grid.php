@@ -94,7 +94,7 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Grid extends Mage_Adminhtml_Bloc
     }
 
     /**
-     * Render protocol column — OAuth 2 if api_role_id set, otherwise OAuth 1
+     * Render protocol column, OAuth 2 if api_role_id set, otherwise OAuth 1
      */
     public function decorateProtocol(string $value, Mage_Oauth_Model_Consumer $row, Mage_Adminhtml_Block_Widget_Grid_Column $column, bool $isExport): string
     {

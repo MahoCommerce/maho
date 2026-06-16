@@ -13,7 +13,7 @@ namespace Maho\Giftcard\Api;
 use Maho\ApiPlatform\CrudProvider;
 
 /**
- * Gift Card Provider — only needs the checkGiftcardBalance named query.
+ * Gift Card Provider, only needs the checkGiftcardBalance named query.
  *
  * All standard CRUD (get, list) is handled by CrudProvider + CrudResource.
  */

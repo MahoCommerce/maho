@@ -18,7 +18,7 @@ afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Grouped Product Links — CRUD Lifecycle', function (): void {
+describe('Grouped Product Links, CRUD Lifecycle', function (): void {
 
     it('creates a grouped product, links children, reads back, removes', function (): void {
         $token = serviceToken(['products/write', 'products/delete', 'products/read']);

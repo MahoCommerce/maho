@@ -85,7 +85,7 @@ function createTestProductWithOptions(): array
         $options[$spec['title']] = $optionData;
     }
 
-    // API Platform doesn't map fileExtension/imageSizeX/Y — set them via DB
+    // API Platform doesn't map fileExtension/imageSizeX/Y, set them via DB
     try {
         $write = \Mage::getSingleton('core/resource')->getConnection('core_write');
         foreach ($optionSpecs as $spec) {
@@ -111,7 +111,7 @@ function createTestProductWithOptions(): array
         // Also set has_options = 1 on the product
         $write->query("UPDATE catalog_product_entity SET has_options = 1, required_options = 1 WHERE entity_id = {$productId}");
     } catch (\Exception $e) {
-        // Non-fatal — some tests may still pass without these
+        // Non-fatal, some tests may still pass without these
     }
 
     $testProduct = [
@@ -238,7 +238,7 @@ afterAll(function (): void {
 
 // ─── Text Options ────────────────────────────────────────────────────────────
 
-describe('Cart Custom Options — Text (field, area)', function (): void {
+describe('Cart Custom Options, Text (field, area)', function (): void {
 
     it('adds item with required text field', function (): void {
         $response = addItemWithOptions(allRequiredOptions(), defaultFileData());
@@ -267,7 +267,7 @@ describe('Cart Custom Options — Text (field, area)', function (): void {
 
 // ─── Select Options ─────────────────────────────────────────────────────────
 
-describe('Cart Custom Options — Select (drop_down, checkbox)', function (): void {
+describe('Cart Custom Options, Select (drop_down, checkbox)', function (): void {
 
     it('adds item with required dropdown value B', function (): void {
         $options = allRequiredOptions([
@@ -295,7 +295,7 @@ describe('Cart Custom Options — Select (drop_down, checkbox)', function (): vo
 
 // ─── Date Options ────────────────────────────────────────────────────────────
 
-describe('Cart Custom Options — Date', function (): void {
+describe('Cart Custom Options, Date', function (): void {
 
     it('adds item with required date', function (): void {
         $response = addItemWithOptions(allRequiredOptions(), defaultFileData());
@@ -304,9 +304,9 @@ describe('Cart Custom Options — Date', function (): void {
     });
 });
 
-// ─── File Options — Happy Path ───────────────────────────────────────────────
+// ─── File Options, Happy Path ───────────────────────────────────────────────
 
-describe('Cart Custom Options — File (happy path)', function (): void {
+describe('Cart Custom Options, File (happy path)', function (): void {
 
     it('uploads a base64 PNG file successfully', function (): void {
         $response = addItemWithOptions(allRequiredOptions(), [
@@ -321,9 +321,9 @@ describe('Cart Custom Options — File (happy path)', function (): void {
     });
 });
 
-// ─── File Options — Security (Critical) ─────────────────────────────────────
+// ─── File Options, Security (Critical) ─────────────────────────────────────
 
-describe('Cart Custom Options — File Security', function (): void {
+describe('Cart Custom Options, File Security', function (): void {
 
     it('rejects forbidden extension .php', function (): void {
         $response = addItemWithOptions(allRequiredOptions(), [
@@ -371,7 +371,7 @@ describe('Cart Custom Options — File Security', function (): void {
             ],
         ]);
 
-        // Rejected by getimagesizefromstring — not valid image data
+        // Rejected by getimagesizefromstring, not valid image data
         expect($response['status'])->toBe(400);
     });
 
@@ -419,9 +419,9 @@ describe('Cart Custom Options — File Security', function (): void {
     });
 });
 
-// ─── File Options — Optional ─────────────────────────────────────────────────
+// ─── File Options, Optional ─────────────────────────────────────────────────
 
-describe('Cart Custom Options — File Optional', function (): void {
+describe('Cart Custom Options, File Optional', function (): void {
 
     it('succeeds when optional file is omitted', function (): void {
         $response = addItemWithOptions(allRequiredOptions(), defaultFileData());
@@ -432,7 +432,7 @@ describe('Cart Custom Options — File Optional', function (): void {
 
 // ─── Combined Options ────────────────────────────────────────────────────────
 
-describe('Cart Custom Options — Combined', function (): void {
+describe('Cart Custom Options, Combined', function (): void {
 
     it('adds item with text + select + file simultaneously', function (): void {
         $options = allRequiredOptions([

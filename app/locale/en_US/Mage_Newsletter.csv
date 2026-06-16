@@ -80,7 +80,7 @@
 "Pause","Pause"
 "Paused","Paused"
 "Per email address. Default 3 per hour. 0 to disable.","Per email address. Default 3 per hour. 0 to disable."
-"Per IP address (lenient — legitimate users). Default 30 per hour. 0 to disable.","Per IP address (lenient — legitimate users). Default 30 per hour. 0 to disable."
+"Per IP address (lenient, legitimate users). Default 30 per hour. 0 to disable.","Per IP address (lenient, legitimate users). Default 30 per hour. 0 to disable."
 "Please enter a valid email address.","Please enter a valid email address."
 "Please refer to exeption.log","Please refer to exeption.log"
 "Please select subscriber(s)","Please select subscriber(s)"

@@ -23,7 +23,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 final class WishlistProvider extends \Maho\ApiPlatform\Provider
 {
     /**
-     * Wishlists are per-user and mutate often — short TTL
+     * Wishlists are per-user and mutate often, short TTL
      */
     private function getCacheTtl(): int
     {

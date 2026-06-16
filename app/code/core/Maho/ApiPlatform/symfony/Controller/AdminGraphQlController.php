@@ -111,7 +111,7 @@ class AdminGraphQlController
             return ['errors' => [['message' => 'Query exceeds maximum allowed length']]];
         }
 
-        // Depth limit — count max nesting of { }
+        // Depth limit, count max nesting of { }
         $depth = $this->calculateQueryDepth($query);
         if ($depth > self::MAX_QUERY_DEPTH) {
             return ['errors' => [['message' => 'Query exceeds maximum depth of ' . self::MAX_QUERY_DEPTH]]];
@@ -200,7 +200,7 @@ class AdminGraphQlController
      *
      * Per-operation Maho admin ACL is enforced inline by each handler method
      * via Maho\ApiPlatform\Security\AdminAcl::checkResource(...). Each
-     * handler imports its own resource class — no central
+     * handler imports its own resource class, no central
      * operation→resource map, so 3rd-party modules can add operations
      * without touching this controller's metadata.
      */

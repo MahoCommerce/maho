@@ -183,7 +183,7 @@ class ApiExceptionListener implements EventSubscriberInterface
         // rule signal in Maho models (Mage::throwException()). Treat it as a
         // 422 Unprocessable Entity with the model's message instead of a 500.
         // The trust assumption is that callers of Mage::throwException() pass
-        // safe, translated messages — log every occurrence to api.log so
+        // safe, translated messages, log every occurrence to api.log so
         // anomalous leaks (DB error fragments, internal IDs, file paths) can
         // be detected post-hoc by reviewing the channel.
         if ($exception instanceof \Mage_Core_Exception) {

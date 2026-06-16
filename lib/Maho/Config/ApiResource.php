@@ -23,7 +23,7 @@ use Attribute;
  * permission-registry metadata directly to the same attribute. API Platform's
  * own scanner uses `is_a(..., true)` / `IS_INSTANCEOF` (see
  * `AttributesResourceNameCollectionFactory` and `MetadataCollectionFactoryTrait`),
- * so subclass instances are picked up exactly like the parent — HTTP routing
+ * so subclass instances are picked up exactly like the parent, HTTP routing
  * and GraphQL surface work unchanged.
  *
  * Compiled at `composer dump-autoload` into `vendor/composer/maho_api_permissions.php`,
@@ -46,7 +46,7 @@ use Attribute;
  * semantics of each maho field.
  *
  * For forward-looking resources without a real DTO, declare on a stub class
- * with `operations: []` (explicit empty — *not* null) so API Platform sees
+ * with `operations: []` (explicit empty, *not* null) so API Platform sees
  * the resource but registers zero endpoints; only the maho fields are picked up.
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
@@ -60,17 +60,17 @@ class ApiResource extends BaseApiResource
      *
      * If API Platform adds a new constructor parameter we haven't mirrored here,
      * `tests/Backend/Integration/ApiPlatform/ApiResourceConstructorParityTest`
-     * fails — keeping the mirror honest.
+     * fails, keeping the mirror honest.
      *
      * The `@param` overrides for `$operations` and `$rules` exist to detach our
-     * signature from the parent docblock — the parent annotates `$operations`
+     * signature from the parent docblock, the parent annotates `$operations`
      * with a generic Operations type (which would require a `@template` tag we
      * don't carry) and `$rules` with `Illuminate\Contracts\Validation\Rule`
-     * (Laravel — not a Maho dependency). Both are pure pass-through values; we
+     * (Laravel, not a Maho dependency). Both are pure pass-through values; we
      * accept them as `mixed` and forward verbatim.
      *
      * @param ?string $mahoId
-     *   Canonical permission identifier — the slug used in role grants
+     *   Canonical permission identifier, the slug used in role grants
      *   (`carts/read`), in REST URL routing, and as the GraphQL field key.
      *   Defaults to the kebab-cased + pluralised `shortName` (`Cart` → `carts`,
      *   `CmsPage` → `cms-pages`). Set explicitly only for irregular plurals
@@ -82,7 +82,7 @@ class ApiResource extends BaseApiResource
      *
      * @param ?string $mahoSection
      *   Section heading the resource is grouped under in the admin role-editor
-     *   tree (one level deep — `Catalog`, `Sales`, `Customers`, `Content`,
+     *   tree (one level deep, `Catalog`, `Sales`, `Customers`, `Content`,
      *   `System`, `Other`). Defaults to the module segment of the namespace
      *   (`Mage\Catalog\Api\Foo` → `'Catalog'`). Override when the namespace
      *   doesn't match the desired UI grouping (e.g. permission stubs).
@@ -105,15 +105,15 @@ class ApiResource extends BaseApiResource
      * @param bool $mahoCustomerScoped
      *   Marks the resource as bound to a logged-in customer (Cart, Order,
      *   Address, Wishlist, Review, NewsletterSubscription). Access is gated by
-     *   the customer JWT, not admin role grants — the admin role editor surfaces
+     *   the customer JWT, not admin role grants, the admin role editor surfaces
      *   these in a separate "Customer endpoints" informational panel rather than
      *   the grant tree. The parent's `description:` doubles as the prose shown
      *   for each entry, so write it action-oriented ("View cart, add/remove
-     *   items, …"). No equivalent in API Platform — must be set explicitly.
+     *   items, …"). No equivalent in API Platform, must be set explicitly.
      *
      * @param string[]|null $mahoRestSegments
      *   Additional top-level URL path segments that should resolve to this
-     *   resource for permission checks. The default is `[$mahoId]` itself —
+     *   resource for permission checks. The default is `[$mahoId]` itself,
      *   `mahoRestSegments` is **augmenting**, so declare only the *extra*
      *   segments (e.g. Cart adds `'guest-carts'` because both `/carts/*` and
      *   `/guest-carts/*` map to the cart resource).
@@ -122,7 +122,7 @@ class ApiResource extends BaseApiResource
      *   Additional GraphQL field names that should resolve to this resource for
      *   permission checks. Auto-derived from `graphQlOperations[].name`,
      *   filtering out internal snake_case identifiers (`item_query`,
-     *   `add_cart_item`). Augmenting — declare only fields the compiler can't
+     *   `add_cart_item`). Augmenting, declare only fields the compiler can't
      *   see, e.g. handler-defined fields in `*MutationHandler` / `*QueryHandler`
      *   classes outside the DTO.
      *
@@ -222,7 +222,7 @@ class ApiResource extends BaseApiResource
     ) {
         // Forward every locally-defined parameter except the maho-specific ones
         // to the parent constructor. get_defined_vars() keeps the parent forward
-        // automatically in sync with the parameter list above — adding/removing a
+        // automatically in sync with the parameter list above, adding/removing a
         // parent arg only requires editing the signature, not the forward call.
         // The maho fields are unset explicitly so the spread maps cleanly to the
         // parent's named parameters.

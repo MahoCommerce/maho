@@ -21,7 +21,7 @@ declare(strict_types=1);
  */
 
 // Test API user credentials. The matching user is seeded in beforeAll() below
-// (and torn down in afterAll()) so the suite is self-contained — there is no
+// (and torn down in afterAll()) so the suite is self-contained, there is no
 // fixture file or install script that creates it.
 const TEST_CLIENT_ID = 'maho_5293a399b1369914b84a9958466e026e';
 const TEST_CLIENT_SECRET = 'pest_test_secret_12345';
@@ -80,7 +80,7 @@ beforeAll(function (): void {
         ->setApiKey(bin2hex(random_bytes(16)))
         ->save();
 
-    // client_id / client_secret aren't on the model — write directly.
+    // client_id / client_secret aren't on the model, write directly.
     $write->update($userTable, [
         'client_id'     => TEST_CLIENT_ID,
         'client_secret' => password_hash(TEST_CLIENT_SECRET, PASSWORD_BCRYPT),
@@ -181,7 +181,7 @@ describe('OAuth2 Client Credentials Flow', function (): void {
         expect($authResponse['status'])->toBe(200);
         $token = $authResponse['json']['token'];
 
-        // This user has "all" permissions — create a CMS page
+        // This user has "all" permissions, create a CMS page
         $create = apiPost('/api/rest/v2/cms-pages', [
             'identifier' => 'pest-auth-flow-test-' . substr(uniqid(), -8),
             'title' => 'Auth Flow Test Page',

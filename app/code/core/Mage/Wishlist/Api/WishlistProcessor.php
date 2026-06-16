@@ -72,7 +72,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
             if (!empty($addedItems)) {
                 return $addedItems[0];
             }
-            // Nothing was added — return first existing wishlist item
+            // Nothing was added, return first existing wishlist item
             return $this->getFirstWishlistItem();
         }
 
@@ -93,7 +93,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         if ($operationName === 'sync_wishlist') {
             $body = $context['request']?->toArray() ?? [];
             $addedItems = $this->syncWishlist($body['productIds'] ?? []);
-            // REST POST expects single resource — return first added or first existing
+            // REST POST expects single resource, return first added or first existing
             if (!empty($addedItems)) {
                 return $addedItems[0];
             }
@@ -138,7 +138,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
 
         $wishlist = $this->getWishlist($customerId);
 
-        // Check if already in wishlist — use a fresh unfiltered collection query
+        // Check if already in wishlist, use a fresh unfiltered collection query
         // (the wishlist's own getItemsCollection() applies setVisibilityFilter() which can miss items)
         // Must use setWishlist() instead of addFieldToFilter('wishlist_id') to initialize the typed property
         /** @var \Mage_Wishlist_Model_Item $existingItem */
@@ -340,7 +340,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        // Empty wishlist — return a placeholder with wishlist ID
+        // Empty wishlist, return a placeholder with wishlist ID
         $placeholder = new WishlistItem();
         $placeholder->id = (int) $wishlist->getId();
         return $placeholder;

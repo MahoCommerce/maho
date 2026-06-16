@@ -33,7 +33,7 @@ describe('POST /api/rest/v2/orders', function (): void {
         $cartId = $cartResponse['json']['id'];
         trackCreated('quote', (int) $cartId);
 
-        // We deliberately skip adding items here — this test asserts the
+        // We deliberately skip adding items here, this test asserts the
         // order endpoint exists and exits cleanly, not that an empty cart
         // produces a real order. Adding items would need a configured SKU,
         // shipping method, address, etc., which belongs in a dedicated

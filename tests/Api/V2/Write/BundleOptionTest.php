@@ -18,7 +18,7 @@ afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Bundle Options — CRUD Lifecycle', function (): void {
+describe('Bundle Options, CRUD Lifecycle', function (): void {
 
     it('creates a bundle product, adds option with selections, reads, deletes', function (): void {
         $token = serviceToken(['products/write', 'products/delete', 'products/read']);

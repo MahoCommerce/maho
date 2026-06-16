@@ -35,7 +35,7 @@ class IdempotencyListener
 
     /**
      * Cap stored response bodies to keep `maho_api_idempotency_keys` from
-     * growing unboundedly. Above the cap we skip storage entirely — a duplicate
+     * growing unboundedly. Above the cap we skip storage entirely, a duplicate
      * request will re-run the operation rather than replay; given idempotency
      * keys are advisory and the underlying writes are themselves idempotent
      * (same payload + caller scope), that's the safe failure mode.
@@ -94,7 +94,7 @@ class IdempotencyListener
         $read = $resource->getConnection('core_read');
         $table = $resource->getTableName(self::TABLE);
 
-        // Only replay records inside the TTL window — older keys are treated as
+        // Only replay records inside the TTL window, older keys are treated as
         // expired so callers can safely reuse them and the table can be pruned.
         $cutoff = \Mage::app()->getLocale()->formatDateForDb('-' . self::TTL_HOURS . ' hours');
 
@@ -157,12 +157,12 @@ class IdempotencyListener
         $scope = $request->attributes->get('_idempotency_scope');
         $response = $event->getResponse();
 
-        // Do not store server errors — transient failures should be retryable
+        // Do not store server errors, transient failures should be retryable
         if ($response->getStatusCode() >= 500) {
             return;
         }
 
-        // Skip storage for oversized bodies — see MAX_STORED_BODY_BYTES.
+        // Skip storage for oversized bodies, see MAX_STORED_BODY_BYTES.
         $responseBody = (string) $response->getContent();
         if (strlen($responseBody) > self::MAX_STORED_BODY_BYTES) {
             return;
@@ -192,7 +192,7 @@ class IdempotencyListener
                 'created_at' => \Mage::app()->getLocale()->formatDateForDb('now'),
             ]);
         } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException) {
-            // Duplicate key — another concurrent request stored it first, that's fine
+            // Duplicate key, another concurrent request stored it first, that's fine
         }
     }
 

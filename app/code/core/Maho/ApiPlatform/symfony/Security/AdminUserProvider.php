@@ -155,12 +155,11 @@ class AdminUserProvider implements UserProviderInterface
         $roles = ['ROLE_ADMIN'];
 
         try {
-            $aclRole = $admin->getRole();
-            if ($aclRole) {
-                $roleName = strtolower($aclRole->getRoleName() ?? '');
-                if (str_contains($roleName, 'administrator') || $roleName === 'administrators') {
-                    $roles[] = 'ROLE_SUPER_ADMIN';
-                }
+            // Super admin is whoever the Maho ACL grants the root 'all'
+            // resource, not a role whose name happens to contain a string.
+            $acl = \Mage::getResourceModel('admin/acl')->loadAcl();
+            if ($acl->isAllowed($admin->getAclRole(), 'all')) {
+                $roles[] = 'ROLE_SUPER_ADMIN';
             }
         } catch (\Exception $e) {
             \Mage::logException($e);

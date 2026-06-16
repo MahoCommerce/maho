@@ -14,7 +14,7 @@ use Maho\ApiPlatform\CrudProvider;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
- * CMS Block Provider — extends CrudProvider with block-specific filters and named queries.
+ * CMS Block Provider, extends CrudProvider with block-specific filters and named queries.
  *
  * All field mapping and DTO construction is handled by CrudResource/CrudProvider.
  * This class only adds collection filters and the cmsBlockByIdentifier query.

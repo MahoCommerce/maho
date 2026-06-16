@@ -21,7 +21,7 @@ use Maho\ApiPlatform\Trait\CacheTrait;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Review Provider — extends CrudProvider with review-specific operations.
+ * Review Provider, extends CrudProvider with review-specific operations.
  *
  * Handles product reviews, customer reviews, and caching.
  * DTO construction uses CrudResource::fromModel() via afterLoad for computed fields.

@@ -468,7 +468,7 @@ class CartMutationHandler
         // Add GraphQL-specific fields
         $data['maskedId'] = base64_encode('cart_' . $quote->getId() . '_' . substr(md5($quote->getId() . $quote->getCreatedAt()), 0, 8));
 
-        // Enrich items with fulfillment type (GraphQL-specific) — align by item ID
+        // Enrich items with fulfillment type (GraphQL-specific), align by item ID
         $quoteItemsById = [];
         foreach ($quote->getAllVisibleItems() as $item) {
             $quoteItemsById[(int) $item->getId()] = $item;

@@ -48,4 +48,15 @@ return function (Schema $schema): void {
     $idempotency->addUniqueIndex(['idempotency_key', 'user_scope', 'request_path', 'request_method']);
     $idempotency->addIndex(['created_at']);
     $idempotency->setComment('API Idempotency Keys');
+
+    // Revoked JWT ids (logout / refresh). Durable so a cache flush cannot
+    // resurrect a revoked token; rows are purged once past expires_at.
+    $revoked = $schema->createTable('maho_api_revoked_tokens');
+    $revoked->addColumn('jti', Types::STRING, ['length' => 64, 'comment' => 'JWT ID (hex)']);
+    $revoked->addColumn('expires_at', Types::INTEGER, ['unsigned' => true, 'comment' => 'Token expiry (unix timestamp)']);
+    $revoked->addPrimaryKeyConstraint(
+        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('jti')->create(),
+    );
+    $revoked->addIndex(['expires_at']);
+    $revoked->setComment('API Revoked JWT Tokens');
 };

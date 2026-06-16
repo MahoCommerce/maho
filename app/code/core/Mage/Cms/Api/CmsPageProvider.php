@@ -17,7 +17,7 @@ use Maho\ApiPlatform\CrudProvider;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
- * CMS Page Provider — extends CrudProvider with page-specific filters and named queries.
+ * CMS Page Provider, extends CrudProvider with page-specific filters and named queries.
  *
  * All field mapping and DTO construction is handled by CrudResource/CrudProvider.
  * This class only adds collection filters and identifier-based lookups.

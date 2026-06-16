@@ -192,7 +192,7 @@ abstract class CrudResource extends Resource
 
         $storeId = Service\StoreContext::getStoreId();
 
-        // Strip {{widget}} directives — they instantiate theme blocks that
+        // Strip {{widget}} directives, they instantiate theme blocks that
         // typically need layout/session context (wishlist, minicart, viewed
         // products). The API context has no session, so rendering them would
         // throw. If callers need widget output they should use server-side
@@ -200,7 +200,7 @@ abstract class CrudResource extends Resource
         $content = preg_replace('/\{\{widget\b[^}]*\}\}/', '', (string) $content);
 
         // Resolve {{block type="cms/block" block_id="..."}} directives inline
-        // by loading the referenced CMS block directly — NOT via Maho's block
+        // by loading the referenced CMS block directly, NOT via Maho's block
         // rendering pipeline, which calls Mage_Core_Block_Abstract::_saveCache()
         // → $session->getSessionName() → null deref in the API context
         // (no HTTP session). This recursive inlining is bounded to prevent
@@ -209,7 +209,7 @@ abstract class CrudResource extends Resource
 
         // Any remaining non-cms-block {{block}} directives need layout context
         // (e.g. type="core/template", type="catalog/product_list_new"). Strip
-        // them — they'd throw the same session error if rendered.
+        // them, they'd throw the same session error if rendered.
         $content = preg_replace('/\{\{block\b[^}]*\}\}/', '', (string) $content);
 
         // If no directives remain, return early.
@@ -235,7 +235,7 @@ abstract class CrudResource extends Resource
      * by loading the referenced CMS block content from the database. Avoids
      * Maho's block rendering pipeline (which crashes in no-session contexts).
      *
-     * Depth-limited and cycle-safe — a block that references itself, or a
+     * Depth-limited and cycle-safe, a block that references itself, or a
      * chain deeper than 5 levels, falls back to stripping the directive.
      */
     private static function resolveCmsBlockDirectives(
@@ -255,7 +255,7 @@ abstract class CrudResource extends Resource
             $pattern,
             static function (array $m) use ($storeId, $seen, $depth): string {
                 // PHP fills unmatched alternation captures with '' (not unset),
-                // so $m[3] and $m[5] are both always present — one has the id,
+                // so $m[3] and $m[5] are both always present, one has the id,
                 // the other is empty. Pick whichever is non-empty.
                 $identifier = ($m[3] ?? '') !== '' ? $m[3] : ($m[5] ?? '');
                 if ($identifier === '' || isset($seen[$identifier])) {

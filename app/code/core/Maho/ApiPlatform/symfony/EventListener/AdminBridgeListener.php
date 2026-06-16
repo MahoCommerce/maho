@@ -73,7 +73,7 @@ class AdminBridgeListener
     /**
      * Resolve a client-supplied storeId to a real, active store. Falls back to
      * the default store view when the value is missing or doesn't match an
-     * active store — admins must not be able to inject the admin scope (id 0)
+     * active store, admins must not be able to inject the admin scope (id 0)
      * or non-existent IDs simply by passing them in the GraphQL body.
      */
     private function resolveStoreId(mixed $requested): int

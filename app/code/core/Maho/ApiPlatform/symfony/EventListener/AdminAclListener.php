@@ -36,11 +36,11 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  *
  * Default-deny policy: when an admin token reaches a resource class that has
  * no ADMIN_RESOURCE constant, the listener throws AccessDeniedHttpException.
- * This forces every admin-reachable endpoint to be conscious about ACL — the
+ * This forces every admin-reachable endpoint to be conscious about ACL, the
  * same mistake that produced the original Catalog-Editor-can-issue-refunds
  * bypass cannot recur silently.
  *
- * Non-admin tokens (customer, API user) bypass this listener — they're gated
+ * Non-admin tokens (customer, API user) bypass this listener, they're gated
  * by the security expression and the ApiUserVoter / GraphQlPermissionListener.
  *
  * Priority 4: after the firewall (8), after StoreContextAuthorizationListener
@@ -86,7 +86,7 @@ class AdminAclListener
             return;
         }
 
-        // Public operations (security: 'true') let anyone in by design —
+        // Public operations (security: 'true') let anyone in by design,
         // /countries, /store-config, /auth/token, etc. Admins should reach
         // them just like customers and unauthenticated callers do, so skip
         // the ACL gate when the operation declares itself public.

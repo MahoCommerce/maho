@@ -20,7 +20,7 @@ afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Product Tier Prices — Permission Enforcement', function (): void {
+describe('Product Tier Prices, Permission Enforcement', function (): void {
 
     it('denies tier price update without authentication', function (): void {
         $productId = fixtures('product_id');
@@ -48,7 +48,7 @@ describe('Product Tier Prices — Permission Enforcement', function (): void {
 
 });
 
-describe('Product Tier Prices — CRUD Lifecycle', function (): void {
+describe('Product Tier Prices, CRUD Lifecycle', function (): void {
 
     it('sets tier prices, reads them back, then removes them', function (): void {
         $productId = fixtures('product_id');

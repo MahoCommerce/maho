@@ -29,7 +29,7 @@ Mage::$headersSentThrowsException = false;
 // Force developer mode off for the duration of the request: any warning emitted
 // by Mage::init() below would print before the Symfony kernel boots and would
 // corrupt the JSON response. Errors are still captured by Mage::log() and the
-// configured Monolog handlers, so debugging info isn't lost — just kept out of
+// configured Monolog handlers, so debugging info isn't lost, just kept out of
 // the response body.
 Mage::setIsDeveloperMode(false);
 Mage::init('admin');
@@ -39,7 +39,7 @@ Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_API, Mage_Core_Model_Ap
 // Boot Symfony kernel.
 // Always use prod mode with debug=false to prevent trace leakage in API responses;
 // errors are still logged. Store context, admin-session bridging, and env-var
-// resolution all happen inside the kernel — see EventListener/ and Kernel::__construct().
+// resolution all happen inside the kernel, see EventListener/ and Kernel::__construct().
 $kernel = new Maho\ApiPlatform\Kernel('prod', false);
 
 $request = Symfony\Component\HttpFoundation\Request::createFromGlobals();

@@ -1,6 +1,6 @@
 "* Required Fields","* Required Fields"
 "<strong style=""color:red"">Warning!</strong> Enabling this feature may cause unwanted messages to be sent to people whose email addresses are being used abusively. Please make sure that you have implemented security measures before enabling (e.g. CAPTCHA, HoneySpam).","<strong style=""color:red"">Warning!</strong> Enabling this feature may cause unwanted messages to be sent to people whose email addresses are being used abusively. Please make sure that you have implemented security measures before enabling (e.g. CAPTCHA, HoneySpam)."
-"Adds a hidden field that bots fill in — zero dependency, works everywhere.","Adds a hidden field that bots fill in — zero dependency, works everywhere."
+"Adds a hidden field that bots fill in, zero dependency, works everywhere.","Adds a hidden field that bots fill in, zero dependency, works everywhere."
 "Allow headless frontends to submit contact forms via the API.","Allow headless frontends to submit contact forms via the API."
 "API Submissions","API Submissions"
 "Auto Reply","Auto Reply"

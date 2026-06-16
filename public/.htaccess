@@ -56,7 +56,7 @@ DirectoryIndex index.php
     # Uncomment next line to enable light API calls processing
     #RewriteRule ^api/([a-z][0-9a-z_]+)/?$ api.php?type=$1 [QSA,L]
 
-    # Maho API Platform — route /api/* to rest.php (Symfony kernel bootstrap).
+    # Maho API Platform, route /api/* to rest.php (Symfony kernel bootstrap).
     #
     # Routing layout:
     #   /api/rest/v2/*    → rest.php           (new REST API, Symfony API Platform)

@@ -111,7 +111,7 @@ SPDX-License-Identifier: AFL-3.0
                         </newsletter_subscribe>
                         <newsletter_unsubscribe translate="label comment" module="newsletter">
                             <label>Newsletter unsubscribe</label>
-                            <comment>Per IP address (lenient — legitimate users). Default 30 per hour. 0 to disable.</comment>
+                            <comment>Per IP address (lenient, legitimate users). Default 30 per hour. 0 to disable.</comment>
                             <sort_order>130</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

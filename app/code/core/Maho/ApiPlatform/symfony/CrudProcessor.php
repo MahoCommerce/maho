@@ -20,9 +20,9 @@ use Maho\ApiPlatform\Security\ApiUser;
  * Only overrides applyData() for auto-mapping and buildResponse() for auto-DTO.
  *
  * Hooks for subclasses:
- *   - validate($data, $model, $isNew) — throw on invalid data
- *   - beforeSave($model, $data, $user) — pre-save adjustments
- *   - afterSave($model, $data, $user) — post-save actions (reindex, cache, etc.)
+ *   - validate($data, $model, $isNew), throw on invalid data
+ *   - beforeSave($model, $data, $user), pre-save adjustments
+ *   - afterSave($model, $data, $user), post-save actions (reindex, cache, etc.)
  */
 class CrudProcessor extends Processor
 {

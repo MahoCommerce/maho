@@ -14,7 +14,7 @@
 class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Product_Option_Type_Default
 {
     /**
-     * MIME types that indicate executable/script content — always rejected for file uploads
+     * MIME types that indicate executable/script content, always rejected for file uploads
      */
     protected const DANGEROUS_MIME_TYPES = [
         'text/x-php', 'application/x-php', 'application/x-httpd-php',
@@ -139,7 +139,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             return $this;
         }
 
-        // Check for API file upload — validated outside try/catch so security errors propagate
+        // Check for API file upload, validated outside try/catch so security errors propagate
         $buyRequest = $this->getRequest();
         $apiFileData = $buyRequest->getData('options_files/' . $option->getId());
         if (is_array($apiFileData) && !empty($apiFileData['base64_encoded_data'])) {
@@ -908,7 +908,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             }
         }
 
-        // 5. finfo_buffer() content validation — polyshell defense (CVE-2025-54263)
+        // 5. finfo_buffer() content validation, polyshell defense (CVE-2025-54263)
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $detectedMime = $finfo->buffer($decodedData);
 
@@ -962,7 +962,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             $io->mkdir($tmpDir, 0777, true);
         }
 
-        // Cryptographically random temp name — even though $tmpDir is non-web-
+        // Cryptographically random temp name, even though $tmpDir is non-web-
         // executable, predictable names invite cross-tenant collisions or
         // race-condition attacks if the dir is ever made reachable.
         $tmpFileName = 'api_opt_' . bin2hex(random_bytes(16)) . '.' . $fileExtension;

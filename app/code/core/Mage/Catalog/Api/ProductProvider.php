@@ -137,7 +137,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      * Full-load a product scoped to the current store and return its detail
      * DTO, or null when it isn't enabled. Single-item lookups (by id, sku,
      * barcode) are public reads, so they must apply the same STATUS_ENABLED
-     * filter the collection paths do — otherwise a disabled product the
+     * filter the collection paths do, otherwise a disabled product the
      * listing hides could be fetched by guessing its identifier.
      */
     private function loadVisibleProductDto(int $id): ?Product
@@ -172,7 +172,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Get products by urlKey — direct DB lookup
+     * Get products by urlKey, direct DB lookup
      *
      * @return TraversablePaginator<Product>
      */
@@ -231,13 +231,13 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             }
         }
 
-        // Handle urlKey filter — direct DB lookup, bypass search
+        // Handle urlKey filter, direct DB lookup, bypass search
         if (!empty($requestFilters['urlKey'])) {
             return $this->getByUrlKey((string) $requestFilters['urlKey'], $page, $pageSize);
         }
 
         // Use search layer for text queries, catalog layer for browsing.
-        // Use a fresh instance instead of the singleton — under FPM workers
+        // Use a fresh instance instead of the singleton, under FPM workers
         // (and in the test runner) singletons retain state across requests,
         // so the previous request's category/query would leak into this one.
         if (!empty($search)) {
@@ -274,7 +274,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             $collection->addAttributeToFilter('price', $priceFilter);
         }
 
-        // Extract attribute filters — REST uses attr_ prefix, GraphQL uses JSON string
+        // Extract attribute filters, REST uses attr_ prefix, GraphQL uses JSON string
         $attributeFilters = [];
         if (!empty($requestFilters['attributeFilters'])) {
             $decoded = json_decode($requestFilters['attributeFilters'], true);
@@ -762,7 +762,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Bundle options with selections — kept as helper due to complexity
+     * Bundle options with selections, kept as helper due to complexity
      * (dynamic vs fixed pricing, batch stock + price loading).
      */
     private function getBundleOptions(\Mage_Catalog_Model_Product $product): array

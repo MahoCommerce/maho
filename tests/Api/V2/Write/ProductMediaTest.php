@@ -18,14 +18,14 @@ afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Product Media Gallery — Read', function (): void {
+describe('Product Media Gallery, Read', function (): void {
 
     it('lists gallery images for existing product', function (): void {
         // Product 421 should have images
         $read = apiGet('/api/rest/v2/products/421/media');
         expect($read['status'])->toBe(200);
         $images = getItems($read);
-        // May or may not have images — just verify format
+        // May or may not have images, just verify format
         if (!empty($images)) {
             expect($images[0])->toHaveKey('file');
             expect($images[0])->toHaveKey('url');
@@ -37,7 +37,7 @@ describe('Product Media Gallery — Read', function (): void {
 
 });
 
-describe('Product Media Gallery — Upload & Manage', function (): void {
+describe('Product Media Gallery, Upload & Manage', function (): void {
 
     it('uploads a base64 image, updates label, then deletes it', function (): void {
         $token = serviceToken(['products/write', 'products/delete', 'products/read']);

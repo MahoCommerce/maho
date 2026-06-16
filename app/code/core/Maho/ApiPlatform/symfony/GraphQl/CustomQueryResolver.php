@@ -27,7 +27,7 @@ use Psr\Container\ContainerInterface;
  * invokes the resource's state provider when ReadProvider couldn't resolve the item.
  *
  * Context available: source, args, info (ResolveInfo), root_class, graphql_context.
- * Note: `operation` is NOT in the resolver context — we reconstruct it from resource metadata.
+ * Note: `operation` is NOT in the resolver context, we reconstruct it from resource metadata.
  *
  * GraphQL field names follow the pattern: lcfirst(operationName + resourceShortName)
  * e.g., operation `me` on resource `Customer` → field `meCustomer`

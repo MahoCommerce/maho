@@ -16,12 +16,12 @@ use Maho\ApiPlatform\Service\StoreContext;
 /**
  * Convention-based provider for CrudResource subclasses.
  *
- * Leverages the parent Provider's provideCollection() and pagination — no duplication.
+ * Leverages the parent Provider's provideCollection() and pagination, no duplication.
  * Only overrides toDto() for auto-mapping and applyCollectionFilters() for store/EAV handling.
  *
  * Hooks for subclasses:
- *   - applyCollectionFilters($collection, $filters) — add WHERE clauses (call parent first)
- *   - afterMap($dto, $model) — enrich DTO with computed/related data
+ *   - applyCollectionFilters($collection, $filters), add WHERE clauses (call parent first)
+ *   - afterMap($dto, $model), enrich DTO with computed/related data
  */
 class CrudProvider extends Provider
 {
@@ -40,7 +40,7 @@ class CrudProvider extends Provider
             $this->modelAlias = $this->resourceClass::metadata()->model;
         }
 
-        // Delegate to parent — handles named operations, collection, single item
+        // Delegate to parent, handles named operations, collection, single item
         return parent::provide($operation, $uriVariables, $context);
     }
 
@@ -68,7 +68,7 @@ class CrudProvider extends Provider
 
     /**
      * Auto-map model to DTO via CrudResource convention + dispatch extension event.
-     * Parent's provideCollection() calls this for each item — no need to override provideCollection().
+     * Parent's provideCollection() calls this for each item, no need to override provideCollection().
      */
     #[\Override]
     public function toDto(object $model): Resource
@@ -93,14 +93,14 @@ class CrudProvider extends Provider
     {
         $storeId = StoreContext::getStoreId();
 
-        // Store filtering — auto-detect the collection's method
+        // Store filtering, auto-detect the collection's method
         if (method_exists($collection, 'addStoreFilter')) {
             $collection->addStoreFilter($storeId);
         } elseif (method_exists($collection, 'setStoreId')) {
             $collection->setStoreId($storeId);
         }
 
-        // EAV collections need explicit attribute selection — only load what the DTO needs
+        // EAV collections need explicit attribute selection, only load what the DTO needs
         if ($collection instanceof \Mage_Eav_Model_Entity_Collection_Abstract
             && $this->resourceClass
             && is_subclass_of($this->resourceClass, CrudResource::class)
@@ -110,7 +110,7 @@ class CrudProvider extends Provider
                     try {
                         $collection->addAttributeToSelect($field->modelField);
                     } catch (\Throwable) {
-                        // Not every DTO field is an EAV attribute — skip silently
+                        // Not every DTO field is an EAV attribute, skip silently
                     }
                 }
             }

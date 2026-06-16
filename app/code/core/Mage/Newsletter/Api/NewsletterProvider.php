@@ -13,7 +13,7 @@ namespace Mage\Newsletter\Api;
 use Maho\ApiPlatform\CrudProvider;
 
 /**
- * Newsletter Provider — extends CrudProvider with subscription status lookup.
+ * Newsletter Provider, extends CrudProvider with subscription status lookup.
  *
  * Handles the newsletterStatus and status named operations.
  */

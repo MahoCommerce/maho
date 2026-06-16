@@ -46,8 +46,8 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
         // valid HMAC bridge token (set by AdminBridgeListener after a real
         // admin session is verified). Without the HMAC, fall back to a
         // direct admin-session lookup. This prevents any earlier code path
-        // — including unusual SAPI/CGI configurations that may surface
-        // request-supplied vars into $_SERVER — from short-circuiting the
+        //, including unusual SAPI/CGI configurations that may surface
+        // request-supplied vars into $_SERVER, from short-circuiting the
         // session check.
         $adminId = null;
         if ($this->hasAdminContext()) {
@@ -127,7 +127,7 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
      *
      * Ensures $_SERVER vars were set by our authenticator, not injected
      * externally. Binds the HMAC to the current PHP session id so a captured
-     * (adminId, token) pair stops working as soon as the admin logs out — the
+     * (adminId, token) pair stops working as soon as the admin logs out, the
      * crypt key alone is not enough to forge a token.
      */
     public static function generateBridgeToken(string $adminId): string

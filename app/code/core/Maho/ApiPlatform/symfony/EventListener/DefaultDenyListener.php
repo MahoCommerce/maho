@@ -23,7 +23,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  * With resource-level security (Option #3), the security.yaml catch-all is
  * PUBLIC_ACCESS, so unauthenticated requests reach API Platform. For item
  * operations (Get, Put, Delete), the Provider runs before the security
- * expression is evaluated — which means a missing entity returns 404 before
+ * expression is evaluated, which means a missing entity returns 404 before
  * the 401 can fire.
  *
  * This listener runs after routing (priority 28, between router at 32 and
@@ -56,7 +56,7 @@ class DefaultDenyListener
             return;
         }
 
-        // Also check for Bearer header presence — the authenticator may not have
+        // Also check for Bearer header presence, the authenticator may not have
         // run yet at this priority, so let Symfony's firewall handle validation
         if (str_starts_with($request->headers->get('Authorization', ''), 'Bearer ')) {
             return;
@@ -72,7 +72,7 @@ class DefaultDenyListener
             $security = null;
         }
 
-        // Public operations — no auth needed
+        // Public operations, no auth needed
         // API Platform may wrap the value in quotes, so strip them before comparing
         if ($security !== null && trim($security, '" ') === 'true') {
             return;

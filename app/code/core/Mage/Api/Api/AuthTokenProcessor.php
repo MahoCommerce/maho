@@ -223,7 +223,7 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
                 return $customer;
             } catch (\Mage_Core_Exception $e) {
                 if ($e->getCode() === \Mage_Customer_Model_Customer::EXCEPTION_EMAIL_NOT_CONFIRMED) {
-                    // Save and keep trying — another website may have a confirmed account.
+                    // Save and keep trying, another website may have a confirmed account.
                     $confirmation ??= $e;
                 }
             }
@@ -365,7 +365,7 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
                 throw new UnauthorizedHttpException('Bearer', 'Customer not found');
             }
 
-            // Honour deactivation between issuance and refresh — without this,
+            // Honour deactivation between issuance and refresh, without this,
             // a banned/disabled customer can keep refreshing tokens indefinitely
             // until the original token's expiry.
             if (!$customer->getIsActive()) {

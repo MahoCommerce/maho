@@ -1,4 +1,4 @@
-# Maho API Platform — REST & GraphQL API Reference
+# Maho API Platform, REST & GraphQL API Reference
 
 > **Base URL:** `https://your-domain.com/api`
 > **Entry Point:** `public/rest.php` (bootstraps Maho + Symfony API Platform)
@@ -83,7 +83,7 @@ curl -X POST /api/rest/v2/auth/token \
 }
 ```
 
-`customer` is populated for the `customer` grant; `apiUser` and `permissions` are populated for `client_credentials` / `api_user` grants. There is no separate `refresh_token` field — call `/auth/refresh` with the existing JWT in the `Authorization` header to get a new token.
+`customer` is populated for the `customer` grant; `apiUser` and `permissions` are populated for `client_credentials` / `api_user` grants. There is no separate `refresh_token` field, call `/auth/refresh` with the existing JWT in the `Authorization` header to get a new token.
 
 **Use the token:**
 ```bash
@@ -102,7 +102,7 @@ curl -X POST /api/rest/v2/auth/refresh \
 |--------|----------|-------------|
 | POST | `/api/rest/v2/auth/logout` | Revoke the current token |
 
-Password reset and "current customer" live under the Customer resource — see [Customers](#customers).
+Password reset and "current customer" live under the Customer resource, see [Customers](#customers).
 
 ### Permission Levels
 
@@ -133,7 +133,7 @@ Collection endpoints support pagination via query parameters (REST) or arguments
 
 | Parameter | Default | Max | Description |
 |-----------|---------|-----|-------------|
-| `page` | 1 | — | Page number |
+| `page` | 1 |, | Page number |
 | `itemsPerPage` (alias: `pageSize`) | 20 | 100 | Items per page |
 
 **Response format depends on the negotiated content type:**
@@ -177,11 +177,11 @@ All responses include:
 
 **Conditional requests:**
 ```bash
-# First request — note the ETag
+# First request, note the ETag
 curl -v /api/rest/v2/products/123
 # < ETag: "abc123"
 
-# Subsequent request — get 304 if unchanged
+# Subsequent request, get 304 if unchanged
 curl /api/rest/v2/products/123 -H 'If-None-Match: "abc123"'
 # Returns 304 Not Modified (no body)
 ```
@@ -193,14 +193,14 @@ curl /api/rest/v2/products/123 -H 'If-None-Match: "abc123"'
 Protect against duplicate mutations by including `X-Idempotency-Key` on POST/PUT/PATCH requests. If the same key+user+path+method is seen again within 24 hours, the stored response is replayed.
 
 ```bash
-# First request — processed normally
+# First request, processed normally
 curl -X POST /api/rest/v2/orders/123/credit-memos \
   -H 'Authorization: Bearer eyJ...' \
   -H 'X-Idempotency-Key: refund-order-123-v1' \
   -H 'Content-Type: application/json' \
   -d '{"items": [{"orderItemId": 456, "qty": 1}]}'
 
-# Duplicate request — returns stored response
+# Duplicate request, returns stored response
 curl -X POST /api/rest/v2/orders/123/credit-memos \
   -H 'Authorization: Bearer eyJ...' \
   -H 'X-Idempotency-Key: refund-order-123-v1' \
@@ -254,7 +254,7 @@ mutation {
 | POST | `/auth/refresh` | Bearer JWT | Refresh JWT token (current token sent via `Authorization` header) |
 | POST | `/auth/logout` | Bearer JWT | Revoke the current token |
 
-"Current customer" and password reset are part of the Customer resource — see [Customers](#customers).
+"Current customer" and password reset are part of the Customer resource, see [Customers](#customers).
 
 ---
 
@@ -378,7 +378,7 @@ Country listings live under [Directory](#directory) (`/countries`).
 | POST | `/customers/reset-password` | None | Reset password with token |
 | POST | `/customers/create-from-order` | None | Create a customer account from a placed guest order |
 
-**Addresses** (`Address` resource — same DTO is exposed under three URL families):
+**Addresses** (`Address` resource, same DTO is exposed under three URL families):
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
@@ -507,11 +507,11 @@ curl -X POST /api/rest/v2/orders/123/credit-memos \
 ```
 
 **Parameters:**
-- `items[]` — Array of items to refund. Each requires `orderItemId` and `qty`. Optional: `backToStock` (boolean, returns qty to inventory).
-- `comment` — Optional refund note.
-- `adjustmentPositive` — Additional positive adjustment (add to refund).
-- `adjustmentNegative` — Negative adjustment (reduce refund).
-- `offlineRefund` — `true` (default) for offline refund, `false` to trigger payment gateway refund.
+- `items[]`, Array of items to refund. Each requires `orderItemId` and `qty`. Optional: `backToStock` (boolean, returns qty to inventory).
+- `comment`, Optional refund note.
+- `adjustmentPositive`, Additional positive adjustment (add to refund).
+- `adjustmentNegative`, Negative adjustment (reduce refund).
+- `offlineRefund`, `true` (default) for offline refund, `false` to trigger payment gateway refund.
 
 **GraphQL:**
 ```graphql
@@ -541,13 +541,13 @@ mutation {
 | GET | `/customers/me/orders/{orderId}/invoices` | Customer/API | List own invoices |
 | GET | `/customers/me/orders/{orderId}/invoices/{id}/pdf` | Customer/API | Download own invoice PDF |
 
-There is no standalone collection endpoint or write endpoint for invoices — they are produced as part of the order workflow.
+There is no standalone collection endpoint or write endpoint for invoices, they are produced as part of the order workflow.
 
 ---
 
 ### Inventory / Stock Updates
 
-Fast direct-SQL stock updates — no model overhead, no observers.
+Fast direct-SQL stock updates, no model overhead, no observers.
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
@@ -640,7 +640,7 @@ Full CRUD for coupon/discount rule management + validation.
 | POST | `/coupons` | Admin/API | Create coupon + rule |
 | PUT | `/coupons/{id}` | Admin/API | Update coupon/rule |
 | DELETE | `/coupons/{id}` | Admin/API | Delete coupon + rule |
-| POST | `/coupons/validate` | None | Validate a coupon code (public — used by storefront checkouts) |
+| POST | `/coupons/validate` | None | Validate a coupon code (public, used by storefront checkouts) |
 
 **Create a coupon:**
 ```bash
@@ -808,7 +808,7 @@ curl -X POST /api/rest/v2/customers/me/revocation-requests \
 ```
 - `orderId` (int) or `orderReference` (order increment ID) identifies the order; one is required.
 - Ownership is re-checked server-side: an order that isn't the authenticated customer's returns `404`.
-- Because the customer is authenticated and owns the order, the recorded declaration is **verified** (`verified: true`) — the same trust level as the my-account web link. The declaration row is the legal receipt and is always written, even if the receipt/notification emails are suppressed.
+- Because the customer is authenticated and owns the order, the recorded declaration is **verified** (`verified: true`), the same trust level as the my-account web link. The declaration row is the legal receipt and is always written, even if the receipt/notification emails are suppressed.
 - The submission is gated by the store's cooling-off window; an order past it returns `422`.
 - Disabled revocation (`revocation/general/enabled = 0`) returns `404`.
 
@@ -862,7 +862,7 @@ curl -X PUT /api/rest/v2/revocation-requests/1234 \
 
 `captchaProvider` is one of `none`, `turnstile`, `recaptcha_v3` (or anything an installed third-party module registers). `captchaSiteKey` is `null` when the provider is `none`. Frontends use these two fields to load the matching widget client-side; for richer per-provider config the helper-based event flow described under [CAPTCHA](#captcha) is used instead.
 
-The `honeypotField` value is **deterministic per install** (derived from the encryption key) and **opaque** to the frontend — render it as a hidden input and don't expose its value, e.g. `<input type="text" name="{honeypotField}" style="display:none" tabindex="-1" autocomplete="off" />`. If a request body arrives with a non-empty value in that field, the API silently treats it as spam (returns success without sending the email). When honeypot is disabled in admin, `honeypotField` is `null` and the frontend can skip it.
+The `honeypotField` value is **deterministic per install** (derived from the encryption key) and **opaque** to the frontend, render it as a hidden input and don't expose its value, e.g. `<input type="text" name="{honeypotField}" style="display:none" tabindex="-1" autocomplete="off" />`. If a request body arrives with a non-empty value in that field, the API silently treats it as spam (returns success without sending the email). When honeypot is disabled in admin, `honeypotField` is `null` and the frontend can skip it.
 
 ---
 
@@ -922,22 +922,22 @@ All errors return JSON with an appropriate HTTP status code:
 
 ## CAPTCHA
 
-The API Platform does not bundle any CAPTCHA provider. Instead, it exposes two events that any captcha module can observe — making the system completely provider-agnostic.
+The API Platform does not bundle any CAPTCHA provider. Instead, it exposes two events that any captcha module can observe, making the system completely provider-agnostic.
 
 ### How it works
 
-**Configuration** — endpoints that need to advertise CAPTCHA settings to a frontend (e.g. `GET /contact/config`) read from store config and/or the `api_captcha_config` event. The exact fields exposed depend on the endpoint; for `/contact/config` they are flat: `captchaProvider`, `captchaSiteKey`, `enabled`. Other endpoints (or third-party modules calling `Mage::helper('apiplatform')->getCaptchaConfig()`) get the open key/value bag populated by the event.
+**Configuration**, endpoints that need to advertise CAPTCHA settings to a frontend (e.g. `GET /contact/config`) read from store config and/or the `api_captcha_config` event. The exact fields exposed depend on the endpoint; for `/contact/config` they are flat: `captchaProvider`, `captchaSiteKey`, `enabled`. Other endpoints (or third-party modules calling `Mage::helper('apiplatform')->getCaptchaConfig()`) get the open key/value bag populated by the event.
 
 The frontend uses this to load the right widget (Turnstile, reCAPTCHA, etc.) and obtain a token.
 
-**Verification** — on form submission, include the solved token as `captchaToken` in the request body. The API dispatches `api_verify_captcha` and the active module verifies it.
+**Verification**, on form submission, include the solved token as `captchaToken` in the request body. The API dispatches `api_verify_captcha` and the active module verifies it.
 
 ### Events
 
 | Event | Purpose | Observer parameters |
 |-------|---------|---------------------|
-| `api_captcha_config` | Describe the active provider to the frontend | `config` (DataObject — set `enabled`, `provider`, and any provider-specific fields like `challengeUrl` or `siteKey`) |
-| `api_verify_captcha` | Verify a submitted token | `result` (DataObject — set `verified` to `false` and `error` to a message string to reject), `data` (array — the full request body, token is in `captchaToken`) |
+| `api_captcha_config` | Describe the active provider to the frontend | `config` (DataObject, set `enabled`, `provider`, and any provider-specific fields like `challengeUrl` or `siteKey`) |
+| `api_verify_captcha` | Verify a submitted token | `result` (DataObject, set `verified` to `false` and `error` to a message string to reject), `data` (array, the full request body, token is in `captchaToken`) |
 
 ### Helper methods
 
@@ -950,7 +950,7 @@ $helper = Mage::helper('apiplatform');
 // Get config for the frontend
 $captchaConfig = $helper->getCaptchaConfig();
 
-// Verify a token — returns null on success, error message on failure
+// Verify a token, returns null on success, error message on failure
 $error = $helper->verifyCaptcha($requestData);
 if ($error !== null) {
     // reject the request
@@ -959,7 +959,7 @@ if ($error !== null) {
 
 ### Built-in: Altcha (Maho_Captcha)
 
-The native `Maho_Captcha` module observes both events out of the box using [Altcha](https://altcha.org/) — a self-hosted, privacy-friendly proof-of-work challenge that requires no third-party API calls.
+The native `Maho_Captcha` module observes both events out of the box using [Altcha](https://altcha.org/), a self-hosted, privacy-friendly proof-of-work challenge that requires no third-party API calls.
 
 ### Third-party providers
 
@@ -1022,10 +1022,10 @@ class My_Turnstile_Model_Observer
 
 The API is built on [API Platform](https://api-platform.com/) (Symfony) integrated with Maho Commerce (PHP 8.3+, fork of OpenMage/Magento 1).
 
-- **Entry point:** `public/rest.php` — bootstraps Maho, then hands off to Symfony
-- **Resources:** PHP 8 `#[ApiResource]` DTOs — all extend `\Maho\ApiPlatform\Resource`
-- **Providers:** State providers (read operations) — all extend `\Maho\ApiPlatform\Provider`
-- **Processors:** State processors (write operations) — all extend `\Maho\ApiPlatform\Processor`
+- **Entry point:** `public/rest.php`, bootstraps Maho, then hands off to Symfony
+- **Resources:** PHP 8 `#[ApiResource]` DTOs, all extend `\Maho\ApiPlatform\Resource`
+- **Providers:** State providers (read operations), all extend `\Maho\ApiPlatform\Provider`
+- **Processors:** State processors (write operations), all extend `\Maho\ApiPlatform\Processor`
 - **Event listeners:** Symfony listeners for cross-cutting concerns (caching, idempotency)
 - **Authentication:** JWT (HS256) via Firebase JWT library
 
@@ -1122,7 +1122,7 @@ Live under `app/code/core/Maho/ApiPlatform/symfony/Service/`:
 
 | Service | Purpose |
 |---|---|
-| `StoreContext` | Store scope management — `ensureStore()`, `getStoreId()`, `storeIdsToStoreCodes()`, `isAvailableForStore()` |
+| `StoreContext` | Store scope management, `ensureStore()`, `getStoreId()`, `storeIdsToStoreCodes()`, `isAvailableForStore()` |
 | `JwtService` | JWT issuance/validation for customer and API-user tokens |
 | `TokenBlacklist` | Tracks revoked JWT IDs (used by `/auth/logout` and on password change) |
 | `StoreDefaults` | Resolves default values per store (currency, locale, etc.) used during DTO building |
@@ -1135,15 +1135,15 @@ All web servers must route the new API URLs (`/api/rest/v2/*`, `/api/graphql`, `
 
 ### Why rest.php, not index.php?
 
-`rest.php` boots the Symfony API Platform kernel directly. `index.php` boots the full Maho front-controller stack and then hands off to Symfony via `Maho_ApiPlatform_IndexController::indexAction`. The first path is ~50-100 ms faster per request — noticeable under chatty API clients (POS terminals, headless storefronts making 5-10 requests per user action).
+`rest.php` boots the Symfony API Platform kernel directly. `index.php` boots the full Maho front-controller stack and then hands off to Symfony via `Maho_ApiPlatform_IndexController::indexAction`. The first path is ~50-100 ms faster per request, noticeable under chatty API clients (POS terminals, headless storefronts making 5-10 requests per user action).
 
 Both paths end up at the same Symfony kernel; `rest.php` is just leaner. Maho is still initialised inside `rest.php` so store context, models, and config are available to API Platform resolvers.
 
 ### Router-shim fallback for environments without rewrite rules
 
-For environments where web-server rewrite rules aren't configured (FrankenPHP with default Caddyfile, `php -S` dev servers, shared hosting without mod_rewrite), Maho also routes the canonical Symfony URLs `/api/graphql` and `/api/docs` through `index.php` via `GraphqlController`/`DocsController` shims that forward to `IndexController::indexAction()`. This means `/api/graphql` will work even without the web-server configuration below — just ~50 ms slower per request. REST resource paths (`/api/rest/v2/products`, `/api/rest/v2/cart`, etc.) still require the rewrite rules below to route through `rest.php`.
+For environments where web-server rewrite rules aren't configured (FrankenPHP with default Caddyfile, `php -S` dev servers, shared hosting without mod_rewrite), Maho also routes the canonical Symfony URLs `/api/graphql` and `/api/docs` through `index.php` via `GraphqlController`/`DocsController` shims that forward to `IndexController::indexAction()`. This means `/api/graphql` will work even without the web-server configuration below, just ~50 ms slower per request. REST resource paths (`/api/rest/v2/products`, `/api/rest/v2/cart`, etc.) still require the rewrite rules below to route through `rest.php`.
 
-The bundled `public/.htaccess` already implements this routing — the snippets below are for installations using nginx/Caddy or for operators who need to replicate the behaviour in a different web server.
+The bundled `public/.htaccess` already implements this routing, the snippets below are for installations using nginx/Caddy or for operators who need to replicate the behaviour in a different web server.
 
 ### Legacy SOAP / XMLRPC / JSONRPC
 
@@ -1154,7 +1154,7 @@ The bundled `public/.htaccess` already implements this routing — the snippets 
 Add these blocks **before** the main `location /` block in your nginx config.
 
 ```nginx
-# API Platform endpoints (new REST + GraphQL + docs) — no basic auth required.
+# API Platform endpoints (new REST + GraphQL + docs), no basic auth required.
 # Matches /api/rest/v2/*, /api/graphql, /api/admin/graphql, /api/docs.
 # Explicitly EXCLUDES legacy paths (/api/rest, /api/soap, /api/v2_soap,
 # /api/xmlrpc, /api/jsonrpc) so the original Magento 1 controllers keep
@@ -1316,7 +1316,7 @@ maho.example.com {
     }
 }
 
-# Worker mode (optional — persistent PHP workers for better performance)
+# Worker mode (optional, persistent PHP workers for better performance)
 # Uncomment to use FrankenPHP worker mode with rest.php:
 #
 # {
@@ -1361,7 +1361,7 @@ After adding or modifying the attribute, run `composer dump-autoload`. The compi
 
 ### Auto-derivation
 
-Most permission-registry fields are derived from the API Platform metadata on the same attribute — set them explicitly only when defaults are wrong:
+Most permission-registry fields are derived from the API Platform metadata on the same attribute, set them explicitly only when defaults are wrong:
 
 | Maho field         | Derived from when omitted                                          |
 |--------------------|--------------------------------------------------------------------|
@@ -1369,16 +1369,16 @@ Most permission-registry fields are derived from the API Platform metadata on th
 | `mahoLabel`        | Title-cased `mahoId` (`cms-pages` → `CMS Pages`; ≤3-char segments are upper-cased as acronyms) |
 | `mahoSection`      | Module segment of the namespace (`Mage\Catalog\Api\Foo` → `'Catalog'`) |
 | `mahoOperations`   | One entry per operation type present in `operations: [...]`. Default labels: `read`/`create`/`write`/`delete` → `View`/`Create`/`Update`/`Delete` |
-| `mahoRestSegments` | The resource id itself. Augmented (not replaced) by your override — declare only the *additional* segments (e.g. Cart adds `'guest-carts'`) |
-| `mahoGraphQlFields`| Each camelCase `name:` from `graphQlOperations[]`. Snake_case names (`item_query`, `add_cart_item`) are skipped — those are API Platform's internal operation identifiers, not schema fields. Augmented by your override for handler-defined fields (e.g. mutations declared in `*MutationHandler` classes the compiler can't see) |
+| `mahoRestSegments` | The resource id itself. Augmented (not replaced) by your override, declare only the *additional* segments (e.g. Cart adds `'guest-carts'`) |
+| `mahoGraphQlFields`| Each camelCase `name:` from `graphQlOperations[]`. Snake_case names (`item_query`, `add_cart_item`) are skipped, those are API Platform's internal operation identifiers, not schema fields. Augmented by your override for handler-defined fields (e.g. mutations declared in `*MutationHandler` classes the compiler can't see) |
 | `mahoPublicRead`   | `true` when every read operation has `security: 'true'`. Override explicitly only if your read security expression doesn't use that literal form |
-| `mahoCustomerScoped` | No equivalent — must be explicit for resources bound to a logged-in customer (carts, wishlists, addresses, etc.) |
+| `mahoCustomerScoped` | No equivalent, must be explicit for resources bound to a logged-in customer (carts, wishlists, addresses, etc.) |
 
-For customer-scoped resources, the parent's `description:` doubles as admin-UI prose — the compiler reads it via `getDescription()` and surfaces it in the role editor. Write it as action-oriented prose ("View cart, add/remove items, apply coupons, set shipping & payment") so it's useful for both API docs and admins.
+For customer-scoped resources, the parent's `description:` doubles as admin-UI prose, the compiler reads it via `getDescription()` and surfaces it in the role editor. Write it as action-oriented prose ("View cart, add/remove items, apply coupons, set shipping & payment") so it's useful for both API docs and admins.
 
 ### Forward-looking resources (no DTO yet)
 
-Permissions for endpoints you plan to build but haven't shipped go on a stub class with `operations: []` (explicit empty — *not* `null`, which would trigger API Platform's CRUD defaults). API Platform sees the resource but registers zero routes; only the maho fields populate the permission registry. Delete the stub when the real DTO ships.
+Permissions for endpoints you plan to build but haven't shipped go on a stub class with `operations: []` (explicit empty, *not* `null`, which would trigger API Platform's CRUD defaults). API Platform sees the resource but registers zero routes; only the maho fields populate the permission registry. Delete the stub when the real DTO ships.
 
 ```php
 namespace MyVendor\MyModule\PermissionStubs;
@@ -1397,21 +1397,21 @@ final class WidgetAttributes {}
 
 ### Multiple `#[ApiResource]` on one class
 
-The attribute is repeatable — a single class can carry several declarations with different `uriTemplate` / `operations` sets that share one permission identity (the Cms `Media` DTO uses this pattern for `/media` and `/media/{path}`). Just give each attribute the same `mahoId` and the compiler unions their segments and GraphQL fields under one registry entry.
+The attribute is repeatable, a single class can carry several declarations with different `uriTemplate` / `operations` sets that share one permission identity (the Cms `Media` DTO uses this pattern for `/media` and `/media/{path}`). Just give each attribute the same `mahoId` and the compiler unions their segments and GraphQL fields under one registry entry.
 
 ## Extending the API (Third-Party Modules)
 
-All API resources extend `\Maho\ApiPlatform\Resource`, which provides an `extensions` field — an open array where modules can inject additional data without modifying core API files. The base class also provides a `toArray()` method for serializing DTOs (used by GraphQL handlers).
+All API resources extend `\Maho\ApiPlatform\Resource`, which provides an `extensions` field, an open array where modules can inject additional data without modifying core API files. The base class also provides a `toArray()` method for serializing DTOs (used by GraphQL handlers).
 
 Providers build DTOs via `toDto($model)` (the abstract method on the `Provider` base class). A handful of providers (Order, Category, Address, Customer, Product, Cart) also expose a public `mapToDto()` method with domain-specific extra arguments, used directly from GraphQL handlers and custom processors when they need a consistent representation including extensions.
 
 ### How It Works
 
-Every resource DTO (Product, Category, Cart, Order, etc.) dispatches a Maho event after building the response object. Your module observes the event and appends data to `$dto->extensions`. These events fire for both **REST and GraphQL** — the GraphQL handlers use the same Provider/Mapper DTO-building methods as REST, ensuring consistent behavior across both APIs.
+Every resource DTO (Product, Category, Cart, Order, etc.) dispatches a Maho event after building the response object. Your module observes the event and appends data to `$dto->extensions`. These events fire for both **REST and GraphQL**, the GraphQL handlers use the same Provider/Mapper DTO-building methods as REST, ensuring consistent behavior across both APIs.
 
 ### Event area: `api`
 
-The API Platform loads a dedicated `api` event area (`Mage_Core_Model_App_Area::AREA_API`), similar to `frontend` and `adminhtml`. Observers registered under `<api><events>` in `config.xml` only load when the API is running — they won't fire on regular frontend, admin, or cron requests.
+The API Platform loads a dedicated `api` event area (`Mage_Core_Model_App_Area::AREA_API`), similar to `frontend` and `adminhtml`. Observers registered under `<api><events>` in `config.xml` only load when the API is running, they won't fire on regular frontend, admin, or cron requests.
 
 ### Available Events
 
@@ -1529,10 +1529,10 @@ class Vendor_SimpleBundles_Model_Api_Observer
 
 ### Guidelines
 
-- **Namespace your data** — use a unique key in `extensions` (e.g. `simpleBundle`, not `items`)
-- **Keep it lightweight** — avoid loading heavy collections in listing mode (check `for_listing`)
-- **Return serializable data** — arrays and scalars only, no objects
-- **Extensions are read-only** — the `extensions` field is populated during read operations; for write operations, use standard Maho model events or custom API processors
+- **Namespace your data**, use a unique key in `extensions` (e.g. `simpleBundle`, not `items`)
+- **Keep it lightweight**, avoid loading heavy collections in listing mode (check `for_listing`)
+- **Return serializable data**, arrays and scalars only, no objects
+- **Extensions are read-only**, the `extensions` field is populated during read operations; for write operations, use standard Maho model events or custom API processors
 
 ## Deployment Notes
 
@@ -1558,4 +1558,4 @@ Run this whenever module API resources change (new/modified `#[ApiResource]` cla
 
 ### Cache invalidation
 
-The container cache is keyed by class file mtimes; a normal deploy that overwrites files invalidates it automatically. If you ever need to force a rebuild manually, delete `var/cache/api_platform/{env}/` — the next request will recompile.
+The container cache is keyed by class file mtimes; a normal deploy that overwrites files invalidates it automatically. If you ever need to force a rebuild manually, delete `var/cache/api_platform/{env}/`, the next request will recompile.

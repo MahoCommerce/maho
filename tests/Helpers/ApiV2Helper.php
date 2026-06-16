@@ -243,7 +243,7 @@ class ApiV2Helper
     }
 
     /**
-     * HTTP OPTIONS request — primarily for CORS preflight.
+     * HTTP OPTIONS request, primarily for CORS preflight.
      *
      * @param array<string, string> $extraHeaders
      * @return array{status: int, json: array, raw: string, headers: array}
@@ -518,7 +518,7 @@ class ApiV2Helper
                 \Mage::app();
                 $bootstrapped = true;
             } catch (\Throwable $e) {
-                // Unable to bootstrap — DB lookups will use fallbacks
+                // Unable to bootstrap, DB lookups will use fallbacks
             }
         }
     }

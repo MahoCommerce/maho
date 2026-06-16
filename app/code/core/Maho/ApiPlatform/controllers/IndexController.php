@@ -17,7 +17,7 @@ declare(strict_types=1);
  * and forward to the original Mage_Api_*Controller classes.
  *
  * Each protocol is gated behind the apiplatform/protocols/* config flag and
- * defaults to disabled — operators must opt in explicitly.
+ * defaults to disabled, operators must opt in explicitly.
  */
 class Maho_ApiPlatform_IndexController extends Mage_Core_Controller_Front_Action
 {

@@ -11,7 +11,7 @@
             <groups>
                 <protocols translate="label comment">
                     <label>API Protocols</label>
-                    <comment><![CDATA[All API protocols are <strong>disabled by default</strong>. Enable only the ones you actually use — anything off returns 404 at the entry point.]]></comment>
+                    <comment><![CDATA[All API protocols are <strong>disabled by default</strong>. Enable only the ones you actually use, anything off returns 404 at the entry point.]]></comment>
                     <sort_order>5</sort_order>
                     <show_in_default>1</show_in_default>
                     <fields>
@@ -24,7 +24,7 @@
                             <show_in_default>1</show_in_default>
                         </rest_v2>
                         <graphql translate="label comment">
-                            <label>GraphQL — public</label>
+                            <label>GraphQL, public</label>
                             <comment>Storefront/customer-facing GraphQL at /api/graphql</comment>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
@@ -32,7 +32,7 @@
                             <show_in_default>1</show_in_default>
                         </graphql>
                         <admin_graphql translate="label comment">
-                            <label>GraphQL — admin</label>
+                            <label>GraphQL, admin</label>
                             <comment>Admin GraphQL at /api/admin/graphql (requires admin auth)</comment>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>

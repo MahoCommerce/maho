@@ -63,7 +63,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
 
         // Single customer lookup. Admin tokens can read any customer (admins
         // are gated by Maho ACL anyway). API-user tokens must hold the
-        // explicit customers/read permission to cross customer boundaries —
+        // explicit customers/read permission to cross customer boundaries,
         // otherwise the bare ROLE_API_USER would let any client_credentials
         // key dump every customer's profile + addresses. ROLE_USER (a
         // customer's own token) falls through to authorizeCustomerAccess(),

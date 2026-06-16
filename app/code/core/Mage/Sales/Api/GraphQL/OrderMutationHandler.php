@@ -427,7 +427,7 @@ class OrderMutationHandler
         // Add GraphQL-specific computed fields
         $data['canRefund'] = $order->canCreditmemo();
 
-        // Enrich items with returnable qty — align by item ID
+        // Enrich items with returnable qty, align by item ID
         $orderItemsById = [];
         foreach ($order->getAllVisibleItems() as $item) {
             $orderItemsById[(int) $item->getId()] = $item;

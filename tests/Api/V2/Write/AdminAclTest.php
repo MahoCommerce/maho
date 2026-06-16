@@ -41,7 +41,7 @@ function adminTokenWithAcl(array $allowedAclPaths, string $username): string
     ApiV2Helper::ensureMahoBootstrapped();
 
     // The JWT secret is auto-generated on the kernel's first HTTP boot.
-    // Trigger it with a public no-auth request before issuing tokens —
+    // Trigger it with a public no-auth request before issuing tokens,
     // mirrors what apiGet/apiPost do implicitly in other tests, but those
     // tests issue tokens after their first HTTP call.
     static $kernelBooted = false;
@@ -92,7 +92,7 @@ function adminTokenWithAcl(array $allowedAclPaths, string $username): string
     ]);
 }
 
-describe('Admin ACL — REST', function (): void {
+describe('Admin ACL, REST', function (): void {
 
     it('grants access when the admin role allows the resource', function (): void {
         $token = adminTokenWithAcl(['catalog/products'], 'pest_acl_grant');
@@ -103,7 +103,7 @@ describe('Admin ACL — REST', function (): void {
     });
 
     it('denies (403) when the admin role does NOT include the resource', function (): void {
-        // Role grants catalog only — credit-memo creation requires
+        // Role grants catalog only, credit-memo creation requires
         // sales/creditmemo and must be denied.
         $token = adminTokenWithAcl(['catalog/products'], 'pest_acl_deny_creditmemo');
         $response = apiPost(
@@ -125,7 +125,7 @@ describe('Admin ACL — REST', function (): void {
 
     it('non-admin tokens are not affected by AdminAclListener', function (): void {
         // A service token (ROLE_API_USER) with explicit cms-pages permission
-        // must work — AdminAclListener must skip non-admin tokens entirely.
+        // must work, AdminAclListener must skip non-admin tokens entirely.
         $token = serviceToken(['cms_pages/all']);
         $response = apiGet('/api/rest/v2/cms-pages', $token);
         expect($response['status'])->not->toBe(403);

@@ -105,7 +105,7 @@ describe('GraphQL Cart - Query Cart', function (): void {
 
         $cart = $response['json']['data']['getCartByMaskedIdCart'] ?? null;
         if ($cart === null) {
-            $this->markTestSkipped('GraphQL Query operations do not invoke the state provider — known API Platform limitation');
+            $this->markTestSkipped('GraphQL Query operations do not invoke the state provider, known API Platform limitation');
         }
 
         expect($cart['maskedId'])->toBe($maskedId);

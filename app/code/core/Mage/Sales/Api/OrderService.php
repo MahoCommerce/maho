@@ -73,7 +73,7 @@ class OrderService
             $quote->setData('employee_id', $employeeId);
         }
 
-        // Re-validate gift-card balances against the live DB before locking —
+        // Re-validate gift-card balances against the live DB before locking,
         // a card spent elsewhere since apply time must not discount this order.
         (new CartService())->revalidateGiftcards($quote);
 
@@ -82,7 +82,7 @@ class OrderService
 
         // Serialize concurrent placement attempts on the same quote. Without
         // this, two simultaneous POSTs both pass the is_active check above and
-        // submit the same cart twice — duplicate orders, double inventory
+        // submit the same cart twice, duplicate orders, double inventory
         // decrement. GET_LOCK gives us a per-quote critical section that
         // releases on disconnect, so a crashed worker can't deadlock the cart.
         $resource = \Mage::getSingleton('core/resource');
@@ -94,7 +94,7 @@ class OrderService
         }
 
         try {
-            // Re-read is_active under the lock — another request may have
+            // Re-read is_active under the lock, another request may have
             // converted this quote while we were waiting.
             $stillActive = (int) $write->fetchOne(
                 $write->select()

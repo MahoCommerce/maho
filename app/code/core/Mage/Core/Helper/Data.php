@@ -863,7 +863,7 @@ XML;
      * Returns true if the rate limit is exceeded.
      *
      * When called without $key/$maxAttempts/$windowSeconds, uses IP-based limiting
-     * with the store config (system/rate_limit/*) — preserving original behavior.
+     * with the store config (system/rate_limit/*), preserving original behavior.
      *
      * When called with explicit parameters, performs sliding-window rate limiting
      * on the given key (ignores the system/rate_limit/active config flag).
@@ -950,7 +950,7 @@ XML;
      * scrapes one Maho install can't blanket-target all of them).
      *
      * Defeats random spambot armies. For targeted attackers (who can
-     * scrape the rendered form), pair with captcha — that's what the
+     * scrape the rendered form), pair with captcha, that's what the
      * `api_captcha_config` / `api_verify_captcha` events are for.
      */
     public function getHoneypotFieldName(): string

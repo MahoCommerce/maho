@@ -67,12 +67,18 @@ describe('GET /api/rest/v2/orders', function (): void {
         expect($response['status'])->toBeUnauthorized();
     });
 
-    it('prevents non-admin from listing all orders', function (): void {
-        $response = apiGet('/api/rest/v2/orders', customerToken());
+    it('prevents a customer from reading another account\'s order by id', function (): void {
+        $orderId = fixtures('order_id');
+        if (!$orderId) {
+            $this->markTestSkipped('No order_id configured in fixtures');
+        }
 
-        // Regular customer should only see their own orders or be forbidden
-        // Depending on implementation, this could be 403 or filtered results
-        expect($response['status'])->toBeGreaterThanOrEqual(200);
+        // The fixture order is sourced independently of the test customer, so a
+        // customer token must not be able to read it: expect a hard deny, never
+        // a 200 leaking the order body (the IDOR property this endpoint needs).
+        $response = apiGet("/api/rest/v2/orders/{$orderId}", customerToken());
+
+        expect($response['status'])->toBeIn([403, 404]);
     });
 
 });
@@ -166,9 +172,20 @@ describe('GET /api/rest/v2/customers/me/orders', function (): void {
         it('only returns orders belonging to authenticated customer', function (): void {
             $response = apiGet('/api/rest/v2/customers/me/orders', customerToken());
 
-            // Each order should belong to the authenticated customer
-            // The API handles this filtering automatically
             expect($response['status'])->toBeSuccessful();
+
+            $orders = $response['json']['member'] ?? $response['json']['hydra:member'] ?? $response['json'] ?? [];
+            if (empty($orders) || !isset($orders[0])) {
+                $this->markTestSkipped('No orders available to verify ownership');
+            }
+
+            // Every returned order must belong to the authenticated customer.
+            $email = fixtures('customer_email');
+            foreach ($orders as $order) {
+                if (isset($order['customerEmail'])) {
+                    expect($order['customerEmail'])->toBe($email);
+                }
+            }
         });
 
     });

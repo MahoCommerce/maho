@@ -263,7 +263,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         }
         $attrData = array_filter($attrData, fn($key) => in_array($key, $validAttrCodes), ARRAY_FILTER_USE_KEY);
 
-        // Bulk EAV update — bypasses model save, observers, URL rewrites
+        // Bulk EAV update, bypasses model save, observers, URL rewrites
         if (!empty($attrData)) {
             try {
                 Mage::getSingleton('catalog/product_action')

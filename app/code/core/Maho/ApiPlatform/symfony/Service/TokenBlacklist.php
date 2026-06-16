@@ -11,58 +11,90 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Service;
 
 /**
- * JWT token blacklist for logout/revocation using the Mage cache backend.
+ * JWT token blacklist for logout/revocation, backed by a durable DB table.
  *
- * This automatically benefits from whatever cache backend is configured
- * (file, Redis, memcached), including multi-server deployments.
+ * A DB store (not the Mage cache) is used deliberately: a routine cache flush
+ * must not resurrect a revoked token. Expired rows are pruned opportunistically.
  */
 class TokenBlacklist
 {
-    private const CACHE_PREFIX = 'API_TOKEN_BLACKLIST_';
-    private const CACHE_TAG = 'API_TOKEN_BLACKLIST';
+    private const TABLE = 'maho_api_revoked_tokens';
 
     public function revoke(string $jti, int $expiresAt): void
     {
-        $ttl = $expiresAt - time();
-        if ($ttl <= 0) {
+        if ($expiresAt - time() <= 0) {
             return;
         }
 
-        $key = self::cacheKey($jti);
-        if ($key === null) {
+        $jti = self::normalizeJti($jti);
+        if ($jti === null) {
             return;
         }
 
-        \Mage::app()->getCache()->save(
-            (string) $expiresAt,
-            $key,
-            [self::CACHE_TAG],
-            $ttl,
+        $resource = \Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $table = $resource->getTableName(self::TABLE);
+
+        // INSERT ... ON DUPLICATE so re-revoking a jti just refreshes expiry.
+        $write->insertOnDuplicate(
+            $table,
+            ['jti' => $jti, 'expires_at' => $expiresAt],
+            ['expires_at'],
         );
     }
 
     public function isRevoked(string $jti): bool
     {
-        $key = self::cacheKey($jti);
-        if ($key === null) {
+        $jti = self::normalizeJti($jti);
+        if ($jti === null) {
             // Reject malformed JTIs by treating them as revoked rather than
-            // collapsing non-hex characters into a shared bucket where
-            // 'aaa@bbb' and 'aaabbb' would share blacklist state.
+            // querying with a value that can never have been issued.
             return true;
         }
-        return \Mage::app()->getCache()->load($key) !== false;
+
+        $resource = \Mage::getSingleton('core/resource');
+        $read = $resource->getConnection('core_read');
+        $table = $resource->getTableName(self::TABLE);
+
+        $expiresAt = $read->fetchOne(
+            $read->select()
+                ->from($table, ['expires_at'])
+                ->where('jti = ?', $jti),
+        );
+
+        if ($expiresAt === false || $expiresAt === null) {
+            return false;
+        }
+
+        // A row past its expiry no longer needs to block the token; clean it up.
+        if ((int) $expiresAt <= time()) {
+            $this->purgeExpired();
+            return false;
+        }
+
+        return true;
     }
 
     /**
-     * Build the cache key for a JTI, or null when the JTI is malformed.
-     * JwtService issues hex JTIs (`bin2hex(random_bytes(16))`), so anything
-     * else is suspicious and rejected rather than silently normalized.
+     * Delete revocation rows whose tokens have already expired.
      */
-    private static function cacheKey(string $jti): ?string
+    public function purgeExpired(): void
+    {
+        $resource = \Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $table = $resource->getTableName(self::TABLE);
+        $write->delete($table, ['expires_at <= ?' => time()]);
+    }
+
+    /**
+     * Normalize a JTI, or null when malformed. JwtService issues hex JTIs
+     * (`bin2hex(random_bytes(16))`), so anything else is rejected.
+     */
+    private static function normalizeJti(string $jti): ?string
     {
         if ($jti === '' || !preg_match('/^[a-f0-9]+$/i', $jti)) {
             return null;
         }
-        return self::CACHE_PREFIX . strtolower($jti);
+        return strtolower($jti);
     }
 }

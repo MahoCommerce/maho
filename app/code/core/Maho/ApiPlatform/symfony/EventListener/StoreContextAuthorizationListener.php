@@ -19,7 +19,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 /**
  * Validates the user's right to operate in the store switched in by
- * StoreContextListener. Runs at priority 6 — after the firewall (8) and
+ * StoreContextListener. Runs at priority 6, after the firewall (8) and
  * GraphQlPermissionListener (7), so the security token is populated.
  *
  * - ROLE_API_USER tokens carry `allowedStoreIds`; the requested store must

@@ -53,7 +53,7 @@ class ApiPermissionRegistry
 
     /**
      * Lazy-load the compiled permissions file. Returns an empty registry and logs
-     * a warning if the file is missing — the API is then effectively closed (most
+     * a warning if the file is missing, the API is then effectively closed (most
      * non-public endpoints deny), which is the safer failure mode than open-by-default.
      *
      * @return array{
@@ -74,7 +74,7 @@ class ApiPermissionRegistry
 
         if (!is_file($path)) {
             \Mage::log(
-                'ApiPermissionRegistry: ' . $path . ' is missing — run `composer dump-autoload`. '
+                'ApiPermissionRegistry: ' . $path . ' is missing, run `composer dump-autoload`. '
                 . 'Falling back to empty registry; API permission checks will deny most requests.',
                 \Mage::LOG_WARNING,
             );
@@ -100,7 +100,7 @@ class ApiPermissionRegistry
 
     /**
      * Mutation field name prefixes that map to the 'create' operation.
-     * Heuristic — not data — so it stays in the class, not in the attribute.
+     * Heuristic, not data, so it stays in the class, not in the attribute.
      */
     private const CREATE_PREFIXES = ['place', 'create', 'register', 'submit', 'subscribe'];
 
@@ -286,14 +286,17 @@ class ApiPermissionRegistry
                 }
 
                 $resource = $fieldMap[$fieldName] ?? null;
-                if ($resource === null) {
-                    continue;
-                }
 
                 if ($operationType === 'query') {
+                    if ($resource === null) {
+                        continue;
+                    }
                     $permissions[] = $resource . '/read';
                 } else {
-                    // Mutation — check if it's a 'create' operation
+                    // Mutation. An unmapped field must fail closed: emit a
+                    // permission keyed on the raw field name that no api_user
+                    // holds and that trips the admin write block, rather than
+                    // skipping it (which would bypass enforcement entirely).
                     $isCreate = false;
                     foreach (self::CREATE_PREFIXES as $prefix) {
                         if (str_starts_with(strtolower($fieldName), $prefix)) {
@@ -301,7 +304,7 @@ class ApiPermissionRegistry
                             break;
                         }
                     }
-                    $permissions[] = $resource . '/' . ($isCreate ? 'create' : 'write');
+                    $permissions[] = ($resource ?? $fieldName) . '/' . ($isCreate ? 'create' : 'write');
                 }
             }
         }

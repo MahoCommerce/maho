@@ -407,7 +407,7 @@
 "This website cannot be deleted.","This website cannot be deleted."
 "This will be displayed just before body closing tag.","This will be displayed just before body closing tag."
 "This will be included before head closing tag in page HTML.","This will be included before head closing tag in page HTML."
-"Throttle public endpoints that send emails or accept content. Independent of the IP-based limit above. Each value is the number of requests allowed per time-window for the named endpoint; <strong>set to 0 to disable that limit</strong>. Fields are contributed by the modules that own each feature — the list shrinks/grows with installed modules.","Throttle public endpoints that send emails or accept content. Independent of the IP-based limit above. Each value is the number of requests allowed per time-window for the named endpoint; <strong>set to 0 to disable that limit</strong>. Fields are contributed by the modules that own each feature — the list shrinks/grows with installed modules."
+"Throttle public endpoints that send emails or accept content. Independent of the IP-based limit above. Each value is the number of requests allowed per time-window for the named endpoint; <strong>set to 0 to disable that limit</strong>. Fields are contributed by the modules that own each feature, the list shrinks/grows with installed modules.","Throttle public endpoints that send emails or accept content. Independent of the IP-based limit above. Each value is the number of requests allowed per time-window for the named endpoint; <strong>set to 0 to disable that limit</strong>. Fields are contributed by the modules that own each feature, the list shrinks/grows with installed modules."
 "Timeframe","Timeframe"
 "Timezone","Timezone"
 "Title Prefix","Title Prefix"

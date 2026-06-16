@@ -157,7 +157,7 @@ function enableRevocation(): void
         $config->saveConfig('revocation/general/cooling_off_days', '0', 'default', 0);
         \Mage::app()->getCache()->cleanType('config');
     } catch (\Throwable $e) {
-        // DB not available — the test will skip on the availability check.
+        // DB not available, the test will skip on the availability check.
     }
 }
 

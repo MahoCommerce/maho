@@ -34,7 +34,7 @@ class CartService
         if ($storeId) {
             $quote->setStoreId($storeId);
         } else {
-            // Use the default store — Mage::app()->getStore() returns admin (0) under Symfony
+            // Use the default store, Mage::app()->getStore() returns admin (0) under Symfony
             $defaultStore = \Mage::app()->getDefaultStoreView();
             if (!$defaultStore) {
                 throw new \RuntimeException('No default store view configured');
@@ -229,7 +229,7 @@ class CartService
             throw new \RuntimeException("Product with SKU '{$sku}' not found");
         }
 
-        // Status gate — addProduct does not check this itself, so without an
+        // Status gate, addProduct does not check this itself, so without an
         // explicit guard a disabled SKU is addable through the public API.
         if ((int) $product->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
             throw new \RuntimeException("Product '{$sku}' is not available");
@@ -342,7 +342,7 @@ class CartService
             $buyRequest->setData('options', $currentOptions);
         }
 
-        // Inject API file uploads into buyRequest (prevents forgery — uses DataObject pattern)
+        // Inject API file uploads into buyRequest (prevents forgery, uses DataObject pattern)
         if (!empty($options['options_files'])) {
             $optionsFiles = [];
             foreach ($options['options_files'] as $optionId => $fileData) {
@@ -449,12 +449,37 @@ class CartService
         $quote->collectTotals();
         $quote->save();
 
-        // Verify coupon was applied successfully
-        if ($quote->getCouponCode() !== $couponCode) {
+        // setCouponCode() persists the string even when the rule does not fire
+        // (inactive/expired/exhausted/wrong website). Confirm the coupon's rule
+        // actually applied by checking the rule id landed on a quote address.
+        if ($quote->getCouponCode() !== $couponCode || !$this->isCouponRuleApplied($quote, (int) $coupon->getRuleId())) {
+            $quote->setCouponCode('');
+            $quote->setTotalsCollectedFlag(false);
+            $quote->collectTotals()->save();
             throw new \RuntimeException("Coupon code '{$couponCode}' could not be applied");
         }
 
         return $quote;
+    }
+
+    /**
+     * Whether the given salesrule rule id fired on any quote address after
+     * totals collection (i.e. the coupon genuinely applied).
+     */
+    private function isCouponRuleApplied(\Mage_Sales_Model_Quote $quote, int $ruleId): bool
+    {
+        if ($ruleId === 0) {
+            return false;
+        }
+        foreach ($quote->getAllAddresses() as $address) {
+            $ruleIds = $address->getAppliedRuleIds();
+            $ruleIds = is_string($ruleIds) ? $ruleIds : '';
+            $applied = array_filter(explode(',', $ruleIds), static fn(string $id): bool => $id !== '');
+            if (in_array((string) $ruleId, $applied, true)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -511,6 +536,11 @@ class CartService
             throw new \RuntimeException('Gift card "' . $giftcardCode . '" is not active');
         }
 
+        // Gift cards are scoped to the website that issued them
+        if (!$giftcard->isValidForWebsite((int) $quote->getStore()->getWebsiteId())) {
+            throw new \RuntimeException('Gift card "' . $giftcardCode . '" is not valid for this store');
+        }
+
         // Get currently applied codes
         $appliedCodes = $quote->getGiftcardCodes();
         $appliedCodes = $appliedCodes ? json_decode($appliedCodes, true) : [];
@@ -550,10 +580,11 @@ class CartService
 
         $changed = false;
         $quoteCurrency = $quote->getQuoteCurrencyCode();
+        $websiteId = (int) $quote->getStore()->getWebsiteId();
 
         foreach ($applied as $code => $snapshotBalance) {
             $card = \Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
-            if (!$card->getId() || !$card->isValid()) {
+            if (!$card->getId() || !$card->isValidForWebsite($websiteId)) {
                 throw new \RuntimeException('Gift card "' . $code . '" is no longer valid');
             }
 
@@ -816,12 +847,19 @@ class CartService
     public function mergeCarts(string $guestMaskedId, int $customerId): \Mage_Sales_Model_Quote
     {
         $guestCartId = $this->getCartIdFromMaskedId($guestMaskedId);
-        // Use loadByIdWithoutStore — admin context may sit on a different store
+        // Use loadByIdWithoutStore, admin context may sit on a different store
         // than the guest cart, and store-scoped load() would return an empty
         // quote even though the masked-ID lookup just resolved successfully.
         $guestCart = \Mage::getModel('sales/quote')->loadByIdWithoutStore($guestCartId);
 
         if (!$guestCart->getId()) {
+            throw new \RuntimeException('Guest cart not found');
+        }
+
+        // Only genuine guest carts may be merged. Reject a masked ID that
+        // resolves to another customer's cart so it cannot be absorbed.
+        $sourceCustomerId = $guestCart->getCustomerId();
+        if (!$guestCart->getCustomerIsGuest() && $sourceCustomerId && (int) $sourceCustomerId !== $customerId) {
             throw new \RuntimeException('Guest cart not found');
         }
 
@@ -953,12 +991,12 @@ class CartService
             $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
         }
 
-        // Ensure quote has addresses — collectTotals() calculates per-address,
+        // Ensure quote has addresses, collectTotals() calculates per-address,
         // so without addresses all totals (including discounts) return 0
         $quote->getBillingAddress();
         $quote->getShippingAddress();
 
-        // Clear address item cache — getAllItems() caches its result, so if collectTotals
+        // Clear address item cache, getAllItems() caches its result, so if collectTotals
         // was called before the item was added (e.g. during cart creation), the cache is stale.
         foreach ($quote->getAllAddresses() as $address) {
             $address->unsetData('cached_items_all');

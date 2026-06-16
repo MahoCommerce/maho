@@ -190,7 +190,7 @@ describe('GraphQL Category By URL Key Query', function (): void {
         $result = $lookupResponse['json']['data']['categoryByUrlKeyCategory'];
         if ($result === null) {
             // Known issue: categoryByUrlKey custom query may return null
-            $this->markTestSkipped('categoryByUrlKeyCategory returns null — provider may not be implemented for this operation');
+            $this->markTestSkipped('categoryByUrlKeyCategory returns null, provider may not be implemented for this operation');
         }
 
         expect($result['urlKey'])->toBe($urlKey);

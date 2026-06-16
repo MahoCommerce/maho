@@ -18,7 +18,7 @@ afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Downloadable Links — CRUD Lifecycle', function (): void {
+describe('Downloadable Links, CRUD Lifecycle', function (): void {
 
     it('reads existing downloadable links', function (): void {
         // Product 448 is a known downloadable product

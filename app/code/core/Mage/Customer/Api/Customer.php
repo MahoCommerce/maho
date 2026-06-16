@@ -184,7 +184,7 @@ class Customer extends CrudResource
     // readableLink: true embeds the Address resource inline rather than
     // serialising as a hydra IRI string. Storefront / headless clients
     // building an address-management UI need the full address shape
-    // (id, firstname, street, etc.) — without readableLink they receive
+    // (id, firstname, street, etc.), without readableLink they receive
     // `"/api/rest/v2/addresses/9"` and lose access to every other field.
     #[ApiProperty(writable: false, readableLink: true, extraProperties: ['computed' => true])]
     public ?Address $defaultBillingAddress = null;

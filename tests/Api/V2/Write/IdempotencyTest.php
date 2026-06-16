@@ -77,7 +77,7 @@ describe('Idempotency listener', function (): void {
         $second = apiPost(
             '/api/rest/v2/cms-pages',
             [
-                // Different body — replay should still echo the original.
+                // Different body, replay should still echo the original.
                 'identifier' => $identifier . '-different',
                 'title' => 'Different Title',
             ],
@@ -94,7 +94,7 @@ describe('Idempotency listener', function (): void {
         $key = 'pest-anon-' . substr(uniqid(), -10);
 
         // Two unauthenticated POSTs to the same path with the same key. Both
-        // should be evaluated independently — i.e. the second must not return
+        // should be evaluated independently, i.e. the second must not return
         // the first's stored body. Because both will likely be rejected with
         // 401 before reaching any storage, the assertion is simply that the
         // listener didn't short-circuit the second with a replayed response.
@@ -112,7 +112,7 @@ describe('Idempotency listener', function (): void {
             ['X-Idempotency-Key' => $key],
         );
 
-        // Crucial: the replay header must not appear on either — anonymous
+        // Crucial: the replay header must not appear on either, anonymous
         // callers bypass storage entirely.
         expect(apiHeader($first, 'X-Idempotency-Replayed'))->toBeNull();
         expect(apiHeader($second, 'X-Idempotency-Replayed'))->toBeNull();

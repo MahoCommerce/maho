@@ -287,7 +287,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             $dto->accessToken = $accessToken;
         }
 
-        // Map items — use preloaded items if available (batch-loaded), otherwise load.
+        // Map items, use preloaded items if available (batch-loaded), otherwise load.
         $dto->items = [];
         $preloadedItems = $order->getData('_preloaded_items');
         if ($preloadedItems) {
@@ -303,7 +303,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         // Map prices
         $dto->prices = $this->mapPricesToArray($order);
 
-        // Map billing address — use joined data if available, otherwise load.
+        // Map billing address, use joined data if available, otherwise load.
         if ($order->getData('billing_telephone') !== null) {
             $dto->billingAddress = new Address();
             $dto->billingAddress->id = (int) ($order->getData('billing_addr_id') ?: 0);

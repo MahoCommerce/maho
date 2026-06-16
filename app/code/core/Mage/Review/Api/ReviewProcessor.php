@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Review Processor — handles review submission with custom logic.
+ * Review Processor, handles review submission with custom logic.
  *
  * Reviews have a non-standard write flow (submit only, no generic CRUD update/delete),
  * so this extends the base Processor rather than CrudProcessor. It uses

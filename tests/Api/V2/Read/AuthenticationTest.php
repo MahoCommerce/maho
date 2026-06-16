@@ -51,6 +51,24 @@ describe('API v2 Authentication', function (): void {
             expect($response['status'])->toBeUnauthorized();
         });
 
+        it('rejects a forged admin token signed with the wrong secret', function (): void {
+            // Valid claims (admin_id, type, roles) but a bad signature. The JWT
+            // signature MUST be verified, otherwise anyone could mint a
+            // super-admin token. This guards the SignedWith constraint.
+            $forged = \Tests\Helpers\ApiV2Helper::generateToken([
+                'sub' => 'admin_1',
+                'admin_id' => 1,
+                'email' => 'admin@example.com',
+                'type' => 'admin',
+                'roles' => ['ROLE_ADMIN'],
+                '_secret' => 'attacker-supplied-secret-not-the-server-key',
+            ]);
+
+            $response = apiGet('/api/rest/v2/orders', $forged);
+
+            expect($response['status'])->toBeUnauthorized();
+        });
+
     });
 
     describe('with expired token', function (): void {

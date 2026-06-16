@@ -50,10 +50,16 @@ class Kernel extends BaseKernel
         if (!isset($_ENV['CORS_ALLOW_ORIGIN'])) {
             $corsOrigins = (string) \Mage::getStoreConfig('apiplatform/general/cors_origins');
             if ($corsOrigins === '') {
+                // Fall back to the store's own origin, but only when base_url
+                // parses to a real host. Never synthesize a guessable default
+                // like 'localhost'. Failing closed (empty allowlist, no
+                // cross-origin access) is safer than trusting a fabricated one.
                 $baseUrl = (string) \Mage::getStoreConfig('web/secure/base_url');
                 $parsed = parse_url($baseUrl);
-                $corsOrigins = ($parsed['scheme'] ?? 'https') . '://' . ($parsed['host'] ?? 'localhost')
-                    . (isset($parsed['port']) ? ':' . $parsed['port'] : '');
+                $corsOrigins = !empty($parsed['host'])
+                    ? ($parsed['scheme'] ?? 'https') . '://' . $parsed['host']
+                        . (isset($parsed['port']) ? ':' . $parsed['port'] : '')
+                    : '';
             }
             // NelmioCors expects an array of origins. Encode as JSON so the
             // env() resolver can split a comma-separated config value into
@@ -65,7 +71,7 @@ class Kernel extends BaseKernel
             ));
             // Reject `*` in the allowlist. NelmioCors echoes a wildcard origin
             // back to any caller, which combined with allow_credentials creates
-            // a CSRF vector — and even without credentials it bypasses the
+            // a CSRF vector, and even without credentials it bypasses the
             // operator's intent of pinning origins. Operators must enumerate
             // the origins they actually trust.
             $origins = array_values(array_filter(
@@ -75,7 +81,7 @@ class Kernel extends BaseKernel
             if (in_array('*', explode(',', $corsOrigins), true)) {
                 \Mage::log(
                     'apiplatform/general/cors_origins contains a "*" wildcard; '
-                    . 'wildcards are dropped — list explicit origins instead.',
+                    . 'wildcards are dropped, list explicit origins instead.',
                     \Mage::LOG_WARNING,
                 );
             }
@@ -188,7 +194,7 @@ class Kernel extends BaseKernel
                 'enabled' => true,
                 'graphiql' => ['enabled' => $twigAvailable && $this->isDebug()],
                 // Introspection lets any unauthenticated client enumerate the
-                // full schema — we only enable it in debug so dev tools work,
+                // full schema, we only enable it in debug so dev tools work,
                 // but keep the production attack surface minimal.
                 'introspection' => ['enabled' => $this->isDebug()],
                 'max_query_depth' => 12,
@@ -219,7 +225,7 @@ class Kernel extends BaseKernel
         // reflected origin (which NelmioCors does when `*` is present, even
         // though we filter it out at env-resolution time) it produces a
         // cross-site credentialed-request vector. The API is bearer-token
-        // authenticated — no cookies/credentials need to flow cross-origin.
+        // authenticated, no cookies/credentials need to flow cross-origin.
         $container->extension('nelmio_cors', [
             'defaults' => [
                 'origin_regex' => false,
@@ -244,7 +250,7 @@ class Kernel extends BaseKernel
         $container->extension('security', [
             // ROLE_ADMIN inherits ROLE_API_USER so admin tokens can reach the
             // REST endpoints gated by ROLE_API_USER (products, categories,
-            // CMS, etc.) — the listener AdminAclListener (default-deny via
+            // CMS, etc.), the listener AdminAclListener (default-deny via
             // ADMIN_RESOURCE) is the actual gate, not the security
             // expression. ROLE_USER is NOT inherited because customer-only
             // endpoints (`/me`, `/me/orders`, etc.) shouldn't be reached by
@@ -348,7 +354,7 @@ class Kernel extends BaseKernel
     }
 
     /**
-     * Boot the kernel — register module autoloader on every request.
+     * Boot the kernel, register module autoloader on every request.
      *
      * build() only runs during container compilation. The SPL autoloader
      * must be registered on every request so the Serializer can find
@@ -441,7 +447,7 @@ class Kernel extends BaseKernel
                     \Mage::log('ApiPlatform: failed to load ' . $filePath . ': ' . $e->getMessage(), \Mage::LOG_ERROR);
                     if ($this->isDebug()) {
                         // In debug, surface module load failures instead of
-                        // silently dropping them — a broken Api class would
+                        // silently dropping them, a broken Api class would
                         // otherwise yield "no resources found" with no clue.
                         throw $e;
                     }
@@ -482,7 +488,7 @@ class Kernel extends BaseKernel
 
     /**
      * Register a PSR-4 autoloader for module Api namespaces.
-     * This allows zero-config deployment — no composer dumpautoload needed.
+     * This allows zero-config deployment, no composer dumpautoload needed.
      *
      * @param array<string, string> $namespaces
      */

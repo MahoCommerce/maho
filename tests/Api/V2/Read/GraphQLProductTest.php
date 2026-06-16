@@ -241,7 +241,7 @@ describe('GraphQL Product By SKU Query', function (): void {
         $product = $response['json']['data']['productBySkuProduct'];
         if ($product === null) {
             // Known issue: productBySku custom query may return null
-            $this->markTestSkipped('productBySkuProduct returns null — provider may not be implemented for this operation');
+            $this->markTestSkipped('productBySkuProduct returns null, provider may not be implemented for this operation');
         }
 
         expect($product['sku'])->toBe($sku);

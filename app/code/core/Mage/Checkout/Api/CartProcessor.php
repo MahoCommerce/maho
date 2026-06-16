@@ -95,7 +95,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Resolve cart and verify access — shared by all operation methods
+     * Resolve cart and verify access, shared by all operation methods
      */
     private function resolveAndVerify(array $context, array $uriVariables): \Mage_Sales_Model_Quote
     {
@@ -312,7 +312,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
 
     /**
      * Get available shipping methods for the cart. Accepts an optional
-     * {address: {...}} body — when present, the address is applied to the
+     * {address: {...}} body, when present, the address is applied to the
      * cart first so the rate calculator has something to evaluate. Returns
      * the cart (the mapper populates availableShippingMethods).
      */

@@ -152,7 +152,7 @@ abstract class Processor implements ProcessorInterface
 
     /**
      * Throttle by client IP, using Maho's proxy-aware lookup. Fails open
-     * (skips the check) if the IP can't be determined — matches the behaviour
+     * (skips the check) if the IP can't be determined, matches the behaviour
      * of `Mage::helper('core')->isRateLimitExceeded()` in IP mode and avoids
      * collapsing every unknown-IP client into a shared bucket.
      */

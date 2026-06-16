@@ -240,7 +240,7 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
      * - Legacy checkbox format: permissions[] array
      *
      * Tree node IDs prefixed with "group_", "section_", or "resource_" are intermediate
-     * nodes and are filtered out — only leaf permission IDs (e.g. "products/read") are saved.
+     * nodes and are filtered out, only leaf permission IDs (e.g. "products/read") are saved.
      *
      * @return string[]
      */

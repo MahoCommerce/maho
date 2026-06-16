@@ -20,7 +20,7 @@ afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Product Custom Options — Permission Enforcement', function (): void {
+describe('Product Custom Options, Permission Enforcement', function (): void {
 
     it('denies custom option create without authentication', function (): void {
         $productId = fixtures('product_id');
@@ -43,7 +43,7 @@ describe('Product Custom Options — Permission Enforcement', function (): void 
 
 });
 
-describe('Product Custom Options — CRUD Lifecycle', function (): void {
+describe('Product Custom Options, CRUD Lifecycle', function (): void {
 
     it('creates a text field option, reads back, updates title, then deletes', function (): void {
         $productId = fixtures('product_id');

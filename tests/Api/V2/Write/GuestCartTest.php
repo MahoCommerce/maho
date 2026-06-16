@@ -25,7 +25,7 @@ afterAll(function (): void {
 
 /**
  * Helper to create a guest cart and track it for cleanup.
- * Returns response — use $response['json']['maskedId'] for subsequent requests
+ * Returns response, use $response['json']['maskedId'] for subsequent requests
  * (numeric 'id' access was removed in security hardening).
  */
 function createGuestCart(): array

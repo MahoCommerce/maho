@@ -28,7 +28,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  *
  * Why static and not a Symfony service: this is meant to be a one-line
  * inline gate that any module's handler can drop in, with no constructor
- * plumbing. Modules don't need to register anything centrally — they just
+ * plumbing. Modules don't need to register anything centrally, they just
  * import the resource class they're acting on and call this helper.
  */
 final class AdminAcl
@@ -43,7 +43,7 @@ final class AdminAcl
     {
         $session = \Mage::getSingleton('admin/session');
         if (!$session->getUser()) {
-            // Not an admin context — let other gates handle this request.
+            // Not an admin context, let other gates handle this request.
             return;
         }
 

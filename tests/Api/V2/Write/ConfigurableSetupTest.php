@@ -18,7 +18,7 @@ afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Configurable Setup — Read', function (): void {
+describe('Configurable Setup, Read', function (): void {
 
     it('reads configurable setup from existing configurable product', function (): void {
         // Use the existing configurable SKU from fixtures
@@ -67,7 +67,7 @@ describe('Configurable Setup — Read', function (): void {
 
 });
 
-describe('Configurable Setup — Child Management', function (): void {
+describe('Configurable Setup, Child Management', function (): void {
 
     it('adds and removes a child from existing configurable', function (): void {
         $token = serviceToken(['products/write', 'products/delete', 'products/read']);

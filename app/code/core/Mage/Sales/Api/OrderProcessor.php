@@ -69,7 +69,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
      * Place order from cart. Accepts the cart identifier from the request body
      * (cartId / maskedId) OR from the URI (e.g. /guest-carts/{id}/place-order).
      * Also applies shipping/billing address, customer email, and payment-method
-     * additionalInformation from the request body — storefront callers send the
+     * additionalInformation from the request body, storefront callers send the
      * full checkout state in one shot rather than pre-mutating the cart.
      */
     private function placeOrder(array $context, array $uriVariables = []): Order
@@ -79,7 +79,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // Accept the masked-id from either the request body or from the URI.
         // We pull from the Request path rather than $uriVariables because API
         // Platform casts URI placeholders to the resource identifier's PHP
-        // type — Order.id is int, so a 32-char hex masked id gets silently
+        // type, Order.id is int, so a 32-char hex masked id gets silently
         // truncated to its leading digit run via PHP (int) coercion. Parsing
         // the path ourselves preserves the string verbatim.
         $maskedId = $args['maskedId'] ?? null;
@@ -94,8 +94,11 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         }
         $guestEmail = $args['guestEmail'] ?? $args['email'] ?? null;
         $orderNote = $args['orderNote'] ?? null;
-        $cashTendered = isset($args['cashTendered']) ? (float) $args['cashTendered'] : null;
-        $employeeId = isset($args['employeeId']) ? (int) $args['employeeId'] : null;
+        // POS-only fields: only trust them from admin/api callers so a guest
+        // cannot stamp an arbitrary employee id or cash amount onto the order.
+        $isPrivileged = $this->isAdmin() || $this->isApiUser();
+        $cashTendered = ($isPrivileged && isset($args['cashTendered'])) ? (float) $args['cashTendered'] : null;
+        $employeeId = ($isPrivileged && isset($args['employeeId'])) ? (int) $args['employeeId'] : null;
         $paymentMethod = $args['paymentMethod'] ?? null;
         $shippingMethod = $args['shippingMethod'] ?? null;
 
@@ -112,7 +115,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // Verify cart ownership
         $this->verifyCartOwnership($quote, $maskedId !== null);
 
-        // Storefront callers send the full checkout state in the body — apply
+        // Storefront callers send the full checkout state in the body, apply
         // any provided addresses to the quote before order placement so the
         // rate calculator and address validations see the right data.
         if (isset($args['shippingAddress']) && is_array($args['shippingAddress'])) {
@@ -140,18 +143,27 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        // Set shipping method directly on the in-memory address — the storefront
-        // sends a composite carrier_method string in the body, and we want to
-        // preserve the in-memory quote state through to placeAdminOrder rather
-        // than save + reload through cartService->setShippingMethod.
+        // Set shipping method directly on the in-memory address. The storefront
+        // sends a composite carrier_method string in the body, and we preserve
+        // the in-memory quote state through to placeAdminOrder rather than
+        // save + reload through cartService->setShippingMethod.
+        $validateShippingMethod = false;
         if ($shippingMethod && !$quote->isVirtual()) {
             $shippingAddress = $quote->getShippingAddress();
             $shippingAddress->setShippingMethod($shippingMethod);
             $shippingAddress->setCollectShippingRates(1);
+            $validateShippingMethod = true;
         }
         $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals();
         $quote->save();
+
+        // Reject a method the client made up: after rates are collected the
+        // chosen code must resolve to a real rate, otherwise a caller could
+        // claim e.g. free shipping that the store does not actually offer.
+        if ($validateShippingMethod && !$quote->getShippingAddress()->getShippingRateByCode($shippingMethod)) {
+            throw new BadRequestHttpException('Shipping method is not available for this address');
+        }
 
         // Allow modules to prepare the quote before order placement
         // (e.g. POS module sets default address, shipping, payment for admin orders)

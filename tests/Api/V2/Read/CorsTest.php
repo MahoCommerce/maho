@@ -40,7 +40,7 @@ describe('CORS', function (): void {
     });
 
     it('echoes a configured allow-origin (not blindly reflecting Origin)', function (): void {
-        // The configured allow_origin defaults to web/secure/base_url's host —
+        // The configured allow_origin defaults to web/secure/base_url's host,
         // we just assert that *some* origin is returned, not that a specific
         // arbitrary one is reflected. Reflecting any Origin would be the bug.
         $response = apiOptions('/api/rest/v2/store-config', [

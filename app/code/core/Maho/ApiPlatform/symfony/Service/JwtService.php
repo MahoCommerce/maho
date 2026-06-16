@@ -16,10 +16,11 @@ use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Validation\Constraint\IssuedBy;
 use Lcobucci\JWT\Validation\Constraint\PermittedFor;
+use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
 
 /**
- * JWT Service - Centralized JWT token management
+ * Centralized JWT token management.
  *
  * Consolidates JWT generation and validation logic from AuthController
  * and OAuth2Authenticator to ensure consistent behavior across the API.
@@ -142,7 +143,7 @@ class JwtService
      *
      * The legacy `Mage::getSingleton('api/config')->getResources()` XML tree is
      * a different (resource-only) namespace and never matched the voter's
-     * checks — using it here would mean api_user grants authorize nothing.
+     * checks, using it here would mean api_user grants authorize nothing.
      *
      * @return array<string> e.g. ['orders/read', 'shipments/write', 'all']
      */
@@ -190,6 +191,9 @@ class JwtService
         $parsed = $config->parser()->parse($token);
 
         $constraints = [
+            // SignedWith verifies the HMAC signature; without it parse() only
+            // decodes the token and any forged payload would be accepted.
+            new SignedWith($config->signer(), $config->signingKey()),
             new IssuedBy($this->getIssuer()),
             new PermittedFor(self::AUDIENCE),
             new StrictValidAt(new class implements \Psr\Clock\ClockInterface {
@@ -213,7 +217,7 @@ class JwtService
         $payload->sub = $claims->get('sub');
         // lcobucci hydrates registered date claims (iat/exp/nbf) as
         // DateTimeImmutable; expose them as unix timestamps so callers can treat
-        // them as ints — casting the object to int throws \Error.
+        // them as ints, casting the object to int throws \Error.
         $iat = $claims->get('iat');
         $exp = $claims->get('exp');
         $payload->iat = $iat instanceof \DateTimeInterface ? $iat->getTimestamp() : $iat;
@@ -335,7 +339,7 @@ class JwtService
     /**
      * Get the issuer URL for tokens.
      *
-     * Prefer the secure base URL — issuer is a public claim and tokens are
+     * Prefer the secure base URL, issuer is a public claim and tokens are
      * meant to be served over HTTPS in production. Fall back to the unsecure
      * URL only when secure isn't configured (dev installs without TLS).
      */

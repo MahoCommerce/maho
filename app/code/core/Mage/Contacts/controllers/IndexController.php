@@ -79,7 +79,7 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
                     Mage::throwException($this->__('Unable to submit your request. Please try again later'));
                 }
 
-                // Throttle by submitter email — same key as the API endpoint so a
+                // Throttle by submitter email, same key as the API endpoint so a
                 // bot rotating between web form and API still hits a unified limit.
                 $contactLimit = (int) Mage::getStoreConfig('system/rate_limit/contact');
                 if ($contactLimit > 0) {

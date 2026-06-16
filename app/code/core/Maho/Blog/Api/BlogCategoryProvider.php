@@ -18,7 +18,7 @@ use Maho\ApiPlatform\Resource;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
- * Blog Category Provider — extends CrudProvider with category-specific filters and named queries.
+ * Blog Category Provider, extends CrudProvider with category-specific filters and named queries.
  *
  * All field mapping and DTO construction is handled by CrudResource/CrudProvider.
  * This class adds store/active filters and the urlKey-based lookup.
