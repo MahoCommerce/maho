@@ -39,16 +39,20 @@ class SampleDataImporter
 
     /**
      * Tables that contain attribute_id column that needs remapping
+     *
+     * catalog_product_entity_int and catalog_category_entity_int are intentionally
+     * excluded: their attribute_id is remapped by remapOptionValuesInProductEntityInt()
+     * and remapOptionValuesInCategoryEntityInt(), which also remap the option value.
+     * Listing them here too would remap attribute_id twice and misroute values when an
+     * attribute's new ID collides with another attribute's old ID.
      */
     private const TABLES_WITH_ATTRIBUTE_ID = [
         'catalog_category_entity_datetime',
         'catalog_category_entity_decimal',
-        'catalog_category_entity_int',
         'catalog_category_entity_text',
         'catalog_category_entity_varchar',
         'catalog_product_entity_datetime',
         'catalog_product_entity_decimal',
-        'catalog_product_entity_int',
         'catalog_product_entity_text',
         'catalog_product_entity_varchar',
         'catalog_eav_attribute',

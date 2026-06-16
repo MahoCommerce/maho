@@ -17,8 +17,16 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Range extends Mage_Adminhtm
         $toLabel = Mage::helper('adminhtml')->__('To');
 
         $html  = '<div class="range filter-range">';
-        $html .= '<div class="range-line"><span class="label">' . $fromLabel . '</span> <input type="number" placeholder="' . $fromLabel . '" name="' . $this->_getHtmlName() . '[from]" id="' . $this->_getHtmlId() . '_from" value="' . $this->getEscapedValue('from') . '" class="input-text no-changes"></div>';
-        $html .= '<div class="range-line"><span class="label">' . $toLabel . '</span><input type="number" placeholder="' . $toLabel . '" name="' . $this->_getHtmlName() . '[to]" id="' . $this->_getHtmlId() . '_to" value="' . $this->getEscapedValue('to') . '" class="input-text no-changes"></div>';
+        $html .= '<div class="range-line">'
+            . '<span class="label" aria-hidden="true" title="' . $this->quoteEscape($fromLabel) . '">&ge;</span>'
+            . '<input type="number" name="' . $this->_getHtmlName() . '[from]" id="' . $this->_getHtmlId() . '_from"'
+                . ' aria-label="' . $this->quoteEscape($fromLabel) . '" title="' . $this->quoteEscape($fromLabel) . '"'
+                . ' value="' . $this->getEscapedValue('from') . '" class="input-text no-changes"></div>';
+        $html .= '<div class="range-line">'
+            . '<span class="label" aria-hidden="true" title="' . $this->quoteEscape($toLabel) . '">&le;</span>'
+            . '<input type="number" name="' . $this->_getHtmlName() . '[to]" id="' . $this->_getHtmlId() . '_to"'
+                . ' aria-label="' . $this->quoteEscape($toLabel) . '" title="' . $this->quoteEscape($toLabel) . '"'
+                . ' value="' . $this->getEscapedValue('to') . '" class="input-text no-changes"></div>';
         $html .= '</div>';
 
         return $html;
