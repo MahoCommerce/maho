@@ -47,7 +47,7 @@
         "laminas/laminas-permissions-acl": "^2.17",
         "lbuchs/webauthn": "^2.2",
         "mahocommerce/icons": "^3",
-        "mahocommerce/maho-composer-plugin": "^4.0.23",
+        "mahocommerce/maho-composer-plugin": "^4.0.32",
         "matthiasmullie/minify": "^1.3",
         "monolog/monolog": "^3.9",
         "paypal/paypal-server-sdk": "^2.2",
@@ -108,7 +108,8 @@
         "laminas/laminas-xmlrpc": "Install this package if you need XML-RPC web services functionality",
         "mahocommerce/module-braintree": "Braintree payment gateway integration",
         "picqer/php-barcode-generator": "Required for gift card barcode generation",
-        "symfony/twig-bundle": "Required to render the API Platform Swagger UI, ReDoc, and GraphiQL explorer pages. Without it, the JSON API still works but the human-browsable docs at /api/docs do not."
+        "symfony/twig-bundle": "Required (together with symfony/asset) to render the API Platform Swagger UI, ReDoc, and GraphiQL explorer pages. Without it, the JSON API and /api/docs.json still work but the human-browsable docs at /api/docs do not.",
+        "symfony/asset": "Required (together with symfony/twig-bundle) for the API Platform Swagger UI: provides the asset() function its template uses."
     },
     "conflict": {
         "colinmollenhour/cache-backend-redis": "*",

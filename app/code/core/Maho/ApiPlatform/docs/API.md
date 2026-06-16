@@ -40,6 +40,7 @@
 - [Base Classes](#base-classes)
 - [Opt-in Traits](#opt-in-traits)
 - [Shared Services](#shared-services)
+- [API Documentation (Swagger UI / OpenAPI)](#api-documentation-swagger-ui--openapi)
 - [Web Server Configuration](#web-server-configuration)
 - [Adding a New API Resource](#adding-a-new-api-resource)
 - [Extending the API (Third-Party Modules)](#extending-the-api-third-party-modules)
@@ -289,7 +290,7 @@ Country listings live under [Directory](#directory) (`/countries`).
 | GET / POST / PUT / DELETE | `/products/{productId}/media` | GET=None, writes=Admin/API | Product images |
 | GET / POST / DELETE | `/products/{productId}/tier-prices` | Admin/API | Tier pricing (POST replaces, DELETE clears all) |
 | GET / POST | `/products/{productId}/custom-options` | GET=None, POST=Admin/API | Custom options |
-| PUT / DELETE | `/products/{productId}/custom-options/{optionId}` | Admin/API | Update/remove a custom option |
+| PUT / DELETE | `/products/{productId}/custom-options/{id}` | Admin/API | Update/remove a custom option |
 | GET | `/products/{sku}/options` | None | Custom options by SKU (resolves configurable parents) |
 | GET | `/custom-option-file/{optionId}/{key}` | None | Download a customer-uploaded option file |
 | GET / POST / PUT / DELETE | `/products/{productId}/bundle-options` | GET=None, writes=Admin/API | Bundle product options |
@@ -302,10 +303,10 @@ Country listings live under [Directory](#directory) (`/countries`).
 | DELETE | `/products/{productId}/grouped/{childProductId}` | Admin/API | Remove a grouped child |
 | GET / POST / PUT | `/products/{productId}/links/related` | GET=None, writes=Admin/API | Related products (POST adds one, PUT replaces all) |
 | DELETE | `/products/{productId}/links/related/{linkedProductId}` | Admin/API | Remove a related link |
-| GET / POST / PUT | `/products/{productId}/links/cross_sell` | GET=None, writes=Admin/API | Cross-sell links (POST adds one, PUT replaces all) |
-| DELETE | `/products/{productId}/links/cross_sell/{linkedProductId}` | Admin/API | Remove a cross-sell link |
-| GET / POST / PUT | `/products/{productId}/links/up_sell` | GET=None, writes=Admin/API | Up-sell links (POST adds one, PUT replaces all) |
-| DELETE | `/products/{productId}/links/up_sell/{linkedProductId}` | Admin/API | Remove an up-sell link |
+| GET / POST / PUT | `/products/{productId}/links/cross-sell` | GET=None, writes=Admin/API | Cross-sell links (POST adds one, PUT replaces all) |
+| DELETE | `/products/{productId}/links/cross-sell/{linkedProductId}` | Admin/API | Remove a cross-sell link |
+| GET / POST / PUT | `/products/{productId}/links/up-sell` | GET=None, writes=Admin/API | Up-sell links (POST adds one, PUT replaces all) |
+| DELETE | `/products/{productId}/links/up-sell/{linkedProductId}` | Admin/API | Remove an up-sell link |
 | GET / POST | `/products/{productId}/reviews` | GET=None, POST=Customer | Reviews for a product |
 
 **Layered navigation:**
@@ -354,8 +355,8 @@ Country listings live under [Directory](#directory) (`/countries`).
 | GET | `/guest-carts/{id}/totals` | None | Get cart totals |
 | POST | `/guest-carts/{id}/coupon` | None | Apply coupon code |
 | DELETE | `/guest-carts/{id}/coupon` | None | Remove coupon |
-| POST | `/guest-carts/{id}/giftcard` | None | Apply gift card |
-| DELETE | `/guest-carts/{id}/giftcard/{code}` | None | Remove gift card |
+| POST | `/guest-carts/{id}/giftcards` | None | Apply gift card |
+| DELETE | `/guest-carts/{id}/giftcards/{code}` | None | Remove gift card |
 | POST | `/guest-carts/{id}/shipping-methods` | None | Get available shipping methods |
 | GET | `/guest-carts/{id}/payment-methods` | None | Get available payment methods |
 | POST | `/guest-carts/{id}/place-order` | None | Place order from guest cart |
@@ -1129,6 +1130,48 @@ Live under `app/code/core/Maho/ApiPlatform/symfony/Service/`:
 
 ---
 
+## API Documentation (Swagger UI / OpenAPI)
+
+The API publishes its own documentation, generated at runtime from the `#[ApiResource]` attributes on each resource. Make sure `/api/docs` is routed to `rest.php` first (see [Web Server Configuration](#web-server-configuration)), otherwise the request falls through to the legacy `Mage_Api` controllers.
+
+### Machine-readable specs (always available)
+
+| URL | Format | Use |
+| --- | --- | --- |
+| `/api/docs.json` | OpenAPI 3.1 (JSON) | Import into Postman/Insomnia, generate clients with `openapi-generator` |
+| `/api/docs.jsonld` | Hydra / JSON-LD | Hypermedia clients |
+
+These need no extra dependencies. A browser hitting `/api/docs` without the packages below gets the JSON-LD document (content negotiation falls back to it when no HTML renderer is available).
+
+### Browsable Swagger UI (opt-in)
+
+The interactive Swagger UI page at `/api/docs` (served when the browser sends `Accept: text/html`) needs two packages that are **not** part of the base install:
+
+```bash
+composer require symfony/twig-bundle symfony/asset
+./maho cache:flush
+```
+
+- `symfony/twig-bundle` renders the page (also enables ReDoc and the GraphiQL explorer at `/api/graphql`).
+- `symfony/asset` provides the `asset()` Twig function the Swagger UI template calls.
+
+Both are required: with neither, `/api/docs` serves the JSON-LD document instead; with Twig but not `symfony/asset`, the page errors because its template can't resolve `asset()`. After installing, clear the compiled kernel so it picks up the new bundles:
+
+```bash
+rm -rf var/cache/api_platform/*
+./maho cache:flush
+```
+
+#### Static assets
+
+The Swagger UI / ReDoc / GraphiQL pages load CSS, JS, and fonts from `public/bundles/apiplatform/`. Maho has no `assets:install` console command, so the `mahocommerce/maho-composer-plugin` publishes these files automatically on every `composer install`/`update` (copying them from `vendor/api-platform/core/.../Resources/public`). If the page renders unstyled with `404`s under `/bundles/apiplatform/*`, re-run `composer install`, or publish them manually:
+
+```bash
+ln -snf ../../vendor/api-platform/core/src/Symfony/Bundle/Resources/public public/bundles/apiplatform
+```
+
+---
+
 ## Web Server Configuration
 
 All web servers must route the new API URLs (`/api/rest/v2/*`, `/api/graphql`, `/api/admin/graphql`, `/api/docs`) to `rest.php` (the Symfony API Platform entry point), while letting legacy paths (`/api/rest`, `/api/soap`, `/api/v2_soap`, `/api/xmlrpc`, `/api/jsonrpc`) fall through to the original Magento 1 controllers. Below are example configurations for the three most common setups.
@@ -1139,11 +1182,11 @@ All web servers must route the new API URLs (`/api/rest/v2/*`, `/api/graphql`, `
 
 Both paths end up at the same Symfony kernel; `rest.php` is just leaner. Maho is still initialised inside `rest.php` so store context, models, and config are available to API Platform resolvers.
 
-### Router-shim fallback for environments without rewrite rules
+### Rewrite rules are mandatory
 
-For environments where web-server rewrite rules aren't configured (FrankenPHP with default Caddyfile, `php -S` dev servers, shared hosting without mod_rewrite), Maho also routes the canonical Symfony URLs `/api/graphql` and `/api/docs` through `index.php` via `GraphqlController`/`DocsController` shims that forward to `IndexController::indexAction()`. This means `/api/graphql` will work even without the web-server configuration below, just ~50 ms slower per request. REST resource paths (`/api/rest/v2/products`, `/api/rest/v2/cart`, etc.) still require the rewrite rules below to route through `rest.php`.
+The new API URLs are served **only** through `rest.php`; there is no `index.php` fallback. Without the rewrite rules below, `/api/*` requests fall through to Maho's normal front controller, where the legacy `Mage_Api` router claims them and tries to dispatch SOAP/XML-RPC, producing a fatal error instead of the API response. Configure the rules for your web server before using the API.
 
-The bundled `public/.htaccess` already implements this routing, the snippets below are for installations using nginx/Caddy or for operators who need to replicate the behaviour in a different web server.
+The bundled `public/.htaccess` already implements this routing for Apache. The snippets below are for installations using nginx/Caddy, or for operators who need to replicate the behaviour in a different web server.
 
 ### Legacy SOAP / XMLRPC / JSONRPC
 
@@ -1159,7 +1202,7 @@ Add these blocks **before** the main `location /` block in your nginx config.
 # Explicitly EXCLUDES legacy paths (/api/rest, /api/soap, /api/v2_soap,
 # /api/xmlrpc, /api/jsonrpc) so the original Magento 1 controllers keep
 # handling them.
-location ~ ^/api/(rest/v2(/|$)|graphql$|admin/graphql$|docs(/|$)) {
+location ~ ^/api/(rest/v2(/|$)|graphql$|admin/graphql$|docs(/|\.|$)) {
     # Bypass any site-wide basic auth / IP restrictions
     satisfy any;
     allow all;
@@ -1281,7 +1324,7 @@ maho.example.com {
     # (/api/rest, /api/soap, /api/v2_soap, /api/xmlrpc, /api/jsonrpc)
     # are NOT included so they fall through to the Magento 1 controllers.
     @api {
-        path /api/rest/v2/* /api/graphql /api/admin/graphql /api/docs /api/docs/*
+        path /api/rest/v2/* /api/graphql /api/admin/graphql /api/docs*
     }
     header @api Access-Control-Allow-Origin "*"
     header @api Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
@@ -1291,13 +1334,13 @@ maho.example.com {
     # Handle CORS preflight
     @preflight {
         method OPTIONS
-        path /api/rest/v2/* /api/graphql /api/admin/graphql /api/docs /api/docs/*
+        path /api/rest/v2/* /api/graphql /api/admin/graphql /api/docs*
     }
     respond @preflight 204
 
     # Route new API URLs to rest.php
     @apiRoute {
-        path /api/rest/v2/* /api/graphql /api/admin/graphql /api/docs /api/docs/*
+        path /api/rest/v2/* /api/graphql /api/admin/graphql /api/docs*
         not file
     }
     rewrite @apiRoute /rest.php

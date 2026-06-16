@@ -21,6 +21,9 @@
 !/public/media/dhl/logo.jpg
 !/public/media/downloadable/.htaccess
 
+# Symfony bundle assets published by maho-composer-plugin (api-platform Swagger UI, etc.)
+/public/bundles/
+
 /var/*
 !/var/.htaccess
 

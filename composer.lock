@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "baca6cb35d36e5201a06f075d67e339f",
+    "content-hash": "28b9fa2ecbfcfe7e29c3f1fb7effc168",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -1681,16 +1681,16 @@
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
-            "version": "v4.0.31",
+            "version": "v4.0.32",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-composer-plugin.git",
-                "reference": "b1131622245a1b7391417aa2b723f979d97834af"
+                "reference": "5db07db7b897493a1f4ea40c3c4542019e5503a4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/b1131622245a1b7391417aa2b723f979d97834af",
-                "reference": "b1131622245a1b7391417aa2b723f979d97834af",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/5db07db7b897493a1f4ea40c3c4542019e5503a4",
+                "reference": "5db07db7b897493a1f4ea40c3c4542019e5503a4",
                 "shasum": ""
             },
             "require": {
@@ -1725,9 +1725,23 @@
             "description": "Extension for Composer to copy assets and enable autoloading for Maho projects.",
             "support": {
                 "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
-                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v4.0.31"
+                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v4.0.32"
             },
-            "time": "2026-05-30T13:24:28+00:00"
+            "funding": [
+                {
+                    "url": "https://www.buymeacoffee.com/fballiano",
+                    "type": "buy_me_a_coffee"
+                },
+                {
+                    "url": "https://paypal.me/fabrizioballiano",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fballiano",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-06-16T18:25:35+00:00"
         },
         {
             "name": "masterminds/html5",
