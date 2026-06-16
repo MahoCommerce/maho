@@ -122,7 +122,71 @@ class SqlConverter
         // Convert boolean values in INSERT statements
         $sql = $this->convertBooleanValues($sql);
 
+        // Convert sample-data integer values destined for binary/bytea columns
+        // (legacy upgrade-1.6.0.0-1.6.0.1.php widened rating_option_vote.remote_ip_long
+        // from BIGINT to VARBINARY(16) on MySQL only; the declarative schema applies
+        // that widening to all engines, but the sample-data SQL still ships bigints).
+        $sql = $this->convertRatingRemoteIpLong($sql);
+
         return $sql;
+    }
+
+    /**
+     * Convert numeric remote_ip_long values in rating_option_vote INSERTs to
+     * Postgres bytea hex literals. Sample data ships values as bigints; the
+     * declarative schema stores the column as bytea.
+     *
+     * The VALUES capture is lazy up to the first ";", so it assumes the
+     * rating_option_vote INSERT carries no semicolon inside a string literal.
+     * That holds for the shipped sample data (its only string column is
+     * remote_ip, an IP address); a dump with semicolons in string values would
+     * truncate the match and leave the tail unconverted.
+     */
+    private function convertRatingRemoteIpLong(string $sql): string
+    {
+        if (!str_contains($sql, 'rating_option_vote')) {
+            return $sql;
+        }
+
+        return preg_replace_callback(
+            '/INSERT\s+INTO\s+"rating_option_vote"\s*\(([^)]+)\)\s*VALUES\s*(.+?);/is',
+            function ($match) {
+                $columns = array_map(
+                    fn($c) => trim($c, " \t\n\r\0\x0B\"`"),
+                    explode(',', $match[1]),
+                );
+                $idx = array_search('remote_ip_long', $columns, true);
+                if ($idx === false) {
+                    return $match[0];
+                }
+
+                // Walk through each VALUES tuple and rewrite the remote_ip_long position.
+                $rewritten = preg_replace_callback(
+                    '/\(([^()]*(?:\([^()]*\)[^()]*)*)\)/',
+                    function ($tupleMatch) use ($idx) {
+                        $values = $this->parseValueTuple($tupleMatch[1]);
+                        if (!isset($values[$idx])) {
+                            return $tupleMatch[0];
+                        }
+                        $value = trim($values[$idx]);
+                        // Only convert plain integer literals; leave NULL / hex / strings alone.
+                        if (preg_match('/^-?\d+$/', $value)) {
+                            // Pad to even-length hex so bytea decodes cleanly.
+                            $hex = dechex((int) $value);
+                            if (strlen($hex) % 2 === 1) {
+                                $hex = '0' . $hex;
+                            }
+                            $values[$idx] = "'\\x{$hex}'";
+                        }
+                        return '(' . implode(',', $values) . ')';
+                    },
+                    $match[2],
+                );
+
+                return 'INSERT INTO "rating_option_vote" (' . $match[1] . ') VALUES ' . $rewritten . ';';
+            },
+            $sql,
+        );
     }
 
     /**
@@ -491,9 +555,12 @@ class SqlConverter
     ];
 
     /**
-     * Execute SQL statements one by one
+     * Execute SQL statements one by one.
+     *
+     * $applyConflictHandling rewrites INSERTs to add Postgres-style ON CONFLICT
+     * clauses; MySQL/SQLite callers should disable it (their dialect differs).
      */
-    public function executeStatements(\PDO $pdo, string $sql, ?callable $progressCallback = null): void
+    public function executeStatements(\PDO $pdo, string $sql, ?callable $progressCallback = null, bool $applyConflictHandling = true): void
     {
         $statements = $this->splitStatements($sql);
         $total = count($statements);
@@ -506,7 +573,7 @@ class SqlConverter
             }
 
             // Add ON CONFLICT handling to INSERT statements
-            if (preg_match('/^\s*INSERT\s+INTO\s+/i', $statement)) {
+            if ($applyConflictHandling && preg_match('/^\s*INSERT\s+INTO\s+/i', $statement)) {
                 $statement = $this->addConflictHandling($statement);
             }
 

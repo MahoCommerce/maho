@@ -7,7 +7,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Dataflow>
-            <version>1.6.0.0</version>
+            <version>2.0.0</version>
         </Mage_Dataflow>
     </modules>
     <global>
@@ -43,13 +43,6 @@ SPDX-License-Identifier: AFL-3.0
                 </entities>
             </dataflow_resource>
         </models>
-        <resources>
-            <dataflow_setup>
-                <setup>
-                    <module>Mage_Dataflow</module>
-                </setup>
-            </dataflow_setup>
-        </resources>
     </global>
     <adminhtml>
         <layout>

@@ -67,7 +67,7 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
             $columns = [
                 'period'                => $periodExpr,
                 'store_id'              => 'store_id',
-                'order_status'          => 'status',
+                'order_status'          => $adapter->getIfNullSql('status', "''"),
                 'shipping_description'  => 'shipping_description',
                 'orders_count'          => new Maho\Db\Expr('COUNT(entity_id)'),
                 'total_shipping'        => new Maho\Db\Expr(
@@ -189,7 +189,7 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
             $columns = [
                 'period'                => $periodExpr,
                 'store_id'              => 'order_table.store_id',
-                'order_status'          => 'order_table.status',
+                'order_status'          => $adapter->getIfNullSql('order_table.status', "''"),
                 'shipping_description'  => 'order_table.shipping_description',
                 'orders_count'          => new Maho\Db\Expr('COUNT(order_table.entity_id)'),
                 'total_shipping'        => new Maho\Db\Expr('SUM((order_table.base_shipping_amount - '

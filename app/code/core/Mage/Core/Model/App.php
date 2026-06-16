@@ -338,7 +338,6 @@ class Mage_Core_Model_App
             $this->_initCurrentStore($scopeCode, $scopeType);
             $this->_initRequest();
             Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
-            Mage_Core_Model_Resource_Setup::applyAllMahoUpdates();
         }
 
         $this->getFrontController()->dispatch();

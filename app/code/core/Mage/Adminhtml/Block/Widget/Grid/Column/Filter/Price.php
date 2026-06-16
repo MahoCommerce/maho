@@ -20,10 +20,21 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
         $toLabel = Mage::helper('adminhtml')->__('To');
 
         $html  = '<div class="range filter-price">';
-        $html .= '<div class="range-line"><span class="label">' . $fromLabel . '</span> <input type="number" placeholder="' . $fromLabel . '" name="' . $this->_getHtmlName() . '[from]" id="' . $this->_getHtmlId() . '_from" value="' . $this->getEscapedValue('from') . '" class="input-text no-changes"></div>';
-        $html .= '<div class="range-line"><span class="label">' . $toLabel . '</span><input type="number" placeholder="' . $toLabel . '" name="' . $this->_getHtmlName() . '[to]" id="' . $this->_getHtmlId() . '_to" value="' . $this->getEscapedValue('to') . '" class="input-text no-changes"></div>';
+        $html .= '<div class="range-line">'
+            . '<span class="label" aria-hidden="true" title="' . $this->quoteEscape($fromLabel) . '">&ge;</span>'
+            . '<input type="number" name="' . $this->_getHtmlName() . '[from]" id="' . $this->_getHtmlId() . '_from"'
+                . ' aria-label="' . $this->quoteEscape($fromLabel) . '" title="' . $this->quoteEscape($fromLabel) . '"'
+                . ' value="' . $this->getEscapedValue('from') . '" class="input-text no-changes"></div>';
+        $html .= '<div class="range-line">'
+            . '<span class="label" aria-hidden="true" title="' . $this->quoteEscape($toLabel) . '">&le;</span>'
+            . '<input type="number" name="' . $this->_getHtmlName() . '[to]" id="' . $this->_getHtmlId() . '_to"'
+                . ' aria-label="' . $this->quoteEscape($toLabel) . '" title="' . $this->quoteEscape($toLabel) . '"'
+                . ' value="' . $this->getEscapedValue('to') . '" class="input-text no-changes"></div>';
         if ($this->getDisplayCurrencySelect()) {
-            $html .= '<div class="range-line"><span class="label">' . Mage::helper('adminhtml')->__('In') . '</span>' . $this->_getCurrencySelectHtml() . '</div>';
+            $currencyLabel = Mage::helper('adminhtml')->__('Currency');
+            $html .= '<div class="range-line">'
+                . '<span class="label" aria-hidden="true"></span>'
+                . $this->_getCurrencySelectHtml($currencyLabel) . '</div>';
         }
         $html .= '</div>';
 
@@ -55,15 +66,17 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
         return $this->_currencyModel;
     }
 
-    protected function _getCurrencySelectHtml()
+    protected function _getCurrencySelectHtml(?string $label = null)
     {
         $value = $this->getEscapedValue('currency');
         if (!$value) {
             $value = $this->getColumn()->getCurrencyCode();
         }
 
+        $label = $label ?: Mage::helper('adminhtml')->__('Currency');
         $html  = '';
-        $html .= '<select name="' . $this->_getHtmlName() . '[currency]" id="' . $this->_getHtmlId() . '_currency">';
+        $html .= '<select name="' . $this->_getHtmlName() . '[currency]" id="' . $this->_getHtmlId() . '_currency"'
+            . ' aria-label="' . $this->quoteEscape($label) . '" title="' . $this->quoteEscape($label) . '">';
         foreach ($this->_getCurrencyList() as $currency) {
             $html .= '<option value="' . $currency . '" ' . ($currency == $value ? 'selected="selected"' : '') . '>'
                 . $currency . '</option>';

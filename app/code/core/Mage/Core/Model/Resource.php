@@ -325,25 +325,6 @@ class Mage_Core_Model_Resource
     }
 
     /**
-     * Clean db row
-     *
-     * @param array $row
-     * @return $this
-     */
-    public function cleanDbRow(&$row)
-    {
-        $zeroDate = $this->getConnection(self::DEFAULT_READ_RESOURCE)->getSuggestedZeroDate();
-        if (!empty($row) && is_array($row)) {
-            foreach ($row as $key => &$value) {
-                if (is_string($value) && $value === $zeroDate) {
-                    $value = '';
-                }
-            }
-        }
-        return $this;
-    }
-
-    /**
      * Create new connection with custom config
      *
      * @param string $name

@@ -174,8 +174,8 @@ select[multiple], select[size] {
   select[multiple] option, select[size] option {
     padding: var(--maho-space-2) var(--maho-space-3); }
   select[multiple] option:checked, select[size] option:checked {
-    background: linear-gradient(var(--maho-surface-sunken), var(--maho-surface-sunken));
-    color: var(--maho-ink);
+    background: linear-gradient(color-mix(in srgb, var(--maho-accent) 30%, var(--maho-control-bg)), color-mix(in srgb, var(--maho-accent) 30%, var(--maho-control-bg)));
+    color: var(--maho-control-ink);
     font-weight: 600; }
   select[multiple] optgroup, select[size] optgroup {
     padding: var(--maho-space-2) 0 0 var(--maho-space-2);

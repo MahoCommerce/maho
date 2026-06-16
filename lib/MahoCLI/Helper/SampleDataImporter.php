@@ -39,16 +39,20 @@ class SampleDataImporter
 
     /**
      * Tables that contain attribute_id column that needs remapping
+     *
+     * catalog_product_entity_int and catalog_category_entity_int are intentionally
+     * excluded: their attribute_id is remapped by remapOptionValuesInProductEntityInt()
+     * and remapOptionValuesInCategoryEntityInt(), which also remap the option value.
+     * Listing them here too would remap attribute_id twice and misroute values when an
+     * attribute's new ID collides with another attribute's old ID.
      */
     private const TABLES_WITH_ATTRIBUTE_ID = [
         'catalog_category_entity_datetime',
         'catalog_category_entity_decimal',
-        'catalog_category_entity_int',
         'catalog_category_entity_text',
         'catalog_category_entity_varchar',
         'catalog_product_entity_datetime',
         'catalog_product_entity_decimal',
-        'catalog_product_entity_int',
         'catalog_product_entity_text',
         'catalog_product_entity_varchar',
         'catalog_eav_attribute',
@@ -1277,5 +1281,70 @@ class SampleDataImporter
     public function getOptionRemap(): array
     {
         return $this->optionRemap;
+    }
+
+    /**
+     * Reconcile every autoincrement sequence in the public schema with the
+     * MAX(column) value currently in its owning table.
+     *
+     * Sample-data INSERTs use explicit IDs which don't advance the underlying
+     * sequence, so the next non-explicit insert collides on the PK. This
+     * setval()'s each sequence to the max value present in its column.
+     *
+     * Probes pg_get_serial_sequence on every column of every base table:
+     * that's the documented API for resolving the backing sequence of either
+     * a legacy SERIAL column or a declarative GENERATED ... AS IDENTITY
+     * column, regardless of Postgres version or how the sequence was created.
+     */
+    public static function bumpPostgresSequences(PDO $pdo, ?callable $logCallback = null): void
+    {
+        $stmt = $pdo->query("
+            SELECT
+                c.table_name,
+                c.column_name,
+                pg_get_serial_sequence(
+                    quote_ident(c.table_schema) || '.' || quote_ident(c.table_name),
+                    c.column_name
+                ) AS sequence_name
+            FROM information_schema.columns c
+            JOIN information_schema.tables t
+              ON t.table_schema = c.table_schema
+             AND t.table_name = c.table_name
+             AND t.table_type = 'BASE TABLE'
+            WHERE c.table_schema = 'public'
+            ORDER BY c.table_name, c.column_name
+        ");
+
+        $bumped = 0;
+        $failed = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $sequenceName = $row['sequence_name'];
+            if (!is_string($sequenceName) || $sequenceName === '') {
+                continue;
+            }
+            $tableName  = $row['table_name'];
+            $columnName = $row['column_name'];
+
+            try {
+                $maxStmt = $pdo->query("SELECT COALESCE(MAX(\"{$columnName}\"), 0) AS max_id FROM \"{$tableName}\"");
+                $maxId   = (int) $maxStmt->fetchColumn();
+
+                if ($maxId > 0) {
+                    // pg_get_serial_sequence returns a schema-qualified identifier
+                    // (double-quoted only when needed) — embed as-is in setval.
+                    $pdo->exec("SELECT setval('{$sequenceName}', {$maxId}, true)");
+                    $bumped++;
+                }
+            } catch (\PDOException $e) {
+                $failed[] = "{$tableName}.{$columnName}: {$e->getMessage()}";
+            }
+        }
+
+        if ($logCallback !== null) {
+            $logCallback("Bumped {$bumped} Postgres sequence(s)", 'info');
+            foreach ($failed as $msg) {
+                $logCallback("Sequence bump failed for {$msg}", 'warning');
+            }
+        }
     }
 }

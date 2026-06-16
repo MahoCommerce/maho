@@ -7,7 +7,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Install>
-            <version>0.7.0</version>
+            <version>2.0.0</version>
         </Mage_Install>
     </modules>
     <global>
