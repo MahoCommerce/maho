@@ -66,7 +66,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
         return $this->_currencyModel;
     }
 
-    protected function _getCurrencySelectHtml($label = null)
+    protected function _getCurrencySelectHtml(?string $label = null)
     {
         $value = $this->getEscapedValue('currency');
         if (!$value) {
