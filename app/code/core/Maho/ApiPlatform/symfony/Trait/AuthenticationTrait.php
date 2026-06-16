@@ -26,6 +26,8 @@ trait AuthenticationTrait
 {
     protected ?Security $security = null;
 
+    private ?int $customerGroupId = null;
+
     protected function getAuthenticatedCustomerId(): ?int
     {
         if ($this->security === null) {
@@ -38,6 +40,37 @@ trait AuthenticationTrait
         }
 
         return null;
+    }
+
+    /**
+     * Customer group of the authenticated customer, or NOT_LOGGED_IN for guests.
+     *
+     * Catalog prices and layered-nav facet counts vary by group, so this must be
+     * part of any catalog cache key or one group's data leaks to another. Resolved
+     * with a single-column read and memoized so cache hits don't load a customer.
+     */
+    protected function getCustomerGroupId(): int
+    {
+        if ($this->customerGroupId !== null) {
+            return $this->customerGroupId;
+        }
+
+        $customerId = $this->getAuthenticatedCustomerId();
+        if ($customerId === null) {
+            return $this->customerGroupId = \Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
+        }
+
+        $resource = \Mage::getSingleton('core/resource');
+        $read = $resource->getConnection('core_read');
+        $select = $read->select()
+            ->from($resource->getTableName('customer/entity'), ['group_id'])
+            ->where('entity_id = ?', $customerId)
+            ->limit(1);
+        $groupId = $read->fetchOne($select);
+
+        return $this->customerGroupId = $groupId !== false
+            ? (int) $groupId
+            : \Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
     }
 
     protected function getAuthenticatedAdminId(): ?int

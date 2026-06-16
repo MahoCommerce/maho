@@ -28,6 +28,14 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
+     * Display currency the cached prices are converted to.
+     */
+    private function resolveCurrencyCode(): string
+    {
+        return StoreContext::getStore()->getCurrentCurrencyCode();
+    }
+
+    /**
      * Provide product data based on operation type
      *
      * @return TraversablePaginator<Product>|Product|null
@@ -74,7 +82,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     private function getItem(int $id): ?Product
     {
         $storeId = StoreContext::getStoreId();
-        $cacheKey = "api_product_{$id}_{$storeId}";
+        $groupId = $this->getCustomerGroupId();
+        $currency = $this->resolveCurrencyCode();
+        $cacheKey = "api_product_{$id}_{$storeId}_{$groupId}_{$currency}";
 
         $cached = \Mage::app()->getCache()->load($cacheKey);
         if ($cached !== false) {
@@ -150,6 +160,10 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         ) {
             return null;
         }
+        // Price models read the group off the product (falling back to the
+        // session, which is empty in the API), so set it explicitly to make
+        // tier, catalog-rule and final prices match the cache key's group.
+        $product->setCustomerGroupId($this->getCustomerGroupId());
         return $this->toDto($product);
     }
 
@@ -168,7 +182,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     {
         $keyData = array_filter($filters, fn($v) => $v !== '' && $v !== null);
         ksort($keyData);
-        return 'api_products_' . md5(json_encode($keyData) . '_' . StoreContext::getStoreId());
+        $scope = StoreContext::getStoreId() . '_' . $this->getCustomerGroupId() . '_' . $this->resolveCurrencyCode();
+        return 'api_products_' . md5(json_encode($keyData) . '_' . $scope);
     }
 
     /**
@@ -263,6 +278,12 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $collection = $layer->getProductCollection();
         $collection->addAttributeToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
 
+        // Re-target the price index to this customer group so price filters,
+        // price sorting and listing prices match the cache key's group. The
+        // layer already joined it for the session group (guest); addPriceData()
+        // is idempotent and just overrides the group on the existing join.
+        $collection->addPriceData($this->getCustomerGroupId());
+
         if (!empty($requestFilters['priceMin']) || !empty($requestFilters['priceMax'])) {
             $priceFilter = [];
             if (!empty($requestFilters['priceMin'])) {
@@ -329,11 +350,13 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $stockItemsByProduct = $this->batchLoadStockItems($productIds);
 
         $forListing = empty($requestFilters['fullDetail']);
+        $groupId = $this->getCustomerGroupId();
 
         $products = [];
         foreach ($result['products'] as $product) {
             if ($product instanceof \Mage_Catalog_Model_Product) {
                 $productId = (int) $product->getId();
+                $product->setCustomerGroupId($groupId);
                 $dto = Product::fromModel($product);
                 $this->enrichProduct(
                     $dto,

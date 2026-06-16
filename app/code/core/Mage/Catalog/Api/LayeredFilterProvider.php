@@ -35,7 +35,11 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
         }
 
         $storeId = StoreContext::getStoreId();
-        $cacheKey = "api_layered_filters_{$categoryId}_{$storeId}";
+        // Facet counts vary by customer group: the catalog layer joins the
+        // group-scoped price index (Mage_Catalog_Model_Layer::addPriceData),
+        // which is why core keys its own layer state by _CUSTGROUP_ too.
+        $groupId = $this->getCustomerGroupId();
+        $cacheKey = "api_layered_filters_{$categoryId}_{$storeId}_{$groupId}";
 
         $cached = \Mage::app()->getCache()->load($cacheKey);
         if ($cached !== false) {
