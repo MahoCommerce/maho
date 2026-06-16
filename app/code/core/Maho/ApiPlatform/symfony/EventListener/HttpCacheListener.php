@@ -95,11 +95,10 @@ class HttpCacheListener
         if (!$isAuthenticated && $this->isPublicPath($path)) {
             // Public endpoints: CDN-cacheable
             $response->headers->set('Cache-Control', 'public, max-age=3600');
-        } elseif ($isAuthenticated && $this->isCollectionPath($path)) {
-            // Authenticated collections: short cache, must revalidate
-            $response->headers->set('Cache-Control', 'private, max-age=60, must-revalidate');
         } elseif ($isAuthenticated) {
-            // Authenticated single resources: moderate cache
+            // Authenticated reads (collections and single resources): moderate
+            // cache. Tag invalidation bounds staleness on writes regardless of
+            // TTL, so there's no benefit to a shorter window for collections.
             $response->headers->set('Cache-Control', 'private, max-age=300, must-revalidate');
         } else {
             // Unauthenticated non-public: no store
@@ -118,12 +117,5 @@ class HttpCacheListener
             }
         }
         return false;
-    }
-
-    private function isCollectionPath(string $path): bool
-    {
-        // Collection endpoints typically don't end with a numeric ID
-        // e.g., /api/rest/v2/products is a collection, /api/rest/v2/products/123 is a single resource
-        return !preg_match('#/\d+$#', $path);
     }
 }
