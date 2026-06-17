@@ -11,6 +11,18 @@
 class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Controller_Sales_Invoice
 {
     /**
+     * Controller pre-dispatch method
+     *
+     * @return Mage_Adminhtml_Controller_Action
+     */
+    #[\Override]
+    public function preDispatch()
+    {
+        $this->_setForcedFormKeyActions(['capture', 'cancel', 'void']);
+        return parent::preDispatch();
+    }
+
+    /**
      * Get requested items qty's from request
      */
     protected function _getItemQtys()
@@ -301,6 +313,9 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     {
         if ($invoice = $this->_initInvoice()) {
             try {
+                if (!$invoice->canCapture()) {
+                    Mage::throwException($this->__('The invoice cannot be captured.'));
+                }
                 $invoice->capture();
                 $this->_saveInvoice($invoice);
                 $this->_getSession()->addSuccess($this->__('The invoice has been captured.'));
@@ -323,6 +338,9 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     {
         if ($invoice = $this->_initInvoice()) {
             try {
+                if (!$invoice->canCancel()) {
+                    Mage::throwException($this->__('The invoice cannot be canceled.'));
+                }
                 $invoice->cancel();
                 $this->_saveInvoice($invoice);
                 $this->_getSession()->addSuccess($this->__('The invoice has been canceled.'));
@@ -345,6 +363,9 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     {
         if ($invoice = $this->_initInvoice()) {
             try {
+                if (!$invoice->canVoid()) {
+                    Mage::throwException($this->__('The invoice cannot be voided.'));
+                }
                 $invoice->void();
                 $this->_saveInvoice($invoice);
                 $this->_getSession()->addSuccess($this->__('The invoice has been voided.'));

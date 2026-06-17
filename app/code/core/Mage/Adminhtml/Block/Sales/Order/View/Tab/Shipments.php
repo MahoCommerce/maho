@@ -36,6 +36,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Shipments extends Mage_Adminhtml
             ->addFieldToSelect('increment_id')
             ->addFieldToSelect('total_qty')
             ->addFieldToSelect('shipping_name')
+            ->addFieldToSelect('shipment_status')
             ->setOrderFilter($this->getOrder())
         ;
         $this->setCollection($collection);
@@ -59,6 +60,13 @@ class Mage_Adminhtml_Block_Sales_Order_View_Tab_Shipments extends Mage_Adminhtml
             'header' => Mage::helper('sales')->__('Date Shipped'),
             'index' => 'created_at',
             'type' => 'datetime',
+        ]);
+
+        $this->addColumn('shipment_status', [
+            'header'  => Mage::helper('sales')->__('Status'),
+            'index'   => 'shipment_status',
+            'type'    => 'options',
+            'options' => Mage_Sales_Model_Order_Shipment::getStatuses(),
         ]);
 
         $this->addColumn('total_qty', [

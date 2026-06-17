@@ -83,6 +83,14 @@ class Mage_Adminhtml_Block_Sales_Shipment_Grid extends Mage_Adminhtml_Block_Widg
             'filter_index' => 'main_table.shipping_name',
         ]);
 
+        $this->addColumn('shipment_status', [
+            'header'       => Mage::helper('sales')->__('Status'),
+            'index'        => 'shipment_status',
+            'filter_index' => 'main_table.shipment_status',
+            'type'         => 'options',
+            'options'      => Mage_Sales_Model_Order_Shipment::getStatuses(),
+        ]);
+
         $this->addColumn('total_qty', [
             'header' => Mage::helper('sales')->__('Total Qty'),
             'index' => 'total_qty',
