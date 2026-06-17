@@ -11,6 +11,24 @@
   display: flex;
   gap: var(--maho-space-5);
 }
+/* The XML / JSON / CSV builders render inside the standard admin .form-list
+   wrapper, so their inputs inherit the global 330px / 280px fixed widths
+   from form.css and base.css. Those collide with the builders' own flex /
+   grid layouts and force horizontal scroll on narrow viewports. Scope an
+   override so width follows the container instead. Specificity (0,1,3,1)
+   beats the global rule (0,0,3,1) without touching any other admin form. */
+.form-list td.value #xml-builder-container input.input-text,
+.form-list td.value #xml-builder-container textarea,
+.form-list td.value #xml-builder-container select,
+.form-list td.value #json-builder-container input.input-text,
+.form-list td.value #json-builder-container textarea,
+.form-list td.value #json-builder-container select,
+.form-list td.value #csv-builder-container input.input-text,
+.form-list td.value #csv-builder-container textarea,
+.form-list td.value #csv-builder-container select {
+  width: auto;
+  max-width: 100%;
+}
 .feedmanager-mapping-source,
 .feedmanager-mapping-target {
   flex: 1;
