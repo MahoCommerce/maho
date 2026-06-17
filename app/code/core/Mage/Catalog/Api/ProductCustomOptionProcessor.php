@@ -48,7 +48,7 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
 
         if ($operation instanceof DeleteOperationInterface) {
             $this->requirePermission($user, 'products/delete');
-            return $this->handleDelete($productId, (int) ($uriVariables['optionId'] ?? 0));
+            return $this->handleDelete($productId, (int) ($uriVariables['id'] ?? 0));
         }
 
         $this->requirePermission($user, 'products/write');
@@ -60,7 +60,7 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
             return $this->handleCreate($productId, $body);
         }
 
-        return $this->handleUpdate($productId, (int) ($uriVariables['optionId'] ?? 0), $body);
+        return $this->handleUpdate($productId, (int) ($uriVariables['id'] ?? 0), $body);
     }
 
     private function handleCreate(int $productId, array $body): ProductCustomOption

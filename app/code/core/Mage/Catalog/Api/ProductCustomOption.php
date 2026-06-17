@@ -57,20 +57,20 @@ use ApiPlatform\Metadata\Put;
             description: 'Add a custom option to a product',
         ),
         new Put(
-            uriTemplate: '/products/{productId}/custom-options/{optionId}',
+            uriTemplate: '/products/{productId}/custom-options/{id}',
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
-                'optionId' => new Link(fromClass: self::class, identifiers: ['id']),
+                'id' => new Link(fromClass: self::class, identifiers: ['id']),
             ],
             processor: ProductCustomOptionProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Update a custom option',
         ),
         new Delete(
-            uriTemplate: '/products/{productId}/custom-options/{optionId}',
+            uriTemplate: '/products/{productId}/custom-options/{id}',
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
-                'optionId' => new Link(fromClass: self::class, identifiers: ['id']),
+                'id' => new Link(fromClass: self::class, identifiers: ['id']),
             ],
             processor: ProductCustomOptionProcessor::class,
             security: "is_granted('ROLE_API_USER')",

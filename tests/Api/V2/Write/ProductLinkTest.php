@@ -113,10 +113,10 @@ describe('Product Links, CRUD Lifecycle', function (): void {
     it('supports cross_sell and up_sell types', function (): void {
         $productId = fixtures('product_id');
 
-        $crossSell = apiGet("/api/rest/v2/products/{$productId}/links/cross_sell");
+        $crossSell = apiGet("/api/rest/v2/products/{$productId}/links/cross-sell");
         expect($crossSell['status'])->toBe(200);
 
-        $upSell = apiGet("/api/rest/v2/products/{$productId}/links/up_sell");
+        $upSell = apiGet("/api/rest/v2/products/{$productId}/links/up-sell");
         expect($upSell['status'])->toBe(200);
     });
 

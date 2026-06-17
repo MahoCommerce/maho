@@ -52,7 +52,7 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
         $linkType = ProductLinkProvider::extractLinkType($context);
 
         if (!isset(self::LINK_SETTER_MAP[$linkType])) {
-            throw new BadRequestHttpException("Invalid link type: {$linkType}. Valid types: related, cross_sell, up_sell");
+            throw new BadRequestHttpException("Invalid link type: {$linkType}. Valid types: related, cross-sell, up-sell");
         }
 
         if ($operation instanceof DeleteOperationInterface) {

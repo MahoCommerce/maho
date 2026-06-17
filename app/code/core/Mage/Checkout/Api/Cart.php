@@ -115,14 +115,14 @@ use Mage\Customer\Api\Address;
             description: 'Remove coupon from guest cart',
         ),
         new Post(
-            uriTemplate: '/guest-carts/{id}/giftcard',
+            uriTemplate: '/guest-carts/{id}/giftcards',
             name: 'apply_guest_giftcard',
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Apply gift card to guest cart',
         ),
         new Delete(
-            uriTemplate: '/guest-carts/{id}/giftcard/{code}',
+            uriTemplate: '/guest-carts/{id}/giftcards/{code}',
             name: 'remove_guest_giftcard',
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',

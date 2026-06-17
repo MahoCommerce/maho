@@ -22,6 +22,8 @@ use ApiPlatform\Metadata\Put;
     mahoOperations: ['read' => 'View', 'write' => 'Manage'],
     shortName: 'ProductLink',
     description: 'Product links (related, cross-sell, up-sell)',
+    // URL segments are kebab-case (cross-sell, up-sell); the internal Magento
+    // link-type codes (cross_sell, up_sell) are restored in extractLinkType().
     provider: ProductLinkProvider::class,
     operations: [
         // --- Related ---
@@ -66,7 +68,7 @@ use ApiPlatform\Metadata\Put;
         ),
         // --- Cross-sell ---
         new GetCollection(
-            uriTemplate: '/products/{productId}/links/cross_sell',
+            uriTemplate: '/products/{productId}/links/cross-sell',
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
@@ -75,7 +77,7 @@ use ApiPlatform\Metadata\Put;
             description: 'Get cross-sell product links',
         ),
         new Put(
-            uriTemplate: '/products/{productId}/links/cross_sell',
+            uriTemplate: '/products/{productId}/links/cross-sell',
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
@@ -85,7 +87,7 @@ use ApiPlatform\Metadata\Put;
             description: 'Replace all cross-sell links',
         ),
         new Post(
-            uriTemplate: '/products/{productId}/links/cross_sell',
+            uriTemplate: '/products/{productId}/links/cross-sell',
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
@@ -95,7 +97,7 @@ use ApiPlatform\Metadata\Put;
             description: 'Add a cross-sell link',
         ),
         new Delete(
-            uriTemplate: '/products/{productId}/links/cross_sell/{linkedProductId}',
+            uriTemplate: '/products/{productId}/links/cross-sell/{linkedProductId}',
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
@@ -106,7 +108,7 @@ use ApiPlatform\Metadata\Put;
         ),
         // --- Up-sell ---
         new GetCollection(
-            uriTemplate: '/products/{productId}/links/up_sell',
+            uriTemplate: '/products/{productId}/links/up-sell',
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
@@ -115,7 +117,7 @@ use ApiPlatform\Metadata\Put;
             description: 'Get up-sell product links',
         ),
         new Put(
-            uriTemplate: '/products/{productId}/links/up_sell',
+            uriTemplate: '/products/{productId}/links/up-sell',
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
@@ -125,7 +127,7 @@ use ApiPlatform\Metadata\Put;
             description: 'Replace all up-sell links',
         ),
         new Post(
-            uriTemplate: '/products/{productId}/links/up_sell',
+            uriTemplate: '/products/{productId}/links/up-sell',
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
@@ -135,7 +137,7 @@ use ApiPlatform\Metadata\Put;
             description: 'Add an up-sell link',
         ),
         new Delete(
-            uriTemplate: '/products/{productId}/links/up_sell/{linkedProductId}',
+            uriTemplate: '/products/{productId}/links/up-sell/{linkedProductId}',
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],

@@ -32,7 +32,7 @@ final class ProductLinkProvider extends \Maho\ApiPlatform\Provider
         $linkType = self::extractLinkType($context);
 
         if (!isset(self::LINK_COLLECTION_MAP[$linkType])) {
-            throw new BadRequestHttpException("Invalid link type: {$linkType}. Valid types: related, cross_sell, up_sell");
+            throw new BadRequestHttpException("Invalid link type: {$linkType}. Valid types: related, cross-sell, up-sell");
         }
 
         $product = $this->loadProduct($productId);
@@ -52,8 +52,9 @@ final class ProductLinkProvider extends \Maho\ApiPlatform\Provider
         }
 
         $path = $request->getPathInfo();
-        if (preg_match('#/products/\d+/links/([a-z_]+)#', $path, $matches)) {
-            return $matches[1];
+        if (preg_match('#/products/\d+/links/([a-z-]+)#', $path, $matches)) {
+            // URL is kebab-case (cross-sell); internal link-type codes use snake_case (cross_sell).
+            return str_replace('-', '_', $matches[1]);
         }
 
         return '';
@@ -70,7 +71,7 @@ final class ProductLinkProvider extends \Maho\ApiPlatform\Provider
         }
 
         $path = $request->getPathInfo();
-        if (preg_match('#/products/\d+/links/[a-z_]+/(\d+)#', $path, $matches)) {
+        if (preg_match('#/products/\d+/links/[a-z-]+/(\d+)#', $path, $matches)) {
             return (int) $matches[1];
         }
 
