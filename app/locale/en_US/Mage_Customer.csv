@@ -93,6 +93,7 @@
 "Customer Account Registration Form","Customer Account Registration Form"
 "Customer accounts cannot be disabled because guest checkout is not allowed. Please enable guest checkout first.","Customer accounts cannot be disabled because guest checkout is not allowed. Please enable guest checkout first."
 "Customer Account Two-Factor Authentication","Customer Account Two-Factor Authentication"
+"Customer Account Two-Factor Authentication Challenge","Customer Account Two-Factor Authentication Challenge"
 "Customer API","Customer API"
 "Customer collection expected.","Customer collection expected."
 "Customer Configuration","Customer Configuration"
