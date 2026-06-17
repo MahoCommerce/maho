@@ -11,6 +11,18 @@
 class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Controller_Sales_Shipment
 {
     /**
+     * Controller pre-dispatch method
+     *
+     * @return Mage_Adminhtml_Controller_Action
+     */
+    #[\Override]
+    public function preDispatch()
+    {
+        $this->_setForcedFormKeyActions(['cancel']);
+        return parent::preDispatch();
+    }
+
+    /**
      * Initialize shipment items QTY
      */
     protected function _getItemQtys()
