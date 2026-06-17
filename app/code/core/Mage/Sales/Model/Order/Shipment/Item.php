@@ -144,6 +144,19 @@ class Mage_Sales_Model_Order_Shipment_Item extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Reverting qty from order item
+     *
+     * @return $this
+     */
+    public function cancel(): self
+    {
+        $this->getOrderItem()->setQtyShipped(
+            $this->getOrderItem()->getQtyShipped() - $this->getQty(),
+        );
+        return $this;
+    }
+
+    /**
      * Before object save
      *
      * @return $this

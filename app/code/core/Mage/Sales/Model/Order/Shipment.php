@@ -43,7 +43,8 @@
  */
 class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
 {
-    public const STATUS_NEW    = 1;
+    public const STATUS_NEW      = 1;
+    public const STATUS_CANCELED = 2;
 
     public const XML_PATH_EMAIL_TEMPLATE               = 'sales_email/shipment/template';
     public const XML_PATH_EMAIL_GUEST_TEMPLATE         = 'sales_email/shipment/guest_template';
@@ -213,6 +214,36 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
             }
         }
         $this->setTotalQty($totalQty);
+
+        return $this;
+    }
+
+    /**
+     * Check whether the shipment can still be canceled
+     */
+    public function canCancel(): bool
+    {
+        return (int) $this->getShipmentStatus() !== self::STATUS_CANCELED;
+    }
+
+    /**
+     * Cancel the shipment: revert shipped quantities and re-open the order
+     *
+     * @return $this
+     */
+    public function cancel(): self
+    {
+        if (!$this->canCancel()) {
+            Mage::throwException(Mage::helper('sales')->__('Cannot cancel the shipment.'));
+        }
+
+        foreach ($this->getAllItems() as $item) {
+            $item->cancel();
+        }
+
+        $this->setShipmentStatus(self::STATUS_CANCELED);
+        $this->getOrder()->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true);
+        Mage::dispatchEvent('sales_order_shipment_cancel', [$this->_eventObject => $this]);
 
         return $this;
     }
