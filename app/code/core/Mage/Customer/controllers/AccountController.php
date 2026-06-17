@@ -190,7 +190,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         $session = $this->_getSession();
         if (!$session->isLoggedIn()
             && $this->_validateFormKey()
-            && Mage::getStoreConfigFlag('customer/security/allow_2fa')
+            && Mage::getStoreConfigFlag('customer/password/allow_2fa')
         ) {
             $login = $this->getRequest()->getPost('login');
             $username = $login['username'] ?? '';
@@ -1254,7 +1254,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/customer/account/twofa', name: 'customer.account.twofa', methods: ['GET'])]
     public function twofaAction(): void
     {
-        if (!Mage::getStoreConfigFlag('customer/security/allow_2fa')) {
+        if (!Mage::getStoreConfigFlag('customer/password/allow_2fa')) {
             $this->norouteAction();
             return;
         }
@@ -1277,7 +1277,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             return;
         }
 
-        if (!Mage::getStoreConfigFlag('customer/security/allow_2fa')) {
+        if (!Mage::getStoreConfigFlag('customer/password/allow_2fa')) {
             $this->norouteAction();
             return;
         }
@@ -1293,6 +1293,9 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 
             $action = $this->getRequest()->getPost('action');
             if ($action === 'disable') {
+                if (Mage::getStoreConfigFlag('customer/password/require_2fa')) {
+                    Mage::throwException($this->__('Two-factor authentication is required and cannot be disabled.'));
+                }
                 $customer->setTwofaEnabled(false)
                     ->setTwofaSecret(null)
                     ->save();

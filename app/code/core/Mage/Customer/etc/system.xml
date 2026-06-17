@@ -330,6 +330,27 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </min_password_length>
+                        <allow_2fa translate="label comment">
+                            <label>Allow Two-Factor Authentication</label>
+                            <comment>Let customers enable TOTP-based two-factor authentication on their account.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </allow_2fa>
+                        <require_2fa translate="label comment">
+                            <label>Require Two-Factor Authentication</label>
+                            <comment>Force all customers to set up two-factor authentication before they can use their account.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><allow_2fa>1</allow_2fa></depends>
+                        </require_2fa>
                     </fields>
                 </password>
                 <password_link translate="label">
@@ -640,25 +661,6 @@ SPDX-License-Identifier: AFL-3.0
                         </js_template>
                     </fields>
                 </address_templates>
-                <security translate="label">
-                    <label>Security</label>
-                    <sort_order>50</sort_order>
-                    <show_in_default>1</show_in_default>
-                    <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
-                    <fields>
-                        <allow_2fa translate="label comment">
-                            <label>Allow Customer 2FA</label>
-                            <comment>Allow customers to enable TOTP-based two-factor authentication on their account.</comment>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
-                            <sort_order>10</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </allow_2fa>
-                    </fields>
-                </security>
             </groups>
         </customer>
         <general>

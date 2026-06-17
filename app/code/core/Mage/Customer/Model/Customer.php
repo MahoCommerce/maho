@@ -99,8 +99,6 @@
  * @method $this setTotal(float $value)
  * @method bool getTwofaEnabled()
  * @method $this setTwofaEnabled(bool $value)
- * @method string|null getTwofaSecret()
- * @method $this setTwofaSecret(string|null $value)
  *
  * @method int getWebsiteId()
  * @method $this setWebsiteId(int $value)
@@ -277,7 +275,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
             );
         }
 
-        if (Mage::getStoreConfigFlag('customer/security/allow_2fa') && $this->getTwofaEnabled()) {
+        if (Mage::getStoreConfigFlag('customer/password/allow_2fa') && $this->getTwofaEnabled()) {
             if (!Mage::helper('core/security')->verifyTotpCode($this->getTwofaSecret() ?? '', $twofaVerificationCode ?? '')) {
                 throw Mage::exception(
                     'Mage_Core',
@@ -293,6 +291,29 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         ]);
 
         return true;
+    }
+
+    /**
+     * Return the decrypted TOTP secret, tolerating legacy plaintext values.
+     */
+    public function getTwofaSecret(): ?string
+    {
+        $secret = $this->getData('twofa_secret');
+        if ($secret === null || $secret === '') {
+            return null;
+        }
+        return Mage::helper('core')->tryDecrypt($secret) ?? $secret;
+    }
+
+    /**
+     * Store the TOTP secret encrypted at rest.
+     */
+    public function setTwofaSecret(#[\SensitiveParameter] ?string $secret): self
+    {
+        if ($secret === null || $secret === '') {
+            return $this->setData('twofa_secret');
+        }
+        return $this->setData('twofa_secret', Mage::helper('core')->encrypt($secret));
     }
 
     /**

@@ -8,7 +8,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Customer>
-            <version>2.0.0</version>
+            <version>2.0.1</version>
         </Mage_Customer>
     </modules>
     <admin>
@@ -458,9 +458,6 @@ SPDX-License-Identifier: AFL-3.0
             <account>
                 <enabled_in_frontend>1</enabled_in_frontend>
             </account>
-            <security>
-                <allow_2fa>1</allow_2fa>
-            </security>
             <account_share>
                 <scope>1</scope>
             </account_share>
@@ -489,6 +486,8 @@ SPDX-License-Identifier: AFL-3.0
                 <reset_link_expiration_period>2</reset_link_expiration_period>
                 <require_admin_user_to_change_user_password>1</require_admin_user_to_change_user_password>
                 <min_password_length>7</min_password_length>
+                <allow_2fa>1</allow_2fa>
+                <require_2fa>0</require_2fa>
             </password>
             <password_link>
                 <email_identity>support</email_identity>

@@ -31,6 +31,19 @@ class Mage_Customer_Block_Account_Dashboard_Info extends Mage_Core_Block_Templat
     }
 
     /**
+     * Whether the two-factor authentication feature is available to customers
+     */
+    public function isTwofaAllowed(): bool
+    {
+        return Mage::getStoreConfigFlag('customer/password/allow_2fa');
+    }
+
+    public function getTwofaUrl(): string
+    {
+        return Mage::getUrl('*/account/twofa');
+    }
+
+    /**
      * Get Customer Subscription Object Information
      *
      * @return Mage_Newsletter_Model_Subscriber

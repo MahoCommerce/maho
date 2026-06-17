@@ -21,6 +21,14 @@ class Mage_Customer_Block_Account_Twofa extends Mage_Core_Block_Template
     }
 
     /**
+     * Whether the merchant forces all customers to use 2FA
+     */
+    public function isRequired(): bool
+    {
+        return Mage::getStoreConfigFlag('customer/password/require_2fa');
+    }
+
+    /**
      * Logged-in customer
      */
     public function getCustomer(): Mage_Customer_Model_Customer
