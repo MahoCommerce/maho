@@ -289,29 +289,3 @@ describe('GET /api/rest/v2/guest-carts/{id}/payment-methods', function (): void 
     });
 
 });
-
-describe('GET /api/rest/v2/products/{sku}/options', function (): void {
-
-    it('returns 404 for non-existent product', function (): void {
-        $response = apiGet('/api/rest/v2/products/NONEXISTENT-SKU-12345/options');
-
-        expect($response['status'])->toBeNotFound();
-    });
-
-    it('returns options for valid SKU', function (): void {
-        $sku = fixtures('product_sku');
-
-        if (!$sku) {
-            $this->markTestSkipped('No product_sku configured in fixtures');
-        }
-
-        $response = apiGet("/api/rest/v2/products/{$sku}/options");
-
-        expect($response['status'])->toBe(200);
-        expect($response['json'])->toHaveKey('sku');
-        expect($response['json'])->toHaveKey('name');
-        expect($response['json'])->toHaveKey('options');
-        expect($response['json']['options'])->toBeArray();
-    });
-
-});

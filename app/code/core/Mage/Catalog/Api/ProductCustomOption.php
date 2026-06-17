@@ -35,12 +35,6 @@ use ApiPlatform\Metadata\Put;
             security: 'true',
             description: 'Get all custom options for a product',
         ),
-        new GetCollection(
-            uriTemplate: '/products/{sku}/options',
-            name: 'get_options_by_sku',
-            security: 'true',
-            description: 'Get custom options for a product by SKU (resolves configurable parents)',
-        ),
         new Get(
             uriTemplate: '/custom-option-file/{optionId}/{key}',
             name: 'download_option_file',

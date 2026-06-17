@@ -283,7 +283,7 @@ Country listings live under [Directory](#directory) (`/countries`).
 | PUT | `/products/{id}` | Admin/API | Update product |
 | DELETE | `/products/{id}` | Admin/API | Delete product |
 
-**Sub-resources** (path parameter is `{productId}` everywhere except `/options`, which uses `{sku}`):
+**Sub-resources** (parent path parameter is `{productId}` throughout):
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
@@ -291,7 +291,6 @@ Country listings live under [Directory](#directory) (`/countries`).
 | GET / POST / DELETE | `/products/{productId}/tier-prices` | Admin/API | Tier pricing (POST replaces, DELETE clears all) |
 | GET / POST | `/products/{productId}/custom-options` | GET=None, POST=Admin/API | Custom options |
 | PUT / DELETE | `/products/{productId}/custom-options/{id}` | Admin/API | Update/remove a custom option |
-| GET | `/products/{sku}/options` | None | Custom options by SKU (resolves configurable parents) |
 | GET | `/custom-option-file/{optionId}/{key}` | None | Download a customer-uploaded option file |
 | GET / POST / PUT / DELETE | `/products/{productId}/bundle-options` | GET=None, writes=Admin/API | Bundle product options |
 | PUT / DELETE | `/products/{productId}/bundle-options/{id}` | Admin/API | Update/remove a bundle option |
