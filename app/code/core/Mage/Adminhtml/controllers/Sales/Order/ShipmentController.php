@@ -241,9 +241,6 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
         }
     }
 
-    /**
-     * Cancel shipment action
-     */
     #[Maho\Config\Route('/admin/sales_order_shipment/cancel')]
     public function cancelAction(): void
     {

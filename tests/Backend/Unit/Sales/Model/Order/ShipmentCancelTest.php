@@ -88,6 +88,28 @@ describe('Mage_Sales_Model_Order_Shipment::cancel', function () {
     });
 });
 
+describe('Mage_Sales_Model_Order_Shipment::register', function () {
+    it('marks the shipment as new on registration', function () {
+        $orderItem = makeOrderItem(qtyOrdered: 5, qtyShipped: 0);
+        $shipment = makeShipment($orderItem, qty: 3);
+
+        $shipment->register();
+
+        expect((int) $shipment->getShipmentStatus())
+            ->toBe(Mage_Sales_Model_Order_Shipment::STATUS_NEW);
+    });
+});
+
+describe('Mage_Sales_Model_Order_Shipment::getStatuses', function () {
+    it('maps the status ids to labels', function () {
+        $statuses = Mage_Sales_Model_Order_Shipment::getStatuses();
+
+        expect($statuses)
+            ->toHaveKey(Mage_Sales_Model_Order_Shipment::STATUS_NEW)
+            ->toHaveKey(Mage_Sales_Model_Order_Shipment::STATUS_CANCELED);
+    });
+});
+
 describe('Mage_Sales_Model_Order_Shipment::canCancel', function () {
     it('is true for a fresh shipment and false once canceled', function () {
         $orderItem = makeOrderItem(qtyOrdered: 5, qtyShipped: 3);

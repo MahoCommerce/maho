@@ -46,6 +46,8 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
     public const STATUS_NEW      = 1;
     public const STATUS_CANCELED = 2;
 
+    protected static ?array $_statuses = null;
+
     public const XML_PATH_EMAIL_TEMPLATE               = 'sales_email/shipment/template';
     public const XML_PATH_EMAIL_GUEST_TEMPLATE         = 'sales_email/shipment/guest_template';
     public const XML_PATH_EMAIL_IDENTITY               = 'sales_email/shipment/identity';
@@ -214,13 +216,25 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
             }
         }
         $this->setTotalQty($totalQty);
+        $this->setShipmentStatus(self::STATUS_NEW);
 
         return $this;
     }
 
     /**
-     * Check whether the shipment can still be canceled
+     * Retrieve the shipment status id => label map
      */
+    public static function getStatuses(): array
+    {
+        if (is_null(self::$_statuses)) {
+            self::$_statuses = [
+                self::STATUS_NEW      => Mage::helper('sales')->__('Shipped'),
+                self::STATUS_CANCELED => Mage::helper('sales')->__('Canceled'),
+            ];
+        }
+        return self::$_statuses;
+    }
+
     public function canCancel(): bool
     {
         return (int) $this->getShipmentStatus() !== self::STATUS_CANCELED;
