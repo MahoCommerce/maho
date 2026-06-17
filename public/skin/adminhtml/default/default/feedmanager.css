@@ -221,6 +221,16 @@
 .category-mapping-container {
   margin-top: var(--maho-space-5);
 }
+#category-mapping-grid {
+  table-layout: fixed;
+  width: 100%;
+}
+#category-mapping-grid thead th:nth-child(1),
+#category-mapping-grid tbody td:nth-child(1) { width: 35%; }
+#category-mapping-grid thead th:nth-child(2),
+#category-mapping-grid tbody td:nth-child(2) { width: 50%; }
+#category-mapping-grid thead th:nth-child(3),
+#category-mapping-grid tbody td:nth-child(3) { width: 15%; }
 /* Bulk Mode Bar */
 .bulk-mode-bar {
   display: none;
