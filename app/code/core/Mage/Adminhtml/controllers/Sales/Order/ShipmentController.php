@@ -241,6 +241,25 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
         }
     }
 
+    #[Maho\Config\Route('/admin/sales_order_shipment/cancel')]
+    public function cancelAction(): void
+    {
+        if ($shipment = $this->_initShipment()) {
+            try {
+                $shipment->cancel();
+                $this->_saveShipment($shipment);
+                $this->_getSession()->addSuccess($this->__('The shipment has been canceled.'));
+            } catch (Mage_Core_Exception $e) {
+                $this->_getSession()->addError($e->getMessage());
+            } catch (Exception $e) {
+                $this->_getSession()->addError($this->__('Cannot cancel the shipment.'));
+            }
+            $this->_redirect('*/*/view', ['shipment_id' => $shipment->getId()]);
+        } else {
+            $this->_forward('noRoute');
+        }
+    }
+
     /**
      * Send email with shipment data to customer
      */

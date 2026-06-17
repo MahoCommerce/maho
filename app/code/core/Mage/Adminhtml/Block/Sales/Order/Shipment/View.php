@@ -41,6 +41,17 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_View extends Mage_Adminhtml_Bloc
                 'class'     => 'save',
                 'onclick'   => Mage::helper('core/js')->getSetLocationJs($this->getPrintUrl()),
             ]);
+
+            if ($this->getShipment()->canCancel()) {
+                $this->_addButton('cancel', [
+                    'label'     => Mage::helper('sales')->__('Cancel'),
+                    'class'     => 'delete',
+                    'onclick'   => Mage::helper('core/js')->getDeleteConfirmJs(
+                        $this->getCancelUrl(),
+                        Mage::helper('sales')->__('Are you sure you want to cancel this shipment?'),
+                    ),
+                ]);
+            }
         }
     }
 
@@ -108,6 +119,11 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_View extends Mage_Adminhtml_Bloc
         return $this->getUrl('*/*/print', [
             'invoice_id' => $this->getShipment()->getId(),
         ]);
+    }
+
+    public function getCancelUrl(): string
+    {
+        return $this->getUrl('*/*/cancel', ['shipment_id' => $this->getShipment()->getId()]);
     }
 
     /**
