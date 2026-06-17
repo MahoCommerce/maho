@@ -97,6 +97,10 @@
  * @method $this setTaxClassId(bool $value)
  * @method string getTaxvat()
  * @method $this setTotal(float $value)
+ * @method bool getTwofaEnabled()
+ * @method $this setTwofaEnabled(bool $value)
+ * @method string|null getTwofaSecret()
+ * @method $this setTwofaSecret(string|null $value)
  *
  * @method int getWebsiteId()
  * @method $this setWebsiteId(int $value)
@@ -131,6 +135,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     public const EXCEPTION_EMAIL_EXISTS              = 3;
     public const EXCEPTION_INVALID_RESET_PASSWORD_LINK_TOKEN = 4;
     public const EXCEPTION_INVALID_RESET_PASSWORD_LINK_CUSTOMER_ID = 5;
+    public const EXCEPTION_2FA_INVALID = 6;
 
     /**
      * Subscriptions
@@ -254,7 +259,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      * @throws Mage_Core_Exception
      * @return true
      */
-    public function authenticate($login, #[\SensitiveParameter] $password)
+    public function authenticate($login, #[\SensitiveParameter] $password, #[\SensitiveParameter] ?string $twofaVerificationCode = null)
     {
         $this->loadByEmail($login);
         if ($this->getConfirmation() && $this->isConfirmationRequired()) {
@@ -270,6 +275,16 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
                 Mage::helper('customer')->__('Invalid login or password.'),
                 self::EXCEPTION_INVALID_EMAIL_OR_PASSWORD,
             );
+        }
+
+        if (Mage::getStoreConfigFlag('customer/security/allow_2fa') && $this->getTwofaEnabled()) {
+            if (!Mage::helper('core/security')->verifyTotpCode($this->getTwofaSecret() ?? '', $twofaVerificationCode ?? '')) {
+                throw Mage::exception(
+                    'Mage_Core',
+                    Mage::helper('customer')->__('2FA verification code is invalid.'),
+                    self::EXCEPTION_2FA_INVALID,
+                );
+            }
         }
 
         Mage::dispatchEvent('customer_customer_authenticated', [

@@ -199,6 +199,21 @@ New customer registration
         </reference>
     </customer_account_edit>
 
+    <customer_account_twofa translate="label">
+        <label>Customer Account Two-Factor Authentication</label>
+        <update handle="customer_account"/>
+        <reference name="root">
+            <action method="setHeaderTitle" translate="title" module="customer"><title>Two-Factor Authentication</title></action>
+        </reference>
+        <reference name="my.account.wrapper">
+            <block type="customer/account_twofa" name="customer_twofa" template="customer/form/twofa.phtml"/>
+        </reference>
+
+        <reference name="left">
+          <action method="unsetChild"><name>left.permanent.callout</name></action>
+        </reference>
+    </customer_account_twofa>
+
 <!--
 Customer account pages, rendered for all tabs in dashboard
 -->
@@ -224,6 +239,7 @@ Customer account pages, rendered for all tabs in dashboard
             <block type="customer/account_navigation" name="customer_account_navigation" before="-" template="customer/account/navigation.phtml">
                 <action method="addLink" translate="label" module="customer"><name>account</name><path>customer/account/</path><label>Account Dashboard</label></action>
                 <action method="addLink" translate="label" module="customer"><name>account_edit</name><path>customer/account/edit/</path><label>Account Information</label></action>
+                <action method="addLink" translate="label" module="customer" ifconfig="customer/security/allow_2fa"><name>account_twofa</name><path>customer/account/twofa/</path><label>Two-Factor Authentication</label></action>
                 <action method="addLink" translate="label" module="customer"><name>address_book</name><path>customer/address/</path><label>Address Book</label></action>
             </block>
         </reference>

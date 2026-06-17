@@ -37,6 +37,9 @@
  * @method bool getNoReferer(bool $value)
  * @method $this setNoReferer(bool $value)
  * @method $this unsNoReferer(bool $value)
+ * @method bool getRequireTwofa()
+ * @method $this setRequireTwofa(bool $value)
+ * @method $this unsRequireTwofa()
  * @method string getUsername()
  * @method $this setUsername(string $value)
  * @method string  getWishlistDisplayType()
@@ -205,19 +208,40 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
+     * Check if 2fa is required for the given credentials
+     */
+    public function prelogin(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $password): void
+    {
+        try {
+            if (!empty($username) && !empty($password)) {
+                /** @var Mage_Customer_Model_Customer $customer */
+                $customer = Mage::getModel('customer/customer')
+                    ->setWebsiteId(Mage::app()->getStore()->getWebsiteId());
+                $customer->authenticate($username, $password);
+            }
+        } catch (Mage_Core_Exception $e) {
+            if ($e->getCode() === Mage_Customer_Model_Customer::EXCEPTION_2FA_INVALID) {
+                $this->setRequireTwofa(true);
+            }
+        } catch (Exception $e) {
+            // Mage::logException($e); // PA DSS violation: this exception log can disclose customer password
+        }
+    }
+
+    /**
      * Customer authorization
      *
      * @param   string $username
      * @param   string $password
      * @return  bool
      */
-    public function login(#[\SensitiveParameter] $username, #[\SensitiveParameter] $password)
+    public function login(#[\SensitiveParameter] $username, #[\SensitiveParameter] $password, #[\SensitiveParameter] ?string $twofaVerificationCode = null)
     {
         /** @var Mage_Customer_Model_Customer $customer */
         $customer = Mage::getModel('customer/customer')
             ->setWebsiteId(Mage::app()->getStore()->getWebsiteId());
 
-        if ($customer->authenticate($username, $password)) {
+        if ($customer->authenticate($username, $password, $twofaVerificationCode)) {
             $this->setCustomerAsLoggedIn($customer);
             return true;
         }

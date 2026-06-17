@@ -458,6 +458,9 @@ SPDX-License-Identifier: AFL-3.0
             <account>
                 <enabled_in_frontend>1</enabled_in_frontend>
             </account>
+            <security>
+                <allow_2fa>1</allow_2fa>
+            </security>
             <account_share>
                 <scope>1</scope>
             </account_share>
