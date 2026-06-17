@@ -65,6 +65,14 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
                 $uriVariables['itemId'] = $rp['itemId'];
             }
         }
+        // Same fallback for the gift card {code} on DELETE /guest-carts/{id}/giftcards/{code}:
+        // it isn't in the operation's uriVariables map, so recover it from the route params.
+        if (!isset($uriVariables['code']) && $req instanceof \Symfony\Component\HttpFoundation\Request) {
+            $rp = $req->attributes->get('_route_params') ?? [];
+            if (isset($rp['code'])) {
+                $uriVariables['code'] = $rp['code'];
+            }
+        }
         // Map uriVariables for sub-resource params
         if (isset($uriVariables['itemId']) && !isset($context['args']['input']['itemId'])) {
             $context['args']['input']['itemId'] = $uriVariables['itemId'];

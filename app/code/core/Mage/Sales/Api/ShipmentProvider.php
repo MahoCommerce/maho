@@ -13,16 +13,17 @@ namespace Mage\Sales\Api;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\ArrayPaginator;
+use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\CrudProvider;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class ShipmentProvider extends CrudProvider
 {
     /**
-     * @return Shipment|ArrayPaginator<Shipment>|null
+     * @return Shipment|ArrayPaginator<Shipment>|TraversablePaginator<Shipment>|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): Shipment|ArrayPaginator|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): Shipment|ArrayPaginator|TraversablePaginator|null
     {
         $this->resourceClass = $operation->getClass();
         $this->modelAlias = 'sales/order_shipment';
@@ -38,11 +39,14 @@ final class ShipmentProvider extends CrudProvider
         }
 
         if ($operation instanceof CollectionOperationInterface) {
+            // Order-scoped collection (REST /orders/{orderId}/shipments) when an
+            // orderId is present; otherwise the unscoped collection (GraphQL
+            // `shipments`) is an admin/API list-all across all orders.
             $orderId = (int) ($uriVariables['orderId'] ?? 0);
-            if (!$orderId) {
-                throw new \RuntimeException('Order ID is required');
+            if ($orderId) {
+                return $this->getShipmentsForOrder($orderId);
             }
-            return $this->getShipmentsForOrder($orderId);
+            return $this->getAllShipments($context);
         }
 
         $id = (int) ($uriVariables['id'] ?? 0);
@@ -78,5 +82,28 @@ final class ShipmentProvider extends CrudProvider
         }
 
         return new ArrayPaginator($shipments, 0, count($shipments));
+    }
+
+    /**
+     * Admin/API list-all across every order, DB-paginated.
+     *
+     * @return TraversablePaginator<Shipment>
+     */
+    private function getAllShipments(array $context): TraversablePaginator
+    {
+        $this->requireAdminOrApiUser('Shipment listing requires admin or API access');
+
+        ['page' => $page, 'pageSize' => $perPage] = $this->extractPagination($context);
+
+        $collection = \Mage::getResourceModel('sales/order_shipment_collection');
+        $collection->setOrder('created_at', 'DESC');
+        $collection->setPageSize($perPage)->setCurPage($page);
+
+        $shipments = [];
+        foreach ($collection as $shipment) {
+            $shipments[] = Shipment::fromModel($shipment);
+        }
+
+        return new TraversablePaginator(new \ArrayIterator($shipments), $page, $perPage, (int) $collection->getSize());
     }
 }

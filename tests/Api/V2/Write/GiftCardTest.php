@@ -312,6 +312,53 @@ describe('GraphQL Gift Card mutations', function (): void {
 
 });
 
+describe('DELETE /api/rest/v2/guest-carts/{id}/giftcards/{code}', function (): void {
+
+    it('removes a gift card from a guest cart by code', function (): void {
+        // A gift card to apply and then remove.
+        $create = apiPost('/api/rest/v2/giftcards', ['initialBalance' => 50.0], adminToken());
+        expect($create['status'])->toBeSuccessful();
+        $code = $create['json']['code'];
+        registerGiftCardCode($code);
+
+        // Guest cart with one line item.
+        $cart = apiPost('/api/rest/v2/guest-carts', []);
+        expect($cart['status'])->toBe(201);
+        $cartId = $cart['json']['maskedId'];
+
+        $add = apiPost("/api/rest/v2/guest-carts/{$cartId}/items", [
+            'sku' => fixtures('write_test_sku'),
+            'qty' => fixtures('write_test_qty') ?? 1,
+        ]);
+        expect($add['status'])->toBe(200);
+
+        // Apply, then confirm it is on the cart.
+        $apply = apiPost("/api/rest/v2/guest-carts/{$cartId}/giftcards", ['giftcardCode' => $code]);
+        expect($apply['status'])->toBeSuccessful();
+        expect($apply['json']['appliedGiftcards'] ?? [])->toHaveCount(1);
+
+        // Remove by code: the {code} placeholder used to never reach the handler,
+        // so this always failed with "Gift card code is required".
+        $remove = apiDelete("/api/rest/v2/guest-carts/{$cartId}/giftcards/{$code}");
+        expect($remove['status'])->toBeSuccessful();
+
+        $get = apiGet("/api/rest/v2/guest-carts/{$cartId}");
+        expect($get['status'])->toBe(200);
+        expect($get['json']['appliedGiftcards'] ?? [])->toBeEmpty();
+    });
+
+    it('rejects removing a code that is not applied with a clean client error', function (): void {
+        $cart = apiPost('/api/rest/v2/guest-carts', []);
+        $cartId = $cart['json']['maskedId'];
+
+        $response = apiDelete("/api/rest/v2/guest-carts/{$cartId}/giftcards/NONEXISTENT-CODE");
+
+        expect($response['status'])->toBeGreaterThanOrEqual(400);
+        expect($response['status'])->toBeLessThan(500);
+    });
+
+});
+
 // Helper to track gift card codes for cleanup
 function registerGiftCardCode(string $code): void
 {

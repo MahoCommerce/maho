@@ -29,7 +29,7 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
         $operationName = $operation->getName();
 
         if ($operationName === 'download_option_file') {
-            return $this->downloadOptionFile($uriVariables);
+            return $this->downloadOptionFile($context);
         }
 
         $productId = (int) ($uriVariables['productId'] ?? 0);
@@ -43,10 +43,20 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
         return $this->getAllOptions($product);
     }
 
-    private function downloadOptionFile(array $uriVariables): Response
+    private function downloadOptionFile(array $context): Response
     {
-        $optionId = (int) ($uriVariables['optionId'] ?? 0);
-        $key = (string) ($uriVariables['key'] ?? '');
+        // {optionId} and {key} are not declared as uriVariables on this route, so
+        // API Platform would coerce them toward the resource's int identifier and
+        // mangle the hex secret key. Read both straight from the request path to
+        // keep the key intact.
+        $request = $context['request'] ?? null;
+        $path = $request instanceof \Symfony\Component\HttpFoundation\Request ? $request->getPathInfo() : '';
+        $optionId = 0;
+        $key = '';
+        if (preg_match('#/custom-option-file/(\d+)/([^/?]+)#', $path, $m)) {
+            $optionId = (int) $m[1];
+            $key = $m[2];
+        }
 
         $option = Mage::getModel('sales/quote_item_option')->load($optionId);
         if (!$option->getId()) {
