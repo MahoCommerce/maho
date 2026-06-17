@@ -108,6 +108,66 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 if (!tree) return;
                 tree.innerHTML = this.renderNodes(this.structure, "", 0);
                 this.updateHiddenField();
+                this.setupSortable();
+            },
+
+            // Wire SortableJS (shipped globally as sortable.min.js) onto the tree root
+            // and every nested .xml-children container. Each container has its own
+            // group key, so dragging is constrained to same-parent siblings; cross-
+            // parent moves are not yet supported (would risk silently orphaning a
+            // node into an unrelated wrapper).
+            setupSortable: function() {
+                if (typeof Sortable === "undefined") return;
+                var self = this;
+                var containers = [];
+                var root = document.getElementById("xml-tree");
+                if (root) containers.push(root);
+                var nested = document.querySelectorAll("#xml-tree .xml-children");
+                for (var n = 0; n < nested.length; n++) containers.push(nested[n]);
+
+                for (var c = 0; c < containers.length; c++) {
+                    var cont = containers[c];
+                    var prior = Sortable.get(cont);
+                    if (prior) prior.destroy();
+                    var containerId = cont.id || "xml-tree";
+                    (function(cid, el) {
+                        Sortable.create(el, {
+                            group: "xml-tree-" + cid,
+                            draggable: ".xml-node",
+                            animation: 150,
+                            ghostClass: "xml-node-ghost",
+                            chosenClass: "xml-node-chosen",
+                            dragClass: "xml-node-dragging",
+                            filter: ".xml-node-actions, .xml-toggle, .xml-node-actions button",
+                            preventOnFilter: false,
+                            onEnd: function(evt) {
+                                if (evt.oldIndex === evt.newIndex) return;
+                                self.reorderSibling(cid, evt.oldIndex, evt.newIndex);
+                            }
+                        });
+                    })(containerId, cont);
+                }
+            },
+
+            // Move a node within its parent siblings list and re-render.
+            // containerId is "xml-tree" for top-level, or "xml-children-X-children-Y..."
+            // for nested — that latter form decodes to the path of the PARENT node.
+            reorderSibling: function(containerId, oldIndex, newIndex) {
+                var arr;
+                if (containerId === "xml-tree") {
+                    arr = this.structure;
+                } else {
+                    var nodePath = containerId.replace(/^xml-children-/, "").replace(/-/g, ".");
+                    var parentNode = this.getNodeByPath(nodePath);
+                    if (!parentNode || !Array.isArray(parentNode.children)) return;
+                    arr = parentNode.children;
+                }
+                if (oldIndex < 0 || oldIndex >= arr.length || newIndex < 0 || newIndex >= arr.length) return;
+                var moved = arr.splice(oldIndex, 1)[0];
+                arr.splice(newIndex, 0, moved);
+                // Path-indexed selection is invalidated by reordering.
+                this.selectedPath = null;
+                this.render();
             },
 
             renderNodes: function(nodes, pathPrefix, depth) {
