@@ -286,10 +286,10 @@
   font-weight: 600;
 }
 .json-key {
-  color: #1976d2;
+  color: light-dark(#1976d2, #6fb1f7);
 }
 .xml-tag {
-  color: #2e7d32;
+  color: light-dark(#2e7d32, #74c87c);
 }
 .json-type {
   color: var(--maho-ink-muted);
@@ -469,7 +469,8 @@
   display: flex;
   align-items: center;
   padding: 10px 12px;
-  background: #f8f9fa;
+  background: light-dark(#f8f9fa, #2a2a2a);
+  color: var(--maho-ink);
   cursor: pointer;
 }
 .transformer-item-number {
@@ -496,17 +497,37 @@
 }
 .transformer-item-options {
   padding: 14px;
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid var(--maho-hairline, #e9ecef);
   display: none;
-  grid-template-columns: 35% 55%;
-  align-items: center;
-  gap: 8px 12px;
+  flex-direction: column;
+  gap: 14px;
 }
 .transformer-item.expanded .transformer-item-options {
-  display: grid;
+  display: flex;
 }
 .transformer-option {
-  display: contents;
+  display: grid;
+  grid-template-columns: 35% 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  align-items: start;
+}
+.transformer-option > label {
+  grid-column: 1;
+  grid-row: 1;
+}
+.transformer-option > input,
+.transformer-option > select,
+.transformer-option > textarea {
+  grid-column: 2;
+  grid-row: 1;
+}
+.transformer-option > .note {
+  grid-column: 2;
+  grid-row: 2;
+  font-size: var(--maho-text-xs, 11px);
+  color: var(--maho-ink-muted, #888);
+  margin-top: 2px;
 }
 .transformer-add-section {
   text-align: center;
