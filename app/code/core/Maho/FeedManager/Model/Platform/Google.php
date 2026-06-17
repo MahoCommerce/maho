@@ -259,7 +259,15 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         'gtin' => ['source_type' => 'attribute', 'source_value' => 'gtin'],
         'mpn' => ['source_type' => 'attribute', 'source_value' => 'mpn'],
         'condition' => ['source_type' => 'static', 'source_value' => 'new'],
-        'availability' => ['source_type' => 'rule', 'source_value' => 'stock_status'],
+        // The standard catalog inventory attribute returns 1 / 0; Google Shopping
+        // wants the literal strings "in_stock" / "out_of_stock". A conditional
+        // transformer maps one to the other so the preset works out of the box
+        // without requiring a separately-seeded dynamic rule.
+        'availability' => [
+            'source_type' => 'attribute',
+            'source_value' => 'is_in_stock',
+            'transformers' => '[{"code":"conditional","options":{"condition_field":"","operator":"eq","compare_value":"1","true_value":"in_stock","false_value":"out_of_stock"}}]',
+        ],
         'google_product_category' => ['source_type' => 'taxonomy', 'source_value' => 'google', 'use_parent' => 'if_empty'],
         'product_type' => ['source_type' => 'attribute', 'source_value' => 'category_path', 'use_parent' => 'if_empty'],
         'item_group_id' => ['source_type' => 'attribute', 'source_value' => 'sku', 'use_parent' => 'always'],
