@@ -37,6 +37,12 @@
  * @method bool getNoReferer(bool $value)
  * @method $this setNoReferer(bool $value)
  * @method $this unsNoReferer(bool $value)
+ * @method bool getRequireTwofa()
+ * @method $this setRequireTwofa(bool $value)
+ * @method $this unsRequireTwofa()
+ * @method int getTwofaPendingCustomerId()
+ * @method $this setTwofaPendingCustomerId(int $value)
+ * @method $this unsTwofaPendingCustomerId()
  * @method string getUsername()
  * @method $this setUsername(string $value)
  * @method string  getWishlistDisplayType()
@@ -205,19 +211,40 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
+     * Check if 2fa is required for the given credentials
+     */
+    public function prelogin(#[\SensitiveParameter] string $username, #[\SensitiveParameter] string $password): void
+    {
+        try {
+            if (!empty($username) && !empty($password)) {
+                /** @var Mage_Customer_Model_Customer $customer */
+                $customer = Mage::getModel('customer/customer')
+                    ->setWebsiteId(Mage::app()->getStore()->getWebsiteId());
+                $customer->authenticate($username, $password);
+            }
+        } catch (Mage_Core_Exception $e) {
+            if ($e->getCode() === Mage_Customer_Model_Customer::EXCEPTION_2FA_INVALID) {
+                $this->setRequireTwofa(true);
+            }
+        } catch (Exception $e) {
+            // Mage::logException($e); // PA DSS violation: this exception log can disclose customer password
+        }
+    }
+
+    /**
      * Customer authorization
      *
      * @param   string $username
      * @param   string $password
      * @return  bool
      */
-    public function login(#[\SensitiveParameter] $username, #[\SensitiveParameter] $password)
+    public function login(#[\SensitiveParameter] $username, #[\SensitiveParameter] $password, #[\SensitiveParameter] ?string $twofaVerificationCode = null)
     {
         /** @var Mage_Customer_Model_Customer $customer */
         $customer = Mage::getModel('customer/customer')
             ->setWebsiteId(Mage::app()->getStore()->getWebsiteId());
 
-        if ($customer->authenticate($username, $password)) {
+        if ($customer->authenticate($username, $password, $twofaVerificationCode)) {
             $this->setCustomerAsLoggedIn($customer);
             return true;
         }
@@ -247,10 +274,62 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     {
         $customer = Mage::getModel('customer/customer')->load($customerId);
         if ($customer->getId()) {
+            // Programmatic entry point: it cannot drive the interactive 2FA challenge,
+            // so it refuses rather than silently bypassing an enabled second factor.
+            if ($this->shouldChallengeTwofa($customer)) {
+                return false;
+            }
             $this->setCustomerAsLoggedIn($customer);
             return true;
         }
         return false;
+    }
+
+    /**
+     * Whether the given customer must clear a 2FA challenge before being logged in
+     */
+    public function shouldChallengeTwofa(Mage_Customer_Model_Customer $customer): bool
+    {
+        return Mage::getStoreConfigFlag('customer/password/allow_2fa') && (bool) $customer->getTwofaEnabled();
+    }
+
+    /**
+     * Remember which customer is mid-way through a 2FA challenge (identity proven, not yet logged in)
+     */
+    public function startTwofaChallenge(Mage_Customer_Model_Customer $customer): void
+    {
+        $this->setTwofaPendingCustomerId((int) $customer->getId());
+    }
+
+    /**
+     * Customer currently waiting on a 2FA challenge, if any
+     */
+    public function getTwofaPendingCustomer(): ?Mage_Customer_Model_Customer
+    {
+        $customerId = $this->getTwofaPendingCustomerId();
+        if (!$customerId) {
+            return null;
+        }
+        /** @var Mage_Customer_Model_Customer $customer */
+        $customer = Mage::getModel('customer/customer')->load($customerId);
+        return $customer->getId() ? $customer : null;
+    }
+
+    /**
+     * Verify the challenge code and, on success, complete the pending login
+     */
+    public function completeTwofaChallenge(#[\SensitiveParameter] string $code): bool
+    {
+        $customer = $this->getTwofaPendingCustomer();
+        if (!$customer) {
+            return false;
+        }
+        if (!Mage::helper('core/security')->verifyTotpCode($customer->getTwofaSecret() ?? '', $code)) {
+            return false;
+        }
+        $this->unsTwofaPendingCustomerId();
+        $this->setCustomerAsLoggedIn($customer);
+        return true;
     }
 
     /**
