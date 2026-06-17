@@ -88,9 +88,16 @@ class Mage_Customer_Model_Observer
         /** @var Mage_Core_Controller_Front_Action $action */
         $action = $observer->getControllerAction();
         $request = $action->getRequest();
-        $current = strtolower($request->getRouteName() . '/' . $request->getControllerName() . '/' . $request->getActionName());
 
-        // Allow the enrollment page itself, its POST handler and logging out
+        // Only gate the sensitive surfaces (account management and checkout); browsing the
+        // catalog, CMS pages, etc. carries no risk and blocking it just punishes the customer.
+        $gatedRoutes = ['customer', 'checkout'];
+        if (!in_array(strtolower((string) $request->getRouteName()), $gatedRoutes, true)) {
+            return;
+        }
+
+        // Within the gated routes, still allow the enrollment page itself, its POST handler and logging out
+        $current = strtolower($request->getRouteName() . '/' . $request->getControllerName() . '/' . $request->getActionName());
         $allowed = [
             'customer/account/twofa',
             'customer/account/twofapost',

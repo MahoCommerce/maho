@@ -64,6 +64,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             'confirmation',
             'magiclinkrequestpost',
             'magiclinklogin',
+            'twofachallenge',
         ];
         $pattern = '/^(' . implode('|', $openActions) . ')/i';
 
@@ -658,6 +659,13 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                     throw new Exception($this->__('Failed to confirm customer account.'));
                 }
 
+                // Customers who opted into 2FA must clear it before the session is logged in
+                if ($session->shouldChallengeTwofa($customer)) {
+                    $session->startTwofaChallenge($customer);
+                    $this->_redirect('*/*/twofaChallenge');
+                    return;
+                }
+
                 // log in and send greeting email, then die happy
                 $session->setCustomerAsLoggedIn($customer);
                 $successUrl = $this->_welcomeCustomer($customer, true);
@@ -1044,12 +1052,19 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 throw new Exception($this->__('This account is not active.'));
             }
 
-            // Login customer
-            $this->_getSession()->setCustomerAsLoggedIn($customer);
-
-            // Clear the token (one-time use)
+            // Token consumed: identity is proven, so clear it now regardless of the 2FA outcome
             $customer->clearMagicLinkToken();
             $customer->save();
+
+            // Customers who opted into 2FA must still clear it before the session is logged in
+            if ($this->_getSession()->shouldChallengeTwofa($customer)) {
+                $this->_getSession()->startTwofaChallenge($customer);
+                $this->_redirect('*/*/twofaChallenge');
+                return;
+            }
+
+            // Login customer
+            $this->_getSession()->setCustomerAsLoggedIn($customer);
 
             $this->_getSession()->addSuccess($this->__('You have been successfully logged in.'));
 
@@ -1315,6 +1330,53 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         }
 
         $this->_redirect('*/*/twofa');
+    }
+
+    /**
+     * Prompt for the 2FA code after a passwordless login (magic link, account confirmation)
+     */
+    #[Maho\Config\Route('/customer/account/twofaChallenge', name: 'customer.account.twofaChallenge', methods: ['GET'])]
+    public function twofaChallengeAction(): void
+    {
+        $session = $this->_getSession();
+        if ($session->isLoggedIn() || !$session->getTwofaPendingCustomer()) {
+            $this->_redirect('*/*/login');
+            return;
+        }
+
+        $this->loadLayout();
+        $this->_initLayoutMessages('customer/session');
+
+        $this->getLayout()->getBlock('head')->setTitle($this->__('Two-Factor Authentication'));
+        $this->renderLayout();
+    }
+
+    /**
+     * Verify the 2FA code and complete a pending passwordless login
+     */
+    #[Maho\Config\Route('/customer/account/twofaChallengePost', name: 'customer.account.twofaChallengePost', methods: ['POST'])]
+    public function twofaChallengePostAction(): void
+    {
+        if (!$this->_validateFormKey()) {
+            $this->_redirect('*/*/twofaChallenge');
+            return;
+        }
+
+        $session = $this->_getSession();
+        if ($session->isLoggedIn() || !$session->getTwofaPendingCustomer()) {
+            $this->_redirect('*/*/login');
+            return;
+        }
+
+        $code = (string) $this->getRequest()->getPost('twofa_verification_code');
+        if ($session->completeTwofaChallenge($code)) {
+            $session->addSuccess($this->__('You have been successfully logged in.'));
+            $this->_loginPostRedirect();
+            return;
+        }
+
+        $session->addError($this->__('2FA verification code is invalid.'));
+        $this->_redirect('*/*/twofaChallenge');
     }
 
     /**
