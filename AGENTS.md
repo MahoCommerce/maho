@@ -305,6 +305,34 @@ it('can process customer orders', function () {
 - Validate/sanitize user input at the model layer
 - Doctrine DBAL parameterized queries are automatic
 
+### Rate limiting & honeypot (shared `core` helper)
+
+Throttle public endpoints and trap bots with the shared `Mage_Core_Helper_Data` primitives — do
+not roll a per-feature limiter.
+
+```php
+// Rate limit: keyed sliding window, $maxAttempts hits per $windowSeconds. Returns true if over
+// budget, records the hit otherwise. Build the key from whatever you scope by (IP, email, store…).
+if (Mage::helper('core')->isRateLimitExceeded(false, true, "myfeature:{$ip}", 5, 3600)) {
+    // blocked
+}
+// 0-disables is a call-site convention: guard `if ($limit <= 0)` before calling.
+// Failure-only counting: record a hit explicitly (see Mage_Sales_Helper_Guest).
+Mage::helper('core')->recordRateLimitHit($key, $windowSeconds);
+```
+
+Counters are cache-backed (tag `rate_limit`), so a full cache flush resets every window — keep
+must-persist security counters (e.g. forgot-password) on durable storage instead.
+
+```php
+// Honeypot: render a visually-hidden trap field, then check it server-side. The field name is
+// install-specific. Toggle via your module's own default-on `*/honeypot_enabled` flag.
+$field = Mage::helper('core')->getHoneypotFieldName();           // in the template
+if (Mage::helper('core')->isHoneypotTriggered($request->getPost(), 'mymodule/abuse/honeypot_enabled')) {
+    // silently drop (works for $request->getPost() and decoded API bodies alike)
+}
+```
+
 ## Git Commit Rules
 - **NEVER** include "Co-Authored-By: Claude" or any AI attribution in commits
 - **NEVER** mention Claude, AI, or assistant in commit messages

@@ -55,26 +55,13 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Check if rate limited (session-based bucket)
+     * Check if rate limited via the shared core/ratelimit primitive, keyed by session id to
+     * preserve the original per-session scope.
      */
     protected function _isRateLimited(): bool
     {
-        $session = Mage::getSingleton('core/session');
-        $attempts = (array) $session->getGiftcardCheckAttempts();
-        $now = time();
-
-        // Clean old attempts outside the window
-        $attempts = array_filter($attempts, fn($timestamp) => ($now - $timestamp) < self::RATE_LIMIT_WINDOW);
-
-        if (count($attempts) >= self::RATE_LIMIT_MAX_ATTEMPTS) {
-            return true;
-        }
-
-        // Record this attempt
-        $attempts[] = $now;
-        $session->setGiftcardCheckAttempts($attempts);
-
-        return false;
+        $key = 'giftcard_balance:' . Mage::getSingleton('core/session')->getSessionId();
+        return Mage::helper('core')->isRateLimitExceeded(false, true, $key, self::RATE_LIMIT_MAX_ATTEMPTS, self::RATE_LIMIT_WINDOW);
     }
 
     /**

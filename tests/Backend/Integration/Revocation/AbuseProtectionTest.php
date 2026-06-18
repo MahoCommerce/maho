@@ -29,7 +29,7 @@ function revocation_valid_post(array $overrides = []): array
         'form_key' => Mage::getSingleton('core/session')->getFormKey(),
         // Render token old enough to pass the min-submit-seconds gate
         'frt' => Mage::helper('core')->encrypt((string) (time() - 60)),
-        'comment_body' => '',
+        Mage::helper('core')->getHoneypotFieldName() => '',
         'customer_name' => 'Max Mustermann',
         'email' => 'gate-' . uniqid() . '@example.com',
         'order_reference' => (string) random_int(100000000, 199999999),
@@ -113,7 +113,7 @@ describe('Revocation controller abuse gates', function () {
     });
 
     it('silently drops submissions with the honeypot field filled', function () {
-        $post = revocation_valid_post(['comment_body' => 'http://spam.example']);
+        $post = revocation_valid_post([Mage::helper('core')->getHoneypotFieldName() => 'http://spam.example']);
         $response = revocation_dispatch_submit($post);
 
         expect($response->isRedirect())->toBeTrue();

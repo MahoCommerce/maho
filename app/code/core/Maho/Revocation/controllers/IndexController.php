@@ -62,7 +62,9 @@ class Maho_Revocation_IndexController extends Mage_Core_Controller_Front_Action
 
         // Honeypot: hidden field humans never see. Bots that fill it get the normal
         // success page so they cannot detect the trap. No row, no email.
-        if (trim((string) $request->getParam('comment_body')) !== '') {
+        $honeypotField = Mage::helper('core')->getHoneypotFieldName();
+        $honeypotBody = [$honeypotField => $request->getParam($honeypotField)];
+        if (Mage::helper('core')->isHoneypotTriggered($honeypotBody, Maho_Revocation_Helper_Data::XML_PATH_HONEYPOT_ENABLED)) {
             $this->_fakeSuccess($receivedAt);
             return;
         }
