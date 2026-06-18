@@ -350,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!templateSelect) return;
 
-    function syncFromTemplate() {
+    function syncFromTemplate(loadBuilderPreset) {
         const value = templateSelect.value;
         if (!value || value.indexOf(':') === -1) return;
 
@@ -364,6 +364,19 @@ document.addEventListener('DOMContentLoaded', function() {
             // Notify the mapping tab so the matching builder fieldset reveals itself
             formatField.dispatchEvent(new Event('change'));
         }
+
+        // When the user actively switches Feed Template to a real platform,
+        // also push that platform's preset into the matching builder so the
+        // structure tree reflects the choice immediately. Skip 'custom' (no
+        // preset to load) and skip on initial page load (loadBuilderPreset
+        // would clobber an existing feed's saved structure).
+        if (loadBuilderPreset && platform !== 'custom') {
+            if (format === 'xml' && typeof XmlBuilder !== 'undefined' && typeof XmlBuilder.loadPreset === 'function') {
+                XmlBuilder.loadPreset(platform, { force: true });
+            } else if ((format === 'json' || format === 'jsonl') && typeof JsonBuilder !== 'undefined' && typeof JsonBuilder.loadPreset === 'function') {
+                JsonBuilder.loadPreset(platform, { force: true });
+            }
+        }
     }
 
     // On a fresh feed the template selector renders with its default value
@@ -375,10 +388,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // back. Existing feeds keep their saved file_format because the template
     // selector's current value already reflects it.
     if (formatField && !formatField.value) {
-        syncFromTemplate();
+        syncFromTemplate(false);
     }
 
-    templateSelect.addEventListener('change', syncFromTemplate);
+    templateSelect.addEventListener('change', function() {
+        syncFromTemplate(true);
+    });
 });
 </script>
 JS;
