@@ -348,23 +348,37 @@ document.addEventListener('DOMContentLoaded', function() {
     const platformField = document.getElementById('feed_platform');
     const formatField = document.getElementById('feed_file_format');
 
-    if (templateSelect) {
-        // Only sync hidden fields when user changes the selector
-        templateSelect.addEventListener('change', function() {
-            const value = this.value;
-            if (!value || value.indexOf(':') === -1) return;
+    if (!templateSelect) return;
 
-            const parts = value.split(':');
-            const platform = parts[0];
-            const format = parts[1];
+    function syncFromTemplate() {
+        const value = templateSelect.value;
+        if (!value || value.indexOf(':') === -1) return;
 
-            if (platformField) platformField.value = platform;
-            if (formatField) formatField.value = format;
+        const parts = value.split(':');
+        const platform = parts[0];
+        const format = parts[1];
 
-            // Trigger change event on format field to update builder visibility
+        if (platformField) platformField.value = platform;
+        if (formatField) {
+            formatField.value = format;
+            // Notify the mapping tab so the matching builder fieldset reveals itself
             formatField.dispatchEvent(new Event('change'));
-        });
+        }
     }
+
+    // On a fresh feed the template selector renders with its default value
+    // ("Custom XML" = custom:xml) but the hidden file_format field is still
+    // empty, so the format-change listener in feedmanager-mapping.js sees no
+    // matching builder and leaves every fieldset hidden. Sync once on load so
+    // the default selection wires up the format and reveals the right builder
+    // without requiring the user to first pick a different template and come
+    // back. Existing feeds keep their saved file_format because the template
+    // selector's current value already reflects it.
+    if (formatField && !formatField.value) {
+        syncFromTemplate();
+    }
+
+    templateSelect.addEventListener('change', syncFromTemplate);
 });
 </script>
 JS;
