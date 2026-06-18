@@ -575,7 +575,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
             ['tag' => 'g:image_link', 'source_type' => 'attribute', 'source_value' => 'image', 'cdata' => false, 'optional' => true, 'use_parent' => 'if_empty'],
             // is_in_stock returns 1 / 0; Google Shopping wants "in_stock" / "out_of_stock",
             // so ship a conditional transformer pre-configured to do the mapping.
-            ['tag' => 'g:availability', 'source_type' => 'attribute', 'source_value' => 'is_in_stock', 'cdata' => false, 'optional' => false, 'transformers' => '[{"code":"conditional","options":{"condition_field":"","operator":"eq","compare_value":"1","true_value":"in_stock","false_value":"out_of_stock"}}]'],
+            ['tag' => 'g:availability', 'source_type' => 'attribute', 'source_value' => 'is_in_stock', 'cdata' => false, 'optional' => false, 'transformers' => 'conditional:operator=eq,compare_value=1,true_value=in_stock,false_value=out_of_stock'],
             ['tag' => 'g:price', 'source_type' => 'attribute', 'source_value' => 'price', 'cdata' => false, 'optional' => false],
             ['tag' => 'g:brand', 'source_type' => 'attribute', 'source_value' => 'brand', 'cdata' => true, 'optional' => true],
             ['tag' => 'g:condition', 'source_type' => 'static', 'source_value' => 'new', 'cdata' => false, 'optional' => true],

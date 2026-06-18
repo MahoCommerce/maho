@@ -266,7 +266,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         'availability' => [
             'source_type' => 'attribute',
             'source_value' => 'is_in_stock',
-            'transformers' => '[{"code":"conditional","options":{"condition_field":"","operator":"eq","compare_value":"1","true_value":"in_stock","false_value":"out_of_stock"}}]',
+            'transformers' => 'conditional:operator=eq,compare_value=1,true_value=in_stock,false_value=out_of_stock',
         ],
         'google_product_category' => ['source_type' => 'taxonomy', 'source_value' => 'google', 'use_parent' => 'if_empty'],
         'product_type' => ['source_type' => 'attribute', 'source_value' => 'category_path', 'use_parent' => 'if_empty'],
