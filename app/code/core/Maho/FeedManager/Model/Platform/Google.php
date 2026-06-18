@@ -442,7 +442,17 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
 
         // ---- Pricing ----
         'sale_price' => ['source_type' => 'attribute', 'source_value' => 'special_price'],
-        'sale_price_effective_date' => ['source_type' => 'attribute', 'source_value' => 'sale_price_effective_date', 'use_parent' => 'if_empty'],
+        // Google's sale_price_effective_date wants an ISO 8601 range. Most
+        // merchants run perpetual promotions and don't set a per-product end
+        // date, so default to a rolling now / +90 days window driven by
+        // relative_date_range. Merchants who have actual sale-end dates can
+        // swap the source to a product attribute (e.g., special_to_date) and
+        // remove the transformer, or chain a different one.
+        'sale_price_effective_date' => [
+            'source_type' => 'static',
+            'source_value' => '',
+            'transformers' => 'relative_date_range',
+        ],
         'cost_of_goods_sold' => ['source_type' => 'attribute', 'source_value' => 'cost'],
         'expiration_date' => ['source_type' => 'static', 'source_value' => ''],
         'unit_pricing_measure' => ['source_type' => 'static', 'source_value' => ''],

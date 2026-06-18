@@ -29,6 +29,7 @@ class Maho_FeedManager_Model_Transformer
         'map_values' => Maho_FeedManager_Model_Transformer_MapValues::class,
         'format_price' => Maho_FeedManager_Model_Transformer_FormatPrice::class,
         'format_date' => Maho_FeedManager_Model_Transformer_FormatDate::class,
+        'relative_date_range' => Maho_FeedManager_Model_Transformer_RelativeDateRange::class,
         'url_encode' => Maho_FeedManager_Model_Transformer_UrlEncode::class,
         'combine_fields' => Maho_FeedManager_Model_Transformer_CombineFields::class, // Internal only - used by Mapper
         'conditional' => Maho_FeedManager_Model_Transformer_Conditional::class,
@@ -61,7 +62,7 @@ class Maho_FeedManager_Model_Transformer
         'text_formatting' => ['uppercase', 'lowercase', 'capitalise', 'strip_tags', 'truncate', 'replace'],
         'values_defaults' => ['default_value', 'map_values', 'conditional'],
         'numbers_prices' => ['format_price', 'round'],
-        'dates_urls' => ['format_date', 'url_encode'],
+        'dates_urls' => ['format_date', 'relative_date_range', 'url_encode'],
         'advanced' => ['prepend_append'],
     ];
 
