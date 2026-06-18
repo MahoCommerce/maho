@@ -375,11 +375,15 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 TransformerModal.open();
             },
 
-            loadPreset: function(platform) {
+            loadPreset: function(platform, options) {
                 if (!platform) return;
+                options = options || {};
 
-                // Confirm before overwriting existing structure
-                if (this.structure && this.structure.length > 0) {
+                // Confirm before overwriting existing structure unless force is set.
+                // Programmatic callers (e.g. the Feed Template dropdown reacting to
+                // a user choice in another fieldset) pass {force:true} because the
+                // user has already explicitly opted in by picking the template.
+                if (!options.force && this.structure && this.structure.length > 0) {
                     if (!confirm("Loading a preset will replace your current XML structure. Continue?")) {
                         document.getElementById("xml-preset-select").value = this.currentPlatform || "";
                         return;
