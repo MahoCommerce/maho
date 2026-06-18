@@ -55,8 +55,8 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Check if rate limited via the shared core/ratelimit primitive, keyed by session id to
-     * preserve the original per-session scope.
+     * Check if rate limited via the shared core helper, keyed by session id to preserve the
+     * original per-session scope. Silent: the action returns its own JSON message.
      */
     protected function _isRateLimited(): bool
     {

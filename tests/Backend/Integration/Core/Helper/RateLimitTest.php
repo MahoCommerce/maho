@@ -43,25 +43,21 @@ describe('Keyed rate limiter', function () {
         }
     });
 
-    it('counts explicit recordRateLimitHit calls toward the budget', function () {
-        $key = 'test_ratelimit_explicit_' . uniqid();
-
-        $this->helper->recordRateLimitHit($key, 60);
-        $this->helper->recordRateLimitHit($key, 60);
-
-        // Two hits recorded; a check that does not record sees the budget exhausted at maxAttempts=2
-        expect($this->helper->isRateLimitExceeded(false, false, $key, 2, 60))->toBeTrue();
-    });
-
-    it('adds a session error when setErrorMessage is true and the limit is exceeded', function () {
+    it('adds the default "Too Soon" session error on block, suppressible', function () {
         $key = 'test_ratelimit_msg_' . uniqid();
         $session = Mage::getSingleton('core/session');
         $session->getMessages(true); // clear
 
+        // Exhaust the single-hit budget, staying silent
         expect($this->helper->isRateLimitExceeded(false, true, $key, 1, 60))->toBeFalse();
-        expect($this->helper->isRateLimitExceeded(true, true, $key, 1, 60))->toBeTrue();
 
+        // Default-on message: blocked + session error
+        expect($this->helper->isRateLimitExceeded(true, true, $key, 1, 60))->toBeTrue();
         expect($session->getMessages()->getErrors())->not->toBeEmpty();
         $session->getMessages(true);
+
+        // Suppressed: blocked but no new error
+        expect($this->helper->isRateLimitExceeded(false, true, $key, 1, 60))->toBeTrue();
+        expect($session->getMessages()->getErrors())->toBeEmpty();
     });
 });

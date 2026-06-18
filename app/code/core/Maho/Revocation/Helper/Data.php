@@ -121,8 +121,9 @@ class Maho_Revocation_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Rolling-window limiter delegating to the shared core/ratelimit primitive. A limit of 0
-     * disables the check (the core helper has no 0-disable, so guard here).
+     * Rolling-window limiter delegating to the shared core helper. A limit of 0 disables the
+     * check (the helper has no 0-disable, so guard here). Silent: the controller fakes success
+     * rather than surfacing an error.
      */
     protected function _isRateLimited(string $cacheKey, int $limit, int $windowSeconds): bool
     {
