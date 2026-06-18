@@ -953,8 +953,7 @@ SPDX-License-Identifier: AFL-3.0
                         <enable_queue translate="label comment">
                             <label>Enable Email Queue</label>
                             <comment>When enabled, emails are queued for background sending. Automatically disabled in developer mode for immediate feedback.</comment>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>95</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -963,8 +962,7 @@ SPDX-License-Identifier: AFL-3.0
                         <log_enabled translate="label comment">
                             <label>Enable Email Logging</label>
                             <comment>When enabled, all sent emails are logged for debugging and auditing purposes.</comment>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>97</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
@@ -1232,8 +1230,7 @@ SPDX-License-Identifier: AFL-3.0
                         <hsts_enabled translate="label comment">
                             <label>Enable HSTS (HTTP Strict Transport Security)</label>
                             <comment>Forces browsers to use HTTPS. Only works on HTTPS connections.</comment>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>6</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -1255,8 +1252,7 @@ SPDX-License-Identifier: AFL-3.0
                         <content_type_options_enabled translate="label comment">
                             <label>Enable X-Content-Type-Options</label>
                             <comment>Prevents browsers from MIME-sniffing responses. Recommended for security.</comment>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>8</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -1265,8 +1261,7 @@ SPDX-License-Identifier: AFL-3.0
                         <xss_protection_enabled translate="label comment">
                             <label>Enable X-XSS-Protection</label>
                             <comment>Enables browser XSS filtering. Note: Modern browsers prefer CSP over this header.</comment>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>9</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
