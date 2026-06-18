@@ -368,11 +368,32 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         ],
     ];
 
+    // Transformer chains use the pipe-separated format consumed by
+    // Maho_FeedManager_Model_Transformer::parseChainString and the admin JS.
+    // Max-length values come from the Google Merchant Center product data spec
+    // (https://support.google.com/merchants/answer/7052112). The Google adapter
+    // also runs a final pass in transformProductData() for title, description,
+    // price, availability, condition, gender and age_group, so the truncate
+    // transformers there are belt-and-braces. For the remaining fields the
+    // transformer is the only safety net.
     protected array $_defaultMappings = [
         // ---- Required ----
-        'id' => ['source_type' => 'attribute', 'source_value' => 'sku'],
-        'title' => ['source_type' => 'attribute', 'source_value' => 'name'],
-        'description' => ['source_type' => 'attribute', 'source_value' => 'description', 'use_parent' => 'if_empty'],
+        'id' => [
+            'source_type' => 'attribute',
+            'source_value' => 'sku',
+            'transformers' => 'truncate:max_length=50',
+        ],
+        'title' => [
+            'source_type' => 'attribute',
+            'source_value' => 'name',
+            'transformers' => 'truncate:max_length=150',
+        ],
+        'description' => [
+            'source_type' => 'attribute',
+            'source_value' => 'description',
+            'use_parent' => 'if_empty',
+            'transformers' => 'strip_tags|truncate:max_length=5000',
+        ],
         'link' => ['source_type' => 'attribute', 'source_value' => 'url', 'use_parent' => 'always'],
         'image_link' => ['source_type' => 'attribute', 'source_value' => 'image', 'use_parent' => 'if_empty'],
         // is_in_stock returns 1 / 0; Google Shopping wants "in_stock" / "out_of_stock".
@@ -384,12 +405,25 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'transformers' => 'conditional:operator=eq,compare_value=1,true_value=in_stock,false_value=out_of_stock',
         ],
         'price' => ['source_type' => 'attribute', 'source_value' => 'price'],
-        'brand' => ['source_type' => 'attribute', 'source_value' => 'manufacturer', 'use_parent' => 'if_empty'],
+        'brand' => [
+            'source_type' => 'attribute',
+            'source_value' => 'manufacturer',
+            'use_parent' => 'if_empty',
+            'transformers' => 'truncate:max_length=70',
+        ],
         'google_product_category' => ['source_type' => 'taxonomy', 'source_value' => 'google', 'use_parent' => 'if_empty'],
 
         // ---- Identifiers ----
-        'gtin' => ['source_type' => 'attribute', 'source_value' => 'gtin'],
-        'mpn' => ['source_type' => 'attribute', 'source_value' => 'mpn'],
+        'gtin' => [
+            'source_type' => 'attribute',
+            'source_value' => 'gtin',
+            'transformers' => 'truncate:max_length=50',
+        ],
+        'mpn' => [
+            'source_type' => 'attribute',
+            'source_value' => 'mpn',
+            'transformers' => 'truncate:max_length=70',
+        ],
         'identifier_exists' => ['source_type' => 'static', 'source_value' => ''],
 
         // ---- Condition & state ----
@@ -407,31 +441,75 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         'availability_date' => ['source_type' => 'static', 'source_value' => ''],
 
         // ---- Imagery & media ----
-        'additional_image_link' => ['source_type' => 'attribute', 'source_value' => 'additional_images_csv', 'use_parent' => 'if_empty'],
-        'lifestyle_image_link' => ['source_type' => 'static', 'source_value' => ''],
+        'additional_image_link' => [
+            'source_type' => 'attribute',
+            'source_value' => 'additional_images_csv',
+            'use_parent' => 'if_empty',
+            'transformers' => 'truncate:max_length=2000',
+        ],
+        'lifestyle_image_link' => [
+            'source_type' => 'static',
+            'source_value' => '',
+            'transformers' => 'truncate:max_length=2000',
+        ],
         'video_link' => ['source_type' => 'static', 'source_value' => ''],
-        'mobile_link' => ['source_type' => 'static', 'source_value' => ''],
+        'mobile_link' => [
+            'source_type' => 'static',
+            'source_value' => '',
+            'transformers' => 'truncate:max_length=2000',
+        ],
 
         // ---- Category ----
-        'product_type' => ['source_type' => 'attribute', 'source_value' => 'category_path', 'use_parent' => 'if_empty'],
+        'product_type' => [
+            'source_type' => 'attribute',
+            'source_value' => 'category_path',
+            'use_parent' => 'if_empty',
+            'transformers' => 'truncate:max_length=750',
+        ],
 
         // ---- Apparel / variant ----
-        'color' => ['source_type' => 'attribute', 'source_value' => 'color'],
-        'size' => ['source_type' => 'attribute', 'source_value' => 'size'],
+        'color' => [
+            'source_type' => 'attribute',
+            'source_value' => 'color',
+            'transformers' => 'truncate:max_length=100',
+        ],
+        'size' => [
+            'source_type' => 'attribute',
+            'source_value' => 'size',
+            'transformers' => 'truncate:max_length=100',
+        ],
         'size_type' => ['source_type' => 'static', 'source_value' => ''],
         'size_system' => ['source_type' => 'static', 'source_value' => ''],
         'gender' => ['source_type' => 'attribute', 'source_value' => 'gender'],
         'age_group' => ['source_type' => 'static', 'source_value' => ''],
-        'material' => ['source_type' => 'attribute', 'source_value' => 'material'],
-        'pattern' => ['source_type' => 'static', 'source_value' => ''],
-        'item_group_id' => ['source_type' => 'attribute', 'source_value' => 'sku', 'use_parent' => 'always'],
-        'item_group_title' => ['source_type' => 'attribute', 'source_value' => 'name', 'use_parent' => 'always'],
+        'material' => [
+            'source_type' => 'attribute',
+            'source_value' => 'material',
+            'transformers' => 'truncate:max_length=200',
+        ],
+        'pattern' => [
+            'source_type' => 'static',
+            'source_value' => '',
+            'transformers' => 'truncate:max_length=100',
+        ],
+        'item_group_id' => [
+            'source_type' => 'attribute',
+            'source_value' => 'sku',
+            'use_parent' => 'always',
+            'transformers' => 'truncate:max_length=50',
+        ],
+        'item_group_title' => [
+            'source_type' => 'attribute',
+            'source_value' => 'name',
+            'use_parent' => 'always',
+            'transformers' => 'truncate:max_length=150',
+        ],
 
         // ---- Multipack / bundle ----
         'multipack' => ['source_type' => 'static', 'source_value' => ''],
         'is_bundle' => ['source_type' => 'static', 'source_value' => ''],
 
-        // ---- Physical dimensions (merchants generally have one weight attribute) ----
+        // ---- Physical dimensions ----
         'product_length' => ['source_type' => 'static', 'source_value' => ''],
         'product_width' => ['source_type' => 'static', 'source_value' => ''],
         'product_height' => ['source_type' => 'static', 'source_value' => ''],
@@ -439,7 +517,11 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
 
         // ---- Rich product detail ----
         'product_detail' => ['source_type' => 'static', 'source_value' => ''],
-        'product_highlight' => ['source_type' => 'static', 'source_value' => ''],
+        'product_highlight' => [
+            'source_type' => 'static',
+            'source_value' => '',
+            'transformers' => 'truncate:max_length=150',
+        ],
         'document_link' => ['source_type' => 'static', 'source_value' => ''],
         'related_product' => ['source_type' => 'static', 'source_value' => ''],
         'question_and_answer' => ['source_type' => 'static', 'source_value' => ''],
@@ -458,13 +540,41 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         'max_energy_efficiency_class' => ['source_type' => 'static', 'source_value' => ''],
 
         // ---- Campaign / promotion ----
-        'promotion_id' => ['source_type' => 'static', 'source_value' => ''],
-        'ads_redirect' => ['source_type' => 'static', 'source_value' => ''],
-        'custom_label_0' => ['source_type' => 'static', 'source_value' => ''],
-        'custom_label_1' => ['source_type' => 'static', 'source_value' => ''],
-        'custom_label_2' => ['source_type' => 'static', 'source_value' => ''],
-        'custom_label_3' => ['source_type' => 'static', 'source_value' => ''],
-        'custom_label_4' => ['source_type' => 'static', 'source_value' => ''],
+        'promotion_id' => [
+            'source_type' => 'static',
+            'source_value' => '',
+            'transformers' => 'truncate:max_length=50',
+        ],
+        'ads_redirect' => [
+            'source_type' => 'static',
+            'source_value' => '',
+            'transformers' => 'truncate:max_length=2000',
+        ],
+        'custom_label_0' => [
+            'source_type' => 'static',
+            'source_value' => '',
+            'transformers' => 'truncate:max_length=100',
+        ],
+        'custom_label_1' => [
+            'source_type' => 'static',
+            'source_value' => '',
+            'transformers' => 'truncate:max_length=100',
+        ],
+        'custom_label_2' => [
+            'source_type' => 'static',
+            'source_value' => '',
+            'transformers' => 'truncate:max_length=100',
+        ],
+        'custom_label_3' => [
+            'source_type' => 'static',
+            'source_value' => '',
+            'transformers' => 'truncate:max_length=100',
+        ],
+        'custom_label_4' => [
+            'source_type' => 'static',
+            'source_value' => '',
+            'transformers' => 'truncate:max_length=100',
+        ],
     ];
 
     #[\Override]
