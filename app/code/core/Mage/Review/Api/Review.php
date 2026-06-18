@@ -122,6 +122,10 @@ class Review extends CrudResource
     #[ApiProperty(writable: false)]
     public ?string $createdAt = null;
 
+    // Not serialized in responses: the author's internal customer id has no
+    // client use and would link public reviews to specific accounts. It is set
+    // server-side from the authenticated session on submit, never from input.
+    #[ApiProperty(readable: false, writable: false)]
     public ?int $customerId = null;
 
     public static function afterLoad(self $dto, object $model): void

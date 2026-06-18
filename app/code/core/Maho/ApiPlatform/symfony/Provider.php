@@ -17,6 +17,7 @@ use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Maho\ApiPlatform\Trait\PaginationTrait;
+use Maho\ApiPlatform\Trait\RateLimitTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
@@ -36,6 +37,7 @@ abstract class Provider implements ProviderInterface
 {
     use AuthenticationTrait;
     use PaginationTrait;
+    use RateLimitTrait;
 
     protected ?string $modelAlias = null;
     protected int $defaultPageSize = 20;

@@ -44,6 +44,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
     graphQlOperations: [
         new Query(
             name: 'item_query',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Get a gift card by ID',
         ),
         new QueryCollection(

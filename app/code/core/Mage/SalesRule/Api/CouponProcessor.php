@@ -271,6 +271,18 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Coupon code is required');
         }
 
+        // Public endpoint, throttle by IP to stop bulk enumeration of
+        // auto-generated coupon batches.
+        $this->checkRateLimitByIp('coupon_validate', 'coupon_validate', 60);
+
+        // Anonymous callers get a yes/no answer only, the concrete discount
+        // type/amount would let an unauthenticated client harvest the value of
+        // every code before redeeming it. Customers/admins/API users still see
+        // the full result (they need it to preview a discount at checkout).
+        $isAnonymous = !$this->isAdmin()
+            && !$this->isApiUser()
+            && $this->getAuthenticatedCustomerId() === null;
+
         $dto = new Coupon();
         $dto->id = 0;
         $dto->code = $code;
@@ -338,6 +350,12 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
         $dto->isValid = true;
         $dto->validationMessage = 'Coupon is valid';
+
+        // Don't disclose rule identity or discount value to anonymous callers.
+        if ($isAnonymous) {
+            return $dto;
+        }
+
         $dto->id = (int) $coupon->getId();
         $dto->ruleId = (int) $coupon->getRuleId();
 

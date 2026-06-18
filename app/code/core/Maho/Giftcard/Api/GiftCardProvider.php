@@ -25,6 +25,9 @@ final class GiftCardProvider extends CrudProvider
     protected function handleOperation(string $name, array $context, array $uriVariables): mixed
     {
         if ($name === 'checkGiftcardBalance') {
+            // Public balance check: throttle to stop code probing / enumeration.
+            $this->checkRateLimitByIp('giftcard_balance', 'giftcard_balance', 60);
+
             $code = $context['args']['code'] ?? null;
             if (!$code) {
                 throw new \RuntimeException('Gift card code is required');
@@ -32,12 +35,30 @@ final class GiftCardProvider extends CrudProvider
 
             $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode(trim($code));
             if (!$giftcard->getId()) {
-                throw new \RuntimeException('Gift card "' . $code . '" not found');
+                throw new \RuntimeException('Gift card not found');
             }
 
-            return $this->toDto($giftcard);
+            return $this->toBalanceDto($giftcard);
         }
 
         return null;
+    }
+
+    /**
+     * Minimal projection for the public balance check: only spendable/status
+     * fields, never the recipient/sender PII or message the full DTO carries.
+     * The code is masked so a balance probe can't echo back full codes.
+     */
+    private function toBalanceDto(\Maho_Giftcard_Model_Giftcard $giftcard): GiftCard
+    {
+        $dto = new GiftCard();
+        $dto->id = 0;
+        $dto->code = \Mage::helper('giftcard')->maskCode((string) $giftcard->getCode());
+        $dto->balance = (float) $giftcard->getBalance();
+        $dto->status = $giftcard->getStatus();
+        $dto->currencyCode = $giftcard->getCurrencyCode();
+        $dto->expiresAt = $giftcard->getExpiresAt();
+
+        return $dto;
     }
 }

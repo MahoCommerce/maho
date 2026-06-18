@@ -465,8 +465,8 @@ class CartMutationHandler
         $dto = $this->cartMapper->mapQuoteToCart($quote);
         $data = $dto->toArray();
 
-        // Add GraphQL-specific fields
-        $data['maskedId'] = base64_encode('cart_' . $quote->getId() . '_' . substr(md5($quote->getId() . $quote->getCreatedAt()), 0, 8));
+        // maskedId is the real, CSPRNG-generated masked_quote_id (set by CartMapper).
+        // Never derive it from the quote id, that would be reversible and guessable.
 
         // Enrich items with fulfillment type (GraphQL-specific), align by item ID
         $quoteItemsById = [];

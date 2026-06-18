@@ -235,10 +235,23 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         $quote = null;
         if ($cartId) {
             // Use CartService to load the cart properly (handles numeric or masked IDs)
-            if (is_numeric($cartId)) {
-                $quote = $this->cartService->getCart((int) $cartId);
-            } else {
+            $accessedByMaskedId = !is_numeric($cartId);
+            if ($accessedByMaskedId) {
                 $quote = $this->cartService->getCart(null, $cartId);
+            } else {
+                $quote = $this->cartService->getCart((int) $cartId);
+            }
+
+            // getCart() applies no ownership filtering, verify the caller owns
+            // this cart (or holds its masked guest token) before writing to it,
+            // otherwise a customer could push items into another customer's cart.
+            if ($quote && $quote->getId()) {
+                $this->cartService->verifyCartAccess(
+                    $quote,
+                    $accessedByMaskedId,
+                    $customerId,
+                    $this->isAdmin() || $this->isApiUser(),
+                );
             }
         }
 

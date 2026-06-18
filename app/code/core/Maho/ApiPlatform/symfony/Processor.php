@@ -17,6 +17,7 @@ use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Trait\ActivityLogTrait;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Maho\ApiPlatform\Trait\ModelPersistenceTrait;
+use Maho\ApiPlatform\Trait\RateLimitTrait;
 use Maho\ApiPlatform\Trait\StoreAccessTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 
@@ -39,6 +40,7 @@ abstract class Processor implements ProcessorInterface
     use ModelPersistenceTrait;
     use ActivityLogTrait;
     use StoreAccessTrait;
+    use RateLimitTrait;
 
     protected ?string $modelAlias = null;
     protected ?string $writePermission = null;
@@ -129,41 +131,4 @@ abstract class Processor implements ProcessorInterface
 
     /** Hook: entity-level authorization after load (e.g. store access checks). */
     protected function authorizeEntity(object $model, ApiUser $user): void {}
-
-    /**
-     * Throttle a caller-supplied key. Reads the limit from
-     * `system/rate_limit/{configKey}`; 0 disables the limit. Throws
-     * TooManyRequestsHttpException when the cap is hit.
-     */
-    protected function checkRateLimit(string $key, string $configKey, int $windowSeconds): void
-    {
-        $limit = (int) \Mage::getStoreConfig('system/rate_limit/' . $configKey);
-        if ($limit <= 0) {
-            return;
-        }
-
-        if (\Mage::helper('core')->isRateLimitExceeded(false, true, $key, $limit, $windowSeconds)) {
-            throw new \Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException(
-                (string) $windowSeconds,
-                'Too many requests. Please try again later.',
-            );
-        }
-    }
-
-    /**
-     * Throttle by client IP, using Maho's proxy-aware lookup. Fails open
-     * (skips the check) if the IP can't be determined, matches the behaviour
-     * of `Mage::helper('core')->isRateLimitExceeded()` in IP mode and avoids
-     * collapsing every unknown-IP client into a shared bucket.
-     */
-    protected function checkRateLimitByIp(string $keyPrefix, string $configKey, int $windowSeconds): void
-    {
-        $ip = \Mage::helper('core/http')->getRemoteAddr();
-        if (!$ip) {
-            return;
-        }
-
-        $this->checkRateLimit($keyPrefix . ':ip:' . $ip, $configKey, $windowSeconds);
-    }
-
 }

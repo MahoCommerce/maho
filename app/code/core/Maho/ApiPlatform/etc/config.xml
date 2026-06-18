@@ -79,6 +79,28 @@
         </layout>
     </adminhtml>
     <default>
+        <system>
+            <rate_limit>
+                <!--
+                    Per-key request caps for the API auth and abuse-prone endpoints.
+                    checkRateLimit() reads system/rate_limit/{key}; an unset key is
+                    0, which disables the limit, so these defaults keep brute-force
+                    and enumeration protection on out of the box. Values are max
+                    requests per the window the call site passes (60s or 3600s).
+                -->
+                <auth_token_ip>10</auth_token_ip>
+                <customer_login>5</customer_login>
+                <customer_register>5</customer_register>
+                <forgot_password>5</forgot_password>
+                <reset_password>10</reset_password>
+                <newsletter_subscribe>5</newsletter_subscribe>
+                <newsletter_unsubscribe>10</newsletter_unsubscribe>
+                <review_submit>10</review_submit>
+                <contact>5</contact>
+                <coupon_validate>20</coupon_validate>
+                <giftcard_balance>10</giftcard_balance>
+            </rate_limit>
+        </system>
         <apiplatform>
             <protocols>
                 <rest_v2>0</rest_v2>

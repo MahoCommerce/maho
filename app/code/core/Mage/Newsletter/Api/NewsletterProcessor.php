@@ -90,18 +90,38 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
             $subscriber = \Mage::getModel('newsletter/subscriber');
 
             $subscriber->loadByEmail($email);
-            if ($subscriber->getId() && $subscriber->getSubscriberStatus() == \Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED) {
+            $alreadySubscribed = $subscriber->getId()
+                && $subscriber->getSubscriberStatus() == \Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED;
+
+            $confirmRequired = \Mage::getStoreConfigFlag(\Mage_Newsletter_Model_Subscriber::XML_PATH_CONFIRMATION_FLAG);
+
+            // Guests get a uniform response regardless of prior state. Echoing
+            // "already subscribed" (or the subscriber's customer_id) would let an
+            // unauthenticated caller probe whether an address is a registered
+            // customer.
+            if ($customerId === null) {
+                if (!$alreadySubscribed) {
+                    $subscriber->subscribe($email);
+                }
+                $dto = new NewsletterSubscription();
+                $dto->email = $email;
+                $dto->message = $confirmRequired
+                    ? 'A confirmation email has been sent. Please check your inbox.'
+                    : 'You have been successfully subscribed to the newsletter.';
+                return $dto;
+            }
+
+            if ($alreadySubscribed) {
                 $dto = NewsletterSubscription::fromModel($subscriber);
                 $dto->message = 'You are already subscribed to the newsletter.';
                 return $dto;
             }
 
-            $status = $subscriber->subscribe($email);
+            $subscriber->subscribe($email);
 
             $subscriber->loadByEmail($email);
             $dto = NewsletterSubscription::fromModel($subscriber);
 
-            $confirmRequired = \Mage::getStoreConfigFlag(\Mage_Newsletter_Model_Subscriber::XML_PATH_CONFIRMATION_FLAG);
             $dto->confirmationRequired = $confirmRequired && !$dto->isSubscribed;
 
             if ($dto->confirmationRequired) {
