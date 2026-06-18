@@ -374,9 +374,13 @@ class Mage_Core_Controller_Request_Http
     public function getPost(string|null $key = null, mixed $default = null): mixed
     {
         if ($key === null) {
-            return $_POST;
+            return $this->symfonyRequest->request->all();
         }
-        return $_POST[$key] ?? $default;
+        if ($this->symfonyRequest->request->has($key)) {
+            // Use all() to support array values
+            return $this->symfonyRequest->request->all()[$key];
+        }
+        return $default;
     }
 
     public function getCookie(string|null $key = null, mixed $default = null): mixed

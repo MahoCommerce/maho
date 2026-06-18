@@ -888,7 +888,7 @@ XML;
             $key = $remoteAddr;
         }
 
-        $windowSeconds ??= (int) Mage::getStoreConfig('system/rate_limit/timeframe');
+        $windowSeconds = max(1, $windowSeconds ?? (int) Mage::getStoreConfig('system/rate_limit/timeframe'));
         $cacheKey = 'rate_limit_' . md5($key);
         $cache = Mage::app()->getCache();
         $now = time();
@@ -928,7 +928,7 @@ XML;
             $key = $remoteAddr;
         }
 
-        $windowSeconds ??= (int) Mage::getStoreConfig('system/rate_limit/timeframe');
+        $windowSeconds = max(1, $windowSeconds ?? (int) Mage::getStoreConfig('system/rate_limit/timeframe'));
         $cacheKey = 'rate_limit_' . md5($key);
         $cache = Mage::app()->getCache();
         $now = time();
@@ -960,23 +960,21 @@ XML;
     /**
      * Honeypot check: returns true when the request body contains a
      * non-empty value in the install-specific trap field returned by
-     * `getHoneypotFieldName()`. Reads the on/off toggle from the
-     * supplied config path so each module owns its own setting (e.g.
-     * `revocation/abuse/honeypot_enabled`); off means the check is
-     * skipped entirely.
+     * `getHoneypotFieldName()`.
      *
-     * Works for any request shape that exposes form data as an array,
-     * so it's usable from web controllers (`$request->getPost()`) and
-     * API processors (decoded JSON body) alike.
+     * The enable/disable toggle is the caller's concern: gate this call
+     * behind your own module setting. Works for any request shape that
+     * exposes form data as an array, so it's usable from web controllers
+     * (`$request->getPost()`) and API processors (decoded JSON body) alike.
      */
-    public function isHoneypotTriggered(array $body, string $configPath): bool
+    public function isHoneypotTriggered(array $body): bool
     {
-        if (!Mage::getStoreConfigFlag($configPath)) {
-            return false;
-        }
         $field = $this->getHoneypotFieldName();
         $value = $body[$field] ?? null;
-        return $value !== null && $value !== '';
+        if (is_array($value)) {
+            return $value !== [];
+        }
+        return trim((string) $value) !== '';
     }
 
     /**

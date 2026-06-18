@@ -12,7 +12,6 @@ uses(Tests\MahoBackendTestCase::class);
 
 beforeEach(function () {
     $this->helper = Mage::helper('core');
-    $this->configPath = 'test/honeypot/enabled_' . uniqid();
 });
 
 describe('Honeypot field name', function () {
@@ -24,25 +23,17 @@ describe('Honeypot field name', function () {
 });
 
 describe('Honeypot trigger detection', function () {
-    it('returns false when the config flag is disabled, even if the trap is filled', function () {
-        Mage::app()->getStore()->setConfig($this->configPath, '0');
-        $body = [$this->helper->getHoneypotFieldName() => 'i-am-a-bot'];
-
-        expect($this->helper->isHoneypotTriggered($body, $this->configPath))->toBeFalse();
-    });
-
-    it('returns true when enabled and the trap field is filled', function () {
-        Mage::app()->getStore()->setConfig($this->configPath, '1');
+    it('returns true when the trap field is filled', function () {
         $body = [$this->helper->getHoneypotFieldName() => 'http://spam.example'];
 
-        expect($this->helper->isHoneypotTriggered($body, $this->configPath))->toBeTrue();
+        expect($this->helper->isHoneypotTriggered($body))->toBeTrue();
     });
 
-    it('returns false when enabled and the trap field is empty or absent', function () {
-        Mage::app()->getStore()->setConfig($this->configPath, '1');
+    it('returns false when the trap field is empty, whitespace-only or absent', function () {
         $field = $this->helper->getHoneypotFieldName();
 
-        expect($this->helper->isHoneypotTriggered([$field => ''], $this->configPath))->toBeFalse();
-        expect($this->helper->isHoneypotTriggered([], $this->configPath))->toBeFalse();
+        expect($this->helper->isHoneypotTriggered([$field => '']))->toBeFalse();
+        expect($this->helper->isHoneypotTriggered([$field => '   ']))->toBeFalse();
+        expect($this->helper->isHoneypotTriggered([]))->toBeFalse();
     });
 });

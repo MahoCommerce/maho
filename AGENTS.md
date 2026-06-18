@@ -326,9 +326,11 @@ must-persist security counters (e.g. forgot-password) on durable storage instead
 
 ```php
 // Honeypot: render a visually-hidden trap field, then check it server-side. The field name is
-// install-specific. Toggle via your module's own default-on `*/honeypot_enabled` flag.
+// install-specific. The on/off toggle is the caller's concern: gate the check behind your
+// module's own default-on `*/honeypot_enabled` flag.
 $field = Mage::helper('core')->getHoneypotFieldName();           // in the template
-if (Mage::helper('core')->isHoneypotTriggered($request->getPost(), 'mymodule/abuse/honeypot_enabled')) {
+if (Mage::getStoreConfigFlag('mymodule/abuse/honeypot_enabled')
+    && Mage::helper('core')->isHoneypotTriggered($request->getPost())) {
     // silently drop (works for $request->getPost() and decoded API bodies alike)
 }
 ```
