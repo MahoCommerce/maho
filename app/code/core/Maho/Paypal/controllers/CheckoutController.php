@@ -127,6 +127,15 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                 shippingCallbackUrl: $shippingCallbackUrl,
             );
 
+            // Vault payments capture synchronously inside createOrder (there is no
+            // popup/approve round-trip), so validate the quote here, before the money
+            // moves, just as the standard flow validates before its capture.
+            if ($vaultPaypalTokenId) {
+                $quote->getPayment()->setMethod($methodCode);
+                $quote->collectTotals();
+                Mage::getModel('sales/service_quote', $quote)->validate();
+            }
+
             /** @var Maho_Paypal_Model_Api_Client $client */
             $client = Mage::getModel('paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
             $paypalOrder = $client->createOrder(['body' => $orderRequest]);
@@ -291,6 +300,10 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                     // different cart and place an order paid by someone else's capture.
                     $this->_assertPaypalOrderMatchesQuote($paypalResult, $quote);
                     $this->_assertPaypalOrderNotAlreadyUsed($paypalOrderId);
+
+                    // Prepare and validate the quote BEFORE capturing. A missing or
+                    // invalid shipping method must fail here, not after the money moves.
+                    $paypalHelper->prepareQuoteForPaypalOrder($quote, $paypalResult, $methodCode);
 
                     $status = $paypalResult['status'] ?? '';
 

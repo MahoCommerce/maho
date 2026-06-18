@@ -57,6 +57,14 @@ class Maho_Paypal_Model_Webhook_Handler_OrderApproved extends Maho_Paypal_Model_
             /** @var Maho_Paypal_Model_Api_Client $client */
             $client = Mage::getModel('paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
 
+            /** @var Maho_Paypal_Helper_Data $helper */
+            $helper = Mage::helper('paypal');
+
+            // Prepare and validate the quote BEFORE capturing, so an unplaceable
+            // quote (e.g. missing shipping method) fails before money moves.
+            $paypalOrder = $client->getOrder($paypalOrderId);
+            $helper->prepareQuoteForPaypalOrder($quote, $paypalOrder, $methodCode);
+
             if ($intent === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE) {
                 $paypalResult = $client->captureOrder($paypalOrderId);
             } else {
