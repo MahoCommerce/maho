@@ -563,10 +563,27 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
     }
 
     /**
-     * Get default XML structure for new feeds
+     * Default XML structure shown when a feed has no stored xml_structure yet.
+     *
+     * If the feed has a platform set we derive the structure from that
+     * platform adapter so a brand new Google Shopping feed (for example)
+     * arrives with the full set of attributes Google's spec defines —
+     * including CDATA flags, namespaced tags, and the default transformer
+     * chains shipped with the adapter. With no platform we fall back to the
+     * generic short list previously hardcoded here.
      */
     protected function _getDefaultXmlStructure(): array
     {
+        $feed = $this->_getFeed();
+        $platformCode = $feed?->getPlatform();
+
+        if ($platformCode) {
+            $adapter = Mage::getSingleton('feedmanager/platform')->getAdapter($platformCode);
+            if ($adapter) {
+                return $this->_buildDefaultFromAdapter($adapter);
+            }
+        }
+
         return [
             ['tag' => 'g:id', 'source_type' => 'attribute', 'source_value' => 'sku', 'cdata' => false, 'optional' => false],
             ['tag' => 'g:title', 'source_type' => 'attribute', 'source_value' => 'name', 'cdata' => true, 'optional' => false],
@@ -580,5 +597,45 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
             ['tag' => 'g:brand', 'source_type' => 'attribute', 'source_value' => 'brand', 'cdata' => true, 'optional' => true],
             ['tag' => 'g:condition', 'source_type' => 'static', 'source_value' => 'new', 'cdata' => false, 'optional' => true],
         ];
+    }
+
+    /**
+     * Build the fresh-feed structure rows by walking a platform adapter's
+     * declared required + optional attributes and its default mappings.
+     * Output matches the shape the controller's platformPresetAction returns
+     * when Load Preset is triggered, except tags carry their namespace
+     * prefix (e.g. g:availability) so the rendered tree visibly mirrors the
+     * final XML output instead of relying on the writer's namespacing step.
+     */
+    protected function _buildDefaultFromAdapter(Maho_FeedManager_Model_Platform_AdapterInterface $adapter): array
+    {
+        $required = $adapter->getRequiredAttributes();
+        $optional = $adapter->getOptionalAttributes();
+        $mappings = $adapter->getDefaultMappings();
+        $namespaced = method_exists($adapter, 'getNamespacedAttributes')
+            ? array_flip($adapter->getNamespacedAttributes())
+            : [];
+        $cdataKeys = ['title', 'description', 'google_product_category', 'product_category', 'product_type'];
+
+        $structure = [];
+        foreach (array_merge($required, $optional) as $key => $attr) {
+            $mapping = $mappings[$key] ?? ['source_type' => 'attribute', 'source_value' => ''];
+            $row = [
+                'tag' => isset($namespaced[$key]) ? 'g:' . $key : $key,
+                'source_type' => $mapping['source_type'],
+                'source_value' => $mapping['source_value'],
+                'cdata' => in_array($key, $cdataKeys, true),
+                'optional' => !($attr['required'] ?? false),
+            ];
+            if (!empty($mapping['use_parent'])) {
+                $row['use_parent'] = $mapping['use_parent'];
+            }
+            if (!empty($mapping['transformers'])) {
+                $row['transformers'] = $mapping['transformers'];
+            }
+            $structure[] = $row;
+        }
+
+        return $structure;
     }
 }
