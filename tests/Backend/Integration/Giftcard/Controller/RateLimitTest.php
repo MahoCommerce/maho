@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 uses(Tests\MahoBackendTestCase::class);
 
-it('blocks gift-card balance checks after the per-IP limit within the window', function () {
+it('blocks gift-card balance checks after the limit within the window', function () {
     $request = new Mage_Core_Controller_Request_Http(
         SymfonyRequest::create('http://localhost/giftcard/cart/checkBalance', 'POST'),
     );
