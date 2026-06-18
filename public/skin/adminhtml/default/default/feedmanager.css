@@ -29,6 +29,19 @@
   width: auto;
   max-width: 100%;
 }
+/* The Properties panel selects (e.g. Source Value) auto-size to their widest
+   <option>, which for product-attribute pickers can be 40+ chars and overflow
+   the narrow side panel. Pin them to container width with min-width: 0 so
+   they shrink when the panel does. */
+#xml-properties-content select,
+#xml-properties-content input.input-text,
+#json-properties-content select,
+#json-properties-content input.input-text {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
 .feedmanager-mapping-source,
 .feedmanager-mapping-target {
   flex: 1;
