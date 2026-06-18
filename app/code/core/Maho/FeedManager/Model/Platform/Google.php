@@ -424,7 +424,17 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'source_value' => 'mpn',
             'transformers' => 'truncate:max_length=70',
         ],
-        'identifier_exists' => ['source_type' => 'static', 'source_value' => ''],
+        // Google wants identifier_exists = "no" only when the product has no
+        // GTIN / MPN / brand. The Conditional transformer reads the raw product
+        // attribute named in condition_field, so we check gtin: empty → "no",
+        // otherwise → "yes". Most products with a GTIN also have a brand, so
+        // this is a sensible default; merchants who need the stricter "no GTIN
+        // AND no MPN AND no brand" rule can extend the chain.
+        'identifier_exists' => [
+            'source_type' => 'static',
+            'source_value' => '',
+            'transformers' => 'conditional:condition_field=gtin,operator=empty,true_value=no,false_value=yes',
+        ],
 
         // ---- Condition & state ----
         'condition' => ['source_type' => 'static', 'source_value' => 'new'],
