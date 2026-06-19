@@ -326,7 +326,9 @@ const TransformerModal = {
                 for (let j = 0; j < optPairs.length; j++) {
                     const kv = optPairs[j].split('=');
                     if (kv.length === 2) {
-                        options[kv[0].trim()] = kv[1].trim();
+                        // Preserve leading/trailing whitespace in the value — eg
+                        // append=" kg" relies on the space to produce "1 kg".
+                        options[kv[0].trim()] = kv[1];
                     }
                 }
             }

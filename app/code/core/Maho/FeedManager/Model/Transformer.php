@@ -288,7 +288,8 @@ class Maho_FeedManager_Model_Transformer
                 foreach ($optPairs as $pair) {
                     $kv = explode('=', $pair, 2);
                     if (count($kv) === 2) {
-                        $options[trim($kv[0])] = trim($kv[1]);
+                        // Preserve whitespace in the value — eg append=" kg" needs the space.
+                        $options[trim($kv[0])] = $kv[1];
                     }
                 }
             }
