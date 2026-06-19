@@ -177,6 +177,54 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
     }
 
     /**
+     * Add "is empty" / "is not empty" operators to the standard set so rule
+     * authors can match products whose EAV value is null, missing, or an
+     * empty string. Maho's stock operator list only covers comparisons
+     * against a non-empty value, which means a "Custom Stock Status is
+     * empty" condition (the equivalent of Amasty's "is empty" operator)
+     * has no way to be expressed otherwise.
+     *
+     * The value field is intentionally left visible for these operators —
+     * its contents are ignored when validateAttribute() takes the
+     * is_empty / is_not_empty branch below.
+     */
+    #[\Override]
+    public function getDefaultOperatorOptions()
+    {
+        if ($this->_defaultOperatorOptions === null) {
+            $this->_defaultOperatorOptions = parent::getDefaultOperatorOptions();
+            $this->_defaultOperatorOptions['is_empty'] = static::$translate
+                ? Mage::helper('rule')->__('is empty')
+                : 'is empty';
+            $this->_defaultOperatorOptions['is_not_empty'] = static::$translate
+                ? Mage::helper('rule')->__('is not empty')
+                : 'is not empty';
+        }
+        return $this->_defaultOperatorOptions;
+    }
+
+    /**
+     * Treat null, empty string, and empty array as "empty". Numeric 0 is
+     * NOT considered empty because for many attributes (price, qty, sort
+     * order) zero is a legitimate value the merchant may want to match
+     * with `equals 0` rather than `is empty`.
+     */
+    #[\Override]
+    public function validateAttribute($validatedValue)
+    {
+        $operator = $this->getOperatorForValidate();
+
+        if ($operator === 'is_empty' || $operator === 'is_not_empty') {
+            $isEmpty = $validatedValue === null
+                || $validatedValue === ''
+                || (is_array($validatedValue) && count($validatedValue) === 0);
+            return $operator === 'is_empty' ? $isEmpty : !$isEmpty;
+        }
+
+        return parent::validateAttribute($validatedValue);
+    }
+
+    /**
      * Get input type for attribute
      */
     #[\Override]
