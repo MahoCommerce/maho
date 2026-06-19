@@ -56,6 +56,9 @@ class Maho_FeedManager_Model_Mapper
     /** @var array<int, array|null> Cache of parent product data by parent ID */
     protected array $_parentDataCache = [];
 
+    /** @var array<int, array<int|string>> Cache of parent product ID => its category IDs */
+    protected array $_parentCategoryIdsCache = [];
+
     /** @var array<int, array{name: string, path: string}> Static cache of category data (id => [name, path]) */
     protected static array $_categoryCache = [];
 
@@ -436,7 +439,7 @@ class Maho_FeedManager_Model_Mapper
             self::SOURCE_TYPE_STATIC => $sourceValue,
             self::SOURCE_TYPE_RULE => $this->_evaluateRule($sourceValue, $rawData, $product),
             self::SOURCE_TYPE_COMBINED => $this->_evaluateCombined($sourceValue, $rawData),
-            self::SOURCE_TYPE_TAXONOMY => $this->_getTaxonomyForProduct($sourceValue, $product),
+            self::SOURCE_TYPE_TAXONOMY => $this->_getTaxonomyForProduct($sourceValue, $product, $useParentMode),
             default => null,
         };
     }
@@ -745,8 +748,11 @@ class Maho_FeedManager_Model_Mapper
      * @param Mage_Catalog_Model_Product $product Product to get taxonomy for
      * @return string|null Taxonomy path or null if no mapping found
      */
-    protected function _getTaxonomyForProduct(string $platform, Mage_Catalog_Model_Product $product): ?string
-    {
+    protected function _getTaxonomyForProduct(
+        string $platform,
+        Mage_Catalog_Model_Product $product,
+        string $useParentMode = '',
+    ): ?string {
         if (empty($platform)) {
             return null;
         }
@@ -796,12 +802,37 @@ class Maho_FeedManager_Model_Mapper
             return null;
         }
 
-        $categoryIds = $product->getCategoryIds();
+        // "always" parent mode: skip the child entirely and resolve from parent.
+        if ($useParentMode === 'always') {
+            return $this->_findTaxonomyForParentCategories($mappings, $product);
+        }
 
-        // Find deepest mapped category (no model loading - depths are pre-cached)
+        // Default behaviour: try the child first.
+        $bestMatch = $this->_findBestTaxonomyMatch($mappings, $product->getCategoryIds());
+
+        // "if_empty": fall back to the parent's category mappings when the
+        // child has no category assignment or no matching mapping. Without
+        // this, configurable variants with no category assignment of their
+        // own emit an empty google_product_category even though the parent
+        // is correctly mapped.
+        if ($bestMatch === null && $useParentMode === 'if_empty') {
+            $bestMatch = $this->_findTaxonomyForParentCategories($mappings, $product);
+        }
+
+        return $bestMatch;
+    }
+
+    /**
+     * Pick the deepest matching taxonomy path from a set of category IDs.
+     * Pre-cached depths mean no per-call model load.
+     *
+     * @param array<int, array{path:string, depth:int}> $mappings
+     * @param array<int|string> $categoryIds
+     */
+    protected function _findBestTaxonomyMatch(array $mappings, array $categoryIds): ?string
+    {
         $bestMatch = null;
         $bestDepth = 0;
-
         foreach ($categoryIds as $categoryId) {
             if (isset($mappings[$categoryId])) {
                 $mapping = $mappings[$categoryId];
@@ -811,8 +842,34 @@ class Maho_FeedManager_Model_Mapper
                 }
             }
         }
-
         return $bestMatch;
+    }
+
+    /**
+     * Walk to the configurable parent of a simple child and look up taxonomy
+     * against the parent's category IDs. Returns null when the product has no
+     * parent or the parent has no matching category mapping.
+     *
+     * @param array<int, array{path:string, depth:int}> $mappings
+     */
+    protected function _findTaxonomyForParentCategories(array $mappings, Mage_Catalog_Model_Product $child): ?string
+    {
+        $parentId = $this->_getParentId($child);
+        if ($parentId === null) {
+            return null;
+        }
+
+        if (!isset($this->_parentCategoryIdsCache[$parentId])) {
+            $resource = Mage::getSingleton('core/resource');
+            $adapter = $resource->getConnection('core_read');
+            $this->_parentCategoryIdsCache[$parentId] = $adapter->fetchCol(
+                $adapter->select()
+                    ->from($resource->getTableName('catalog/category_product'), 'category_id')
+                    ->where('product_id = ?', $parentId),
+            );
+        }
+
+        return $this->_findBestTaxonomyMatch($mappings, $this->_parentCategoryIdsCache[$parentId]);
     }
 
     /**
