@@ -264,6 +264,17 @@ class Maho_FeedManager_Model_Mapper
         $additionalImages = $this->_getAdditionalImages($product);
         $data['additional_images'] = $additionalImages;
         $data['additional_images_csv'] = implode(',', $additionalImages);
+        // The XML/JSON/CSV builders expose "Gallery Image 1" … "Gallery Image 10"
+        // as selectable source values (image_1 … image_10 in the source dropdown
+        // in AbstractBuilder::_getProductAttributeOptionsForEditor). Without the
+        // keys populated here, picking those options silently emits empty tags.
+        // Populate them so each <additional_image_link> mapping can resolve to
+        // a distinct gallery URL, and so the standard use_parent fallback picks
+        // them up via `parent_image_N` when the variant has no gallery of its
+        // own (most catalog children inherit imagery from the parent).
+        for ($i = 1; $i <= 10; $i++) {
+            $data['image_' . $i] = $additionalImages[$i - 1] ?? null;
+        }
 
         // Categories
         $data['category_ids'] = $product->getCategoryIds();
