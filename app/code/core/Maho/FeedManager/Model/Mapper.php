@@ -550,12 +550,21 @@ class Maho_FeedManager_Model_Mapper
     {
         $images = [];
 
+        // Force-load the media_gallery backend; collections in the generator
+        // don't trigger it by default, so without this both branches below
+        // would always come back empty.
+        if ($product->getData('media_gallery') === null) {
+            $attr = $product->getResource()->getAttribute('media_gallery');
+            if ($attr) {
+                $attr->getBackend()->afterLoad($product);
+            }
+        }
+
         try {
             $gallery = $product->getMediaGalleryImages();
             if ($gallery && $gallery->getSize() > 0) {
                 foreach ($gallery as $image) {
                     $url = $image->getUrl();
-                    // Ensure we have a string URL
                     if (is_string($url) && !empty($url)) {
                         $images[] = $url;
                     }
