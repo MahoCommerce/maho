@@ -74,7 +74,7 @@ class Maho_Revocation_IndexController extends Mage_Core_Controller_Front_Action
         }
 
         $ip = (string) Mage::helper('core/http')->getRemoteAddr();
-        if (Mage::helper('revocation')->isIpRateLimited($ip)) {
+        if (Mage::helper('revocation')->isIpRateLimited()) {
             $session->addError($this->__('Your request could not be processed right now. Please try again later or contact us directly.'));
             $this->_redirectUrl(Mage::getUrl('revocation/index/index'));
             return;

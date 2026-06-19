@@ -860,87 +860,59 @@ XML;
     }
 
     /**
-     * Returns true if the rate limit is exceeded.
-     *
-     * IP path (no $key): governed by the store config (system/rate_limit/*).
-     * Keyed path: a sliding window of $maxAttempts hits per $windowSeconds on $key, build the
-     * key from whatever you scope by (IP, email, session). Adds the default "Too Soon" error to
-     * the core session on block unless $setErrorMessage is false, and records the hit when under
-     * budget unless $recordRateLimitHit is false.
+     * Rate limiter scoped to the request client. Core resolves the identity (IP/session) from
+     * $scope, so callers never read the remote address or session id themselves. $namespace
+     * separates one feature's budget from another's. A non-positive $maxAttempts disables it.
      */
-    public function isRateLimitExceeded(
-        bool $setErrorMessage = true,
-        bool $recordRateLimitHit = true,
-        ?string $key = null,
-        int $maxAttempts = 1,
-        ?int $windowSeconds = null,
-    ): bool {
-        [$key, $windowSeconds] = $this->resolveRateLimit($key, $windowSeconds);
-        if ($key === null) {
-            return false;
-        }
-
-        if (count($this->loadRateLimitHits($key, $windowSeconds)) >= $maxAttempts) {
-            if ($setErrorMessage) {
-                Mage::getSingleton('core/session')->addError(
-                    $this->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.'),
-                );
-            }
-            return true;
-        }
-
-        if ($recordRateLimitHit) {
-            $this->saveRateLimitHit($key, $windowSeconds);
-        }
-
-        return false;
+    public function rateLimiter(
+        string $namespace,
+        int $maxAttempts,
+        int $windowSeconds,
+        \Maho\Security\RateLimitScope $scope = \Maho\Security\RateLimitScope::Client,
+    ): \Maho\Security\RateLimiter {
+        $identity = $this->resolveRateLimitIdentity($scope);
+        return new \Maho\Security\RateLimiter("{$namespace}:{$identity}", $maxAttempts, $windowSeconds);
     }
 
     /**
-     * Record a rate limit hit for the current IP (failure-only counting, see Mage_Sales_Helper_Guest).
+     * Rate limiter keyed by a caller-owned domain value (email, store id, order reference) rather
+     * than by request identity. The caller passes a value it already holds; nothing is read from
+     * the request. A non-positive $maxAttempts disables it.
      */
-    public function recordRateLimitHit(): void
-    {
-        [$key, $windowSeconds] = $this->resolveRateLimit(null, null);
-        if ($key !== null) {
-            $this->saveRateLimitHit($key, $windowSeconds);
-        }
+    public function rateLimiterBy(
+        string $namespace,
+        string $value,
+        int $maxAttempts,
+        int $windowSeconds,
+    ): \Maho\Security\RateLimiter {
+        return new \Maho\Security\RateLimiter("{$namespace}:{$value}", $maxAttempts, $windowSeconds);
     }
 
     /**
-     * Resolve a limiter key and window. A null $key selects the built-in IP limiter, which yields
-     * a null key (no-op) when rate limiting is disabled or the remote address is unknown.
-     *
-     * @return array{0: string|null, 1: int}
+     * Config-governed IP limiter (system/rate_limit/*). Returns null when rate limiting is
+     * disabled or the client IP is unknown; callers treat null as "not limited".
      */
-    protected function resolveRateLimit(?string $key, ?int $windowSeconds): array
+    public function ipRateLimiter(): ?\Maho\Security\RateLimiter
     {
-        if ($key === null) {
-            if (!Mage::getStoreConfigFlag('system/rate_limit/active')) {
-                return [null, 0];
-            }
-            $key = Mage::helper('core/http')->getRemoteAddr() ?: null;
-            if ($key === null) {
-                return [null, 0];
-            }
-            $windowSeconds ??= (int) Mage::getStoreConfig('system/rate_limit/timeframe');
+        if (!Mage::getStoreConfigFlag('system/rate_limit/active')) {
+            return null;
         }
-        return [$key, max(1, (int) $windowSeconds)];
+        $ip = Mage::helper('core/http')->getRemoteAddr();
+        if (!$ip) {
+            return null;
+        }
+        $window = max(1, (int) Mage::getStoreConfig('system/rate_limit/timeframe'));
+        return new \Maho\Security\RateLimiter("ip:{$ip}", 1, $window);
     }
 
-    protected function loadRateLimitHits(string $key, int $windowSeconds): array
+    protected function resolveRateLimitIdentity(\Maho\Security\RateLimitScope $scope): string
     {
-        $now = time();
-        $data = Mage::app()->getCache()->load('rate_limit_' . md5($key));
-        $hits = $data ? (json_decode($data, true) ?? []) : [];
-        return array_values(array_filter($hits, fn(int $ts) => $ts > $now - $windowSeconds));
-    }
-
-    protected function saveRateLimitHit(string $key, int $windowSeconds): void
-    {
-        $hits = $this->loadRateLimitHits($key, $windowSeconds);
-        $hits[] = time();
-        Mage::app()->getCache()->save(json_encode($hits), 'rate_limit_' . md5($key), ['rate_limit'], $windowSeconds);
+        return match ($scope) {
+            \Maho\Security\RateLimitScope::Ip => (string) Mage::helper('core/http')->getRemoteAddr(),
+            \Maho\Security\RateLimitScope::Session => (string) Mage::getSingleton('core/session')->getSessionId(),
+            \Maho\Security\RateLimitScope::Client => (string) (Mage::helper('core/http')->getRemoteAddr()
+                ?: Mage::getSingleton('core/session')->getSessionId()),
+        };
     }
 
     /**

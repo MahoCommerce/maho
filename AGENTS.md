@@ -307,25 +307,38 @@ it('can process customer orders', function () {
 
 ### Rate limiting & honeypot (shared `core` helper)
 
-Throttle public endpoints and trap bots with the shared `Mage_Core_Helper_Data` primitives, do
-not roll a per-feature limiter.
+Throttle public endpoints and trap bots with the shared `Mage_Core_Helper_Data` factories, do
+not roll a per-feature limiter. They hand back a `\Maho\Security\RateLimiter` (sliding window of
+`$maxAttempts` hits per `$windowSeconds`). **Core owns request identity**: callers never read the
+client IP or session id themselves, they name a scope and core resolves it. A non-positive
+`$maxAttempts` disables a limiter (no call-site `if ($limit <= 0)` guard needed).
 
 ```php
-// Keyed sliding window: $maxAttempts hits per $windowSeconds. Returns true if over budget,
-// records the hit otherwise. Build the key from whatever you scope by (IP, email, session…).
-// Adds a default "Too Soon" session error on block; pass false to stay silent (e.g. AJAX/API).
-if (Mage::helper('core')->isRateLimitExceeded(false, true, "myfeature:{$ip}", 5, 3600)) {
+use Maho\Security\RateLimitScope;
+
+// Scope by request client (core resolves the identity). Default scope is Client = IP, falling
+// back to session id when the IP is unknown. Other scopes: RateLimitScope::Ip, ::Session.
+$limiter = Mage::helper('core')->rateLimiter('myfeature', 5, 3600);   // namespace, max, window
+if (!$limiter->attempt()) {            // check-and-record; false = blocked
+    // blocked — surface your own message (AJAX/API stay silent)
+}
+
+// Scope by a value you already hold (email, store id, order ref) — not request identity.
+if (!Mage::helper('core')->rateLimiterBy('myfeature_email', $email, 1, 86400)->attempt()) {
     // blocked
 }
-// 0-disables is a call-site convention: guard `if ($limit <= 0)` before calling.
 
-// IP limit governed by store config (system/rate_limit/*). recordRateLimitHit() is IP-only,
-// for failure-only counting (check up front, record only on failure; see Mage_Sales_Helper_Guest):
-if (Mage::helper('core')->isRateLimitExceeded()) { /* blocked */ }
-Mage::helper('core')->recordRateLimitHit();
+// Check up front, record only on failure (see Mage_Sales_Helper_Guest). ipRateLimiter() is the
+// store-config-governed IP limiter (system/rate_limit/*); null when disabled or IP unknown.
+$limiter = Mage::helper('core')->ipRateLimiter();
+if ($limiter?->tooManyAttempts()) { /* blocked: present "Too Soon" */ }
+// ...later, on a failed attempt only:
+$limiter?->hit();
 ```
 
-Counters are cache-backed (tag `rate_limit`), so a full cache flush resets every window. Keep
+`attempt()` is check-and-record; `tooManyAttempts()` is a pure read; `hit()` records explicitly.
+`remaining()` and `clear()` round out the object. Counters are cache-backed (tag
+`\Maho\Security\RateLimiter::CACHE_TAG`), so a full cache flush resets every window. Keep
 must-persist security counters (e.g. forgot-password) on durable storage instead.
 
 ```php

@@ -101,35 +101,28 @@ class Maho_Revocation_Helper_Data extends Mage_Core_Helper_Abstract
         return $local . '@' . $domain;
     }
 
-    public function isIpRateLimited(string $ip, mixed $store = null): bool
+    public function isIpRateLimited(mixed $store = null): bool
     {
         $limit = (int) Mage::getStoreConfig(self::XML_PATH_IP_RATE_LIMIT, $store);
-        return $this->_isRateLimited('revocation_ratelimit_ip_' . sha1($ip), $limit, 3600);
+        return !Mage::helper('core')
+            ->rateLimiter('revocation_ip', $limit, 3600, \Maho\Security\RateLimitScope::Ip)
+            ->attempt();
     }
 
     public function isRecipientRateLimited(#[\SensitiveParameter]
         string $email, mixed $store = null): bool
     {
         $limit = (int) Mage::getStoreConfig(self::XML_PATH_RECIPIENT_RATE_LIMIT, $store);
-        return $this->_isRateLimited('revocation_ratelimit_email_' . sha1($this->normalizeEmail($email)), $limit, 86400);
+        return !Mage::helper('core')
+            ->rateLimiterBy('revocation_recipient', $this->normalizeEmail($email), $limit, 86400)
+            ->attempt();
     }
 
     public function isMerchantNotificationRateLimited(?int $storeId, mixed $store = null): bool
     {
         $limit = (int) Mage::getStoreConfig(self::XML_PATH_MERCHANT_RATE_LIMIT, $store);
-        return $this->_isRateLimited('revocation_ratelimit_merchant_' . (int) $storeId, $limit, 3600);
-    }
-
-    /**
-     * Rolling-window limiter delegating to the shared core helper. A limit of 0 disables the
-     * check (the helper has no 0-disable, so guard here). Silent: the controller fakes success
-     * rather than surfacing an error.
-     */
-    protected function _isRateLimited(string $cacheKey, int $limit, int $windowSeconds): bool
-    {
-        if ($limit <= 0) {
-            return false;
-        }
-        return Mage::helper('core')->isRateLimitExceeded(false, true, $cacheKey, $limit, $windowSeconds);
+        return !Mage::helper('core')
+            ->rateLimiterBy('revocation_merchant', (string) (int) $storeId, $limit, 3600)
+            ->attempt();
     }
 }

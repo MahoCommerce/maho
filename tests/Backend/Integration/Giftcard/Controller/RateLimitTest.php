@@ -13,6 +13,10 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 uses(Tests\MahoBackendTestCase::class);
 
 it('blocks gift-card balance checks after the limit within the window', function () {
+    // The limiter now keys by client identity (not a unique per-run key), so clear any
+    // carry-over hits for this test client before counting.
+    Mage::app()->cleanCache([\Maho\Security\RateLimiter::CACHE_TAG]);
+
     $request = new Mage_Core_Controller_Request_Http(
         SymfonyRequest::create('http://localhost/giftcard/cart/checkBalance', 'POST'),
     );

@@ -14,50 +14,60 @@ beforeEach(function () {
     $this->helper = Mage::helper('core');
 });
 
-describe('Keyed rate limiter', function () {
+describe('Value-keyed rate limiter', function () {
     it('allows maxAttempts hits then blocks the next one', function () {
-        $key = 'test_ratelimit_' . uniqid();
+        $value = uniqid();
 
         for ($i = 0; $i < 3; $i++) {
-            expect($this->helper->isRateLimitExceeded(false, true, $key, 3, 60))->toBeFalse();
+            expect($this->helper->rateLimiterBy('test', $value, 3, 60)->attempt())->toBeTrue();
         }
-        expect($this->helper->isRateLimitExceeded(false, true, $key, 3, 60))->toBeTrue();
+        expect($this->helper->rateLimiterBy('test', $value, 3, 60)->attempt())->toBeFalse();
     });
 
-    it('keeps independent budgets per key', function () {
-        $keyA = 'test_ratelimit_a_' . uniqid();
-        $keyB = 'test_ratelimit_b_' . uniqid();
+    it('keeps independent budgets per value and per namespace', function () {
+        $a = uniqid();
+        $b = uniqid();
 
-        expect($this->helper->isRateLimitExceeded(false, true, $keyA, 1, 60))->toBeFalse();
-        expect($this->helper->isRateLimitExceeded(false, true, $keyA, 1, 60))->toBeTrue();
+        expect($this->helper->rateLimiterBy('test', $a, 1, 60)->attempt())->toBeTrue();
+        expect($this->helper->rateLimiterBy('test', $a, 1, 60)->attempt())->toBeFalse();
 
-        // keyB is untouched by keyA's exhaustion
-        expect($this->helper->isRateLimitExceeded(false, true, $keyB, 1, 60))->toBeFalse();
+        // A different value is untouched by $a's exhaustion...
+        expect($this->helper->rateLimiterBy('test', $b, 1, 60)->attempt())->toBeTrue();
+        // ...and so is the same value under a different namespace.
+        expect($this->helper->rateLimiterBy('other', $a, 1, 60)->attempt())->toBeTrue();
     });
 
-    it('does not consume budget when recordRateLimitHit is false', function () {
-        $key = 'test_ratelimit_norecord_' . uniqid();
+    it('treats tooManyAttempts as a pure read that consumes no budget', function () {
+        $value = uniqid();
+        $limiter = $this->helper->rateLimiterBy('test', $value, 1, 60);
 
         for ($i = 0; $i < 10; $i++) {
-            expect($this->helper->isRateLimitExceeded(false, false, $key, 1, 60))->toBeFalse();
+            expect($limiter->tooManyAttempts())->toBeFalse();
         }
+        // Still allowed: the reads above recorded nothing.
+        expect($limiter->attempt())->toBeTrue();
+        expect($limiter->tooManyAttempts())->toBeTrue();
     });
 
-    it('adds the default "Too Soon" session error on block, suppressible', function () {
-        $key = 'test_ratelimit_msg_' . uniqid();
-        $session = Mage::getSingleton('core/session');
-        $session->getMessages(true); // clear
+    it('reports remaining budget and can be cleared', function () {
+        $value = uniqid();
+        $limiter = $this->helper->rateLimiterBy('test', $value, 3, 60);
 
-        // Exhaust the single-hit budget, staying silent
-        expect($this->helper->isRateLimitExceeded(false, true, $key, 1, 60))->toBeFalse();
+        expect($limiter->remaining())->toBe(3);
+        $limiter->hit();
+        expect($limiter->remaining())->toBe(2);
 
-        // Default-on message: blocked + session error
-        expect($this->helper->isRateLimitExceeded(true, true, $key, 1, 60))->toBeTrue();
-        expect($session->getMessages()->getErrors())->not->toBeEmpty();
-        $session->getMessages(true);
+        $limiter->clear();
+        expect($limiter->remaining())->toBe(3);
+        expect($limiter->attempt())->toBeTrue();
+    });
 
-        // Suppressed: blocked but no new error
-        expect($this->helper->isRateLimitExceeded(false, true, $key, 1, 60))->toBeTrue();
-        expect($session->getMessages()->getErrors())->toBeEmpty();
+    it('is disabled by a non-positive limit (never blocks, records nothing)', function () {
+        $value = uniqid();
+
+        for ($i = 0; $i < 20; $i++) {
+            expect($this->helper->rateLimiterBy('test', $value, 0, 60)->attempt())->toBeTrue();
+        }
+        expect($this->helper->rateLimiterBy('test', $value, -5, 60)->tooManyAttempts())->toBeFalse();
     });
 });

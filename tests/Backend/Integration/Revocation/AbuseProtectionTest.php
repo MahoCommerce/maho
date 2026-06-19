@@ -69,23 +69,27 @@ describe('Revocation email normalization', function () {
 });
 
 describe('Revocation per-IP rate limit', function () {
+    beforeEach(function () {
+        // Core resolves the client IP itself now, so the key is constant within the run;
+        // clear carry-over hits for this test client before counting.
+        Mage::app()->cleanCache([\Maho\Security\RateLimiter::CACHE_TAG]);
+    });
+
     it('blocks after the configured number of submissions per hour', function () {
         $helper = Mage::helper('revocation');
-        $ip = '198.51.100.' . random_int(1, 254) . '-' . uniqid();
 
         for ($i = 0; $i < 5; $i++) {
-            expect($helper->isIpRateLimited($ip))->toBeFalse();
+            expect($helper->isIpRateLimited())->toBeFalse();
         }
-        expect($helper->isIpRateLimited($ip))->toBeTrue();
+        expect($helper->isIpRateLimited())->toBeTrue();
     });
 
     it('is disabled when the limit is configured to 0', function () {
         Mage::app()->getStore()->setConfig('revocation/abuse/ip_rate_limit_per_hour', '0');
         $helper = Mage::helper('revocation');
-        $ip = 'unlimited-' . uniqid();
 
         for ($i = 0; $i < 20; $i++) {
-            expect($helper->isIpRateLimited($ip))->toBeFalse();
+            expect($helper->isIpRateLimited())->toBeFalse();
         }
     });
 });

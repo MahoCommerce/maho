@@ -55,16 +55,15 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Check if rate limited via the shared core helper, keyed by client IP so balance-code
-     * enumeration cannot be reset by dropping the session cookie. Falls back to the session id
-     * when the IP is unknown, to avoid bucketing every IP-less client together. Silent: the
-     * action returns its own JSON message.
+     * Check if rate limited via the shared core helper. The Client scope keys by IP so balance-code
+     * enumeration cannot be reset by dropping the session cookie, falling back to the session id
+     * when the IP is unknown. Silent: the action returns its own JSON message.
      */
     protected function _isRateLimited(): bool
     {
-        $scope = Mage::helper('core/http')->getRemoteAddr() ?: Mage::getSingleton('core/session')->getSessionId();
-        $key = 'giftcard_balance:' . $scope;
-        return Mage::helper('core')->isRateLimitExceeded(false, true, $key, self::RATE_LIMIT_MAX_ATTEMPTS, self::RATE_LIMIT_WINDOW);
+        return !Mage::helper('core')
+            ->rateLimiter('giftcard_balance', self::RATE_LIMIT_MAX_ATTEMPTS, self::RATE_LIMIT_WINDOW)
+            ->attempt();
     }
 
     /**

@@ -89,7 +89,7 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
                     $errors = true;
                 }
             } else {
-                Mage::helper('core')->recordRateLimitHit();
+                Mage::helper('core')->ipRateLimiter()?->hit();
                 $errors = true;
             }
         }
@@ -99,7 +99,12 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
             return true;
         }
 
-        if (!Mage::helper('core')->isRateLimitExceeded(true, false)) {
+        $limiter = Mage::helper('core')->ipRateLimiter();
+        if ($limiter && $limiter->tooManyAttempts()) {
+            Mage::getSingleton('core/session')->addError(
+                $this->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.'),
+            );
+        } else {
             Mage::getSingleton('core/session')->addError($this->__($errorMessage));
         }
 
