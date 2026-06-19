@@ -594,6 +594,13 @@ class Maho_FeedManager_Model_Mapper
             }
         }
 
+        // Drop the URL that matches the main image_link so additional_image_link
+        // never duplicates what's already in image_link (per Google's spec).
+        $mainImageUrl = $this->_getImageUrl($product, 'image');
+        if ($mainImageUrl) {
+            $images = array_values(array_filter($images, fn($u) => $u !== $mainImageUrl));
+        }
+
         return $images;
     }
 
