@@ -320,10 +320,10 @@ use Maho\Security\RateLimitScope;
 // back to session id when the IP is unknown. Other scopes: RateLimitScope::Ip, ::Session.
 $limiter = Mage::helper('core')->rateLimiter('myfeature', 5, 3600);   // namespace, max, window
 if (!$limiter->attempt()) {            // check-and-record; false = blocked
-    // blocked — surface your own message (AJAX/API stay silent)
+    // blocked, surface your own message (AJAX/API stay silent)
 }
 
-// Scope by a value you already hold (email, store id, order ref) — not request identity.
+// Scope by a value you already hold (email, store id, order ref), not request identity.
 if (!Mage::helper('core')->rateLimiterBy('myfeature_email', $email, 1, 86400)->attempt()) {
     // blocked
 }
