@@ -407,6 +407,13 @@ class Maho_FeedManager_Model_Mapper
         $data['small_image'] = $this->_getImageUrl($parent, 'small_image');
         $data['thumbnail'] = $this->_getImageUrl($parent, 'thumbnail');
 
+        $additionalImages = $this->_getAdditionalImages($parent);
+        $data['additional_images'] = $additionalImages;
+        $data['additional_images_csv'] = implode(',', $additionalImages);
+        for ($i = 1; $i <= 10; $i++) {
+            $data['image_' . $i] = $additionalImages[$i - 1] ?? null;
+        }
+
         // Add common custom attributes
         foreach ($parent->getAttributes() as $attribute) {
             $code = $attribute->getAttributeCode();
