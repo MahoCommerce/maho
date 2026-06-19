@@ -264,14 +264,7 @@ class Maho_FeedManager_Model_Mapper
         $additionalImages = $this->_getAdditionalImages($product);
         $data['additional_images'] = $additionalImages;
         $data['additional_images_csv'] = implode(',', $additionalImages);
-        // The XML/JSON/CSV builders expose "Gallery Image 1" … "Gallery Image 10"
-        // as selectable source values (image_1 … image_10 in the source dropdown
-        // in AbstractBuilder::_getProductAttributeOptionsForEditor). Without the
-        // keys populated here, picking those options silently emits empty tags.
-        // Populate them so each <additional_image_link> mapping can resolve to
-        // a distinct gallery URL, and so the standard use_parent fallback picks
-        // them up via `parent_image_N` when the variant has no gallery of its
-        // own (most catalog children inherit imagery from the parent).
+        // image_1..image_10 are advertised as source options in AbstractBuilder.
         for ($i = 1; $i <= 10; $i++) {
             $data['image_' . $i] = $additionalImages[$i - 1] ?? null;
         }
@@ -813,19 +806,12 @@ class Maho_FeedManager_Model_Mapper
             return null;
         }
 
-        // "always" parent mode: skip the child entirely and resolve from parent.
         if ($useParentMode === 'always') {
             return $this->_findTaxonomyForParentCategories($mappings, $product);
         }
 
-        // Default behaviour: try the child first.
         $bestMatch = $this->_findBestTaxonomyMatch($mappings, $product->getCategoryIds());
 
-        // "if_empty": fall back to the parent's category mappings when the
-        // child has no category assignment or no matching mapping. Without
-        // this, configurable variants with no category assignment of their
-        // own emit an empty google_product_category even though the parent
-        // is correctly mapped.
         if ($bestMatch === null && $useParentMode === 'if_empty') {
             $bestMatch = $this->_findTaxonomyForParentCategories($mappings, $product);
         }
@@ -834,9 +820,6 @@ class Maho_FeedManager_Model_Mapper
     }
 
     /**
-     * Pick the deepest matching taxonomy path from a set of category IDs.
-     * Pre-cached depths mean no per-call model load.
-     *
      * @param array<int, array{path:string, depth:int}> $mappings
      * @param array<int|string> $categoryIds
      */
@@ -857,10 +840,6 @@ class Maho_FeedManager_Model_Mapper
     }
 
     /**
-     * Walk to the configurable parent of a simple child and look up taxonomy
-     * against the parent's category IDs. Returns null when the product has no
-     * parent or the parent has no matching category mapping.
-     *
      * @param array<int, array{path:string, depth:int}> $mappings
      */
     protected function _findTaxonomyForParentCategories(array $mappings, Mage_Catalog_Model_Product $child): ?string
