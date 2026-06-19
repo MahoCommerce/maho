@@ -204,6 +204,31 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
     }
 
     /**
+     * Make is_empty / is_not_empty actually selectable in the UI for
+     * every input type (the parent's operator-by-input-type map otherwise
+     * limits select / boolean to just ==/!= and so on). Without this, the
+     * new operators are present in getDefaultOperatorOptions() but the
+     * rule UI silently filters them out when building the per-row operator
+     * dropdown.
+     */
+    #[\Override]
+    public function loadOperatorOptions()
+    {
+        parent::loadOperatorOptions();
+        $map = $this->getOperatorByInputType();
+        if (is_array($map)) {
+            foreach ($map as $type => $operators) {
+                if (!in_array('is_empty', $operators, true)) {
+                    $map[$type][] = 'is_empty';
+                    $map[$type][] = 'is_not_empty';
+                }
+            }
+            $this->setOperatorByInputType($map);
+        }
+        return $this;
+    }
+
+    /**
      * Treat null, empty string, and empty array as "empty". Numeric 0 is
      * NOT considered empty because for many attributes (price, qty, sort
      * order) zero is a legitimate value the merchant may want to match
