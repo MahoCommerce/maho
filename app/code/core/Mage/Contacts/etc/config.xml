@@ -60,6 +60,11 @@ SPDX-License-Identifier: AFL-3.0
             <contacts>
                 <enabled>1</enabled>
             </contacts>
+            <abuse>
+                <honeypot_enabled>1</honeypot_enabled>
+                <ip_rate_limit_per_hour>10</ip_rate_limit_per_hour>
+                <recipient_rate_limit_per_hour>3</recipient_rate_limit_per_hour>
+            </abuse>
             <email>
                 <recipient_email><![CDATA[hello@example.com]]></recipient_email>
                 <sender_email_identity>custom2</sender_email_identity>

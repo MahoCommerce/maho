@@ -20,10 +20,9 @@ $formData = $this->getFormData();
     <?php if ($formData->getSessionOrderId()): ?>
         <input type="hidden" name="session_order_id" value="<?= (int) $formData->getSessionOrderId() ?>">
     <?php endif ?>
-    <div class="revocation-hp" aria-hidden="true" style="position:absolute;left:-9999px;height:0;overflow:hidden;">
-        <label for="comment_body"><?= $helper->__('Leave this field empty') ?></label>
-        <input name="comment_body" id="comment_body" value="" type="text" tabindex="-1" autocomplete="off">
-    </div>
+    <?php if (Mage::getStoreConfigFlag(Maho_Revocation_Helper_Data::XML_PATH_HONEYPOT_ENABLED)): ?>
+        <?= Mage::helper('core')->getHoneypotFieldHtml() ?>
+    <?php endif ?>
     <div class="fieldset" style="margin-top:1.5rem;">
         <ul class="form-list">
             <li class="fields">

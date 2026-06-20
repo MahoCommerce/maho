@@ -26,8 +26,7 @@ SPDX-License-Identifier: OSL-3.0
                         <enabled translate="label comment">
                             <label>Enabled</label>
                             <comment><![CDATA[<strong>Enabling this alone does not display the button.</strong> The law requires the revocation button to stay permanently visible during the withdrawal period, but only your theme knows where that is. After enabling, you must place the <strong>Revocation Button</strong> widget in a block shown on every storefront page (typically the footer). Until you do, the form exists at <em>/revocation</em> but nothing links to it.]]></comment>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -111,6 +110,15 @@ SPDX-License-Identifier: OSL-3.0
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <fields>
+                        <honeypot_enabled translate="label comment">
+                            <label>Honeypot Field</label>
+                            <comment>Adds an invisible trap field. Submissions that fill it are silently dropped as bot traffic.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </honeypot_enabled>
                         <min_submit_seconds translate="label comment">
                             <label>Minimum Submit Time (Seconds)</label>
                             <comment>Submissions faster than this after page render are silently dropped as bot traffic. 0 disables the check.</comment>
