@@ -78,7 +78,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
     ];
 
     protected array $_optionalAttributes = [
-        // ---- Product identifiers (conditionally required) ----
+        // Product identifiers (conditionally required)
         'gtin' => [
             'label' => 'GTIN',
             'required' => false,
@@ -94,7 +94,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'required' => false,
             'description' => 'yes / no — set to no if the product has neither GTIN nor MPN nor brand',
         ],
-        // ---- Condition & state ----
+        // Condition & state
         'condition' => [
             'label' => 'Condition',
             'required' => false,
@@ -105,7 +105,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'required' => false,
             'description' => 'yes / no — required if the product is sexually suggestive',
         ],
-        // ---- Pricing ----
+        // Pricing
         'sale_price' => [
             'label' => 'Sale Price',
             'required' => false,
@@ -141,13 +141,13 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'required' => false,
             'description' => 'Lowest price allowed for dynamic pricing campaigns (numeric + ISO 4217)',
         ],
-        // ---- Availability date ----
+        // Availability date
         'availability_date' => [
             'label' => 'Availability Date',
             'required' => false,
             'description' => 'ISO 8601 date a preorder/backorder product becomes available (required when availability is preorder or backorder)',
         ],
-        // ---- Imagery & media ----
+        // Imagery & media
         'additional_image_link' => [
             'label' => 'Additional Image Link',
             'required' => false,
@@ -168,13 +168,13 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'required' => false,
             'description' => 'Mobile-optimised landing page URL (max 2000 chars)',
         ],
-        // ---- Category ----
+        // Category
         'product_type' => [
             'label' => 'Product Type',
             'required' => false,
             'description' => 'Your own product categorisation (max 750 chars; full path recommended)',
         ],
-        // ---- Apparel / variant attributes ----
+        // Apparel / variant attributes
         'color' => [
             'label' => 'Color',
             'required' => false,
@@ -225,7 +225,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'required' => false,
             'description' => 'Parent product name for the variant group (max 150 chars)',
         ],
-        // ---- Multipack / bundle ----
+        // Multipack / bundle
         'multipack' => [
             'label' => 'Multipack',
             'required' => false,
@@ -236,7 +236,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'required' => false,
             'description' => 'yes / no — is this a merchant-defined bundle; required in some regions',
         ],
-        // ---- Physical dimensions ----
+        // Physical dimensions
         'product_length' => [
             'label' => 'Product Length',
             'required' => false,
@@ -257,7 +257,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'required' => false,
             'description' => 'Product mass (number + unit lb/oz/g/kg, 0–2000)',
         ],
-        // ---- Rich product detail ----
+        // Rich product detail
         'product_detail' => [
             'label' => 'Product Detail',
             'required' => false,
@@ -283,7 +283,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'required' => false,
             'description' => 'Product Q&A pairs (max 30 pairs, max 1000 chars each)',
         ],
-        // ---- Shipping & tax ----
+        // Shipping & tax
         'shipping' => [
             'label' => 'Shipping',
             'required' => false,
@@ -314,7 +314,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'required' => false,
             'description' => 'Tax rate information',
         ],
-        // ---- Energy labels (CH/NO/UK) ----
+        // Energy labels (CH/NO/UK)
         'energy_efficiency_class' => [
             'label' => 'Energy Efficiency Class',
             'required' => false,
@@ -330,7 +330,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'required' => false,
             'description' => 'Maximum energy class on the scale',
         ],
-        // ---- Campaign / promotion ----
+        // Campaign / promotion
         'promotion_id' => [
             'label' => 'Promotion ID',
             'required' => false,
@@ -369,7 +369,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
     ];
 
     protected array $_defaultMappings = [
-        // ---- Required ----
+        // Required
         'id' => [
             'source_type' => 'attribute',
             'source_value' => 'sku',
@@ -403,7 +403,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         ],
         'google_product_category' => ['source_type' => 'taxonomy', 'source_value' => 'google', 'use_parent' => 'if_empty'],
 
-        // ---- Identifiers ----
+        // Identifiers
         'gtin' => [
             'source_type' => 'attribute',
             'source_value' => 'gtin',
@@ -422,11 +422,11 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'transformers' => 'conditional:condition_field=gtin,operator=empty,true_value=no,false_value=yes',
         ],
 
-        // ---- Condition & state ----
+        // Condition & state
         'condition' => ['source_type' => 'static', 'source_value' => 'new'],
         'adult' => ['source_type' => 'static', 'source_value' => ''],
 
-        // ---- Pricing ----
+        // Pricing
         'sale_price' => ['source_type' => 'attribute', 'source_value' => 'special_price'],
         // Rolling now / +90 days range. Swap source to special_to_date if
         // the catalog has real per-product sale-end dates.
@@ -442,7 +442,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         'auto_pricing_min_price' => ['source_type' => 'static', 'source_value' => ''],
         'availability_date' => ['source_type' => 'static', 'source_value' => ''],
 
-        // ---- Imagery & media ----
+        // Imagery & media
         'additional_image_link' => [
             'source_type' => 'attribute',
             'source_value' => 'additional_images_csv',
@@ -461,7 +461,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'transformers' => 'truncate:max_length=2000',
         ],
 
-        // ---- Category ----
+        // Category
         'product_type' => [
             'source_type' => 'attribute',
             'source_value' => 'category_path',
@@ -469,7 +469,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'transformers' => 'truncate:max_length=750',
         ],
 
-        // ---- Apparel / variant ----
+        // Apparel / variant
         'color' => [
             'source_type' => 'attribute',
             'source_value' => 'color',
@@ -507,17 +507,17 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'transformers' => 'truncate:max_length=150',
         ],
 
-        // ---- Multipack / bundle ----
+        // Multipack / bundle
         'multipack' => ['source_type' => 'static', 'source_value' => ''],
         'is_bundle' => ['source_type' => 'static', 'source_value' => ''],
 
-        // ---- Physical dimensions ----
+        // Physical dimensions
         'product_length' => ['source_type' => 'static', 'source_value' => ''],
         'product_width' => ['source_type' => 'static', 'source_value' => ''],
         'product_height' => ['source_type' => 'static', 'source_value' => ''],
         'product_weight' => ['source_type' => 'attribute', 'source_value' => 'weight'],
 
-        // ---- Rich product detail ----
+        // Rich product detail
         'product_detail' => ['source_type' => 'static', 'source_value' => ''],
         'product_highlight' => [
             'source_type' => 'static',
@@ -528,7 +528,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         'related_product' => ['source_type' => 'static', 'source_value' => ''],
         'question_and_answer' => ['source_type' => 'static', 'source_value' => ''],
 
-        // ---- Shipping & tax ----
+        // Shipping & tax
         'shipping' => ['source_type' => 'static', 'source_value' => ''],
         'shipping_weight' => ['source_type' => 'attribute', 'source_value' => 'weight'],
         'shipping_length' => ['source_type' => 'static', 'source_value' => ''],
@@ -536,12 +536,12 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         'shipping_height' => ['source_type' => 'static', 'source_value' => ''],
         'tax' => ['source_type' => 'static', 'source_value' => ''],
 
-        // ---- Energy labels ----
+        // Energy labels
         'energy_efficiency_class' => ['source_type' => 'static', 'source_value' => ''],
         'min_energy_efficiency_class' => ['source_type' => 'static', 'source_value' => ''],
         'max_energy_efficiency_class' => ['source_type' => 'static', 'source_value' => ''],
 
-        // ---- Campaign / promotion ----
+        // Campaign / promotion
         'promotion_id' => [
             'source_type' => 'static',
             'source_value' => '',
