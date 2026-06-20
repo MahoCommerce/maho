@@ -129,7 +129,7 @@ it('detects multiple statements while ignoring literals, identifiers, and commen
         ->and(dbQueryReflect('containsMultipleStatements', 'SELECT "x;y"'))->toBeFalse()
         ->and(dbQueryReflect('containsMultipleStatements', 'SELECT `a;b`'))->toBeFalse()
         ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1 /* ; */ , 2'))->toBeFalse()
-        ->and(dbQueryReflect('containsMultipleStatements', "UPDATE a SET x=1; UPDATE b SET y=2"))->toBeTrue();
+        ->and(dbQueryReflect('containsMultipleStatements', 'UPDATE a SET x=1; UPDATE b SET y=2'))->toBeTrue();
 });
 
 it('maps each engine to its client binary name', function () {
