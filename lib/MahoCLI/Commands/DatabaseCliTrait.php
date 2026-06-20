@@ -32,6 +32,35 @@ trait DatabaseCliTrait
         return 'mysql';
     }
 
+    /**
+     * Map a database engine to the name of its interactive CLI client binary.
+     * Returns an empty string for engines that have no known client.
+     */
+    private function clientBinaryForEngine(string $engine): string
+    {
+        return match ($engine) {
+            'mysql' => 'mysql',
+            'pgsql' => 'psql',
+            'sqlite' => 'sqlite3',
+            default => '',
+        };
+    }
+
+    /**
+     * Whether the native CLI client for the given engine is available on PATH.
+     */
+    private function isClientBinaryAvailable(string $engine): bool
+    {
+        $binary = $this->clientBinaryForEngine($engine);
+        if ($binary === '') {
+            return false;
+        }
+
+        $resolved = shell_exec(sprintf('command -v %s 2>/dev/null', escapeshellarg($binary)));
+
+        return is_string($resolved) && trim($resolved) !== '';
+    }
+
     private function createTempMySQLConfig(
         #[\SensitiveParameter]
         string $host,
