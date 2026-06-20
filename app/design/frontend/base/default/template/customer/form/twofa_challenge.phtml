@@ -1,0 +1,35 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/** @var Mage_Core_Block_Template $this */
+?>
+<div class="page-title">
+    <h1><?= $this->__('Two-Factor Authentication') ?></h1>
+</div>
+<?= $this->getMessagesBlock()->toHtml() ?>
+<form action="<?= $this->getUrl('customer/account/twofaChallengePost') ?>" method="post" autocomplete="off" id="twofa-challenge-form" class="scaffold-form">
+    <?= $this->getBlockHtml('formkey') ?>
+    <div class="fieldset">
+        <h2 class="legend"><?= $this->__('Two-Factor Authentication') ?></h2>
+        <p><?= $this->__('Enter the 6-digit code from your authenticator app to finish signing in.') ?></p>
+        <p class="required"><?= $this->__('* Required Fields') ?></p>
+        <ul class="form-list">
+            <li>
+                <label for="twofa_verification_code" class="required"><?= $this->__('Verification Code') ?></label>
+                <div class="input-box">
+                    <input type="text" name="twofa_verification_code" id="twofa_verification_code" title="<?= $this->quoteEscape($this->__('Verification Code')) ?>" class="input-text required-entry validate-number" autocomplete="one-time-code">
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="buttons-set">
+        <button type="submit" class="button" title="<?= $this->quoteEscape($this->__('Sign In')) ?>"><span><?= $this->__('Sign In') ?></span></button>
+    </div>
+</form>
+<script>
+    new VarienForm('twofa-challenge-form', true);
+</script>

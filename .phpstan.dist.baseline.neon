@@ -13150,48 +13150,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Translate/Expr.php
 
 		-
-			rawMessage: 'Method Mage_Core_Model_Translate_Inline::_insertInlineScriptsHtml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Translate/Inline.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Translate_Inline::_otherText() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Translate/Inline.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Translate_Inline::_prepareTagAttributesForContent() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Translate/Inline.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Translate_Inline::_specialTags() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Translate/Inline.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Translate_Inline::_tagAttributes() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Translate/Inline.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Translate_Inline::_translateTags() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Translate/Inline.php
-
-		-
-			rawMessage: 'Parameter #3 $storeId of method Mage_Core_Model_Resource_Translate_String::deleteTranslate() expects int|null, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Translate/Inline.php
-
-		-
 			rawMessage: 'Method Mage_Core_Model_Url_Rewrite::setTags() invoked with 2 parameters, 1 required.'
 			identifier: arguments.count
 			count: 1

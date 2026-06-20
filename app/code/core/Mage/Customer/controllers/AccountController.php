@@ -53,6 +53,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         $openActions = [
             'create',
             'login',
+            'prelogin',
             'logoutsuccess',
             'forgotpassword',
             'forgotpasswordpost',
@@ -63,6 +64,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             'confirmation',
             'magiclinkrequestpost',
             'magiclinklogin',
+            'twofachallenge',
         ];
         $pattern = '/^(' . implode('|', $openActions) . ')/i';
 
@@ -145,8 +147,9 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             $login = $this->getRequest()->getPost('login');
             if (!empty($login['username']) && !empty($login['password'])) {
                 try {
+                    $twofaCode = $login['twofa_verification_code'] ?? null;
                     $session->setRememberMe((bool) $this->getRequest()->getPost('remember_me'))
-                            ->login($login['username'], $login['password']);
+                            ->login($login['username'], $login['password'], $twofaCode);
                     if ($session->getCustomer()->getIsJustConfirmed()) {
                         $this->_welcomeCustomer($session->getCustomer(), true);
                     }
@@ -175,6 +178,33 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         }
 
         $this->_loginPostRedirect();
+    }
+
+    /**
+     * Detect whether 2FA is required before completing the login
+     */
+    #[Maho\Config\Route('/customer/account/prelogin', name: 'customer.account.prelogin', methods: ['POST'])]
+    public function preloginAction(): void
+    {
+        $result = [];
+
+        $session = $this->_getSession();
+        if (!$session->isLoggedIn()
+            && $this->_validateFormKey()
+            && Mage::getStoreConfigFlag('customer/password/allow_2fa')
+        ) {
+            $login = $this->getRequest()->getPost('login');
+            $username = $login['username'] ?? '';
+            $password = $login['password'] ?? '';
+
+            $session->prelogin($username, $password);
+            if ($session->getRequireTwofa()) {
+                $result['require_twofa'] = true;
+                $session->unsRequireTwofa();
+            }
+        }
+
+        $this->getResponse()->setBodyJson($result);
     }
 
     /**
@@ -629,6 +659,13 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                     throw new Exception($this->__('Failed to confirm customer account.'));
                 }
 
+                // Customers who opted into 2FA must clear it before the session is logged in
+                if ($session->shouldChallengeTwofa($customer)) {
+                    $session->startTwofaChallenge($customer);
+                    $this->_redirect('*/*/twofaChallenge');
+                    return;
+                }
+
                 // log in and send greeting email, then die happy
                 $session->setCustomerAsLoggedIn($customer);
                 $successUrl = $this->_welcomeCustomer($customer, true);
@@ -1015,12 +1052,19 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 throw new Exception($this->__('This account is not active.'));
             }
 
-            // Login customer
-            $this->_getSession()->setCustomerAsLoggedIn($customer);
-
-            // Clear the token (one-time use)
+            // Token consumed: identity is proven, so clear it now regardless of the 2FA outcome
             $customer->clearMagicLinkToken();
             $customer->save();
+
+            // Customers who opted into 2FA must still clear it before the session is logged in
+            if ($this->_getSession()->shouldChallengeTwofa($customer)) {
+                $this->_getSession()->startTwofaChallenge($customer);
+                $this->_redirect('*/*/twofaChallenge');
+                return;
+            }
+
+            // Login customer
+            $this->_getSession()->setCustomerAsLoggedIn($customer);
 
             $this->_getSession()->addSuccess($this->__('You have been successfully logged in.'));
 
@@ -1217,6 +1261,122 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         }
 
         $this->_redirect('*/*/edit');
+    }
+
+    /**
+     * Two-factor authentication management page
+     */
+    #[Maho\Config\Route('/customer/account/twofa', name: 'customer.account.twofa', methods: ['GET'])]
+    public function twofaAction(): void
+    {
+        if (!Mage::getStoreConfigFlag('customer/password/allow_2fa')) {
+            $this->norouteAction();
+            return;
+        }
+
+        $this->loadLayout();
+        $this->_initLayoutMessages('customer/session');
+
+        $this->getLayout()->getBlock('head')->setTitle($this->__('Two-Factor Authentication'));
+        $this->renderLayout();
+    }
+
+    /**
+     * Enable or disable two-factor authentication for the current customer
+     */
+    #[Maho\Config\Route('/customer/account/twofaPost', name: 'customer.account.twofaPost', methods: ['POST'])]
+    public function twofaPostAction(): void
+    {
+        if (!$this->_validateFormKey()) {
+            $this->_redirect('*/*/twofa');
+            return;
+        }
+
+        if (!Mage::getStoreConfigFlag('customer/password/allow_2fa')) {
+            $this->norouteAction();
+            return;
+        }
+
+        $session = $this->_getSession();
+        $customer = $session->getCustomer();
+
+        try {
+            // Dedicated confirmation step: re-verify the current password
+            if (!$customer->validatePassword((string) $this->getRequest()->getPost('current_password'))) {
+                Mage::throwException($this->__('Invalid current password'));
+            }
+
+            $action = $this->getRequest()->getPost('action');
+            if ($action === 'disable') {
+                if (Mage::getStoreConfigFlag('customer/password/require_2fa')) {
+                    Mage::throwException($this->__('Two-factor authentication is required and cannot be disabled.'));
+                }
+                $customer->setTwofaEnabled(false)
+                    ->setTwofaSecret(null)
+                    ->save();
+                $session->addSuccess($this->__('Two-factor authentication has been disabled.'));
+            } else {
+                $code = (string) $this->getRequest()->getPost('twofa_verification_code');
+                if (!Mage::helper('core/security')->verifyTotpCode($customer->getTwofaSecret() ?? '', $code)) {
+                    Mage::throwException($this->__('Invalid 2FA verification code'));
+                }
+                $customer->setTwofaEnabled(true)->save();
+                $session->addSuccess($this->__('Two-factor authentication has been enabled.'));
+            }
+        } catch (Mage_Core_Exception $e) {
+            $session->addError($e->getMessage());
+        } catch (Exception $e) {
+            $session->addException($e, $this->__('An error occurred while updating two-factor authentication.'));
+        }
+
+        $this->_redirect('*/*/twofa');
+    }
+
+    /**
+     * Prompt for the 2FA code after a passwordless login (magic link, account confirmation)
+     */
+    #[Maho\Config\Route('/customer/account/twofaChallenge', name: 'customer.account.twofaChallenge', methods: ['GET'])]
+    public function twofaChallengeAction(): void
+    {
+        $session = $this->_getSession();
+        if ($session->isLoggedIn() || !$session->getTwofaPendingCustomer()) {
+            $this->_redirect('*/*/login');
+            return;
+        }
+
+        $this->loadLayout();
+        $this->_initLayoutMessages('customer/session');
+
+        $this->getLayout()->getBlock('head')->setTitle($this->__('Two-Factor Authentication'));
+        $this->renderLayout();
+    }
+
+    /**
+     * Verify the 2FA code and complete a pending passwordless login
+     */
+    #[Maho\Config\Route('/customer/account/twofaChallengePost', name: 'customer.account.twofaChallengePost', methods: ['POST'])]
+    public function twofaChallengePostAction(): void
+    {
+        if (!$this->_validateFormKey()) {
+            $this->_redirect('*/*/twofaChallenge');
+            return;
+        }
+
+        $session = $this->_getSession();
+        if ($session->isLoggedIn() || !$session->getTwofaPendingCustomer()) {
+            $this->_redirect('*/*/login');
+            return;
+        }
+
+        $code = (string) $this->getRequest()->getPost('twofa_verification_code');
+        if ($session->completeTwofaChallenge($code)) {
+            $session->addSuccess($this->__('You have been successfully logged in.'));
+            $this->_loginPostRedirect();
+            return;
+        }
+
+        $session->addError($this->__('2FA verification code is invalid.'));
+        $this->_redirect('*/*/twofaChallenge');
     }
 
     /**

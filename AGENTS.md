@@ -305,6 +305,53 @@ it('can process customer orders', function () {
 - Validate/sanitize user input at the model layer
 - Doctrine DBAL parameterized queries are automatic
 
+### Rate limiting & honeypot (shared `core` helper)
+
+Throttle public endpoints and trap bots with the shared `Mage_Core_Helper_Data` factories, do
+not roll a per-feature limiter. They hand back a `\Maho\Security\RateLimiter` (sliding window of
+`$maxAttempts` hits per `$windowSeconds`). **Core owns request identity**: callers never read the
+client IP or session id themselves, they name a scope and core resolves it. A non-positive
+`$maxAttempts` disables a limiter (no call-site `if ($limit <= 0)` guard needed).
+
+```php
+use Maho\Security\RateLimitScope;
+
+// Scope by request client (core resolves the identity). Default scope is Client = IP, falling
+// back to session id when the IP is unknown. Other scopes: RateLimitScope::Ip, ::Session.
+$limiter = Mage::helper('core')->rateLimiter('myfeature', 5, 3600);   // namespace, max, window
+if (!$limiter->attempt()) {            // check-and-record; false = blocked
+    // blocked, surface your own message (AJAX/API stay silent)
+}
+
+// Scope by a value you already hold (email, store id, order ref), not request identity.
+if (!Mage::helper('core')->rateLimiterBy('myfeature_email', $email, 1, 86400)->attempt()) {
+    // blocked
+}
+
+// Check up front, record only on failure (see Mage_Sales_Helper_Guest). ipRateLimiter() is the
+// store-config-governed IP limiter (system/rate_limit/*); null when disabled or IP unknown.
+$limiter = Mage::helper('core')->ipRateLimiter();
+if ($limiter?->tooManyAttempts()) { /* blocked: present "Too Soon" */ }
+// ...later, on a failed attempt only:
+$limiter?->hit();
+```
+
+`attempt()` is check-and-record; `tooManyAttempts()` is a pure read; `hit()` records explicitly.
+`remaining()` and `clear()` round out the object. Counters are cache-backed (tag
+`\Maho\Security\RateLimiter::CACHE_TAG`), so a full cache flush resets every window. Keep
+must-persist security counters (e.g. forgot-password) on durable storage instead.
+
+```php
+// Honeypot: render a visually-hidden trap field, then check it server-side. The field name is
+// install-specific. The on/off toggle is the caller's concern: gate both the render and the
+// check behind your module's own default-on `*/honeypot_enabled` flag.
+echo Mage::helper('core')->getHoneypotFieldHtml();               // in the template (ready-to-echo markup)
+if (Mage::getStoreConfigFlag('mymodule/abuse/honeypot_enabled')
+    && Mage::helper('core')->isHoneypotTriggered($request->getPost())) {
+    // silently drop (works for $request->getPost() and decoded API bodies alike)
+}
+```
+
 ## Git Commit Rules
 - **NEVER** include "Co-Authored-By: Claude" or any AI attribution in commits
 - **NEVER** mention Claude, AI, or assistant in commit messages

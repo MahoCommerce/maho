@@ -20,6 +20,10 @@
                     <?= $this->escapeHtml($this->getCustomer()->getName()) ?><br>
                     <?= $this->escapeHtml($this->getCustomer()->getEmail()) ?><br>
                     <a href="<?= $this->getChangePasswordUrl() ?>"><?= $this->__('Change Password') ?></a>
+                    <?php if ($this->isTwofaAllowed()): ?>
+                    <br>
+                    <a href="<?= $this->getTwofaUrl() ?>"><?= $this->__('Two-Factor Authentication') ?></a>
+                    <?php endif ?>
                 </p>
             </div>
         </div>

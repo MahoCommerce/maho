@@ -130,7 +130,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         $layout->generateXml();
         $layout->generateBlocks();
         $output = $layout->getOutput();
-        Mage::getSingleton('core/translate_inline')->processResponseBody($output);
         return $output;
     }
 

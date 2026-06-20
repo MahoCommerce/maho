@@ -105,6 +105,7 @@ SPDX-License-Identifier: OSL-3.0
                 <identity>general</identity>
             </email>
             <abuse>
+                <honeypot_enabled>1</honeypot_enabled>
                 <min_submit_seconds>3</min_submit_seconds>
                 <ip_rate_limit_per_hour>5</ip_rate_limit_per_hour>
                 <recipient_rate_limit_per_day>1</recipient_rate_limit_per_day>

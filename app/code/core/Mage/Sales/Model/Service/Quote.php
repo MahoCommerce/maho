@@ -250,6 +250,16 @@ class Mage_Sales_Model_Service_Quote
     }
 
     /**
+     * Public entry point to validate the quote without submitting it.
+     * Lets callers (e.g. PayPal) verify the quote is placeable before
+     * taking an irreversible action such as capturing payment.
+     */
+    public function validate(): self
+    {
+        return $this->_validate();
+    }
+
+    /**
      * Validate quote data before converting to order
      *
      * @return $this

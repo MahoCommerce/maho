@@ -12,6 +12,7 @@
 <form id="edit_form" method="post" action="<?= $this->getSaveUrl() ?>">
     <?= $this->getBlockHtml('formkey') ?>
     <?php $_order = $this->getInvoice()->getOrder() ?>
+    <div class="order-information">
     <?= $this->getChildHtml('order_info') ?>
     <?php if (!$_order->getIsVirtual()): ?>
     <div class="box-left">
@@ -76,6 +77,7 @@
     </div>
     <div id="invoice_item_container">
           <?= $this->getChildHtml('order_items') ?>
+    </div>
     </div>
 </form>
 <script>

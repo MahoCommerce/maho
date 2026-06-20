@@ -232,27 +232,4 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
         return $a['sort_order'] <=> $b['sort_order'];
     }
 
-    /**
-     * Before get PDF
-     *
-     * @return void
-     */
-    protected function _beforeGetPdf()
-    {
-        $translate = Mage::getSingleton('core/translate');
-        /** @var Mage_Core_Model_Translate $translate */
-        $translate->setTranslateInline(false);
-    }
-
-    /**
-     * After get PDF
-     *
-     * @return void
-     */
-    protected function _afterGetPdf()
-    {
-        $translate = Mage::getSingleton('core/translate');
-        /** @var Mage_Core_Model_Translate $translate */
-        $translate->setTranslateInline(true);
-    }
 }

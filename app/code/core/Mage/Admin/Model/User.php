@@ -439,7 +439,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
             if ($needsTwofa && $this->getTwofaEnabled()) {
                 $secret = $this->getTwofaSecret();
-                if (!Mage::helper('admin/auth')->verifyTwofaCode($secret, $twofaVerificationCode ?? '')) {
+                if (!Mage::helper('core/security')->verifyTotpCode($secret, $twofaVerificationCode ?? '')) {
                     throw new Mage_Core_Exception(
                         Mage::helper('adminhtml')->__('2FA verification code is invalid.'),
                         self::AUTH_ERR_2FA_INVALID,

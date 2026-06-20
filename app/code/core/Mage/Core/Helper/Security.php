@@ -42,4 +42,42 @@ class Mage_Core_Helper_Security extends Mage_Core_Helper_Abstract
     {
         $this->ensureBlockMethodAllowed($block, $method, $args);
     }
+
+    /**
+     * Generate a new random TOTP secret.
+     */
+    public function generateTotpSecret(): string
+    {
+        return \OTPHP\TOTP::generate()->getSecret();
+    }
+
+    /**
+     * Build an SVG QR code for the given TOTP secret, ready to be scanned by an authenticator app.
+     */
+    public function getTotpQrCode(#[\SensitiveParameter] string $label, #[\SensitiveParameter] string $secret, ?string $issuer = null): string
+    {
+        $issuer ??= Mage::getStoreConfig('general/store_information/name') ?: 'Maho';
+
+        $otp = \OTPHP\TOTP::createFromSecret($secret)
+            ->withLabel($label)
+            ->withIssuer($issuer)
+            ->withParameter('image', 'https://mahocommerce.com/assets/maho-logo-square.png');
+
+        $qrWriter = new \BaconQrCode\Writer(
+            new \BaconQrCode\Renderer\ImageRenderer(
+                new \BaconQrCode\Renderer\RendererStyle\RendererStyle(300),
+                new \BaconQrCode\Renderer\Image\SvgImageBackEnd(),
+            ),
+        );
+        return $qrWriter->writeString($otp->getProvisioningUri());
+    }
+
+    /**
+     * Verify a 6-digit TOTP code against the given secret.
+     */
+    public function verifyTotpCode(#[\SensitiveParameter] string $secret, #[\SensitiveParameter] string $code): bool
+    {
+        $otp = \OTPHP\TOTP::createFromSecret($secret);
+        return $otp->verify($code);
+    }
 }

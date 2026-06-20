@@ -1,0 +1,73 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/** @var Mage_Customer_Block_Account_Twofa $this */
+?>
+<div class="page-title">
+    <h1><?= $this->__('Two-Factor Authentication') ?></h1>
+</div>
+<?= $this->getMessagesBlock()->toHtml() ?>
+<form action="<?= $this->getFormAction() ?>" method="post" autocomplete="off" id="twofa-form" class="scaffold-form">
+    <?= $this->getBlockHtml('formkey') ?>
+    <?php if ($this->isEnabled()): ?>
+        <div class="fieldset">
+            <h2 class="legend"><?= $this->__('Two-Factor Authentication') ?></h2>
+            <p><?= $this->__('Two-factor authentication is currently <strong>enabled</strong> on your account.') ?></p>
+            <?php if ($this->isRequired()): ?>
+                <p><?= $this->__('Two-factor authentication is required by the store and cannot be disabled.') ?></p>
+            <?php endif ?>
+            <?php if (!$this->isRequired()): ?>
+                <input type="hidden" name="action" value="disable">
+                <p class="required"><?= $this->__('* Required Fields') ?></p>
+                <ul class="form-list">
+                    <li>
+                        <label for="current_password" class="required"><?= $this->__('Current Password') ?></label>
+                        <div class="input-box">
+                            <input type="password" name="current_password" id="current_password" title="<?= $this->quoteEscape($this->__('Current Password')) ?>" class="input-text required-entry" autocomplete="current-password">
+                        </div>
+                    </li>
+                </ul>
+            <?php endif ?>
+        </div>
+        <?php if (!$this->isRequired()): ?>
+        <div class="buttons-set">
+            <button type="submit" class="button" title="<?= $this->quoteEscape($this->__('Disable 2FA')) ?>"><span><?= $this->__('Disable 2FA') ?></span></button>
+        </div>
+        <?php endif ?>
+    <?php else: ?>
+        <input type="hidden" name="action" value="enable">
+        <div class="fieldset">
+            <h2 class="legend"><?= $this->__('Enable Two-Factor Authentication') ?></h2>
+            <?php if ($this->isRequired()): ?>
+                <p><?= $this->__('Two-factor authentication is required by the store. Please set it up to continue using your account.') ?></p>
+            <?php endif ?>
+            <p><?= $this->__('Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.), then enter the 6-digit code below to enable two-factor authentication.') ?></p>
+            <div class="twofa-qr-code"><?= $this->getQrCode() ?></div>
+            <p class="required"><?= $this->__('* Required Fields') ?></p>
+            <ul class="form-list">
+                <li>
+                    <label for="twofa_verification_code" class="required"><?= $this->__('Verification Code') ?></label>
+                    <div class="input-box">
+                        <input type="text" name="twofa_verification_code" id="twofa_verification_code" title="<?= $this->quoteEscape($this->__('Verification Code')) ?>" class="input-text required-entry validate-number" autocomplete="one-time-code">
+                    </div>
+                </li>
+                <li>
+                    <label for="current_password" class="required"><?= $this->__('Current Password') ?></label>
+                    <div class="input-box">
+                        <input type="password" name="current_password" id="current_password" title="<?= $this->quoteEscape($this->__('Current Password')) ?>" class="input-text required-entry" autocomplete="current-password">
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="buttons-set">
+            <button type="submit" class="button" title="<?= $this->quoteEscape($this->__('Enable 2FA')) ?>"><span><?= $this->__('Enable 2FA') ?></span></button>
+        </div>
+    <?php endif ?>
+</form>
+<script>
+    new VarienForm('twofa-form', true);
+</script>
