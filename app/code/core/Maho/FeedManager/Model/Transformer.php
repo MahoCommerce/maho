@@ -288,8 +288,8 @@ class Maho_FeedManager_Model_Transformer
                 foreach ($optPairs as $pair) {
                     $kv = explode('=', $pair, 2);
                     if (count($kv) === 2) {
-                        // Preserve whitespace in the value — eg append=" kg" needs the space.
-                        $options[trim($kv[0])] = $kv[1];
+                        $key = trim($kv[0]);
+                        $options[$key] = self::_trimOptionValue($code, $key, $kv[1]);
                     }
                 }
             }
@@ -301,6 +301,21 @@ class Maho_FeedManager_Model_Transformer
         }
 
         return $chain;
+    }
+
+    /**
+     * Direction-aware trim — preserves the inside edge for prepend_append.prepend/append
+     * (where whitespace is the gap between affix and value); full trim everywhere else.
+     */
+    protected static function _trimOptionValue(string $code, string $key, string $raw): string
+    {
+        if ($code === 'prepend_append' && $key === 'prepend') {
+            return ltrim($raw);
+        }
+        if ($code === 'prepend_append' && $key === 'append') {
+            return rtrim($raw);
+        }
+        return trim($raw);
     }
 
     /**
