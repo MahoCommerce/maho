@@ -281,6 +281,17 @@
 .xml-node.selected {
   background: var(--maho-success-bg);
 }
+/* SortableJS drag states for the XML structure tree */
+.xml-node-ghost {
+  opacity: 0.4;
+  background: var(--maho-surface-sunken, #f5f5f5);
+}
+.xml-node-chosen {
+  background: var(--maho-info-bg);
+}
+.xml-node-dragging {
+  opacity: 0.8;
+}
 .json-key,
 .xml-tag {
   font-weight: 600;
