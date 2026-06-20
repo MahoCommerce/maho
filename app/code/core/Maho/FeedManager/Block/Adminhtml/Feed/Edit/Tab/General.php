@@ -361,15 +361,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (platformField) platformField.value = platform;
         if (formatField) {
             formatField.value = format;
-            // Notify the mapping tab so the matching builder fieldset reveals itself
             formatField.dispatchEvent(new Event('change'));
         }
 
-        // When the user actively switches Feed Template to a real platform,
-        // also push that platform's preset into the matching builder so the
-        // structure tree reflects the choice immediately. Skip 'custom' (no
-        // preset to load) and skip on initial page load (loadBuilderPreset
-        // would clobber an existing feed's saved structure).
+        // Push the platform preset on a user-driven change only; skip on init
+        // so existing feeds keep their saved structure.
         if (loadBuilderPreset && platform !== 'custom') {
             if (format === 'xml' && typeof XmlBuilder !== 'undefined' && typeof XmlBuilder.loadPreset === 'function') {
                 XmlBuilder.loadPreset(platform, { force: true });
@@ -379,14 +375,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // On a fresh feed the template selector renders with its default value
-    // ("Custom XML" = custom:xml) but the hidden file_format field is still
-    // empty, so the format-change listener in feedmanager-mapping.js sees no
-    // matching builder and leaves every fieldset hidden. Sync once on load so
-    // the default selection wires up the format and reveals the right builder
-    // without requiring the user to first pick a different template and come
-    // back. Existing feeds keep their saved file_format because the template
-    // selector's current value already reflects it.
+    // Wire the default template selection to file_format on a fresh feed so
+    // the matching builder fieldset reveals itself without user interaction.
     if (formatField && !formatField.value) {
         syncFromTemplate(false);
     }
