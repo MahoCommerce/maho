@@ -158,7 +158,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 if (oldIndex < 0 || oldIndex >= arr.length || newIndex < 0 || newIndex >= arr.length) return;
                 var moved = arr.splice(oldIndex, 1)[0];
                 arr.splice(newIndex, 0, moved);
-                this.selectedPath = null;
+                // Inputs in the properties panel are bound to now-stale paths after a reorder.
+                this.clearSelection();
                 this.render();
             },
 
@@ -204,6 +205,15 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 this.selectedPath = path;
                 this.render();
                 this.showProperties(path);
+            },
+
+            // Clear the active selection and reset the properties panel; callers re-render.
+            clearSelection: function() {
+                this.selectedPath = null;
+                var panel = document.getElementById("xml-properties-content");
+                if (panel) panel.innerHTML = "<p class=\"fm-status-muted a-center\">' . addslashes($this->__('Select an element to edit its properties')) . '</p>";
+                var childBtn = document.getElementById("xml-add-child-btn");
+                if (childBtn) childBtn.style.display = "none";
             },
 
             showProperties: function(path) {
@@ -377,11 +387,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 var info = this.getParentAndIndex(path);
                 if (info.parent && Array.isArray(info.parent)) {
                     info.parent.splice(info.index, 1);
-                    this.selectedPath = null;
+                    this.clearSelection();
                     this.render();
-                    document.getElementById("xml-properties-content").innerHTML = "<p style=\"color: #666; text-align: center;\">' . addslashes($this->__('Select an element to edit its properties')) . '</p>";
-                    var childBtn = document.getElementById("xml-add-child-btn");
-                    if (childBtn) childBtn.style.display = "none";
                 }
             },
 
@@ -454,11 +461,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                         alert("Error: " + data.message);
                     } else if (data.structure) {
                         self.structure = data.structure;
-                        self.selectedPath = null;
+                        self.clearSelection();
                         self.render();
-                        document.getElementById("xml-properties-content").innerHTML = "<p style=\"color: #666; text-align: center;\">' . addslashes($this->__('Select an element to edit its properties')) . '</p>";
-                        var childBtn = document.getElementById("xml-add-child-btn");
-                        if (childBtn) childBtn.style.display = "none";
                         // Update platform field in General tab
                         self.updatePlatform(data.platform);
                     }
