@@ -63,6 +63,93 @@ trait DatabaseCliTrait
         return (new ExecutableFinder())->find($binary) !== null;
     }
 
+    /**
+     * Whether the SQL string contains more than one statement.
+     */
+    private function containsMultipleStatements(string $sql): bool
+    {
+        return count($this->splitSqlStatements($sql)) > 1;
+    }
+
+    /**
+     * Split a SQL string into individual statements, ignoring semicolons that appear inside
+     * string literals, quoted identifiers, or comments. Empty fragments are dropped.
+     *
+     * @return list<string>
+     */
+    private function splitSqlStatements(string $sql): array
+    {
+        $statements = [];
+        $current = '';
+        $length = strlen($sql);
+        $i = 0;
+
+        while ($i < $length) {
+            $char = $sql[$i];
+            $next = $sql[$i + 1] ?? '';
+
+            // Line comment: "# ..." or "-- ..." (the latter requires whitespace/EOL after --).
+            $dashComment = $char === '-' && $next === '-' && (($i + 2 >= $length) || ctype_space($sql[$i + 2]));
+            if ($char === '#' || $dashComment) {
+                $newline = strpos($sql, "\n", $i);
+                $i = $newline === false ? $length : $newline + 1;
+                continue;
+            }
+
+            // Block comment: /* ... */
+            if ($char === '/' && $next === '*') {
+                $end = strpos($sql, '*/', $i + 2);
+                $i = $end === false ? $length : $end + 2;
+                continue;
+            }
+
+            // Quoted string ('...', "...") or quoted identifier (`...`).
+            if ($char === "'" || $char === '"' || $char === '`') {
+                $current .= $char;
+                $i++;
+                while ($i < $length) {
+                    $c = $sql[$i];
+                    $current .= $c;
+                    // Backslash escape (MySQL string literals; not for backtick identifiers).
+                    if ($c === '\\' && $char !== '`' && $i + 1 < $length) {
+                        $current .= $sql[$i + 1];
+                        $i += 2;
+                        continue;
+                    }
+                    if ($c === $char) {
+                        // A doubled quote is an escaped quote, not a terminator.
+                        if (($sql[$i + 1] ?? '') === $char) {
+                            $current .= $char;
+                            $i += 2;
+                            continue;
+                        }
+                        $i++;
+                        break;
+                    }
+                    $i++;
+                }
+                continue;
+            }
+
+            if ($char === ';') {
+                $statements[] = $current;
+                $current = '';
+                $i++;
+                continue;
+            }
+
+            $current .= $char;
+            $i++;
+        }
+
+        $statements[] = $current;
+
+        return array_values(array_filter(
+            array_map('trim', $statements),
+            static fn(string $statement): bool => $statement !== '',
+        ));
+    }
+
     private function createTempMySQLConfig(
         #[\SensitiveParameter]
         string $host,

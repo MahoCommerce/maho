@@ -91,6 +91,47 @@ it('rejects an unknown --driver value on STDERR', function () {
     expect($tester->getErrorOutput())->toContain('Invalid --driver value');
 });
 
+it('refuses multiple statements on the adapter path instead of running only the first', function () {
+    $tester = dbQueryTester();
+    $tester->execute(
+        ['query' => 'SELECT 1 AS a; SELECT 2 AS b', '--driver' => 'adapter'],
+        ['capture_stderr_separately' => true],
+    );
+
+    expect($tester->getStatusCode())->toBe(Command::INVALID);
+    expect($tester->getErrorOutput())->toContain('Multiple SQL statements');
+});
+
+it('does not treat a semicolon inside a string literal as multiple statements', function () {
+    $tester = dbQueryTester();
+    $tester->execute(['query' => "SELECT 'a;b' AS semi, 1 AS n", '--driver' => 'adapter']);
+
+    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
+    expect($tester->getDisplay())->toContain('a;b');
+});
+
+it('refuses a result set with duplicate column names instead of dropping a column', function () {
+    $tester = dbQueryTester();
+    $tester->execute(
+        ['query' => 'SELECT 1 AS id, 2 AS id', '--driver' => 'adapter'],
+        ['capture_stderr_separately' => true],
+    );
+
+    expect($tester->getStatusCode())->toBe(Command::FAILURE);
+    expect($tester->getErrorOutput())->toContain('duplicate or ambiguous column names');
+});
+
+it('detects multiple statements while ignoring literals, identifiers, and comments', function () {
+    expect(dbQueryReflect('containsMultipleStatements', 'SELECT 1'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1;'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1; SELECT 2'))->toBeTrue()
+        ->and(dbQueryReflect('containsMultipleStatements', "SELECT 'a;b'"))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT "x;y"'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT `a;b`'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', 'SELECT 1 /* ; */ , 2'))->toBeFalse()
+        ->and(dbQueryReflect('containsMultipleStatements', "UPDATE a SET x=1; UPDATE b SET y=2"))->toBeTrue();
+});
+
 it('maps each engine to its client binary name', function () {
     expect(dbQueryReflect('clientBinaryForEngine', 'mysql'))->toBe('mysql')
         ->and(dbQueryReflect('clientBinaryForEngine', 'pgsql'))->toBe('psql')

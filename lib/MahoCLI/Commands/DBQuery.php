@@ -92,6 +92,17 @@ class DBQuery extends BaseMahoCommand
 
     private function executeViaAdapter(OutputInterface $output, string $query): int
     {
+        // query() runs a single statement, so trailing statements in a multi-statement string
+        // would be silently dropped. Refuse them and point to the multi-statement-capable paths.
+        if ($this->containsMultipleStatements($query)) {
+            $this->writeError(
+                $output,
+                'Multiple SQL statements are not supported on the framework connection; '
+                    . 'run them with --driver=client or db:connect.',
+            );
+            return Command::INVALID;
+        }
+
         // Write connection: it can both read and run DML, so a single path serves SELECT and
         // INSERT/UPDATE/DELETE/DDL without choosing a connection per statement type.
         $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
@@ -102,12 +113,13 @@ class DBQuery extends BaseMahoCommand
 
         try {
             $statement = $connection->query($query);
+            $columnCount = $statement->columnCount();
 
             // columnCount() is the reliable discriminator: > 0 means the statement produced a
             // result set (SELECT / SHOW / DESCRIBE / EXPLAIN); 0 means a non-result statement
             // (INSERT / UPDATE / DELETE / DDL). It also avoids fetching from a statement that
             // has no result set.
-            if ($statement->columnCount() === 0) {
+            if ($columnCount === 0) {
                 $output->writeln(sprintf('%d row(s) affected.', $statement->rowCount()));
                 return Command::SUCCESS;
             }
@@ -123,6 +135,17 @@ class DBQuery extends BaseMahoCommand
         if ($rows === []) {
             $output->writeln('Empty result set.');
             return Command::SUCCESS;
+        }
+
+        // Associative fetch collapses duplicate column labels (e.g. SELECT a.id, b.id), which
+        // would silently drop a column. Refuse rather than render a misleading result.
+        if ($columnCount !== count($rows[0])) {
+            $this->writeError(
+                $output,
+                'The result set has duplicate or ambiguous column names; render it with '
+                    . '--driver=client, or alias the columns (e.g. SELECT a.id AS a_id, b.id AS b_id).',
+            );
+            return Command::FAILURE;
         }
 
         $table = new Table($output);
