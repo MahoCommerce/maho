@@ -15,6 +15,9 @@
 </div>
 <form action="<?= $this->getFormAction() ?>" id="contactForm" method="post" class="scaffold-form" autocomplete="off">
     <?= $this->getBlockHtml('formkey') ?>
+    <?php if (Mage::getStoreConfigFlag(Mage_Contacts_IndexController::XML_PATH_HONEYPOT_ENABLED)): ?>
+        <?= Mage::helper('core')->getHoneypotFieldHtml() ?>
+    <?php endif ?>
     <div class="fieldset">
         <ul class="form-list">
             <li class="fields">

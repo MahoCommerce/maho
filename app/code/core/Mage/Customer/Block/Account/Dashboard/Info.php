@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -28,6 +29,19 @@ class Mage_Customer_Block_Account_Dashboard_Info extends Mage_Core_Block_Templat
     public function getChangePasswordUrl()
     {
         return Mage::getUrl('*/account/edit/changepass/1');
+    }
+
+    /**
+     * Whether the two-factor authentication feature is available to customers
+     */
+    public function isTwofaAllowed(): bool
+    {
+        return Mage::getStoreConfigFlag('customer/password/allow_2fa');
+    }
+
+    public function getTwofaUrl(): string
+    {
+        return Mage::getUrl('*/account/twofa');
     }
 
     /**

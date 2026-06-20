@@ -225,13 +225,6 @@ SPDX-License-Identifier: AFL-3.0
             <debug>
                 <profiler>0</profiler>
             </debug>
-            <translate_inline>
-                <active>0</active>
-                <active_admin>0</active_admin>
-                <invalid_caches>
-                    <block_html/>
-                </invalid_caches>
-            </translate_inline>
             <log>
                 <active>0</active>
                 <min_level>100</min_level>

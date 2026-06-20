@@ -203,6 +203,36 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
         }
     }
 
+    /**
+     * Prepare and validate the quote before any payment is captured.
+     *
+     * Imports the PayPal address (assigning a shipping method) when needed,
+     * recollects totals, then runs the same validation order placement will
+     * run. Throws here, before the irreversible capture, when the quote is not
+     * placeable (e.g. missing shipping method), so no money moves for an order
+     * that cannot be created.
+     */
+    public function prepareQuoteForPaypalOrder(
+        Mage_Sales_Model_Quote $quote,
+        array $paypalResult,
+        string $methodCode,
+    ): void {
+        $quote->getPayment()->setMethod($methodCode);
+
+        if (!$quote->getBillingAddress()->getFirstname()) {
+            $this->importPaypalAddress($paypalResult, $quote);
+        }
+
+        // Ensure correct checkout method for sessionless contexts (webhooks)
+        if ($quote->getCustomerId() && !$quote->getData('checkout_method')) {
+            $quote->setData('checkout_method', Mage_Checkout_Model_Type_Onepage::METHOD_CUSTOMER);
+        }
+
+        $quote->collectTotals();
+
+        Mage::getModel('sales/service_quote', $quote)->validate();
+    }
+
     public function saveVaultToken(array $paypalResult, Mage_Sales_Model_Quote $quote): void
     {
         $customerId = $quote->getCustomerId();

@@ -35,10 +35,6 @@ class Mage_Log_Model_Cron extends Mage_Core_Model_Abstract
             return $this;
         }
 
-        $translate = Mage::getSingleton('core/translate');
-        /** @var Mage_Core_Model_Translate $translate */
-        $translate->setTranslateInline(false);
-
         $emailTemplate = Mage::getModel('core/email_template');
         /** @var Mage_Core_Model_Email_Template $emailTemplate */
         $emailTemplate->setDesignConfig(['area' => 'backend'])
@@ -49,8 +45,6 @@ class Mage_Log_Model_Cron extends Mage_Core_Model_Abstract
                 null,
                 ['warnings' => implode("\n", $this->_errors)],
             );
-
-        $translate->setTranslateInline(true);
 
         return $this;
     }

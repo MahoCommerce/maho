@@ -27,6 +27,8 @@ return function (Schema $schema): void {
     $entity->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $entity->addColumn('is_active', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
     $entity->addColumn('disable_auto_group_change', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
+    $entity->addColumn('twofa_enabled', Types::SMALLINT, ['default' => 0]);
+    $entity->addColumn('twofa_secret', Types::STRING, ['length' => 255, 'notnull' => false]);
     $entity->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );

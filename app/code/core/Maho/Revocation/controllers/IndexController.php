@@ -62,7 +62,8 @@ class Maho_Revocation_IndexController extends Mage_Core_Controller_Front_Action
 
         // Honeypot: hidden field humans never see. Bots that fill it get the normal
         // success page so they cannot detect the trap. No row, no email.
-        if (trim((string) $request->getParam('comment_body')) !== '') {
+        if (Mage::getStoreConfigFlag(Maho_Revocation_Helper_Data::XML_PATH_HONEYPOT_ENABLED)
+            && Mage::helper('core')->isHoneypotTriggered($request->getPost())) {
             $this->_fakeSuccess($receivedAt);
             return;
         }
@@ -73,7 +74,7 @@ class Maho_Revocation_IndexController extends Mage_Core_Controller_Front_Action
         }
 
         $ip = (string) Mage::helper('core/http')->getRemoteAddr();
-        if (Mage::helper('revocation')->isIpRateLimited($ip)) {
+        if (Mage::helper('revocation')->isIpRateLimited()) {
             $session->addError($this->__('Your request could not be processed right now. Please try again later or contact us directly.'));
             $this->_redirectUrl(Mage::getUrl('revocation/index/index'));
             return;

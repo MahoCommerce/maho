@@ -11,6 +11,18 @@
 class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Controller_Sales_Shipment
 {
     /**
+     * Controller pre-dispatch method
+     *
+     * @return Mage_Adminhtml_Controller_Action
+     */
+    #[\Override]
+    public function preDispatch()
+    {
+        $this->_setForcedFormKeyActions(['cancel']);
+        return parent::preDispatch();
+    }
+
+    /**
      * Initialize shipment items QTY
      */
     protected function _getItemQtys()
@@ -238,6 +250,25 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
             $this->getResponse()->setBodyJson($responseAjax);
         } else {
             $this->_redirect('*/sales_order/view', ['order_id' => $shipment->getOrderId()]);
+        }
+    }
+
+    #[Maho\Config\Route('/admin/sales_order_shipment/cancel')]
+    public function cancelAction(): void
+    {
+        if ($shipment = $this->_initShipment()) {
+            try {
+                $shipment->cancel();
+                $this->_saveShipment($shipment);
+                $this->_getSession()->addSuccess($this->__('The shipment has been canceled.'));
+            } catch (Mage_Core_Exception $e) {
+                $this->_getSession()->addError($e->getMessage());
+            } catch (Exception $e) {
+                $this->_getSession()->addError($this->__('Cannot cancel the shipment.'));
+            }
+            $this->_redirect('*/*/view', ['shipment_id' => $shipment->getId()]);
+        } else {
+            $this->_forward('noRoute');
         }
     }
 

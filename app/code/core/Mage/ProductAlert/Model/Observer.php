@@ -249,10 +249,6 @@ class Mage_ProductAlert_Model_Observer
                 return $this;
             }
 
-            $translate = Mage::getSingleton('core/translate');
-            /** @var Mage_Core_Model_Translate $translate */
-            $translate->setTranslateInline(false);
-
             $emailTemplate = Mage::getModel('core/email_template');
             /** @var Mage_Core_Model_Email_Template $emailTemplate */
             $emailTemplate->setDesignConfig(['area'  => 'backend'])
@@ -264,7 +260,6 @@ class Mage_ProductAlert_Model_Observer
                     ['warnings' => implode("\n", $this->_errors)],
                 );
 
-            $translate->setTranslateInline(true);
             $this->_errors[] = [];
         }
         return $this;

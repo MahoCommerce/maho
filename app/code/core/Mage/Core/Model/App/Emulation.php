@@ -39,22 +39,15 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
      *
      * @param int $storeId
      * @param string $area
-     * @param bool $emulateStoreInlineTranslation emulate inline translation of the specified store or just disable it
      *
      * @return \Maho\DataObject information about environment of the initial store
      */
     public function startEnvironmentEmulation(
         $storeId,
         $area = Mage_Core_Model_App_Area::AREA_FRONTEND,
-        $emulateStoreInlineTranslation = false,
     ) {
         if (is_null($area)) {
             $area = Mage_Core_Model_App_Area::AREA_FRONTEND;
-        }
-        if ($emulateStoreInlineTranslation) {
-            $initialTranslateInline = $this->_emulateInlineTranslation($storeId, $area);
-        } else {
-            $initialTranslateInline = $this->_emulateInlineTranslation();
         }
         $initialDesign = $this->_emulateDesign($storeId, $area);
         // Current store needs to be changed right before locale change and after design change
@@ -62,8 +55,7 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
         $initialLocaleCode = $this->_emulateLocale($storeId, $area);
 
         $initialEnvironmentInfo = new \Maho\DataObject();
-        $initialEnvironmentInfo->setInitialTranslateInline($initialTranslateInline)
-            ->setInitialDesign($initialDesign)
+        $initialEnvironmentInfo->setInitialDesign($initialDesign)
             ->setInitialLocaleCode($initialLocaleCode);
 
         Mage::app()->getTranslator()->init($area, true);
@@ -82,40 +74,12 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
      */
     public function stopEnvironmentEmulation(\Maho\DataObject $initialEnvironmentInfo)
     {
-        $this->_restoreInitialInlineTranslation($initialEnvironmentInfo->getInitialTranslateInline());
         $initialDesign = $initialEnvironmentInfo->getInitialDesign();
         $this->_restoreInitialDesign($initialDesign);
         // Current store needs to be changed right before locale change and after design change
         $this->_app->setCurrentStore($initialDesign['store']);
         $this->_restoreInitialLocale($initialEnvironmentInfo->getInitialLocaleCode(), $initialDesign['area']);
         return $this;
-    }
-
-    /**
-     * Emulate inline translation of the specified store
-     *
-     * Function disables inline translation if $storeId is null
-     *
-     * @param int|null $storeId
-     * @param string $area
-     *
-     * @return bool initial inline translation state
-     */
-    protected function _emulateInlineTranslation($storeId = null, $area = Mage_Core_Model_App_Area::AREA_FRONTEND)
-    {
-        if (is_null($storeId)) {
-            $newTranslateInline = false;
-        } else {
-            if ($area == Mage_Core_Model_App_Area::AREA_ADMINHTML) {
-                $newTranslateInline = Mage::getStoreConfigFlag('dev/translate_inline/active_admin', $storeId);
-            } else {
-                $newTranslateInline = Mage::getStoreConfigFlag('dev/translate_inline/active', $storeId);
-            }
-        }
-        $translateModel = Mage::getSingleton('core/translate');
-        $initialTranslateInline = $translateModel->getTranslateInline();
-        $translateModel->setTranslateInline($newTranslateInline);
-        return $initialTranslateInline;
     }
 
     /**
@@ -167,20 +131,6 @@ class Mage_Core_Model_App_Emulation extends \Maho\DataObject
     protected function _getStoreConfig($path, $store = null)
     {
         return Mage::getStoreConfig($path, $store);
-    }
-
-    /**
-     * Restore initial inline translation state
-     *
-     * @param bool $initialTranslateInline
-     *
-     * @return $this
-     */
-    protected function _restoreInitialInlineTranslation($initialTranslateInline)
-    {
-        $translateModel = Mage::getSingleton('core/translate');
-        $translateModel->setTranslateInline($initialTranslateInline);
-        return $this;
     }
 
     /**

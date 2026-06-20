@@ -12,6 +12,7 @@
 <form id="edit_form" method="post" action="<?= $this->getSaveUrl() ?>">
     <?= $this->getBlockHtml('formkey') ?>
     <?php  $_order = $this->getShipment()->getOrder() ?>
+    <div class="order-information">
     <?= $this->getChildHtml('order_info') ?>
 
 
@@ -63,6 +64,7 @@
     </div>
     <div id="ship_items_container">
             <?= $this->getItemsHtml() ?>
+    </div>
     </div>
 </form>
 <?= $this->getChildHtml('shipment_packaging') ?>

@@ -3,7 +3,24 @@
 // SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 // SPDX-License-Identifier: AFL-3.0
 function setLocation(url){
-    window.location.href = encodeURI(url);
+    window.location.href = addAdminFormKey(url);
+}
+
+// Append the admin form key to same-origin navigations so state-changing GET
+// actions guarded by _setForcedFormKeyActions() pass server-side CSRF validation.
+function addAdminFormKey(url){
+    if (typeof FORM_KEY === 'undefined' || !FORM_KEY) {
+        return encodeURI(url);
+    }
+    try {
+        const target = new URL(url, window.location.href);
+        if (target.origin === window.location.origin && !target.searchParams.has('form_key')) {
+            target.searchParams.set('form_key', FORM_KEY);
+        }
+        return target.href;
+    } catch (e) {
+        return encodeURI(url);
+    }
 }
 
 function confirmSetLocation(message, url){

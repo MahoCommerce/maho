@@ -68,6 +68,52 @@ class Mage_Customer_Model_Observer
     }
 
     /**
+     * Force customers to enroll in 2FA before using their account when it is mandatory.
+     */
+    #[Maho\Config\Observer('controller_action_predispatch', area: 'frontend')]
+    public function enforceMandatoryTwofa(\Maho\Event\Observer $observer): void
+    {
+        if (!Mage::getStoreConfigFlag('customer/password/allow_2fa')
+            || !Mage::getStoreConfigFlag('customer/password/require_2fa')
+        ) {
+            return;
+        }
+
+        /** @var Mage_Customer_Model_Session $session */
+        $session = Mage::getSingleton('customer/session');
+        if (!$session->isLoggedIn() || $session->getCustomer()->getTwofaEnabled()) {
+            return;
+        }
+
+        /** @var Mage_Core_Controller_Front_Action $action */
+        $action = $observer->getControllerAction();
+        $request = $action->getRequest();
+
+        // Only gate the sensitive surfaces (account management and checkout); browsing the
+        // catalog, CMS pages, etc. carries no risk and blocking it just punishes the customer.
+        $gatedRoutes = ['customer', 'checkout'];
+        if (!in_array(strtolower((string) $request->getRouteName()), $gatedRoutes, true)) {
+            return;
+        }
+
+        // Within the gated routes, still allow the enrollment page itself, its POST handler and logging out
+        $current = strtolower($request->getRouteName() . '/' . $request->getControllerName() . '/' . $request->getActionName());
+        $allowed = [
+            'customer/account/twofa',
+            'customer/account/twofapost',
+            'customer/account/logout',
+            'customer/account/logoutsuccess',
+        ];
+        if (in_array($current, $allowed, true)) {
+            return;
+        }
+
+        $session->addNotice(Mage::helper('customer')->__('Two-factor authentication is required. Please set it up to continue.'));
+        $action->setFlag('', Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH, true);
+        $action->getResponse()->setRedirect(Mage::getUrl('customer/account/twofa'));
+    }
+
+    /**
      * Before load layout event handler
      *
      * @param \Maho\Event\Observer $observer

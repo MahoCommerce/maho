@@ -363,7 +363,6 @@ abstract class Mage_Core_Controller_Varien_Action
         $this->getLayout()->setDirectOutput(false);
 
         $output = $this->getLayout()->getOutput();
-        Mage::getSingleton('core/translate_inline')->processResponseBody($output);
         $this->getResponse()->appendBody($output);
         \Maho\Profiler::stop("$profilerKey::layout_render");
 

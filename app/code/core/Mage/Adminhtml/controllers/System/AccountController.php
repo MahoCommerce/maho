@@ -89,7 +89,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
             $user->setTwofaEnabled((bool) $this->getRequest()->getPost('twofa_enabled'));
             $twofaCode = $this->getRequest()->getPost('twofa_verification_code', '');
             if ($user->getTwofaEnabled() && $twofaCode) {
-                if (!Mage::helper('admin/auth')->verifyTwofaCode($user->getTwofaSecret(), $twofaCode)) {
+                if (!Mage::helper('core/security')->verifyTotpCode($user->getTwofaSecret(), $twofaCode)) {
                     Mage::throwException(Mage::helper('adminhtml')->__('Invalid 2FA verification code'));
                 }
             }
