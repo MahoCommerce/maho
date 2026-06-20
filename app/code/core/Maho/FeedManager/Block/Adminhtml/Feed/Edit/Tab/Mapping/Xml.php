@@ -111,11 +111,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 this.setupSortable();
             },
 
-            // Wire SortableJS (shipped globally as sortable.min.js) onto the tree root
-            // and every nested .xml-children container. Each container has its own
-            // group key, so dragging is constrained to same-parent siblings; cross-
-            // parent moves are not yet supported (would risk silently orphaning a
-            // node into an unrelated wrapper).
+            // Constrain drag to same-parent siblings via per-container group keys.
             setupSortable: function() {
                 if (typeof Sortable === "undefined") return;
                 var self = this;
@@ -149,9 +145,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 }
             },
 
-            // Move a node within its parent siblings list and re-render.
-            // containerId is "xml-tree" for top-level, or "xml-children-X-children-Y..."
-            // for nested — that latter form decodes to the path of the PARENT node.
             reorderSibling: function(containerId, oldIndex, newIndex) {
                 var arr;
                 if (containerId === "xml-tree") {
@@ -165,7 +158,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 if (oldIndex < 0 || oldIndex >= arr.length || newIndex < 0 || newIndex >= arr.length) return;
                 var moved = arr.splice(oldIndex, 1)[0];
                 arr.splice(newIndex, 0, moved);
-                // Path-indexed selection is invalidated by reordering.
                 this.selectedPath = null;
                 this.render();
             },
