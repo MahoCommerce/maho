@@ -678,24 +678,12 @@ XML;
      * Encode the mixed $valueToEncode into the JSON format
      *
      * @param mixed $valueToEncode
-     * @param bool $cycleCheck Optional; whether or not to check for object recursion; off by default
-     * @param  array $options Additional options used during encoding
      * @return string
      * @throws JsonException
      */
-    public function jsonEncode($valueToEncode, $cycleCheck = false, $options = [])
+    public function jsonEncode($valueToEncode)
     {
-        $json = json_encode($valueToEncode, JSON_THROW_ON_ERROR);
-
-        /** @var Mage_Core_Model_Translate_Inline $inline */
-        $inline = Mage::getSingleton('core/translate_inline');
-        if ($inline->isAllowed()) {
-            $inline->setIsJson(true);
-            $inline->processResponseBody($json);
-            $inline->setIsJson(false);
-        }
-
-        return $json;
+        return json_encode($valueToEncode, JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -860,41 +848,112 @@ XML;
     }
 
     /**
-     * Returns true if the rate limit of the current client is exceeded
-     * @param bool $setErrorMessage Adds a predefined error message to the 'core/session' object
-     * @return bool is rate limit exceeded
+     * Rate limiter scoped to the request client. Core resolves the identity (IP/session) from
+     * $scope, so callers never read the remote address or session id themselves. $namespace
+     * separates one feature's budget from another's. A non-positive $maxAttempts disables it.
      */
-    public function isRateLimitExceeded(bool $setErrorMessage = true, bool $recordRateLimitHit = true): bool
-    {
-        $active = Mage::getStoreConfigFlag('system/rate_limit/active');
-        if ($active && $remoteAddr = Mage::helper('core/http')->getRemoteAddr()) {
-            $cacheTag = 'rate_limit_' . $remoteAddr;
-            if (Mage::app()->testCache($cacheTag)) {
-                if ($setErrorMessage) {
-                    $errorMessage = $this->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.');
-                    Mage::getSingleton('core/session')->addError($errorMessage);
-                }
-                return true;
-            }
-
-            if ($recordRateLimitHit) {
-                $this->recordRateLimitHit();
-            }
-        }
-
-        return false;
+    public function rateLimiter(
+        string $namespace,
+        int $maxAttempts,
+        int $windowSeconds,
+        \Maho\Security\RateLimitScope $scope = \Maho\Security\RateLimitScope::Client,
+    ): \Maho\Security\RateLimiter {
+        $identity = $this->resolveRateLimitIdentity($scope);
+        return new \Maho\Security\RateLimiter("{$namespace}:{$identity}", $maxAttempts, $windowSeconds);
     }
 
     /**
-     * Save the client rate limit hit to the cache
+     * Rate limiter keyed by a caller-owned domain value (email, store id, order reference) rather
+     * than by request identity. The caller passes a value it already holds; nothing is read from
+     * the request. A non-positive $maxAttempts disables it.
      */
-    public function recordRateLimitHit(): void
+    public function rateLimiterBy(
+        string $namespace,
+        string $value,
+        int $maxAttempts,
+        int $windowSeconds,
+    ): \Maho\Security\RateLimiter {
+        return new \Maho\Security\RateLimiter("{$namespace}:{$value}", $maxAttempts, $windowSeconds);
+    }
+
+    /**
+     * Config-governed IP limiter (system/rate_limit/*). Returns null when rate limiting is
+     * disabled or the client IP is unknown; callers treat null as "not limited".
+     */
+    public function ipRateLimiter(): ?\Maho\Security\RateLimiter
     {
-        $active = Mage::getStoreConfigFlag('system/rate_limit/active');
-        if ($active && $remoteAddr = Mage::helper('core/http')->getRemoteAddr()) {
-            $cacheTag = 'rate_limit_' . $remoteAddr;
-            Mage::app()->saveCache(1, $cacheTag, ['brute_force'], Mage::getStoreConfig('system/rate_limit/timeframe'));
+        if (!Mage::getStoreConfigFlag('system/rate_limit/active')) {
+            return null;
         }
+        $ip = Mage::helper('core/http')->getRemoteAddr();
+        if (!$ip) {
+            return null;
+        }
+        $window = max(1, (int) Mage::getStoreConfig('system/rate_limit/timeframe'));
+        return new \Maho\Security\RateLimiter("ip:{$ip}", 1, $window);
+    }
+
+    protected function resolveRateLimitIdentity(\Maho\Security\RateLimitScope $scope): string
+    {
+        return match ($scope) {
+            \Maho\Security\RateLimitScope::Ip => (string) Mage::helper('core/http')->getRemoteAddr(),
+            \Maho\Security\RateLimitScope::Session => (string) Mage::getSingleton('core/session')->getSessionId(),
+            \Maho\Security\RateLimitScope::Client => (string) (Mage::helper('core/http')->getRemoteAddr()
+                ?: Mage::getSingleton('core/session')->getSessionId()),
+        };
+    }
+
+    /**
+     * Per-install hidden trap field name for honeypot anti-spam.
+     *
+     * Derived deterministically from the encryption key, so the same
+     * install always returns the same name (frontend can cache it),
+     * and different installs return different names (so a bot that
+     * scrapes one Maho install can't blanket-target all of them).
+     *
+     * Defeats random spambot armies. For targeted attackers (who can
+     * scrape the rendered form), pair with captcha.
+     */
+    public function getHoneypotFieldName(): string
+    {
+        return '_h_' . substr(hash('sha256', Mage::getEncryptionKeyAsHex() . 'honeypot'), 0, 8);
+    }
+
+    /**
+     * Honeypot check: returns true when the request body contains a
+     * non-empty value in the install-specific trap field returned by
+     * `getHoneypotFieldName()`.
+     *
+     * The enable/disable toggle is the caller's concern: gate this call
+     * behind your own module setting. Works for any request shape that
+     * exposes form data as an array, so it's usable from web controllers
+     * (`$request->getPost()`) and API processors (decoded JSON body) alike.
+     */
+    public function isHoneypotTriggered(array $body): bool
+    {
+        $field = $this->getHoneypotFieldName();
+        $value = $body[$field] ?? null;
+        if (is_array($value)) {
+            return $value !== [];
+        }
+        return trim((string) $value) !== '';
+    }
+
+    /**
+     * Visually-hidden honeypot trap field markup, ready to echo inside a `<form>`.
+     *
+     * Renders the install-specific field from `getHoneypotFieldName()` so every
+     * caller emits an identical, correctly-named trap. The enable/disable toggle
+     * stays the caller's concern: gate this behind your own module setting.
+     */
+    public function getHoneypotFieldHtml(): string
+    {
+        $field = $this->getHoneypotFieldName();
+        $label = $this->escapeHtml($this->__('Leave this field empty'));
+        return '<div aria-hidden="true" style="position:absolute;left:-9999px;height:0;overflow:hidden;">'
+            . '<label for="' . $field . '">' . $label . '</label>'
+            . '<input name="' . $field . '" id="' . $field . '" value="" type="text" tabindex="-1" autocomplete="off">'
+            . '</div>';
     }
 
     /**

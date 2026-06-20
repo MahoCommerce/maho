@@ -166,10 +166,6 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function sendPaymentFailedEmail($checkout, $message, $checkoutType = 'onepage')
     {
-        $translate = Mage::getSingleton('core/translate');
-        /** @var Mage_Core_Model_Translate $translate */
-        $translate->setTranslateInline(false);
-
         $mailTemplate = Mage::getModel('core/email_template');
         /** @var Mage_Core_Model_Email_Template $mailTemplate */
 
@@ -243,8 +239,6 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
                     ],
                 );
         }
-
-        $translate->setTranslateInline(true);
 
         return $this;
     }

@@ -52,20 +52,20 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Bloc
                 $this->addTab('group_' . $group->getId(), [
                     'label'     => Mage::helper('catalog')->__($group->getAttributeGroupName()),
                     'code'      => $group->getAttributeGroupName(),
-                    'content'   => $this->_translateHtml($this->getLayout()->createBlock(
+                    'content'   => $this->getLayout()->createBlock(
                         $this->getAttributeTabBlock(),
                         'adminhtml.catalog.product.edit.tab.attributes',
                     )->setGroup($group)
                             ->setGroupAttributes($attributes)
-                            ->toHtml()),
+                            ->toHtml(),
                 ]);
             }
 
             if ($this->isModuleEnabled('Mage_CatalogInventory')) {
                 $this->addTab('inventory', [
                     'label'     => Mage::helper('catalog')->__('Inventory'),
-                    'content'   => $this->_translateHtml($this->getLayout()
-                        ->createBlock('adminhtml/catalog_product_edit_tab_inventory')->toHtml()),
+                    'content'   => $this->getLayout()
+                        ->createBlock('adminhtml/catalog_product_edit_tab_inventory')->toHtml(),
                 ]);
             }
 
@@ -75,8 +75,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Bloc
             if (!Mage::app()->isSingleStoreMode()) {
                 $this->addTab('websites', [
                     'label'     => Mage::helper('catalog')->__('Websites'),
-                    'content'   => $this->_translateHtml($this->getLayout()
-                        ->createBlock('adminhtml/catalog_product_edit_tab_websites')->toHtml()),
+                    'content'   => $this->getLayout()
+                        ->createBlock('adminhtml/catalog_product_edit_tab_websites')->toHtml(),
                 ]);
             }
 
@@ -124,8 +124,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Bloc
             if (($alertPriceAllow || $alertStockAllow) && !$product->isGrouped()) {
                 $this->addTab('productalert', [
                     'label'     => Mage::helper('catalog')->__('Product Alerts'),
-                    'content'   => $this->_translateHtml($this->getLayout()
-                        ->createBlock('adminhtml/catalog_product_edit_tab_alerts', 'admin.alerts.products')->toHtml()),
+                    'content'   => $this->getLayout()
+                        ->createBlock('adminhtml/catalog_product_edit_tab_alerts', 'admin.alerts.products')->toHtml(),
                 ]);
             }
 
@@ -171,8 +171,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Bloc
         } else {
             $this->addTab('set', [
                 'label'     => Mage::helper('catalog')->__('Settings'),
-                'content'   => $this->_translateHtml($this->getLayout()
-                    ->createBlock('adminhtml/catalog_product_edit_tab_settings')->toHtml()),
+                'content'   => $this->getLayout()
+                    ->createBlock('adminhtml/catalog_product_edit_tab_settings')->toHtml(),
                 'active'    => true,
             ]);
         }
@@ -209,17 +209,5 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Bloc
     {
         $this->_attributeTabBlock = $attributeTabBlock;
         return $this;
-    }
-
-    /**
-     * Translate html content
-     *
-     * @param string $html
-     * @return string
-     */
-    protected function _translateHtml($html)
-    {
-        Mage::getSingleton('core/translate_inline')->processResponseBody($html);
-        return $html;
     }
 }

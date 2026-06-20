@@ -51,7 +51,6 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
     #[\Override]
     public function getPdf(array|\Maho\Data\Collection $shipments = []): string
     {
-        $this->_beforeGetPdf();
         $this->_initRenderer('shipment');
 
         // Handle collections
@@ -65,8 +64,6 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
 
         $html = $this->_renderDocumentsHtml($shipments);
         $pdf = $this->generatePdf($html);
-
-        $this->_afterGetPdf();
         return $pdf;
     }
 

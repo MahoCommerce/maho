@@ -127,15 +127,11 @@ describe('Front observer HTTPS enforcement — skip conditions', function () {
     it('does not redirect on a POST submission even when HTTPS is required', function () {
         // The skip check is `$request->getPost()` — body data, not method —
         // specifically to preserve form posts that would otherwise lose data
-        // on a 302 redirect. Mage's getPost() reads from `$_POST`, so seed it
-        // directly rather than via the SymfonyRequest constructor.
-        $_POST = ['login' => ['username' => 'x']];
-        try {
-            $response = dispatchBefore('/customer/account/login', 'POST');
-            expect($response->isRedirect())->toBeFalse();
-        } finally {
-            $_POST = [];
-        }
+        // on a 302 redirect. getPost() reads the Symfony request bag, so pass
+        // the body through the SymfonyRequest constructor.
+        $response = dispatchBefore('/customer/account/login', 'POST', postData: ['login' => ['username' => 'x']]);
+
+        expect($response->isRedirect())->toBeFalse();
     });
 
     it('does not redirect when the request is already HTTPS', function () {

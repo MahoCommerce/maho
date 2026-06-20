@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -89,7 +90,7 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
                     $errors = true;
                 }
             } else {
-                Mage::helper('core')->recordRateLimitHit();
+                Mage::helper('core')->ipRateLimiter()?->hit();
                 $errors = true;
             }
         }
@@ -99,7 +100,12 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
             return true;
         }
 
-        if (!Mage::helper('core')->isRateLimitExceeded(true, false)) {
+        $limiter = Mage::helper('core')->ipRateLimiter();
+        if ($limiter && $limiter->tooManyAttempts()) {
+            Mage::getSingleton('core/session')->addError(
+                $this->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.'),
+            );
+        } else {
             Mage::getSingleton('core/session')->addError($this->__($errorMessage));
         }
 

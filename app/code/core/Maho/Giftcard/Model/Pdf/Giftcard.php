@@ -49,8 +49,6 @@ class Maho_Giftcard_Model_Pdf_Giftcard extends Mage_Sales_Model_Order_Pdf_Abstra
         // Convert to array if collection
         $giftcards = $documents instanceof Maho\Data\Collection ? $documents->getItems() : $documents;
 
-        $this->_beforeGetPdf();
-
         try {
             // Create PDF block and set gift cards
             $block = Mage::app()->getLayout()->createBlock('giftcard/pdf_giftcard');
@@ -61,8 +59,6 @@ class Maho_Giftcard_Model_Pdf_Giftcard extends Mage_Sales_Model_Order_Pdf_Abstra
 
             // Generate PDF using DomPdf
             $pdfContent = $this->generatePdf($html, 'giftcard.pdf');
-
-            $this->_afterGetPdf();
 
             return $pdfContent;
 

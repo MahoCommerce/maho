@@ -29,7 +29,7 @@ function revocation_valid_post(array $overrides = []): array
         'form_key' => Mage::getSingleton('core/session')->getFormKey(),
         // Render token old enough to pass the min-submit-seconds gate
         'frt' => Mage::helper('core')->encrypt((string) (time() - 60)),
-        'comment_body' => '',
+        Mage::helper('core')->getHoneypotFieldName() => '',
         'customer_name' => 'Max Mustermann',
         'email' => 'gate-' . uniqid() . '@example.com',
         'order_reference' => (string) random_int(100000000, 199999999),
@@ -69,23 +69,27 @@ describe('Revocation email normalization', function () {
 });
 
 describe('Revocation per-IP rate limit', function () {
+    beforeEach(function () {
+        // Core resolves the client IP itself now, so the key is constant within the run;
+        // clear carry-over hits for this test client before counting.
+        Mage::app()->cleanCache([\Maho\Security\RateLimiter::CACHE_TAG]);
+    });
+
     it('blocks after the configured number of submissions per hour', function () {
         $helper = Mage::helper('revocation');
-        $ip = '198.51.100.' . random_int(1, 254) . '-' . uniqid();
 
         for ($i = 0; $i < 5; $i++) {
-            expect($helper->isIpRateLimited($ip))->toBeFalse();
+            expect($helper->isIpRateLimited())->toBeFalse();
         }
-        expect($helper->isIpRateLimited($ip))->toBeTrue();
+        expect($helper->isIpRateLimited())->toBeTrue();
     });
 
     it('is disabled when the limit is configured to 0', function () {
         Mage::app()->getStore()->setConfig('revocation/abuse/ip_rate_limit_per_hour', '0');
         $helper = Mage::helper('revocation');
-        $ip = 'unlimited-' . uniqid();
 
         for ($i = 0; $i < 20; $i++) {
-            expect($helper->isIpRateLimited($ip))->toBeFalse();
+            expect($helper->isIpRateLimited())->toBeFalse();
         }
     });
 });
@@ -113,7 +117,7 @@ describe('Revocation controller abuse gates', function () {
     });
 
     it('silently drops submissions with the honeypot field filled', function () {
-        $post = revocation_valid_post(['comment_body' => 'http://spam.example']);
+        $post = revocation_valid_post([Mage::helper('core')->getHoneypotFieldName() => 'http://spam.example']);
         $response = revocation_dispatch_submit($post);
 
         expect($response->isRedirect())->toBeTrue();

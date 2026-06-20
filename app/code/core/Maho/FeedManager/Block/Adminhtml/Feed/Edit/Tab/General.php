@@ -348,23 +348,44 @@ document.addEventListener('DOMContentLoaded', function() {
     const platformField = document.getElementById('feed_platform');
     const formatField = document.getElementById('feed_file_format');
 
-    if (templateSelect) {
-        // Only sync hidden fields when user changes the selector
-        templateSelect.addEventListener('change', function() {
-            const value = this.value;
-            if (!value || value.indexOf(':') === -1) return;
+    if (!templateSelect) return;
 
-            const parts = value.split(':');
-            const platform = parts[0];
-            const format = parts[1];
+    function syncFromTemplate(loadBuilderPreset) {
+        const value = templateSelect.value;
+        if (!value || value.indexOf(':') === -1) return;
 
-            if (platformField) platformField.value = platform;
-            if (formatField) formatField.value = format;
+        const parts = value.split(':');
+        const platform = parts[0];
+        const format = parts[1];
 
-            // Trigger change event on format field to update builder visibility
+        if (platformField) platformField.value = platform;
+        if (formatField) {
+            formatField.value = format;
             formatField.dispatchEvent(new Event('change'));
-        });
+        }
+
+        // Push the platform preset on a user-driven change only; skip on init
+        // so existing feeds keep their saved structure.
+        if (loadBuilderPreset && platform !== 'custom') {
+            if (format === 'xml' && typeof XmlBuilder !== 'undefined' && typeof XmlBuilder.loadPreset === 'function') {
+                XmlBuilder.loadPreset(platform, { force: true });
+            } else if ((format === 'json' || format === 'jsonl') && typeof JsonBuilder !== 'undefined' && typeof JsonBuilder.loadPreset === 'function') {
+                JsonBuilder.loadPreset(platform, { force: true });
+            } else if (format === 'csv' && typeof CsvBuilder !== 'undefined' && typeof CsvBuilder.loadPreset === 'function') {
+                CsvBuilder.loadPreset(platform, { force: true });
+            }
+        }
     }
+
+    // Wire the default template selection to file_format on a fresh feed so
+    // the matching builder fieldset reveals itself without user interaction.
+    if (formatField && !formatField.value) {
+        syncFromTemplate(false);
+    }
+
+    templateSelect.addEventListener('change', function() {
+        syncFromTemplate(true);
+    });
 });
 </script>
 JS;
