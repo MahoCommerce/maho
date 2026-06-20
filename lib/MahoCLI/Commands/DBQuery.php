@@ -16,6 +16,7 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -57,7 +58,7 @@ class DBQuery extends BaseMahoCommand
 
         $driver = (string) $input->getOption('driver');
         if (!in_array($driver, ['auto', 'client', 'adapter'], true)) {
-            fwrite(STDERR, "Invalid --driver value: {$driver} (expected: auto, client, or adapter)\n");
+            $this->writeError($output, "Invalid --driver value: {$driver} (expected: auto, client, or adapter)");
             return Command::INVALID;
         }
 
@@ -73,8 +74,8 @@ class DBQuery extends BaseMahoCommand
         if ($useAdapter) {
             if ($driver === 'auto') {
                 $binary = $this->clientBinaryForEngine($engine);
-                fwrite(STDERR, sprintf(
-                    "Notice: '%s' client binary not found; running the query through the framework database connection.\n",
+                $this->writeError($output, sprintf(
+                    "Notice: '%s' client binary not found; running the query through the framework database connection.",
                     $binary !== '' ? $binary : $engine,
                 ));
             }
@@ -95,7 +96,7 @@ class DBQuery extends BaseMahoCommand
         // INSERT/UPDATE/DELETE/DDL without choosing a connection per statement type.
         $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
         if (!$connection instanceof \Maho\Db\Adapter\AdapterInterface) {
-            fwrite(STDERR, "Unable to resolve the framework database connection.\n");
+            $this->writeError($output, 'Unable to resolve the framework database connection.');
             return Command::FAILURE;
         }
 
@@ -115,7 +116,7 @@ class DBQuery extends BaseMahoCommand
         } catch (\Throwable $e) {
             // Surface a one-line error and a clean exit code, mirroring the native-client path,
             // instead of letting the exception become a multi-frame console stack dump.
-            fwrite(STDERR, $e->getMessage() . "\n");
+            $this->writeError($output, $e->getMessage());
             return Command::FAILURE;
         }
 
@@ -135,6 +136,17 @@ class DBQuery extends BaseMahoCommand
         $table->render();
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Write a diagnostic to STDERR. Uses the console's dedicated error stream when available
+     * (so it stays off STDOUT and is assertable in tests) and OUTPUT_RAW so a message that
+     * happens to contain "<...>" is not parsed as console markup.
+     */
+    private function writeError(OutputInterface $output, string $message): void
+    {
+        $stream = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output;
+        $stream->writeln($message, OutputInterface::OUTPUT_RAW);
     }
 
     private function executeMysql(mixed $connConfig, string $query): int

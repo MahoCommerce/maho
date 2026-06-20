@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace MahoCLI\Commands;
 
+use Symfony\Component\Process\ExecutableFinder;
+
 trait DatabaseCliTrait
 {
     private function getEngine(mixed $connConfig): string
@@ -56,9 +58,9 @@ trait DatabaseCliTrait
             return false;
         }
 
-        $resolved = shell_exec(sprintf('command -v %s 2>/dev/null', escapeshellarg($binary)));
-
-        return is_string($resolved) && trim($resolved) !== '';
+        // ExecutableFinder is cross-platform (resolves "mysql.exe" on Windows), spawns no shell,
+        // and is not defeated by disable_functions — unlike a shell_exec('command -v ...') probe.
+        return (new ExecutableFinder())->find($binary) !== null;
     }
 
     private function createTempMySQLConfig(

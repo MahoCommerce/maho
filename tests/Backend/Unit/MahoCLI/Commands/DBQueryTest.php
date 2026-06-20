@@ -69,18 +69,26 @@ it('prints an empty-result-set notice when a query returns no rows', function ()
     expect($tester->getDisplay())->toContain('Empty result set');
 });
 
-it('fails cleanly on an invalid query instead of dumping a stack trace', function () {
+it('fails cleanly on an invalid query, reporting the error on STDERR', function () {
     $tester = dbQueryTester();
-    $tester->execute(['query' => 'SELECT * FROM maho_dbquery_no_such_table', '--driver' => 'adapter']);
+    $tester->execute(
+        ['query' => 'SELECT * FROM maho_dbquery_no_such_table', '--driver' => 'adapter'],
+        ['capture_stderr_separately' => true],
+    );
 
     expect($tester->getStatusCode())->toBe(Command::FAILURE);
+    expect($tester->getErrorOutput())->toContain('maho_dbquery_no_such_table');
 });
 
-it('rejects an unknown --driver value', function () {
+it('rejects an unknown --driver value on STDERR', function () {
     $tester = dbQueryTester();
-    $tester->execute(['query' => 'SELECT 1', '--driver' => 'bogus']);
+    $tester->execute(
+        ['query' => 'SELECT 1', '--driver' => 'bogus'],
+        ['capture_stderr_separately' => true],
+    );
 
     expect($tester->getStatusCode())->toBe(Command::INVALID);
+    expect($tester->getErrorOutput())->toContain('Invalid --driver value');
 });
 
 it('maps each engine to its client binary name', function () {
