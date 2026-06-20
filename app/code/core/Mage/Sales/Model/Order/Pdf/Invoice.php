@@ -49,7 +49,6 @@ class Mage_Sales_Model_Order_Pdf_Invoice extends Mage_Sales_Model_Order_Pdf_Abst
     #[\Override]
     public function getPdf(array|\Maho\Data\Collection $invoices = []): string
     {
-        $this->_beforeGetPdf();
         $this->_initRenderer('invoice');
 
         // Handle collections
@@ -63,8 +62,6 @@ class Mage_Sales_Model_Order_Pdf_Invoice extends Mage_Sales_Model_Order_Pdf_Abst
 
         $html = $this->_renderDocumentsHtml($invoices);
         $pdf = $this->generatePdf($html);
-
-        $this->_afterGetPdf();
         return $pdf;
     }
 }

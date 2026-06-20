@@ -62,10 +62,6 @@ class Mage_Sitemap_Model_Observer
         }
 
         if ($errors && Mage::getStoreConfig(self::XML_PATH_ERROR_RECIPIENT)) {
-            $translate = Mage::getSingleton('core/translate');
-            /** @var Mage_Core_Model_Translate $translate */
-            $translate->setTranslateInline(false);
-
             $emailTemplate = Mage::getModel('core/email_template');
             /** @var Mage_Core_Model_Email_Template $emailTemplate */
             $emailTemplate->setDesignConfig(['area' => 'backend'])
@@ -76,8 +72,6 @@ class Mage_Sitemap_Model_Observer
                     null,
                     ['warnings' => implode("\n", $errors)],
                 );
-
-            $translate->setTranslateInline(true);
         }
     }
 }

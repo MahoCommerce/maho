@@ -120,17 +120,6 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     }
 
     /**
-     * Set body to response
-     *
-     * @param string $body
-     */
-    private function setBody($body): void
-    {
-        Mage::getSingleton('core/translate_inline')->processResponseBody($body);
-        $this->getResponse()->setBody($body);
-    }
-
-    /**
      * Validate action
      */
     #[Maho\Config\Route('/admin/widget_instance/validate')]
@@ -221,7 +210,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
             ->setId(Mage::helper('core')->uniqHash('categories'))
             ->setIsAnchorOnly($isAnchorOnly)
             ->setSelectedCategories(explode(',', $selected));
-        $this->setBody($chooser->toHtml());
+        $this->getResponse()->setBody($chooser->toHtml());
     }
 
     /**
@@ -241,7 +230,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
         /** @var Mage_Adminhtml_Block_Widget_Grid_Serializer $serializer */
         $serializer = $this->getLayout()->createBlock('adminhtml/widget_grid_serializer');
         $serializer->initSerializerBlock($chooser, 'getSelectedProducts', 'selected_products', 'selected_products');
-        $this->setBody($chooser->toHtml() . $serializer->toHtml());
+        $this->getResponse()->setBody($chooser->toHtml() . $serializer->toHtml());
     }
 
     /**
@@ -262,7 +251,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
             ->setLayoutHandle($layout)
             ->setSelected($selected)
             ->setAllowedBlocks($widgetInstance->getWidgetSupportedBlocks());
-        $this->setBody($blocksChooser->toHtml());
+        $this->getResponse()->setBody($blocksChooser->toHtml());
     }
 
     /**
@@ -279,7 +268,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
             ->createBlock('widget/adminhtml_widget_instance_edit_chooser_template')
             ->setSelected($selected)
             ->setWidgetTemplates($widgetInstance->getWidgetSupportedTemplatesByBlock($block));
-        $this->setBody($templateChooser->toHtml());
+        $this->getResponse()->setBody($templateChooser->toHtml());
     }
 
     /**

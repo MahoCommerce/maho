@@ -678,24 +678,12 @@ XML;
      * Encode the mixed $valueToEncode into the JSON format
      *
      * @param mixed $valueToEncode
-     * @param bool $cycleCheck Optional; whether or not to check for object recursion; off by default
-     * @param  array $options Additional options used during encoding
      * @return string
      * @throws JsonException
      */
-    public function jsonEncode($valueToEncode, $cycleCheck = false, $options = [])
+    public function jsonEncode($valueToEncode)
     {
-        $json = json_encode($valueToEncode, JSON_THROW_ON_ERROR);
-
-        /** @var Mage_Core_Model_Translate_Inline $inline */
-        $inline = Mage::getSingleton('core/translate_inline');
-        if ($inline->isAllowed()) {
-            $inline->setIsJson(true);
-            $inline->processResponseBody($json);
-            $inline->setIsJson(false);
-        }
-
-        return $json;
+        return json_encode($valueToEncode, JSON_THROW_ON_ERROR);
     }
 
     /**

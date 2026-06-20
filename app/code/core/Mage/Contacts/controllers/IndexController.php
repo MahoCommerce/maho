@@ -51,9 +51,6 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
     {
         $post = $this->getRequest()->getPost();
         if ($post) {
-            $translate = Mage::getSingleton('core/translate');
-            /** @var Mage_Core_Model_Translate $translate */
-            $translate->setTranslateInline(false);
             $successMessage = $this->__('Your inquiry was submitted and will be responded to as soon as possible. Thank you for contacting us.');
             try {
                 if (!$this->_validateFormKey()) {
@@ -64,7 +61,6 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
                 // success page so they cannot detect the trap. No email is sent.
                 if (Mage::getStoreConfigFlag(self::XML_PATH_HONEYPOT_ENABLED)
                     && Mage::helper('core')->isHoneypotTriggered($post)) {
-                    $translate->setTranslateInline(true);
                     Mage::getSingleton('customer/session')->addSuccess($successMessage);
                     $this->_redirect('*/*/');
                     return;
@@ -73,7 +69,6 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
                 // Per-IP throttle to blunt automated submission floods.
                 $ipLimit = (int) Mage::getStoreConfig(self::XML_PATH_IP_RATE_LIMIT);
                 if (!Mage::helper('core')->rateLimiter('contacts_ip', $ipLimit, 3600, \Maho\Security\RateLimitScope::Ip)->attempt()) {
-                    $translate->setTranslateInline(true);
                     Mage::getSingleton('customer/session')->addError($this->__('Too many requests. Please wait a moment and try again.'));
                     $this->_redirect('*/*/');
                     return;
@@ -138,13 +133,11 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
                         );
                 }
 
-                $translate->setTranslateInline(true);
                 Mage::getSingleton('customer/session')->addSuccess($successMessage);
                 $this->_redirect('*/*/');
 
                 return;
             } catch (Mage_Core_Exception $e) {
-                $translate->setTranslateInline(true);
                 Mage::logException($e);
                 Mage::getSingleton('customer/session')->addError($e->getMessage());
             } catch (Throwable $e) {

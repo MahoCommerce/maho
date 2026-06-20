@@ -24,7 +24,6 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
             $block->assign($index, $value);
         }
         $html = $block->toHtml();
-        Mage::getSingleton('core/translate_inline')->processResponseBody($html);
         $this->getResponse()->setBody($html);
     }
 

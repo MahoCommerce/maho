@@ -904,19 +904,9 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
         }
         $html = $this->_loadCache();
         if ($html === false) {
-            $translate = Mage::getSingleton('core/translate');
-            /** @var Mage_Core_Model_Translate $translate */
-            if ($this->hasData('translate_inline')) {
-                $translate->setTranslateInline($this->getData('translate_inline'));
-            }
-
             $this->_beforeToHtml();
             $html = $this->_toHtml();
             $this->_saveCache($html);
-
-            if ($this->hasData('translate_inline')) {
-                $translate->setTranslateInline(true);
-            }
         }
         $html = $this->_afterToHtml($html);
 
@@ -1320,9 +1310,9 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      *
      * @see Mage_Core_Helper_Data::jsonEncode()
      */
-    public function jsonEncode($valueToEncode, bool $cycleCheck = false, array $options = []): string
+    public function jsonEncode($valueToEncode): string
     {
-        return Mage::helper('core')->jsonEncode($valueToEncode, $cycleCheck, $options);
+        return Mage::helper('core')->jsonEncode($valueToEncode);
     }
 
     /**
