@@ -69,6 +69,11 @@ SPDX-License-Identifier: AFL-3.0
                 <enabled>1</enabled>
                 <honeypot_enabled>1</honeypot_enabled>
             </api>
+            <abuse>
+                <honeypot_enabled>1</honeypot_enabled>
+                <ip_rate_limit_per_hour>10</ip_rate_limit_per_hour>
+                <recipient_rate_limit_per_hour>3</recipient_rate_limit_per_hour>
+            </abuse>
             <email>
                 <recipient_email><![CDATA[hello@example.com]]></recipient_email>
                 <sender_email_identity>custom2</sender_email_identity>

@@ -63,6 +63,43 @@ SPDX-License-Identifier: AFL-3.0
                         </honeypot_enabled>
                     </fields>
                 </api>
+                <abuse translate="label comment">
+                    <label>Abuse Protection</label>
+                    <comment><![CDATA[Invisible background measures (honeypot, rate limits) that blunt spam and email-bombing without inconveniencing real customers. Do not set the limits so low that legitimate visitors are blocked.]]></comment>
+                    <sort_order>30</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <honeypot_enabled translate="label comment">
+                            <label>Honeypot Field</label>
+                            <comment>Adds an invisible trap field. Submissions that fill it are silently dropped as bot traffic.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </honeypot_enabled>
+                        <ip_rate_limit_per_hour translate="label comment">
+                            <label>Submissions per IP per Hour</label>
+                            <comment>0 disables the limit.</comment>
+                            <validate>validate-digits</validate>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </ip_rate_limit_per_hour>
+                        <recipient_rate_limit_per_hour translate="label comment">
+                            <label>Auto-Reply Emails per Recipient per Hour</label>
+                            <comment>Caps how many auto-reply emails a single address can receive per hour. The merchant notification is still sent. Defeats email-bombing of third parties. 0 disables the limit.</comment>
+                            <validate>validate-digits</validate>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </recipient_rate_limit_per_hour>
+                    </fields>
+                </abuse>
                 <email translate="label">
                     <label>Email Options</label>
                     <sort_order>50</sort_order>

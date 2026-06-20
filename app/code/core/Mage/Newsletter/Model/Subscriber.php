@@ -497,10 +497,6 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
             return $this;
         }
 
-        $translate = Mage::getSingleton('core/translate');
-        /** @var Mage_Core_Model_Translate $translate */
-        $translate->setTranslateInline(false);
-
         $email = Mage::getModel('core/email_template');
         $email->setDesignConfig(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND, 'store' => $this->getStoreId()]);
 
@@ -511,8 +507,6 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
             $this->getName(),
             ['subscriber' => $this],
         );
-
-        $translate->setTranslateInline(true);
 
         return $this;
     }
@@ -534,10 +528,6 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
             return $this;
         }
 
-        $translate = Mage::getSingleton('core/translate');
-        /** @var Mage_Core_Model_Translate $translate */
-        $translate->setTranslateInline(false);
-
         $email = Mage::getModel('core/email_template');
         $email->setDesignConfig(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND, 'store' => $this->getStoreId()]);
 
@@ -548,8 +538,6 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
             $this->getName(),
             ['subscriber' => $this],
         );
-
-        $translate->setTranslateInline(true);
 
         return $this;
     }
@@ -570,10 +558,6 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
             return $this;
         }
 
-        $translate = Mage::getSingleton('core/translate');
-        /** @var Mage_Core_Model_Translate $translate */
-        $translate->setTranslateInline(false);
-
         $email = Mage::getModel('core/email_template');
         $email->setDesignConfig(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND, 'store' => $this->getStoreId()]);
 
@@ -584,8 +568,6 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
             $this->getName(),
             ['subscriber' => $this],
         );
-
-        $translate->setTranslateInline(true);
 
         return $this;
     }

@@ -29,11 +29,9 @@ trait RateLimitTrait
     protected function checkRateLimit(string $key, string $configKey, int $windowSeconds): void
     {
         $limit = (int) \Mage::getStoreConfig('system/rate_limit/' . $configKey);
-        if ($limit <= 0) {
-            return;
-        }
 
-        if (\Mage::helper('core')->isRateLimitExceeded(false, true, $key, $limit, $windowSeconds)) {
+        // A non-positive limit disables the limiter inside RateLimiter, so no guard needed here.
+        if (!\Mage::helper('core')->rateLimiterBy($configKey, $key, $limit, $windowSeconds)->attempt()) {
             throw new TooManyRequestsHttpException(
                 (string) $windowSeconds,
                 'Too many requests. Please try again later.',
@@ -43,9 +41,8 @@ trait RateLimitTrait
 
     /**
      * Throttle by client IP, using Maho's proxy-aware lookup. Fails open
-     * (skips the check) if the IP can't be determined, matches the behaviour
-     * of `Mage::helper('core')->isRateLimitExceeded()` in IP mode and avoids
-     * collapsing every unknown-IP client into a shared bucket.
+     * (skips the check) if the IP can't be determined, avoiding collapsing
+     * every unknown-IP client into a shared bucket.
      */
     protected function checkRateLimitByIp(string $keyPrefix, string $configKey, int $windowSeconds): void
     {

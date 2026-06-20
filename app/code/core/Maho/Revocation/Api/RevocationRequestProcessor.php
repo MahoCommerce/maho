@@ -79,7 +79,7 @@ final class RevocationRequestProcessor extends Processor
         }
 
         $ip = (string) \Mage::helper('core/http')->getRemoteAddr();
-        if ($ip !== '' && $helper->isIpRateLimited($ip, $order->getStore())) {
+        if ($ip !== '' && $helper->isIpRateLimited($order->getStore())) {
             throw new TooManyRequestsHttpException(3600, 'Too many requests. Please try again later.');
         }
 
