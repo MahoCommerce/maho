@@ -177,16 +177,7 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
     }
 
     /**
-     * Add "is empty" / "is not empty" operators to the standard set so rule
-     * authors can match products whose EAV value is null, missing, or an
-     * empty string. Maho's stock operator list only covers comparisons
-     * against a non-empty value, which means a "Custom Stock Status is
-     * empty" condition (the equivalent of Amasty's "is empty" operator)
-     * has no way to be expressed otherwise.
-     *
-     * The value field is intentionally left visible for these operators —
-     * its contents are ignored when validateAttribute() takes the
-     * is_empty / is_not_empty branch below.
+     * Add is_empty / is_not_empty operators for matching null / missing / blank EAV values.
      */
     #[\Override]
     public function getDefaultOperatorOptions()
@@ -204,12 +195,7 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
     }
 
     /**
-     * Make is_empty / is_not_empty actually selectable in the UI for
-     * every input type (the parent's operator-by-input-type map otherwise
-     * limits select / boolean to just ==/!= and so on). Without this, the
-     * new operators are present in getDefaultOperatorOptions() but the
-     * rule UI silently filters them out when building the per-row operator
-     * dropdown.
+     * Expose is_empty / is_not_empty on every input type — parent map otherwise hides them on select/boolean.
      */
     #[\Override]
     public function loadOperatorOptions()
