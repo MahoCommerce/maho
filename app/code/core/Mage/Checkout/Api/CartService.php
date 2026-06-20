@@ -32,7 +32,18 @@ class CartService
         $quote = \Mage::getModel('sales/quote');
 
         if ($storeId) {
-            $quote->setStoreId($storeId);
+            // A client must not bind a cart to an arbitrary, disabled, or
+            // non-existent store: the store drives pricing and gift-card/coupon
+            // website scoping for the whole cart lifecycle.
+            try {
+                $store = \Mage::app()->getStore($storeId);
+            } catch (\Throwable) {
+                $store = null;
+            }
+            if (!$store || !$store->getId() || !$store->getIsActive()) {
+                throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException("Invalid store: {$storeId}");
+            }
+            $quote->setStoreId((int) $store->getId());
         } else {
             // Use the default store, Mage::app()->getStore() returns admin (0) under Symfony
             $defaultStore = \Mage::app()->getDefaultStoreView();
@@ -502,7 +513,7 @@ class CartService
      *
      * @throws \RuntimeException
      */
-    public function applyGiftcard(\Mage_Sales_Model_Quote $quote, string $giftcardCode): \Mage_Sales_Model_Quote
+    public function applyGiftcard(\Mage_Sales_Model_Quote $quote, string $giftcardCode, ?float $amount = null): \Mage_Sales_Model_Quote
     {
         if (!$giftcardCode) {
             throw new \RuntimeException('Gift card code is required');
@@ -550,9 +561,13 @@ class CartService
             throw new \RuntimeException('Gift card "' . $giftcardCode . '" is already applied');
         }
 
-        // Apply gift card - store max amount available (in quote currency)
+        // Apply gift card - store the requested amount capped at the live
+        // balance (in quote currency), or the full balance when no amount is
+        // given. revalidateGiftcards() re-checks at placement, but the capped
+        // value here keeps quote totals and pre-auth correct in the meantime.
         $quoteCurrency = $quote->getQuoteCurrencyCode();
-        $appliedCodes[$giftcardCode] = $giftcard->getBalance($quoteCurrency);
+        $balance = (float) $giftcard->getBalance($quoteCurrency);
+        $appliedCodes[$giftcardCode] = $amount === null ? $balance : min($amount, $balance);
 
         $quote->setGiftcardCodes(json_encode($appliedCodes));
         $quote->collectTotals()->save();

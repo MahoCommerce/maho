@@ -23,6 +23,31 @@ final class CmsBlockProvider extends CrudProvider
 {
     protected array $defaultSort = ['title' => 'ASC'];
 
+    /**
+     * Disabled blocks must not be readable through the public GET /cms-blocks/{id}
+     * route. The base provider only store-scopes; enforce is_active here so the
+     * numeric-id path matches the identifier and collection paths.
+     */
+    #[\Override]
+    protected function provideItem(int|string $id): ?CmsBlock
+    {
+        $block = \Mage::getModel('cms/block')->load($id);
+        if (!$block->getId() || !$block->getIsActive()) {
+            return null;
+        }
+
+        $resource = $block->getResource();
+        if (method_exists($resource, 'lookupStoreIds')) {
+            $storeIds = $resource->lookupStoreIds($block->getId());
+            if (!StoreContext::isAvailableForStore($storeIds, StoreContext::getStoreId())) {
+                return null;
+            }
+        }
+
+        /** @var CmsBlock */
+        return $this->toDto($block);
+    }
+
     #[\Override]
     protected function handleOperation(string $name, array $context, array $uriVariables): mixed
     {

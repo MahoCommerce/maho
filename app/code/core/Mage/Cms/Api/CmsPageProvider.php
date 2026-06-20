@@ -93,6 +93,31 @@ final class CmsPageProvider extends CrudProvider
         }
     }
 
+    /**
+     * Disabled pages must not be readable through the public GET /cms-pages/{id}
+     * route. The base provider only store-scopes; enforce is_active here so the
+     * numeric-id path matches the identifier and collection paths.
+     */
+    #[\Override]
+    protected function provideItem(int|string $id): ?CmsPage
+    {
+        $page = \Mage::getModel('cms/page')->load($id);
+        if (!$page->getId() || !$page->getIsActive()) {
+            return null;
+        }
+
+        $resource = $page->getResource();
+        if (method_exists($resource, 'lookupStoreIds')) {
+            $storeIds = $resource->lookupStoreIds($page->getId());
+            if (!StoreContext::isAvailableForStore($storeIds, StoreContext::getStoreId())) {
+                return null;
+            }
+        }
+
+        /** @var CmsPage */
+        return $this->toDto($page);
+    }
+
     private function getPageByIdentifier(string $identifier): ?CmsPage
     {
         $storeId = StoreContext::getStoreId();

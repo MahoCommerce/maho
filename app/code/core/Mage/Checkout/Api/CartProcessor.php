@@ -273,6 +273,14 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             throw new \RuntimeException('Coupon code is required');
         }
 
+        // Throttle anonymous/customer callers by IP: applying a coupon to a cart
+        // is otherwise an unauthenticated oracle for enumerating auto-generated
+        // coupon batches, the same risk the /coupons/validate endpoint guards.
+        // POS/API callers are exempt (legitimate high-volume checkout).
+        if (!$this->isAdmin() && !$this->isApiUser()) {
+            $this->checkRateLimitByIp('cart_coupon', 'coupon_validate', 60);
+        }
+
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->applyCoupon($quote, $couponCode);
 

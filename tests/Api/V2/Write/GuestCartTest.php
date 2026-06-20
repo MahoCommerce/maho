@@ -55,6 +55,12 @@ describe('POST /api/rest/v2/guest-carts (Create Cart)', function (): void {
         expect($response['status'])->toBe(201);
     });
 
+    it('rejects a non-existent store id with 400', function (): void {
+        $response = apiPost('/api/rest/v2/guest-carts', ['storeId' => 999999]);
+
+        expect($response['status'])->toBe(400);
+    });
+
 });
 
 describe('GET /api/rest/v2/guest-carts/{id} (Get Cart)', function (): void {

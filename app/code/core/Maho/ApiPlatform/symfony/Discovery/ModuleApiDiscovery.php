@@ -21,6 +21,11 @@ use Maho\ComposerPlugin\AutoloadRuntime;
  */
 final class ModuleApiDiscovery
 {
+    private const CACHE_ID = 'maho_api_platform_discovery';
+    // Part of the "api_data" cache type (see etc/config.xml), so flushing the
+    // API Data cache in admin clears the module discovery map too.
+    private const CACHE_TAG = 'API_DISCOVERY';
+
     /** @var array{paths: string[], namespaces: array<string, string>}|null */
     private static ?array $cache = null;
 
@@ -31,6 +36,14 @@ final class ModuleApiDiscovery
     {
         if (self::$cache !== null) {
             return self::$cache;
+        }
+
+        // Kernel::boot() runs on every request, so the directory glob below would
+        // re-scan the filesystem on the hot path. Persist the result through the
+        // Maho cache (cleared by cache:flush) so subsequent requests skip the scan.
+        $cached = self::loadFromCache();
+        if ($cached !== null) {
+            return self::$cache = $cached;
         }
 
         $paths = [];
@@ -55,7 +68,10 @@ final class ModuleApiDiscovery
             $namespaces["{$nsPrefix}\\{$moduleName}\\Api\\"] = $apiDir;
         }
 
-        return self::$cache = ['paths' => $paths, 'namespaces' => $namespaces];
+        self::$cache = ['paths' => $paths, 'namespaces' => $namespaces];
+        self::saveToCache(self::$cache);
+
+        return self::$cache;
     }
 
     /**
@@ -64,5 +80,59 @@ final class ModuleApiDiscovery
     public static function clearCache(): void
     {
         self::$cache = null;
+
+        $app = self::mageApp();
+        $app?->removeCache(self::CACHE_ID);
+    }
+
+    /**
+     * @return array{paths: string[], namespaces: array<string, string>}|null
+     */
+    private static function loadFromCache(): ?array
+    {
+        $app = self::mageApp();
+        if ($app === null) {
+            return null;
+        }
+
+        $raw = $app->loadCache(self::CACHE_ID);
+        if (!is_string($raw) || $raw === '') {
+            return null;
+        }
+
+        $decoded = json_decode($raw, true);
+        if (is_array($decoded) && isset($decoded['paths'], $decoded['namespaces'])) {
+            /** @var array{paths: string[], namespaces: array<string, string>} $decoded */
+            return $decoded;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array{paths: string[], namespaces: array<string, string>} $data
+     */
+    private static function saveToCache(array $data): void
+    {
+        $app = self::mageApp();
+        $app?->saveCache(json_encode($data), self::CACHE_ID, [self::CACHE_TAG]);
+    }
+
+    /**
+     * Returns the Mage app only when it's safe to touch the cache subsystem.
+     * Falls back to null (uncached glob) for CLI/warmup contexts where Mage
+     * isn't initialised, so discovery never hard-depends on a booted app.
+     */
+    private static function mageApp(): ?\Mage_Core_Model_App
+    {
+        if (!class_exists(\Mage::class) || !\Mage::isInstalled()) {
+            return null;
+        }
+
+        try {
+            return \Mage::app();
+        } catch (\Throwable) {
+            return null;
+        }
     }
 }

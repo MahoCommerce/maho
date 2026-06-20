@@ -33,7 +33,7 @@
                 <api_data translate="label,description" module="apiplatform">
                     <label>API Data</label>
                     <description>REST and GraphQL API response cache (products, reviews, wishlists, etc.)</description>
-                    <tags>API_PRODUCTS,API_REVIEWS,API_WISHLIST,API_STORE_CONFIG,API_COUNTRIES</tags>
+                    <tags>API_PRODUCTS,API_REVIEWS,API_WISHLIST,API_STORE_CONFIG,API_COUNTRIES,API_DISCOVERY</tags>
                 </api_data>
             </types>
         </cache>

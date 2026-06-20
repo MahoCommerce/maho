@@ -226,9 +226,13 @@ class CartMutationHandler
         /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
         $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($couponCode);
         if ($giftcard->getId() && $giftcard->isValid()) {
-            // It's a valid gift card - apply it to quote via giftcard_codes field
-            $this->applyGiftcardToQuote($quote, $giftcard);
-            $quote->collectTotals()->save();
+            // It's a valid gift card - apply via the shared REST path so the
+            // website-scope and currency checks aren't bypassed.
+            try {
+                $this->cartService->applyGiftcard($quote, $couponCode);
+            } catch (\RuntimeException $e) {
+                throw ValidationException::invalidValue('couponCode', $e->getMessage());
+            }
             return ['applyCoupon' => $this->mapCart($quote)];
         }
 
@@ -340,14 +344,14 @@ class CartMutationHandler
             throw NotFoundException::cart($cartId);
         }
 
-        /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
-        $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($code);
-        if (!$giftcard->getId() || !$giftcard->isValid()) {
-            throw ValidationException::invalidValue('code', 'invalid or expired gift card');
+        // Reuse the REST path so website-scope, quote-currency balance, validity
+        // and duplicate checks stay in one place (CartService::applyGiftcard also
+        // collects totals and saves). Avoids the drift this handler had before.
+        try {
+            $this->cartService->applyGiftcard($quote, (string) $code, $amount);
+        } catch (\RuntimeException $e) {
+            throw ValidationException::invalidValue('code', $e->getMessage());
         }
-
-        $this->applyGiftcardToQuote($quote, $giftcard, $amount);
-        $quote->collectTotals()->save();
 
         // Reload quote to get fresh totals
         $quote = $this->cartService->getCart((int) $cartId);
@@ -524,24 +528,6 @@ class CartMutationHandler
         }
 
         return $giftcards;
-    }
-
-    /**
-     * Apply a gift card to a quote by storing its code and amount in giftcard_codes
-     */
-    private function applyGiftcardToQuote(\Mage_Sales_Model_Quote $quote, \Maho_Giftcard_Model_Giftcard $giftcard, ?float $amount = null): void
-    {
-        $codesJson = $quote->getGiftcardCodes();
-        $codes = $codesJson ? (array) json_decode($codesJson, true) : [];
-
-        // Cap caller-supplied amount at the live balance: revalidateGiftcards()
-        // re-checks at order placement, but until then the inflated amount
-        // distorts every quote total and any pre-placement payment authorization.
-        $balance = (float) $giftcard->getBalance();
-        $applyAmount = $amount === null ? $balance : min((float) $amount, $balance);
-        $codes[$giftcard->getCode()] = $applyAmount;
-
-        $quote->setGiftcardCodes(json_encode($codes));
     }
 
     /**
