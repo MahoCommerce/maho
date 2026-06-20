@@ -962,7 +962,7 @@ XML;
     {
         $field = $this->getHoneypotFieldName();
         $label = $this->escapeHtml($this->__('Leave this field empty'));
-        return '<div class="maho-honeypot" aria-hidden="true" style="position:absolute;left:-9999px;height:0;overflow:hidden;">'
+        return '<div aria-hidden="true" style="position:absolute;left:-9999px;height:0;overflow:hidden;">'
             . '<label for="' . $field . '">' . $label . '</label>'
             . '<input name="' . $field . '" id="' . $field . '" value="" type="text" tabindex="-1" autocomplete="off">'
             . '</div>';
