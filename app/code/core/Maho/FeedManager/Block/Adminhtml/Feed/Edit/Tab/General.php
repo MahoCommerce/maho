@@ -371,6 +371,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 XmlBuilder.loadPreset(platform, { force: true });
             } else if ((format === 'json' || format === 'jsonl') && typeof JsonBuilder !== 'undefined' && typeof JsonBuilder.loadPreset === 'function') {
                 JsonBuilder.loadPreset(platform, { force: true });
+            } else if (format === 'csv' && typeof CsvBuilder !== 'undefined' && typeof CsvBuilder.loadPreset === 'function') {
+                CsvBuilder.loadPreset(platform, { force: true });
             }
         }
     }
