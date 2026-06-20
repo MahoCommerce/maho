@@ -952,6 +952,23 @@ XML;
     }
 
     /**
+     * Visually-hidden honeypot trap field markup, ready to echo inside a `<form>`.
+     *
+     * Renders the install-specific field from `getHoneypotFieldName()` so every
+     * caller emits an identical, correctly-named trap. The enable/disable toggle
+     * stays the caller's concern: gate this behind your own module setting.
+     */
+    public function getHoneypotFieldHtml(): string
+    {
+        $field = $this->getHoneypotFieldName();
+        $label = $this->escapeHtml($this->__('Leave this field empty'));
+        return '<div class="maho-honeypot" aria-hidden="true" style="position:absolute;left:-9999px;height:0;overflow:hidden;">'
+            . '<label for="' . $field . '">' . $label . '</label>'
+            . '<input name="' . $field . '" id="' . $field . '" value="" type="text" tabindex="-1" autocomplete="off">'
+            . '</div>';
+    }
+
+    /**
      * Filter value using specified filter type
      */
     public function filter(mixed $value, string $filter, mixed ...$args): mixed

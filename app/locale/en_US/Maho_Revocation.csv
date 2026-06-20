@@ -38,7 +38,6 @@
 "Leave empty to use the General Contact email address.","Leave empty to use the General Contact email address."
 "Leave empty to use the label configured under Sales > Revocation Button.","Leave empty to use the label configured under Sales > Revocation Button."
 "Leave empty to use the translated default (""Revoke contract"" / ""Vertrag widerrufen"").","Leave empty to use the translated default (""Revoke contract"" / ""Vertrag widerrufen"")."
-"Leave this field empty","Leave this field empty"
 "Link Order","Link Order"
 "Link to order (increment ID):","Link to order (increment ID):"
 "Link to the contract revocation form (EU Directive 2023/2673). Place it in your footer or anywhere it must stay visible during the withdrawal period.","Link to the contract revocation form (EU Directive 2023/2673). Place it in your footer or anywhere it must stay visible during the withdrawal period."

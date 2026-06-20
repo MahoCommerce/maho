@@ -211,6 +211,7 @@
 "Lax","Lax"
 "Layout","Layout"
 "Leave empty for access from any location.","Leave empty for access from any location."
+"Leave this field empty","Leave this field empty"
 "List of stores","List of stores"
 "Loading Indicator Timeout","Loading Indicator Timeout"
 "Load on Intent","Load on Intent"

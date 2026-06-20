@@ -76,6 +76,9 @@ final class RateLimiter
      */
     public function remaining(): int
     {
+        if ($this->maxAttempts <= 0) {
+            return PHP_INT_MAX;
+        }
         return max(0, $this->maxAttempts - $this->attempts());
     }
 
