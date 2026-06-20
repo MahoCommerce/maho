@@ -368,14 +368,6 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         ],
     ];
 
-    // Transformer chains use the pipe-separated format consumed by
-    // Maho_FeedManager_Model_Transformer::parseChainString and the admin JS.
-    // Max-length values come from the Google Merchant Center product data spec
-    // (https://support.google.com/merchants/answer/7052112). The Google adapter
-    // also runs a final pass in transformProductData() for title, description,
-    // price, availability, condition, gender and age_group, so the truncate
-    // transformers there are belt-and-braces. For the remaining fields the
-    // transformer is the only safety net.
     protected array $_defaultMappings = [
         // ---- Required ----
         'id' => [
@@ -396,9 +388,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         ],
         'link' => ['source_type' => 'attribute', 'source_value' => 'url', 'use_parent' => 'always'],
         'image_link' => ['source_type' => 'attribute', 'source_value' => 'image', 'use_parent' => 'if_empty'],
-        // is_in_stock returns 1 / 0; Google Shopping wants "in_stock" / "out_of_stock".
-        // A conditional transformer maps one to the other so the preset works out of
-        // the box without requiring a separately-seeded dynamic rule.
+        // is_in_stock returns 1 / 0; Google wants "in_stock" / "out_of_stock".
         'availability' => [
             'source_type' => 'attribute',
             'source_value' => 'is_in_stock',
@@ -424,12 +414,8 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'source_value' => 'mpn',
             'transformers' => 'truncate:max_length=70',
         ],
-        // Google wants identifier_exists = "no" only when the product has no
-        // GTIN / MPN / brand. The Conditional transformer reads the raw product
-        // attribute named in condition_field, so we check gtin: empty → "no",
-        // otherwise → "yes". Most products with a GTIN also have a brand, so
-        // this is a sensible default; merchants who need the stricter "no GTIN
-        // AND no MPN AND no brand" rule can extend the chain.
+        // Empty gtin → "no", otherwise → "yes". Extend the chain for the
+        // stricter "no GTIN AND no MPN AND no brand" rule if needed.
         'identifier_exists' => [
             'source_type' => 'static',
             'source_value' => '',
@@ -442,12 +428,8 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
 
         // ---- Pricing ----
         'sale_price' => ['source_type' => 'attribute', 'source_value' => 'special_price'],
-        // Google's sale_price_effective_date wants an ISO 8601 range. Most
-        // merchants run perpetual promotions and don't set a per-product end
-        // date, so default to a rolling now / +90 days window driven by
-        // relative_date_range. Merchants who have actual sale-end dates can
-        // swap the source to a product attribute (e.g., special_to_date) and
-        // remove the transformer, or chain a different one.
+        // Rolling now / +90 days range. Swap source to special_to_date if
+        // the catalog has real per-product sale-end dates.
         'sale_price_effective_date' => [
             'source_type' => 'static',
             'source_value' => '',

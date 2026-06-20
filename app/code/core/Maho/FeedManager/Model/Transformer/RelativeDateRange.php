@@ -9,23 +9,8 @@
 declare(strict_types=1);
 
 /**
- * Emit a Google-Shopping-style ISO 8601 date range derived from offsets
- * evaluated at generation time.
- *
- * Google's `sale_price_effective_date` (and a few similar fields) wants
- * two ISO 8601 datetimes joined with a slash. Most catalogs run perpetual
- * promotions and have no per-product sale-end date, so the practical
- * pattern is to synthesise a rolling window: "now / now + N units". The
- * incoming value is ignored — the transformer emits the calculated range
- * regardless of the source it is chained on.
- *
- * Options are structured (direction + amount + unit) per end of the
- * range, so the admin UI shows sign / number / unit selectors instead of
- * raw strtotime expressions. Internally the offsets are stitched into
- * "+N units" / "-N units" strings and parsed by DateTime.
- *
- * Defaults produce "now / +90 days" — leaving the option chain blank in
- * the admin UI emits a 3-month rolling window with no extra config.
+ * Output an ISO 8601 date range (e.g. now / +90 days) for fields like
+ * sale_price_effective_date. The incoming value is ignored.
  */
 class Maho_FeedManager_Model_Transformer_RelativeDateRange extends Maho_FeedManager_Model_Transformer_AbstractTransformer
 {
@@ -131,19 +116,12 @@ class Maho_FeedManager_Model_Transformer_RelativeDateRange extends Maho_FeedMana
             $start = new DateTime($startExpr, $tz);
             $end = new DateTime($endExpr, $tz);
         } catch (Exception $e) {
-            // Bad offset or timezone — fall back to the original value rather
-            // than emitting a malformed range that would break a feed parser.
             return $value;
         }
 
         return $start->format($outputFormat) . '/' . $end->format($outputFormat);
     }
 
-    /**
-     * Stitch a strtotime-compatible expression from the structured pieces.
-     * "+ 0 days" parses to "now" so the start defaults work without any
-     * additional special-casing.
-     */
     protected function _buildOffsetExpression(string $direction, string $amount, string $unit): string
     {
         $sign = $direction === '-' ? '-' : '+';

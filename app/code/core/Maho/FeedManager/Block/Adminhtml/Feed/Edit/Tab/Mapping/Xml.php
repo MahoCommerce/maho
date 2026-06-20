@@ -379,10 +379,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 if (!platform) return;
                 options = options || {};
 
-                // Confirm before overwriting existing structure unless force is set.
-                // Programmatic callers (e.g. the Feed Template dropdown reacting to
-                // a user choice in another fieldset) pass {force:true} because the
-                // user has already explicitly opted in by picking the template.
+                // Programmatic callers pass {force:true} to skip the confirm.
                 if (!options.force && this.structure && this.structure.length > 0) {
                     if (!confirm("Loading a preset will replace your current XML structure. Continue?")) {
                         document.getElementById("xml-preset-select").value = this.currentPlatform || "";
@@ -567,19 +564,12 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
     }
 
     /**
-     * Default XML structure shown when a feed has no stored xml_structure yet.
-     *
-     * If the feed has a platform set we derive the structure from that
-     * platform adapter so a brand new Google Shopping feed (for example)
-     * arrives with the full set of attributes Google's spec defines —
-     * including CDATA flags, namespaced tags, and the default transformer
-     * chains shipped with the adapter. With no platform we fall back to the
-     * generic short list previously hardcoded here.
+     * Derives the structure from the feed's platform adapter when one is set,
+     * otherwise falls back to a generic Google-flavoured short list.
      */
     protected function _getDefaultXmlStructure(): array
     {
-        $feed = $this->_getFeed();
-        $platformCode = $feed?->getPlatform();
+        $platformCode = $this->_getFeed()->getPlatform();
 
         if ($platformCode) {
             $adapter = Mage::getSingleton('feedmanager/platform')->getAdapter($platformCode);
@@ -594,8 +584,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
             ['tag' => 'g:description', 'source_type' => 'attribute', 'source_value' => 'description', 'cdata' => true, 'optional' => true, 'use_parent' => 'if_empty'],
             ['tag' => 'g:link', 'source_type' => 'attribute', 'source_value' => 'url', 'cdata' => false, 'optional' => false, 'use_parent' => 'if_empty'],
             ['tag' => 'g:image_link', 'source_type' => 'attribute', 'source_value' => 'image', 'cdata' => false, 'optional' => true, 'use_parent' => 'if_empty'],
-            // is_in_stock returns 1 / 0; Google Shopping wants "in_stock" / "out_of_stock",
-            // so ship a conditional transformer pre-configured to do the mapping.
             ['tag' => 'g:availability', 'source_type' => 'attribute', 'source_value' => 'is_in_stock', 'cdata' => false, 'optional' => false, 'transformers' => 'conditional:operator=eq,compare_value=1,true_value=in_stock,false_value=out_of_stock'],
             ['tag' => 'g:price', 'source_type' => 'attribute', 'source_value' => 'price', 'cdata' => false, 'optional' => false],
             ['tag' => 'g:brand', 'source_type' => 'attribute', 'source_value' => 'brand', 'cdata' => true, 'optional' => true],
@@ -603,22 +591,12 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
         ];
     }
 
-    /**
-     * Build the fresh-feed structure rows by walking a platform adapter's
-     * declared required + optional attributes and its default mappings.
-     * Output matches the shape the controller's platformPresetAction returns
-     * when Load Preset is triggered, except tags carry their namespace
-     * prefix (e.g. g:availability) so the rendered tree visibly mirrors the
-     * final XML output instead of relying on the writer's namespacing step.
-     */
     protected function _buildDefaultFromAdapter(Maho_FeedManager_Model_Platform_AdapterInterface $adapter): array
     {
         $required = $adapter->getRequiredAttributes();
         $optional = $adapter->getOptionalAttributes();
         $mappings = $adapter->getDefaultMappings();
-        $namespaced = method_exists($adapter, 'getNamespacedAttributes')
-            ? array_flip($adapter->getNamespacedAttributes())
-            : [];
+        $namespaced = array_flip($adapter->getNamespacedAttributes());
         $cdataKeys = ['title', 'description', 'google_product_category', 'product_category', 'product_type'];
 
         $structure = [];
@@ -631,10 +609,10 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 'cdata' => in_array($key, $cdataKeys, true),
                 'optional' => !($attr['required'] ?? false),
             ];
-            if (!empty($mapping['use_parent'])) {
+            if (!empty($mapping['use_parent'] ?? '')) {
                 $row['use_parent'] = $mapping['use_parent'];
             }
-            if (!empty($mapping['transformers'])) {
+            if (!empty($mapping['transformers'] ?? '')) {
                 $row['transformers'] = $mapping['transformers'];
             }
             $structure[] = $row;
