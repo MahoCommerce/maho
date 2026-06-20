@@ -28,7 +28,8 @@ describe('Transformer Factory', function () {
             ->and($available)->toContain('uppercase')
             ->and($available)->toContain('lowercase')
             ->and($available)->toContain('capitalise')
-            ->and($available)->toHaveCount(15);
+            ->and($available)->toContain('relative_date_range')
+            ->and($available)->toHaveCount(16);
     });
 
     test('getTransformer returns correct instance', function () {
