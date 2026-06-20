@@ -576,34 +576,6 @@ SPDX-License-Identifier: AFL-3.0
                         </allow_symlink>
                     </fields>
                 </template>
-                <translate_inline translate="label">
-                    <label>Translate Inline</label>
-                    <sort_order>30</sort_order>
-                    <show_in_default>1</show_in_default>
-                    <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
-                    <fields>
-                        <active translate="label">
-                            <label>Enabled for Frontend</label>
-                            <frontend_type>boolean</frontend_type>
-                            <backend_model>adminhtml/system_config_backend_translate</backend_model>
-                            <sort_order>10</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </active>
-                        <active_admin translate="label comment">
-                            <label>Enabled for Admin</label>
-                            <frontend_type>boolean</frontend_type>
-                            <backend_model>adminhtml/system_config_backend_translate</backend_model>
-                            <sort_order>20</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <comment>Translate, blocks and other output caches should be disabled for both frontend and admin inline translations.</comment>
-                        </active_admin>
-                    </fields>
-                </translate_inline>
                 <log translate="label">
                     <label>Log Settings</label>
                     <frontend_model>adminhtml/system_config_frontend_log</frontend_model>
