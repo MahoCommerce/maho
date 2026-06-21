@@ -12,8 +12,11 @@ namespace MahoCLI\Commands;
 use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -32,6 +35,17 @@ class DBQuery extends BaseMahoCommand
             InputArgument::REQUIRED,
             'The SQL query to execute',
         );
+        $this->addOption(
+            'driver',
+            null,
+            InputOption::VALUE_REQUIRED,
+            "Execution backend: 'auto' (native client when available, otherwise the framework "
+                . "database connection), 'client' (force the native client), or 'adapter' (force "
+                . 'the framework connection). The adapter path runs a single statement and may '
+                . 'misread an unquoted "?" (e.g. a PostgreSQL JSON operator) as a bind '
+                . 'placeholder; use --driver=client for those.',
+            'auto',
+        );
     }
 
     #[\Override]
@@ -42,7 +56,33 @@ class DBQuery extends BaseMahoCommand
         $connConfig = Mage::getConfig()->getNode('global/resources/default_setup/connection');
 
         $engine = $this->getEngine($connConfig);
-        $query = $input->getArgument('query');
+        $query = (string) $input->getArgument('query');
+
+        $driver = (string) $input->getOption('driver');
+        if (!in_array($driver, ['auto', 'client', 'adapter'], true)) {
+            $this->writeError($output, "Invalid --driver value: {$driver} (expected: auto, client, or adapter)");
+            return Command::INVALID;
+        }
+
+        // 'adapter' forces the framework connection; 'client' forces the native CLI client;
+        // 'auto' uses the client when its binary is available and otherwise falls back to the
+        // framework connection so the command still works on PHP-only hosts (CI, slim images).
+        $useAdapter = match ($driver) {
+            'adapter' => true,
+            'client' => false,
+            default => !$this->isClientBinaryAvailable($engine),
+        };
+
+        if ($useAdapter) {
+            if ($driver === 'auto') {
+                $binary = $this->clientBinaryForEngine($engine);
+                $this->writeError($output, sprintf(
+                    "Notice: '%s' client binary not found; running the query through the framework database connection.",
+                    $binary !== '' ? $binary : $engine,
+                ));
+            }
+            return $this->executeViaAdapter($output, $query, $this->isClientBinaryAvailable($engine));
+        }
 
         return match ($engine) {
             'mysql' => $this->executeMysql($connConfig, $query),
@@ -50,6 +90,92 @@ class DBQuery extends BaseMahoCommand
             'sqlite' => $this->executeSqlite($connConfig, $query),
             default => $this->handleUnsupportedEngine($engine),
         };
+    }
+
+    private function executeViaAdapter(OutputInterface $output, string $query, bool $clientAvailable): int
+    {
+        // query() runs a single statement, so trailing statements in a multi-statement string
+        // would be silently dropped. Refuse them and point to a path that actually works here:
+        // the native client only when its binary exists, otherwise one statement per call.
+        if ($this->containsMultipleStatements($query)) {
+            $hint = $clientAvailable
+                ? 'run them with --driver=client or db:connect.'
+                : 'run each statement in a separate db:query call '
+                    . '(no native client binary is available on this host).';
+            $this->writeError(
+                $output,
+                'Multiple SQL statements are not supported on the framework connection; ' . $hint,
+            );
+            return Command::INVALID;
+        }
+
+        // Write connection: it can both read and run DML, so a single path serves SELECT and
+        // INSERT/UPDATE/DELETE/DDL without choosing a connection per statement type.
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+        if (!$connection instanceof \Maho\Db\Adapter\AdapterInterface) {
+            $this->writeError($output, 'Unable to resolve the framework database connection.');
+            return Command::FAILURE;
+        }
+
+        try {
+            $statement = $connection->query($query);
+            $columnCount = $statement->columnCount();
+
+            // columnCount() is the reliable discriminator: > 0 means the statement produced a
+            // result set (SELECT / SHOW / DESCRIBE / EXPLAIN); 0 means a non-result statement
+            // (INSERT / UPDATE / DELETE / DDL). It also avoids fetching from a statement that
+            // has no result set.
+            if ($columnCount === 0) {
+                $output->writeln(sprintf('%d row(s) affected.', $statement->rowCount()));
+                return Command::SUCCESS;
+            }
+
+            $rows = $statement->fetchAll();
+        } catch (\Throwable $e) {
+            // Surface a one-line error and a clean exit code, mirroring the native-client path,
+            // instead of letting the exception become a multi-frame console stack dump.
+            $this->writeError($output, $e->getMessage());
+            return Command::FAILURE;
+        }
+
+        if ($rows === []) {
+            $output->writeln('Empty result set.');
+            return Command::SUCCESS;
+        }
+
+        // Associative fetch collapses duplicate column labels (e.g. SELECT a.id, b.id), which
+        // would silently drop a column. Refuse rather than render a misleading result.
+        if ($columnCount !== count($rows[0])) {
+            $this->writeError(
+                $output,
+                'The result set has duplicate or ambiguous column names; render it with '
+                    . '--driver=client, or alias the columns (e.g. SELECT a.id AS a_id, b.id AS b_id).',
+            );
+            return Command::FAILURE;
+        }
+
+        $table = new Table($output);
+        $table->setHeaders(array_keys($rows[0]));
+        foreach ($rows as $row) {
+            $table->addRow(array_map(
+                static fn(mixed $value): string => $value === null ? 'NULL' : (string) $value,
+                array_values($row),
+            ));
+        }
+        $table->render();
+
+        return Command::SUCCESS;
+    }
+
+    /**
+     * Write a diagnostic to STDERR. Uses the console's dedicated error stream when available
+     * (so it stays off STDOUT and is assertable in tests) and OUTPUT_RAW so a message that
+     * happens to contain "<...>" is not parsed as console markup.
+     */
+    private function writeError(OutputInterface $output, string $message): void
+    {
+        $stream = $output instanceof ConsoleOutputInterface ? $output->getErrorOutput() : $output;
+        $stream->writeln($message, OutputInterface::OUTPUT_RAW);
     }
 
     private function executeMysql(mixed $connConfig, string $query): int
@@ -61,8 +187,13 @@ class DBQuery extends BaseMahoCommand
 
         $configFile = $this->createTempMySQLConfig($host, $user, $password);
 
+        // Prefer whichever client is installed: "mariadb" on modern MariaDB, "mysql" elsewhere
+        // (and as the MariaDB compat symlink). Both accept the same flags.
+        $binary = $this->resolveClientBinary('mysql') ?? 'mysql';
+
         $command = sprintf(
-            'mysql --defaults-extra-file=%s %s -e %s',
+            '%s --defaults-extra-file=%s %s -e %s',
+            escapeshellarg($binary),
             escapeshellarg($configFile),
             escapeshellarg($dbname),
             escapeshellarg($query),
