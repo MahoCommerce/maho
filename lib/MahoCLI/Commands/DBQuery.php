@@ -41,7 +41,9 @@ class DBQuery extends BaseMahoCommand
             InputOption::VALUE_REQUIRED,
             "Execution backend: 'auto' (native client when available, otherwise the framework "
                 . "database connection), 'client' (force the native client), or 'adapter' (force "
-                . 'the framework connection).',
+                . 'the framework connection). The adapter path runs a single statement and may '
+                . 'misread an unquoted "?" (e.g. a PostgreSQL JSON operator) as a bind '
+                . 'placeholder; use --driver=client for those.',
             'auto',
         );
     }
@@ -79,7 +81,7 @@ class DBQuery extends BaseMahoCommand
                     $binary !== '' ? $binary : $engine,
                 ));
             }
-            return $this->executeViaAdapter($output, $query);
+            return $this->executeViaAdapter($output, $query, $this->isClientBinaryAvailable($engine));
         }
 
         return match ($engine) {
@@ -90,15 +92,19 @@ class DBQuery extends BaseMahoCommand
         };
     }
 
-    private function executeViaAdapter(OutputInterface $output, string $query): int
+    private function executeViaAdapter(OutputInterface $output, string $query, bool $clientAvailable): int
     {
         // query() runs a single statement, so trailing statements in a multi-statement string
-        // would be silently dropped. Refuse them and point to the multi-statement-capable paths.
+        // would be silently dropped. Refuse them and point to a path that actually works here:
+        // the native client only when its binary exists, otherwise one statement per call.
         if ($this->containsMultipleStatements($query)) {
+            $hint = $clientAvailable
+                ? 'run them with --driver=client or db:connect.'
+                : 'run each statement in a separate db:query call '
+                    . '(no native client binary is available on this host).';
             $this->writeError(
                 $output,
-                'Multiple SQL statements are not supported on the framework connection; '
-                    . 'run them with --driver=client or db:connect.',
+                'Multiple SQL statements are not supported on the framework connection; ' . $hint,
             );
             return Command::INVALID;
         }
@@ -181,8 +187,13 @@ class DBQuery extends BaseMahoCommand
 
         $configFile = $this->createTempMySQLConfig($host, $user, $password);
 
+        // Prefer whichever client is installed: "mariadb" on modern MariaDB, "mysql" elsewhere
+        // (and as the MariaDB compat symlink). Both accept the same flags.
+        $binary = $this->resolveClientBinary('mysql') ?? 'mysql';
+
         $command = sprintf(
-            'mysql --defaults-extra-file=%s %s -e %s',
+            '%s --defaults-extra-file=%s %s -e %s',
+            escapeshellarg($binary),
             escapeshellarg($configFile),
             escapeshellarg($dbname),
             escapeshellarg($query),

@@ -35,32 +35,55 @@ trait DatabaseCliTrait
     }
 
     /**
-     * Map a database engine to the name of its interactive CLI client binary.
-     * Returns an empty string for engines that have no known client.
+     * Candidate CLI client binary names for a database engine, in preference order.
+     * The 'mysql' engine covers MariaDB too: MariaDB 10.5+ ships the client as "mariadb"
+     * and only keeps "mysql" as a back-compat symlink that newer versions deprecate and
+     * some slim images omit, so both names are accepted.
+     *
+     * @return list<string>
      */
-    private function clientBinaryForEngine(string $engine): string
+    private function clientBinaryCandidatesForEngine(string $engine): array
     {
         return match ($engine) {
-            'mysql' => 'mysql',
-            'pgsql' => 'psql',
-            'sqlite' => 'sqlite3',
-            default => '',
+            'mysql' => ['mysql', 'mariadb'],
+            'pgsql' => ['psql'],
+            'sqlite' => ['sqlite3'],
+            default => [],
         };
     }
 
     /**
-     * Whether the native CLI client for the given engine is available on PATH.
+     * Canonical client binary name for an engine, for diagnostics. Returns an empty string
+     * for engines that have no known client.
+     */
+    private function clientBinaryForEngine(string $engine): string
+    {
+        return $this->clientBinaryCandidatesForEngine($engine)[0] ?? '';
+    }
+
+    /**
+     * Resolve the first client binary that is actually available on PATH, or null if none is.
+     */
+    private function resolveClientBinary(string $engine): ?string
+    {
+        // ExecutableFinder is cross-platform (resolves "mysql.exe" on Windows), spawns no shell,
+        // and is not defeated by disable_functions — unlike a shell_exec('command -v ...') probe.
+        $finder = new ExecutableFinder();
+        foreach ($this->clientBinaryCandidatesForEngine($engine) as $candidate) {
+            if ($finder->find($candidate) !== null) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Whether a native CLI client for the given engine is available on PATH.
      */
     private function isClientBinaryAvailable(string $engine): bool
     {
-        $binary = $this->clientBinaryForEngine($engine);
-        if ($binary === '') {
-            return false;
-        }
-
-        // ExecutableFinder is cross-platform (resolves "mysql.exe" on Windows), spawns no shell,
-        // and is not defeated by disable_functions — unlike a shell_exec('command -v ...') probe.
-        return (new ExecutableFinder())->find($binary) !== null;
+        return $this->resolveClientBinary($engine) !== null;
     }
 
     /**
