@@ -108,6 +108,59 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 if (!tree) return;
                 tree.innerHTML = this.renderNodes(this.structure, "", 0);
                 this.updateHiddenField();
+                this.setupSortable();
+            },
+
+            // Constrain drag to same-parent siblings via per-container group keys.
+            setupSortable: function() {
+                if (typeof Sortable === "undefined") return;
+                var self = this;
+                var containers = [];
+                var root = document.getElementById("xml-tree");
+                if (root) containers.push(root);
+                var nested = document.querySelectorAll("#xml-tree .xml-children");
+                for (var n = 0; n < nested.length; n++) containers.push(nested[n]);
+
+                for (var c = 0; c < containers.length; c++) {
+                    var cont = containers[c];
+                    var prior = Sortable.get(cont);
+                    if (prior) prior.destroy();
+                    var containerId = cont.id || "xml-tree";
+                    (function(cid, el) {
+                        Sortable.create(el, {
+                            group: "xml-tree-" + cid,
+                            draggable: ".xml-node",
+                            animation: 150,
+                            ghostClass: "xml-node-ghost",
+                            chosenClass: "xml-node-chosen",
+                            dragClass: "xml-node-dragging",
+                            filter: ".xml-node-actions, .xml-toggle, .xml-node-actions button",
+                            preventOnFilter: false,
+                            onEnd: function(evt) {
+                                if (evt.oldIndex === evt.newIndex) return;
+                                self.reorderSibling(cid, evt.oldIndex, evt.newIndex);
+                            }
+                        });
+                    })(containerId, cont);
+                }
+            },
+
+            reorderSibling: function(containerId, oldIndex, newIndex) {
+                var arr;
+                if (containerId === "xml-tree") {
+                    arr = this.structure;
+                } else {
+                    var nodePath = containerId.replace(/^xml-children-/, "").replace(/-/g, ".");
+                    var parentNode = this.getNodeByPath(nodePath);
+                    if (!parentNode || !Array.isArray(parentNode.children)) return;
+                    arr = parentNode.children;
+                }
+                if (oldIndex < 0 || oldIndex >= arr.length || newIndex < 0 || newIndex >= arr.length) return;
+                var moved = arr.splice(oldIndex, 1)[0];
+                arr.splice(newIndex, 0, moved);
+                // Inputs in the properties panel are bound to now-stale paths after a reorder.
+                this.clearSelection();
+                this.render();
             },
 
             renderNodes: function(nodes, pathPrefix, depth) {
@@ -152,6 +205,15 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 this.selectedPath = path;
                 this.render();
                 this.showProperties(path);
+            },
+
+            // Clear the active selection and reset the properties panel; callers re-render.
+            clearSelection: function() {
+                this.selectedPath = null;
+                var panel = document.getElementById("xml-properties-content");
+                if (panel) panel.innerHTML = "<p class=\"fm-status-muted a-center\">' . addslashes($this->__('Select an element to edit its properties')) . '</p>";
+                var childBtn = document.getElementById("xml-add-child-btn");
+                if (childBtn) childBtn.style.display = "none";
             },
 
             showProperties: function(path) {
@@ -325,11 +387,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 var info = this.getParentAndIndex(path);
                 if (info.parent && Array.isArray(info.parent)) {
                     info.parent.splice(info.index, 1);
-                    this.selectedPath = null;
+                    this.clearSelection();
                     this.render();
-                    document.getElementById("xml-properties-content").innerHTML = "<p style=\"color: #666; text-align: center;\">' . addslashes($this->__('Select an element to edit its properties')) . '</p>";
-                    var childBtn = document.getElementById("xml-add-child-btn");
-                    if (childBtn) childBtn.style.display = "none";
                 }
             },
 
@@ -375,11 +434,12 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 TransformerModal.open();
             },
 
-            loadPreset: function(platform) {
+            loadPreset: function(platform, options) {
                 if (!platform) return;
+                options = options || {};
 
-                // Confirm before overwriting existing structure
-                if (this.structure && this.structure.length > 0) {
+                // Programmatic callers pass {force:true} to skip the confirm.
+                if (!options.force && this.structure && this.structure.length > 0) {
                     if (!confirm("Loading a preset will replace your current XML structure. Continue?")) {
                         document.getElementById("xml-preset-select").value = this.currentPlatform || "";
                         return;
@@ -402,11 +462,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                         alert("Error: " + data.message);
                     } else if (data.structure) {
                         self.structure = data.structure;
-                        self.selectedPath = null;
+                        self.clearSelection();
                         self.render();
-                        document.getElementById("xml-properties-content").innerHTML = "<p style=\"color: #666; text-align: center;\">' . addslashes($this->__('Select an element to edit its properties')) . '</p>";
-                        var childBtn = document.getElementById("xml-add-child-btn");
-                        if (childBtn) childBtn.style.display = "none";
                         // Update platform field in General tab
                         self.updatePlatform(data.platform);
                     }
@@ -563,20 +620,60 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
     }
 
     /**
-     * Get default XML structure for new feeds
+     * Derives the structure from the feed's platform adapter when one is set,
+     * otherwise falls back to a generic Google-flavoured short list.
      */
     protected function _getDefaultXmlStructure(): array
     {
+        $platformCode = $this->_getFeed()->getPlatform();
+
+        if ($platformCode) {
+            $adapter = Mage::getSingleton('feedmanager/platform')->getAdapter($platformCode);
+            if ($adapter) {
+                return $this->_buildDefaultFromAdapter($adapter);
+            }
+        }
+
         return [
             ['tag' => 'g:id', 'source_type' => 'attribute', 'source_value' => 'sku', 'cdata' => false, 'optional' => false],
             ['tag' => 'g:title', 'source_type' => 'attribute', 'source_value' => 'name', 'cdata' => true, 'optional' => false],
             ['tag' => 'g:description', 'source_type' => 'attribute', 'source_value' => 'description', 'cdata' => true, 'optional' => true, 'use_parent' => 'if_empty'],
             ['tag' => 'g:link', 'source_type' => 'attribute', 'source_value' => 'url', 'cdata' => false, 'optional' => false, 'use_parent' => 'if_empty'],
             ['tag' => 'g:image_link', 'source_type' => 'attribute', 'source_value' => 'image', 'cdata' => false, 'optional' => true, 'use_parent' => 'if_empty'],
-            ['tag' => 'g:availability', 'source_type' => 'attribute', 'source_value' => 'is_in_stock', 'cdata' => false, 'optional' => false],
+            ['tag' => 'g:availability', 'source_type' => 'attribute', 'source_value' => 'is_in_stock', 'cdata' => false, 'optional' => false, 'transformers' => 'conditional:operator=eq,compare_value=1,true_value=in_stock,false_value=out_of_stock'],
             ['tag' => 'g:price', 'source_type' => 'attribute', 'source_value' => 'price', 'cdata' => false, 'optional' => false],
             ['tag' => 'g:brand', 'source_type' => 'attribute', 'source_value' => 'brand', 'cdata' => true, 'optional' => true],
             ['tag' => 'g:condition', 'source_type' => 'static', 'source_value' => 'new', 'cdata' => false, 'optional' => true],
         ];
+    }
+
+    protected function _buildDefaultFromAdapter(Maho_FeedManager_Model_Platform_AdapterInterface $adapter): array
+    {
+        $required = $adapter->getRequiredAttributes();
+        $optional = $adapter->getOptionalAttributes();
+        $mappings = $adapter->getDefaultMappings();
+        $namespaced = array_flip($adapter->getNamespacedAttributes());
+        $cdataKeys = ['title', 'description', 'google_product_category', 'product_type'];
+
+        $structure = [];
+        foreach (array_merge($required, $optional) as $key => $attr) {
+            $mapping = $mappings[$key] ?? ['source_type' => 'attribute', 'source_value' => ''];
+            $row = [
+                'tag' => isset($namespaced[$key]) ? 'g:' . $key : $key,
+                'source_type' => $mapping['source_type'],
+                'source_value' => $mapping['source_value'],
+                'cdata' => in_array($key, $cdataKeys, true),
+                'optional' => !($attr['required'] ?? false),
+            ];
+            if (!empty($mapping['use_parent'] ?? '')) {
+                $row['use_parent'] = $mapping['use_parent'];
+            }
+            if (!empty($mapping['transformers'] ?? '')) {
+                $row['transformers'] = $mapping['transformers'];
+            }
+            $structure[] = $row;
+        }
+
+        return $structure;
     }
 }
