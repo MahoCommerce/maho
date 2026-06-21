@@ -326,7 +326,18 @@ const TransformerModal = {
                 for (let j = 0; j < optPairs.length; j++) {
                     const kv = optPairs[j].split('=');
                     if (kv.length === 2) {
-                        options[kv[0].trim()] = kv[1].trim();
+                        const key = kv[0].trim();
+                        const raw = kv[1];
+                        // Direction-aware trim — keep the inside edge for prepend_append.
+                        let value;
+                        if (code === 'prepend_append' && key === 'prepend') {
+                            value = raw.replace(/^\s+/, '');
+                        } else if (code === 'prepend_append' && key === 'append') {
+                            value = raw.replace(/\s+$/, '');
+                        } else {
+                            value = raw.trim();
+                        }
+                        options[key] = value;
                     }
                 }
             }

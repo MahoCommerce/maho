@@ -28,7 +28,8 @@ describe('Transformer Factory', function () {
             ->and($available)->toContain('uppercase')
             ->and($available)->toContain('lowercase')
             ->and($available)->toContain('capitalise')
-            ->and($available)->toHaveCount(15);
+            ->and($available)->toContain('relative_date_range')
+            ->and($available)->toHaveCount(16);
     });
 
     test('getTransformer returns correct instance', function () {
@@ -119,7 +120,7 @@ describe('TransformerInterface compliance', function () {
     $transformerCodes = [
         'strip_tags', 'truncate', 'default_value', 'prepend_append', 'replace',
         'map_values', 'format_price', 'format_date', 'url_encode', 'combine_fields',
-        'conditional', 'round', 'uppercase', 'lowercase', 'capitalise',
+        'conditional', 'round', 'uppercase', 'lowercase', 'capitalise', 'relative_date_range',
     ];
 
     foreach ($transformerCodes as $code) {
@@ -734,6 +735,74 @@ describe('Conditional Transformer', function () {
             'status' => '1',
         ]);
         expect($result)->toBe('enabled');
+    });
+});
+
+describe('RelativeDateRange Transformer', function () {
+    test('emits a start/end range spanning the configured offset', function () {
+        $result = Maho_FeedManager_Model_Transformer::apply('', 'relative_date_range', [
+            'output_format' => 'Y-m-d',
+            'start_amount' => '0',
+            'end_amount' => '90',
+            'timezone' => 'UTC',
+        ]);
+        expect($result)->toContain('/');
+        [$start, $end] = explode('/', $result);
+        $days = (new DateTime($start))->diff(new DateTime($end))->days;
+        expect($days)->toBe(90);
+    });
+
+    test('ignores the incoming value', function () {
+        $result = Maho_FeedManager_Model_Transformer::apply('ignored', 'relative_date_range', [
+            'output_format' => 'Y-m-d',
+            'timezone' => 'UTC',
+        ]);
+        expect($result)->not->toContain('ignored');
+        expect($result)->toContain('/');
+    });
+
+    test('supports a backward start direction', function () {
+        $result = Maho_FeedManager_Model_Transformer::apply('', 'relative_date_range', [
+            'output_format' => 'Y-m-d',
+            'start_direction' => '-',
+            'start_amount' => '7',
+            'start_unit' => 'days',
+            'end_amount' => '0',
+            'timezone' => 'UTC',
+        ]);
+        [$start, $end] = explode('/', $result);
+        expect((new DateTime($start)) < (new DateTime($end)))->toBeTrue();
+        $days = (new DateTime($start))->diff(new DateTime($end))->days;
+        expect($days)->toBe(7);
+    });
+
+    test('returns the original value when the timezone is invalid', function () {
+        $result = Maho_FeedManager_Model_Transformer::apply('original', 'relative_date_range', [
+            'timezone' => 'Not/ARealZone',
+        ]);
+        expect($result)->toBe('original');
+    });
+});
+
+describe('Direction-aware option trimming', function () {
+    test('preserves the inside-edge space on prepend_append append', function () {
+        $chain = Maho_FeedManager_Model_Transformer::parseChainString('prepend_append:append= kg');
+        expect($chain[0]['options']['append'])->toBe(' kg');
+    });
+
+    test('preserves the inside-edge space on prepend_append prepend', function () {
+        $chain = Maho_FeedManager_Model_Transformer::parseChainString('prepend_append:prepend=Approx ');
+        expect($chain[0]['options']['prepend'])->toBe('Approx ');
+    });
+
+    test('strips the outer edge on prepend_append affixes', function () {
+        $chain = Maho_FeedManager_Model_Transformer::parseChainString('prepend_append:append=kg ');
+        expect($chain[0]['options']['append'])->toBe('kg');
+    });
+
+    test('fully trims option values for other transformers', function () {
+        $chain = Maho_FeedManager_Model_Transformer::parseChainString('conditional:compare_value= 1 ');
+        expect($chain[0]['options']['compare_value'])->toBe('1');
     });
 });
 
