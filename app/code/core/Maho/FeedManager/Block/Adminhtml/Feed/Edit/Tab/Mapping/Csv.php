@@ -249,11 +249,12 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
                 }
             },
 
-            loadPreset: function(platform) {
+            loadPreset: function(platform, options) {
                 if (!platform) return;
+                options = options || {};
 
-                // Confirm before overwriting existing mappings
-                if (this.columns && this.columns.length > 0) {
+                // Programmatic callers pass {force:true} to skip the confirm.
+                if (!options.force && this.columns && this.columns.length > 0) {
                     if (!confirm("Loading a preset will replace your current column mappings. Continue?")) {
                         document.getElementById("csv-preset-select").value = this.currentPlatform || "";
                         return;

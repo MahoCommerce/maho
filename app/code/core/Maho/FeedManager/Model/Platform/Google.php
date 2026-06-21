@@ -414,8 +414,11 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'source_value' => 'mpn',
             'transformers' => 'truncate:max_length=70',
         ],
-        // Empty gtin → "no", otherwise → "yes". Extend the chain for the
-        // stricter "no GTIN AND no MPN AND no brand" rule if needed.
+        // WARNING: GTIN-only heuristic. Empty gtin → "no", otherwise → "yes".
+        // This MISLABELS brand+MPN-only products (which Google treats as having
+        // a valid identifier) as identifier_exists="no", which can suppress them.
+        // For catalogs that rely on brand+MPN, replace this with a rule/combined
+        // source covering the full "no GTIN AND no MPN AND no brand" condition.
         'identifier_exists' => [
             'source_type' => 'static',
             'source_value' => '',

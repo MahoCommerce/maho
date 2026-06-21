@@ -653,7 +653,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
         $optional = $adapter->getOptionalAttributes();
         $mappings = $adapter->getDefaultMappings();
         $namespaced = array_flip($adapter->getNamespacedAttributes());
-        $cdataKeys = ['title', 'description', 'google_product_category', 'product_category', 'product_type'];
+        $cdataKeys = ['title', 'description', 'google_product_category', 'product_type'];
 
         $structure = [];
         foreach (array_merge($required, $optional) as $key => $attr) {
