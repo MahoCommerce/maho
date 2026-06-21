@@ -49,7 +49,11 @@ final class ProductTierPriceProcessor extends \Maho\ApiPlatform\Processor
         $product = $this->loadProduct($productId);
 
         $request = $context['request'] ?? null;
-        $body = $request ? json_decode($request->getContent(), true) : [];
+        try {
+            $body = $request ? \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]') : [];
+        } catch (\JsonException) {
+            throw new BadRequestHttpException('Invalid JSON in request body');
+        }
 
         if (!is_array($body)) {
             throw new BadRequestHttpException('Request body must be an array of tier prices');

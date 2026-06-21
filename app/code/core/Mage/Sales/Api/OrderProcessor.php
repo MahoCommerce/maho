@@ -126,7 +126,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Set customer email from the body if provided (guest checkout)
-        if ($guestEmail && filter_var($guestEmail, FILTER_VALIDATE_EMAIL)) {
+        if ($guestEmail && \Mage::helper('core')->isValidEmail($guestEmail)) {
             $quote->setCustomerEmail($guestEmail);
         }
 

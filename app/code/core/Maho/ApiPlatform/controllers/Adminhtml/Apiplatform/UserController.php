@@ -81,6 +81,10 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_UserController extends Mage_Adminht
             $model->setLastname($data['lastname'] ?? $model->getLastname());
             $model->setEmail($data['email'] ?? $model->getEmail());
             $model->setIsActive($data['is_active'] ?? $model->getIsActive());
+            if (array_key_exists('allowed_store_ids', $data)) {
+                $storeIds = array_values(array_filter(array_map('intval', (array) $data['allowed_store_ids'])));
+                $model->setAllowedStoreIds($storeIds === [] ? null : Mage::helper('core')->jsonEncode($storeIds));
+            }
         }
 
         Mage::register('api_user', $model);
@@ -119,6 +123,12 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_UserController extends Mage_Adminht
             $model->setLastname($data['lastname'] ?? '');
             $model->setEmail($data['email'] ?? '');
             $model->setIsActive($data['is_active'] ?? 1);
+
+            // Normalize the store-restriction multiselect into a JSON array of
+            // ints (empty selection => null => all stores). The JWT issuer reads
+            // this column to scope tokens.
+            $storeIds = array_values(array_filter(array_map('intval', (array) ($data['allowed_store_ids'] ?? []))));
+            $model->setAllowedStoreIds($storeIds === [] ? null : Mage::helper('core')->jsonEncode($storeIds));
 
             // Set API key if provided
             if (!empty($data['api_key'])) {

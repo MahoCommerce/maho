@@ -62,7 +62,11 @@ class ApiUserVoter extends Voter
 
         $resource = $this->registry->resolveRestResource($request->getPathInfo());
         if ($resource === null) {
-            return false;
+            // No registered resource maps to this path, so there is no granular
+            // permission to enforce. Defer to the operation's own security
+            // expression rather than denying, which would otherwise 403 every
+            // unmapped (but legitimately role-gated) endpoint.
+            return true;
         }
 
         $operation = $this->resolveOperation($request->getMethod(), $resource);

@@ -20,6 +20,7 @@ return function (Schema $schema): void {
     $apiUser = $schema->getTable('api_user');
     $apiUser->addColumn('client_id', Types::STRING, ['length' => 64, 'notnull' => false, 'comment' => 'OAuth2 Client ID']);
     $apiUser->addColumn('client_secret', Types::STRING, ['length' => 255, 'notnull' => false, 'comment' => 'OAuth2 Client Secret (bcrypt hashed)']);
+    $apiUser->addColumn('allowed_store_ids', Types::TEXT, ['notnull' => false, 'comment' => 'JSON array of store ids the API user is restricted to; null/empty = all stores']);
     $apiUser->addUniqueIndex(['client_id']);
 
     // Per-order one-time token for guest order lookup (getGuestOrder / /guestOrder).

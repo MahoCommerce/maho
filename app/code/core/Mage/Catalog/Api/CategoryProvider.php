@@ -53,7 +53,11 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
     {
         $mahoCategory = \Mage::getModel('catalog/category')->load($id);
 
-        if (!$mahoCategory->getId()) {
+        // Single-item reads must apply the same is_active + store-tree scoping
+        // the collection path applies; otherwise a disabled category, or one
+        // belonging to another store's root tree (including its rendered
+        // landing_page CMS block), is readable by guessing its id.
+        if (!$this->isAccessibleCategory($mahoCategory)) {
             return null;
         }
 
@@ -79,7 +83,35 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         // Load full category
         $mahoCategory = \Mage::getModel('catalog/category')->load($category->getId());
 
+        // url_key is not unique across store trees, so re-scope after reload to
+        // avoid returning a same-keyed category from another store's tree.
+        if (!$this->isAccessibleCategory($mahoCategory)) {
+            return null;
+        }
+
         return $this->mapToDto($mahoCategory, true);
+    }
+
+    /**
+     * Whether a category is active and lives under the current store's root
+     * category tree. Mirrors the scoping the collection path applies so single
+     * lookups (by id / url key) cannot leak disabled or cross-store categories.
+     */
+    private function isAccessibleCategory(\Mage_Catalog_Model_Category $category): bool
+    {
+        if (!$category->getId() || !$category->getIsActive()) {
+            return false;
+        }
+
+        $rootCategoryId = (int) StoreContext::getRootCategoryId();
+        if ($rootCategoryId <= 0) {
+            return true;
+        }
+
+        // The store root and every descendant carry the root id in their path
+        // ("1/<root>/..."). Anchoring with slashes prevents substring matches.
+        $pathIds = array_map('intval', explode('/', (string) $category->getPath()));
+        return in_array($rootCategoryId, $pathIds, true);
     }
 
     /**
@@ -115,6 +147,14 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         if ($search) {
             $escapedSearch = addcslashes($search, '%_');
             $collection->addAttributeToFilter('name', ['like' => "%{$escapedSearch}%"]);
+
+            // Search has no parent filter, so without this it would return
+            // categories from every store's tree. Constrain to the current
+            // store root so cross-store categories aren't leaked via search.
+            $rootCategoryId = (int) StoreContext::getRootCategoryId();
+            if ($rootCategoryId > 0) {
+                $collection->addAttributeToFilter('path', ['like' => "%/{$rootCategoryId}/%"]);
+            }
         }
 
         if ($includeInMenu !== null) {

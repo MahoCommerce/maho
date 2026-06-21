@@ -104,6 +104,36 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Edit_Tab_Main extends Ma
             ],
         ]);
 
+        // Decode the persisted JSON list of store ids into an array of ints so the
+        // multiselect pre-selects the saved scope. Empty/invalid => no restriction
+        // (all stores), matching the JWT/consumer "null = all stores" semantics.
+        $allowedStoreIds = [];
+        $rawAllowedStoreIds = $model->getAllowedStoreIds();
+        if (is_string($rawAllowedStoreIds) && $rawAllowedStoreIds !== '') {
+            try {
+                $decoded = Mage::helper('core')->jsonDecode($rawAllowedStoreIds);
+                if (is_array($decoded)) {
+                    $allowedStoreIds = array_map('intval', $decoded);
+                }
+            } catch (JsonException $e) {
+                $allowedStoreIds = [];
+            }
+        }
+
+        // Normalize the model value to the decoded array so the trailing
+        // setValues($model->getData()) populates the multiselect correctly
+        // instead of re-applying the raw JSON string.
+        $model->setAllowedStoreIds($allowedStoreIds);
+
+        $fieldset->addField('allowed_store_ids', 'multiselect', [
+            'name'   => 'allowed_store_ids[]',
+            'label'  => $this->__('Restrict to Stores'),
+            'title'  => $this->__('Restrict to Stores'),
+            'values' => Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(),
+            'value'  => $allowedStoreIds,
+            'note'   => $this->__('Leave empty to allow access to all stores.'),
+        ]);
+
         // OAuth2 Client Credentials section
         $oauth = $form->addFieldset('oauth_fieldset', [
             'legend' => $this->__('OAuth2 Client Credentials'),

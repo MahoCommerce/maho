@@ -13,6 +13,7 @@ namespace Mage\Checkout\Api;
 use ApiPlatform\Metadata\Operation;
 use Symfony\Bundle\SecurityBundle\Security;
 use Maho\ApiPlatform\Service\StoreContext;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -45,7 +46,11 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             $context['args']['input'] = [];
             $request = $context['request'] ?? null;
             if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
-                $body = json_decode($request->getContent(), true);
+                try {
+                    $body = \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]');
+                } catch (\JsonException) {
+                    throw new BadRequestHttpException('Invalid JSON in request body');
+                }
                 if (is_array($body)) {
                     $context['args']['input'] = $body;
                 }

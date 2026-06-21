@@ -41,7 +41,11 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
         $productId = (int) ($uriVariables['productId'] ?? 0);
 
         $request = $context['request'] ?? null;
-        $body = $request ? json_decode($request->getContent(), true) : [];
+        try {
+            $body = $request ? (array) \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]') : [];
+        } catch (\JsonException) {
+            throw new BadRequestHttpException('Invalid JSON in request body');
+        }
 
         if ($operation instanceof DeleteOperationInterface) {
             $this->requirePermission($user, 'products/delete');

@@ -21,6 +21,7 @@ use Mage_CatalogInventory_Model_Stock_Item;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Trait\ActivityLogTrait;
 use Maho\ApiPlatform\Service\StoreContext;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -104,7 +105,8 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
 
         $this->applyProductData($product, $data);
 
-        $websiteIds = $data->websiteIds ?? $this->getDefaultWebsiteIds();
+        $websiteIds = $data->websiteIds ?? $this->getDefaultWebsiteIds($user);
+        $this->validateSubmittedWebsiteIds($websiteIds, $user);
         $product->setWebsiteIds($websiteIds);
 
         $this->safeSave($product, 'create product');
@@ -138,6 +140,8 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Product not found');
         }
 
+        $this->authorizeProductWebsites($product, $user);
+
         $oldData = $product->getData();
 
         if ($data->name !== '') {
@@ -164,6 +168,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $this->applyProductData($product, $data);
 
         if ($data->websiteIds !== null) {
+            $this->validateSubmittedWebsiteIds($data->websiteIds, $user);
             $product->setWebsiteIds($data->websiteIds);
         }
 
@@ -200,6 +205,14 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
 
         if (!$product->getId()) {
             throw new NotFoundHttpException('Product not found');
+        }
+
+        $this->authorizeProductWebsites($product, $user);
+
+        // A store-restricted user may only write attribute values into a store
+        // they're allowed to (storeId 0 = admin/default scope = all stores).
+        if ($storeId && $user->getAllowedStoreIds() !== null && !$user->canAccessStore($storeId)) {
+            throw new AccessDeniedHttpException("Access denied for store: {$storeId}");
         }
 
         $oldData = $product->getData();
@@ -285,6 +298,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
 
         // Website IDs still use model (infrequent, complex)
         if ($data->websiteIds !== null) {
+            $this->validateSubmittedWebsiteIds($data->websiteIds, $user);
             $product->setWebsiteIds($data->websiteIds);
             $product->save();
         }
@@ -303,6 +317,8 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         if (!$product->getId()) {
             throw new NotFoundHttpException('Product not found');
         }
+
+        $this->authorizeProductWebsites($product, $user);
 
         $oldData = $product->getData();
 
@@ -493,12 +509,93 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
 
 
     /**
+     * Default website assignment when the request omits websiteIds.
+     *
+     * For an unrestricted user this mirrors core behaviour (current store's
+     * website, falling back to website 1). For a store-restricted user we never
+     * broaden beyond the websites they're allowed: we scope the default to the
+     * allowed websites so a missing websiteIds can't silently assign a product
+     * to a website outside the user's scope.
+     *
      * @return int[]
      */
-    private function getDefaultWebsiteIds(): array
+    private function getDefaultWebsiteIds(ApiUser $user): array
     {
+        $allowedWebsiteIds = $this->getAllowedWebsiteIds($user);
+
         $websiteId = (int) Mage::app()->getStore()->getWebsiteId();
-        return $websiteId ? [$websiteId] : [1];
+        $defaults = $websiteId ? [$websiteId] : [1];
+
+        if ($allowedWebsiteIds === null) {
+            return $defaults;
+        }
+
+        // Keep only defaults inside the allowed set; if none qualify, fall back
+        // to the full allowed set so the product lands in the user's scope.
+        $scoped = array_values(array_intersect($defaults, $allowedWebsiteIds));
+        return $scoped !== [] ? $scoped : $allowedWebsiteIds;
+    }
+
+    /**
+     * Map the user's allowed STORE ids to their website ids.
+     *
+     * Returns null when the user is unrestricted (getAllowedStoreIds() === null),
+     * signalling "no website restriction" — callers must treat null as "allow all".
+     *
+     * @return int[]|null
+     */
+    private function getAllowedWebsiteIds(ApiUser $user): ?array
+    {
+        $allowedStoreIds = $user->getAllowedStoreIds();
+        if ($allowedStoreIds === null) {
+            return null;
+        }
+
+        $websiteIds = [];
+        foreach ($allowedStoreIds as $storeId) {
+            $websiteIds[] = (int) Mage::app()->getStore($storeId)->getWebsiteId();
+        }
+
+        return array_values(array_unique($websiteIds));
+    }
+
+    /**
+     * Reject submitted website IDs that fall outside a store-restricted user's
+     * allowed websites. No-op for unrestricted users.
+     *
+     * @param int[] $websiteIds
+     */
+    private function validateSubmittedWebsiteIds(array $websiteIds, ApiUser $user): void
+    {
+        $allowedWebsiteIds = $this->getAllowedWebsiteIds($user);
+        if ($allowedWebsiteIds === null) {
+            return;
+        }
+
+        foreach ($websiteIds as $websiteId) {
+            if (!in_array((int) $websiteId, $allowedWebsiteIds, true)) {
+                throw new AccessDeniedHttpException("Access denied for website: {$websiteId}");
+            }
+        }
+    }
+
+    /**
+     * Authorize a loaded product against a store-restricted user: the product
+     * must belong to at least one website the user is allowed to. No-op for
+     * unrestricted users.
+     */
+    private function authorizeProductWebsites(Mage_Catalog_Model_Product $product, ApiUser $user): void
+    {
+        $allowedWebsiteIds = $this->getAllowedWebsiteIds($user);
+        if ($allowedWebsiteIds === null) {
+            return;
+        }
+
+        $productWebsiteIds = array_map('intval', $product->getWebsiteIds());
+
+        if (array_intersect($productWebsiteIds, $allowedWebsiteIds) === []) {
+            throw new AccessDeniedHttpException("Access denied for this product's websites");
+        }
     }
 
     private function invalidateCache(int $productId): void

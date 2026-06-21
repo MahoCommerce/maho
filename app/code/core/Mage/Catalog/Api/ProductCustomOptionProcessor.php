@@ -54,7 +54,11 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         $this->requirePermission($user, 'products/write');
 
         $request = $context['request'] ?? null;
-        $body = $request ? json_decode($request->getContent(), true) : [];
+        try {
+            $body = $request ? (array) \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]') : [];
+        } catch (\JsonException) {
+            throw new BadRequestHttpException('Invalid JSON in request body');
+        }
 
         if ($operation instanceof Post) {
             return $this->handleCreate($productId, $body);

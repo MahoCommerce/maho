@@ -140,7 +140,11 @@ class CartService
 
         // Bridge REST request body for Provider context (Processor does this later, but Provider runs first)
         if (empty($args) && $request instanceof \Symfony\Component\HttpFoundation\Request) {
-            $body = json_decode((string) $request->getContent(), true);
+            try {
+                $body = \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]');
+            } catch (\JsonException) {
+                throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('Invalid JSON in request body');
+            }
             if (is_array($body)) {
                 $args = $body;
             }

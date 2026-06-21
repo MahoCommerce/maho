@@ -255,8 +255,13 @@ class ApiPermissionRegistry
     {
         try {
             $document = Parser::parse($query);
-        } catch (\Exception) {
-            return [];
+        } catch (\Exception $e) {
+            // Never fail open: a query this parser cannot read must not bypass
+            // permission analysis just because it returned an empty permission
+            // set. The caller (GraphQlPermissionListener) treats a thrown
+            // exception as "deny", so an unparseable query is rejected rather
+            // than executed unchecked by API Platform's own parser.
+            throw new \RuntimeException('Unable to parse GraphQL query for permission analysis.', 0, $e);
         }
 
         $fieldMap = self::load()['graphQlFieldMap'];

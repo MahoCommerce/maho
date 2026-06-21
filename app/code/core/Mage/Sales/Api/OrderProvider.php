@@ -189,8 +189,10 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             return true;
         }
 
-        // API users with orders/read permission can access any order
-        // (permission enforcement is handled by security.yaml + ApiUserVoter)
+        // API users with orders/read permission can access any order. The
+        // granular orders/read check is enforced upstream by
+        // ApiUserRestPermissionListener (via ApiUserVoter) before this runs, so
+        // by the time we get here the key is already authorized to read orders.
         $user = $this->security->getUser();
         if ($user instanceof \Maho\ApiPlatform\Security\ApiUser && $user->isApiUser()) {
             return true;

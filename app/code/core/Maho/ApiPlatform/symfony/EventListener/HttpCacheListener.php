@@ -93,8 +93,21 @@ class HttpCacheListener
         $path = $request->getPathInfo();
 
         if (!$isAuthenticated && $this->isPublicPath($path)) {
-            // Public endpoints: CDN-cacheable
-            $response->headers->set('Cache-Control', 'public, max-age=3600');
+            if ($request->query->has('store')) {
+                // Store selected via the `store` query parameter. These public
+                // endpoints (categories, store-config, countries) are
+                // store-specific, but a shared/CDN cache keyed on URL + Vary
+                // cannot distinguish stores here: Vary cannot express a query
+                // parameter and many CDNs strip/normalize the query string, so a
+                // `public` response could be served to a client targeting a
+                // different store (cross-store cache poisoning). Keep it private.
+                // Clients that want CDN-cacheable responses must select the store
+                // via the X-Store-Code header, which Vary covers.
+                $response->headers->set('Cache-Control', 'private, max-age=3600');
+            } else {
+                // Public endpoints: CDN-cacheable
+                $response->headers->set('Cache-Control', 'public, max-age=3600');
+            }
         } elseif ($isAuthenticated) {
             // Authenticated reads (collections and single resources): moderate
             // cache. Tag invalidation bounds staleness on writes regardless of

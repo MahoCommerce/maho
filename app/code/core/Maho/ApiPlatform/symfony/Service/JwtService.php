@@ -117,7 +117,7 @@ class JwtService
         $now = new DateTimeImmutable();
         $config = $this->getConfig();
 
-        $token = $config->builder()
+        $builder = $config->builder()
             ->issuedBy($this->getIssuer())
             ->permittedFor(self::AUDIENCE)
             ->identifiedBy(bin2hex(random_bytes(16)))
@@ -129,10 +129,45 @@ class JwtService
             ->withClaim('username', $apiUser->getUsername())
             ->withClaim('type', 'api_user')
             ->withClaim('roles', ['ROLE_API_USER'])
-            ->withClaim('permissions', $permissions)
-            ->getToken($config->signer(), $config->signingKey());
+            ->withClaim('permissions', $permissions);
+
+        // Scope the token to the api user's allowed stores, when set. A
+        // null/empty/invalid column means "all stores" — emit no claim, so the
+        // consumer side (OAuth2Authenticator) leaves allowedStoreIds null.
+        $allowedStoreIds = $this->getApiUserAllowedStoreIds($apiUser);
+        if ($allowedStoreIds !== []) {
+            $builder = $builder->withClaim('allowed_store_ids', array_map('intval', $allowedStoreIds));
+        }
+
+        $token = $builder->getToken($config->signer(), $config->signingKey());
 
         return $token->toString();
+    }
+
+    /**
+     * Read and decode the api_user.allowed_store_ids JSON column.
+     *
+     * Returns the list of store ids the user is restricted to, or an empty
+     * array when unrestricted (null/empty column or undecodable JSON — treated
+     * conservatively as no restriction so a malformed value can't lock a user
+     * out of every store).
+     *
+     * @return array<int, mixed>
+     */
+    private function getApiUserAllowedStoreIds(\Mage_Api_Model_User $apiUser): array
+    {
+        $raw = $apiUser->getData('allowed_store_ids');
+        if (!is_string($raw) || $raw === '') {
+            return [];
+        }
+
+        try {
+            $decoded = \Mage::helper('core')->jsonDecode($raw);
+        } catch (\JsonException) {
+            return [];
+        }
+
+        return is_array($decoded) ? $decoded : [];
     }
 
     /**

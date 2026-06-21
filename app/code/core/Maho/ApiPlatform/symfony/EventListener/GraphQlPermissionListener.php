@@ -13,6 +13,7 @@ namespace Maho\ApiPlatform\EventListener;
 use Maho\ApiPlatform\Security\ApiPermissionRegistry;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -69,22 +70,27 @@ class GraphQlPermissionListener
             return;
         }
 
-        $content = $request->getContent();
-        if ($content === '') {
+        $query = $this->extractQuery($request);
+        if ($query === null || $query === '') {
+            // A privileged token is hitting the GraphQL endpoint but we could
+            // not extract an analyzable query. If there's no body at all, let
+            // API Platform produce its own 400; but if there IS content we
+            // couldn't read (unexpected content type, malformed body), fail
+            // closed rather than let an unanalyzed operation through.
+            if ($request->getContent() !== '') {
+                throw new AccessDeniedHttpException('Unable to analyze GraphQL query for permission enforcement.');
+            }
             return;
         }
 
         try {
-            $body = (array) \Mage::helper('core')->jsonDecode($content);
-        } catch (\JsonException) {
-            return;
+            $requiredPermissions = $this->registry->resolveGraphQlPermissions($query);
+        } catch (\Throwable) {
+            // resolveGraphQlPermissions throws when it cannot parse the query.
+            // Parser disagreement must never fail open: deny instead of letting
+            // API Platform's parser execute an operation we never analyzed.
+            throw new AccessDeniedHttpException('Unable to analyze GraphQL query for permission enforcement.');
         }
-        $query = $body['query'] ?? null;
-        if (!is_string($query) || $query === '') {
-            return;
-        }
-
-        $requiredPermissions = $this->registry->resolveGraphQlPermissions($query);
         if ($requiredPermissions === []) {
             return;
         }
@@ -113,5 +119,51 @@ class GraphQlPermissionListener
                 );
             }
         }
+    }
+
+    /**
+     * Extract the GraphQL query string from the request across the transports
+     * API Platform accepts (JSON body, raw application/graphql, multipart
+     * uploads). Returns null when no query can be read; the caller decides
+     * whether that is benign (empty body) or must fail closed.
+     */
+    private function extractQuery(Request $request): ?string
+    {
+        $contentType = (string) $request->headers->get('Content-Type', '');
+
+        // Raw GraphQL transport: the entire body is the query.
+        if (str_contains($contentType, 'application/graphql')) {
+            $content = $request->getContent();
+            return $content === '' ? null : $content;
+        }
+
+        // GraphQL multipart request (file uploads): the operation lives in the
+        // 'operations' form field per the graphql-multipart-request spec.
+        if (str_contains($contentType, 'multipart/form-data')) {
+            $operations = $request->request->get('operations');
+            if (!is_string($operations) || $operations === '') {
+                return null;
+            }
+            try {
+                $decoded = (array) \Mage::helper('core')->jsonDecode($operations);
+            } catch (\JsonException) {
+                return null;
+            }
+            $query = $decoded['query'] ?? null;
+            return is_string($query) ? $query : null;
+        }
+
+        // Default JSON transport.
+        $content = $request->getContent();
+        if ($content === '') {
+            return null;
+        }
+        try {
+            $body = (array) \Mage::helper('core')->jsonDecode($content);
+        } catch (\JsonException) {
+            return null;
+        }
+        $query = $body['query'] ?? null;
+        return is_string($query) ? $query : null;
     }
 }
