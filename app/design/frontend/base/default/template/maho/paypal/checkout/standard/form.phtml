@@ -7,6 +7,9 @@
 
 /** @var Maho_Paypal_Block_Checkout_Standard_Form $this */
 $containerId = 'paypal-button-container-' . $this->getMethodCode();
+// In multistep checkout the smart button (and order placement) moves to the review step,
+// so the payment step only shows a hint. Onestep keeps the button here as the terminal action.
+$isMultistep = !Mage::getStoreConfigFlag('checkout/options/onestep_checkout_enabled');
 ?>
 <div id="payment_form_<?= $this->escapeHtml($this->getMethodCode()) ?>" style="display:none"
     data-sdk-url="<?= $this->escapeUrl($this->getJsSdkUrl()) ?>"
@@ -16,6 +19,9 @@ $containerId = 'paypal-button-container-' . $this->getMethodCode();
     data-approve-order-url="<?= $this->escapeUrl($this->getApproveOrderUrl()) ?>"
     data-container-id="<?= $this->escapeHtml($containerId) ?>"
     data-method-code="<?= $this->escapeHtml($this->getMethodCode()) ?>">
+    <?php if ($isMultistep): ?>
+    <p class="paypal-multistep-hint"><?= $this->escapeHtml($this->__('Review your order on the next step to confirm your payment with PayPal.')) ?></p>
+    <?php else: ?>
     <div id="<?= $this->escapeHtml($containerId) ?>" class="paypal-button-container">
         <paypal-button hidden></paypal-button>
     </div>
@@ -25,5 +31,6 @@ $containerId = 'paypal-button-container-' . $this->getMethodCode();
         <span class="paypal-save-vault-icon"><?= Mage::helper('core')->getIconSvg('lock', 'outline') ?></span>
         <span><?= $this->escapeHtml($this->__('Save this payment method for future purchases')) ?></span>
     </label>
+    <?php endif; ?>
     <?php endif; ?>
 </div>

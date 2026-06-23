@@ -50,6 +50,7 @@
 <script>truncateOptions();</script>
 <div id="checkout-review-submit">
     <?= $this->getChildHtml('agreements') ?>
+    <?= $this->getChildHtml('paypal_standard') ?>
     <div class="buttons-set" id="review-buttons-container">
         <a class="continue-shopping" href="<?= $this->getUrl() ?>"><?= $this->__('Continue Shopping') ?></a>
         <?= $this->getChildHtml('button') ?>

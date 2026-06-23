@@ -34,6 +34,12 @@ SPDX-License-Identifier: OSL-3.0
         </reference>
     </checkout_onepage_index>
 
+    <checkout_onepage_review>
+        <reference name="root">
+            <block type="paypal/checkout_standard_review" name="checkout.onepage.review.paypal_standard" as="paypal_standard" template="maho/paypal/checkout/standard/review.phtml"/>
+        </reference>
+    </checkout_onepage_review>
+
     <checkout_cart_index>
         <reference name="head">
             <action method="addJs" ifconfig="payment/paypal_standard_checkout/active"><script>maho/paypal/sdk-loader.js</script></action>
