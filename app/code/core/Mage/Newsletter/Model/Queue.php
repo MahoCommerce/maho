@@ -163,7 +163,7 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
             $name = $item->getSubscriberFullName();
 
             $sender->emulateDesign($item->getStoreId());
-            $successSend = $sender->send($email, $name, ['subscriber' => $item]);
+            $successSend = $sender->send($email, $name, ['subscriber' => $item, 'is_newsletter' => true]);
             $sender->revertDesign();
 
             if ($successSend) {

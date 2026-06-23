@@ -256,7 +256,7 @@ class Maho_Paypal_Model_Api_Client
             $message = $errorData['message'] ?? $errorBody;
             if (!empty($errorData['details'])) {
                 $details = array_map(fn(array $d) => $d['description'] ?? $d['issue'] ?? '', $errorData['details']);
-                $message .= ' — ' . implode('; ', array_filter($details));
+                $message .= ': ' . implode('; ', array_filter($details));
             }
             $this->_log('Webhook registration failed', ['url' => $url, 'status' => $statusCode, 'response' => $errorData]);
             throw new \RuntimeException($message);
@@ -335,7 +335,10 @@ class Maho_Paypal_Model_Api_Client
         }
 
         if (is_object($response) && method_exists($response, 'getBody')) {
-            return Mage::helper('core')->jsonDecode((string) $response->getBody());
+            // Empty body (HTTP 204) decodes to "", not an array.
+            $body = (string) $response->getBody();
+            $decoded = $body === '' ? [] : Mage::helper('core')->jsonDecode($body);
+            return is_array($decoded) ? $decoded : [];
         }
 
         return [];

@@ -12,6 +12,11 @@ class MahoPaypalStandardCheckout {
         this.containerId = formDiv.dataset.containerId;
         this.methodCode = formDiv.dataset.methodCode;
         this.addToCartFormId = formDiv.dataset.addToCartForm || null;
+        // Review mode (multistep checkout): PayPal approval only pre-confirms the funding
+        // source. The native "Place Order" button stays the terminal action and runs
+        // placeApprovedOrder() (capture + placement). onApprove does not redirect here.
+        this.reviewMode = formDiv.dataset.reviewMode === '1';
+        this._approvedOrderId = null;
         this._mounted = false;
         this._paymentSession = null;
     }
@@ -39,7 +44,7 @@ class MahoPaypalStandardCheckout {
 
         const paymentMethods = await sdk.findEligibleMethods({ currencyCode: this.currencyCode });
         if (!paymentMethods.isEligible('paypal')) {
-            console.warn('PayPal is not eligible for this transaction');
+            hideLoader();
             return;
         }
 
@@ -56,6 +61,9 @@ class MahoPaypalStandardCheckout {
         await new Promise(r => setTimeout(r, 500));
         hideLoader();
         button.addEventListener('click', async () => {
+            if (this.reviewMode && !this._validateAgreements()) {
+                return;
+            }
             try {
                 const orderId = await this.createOrder();
                 this._paymentSession.start(
@@ -84,7 +92,7 @@ class MahoPaypalStandardCheckout {
             await this._addToCart();
         }
 
-        const saveVault = this.formDiv.querySelector('#paypal_standard_save_vault')?.checked || false;
+        const saveVault = this.formDiv.querySelector('input[name="payment[save_vault]"]')?.checked || false;
         const response = await mahoFetch(this.createOrderUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -115,11 +123,48 @@ class MahoPaypalStandardCheckout {
     }
 
     async onApprove(data) {
+        // Review mode: don't capture/place or redirect here. Record the approved order id
+        // and enable the native "Place Order" button, which becomes the terminal action.
+        if (this.reviewMode) {
+            this._approvedOrderId = data.orderId;
+            const hidden = document.getElementById('paypal_review_order_id');
+            if (hidden) {
+                hidden.value = data.orderId;
+            }
+            document.querySelectorAll('#checkout-review-submit .btn-checkout').forEach((btn) => {
+                btn.disabled = false;
+                btn.removeAttribute('disabled');
+            });
+            this.formDiv.classList.add('paypal-review-approved');
+            return;
+        }
+
+        await this._captureAndRedirect(data.orderId);
+    }
+
+    /**
+     * Terminal action for review mode: capture + place the order using the previously
+     * approved PayPal order id, then redirect to success.
+     */
+    async placeApprovedOrder() {
+        if (!this._validateAgreements()) {
+            return;
+        }
+        const orderId = this._approvedOrderId
+            || document.getElementById('paypal_review_order_id')?.value;
+        if (!orderId) {
+            this.handleError(new Error('Please confirm your payment with PayPal first.'));
+            return;
+        }
+        await this._captureAndRedirect(orderId);
+    }
+
+    async _captureAndRedirect(orderId) {
         const response = await mahoFetch(this.approveOrderUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                paypal_order_id: data.orderId,
+                paypal_order_id: orderId,
                 method: this.methodCode,
             }),
             loaderArea: this.formDiv,
@@ -130,6 +175,17 @@ class MahoPaypalStandardCheckout {
         } else {
             this.handleError(new Error(response.message || 'Payment approval failed'));
         }
+    }
+
+    _validateAgreements() {
+        const boxes = document.querySelectorAll('.checkout-agreements input[type="checkbox"]');
+        for (const box of boxes) {
+            if (!box.checked) {
+                this.handleError(new Error('Please agree to all the terms and conditions before placing the order.'));
+                return false;
+            }
+        }
+        return true;
     }
 
     handleError(err) {
@@ -147,9 +203,15 @@ class MahoPaypalStandardCheckout {
 
 document.addEventListener('payment-method:switched', function(e) {
     const isPaypalStandard = e.target.dataset.methodCode === 'paypal_standard_checkout';
-    document.body.classList.toggle('paypal-standard-active', isPaypalStandard);
 
-    if (!isPaypalStandard) return;
+    // In multistep checkout the smart button and order placement move to the review step:
+    // the payment step only shows a hint, the native review button stays visible, and the
+    // `paypal-standard-active` body class (which hides .btn-checkout) must NOT apply. Only
+    // onestep (payment + review on one page) keeps the button here as the terminal action.
+    const isOnestep = !!document.getElementById('onestep-checkout');
+    document.body.classList.toggle('paypal-standard-active', isPaypalStandard && isOnestep);
+
+    if (!isPaypalStandard || !isOnestep) return;
 
     const formDiv = e.target;
     // Always re-create on new DOM elements (checkout may re-render payment HTML)
