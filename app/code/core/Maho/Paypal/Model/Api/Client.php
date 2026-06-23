@@ -335,16 +335,10 @@ class Maho_Paypal_Model_Api_Client
         }
 
         if (is_object($response) && method_exists($response, 'getBody')) {
-            // No-content responses (e.g. HTTP 204 from voidPayment) have an empty
-            // body. jsonDecode('') yields the string "", which violates the array
-            // return type. Treat empty or non-array bodies as an empty result.
+            // Empty body (HTTP 204) decodes to "", not an array.
             $body = (string) $response->getBody();
-            if ($body !== '') {
-                $decoded = Mage::helper('core')->jsonDecode($body);
-                if (is_array($decoded)) {
-                    return $decoded;
-                }
-            }
+            $decoded = $body === '' ? [] : Mage::helper('core')->jsonDecode($body);
+            return is_array($decoded) ? $decoded : [];
         }
 
         return [];
