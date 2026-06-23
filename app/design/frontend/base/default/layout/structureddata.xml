@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<layout version="0.1.0">
+    <!-- Organization + WebSite on every page -->
+    <default>
+        <reference name="head">
+            <block type="structureddata/jsonld_organization" name="structured_data.organization" />
+            <block type="structureddata/jsonld_website" name="structured_data.website" />
+        </reference>
+    </default>
+
+    <!-- Product pages: Product + BreadcrumbList -->
+    <catalog_product_view>
+        <reference name="head">
+            <block type="structureddata/jsonld_product" name="structured_data.product" />
+            <block type="structureddata/jsonld_breadcrumbs" name="structured_data.breadcrumbs" />
+        </reference>
+    </catalog_product_view>
+
+    <!-- Category pages: BreadcrumbList -->
+    <catalog_category_view>
+        <reference name="head">
+            <block type="structureddata/jsonld_breadcrumbs" name="structured_data.breadcrumbs" />
+        </reference>
+    </catalog_category_view>
+
+    <!-- CMS pages: BreadcrumbList -->
+    <cms_page>
+        <reference name="head">
+            <block type="structureddata/jsonld_breadcrumbs" name="structured_data.breadcrumbs" />
+        </reference>
+    </cms_page>
+</layout>

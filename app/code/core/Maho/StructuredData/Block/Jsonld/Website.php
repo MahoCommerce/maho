@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * WebSite JSON-LD structured data with a sitelinks SearchAction.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_StructuredData
+ */
+
+declare(strict_types=1);
+
+class Maho_StructuredData_Block_Jsonld_Website extends Maho_StructuredData_Block_Jsonld_Abstract
+{
+    #[\Override]
+    protected function isTypeEnabled(): bool
+    {
+        $helper = Mage::helper('structureddata');
+        return $helper->isWebsiteEnabled();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    #[\Override]
+    protected function getStructuredData(): array
+    {
+        $baseUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
+        $searchUrl = Mage::getUrl('catalogsearch/result');
+        $queryParam = Mage::helper('catalogsearch')->getQueryParamName();
+
+        return [
+            '@context' => 'https://schema.org/',
+            '@type' => 'WebSite',
+            'url' => $baseUrl,
+            'name' => $this->_getName(),
+            'potentialAction' => [
+                '@type' => 'SearchAction',
+                'target' => [
+                    '@type' => 'EntryPoint',
+                    'urlTemplate' => $searchUrl . '?' . $queryParam . '={search_term_string}',
+                ],
+                'query-input' => 'required name=search_term_string',
+            ],
+        ];
+    }
+
+    protected function _getName(): string
+    {
+        $name = trim((string) Mage::getStoreConfig('general/store_information/name'));
+        if ($name !== '') {
+            return $name;
+        }
+        return (string) Mage::app()->getStore()->getFrontendName();
+    }
+}
