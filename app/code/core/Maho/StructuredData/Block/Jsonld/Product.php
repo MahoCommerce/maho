@@ -205,14 +205,21 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
             $base['priceValidUntil'] = $validUntil;
         }
 
-        if (count($prices) === 1) {
-            return ['@type' => 'Offer', 'price' => $helper->formatPrice($prices[0])] + $base;
+        // Collapse to a single Offer when every candidate price is the same (e.g. a configurable
+        // whose variants carry no price differential). Emitting AggregateOffer with
+        // lowPrice === highPrice is flagged by validators and misrepresents the offer set.
+        $uniquePrices = array_values(array_unique($prices));
+        if (count($uniquePrices) === 1) {
+            return ['@type' => 'Offer', 'price' => $helper->formatPrice($uniquePrices[0])] + $base;
         }
 
+        // offerCount is the total number of offers (variants), not the number of distinct price
+        // points — schema.org/AggregateOffer.offerCount is the count of offers in the set, and
+        // Google's Rich Results Test flags a mismatch against the actual variant count.
         return [
             '@type' => 'AggregateOffer',
-            'lowPrice' => $helper->formatPrice(min($prices)),
-            'highPrice' => $helper->formatPrice(max($prices)),
+            'lowPrice' => $helper->formatPrice(min($uniquePrices)),
+            'highPrice' => $helper->formatPrice(max($uniquePrices)),
             'offerCount' => count($prices),
         ] + $base;
     }
