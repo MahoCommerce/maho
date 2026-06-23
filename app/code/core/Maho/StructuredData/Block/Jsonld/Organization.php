@@ -21,7 +21,7 @@ class Maho_StructuredData_Block_Jsonld_Organization extends Maho_StructuredData_
     protected function getStructuredData(): array
     {
         $helper = Mage::helper('structureddata');
-        $type = (string) Mage::getStoreConfig(Maho_StructuredData_Helper_Data::XML_PATH_ORGANIZATION_TYPE) ?: 'Organization';
+        $type = $this->_getOrganizationType();
 
         $data = [
             '@context' => Maho_StructuredData_Helper_Data::SCHEMA,
@@ -53,6 +53,20 @@ class Maho_StructuredData_Block_Jsonld_Organization extends Maho_StructuredData_
         }
 
         return $data;
+    }
+
+    /**
+     * Resolve the configured organization @type, validated against the allowed schema.org types so
+     * only a known-good value is ever emitted (falls back to 'Organization' for anything else).
+     */
+    protected function _getOrganizationType(): string
+    {
+        $type = (string) Mage::getStoreConfig(Maho_StructuredData_Helper_Data::XML_PATH_ORGANIZATION_TYPE);
+        $allowed = array_column(
+            Mage::getSingleton('structureddata/system_config_source_organization_type')->toOptionArray(),
+            'value',
+        );
+        return in_array($type, $allowed, true) ? $type : 'Organization';
     }
 
     /**
