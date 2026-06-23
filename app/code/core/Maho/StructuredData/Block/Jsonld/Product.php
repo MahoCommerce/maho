@@ -12,6 +12,9 @@ declare(strict_types=1);
 
 class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block_Jsonld_Abstract
 {
+    /** Cap the number of individual Review nodes emitted, newest first, to bound page weight. */
+    protected const REVIEWS_LIMIT = 10;
+
     #[\Override]
     protected function isTypeEnabled(): bool
     {
@@ -88,6 +91,11 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
             $rating = $this->_getAggregateRating($product);
             if ($rating !== []) {
                 $data['aggregateRating'] = $rating;
+            }
+
+            $reviews = $this->_getReviews($product);
+            if ($reviews !== []) {
+                $data['review'] = $reviews;
             }
         }
 
@@ -306,6 +314,118 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
             '@type' => 'AggregateRating',
             'ratingValue' => number_format($percent / 20, 1, '.', ''),
             'reviewCount' => $reviewCount,
+            'bestRating' => '5',
+            'worstRating' => '1',
+        ];
+    }
+
+    /**
+     * Build individual Review nodes from the most recent approved reviews.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    protected function _getReviews(Mage_Catalog_Model_Product $product): array
+    {
+        $helper = Mage::helper('structureddata');
+
+        $collection = $this->_getReviewsCollection($product);
+
+        $reviews = [];
+        foreach ($collection as $review) {
+            if (count($reviews) >= self::REVIEWS_LIMIT) {
+                break;
+            }
+
+            $author = trim((string) $review->getNickname());
+            $body = $helper->toPlainText((string) $review->getDetail());
+            if ($author === '' || $body === '') {
+                continue;
+            }
+
+            $node = [
+                '@type' => 'Review',
+                'author' => ['@type' => 'Person', 'name' => $author],
+                'reviewBody' => $body,
+            ];
+
+            $title = trim((string) $review->getTitle());
+            if ($title !== '') {
+                $node['name'] = $title;
+            }
+
+            // created_at is a genuine UTC datetime, so utcToStore() conversion is correct here.
+            $datePublished = $helper->formatUtcDateTime((string) $review->getCreatedAt());
+            if ($datePublished !== '') {
+                $node['datePublished'] = $datePublished;
+            }
+
+            $rating = $this->_getReviewRating($review);
+            if ($rating !== []) {
+                $node['reviewRating'] = $rating;
+            }
+
+            $reviews[] = $node;
+        }
+
+        return $reviews;
+    }
+
+    /**
+     * Resolve the approved-reviews collection for the product. Prefers the product page's own
+     * review list block (`product.reviews`) so we share its single load instead of issuing a second
+     * query; falls back to a direct, page-size-bounded query when that block isn't on the page.
+     *
+     * @return iterable<Mage_Review_Model_Review>
+     */
+    protected function _getReviewsCollection(Mage_Catalog_Model_Product $product): iterable
+    {
+        $block = $this->getLayout()->getBlock('product.reviews');
+        if ($block instanceof Mage_Review_Block_Product_View) {
+            $collection = $block->getReviewsCollection();
+        } else {
+            $collection = Mage::getModel('review/review')->getCollection()
+                ->addStoreFilter((int) $product->getStoreId())
+                ->addStatusFilter(Mage_Review_Model_Review::STATUS_APPROVED)
+                ->addEntityFilter('product', $product->getId())
+                ->setDateOrder()
+                ->setPageSize(self::REVIEWS_LIMIT);
+        }
+
+        // load() is idempotent, so when the list block later renders it reuses this same instance.
+        $collection->load()->addRateVotes();
+
+        return $collection;
+    }
+
+    /**
+     * Average a single review's rating votes (each a 0-100 percent) into a 0-5 Rating node.
+     *
+     * @return array<string, mixed>
+     */
+    protected function _getReviewRating(Mage_Review_Model_Review $review): array
+    {
+        $votes = $review->getRatingVotes();
+        if (!$votes || count($votes) === 0) {
+            return [];
+        }
+
+        $sum = 0;
+        $count = 0;
+        foreach ($votes as $vote) {
+            $percent = (int) $vote->getPercent();
+            if ($percent > 0) {
+                $sum += $percent;
+                $count++;
+            }
+        }
+
+        if ($count === 0) {
+            return [];
+        }
+
+        return [
+            '@type' => 'Rating',
+            'ratingValue' => number_format($sum / $count / 20, 1, '.', ''),
             'bestRating' => '5',
             'worstRating' => '1',
         ];

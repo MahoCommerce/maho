@@ -252,6 +252,25 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Convert a stored UTC datetime (e.g. created_at, updated_at) to an ISO-8601 string in the
+     * store timezone. Returns '' for empty, zero ("0000-...") or unparseable input.
+     */
+    public function formatUtcDateTime(string $value, int|string|null $store = null): string
+    {
+        if ($value === '' || str_starts_with($value, '0000')) {
+            return '';
+        }
+
+        try {
+            return Mage::app()->getLocale()
+                ->utcToStore(Mage::app()->getStore($store), $value)
+                ->format('c');
+        } catch (\Throwable) {
+            return '';
+        }
+    }
+
+    /**
      * Reduce an HTML fragment to single-line plain text: strip tags, decode entities (so
      * "Tom &amp; Jerry" becomes "Tom & Jerry"), then collapse runs of whitespace.
      */

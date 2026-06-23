@@ -63,7 +63,7 @@ class Maho_StructuredData_Block_Jsonld_Article extends Maho_StructuredData_Block
             $data['datePublished'] = $published;
         }
 
-        $modified = $this->_formatDate((string) $post->getData('updated_at'));
+        $modified = $helper->formatUtcDateTime((string) $post->getData('updated_at'));
         if ($modified !== '') {
             $data['dateModified'] = $modified;
         }
@@ -98,23 +98,5 @@ class Maho_StructuredData_Block_Jsonld_Article extends Maho_StructuredData_Block
         }
 
         return substr($value, 0, 10);
-    }
-
-    /**
-     * Normalise a stored UTC datetime (e.g. updated_at) to an ISO-8601 string in the store timezone.
-     */
-    protected function _formatDate(string $value): string
-    {
-        if ($value === '' || str_starts_with($value, '0000')) {
-            return '';
-        }
-
-        try {
-            return Mage::app()->getLocale()
-                ->utcToStore(Mage::app()->getStore(), $value)
-                ->format('c');
-        } catch (\Throwable) {
-            return '';
-        }
     }
 }
