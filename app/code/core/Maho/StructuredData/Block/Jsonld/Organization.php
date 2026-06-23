@@ -57,7 +57,8 @@ class Maho_StructuredData_Block_Jsonld_Organization extends Maho_StructuredData_
 
     /**
      * Resolve the configured organization @type, validated against the allowed schema.org types so
-     * only a known-good value is ever emitted (falls back to 'Organization' for anything else).
+     * only a known-good value is ever emitted (falls back to the 'OnlineStore' default for anything
+     * else, matching the config.xml default).
      */
     protected function _getOrganizationType(): string
     {
@@ -66,7 +67,7 @@ class Maho_StructuredData_Block_Jsonld_Organization extends Maho_StructuredData_
             Mage::getSingleton('structureddata/system_config_source_organization_type')->toOptionArray(),
             'value',
         );
-        return in_array($type, $allowed, true) ? $type : 'Organization';
+        return in_array($type, $allowed, true) ? $type : 'OnlineStore';
     }
 
     /**
