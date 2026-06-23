@@ -1,5 +1,5 @@
 "-- None --","-- None --"
-"Adds aggregateRating (rating value and review count) to the product schema when reviews are enabled.","Adds aggregateRating (rating value and review count) to the product schema when reviews are enabled."
+"Adds aggregateRating (rating value and review count) and individual review nodes (reviewer name and review text) to the product schema when reviews are enabled.","Adds aggregateRating (rating value and review count) and individual review nodes (reviewer name and review text) to the product schema when reviews are enabled."
 "Brand Attribute","Brand Attribute"
 "Enable Structured Data","Enable Structured Data"
 "GTIN Attribute","GTIN Attribute"

@@ -48,7 +48,7 @@ SPDX-License-Identifier: AFL-3.0
                         </product_heading>
                         <product_include_reviews translate="label comment">
                             <label>Include Ratings &amp; Reviews</label>
-                            <comment>Adds aggregateRating (rating value and review count) to the product schema when reviews are enabled.</comment>
+                            <comment>Adds aggregateRating (rating value and review count) and individual review nodes (reviewer name and review text) to the product schema when reviews are enabled.</comment>
                             <config_path>catalog/structured_data/product/include_reviews</config_path>
                             <frontend_type>boolean</frontend_type>
                             <sort_order>210</sort_order>

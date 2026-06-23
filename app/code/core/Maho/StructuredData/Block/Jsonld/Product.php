@@ -124,8 +124,11 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
     {
         $images = [];
 
+        // Use the canonical original media URL (the same form gallery images use below) rather than
+        // the resize helper, which returns a signed core/index/resize endpoint URL. This keeps the
+        // emitted image stable/crawlable and lets the gallery dedup catch the base image.
         if ($product->getImage() && $product->getImage() !== 'no_selection') {
-            $images[] = (string) Mage::helper('catalog/image')->init($product, 'image');
+            $images[] = (string) $product->getMediaConfig()->getMediaUrl($product->getImage());
         }
 
         $gallery = $product->getMediaGalleryImages();
