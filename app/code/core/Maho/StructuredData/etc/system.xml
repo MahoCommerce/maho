@@ -249,6 +249,27 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <depends><enabled>1</enabled></depends>
                         </website_enabled>
+
+                        <blog_heading translate="label">
+                            <label>Blog Schema</label>
+                            <frontend_model>adminhtml/system_config_form_field_heading</frontend_model>
+                            <sort_order>500</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </blog_heading>
+                        <blog_enabled translate="label comment">
+                            <label>Enable BlogPosting Schema</label>
+                            <comment>Outputs BlogPosting (Article) schema on blog post pages. Requires the Maho_Blog module.</comment>
+                            <config_path>catalog/structured_data/blog/enabled</config_path>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>510</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </blog_enabled>
                     </fields>
                 </structured_data>
             </groups>

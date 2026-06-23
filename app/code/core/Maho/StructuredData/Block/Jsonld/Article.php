@@ -1,0 +1,106 @@
+<?php
+
+/**
+ * Blog post JSON-LD structured data (schema.org/BlogPosting).
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_StructuredData
+ */
+
+declare(strict_types=1);
+
+class Maho_StructuredData_Block_Jsonld_Article extends Maho_StructuredData_Block_Jsonld_Abstract
+{
+    #[\Override]
+    protected function isTypeEnabled(): bool
+    {
+        $helper = Mage::helper('structureddata');
+        return $helper->isBlogEnabled();
+    }
+
+    public function getPost(): ?Maho_Blog_Model_Post
+    {
+        $post = Mage::registry('current_blog_post');
+        return $post instanceof Maho_Blog_Model_Post ? $post : null;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    #[\Override]
+    protected function getStructuredData(): array
+    {
+        $post = $this->getPost();
+        if (!$post) {
+            return [];
+        }
+
+        $helper = Mage::helper('structureddata');
+        $url = $post->getUrl();
+
+        $data = [
+            '@context' => 'https://schema.org/',
+            '@type' => 'BlogPosting',
+            'headline' => (string) $post->getTitle(),
+            'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => $url],
+            'url' => $url,
+            'publisher' => $helper->getPublisherData(),
+        ];
+
+        $description = $this->_getDescription($post);
+        if ($description !== '') {
+            $data['description'] = $description;
+        }
+
+        $image = $post->getImageUrl();
+        if ($image) {
+            $data['image'] = [$image];
+        }
+
+        $published = $this->_formatDate((string) $post->getPublishDate());
+        if ($published !== '') {
+            $data['datePublished'] = $published;
+        }
+
+        $modified = $this->_formatDate((string) $post->getData('updated_at'));
+        if ($modified !== '') {
+            $data['dateModified'] = $modified;
+        }
+
+        // Blog posts carry no author field, so attribute authorship to the publisher.
+        $data['author'] = ['@type' => 'Organization', 'name' => $helper->getOrganizationName()];
+
+        $transport = new Maho\DataObject(['structured_data' => $data]);
+        Mage::dispatchEvent('maho_structureddata_article_data', [
+            'post' => $post,
+            'transport' => $transport,
+        ]);
+
+        return $transport->getStructuredData();
+    }
+
+    protected function _getDescription(Maho_Blog_Model_Post $post): string
+    {
+        $description = (string) ($post->getMetaDescription() ?: $post->getContent());
+        return trim(preg_replace('/\s+/', ' ', strip_tags($description)) ?? '');
+    }
+
+    /**
+     * Normalise a stored date/datetime to an ISO-8601 string in the store timezone.
+     */
+    protected function _formatDate(string $value): string
+    {
+        if ($value === '' || str_starts_with($value, '0000')) {
+            return '';
+        }
+
+        try {
+            return Mage::app()->getLocale()
+                ->utcToStore(Mage::app()->getStore(), $value)
+                ->format('c');
+        } catch (\Throwable) {
+            return '';
+        }
+    }
+}

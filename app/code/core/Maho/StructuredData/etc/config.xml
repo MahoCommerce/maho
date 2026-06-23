@@ -73,6 +73,9 @@ SPDX-License-Identifier: AFL-3.0
                 <website>
                     <enabled>1</enabled>
                 </website>
+                <blog>
+                    <enabled>1</enabled>
+                </blog>
             </structured_data>
         </catalog>
     </default>

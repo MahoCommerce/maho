@@ -31,11 +31,11 @@ class Maho_StructuredData_Block_Jsonld_Organization extends Maho_StructuredData_
         $data = [
             '@context' => 'https://schema.org/',
             '@type' => $type,
-            'name' => $this->_getName(),
+            'name' => $helper->getOrganizationName(),
             'url' => Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB),
         ];
 
-        $logo = $this->_getLogoUrl();
+        $logo = $helper->getOrganizationLogoUrl();
         if ($logo !== '') {
             $data['logo'] = $logo;
         }
@@ -58,30 +58,6 @@ class Maho_StructuredData_Block_Jsonld_Organization extends Maho_StructuredData_
         }
 
         return $data;
-    }
-
-    protected function _getName(): string
-    {
-        $name = trim((string) Mage::getStoreConfig('general/store_information/name'));
-        if ($name !== '') {
-            return $name;
-        }
-        return (string) Mage::app()->getStore()->getFrontendName();
-    }
-
-    protected function _getLogoUrl(): string
-    {
-        $configured = trim((string) Mage::getStoreConfig(Maho_StructuredData_Helper_Data::XML_PATH_ORGANIZATION_LOGO_URL));
-        if ($configured !== '') {
-            return $configured;
-        }
-
-        $logoSrc = (string) Mage::getStoreConfig('design/header/logo_src');
-        if ($logoSrc !== '') {
-            return $this->getSkinUrl($logoSrc);
-        }
-
-        return '';
     }
 
     /**

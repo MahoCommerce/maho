@@ -33,4 +33,20 @@ SPDX-License-Identifier: AFL-3.0
             <block type="structureddata/jsonld_breadcrumbs" name="structured_data.breadcrumbs" />
         </reference>
     </cms_page>
+
+    <!-- Blog post pages: BlogPosting + BreadcrumbList (soft dependency on Maho_Blog;
+         these handles are dormant unless the Blog module routes the request) -->
+    <blog_index_view>
+        <reference name="head">
+            <block type="structureddata/jsonld_article" name="structured_data.article" />
+            <block type="structureddata/jsonld_breadcrumbs" name="structured_data.breadcrumbs" />
+        </reference>
+    </blog_index_view>
+
+    <!-- Blog category/listing pages: BreadcrumbList -->
+    <blog_index_category>
+        <reference name="head">
+            <block type="structureddata/jsonld_breadcrumbs" name="structured_data.breadcrumbs" />
+        </reference>
+    </blog_index_category>
 </layout>

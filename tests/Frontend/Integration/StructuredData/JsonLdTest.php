@@ -166,6 +166,44 @@ describe('Product block', function () {
     });
 });
 
+describe('Article (blog) block', function () {
+    beforeEach(function () {
+        Mage::unregister('current_blog_post');
+    });
+
+    afterEach(function () {
+        Mage::unregister('current_blog_post');
+    });
+
+    test('renders a BlogPosting graph for a blog post', function () {
+        if (!Mage::helper('core')->isModuleEnabled('Maho_Blog')) {
+            $this->markTestSkipped('Maho_Blog module is not enabled.');
+        }
+
+        $post = Mage::getModel('blog/post')->getCollection()->setPageSize(1)->getFirstItem();
+        if (!$post->getId()) {
+            $this->markTestSkipped('No blog post in catalog.');
+        }
+        Mage::register('current_blog_post', $post);
+
+        $data = decodeJsonLd(
+            Mage::app()->getLayout()->createBlock('structureddata/jsonld_article')->toHtml(),
+        );
+
+        expect($data['@type'])->toBe('BlogPosting');
+        expect($data['headline'])->not->toBeEmpty();
+        expect($data['url'])->toStartWith('http');
+        expect($data['mainEntityOfPage']['@id'])->toBe($data['url']);
+        expect($data['publisher']['@type'])->toBe('Organization');
+        expect($data['author'])->toHaveKey('name');
+    });
+
+    test('renders nothing without a current blog post', function () {
+        $html = Mage::app()->getLayout()->createBlock('structureddata/jsonld_article')->toHtml();
+        expect(trim($html))->toBe('');
+    });
+});
+
 describe('Breadcrumbs block', function () {
     test('requires at least two crumbs', function () {
         $layout = Mage::app()->getLayout();

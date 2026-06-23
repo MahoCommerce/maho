@@ -25,6 +25,7 @@ class Maho_StructuredData_Block_Jsonld_Website extends Maho_StructuredData_Block
     #[\Override]
     protected function getStructuredData(): array
     {
+        $helper = Mage::helper('structureddata');
         $baseUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
         $searchUrl = Mage::getUrl('catalogsearch/result');
         $queryParam = Mage::helper('catalogsearch')->getQueryParamName();
@@ -33,7 +34,7 @@ class Maho_StructuredData_Block_Jsonld_Website extends Maho_StructuredData_Block
             '@context' => 'https://schema.org/',
             '@type' => 'WebSite',
             'url' => $baseUrl,
-            'name' => $this->_getName(),
+            'name' => $helper->getOrganizationName(),
             'potentialAction' => [
                 '@type' => 'SearchAction',
                 'target' => [
@@ -43,14 +44,5 @@ class Maho_StructuredData_Block_Jsonld_Website extends Maho_StructuredData_Block
                 'query-input' => 'required name=search_term_string',
             ],
         ];
-    }
-
-    protected function _getName(): string
-    {
-        $name = trim((string) Mage::getStoreConfig('general/store_information/name'));
-        if ($name !== '') {
-            return $name;
-        }
-        return (string) Mage::app()->getStore()->getFrontendName();
     }
 }

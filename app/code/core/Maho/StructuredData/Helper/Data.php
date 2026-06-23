@@ -28,6 +28,7 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_ORGANIZATION_CONTACT_PHONE = 'catalog/structured_data/organization/contact_phone';
     public const XML_PATH_ORGANIZATION_CONTACT_EMAIL = 'catalog/structured_data/organization/contact_email';
     public const XML_PATH_WEBSITE_ENABLED = 'catalog/structured_data/website/enabled';
+    public const XML_PATH_BLOG_ENABLED = 'catalog/structured_data/blog/enabled';
 
     public const SCHEMA = 'https://schema.org/';
 
@@ -67,6 +68,58 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     public function isWebsiteEnabled(int|string|null $store = null): bool
     {
         return $this->isEnabled($store) && Mage::getStoreConfigFlag(self::XML_PATH_WEBSITE_ENABLED, $store);
+    }
+
+    public function isBlogEnabled(int|string|null $store = null): bool
+    {
+        return $this->isEnabled($store) && Mage::getStoreConfigFlag(self::XML_PATH_BLOG_ENABLED, $store);
+    }
+
+    public function getOrganizationName(int|string|null $store = null): string
+    {
+        $name = trim((string) Mage::getStoreConfig('general/store_information/name', $store));
+        if ($name !== '') {
+            return $name;
+        }
+        return (string) Mage::app()->getStore($store)->getFrontendName();
+    }
+
+    /**
+     * Resolve the organization logo: the configured URL, otherwise the theme logo.
+     */
+    public function getOrganizationLogoUrl(int|string|null $store = null): string
+    {
+        $configured = trim((string) Mage::getStoreConfig(self::XML_PATH_ORGANIZATION_LOGO_URL, $store));
+        if ($configured !== '') {
+            return $configured;
+        }
+
+        $logoSrc = (string) Mage::getStoreConfig('design/header/logo_src', $store);
+        if ($logoSrc !== '') {
+            return (string) Mage::getDesign()->getSkinUrl($logoSrc);
+        }
+
+        return '';
+    }
+
+    /**
+     * Build a publisher Organization node (name + logo) shared by the Article schema.
+     *
+     * @return array<string, mixed>
+     */
+    public function getPublisherData(int|string|null $store = null): array
+    {
+        $publisher = [
+            '@type' => 'Organization',
+            'name' => $this->getOrganizationName($store),
+        ];
+
+        $logo = $this->getOrganizationLogoUrl($store);
+        if ($logo !== '') {
+            $publisher['logo'] = ['@type' => 'ImageObject', 'url' => $logo];
+        }
+
+        return $publisher;
     }
 
     public function getBrandAttribute(int|string|null $store = null): string
