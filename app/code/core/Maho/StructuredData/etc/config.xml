@@ -64,13 +64,7 @@ SPDX-License-Identifier: AFL-3.0
                 <organization>
                     <enabled>1</enabled>
                     <type>Organization</type>
-                    <logo_url></logo_url>
-                    <contact_phone></contact_phone>
                     <contact_email></contact_email>
-                    <facebook_url></facebook_url>
-                    <twitter_url></twitter_url>
-                    <instagram_url></instagram_url>
-                    <linkedin_url></linkedin_url>
                 </organization>
                 <website>
                     <enabled>1</enabled>

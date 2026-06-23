@@ -24,20 +24,18 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_PRODUCTLIST_ENABLED = 'catalog/structured_data/productlist/enabled';
     public const XML_PATH_ORGANIZATION_ENABLED = 'catalog/structured_data/organization/enabled';
     public const XML_PATH_ORGANIZATION_TYPE = 'catalog/structured_data/organization/type';
-    public const XML_PATH_ORGANIZATION_LOGO_URL = 'catalog/structured_data/organization/logo_url';
-    public const XML_PATH_ORGANIZATION_CONTACT_PHONE = 'catalog/structured_data/organization/contact_phone';
     public const XML_PATH_ORGANIZATION_CONTACT_EMAIL = 'catalog/structured_data/organization/contact_email';
     public const XML_PATH_WEBSITE_ENABLED = 'catalog/structured_data/website/enabled';
     public const XML_PATH_BLOG_ENABLED = 'catalog/structured_data/blog/enabled';
 
     public const SCHEMA = 'https://schema.org/';
 
-    /** @var array<int, string> social profile config paths */
+    /** @var array<int, string> social profile config paths (general business identity, shared across features) */
     public const SOCIAL_PATHS = [
-        'catalog/structured_data/organization/facebook_url',
-        'catalog/structured_data/organization/twitter_url',
-        'catalog/structured_data/organization/instagram_url',
-        'catalog/structured_data/organization/linkedin_url',
+        'general/social_profiles/facebook_url',
+        'general/social_profiles/twitter_url',
+        'general/social_profiles/instagram_url',
+        'general/social_profiles/linkedin_url',
     ];
 
     public function isEnabled(int|string|null $store = null): bool
@@ -127,15 +125,10 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Resolve the organization logo: the configured URL, otherwise the theme logo.
+     * Resolve the organization logo from the theme logo.
      */
     public function getOrganizationLogoUrl(int|string|null $store = null): string
     {
-        $configured = trim((string) Mage::getStoreConfig(self::XML_PATH_ORGANIZATION_LOGO_URL, $store));
-        if ($configured !== '') {
-            return $configured;
-        }
-
         $logoSrc = (string) Mage::getStoreConfig('design/header/logo_src', $store);
         if ($logoSrc !== '') {
             return (string) Mage::getDesign()->getSkinUrl($logoSrc);

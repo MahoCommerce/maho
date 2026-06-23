@@ -828,6 +828,47 @@ SPDX-License-Identifier: AFL-3.0
                         </address>
                     </fields>
                 </store_information>
+                <social_profiles translate="label">
+                    <label>Social Profiles</label>
+                    <sort_order>110</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <facebook_url translate="label comment">
+                            <label>Facebook URL</label>
+                            <comment>Full URL to the official Facebook profile.</comment>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </facebook_url>
+                        <twitter_url translate="label comment">
+                            <label>X (Twitter) URL</label>
+                            <comment>Full URL to the official X (Twitter) profile.</comment>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </twitter_url>
+                        <instagram_url translate="label comment">
+                            <label>Instagram URL</label>
+                            <comment>Full URL to the official Instagram profile.</comment>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </instagram_url>
+                        <linkedin_url translate="label comment">
+                            <label>LinkedIn URL</label>
+                            <comment>Full URL to the official LinkedIn profile.</comment>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </linkedin_url>
+                    </fields>
+                </social_profiles>
             </groups>
         </general>
         <system translate="label" module="core">

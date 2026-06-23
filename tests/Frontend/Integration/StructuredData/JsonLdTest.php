@@ -63,8 +63,8 @@ describe('config helper', function () {
     });
 
     test('social profiles only include configured non-empty URLs', function () {
-        Mage::app()->getStore()->setConfig('catalog/structured_data/organization/facebook_url', 'https://facebook.com/demo');
-        Mage::app()->getStore()->setConfig('catalog/structured_data/organization/twitter_url', '');
+        Mage::app()->getStore()->setConfig('general/social_profiles/facebook_url', 'https://facebook.com/demo');
+        Mage::app()->getStore()->setConfig('general/social_profiles/twitter_url', '');
         expect($this->helper->getSocialProfiles())->toBe(['https://facebook.com/demo']);
     });
 });

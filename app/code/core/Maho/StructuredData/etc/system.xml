@@ -163,28 +163,6 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <depends><enabled>1</enabled><organization_enabled>1</organization_enabled></depends>
                         </organization_type>
-                        <organization_logo_url translate="label comment">
-                            <label>Logo URL</label>
-                            <comment>Absolute URL to the organization logo. Leave empty to use the store logo.</comment>
-                            <config_path>catalog/structured_data/organization/logo_url</config_path>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>330</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled><organization_enabled>1</organization_enabled></depends>
-                        </organization_logo_url>
-                        <organization_contact_phone translate="label comment">
-                            <label>Contact Phone</label>
-                            <comment>Customer service telephone number. Leave empty to use the store information phone.</comment>
-                            <config_path>catalog/structured_data/organization/contact_phone</config_path>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>340</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled><organization_enabled>1</organization_enabled></depends>
-                        </organization_contact_phone>
                         <organization_contact_email translate="label comment">
                             <label>Contact Email</label>
                             <comment>Customer service email address (optional).</comment>
@@ -196,46 +174,6 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <depends><enabled>1</enabled><organization_enabled>1</organization_enabled></depends>
                         </organization_contact_email>
-                        <organization_facebook_url translate="label">
-                            <label>Facebook URL</label>
-                            <config_path>catalog/structured_data/organization/facebook_url</config_path>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>360</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled><organization_enabled>1</organization_enabled></depends>
-                        </organization_facebook_url>
-                        <organization_twitter_url translate="label">
-                            <label>X (Twitter) URL</label>
-                            <config_path>catalog/structured_data/organization/twitter_url</config_path>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>370</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled><organization_enabled>1</organization_enabled></depends>
-                        </organization_twitter_url>
-                        <organization_instagram_url translate="label">
-                            <label>Instagram URL</label>
-                            <config_path>catalog/structured_data/organization/instagram_url</config_path>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>380</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled><organization_enabled>1</organization_enabled></depends>
-                        </organization_instagram_url>
-                        <organization_linkedin_url translate="label">
-                            <label>LinkedIn URL</label>
-                            <config_path>catalog/structured_data/organization/linkedin_url</config_path>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>390</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled><organization_enabled>1</organization_enabled></depends>
-                        </organization_linkedin_url>
 
                         <website_heading translate="label">
                             <label>Website Schema</label>

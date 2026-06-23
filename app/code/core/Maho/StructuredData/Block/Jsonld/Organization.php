@@ -65,8 +65,7 @@ class Maho_StructuredData_Block_Jsonld_Organization extends Maho_StructuredData_
      */
     protected function _getContactPoint(): array
     {
-        $phone = trim((string) Mage::getStoreConfig(Maho_StructuredData_Helper_Data::XML_PATH_ORGANIZATION_CONTACT_PHONE))
-            ?: trim((string) Mage::getStoreConfig('general/store_information/phone'));
+        $phone = trim((string) Mage::getStoreConfig('general/store_information/phone'));
         $email = trim((string) Mage::getStoreConfig(Maho_StructuredData_Helper_Data::XML_PATH_ORGANIZATION_CONTACT_EMAIL));
 
         if ($phone === '' && $email === '') {
