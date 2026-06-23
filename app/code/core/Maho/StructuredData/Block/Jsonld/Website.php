@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Maho_StructuredData_Block_Jsonld_Website extends Maho_StructuredData_Block_Jsonld_Abstract
 {
+    protected string $_eventObject = 'website';
+
     /**
      * @return array<string, mixed>
      */

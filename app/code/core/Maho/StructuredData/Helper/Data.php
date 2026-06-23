@@ -38,7 +38,28 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function includeReviews(int|string|null $store = null): bool
     {
+        // Reviews are a soft dependency: the module declares no dependency on Mage_Review, so guard
+        // here (the single chokepoint for both aggregateRating and review nodes) to avoid calling
+        // Mage::getModel('review/review') — which returns false and fatals — when it is disabled.
+        if (!Mage::helper('core')->isModuleEnabled('Mage_Review')) {
+            return false;
+        }
         return Mage::getStoreConfigFlag(self::XML_PATH_PRODUCT_INCLUDE_REVIEWS, $store);
+    }
+
+    /**
+     * Wrap a schema.org graph in a JSON-LD <script> tag. Single source of truth for the markup,
+     * shared by the jsonld.phtml template and the listing-page observer. Relies on jsonEncode's
+     * default slash-escaping (no JSON_UNESCAPED_SLASHES) to neutralize any literal "</script>".
+     *
+     * @param array<string, mixed> $data
+     */
+    public function renderJsonLdScript(array $data): string
+    {
+        if ($data === []) {
+            return '';
+        }
+        return '<script type="application/ld+json">' . Mage::helper('core')->jsonEncode($data) . '</script>';
     }
 
     /**
@@ -156,6 +177,14 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
 
         // Stock not managed by quantity: rely on the in-stock flag only.
         if (!$stockItem->getManageStock()) {
+            return self::SCHEMA . 'InStock';
+        }
+
+        // Composite products (configurable/grouped/bundle) track stock on their children; the parent
+        // stock row's qty is forced to 0, so the qty-based checks below would wrongly report a
+        // saleable, in-stock parent as out of stock. isSaleable() + the in-stock flag above already
+        // reflect child availability for these types.
+        if ($product->isComposite()) {
             return self::SCHEMA . 'InStock';
         }
 

@@ -10,4 +10,4 @@ if (empty($data)) {
     return;
 }
 ?>
-<script type="application/ld+json"><?= Mage::helper('core')->jsonEncode($data) ?></script>
+<?= Mage::helper('structureddata')->renderJsonLdScript($data) ?>

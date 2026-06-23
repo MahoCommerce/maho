@@ -12,10 +12,21 @@ declare(strict_types=1);
 
 class Maho_StructuredData_Block_Jsonld_Article extends Maho_StructuredData_Block_Jsonld_Abstract
 {
+    protected string $_eventObject = 'article';
+
     public function getPost(): ?Maho_Blog_Model_Post
     {
         $post = Mage::registry('current_blog_post');
         return $post instanceof Maho_Blog_Model_Post ? $post : null;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    #[\Override]
+    protected function _getEventData(): array
+    {
+        return ['post' => $this->getPost()];
     }
 
     /**
@@ -64,13 +75,7 @@ class Maho_StructuredData_Block_Jsonld_Article extends Maho_StructuredData_Block
         // Blog posts carry no author field, so attribute authorship to the publisher.
         $data['author'] = ['@type' => 'Organization', 'name' => $helper->getOrganizationName()];
 
-        $transport = new Maho\DataObject(['structured_data' => $data]);
-        Mage::dispatchEvent('maho_structureddata_article_data', [
-            'post' => $post,
-            'transport' => $transport,
-        ]);
-
-        return $transport->getStructuredData();
+        return $data;
     }
 
     protected function _getDescription(Maho_Blog_Model_Post $post): string

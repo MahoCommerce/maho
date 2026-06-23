@@ -15,10 +15,21 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
     /** Cap the number of individual Review nodes emitted, newest first, to bound page weight. */
     protected const REVIEWS_LIMIT = 10;
 
+    protected string $_eventObject = 'product';
+
     public function getProduct(): ?Mage_Catalog_Model_Product
     {
         $product = Mage::registry('current_product');
         return $product instanceof Mage_Catalog_Model_Product ? $product : null;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    #[\Override]
+    protected function _getEventData(): array
+    {
+        return ['product' => $this->getProduct()];
     }
 
     /**
@@ -92,14 +103,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
             }
         }
 
-        // Allow other modules to enrich or alter the product structured data.
-        $transport = new Maho\DataObject(['structured_data' => $data]);
-        Mage::dispatchEvent('maho_structureddata_product_data', [
-            'product' => $product,
-            'transport' => $transport,
-        ]);
-
-        return $transport->getStructuredData();
+        return $data;
     }
 
     protected function _getDescription(Mage_Catalog_Model_Product $product): string
@@ -262,25 +266,30 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
 
     protected function _getPriceValidUntil(Mage_Catalog_Model_Product $product): string
     {
-        $specialTo = $product->getSpecialToDate();
-        if (!$specialTo) {
+        $specialTo = (string) $product->getSpecialToDate();
+        if ($specialTo === '' || str_starts_with($specialTo, '0000')) {
             return '';
         }
 
-        try {
-            $validUntil = Mage::app()->getLocale()->utcToStore($product->getStore(), (string) $specialTo);
+        // special_to_date is a store-local, date-only column (like blog publish_date): emit it
+        // verbatim with no timezone conversion. Running it through utcToStore() would shift it by
+        // the store offset and could roll it to the wrong calendar day. Core's special-price
+        // interval check (isStoreDateInInterval) compares the raw date in the store timezone too.
+        $validUntil = substr($specialTo, 0, 10);
 
-            // An expired special no longer affects getFinalPrice(), so emitting a past
-            // priceValidUntil would advertise an already-expired offer to search engines.
-            $today = Mage::app()->getLocale()->utcToStore($product->getStore())->setTime(0, 0, 0);
+        try {
+            // An expired special no longer affects getFinalPrice(), so don't advertise a past date.
+            // Core keeps the special valid through the whole to-date day, so drop only when strictly before today.
+            $today = Mage::app()->getLocale()->utcToStore($product->getStore())
+                ->format(Mage_Core_Model_Locale::DATE_FORMAT);
             if ($validUntil < $today) {
                 return '';
             }
-
-            return $validUntil->format(Mage_Core_Model_Locale::DATE_FORMAT);
         } catch (\Throwable) {
             return '';
         }
+
+        return $validUntil;
     }
 
     /**
@@ -364,27 +373,23 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
     }
 
     /**
-     * Resolve the approved-reviews collection for the product. Prefers the product page's own
-     * review list block (`product.reviews`) so we share its single load instead of issuing a second
-     * query; falls back to a direct, page-size-bounded query when that block isn't on the page.
+     * Resolve the approved-reviews collection for the product. Always uses an independent,
+     * page-size-bounded query: reusing the product page's own `product.reviews` collection would
+     * mean loading every approved review (that block sets no page size) and running addRateVotes()
+     * as an N+1 over all of them, just to emit at most REVIEWS_LIMIT nodes — and would mutate the
+     * shared instance the visible review list paginates.
      *
      * @return iterable<Mage_Review_Model_Review>
      */
     protected function _getReviewsCollection(Mage_Catalog_Model_Product $product): iterable
     {
-        $block = $this->getLayout()->getBlock('product.reviews');
-        if ($block instanceof Mage_Review_Block_Product_View) {
-            $collection = $block->getReviewsCollection();
-        } else {
-            $collection = Mage::getModel('review/review')->getCollection()
-                ->addStoreFilter((int) $product->getStoreId())
-                ->addStatusFilter(Mage_Review_Model_Review::STATUS_APPROVED)
-                ->addEntityFilter('product', $product->getId())
-                ->setDateOrder()
-                ->setPageSize(self::REVIEWS_LIMIT);
-        }
+        $collection = Mage::getModel('review/review')->getCollection()
+            ->addStoreFilter((int) $product->getStoreId())
+            ->addStatusFilter(Mage_Review_Model_Review::STATUS_APPROVED)
+            ->addEntityFilter('product', $product->getId())
+            ->setDateOrder()
+            ->setPageSize(self::REVIEWS_LIMIT);
 
-        // load() is idempotent, so when the list block later renders it reuses this same instance.
         $collection->load()->addRateVotes();
 
         return $collection;

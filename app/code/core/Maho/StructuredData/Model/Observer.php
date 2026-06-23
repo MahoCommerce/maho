@@ -34,16 +34,25 @@ class Maho_StructuredData_Model_Observer
             return;
         }
 
-        $data = Mage::helper('structureddata')->buildItemList($urls);
+        $helper = Mage::helper('structureddata');
+        $data = $helper->buildItemList($urls);
+        if ($data === []) {
+            return;
+        }
+
+        // Let other modules enrich or alter the listing graph, mirroring the per-block data events.
+        $dataTransport = new Maho\DataObject(['structured_data' => $data]);
+        Mage::dispatchEvent('maho_structureddata_itemlist_data', [
+            'block' => $observer->getEvent()->getBlock(),
+            'transport' => $dataTransport,
+        ]);
+        $data = (array) $dataTransport->getStructuredData();
         if ($data === []) {
             return;
         }
 
         $transport = $observer->getEvent()->getTransport();
-        $transport->setHtml(
-            $transport->getHtml()
-            . '<script type="application/ld+json">' . Mage::helper('core')->jsonEncode($data) . '</script>',
-        );
+        $transport->setHtml($transport->getHtml() . $helper->renderJsonLdScript($data));
     }
 
     /**
@@ -57,7 +66,14 @@ class Maho_StructuredData_Model_Observer
         // Product listings. Category and search render through Mage_Catalog_Block_Product_List;
         // new-products / featured widgets expose their loaded collection via getProductCollection().
         if ($block instanceof Mage_Catalog_Block_Product_List) {
-            return $this->_urls($block->getLoadedProductCollection(), 'getProductUrl');
+            $collection = $block->getLoadedProductCollection();
+            // On a block-cache hit _toHtml() is skipped but this event still fires; the collection
+            // is then unloaded, so reusing it would force a full listing query on every request and
+            // defeat the cache. Only emit when the block actually rendered (collection already loaded).
+            if ($collection instanceof Maho\Data\Collection\Db && !$collection->isLoaded()) {
+                return [];
+            }
+            return $this->_urls($collection, 'getProductUrl');
         }
         if ($block instanceof Mage_Catalog_Block_Product_Abstract) {
             // Related/upsell/crosssell blocks don't set product_collection, so they're skipped.

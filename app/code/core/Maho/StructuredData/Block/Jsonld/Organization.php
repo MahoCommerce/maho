@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Maho_StructuredData_Block_Jsonld_Organization extends Maho_StructuredData_Block_Jsonld_Abstract
 {
+    protected string $_eventObject = 'organization';
+
     /**
      * @return array<string, mixed>
      */
@@ -38,11 +40,11 @@ class Maho_StructuredData_Block_Jsonld_Organization extends Maho_StructuredData_
             $data['contactPoint'] = $contactPoint;
         }
 
-        if ($type === 'LocalBusiness') {
-            $address = $this->_getAddress();
-            if ($address !== []) {
-                $data['address'] = $address;
-            }
+        // address is valid on Organization/OnlineStore (optional) and required on LocalBusiness, so
+        // emit it whenever the store address is configured rather than only for the LocalBusiness type.
+        $address = $this->_getAddress();
+        if ($address !== []) {
+            $data['address'] = $address;
         }
 
         $sameAs = $helper->getSocialProfiles();
