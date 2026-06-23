@@ -195,6 +195,17 @@ class ControllerDispatcher
             return false;
         }
 
+        // Honor the runtime module-enabled state. The compiled matcher only refreshes
+        // on `composer dump-autoload`, so a route can survive in the table after its
+        // module was disabled in app/etc/modules/*.xml. Without this guard the request
+        // would dispatch a controller whose module config never loaded (fatal error);
+        // returning false here lets the router fall through to the no-route handler.
+        // $module is the canonical declaration name (e.g. Maho_Blog), stored verbatim
+        // in maho_attributes.php as `module` and exposed here as `_maho_module`.
+        if ($module !== '' && !Mage::helper('core')->isModuleEnabled($module)) {
+            return false;
+        }
+
         // Admin area: verify the matched frontName matches the runtime admin frontName.
         // Without this, a request like /notadmin/... would match admin routes with any
         // segment for `{_adminFrontName}` and dispatch as admin — rejecting at this point
