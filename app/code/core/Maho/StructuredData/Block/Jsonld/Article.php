@@ -40,7 +40,7 @@ class Maho_StructuredData_Block_Jsonld_Article extends Maho_StructuredData_Block
         $url = $post->getUrl();
 
         $data = [
-            '@context' => 'https://schema.org/',
+            '@context' => Maho_StructuredData_Helper_Data::SCHEMA,
             '@type' => 'BlogPosting',
             'headline' => (string) $post->getTitle(),
             'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => $url],
@@ -58,7 +58,7 @@ class Maho_StructuredData_Block_Jsonld_Article extends Maho_StructuredData_Block
             $data['image'] = [$image];
         }
 
-        $published = $this->_formatDate((string) $post->getPublishDate());
+        $published = $this->_formatPublishDate((string) $post->getPublishDate());
         if ($published !== '') {
             $data['datePublished'] = $published;
         }
@@ -83,11 +83,25 @@ class Maho_StructuredData_Block_Jsonld_Article extends Maho_StructuredData_Block
     protected function _getDescription(Maho_Blog_Model_Post $post): string
     {
         $description = (string) ($post->getMetaDescription() ?: $post->getContent());
-        return trim(preg_replace('/\s+/', ' ', strip_tags($description)) ?? '');
+        return Mage::helper('structureddata')->toPlainText($description);
     }
 
     /**
-     * Normalise a stored date/datetime to an ISO-8601 string in the store timezone.
+     * Blog publish_date is a store-local, date-only column (see Maho_Blog_Model_Resource_Post),
+     * so it is emitted verbatim as a plain date with no timezone conversion. Converting it through
+     * utcToStore() would shift it by the store offset and could roll it to the wrong calendar day.
+     */
+    protected function _formatPublishDate(string $value): string
+    {
+        if ($value === '' || str_starts_with($value, '0000')) {
+            return '';
+        }
+
+        return substr($value, 0, 10);
+    }
+
+    /**
+     * Normalise a stored UTC datetime (e.g. updated_at) to an ISO-8601 string in the store timezone.
      */
     protected function _formatDate(string $value): string
     {

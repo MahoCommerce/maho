@@ -39,7 +39,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         $helper = Mage::helper('structureddata');
 
         $data = [
-            '@context' => 'https://schema.org/',
+            '@context' => Maho_StructuredData_Helper_Data::SCHEMA,
             '@type' => 'Product',
             'name' => $product->getName(),
         ];
@@ -107,9 +107,7 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
             ?: $product->getShortDescription()
             ?: $product->getDescription());
 
-        $description = trim(preg_replace('/\s+/', ' ', strip_tags($description)) ?? '');
-
-        return $description;
+        return Mage::helper('structureddata')->toPlainText($description);
     }
 
     /**

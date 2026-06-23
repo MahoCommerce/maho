@@ -13,13 +13,22 @@ declare(strict_types=1);
 class Maho_StructuredData_Model_Observer
 {
     /**
-     * Emit a summary-format ItemList for any listing block as it renders, so product listings
-     * (category, search, CMS/home widgets) and blog listings (index, category) are covered
-     * automatically without per-handle layout wiring.
+     * Emit a summary-format ItemList for any listing block as it renders.
+     *
+     * This deliberately hooks the global core_block_abstract_to_html_after rather than wiring
+     * blocks per layout handle: product listings appear under several fixed block names (category,
+     * search) PLUS dynamically-named widget instances on CMS/home pages, which layout cannot target
+     * by name or type. Catching blocks we can neither name nor predict the class of requires
+     * inspecting every block as it renders. The handler stays cheap — an isEnabled() short-circuit
+     * and an instanceof filter that returns immediately for the (vast) non-listing majority.
      */
     #[Maho\Config\Observer('core_block_abstract_to_html_after', area: 'frontend')]
     public function appendListJsonLd(\Maho\Event\Observer $observer): void
     {
+        if (!Mage::helper('structureddata')->isEnabled()) {
+            return;
+        }
+
         $urls = $this->_resolveListUrls($observer->getEvent()->getBlock());
         if ($urls === []) {
             return;

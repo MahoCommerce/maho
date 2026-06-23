@@ -60,7 +60,7 @@ class Maho_StructuredData_Block_Jsonld_Breadcrumbs extends Maho_StructuredData_B
         }
 
         return [
-            '@context' => 'https://schema.org/',
+            '@context' => Maho_StructuredData_Helper_Data::SCHEMA,
             '@type' => 'BreadcrumbList',
             'itemListElement' => $itemListElement,
         ];

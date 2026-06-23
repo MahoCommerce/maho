@@ -29,7 +29,7 @@ class Maho_StructuredData_Block_Jsonld_Organization extends Maho_StructuredData_
         $type = (string) Mage::getStoreConfig(Maho_StructuredData_Helper_Data::XML_PATH_ORGANIZATION_TYPE) ?: 'Organization';
 
         $data = [
-            '@context' => 'https://schema.org/',
+            '@context' => Maho_StructuredData_Helper_Data::SCHEMA,
             '@type' => $type,
             'name' => $helper->getOrganizationName(),
             'url' => Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB),

@@ -29,7 +29,7 @@ class Maho_StructuredData_Block_Jsonld_Website extends Maho_StructuredData_Block
         $baseUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
 
         $data = [
-            '@context' => 'https://schema.org/',
+            '@context' => Maho_StructuredData_Helper_Data::SCHEMA,
             '@type' => 'WebSite',
             'url' => $baseUrl,
             'name' => $helper->getOrganizationName(),
