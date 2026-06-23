@@ -13,9 +13,10 @@ function paypalReviewBlock(): Maho_Paypal_Block_Checkout_Standard_Review
 {
     /** @var Maho_Paypal_Block_Checkout_Standard_Review $block */
     $block = Mage::app()->getLayout()->createBlock('paypal/checkout_standard_review');
-    // The payment layer sets the method instance on the form block in real checkout;
-    // the template reads getMethodCode() from it.
-    $block->setMethod(Mage::getModel('paypal/method_standardCheckout'));
+    // Deliberately do NOT setMethod(): the review block is rendered standalone in the
+    // order-review block, so the payment layer never sets a method instance on it. It must
+    // render without one (it supplies its own method code). Setting one here would mask the
+    // "Cannot retrieve the payment method model object" regression.
     return $block;
 }
 

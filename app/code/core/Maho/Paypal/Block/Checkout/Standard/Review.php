@@ -20,6 +20,18 @@ class Maho_Paypal_Block_Checkout_Standard_Review extends Maho_Paypal_Block_Check
     }
 
     /**
+     * Unlike the payment-step form block, the review block is rendered standalone (as a child
+     * of the order-review block), so the payment layer never sets a method model object on it.
+     * This block is always PayPal Standard, so return its code directly instead of relying on
+     * the parent's getMethod()->getCode(), which would throw here.
+     */
+    #[\Override]
+    public function getMethodCode(): string
+    {
+        return Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT;
+    }
+
+    /**
      * The review-step button is only relevant in multistep checkout when PayPal
      * Standard is the currently selected payment method. In onestep checkout the
      * smart button lives in the payment step and stays the terminal action.

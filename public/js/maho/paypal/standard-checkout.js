@@ -14,7 +14,7 @@ class MahoPaypalStandardCheckout {
         this.addToCartFormId = formDiv.dataset.addToCartForm || null;
         // Review mode (multistep checkout): PayPal approval only pre-confirms the funding
         // source. The native "Place Order" button stays the terminal action and runs
-        // placeApprovedOrder() (capture + placement) — onApprove does not redirect here.
+        // placeApprovedOrder() (capture + placement). onApprove does not redirect here.
         this.reviewMode = formDiv.dataset.reviewMode === '1';
         this._approvedOrderId = null;
         this._mounted = false;
