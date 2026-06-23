@@ -20,7 +20,6 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_PRODUCT_BRAND_ATTRIBUTE = 'catalog/structured_data/product/brand_attribute';
     public const XML_PATH_PRODUCT_GTIN_ATTRIBUTE = 'catalog/structured_data/product/gtin_attribute';
     public const XML_PATH_PRODUCT_MPN_ATTRIBUTE = 'catalog/structured_data/product/mpn_attribute';
-    public const XML_PATH_PRODUCT_LOW_STOCK_THRESHOLD = 'catalog/structured_data/product/low_stock_threshold';
     public const XML_PATH_BREADCRUMBS_ENABLED = 'catalog/structured_data/breadcrumbs/enabled';
     public const XML_PATH_PRODUCTLIST_ENABLED = 'catalog/structured_data/productlist/enabled';
     public const XML_PATH_ORGANIZATION_ENABLED = 'catalog/structured_data/organization/enabled';
@@ -180,11 +179,6 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
         return trim((string) Mage::getStoreConfig(self::XML_PATH_PRODUCT_MPN_ATTRIBUTE, $store));
     }
 
-    public function getLowStockThreshold(int|string|null $store = null): int
-    {
-        return (int) Mage::getStoreConfig(self::XML_PATH_PRODUCT_LOW_STOCK_THRESHOLD, $store);
-    }
-
     /**
      * Map a product's stock state to a schema.org ItemAvailability URL.
      */
@@ -218,7 +212,9 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
             return self::SCHEMA . 'OutOfStock';
         }
 
-        $threshold = $this->getLowStockThreshold($product->getStoreId());
+        // Reuse the inventory low-stock threshold (cataloginventory/item_options/notify_stock_qty),
+        // which the stock item resolves per-product with fallback to the global default.
+        $threshold = (float) $stockItem->getNotifyStockQty();
         if ($threshold > 0 && $qty <= $threshold) {
             return self::SCHEMA . 'LimitedAvailability';
         }

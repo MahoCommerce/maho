@@ -22,7 +22,6 @@
 "LinkedIn URL","LinkedIn URL"
 "Local Business","Local Business"
 "Logo URL","Logo URL"
-"Low Stock Threshold","Low Stock Threshold"
 "MPN Attribute","MPN Attribute"
 "Online Store","Online Store"
 "Organization","Organization"
@@ -40,5 +39,4 @@
 "Structured Data (schema.org)","Structured Data (schema.org)"
 "The schema.org @type used for the organization. Use Local Business to include the store address.","The schema.org @type used for the organization. Use Local Business to include the store address."
 "Website Schema","Website Schema"
-"When the saleable quantity is at or below this value, availability is reported as LimitedAvailability. Set to 0 to disable.","When the saleable quantity is at or below this value, availability is reported as LimitedAvailability. Set to 0 to disable."
 "X (Twitter) URL","X (Twitter) URL"

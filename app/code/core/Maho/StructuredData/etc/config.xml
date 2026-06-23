@@ -52,9 +52,8 @@ SPDX-License-Identifier: AFL-3.0
                     <enabled>1</enabled>
                     <include_reviews>1</include_reviews>
                     <brand_attribute>manufacturer</brand_attribute>
-                    <gtin_attribute></gtin_attribute>
-                    <mpn_attribute></mpn_attribute>
-                    <low_stock_threshold>0</low_stock_threshold>
+                    <gtin_attribute>gtin</gtin_attribute>
+                    <mpn_attribute>mpn</mpn_attribute>
                 </product>
                 <breadcrumbs>
                     <enabled>1</enabled>
