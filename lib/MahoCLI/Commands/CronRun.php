@@ -142,6 +142,9 @@ class CronRun extends BaseMahoCommand
         $compiledJobs = Maho::getCompiledAttributes()['crontab'] ?? [];
         if (isset($compiledJobs[$jobCode])) {
             $jobDef = $compiledJobs[$jobCode];
+            if (!empty($jobDef['module']) && !Mage::helper('core')->isModuleEnabled($jobDef['module'])) {
+                return null;
+            }
             return $jobDef['alias'] . '::' . $jobDef['method'];
         }
 
