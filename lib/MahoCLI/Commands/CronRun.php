@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace MahoCLI\Commands;
 
+use Maho;
 use Mage;
 use Mage_Cron_Model_Observer;
 use Mage_Cron_Model_Schedule;
@@ -66,17 +67,12 @@ class CronRun extends BaseMahoCommand
             $output->writeln("<comment>{$jobCode} is disabled in admin. Running anyway via CLI.</comment>");
         }
 
-        $jobConfig = $this->getJobConfig($jobCode);
-        if (!$jobConfig) {
+        $runModel = $this->getJobRunModel($jobCode);
+        if ($runModel === null) {
             $output->writeln("<error>Unknown mode/job: {$modeOrJobCode}</error>");
             return Command::FAILURE;
         }
-        $runConfig = $jobConfig['run'];
-        if (!$runConfig['model']) {
-            $output->writeln("<error>Invalid model definition for {$jobCode}</error>");
-            return Command::FAILURE;
-        }
-        if (!preg_match(Mage_Cron_Model_Observer::REGEX_RUN_MODEL, (string) $runConfig['model'], $run)) {
+        if (!preg_match(Mage_Cron_Model_Observer::REGEX_RUN_MODEL, $runModel, $run)) {
             $output->writeln('<error>Invalid model/method definition, expecting "model/class::method"</error>');
             return Command::FAILURE;
         }
@@ -135,19 +131,31 @@ class CronRun extends BaseMahoCommand
         return Command::SUCCESS;
     }
 
-    protected function getJobConfig(string $jobCode): array|false
+    /**
+     * Resolve the "model/class::method" run definition for a job_code.
+     *
+     * Looks up attribute-registered (compiled) cron jobs first, then falls back to
+     * legacy XML-declared jobs under crontab/jobs and default/crontab/jobs.
+     */
+    protected function getJobRunModel(string $jobCode): ?string
     {
-        $jobConfig = Mage::getConfig()->getNode("crontab/jobs/{$jobCode}")->asArray();
-        if ($jobConfig) {
-            return $jobConfig;
+        $compiledJobs = Maho::getCompiledAttributes()['crontab'] ?? [];
+        if (isset($compiledJobs[$jobCode])) {
+            $jobDef = $compiledJobs[$jobCode];
+            if (!empty($jobDef['module']) && !Mage::helper('core')->isModuleEnabled($jobDef['module'])) {
+                return null;
+            }
+            return $jobDef['alias'] . '::' . $jobDef['method'];
         }
 
-        $jobConfig = Mage::getConfig()->getNode("default/crontab/jobs/{$jobCode}")->asArray();
-        if ($jobConfig) {
-            return $jobConfig;
+        foreach (['crontab/jobs', 'default/crontab/jobs'] as $path) {
+            $node = Mage::getConfig()->getNode("{$path}/{$jobCode}");
+            if ($node && $node->run && (string) $node->run->model !== '') {
+                return (string) $node->run->model;
+            }
         }
 
-        return false;
+        return null;
     }
 
 }
