@@ -358,6 +358,6 @@ if (Mage::getStoreConfigFlag('mymodule/abuse/honeypot_enabled')
 - Keep commits professional and focused only on code changes
 
 ## Pull Request Titles
-- Write a plain, descriptive title — **no** conventional-commit prefix (`feat(...)`, `fix(...)`, etc.)
+- Write a plain, descriptive title with **no** conventional-commit prefix (`feat(...)`, `fix(...)`, etc.)
 - Phrase it in the **past tense** describing what was done (e.g. "Added schema.org structured data for products and blog posts")
 - Spell out what the change delivers rather than using a vague summary
