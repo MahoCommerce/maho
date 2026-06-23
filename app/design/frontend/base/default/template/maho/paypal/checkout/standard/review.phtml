@@ -1,0 +1,60 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package Maho_Paypal
+ */
+
+/** @var Maho_Paypal_Block_Checkout_Standard_Review $this */
+if (!$this->isActive()) {
+    return;
+}
+$containerId = 'paypal-review-button-container';
+?>
+<div id="paypal-review-standard-checkout" class="paypal-review-checkout"
+    data-sdk-url="<?= $this->escapeUrl($this->getJsSdkUrl()) ?>"
+    data-client-token-url="<?= $this->escapeUrl($this->getClientTokenUrl()) ?>"
+    data-currency-code="<?= $this->escapeHtml($this->getCurrencyCode()) ?>"
+    data-create-order-url="<?= $this->escapeUrl($this->getCreateOrderUrl()) ?>"
+    data-approve-order-url="<?= $this->escapeUrl($this->getApproveOrderUrl()) ?>"
+    data-container-id="<?= $this->escapeHtml($containerId) ?>"
+    data-method-code="<?= $this->escapeHtml($this->getMethodCode()) ?>"
+    data-review-mode="1">
+    <p class="paypal-review-hint"><?= $this->escapeHtml($this->__('Confirm your payment with PayPal, then click "Place Order".')) ?></p>
+    <div id="<?= $this->escapeHtml($containerId) ?>" class="paypal-button-container">
+        <paypal-button hidden></paypal-button>
+    </div>
+    <?php if ($this->isVaultAvailable()): ?>
+    <label class="paypal-save-vault" for="paypal_review_save_vault">
+        <input type="checkbox" id="paypal_review_save_vault" name="payment[save_vault]" value="1">
+        <span class="paypal-save-vault-icon"><?= Mage::helper('core')->getIconSvg('lock', 'outline') ?></span>
+        <span><?= $this->escapeHtml($this->__('Save this payment method for future purchases')) ?></span>
+    </label>
+    <?php endif; ?>
+    <input type="hidden" id="paypal_review_order_id" value="">
+</div>
+<script>
+(function () {
+    const el = document.getElementById('paypal-review-standard-checkout');
+    if (!el || typeof MahoPaypalStandardCheckout === 'undefined') {
+        return;
+    }
+
+    const checkout = new MahoPaypalStandardCheckout(el);
+    el._paypalCheckout = checkout;
+    checkout.loadSdkAndMount();
+
+    // The native "Place Order" button stays the terminal action (§312j). It starts
+    // disabled and is only enabled by onApprove() once PayPal has confirmed funding.
+    const submit = document.getElementById('checkout-review-submit') || document;
+    submit.querySelectorAll('.btn-checkout').forEach((btn) => {
+        btn.disabled = true;
+        btn.setAttribute('disabled', 'disabled');
+        btn.onclick = function (event) {
+            event.preventDefault();
+            checkout.placeApprovedOrder();
+            return false;
+        };
+    });
+}());
+</script>
