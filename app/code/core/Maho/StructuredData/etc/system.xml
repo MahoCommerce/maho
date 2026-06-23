@@ -124,6 +124,27 @@ SPDX-License-Identifier: AFL-3.0
                             <depends><enabled>1</enabled></depends>
                         </breadcrumbs_enabled>
 
+                        <productlist_heading translate="label">
+                            <label>Product List Schema</label>
+                            <frontend_model>adminhtml/system_config_form_field_heading</frontend_model>
+                            <sort_order>250</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </productlist_heading>
+                        <productlist_enabled translate="label comment">
+                            <label>Enable ItemList Schema</label>
+                            <comment>Outputs ItemList (summary format) on any product listing (category, search results and CMS/home product widgets), linking to each product page that carries the full Product schema.</comment>
+                            <config_path>catalog/structured_data/productlist/enabled</config_path>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>260</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </productlist_enabled>
+
                         <organization_heading translate="label">
                             <label>Organization Schema</label>
                             <frontend_model>adminhtml/system_config_form_field_heading</frontend_model>

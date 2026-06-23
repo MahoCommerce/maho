@@ -269,9 +269,16 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
         }
 
         try {
-            return Mage::app()->getLocale()
-                ->utcToStore($product->getStore(), (string) $specialTo)
-                ->format(Mage_Core_Model_Locale::DATE_FORMAT);
+            $validUntil = Mage::app()->getLocale()->utcToStore($product->getStore(), (string) $specialTo);
+
+            // An expired special no longer affects getFinalPrice(), so emitting a past
+            // priceValidUntil would advertise an already-expired offer to search engines.
+            $today = Mage::app()->getLocale()->utcToStore($product->getStore())->setTime(0, 0, 0);
+            if ($validUntil < $today) {
+                return '';
+            }
+
+            return $validUntil->format(Mage_Core_Model_Locale::DATE_FORMAT);
         } catch (\Throwable) {
             return '';
         }

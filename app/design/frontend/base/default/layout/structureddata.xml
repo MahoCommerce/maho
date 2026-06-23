@@ -20,7 +20,9 @@ SPDX-License-Identifier: AFL-3.0
         </reference>
     </catalog_product_view>
 
-    <!-- Category pages: BreadcrumbList -->
+    <!-- Category pages: BreadcrumbList. The ItemList (summary format) for product listings
+         is emitted generically by Maho_StructuredData_Model_Observer wherever a product list
+         block renders (category, search, CMS/home widgets), so it needs no per-handle wiring. -->
     <catalog_category_view>
         <reference name="head">
             <block type="structureddata/jsonld_breadcrumbs" name="structured_data.breadcrumbs" />

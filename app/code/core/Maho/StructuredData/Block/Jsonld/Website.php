@@ -27,22 +27,28 @@ class Maho_StructuredData_Block_Jsonld_Website extends Maho_StructuredData_Block
     {
         $helper = Mage::helper('structureddata');
         $baseUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
-        $searchUrl = Mage::getUrl('catalogsearch/result');
-        $queryParam = Mage::helper('catalogsearch')->getQueryParamName();
 
-        return [
+        $data = [
             '@context' => 'https://schema.org/',
             '@type' => 'WebSite',
             'url' => $baseUrl,
             'name' => $helper->getOrganizationName(),
-            'potentialAction' => [
+        ];
+
+        // SearchAction depends on Mage_CatalogSearch (soft dependency): only add it when present.
+        if (Mage::helper('core')->isModuleEnabled('Mage_CatalogSearch')) {
+            $searchUrl = Mage::getUrl('catalogsearch/result');
+            $queryParam = Mage::helper('catalogsearch')->getQueryParamName();
+            $data['potentialAction'] = [
                 '@type' => 'SearchAction',
                 'target' => [
                     '@type' => 'EntryPoint',
                     'urlTemplate' => $searchUrl . '?' . $queryParam . '={search_term_string}',
                 ],
                 'query-input' => 'required name=search_term_string',
-            ],
-        ];
+            ];
+        }
+
+        return $data;
     }
 }

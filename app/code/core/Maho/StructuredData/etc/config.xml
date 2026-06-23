@@ -59,6 +59,9 @@ SPDX-License-Identifier: AFL-3.0
                 <breadcrumbs>
                     <enabled>1</enabled>
                 </breadcrumbs>
+                <productlist>
+                    <enabled>1</enabled>
+                </productlist>
                 <organization>
                     <enabled>1</enabled>
                     <type>Organization</type>

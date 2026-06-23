@@ -22,6 +22,7 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_PRODUCT_MPN_ATTRIBUTE = 'catalog/structured_data/product/mpn_attribute';
     public const XML_PATH_PRODUCT_LOW_STOCK_THRESHOLD = 'catalog/structured_data/product/low_stock_threshold';
     public const XML_PATH_BREADCRUMBS_ENABLED = 'catalog/structured_data/breadcrumbs/enabled';
+    public const XML_PATH_PRODUCTLIST_ENABLED = 'catalog/structured_data/productlist/enabled';
     public const XML_PATH_ORGANIZATION_ENABLED = 'catalog/structured_data/organization/enabled';
     public const XML_PATH_ORGANIZATION_TYPE = 'catalog/structured_data/organization/type';
     public const XML_PATH_ORGANIZATION_LOGO_URL = 'catalog/structured_data/organization/logo_url';
@@ -58,6 +59,48 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     public function isBreadcrumbsEnabled(int|string|null $store = null): bool
     {
         return $this->isEnabled($store) && Mage::getStoreConfigFlag(self::XML_PATH_BREADCRUMBS_ENABLED, $store);
+    }
+
+    public function isProductListEnabled(int|string|null $store = null): bool
+    {
+        return $this->isEnabled($store) && Mage::getStoreConfigFlag(self::XML_PATH_PRODUCTLIST_ENABLED, $store);
+    }
+
+    /**
+     * Build a summary-format ItemList graph from a list of page URLs. Each entry links to the
+     * detail page that carries the full markup (Product, BlogPosting, ...) — Google's recommended
+     * format for listing pages — so it is reused across product, search and blog listings.
+     *
+     * @param array<int, string> $urls
+     * @return array<string, mixed>
+     */
+    public function buildItemList(array $urls): array
+    {
+        $itemListElement = [];
+        $position = 1;
+        foreach ($urls as $url) {
+            $url = (string) $url;
+            if ($url === '') {
+                continue;
+            }
+
+            $itemListElement[] = [
+                '@type' => 'ListItem',
+                'position' => $position,
+                'url' => $url,
+            ];
+            $position++;
+        }
+
+        if ($itemListElement === []) {
+            return [];
+        }
+
+        return [
+            '@context' => self::SCHEMA,
+            '@type' => 'ItemList',
+            'itemListElement' => $itemListElement,
+        ];
     }
 
     public function isOrganizationEnabled(int|string|null $store = null): bool

@@ -97,9 +97,17 @@ class Maho_StructuredData_Block_Jsonld_Organization extends Maho_StructuredData_
             return [];
         }
 
-        return [
+        $data = [
             '@type' => 'PostalAddress',
             'streetAddress' => preg_replace('/\s+/', ' ', $address),
         ];
+
+        // Google's LocalBusiness address requires a country to validate.
+        $country = trim((string) Mage::getStoreConfig('general/store_information/merchant_country'));
+        if ($country !== '') {
+            $data['addressCountry'] = $country;
+        }
+
+        return $data;
     }
 }
