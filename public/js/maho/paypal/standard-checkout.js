@@ -44,7 +44,7 @@ class MahoPaypalStandardCheckout {
 
         const paymentMethods = await sdk.findEligibleMethods({ currencyCode: this.currencyCode });
         if (!paymentMethods.isEligible('paypal')) {
-            console.warn('PayPal is not eligible for this transaction');
+            hideLoader();
             return;
         }
 
@@ -147,6 +147,9 @@ class MahoPaypalStandardCheckout {
      * approved PayPal order id, then redirect to success.
      */
     async placeApprovedOrder() {
+        if (!this._validateAgreements()) {
+            return;
+        }
         const orderId = this._approvedOrderId
             || document.getElementById('paypal_review_order_id')?.value;
         if (!orderId) {
