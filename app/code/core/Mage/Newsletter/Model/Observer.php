@@ -8,8 +8,35 @@
  * @package Mage_Newsletter
  */
 
+use Symfony\Component\Mime\Email;
+
 class Mage_Newsletter_Model_Observer
 {
+    /**
+     * Add RFC 8058 List-Unsubscribe headers to outgoing newsletter mails.
+     *
+     * List-Unsubscribe exposes the one-click endpoint, List-Unsubscribe-Post opts the URL
+     * into the one-click POST flow that Gmail/Yahoo require from bulk senders. The send()
+     * path is shared with transactional mail, so the only reliable discriminator is the
+     * 'subscriber' variable, which is set exclusively by the newsletter queue.
+     */
+    #[Maho\Config\Observer('email_template_send_before')]
+    public function addListUnsubscribeHeaders(\Maho\Event\Observer $observer): void
+    {
+        $mail = $observer->getEvent()->getMail();
+        if (!$mail instanceof Email) {
+            return;
+        }
+        $variables = $observer->getEvent()->getVariables();
+        if (!isset($variables['subscriber'])) {
+            return;
+        }
+        $url = Mage::helper('newsletter')->getUnsubscribeUrl($variables['subscriber']);
+        $headers = $mail->getHeaders();
+        $headers->addTextHeader('List-Unsubscribe', '<' . $url . '>');
+        $headers->addTextHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
+    }
+
     /**
      * @return $this
      */
