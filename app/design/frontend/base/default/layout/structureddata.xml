@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<layout version="0.1.0">
+    <!-- Organization + WebSite belong on the homepage only: Google's Organization guidance is
+         "you don't need to include it on every page", so we scope these to the homepage handle
+         rather than <default>. (The WebSite sitelinks SearchAction was retired by Google in Nov
+         2024 but remains valid, harmless markup.) -->
+    <cms_index_index>
+        <reference name="head">
+            <block type="structureddata/jsonld_organization" name="structured_data.organization" />
+            <block type="structureddata/jsonld_website" name="structured_data.website" />
+        </reference>
+    </cms_index_index>
+
+    <!-- Product pages: Product + BreadcrumbList -->
+    <catalog_product_view>
+        <reference name="head">
+            <block type="structureddata/jsonld_product" name="structured_data.product" />
+            <block type="structureddata/jsonld_breadcrumbs" name="structured_data.breadcrumbs" />
+        </reference>
+    </catalog_product_view>
+
+    <!-- Category pages: BreadcrumbList. The ItemList (summary format) for product listings is
+         emitted generically by Maho_StructuredData_Model_Observer wherever a product-list block
+         renders (category, search, CMS/home widgets), since those include dynamically-named widget
+         instances that layout cannot target by name or type. -->
+    <catalog_category_view>
+        <reference name="head">
+            <block type="structureddata/jsonld_breadcrumbs" name="structured_data.breadcrumbs" />
+        </reference>
+    </catalog_category_view>
+
+    <!-- CMS pages: BreadcrumbList -->
+    <cms_page>
+        <reference name="head">
+            <block type="structureddata/jsonld_breadcrumbs" name="structured_data.breadcrumbs" />
+        </reference>
+    </cms_page>
+
+    <!-- Blog post pages: BlogPosting + BreadcrumbList (soft dependency on Maho_Blog;
+         these handles are dormant unless the Blog module routes the request) -->
+    <blog_index_view>
+        <reference name="head">
+            <block type="structureddata/jsonld_article" name="structured_data.article" />
+            <block type="structureddata/jsonld_breadcrumbs" name="structured_data.breadcrumbs" />
+        </reference>
+    </blog_index_view>
+
+    <!-- Blog category/listing pages: BreadcrumbList -->
+    <blog_index_category>
+        <reference name="head">
+            <block type="structureddata/jsonld_breadcrumbs" name="structured_data.breadcrumbs" />
+        </reference>
+    </blog_index_category>
+</layout>
