@@ -63,8 +63,7 @@ SPDX-License-Identifier: AFL-3.0
                 </productlist>
                 <organization>
                     <enabled>1</enabled>
-                    <type>Organization</type>
-                    <contact_email></contact_email>
+                    <type>OnlineStore</type>
                 </organization>
                 <website>
                     <enabled>1</enabled>

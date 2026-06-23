@@ -24,7 +24,6 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_PRODUCTLIST_ENABLED = 'catalog/structured_data/productlist/enabled';
     public const XML_PATH_ORGANIZATION_ENABLED = 'catalog/structured_data/organization/enabled';
     public const XML_PATH_ORGANIZATION_TYPE = 'catalog/structured_data/organization/type';
-    public const XML_PATH_ORGANIZATION_CONTACT_EMAIL = 'catalog/structured_data/organization/contact_email';
     public const XML_PATH_WEBSITE_ENABLED = 'catalog/structured_data/website/enabled';
     public const XML_PATH_BLOG_ENABLED = 'catalog/structured_data/blog/enabled';
 

@@ -76,7 +76,7 @@ describe('Organization block', function () {
         );
 
         expect($data)->not->toBeNull();
-        expect($data['@type'])->toBe('Organization');
+        expect($data['@type'])->toBe('OnlineStore');
         expect($data['@context'])->toBe('https://schema.org/');
         expect($data['name'])->not->toBeEmpty();
         expect($data['url'])->toStartWith('http');
