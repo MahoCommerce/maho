@@ -15,17 +15,11 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
     protected $_moduleName = 'Maho_StructuredData';
 
     public const XML_PATH_ENABLED = 'catalog/structured_data/enabled';
-    public const XML_PATH_PRODUCT_ENABLED = 'catalog/structured_data/product/enabled';
     public const XML_PATH_PRODUCT_INCLUDE_REVIEWS = 'catalog/structured_data/product/include_reviews';
     public const XML_PATH_PRODUCT_BRAND_ATTRIBUTE = 'catalog/structured_data/product/brand_attribute';
     public const XML_PATH_PRODUCT_GTIN_ATTRIBUTE = 'catalog/structured_data/product/gtin_attribute';
     public const XML_PATH_PRODUCT_MPN_ATTRIBUTE = 'catalog/structured_data/product/mpn_attribute';
-    public const XML_PATH_BREADCRUMBS_ENABLED = 'catalog/structured_data/breadcrumbs/enabled';
-    public const XML_PATH_PRODUCTLIST_ENABLED = 'catalog/structured_data/productlist/enabled';
-    public const XML_PATH_ORGANIZATION_ENABLED = 'catalog/structured_data/organization/enabled';
     public const XML_PATH_ORGANIZATION_TYPE = 'catalog/structured_data/organization/type';
-    public const XML_PATH_WEBSITE_ENABLED = 'catalog/structured_data/website/enabled';
-    public const XML_PATH_BLOG_ENABLED = 'catalog/structured_data/blog/enabled';
 
     public const SCHEMA = 'https://schema.org/';
 
@@ -42,24 +36,9 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
         return Mage::getStoreConfigFlag(self::XML_PATH_ENABLED, $store);
     }
 
-    public function isProductEnabled(int|string|null $store = null): bool
-    {
-        return $this->isEnabled($store) && Mage::getStoreConfigFlag(self::XML_PATH_PRODUCT_ENABLED, $store);
-    }
-
     public function includeReviews(int|string|null $store = null): bool
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_PRODUCT_INCLUDE_REVIEWS, $store);
-    }
-
-    public function isBreadcrumbsEnabled(int|string|null $store = null): bool
-    {
-        return $this->isEnabled($store) && Mage::getStoreConfigFlag(self::XML_PATH_BREADCRUMBS_ENABLED, $store);
-    }
-
-    public function isProductListEnabled(int|string|null $store = null): bool
-    {
-        return $this->isEnabled($store) && Mage::getStoreConfigFlag(self::XML_PATH_PRODUCTLIST_ENABLED, $store);
     }
 
     /**
@@ -97,21 +76,6 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
             '@type' => 'ItemList',
             'itemListElement' => $itemListElement,
         ];
-    }
-
-    public function isOrganizationEnabled(int|string|null $store = null): bool
-    {
-        return $this->isEnabled($store) && Mage::getStoreConfigFlag(self::XML_PATH_ORGANIZATION_ENABLED, $store);
-    }
-
-    public function isWebsiteEnabled(int|string|null $store = null): bool
-    {
-        return $this->isEnabled($store) && Mage::getStoreConfigFlag(self::XML_PATH_WEBSITE_ENABLED, $store);
-    }
-
-    public function isBlogEnabled(int|string|null $store = null): bool
-    {
-        return $this->isEnabled($store) && Mage::getStoreConfigFlag(self::XML_PATH_BLOG_ENABLED, $store);
     }
 
     public function getOrganizationName(int|string|null $store = null): string

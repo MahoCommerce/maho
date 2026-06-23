@@ -49,28 +49,14 @@ SPDX-License-Identifier: AFL-3.0
             <structured_data>
                 <enabled>1</enabled>
                 <product>
-                    <enabled>1</enabled>
                     <include_reviews>1</include_reviews>
                     <brand_attribute>manufacturer</brand_attribute>
                     <gtin_attribute>gtin</gtin_attribute>
                     <mpn_attribute>mpn</mpn_attribute>
                 </product>
-                <breadcrumbs>
-                    <enabled>1</enabled>
-                </breadcrumbs>
-                <productlist>
-                    <enabled>1</enabled>
-                </productlist>
                 <organization>
-                    <enabled>1</enabled>
                     <type>OnlineStore</type>
                 </organization>
-                <website>
-                    <enabled>1</enabled>
-                </website>
-                <blog>
-                    <enabled>1</enabled>
-                </blog>
             </structured_data>
         </catalog>
     </default>

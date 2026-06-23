@@ -15,13 +15,6 @@ class Maho_StructuredData_Block_Jsonld_Product extends Maho_StructuredData_Block
     /** Cap the number of individual Review nodes emitted, newest first, to bound page weight. */
     protected const REVIEWS_LIMIT = 10;
 
-    #[\Override]
-    protected function isTypeEnabled(): bool
-    {
-        $helper = Mage::helper('structureddata');
-        return $helper->isProductEnabled();
-    }
-
     public function getProduct(): ?Mage_Catalog_Model_Product
     {
         $product = Mage::registry('current_product');

@@ -23,7 +23,7 @@ abstract class Maho_StructuredData_Block_Jsonld_Abstract extends Mage_Core_Block
     protected function _toHtml(): string
     {
         $helper = Mage::helper('structureddata');
-        if (!$helper->isEnabled() || !$this->isTypeEnabled()) {
+        if (!$helper->isEnabled()) {
             return '';
         }
 
@@ -42,9 +42,4 @@ abstract class Maho_StructuredData_Block_Jsonld_Abstract extends Mage_Core_Block
      * @return array<string, mixed>
      */
     abstract protected function getStructuredData(): array;
-
-    /**
-     * Whether this specific schema type is enabled in configuration.
-     */
-    abstract protected function isTypeEnabled(): bool;
 }

@@ -12,13 +12,6 @@ declare(strict_types=1);
 
 class Maho_StructuredData_Block_Jsonld_Organization extends Maho_StructuredData_Block_Jsonld_Abstract
 {
-    #[\Override]
-    protected function isTypeEnabled(): bool
-    {
-        $helper = Mage::helper('structureddata');
-        return $helper->isOrganizationEnabled();
-    }
-
     /**
      * @return array<string, mixed>
      */

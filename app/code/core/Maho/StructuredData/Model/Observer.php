@@ -47,26 +47,22 @@ class Maho_StructuredData_Model_Observer
     }
 
     /**
-     * Resolve the detail-page URLs a listing block displays, gated by the relevant config toggle.
-     * Returns an empty array for any block that is not an enabled listing.
+     * Resolve the detail-page URLs a listing block displays.
+     * Returns an empty array for any block that is not a listing.
      *
      * @return array<int, string>
      */
     protected function _resolveListUrls(Mage_Core_Block_Abstract $block): array
     {
-        $helper = Mage::helper('structureddata');
-
         // Product listings. Category and search render through Mage_Catalog_Block_Product_List;
         // new-products / featured widgets expose their loaded collection via getProductCollection().
         if ($block instanceof Mage_Catalog_Block_Product_List) {
-            return $helper->isProductListEnabled()
-                ? $this->_urls($block->getLoadedProductCollection(), 'getProductUrl')
-                : [];
+            return $this->_urls($block->getLoadedProductCollection(), 'getProductUrl');
         }
         if ($block instanceof Mage_Catalog_Block_Product_Abstract) {
             // Related/upsell/crosssell blocks don't set product_collection, so they're skipped.
             $collection = $block->getProductCollection();
-            if (is_iterable($collection) && $helper->isProductListEnabled()) {
+            if (is_iterable($collection)) {
                 return $this->_urls($collection, 'getProductUrl');
             }
             return [];
@@ -74,9 +70,7 @@ class Maho_StructuredData_Model_Observer
 
         // Blog listings (soft dependency on Maho_Blog: instanceof is false when absent).
         if ($block instanceof Maho_Blog_Block_Post_List || $block instanceof Maho_Blog_Block_Category_View) {
-            return $helper->isBlogEnabled()
-                ? $this->_urls($block->getPosts(), 'getUrl')
-                : [];
+            return $this->_urls($block->getPosts(), 'getUrl');
         }
 
         return [];

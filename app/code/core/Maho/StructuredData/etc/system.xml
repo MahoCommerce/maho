@@ -34,79 +34,38 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <depends><enabled>1</enabled></depends>
                         </organization_heading>
-                        <organization_enabled translate="label">
-                            <label>Enable Organization Schema</label>
-                            <config_path>catalog/structured_data/organization/enabled</config_path>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>110</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </organization_enabled>
                         <organization_type translate="label comment">
                             <label>Organization Type</label>
                             <comment>The schema.org @type used for the organization. Use Local Business to include the store address.</comment>
                             <config_path>catalog/structured_data/organization/type</config_path>
                             <frontend_type>select</frontend_type>
                             <source_model>structureddata/system_config_source_organization_type</source_model>
-                            <sort_order>120</sort_order>
+                            <sort_order>110</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled><organization_enabled>1</organization_enabled></depends>
+                            <depends><enabled>1</enabled></depends>
                         </organization_type>
 
-                        <website_heading translate="label">
-                            <label>Website Schema</label>
+                        <product_heading translate="label">
+                            <label>Product Schema</label>
                             <frontend_model>adminhtml/system_config_form_field_heading</frontend_model>
                             <sort_order>200</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                             <depends><enabled>1</enabled></depends>
-                        </website_heading>
-                        <website_enabled translate="label comment">
-                            <label>Enable WebSite Schema</label>
-                            <comment>Outputs WebSite schema with a SearchAction so search engines can offer a sitelinks search box.</comment>
-                            <config_path>catalog/structured_data/website/enabled</config_path>
+                        </product_heading>
+                        <product_include_reviews translate="label comment">
+                            <label>Include Ratings &amp; Reviews</label>
+                            <comment>Adds aggregateRating (rating value and review count) to the product schema when reviews are enabled.</comment>
+                            <config_path>catalog/structured_data/product/include_reviews</config_path>
                             <frontend_type>boolean</frontend_type>
                             <sort_order>210</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                             <depends><enabled>1</enabled></depends>
-                        </website_enabled>
-
-                        <product_heading translate="label">
-                            <label>Product Schema</label>
-                            <frontend_model>adminhtml/system_config_form_field_heading</frontend_model>
-                            <sort_order>300</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </product_heading>
-                        <product_enabled translate="label">
-                            <label>Enable Product Schema</label>
-                            <config_path>catalog/structured_data/product/enabled</config_path>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>310</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </product_enabled>
-                        <product_include_reviews translate="label comment">
-                            <label>Include Ratings &amp; Reviews</label>
-                            <comment>Adds aggregateRating (rating value and review count) to the product schema when reviews are enabled.</comment>
-                            <config_path>catalog/structured_data/product/include_reviews</config_path>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>320</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled><product_enabled>1</product_enabled></depends>
                         </product_include_reviews>
                         <product_brand_attribute translate="label comment">
                             <label>Brand Attribute</label>
@@ -114,11 +73,11 @@ SPDX-License-Identifier: AFL-3.0
                             <config_path>catalog/structured_data/product/brand_attribute</config_path>
                             <frontend_type>select</frontend_type>
                             <source_model>structureddata/system_config_source_product_attribute</source_model>
-                            <sort_order>330</sort_order>
+                            <sort_order>220</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled><product_enabled>1</product_enabled></depends>
+                            <depends><enabled>1</enabled></depends>
                         </product_brand_attribute>
                         <product_gtin_attribute translate="label comment">
                             <label>GTIN Attribute</label>
@@ -126,11 +85,11 @@ SPDX-License-Identifier: AFL-3.0
                             <config_path>catalog/structured_data/product/gtin_attribute</config_path>
                             <frontend_type>select</frontend_type>
                             <source_model>structureddata/system_config_source_product_attribute</source_model>
-                            <sort_order>340</sort_order>
+                            <sort_order>230</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled><product_enabled>1</product_enabled></depends>
+                            <depends><enabled>1</enabled></depends>
                         </product_gtin_attribute>
                         <product_mpn_attribute translate="label comment">
                             <label>MPN Attribute</label>
@@ -138,74 +97,12 @@ SPDX-License-Identifier: AFL-3.0
                             <config_path>catalog/structured_data/product/mpn_attribute</config_path>
                             <frontend_type>select</frontend_type>
                             <source_model>structureddata/system_config_source_product_attribute</source_model>
-                            <sort_order>350</sort_order>
+                            <sort_order>240</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled><product_enabled>1</product_enabled></depends>
+                            <depends><enabled>1</enabled></depends>
                         </product_mpn_attribute>
-
-                        <breadcrumbs_heading translate="label">
-                            <label>Breadcrumbs Schema</label>
-                            <frontend_model>adminhtml/system_config_form_field_heading</frontend_model>
-                            <sort_order>400</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </breadcrumbs_heading>
-                        <breadcrumbs_enabled translate="label">
-                            <label>Enable BreadcrumbList Schema</label>
-                            <config_path>catalog/structured_data/breadcrumbs/enabled</config_path>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>410</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </breadcrumbs_enabled>
-
-                        <productlist_heading translate="label">
-                            <label>Product List Schema</label>
-                            <frontend_model>adminhtml/system_config_form_field_heading</frontend_model>
-                            <sort_order>450</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </productlist_heading>
-                        <productlist_enabled translate="label comment">
-                            <label>Enable ItemList Schema</label>
-                            <comment>Outputs ItemList (summary format) on any product listing (category, search results and CMS/home product widgets), linking to each product page that carries the full Product schema.</comment>
-                            <config_path>catalog/structured_data/productlist/enabled</config_path>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>460</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </productlist_enabled>
-
-                        <blog_heading translate="label">
-                            <label>Blog Schema</label>
-                            <frontend_model>adminhtml/system_config_form_field_heading</frontend_model>
-                            <sort_order>500</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </blog_heading>
-                        <blog_enabled translate="label comment">
-                            <label>Enable BlogPosting Schema</label>
-                            <comment>Outputs BlogPosting (Article) schema on blog post pages. Requires the Maho_Blog module.</comment>
-                            <config_path>catalog/structured_data/blog/enabled</config_path>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>510</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </blog_enabled>
                     </fields>
                 </structured_data>
             </groups>
