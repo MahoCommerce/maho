@@ -350,9 +350,28 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             }
         }
         foreach ($attributeFilters as $code => $value) {
-            if (preg_match('/^[a-z][a-z0-9_]*$/', $code)) {
-                $collection->addAttributeToFilter($code, $value);
+            if (!preg_match('/^[a-z][a-z0-9_]*$/', $code)) {
+                continue;
             }
+            // Multiselect attributes persist their selected option ids as a comma-joined set,
+            // so an equality match never hits (the bug that made e.g. ?attr_material= return
+            // zero). Filter each id with FIND_IN_SET (finset) instead, OR-ing multiple
+            // comma-separated ids the same way the layered-filter facets count them.
+            $attribute = \Mage::getSingleton('eav/config')->getAttribute(\Mage_Catalog_Model_Product::ENTITY, $code);
+            if ($attribute->getId() && $attribute->getFrontendInput() === 'multiselect') {
+                $conditions = [];
+                foreach (is_array($value) ? $value : explode(',', (string) $value) as $optionId) {
+                    $optionId = trim((string) $optionId);
+                    if ($optionId !== '') {
+                        $conditions[] = ['finset' => $optionId];
+                    }
+                }
+                if ($conditions !== []) {
+                    $collection->addAttributeToFilter($code, $conditions);
+                }
+                continue;
+            }
+            $collection->addAttributeToFilter($code, $value);
         }
 
         if (!empty($requestFilters['sortBy'])) {
