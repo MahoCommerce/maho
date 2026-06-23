@@ -49,8 +49,9 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Wrap a schema.org graph in a JSON-LD <script> tag. Single source of truth for the markup,
-     * shared by the jsonld.phtml template and the listing-page observer. Relies on jsonEncode's
-     * default slash-escaping (no JSON_UNESCAPED_SLASHES) to neutralize any literal "</script>".
+     * shared by the jsonld.phtml template and the listing-page observer. Uses JSON_HEX_TAG and
+     * JSON_HEX_AMP so any literal "</script>" (or other "<", ">", "&") in admin- or
+     * customer-controlled string data is escaped and cannot break out of the script element.
      *
      * @param array<string, mixed> $data
      */
@@ -59,7 +60,8 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
         if ($data === []) {
             return '';
         }
-        return '<script type="application/ld+json">' . Mage::helper('core')->jsonEncode($data) . '</script>';
+        $json = json_encode($data, JSON_THROW_ON_ERROR | JSON_HEX_TAG | JSON_HEX_AMP);
+        return '<script type="application/ld+json">' . $json . '</script>';
     }
 
     /**
@@ -271,7 +273,8 @@ class Maho_StructuredData_Helper_Data extends Mage_Core_Helper_Abstract
         $profiles = [];
         foreach (self::SOCIAL_PATHS as $path) {
             $url = trim((string) Mage::getStoreConfig($path, $store));
-            if ($url !== '') {
+            // Only emit valid http(s) URLs; reject javascript: and other unsafe schemes.
+            if ($url !== '' && Mage::helper('core')->isValidUrl($url)) {
                 $profiles[] = $url;
             }
         }
