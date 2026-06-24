@@ -55,7 +55,11 @@ class IdempotencyListener
         private readonly TokenStorageInterface $tokenStorage,
     ) {}
 
-    #[AsEventListener(event: KernelEvents::REQUEST, priority: 100)]
+    // Must run AFTER Symfony's security firewall (priority 8) so the security
+    // token is populated; getUserScope() relies on the authenticated user.
+    // Running before the firewall (e.g. at priority 100) makes getUserScope()
+    // always return null, silently disabling idempotency for every request.
+    #[AsEventListener(event: KernelEvents::REQUEST, priority: 5)]
     public function onRequest(RequestEvent $event): void
     {
         $request = $event->getRequest();

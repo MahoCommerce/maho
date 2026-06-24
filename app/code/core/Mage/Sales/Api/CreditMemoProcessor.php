@@ -145,6 +145,13 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         }
         $creditmemo->setPaymentRefundDisallowed($offlineRefund ? 1.0 : 0.0);
 
+        // Add comment before register/save so it is persisted atomically with
+        // the credit memo. Saving it separately after the transaction commit
+        // would re-trigger post-save observers on an already-refunded memo.
+        if ($comment) {
+            $creditmemo->addComment($comment, false);
+        }
+
         // Register the credit memo (triggers payment gateway for online refunds)
         $creditmemo->register();
 
@@ -154,12 +161,6 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         $transaction->addObject($creditmemo)
             ->addObject($order)
             ->save();
-
-        // Add comment if provided
-        if ($comment) {
-            $creditmemo->addComment($comment);
-            $creditmemo->save();
-        }
 
         return CreditMemo::fromModel($creditmemo);
     }

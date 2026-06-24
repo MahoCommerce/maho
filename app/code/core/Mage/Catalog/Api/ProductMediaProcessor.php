@@ -82,7 +82,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             if ($decoded === false) {
                 throw new BadRequestHttpException('Invalid base64 image data');
             }
-            $tmpPath = tempnam(sys_get_temp_dir(), 'maho_media_');
+            $tmpPath = tempnam(\Mage::getBaseDir('tmp'), 'maho_media_');
             file_put_contents($tmpPath, $decoded);
             // Rename with proper extension
             $ext = pathinfo($filename, PATHINFO_EXTENSION) ?: 'jpg';
@@ -116,8 +116,14 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
                 throw new BadRequestHttpException('Failed to download image from URL');
             }
             $ext = pathinfo(parse_url($imageUrl, PHP_URL_PATH) ?: '', PATHINFO_EXTENSION) ?: 'jpg';
-            $tmpPath = tempnam(sys_get_temp_dir(), 'maho_media_') . '.' . $ext;
+            // Write to the tempnam-created file first, then atomically rename to
+            // the extension-suffixed name (mirrors the base64 path) so no bare
+            // file leaks and the extension path is uniquely owned.
+            $tmpPath = tempnam(\Mage::getBaseDir('tmp'), 'maho_media_');
             file_put_contents($tmpPath, $imageData);
+            $newPath = $tmpPath . '.' . $ext;
+            rename($tmpPath, $newPath);
+            $tmpPath = $newPath;
         } else {
             throw new BadRequestHttpException('Either base64, imageData, or imageUrl is required');
         }

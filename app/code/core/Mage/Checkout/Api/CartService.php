@@ -330,6 +330,17 @@ class CartService
             }
         }
 
+        // If the product is still a not-visible simple at this point, it was not
+        // promoted to a configurable parent (no parent, or super-attributes could
+        // not be resolved). Such a SKU must not be added directly — that would
+        // bypass the visibility gate. Only genuine configurable variants reach the
+        // cart, and always as their configurable parent.
+        if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
+            && (int) $product->getVisibility() === \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
+        ) {
+            throw new \RuntimeException("Product '{$sku}' is not available");
+        }
+
         $this->logDebug("Product loaded: ID={$product->getId()}, StoreId={$product->getStoreId()}, Price={$product->getPrice()}, FinalPrice={$product->getFinalPrice()}");
         // Convert flat date/datetime values to the array format Magento expects
         $currentOptions = $buyRequest->getData('options') ?: [];

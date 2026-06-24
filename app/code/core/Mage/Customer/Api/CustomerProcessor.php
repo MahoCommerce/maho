@@ -273,6 +273,10 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Email and password are required');
         }
 
+        // Per-IP cap first (matches the REST /auth/token endpoint), so an
+        // attacker rotating email addresses can't spray the login mutation
+        // beyond the IP allowance; then the tighter per-email cap.
+        $this->checkRateLimitByIp('graphql_login', 'auth_token_ip', 60);
         $this->checkRateLimit('graphql_login:email:' . strtolower($email), 'customer_login', 60);
 
         StoreContext::ensureStore();

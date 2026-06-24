@@ -480,7 +480,9 @@ class CustomerService
         }
 
         if ($customer->isResetPasswordLinkTokenExpired()) {
-            throw new \Exception('Reset token has expired.');
+            // Use the same message as an invalid token so the response does not
+            // confirm to a caller that a supplied token was correct-but-expired.
+            throw new \Exception('Invalid or expired reset token.');
         }
 
         $customer->setPassword($newPassword);

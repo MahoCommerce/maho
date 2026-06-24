@@ -106,49 +106,13 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
 
             if ($guestCartMaskedId && is_string($guestCartMaskedId) && preg_match('/^[a-f0-9]{32}$/i', $guestCartMaskedId)) {
                 try {
-                    $guestCart = $this->cartService->getCart(null, $guestCartMaskedId);
-
-                    if ($guestCart && $guestCart->getId() && !$guestCart->getCustomerId()) {
-                        $customerCart = \Mage::getModel('sales/quote')
-                            ->setSharedStoreIds([\Mage::app()->getStore()->getId()])
-                            ->loadByCustomer((int) $customer->getId());
-
-                        if (!$customerCart->getId()) {
-                            $customerCart = \Mage::getModel('sales/quote');
-                            $customerCart->setStoreId(\Mage::app()->getStore()->getId());
-                            $customerCart->assignCustomer($customer);
-                            $customerCart->setIsActive(1);
-                            $customerCart->save();
-                        }
-
-                        $customerCart->merge($guestCart);
-
-                        // Import customer default addresses so shipping quotes work on cart page
-                        $defaultShipping = $customer->getDefaultShippingAddress();
-                        if ($defaultShipping && $defaultShipping->getId()) {
-                            $shippingAddress = $customerCart->getShippingAddress();
-                            if (!$shippingAddress->getFirstname()) {
-                                $shippingAddress->importCustomerAddress($defaultShipping);
-                                $shippingAddress->setSaveInAddressBook(0);
-                            }
-                        }
-                        $defaultBilling = $customer->getDefaultBillingAddress();
-                        if ($defaultBilling && $defaultBilling->getId()) {
-                            $billingAddress = $customerCart->getBillingAddress();
-                            if (!$billingAddress->getFirstname()) {
-                                $billingAddress->importCustomerAddress($defaultBilling);
-                                $billingAddress->setSaveInAddressBook(0);
-                            }
-                        }
-
-                        $customerCart->collectTotals();
-                        $customerCart->save();
-
-                        $guestCart->setIsActive(0);
-                        $guestCart->save();
-
-                        $cartId = (int) $customerCart->getId();
-                    }
+                    // Delegate to CartService::mergeCarts, which enforces the full
+                    // guest-cart ownership guard (rejecting a masked ID resolving
+                    // to another customer's cart), re-collects totals correctly
+                    // (setTotalsCollectedFlag(false) before collectTotals), and
+                    // deactivates the guest cart atomically.
+                    $customerCart = $this->cartService->mergeCarts($guestCartMaskedId, (int) $customer->getId());
+                    $cartId = (int) $customerCart->getId();
                 } catch (\Exception $e) {
                     \Mage::log('Cart merge failed: ' . $e->getMessage(), \Mage::LOG_WARNING);
                 }

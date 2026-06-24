@@ -5,7 +5,7 @@
  *
  * Bootstraps Maho and Symfony API Platform for REST API requests.
  *
- * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Maho_ApiPlatform
  */

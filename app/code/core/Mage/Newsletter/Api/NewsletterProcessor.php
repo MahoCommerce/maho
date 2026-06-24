@@ -54,9 +54,10 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
                 throw new BadRequestHttpException('Customer not found');
             }
 
-            if (empty($email)) {
-                $email = $customer->getEmail();
-            }
+            // An authenticated customer may only subscribe their own address.
+            // Ignore any client-supplied email to prevent subscribing (and
+            // emailing) arbitrary third-party addresses under this customer_id.
+            $email = $customer->getEmail();
 
             $data->customerId = $customerId;
         }

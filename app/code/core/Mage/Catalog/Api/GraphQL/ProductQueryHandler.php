@@ -200,11 +200,20 @@ class ProductQueryHandler
             $parentId = $rootCategoryId;
         }
 
+        // maxDepth is relative to the requested parent, so cap on the parent's
+        // absolute tree level rather than assuming the parent is the store root.
+        // Using $maxDepth + 1 against the global level only works when the parent
+        // sits at level 1; deeper parents would otherwise truncate or return
+        // nothing.
+        $parentCategory = \Mage::getModel('catalog/category')->load((int) $parentId);
+        $parentLevel = $parentCategory->getId() ? (int) $parentCategory->getLevel() : 1;
+        $absoluteMaxLevel = $parentLevel + $maxDepth;
+
         $escapedParentId = addcslashes((string) $parentId, '%_');
         $collection = \Mage::getModel('catalog/category')->getCollection()
             ->addAttributeToSelect(['name', 'is_active', 'position', 'level', 'children_count', 'image'])
             ->addFieldToFilter('path', ['like' => "%/{$escapedParentId}/%"])
-            ->addFieldToFilter('level', ['lteq' => $maxDepth + 1])
+            ->addFieldToFilter('level', ['lteq' => $absoluteMaxLevel])
             ->setOrder('position', 'ASC');
 
         if (!$includeInactive) {

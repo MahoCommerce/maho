@@ -26,11 +26,13 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  * expression is evaluated, which means a missing entity returns 404 before
  * the 401 can fire.
  *
- * This listener runs after routing (priority 28, between router at 32 and
- * API Platform's controller) and rejects unauthenticated requests to
- * non-public operations before the Provider has a chance to run.
+ * This listener runs after routing (priority 32) AND after Symfony's security
+ * firewall (priority 8) so the security token reflects the real authentication
+ * result, then rejects unauthenticated requests to non-public operations before
+ * the Provider runs (the Provider executes during the CONTROLLER phase, well
+ * after all REQUEST listeners).
  */
-#[AsEventListener(event: KernelEvents::REQUEST, priority: 28)]
+#[AsEventListener(event: KernelEvents::REQUEST, priority: 5)]
 class DefaultDenyListener
 {
     public function __construct(
@@ -49,16 +51,14 @@ class DefaultDenyListener
             return;
         }
 
-        // If user is already authenticated (valid token in security context),
-        // let API Platform handle authorization normally
+        // We run after the firewall (priority 8), so the security token now
+        // reflects the real authentication result. If the user is authenticated,
+        // let API Platform handle per-operation authorization normally. A request
+        // carrying an invalid/expired/forged Bearer token leaves the token empty
+        // here and is correctly denied below — it can no longer bypass this gate
+        // merely by including a junk Authorization header.
         $token = $this->tokenStorage->getToken();
         if ($token !== null && $token->getUser() !== null) {
-            return;
-        }
-
-        // Also check for Bearer header presence, the authenticator may not have
-        // run yet at this priority, so let Symfony's firewall handle validation
-        if (str_starts_with($request->headers->get('Authorization', ''), 'Bearer ')) {
             return;
         }
 

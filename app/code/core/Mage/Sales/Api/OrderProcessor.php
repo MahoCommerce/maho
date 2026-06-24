@@ -163,14 +163,17 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         }
         $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals();
-        $quote->save();
 
         // Reject a method the client made up: after rates are collected the
         // chosen code must resolve to a real rate, otherwise a caller could
         // claim e.g. free shipping that the store does not actually offer.
+        // Validate before persisting so a bogus method never lands on the saved
+        // quote's shipping address (which would corrupt later loads of the cart).
         if ($validateShippingMethod && !$quote->getShippingAddress()->getShippingRateByCode($shippingMethod)) {
             throw new BadRequestHttpException('Shipping method is not available for this address');
         }
+
+        $quote->save();
 
         // Allow modules to prepare the quote before order placement
         // (e.g. POS module sets default address, shipping, payment for admin orders)

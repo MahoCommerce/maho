@@ -84,8 +84,14 @@ class OAuth2Authenticator extends AbstractAuthenticator
             throw new CustomUserMessageAuthenticationException('Invalid token: missing subject');
         }
 
+        // Every token issued by JwtService carries a jti (identifiedBy). Reject any
+        // token missing it so a token without a jti cannot skip the blacklist check.
+        if (!isset($payload->jti) || (string) $payload->jti === '') {
+            throw new CustomUserMessageAuthenticationException('Invalid token: missing token identifier');
+        }
+
         // Check token blacklist
-        if (isset($payload->jti) && $this->tokenBlacklist->isRevoked($payload->jti)) {
+        if ($this->tokenBlacklist->isRevoked((string) $payload->jti)) {
             throw new CustomUserMessageAuthenticationException('Token has been revoked');
         }
 

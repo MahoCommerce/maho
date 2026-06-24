@@ -342,9 +342,11 @@ class Kernel extends BaseKernel
             ->decorate('api_platform.graphql.state_provider.read')
             ->arg('$inner', new Reference(GraphQl\IriToleranceProvider::class . '.inner'));
 
-        $services->set(EventListener\DefaultDenyListener::class)
-            ->arg('$resourceMetadataFactory', new Reference('api_platform.metadata.resource.metadata_collection_factory'))
-            ->tag('kernel.event_listener', ['event' => 'kernel.request', 'priority' => 28]);
+        // DefaultDenyListener is wired via its #[AsEventListener(priority: 5)]
+        // attribute (autoconfigured by the services loader above) so it runs
+        // after the security firewall (priority 8). It must NOT be re-tagged
+        // here: a second registration at a pre-firewall priority would see an
+        // empty token and 401 every authenticated request.
     }
 
     protected function configureRoutes(RoutingConfigurator $routes): void

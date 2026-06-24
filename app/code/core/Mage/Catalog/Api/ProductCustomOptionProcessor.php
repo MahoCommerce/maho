@@ -14,7 +14,6 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use Mage;
-use Mage_Catalog_Model_Product;
 use Mage_Catalog_Model_Product_Option;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -177,8 +176,26 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
             ], ['title']);
         }
 
+        // Clean up orphan rows when the type category changes (select <-> non-select)
+        $oldType = $option->getType();
+        $type = $body['type'] ?? $oldType;
+        $oldIsSelect = in_array($oldType, self::SELECT_TYPES);
+        $newIsSelect = in_array($type, self::SELECT_TYPES);
+        if ($oldIsSelect && !$newIsSelect) {
+            // Select -> non-select: drop now-orphaned option value rows
+            $write->delete(
+                $resource->getTableName('catalog/product_option_type_value'),
+                ['option_id = ?' => $optionId],
+            );
+        } elseif (!$oldIsSelect && $newIsSelect) {
+            // Non-select -> select: drop the now-orphaned price row
+            $write->delete(
+                $resource->getTableName('catalog/product_option_price'),
+                ['option_id = ?' => $optionId],
+            );
+        }
+
         // Update price for non-select types
-        $type = $body['type'] ?? $option->getType();
         if (!in_array($type, self::SELECT_TYPES)) {
             $priceUpdate = [];
             if (isset($body['price'])) {
@@ -190,9 +207,13 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
             }
             if (!empty($priceUpdate)) {
                 $priceTable = $resource->getTableName('catalog/product_option_price');
+                // Only the value columns may be updated on conflict; the
+                // identity columns (option_id, store_id) form the unique key
+                // and must not appear in the ON DUPLICATE/CONFLICT update list.
+                $updateFields = array_keys($priceUpdate);
                 $priceUpdate['option_id'] = $optionId;
                 $priceUpdate['store_id'] = 0;
-                $write->insertOnDuplicate($priceTable, $priceUpdate, array_keys($priceUpdate));
+                $write->insertOnDuplicate($priceTable, $priceUpdate, $updateFields);
             }
         }
 

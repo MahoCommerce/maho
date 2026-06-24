@@ -64,6 +64,14 @@ class OrderMutationHandler
             $quote->collectTotals()->save();
         }
 
+        // Reject a method the client made up: after rates are collected the
+        // chosen code must resolve to a real rate, otherwise a caller could
+        // claim e.g. free shipping that the store does not actually offer.
+        if ($shippingMethod && !$quote->isVirtual()
+            && !$quote->getShippingAddress()->getShippingRateByCode($shippingMethod)) {
+            throw ValidationException::invalidValue('shippingMethod', 'is not available for this address');
+        }
+
         $result = $this->orderService->placeAdminOrder(
             $quote,
             $variables['guestEmail'] ?? null,
@@ -315,7 +323,7 @@ class OrderMutationHandler
             ]];
         } catch (\Exception $e) {
             \Mage::logException($e);
-            throw ValidationException::invalidValue('return', 'failed to process: ' . $e->getMessage());
+            throw ValidationException::invalidValue('return', 'failed to process the return', $e);
         }
     }
 

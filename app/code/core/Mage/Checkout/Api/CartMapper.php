@@ -146,7 +146,7 @@ class CartMapper
         $dto->priceInclTax = (float) $item->getPriceInclTax();
         $dto->rowTotal = (float) $item->getRowTotal();
         $dto->rowTotalInclTax = (float) $item->getRowTotalInclTax();
-        $dto->rowTotalWithDiscount = (float) ($item->getRowTotal() - $item->getDiscountAmount());
+        $dto->rowTotalWithDiscount = max(0.0, (float) $item->getRowTotal() - (float) $item->getDiscountAmount());
         $dto->discountAmount = $item->getDiscountAmount() ? (float) $item->getDiscountAmount() : null;
         $dto->discountPercent = $item->getDiscountPercent() ? (float) $item->getDiscountPercent() : null;
         $dto->taxAmount = $item->getTaxAmount() ? (float) $item->getTaxAmount() : null;

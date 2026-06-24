@@ -47,16 +47,6 @@ class Money extends \Maho\ApiPlatform\Resource
      */
     private function format(float $value, string $currency): string
     {
-        $symbols = [
-            'AUD' => '$',
-            'USD' => '$',
-            'EUR' => '€',
-            'GBP' => '£',
-            'NZD' => '$',
-        ];
-
-        $symbol = $symbols[$currency] ?? $currency . ' ';
-
-        return $symbol . number_format($value, 2);
+        return \Mage::app()->getLocale()->formatCurrency($value, $currency);
     }
 }

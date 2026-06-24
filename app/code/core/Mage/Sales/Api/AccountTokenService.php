@@ -25,12 +25,12 @@ final class AccountTokenService
     {
         // JSON-encode the payload so no field value (e.g. an email containing a
         // delimiter) can shift parse boundaries and forge another field.
-        $payload = json_encode([
+        $payload = (string) \Mage::helper('core')->jsonEncode([
             'orderId' => $orderId,
             'email' => $email,
             'timestamp' => time(),
             'action' => $action,
-        ], JSON_THROW_ON_ERROR);
+        ]);
         $payloadBase64 = base64_encode($payload);
         $signature = hash_hmac('sha256', $payloadBase64, self::getCryptKey());
 
@@ -64,14 +64,12 @@ final class AccountTokenService
         }
 
         try {
-            $data = json_decode($payload, true, 512, JSON_THROW_ON_ERROR);
+            $data = (array) \Mage::helper('core')->jsonDecode($payload);
         } catch (\JsonException) {
             throw new \Mage_Core_Exception('Invalid token payload.');
         }
 
-        if (!is_array($data)
-            || !isset($data['orderId'], $data['email'], $data['timestamp'], $data['action'])
-        ) {
+        if (!isset($data['orderId'], $data['email'], $data['timestamp'], $data['action'])) {
             throw new \Mage_Core_Exception('Invalid token payload.');
         }
 
@@ -92,8 +90,18 @@ final class AccountTokenService
         ];
     }
 
+    /**
+     * Derive a purpose-specific signing key from the install crypt key via HKDF.
+     *
+     * Using the raw crypt key directly would overload a single secret across
+     * many security-critical operations, multiplying the blast radius of any
+     * leak. HKDF scopes the signing material to this token's purpose without
+     * requiring a separate config value.
+     */
     private static function getCryptKey(): string
     {
-        return (string) \Mage::app()->getConfig()->getNode('global/crypt/key');
+        $cryptKey = (string) \Mage::app()->getConfig()->getNode('global/crypt/key');
+
+        return hash_hkdf('sha256', $cryptKey, 32, 'maho-account-token-v1');
     }
 }

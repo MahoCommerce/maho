@@ -18,7 +18,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     #[\Override]
     public function preDispatch()
     {
-        $this->_setForcedFormKeyActions(['delete', 'massDelete', 'massStatus']);
+        $this->_setForcedFormKeyActions(['save', 'delete', 'massDelete', 'massStatus']);
         return parent::preDispatch();
     }
 
@@ -239,7 +239,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
         } else {
             try {
                 foreach ($giftcardIds as $giftcardId) {
-                    $giftcard = Mage::getModel('giftcard/giftcard')
+                    Mage::getModel('giftcard/giftcard')
                         ->load($giftcardId)
                         ->setStatus($status)
                         ->save();
@@ -270,7 +270,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
         $code = $this->getRequest()->getParam('code');
 
         if ($code === null || $code === '') {
-            $this->getResponse()->setBody(json_encode([
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
                 'success' => false,
                 'message' => 'Please enter a gift card code.',
             ]));
@@ -280,14 +280,14 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
         $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
 
         if (!$giftcard->getId()) {
-            $this->getResponse()->setBody(json_encode([
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
                 'success' => false,
                 'message' => 'Gift card not found.',
             ]));
             return;
         }
 
-        $this->getResponse()->setBody(json_encode([
+        $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
             'success' => true,
             'giftcard_id' => $giftcard->getId(),
             'code' => $giftcard->getCode(),

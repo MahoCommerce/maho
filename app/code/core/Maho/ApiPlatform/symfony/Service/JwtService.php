@@ -208,9 +208,12 @@ class JwtService
             return ['all'];
         }
 
+        // resource_id is nullable in api/rule, so fetchCol() may return null
+        // entries. Filter to non-empty strings (a bare `static fn(string $r)`
+        // would TypeError on null under strict_types).
         return array_values(array_unique(array_filter(
             $rows,
-            static fn(string $r): bool => $r !== '',
+            static fn(mixed $r): bool => is_string($r) && $r !== '',
         )));
     }
 
@@ -365,6 +368,24 @@ class JwtService
             $secret = bin2hex(random_bytes(32));
             \Mage::getConfig()->saveConfig(self::CONFIG_PATH_SECRET, $secret);
             \Mage::app()->getCache()->cleanType('config');
+
+            // First-boot race: two concurrent workers can each generate a
+            // secret and the last saveConfig() wins in the DB. Re-read the
+            // committed value straight from core_config_data so every worker
+            // converges on the persisted secret instead of signing tokens with
+            // a local-only value that other workers would reject.
+            $resource = \Mage::getSingleton('core/resource');
+            $read = $resource->getConnection('core_read');
+            $committed = (string) $read->fetchOne(
+                $read->select()
+                    ->from($resource->getTableName('core/config_data'), ['value'])
+                    ->where('path = ?', self::CONFIG_PATH_SECRET)
+                    ->where('scope = ?', 'default')
+                    ->where('scope_id = ?', 0),
+            );
+            if ($committed !== '') {
+                $secret = $committed;
+            }
         }
 
         return $secret;

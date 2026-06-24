@@ -75,7 +75,7 @@ trait ModelPersistenceTrait
         try {
             $model->delete();
         } catch (\Throwable $e) {
-            throw new UnprocessableEntityHttpException("Failed to {$entityLabel}: " . $e->getMessage());
+            throw $this->persistenceError($e, $entityLabel);
         } finally {
             if (!$wasSecure) {
                 Mage::unregister('isSecureArea');

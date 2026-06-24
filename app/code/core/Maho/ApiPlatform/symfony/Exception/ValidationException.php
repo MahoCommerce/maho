@@ -58,12 +58,13 @@ class ValidationException extends ApiException
     /**
      * Create exception for an invalid field value
      */
-    public static function invalidValue(string $field, string $reason): self
+    public static function invalidValue(string $field, string $reason, ?\Throwable $previous = null): self
     {
         return new self(
             message: "Invalid {$field}: {$reason}",
             field: $field,
             constraint: 'Invalid',
+            previous: $previous,
         );
     }
 

@@ -14,7 +14,6 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use Mage;
-use Mage_Catalog_Model_Product;
 use Mage_Catalog_Model_Product_Type;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -93,31 +92,42 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
 
         $this->safeSave($option, 'create bundle option');
 
-        // Register product in Mage registry, Selection::_afterSave() requires it
-
-        if (!Mage::registry('product')) {
-            Mage::register('product', $product);
+        // Register product in Mage registry, Selection::_afterSave() requires it.
+        // Force the correct product (a stale entry from a prior operation in the
+        // same process would otherwise leak the wrong store scope into the
+        // selection price save), then restore the previous registry state.
+        $previousProduct = Mage::registry('product');
+        if ($previousProduct !== null) {
+            Mage::unregister('product');
         }
+        Mage::register('product', $product);
 
-        // Add selections
-        foreach ($selections as $sel) {
-            $selProductId = (int) ($sel['productId'] ?? $sel['product_id'] ?? 0);
-            if ($selProductId <= 0) {
-                continue;
+        try {
+            // Add selections
+            foreach ($selections as $sel) {
+                $selProductId = (int) ($sel['productId'] ?? $sel['product_id'] ?? 0);
+                if ($selProductId <= 0) {
+                    continue;
+                }
+
+                /** @var \Mage_Bundle_Model_Selection $selection */
+                $selection = Mage::getModel('bundle/selection');
+                $selection->setOptionId($option->getId());
+                $selection->setProductId($selProductId);
+                $selection->setSelectionQty((float) ($sel['qty'] ?? 1));
+                $selection->setSelectionCanChangeQty((int) ($sel['canChangeQty'] ?? $sel['can_change_qty'] ?? 1));
+                $selection->setIsDefault((int) ($sel['isDefault'] ?? $sel['is_default'] ?? 0));
+                $selection->setSelectionPriceType(($sel['priceType'] ?? $sel['price_type'] ?? 'fixed') === 'percent' ? 1 : 0);
+                $selection->setSelectionPriceValue((float) ($sel['price'] ?? 0));
+                $selection->setPosition((int) ($sel['position'] ?? 0));
+
+                $this->safeSave($selection, 'create selection');
             }
-
-            /** @var \Mage_Bundle_Model_Selection $selection */
-            $selection = Mage::getModel('bundle/selection');
-            $selection->setOptionId($option->getId());
-            $selection->setProductId($selProductId);
-            $selection->setSelectionQty((float) ($sel['qty'] ?? 1));
-            $selection->setSelectionCanChangeQty((int) ($sel['canChangeQty'] ?? $sel['can_change_qty'] ?? 1));
-            $selection->setIsDefault((int) ($sel['isDefault'] ?? $sel['is_default'] ?? 0));
-            $selection->setSelectionPriceType(($sel['priceType'] ?? $sel['price_type'] ?? 'fixed') === 'percent' ? 1 : 0);
-            $selection->setSelectionPriceValue((float) ($sel['price'] ?? 0));
-            $selection->setPosition((int) ($sel['position'] ?? 0));
-
-            $this->safeSave($selection, 'create selection');
+        } finally {
+            Mage::unregister('product');
+            if ($previousProduct !== null) {
+                Mage::register('product', $previousProduct);
+            }
         }
 
         // Return the created option

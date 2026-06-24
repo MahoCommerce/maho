@@ -166,6 +166,13 @@ trait AuthenticationTrait
 
     protected function requirePermission(ApiUser $user, string $permission): void
     {
+        // Admin tokens carry no API-user permission grants; their authorization
+        // is enforced separately by AdminAclListener (Maho admin ACL) before the
+        // controller runs. Checking hasPermission() here would always fail for
+        // admins and wrongly 403 every admin REST write. Defer to the ACL gate.
+        if ($user->isAdmin()) {
+            return;
+        }
         if (!$user->hasPermission($permission)) {
             throw new AccessDeniedHttpException("Missing permission: {$permission}");
         }

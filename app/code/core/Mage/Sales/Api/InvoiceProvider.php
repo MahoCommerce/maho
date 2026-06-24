@@ -59,7 +59,7 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
         $orderId = (int) ($uriVariables['orderId'] ?? 0);
         $invoiceId = (int) ($uriVariables['id'] ?? 0);
 
-        $order = $this->loadAndAuthorizeOrder($orderId, $operationName);
+        $this->loadAndAuthorizeOrder($orderId, $operationName);
 
         $invoice = \Mage::getModel('sales/order_invoice')->load($invoiceId);
         if (!$invoice->getId() || $invoice->getOrderId() != $orderId) {
@@ -94,11 +94,17 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
                 throw new NotFoundHttpException('Order not found');
             }
         } else {
-            $customerId = $order->getCustomerId();
-            if ($customerId) {
-                $this->authorizeCustomerAccess((int) $customerId, 'You can only access your own order invoices');
-            } elseif (!$this->isAdmin()) {
-                throw new AccessDeniedHttpException('Access denied');
+            // Admins and API users (permission already enforced upstream by
+            // ApiUserRestPermissionListener) may access any order's invoices,
+            // matching OrderProvider::canAccessOrder(). Customers are limited
+            // to their own orders.
+            if (!$this->isAdmin() && !$this->isApiUser()) {
+                $customerId = $order->getCustomerId();
+                if ($customerId) {
+                    $this->authorizeCustomerAccess((int) $customerId, 'You can only access your own order invoices');
+                } else {
+                    throw new AccessDeniedHttpException('Access denied');
+                }
             }
         }
 

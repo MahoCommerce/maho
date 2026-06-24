@@ -188,7 +188,12 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_UserController extends Mage_Adminht
             }
         } catch (Exception $e) {
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-            Mage::getSingleton('adminhtml/session')->setApiUserData($data);
+            // Flash only the safe display fields editAction() re-reads. Never
+            // persist secrets (api_key, client credentials) into the session.
+            $safeData = array_intersect_key($data, array_flip([
+                'username', 'firstname', 'lastname', 'email', 'is_active', 'allowed_store_ids', 'api_role',
+            ]));
+            Mage::getSingleton('adminhtml/session')->setApiUserData($safeData);
             if ($id) {
                 $this->_redirect('*/*/edit', ['user_id' => $id]);
             } else {

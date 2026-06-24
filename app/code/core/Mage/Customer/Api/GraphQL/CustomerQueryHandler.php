@@ -128,7 +128,8 @@ class CustomerQueryHandler
                 'success' => true,
             ]];
         } catch (\Exception $e) {
-            throw ValidationException::invalidValue('customer', 'failed to create: ' . $e->getMessage());
+            \Mage::logException($e);
+            throw ValidationException::invalidValue('customer', 'failed to create the customer', $e);
         }
     }
 
@@ -204,7 +205,8 @@ class CustomerQueryHandler
                 'customer' => $this->mapCustomer($customer),
             ]];
         } catch (\Exception $e) {
-            throw ValidationException::invalidValue('address', 'failed to update: ' . $e->getMessage());
+            \Mage::logException($e);
+            throw ValidationException::invalidValue('address', 'failed to update the address', $e);
         }
     }
 
