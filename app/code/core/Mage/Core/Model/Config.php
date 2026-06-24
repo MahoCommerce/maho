@@ -470,7 +470,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             return;
         }
         // Poll with non-blocking GET_LOCK + sleep instead of one blocking call, which
-        // would park a busy DB thread per waiting request and pile up under load (#1050).
+        // would park a busy DB thread per waiting request and pile up under load.
         $deadline = time() + $waitTime;
         while (!$connection->getLock('core_config_cache_save_lock', 0)) {
             if (time() >= $deadline) {
