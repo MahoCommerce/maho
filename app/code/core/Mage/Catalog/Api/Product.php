@@ -213,6 +213,10 @@ class Product extends CrudResource
     #[ApiProperty(description: 'Minimum price (useful for bundles/grouped)', writable: false, extraProperties: ['computed' => true])]
     public ?float $minimalPrice = null;
 
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Currency code for all price fields', writable: false, extraProperties: ['computed' => true])]
+    public string $currency = '';
+
     #[Groups(['product:detail'])]
     #[ApiProperty(description: 'Tier pricing thresholds', writable: false, extraProperties: ['computed' => true])]
     public array $tierPrices = [];
@@ -355,6 +359,8 @@ class Product extends CrudResource
         $dto->status = (int) $model->getData('status') === \Mage_Catalog_Model_Product_Status::STATUS_ENABLED
             ? 'enabled' : 'disabled';
         $dto->isActive = $dto->status === 'enabled';
+
+        $dto->currency = \Mage::app()->getStore()->getCurrentCurrencyCode();
 
         $dto->visibility = match ((int) $model->getData('visibility')) {
             \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE => 'not_visible',

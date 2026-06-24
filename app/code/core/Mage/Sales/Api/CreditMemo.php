@@ -99,6 +99,9 @@ class CreditMemo extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $state = null;
 
+    #[ApiProperty(description: 'Currency code for all amount fields', writable: false, extraProperties: ['computed' => true])]
+    public string $currency = '';
+
     #[ApiProperty(writable: false)]
     public float $grandTotal = 0;
 
@@ -141,6 +144,8 @@ class CreditMemo extends CrudResource
             \Mage_Sales_Model_Order_Creditmemo::STATE_CANCELED => 'canceled',
         ];
         $dto->state = $stateMap[(int) $model->getState()] ?? 'unknown';
+
+        $dto->currency = $model->getOrderCurrencyCode() ?: \Mage::app()->getStore()->getCurrentCurrencyCode();
 
         $order = $model->getOrder();
         $dto->orderIncrementId = $order ? $order->getIncrementId() : null;

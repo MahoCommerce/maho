@@ -66,6 +66,9 @@ class Invoice extends CrudResource
     #[ApiProperty(writable: false)]
     public float $grandTotal = 0.0;
 
+    #[ApiProperty(description: 'Currency code for all amount fields', writable: false, extraProperties: ['computed' => true])]
+    public string $currency = '';
+
     #[ApiProperty(writable: false)]
     public ?int $state = null;
 
@@ -80,6 +83,8 @@ class Invoice extends CrudResource
 
     public static function afterLoad(self $dto, object $model): void
     {
+        $dto->currency = $model->getOrderCurrencyCode() ?: \Mage::app()->getStore()->getCurrentCurrencyCode();
+
         $dto->stateName = match ($dto->state) {
             \Mage_Sales_Model_Order_Invoice::STATE_OPEN => 'open',
             \Mage_Sales_Model_Order_Invoice::STATE_PAID => 'paid',

@@ -88,10 +88,8 @@ class OrderMutationHandler
                 'orderId' => (int) $order->getId(),
                 'incrementId' => $order->getIncrementId(),
                 'status' => $order->getStatus(),
-                'grandTotal' => [
-                    'value' => (float) $order->getGrandTotal(),
-                    'formatted' => \Mage::helper('core')->currency($order->getGrandTotal(), true, false),
-                ],
+                'currency' => $order->getOrderCurrencyCode(),
+                'grandTotal' => (float) $order->getGrandTotal(),
             ],
             'invoice' => $invoiceAndShipment['invoice'],
             'shipment' => $invoiceAndShipment['shipment'],
@@ -313,10 +311,8 @@ class OrderMutationHandler
                 'creditmemo' => [
                     'id' => (int) $creditmemo->getId(),
                     'incrementId' => $creditmemo->getIncrementId(),
-                    'grandTotal' => [
-                        'value' => (float) $creditmemo->getGrandTotal(),
-                        'formatted' => \Mage::helper('core')->currency($creditmemo->getGrandTotal(), true, false),
-                    ],
+                    'currency' => $creditmemo->getOrderCurrencyCode(),
+                    'grandTotal' => (float) $creditmemo->getGrandTotal(),
                     'createdAt' => $creditmemo->getCreatedAt(),
                 ],
                 'order' => $this->mapOrder($order->load($order->getId())),
@@ -406,10 +402,8 @@ class OrderMutationHandler
             'status' => $order->getStatus(),
             'customerName' => $customerName,
             'createdAt' => \Mage::helper('core')->formatDate($order->getCreatedAt(), 'medium', true),
-            'grandTotal' => [
-                'value' => (float) $order->getGrandTotal(),
-                'formatted' => \Mage::helper('core')->currency($order->getGrandTotal(), true, false),
-            ],
+            'currency' => $order->getOrderCurrencyCode(),
+            'grandTotal' => (float) $order->getGrandTotal(),
             'items' => $items,
         ];
     }
@@ -424,13 +418,14 @@ class OrderMutationHandler
         $dto = $this->orderProvider->mapToDto($order);
         $data = $dto->toArray();
 
-        // Reshape money fields into {value, formatted} for GraphQL
-        $data['grandTotal'] = $this->formatMoney($order->getGrandTotal());
-        $data['subtotal'] = $this->formatMoney($order->getSubtotal());
-        $data['taxAmount'] = $this->formatMoney($order->getTaxAmount());
-        $data['shippingAmount'] = $this->formatMoney($order->getShippingAmount());
-        $data['discountAmount'] = $this->formatMoney(abs((float) $order->getDiscountAmount()));
-        $data['totalRefunded'] = $this->formatMoney($order->getTotalRefunded() ?? 0);
+        // Money fields are plain numbers; $data['currency'] (from the Order DTO)
+        // names the currency once for the whole response.
+        $data['grandTotal'] = (float) $order->getGrandTotal();
+        $data['subtotal'] = (float) $order->getSubtotal();
+        $data['taxAmount'] = (float) $order->getTaxAmount();
+        $data['shippingAmount'] = (float) $order->getShippingAmount();
+        $data['discountAmount'] = abs((float) $order->getDiscountAmount());
+        $data['totalRefunded'] = (float) ($order->getTotalRefunded() ?? 0);
 
         // Add GraphQL-specific computed fields
         $data['canRefund'] = $order->canCreditmemo();
@@ -451,14 +446,5 @@ class OrderMutationHandler
         unset($itemData);
 
         return $data;
-    }
-
-    private function formatMoney(float|string|null $amount): array
-    {
-        $value = (float) ($amount ?? 0);
-        return [
-            'value' => $value,
-            'formatted' => \Mage::helper('core')->currency($value, true, false),
-        ];
     }
 }

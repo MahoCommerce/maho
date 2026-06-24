@@ -312,10 +312,8 @@ class CartMutationHandler
         }
         return ['checkGiftCardBalance' => [
             'code' => $giftcard->getCode(),
-            'balance' => [
-                'value' => (float) $giftcard->getBalance(),
-                'formatted' => \Mage::helper('core')->currency($giftcard->getBalance(), true, false),
-            ],
+            'currency' => \Mage::app()->getStore()->getCurrentCurrencyCode(),
+            'balance' => (float) $giftcard->getBalance(),
             'status' => $giftcard->getStatus(),
             'isValid' => $giftcard->isValid(),
             'expiresAt' => $giftcard->getExpiresAt(),
@@ -418,6 +416,7 @@ class CartMutationHandler
 
         $shippingAddress->collectShippingRates();
         $rates = $shippingAddress->getGroupedAllShippingRates();
+        $currency = $quote->getQuoteCurrencyCode();
 
         $methods = [];
         foreach ($rates as $carrierRates) {
@@ -427,7 +426,8 @@ class CartMutationHandler
                     'carrierTitle' => $rate->getCarrierTitle(),
                     'methodCode' => $rate->getMethod(),
                     'methodTitle' => $rate->getMethodTitle(),
-                    'amount' => ['value' => (float) $rate->getPrice(), 'formatted' => \Mage::helper('core')->currency($rate->getPrice(), true, false)],
+                    'amount' => (float) $rate->getPrice(),
+                    'currency' => $currency,
                     'available' => !$rate->getErrorMessage(),
                     'errorMessage' => $rate->getErrorMessage(),
                 ];
@@ -438,7 +438,8 @@ class CartMutationHandler
             array_unshift($methods, [
                 'carrierCode' => 'freeshipping', 'carrierTitle' => 'Free Shipping',
                 'methodCode' => 'freeshipping', 'methodTitle' => 'POS In-Store Pickup',
-                'amount' => ['value' => 0, 'formatted' => '$0.00'],
+                'amount' => 0.0,
+                'currency' => $currency,
                 'available' => true, 'errorMessage' => null,
             ]);
         }
@@ -507,14 +508,8 @@ class CartMutationHandler
             if ($giftcard->getId()) {
                 $giftcards[] = [
                     'code' => $code,
-                    'appliedAmount' => [
-                        'value' => (float) $appliedAmount,
-                        'formatted' => \Mage::helper('core')->currency($appliedAmount, true, false),
-                    ],
-                    'balance' => [
-                        'value' => (float) $giftcard->getBalance(),
-                        'formatted' => \Mage::helper('core')->currency($giftcard->getBalance(), true, false),
-                    ],
+                    'appliedAmount' => (float) $appliedAmount,
+                    'balance' => (float) $giftcard->getBalance(),
                 ];
             }
         }
