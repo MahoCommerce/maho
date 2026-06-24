@@ -32,7 +32,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
     public const SWATCH_FALLBACK_MEDIA_DIR = 'wysiwyg/swatches';
     public const SWATCH_CACHE_DIR = 'catalog/swatches';
 
-    /** @deprecated since 26.3 — use {@see getSwatchFileExt()} instead */
+    #[\Deprecated(message: 'since 26.3 — use {@see getSwatchFileExt()} instead')]
     public const SWATCH_FILE_EXT = '.png';
 
     /**

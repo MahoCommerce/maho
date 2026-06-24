@@ -259,8 +259,8 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      * Always returns true as we only use native inputs now
      *
      * @return bool
-     * @deprecated since 25.9.0
      */
+    #[\Deprecated(message: 'since 25.9.0')]
     public function useCalendar()
     {
         return true;
@@ -271,8 +271,8 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      * Always returns true for 24h format as native inputs handle this
      *
      * @return bool
-     * @deprecated since 25.9.0
      */
+    #[\Deprecated(message: 'since 25.9.0')]
     public function is24hTimeFormat()
     {
         return true;

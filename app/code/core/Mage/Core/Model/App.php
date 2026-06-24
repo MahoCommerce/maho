@@ -1110,9 +1110,7 @@ class Mage_Core_Model_App
         return $this->_frontController;
     }
 
-    /**
-     * @deprecated since 25.5, use getCache()
-     */
+    #[\Deprecated(message: 'since 25.5, use getCache()')]
     public function getCacheInstance(): Mage_Core_Model_Cache
     {
         return $this->getCache();

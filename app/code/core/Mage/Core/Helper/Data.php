@@ -839,9 +839,7 @@ XML;
         return $data;
     }
 
-    /**
-     * @deprecated since 25.5.0
-     */
+    #[\Deprecated(message: 'since 25.5.0')]
     public function isFormKeyEnabled(): bool
     {
         return true;

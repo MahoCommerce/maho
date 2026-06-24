@@ -60,13 +60,7 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
                     continue;
                 }
                 $text = (string) ($msg['message'] ?? '');
-                $skip = false;
-                foreach ($ignoreList as $needle) {
-                    if (str_contains($text, $needle)) {
-                        $skip = true;
-                        break;
-                    }
-                }
+                $skip = array_any($ignoreList, fn($needle) => str_contains($text, $needle));
                 if ($skip) {
                     $ignoredCount++;
                     continue;

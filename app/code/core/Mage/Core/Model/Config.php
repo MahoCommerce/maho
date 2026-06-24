@@ -1112,12 +1112,12 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      *
      * If $moduleName is specified retrieves specific value for the module.
      *
-     * @deprecated in favor of Mage_Core_Model_Config_Options
      * @todo get global dir config
      * @param string $type
      * @return string
      * @throws Mage_Core_Exception
      */
+    #[\Deprecated(message: 'in favor of Mage_Core_Model_Config_Options')]
     public function getBaseDir($type = 'base')
     {
         return $this->getOptions()->getDir($type);
@@ -1356,9 +1356,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      *
      * @param string $moduleAlias
      * @return Mage_Core_Model_Resource_Helper_Abstract|false
-     * @deprecated Use getResourceHelperInstance() method instead
      * @see Mage_Core_Model_Config::getResourceHelperInstance()
      */
+    #[\Deprecated(message: 'Use getResourceHelperInstance() method instead')]
     public function getResourceHelper($moduleAlias)
     {
         return $this->getResourceHelperInstance($moduleAlias);

@@ -505,8 +505,8 @@ abstract class Mage_Eav_Model_Entity_Attribute_Abstract extends Mage_Core_Model_
 
     /**
      * @return string
-     * @deprecated since 26.1 use getDefaultSourceModel() instead
      */
+    #[\Deprecated(message: 'since 26.1 use getDefaultSourceModel() instead')]
     protected function _getDefaultSourceModel()
     {
         return $this->getDefaultSourceModel();

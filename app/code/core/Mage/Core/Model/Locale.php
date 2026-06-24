@@ -531,11 +531,11 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
 
 
     /**
-     * @deprecated since 26.5 Use utcToStore() or storeToUtc() instead
      * @see utcToStore()
      * @see storeToUtc()
      * @param string             $part
      */
+    #[\Deprecated(message: 'since 26.5 Use utcToStore() or storeToUtc() instead')]
     public function date(string|int|DateTime|DateTimeImmutable|null $date = null, ?string $part = null, ?string $locale = null, bool $useTimezone = true): DateTime
     {
         if (!is_int($date) && empty($date)) {
@@ -567,10 +567,10 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      * Create mutable DateTime object for current locale
      * Alias for date() method with explicit name
      *
-     * @deprecated since 26.5 Use utcToStore() or storeToUtc() instead
      * @see utcToStore()
      * @see storeToUtc()
      */
+    #[\Deprecated(message: 'since 26.5 Use utcToStore() or storeToUtc() instead')]
     public function dateMutable(
         string|int|DateTime|null $date = null,
         ?string $part = null,
@@ -583,10 +583,10 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     /**
      * Create immutable DateTime object for current locale
      *
-     * @deprecated since 26.5 Use utcToStore() or storeToUtc() with DateTimeImmutable::createFromMutable() instead
      * @see utcToStore()
      * @see storeToUtc()
      */
+    #[\Deprecated(message: 'since 26.5 Use utcToStore() or storeToUtc() with DateTimeImmutable::createFromMutable() instead')]
     public function dateImmutable(
         string|int|DateTime|null $date = null,
         ?string $part = null,
@@ -600,7 +600,6 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
     /**
      * Create DateTime object with date converted to store timezone and store Locale
      *
-     * @deprecated since 26.5 Use utcToStore() instead. Callers should format the result themselves.
      * @see utcToStore()
      *
      * @param   null|string|bool|int|Mage_Core_Model_Store $store Information about store
@@ -613,6 +612,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      *                                * type="datetime-local": YYYY-MM-DDTHH:mm (e.g., "2024-12-25T14:30")
      *                              - PHP format strings: 'Y-m-d H:i:s', etc. (returns DateTime)
      */
+    #[\Deprecated(message: 'since 26.5 Use utcToStore() instead. Callers should format the result themselves.')]
     public function storeDate(mixed $store = null, string|int|DateTime|DateTimeImmutable|null $date = null, bool $includeTime = false, ?string $format = null): DateTime|string|null
     {
         // Special handling for HTML5 format output when format is 'html5'
@@ -671,7 +671,6 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      * to UTC time zone. Date can be passed in format of store's locale
      * or in format which was passed as parameter.
      *
-     * @deprecated since 26.5 Use storeToUtc() instead. Callers should format the result themselves.
      * @see storeToUtc()
      *
      * @param mixed $store Information about store
@@ -684,6 +683,7 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      *                               * Returns: YYYY-MM-DD HH:mm:ss (MySQL datetime format)
      *                             - PHP format strings: 'Y-m-d H:i:s', etc. (returns DateTime)
      */
+    #[\Deprecated(message: 'since 26.5 Use storeToUtc() instead. Callers should format the result themselves.')]
     public function utcDate(mixed $store, string|int|DateTime|DateTimeImmutable|null $date = null, bool $includeTime = false, ?string $format = null): DateTime|string|null
     {
         // Special handling for HTML5 native input formats
@@ -766,9 +766,9 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      *
      * Timestamp will be built with store timezone settings
      *
-     * @deprecated since 26.5 Use utcToStore($store) for store-local dates, or time() for real timestamps
      * @see utcToStore()
      */
+    #[\Deprecated(message: 'since 26.5 Use utcToStore($store) for store-local dates, or time() for real timestamps')]
     public function storeTimeStamp(mixed $store = null): int
     {
         return $this->utcToStore($store)->getTimestamp();

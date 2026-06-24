@@ -109,8 +109,8 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
      * @param string $className
      * @param array $arguments
      * @return Mage_Core_Model_Abstract|false
-     * @deprecated use Mage::getSingleton()
      */
+    #[\Deprecated(message: 'use Mage::getSingleton()')]
     protected function _getSingletonModel($className, $arguments = [])
     {
         return Mage::getSingleton($className, $arguments);

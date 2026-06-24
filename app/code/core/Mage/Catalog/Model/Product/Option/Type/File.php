@@ -351,14 +351,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         if (isset($optionValue['order_path']) && !$this->getUseQuotePath()) {
             $checkPaths[] = Mage::getBaseDir() . $optionValue['order_path'];
         }
-
-        $fileFullPath = null;
-        foreach ($checkPaths as $path) {
-            if (is_file($path)) {
-                $fileFullPath = $path;
-                break;
-            }
-        }
+        $fileFullPath = array_find($checkPaths, fn($path) => is_file($path));
 
         if ($fileFullPath === null) {
             return false;

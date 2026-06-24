@@ -366,12 +366,7 @@ class Mage_Core_Model_Logger
      */
     protected static function isRotatingFileHandler(Logger $logger): bool
     {
-        foreach ($logger->getHandlers() as $handler) {
-            if ($handler instanceof \Monolog\Handler\RotatingFileHandler) {
-                return true;
-            }
-        }
-        return false;
+        return array_any($logger->getHandlers(), fn($handler) => $handler instanceof \Monolog\Handler\RotatingFileHandler);
     }
 
     /**

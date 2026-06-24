@@ -2126,12 +2126,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     {
         $products = $this->_getResource()->getProductsSku($productIds);
         if (count($products)) {
-            foreach ($products as $product) {
-                if (!strlen($product['sku'])) {
-                    return false;
-                }
-            }
-            return true;
+            return array_all($products, fn($product) => $product['sku'] !== '');
         }
         return null;
     }

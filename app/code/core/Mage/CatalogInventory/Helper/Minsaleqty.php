@@ -86,12 +86,7 @@ class Mage_CatalogInventory_Helper_Minsaleqty extends Mage_Core_Helper_Abstract
             return false;
         }
         unset($value['__empty']);
-        foreach ($value as $_id => $row) {
-            if (!is_array($row) || !array_key_exists('customer_group_id', $row) || !array_key_exists('min_sale_qty', $row)) {
-                return false;
-            }
-        }
-        return true;
+        return array_all($value, fn($row) => !(!is_array($row) || !array_key_exists('customer_group_id', $row) || !array_key_exists('min_sale_qty', $row)));
     }
 
     /**

@@ -90,9 +90,9 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      * Retrieve default attribute source model
      *
      * @return string
-     * @deprecated since 26.1 use getDefaultSourceModel() instead
      */
     #[\Override]
+    #[\Deprecated(message: 'since 26.1 use getDefaultSourceModel() instead')]
     protected function _getDefaultSourceModel()
     {
         return $this->getDefaultSourceModel();
