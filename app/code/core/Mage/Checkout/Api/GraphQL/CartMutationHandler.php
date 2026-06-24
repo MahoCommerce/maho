@@ -433,15 +433,7 @@ class CartMutationHandler
                 ];
             }
         }
-
-        // Ensure freeshipping for POS
-        $hasFreeShipping = false;
-        foreach ($methods as $m) {
-            if ($m['carrierCode'] === 'freeshipping') {
-                $hasFreeShipping = true;
-                break;
-            }
-        }
+        $hasFreeShipping = array_any($methods, fn($m) => $m['carrierCode'] === 'freeshipping');
         if (!$hasFreeShipping) {
             array_unshift($methods, [
                 'carrierCode' => 'freeshipping', 'carrierTitle' => 'Free Shipping',

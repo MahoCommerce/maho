@@ -298,17 +298,7 @@ class ApiPermissionRegistry
                     }
                     $permissions[] = $resource . '/read';
                 } else {
-                    // Mutation. An unmapped field must fail closed: emit a
-                    // permission keyed on the raw field name that no api_user
-                    // holds and that trips the admin write block, rather than
-                    // skipping it (which would bypass enforcement entirely).
-                    $isCreate = false;
-                    foreach (self::CREATE_PREFIXES as $prefix) {
-                        if (str_starts_with(strtolower($fieldName), $prefix)) {
-                            $isCreate = true;
-                            break;
-                        }
-                    }
+                    $isCreate = array_any(self::CREATE_PREFIXES, fn($prefix) => str_starts_with(strtolower($fieldName), $prefix));
                     $permissions[] = ($resource ?? $fieldName) . '/' . ($isCreate ? 'create' : 'write');
                 }
             }
