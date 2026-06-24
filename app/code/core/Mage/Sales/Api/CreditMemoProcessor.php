@@ -23,6 +23,7 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): CreditMemo
     {
         $this->requireAdminOrApiUser('Credit memo creation requires admin or API access');
+        $this->requireApiPermission('credit-memos/create');
         $operationName = $operation->getName();
 
         return match ($operationName) {

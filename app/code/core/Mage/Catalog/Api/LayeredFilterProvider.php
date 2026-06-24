@@ -43,7 +43,7 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
 
         $cached = \Mage::app()->getCache()->load($cacheKey);
         if ($cached !== false) {
-            $data = json_decode($cached, true);
+            $data = \Mage::helper('core')->jsonDecode($cached, true);
             if (is_array($data)) {
                 $filters = array_map(fn(array $f) => $this->arrayToDto($f), $data);
                 return new TraversablePaginator(new \ArrayIterator($filters), 1, 100, count($filters));
@@ -55,7 +55,7 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
         if (!empty($filters)) {
             $cacheData = array_map(fn(LayeredFilter $f) => $this->dtoToArray($f), $filters);
             \Mage::app()->getCache()->save(
-                json_encode($cacheData),
+                \Mage::helper('core')->jsonEncode($cacheData),
                 $cacheKey,
                 ['API_LAYERED_FILTERS', 'API_PRODUCTS'],
                 \Maho_ApiPlatform_Model_Observer::getCacheTtl(),

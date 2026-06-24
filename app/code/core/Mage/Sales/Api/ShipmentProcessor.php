@@ -23,6 +23,7 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Shipment
     {
         $this->requireAdminOrApiUser('Shipment creation requires admin or API access');
+        $this->requireApiPermission('shipments/create');
         $operationName = $operation->getName();
 
         return match ($operationName) {

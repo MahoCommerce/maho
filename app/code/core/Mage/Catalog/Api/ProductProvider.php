@@ -92,7 +92,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
         $cached = \Mage::app()->getCache()->load($cacheKey);
         if ($cached !== false) {
-            $data = json_decode($cached, true);
+            $data = \Mage::helper('core')->jsonDecode($cached, true);
             if ($data !== null) {
                 return Product::fromArray($data);
             }
@@ -104,7 +104,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         \Mage::app()->getCache()->save(
-            (string) json_encode($dto->toArray()),
+            (string) \Mage::helper('core')->jsonEncode($dto->toArray()),
             $cacheKey,
             ['API_PRODUCTS', "API_PRODUCT_{$id}"],
             $this->getCacheTtl(),
@@ -187,7 +187,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $keyData = array_filter($filters, fn($v) => $v !== '' && $v !== null);
         ksort($keyData);
         $scope = StoreContext::getStoreId() . '_' . $this->getCustomerGroupId() . '_' . $this->resolveCurrencyCode();
-        return 'api_products_' . md5(json_encode($keyData) . '_' . $scope);
+        return 'api_products_' . md5(\Mage::helper('core')->jsonEncode($keyData) . '_' . $scope);
     }
 
     /**
@@ -241,7 +241,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             $cacheKey = $this->getCollectionCacheKey($requestFilters);
             $cached = \Mage::app()->getCache()->load($cacheKey);
             if ($cached !== false) {
-                $cachedData = json_decode($cached, true);
+                $cachedData = \Mage::helper('core')->jsonDecode($cached, true);
                 if ($cachedData !== null) {
                     // Reconstruct Product DTOs from cached data
                     $products = array_map(fn($data) => Product::fromArray($data), $cachedData['products']);
@@ -393,7 +393,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 'total' => (int) $result['total'],
             ];
             \Mage::app()->getCache()->save(
-                json_encode($cacheData),
+                \Mage::helper('core')->jsonEncode($cacheData),
                 $cacheKey,
                 ['API_PRODUCTS'],
                 $this->getCacheTtl(),

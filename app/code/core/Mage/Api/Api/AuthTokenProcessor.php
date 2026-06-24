@@ -310,6 +310,8 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
 
         $tokenString = substr($authHeader, 7);
 
+        $this->checkRateLimitByIp('refresh_token', 'auth_token_ip', 60);
+
         try {
             $payload = $this->jwtService->decodeToken($tokenString);
 

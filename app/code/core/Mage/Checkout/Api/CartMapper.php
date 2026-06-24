@@ -107,7 +107,7 @@ class CartMapper
         // Get applied gift cards
         $giftcardCodesJson = $quote->getData('giftcard_codes');
         if ($giftcardCodesJson) {
-            $giftcardCodes = json_decode($giftcardCodesJson, true);
+            $giftcardCodes = \Mage::helper('core')->jsonDecode($giftcardCodesJson, true);
             if (is_array($giftcardCodes)) {
                 foreach ($giftcardCodes as $code => $balance) {
                     $cart->appliedGiftcards[] = [
@@ -369,7 +369,7 @@ class CartMapper
         $additionalData = $item->getAdditionalData();
 
         if ($additionalData) {
-            $data = json_decode($additionalData, true);
+            $data = \Mage::helper('core')->jsonDecode($additionalData, true);
             if (is_array($data) && isset($data['fulfillment_type'])) {
                 return strtoupper($data['fulfillment_type']);
             }

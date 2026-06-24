@@ -497,7 +497,7 @@ class CartMutationHandler
             return $giftcards;
         }
 
-        $codesData = json_decode($giftcardCodes, true);
+        $codesData = \Mage::helper('core')->jsonDecode($giftcardCodes, true);
         if (!is_array($codesData)) {
             return $giftcards;
         }
@@ -523,11 +523,11 @@ class CartMutationHandler
     private function removeGiftcardFromQuote(\Mage_Sales_Model_Quote $quote, string $code): void
     {
         $codesJson = $quote->getGiftcardCodes();
-        $codes = $codesJson ? (array) json_decode($codesJson, true) : [];
+        $codes = $codesJson ? (array) \Mage::helper('core')->jsonDecode($codesJson, true) : [];
 
         unset($codes[$code]);
 
-        $quote->setGiftcardCodes(empty($codes) ? null : json_encode($codes));
+        $quote->setGiftcardCodes(empty($codes) ? null : \Mage::helper('core')->jsonEncode($codes));
     }
 
     /**
@@ -536,7 +536,7 @@ class CartMutationHandler
     private function setItemFulfillmentType(\Mage_Sales_Model_Quote_Item $item, string $fulfillmentType): void
     {
         $additionalData = $item->getAdditionalData();
-        $data = $additionalData ? json_decode($additionalData, true) : [];
+        $data = $additionalData ? \Mage::helper('core')->jsonDecode($additionalData, true) : [];
 
         if (!is_array($data)) {
             $data = [];
@@ -544,7 +544,7 @@ class CartMutationHandler
 
         $data['fulfillment_type'] = $fulfillmentType;
 
-        $item->setAdditionalData(json_encode($data));
+        $item->setAdditionalData(\Mage::helper('core')->jsonEncode($data));
         $item->save();
     }
 
@@ -556,7 +556,7 @@ class CartMutationHandler
         $additionalData = $item->getAdditionalData();
 
         if ($additionalData) {
-            $data = json_decode($additionalData, true);
+            $data = \Mage::helper('core')->jsonDecode($additionalData, true);
             if (is_array($data) && isset($data['fulfillment_type'])) {
                 return strtoupper($data['fulfillment_type']);
             }

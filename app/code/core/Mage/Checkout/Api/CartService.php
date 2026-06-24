@@ -324,7 +324,7 @@ class CartService
 
                         // Use the configurable product instead
                         $product = $configurableProduct;
-                        $this->logDebug("Using configurable product {$parentId} with super_attributes: " . json_encode($superAttributes));
+                        $this->logDebug("Using configurable product {$parentId} with super_attributes: " . \Mage::helper('core')->jsonEncode($superAttributes));
                     }
                 }
             }
@@ -569,7 +569,7 @@ class CartService
 
         // Get currently applied codes
         $appliedCodes = $quote->getGiftcardCodes();
-        $appliedCodes = $appliedCodes ? json_decode($appliedCodes, true) : [];
+        $appliedCodes = $appliedCodes ? \Mage::helper('core')->jsonDecode($appliedCodes, true) : [];
 
         // Check if already applied
         if (isset($appliedCodes[$giftcardCode])) {
@@ -584,7 +584,7 @@ class CartService
         $balance = (float) $giftcard->getBalance($quoteCurrency);
         $appliedCodes[$giftcardCode] = $amount === null ? $balance : min($amount, $balance);
 
-        $quote->setGiftcardCodes(json_encode($appliedCodes));
+        $quote->setGiftcardCodes(\Mage::helper('core')->jsonEncode($appliedCodes));
         $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals()->save();
 
@@ -604,7 +604,7 @@ class CartService
     public function revalidateGiftcards(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
     {
         $applied = $quote->getGiftcardCodes();
-        $applied = $applied ? json_decode($applied, true) : [];
+        $applied = $applied ? \Mage::helper('core')->jsonDecode($applied, true) : [];
         if (!$applied) {
             return $quote;
         }
@@ -632,7 +632,7 @@ class CartService
         }
 
         if ($changed) {
-            $quote->setGiftcardCodes(json_encode($applied));
+            $quote->setGiftcardCodes(\Mage::helper('core')->jsonEncode($applied));
             $quote->setTotalsCollectedFlag(false);
             $quote->collectTotals()->save();
         }
@@ -653,7 +653,7 @@ class CartService
 
         // Get currently applied codes
         $appliedCodes = $quote->getGiftcardCodes();
-        $appliedCodes = $appliedCodes ? json_decode($appliedCodes, true) : [];
+        $appliedCodes = $appliedCodes ? \Mage::helper('core')->jsonDecode($appliedCodes, true) : [];
 
         // Check if gift card is applied
         if (!isset($appliedCodes[$giftcardCode])) {
@@ -668,7 +668,7 @@ class CartService
             $quote->setGiftcardAmount(0);
             $quote->setBaseGiftcardAmount(0);
         } else {
-            $quote->setGiftcardCodes(json_encode($appliedCodes));
+            $quote->setGiftcardCodes(\Mage::helper('core')->jsonEncode($appliedCodes));
         }
 
         // Force a fresh totals pass, otherwise an already-collected quote in the
@@ -704,13 +704,13 @@ class CartService
         }
 
         $additionalData = $targetItem->getAdditionalData();
-        $data = $additionalData ? json_decode($additionalData, true) : [];
+        $data = $additionalData ? \Mage::helper('core')->jsonDecode($additionalData, true) : [];
         if (!is_array($data)) {
             $data = [];
         }
         $data['fulfillment_type'] = $fulfillmentType;
 
-        $targetItem->setAdditionalData(json_encode($data));
+        $targetItem->setAdditionalData(\Mage::helper('core')->jsonEncode($data));
         $targetItem->save();
 
         return $quote;
@@ -893,7 +893,7 @@ class CartService
         // Only genuine guest carts may be merged. Reject a masked ID that
         // resolves to another customer's cart so it cannot be absorbed.
         $sourceCustomerId = $guestCart->getCustomerId();
-        if (!$guestCart->getCustomerIsGuest() && $sourceCustomerId && (int) $sourceCustomerId !== $customerId) {
+        if (!$guestCart->getCustomerIsGuest() && (int) $sourceCustomerId !== $customerId) {
             throw new \RuntimeException('Guest cart not found');
         }
 
