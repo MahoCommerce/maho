@@ -73,7 +73,11 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
 
         $cached = \Mage::app()->getCache()->load($cacheKey);
         if ($cached !== false) {
-            $data = json_decode($cached, true);
+            try {
+                $data = \Mage::helper('core')->jsonDecode($cached);
+            } catch (\JsonException) {
+                $data = null;
+            }
             if (is_array($data)) {
                 return array_map(fn(array $d) => $this->arrayToWishlistDto($d), $data);
             }
@@ -101,7 +105,7 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
         }
 
         \Mage::app()->getCache()->save(
-            (string) json_encode(array_map(fn(WishlistItem $i) => $this->wishlistDtoToArray($i), $items)),
+            (string) \Mage::helper('core')->jsonEncode(array_map(fn(WishlistItem $i) => $this->wishlistDtoToArray($i), $items)),
             $cacheKey,
             ['API_WISHLIST', "API_WISHLIST_{$customerId}"],
             $this->getCacheTtl(),

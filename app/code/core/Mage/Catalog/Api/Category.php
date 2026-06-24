@@ -122,7 +122,7 @@ class Category extends CrudResource
     public int $level = 0;
 
     #[Groups(['category:read'])]
-    public int $position = 0;
+    public ?int $position = null;
 
     #[Groups(['category:read'])]
     public ?bool $isActive = null;

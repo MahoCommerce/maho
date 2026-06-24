@@ -173,7 +173,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         if ($data->description !== null) {
             $category->setDescription($data->description);
         }
-        if ($data->position !== 0) {
+        if ($data->position !== null) {
             $category->setPosition($data->position);
         }
         if ($data->metaTitle !== null) {

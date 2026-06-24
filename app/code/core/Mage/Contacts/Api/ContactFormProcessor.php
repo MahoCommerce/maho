@@ -146,7 +146,11 @@ class ContactFormProcessor extends \Maho\ApiPlatform\Processor
         } catch (HttpException $e) {
             throw $e;
         } catch (\Exception $e) {
+            // Fail closed: a transport/decoding error (timeout, DNS, provider
+            // outage) must not let the submission through unverified, otherwise
+            // an attacker who can disrupt the verify endpoint bypasses CAPTCHA.
             \Mage::logException($e);
+            throw new HttpException(503, 'CAPTCHA verification is temporarily unavailable. Please try again later.');
         }
     }
 

@@ -91,6 +91,8 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
     private function doCreate(array $data): Coupon
     {
+        $this->requireAdminOrApiUser('Coupon creation requires admin or API access');
+
         $code = $data['code'] ?? '';
         $this->validateCouponCode($code);
 

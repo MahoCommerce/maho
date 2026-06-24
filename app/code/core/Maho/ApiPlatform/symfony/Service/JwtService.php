@@ -57,7 +57,7 @@ class JwtService
      */
     public function generateCustomerToken(\Mage_Customer_Model_Customer $customer): string
     {
-        $now = new DateTimeImmutable();
+        $now = new DateTimeImmutable('now', new \DateTimeZone('UTC'));
         $config = $this->getConfig();
 
         $token = $config->builder()
@@ -85,7 +85,7 @@ class JwtService
      */
     public function generateAdminToken(\Mage_Admin_Model_User $admin): string
     {
-        $now = new DateTimeImmutable();
+        $now = new DateTimeImmutable('now', new \DateTimeZone('UTC'));
         $config = $this->getConfig();
 
         $token = $config->builder()
@@ -114,7 +114,7 @@ class JwtService
      */
     public function generateApiUserToken(\Mage_Api_Model_User $apiUser, array $permissions = []): string
     {
-        $now = new DateTimeImmutable();
+        $now = new DateTimeImmutable('now', new \DateTimeZone('UTC'));
         $config = $this->getConfig();
 
         $builder = $config->builder()

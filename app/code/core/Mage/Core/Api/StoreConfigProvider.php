@@ -46,8 +46,12 @@ final class StoreConfigProvider extends \Maho\ApiPlatform\Provider
         // Try cache (1-hour TTL)
         $cached = \Mage::app()->getCache()->load($cacheKey);
         if ($cached !== false) {
-            $data = json_decode($cached, true);
-            if ($data !== null) {
+            try {
+                $data = \Mage::helper('core')->jsonDecode($cached);
+            } catch (\JsonException) {
+                $data = null;
+            }
+            if (is_array($data)) {
                 return $this->arrayToDto($data);
             }
         }
@@ -97,7 +101,7 @@ final class StoreConfigProvider extends \Maho\ApiPlatform\Provider
 
         // Cache for 24 hours (store config rarely changes, auto-cleaned on save)
         \Mage::app()->getCache()->save(
-            json_encode($this->dtoToArray($dto)),
+            (string) \Mage::helper('core')->jsonEncode($this->dtoToArray($dto)),
             $cacheKey,
             ['API_STORE_CONFIG'],
             86400,

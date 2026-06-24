@@ -67,7 +67,11 @@ final class CountryProvider extends \Maho\ApiPlatform\Provider
         // Try cache first (1-hour TTL)
         $cached = \Mage::app()->getCache()->load($cacheKey);
         if ($cached !== false) {
-            $data = json_decode($cached, true);
+            try {
+                $data = \Mage::helper('core')->jsonDecode($cached);
+            } catch (\JsonException) {
+                $data = null;
+            }
             if (is_array($data)) {
                 $countries = array_map(fn(array $c) => $this->arrayToDto($c), $data);
                 $total = count($countries);
@@ -96,7 +100,7 @@ final class CountryProvider extends \Maho\ApiPlatform\Provider
         // Cache for 1 hour
         $cacheData = array_map(fn(Country $c) => $this->dtoToArray($c), $countries);
         \Mage::app()->getCache()->save(
-            json_encode($cacheData),
+            (string) \Mage::helper('core')->jsonEncode($cacheData),
             $cacheKey,
             ['API_COUNTRIES'],
             3600,

@@ -39,6 +39,10 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
         $user = $this->getAuthorizedUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
 
+        // Enforce website scope for store-restricted API users on every
+        // sub-resource write/delete (mirrors ProductProcessor's main CRUD check).
+        $this->authorizeProductWebsites($this->loadProduct($productId), $user);
+
         $request = $context['request'] ?? null;
         try {
             $body = $request ? (array) \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]') : [];
@@ -162,6 +166,10 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
             $option->setDefaultTitle($body['title']);
         }
         if (isset($body['type'])) {
+            $validTypes = ['select', 'radio', 'checkbox', 'multi'];
+            if (!in_array($body['type'], $validTypes, true)) {
+                throw new BadRequestHttpException("Invalid type: {$body['type']}. Valid: " . implode(', ', $validTypes));
+            }
             $option->setType($body['type']);
         }
         if (isset($body['required'])) {

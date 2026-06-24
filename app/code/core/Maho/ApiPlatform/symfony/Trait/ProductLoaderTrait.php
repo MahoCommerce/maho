@@ -12,7 +12,9 @@ namespace Maho\ApiPlatform\Trait;
 
 use Mage;
 use Mage_Catalog_Model_Product;
+use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -49,5 +51,33 @@ trait ProductLoaderTrait
         }
 
         return $product;
+    }
+
+    /**
+     * Authorize a loaded product against a store-restricted API user: the product
+     * must belong to at least one website the user's allowed stores map to. No-op
+     * for unrestricted users (getAllowedStoreIds() === null). Mirrors the check
+     * ProductProcessor applies on the main product CRUD, so sub-resource writes
+     * (custom options, media, tier prices, links, bundle/configurable setup, …)
+     * cannot be used to reach a product outside the user's website scope.
+     */
+    protected function authorizeProductWebsites(Mage_Catalog_Model_Product $product, ApiUser $user): void
+    {
+        $allowedStoreIds = $user->getAllowedStoreIds();
+        if ($allowedStoreIds === null) {
+            return;
+        }
+
+        $allowedWebsiteIds = [];
+        foreach ($allowedStoreIds as $storeId) {
+            $allowedWebsiteIds[] = (int) Mage::app()->getStore($storeId)->getWebsiteId();
+        }
+        $allowedWebsiteIds = array_values(array_unique($allowedWebsiteIds));
+
+        $productWebsiteIds = array_map('intval', $product->getWebsiteIds());
+
+        if (array_intersect($productWebsiteIds, $allowedWebsiteIds) === []) {
+            throw new AccessDeniedHttpException("Access denied for this product's websites");
+        }
     }
 }

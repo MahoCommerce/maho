@@ -45,7 +45,7 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
 
         // customerCart query, get authenticated user's active cart
         if ($operationName === 'customerCart') {
-            $customerId = $context['customer_id'] ?? $this->getAuthenticatedCustomerId();
+            $customerId = $this->getAuthenticatedCustomerId();
             if (!$customerId) {
                 return null;
             }

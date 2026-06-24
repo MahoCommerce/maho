@@ -59,6 +59,8 @@ final class ShipmentProvider extends CrudProvider
 
     private function getShipmentById(int $id): Shipment
     {
+        $this->requireAdminOrApiUser('Shipment access requires admin or API access');
+
         $shipment = \Mage::getModel('sales/order_shipment')->load($id);
         if (!$shipment->getId()) {
             throw new NotFoundHttpException('Shipment not found');
@@ -71,6 +73,8 @@ final class ShipmentProvider extends CrudProvider
      */
     private function getShipmentsForOrder(int $orderId): ArrayPaginator
     {
+        $this->requireAdminOrApiUser('Shipment access requires admin or API access');
+
         $order = \Mage::getModel('sales/order')->load($orderId);
         if (!$order->getId()) {
             throw new NotFoundHttpException('Order not found');

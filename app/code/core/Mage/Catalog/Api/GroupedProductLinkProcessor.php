@@ -38,6 +38,10 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
         $user = $this->getAuthorizedUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
 
+        // Enforce website scope for store-restricted API users on every
+        // sub-resource write/delete (mirrors ProductProcessor's main CRUD check).
+        $this->authorizeProductWebsites($this->loadProduct($productId), $user);
+
         if ($operation instanceof DeleteOperationInterface) {
             $this->requirePermission($user, 'products/delete');
             $childProductId = self::extractChildProductId($context);

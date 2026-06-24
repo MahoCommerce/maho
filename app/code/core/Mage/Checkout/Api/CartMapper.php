@@ -109,11 +109,20 @@ class CartMapper
         if ($giftcardCodesJson) {
             $giftcardCodes = \Mage::helper('core')->jsonDecode($giftcardCodesJson, true);
             if (is_array($giftcardCodes)) {
-                foreach ($giftcardCodes as $code => $balance) {
+                // giftcard_codes stores {code: applied_amount}. The live card
+                // balance must be loaded from the model — mirrors
+                // CartMutationHandler::mapAppliedGiftcards() so REST and GraphQL
+                // return identical, correct values.
+                foreach ($giftcardCodes as $code => $appliedAmount) {
+                    /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
+                    $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
+                    if (!$giftcard->getId()) {
+                        continue;
+                    }
                     $cart->appliedGiftcards[] = [
                         'code' => (string) $code,
-                        'balance' => (float) $balance,
-                        'appliedAmount' => 0.0,
+                        'balance' => (float) $giftcard->getBalance(),
+                        'appliedAmount' => (float) $appliedAmount,
                     ];
                 }
             }

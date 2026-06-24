@@ -51,7 +51,7 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
         // session check.
         $adminId = null;
         if ($this->hasAdminContext()) {
-            $adminId = $_SERVER['MAHO_ADMIN_USER_ID'];
+            $adminId = (int) $_SERVER['MAHO_ADMIN_USER_ID'];
         }
 
         if ($adminId === null) {

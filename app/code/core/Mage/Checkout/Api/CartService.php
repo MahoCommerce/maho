@@ -314,6 +314,13 @@ class CartService
                     ->load($parentId);
 
                 if ($configurableProduct->getId()) {
+                    // The originally-loaded simple passed the status gate, but the
+                    // product actually added to the cart is the configurable parent.
+                    // A disabled parent with an enabled child must not be addable.
+                    if ((int) $configurableProduct->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
+                        throw new \RuntimeException("Product '{$sku}' is not available");
+                    }
+
                     // Get the super_attribute values for this simple product
                     $superAttributes = $this->getSuperAttributesForSimple($configurableProduct, $product);
 
@@ -427,7 +434,7 @@ class CartService
         $item = $quote->getItemById($itemId);
 
         if (!$item) {
-            throw new \RuntimeException("Cart item with ID '{$itemId}' not found");
+            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("Cart item with ID '{$itemId}' not found");
         }
 
         $item->setQty($qty);
@@ -447,6 +454,12 @@ class CartService
      */
     public function removeItem(\Mage_Sales_Model_Quote $quote, int $itemId): \Mage_Sales_Model_Quote
     {
+        // removeItem() is a silent no-op for an unknown ID, so guard explicitly
+        // to return a 404 instead of a false-positive 200 (mirrors updateItem()).
+        if (!$quote->getItemById($itemId)) {
+            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("Cart item with ID '{$itemId}' not found");
+        }
+
         $quote->removeItem($itemId);
         $this->collectAndVerifyTotals($quote);
 

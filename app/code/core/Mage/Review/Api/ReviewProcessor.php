@@ -69,7 +69,11 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
     ): Review {
         $customerId = $this->requireAuthentication();
 
+        // Limit by IP and by account: the IP check is skipped when the client IP
+        // is unknown and can be sidestepped by IP rotation, so a per-customer
+        // bucket backstops review flooding from a single account.
         $this->checkRateLimitByIp('review_submit', 'review_submit', 3600);
+        $this->checkRateLimit('review_submit:customer:' . $customerId, 'review_submit', 3600);
 
         /** @var \Mage_Catalog_Model_Product $product */
         $product = \Mage::getModel('catalog/product')->load($productId);

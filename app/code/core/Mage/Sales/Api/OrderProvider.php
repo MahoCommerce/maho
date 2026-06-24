@@ -57,10 +57,10 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             $request = $context['request'] ?? null;
             $token = '';
             if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
+                // Header only: a token in the query string would leak into web
+                // server / CDN access logs and Referer headers, surviving the
+                // one-time-use wipe below for the lifetime of those logs.
                 $token = (string) $request->headers->get('X-Order-Token', '');
-                if ($token === '') {
-                    $token = (string) $request->query->get('token', '');
-                }
             }
             $incrementId = (string) ($uriVariables['incrementId'] ?? '');
 
@@ -147,7 +147,9 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
 
         // Handle customerOrders collection query
         if ($operationName === 'customerOrders') {
-            $customerId = $context['customer_id'] ?? null;
+            // Bind strictly to the authenticated JWT identity (mirrors getMyOrders).
+            // Never trust a request/context-supplied id here, that would be an IDOR.
+            $customerId = $this->getAuthenticatedCustomerId();
             if (!$customerId) {
                 return new TraversablePaginator(new \ArrayIterator([]), 1, 20, 0);
             }

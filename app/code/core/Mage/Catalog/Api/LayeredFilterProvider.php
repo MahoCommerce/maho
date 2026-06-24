@@ -77,8 +77,12 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
             return [];
         }
 
+        // Fresh instance, not the singleton: under FPM workers and the test
+        // runner the singleton retains setCurrentCategory() state across
+        // requests, which would leak the wrong category into facet counts
+        // (mirrors ProductProvider).
         /** @var \Mage_Catalog_Model_Layer $layer */
-        $layer = \Mage::getSingleton('catalog/layer');
+        $layer = \Mage::getModel('catalog/layer');
         $layer->setCurrentCategory($category);
 
         $filterableAttributes = $layer->getFilterableAttributes();

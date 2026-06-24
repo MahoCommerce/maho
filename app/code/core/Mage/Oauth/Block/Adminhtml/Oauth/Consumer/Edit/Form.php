@@ -158,7 +158,11 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Edit_Form extends Mage_Adminhtml
         if (empty($storeIds) || $storeIds === 'all') {
             return [];
         }
-        $decoded = json_decode($storeIds, true);
+        try {
+            $decoded = Mage::helper('core')->jsonDecode($storeIds, true);
+        } catch (JsonException) {
+            return [];
+        }
         return is_array($decoded) ? $decoded : [];
     }
 }

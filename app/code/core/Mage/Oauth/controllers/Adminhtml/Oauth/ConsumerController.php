@@ -206,7 +206,7 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
 
             $storeIds = $this->getRequest()->getPost('store_ids', []);
             if (!empty($storeIds)) {
-                $model->setStoreIds(json_encode($storeIds));
+                $model->setStoreIds(Mage::helper('core')->jsonEncode($storeIds));
             } else {
                 $model->setStoreIds('all');
             }
