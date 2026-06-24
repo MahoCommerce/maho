@@ -452,12 +452,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     /**
      * Call before building and saving cache to ensure only one process can save the cache
      *
-     * Acquires the lock by polling with non-blocking GET_LOCK attempts and
-     * sleeping in PHP between tries, rather than one blocking GET_LOCK that
-     * parks a DB connection in "User lock" wait for the whole timeout. Under a
-     * post-flush stampede the blocking form keeps one busy DB thread per waiting
-     * request, which can overwhelm the server (see issue #1050).
-     *
      * If failed to get cache lock:
      *   - CLI: throws exception
      *   - Other: 503 error
@@ -475,9 +469,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if (!$connection) {
             return;
         }
-        $deadline = microtime(true) + (float) $waitTime;
+        // Poll with non-blocking GET_LOCK + sleep instead of one blocking call, which
+        // would park a busy DB thread per waiting request and pile up under load (#1050).
+        $deadline = time() + $waitTime;
         while (!$connection->getLock('core_config_cache_save_lock', 0)) {
-            if (microtime(true) >= $deadline) {
+            if (time() >= $deadline) {
                 if ($ignoreFailure) {
                     return;
                 }
