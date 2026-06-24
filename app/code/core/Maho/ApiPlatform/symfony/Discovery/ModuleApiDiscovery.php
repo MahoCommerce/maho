@@ -100,7 +100,11 @@ final class ModuleApiDiscovery
             return null;
         }
 
-        $decoded = json_decode($raw, true);
+        try {
+            $decoded = \Mage::helper('core')->jsonDecode($raw);
+        } catch (\Throwable) {
+            return null;
+        }
         if (is_array($decoded) && isset($decoded['paths'], $decoded['namespaces'])) {
             /** @var array{paths: string[], namespaces: array<string, string>} $decoded */
             return $decoded;
@@ -115,7 +119,7 @@ final class ModuleApiDiscovery
     private static function saveToCache(array $data): void
     {
         $app = self::mageApp();
-        $app?->saveCache(json_encode($data), self::CACHE_ID, [self::CACHE_TAG]);
+        $app?->saveCache(\Mage::helper('core')->jsonEncode($data), self::CACHE_ID, [self::CACHE_TAG]);
     }
 
     /**

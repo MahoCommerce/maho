@@ -12,6 +12,7 @@ namespace Mage\Contacts\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Service\StoreContext;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -39,7 +40,17 @@ class ContactFormProcessor extends \Maho\ApiPlatform\Processor
         $storeId = StoreContext::getStoreId();
 
         $request = $context['request'] ?? null;
-        $body = $request ? (json_decode($request->getContent(), true) ?? []) : [];
+        $body = [];
+        if ($request) {
+            $content = $request->getContent();
+            if ($content !== '') {
+                try {
+                    $body = (array) \Mage::helper('core')->jsonDecode($content);
+                } catch (\JsonException) {
+                    throw new BadRequestHttpException('Invalid JSON body');
+                }
+            }
+        }
 
         if (!\Mage::getStoreConfigFlag(self::CONFIG_ENABLED, $storeId)) {
             throw new NotFoundHttpException('Contact form is not available');

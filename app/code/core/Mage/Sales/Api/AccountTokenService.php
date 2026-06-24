@@ -13,7 +13,7 @@ namespace Mage\Sales\Api;
 /**
  * HMAC-signed account token for guest order → customer account creation
  *
- * Token format: base64(orderId|email|timestamp|action=<action>).hmac_sha256(base64_payload, crypt_key)
+ * Token format: base64(json{orderId,email,timestamp,action}).hmac_sha256(base64_payload, crypt_key)
  */
 final class AccountTokenService
 {
@@ -23,7 +23,14 @@ final class AccountTokenService
     public static function generate(int $orderId, #[\SensitiveParameter]
         string $email, string $action = 'create_account'): string
     {
-        $payload = $orderId . '|' . $email . '|' . time() . '|action=' . $action;
+        // JSON-encode the payload so no field value (e.g. an email containing a
+        // delimiter) can shift parse boundaries and forge another field.
+        $payload = json_encode([
+            'orderId' => $orderId,
+            'email' => $email,
+            'timestamp' => time(),
+            'action' => $action,
+        ], JSON_THROW_ON_ERROR);
         $payloadBase64 = base64_encode($payload);
         $signature = hash_hmac('sha256', $payloadBase64, self::getCryptKey());
 
@@ -56,21 +63,22 @@ final class AccountTokenService
             throw new \Mage_Core_Exception('Invalid token payload.');
         }
 
-        $payloadParts = explode('|', $payload);
-        if (count($payloadParts) < 4) {
+        try {
+            $data = json_decode($payload, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
             throw new \Mage_Core_Exception('Invalid token payload.');
         }
 
-        $orderId = (int) $payloadParts[0];
-        $email = $payloadParts[1];
-        $timestamp = (int) $payloadParts[2];
-        $actionPart = $payloadParts[3];
-
-        if (!str_starts_with($actionPart, 'action=')) {
-            throw new \Mage_Core_Exception('Invalid token action.');
+        if (!is_array($data)
+            || !isset($data['orderId'], $data['email'], $data['timestamp'], $data['action'])
+        ) {
+            throw new \Mage_Core_Exception('Invalid token payload.');
         }
 
-        $action = substr($actionPart, 7);
+        $orderId = (int) $data['orderId'];
+        $email = (string) $data['email'];
+        $timestamp = (int) $data['timestamp'];
+        $action = (string) $data['action'];
 
         if (time() - $timestamp > $maxAgeSeconds) {
             throw new \Mage_Core_Exception('Account creation token has expired.');

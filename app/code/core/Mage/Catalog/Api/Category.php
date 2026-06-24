@@ -125,10 +125,10 @@ class Category extends CrudResource
     public int $position = 0;
 
     #[Groups(['category:read'])]
-    public bool $isActive = true;
+    public ?bool $isActive = null;
 
     #[Groups(['category:read'])]
-    public bool $includeInMenu = true;
+    public ?bool $includeInMenu = null;
 
     #[Groups(['category:read'])]
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]

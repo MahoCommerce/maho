@@ -73,15 +73,6 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
                 return null;
             }
 
-            // One-time use: clear the token so refreshing the success page
-            // doesn't re-fire analytics or re-expose the order.
-            $resource = \Mage::getSingleton('core/resource');
-            $resource->getConnection('core_write')->update(
-                $resource->getTableName('sales/order'),
-                ['guest_access_token' => null],
-                ['entity_id = ?' => $order->getId()],
-            );
-
             $dto = $this->mapToDto($order);
 
             // Issue an account-creation token if no customer exists for this email
@@ -95,6 +86,17 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
                     $dto->accountToken = AccountTokenService::generate((int) $order->getId(), $orderEmail);
                 }
             }
+
+            // One-time use: clear the token so refreshing the success page
+            // doesn't re-fire analytics or re-expose the order. Done only after
+            // the DTO is built so a mapping failure can't permanently strand the
+            // guest's access to their order.
+            $resource = \Mage::getSingleton('core/resource');
+            $resource->getConnection('core_write')->update(
+                $resource->getTableName('sales/order'),
+                ['guest_access_token' => null],
+                ['entity_id = ?' => $order->getId()],
+            );
 
             return $dto;
         }
@@ -113,7 +115,10 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
                 return null;
             }
 
-            $dto = $this->mapToDto($order, $accessToken);
+            // Don't echo the access token back: it's consumed below (one-time
+            // use), so returning it would only leak a dead token into response
+            // bodies, logs and caches. Mirrors the REST get_order_by_token path.
+            $dto = $this->mapToDto($order);
 
             // Issue an account-creation token if no customer exists for this email
             $orderEmail = $order->getCustomerEmail();
@@ -126,6 +131,16 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
                     $dto->accountToken = AccountTokenService::generate((int) $order->getId(), $orderEmail);
                 }
             }
+
+            // One-time use: clear the token so it can't be replayed to re-expose
+            // the order. Mirrors the REST get_order_by_token path; done only after
+            // the DTO is built so a mapping failure can't strand the guest.
+            $resource = \Mage::getSingleton('core/resource');
+            $resource->getConnection('core_write')->update(
+                $resource->getTableName('sales/order'),
+                ['guest_access_token' => null],
+                ['entity_id = ?' => $order->getId()],
+            );
 
             return $dto;
         }

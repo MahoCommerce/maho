@@ -85,10 +85,10 @@ class CmsPage extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public string $status = 'enabled';
 
-    public bool $isActive = true;
+    public ?bool $isActive = null;
 
-    /** @var int[] */
-    public array $stores = [0];
+    /** @var int[]|null */
+    public ?array $stores = null;
 
     #[ApiProperty(writable: false, extraProperties: ['modelField' => 'creation_time'])]
     public ?string $createdAt = null;
@@ -102,7 +102,7 @@ class CmsPage extends CrudResource
     public static function afterLoad(self $dto, object $model): void
     {
         $dto->content = self::filterContent($dto->content ?? '');
-        $dto->status = $dto->isActive ? 'enabled' : 'disabled';
+        $dto->status = ($dto->isActive ?? false) ? 'enabled' : 'disabled';
 
         if (method_exists($model->getResource(), 'lookupStoreIds')) {
             $dto->stores = array_map('intval', $model->getResource()->lookupStoreIds($model->getId()));

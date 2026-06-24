@@ -123,8 +123,14 @@ class CrudProcessor extends Processor
     private function validateStoreAccess(CrudResource $data, ApiUser $user): void
     {
         if ($this->isStoreScoped()) {
-            /** @var array<int> $stores */
+            /** @var array<int>|null $stores */
             $stores = (new \ReflectionProperty($data, 'stores'))->getValue($data);
+            // A null `stores` means the field was omitted from the request: on update the
+            // existing assignment is left untouched (nothing to validate), on create the
+            // model default (all stores) is applied later and validated against [0].
+            if ($stores === null) {
+                return;
+            }
             $this->validateEntityStoreAccess($stores, $user, $this->entityLabel);
         }
     }

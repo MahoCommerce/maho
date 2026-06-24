@@ -91,6 +91,10 @@ final class StoreConfigProvider extends \Maho\ApiPlatform\Provider
         // Homepage CMS page identifier
         $dto->cmsHomePage = \Mage::getStoreConfig('web/default/cms_home_page', $storeId) ?: 'home';
 
+        // Dispatch before caching so observer mutations are persisted in the
+        // cached payload, not just on the instance returned this request.
+        \Mage::dispatchEvent('api_store_config_dto_build', ['dto' => $dto]);
+
         // Cache for 24 hours (store config rarely changes, auto-cleaned on save)
         \Mage::app()->getCache()->save(
             json_encode($this->dtoToArray($dto)),
@@ -98,9 +102,6 @@ final class StoreConfigProvider extends \Maho\ApiPlatform\Provider
             ['API_STORE_CONFIG'],
             86400,
         );
-
-        \Mage::dispatchEvent('api_store_config_dto_build', ['dto' => $dto]);
-
 
         return $dto;
     }

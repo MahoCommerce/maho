@@ -414,7 +414,14 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             $stockItem->setIsInStock($isInStock ? 1 : 0);
         }
 
-        $stockItem->setManageStock(1);
+        // Only touch manage_stock when the caller explicitly provides it; otherwise
+        // preserve the existing setting and default to enabled only for new items.
+        if ($data->stockData !== null && isset($data->stockData['manage_stock'])) {
+            $stockItem->setManageStock($data->stockData['manage_stock'] ? 1 : 0);
+        } elseif (!$stockItem->getId()) {
+            $stockItem->setManageStock(1);
+        }
+
         $this->safeSave($stockItem, 'update stock');
     }
 
@@ -443,7 +450,12 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $write = $resource->getConnection('core_write');
         $table = $resource->getTableName('cataloginventory/stock_item');
 
-        $stockData = ['manage_stock' => 1];
+        $stockData = [];
+        // Only touch manage_stock when the caller explicitly provides it; otherwise
+        // preserve the existing value (default to enabled only on INSERT below).
+        if ($data->stockData !== null && isset($data->stockData['manage_stock'])) {
+            $stockData['manage_stock'] = $data->stockData['manage_stock'] ? 1 : 0;
+        }
         if ($qty !== null) {
             if ($qty < 0 || $qty > 99999999) {
                 throw new BadRequestHttpException('Invalid stock quantity');
@@ -465,6 +477,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         if ($stockItemId) {
             $write->update($table, $stockData, 'item_id = ' . (int) $stockItemId);
         } else {
+            $stockData['manage_stock'] ??= 1;
             $stockData['product_id'] = $productId;
             $stockData['stock_id'] = 1;
             $write->insert($table, $stockData);

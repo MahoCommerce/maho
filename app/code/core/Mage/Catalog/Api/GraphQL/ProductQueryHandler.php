@@ -90,12 +90,19 @@ class ProductQueryHandler
         $pageSize = $variables['pageSize'] ?? $variables['limit'] ?? 20;
         $categoryId = $variables['categoryId'] ?? null;
 
-        // Use search layer for text queries, catalog layer for browsing
+        // Use search layer for text queries, catalog layer for browsing.
+        // Use fresh instances instead of singletons: under FPM workers (and the
+        // test runner) the layer/helper singletons retain state across requests,
+        // so a previous request's query text or current category would leak in.
         if (!empty($search)) {
-            \Mage::helper('catalogsearch')->getQuery()->setQueryText($search);
-            $layer = \Mage::getSingleton('catalogsearch/layer');
+            \Mage::unregister('_helper/catalogsearch');
+            $searchHelper = \Mage::helper('catalogsearch');
+            \Mage::app()->getRequest()->setParam($searchHelper->getQueryParamName(), $search);
+            $searchHelper->getQuery()->setStoreId((int) \Mage::app()->getStore()->getId());
+            $searchHelper->getQuery()->setQueryText($search);
+            $layer = \Mage::getModel('catalogsearch/layer');
         } else {
-            $layer = \Mage::getSingleton('catalog/layer');
+            $layer = \Mage::getModel('catalog/layer');
         }
 
         if ($categoryId) {

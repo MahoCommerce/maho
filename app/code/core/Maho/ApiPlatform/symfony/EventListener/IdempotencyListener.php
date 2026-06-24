@@ -142,7 +142,13 @@ class IdempotencyListener
             }
 
             // Stale row outside the TTL window: reclaim it as a fresh
-            // reservation so the key becomes reusable after expiry.
+            // reservation so the key becomes reusable after expiry. The
+            // `created_at < cutoff` guard makes the reclaim atomic: when two
+            // concurrent requests both see an expired row, only the one whose
+            // UPDATE runs first matches the stale timestamp and wins; the
+            // loser matches nothing (the row is now fresh) and gets a 409.
+            $reclaimWhere = $this->recordWhere($idempotencyKey, $scope, $path, $method);
+            $reclaimWhere['created_at < ?'] = $cutoff;
             $reclaimed = $write->update(
                 $table,
                 [
@@ -151,7 +157,7 @@ class IdempotencyListener
                     'response_headers' => null,
                     'created_at' => \Mage::app()->getLocale()->formatDateForDb('now'),
                 ],
-                $this->recordWhere($idempotencyKey, $scope, $path, $method),
+                $reclaimWhere,
             );
             if ($reclaimed === 0) {
                 // Lost a race to another request that reclaimed/completed the

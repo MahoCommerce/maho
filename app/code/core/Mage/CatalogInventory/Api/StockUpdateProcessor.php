@@ -96,7 +96,11 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         // Build update data
         $stockData = [];
         $stockData['qty'] = $qty;
-        $stockData['manage_stock'] = ($manageStock !== null) ? ($manageStock ? 1 : 0) : 1;
+        // Only touch manage_stock when the caller explicitly provides it; otherwise
+        // preserve the product's existing setting instead of clobbering it with 1.
+        if ($manageStock !== null) {
+            $stockData['manage_stock'] = $manageStock ? 1 : 0;
+        }
 
         if ($isInStock === null) {
             $stockData['is_in_stock'] = $qty > 0 ? 1 : 0;
@@ -112,10 +116,19 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 
         if ($stockItemId) {
             $write->update($table, $stockData, 'item_id = ' . (int) $stockItemId);
+            $manageStockValue = $manageStock !== null
+                ? ($manageStock ? 1 : 0)
+                : (int) $write->fetchOne(
+                    "SELECT manage_stock FROM {$table} WHERE item_id = ?",
+                    [(int) $stockItemId],
+                );
         } else {
+            // New stock item: default manage_stock to enabled when not provided.
+            $stockData['manage_stock'] ??= 1;
             $stockData['product_id'] = $productId;
             $stockData['stock_id'] = 1;
             $write->insert($table, $stockData);
+            $manageStockValue = $stockData['manage_stock'];
         }
 
         // Invalidate cache
@@ -125,7 +138,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         $dto->sku = $sku;
         $dto->qty = $qty;
         $dto->isInStock = (bool) $stockData['is_in_stock'];
-        $dto->manageStock = (bool) $stockData['manage_stock'];
+        $dto->manageStock = (bool) $manageStockValue;
         $dto->previousQty = $currentQty;
         $dto->success = true;
 
@@ -186,7 +199,10 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 
                 $stockData = [];
                 $stockData['qty'] = $qty;
-                $stockData['manage_stock'] = ($manageStock !== null) ? ($manageStock ? 1 : 0) : 1;
+                // Only touch manage_stock when explicitly provided; otherwise preserve it.
+                if ($manageStock !== null) {
+                    $stockData['manage_stock'] = $manageStock ? 1 : 0;
+                }
                 $stockData['is_in_stock'] = ($isInStock ?? ($qty > 0)) ? 1 : 0;
 
                 $stockItemId = $write->fetchOne(
@@ -196,10 +212,18 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 
                 if ($stockItemId) {
                     $write->update($table, $stockData, 'item_id = ' . (int) $stockItemId);
+                    $manageStockValue = $manageStock !== null
+                        ? ($manageStock ? 1 : 0)
+                        : (int) $write->fetchOne(
+                            "SELECT manage_stock FROM {$table} WHERE item_id = ?",
+                            [(int) $stockItemId],
+                        );
                 } else {
+                    $stockData['manage_stock'] ??= 1;
                     $stockData['product_id'] = $productId;
                     $stockData['stock_id'] = 1;
                     $write->insert($table, $stockData);
+                    $manageStockValue = $stockData['manage_stock'];
                 }
 
                 $cacheTags[] = "API_PRODUCT_{$productId}";
@@ -208,7 +232,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
                 $result->sku = $sku;
                 $result->qty = $qty;
                 $result->isInStock = (bool) $stockData['is_in_stock'];
-                $result->manageStock = (bool) $stockData['manage_stock'];
+                $result->manageStock = (bool) $manageStockValue;
                 $result->previousQty = $currentQty;
                 $result->success = true;
                 $results[] = $result;

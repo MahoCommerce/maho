@@ -95,10 +95,10 @@ class BlogPost extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public string $status = 'enabled';
 
-    public bool $isActive = true;
+    public ?bool $isActive = null;
 
-    /** @var int[] */
-    public array $stores = [0];
+    /** @var int[]|null */
+    public ?array $stores = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     /** @var int[] */
@@ -112,6 +112,24 @@ class BlogPost extends CrudResource
 
     #[ApiProperty(writable: false)]
     public ?string $updatedAt = null;
+
+    #[\Override]
+    public function applyToModel(object $model): void
+    {
+        parent::applyToModel($model);
+
+        // On create, apply sensible defaults for fields omitted from the request.
+        // On partial update these stay untouched (parent::applyToModel skips nulls),
+        // so an enabled/store-restricted post is not silently reset.
+        if (!$model->getId()) {
+            if ($this->isActive === null) {
+                $model->setData('is_active', 1);
+            }
+            if ($this->stores === null) {
+                $model->setData('stores', [0]);
+            }
+        }
+    }
 
     public static function afterLoad(self $dto, object $model): void
     {

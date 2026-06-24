@@ -302,7 +302,11 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // Extract attribute filters, REST uses attr_ prefix, GraphQL uses JSON string
         $attributeFilters = [];
         if (!empty($requestFilters['attributeFilters'])) {
-            $decoded = json_decode($requestFilters['attributeFilters'], true);
+            try {
+                $decoded = \Mage::helper('core')->jsonDecode($requestFilters['attributeFilters']);
+            } catch (\JsonException) {
+                throw new BadRequestHttpException('attributeFilters must be a valid JSON object');
+            }
             if (is_array($decoded)) {
                 $attributeFilters = $decoded;
             }

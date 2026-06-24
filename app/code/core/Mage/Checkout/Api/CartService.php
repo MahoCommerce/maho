@@ -574,6 +574,7 @@ class CartService
         $appliedCodes[$giftcardCode] = $amount === null ? $balance : min($amount, $balance);
 
         $quote->setGiftcardCodes(json_encode($appliedCodes));
+        $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals()->save();
 
         return $quote;
@@ -659,6 +660,9 @@ class CartService
             $quote->setGiftcardCodes(json_encode($appliedCodes));
         }
 
+        // Force a fresh totals pass, otherwise an already-collected quote in the
+        // same request leaves a stale giftcard_amount on the saved quote.
+        $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals()->save();
 
         return $quote;
@@ -907,6 +911,7 @@ class CartService
                 }
             }
         }
+        $customerCart->setTotalsCollectedFlag(false);
         $customerCart->collectTotals();
         $customerCart->save();
 

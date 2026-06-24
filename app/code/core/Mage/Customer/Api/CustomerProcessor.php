@@ -59,6 +59,25 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     {
         $operationName = $operation->getName();
 
+        // Bridge REST request body into context args (GraphQL populates args natively).
+        // The forgot/reset/create-from-order handlers read from $context['args']['input'];
+        // for REST callers API Platform does not populate that key, so the JSON body is
+        // injected here to keep those endpoints working over REST.
+        if (empty($context['args']['input'])) {
+            $context['args']['input'] = [];
+            $request = $context['request'] ?? null;
+            if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
+                try {
+                    $body = \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]');
+                } catch (\JsonException) {
+                    throw new BadRequestHttpException('Invalid JSON in request body');
+                }
+                if (is_array($body)) {
+                    $context['args']['input'] = $body;
+                }
+            }
+        }
+
         // Handle REST PUT /customers/me (update profile)
         if ($operationName === 'update_profile') {
             return $this->updateProfile($data);
@@ -290,8 +309,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
 
         return $this->doUpdateProfile(
-            firstName: $args['firstname'] ?? null,
-            lastName: $args['lastname'] ?? null,
+            firstName: $args['firstName'] ?? null,
+            lastName: $args['lastName'] ?? null,
             email: $args['email'] ?? null,
         );
     }
@@ -456,9 +475,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
      */
     private function createAccountFromOrder(array $context): Customer
     {
-        $request = $context['request'] ?? null;
-        $body = $request ? (json_decode($request->getContent(), true) ?? []) : [];
-        $args = $context['args']['input'] ?? $body;
+        $args = $context['args']['input'] ?? [];
 
         $accountToken = $args['accountToken'] ?? '';
         $password = $args['password'] ?? '';
@@ -499,14 +516,15 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new HttpException(409, 'An account with this email already exists. Please log in.');
         }
 
-        $billingAddress = $order->getBillingAddress();
+        // Virtual/incomplete orders may have no billing address (getBillingAddress() returns false)
+        $billingAddress = $order->getBillingAddress() ?: null;
 
         $customer = \Mage::getModel('customer/customer');
         $customer->setWebsiteId($websiteId);
         $customer->setStoreId($order->getStoreId());
         $customer->setEmail($email);
-        $customer->setFirstname($billingAddress->getFirstname());
-        $customer->setLastname($billingAddress->getLastname());
+        $customer->setFirstname($billingAddress ? $billingAddress->getFirstname() : '');
+        $customer->setLastname($billingAddress ? $billingAddress->getLastname() : '');
         $customer->setPassword($password);
         $customer->save();
 

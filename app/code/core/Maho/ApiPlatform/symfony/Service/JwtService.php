@@ -243,7 +243,12 @@ class JwtService
             }),
         ];
 
-        assert($parsed instanceof \Lcobucci\JWT\Token\Plain);
+        // Hard guard rather than assert(): assertions may be disabled in
+        // production (assert.active=0), and a non-Plain (e.g. Unsecured) token
+        // must never bypass the SignedWith constraint below.
+        if (!$parsed instanceof \Lcobucci\JWT\Token\Plain) {
+            throw new \Lcobucci\JWT\Token\InvalidTokenStructure('Token is not a valid signed JWT.');
+        }
         $config->validator()->assert($parsed, ...$constraints);
 
         // Convert to stdClass for backward compatibility

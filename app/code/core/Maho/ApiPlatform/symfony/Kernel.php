@@ -85,7 +85,7 @@ class Kernel extends BaseKernel
                     \Mage::LOG_WARNING,
                 );
             }
-            $_ENV['CORS_ALLOW_ORIGIN'] = json_encode($origins, JSON_THROW_ON_ERROR);
+            $_ENV['CORS_ALLOW_ORIGIN'] = \Mage::helper('core')->jsonEncode($origins);
         }
     }
 
@@ -141,7 +141,7 @@ class Kernel extends BaseKernel
         // so the placeholder string reaches in_array() unresolved and
         // trips a TypeError. resolveEnvironmentVars() has already
         // populated $_ENV['CORS_ALLOW_ORIGIN'] with the JSON-encoded list.
-        $corsAllowOrigin = json_decode($_ENV['CORS_ALLOW_ORIGIN'] ?? '[]', true) ?: [];
+        $corsAllowOrigin = ((array) \Mage::helper('core')->jsonDecode($_ENV['CORS_ALLOW_ORIGIN'] ?? '[]')) ?: [];
 
         $container->extension('framework', [
             'secret' => '%env(APP_SECRET)%',
@@ -232,7 +232,7 @@ class Kernel extends BaseKernel
                 'allow_origin' => $corsAllowOrigin,
                 'allow_credentials' => false,
                 'allow_methods' => ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE'],
-                'allow_headers' => ['Content-Type', 'Authorization', 'X-Requested-With'],
+                'allow_headers' => ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Idempotency-Key'],
                 'expose_headers' => ['Link', 'Deprecation', 'Sunset'],
                 'max_age' => 3600,
             ],
@@ -240,7 +240,7 @@ class Kernel extends BaseKernel
                 '^/api/' => [
                     'allow_origin' => $corsAllowOrigin,
                     'allow_credentials' => false,
-                    'allow_headers' => ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Store-Code'],
+                    'allow_headers' => ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Store-Code', 'X-Idempotency-Key'],
                     'allow_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
                     'max_age' => 3600,
                 ],

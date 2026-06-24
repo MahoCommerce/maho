@@ -223,10 +223,10 @@ class Address extends CrudResource
     // from the customer's default_billing column, not a column on the
     // address itself.
     #[ApiProperty(extraProperties: ['computed' => true])]
-    public bool $isDefaultBilling = false;
+    public ?bool $isDefaultBilling = null;
 
     #[ApiProperty(extraProperties: ['computed' => true])]
-    public bool $isDefaultShipping = false;
+    public ?bool $isDefaultShipping = null;
 
     public static function afterLoad(self $dto, object $model): void
     {

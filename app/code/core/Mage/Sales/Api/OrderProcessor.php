@@ -51,9 +51,16 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             $context['args']['input'] = [];
             $request = $context['request'] ?? null;
             if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
-                $body = json_decode($request->getContent(), true);
-                if (is_array($body)) {
-                    $context['args']['input'] = $body;
+                $content = $request->getContent();
+                if ($content !== '') {
+                    try {
+                        $body = \Mage::helper('core')->jsonDecode($content);
+                    } catch (\JsonException) {
+                        throw new BadRequestHttpException('Invalid JSON in request body');
+                    }
+                    if (is_array($body)) {
+                        $context['args']['input'] = $body;
+                    }
                 }
             }
         }

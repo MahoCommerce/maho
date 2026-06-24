@@ -83,8 +83,13 @@ final class MediaProvider implements ProviderInterface
             throw new BadRequestHttpException('Folder does not exist');
         }
 
+        // Boundary check with a trailing separator so a sibling directory whose
+        // name merely starts with "wysiwyg" (e.g. wysiwyg_cache) can't pass a bare
+        // prefix match. correctPath() does not strip ".." segments, so realpath()
+        // is the only thing collapsing traversal here.
         $realTargetDir = realpath($targetDir);
-        if (!$realTargetDir || !str_starts_with($realTargetDir, $realWysiwygDir)) {
+        $wysiwygBoundary = rtrim($realWysiwygDir, DS) . DS;
+        if (!$realTargetDir || !str_starts_with(rtrim($realTargetDir, DS) . DS, $wysiwygBoundary)) {
             throw new BadRequestHttpException('Invalid folder path. Must be within wysiwyg/');
         }
 

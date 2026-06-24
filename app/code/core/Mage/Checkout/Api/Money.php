@@ -27,7 +27,7 @@ class Money extends \Maho\ApiPlatform\Resource
     public function __construct(?float $value = null, ?string $currency = null)
     {
         $this->value = $value;
-        $this->currency = $currency ?? 'AUD';
+        $this->currency = $currency ?? \Mage::app()->getStore()->getCurrentCurrencyCode();
 
         if ($value !== null) {
             $this->formatted = $this->format($value, $this->currency);

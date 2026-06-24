@@ -92,10 +92,21 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
         } elseif ($imageUrl !== null) {
             // Validate URL and get resolved IP to prevent DNS rebinding SSRF
             $validatedIp = $this->validateImageUrl($imageUrl);
-            // Replace hostname with validated IP for the actual request
+            // Rebuild the URL from its parsed components using the validated IP
+            // as the authority. Reconstructing (rather than str_replace) avoids
+            // accidentally rewriting the host string where it appears in the
+            // path/query, and pins the fetch to the IP that was just validated,
+            // closing the DNS-rebinding TOCTOU window.
             $parsedUrl = parse_url($imageUrl);
             $originalHost = $parsedUrl['host'] ?? '';
-            $ipUrl = str_replace($originalHost, $validatedIp, $imageUrl);
+            $scheme = $parsedUrl['scheme'] ?? 'http';
+            $ipAuthority = str_contains($validatedIp, ':') ? "[{$validatedIp}]" : $validatedIp;
+            if (isset($parsedUrl['port'])) {
+                $ipAuthority .= ':' . $parsedUrl['port'];
+            }
+            $ipUrl = $scheme . '://' . $ipAuthority
+                . ($parsedUrl['path'] ?? '')
+                . (isset($parsedUrl['query']) ? '?' . $parsedUrl['query'] : '');
             $context = stream_context_create(['http' => [
                 'header' => "Host: {$originalHost}\r\n",
                 'timeout' => 10,

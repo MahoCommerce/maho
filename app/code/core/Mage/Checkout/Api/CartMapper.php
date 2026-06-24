@@ -93,12 +93,14 @@ class CartMapper
             }
         }
 
-        // Get applied coupon
+        // Get applied coupon. Virtual/downloadable-only carts accumulate
+        // totals on the billing address, so read discounts from there.
+        $totalsAddress = $quote->isVirtual() ? $quote->getBillingAddress() : $shippingAddress;
         $couponCode = $quote->getCouponCode();
         if ($couponCode) {
             $cart->appliedCoupon = [
                 'code' => $couponCode,
-                'discountAmount' => (float) abs($shippingAddress ? $shippingAddress->getDiscountAmount() : 0),
+                'discountAmount' => (float) abs($totalsAddress ? $totalsAddress->getDiscountAmount() : 0),
             ];
         }
 
@@ -242,6 +244,9 @@ class CartMapper
      */
     public function mapPricesToArray(\Mage_Sales_Model_Quote $quote): array
     {
+        // Virtual/downloadable-only carts accumulate discount and tax totals on
+        // the billing address rather than the shipping address.
+        $totalsAddress = $quote->isVirtual() ? $quote->getBillingAddress() : $quote->getShippingAddress();
         $shippingAddress = $quote->getShippingAddress();
 
         $prices = [
@@ -256,17 +261,19 @@ class CartMapper
             'giftcardAmount' => null,
         ];
 
-        if ($shippingAddress) {
-            $prices['discountAmount'] = $shippingAddress->getDiscountAmount()
-                ? (float) abs($shippingAddress->getDiscountAmount())
+        if ($totalsAddress) {
+            $prices['discountAmount'] = $totalsAddress->getDiscountAmount()
+                ? (float) abs($totalsAddress->getDiscountAmount())
                 : null;
+            $prices['taxAmount'] = (float) $totalsAddress->getTaxAmount();
+        }
+        if ($shippingAddress) {
             $prices['shippingAmount'] = $shippingAddress->getShippingAmount()
                 ? (float) $shippingAddress->getShippingAmount()
                 : null;
             $prices['shippingAmountInclTax'] = $shippingAddress->getShippingInclTax()
                 ? (float) $shippingAddress->getShippingInclTax()
                 : null;
-            $prices['taxAmount'] = (float) $shippingAddress->getTaxAmount();
         }
 
         return $prices;

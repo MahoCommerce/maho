@@ -117,7 +117,7 @@ class OrderMutationHandler
     {
         AdminAcl::checkResource(Order::class);
         $customerId = $variables['customerId'] ?? null;
-        $limit = $variables['limit'] ?? 10;
+        $limit = max(1, min((int) ($variables['limit'] ?? 10), 100));
 
         if (!$customerId) {
             throw ValidationException::requiredField('customerId');
@@ -148,7 +148,7 @@ class OrderMutationHandler
     {
         AdminAcl::checkResource(Order::class);
         $storeId = $variables['storeId'] ?? null;
-        $limit = $variables['limit'] ?? 10;
+        $limit = max(1, min((int) ($variables['limit'] ?? 10), 100));
 
         try {
             $orders = \Mage::getModel('sales/order')->getCollection()
@@ -179,7 +179,7 @@ class OrderMutationHandler
         AdminAcl::checkResource(Order::class);
         $search = $variables['search'] ?? null;
         $storeId = $variables['storeId'] ?? null;
-        $limit = $variables['limit'] ?? 10;
+        $limit = max(1, min((int) ($variables['limit'] ?? 10), 100));
 
         if (!$search) {
             return ['searchOrders' => []];

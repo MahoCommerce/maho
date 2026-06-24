@@ -173,18 +173,21 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
             // Handle default billing/shipping updates
             $needsCustomerSave = false;
 
-            if ($data->isDefaultBilling && $customer->getDefaultBilling() != $addressId) {
+            // Only touch the customer's default pointers when the flag was
+            // explicitly provided. A null value means the field was omitted from
+            // a partial update and must not silently clear an existing default.
+            if ($data->isDefaultBilling === true && $customer->getDefaultBilling() != $addressId) {
                 $customer->setDefaultBilling($addressId);
                 $needsCustomerSave = true;
-            } elseif (!$data->isDefaultBilling && $customer->getDefaultBilling() == $addressId) {
+            } elseif ($data->isDefaultBilling === false && $customer->getDefaultBilling() == $addressId) {
                 $customer->setDefaultBilling(null);
                 $needsCustomerSave = true;
             }
 
-            if ($data->isDefaultShipping && $customer->getDefaultShipping() != $addressId) {
+            if ($data->isDefaultShipping === true && $customer->getDefaultShipping() != $addressId) {
                 $customer->setDefaultShipping($addressId);
                 $needsCustomerSave = true;
-            } elseif (!$data->isDefaultShipping && $customer->getDefaultShipping() == $addressId) {
+            } elseif ($data->isDefaultShipping === false && $customer->getDefaultShipping() == $addressId) {
                 $customer->setDefaultShipping(null);
                 $needsCustomerSave = true;
             }
