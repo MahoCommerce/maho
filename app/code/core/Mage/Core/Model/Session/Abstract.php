@@ -871,12 +871,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
             && $sessionData[self::VALIDATOR_HTTP_USER_AGENT_KEY] != $validatorData[self::VALIDATOR_HTTP_USER_AGENT_KEY]
         ) {
             $userAgentValidated = $this->getValidateHttpUserAgentSkip();
-            foreach ($userAgentValidated as $agent) {
-                if (preg_match('/' . $agent . '/iu', $validatorData[self::VALIDATOR_HTTP_USER_AGENT_KEY])) {
-                    return true;
-                }
-            }
-            return false;
+            return array_any($userAgentValidated, fn($agent) => preg_match('/' . $agent . '/iu', $validatorData[self::VALIDATOR_HTTP_USER_AGENT_KEY]));
         }
 
         $session = $this->getSymfonySession();

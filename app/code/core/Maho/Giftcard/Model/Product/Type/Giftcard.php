@@ -161,15 +161,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
                 if ($allowedAmounts) {
                     $amounts = array_map('trim', explode(',', $allowedAmounts));
                     $amounts = array_map('floatval', $amounts);
-
-                    // Use float comparison with small epsilon for precision issues
-                    $isValid = false;
-                    foreach ($amounts as $allowedAmount) {
-                        if (abs($amount - $allowedAmount) < 0.01) {
-                            $isValid = true;
-                            break;
-                        }
-                    }
+                    $isValid = array_any($amounts, fn($allowedAmount) => abs($amount - $allowedAmount) < 0.01);
 
                     if (!$isValid) {
                         return Mage::helper('giftcard')->__('Please select a valid gift card amount');

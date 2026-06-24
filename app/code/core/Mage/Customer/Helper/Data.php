@@ -25,9 +25,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public const XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD = 'customer/login/redirect_dashboard';
 
-    /**
-     * @deprecated Since 26.1.0. Use XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD instead
-     */
+    #[\Deprecated(message: 'Since 26.1.0. Use XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD instead')]
     public const XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD = self::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD;
 
     /**

@@ -118,12 +118,7 @@ class Mage_Cron_Model_Schedule extends Mage_Core_Model_Abstract
 
         // handle multiple options
         if (str_contains($expr, ',')) {
-            foreach (explode(',', $expr) as $e) {
-                if ($this->matchCronExpression($e, $num)) {
-                    return true;
-                }
-            }
-            return false;
+            return array_any(explode(',', $expr), fn($e) => $this->matchCronExpression($e, $num));
         }
 
         // handle modulus

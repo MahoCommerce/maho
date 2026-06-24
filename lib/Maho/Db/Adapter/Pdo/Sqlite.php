@@ -1483,12 +1483,7 @@ class Sqlite extends AbstractPdoAdapter
     public function tableColumnExists(string $tableName, string $columnName, ?string $schemaName = null): bool
     {
         $describe = $this->describeTable($tableName, $schemaName);
-        foreach ($describe as $column) {
-            if (strcasecmp($column['COLUMN_NAME'], $columnName) === 0) {
-                return true;
-            }
-        }
-        return false;
+        return array_any($describe, fn($column) => strcasecmp($column['COLUMN_NAME'], $columnName) === 0);
     }
 
     /**
@@ -2287,14 +2282,7 @@ class Sqlite extends AbstractPdoAdapter
 
         // Add composite PRIMARY KEY if no identity column and multiple primary columns
         if (!$hasIdentity && !empty($primary) && count($primary) > 0) {
-            // Check if we didn't already add it inline
-            $hasInlinePrimary = false;
-            foreach ($definition as $def) {
-                if (str_contains($def, 'PRIMARY KEY')) {
-                    $hasInlinePrimary = true;
-                    break;
-                }
-            }
+            $hasInlinePrimary = array_any($definition, fn($def) => str_contains($def, 'PRIMARY KEY'));
             if (!$hasInlinePrimary) {
                 asort($primary, SORT_NUMERIC);
                 $primaryCols = array_map([$this, 'quoteIdentifier'], array_keys($primary));

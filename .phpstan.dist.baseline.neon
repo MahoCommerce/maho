@@ -18987,11 +18987,6 @@ parameters:
 			count: 1
 			path: app/design/adminhtml/default/default/template/system/autocomplete.phtml
 
-		-
-			rawMessage: 'Call to deprecated method getSaveUrl() of class Mage_Adminhtml_Block_Tag_Edit.'
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/tag/edit/container.phtml
 
 		-
 			rawMessage: Variable $this might not be defined.

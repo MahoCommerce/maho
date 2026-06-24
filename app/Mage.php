@@ -27,24 +27,16 @@ final class Mage
     public const LOG_INFO      = Level::Info;
     public const LOG_DEBUG     = Level::Debug;
 
-    /**
-     * @deprecated Use LOG_EMERGENCY instead
-     */
+    #[\Deprecated(message: 'Use LOG_EMERGENCY instead')]
     public const LOG_EMERG = self::LOG_EMERGENCY;
 
-    /**
-     * @deprecated Use LOG_CRITICAL instead
-     */
+    #[\Deprecated(message: 'Use LOG_CRITICAL instead')]
     public const LOG_CRIT = self::LOG_CRITICAL;
 
-    /**
-     * @deprecated Use LOG_ERROR instead
-     */
+    #[\Deprecated(message: 'Use LOG_ERROR instead')]
     public const LOG_ERR = self::LOG_ERROR;
 
-    /**
-     * @deprecated Use LOG_WARNING instead
-     */
+    #[\Deprecated(message: 'Use LOG_WARNING instead')]
     public const LOG_WARN = self::LOG_WARNING;
 
     /**

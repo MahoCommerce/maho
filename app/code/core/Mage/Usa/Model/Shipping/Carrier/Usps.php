@@ -1945,17 +1945,13 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         return [$zip5, $zip4];
     }
 
-    /**
-     * @deprecated
-     */
+    #[\Deprecated]
     protected function _methodsMapper($method, $valuesToLabels = true)
     {
         return $method;
     }
 
-    /**
-     * @deprecated
-     */
+    #[\Deprecated]
     public function getMethodLabel($value)
     {
         return $this->_methodsMapper($value, true);
@@ -1963,16 +1959,14 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
 
     /**
      * Get value of method by its label
-     * @deprecated
      */
+    #[\Deprecated]
     public function getMethodValue($label)
     {
         return $this->_methodsMapper($label, false);
     }
 
-    /**
-     * @deprecated
-     */
+    #[\Deprecated]
     protected function setTrackingReqeust()
     {
         $this->setTrackingRequest();

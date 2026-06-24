@@ -89,9 +89,7 @@ class Mage_Tax_Model_Config
     public const FPT_TAXED = 1;
     public const FPT_LOADED_DISPLAY_WITH_TAX = 2;
 
-    /**
-     * @deprecated
-     */
+    #[\Deprecated]
     public const CONFIG_XML_PATH_DISPLAY_TAX_COLUMN = 'tax/display/column_in_summary';
 
     /**
@@ -308,10 +306,10 @@ class Mage_Tax_Model_Config
     /**
      * Get shopping cart prices display type
      *
-     * @deprecated please use displayCartPrice or displaySalesZeroTax
      * @param   null|string|bool|int|Mage_Core_Model_Store $store
      * @return  bool
      */
+    #[\Deprecated(message: 'please use displayCartPrice or displaySalesZeroTax')]
     public function displayTaxColumn($store = null)
     {
         return (bool) $this->_getStoreConfig(self::CONFIG_XML_PATH_DISPLAY_TAX_COLUMN, $store);

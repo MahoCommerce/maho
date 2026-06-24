@@ -688,12 +688,7 @@ class Mysql extends AbstractPdoAdapter
     public function tableColumnExists(string $tableName, string $columnName, ?string $schemaName = null): bool
     {
         $describe = $this->describeTable($tableName, $schemaName);
-        foreach ($describe as $column) {
-            if ($column['COLUMN_NAME'] == $columnName) {
-                return true;
-            }
-        }
-        return false;
+        return array_any($describe, fn($column) => $column['COLUMN_NAME'] == $columnName);
     }
 
     /**

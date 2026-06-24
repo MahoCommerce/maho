@@ -431,8 +431,8 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
      * Save current path in session
      *
      * @return $this
-     * @deprecated since 25.7.0 current path is no longer stored in session
      */
+    #[\Deprecated(message: 'since 25.7.0 current path is no longer stored in session')]
     protected function _saveSessionCurrentPath()
     {
         return $this;
