@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Trait;
 
+use Maho\Security\RateLimitScope;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 /**
@@ -40,17 +41,20 @@ trait RateLimitTrait
     }
 
     /**
-     * Throttle by client IP, using Maho's proxy-aware lookup. Fails open
-     * (skips the check) if the IP can't be determined, avoiding collapsing
-     * every unknown-IP client into a shared bucket.
+     * Throttle by client IP. Core resolves the identity (proxy-aware) from the
+     * Ip scope, so this never reads the remote address itself. Reads the limit
+     * from `system/rate_limit/{configKey}`; a non-positive value disables it.
      */
     protected function checkRateLimitByIp(string $keyPrefix, string $configKey, int $windowSeconds): void
     {
-        $ip = \Mage::helper('core/http')->getRemoteAddr();
-        if (!$ip) {
-            return;
-        }
+        $limit = (int) \Mage::getStoreConfig('system/rate_limit/' . $configKey);
 
-        $this->checkRateLimit($keyPrefix . ':ip:' . $ip, $configKey, $windowSeconds);
+        // A non-positive limit disables the limiter inside RateLimiter, so no guard needed here.
+        if (!\Mage::helper('core')->rateLimiter($keyPrefix, $limit, $windowSeconds, RateLimitScope::Ip)->attempt()) {
+            throw new TooManyRequestsHttpException(
+                (string) $windowSeconds,
+                'Too many requests. Please try again later.',
+            );
+        }
     }
 }

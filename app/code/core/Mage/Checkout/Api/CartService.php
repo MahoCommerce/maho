@@ -113,7 +113,12 @@ class CartService
      */
     public function getCustomerCart(int $customerId): \Mage_Sales_Model_Quote
     {
+        // Scope the lookup to the current API store. loadByCustomer() otherwise
+        // returns the most-recently-updated active quote across all stores, which
+        // in a multi-store setup surfaces another store's cart (wrong prices,
+        // currency and availability). Mirrors AuthTokenProcessor's grant path.
         $quote = \Mage::getModel('sales/quote')
+            ->setSharedStoreIds([\Mage::app()->getStore()->getId()])
             ->loadByCustomer($customerId);
 
         if (!$quote->getId()) {
@@ -903,10 +908,12 @@ class CartService
             throw new \RuntimeException('Guest cart not found');
         }
 
-        // Only genuine guest carts may be merged. Reject a masked ID that
-        // resolves to another customer's cart so it cannot be absorbed.
+        // Reject any masked ID that resolves to a cart owned by a different
+        // customer, regardless of the customer_is_guest flag. A cart can carry
+        // customer_is_guest=1 together with a foreign customer_id, which the
+        // previous guard let slip through and allowed to be absorbed.
         $sourceCustomerId = $guestCart->getCustomerId();
-        if (!$guestCart->getCustomerIsGuest() && (int) $sourceCustomerId !== $customerId) {
+        if ($sourceCustomerId && (int) $sourceCustomerId !== $customerId) {
             throw new \RuntimeException('Guest cart not found');
         }
 

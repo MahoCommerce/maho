@@ -306,6 +306,17 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Invalid imageUrl');
         }
 
+        // Explicitly reject IPv6 literals in private/reserved ranges. gethostbyname()
+        // is IPv4-only and FILTER_FLAG_NO_PRIV_RANGE doesn't cover IPv6, so without
+        // this guard a target like [::1] or [fd00::1] would only be blocked as a
+        // side effect of gethostbyname() returning it unchanged. Make it explicit.
+        $bareHost = str_starts_with($host, '[') ? substr($host, 1, -1) : $host;
+        if (filter_var($bareHost, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
+            && filter_var($bareHost, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false
+        ) {
+            throw new BadRequestHttpException('imageUrl cannot point to private or reserved IP addresses');
+        }
+
         // Block private/internal IP ranges
         $ip = gethostbyname($host);
         if ($ip === $host && !filter_var($host, FILTER_VALIDATE_IP)) {

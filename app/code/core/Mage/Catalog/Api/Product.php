@@ -190,7 +190,7 @@ class Product extends CrudResource
     public string $status = 'enabled';
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Visibility: not_visible, catalog, search, catalog_search', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Visibility: not_visible, catalog, search, catalog_search')]
     public ?string $visibility = null;
 
     #[Groups(['product:read'])]
@@ -222,7 +222,7 @@ class Product extends CrudResource
     public array $tierPrices = [];
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Available stock quantity', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Available stock quantity')]
     public ?float $stockQty = null;
 
     #[Groups(['product:read'])]
@@ -230,7 +230,7 @@ class Product extends CrudResource
     public ?float $weight = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Product barcode (EAN/UPC)', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Product barcode (EAN/UPC)')]
     public ?string $barcode = null;
 
     #[Groups(['product:read'])]
@@ -246,7 +246,7 @@ class Product extends CrudResource
     public ?string $thumbnailUrl = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Category IDs this product belongs to', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Category IDs this product belongs to')]
     public array $categoryIds = [];
 
     #[Groups(['product:read'])]
@@ -339,7 +339,7 @@ class Product extends CrudResource
     #[ApiProperty(description: 'Website IDs for product assignment', readable: false)]
     public ?array $websiteIds = null;
 
-    #[ApiProperty(description: 'Whether product is enabled', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Whether product is enabled (write to enable/disable; read reflects saved state)')]
     public ?bool $isActive = null;
 
     /** @var array|null Stock data: {qty: float, is_in_stock: bool} */

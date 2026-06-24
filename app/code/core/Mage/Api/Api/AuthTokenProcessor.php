@@ -338,8 +338,11 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
                 throw new UnauthorizedHttpException('Bearer', 'Customer account is inactive');
             }
 
-            $this->tokenBlacklist->revoke($payload->jti, (int) ($payload->exp ?? time() + 86400));
+            // Issue the replacement token first; only revoke the old one once we
+            // hold a valid new token, so a generation failure can't strand the
+            // customer with no usable token (forcing a full re-login).
             $newToken = $this->jwtService->generateCustomerToken($customer);
+            $this->tokenBlacklist->revoke($payload->jti, (int) ($payload->exp ?? time() + 86400));
 
             $dto = new AuthToken();
             $dto->token = $newToken;

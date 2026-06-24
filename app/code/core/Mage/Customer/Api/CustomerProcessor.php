@@ -247,7 +247,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
                 $address->setStreet(['']);
                 $address->setCity('');
                 $address->setPostcode('');
-                $address->setCountryId('AU');
+                $address->setCountryId(\Mage::getStoreConfig('general/country/default', $storeId) ?: 'US');
                 $address->setIsDefaultBilling(true);
                 $address->setIsDefaultShipping(true);
                 $address->save();

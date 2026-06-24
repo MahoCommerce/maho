@@ -74,9 +74,12 @@ class IdempotencyListener
             return;
         }
 
-        // Reject idempotency keys on auth endpoints to prevent response replay attacks
+        // Reject idempotency keys on every auth endpoint to prevent response
+        // replay attacks. Covers /auth/token, /auth/refresh and /auth/logout so
+        // a replayed response can never hand back JWT material or skip a real
+        // token rotation/revocation.
         $path = $request->getPathInfo();
-        if (str_contains($path, '/auth/token') || str_contains($path, '/auth/login')) {
+        if (str_contains($path, '/auth/')) {
             return;
         }
 

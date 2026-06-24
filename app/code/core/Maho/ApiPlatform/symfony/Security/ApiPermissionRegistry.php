@@ -105,6 +105,15 @@ class ApiPermissionRegistry
     private const CREATE_PREFIXES = ['place', 'create', 'register', 'submit', 'subscribe'];
 
     /**
+     * GraphQL mutation-name prefixes that denote a destructive (delete) operation.
+     * Mapped to the resource's 'delete' permission — but only when the resource
+     * actually defines one (mirroring ApiUserVoter::resolveOperation for REST).
+     * Resources without a delete op fall back to 'write', so a mutation is never
+     * gated behind a permission that can never be granted.
+     */
+    private const DELETE_PREFIXES = ['remove', 'delete'];
+
+    /**
      * Get full resource definitions for admin UI
      *
      * @return array<string, array{label: string, section: string, operations: array<string, string>}>
@@ -298,8 +307,20 @@ class ApiPermissionRegistry
                     }
                     $permissions[] = $resource . '/read';
                 } else {
-                    $isCreate = array_any(self::CREATE_PREFIXES, fn($prefix) => str_starts_with(strtolower($fieldName), $prefix));
-                    $permissions[] = ($resource ?? $fieldName) . '/' . ($isCreate ? 'create' : 'write');
+                    $fieldLower = strtolower($fieldName);
+                    if (array_any(self::CREATE_PREFIXES, fn($prefix) => str_starts_with($fieldLower, $prefix))) {
+                        $op = 'create';
+                    } elseif ($resource !== null
+                        && array_any(self::DELETE_PREFIXES, fn($prefix) => str_starts_with($fieldLower, $prefix))
+                        && $this->resourceHasOperation($resource, 'delete')
+                    ) {
+                        // Destructive mutation on a resource that defines a distinct
+                        // delete permission — require it instead of plain write.
+                        $op = 'delete';
+                    } else {
+                        $op = 'write';
+                    }
+                    $permissions[] = ($resource ?? $fieldName) . '/' . $op;
                 }
             }
         }
@@ -313,7 +334,7 @@ class ApiPermissionRegistry
      * @param array<string, FragmentDefinitionNode> $fragments
      * @return array<string>
      */
-    private function collectTopLevelFields(SelectionSetNode $selectionSet, array $fragments): array
+    private function collectTopLevelFields(SelectionSetNode $selectionSet, array $fragments, array $visited = []): array
     {
         $fields = [];
 
@@ -322,16 +343,25 @@ class ApiPermissionRegistry
                 $fields[] = $selection->name->value;
             } elseif ($selection instanceof FragmentSpreadNode) {
                 $fragmentName = $selection->name->value;
-                if (isset($fragments[$fragmentName])) {
+                // Guard against cyclic fragment spreads (A → B → A). Parser::parse()
+                // accepts them syntactically — cycle detection only runs during full
+                // GraphQL validation, which happens after this permission check — so
+                // without this guard a crafted query would recurse until the stack
+                // is exhausted.
+                if (isset($fragments[$fragmentName]) && !isset($visited[$fragmentName])) {
                     $fields = array_merge(
                         $fields,
-                        $this->collectTopLevelFields($fragments[$fragmentName]->selectionSet, $fragments),
+                        $this->collectTopLevelFields(
+                            $fragments[$fragmentName]->selectionSet,
+                            $fragments,
+                            $visited + [$fragmentName => true],
+                        ),
                     );
                 }
             } elseif ($selection instanceof InlineFragmentNode) {
                 $fields = array_merge(
                     $fields,
-                    $this->collectTopLevelFields($selection->selectionSet, $fragments),
+                    $this->collectTopLevelFields($selection->selectionSet, $fragments, $visited),
                 );
             }
         }
