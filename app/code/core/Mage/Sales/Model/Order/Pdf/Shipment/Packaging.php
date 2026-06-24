@@ -70,8 +70,8 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
     /**
      * @param mixed $page
      * @return $this
-     * @deprecated No longer used with HTML/CSS approach
      */
+    #[\Deprecated(message: 'No longer used with HTML/CSS approach')]
     protected function _drawHeaderBlock($page = null): self
     {
         // Legacy method - no longer used with HTML/CSS approach
@@ -81,8 +81,8 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
     /**
      * @param mixed $page
      * @return $this
-     * @deprecated No longer used with HTML/CSS approach
      */
+    #[\Deprecated(message: 'No longer used with HTML/CSS approach')]
     protected function _drawPackageBlock($page = null): self
     {
         // Legacy method - no longer used with HTML/CSS approach

@@ -687,13 +687,13 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
     /**
      * Format Date to internal database date format
      *
-     * @deprecated since 26.5 Use Mage::app()->getLocale()->formatDateForDb() or now() instead
      * @see Mage_Core_Model_Locale::formatDateForDb()
      *
      * @param int|string|DateTime|bool $date
      * @param bool $withTime
      * @return string|null
      */
+    #[\Deprecated(message: 'since 26.5 Use Mage::app()->getLocale()->formatDateForDb() or now() instead')]
     public function formatDate($date, $withTime = true)
     {
         if ($date === true) {

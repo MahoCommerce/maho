@@ -32,9 +32,9 @@ class Mage_Catalog_Model_Product_Visibility extends \Maho\DataObject
     }
 
     /**
-     * @deprecated since 26.5 Use $collection->setVisibility($this->getVisibleInCatalogIds()) instead
      * @return $this
      */
+    #[\Deprecated(message: 'since 26.5 Use $collection->setVisibility($this->getVisibleInCatalogIds()) instead')]
     public function addVisibleInCatalogFilterToCollection(Mage_Catalog_Model_Resource_Product_Collection $collection)
     {
         $collection->setVisibility(static::getVisibleInCatalogIds());
@@ -42,9 +42,9 @@ class Mage_Catalog_Model_Product_Visibility extends \Maho\DataObject
     }
 
     /**
-     * @deprecated since 26.5 Use $collection->setVisibility($this->getVisibleInSearchIds()) instead
      * @return $this
      */
+    #[\Deprecated(message: 'since 26.5 Use $collection->setVisibility($this->getVisibleInSearchIds()) instead')]
     public function addVisibleInSearchFilterToCollection(Mage_Catalog_Model_Resource_Product_Collection $collection)
     {
         $collection->setVisibility(static::getVisibleInSearchIds());
@@ -52,9 +52,9 @@ class Mage_Catalog_Model_Product_Visibility extends \Maho\DataObject
     }
 
     /**
-     * @deprecated since 26.5 Use $collection->setVisibility($this->getVisibleInSiteIds()) instead
      * @return $this
      */
+    #[\Deprecated(message: 'since 26.5 Use $collection->setVisibility($this->getVisibleInSiteIds()) instead')]
     public function addVisibleInSiteFilterToCollection(Mage_Catalog_Model_Resource_Product_Collection $collection)
     {
         $collection->setVisibility(static::getVisibleInSiteIds());

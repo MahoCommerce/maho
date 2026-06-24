@@ -43,11 +43,12 @@ class Mapper
      * @param array|DataObject|callable $from
      * @param array|DataObject|callable $to
      * @return array|DataObject
-     *
-     * @deprecated since 26.5 For DataObject-to-DataObject copies use $target->addData($source->toArray($map)).
-     *             For arrays use array_intersect_key() / direct assignment. The callable-array source/target
-     *             form has no remaining callers in Maho core.
      */
+    #[\Deprecated(message: <<<'TXT'
+    since 26.5 For DataObject-to-DataObject copies use $target->addData($source->toArray($map)).
+                 For arrays use array_intersect_key() / direct assignment. The callable-array source/target
+                 form has no remaining callers in Maho core.
+    TXT)]
     public static function &accumulateByMap($from, $to, array $map, array $defaults = [])
     {
         $get = 'getData';
