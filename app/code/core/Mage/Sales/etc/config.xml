@@ -1496,6 +1496,11 @@ SPDX-License-Identifier: AFL-3.0
         </layout>
     </adminhtml>
     <default>
+        <system>
+            <rate_limit>
+                <guest_order_lookup>30</guest_order_lookup>
+            </rate_limit>
+        </system>
         <sales>
             <totals_sort>
                 <discount>20</discount>

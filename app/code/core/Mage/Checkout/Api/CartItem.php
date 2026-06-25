@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Mage\Checkout\Api;
 
 /**
- * CartItem DTO - Data transfer object for cart line items
+ * CartItem DTO - Data transfer object for cart line items.
  */
 
 class CartItem extends \Maho\ApiPlatform\Resource

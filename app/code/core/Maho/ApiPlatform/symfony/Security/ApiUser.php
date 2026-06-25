@@ -13,7 +13,7 @@ namespace Maho\ApiPlatform\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * API User - Represents an authenticated API user (customer, admin, or API user)
+ * API User - Represents an authenticated API user (customer, admin, or API user).
  */
 class ApiUser implements UserInterface
 {

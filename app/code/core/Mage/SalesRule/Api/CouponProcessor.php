@@ -16,7 +16,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Coupon State Processor - Handles coupon CRUD and validation
+ * Coupon State Processor - Handles coupon CRUD and validation.
  */
 final class CouponProcessor extends \Maho\ApiPlatform\Processor
 {

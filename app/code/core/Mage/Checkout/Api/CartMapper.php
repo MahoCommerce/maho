@@ -13,7 +13,7 @@ namespace Mage\Checkout\Api;
 use Mage\Customer\Api\Address;
 
 /**
- * Shared cart-to-DTO mapping logic used by both CartProvider and CartProcessor
+ * Shared cart-to-DTO mapping logic used by both CartProvider and CartProcessor.
  */
 class CartMapper
 {

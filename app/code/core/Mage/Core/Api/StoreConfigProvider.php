@@ -14,7 +14,7 @@ use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
- * StoreConfig State Provider - Provides store configuration data
+ * StoreConfig State Provider - Provides store configuration data.
  */
 final class StoreConfigProvider extends \Maho\ApiPlatform\Provider
 {

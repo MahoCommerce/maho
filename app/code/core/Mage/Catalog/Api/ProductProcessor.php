@@ -27,7 +27,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
- * Product State Processor
+ * Product State Processor.
  *
  * Handles create, update, and delete operations for products.
  * Requires JWT authentication with products/write or products/delete permission.

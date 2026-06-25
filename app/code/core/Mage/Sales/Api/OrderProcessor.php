@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Order State Processor - Handles order mutations for API Platform
+ * Order State Processor - Handles order mutations for API Platform.
  */
 final class OrderProcessor extends \Maho\ApiPlatform\Processor
 {

@@ -16,7 +16,7 @@ use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
- * Category State Provider - Fetches category data for API Platform
+ * Category State Provider - Fetches category data for API Platform.
  */
 final class CategoryProvider extends \Maho\ApiPlatform\Provider
 {

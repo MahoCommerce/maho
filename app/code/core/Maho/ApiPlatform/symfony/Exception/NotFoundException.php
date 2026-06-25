@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Exception;
 
 /**
- * Not Found Exception - 404 Not Found
+ * Not Found Exception - 404 Not Found.
  *
  * Use when a requested resource does not exist.
  */

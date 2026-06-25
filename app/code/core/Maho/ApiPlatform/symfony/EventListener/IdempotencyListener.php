@@ -21,7 +21,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
- * Idempotency Key Listener
+ * Idempotency Key Listener.
  *
  * Provides replay protection for POST/PUT/PATCH requests using the X-Idempotency-Key header.
  * Stored responses are replayed for duplicate requests within 24 hours.

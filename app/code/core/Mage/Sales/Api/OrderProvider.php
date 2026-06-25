@@ -17,7 +17,7 @@ use Mage\Customer\Api\Address;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
- * Order State Provider - Fetches order data for API Platform
+ * Order State Provider - Fetches order data for API Platform.
  */
 final class OrderProvider extends \Maho\ApiPlatform\Provider
 {
@@ -54,6 +54,10 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         // token on a successful read so refreshing the page can't replay
         // analytics or expose the order to a later viewer.
         if ($operationName === 'get_order_by_token') {
+            // Public, unauthenticated endpoint: throttle by IP so the strong
+            // one-time token can't be brute-forced against a known increment ID.
+            $this->checkRateLimitByIp('guest_order_token', 'guest_order_lookup', 3600);
+
             $request = $context['request'] ?? null;
             $token = '';
             if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
@@ -103,6 +107,10 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
 
         // Handle guestOrder query - get order by increment ID and access token
         if ($operationName === 'guestOrder') {
+            // Same public token-lookup surface as the REST path above; throttle
+            // by IP so the one-time token can't be brute-forced via GraphQL.
+            $this->checkRateLimitByIp('guest_order_token', 'guest_order_lookup', 3600);
+
             $incrementId = $context['args']['incrementId'] ?? null;
             $accessToken = $context['args']['accessToken'] ?? null;
 

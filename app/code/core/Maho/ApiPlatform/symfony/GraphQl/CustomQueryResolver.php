@@ -17,7 +17,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use Psr\Container\ContainerInterface;
 
 /**
- * Custom GraphQL Query Resolver
+ * Custom GraphQL Query Resolver.
  *
  * API Platform's ReadProvider requires an `id` argument for non-collection queries.
  * Custom queries like `me`, `customerCart`, `storeConfig` etc. don't have an `id` arg,

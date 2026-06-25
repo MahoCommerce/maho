@@ -19,7 +19,7 @@ use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\AdminAcl;
 
 /**
- * Order Mutation Handler
+ * Order Mutation Handler.
  *
  * Handles all order-related GraphQL operations for admin API.
  * Extracted from AdminGraphQlController for better code organization.
@@ -249,10 +249,43 @@ class OrderMutationHandler
             throw NotFoundException::order();
         }
 
-        if (!$order->canCreditmemo()) {
-            throw ValidationException::invalidValue('orderId', 'cannot create credit memo for this order');
+        // Serialize concurrent refunds on the same order so two requests can't
+        // both pass canCreditmemo() and both register(), double-refunding.
+        // Mirrors OrderService::placeAdminOrder() and CreditMemoProcessor.
+        $resource = \Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $lockName = 'maho_creditmemo_order:' . (int) $order->getId();
+        $acquired = (int) $write->fetchOne('SELECT GET_LOCK(?, 5)', [$lockName]);
+        if ($acquired !== 1) {
+            throw ValidationException::invalidValue('orderId', 'a refund is already in progress for this order');
         }
 
+        try {
+            // Re-read the order under the lock so canCreditmemo() sees the live
+            // total_refunded, not a value another request changed while waiting.
+            $order->load($orderId);
+            if (!$order->canCreditmemo()) {
+                throw ValidationException::invalidValue('orderId', 'cannot create credit memo for this order');
+            }
+
+            return $this->buildProcessReturn($order, $items, $comment, $adjustmentPositive, $adjustmentNegative, $refundToStoreCredit);
+        } finally {
+            $write->query('SELECT RELEASE_LOCK(?)', [$lockName]);
+        }
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $items
+     * @return array<string, mixed>
+     */
+    private function buildProcessReturn(
+        \Mage_Sales_Model_Order $order,
+        array $items,
+        ?string $comment,
+        float $adjustmentPositive,
+        float $adjustmentNegative,
+        bool $refundToStoreCredit,
+    ): array {
         // Build credit memo data
         $creditmemoData = [
             'qtys' => [],
@@ -287,7 +320,9 @@ class OrderMutationHandler
                 $creditmemo->setPaymentRefundDisallowed(1.0);
             }
 
-            $creditmemo->addComment($comment, false);
+            if ($comment !== null && $comment !== '') {
+                $creditmemo->addComment($comment, false);
+            }
 
             // Register and save credit memo
             $creditmemo->register();

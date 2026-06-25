@@ -16,7 +16,7 @@ use ApiPlatform\State\Pagination\TraversablePaginator;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
- * Customer State Provider - Fetches customer data for API Platform
+ * Customer State Provider - Fetches customer data for API Platform.
  *
  * SECURITY: Customers can only access their own data.
  * Collection listing requires ROLE_ADMIN.

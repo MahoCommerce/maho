@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Cart State Processor - Handles cart mutations for API Platform
+ * Cart State Processor - Handles cart mutations for API Platform.
  */
 final class CartProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -212,11 +212,21 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
                     $addedItem = $item;
                 }
             }
-            // Fall back to SKU match when quantities merged into an existing row
-            // (no new item appears); covers simple products added repeatedly.
+            // Fall back to product-id match when quantities merged into an
+            // existing row (no new item appears). Match by product id, not SKU:
+            // a configurable added by child SKU merges into a row carrying the
+            // PARENT product id and parent SKU, so a child-SKU comparison never
+            // matches and the fulfillment type would be silently dropped.
             if (!$addedItem) {
+                $productId = (int) \Mage::getModel('catalog/product')->getIdBySku($sku);
+                $candidateIds = $productId > 0 ? [$productId] : [];
+                if ($productId > 0) {
+                    foreach (\Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($productId) as $parentId) {
+                        $candidateIds[] = (int) $parentId;
+                    }
+                }
                 foreach ($quote->getAllVisibleItems() as $item) {
-                    if ($item->getSku() === $sku) {
+                    if (in_array((int) $item->getProductId(), $candidateIds, true)) {
                         $addedItem = $item;
                     }
                 }

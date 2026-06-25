@@ -3,7 +3,6 @@
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
- * @package Maho
  */
 
 declare(strict_types=1);

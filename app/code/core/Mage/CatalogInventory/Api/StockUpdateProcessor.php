@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Stock Update Processor - Fast direct SQL stock updates
+ * Stock Update Processor - Fast direct SQL stock updates.
  */
 final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 {

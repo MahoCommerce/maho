@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Shipment State Processor - Handles shipment creation for API Platform
+ * Shipment State Processor - Handles shipment creation for API Platform.
  */
 final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
 {

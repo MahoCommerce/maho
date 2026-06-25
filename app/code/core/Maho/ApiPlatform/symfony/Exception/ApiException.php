@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Exception;
 
 /**
- * Base API Exception
+ * Base API Exception.
  *
  * All API-specific exceptions should extend this class.
  * Provides structured error response data for consistent API error handling.

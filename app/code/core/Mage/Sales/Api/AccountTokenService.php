@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 /**
- * HMAC-signed account token for guest order → customer account creation
+ * HMAC-signed account token for guest order → customer account creation.
  *
  * Token format: base64(json{orderId,email,timestamp,action}).hmac_sha256(base64_payload, crypt_key)
  */

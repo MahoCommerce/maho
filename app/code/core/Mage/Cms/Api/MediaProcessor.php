@@ -25,7 +25,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
- * Media State Processor
+ * Media State Processor.
  *
  * Handles file uploads (POST) and deletions (DELETE) for the media gallery.
  * Requires JWT authentication with media/write permission.
@@ -73,6 +73,12 @@ final class MediaProcessor implements ProcessorInterface
         // Resolve target directory within wysiwyg storage root
         $folder = $request->request->get('folder', 'wysiwyg');
         $folder = $helper->correctPath($folder);
+        // correctPath() does not strip "..", so remove any traversal segments up
+        // front as defense-in-depth before the realpath boundary checks below.
+        $folder = implode('/', array_filter(
+            explode('/', str_replace('\\', '/', $folder)),
+            static fn(string $segment): bool => $segment !== '..',
+        ));
         $targetDir = $helper->getStorageRoot();
 
         if ($folder !== 'wysiwyg' && $folder !== '') {

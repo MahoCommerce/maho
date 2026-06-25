@@ -15,7 +15,7 @@ use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
- * Layered Filter Provider, uses Maho's built-in catalog layer to build facets
+ * Layered Filter Provider, uses Maho's built-in catalog layer to build facets.
  */
 final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
 {

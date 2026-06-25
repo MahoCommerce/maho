@@ -22,7 +22,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
- * Category State Processor
+ * Category State Processor.
  *
  * Handles create, update, and delete operations for categories.
  * Requires JWT authentication with categories/write or categories/delete permission.

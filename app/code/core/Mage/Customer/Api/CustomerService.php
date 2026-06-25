@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Mage\Customer\Api;
 
 /**
- * Customer Service - Business logic for customer operations
+ * Customer Service - Business logic for customer operations.
  */
 class CustomerService
 {
@@ -48,6 +48,10 @@ class CustomerService
 
     /**
      * Get customer by email
+     *
+     * @phpstan-impure Hits the DB; the result changes as customers are created,
+     *                 so two calls with the same email can legitimately differ
+     *                 (used to detect a concurrent registration race).
      */
     public function getCustomerByEmail(#[\SensitiveParameter]
         string $email): ?\Mage_Customer_Model_Customer
@@ -318,7 +322,7 @@ class CustomerService
 
         // If no email provided, generate a temporary one
         if (empty($email)) {
-            $email = 'guest_' . time() . '_' . random_int(1000, 9999) . '@pos.local';
+            $email = 'guest_' . bin2hex(random_bytes(8)) . '@pos.local';
         }
 
         $customer->setWebsiteId(\Mage::app()->getStore()->getWebsiteId())
@@ -382,7 +386,18 @@ class CustomerService
             ->setPassword($password)
             ->setIsSubscribed($isSubscribed);
 
-        $customer->save();
+        try {
+            $customer->save();
+        } catch (\Throwable $e) {
+            // The pre-check above is a TOCTOU: a concurrent registration with the
+            // same email can slip in between it and save(), tripping the unique
+            // constraint. Re-check and surface the same clean error rather than a
+            // raw DB exception (500).
+            if ($this->getCustomerByEmail($email)) {
+                throw new \Exception('A customer with this email already exists.');
+            }
+            throw $e;
+        }
 
         return $customer;
     }

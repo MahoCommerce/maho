@@ -21,7 +21,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
- * Address State Processor - Handles address mutations
+ * Address State Processor - Handles address mutations.
  *
  * SECURITY: Customers can only modify their own addresses.
  * Admins can modify any customer's addresses.

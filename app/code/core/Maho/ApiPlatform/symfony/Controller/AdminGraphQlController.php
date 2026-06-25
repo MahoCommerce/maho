@@ -21,7 +21,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * Admin GraphQL Controller
+ * Admin GraphQL Controller.
  *
  * Handles GraphQL requests for authenticated admin users.
  * Uses handler-based resolution for clean separation of concerns.

@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 /**
- * OrderItem DTO - Data transfer object for order line items
+ * OrderItem DTO - Data transfer object for order line items.
  */
 
 class OrderItem extends \Maho\ApiPlatform\Resource

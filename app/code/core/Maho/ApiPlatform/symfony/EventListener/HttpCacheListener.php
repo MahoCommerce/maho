@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
- * HTTP Cache Listener - Adds ETag, Cache-Control, and 304 Not Modified support
+ * HTTP Cache Listener - Adds ETag, Cache-Control, and 304 Not Modified support.
  *
  * Cache tiers:
  * - Public endpoints (unauthenticated GET): Cache-Control: public, max-age=3600

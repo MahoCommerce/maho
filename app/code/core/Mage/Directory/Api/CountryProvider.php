@@ -16,7 +16,7 @@ use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
- * Country State Provider - Fetches country and region data
+ * Country State Provider - Fetches country and region data.
  */
 final class CountryProvider extends \Maho\ApiPlatform\Provider
 {

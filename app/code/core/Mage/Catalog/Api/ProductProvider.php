@@ -17,7 +17,7 @@ use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
- * Product State Provider - Fetches product data for API Platform
+ * Product State Provider - Fetches product data for API Platform.
  */
 final class ProductProvider extends \Maho\ApiPlatform\Provider
 {

@@ -19,7 +19,7 @@ use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\AdminAcl;
 
 /**
- * Customer Query Handler
+ * Customer Query Handler.
  *
  * Handles all customer-related GraphQL operations for admin API.
  * Uses CustomerProvider::mapToDto() for model-based mapping to ensure

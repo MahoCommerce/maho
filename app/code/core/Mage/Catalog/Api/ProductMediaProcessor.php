@@ -86,13 +86,8 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             if ($decoded === false) {
                 throw new BadRequestHttpException('Invalid base64 image data');
             }
-            $tmpPath = tempnam(\Mage::getBaseDir('tmp'), 'maho_media_');
-            file_put_contents($tmpPath, $decoded);
-            // Rename with proper extension
-            $ext = pathinfo($filename, PATHINFO_EXTENSION) ?: 'jpg';
-            $newPath = $tmpPath . '.' . $ext;
-            rename($tmpPath, $newPath);
-            $tmpPath = $newPath;
+            $ext = $this->sanitizeImageExtension(pathinfo($filename, PATHINFO_EXTENSION));
+            $tmpPath = $this->writeTempImage($decoded, $ext);
         } elseif ($imageUrl !== null) {
             // Validate URL and get resolved IP to prevent DNS rebinding SSRF
             $validatedIp = $this->validateImageUrl($imageUrl);
@@ -111,23 +106,36 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             $ipUrl = $scheme . '://' . $ipAuthority
                 . ($parsedUrl['path'] ?? '')
                 . (isset($parsedUrl['query']) ? '?' . $parsedUrl['query'] : '');
-            $context = stream_context_create(['http' => [
-                'header' => "Host: {$originalHost}\r\n",
-                'timeout' => 10,
-            ]]);
+            // Pin the fetch to the validated IP and forbid redirects: without
+            // follow_location=0 / max_redirects=0 a server at the validated
+            // (public) IP could 30x-redirect to an internal host (e.g. the
+            // cloud metadata endpoint or 127.0.0.1), defeating the SSRF guard
+            // that only validated the original host's IP.
+            $context = stream_context_create([
+                'http' => [
+                    'header' => "Host: {$originalHost}\r\n",
+                    'timeout' => 10,
+                    'follow_location' => 0,
+                    'max_redirects' => 0,
+                ],
+                // The URL is pinned to the validated IP, so for HTTPS the TLS
+                // layer would otherwise validate the certificate against the IP
+                // (SNI/peer name) and fail. Pin verification to the original host
+                // name and keep peer verification on so a host at the validated
+                // IP can't present an arbitrary certificate.
+                'ssl' => [
+                    'verify_peer' => true,
+                    'verify_peer_name' => true,
+                    'SNI_enabled' => true,
+                    'peer_name' => $originalHost,
+                ],
+            ]);
             $imageData = @file_get_contents($ipUrl, false, $context);
             if ($imageData === false) {
                 throw new BadRequestHttpException('Failed to download image from URL');
             }
-            $ext = pathinfo(parse_url($imageUrl, PHP_URL_PATH) ?: '', PATHINFO_EXTENSION) ?: 'jpg';
-            // Write to the tempnam-created file first, then atomically rename to
-            // the extension-suffixed name (mirrors the base64 path) so no bare
-            // file leaks and the extension path is uniquely owned.
-            $tmpPath = tempnam(\Mage::getBaseDir('tmp'), 'maho_media_');
-            file_put_contents($tmpPath, $imageData);
-            $newPath = $tmpPath . '.' . $ext;
-            rename($tmpPath, $newPath);
-            $tmpPath = $newPath;
+            $ext = $this->sanitizeImageExtension(pathinfo(parse_url($imageUrl, PHP_URL_PATH) ?: '', PATHINFO_EXTENSION));
+            $tmpPath = $this->writeTempImage($imageData, $ext);
         } else {
             throw new BadRequestHttpException('Either base64, imageData, or imageUrl is required');
         }
@@ -165,7 +173,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             \Mage::logException($e);
             throw new UnprocessableEntityHttpException('Failed to upload image: ' . $e->getMessage());
         } finally {
-            if ($tmpPath && file_exists($tmpPath)) {
+            if (file_exists($tmpPath)) {
                 @unlink($tmpPath);
             }
         }
@@ -333,13 +341,51 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
      * Reject anything that isn't a supported raster image. Deletes the temp
      * file on rejection so a failed upload leaves nothing behind.
      */
+    /**
+     * Constrain a user-supplied extension to a known image allowlist.
+     *
+     * The temp file is named with this extension before the magic-byte check in
+     * assertImageFile() runs, so an untrusted filename/URL must never be able to
+     * give the temp file an executable suffix (e.g. .php). Anything outside the
+     * allowlist falls back to 'jpg'.
+     */
+    /**
+     * Write image bytes to a temp file named with the given extension.
+     *
+     * Uses tempnam() to create the file, then atomically renames it to the
+     * extension-suffixed name (the gallery backend keys off the extension). If
+     * the rename fails the bare tempnam file is unlinked before throwing so no
+     * temp file leaks. Returns the final, extension-suffixed path.
+     */
+    private function writeTempImage(string $data, string $ext): string
+    {
+        $tmpPath = tempnam(\Mage::getBaseDir('tmp'), 'maho_media_');
+        if ($tmpPath === false) {
+            throw new UnprocessableEntityHttpException('Failed to create temporary file for upload');
+        }
+        file_put_contents($tmpPath, $data);
+        $newPath = $tmpPath . '.' . $ext;
+        if (!rename($tmpPath, $newPath)) {
+            @unlink($tmpPath);
+            throw new UnprocessableEntityHttpException('Failed to prepare uploaded image');
+        }
+        return $newPath;
+    }
+
+    private function sanitizeImageExtension(string $ext): string
+    {
+        $ext = strtolower($ext);
+        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'];
+        return in_array($ext, $allowed, true) ? $ext : 'jpg';
+    }
+
     private function assertImageFile(string $path): void
     {
         $info = @\Maho\Io::getImageSize($path);
-        $allowed = [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF, IMAGETYPE_WEBP];
+        $allowed = [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF, IMAGETYPE_WEBP, IMAGETYPE_AVIF];
         if ($info === false || !in_array($info[2], $allowed, true)) {
             @unlink($path);
-            throw new BadRequestHttpException('Uploaded data is not a valid JPEG, PNG, GIF or WEBP image');
+            throw new BadRequestHttpException('Uploaded data is not a valid JPEG, PNG, GIF, WEBP or AVIF image');
         }
     }
 }

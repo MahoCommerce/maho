@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Exception;
 
 /**
- * Validation Exception - 400 Bad Request
+ * Validation Exception - 400 Bad Request.
  *
  * Use when request data fails validation (missing fields, invalid format, etc.)
  */

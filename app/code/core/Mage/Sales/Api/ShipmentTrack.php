@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 /**
- * Shipment Track DTO
+ * Shipment Track DTO.
  */
 class ShipmentTrack extends \Maho\ApiPlatform\Resource
 {

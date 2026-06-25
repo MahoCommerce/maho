@@ -22,7 +22,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Customer State Processor - Handles customer mutations for API Platform
+ * Customer State Processor - Handles customer mutations for API Platform.
  */
 final class CustomerProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -289,6 +289,12 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         try {
             $customer->authenticate($email, $password);
         } catch (\Mage_Core_Exception $e) {
+            // Surface unconfirmed-email distinctly (matches the REST /auth/token
+            // path) so the customer knows to confirm rather than seeing a
+            // misleading "wrong password" error.
+            if ($e->getCode() === \Mage_Customer_Model_Customer::EXCEPTION_EMAIL_NOT_CONFIRMED) {
+                throw new HttpException(403, 'This account is not confirmed. Please check your email for the confirmation link.');
+            }
             throw new BadRequestHttpException('Invalid email or password');
         }
 

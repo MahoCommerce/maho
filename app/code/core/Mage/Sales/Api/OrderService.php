@@ -13,7 +13,7 @@ namespace Mage\Sales\Api;
 use Mage\Checkout\Api\CartService;
 
 /**
- * Order Service - Business logic for checkout and order operations
+ * Order Service - Business logic for checkout and order operations.
  */
 class OrderService
 {

@@ -21,7 +21,7 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 
 /**
- * API Exception Listener
+ * API Exception Listener.
  *
  * Converts API exceptions to standardized JSON error responses.
  */

@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Exception;
 
 /**
- * Authentication Exception - 401 Unauthorized
+ * Authentication Exception - 401 Unauthorized.
  *
  * Use when user is not authenticated or credentials are invalid.
  */

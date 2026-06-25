@@ -18,7 +18,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
- * Wishlist State Provider
+ * Wishlist State Provider.
  */
 final class WishlistProvider extends \Maho\ApiPlatform\Provider
 {

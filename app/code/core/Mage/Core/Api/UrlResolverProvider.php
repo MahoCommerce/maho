@@ -14,7 +14,7 @@ use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
- * URL Resolver State Provider
+ * URL Resolver State Provider.
  *
  * Resolves URL paths to their targets (CMS pages, categories, products)
  */

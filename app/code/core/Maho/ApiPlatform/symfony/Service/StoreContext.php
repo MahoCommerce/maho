@@ -13,7 +13,7 @@ namespace Maho\ApiPlatform\Service;
 use Symfony\Contracts\Service\ResetInterface;
 
 /**
- * Store Context Service
+ * Store Context Service.
  *
  * Manages store context for API requests. Ensures a valid store is set
  * for multi-store configurations and provides store switching capability.

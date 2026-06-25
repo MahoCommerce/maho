@@ -12,10 +12,11 @@ namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Credit Memo State Processor - Handles credit memo creation for API Platform
+ * Credit Memo State Processor - Handles credit memo creation for API Platform.
  */
 final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -86,10 +87,40 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Order not found');
         }
 
-        if (!$order->canCreditmemo()) {
-            throw new BadRequestHttpException('Order cannot be refunded (already fully refunded or not in a refundable state)');
+        // Serialize concurrent refunds on the same order. Without this, two
+        // simultaneous requests both pass canCreditmemo() and both register(),
+        // issuing a double refund. GET_LOCK gives a per-order critical section
+        // that releases on disconnect (mirrors OrderService::placeAdminOrder).
+        $resource = \Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $lockName = 'maho_creditmemo_order:' . (int) $order->getId();
+        $acquired = (int) $write->fetchOne('SELECT GET_LOCK(?, 5)', [$lockName]);
+        if ($acquired !== 1) {
+            throw new ConflictHttpException('A refund is already in progress for this order');
         }
 
+        try {
+            // Re-load the order under the lock so canCreditmemo() sees the live
+            // total_refunded, not a value another request changed while waiting.
+            $order->load($orderId);
+            if (!$order->canCreditmemo()) {
+                throw new BadRequestHttpException('Order cannot be refunded (already fully refunded or not in a refundable state)');
+            }
+
+            return $this->buildAndRegisterCreditMemo($order, $items, $comment, $adjustmentPositive, $adjustmentNegative, $offlineRefund);
+        } finally {
+            $write->query('SELECT RELEASE_LOCK(?)', [$lockName]);
+        }
+    }
+
+    private function buildAndRegisterCreditMemo(
+        \Mage_Sales_Model_Order $order,
+        array $items,
+        ?string $comment,
+        ?float $adjustmentPositive,
+        ?float $adjustmentNegative,
+        bool $offlineRefund,
+    ): CreditMemo {
         // Build qty data array: ['qtys' => [orderItemId => qty]]
         $data = ['qtys' => []];
         $backToStockItems = [];

@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Mage\Directory\Api;
 
 /**
- * Region/State within a country (not a standalone API resource)
+ * Region/State within a country (not a standalone API resource).
  */
 class Region extends \Maho\ApiPlatform\Resource
 {

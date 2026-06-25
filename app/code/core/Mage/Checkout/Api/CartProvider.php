@@ -15,7 +15,7 @@ use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
- * Cart State Provider - Fetches cart data for API Platform
+ * Cart State Provider - Fetches cart data for API Platform.
  *
  * Overrides provide() because Cart has non-standard routing:
  * guest carts (masked ID), customer carts, and numeric ID carts

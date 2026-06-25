@@ -9,7 +9,7 @@
 declare(strict_types=1);
 
 /**
- * API Platform Observer
+ * API Platform Observer.
  *
  * Adds RFC 8594 deprecation headers to legacy SOAP/REST API responses
  */

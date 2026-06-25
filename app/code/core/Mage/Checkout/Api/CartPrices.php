@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Mage\Checkout\Api;
 
 /**
- * CartPrices DTO - Data transfer object for cart totals and pricing
+ * CartPrices DTO - Data transfer object for cart totals and pricing.
  */
 class CartPrices extends \Maho\ApiPlatform\Resource
 {

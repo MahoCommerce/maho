@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Exception;
 
 /**
- * Conflict Exception - 409 Conflict
+ * Conflict Exception - 409 Conflict.
  *
  * Use when the request conflicts with current state (e.g., duplicate email, already exists).
  */

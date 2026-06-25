@@ -17,7 +17,7 @@ use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\AdminAcl;
 
 /**
- * Product Query Handler
+ * Product Query Handler.
  *
  * Handles all product-related GraphQL operations for admin API.
  * Uses ProductProvider::toDto() for model-based mapping to ensure

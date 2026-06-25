@@ -19,7 +19,7 @@ use Maho\ApiPlatform\Security\AdminAcl;
 use Maho\Giftcard\Api\GiftCard;
 
 /**
- * Cart Mutation Handler
+ * Cart Mutation Handler.
  *
  * Handles all cart-related GraphQL operations for admin API.
  * Uses CartMapper::mapQuoteToCart() for DTO building to ensure

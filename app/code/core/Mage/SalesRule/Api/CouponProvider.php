@@ -16,7 +16,7 @@ use Maho\ApiPlatform\Resource;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Coupon State Provider
+ * Coupon State Provider.
  */
 final class CouponProvider extends \Maho\ApiPlatform\Provider
 {

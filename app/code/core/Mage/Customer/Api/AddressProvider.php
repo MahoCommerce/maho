@@ -18,7 +18,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
- * Address State Provider - Fetches customer address data
+ * Address State Provider - Fetches customer address data.
  *
  * SECURITY: Customers can only access their own addresses.
  * Admins can access any customer's addresses.

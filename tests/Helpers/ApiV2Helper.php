@@ -16,7 +16,7 @@ use Lcobucci\JWT\Signer\Key\InMemory;
 use Maho\ApiPlatform\Service\JwtService;
 
 /**
- * API v2 Test Helper
+ * API v2 Test Helper.
  *
  * Provides HTTP client methods, JWT token generation, and test fixtures
  * for integration testing the API Platform REST and GraphQL endpoints.

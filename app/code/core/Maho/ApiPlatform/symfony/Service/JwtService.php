@@ -154,7 +154,7 @@ class JwtService
      *
      * @return array<int, mixed>
      */
-    private function getApiUserAllowedStoreIds(\Mage_Api_Model_User $apiUser): array
+    public function getApiUserAllowedStoreIds(\Mage_Api_Model_User $apiUser): array
     {
         $raw = $apiUser->getData('allowed_store_ids');
         if (!is_string($raw) || $raw === '') {

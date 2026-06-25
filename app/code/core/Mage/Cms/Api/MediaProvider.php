@@ -23,7 +23,7 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
- * Media State Provider
+ * Media State Provider.
  *
  * Lists files in a media folder.
  * Requires JWT authentication with media/read permission.

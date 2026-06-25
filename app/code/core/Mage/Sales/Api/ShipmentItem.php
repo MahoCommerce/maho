@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 /**
- * Shipment Item DTO
+ * Shipment Item DTO.
  */
 class ShipmentItem extends \Maho\ApiPlatform\Resource
 {

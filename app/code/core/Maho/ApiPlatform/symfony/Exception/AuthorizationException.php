@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Exception;
 
 /**
- * Authorization Exception - 403 Forbidden
+ * Authorization Exception - 403 Forbidden.
  *
  * Use when user is authenticated but lacks permission for the requested action.
  */

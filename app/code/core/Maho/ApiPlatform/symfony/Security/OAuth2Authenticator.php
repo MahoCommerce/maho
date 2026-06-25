@@ -180,12 +180,17 @@ class OAuth2Authenticator extends AbstractAuthenticator
             if (!$apiUser->getId() || !(int) $apiUser->getIsActive()) {
                 throw new CustomUserMessageAuthenticationException('API user account is inactive or not found');
             }
+            // Re-read store scope from the DB rather than trusting the token's
+            // allowed_store_ids claim, so changes to the user's store restriction
+            // take effect immediately instead of waiting for the JWT to expire
+            // (mirrors the live permission re-read above). [] means unrestricted.
+            $apiUserStoreIds = array_map('intval', $this->jwtService->getApiUserAllowedStoreIds($apiUser));
             return new ApiUser(
                 identifier: (string) $payload->sub,
                 roles: ['ROLE_API_USER'],
                 apiUserId: $apiUserId,
                 permissions: $this->jwtService->loadApiUserPermissions($apiUser),
-                allowedStoreIds: $allowedStoreIds,
+                allowedStoreIds: $apiUserStoreIds === [] ? null : $apiUserStoreIds,
             );
         }
 

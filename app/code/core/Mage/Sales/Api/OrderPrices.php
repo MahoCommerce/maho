@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 /**
- * OrderPrices DTO - Data transfer object for order totals and pricing
+ * OrderPrices DTO - Data transfer object for order totals and pricing.
  */
 class OrderPrices extends \Maho\ApiPlatform\Resource
 {

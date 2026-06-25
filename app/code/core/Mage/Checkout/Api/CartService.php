@@ -14,7 +14,7 @@ use Maho\ApiPlatform\Service\StoreDefaults;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
- * Cart Service - Business logic for cart operations
+ * Cart Service - Business logic for cart operations.
  */
 class CartService
 {
@@ -117,14 +117,34 @@ class CartService
         // returns the most-recently-updated active quote across all stores, which
         // in a multi-store setup surfaces another store's cart (wrong prices,
         // currency and availability). Mirrors AuthTokenProcessor's grant path.
-        $quote = \Mage::getModel('sales/quote')
+        $loadQuote = fn(): \Mage_Sales_Model_Quote => \Mage::getModel('sales/quote')
             ->setSharedStoreIds([\Mage::app()->getStore()->getId()])
             ->loadByCustomer($customerId);
 
-        if (!$quote->getId()) {
-            // Create new cart for customer
-            $result = $this->createEmptyCart($customerId);
-            $quote = $result['quote'];
+        $quote = $loadQuote();
+        if ($quote->getId()) {
+            return $quote;
+        }
+
+        // No active cart: serialize creation so two concurrent requests don't
+        // each create a duplicate active cart (the loser's cart, and anything
+        // added to it, would be silently dropped). GET_LOCK releases on
+        // disconnect; on timeout we fall back to best-effort load-or-create.
+        $resource = \Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $lockName = 'maho_customer_cart_create:' . $customerId;
+        $acquired = (int) $write->fetchOne('SELECT GET_LOCK(?, 5)', [$lockName]);
+        try {
+            // Re-load under the lock: another request may have created the cart
+            // while we waited. Only create when there is still none.
+            $quote = $loadQuote();
+            if (!$quote->getId()) {
+                $quote = $this->createEmptyCart($customerId)['quote'];
+            }
+        } finally {
+            if ($acquired === 1) {
+                $write->query('SELECT RELEASE_LOCK(?)', [$lockName]);
+            }
         }
 
         return $quote;
@@ -981,6 +1001,11 @@ class CartService
         if (!preg_match('/^[a-f0-9]{32}$/i', $maskedId)) {
             return null;
         }
+
+        // Masked IDs are always generated lowercase (bin2hex); normalize so the
+        // lookup is deterministic regardless of the column collation and matches
+        // the stored value no matter how the caller cased the input.
+        $maskedId = strtolower($maskedId);
 
         // Database lookup
         $resource = \Mage::getSingleton('core/resource');
