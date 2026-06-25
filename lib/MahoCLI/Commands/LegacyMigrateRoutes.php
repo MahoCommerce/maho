@@ -249,6 +249,66 @@ class LegacyMigrateRoutes extends BaseMahoCommand
     }
 
     /**
+     * Yield every `<{scope}><routers><{code}><args><modules>` node in a config.xml, paired with a
+     * human-readable `{scope}/{code}` label. Shared by the cross-file pre-pass (read-only) and the
+     * migration pass (mutating) so both walk the tree identically. Router children are snapshotted,
+     * so callers may detach nodes while iterating.
+     *
+     * @return iterable<array{node: DOMElement, label: string}>
+     */
+    private function iterateOverrideModulesNodes(DOMDocument $dom): iterable
+    {
+        $config = $dom->documentElement;
+        if ($config === null) {
+            return;
+        }
+
+        foreach (['frontend', 'admin', 'install'] as $scope) {
+            $scopeNode = $this->firstChildElement($config, $scope);
+            if ($scopeNode === null) {
+                continue;
+            }
+            $routersNode = $this->firstChildElement($scopeNode, 'routers');
+            if ($routersNode === null) {
+                continue;
+            }
+            foreach (iterator_to_array($routersNode->childNodes) as $routerNode) {
+                if (!$routerNode instanceof DOMElement) {
+                    continue;
+                }
+                $argsNode = $this->firstChildElement($routerNode, 'args');
+                if ($argsNode === null) {
+                    continue;
+                }
+                $modulesNode = $this->firstChildElement($argsNode, 'modules');
+                if ($modulesNode === null) {
+                    continue;
+                }
+                yield ['node' => $modulesNode, 'label' => $scope . '/' . $routerNode->localName];
+            }
+        }
+    }
+
+    /**
+     * The non-empty module prefixes declared inside a `<modules>` override node, in document order.
+     *
+     * @return list<string>
+     */
+    private function overrideModulePrefixes(DOMElement $modulesNode): array
+    {
+        $prefixes = [];
+        foreach ($modulesNode->childNodes as $child) {
+            if ($child instanceof DOMElement) {
+                $prefix = trim($child->textContent);
+                if ($prefix !== '') {
+                    $prefixes[] = $prefix;
+                }
+            }
+        }
+        return $prefixes;
+    }
+
+    /**
      * Collect, grouped by routed base class, every clean override declared in a config.xml's
      * `<args><modules>` chains. Read-only (no output, no DOM mutation) — used by the pre-pass to
      * detect sibling conflicts that span two separate files before any XML is removed. Only
@@ -260,40 +320,13 @@ class LegacyMigrateRoutes extends BaseMahoCommand
      */
     private function collectCleanOverridesByBase(DOMDocument $dom): array
     {
-        $config = $dom->documentElement;
-        if ($config === null) {
-            return [];
-        }
-
         $byBase = [];
-        foreach (['frontend', 'admin', 'install'] as $scope) {
-            $scopeNode = $this->firstChildElement($config, $scope);
-            $routersNode = $scopeNode === null ? null : $this->firstChildElement($scopeNode, 'routers');
-            if ($routersNode === null) {
-                continue;
-            }
-            foreach ($routersNode->childNodes as $routerNode) {
-                if (!$routerNode instanceof DOMElement) {
-                    continue;
-                }
-                $argsNode = $this->firstChildElement($routerNode, 'args');
-                $modulesNode = $argsNode === null ? null : $this->firstChildElement($argsNode, 'modules');
-                if ($modulesNode === null) {
-                    continue;
-                }
-                foreach ($modulesNode->childNodes as $child) {
-                    if (!$child instanceof DOMElement) {
-                        continue;
-                    }
-                    $prefix = trim($child->textContent);
-                    if ($prefix === '') {
-                        continue;
-                    }
-                    foreach ($this->findControllers($prefix) as $controller) {
-                        $analysis = $this->analyzeOverrideController($controller['className']);
-                        if ($analysis['pure'] && $analysis['newActions'] === []) {
-                            $byBase[(string) $analysis['base']][] = $controller['className'];
-                        }
+        foreach ($this->iterateOverrideModulesNodes($dom) as $entry) {
+            foreach ($this->overrideModulePrefixes($entry['node']) as $prefix) {
+                foreach ($this->findControllers($prefix) as $controller) {
+                    $analysis = $this->analyzeOverrideController($controller['className']);
+                    if ($analysis['pure'] && $analysis['newActions'] === []) {
+                        $byBase[(string) $analysis['base']][] = $controller['className'];
                     }
                 }
             }
@@ -329,47 +362,18 @@ class LegacyMigrateRoutes extends BaseMahoCommand
         bool &$fileChanged,
         array $conflictedBases,
     ): void {
-        $config = $dom->documentElement;
-        if ($config === null) {
-            return;
-        }
-
-        foreach (['frontend', 'admin', 'install'] as $scope) {
-            $scopeNode = $this->firstChildElement($config, $scope);
-            if ($scopeNode === null) {
-                continue;
-            }
-            $routersNode = $this->firstChildElement($scopeNode, 'routers');
-            if ($routersNode === null) {
-                continue;
-            }
-
-            // Snapshot children: detachAndPrune() mutates the tree as we go.
-            foreach (iterator_to_array($routersNode->childNodes) as $routerNode) {
-                if (!$routerNode instanceof DOMElement) {
-                    continue;
-                }
-                $argsNode = $this->firstChildElement($routerNode, 'args');
-                if ($argsNode === null) {
-                    continue;
-                }
-                $modulesNode = $this->firstChildElement($argsNode, 'modules');
-                if ($modulesNode === null) {
-                    continue;
-                }
-
-                $this->migrateOverrideModulesNode(
-                    $modulesNode,
-                    $scope . '/' . $routerNode->localName,
-                    $output,
-                    $dryRun,
-                    $ensureHeader,
-                    $removed,
-                    $skipped,
-                    $fileChanged,
-                    $conflictedBases,
-                );
-            }
+        foreach ($this->iterateOverrideModulesNodes($dom) as $entry) {
+            $this->migrateOverrideModulesNode(
+                $entry['node'],
+                $entry['label'],
+                $output,
+                $dryRun,
+                $ensureHeader,
+                $removed,
+                $skipped,
+                $fileChanged,
+                $conflictedBases,
+            );
         }
     }
 
@@ -389,15 +393,7 @@ class LegacyMigrateRoutes extends BaseMahoCommand
         bool &$fileChanged,
         array $conflictedBases,
     ): void {
-        $modulePrefixes = [];
-        foreach ($modulesNode->childNodes as $child) {
-            if ($child instanceof DOMElement) {
-                $prefix = trim($child->textContent);
-                if ($prefix !== '') {
-                    $modulePrefixes[] = $prefix;
-                }
-            }
-        }
+        $modulePrefixes = $this->overrideModulePrefixes($modulesNode);
         if ($modulePrefixes === []) {
             // Empty <modules> wrapper carries nothing — drop the dead XML.
             $ensureHeader();
