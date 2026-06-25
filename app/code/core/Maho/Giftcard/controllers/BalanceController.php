@@ -53,8 +53,11 @@ class Maho_Giftcard_BalanceController extends Mage_Core_Controller_Front_Action
     public function indexAction(): void
     {
         $this->loadLayout();
+        // Flash errors use customer/session (consumed by the standard My
+        // Account messages block on render); giftcard/session carries only
+        // the lookup result payload, not user-facing messages, so it doesn't
+        // need wiring into the messages block.
         $this->_initLayoutMessages('customer/session');
-        $this->_initLayoutMessages('giftcard/session');
         $this->renderLayout();
     }
 
@@ -75,18 +78,19 @@ class Maho_Giftcard_BalanceController extends Mage_Core_Controller_Front_Action
     {
         $session = Mage::getSingleton('giftcard/session');
         $session->setLastGiftcardLookup(null);
+        $flash = Mage::getSingleton('customer/session');
 
         $customerId = (string) Mage::getSingleton('customer/session')->getCustomerId();
         $limiter = Mage::helper('core')->rateLimiterBy('giftcard_balance_check', $customerId, 10, 3600);
         if ($limiter->tooManyAttempts()) {
-            $session->addError(Mage::helper('giftcard')->__('Too many recent lookup attempts. Please wait a while before trying again.'));
+            $flash->addError(Mage::helper('giftcard')->__('Too many recent lookup attempts. Please wait a while before trying again.'));
             $this->_redirect('*/*/');
             return;
         }
 
         $code = trim((string) $this->getRequest()->getPost('giftcard_code', ''));
         if ($code === '') {
-            $session->addError(Mage::helper('giftcard')->__('Please enter a gift card code.'));
+            $flash->addError(Mage::helper('giftcard')->__('Please enter a gift card code.'));
             $this->_redirect('*/*/');
             return;
         }
@@ -101,7 +105,7 @@ class Maho_Giftcard_BalanceController extends Mage_Core_Controller_Front_Action
 
         if (!$card->getId() || !$card->isValidForWebsite($websiteId)) {
             $limiter->hit();
-            $session->addError(Mage::helper('giftcard')->__('We could not find an active gift card for that code on this store.'));
+            $flash->addError(Mage::helper('giftcard')->__('We could not find an active gift card for that code on this store.'));
             $this->_redirect('*/*/');
             return;
         }
