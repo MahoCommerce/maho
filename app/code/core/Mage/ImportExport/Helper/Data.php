@@ -34,9 +34,9 @@ class Mage_ImportExport_Helper_Data extends Mage_Core_Helper_Data
     /**
      * Get valid path masks to files for importing/exporting
      *
-     * @deprecated since 26.1 Use Maho\Io::allowedPath() for path validation instead
      * @return array
      */
+    #[\Deprecated(message: 'since 26.1 Use Maho\Io::allowedPath() for path validation instead')]
     public function getLocalValidPaths()
     {
         return Mage::getStoreConfig(self::XML_PATH_EXPORT_LOCAL_VALID_PATH);

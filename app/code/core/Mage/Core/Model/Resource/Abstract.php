@@ -110,13 +110,13 @@ abstract class Mage_Core_Model_Resource_Abstract
     /**
      * Format date to internal format
      *
-     * @deprecated since 26.5 Use Mage::app()->getLocale()->formatDateForDb() instead
      * @see Mage_Core_Model_Locale::formatDateForDb()
      *
      * @param int|string|DateTime|bool|null $date
      * @param bool $withTime
      * @return string|null
      */
+    #[\Deprecated(message: 'since 26.5 Use Mage::app()->getLocale()->formatDateForDb() instead')]
     public function formatDate($date, $withTime = true)
     {
         if ($date === true) {

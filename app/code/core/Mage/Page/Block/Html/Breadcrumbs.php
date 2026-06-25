@@ -93,6 +93,16 @@ class Mage_Page_Block_Html_Breadcrumbs extends Mage_Core_Block_Template
     }
 
     /**
+     * Get the collected breadcrumbs in display order.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public function getCrumbs(): array
+    {
+        return is_array($this->_crumbs) ? $this->_crumbs : [];
+    }
+
+    /**
      * Get cache key informative items
      *
      * @return array

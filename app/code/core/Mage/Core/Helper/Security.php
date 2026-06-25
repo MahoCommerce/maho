@@ -35,9 +35,7 @@ class Mage_Core_Helper_Security extends Mage_Core_Helper_Abstract
         }
     }
 
-    /**
-     * @deprecated since 26.1, use ensureBlockMethodAllowed() instead
-     */
+    #[\Deprecated(message: 'since 26.1, use ensureBlockMethodAllowed() instead')]
     public function validateAgainstBlockMethodBlacklist(Mage_Core_Block_Abstract $block, string $method, array $args): void
     {
         $this->ensureBlockMethodAllowed($block, $method, $args);

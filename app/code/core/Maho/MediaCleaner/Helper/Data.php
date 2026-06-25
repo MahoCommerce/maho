@@ -91,12 +91,6 @@ class Maho_MediaCleaner_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function isBlacklisted(string $path, array $blacklistedPatterns): bool
     {
-        foreach ($blacklistedPatterns as $blacklistedPattern) {
-            if (fnmatch('*/' . $blacklistedPattern, $path)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($blacklistedPatterns, fn($blacklistedPattern) => fnmatch('*/' . $blacklistedPattern, $path));
     }
 }

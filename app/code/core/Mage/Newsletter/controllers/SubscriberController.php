@@ -92,12 +92,23 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
 
     /**
      * Unsubscribe newsletter
+     *
+     * Accepts POST in addition to GET for RFC 8058 one-click unsubscribe. Mail clients that
+     * honour the List-Unsubscribe-Post header send a server-to-server POST (no cookies, no
+     * referer) with body "List-Unsubscribe=One-Click"; that request is answered with a bare
+     * status code, not a redirect. A regular GET (the link a human clicks) keeps redirecting.
+     *
+     * POST status policy: 200 on success and on an invalid/expired code alike, so the endpoint
+     * is not an enumeration oracle and a stale link does not surface as an error to the mail
+     * client. Only an unexpected server-side failure returns 503, so the mail client retries
+     * (unsubscribe is idempotent) rather than reporting a success that never happened.
      */
-    #[Maho\Config\Route('/newsletter/subscriber/unsubscribe', name: 'newsletter.subscriber.unsubscribe', methods: ['GET'])]
+    #[Maho\Config\Route('/newsletter/subscriber/unsubscribe', name: 'newsletter.subscriber.unsubscribe', methods: ['GET', 'POST'])]
     public function unsubscribeAction(): void
     {
         $id    = (int) $this->getRequest()->getParam('id');
         $code  = (string) $this->getRequest()->getParam('code');
+        $isPost = $this->getRequest()->isPost();
 
         if ($id && $code) {
             $session = Mage::getSingleton('core/session');
@@ -105,12 +116,27 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
                 Mage::getModel('newsletter/subscriber')->load($id)
                     ->setCheckCode($code)
                     ->unsubscribe();
-                $session->addSuccess($this->__('You have been unsubscribed.'));
+                if (!$isPost) {
+                    $session->addSuccess($this->__('You have been unsubscribed.'));
+                }
             } catch (Mage_Core_Exception $e) {
-                $session->addException($e, $e->getMessage());
+                // Invalid/expired code: a client-side condition, not a server failure.
+                if (!$isPost) {
+                    $session->addException($e, $e->getMessage());
+                }
             } catch (Exception $e) {
+                Mage::logException($e);
+                if ($isPost) {
+                    $this->getResponse()->setHttpResponseCode(503)->setBody('');
+                    return;
+                }
                 $session->addException($e, $this->__('There was a problem with the un-subscription.'));
             }
+        }
+
+        if ($isPost) {
+            $this->getResponse()->setHttpResponseCode(200)->setBody('');
+            return;
         }
         $this->_redirectReferer();
     }

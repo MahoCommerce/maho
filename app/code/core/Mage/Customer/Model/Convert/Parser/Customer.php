@@ -414,10 +414,8 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
         return $this->_customerGroups[$customer->getGroupId()] ?? null;
     }
 
-    /**
-     * @deprecated not used anymore
-     */
     #[\Override]
+    #[\Deprecated(message: 'not used anymore')]
     public function parse()
     {
         $data = $this->getData();

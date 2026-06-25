@@ -365,15 +365,16 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                 TransformerModal.open();
             },
 
-            loadPreset: function(platform) {
+            loadPreset: function(platform, options) {
                 if (!platform) return;
+                options = options || {};
 
-                // Confirm before overwriting existing structure
+                // Programmatic callers pass {force:true} to skip the confirm.
                 var hasContent = this.structure && (
                     (Array.isArray(this.structure) && this.structure.length > 0) ||
                     (typeof this.structure === "object" && Object.keys(this.structure).length > 0)
                 );
-                if (hasContent) {
+                if (!options.force && hasContent) {
                     if (!confirm("Loading a preset will replace your current JSON structure. Continue?")) {
                         document.getElementById("json-preset-select").value = this.currentPlatform || "";
                         return;

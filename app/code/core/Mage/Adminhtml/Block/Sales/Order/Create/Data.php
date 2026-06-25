@@ -38,8 +38,8 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Data extends Mage_Adminhtml_Block_
      *
      * @param   string $code
      * @return  string
-     * @deprecated since 25.9.0
      */
+    #[\Deprecated(message: 'since 25.9.0')]
     public function getCurrencyName($code)
     {
         return $code;

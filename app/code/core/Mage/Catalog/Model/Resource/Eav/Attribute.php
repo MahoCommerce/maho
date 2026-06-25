@@ -293,9 +293,9 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
 
     /**
      * @return string
-     * @deprecated since 26.1 use getDefaultSourceModel() instead
      */
     #[\Override]
+    #[\Deprecated(message: 'since 26.1 use getDefaultSourceModel() instead')]
     protected function _getDefaultSourceModel()
     {
         return $this->getDefaultSourceModel();

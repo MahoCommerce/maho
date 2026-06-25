@@ -183,15 +183,7 @@ abstract class Maho_FeedManager_Model_Platform_AbstractAdapter implements Maho_F
             // Parse line - format depends on taxonomy file
             // Google format: "id - Category > Subcategory > ..." or just "Category > Subcategory > ..."
             $lineLower = strtolower($line);
-
-            // Check if all query parts match
-            $allMatch = true;
-            foreach ($queryParts as $part) {
-                if (!str_contains($lineLower, $part)) {
-                    $allMatch = false;
-                    break;
-                }
-            }
+            $allMatch = array_all($queryParts, fn($part) => str_contains($lineLower, $part));
 
             if ($allMatch) {
                 // Extract ID and path

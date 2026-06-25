@@ -69,14 +69,15 @@ class Table
 
     /**
      * Default values for timestamp columns: fill with current timestamp on insert, on update, or both.
-     *
-     * @deprecated TIMESTAMP_INIT_UPDATE is unsafe for cross-engine use: PgSQL and SQLite
-     * silently downgrade it to plain CURRENT_TIMESTAMP (no on-update auto-bump), and the
-     * surgical modifyColumn path drops the ON UPDATE clause across all adapters because
-     * Doctrine DBAL's column model has no on-update concept. Use TIMESTAMP_INIT plus an
-     * explicit _beforeSave() that calls setUpdatedAt(Mage::app()->getLocale()->formatDateForDb('now'))
-     * for cross-engine parity.
      */
+    #[\Deprecated(message: <<<'TXT'
+    TIMESTAMP_INIT_UPDATE is unsafe for cross-engine use: PgSQL and SQLite
+     silently downgrade it to plain CURRENT_TIMESTAMP (no on-update auto-bump), and the
+     surgical modifyColumn path drops the ON UPDATE clause across all adapters because
+     Doctrine DBAL's column model has no on-update concept. Use TIMESTAMP_INIT plus an
+     explicit _beforeSave() that calls setUpdatedAt(Mage::app()->getLocale()->formatDateForDb('now'))
+     for cross-engine parity.
+    TXT)]
     public const TIMESTAMP_INIT_UPDATE = 'TIMESTAMP_INIT_UPDATE';
     public const TIMESTAMP_INIT        = 'TIMESTAMP_INIT';
     /**

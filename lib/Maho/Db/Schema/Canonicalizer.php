@@ -57,6 +57,7 @@ final class Canonicalizer
     {
         self::stripPhantomIndexes($live, $physicalLiveIndexNames);
         self::alignIndexNames($live, $target);
+        self::alignTableCharset($live, $target);
         self::stripColumnComments($live);
         self::stripColumnComments($target);
         self::reconcileColumns($live, $target);
@@ -154,6 +155,56 @@ final class Canonicalizer
                 break;
             }
         }
+    }
+
+    /**
+     * Copy the live table's charset/collation onto the target when the two name
+     * the same physical charset, so MySQL's Comparator strips column-level
+     * charset symmetrically on both sides.
+     *
+     * MySQL's Comparator (Doctrine\DBAL\Platforms\MySQL\Comparator::normalizeTable)
+     * drops a column's charset/collation when it equals the *table's* — by a
+     * strict string compare (array_diff_assoc). A legacy install reports its
+     * tables as 'utf8mb3', while the declarative target sets the legacy adapter's
+     * historical alias 'utf8' (see Collector::applyTableDefaults). The two are
+     * the same charset, but the literal strings differ, so for a column added to
+     * a legacy core table by a third-party module (introspected as utf8mb3, then
+     * merged into the target by preserveUndeclaredColumns) the Comparator strips
+     * the charset on the live side (column utf8mb3 == table utf8mb3) but keeps it
+     * on the target side (column utf8mb3 != table 'utf8'), re-emitting a no-op
+     * CHANGE forever. Aligning the table option strings makes the strip
+     * symmetric and the diff converge.
+     *
+     * Only same-charset pairs are aligned (utf8 and its utf8mb3 synonym); a
+     * genuine table charset migration (e.g. utf8mb3 to utf8mb4) keeps differing
+     * strings so the Comparator still emits it.
+     */
+    private static function alignTableCharset(Table $live, Table $target): void
+    {
+        foreach (['charset', 'collation'] as $option) {
+            if (!$live->hasOption($option) || !$target->hasOption($option)) {
+                continue;
+            }
+            $liveValue = (string) $live->getOption($option);
+            $targetValue = (string) $target->getOption($option);
+            if ($liveValue !== $targetValue && self::charsetSynonyms($liveValue, $targetValue)) {
+                $target->addOption($option, $liveValue);
+            }
+        }
+    }
+
+    /**
+     * Do two charset/collation names denote the same physical charset, differing
+     * only as historical synonyms? MySQL renamed the original 'utf8' to 'utf8mb3'
+     * (and its 'utf8_*' collations to 'utf8mb3_*'); both spellings still resolve
+     * to the same 3-byte charset. Anything else (a real charset change) is not a
+     * synonym.
+     */
+    private static function charsetSynonyms(string $a, string $b): bool
+    {
+        $canonical = static fn(string $name): string => preg_replace('/^utf8(?=_|$)/', 'utf8mb3', strtolower($name)) ?? strtolower($name);
+
+        return $canonical($a) === $canonical($b);
     }
 
     /**

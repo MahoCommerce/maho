@@ -26,8 +26,8 @@ class Mage_Catalog_Block_Product_View_Options_Type_Date extends Mage_Catalog_Blo
      * Use JS calendar settings
      *
      * @return bool
-     * @deprecated since 25.9.0
      */
+    #[\Deprecated(message: 'since 25.9.0')]
     public function useCalendar()
     {
         return true; // Always use native date inputs

@@ -564,13 +564,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
      */
     public function hasExceptionOfType(string $type): bool
     {
-        foreach ($this->_exceptions as $e) {
-            if ($e instanceof $type) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->_exceptions, fn($e) => $e instanceof $type);
     }
 
     /**
@@ -578,13 +572,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
      */
     public function hasExceptionOfMessage(string $message): bool
     {
-        foreach ($this->_exceptions as $e) {
-            if ($message == $e->getMessage()) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->_exceptions, fn($e) => $message == $e->getMessage());
     }
 
     /**
@@ -593,13 +581,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
     public function hasExceptionOfCode(int $code): bool
     {
         $code = (int) $code;
-        foreach ($this->_exceptions as $e) {
-            if ($code == $e->getCode()) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->_exceptions, fn($e) => $code == $e->getCode());
     }
 
     /**

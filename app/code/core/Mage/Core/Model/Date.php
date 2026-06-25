@@ -72,12 +72,13 @@ class Mage_Core_Model_Date
      * @param  string $format
      * @param  int|string $input date in current timezone
      * @return false|string
-     *
-     * @deprecated since 26.5 For DB-bound strings use Mage::app()->getLocale()->formatDateForDb('now')
-     *             (or formatDateForDb('now', withTime: false) for date-only). For non-DB use, use
-     *             Mage::app()->getLocale()->nowUtc() / todayUtc(). When converting a store-TZ input
-     *             to a UTC string, use Mage::app()->getLocale()->storeToUtc($store, $input)->format($format).
      */
+    #[\Deprecated(message: <<<'TXT'
+    since 26.5 For DB-bound strings use Mage::app()->getLocale()->formatDateForDb('now')
+                 (or formatDateForDb('now', withTime: false) for date-only). For non-DB use, use
+                 Mage::app()->getLocale()->nowUtc() / todayUtc(). When converting a store-TZ input
+                 to a UTC string, use Mage::app()->getLocale()->storeToUtc($store, $input)->format($format).
+    TXT)]
     public function gmtDate($format = null, $input = null)
     {
         if (is_null($format)) {
@@ -100,10 +101,11 @@ class Mage_Core_Model_Date
      * @param  string $format
      * @param  int|string $input date in GMT timezone
      * @return string
-     *
-     * @deprecated since 26.5 Use Mage::app()->getLocale()->utcToStore($store, $input)->format($format).
-     *             For "now" in store TZ, omit the second argument: utcToStore()->format($format).
      */
+    #[\Deprecated(message: <<<'TXT'
+    since 26.5 Use Mage::app()->getLocale()->utcToStore($store, $input)->format($format).
+                 For "now" in store TZ, omit the second argument: utcToStore()->format($format).
+    TXT)]
     public function date($format = null, $input = null)
     {
         if (is_null($format)) {
@@ -118,11 +120,12 @@ class Mage_Core_Model_Date
      *
      * @param  int|string $input date in current timezone
      * @return string|false|int
-     *
-     * @deprecated since 26.5 For "now" use the native time() — Unix epochs are timezone-agnostic.
-     *             For converting a store-TZ input to a UTC epoch, use
-     *             Mage::app()->getLocale()->storeToUtc($store, $input)->getTimestamp().
      */
+    #[\Deprecated(message: <<<'TXT'
+    since 26.5 For "now" use the native time() — Unix epochs are timezone-agnostic.
+                 For converting a store-TZ input to a UTC epoch, use
+                 Mage::app()->getLocale()->storeToUtc($store, $input)->getTimestamp().
+    TXT)]
     public function gmtTimestamp($input = null)
     {
         if (is_null($input)) {
@@ -157,12 +160,13 @@ class Mage_Core_Model_Date
      *
      * @param  int|string $input date in GMT timezone
      * @return int
-     *
-     * @deprecated since 26.5 The "store-shifted timestamp" this method returns is not a real epoch
-     *             and was used by legacy code as a stepping stone to extract store-local components.
-     *             Prefer Mage::app()->getLocale()->utcToStore($store, $input) and call ->format(...) /
-     *             ->getTimestamp() on the result. For "now" use time().
      */
+    #[\Deprecated(message: <<<'TXT'
+    since 26.5 The "store-shifted timestamp" this method returns is not a real epoch
+                 and was used by legacy code as a stepping stone to extract store-local components.
+                 Prefer Mage::app()->getLocale()->utcToStore($store, $input) and call ->format(...) /
+                 ->getTimestamp() on the result. For "now" use time().
+    TXT)]
     public function timestamp($input = null)
     {
         if (is_null($input)) {
@@ -190,10 +194,11 @@ class Mage_Core_Model_Date
      *
      * @param  string $type
      * @return int
-     *
-     * @deprecated since 26.5 Use a DateTimeZone directly:
-     *             (new DateTimeZone($store->getConfig('general/locale/timezone')))->getOffset(new DateTimeImmutable())
      */
+    #[\Deprecated(message: <<<'TXT'
+    since 26.5 Use a DateTimeZone directly:
+                 (new DateTimeZone($store->getConfig('general/locale/timezone')))->getOffset(new DateTimeImmutable())
+    TXT)]
     public function getGmtOffset($type = 'seconds')
     {
         $result = $this->_offset;

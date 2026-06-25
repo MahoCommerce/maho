@@ -147,3 +147,42 @@ it('aligns a legacy SERIAL column to the target identity form', function () {
     expect($live->getColumn('id')->getAutoincrement())->toBeTrue();
     expect($live->getColumn('id')->getDefault())->toBeNull();
 });
+
+it('aligns the target table charset to a utf8/utf8mb3 synonym so the diff converges', function () {
+    // A legacy install reports its tables as 'utf8mb3'; the declarative target
+    // carries the historical alias 'utf8'. They are the same physical charset, so
+    // the option strings must be aligned or the Comparator re-emits a no-op CHANGE
+    // forever for every undeclared column merged onto the table.
+    $live = canonTable('t');
+    $live->addColumn('id', Types::INTEGER, ['unsigned' => true]);
+    $live->addOption('charset', 'utf8mb3');
+    $live->addOption('collation', 'utf8mb3_general_ci');
+
+    $target = canonTable('t');
+    $target->addColumn('id', Types::INTEGER, ['unsigned' => true]);
+    $target->addOption('charset', 'utf8');
+    $target->addOption('collation', 'utf8_general_ci');
+
+    Canonicalizer::reconcile($live, $target, []);
+
+    expect($target->getOption('charset'))->toBe('utf8mb3');
+    expect($target->getOption('collation'))->toBe('utf8mb3_general_ci');
+});
+
+it('keeps a genuine table charset migration (utf8mb3 to utf8mb4)', function () {
+    $live = canonTable('t');
+    $live->addColumn('id', Types::INTEGER, ['unsigned' => true]);
+    $live->addOption('charset', 'utf8mb3');
+    $live->addOption('collation', 'utf8mb3_general_ci');
+
+    $target = canonTable('t');
+    $target->addColumn('id', Types::INTEGER, ['unsigned' => true]);
+    $target->addOption('charset', 'utf8mb4');
+    $target->addOption('collation', 'utf8mb4_general_ci');
+
+    Canonicalizer::reconcile($live, $target, []);
+
+    // A real charset change must survive — not aligned away.
+    expect($target->getOption('charset'))->toBe('utf8mb4');
+    expect($target->getOption('collation'))->toBe('utf8mb4_general_ci');
+});

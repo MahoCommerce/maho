@@ -735,9 +735,9 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
     /**
      * Calculate item tax amount
      *
-     * @deprecated logic moved to tax totals calculation model
      * @return  $this
      */
+    #[\Deprecated(message: 'logic moved to tax totals calculation model')]
     public function calcTaxAmount()
     {
         $store = $this->getStore();

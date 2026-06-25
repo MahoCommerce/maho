@@ -49,8 +49,12 @@ class DBConnect extends BaseMahoCommand
 
         $configFile = $this->createTempMySQLConfig($host, $user, $password);
 
+        // Prefer "mariadb" on modern MariaDB, falling back to "mysql"; both accept the same flags.
+        $binary = $this->resolveClientBinary('mysql') ?? 'mysql';
+
         $command = sprintf(
-            'mysql --defaults-extra-file=%s %s',
+            '%s --defaults-extra-file=%s %s',
+            escapeshellarg($binary),
             escapeshellarg($configFile),
             escapeshellarg($dbname),
         );

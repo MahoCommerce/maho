@@ -3310,12 +3310,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Form.php
 
 		-
-			rawMessage: 'Call to deprecated method getSaveUrl() of class Mage_Adminhtml_Block_Widget_Form_Container.'
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Container.php
-
-		-
 			rawMessage: Property Mage_Adminhtml_Block_Widget_Form_Container::$_blockGroup has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -22308,11 +22302,6 @@ parameters:
 			count: 1
 			path: app/design/adminhtml/default/default/template/system/autocomplete.phtml
 
-		-
-			rawMessage: 'Call to deprecated method getSaveUrl() of class Mage_Adminhtml_Block_Tag_Edit.'
-			identifier: method.deprecated
-			count: 1
-			path: app/design/adminhtml/default/default/template/tag/edit/container.phtml
 
 		-
 			rawMessage: Variable $this might not be defined.

@@ -1031,8 +1031,8 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
      *
      * @param string $name
      * @return Mage_Core_Model_Abstract|false
-     * @deprecated use Mage::getSingleton()
      */
+    #[\Deprecated(message: 'use Mage::getSingleton()')]
     protected function _getSingleton($name)
     {
         return Mage::getSingleton($name);
@@ -1043,8 +1043,8 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
      *
      * @param string $name
      * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
      */
+    #[\Deprecated(message: 'use Mage::helper()')]
     protected function _getHelper($name)
     {
         return Mage::helper($name);
