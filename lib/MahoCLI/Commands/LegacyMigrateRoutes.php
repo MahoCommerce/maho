@@ -88,6 +88,20 @@ class LegacyMigrateRoutes extends BaseMahoCommand
                 $fileChanged = true;
             }
 
+            // Override <modules> chains → drop the XML; inheritance now auto-registers them.
+            // Run before the route loop: a router carrying BOTH a <use> route declaration and a
+            // <modules> override chain must be classified (clean → removed, blocker → warned)
+            // before detachAndPrune() below would otherwise drop the whole router silently.
+            $this->migrateControllerOverrides(
+                $dom,
+                $output,
+                $dryRun,
+                $ensureHeader,
+                $totalOverridesRemoved,
+                $totalOverridesSkipped,
+                $fileChanged,
+            );
+
             foreach ($routerEntries as $routerEntry) {
                 $totalRouters++;
                 $routerNode = $routerEntry['node'];
@@ -163,20 +177,14 @@ class LegacyMigrateRoutes extends BaseMahoCommand
                     }
                 }
 
-                // Bubble up through <routers> and the area scope if they become empty.
-                $this->detachAndPrune($routerNode);
+                // Bubble up through <routers> and the area scope if they become empty — but
+                // never when a <modules> override chain survived classification (a blocker kept
+                // it): pruning the whole router would silently drop that preserved override XML.
+                $argsNode = $this->firstChildElement($routerNode, 'args');
+                if ($argsNode === null || $this->firstChildElement($argsNode, 'modules') === null) {
+                    $this->detachAndPrune($routerNode);
+                }
             }
-
-            // Override <modules> chains → drop the XML; inheritance now auto-registers them.
-            $this->migrateControllerOverrides(
-                $dom,
-                $output,
-                $dryRun,
-                $ensureHeader,
-                $totalOverridesRemoved,
-                $totalOverridesSkipped,
-                $fileChanged,
-            );
 
             if (!$dryRun && $fileChanged) {
                 $this->saveConfigXml($dom, $configPath);
@@ -300,6 +308,13 @@ class LegacyMigrateRoutes extends BaseMahoCommand
             }
         }
         if ($modulePrefixes === []) {
+            // Empty <modules> wrapper carries nothing — drop the dead XML.
+            if (!$dryRun) {
+                $ensureHeader();
+                $this->detachAndPrune($modulesNode);
+                $fileChanged = true;
+                $output->writeln(sprintf('  <info>migrated</info> removed empty %s override chain', $routerLabel));
+            }
             return;
         }
 
@@ -452,6 +467,9 @@ class LegacyMigrateRoutes extends BaseMahoCommand
      */
     private function hasSiblingConflict(array $classes): bool
     {
+        // Dedup first: the same class discovered twice (e.g. a module present in two code dirs)
+        // would otherwise each count as "maximal" and fake a conflict.
+        $classes = array_values(array_unique($classes));
         $maximal = 0;
         foreach ($classes as $candidate) {
             $isMaximal = array_all($classes, fn($other) => !($other !== $candidate && is_subclass_of($other, $candidate)));
