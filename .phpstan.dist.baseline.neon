@@ -3192,7 +3192,6 @@ parameters:
 			count: 2
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Form.php
 
-
 		-
 			rawMessage: Property Mage_Adminhtml_Block_Widget_Form_Container::$_blockGroup has no type specified.
 			identifier: missingType.property
