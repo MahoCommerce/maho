@@ -192,14 +192,33 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
+
+        // Snapshot existing item IDs so we can identify the row addItem() creates.
+        // Matching by $sku is unreliable: a configurable variant added by its
+        // child SKU is promoted to the parent, so the resulting visible item
+        // carries the parent's SKU, not the child SKU the caller passed.
+        $existingItemIds = [];
+        foreach ($quote->getAllVisibleItems() as $item) {
+            $existingItemIds[(int) $item->getId()] = true;
+        }
+
         $quote = $this->cartService->addItem($quote, $sku, $qty, $buyOptions);
 
         // Set fulfillment type on the newly added item
         if ($fulfillmentType !== 'SHIP') {
             $addedItem = null;
             foreach ($quote->getAllVisibleItems() as $item) {
-                if ($item->getSku() === $sku) {
+                if (!isset($existingItemIds[(int) $item->getId()])) {
                     $addedItem = $item;
+                }
+            }
+            // Fall back to SKU match when quantities merged into an existing row
+            // (no new item appears); covers simple products added repeatedly.
+            if (!$addedItem) {
+                foreach ($quote->getAllVisibleItems() as $item) {
+                    if ($item->getSku() === $sku) {
+                        $addedItem = $item;
+                    }
                 }
             }
             if ($addedItem) {

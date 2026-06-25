@@ -31,7 +31,7 @@ trait ActivityLogTrait
                 'entity_id' => $model ? (int) $model->getId() : ($oldData['entity_id'] ?? $oldData['page_id'] ?? $oldData['block_id'] ?? 0),
                 'old_data' => $oldData,
                 'new_data' => $model?->getData(),
-                'api_user_id' => $user->getApiUserId(),
+                'consumer_id' => $user->getApiUserId(),
                 'username' => 'API: ' . $user->getUserIdentifier(),
             ]);
         } catch (\Exception $e) {

@@ -90,15 +90,32 @@ class CartMutationHandler
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
+        // Snapshot existing item IDs so we can identify the row addItem() creates.
+        // Matching by $sku is unreliable: a configurable variant added by its
+        // child SKU is promoted to the parent, so the resulting visible item
+        // carries the parent's SKU, not the child SKU the caller passed.
+        $existingItemIds = [];
+        foreach ($quote->getAllVisibleItems() as $item) {
+            $existingItemIds[(int) $item->getId()] = true;
+        }
+
         $quote = $this->cartService->addItem($quote, $sku, (float) $qty);
 
         // Set fulfillment type on the newly added item
         if ($fulfillmentType !== 'SHIP') {
-            // Find the item we just added (by SKU, get the last one in case of duplicates)
             $addedItem = null;
             foreach ($quote->getAllVisibleItems() as $item) {
-                if ($item->getSku() === $sku) {
+                if (!isset($existingItemIds[(int) $item->getId()])) {
                     $addedItem = $item;
+                }
+            }
+            // Fall back to SKU match when quantities merged into an existing row
+            // (no new item appears); covers simple products added repeatedly.
+            if (!$addedItem) {
+                foreach ($quote->getAllVisibleItems() as $item) {
+                    if ($item->getSku() === $sku) {
+                        $addedItem = $item;
+                    }
                 }
             }
             if ($addedItem) {
@@ -351,9 +368,11 @@ class CartMutationHandler
             throw ValidationException::invalidValue('code', $e->getMessage());
         }
 
-        // Reload quote to get fresh totals
-        $quote = $this->cartService->getCart((int) $cartId);
-        return ['applyGiftcardToCart' => $this->mapCart($quote)];
+        // Reload quote to get fresh totals, falling back to the in-memory quote
+        // (already collected and saved by applyGiftcard) if the reload comes back
+        // empty, so mapCart() never receives null.
+        $reloaded = $this->cartService->getCart((int) $cartId);
+        return ['applyGiftcardToCart' => $this->mapCart($reloaded ?? $quote)];
     }
 
     /**
@@ -377,12 +396,22 @@ class CartMutationHandler
             throw NotFoundException::cart($cartId);
         }
 
-        $this->removeGiftcardFromQuote($quote, $code);
-        $quote->collectTotals()->save();
+        // Reuse the REST path so the giftcard_amount/base_giftcard_amount fields
+        // are zeroed and the totals-collected flag is reset before re-collecting
+        // (removeGiftcard also collects totals and saves). The previous inline
+        // removal only unset the code from the JSON blob, leaving a stale gift
+        // card discount on an already-collected quote.
+        try {
+            $this->cartService->removeGiftcard($quote, (string) $code);
+        } catch (\RuntimeException $e) {
+            throw ValidationException::invalidValue('code', $e->getMessage());
+        }
 
-        // Reload quote to get fresh totals
-        $quote = $this->cartService->getCart((int) $cartId);
-        return ['removeGiftcardFromCart' => $this->mapCart($quote)];
+        // Reload quote to get fresh totals, falling back to the in-memory quote
+        // (already collected and saved above) if the reload comes back empty, so
+        // mapCart() never receives null.
+        $reloaded = $this->cartService->getCart((int) $cartId);
+        return ['removeGiftcardFromCart' => $this->mapCart($reloaded ?? $quote)];
     }
 
     /**
@@ -515,19 +544,6 @@ class CartMutationHandler
         }
 
         return $giftcards;
-    }
-
-    /**
-     * Remove a gift card from a quote by its code
-     */
-    private function removeGiftcardFromQuote(\Mage_Sales_Model_Quote $quote, string $code): void
-    {
-        $codesJson = $quote->getGiftcardCodes();
-        $codes = $codesJson ? (array) \Mage::helper('core')->jsonDecode($codesJson, true) : [];
-
-        unset($codes[$code]);
-
-        $quote->setGiftcardCodes(empty($codes) ? null : \Mage::helper('core')->jsonEncode($codes));
     }
 
     /**

@@ -78,6 +78,11 @@ class ContactFormProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $this->verifyCaptcha($body, $storeId, $request);
+        // Cap by client IP as well as by email: the email-keyed limit alone lets
+        // a single client rotate through unlimited addresses to spam the store
+        // owner (and email-bomb third parties via auto-reply) when CAPTCHA and
+        // honeypot are disabled. Both share the system/rate_limit/contact limit.
+        $this->checkRateLimitByIp("contact:{$storeId}", 'contact', 3600);
         $this->checkRateLimit("contact:{$storeId}:" . strtolower($email), 'contact', 3600);
 
         try {

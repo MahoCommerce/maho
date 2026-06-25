@@ -899,6 +899,9 @@ class CartService
     public function mergeCarts(string $guestMaskedId, int $customerId): \Mage_Sales_Model_Quote
     {
         $guestCartId = $this->getCartIdFromMaskedId($guestMaskedId);
+        if (!$guestCartId) {
+            throw new \RuntimeException('Guest cart not found');
+        }
         // Use loadByIdWithoutStore, admin context may sit on a different store
         // than the guest cart, and store-scoped load() would return an empty
         // quote even though the masked-ID lookup just resolved successfully.

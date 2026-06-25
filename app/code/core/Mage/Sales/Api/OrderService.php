@@ -73,13 +73,6 @@ class OrderService
             $quote->setData('employee_id', $employeeId);
         }
 
-        // Re-validate gift-card balances against the live DB before locking,
-        // a card spent elsewhere since apply time must not discount this order.
-        (new CartService())->revalidateGiftcards($quote);
-
-        // Collect totals one final time
-        $quote->collectTotals();
-
         // Serialize concurrent placement attempts on the same quote. Without
         // this, two simultaneous POSTs both pass the is_active check above and
         // submit the same cart twice, duplicate orders, double inventory
@@ -104,6 +97,13 @@ class OrderService
             if ($stillActive !== 1) {
                 throw new \RuntimeException('Cart is no longer active');
             }
+
+            // Re-validate gift-card balances against the live DB under the lock,
+            // immediately before consuming them, a card spent elsewhere since
+            // apply time must not discount this order. Collect totals once more
+            // so submitAll() converts the freshly revalidated amounts.
+            (new CartService())->revalidateGiftcards($quote);
+            $quote->collectTotals();
 
             // Convert quote to order
             $service = \Mage::getModel('sales/service_quote', $quote);

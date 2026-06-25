@@ -135,6 +135,11 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         // Invalidate cache
         \Mage::app()->cleanCache(["API_PRODUCT_{$productId}"]);
 
+        // Keep the stock_status index in sync. Direct SQL writes bypass the stock
+        // item model's afterCommit reindex, so catalog listings and layered nav
+        // would otherwise show stale availability until a manual reindex.
+        $this->reindexStockStatus((int) $productId);
+
         $dto = new StockUpdate();
         $dto->sku = $sku;
         $dto->qty = $qty;
@@ -248,6 +253,13 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         // Invalidate cache for all updated products
         \Mage::app()->cleanCache($cacheTags);
 
+        // Keep the stock_status index in sync for every updated product (see
+        // doSingleUpdate). Runs after commit so updateStatus() reads the persisted
+        // values.
+        foreach ($skuToProductId as $productId) {
+            $this->reindexStockStatus((int) $productId);
+        }
+
         // Return wrapper DTO with results
         $dto = new StockUpdate();
         $dto->sku = 'bulk';
@@ -261,6 +273,25 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
     {
         if ($qty < 0 || $qty > 99999999) {
             throw new BadRequestHttpException('Quantity must be between 0 and 99999999');
+        }
+    }
+
+    /**
+     * Recompute the cataloginventory_stock_status index for a product (and its
+     * configurable/grouped parents and children). The stock data is already
+     * persisted at this point, so a reindex failure is logged but not fatal.
+     */
+    private function reindexStockStatus(int $productId): void
+    {
+        try {
+            /** @var \Mage_CatalogInventory_Model_Stock_Status $stockStatus */
+            $stockStatus = \Mage::getSingleton('cataloginventory/stock_status');
+            $stockStatus->updateStatus($productId);
+        } catch (\Exception $e) {
+            \Mage::log(
+                "StockUpdateProcessor: failed to reindex stock status for product {$productId}: " . $e->getMessage(),
+                \Mage::LOG_ERROR,
+            );
         }
     }
 }

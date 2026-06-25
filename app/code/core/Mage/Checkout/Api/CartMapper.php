@@ -310,7 +310,7 @@ class CartMapper
                 ];
             }
         } catch (\Exception $e) {
-            \Mage::log('Error getting shipping methods: ' . $e->getMessage());
+            \Mage::log('Error getting shipping methods: ' . $e->getMessage(), \Mage::LOG_ERROR);
         }
 
         return $methods;
@@ -364,7 +364,7 @@ class CartMapper
                 }
             }
         } catch (\Exception $e) {
-            \Mage::log('Error getting payment methods: ' . $e->getMessage());
+            \Mage::log('Error getting payment methods: ' . $e->getMessage(), \Mage::LOG_ERROR);
         }
 
         return $methods;

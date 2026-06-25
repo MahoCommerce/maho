@@ -10,6 +10,8 @@
 
 class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_Action
 {
+    public const ADMIN_RESOURCE = 'system/api/rest_roles';
+
     /**
      * Controller pre-dispatch method
      *
@@ -276,14 +278,6 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
         }
 
         $this->_redirect('*/*/');
-    }
-
-    #[\Override]
-    protected function _isAllowed()
-    {
-        /** @var Mage_Admin_Model_Session $session */
-        $session = Mage::getSingleton('admin/session');
-        return $session->isAllowed('system/api/rest_roles');
     }
 
     /**

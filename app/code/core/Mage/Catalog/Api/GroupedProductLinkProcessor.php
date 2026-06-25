@@ -134,6 +134,13 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleRemove(int $productId, int $childProductId): null
     {
+        // extractChildProductId() returns 0 when the path can't be parsed; without
+        // this guard the unset() below is a no-op and the DELETE reports success
+        // for a link it never removed. Mirrors ConfigurableSetupProcessor.
+        if ($childProductId <= 0) {
+            throw new BadRequestHttpException('childProductId is required and must be positive');
+        }
+
         $product = $this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
 
         $existing = $this->getExistingLinkData($product);

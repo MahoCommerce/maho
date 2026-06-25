@@ -89,8 +89,12 @@ class CrudProcessor extends Processor
         }
 
         if ($this->resourceClass && is_subclass_of($this->resourceClass, CrudResource::class)) {
-            // Reload model to get computed/default values set by the DB
-            return $this->resourceClass::fromModel(\Mage::getModel($this->modelAlias)->load($model->getId()));
+            // Reload model to get computed/default values set by the DB. Fall back
+            // to the in-memory saved model if the reload comes back empty (e.g. a
+            // store-scoped load() filtering it out), so the response is never a DTO
+            // of nulls for a row that was just persisted.
+            $reloaded = \Mage::getModel($this->modelAlias)->load($model->getId());
+            return $this->resourceClass::fromModel($reloaded->getId() ? $reloaded : $model);
         }
 
         return $data;

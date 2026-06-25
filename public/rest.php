@@ -20,6 +20,8 @@ require MAHO_ROOT_DIR . '/vendor/autoload.php';
 if (!Mage::isInstalled()) {
     header('Content-Type: application/json');
     http_response_code(503);
+    // Raw json_encode is intentional here: Mage is not initialized yet, so
+    // Mage::helper('core')->jsonEncode() is unavailable at this point.
     echo json_encode(['error' => 'Application is not installed yet.']);
     exit;
 }

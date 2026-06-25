@@ -47,6 +47,12 @@ DirectoryIndex index.php
     Options +FollowSymLinks
     RewriteEngine on
 
+    # TRACE and TRACK HTTP methods disabled to prevent XSS attacks. Must come
+    # before any [L] rule (e.g. the /api/* rewrites below) so those methods are
+    # rejected for every path, including the API endpoints, before routing.
+    RewriteCond %{REQUEST_METHOD} ^TRAC[EK]
+    RewriteRule .* - [L,R=405]
+
     # Prevent serving "hidden" files like git repository
     # Allow .thumbs directory used by WYSIWYG media storage
     RewriteCond %{REQUEST_URI} /\.
@@ -84,10 +90,6 @@ DirectoryIndex index.php
 
     # Workaround for HTTP authorization in CGI environment
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-
-    # TRACE and TRACK HTTP methods disabled to prevent XSS attacks
-    RewriteCond %{REQUEST_METHOD} ^TRAC[EK]
-    RewriteRule .* - [L,R=405]
 
     <IfModule mod_setenvif.c>
         # Enable Developer Mode based on OS environment variable

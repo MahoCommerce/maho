@@ -155,7 +155,7 @@ class CustomerService
 
         // Validate required attributes exist
         if (!$firstnameAttr || !$lastnameAttr || !$telephoneAttr) {
-            \Mage::log('CustomerService: Required EAV attributes not found');
+            \Mage::log('CustomerService: Required EAV attributes not found', \Mage::LOG_ERROR);
             return ['ids' => [], 'total' => 0];
         }
 

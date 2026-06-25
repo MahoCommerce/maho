@@ -223,16 +223,20 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
                 $read->select()->from($table)->where('client_id = ?', $clientId),
             );
 
-            if (!$row) {
+            // Always run password_verify (constant cost) even when the client_id
+            // is unknown, using a dummy hash. This keeps the timing and the error
+            // message identical whether the row is missing or the secret is wrong,
+            // so a valid client_id can't be enumerated via response differences.
+            $hash = $row['client_secret'] ?? '$2y$12$RlGJvrrS3GC1gKQvcwvjHedpfOFOSifqxMHE5umNj0nelSZsQqdYO';
+            $secretValid = password_verify($clientSecret, $hash);
+
+            if (!$row || !$secretValid) {
                 throw new UnauthorizedHttpException('Bearer', 'Invalid client credentials');
             }
 
+            // Only disclose account state once the secret is proven correct.
             if (!(int) $row['is_active']) {
                 throw new UnauthorizedHttpException('Bearer', 'API user account is inactive');
-            }
-
-            if (!password_verify($clientSecret, $row['client_secret'])) {
-                throw new UnauthorizedHttpException('Bearer', 'Invalid client credentials');
             }
 
             $apiUser = \Mage::getModel('api/user')->load($row['user_id']);
@@ -260,16 +264,22 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         try {
             $apiUser = \Mage::getModel('api/user')->loadByUsername($username);
 
-            if (!$apiUser->getId()) {
+            // Always run the hash check (constant cost) even when the username is
+            // unknown, using a dummy hash. This keeps the timing and the error
+            // message identical whether the user is missing or the key is wrong,
+            // so a valid username can't be enumerated via response differences.
+            $storedHash = $apiUser->getId()
+                ? (string) $apiUser->getApiKey()
+                : '$2y$12$RlGJvrrS3GC1gKQvcwvjHedpfOFOSifqxMHE5umNj0nelSZsQqdYO';
+            $keyValid = \Mage::helper('core')->validateHash($apiKey, $storedHash);
+
+            if (!$apiUser->getId() || !$keyValid) {
                 throw new UnauthorizedHttpException('Bearer', 'Invalid API credentials');
             }
 
+            // Only disclose account state once the key is proven correct.
             if (!(int) $apiUser->getIsActive()) {
                 throw new UnauthorizedHttpException('Bearer', 'API user account is inactive');
-            }
-
-            if (!\Mage::helper('core')->validateHash($apiKey, $apiUser->getApiKey())) {
-                throw new UnauthorizedHttpException('Bearer', 'Invalid API credentials');
             }
 
             return $this->generateApiUserTokenResponse($apiUser);
