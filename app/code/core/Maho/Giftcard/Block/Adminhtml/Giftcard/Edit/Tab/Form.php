@@ -217,7 +217,17 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
             ]);
         }
 
-        $form->setValues($model->getData());
+        // DB stores balance/initial_balance as decimal(12,4) for arithmetic
+        // precision (post-tax, currency conversion, partial redemption math).
+        // The admin form shouldn't expose the trailing zeros — admins enter
+        // and review prices to 2dp.
+        $data = $model->getData();
+        foreach (['balance', 'initial_balance'] as $field) {
+            if (isset($data[$field]) && $data[$field] !== '' && $data[$field] !== null) {
+                $data[$field] = number_format((float) $data[$field], 2, '.', '');
+            }
+        }
+        $form->setValues($data);
         $this->setForm($form);
 
         return parent::_prepareForm();
