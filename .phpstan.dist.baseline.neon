@@ -3192,11 +3192,6 @@ parameters:
 			count: 2
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Form.php
 
-		-
-			rawMessage: 'Call to deprecated method getSaveUrl() of class Mage_Adminhtml_Block_Widget_Form_Container.'
-			identifier: method.deprecated
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Form/Container.php
 
 		-
 			rawMessage: Property Mage_Adminhtml_Block_Widget_Form_Container::$_blockGroup has no type specified.
