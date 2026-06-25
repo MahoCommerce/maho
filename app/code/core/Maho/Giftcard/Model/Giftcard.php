@@ -160,21 +160,32 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
      * setWebsiteIds() (e.g. from the admin form) replaces the memoised list;
      * the resource model's _afterSave hook then syncs the junction.
      *
+     * Falls back to the legacy `website_id` scalar when the junction is
+     * empty. Preserves pre-1.1.0 semantics for code paths that still set
+     * the scalar directly (programmatic creation, imports, fixtures, tests)
+     * without populating the junction — the 1.0.0→1.1.0 upgrade backfills
+     * existing rows so this fallback only matters for new unmigrated saves.
+     *
      * @return int[]
      */
     public function getWebsiteIds(): array
     {
         $ids = $this->getData('website_ids');
         if ($ids === null) {
-            if (!$this->getId()) {
-                return [];
+            if ($this->getId()) {
+                /** @var Maho_Giftcard_Model_Resource_Giftcard $resource */
+                $resource = $this->getResource();
+                $ids = $resource->getWebsiteIds((int) $this->getId());
+            } else {
+                $ids = [];
             }
-            /** @var Maho_Giftcard_Model_Resource_Giftcard $resource */
-            $resource = $this->getResource();
-            $ids = $resource->getWebsiteIds((int) $this->getId());
             $this->setData('website_ids', $ids);
         }
-        return array_map('intval', (array) $ids);
+        $ids = array_map('intval', (array) $ids);
+        if ($ids === [] && $this->getWebsiteId()) {
+            return [(int) $this->getWebsiteId()];
+        }
+        return $ids;
     }
 
     /**
