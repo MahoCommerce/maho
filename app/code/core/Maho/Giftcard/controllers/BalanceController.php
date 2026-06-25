@@ -62,12 +62,25 @@ class Maho_Giftcard_BalanceController extends Mage_Core_Controller_Front_Action
      * outcome so this endpoint can't be used to enumerate which codes are
      * live — a customer who genuinely owns a code will see it; an attacker
      * walking codes can't distinguish "expired" from "doesn't exist".
+     *
+     * Rate-limited to 10 failed attempts per hour per customer via the
+     * shared Maho\Security\RateLimiter (`Mage_Core_Helper_Data::rateLimiterBy`).
+     * "Check upfront, hit only on failure" pattern so a customer with
+     * several legitimate cards isn't penalised for genuine lookups.
      */
     #[Maho\Config\Route('/giftcard/balance/check', methods: ['POST'])]
     public function checkAction(): void
     {
         $session = Mage::getSingleton('giftcard/session');
         $session->setLastGiftcardLookup(null);
+
+        $customerId = (string) Mage::getSingleton('customer/session')->getCustomerId();
+        $limiter = Mage::helper('core')->rateLimiterBy('giftcard_balance_check', $customerId, 10, 3600);
+        if ($limiter->tooManyAttempts()) {
+            $session->addError(Mage::helper('giftcard')->__('Too many recent lookup attempts. Please wait a while before trying again.'));
+            $this->_redirect('*/*/');
+            return;
+        }
 
         $code = trim((string) $this->getRequest()->getPost('giftcard_code', ''));
         if ($code === '') {
@@ -82,6 +95,7 @@ class Maho_Giftcard_BalanceController extends Mage_Core_Controller_Front_Action
         $websiteId = (int) Mage::app()->getStore()->getWebsiteId();
 
         if (!$card->getId() || !$card->isValidForWebsite($websiteId)) {
+            $limiter->hit();
             $session->addError(Mage::helper('giftcard')->__('We could not find an active gift card for that code on this store.'));
             $this->_redirect('*/*/');
             return;
