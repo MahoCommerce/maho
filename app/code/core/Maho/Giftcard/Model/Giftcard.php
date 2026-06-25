@@ -137,6 +137,11 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
     /**
      * Check if gift card is valid for use on a specific website
+     *
+     * Membership lookup against the giftcard_website junction. A card with no
+     * websites assigned (orphaned from a botched import or hand-crafted row)
+     * is treated as not valid anywhere — fail closed rather than opening the
+     * card up to every website silently.
      */
     public function isValidForWebsite(int $websiteId): bool
     {
@@ -144,7 +149,51 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             return false;
         }
 
-        return (int) $this->getWebsiteId() === $websiteId;
+        return in_array($websiteId, $this->getWebsiteIds(), true);
+    }
+
+    /**
+     * Get the list of website IDs this card is valid on.
+     *
+     * Loaded lazily from the giftcard_website junction and memoised on the
+     * model under the `website_ids` data key. Setting an array via
+     * setWebsiteIds() (e.g. from the admin form) replaces the memoised list;
+     * the resource model's _afterSave hook then syncs the junction.
+     *
+     * @return int[]
+     */
+    public function getWebsiteIds(): array
+    {
+        $ids = $this->getData('website_ids');
+        if ($ids === null) {
+            if (!$this->getId()) {
+                return [];
+            }
+            /** @var Maho_Giftcard_Model_Resource_Giftcard $resource */
+            $resource = $this->getResource();
+            $ids = $resource->getWebsiteIds((int) $this->getId());
+            $this->setData('website_ids', $ids);
+        }
+        return array_map('intval', (array) $ids);
+    }
+
+    /**
+     * Set the list of website IDs this card is valid on. The resource
+     * model's _afterSave hook persists the change to the junction.
+     *
+     * @param int[] $websiteIds
+     */
+    public function setWebsiteIds(array $websiteIds): self
+    {
+        $clean = [];
+        foreach ($websiteIds as $id) {
+            $id = (int) $id;
+            if ($id > 0) {
+                $clean[$id] = true;
+            }
+        }
+        $this->setData('website_ids', array_keys($clean));
+        return $this;
     }
 
     /**
