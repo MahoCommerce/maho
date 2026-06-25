@@ -134,9 +134,17 @@ public function viewAction() { ... }
 - Back-compat: modules still declaring `<frontend><routers>` in `config.xml` keep working via a legacy-XML match path that runs **before** the Symfony matcher, preserving M1's "first declared wins" precedence. A single `LOG_NOTICE` is emitted once per process listing legacy frontNames, encouraging migration.
 
 #### Overriding controllers
-- **Admin**: register your module under `<admin><routers><adminhtml><args><modules><MyMod before|after="Mage_Adminhtml"/>` in `config.xml`. The runtime walks this chain at dispatch time, so admin controllers (subclasses of `Mage_Adminhtml_Controller_Action` / `Maho\Controller\AdminAction`) override core controllers without redeclaring routes.
-- **Frontend**: same pattern via `<frontend><routers><{routerCode}><args><modules><MyMod before|after="Mage_Customer"/>` (the router code must equal the frontName you're overriding, or supply `<args><frontName>` explicitly). Subclasses of the core controller win over the base when present; M1 chain semantics are preserved.
-- **Install**: no chain support; override by redeclaring `#[Route]` attributes on a custom controller.
+Preferred (no XML): **subclass the controller you want to override.** The compiler detects, at `composer dump-autoload`, any controller that extends a route-owning controller and declares no `#[Route]` of its own, and points the route at the subclass. This works in every area (frontend, admin, install).
+
+```php
+// Just works — no XML, no attribute. Run `composer dump-autoload` after adding it.
+class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /* override actions */ }
+```
+
+- **Precedence is structural.** When several modules override the same controller they should form a single inheritance chain (B extends A extends Core); the most-derived class wins, deterministically and regardless of module load order. Two *sibling* subclasses extending the same base independently are a conflict: the compiler logs an error and falls back to module load order (local/community over core) — resolve it by having one override extend the other.
+- A subclass that adds **new** actions needs its own `#[Route]` for those actions (inheritance only carries over the base's existing routes).
+
+Legacy XML chain (still honored for BC, wins over the compiled override): register your module under `<{area}><routers><{routerCode}><args><modules><MyMod before|after="Mage_X"/>`. Migrate existing chains with `./maho legacy:migrate-routes` (it drops a `<modules>` chain once the overrides are clean subclasses). Use the inheritance approach for new code.
 
 ## Development Guidelines
 
@@ -173,7 +181,7 @@ All Zend Framework and Varien components have been completely removed. **NEVER**
 - New modules: `app/code/core/Maho/` namespace, declared in `app/etc/modules/`
 - Follow existing module patterns; use `declare(strict_types=1)` (placed *after* the file-level docblock, not before) and PHP 8.3+ features
 - Use `#[\Override]` attribute for overridden methods
-- When overriding admin routes in Maho modules, use `before="Mage_Adminhtml"` pattern
+- To override an existing controller, subclass it (see "Overriding controllers" above) — no XML needed
 
 ### Modifying Existing Features
 - Feel free to modify core files directly

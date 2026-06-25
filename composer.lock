@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e29b4da480537dfe26290a9f68bb5804",
+    "content-hash": "959f0fa2c25f257068b61b7823733719",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -1223,16 +1223,16 @@
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
-            "version": "v4.0.32",
+            "version": "v4.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-composer-plugin.git",
-                "reference": "5db07db7b897493a1f4ea40c3c4542019e5503a4"
+                "reference": "3e03a6130e98d143dea139be90cfcdd179f8daa1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/5db07db7b897493a1f4ea40c3c4542019e5503a4",
-                "reference": "5db07db7b897493a1f4ea40c3c4542019e5503a4",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/3e03a6130e98d143dea139be90cfcdd179f8daa1",
+                "reference": "3e03a6130e98d143dea139be90cfcdd179f8daa1",
                 "shasum": ""
             },
             "require": {
@@ -1267,7 +1267,7 @@
             "description": "Extension for Composer to copy assets and enable autoloading for Maho projects.",
             "support": {
                 "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
-                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v4.0.32"
+                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v4.1.1"
             },
             "funding": [
                 {
@@ -1283,7 +1283,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-06-16T18:25:35+00:00"
+            "time": "2026-06-25T13:27:16+00:00"
         },
         {
             "name": "masterminds/html5",

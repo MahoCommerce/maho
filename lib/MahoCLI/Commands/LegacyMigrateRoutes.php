@@ -9,7 +9,11 @@ declare(strict_types=1);
 
 namespace MahoCLI\Commands;
 
+use DOMDocument;
 use DOMElement;
+use Maho\Config\Route;
+use ReflectionClass;
+use ReflectionMethod;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -55,6 +59,8 @@ class LegacyMigrateRoutes extends BaseMahoCommand
         $totalRoutes = 0;
         $totalSkipped = 0;
         $totalRouters = 0;
+        $totalOverridesRemoved = 0;
+        $totalOverridesSkipped = 0;
 
         foreach ($this->findUserConfigXmlFiles() as $entry) {
             $module = $entry['module'];
@@ -66,12 +72,21 @@ class LegacyMigrateRoutes extends BaseMahoCommand
                 continue;
             }
 
-            $routerEntries = $this->findRouterNodes($dom, $module);
-            if ($routerEntries === []) {
-                continue;
-            }
+            // Header is printed lazily so override-only modules (no <use> router) still show up.
+            $headerPrinted = false;
+            $ensureHeader = function () use (&$headerPrinted, $output, $module, $configPath): void {
+                if (!$headerPrinted) {
+                    $output->writeln(sprintf('<info>%s</info> (%s)', $module, $configPath));
+                    $headerPrinted = true;
+                }
+            };
+            $fileChanged = false;
 
-            $output->writeln(sprintf('<info>%s</info> (%s)', $module, $configPath));
+            $routerEntries = $this->findRouterNodes($dom, $module);
+            if ($routerEntries !== []) {
+                $ensureHeader();
+                $fileChanged = true;
+            }
 
             foreach ($routerEntries as $routerEntry) {
                 $totalRouters++;
@@ -152,24 +167,41 @@ class LegacyMigrateRoutes extends BaseMahoCommand
                 $this->detachAndPrune($routerNode);
             }
 
-            if (!$dryRun) {
+            // Override <modules> chains → drop the XML; inheritance now auto-registers them.
+            $this->migrateControllerOverrides(
+                $dom,
+                $output,
+                $dryRun,
+                $ensureHeader,
+                $totalOverridesRemoved,
+                $totalOverridesSkipped,
+                $fileChanged,
+            );
+
+            if (!$dryRun && $fileChanged) {
                 $this->saveConfigXml($dom, $configPath);
             }
 
-            $output->writeln('');
+            if ($headerPrinted) {
+                $output->writeln('');
+            }
         }
 
         $output->writeln(sprintf(
-            '<info>Done.</info> Routers processed: %d, route attributes added: %d, skipped: %d.',
+            '<info>Done.</info> Routers processed: %d, route attributes added: %d, skipped: %d. '
+            . 'Override chains removed: %d, skipped: %d.',
             $totalRouters,
             $totalRoutes,
             $totalSkipped,
+            $totalOverridesRemoved,
+            $totalOverridesSkipped,
         ));
 
-        if ($dryRun && $totalRoutes > 0) {
+        $changed = $totalRoutes > 0 || $totalOverridesRemoved > 0;
+        if ($dryRun && $changed) {
             $output->writeln('Re-run without --dry-run to apply.');
             $output->writeln('<comment>Tip: review the generated routes carefully; controller-method scanning is best-effort.</comment>');
-        } elseif (!$dryRun && $totalRoutes > 0) {
+        } elseif (!$dryRun && $changed) {
             $output->writeln('Run <info>composer dump-autoload</info> to compile the new attributes.');
             $output->writeln('<comment>Tip: review the generated routes carefully; controller-method scanning is best-effort.</comment>');
         }
@@ -177,6 +209,257 @@ class LegacyMigrateRoutes extends BaseMahoCommand
         $this->migrateLocalXmlAdminPath($output, $dryRun);
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Migrate legacy controller-override chains to the attribute era.
+     *
+     * `<{scope}><routers><{code}><args><modules><My_Module .../></modules>` piggybacks a
+     * module onto an existing frontName purely to override its controllers. Because override
+     * controllers already extend the core controller, Maho now auto-registers them as
+     * overrides at `composer dump-autoload`, so migrating just means deleting the XML.
+     *
+     * A `<modules>` node is removed only when every declared override is a clean
+     * re-implementation of inherited, routed actions. Anything needing a human — a controller
+     * that isn't a subclass of a routed controller, one adding un-routed actions, or sibling
+     * modules overriding the same controller with no shared inheritance chain — is reported
+     * and the XML left untouched, so re-running after a manual fix is safe.
+     */
+    private function migrateControllerOverrides(
+        DOMDocument $dom,
+        OutputInterface $output,
+        bool $dryRun,
+        callable $ensureHeader,
+        int &$removed,
+        int &$skipped,
+        bool &$fileChanged,
+    ): void {
+        $config = $dom->documentElement;
+        if ($config === null) {
+            return;
+        }
+
+        foreach (['frontend', 'admin', 'install'] as $scope) {
+            $scopeNode = $this->firstChildElement($config, $scope);
+            if ($scopeNode === null) {
+                continue;
+            }
+            $routersNode = $this->firstChildElement($scopeNode, 'routers');
+            if ($routersNode === null) {
+                continue;
+            }
+
+            // Snapshot children: detachAndPrune() mutates the tree as we go.
+            foreach (iterator_to_array($routersNode->childNodes) as $routerNode) {
+                if (!$routerNode instanceof DOMElement) {
+                    continue;
+                }
+                $argsNode = $this->firstChildElement($routerNode, 'args');
+                if ($argsNode === null) {
+                    continue;
+                }
+                $modulesNode = $this->firstChildElement($argsNode, 'modules');
+                if ($modulesNode === null) {
+                    continue;
+                }
+
+                $this->migrateOverrideModulesNode(
+                    $modulesNode,
+                    $scope . '/' . $routerNode->localName,
+                    $output,
+                    $dryRun,
+                    $ensureHeader,
+                    $removed,
+                    $skipped,
+                    $fileChanged,
+                );
+            }
+        }
+    }
+
+    /**
+     * Analyze and (when safe) remove a single `<args><modules>` override chain.
+     */
+    private function migrateOverrideModulesNode(
+        DOMElement $modulesNode,
+        string $routerLabel,
+        OutputInterface $output,
+        bool $dryRun,
+        callable $ensureHeader,
+        int &$removed,
+        int &$skipped,
+        bool &$fileChanged,
+    ): void {
+        $modulePrefixes = [];
+        foreach ($modulesNode->childNodes as $child) {
+            if ($child instanceof DOMElement) {
+                $prefix = trim($child->textContent);
+                if ($prefix !== '') {
+                    $modulePrefixes[] = $prefix;
+                }
+            }
+        }
+        if ($modulePrefixes === []) {
+            return;
+        }
+
+        $ensureHeader();
+
+        /** @var list<string> $blockers */
+        $blockers = [];
+        $overrideClasses = [];
+        /** @var array<string, list<string>> $byBase */
+        $byBase = [];
+
+        foreach ($modulePrefixes as $prefix) {
+            $controllers = $this->findControllers($prefix);
+            if ($controllers === []) {
+                $blockers[] = sprintf('module %s declares no controllers', $prefix);
+                continue;
+            }
+            foreach ($controllers as $controller) {
+                $class = $controller['className'];
+                $analysis = $this->analyzeOverrideController($class);
+                if (!$analysis['pure']) {
+                    $blockers[] = sprintf('%s %s', $class, $analysis['reason']);
+                    continue;
+                }
+                if ($analysis['newActions'] !== []) {
+                    $actions = implode(', ', array_map(fn(string $a): string => $a . 'Action', $analysis['newActions']));
+                    $blockers[] = sprintf(
+                        '%s adds un-routed action(s) [%s] — add #[Maho\\Config\\Route] for them first',
+                        $class,
+                        $actions,
+                    );
+                    continue;
+                }
+                $overrideClasses[] = $class;
+                $byBase[(string) $analysis['base']][] = $class;
+            }
+        }
+
+        // Sibling conflict: two overrides of the same base with no shared inheritance chain.
+        foreach ($byBase as $base => $classes) {
+            if (count($classes) > 1 && $this->hasSiblingConflict($classes)) {
+                $blockers[] = sprintf(
+                    'overrides of %s have no shared inheritance chain (%s) — make one extend the other',
+                    $base,
+                    implode(', ', $classes),
+                );
+            }
+        }
+
+        if ($blockers !== []) {
+            $output->writeln(sprintf('  <comment>skip</comment> %s override chain:', $routerLabel));
+            foreach ($blockers as $reason) {
+                $output->writeln(sprintf('    - %s', $reason));
+            }
+            $skipped++;
+            return;
+        }
+
+        if ($dryRun) {
+            $output->writeln(sprintf(
+                '  would remove %s override chain (%d override(s) now auto-registered by inheritance)',
+                $routerLabel,
+                count($overrideClasses),
+            ));
+            $removed++;
+            return;
+        }
+
+        $this->detachAndPrune($modulesNode);
+        $fileChanged = true;
+        $removed++;
+        $output->writeln(sprintf(
+            '  <info>migrated</info> removed %s override chain (%d override(s) auto-registered by inheritance)',
+            $routerLabel,
+            count($overrideClasses),
+        ));
+    }
+
+    /**
+     * Classify an override controller: is it a clean subclass of a routed controller that
+     * only re-implements inherited actions (safe to drop from XML), and which routed base
+     * does it extend?
+     *
+     * @return array{pure: bool, base: ?string, reason: string, newActions: list<string>}
+     */
+    private function analyzeOverrideController(string $className): array
+    {
+        $fail = fn(string $reason): array => ['pure' => false, 'base' => null, 'reason' => $reason, 'newActions' => []];
+
+        if ($this->findClassFile($className) === null) {
+            return $fail('is not autoloadable');
+        }
+
+        $reflection = new ReflectionClass($className);
+        $parent = $reflection->getParentClass();
+        if ($parent === false) {
+            return $fail('extends no controller (needs its own #[Maho\\Config\\Route])');
+        }
+
+        $base = null;
+        for ($ancestor = $parent; $ancestor !== false; $ancestor = $ancestor->getParentClass()) {
+            if ($this->controllerOwnsRoutes($ancestor)) {
+                $base = $ancestor->getName();
+                break;
+            }
+        }
+        if ($base === null) {
+            return $fail('extends no routed controller (needs its own #[Maho\\Config\\Route])');
+        }
+
+        // Public *Action methods the subclass declares that its parent chain doesn't have are
+        // brand-new, un-routed actions — inheritance can't register a route that doesn't exist.
+        $newActions = [];
+        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            if ($method->getDeclaringClass()->getName() !== $className) {
+                continue;
+            }
+            $name = $method->getName();
+            if (str_ends_with($name, 'Action') && !method_exists($parent->getName(), $name)) {
+                $newActions[] = substr($name, 0, -strlen('Action'));
+            }
+        }
+
+        return ['pure' => true, 'base' => $base, 'reason' => '', 'newActions' => $newActions];
+    }
+
+    /**
+     * Whether the class declares at least one `#[Maho\Config\Route]` of its own.
+     *
+     * @param ReflectionClass<object> $class
+     */
+    private function controllerOwnsRoutes(ReflectionClass $class): bool
+    {
+        foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            if ($method->getDeclaringClass()->getName() !== $class->getName()) {
+                continue;
+            }
+            if ($method->getAttributes(Route::class) !== []) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * True when the override classes don't reduce to a single most-derived class — i.e. two or
+     * more are mutually incomparable (siblings), mirroring the compiler's conflict detection.
+     *
+     * @param list<string> $classes
+     */
+    private function hasSiblingConflict(array $classes): bool
+    {
+        $maximal = 0;
+        foreach ($classes as $candidate) {
+            $isMaximal = array_all($classes, fn($other) => !($other !== $candidate && is_subclass_of($other, $candidate)));
+            if ($isMaximal) {
+                $maximal++;
+            }
+        }
+        return $maximal > 1;
     }
 
     /**
