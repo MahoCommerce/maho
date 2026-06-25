@@ -65,6 +65,31 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     }
 
     /**
+     * AJAX grid action for the Transaction History tab on the edit page.
+     *
+     * Registers the current gift card so the tab block scopes its
+     * collection correctly, then renders the grid in isolation (Mage's
+     * Tabs widget reloads the inner grid via this URL on page filter/sort).
+     */
+    #[Maho\Config\Route('/admin/giftcard/historyGrid')]
+    public function historyGridAction(): void
+    {
+        $model = Mage::getModel('giftcard/giftcard');
+        $id = (int) $this->getRequest()->getParam('id');
+        if ($id > 0) {
+            $model->load($id);
+        }
+        Mage::register('current_giftcard', $model);
+
+        $this->loadLayout();
+        $this->getResponse()->setBody(
+            $this->getLayout()
+                ->createBlock('giftcard/adminhtml_giftcard_edit_history')
+                ->toHtml(),
+        );
+    }
+
+    /**
      * New gift card
      */
     #[Maho\Config\Route('/admin/giftcard/new')]
@@ -103,8 +128,11 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
 
         Mage::register('current_giftcard', $model);
 
+        // Layout XML handle adminhtml_giftcard_edit registers the Form_Container
+        // in `content` and the Tabs block in `left`; loadLayout() picks both
+        // up automatically via the handle. The form and the transaction-history
+        // grid render as separate tabs of the same edit form.
         $this->_initAction();
-        $this->_addContent($this->getLayout()->createBlock('giftcard/adminhtml_giftcard_edit'));
         $this->renderLayout();
     }
 
