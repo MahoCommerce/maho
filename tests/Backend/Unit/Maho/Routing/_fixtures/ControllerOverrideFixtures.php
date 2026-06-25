@@ -41,3 +41,9 @@ class Fixture_NewAction_CartController extends Mage_Checkout_CartController
 {
     public function brandNewAction(): void {}
 }
+
+// Two clean sibling overrides of the same routed core controller, living in *separate*
+// modules — stand-ins for a cross-file sibling conflict the migrator's pre-pass must detect
+// (each module looks clean in isolation; only the global view reveals the clash).
+class Fixture_SiblingX_CartController extends Mage_Checkout_CartController {}
+class Fixture_SiblingY_CartController extends Mage_Checkout_CartController {}

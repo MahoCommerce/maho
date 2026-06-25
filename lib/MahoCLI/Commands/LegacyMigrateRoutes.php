@@ -62,6 +62,34 @@ class LegacyMigrateRoutes extends BaseMahoCommand
         $totalOverridesRemoved = 0;
         $totalOverridesSkipped = 0;
 
+        // Pre-pass: detect sibling conflicts spanning two separate modules' config.xml. Each
+        // file's per-<modules> check only sees overrides declared in the same node, so two
+        // modules independently overriding the same base each look clean in isolation. We must
+        // know about such cross-file conflicts BEFORE removing any XML, otherwise apply mode
+        // would delete both protective <modules> nodes and only warn afterwards — too late, the
+        // safety net is gone. Bases found in conflict here are treated as blockers below (left
+        // untouched), keeping dry-run and apply behavior identical.
+        /** @var array<string, list<string>> $globalByBase */
+        $globalByBase = [];
+        foreach ($this->findUserConfigXmlFiles() as $entry) {
+            $dom = $this->loadConfigXmlAsDom($entry['path']);
+            if ($dom === null) {
+                continue;
+            }
+            foreach ($this->collectCleanOverridesByBase($dom) as $base => $classes) {
+                foreach ($classes as $class) {
+                    $globalByBase[$base][] = $class;
+                }
+            }
+        }
+        /** @var list<string> $conflictedBases */
+        $conflictedBases = [];
+        foreach ($globalByBase as $base => $classes) {
+            if (count($classes) > 1 && $this->hasSiblingConflict($classes)) {
+                $conflictedBases[] = $base;
+            }
+        }
+
         foreach ($this->findUserConfigXmlFiles() as $entry) {
             $module = $entry['module'];
             $configPath = $entry['path'];
@@ -100,6 +128,7 @@ class LegacyMigrateRoutes extends BaseMahoCommand
                 $totalOverridesRemoved,
                 $totalOverridesSkipped,
                 $fileChanged,
+                $conflictedBases,
             );
 
             foreach ($routerEntries as $routerEntry) {
@@ -220,6 +249,60 @@ class LegacyMigrateRoutes extends BaseMahoCommand
     }
 
     /**
+     * Collect, grouped by routed base class, every clean override declared in a config.xml's
+     * `<args><modules>` chains. Read-only (no output, no DOM mutation) — used by the pre-pass to
+     * detect sibling conflicts that span two separate files before any XML is removed. Only
+     * overrides that would actually be removed (pure subclasses of a routed base that add no
+     * un-routed actions) are reported; anything that is itself a per-file blocker is irrelevant
+     * to cross-file conflict detection since its node is never removed.
+     *
+     * @return array<string, list<string>>
+     */
+    private function collectCleanOverridesByBase(DOMDocument $dom): array
+    {
+        $config = $dom->documentElement;
+        if ($config === null) {
+            return [];
+        }
+
+        $byBase = [];
+        foreach (['frontend', 'admin', 'install'] as $scope) {
+            $scopeNode = $this->firstChildElement($config, $scope);
+            $routersNode = $scopeNode === null ? null : $this->firstChildElement($scopeNode, 'routers');
+            if ($routersNode === null) {
+                continue;
+            }
+            foreach ($routersNode->childNodes as $routerNode) {
+                if (!$routerNode instanceof DOMElement) {
+                    continue;
+                }
+                $argsNode = $this->firstChildElement($routerNode, 'args');
+                $modulesNode = $argsNode === null ? null : $this->firstChildElement($argsNode, 'modules');
+                if ($modulesNode === null) {
+                    continue;
+                }
+                foreach ($modulesNode->childNodes as $child) {
+                    if (!$child instanceof DOMElement) {
+                        continue;
+                    }
+                    $prefix = trim($child->textContent);
+                    if ($prefix === '') {
+                        continue;
+                    }
+                    foreach ($this->findControllers($prefix) as $controller) {
+                        $analysis = $this->analyzeOverrideController($controller['className']);
+                        if ($analysis['pure'] && $analysis['newActions'] === []) {
+                            $byBase[(string) $analysis['base']][] = $controller['className'];
+                        }
+                    }
+                }
+            }
+        }
+
+        return $byBase;
+    }
+
+    /**
      * Migrate legacy controller-override chains to the attribute era.
      *
      * `<{scope}><routers><{code}><args><modules><My_Module .../></modules>` piggybacks a
@@ -230,8 +313,11 @@ class LegacyMigrateRoutes extends BaseMahoCommand
      * A `<modules>` node is removed only when every declared override is a clean
      * re-implementation of inherited, routed actions. Anything needing a human — a controller
      * that isn't a subclass of a routed controller, one adding un-routed actions, or sibling
-     * modules overriding the same controller with no shared inheritance chain — is reported
-     * and the XML left untouched, so re-running after a manual fix is safe.
+     * modules overriding the same controller with no shared inheritance chain (whether in this
+     * file or across files, via $conflictedBases) — is reported and the XML left untouched, so
+     * re-running after a manual fix is safe.
+     *
+     * @param list<string> $conflictedBases routed base classes with a cross-file sibling conflict
      */
     private function migrateControllerOverrides(
         DOMDocument $dom,
@@ -241,6 +327,7 @@ class LegacyMigrateRoutes extends BaseMahoCommand
         int &$removed,
         int &$skipped,
         bool &$fileChanged,
+        array $conflictedBases,
     ): void {
         $config = $dom->documentElement;
         if ($config === null) {
@@ -280,6 +367,7 @@ class LegacyMigrateRoutes extends BaseMahoCommand
                     $removed,
                     $skipped,
                     $fileChanged,
+                    $conflictedBases,
                 );
             }
         }
@@ -287,6 +375,8 @@ class LegacyMigrateRoutes extends BaseMahoCommand
 
     /**
      * Analyze and (when safe) remove a single `<args><modules>` override chain.
+     *
+     * @param list<string> $conflictedBases routed base classes with a cross-file sibling conflict
      */
     private function migrateOverrideModulesNode(
         DOMElement $modulesNode,
@@ -297,6 +387,7 @@ class LegacyMigrateRoutes extends BaseMahoCommand
         int &$removed,
         int &$skipped,
         bool &$fileChanged,
+        array $conflictedBases,
     ): void {
         $modulePrefixes = [];
         foreach ($modulesNode->childNodes as $child) {
@@ -310,6 +401,7 @@ class LegacyMigrateRoutes extends BaseMahoCommand
         if ($modulePrefixes === []) {
             // Empty <modules> wrapper carries nothing — drop the dead XML.
             $ensureHeader();
+            $removed++;
             if ($dryRun) {
                 $output->writeln(sprintf('  would remove empty %s override chain', $routerLabel));
             } else {
@@ -356,12 +448,20 @@ class LegacyMigrateRoutes extends BaseMahoCommand
         }
 
         // Sibling conflict: two overrides of the same base with no shared inheritance chain.
+        // Check both within this node ($byBase) and across files ($conflictedBases, computed in
+        // the pre-pass) so the conflicting XML is left in place rather than silently removed.
         foreach ($byBase as $base => $classes) {
             if (count($classes) > 1 && $this->hasSiblingConflict($classes)) {
                 $blockers[] = sprintf(
                     'overrides of %s have no shared inheritance chain (%s) — make one extend the other',
                     $base,
                     implode(', ', $classes),
+                );
+            } elseif (in_array($base, $conflictedBases, true)) {
+                $blockers[] = sprintf(
+                    'overrides of %s across modules have no shared inheritance chain — make one '
+                    . 'extend the other before running composer dump-autoload',
+                    $base,
                 );
             }
         }
@@ -427,15 +527,16 @@ class LegacyMigrateRoutes extends BaseMahoCommand
             return $fail('extends no routed controller (needs its own #[Maho\\Config\\Route])');
         }
 
-        // Public *Action methods the subclass declares that its parent chain doesn't have are
-        // brand-new, un-routed actions — inheritance can't register a route that doesn't exist.
+        // Public *Action methods the subclass declares that the routed base doesn't have are
+        // brand-new, un-routed actions — inheritance only carries routes from $base, so an
+        // action absent there (even if an intermediate override added it) can't be auto-routed.
         $newActions = [];
         foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
             if ($method->getDeclaringClass()->getName() !== $className) {
                 continue;
             }
             $name = $method->getName();
-            if (str_ends_with($name, 'Action') && !method_exists($parent->getName(), $name)) {
+            if (str_ends_with($name, 'Action') && !method_exists($base, $name)) {
                 $newActions[] = substr($name, 0, -strlen('Action'));
             }
         }
