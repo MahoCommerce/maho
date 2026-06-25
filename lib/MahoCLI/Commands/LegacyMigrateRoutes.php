@@ -309,8 +309,10 @@ class LegacyMigrateRoutes extends BaseMahoCommand
         }
         if ($modulePrefixes === []) {
             // Empty <modules> wrapper carries nothing — drop the dead XML.
-            if (!$dryRun) {
-                $ensureHeader();
+            $ensureHeader();
+            if ($dryRun) {
+                $output->writeln(sprintf('  would remove empty %s override chain', $routerLabel));
+            } else {
                 $this->detachAndPrune($modulesNode);
                 $fileChanged = true;
                 $output->writeln(sprintf('  <info>migrated</info> removed empty %s override chain', $routerLabel));

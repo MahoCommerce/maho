@@ -280,6 +280,13 @@ class ControllerDispatcher
 
         if ($area === 'adminhtml') {
             foreach ($this->buildAdminModuleChain() as $realModule) {
+                // The chain is seeded with the Mage_Adminhtml base; skip it so the base
+                // (and any inheritance-based override of it) is resolved via the compiled
+                // lookup below, mirroring the override-only frontend chain. Only XML
+                // `<args><modules>` overrides win here.
+                if ($realModule === 'Mage_Adminhtml') {
+                    continue;
+                }
                 $className = $realModule . '_' . uc_words($controllerName) . 'Controller';
                 if (class_exists($className)) {
                     return $className;
