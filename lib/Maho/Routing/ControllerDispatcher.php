@@ -256,9 +256,18 @@ class ControllerDispatcher
     }
 
     /**
-     * Walk the area's module override chain. Both admin and frontend honor
-     * <args><modules> declarations from third-party config.xml — admin via
-     * `admin/routers/adminhtml`, frontend via `frontend/routers/<frontName>`.
+     * Resolve the controller class for a Symfony-matched route, honoring overrides.
+     *
+     * Precedence:
+     *  1. XML `<args><modules>` chain (M1 BC) — admin via `admin/routers/adminhtml`,
+     *     frontend via `frontend/routers/<frontName>`. A config.xml override wins.
+     *  2. Compiled `controllerLookup` — resolves attribute/inheritance-based overrides
+     *     (a subclass of a route-owning controller automatically supersedes it) and, when
+     *     no override exists, the route-owning base controller itself.
+     *
+     * Returning null lets the caller fall back to the route's `_maho_controller` default.
+     * For admin/install the incoming frontName is already the sentinel; normalizeFrontName()
+     * inside the lookup is idempotent on sentinels, so it keys correctly either way.
      */
     protected function resolveAttributeControllerClass(
         string $controllerName,
@@ -271,21 +280,30 @@ class ControllerDispatcher
 
         if ($area === 'adminhtml') {
             foreach ($this->buildAdminModuleChain() as $realModule) {
+                // The chain is seeded with the Mage_Adminhtml base; skip it so the base
+                // (and any inheritance-based override of it) is resolved via the compiled
+                // lookup below, mirroring the override-only frontend chain. Only XML
+                // `<args><modules>` overrides win here.
+                if ($realModule === 'Mage_Adminhtml') {
+                    continue;
+                }
                 $className = $realModule . '_' . uc_words($controllerName) . 'Controller';
                 if (class_exists($className)) {
                     return $className;
                 }
             }
-            return null;
-        }
-
-        if ($area === 'frontend') {
+        } elseif ($area === 'frontend') {
             foreach ($this->buildFrontendModuleChain($frontName) as $chainModule) {
                 $className = $chainModule . '_' . uc_words($controllerName) . 'Controller';
                 if (class_exists($className)) {
                     return $className;
                 }
             }
+        }
+
+        $className = RouteCollectionBuilder::lookupCompiledControllerClass($frontName, $controllerName);
+        if ($className !== null && class_exists($className)) {
+            return $className;
         }
 
         return null;
