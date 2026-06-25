@@ -128,10 +128,23 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
                     $data['code'] = Mage::helper('giftcard')->generateCode();
                 }
 
-                // Set website_id for new gift cards
-                if (!$model->getId() && (!isset($data['website_id']) || $data['website_id'] === '')) {
-                    $data['website_id'] = Mage::app()->getWebsite()->getId();
+                // Normalise the multiselect post: the form sends website_ids[]
+                // (or, if the JS is bypassed, sometimes a single value). Keep
+                // the legacy website_id scalar in sync with the first selection
+                // so currency derivation and the back-compat FK keep working.
+                $websiteIds = $data['website_ids'] ?? [];
+                if (!is_array($websiteIds)) {
+                    $websiteIds = $websiteIds === '' ? [] : [$websiteIds];
                 }
+                $websiteIds = array_values(array_unique(array_filter(array_map('intval', $websiteIds))));
+                if (empty($websiteIds)) {
+                    // Nothing posted (e.g. an old form, an API caller) — fall
+                    // back to the current admin website so saves never land
+                    // with an empty association set that would orphan the card.
+                    $websiteIds = [(int) Mage::app()->getWebsite()->getId()];
+                }
+                $data['website_ids'] = $websiteIds;
+                $data['website_id'] = $websiteIds[0];
 
                 // Set expiration if not set
                 if (!$model->getId() && (!isset($data['expires_at']) || $data['expires_at'] === '')) {

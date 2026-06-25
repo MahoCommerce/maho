@@ -54,7 +54,11 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
             ],
         ]);
 
-        // Website selector with currency mapping
+        // Website selector with currency mapping. Multiselect so a card can
+        // be valid on more than one website; on save the controller persists
+        // these via setWebsiteIds() into the giftcard_website junction.
+        // The legacy single `website_id` scalar is still written for back-compat
+        // (currency derivation, FK constraint) — set to the first selection.
         $websites = Mage::app()->getWebsites();
         $websiteCurrencies = [];
         $websiteValues = [];
@@ -64,31 +68,36 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
         }
 
         if (!$model->getId()) {
-            $defaultWebsiteId = $model->getWebsiteId() ?: (int) array_key_first($websiteCurrencies);
+            $defaultWebsiteId = (int) array_key_first($websiteCurrencies);
+            $defaultSelection = [$defaultWebsiteId];
             $defaultCurrency = $websiteCurrencies[$defaultWebsiteId] ?? '';
-
-            $fieldset->addField('website_id', 'select', [
-                'name'     => 'website_id',
-                'label'    => Mage::helper('giftcard')->__('Website'),
-                'title'    => Mage::helper('giftcard')->__('Website'),
-                'required' => true,
-                'values'   => $websiteValues,
-                'value'    => $defaultWebsiteId,
-                'after_element_html' => $this->_getWebsiteCurrencyScript($websiteCurrencies),
-            ]);
             $currencyNote = '<span class="giftcard-currency-note">[' . $defaultCurrency . ']</span>';
         } else {
-            // Show website as read-only for existing gift cards
-            $website = Mage::app()->getWebsite($model->getWebsiteId());
-            $fieldset->addField('website_display', 'note', [
-                'label' => Mage::helper('giftcard')->__('Website'),
-                'text'  => $website->getName() . ' (Base Currency: ' . $model->getCurrencyCode() . ')',
-            ]);
-            $fieldset->addField('website_id', 'hidden', [
-                'name' => 'website_id',
-            ]);
+            // Existing card — pre-select the websites already associated via
+            // the junction. Editable so an admin can re-scope after the fact.
+            $defaultSelection = $model->getWebsiteIds();
+            if (empty($defaultSelection) && $model->getWebsiteId()) {
+                // Pre-1.1.0 row that hasn't been backfilled yet — fall back
+                // to the legacy scalar so the multiselect isn't blank.
+                $defaultSelection = [(int) $model->getWebsiteId()];
+            }
             $currencyNote = '[' . $model->getCurrencyCode() . ']';
         }
+
+        $fieldset->addField('website_ids', 'multiselect', [
+            'name'     => 'website_ids[]',
+            'label'    => Mage::helper('giftcard')->__('Websites'),
+            'title'    => Mage::helper('giftcard')->__('Websites'),
+            'required' => true,
+            'values'   => array_map(
+                static fn($id, $name) => ['value' => (int) $id, 'label' => $name],
+                array_keys($websiteValues),
+                $websiteValues,
+            ),
+            'value'    => $defaultSelection,
+            'note'     => Mage::helper('giftcard')->__('Hold Ctrl/Cmd to select multiple. Card balance is in the first selected website\'s base currency.'),
+            'after_element_html' => $this->_getWebsiteCurrencyScript($websiteCurrencies),
+        ]);
 
         if (!$model->getId()) {
             $fieldset->addField('balance', 'text', [
