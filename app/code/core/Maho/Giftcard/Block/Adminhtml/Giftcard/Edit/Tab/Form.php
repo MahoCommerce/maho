@@ -252,10 +252,10 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
     const websiteCurrencies = {$currenciesJson};
 
     function updateCurrencyDisplay() {
-        const websiteSelect = document.getElementById('website_id');
+        const websiteSelect = document.getElementById('website_ids');
         if (!websiteSelect) return;
 
-        const websiteId = websiteSelect.value;
+        const websiteId = websiteSelect.selectedOptions[0] ? websiteSelect.selectedOptions[0].value : '';
         const currency = websiteCurrencies[websiteId] || '';
         const currencyText = '[' + currency + ']';
 
@@ -265,7 +265,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
     }
 
     function init() {
-        const websiteSelect = document.getElementById('website_id');
+        const websiteSelect = document.getElementById('website_ids');
         if (websiteSelect) {
             websiteSelect.addEventListener('change', updateCurrencyDisplay);
         }

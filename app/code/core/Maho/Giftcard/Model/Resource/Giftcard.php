@@ -105,19 +105,6 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
     }
 
     /**
-     * Load the cached website associations onto the model so getWebsiteIds()
-     * reads them without an extra round trip.
-     */
-    #[\Override]
-    protected function _afterLoad(Mage_Core_Model_Abstract $object)
-    {
-        if ($object->getId()) {
-            $object->setData('website_ids', $this->getWebsiteIds((int) $object->getId()));
-        }
-        return parent::_afterLoad($object);
-    }
-
-    /**
      * Fetch the website IDs this card is valid on, ordered.
      *
      * @return int[]

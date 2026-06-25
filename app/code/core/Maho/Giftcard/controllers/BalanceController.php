@@ -76,6 +76,14 @@ class Maho_Giftcard_BalanceController extends Mage_Core_Controller_Front_Action
     #[Maho\Config\Route('/giftcard/balance/check', methods: ['POST'])]
     public function checkAction(): void
     {
+        // Frontend POSTs are not form-key-validated automatically; do it
+        // explicitly (as CartController does) so a cross-site POST can't burn
+        // the victim's rate-limit slots and lock them out of the feature.
+        if (!$this->_validateFormKey()) {
+            $this->_redirect('*/*/');
+            return;
+        }
+
         $session = Mage::getSingleton('giftcard/session');
         $session->setLastGiftcardLookup(null);
         $flash = Mage::getSingleton('customer/session');
