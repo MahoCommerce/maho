@@ -82,12 +82,12 @@ class Mage_Adminhtml_Block_System_Variable_Edit extends Mage_Adminhtml_Block_Wid
     }
 
     /**
-     * Return save url for edit form
+     * Return form action url for edit form
      *
      * @return string
      */
     #[\Override]
-    public function getSaveUrl()
+    public function getFormActionUrl()
     {
         return $this->getUrl('*/*/save', ['_current' => true, 'back' => null]);
     }

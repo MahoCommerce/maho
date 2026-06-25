@@ -125,12 +125,12 @@ class Mage_Adminhtml_Block_Tag_Edit extends Mage_Adminhtml_Block_Widget_Form_Con
     }
 
     /**
-     * Retrieve Tag Save URL
+     * Retrieve Tag form action URL
      *
      * @return string
      */
     #[\Override]
-    public function getSaveUrl()
+    public function getFormActionUrl()
     {
         return $this->getUrl('*/*/save', ['_current' => true]);
     }
