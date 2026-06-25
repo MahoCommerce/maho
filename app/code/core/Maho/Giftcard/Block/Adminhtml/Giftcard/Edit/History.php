@@ -24,22 +24,26 @@ declare(strict_types=1);
  */
 class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_History extends Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+    #[\Override]
     public function getTabLabel(): string
     {
         return Mage::helper('giftcard')->__('Transaction History');
     }
 
+    #[\Override]
     public function getTabTitle(): string
     {
         return Mage::helper('giftcard')->__('Transaction History');
     }
 
+    #[\Override]
     public function canShowTab(): bool
     {
         $model = Mage::registry('current_giftcard');
         return $model !== null && $model->getId() !== null;
     }
 
+    #[\Override]
     public function isHidden(): bool
     {
         return false;

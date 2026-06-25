@@ -17,21 +17,25 @@ declare(strict_types=1);
  */
 class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+    #[\Override]
     public function getTabLabel(): string
     {
         return Mage::helper('giftcard')->__('General');
     }
 
+    #[\Override]
     public function getTabTitle(): string
     {
         return Mage::helper('giftcard')->__('General');
     }
 
+    #[\Override]
     public function canShowTab(): bool
     {
         return true;
     }
 
+    #[\Override]
     public function isHidden(): bool
     {
         return false;
@@ -223,7 +227,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
         // and review prices to 2dp.
         $data = $model->getData();
         foreach (['balance', 'initial_balance'] as $field) {
-            if (isset($data[$field]) && $data[$field] !== '' && $data[$field] !== null) {
+            if (isset($data[$field]) && $data[$field] !== '') {
                 $data[$field] = number_format((float) $data[$field], 2, '.', '');
             }
         }

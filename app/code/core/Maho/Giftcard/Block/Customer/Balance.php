@@ -25,14 +25,19 @@ class Maho_Giftcard_Block_Customer_Balance extends Mage_Core_Block_Template
     {
         $session = Mage::getSingleton('giftcard/session');
         $data = $session->getLastGiftcardLookup();
-        if (!is_array($data)) {
+        if (!is_array($data) || !isset($data['code'], $data['balance'], $data['currency_code'])) {
             return null;
         }
         // One-shot: consume on render so a back/forward navigation doesn't
         // re-display the previous customer's check result if the customer
         // shares a device.
         $session->setLastGiftcardLookup(null);
-        return $data;
+        return [
+            'code'          => (string) $data['code'],
+            'balance'       => (float) $data['balance'],
+            'currency_code' => (string) $data['currency_code'],
+            'expires_at'    => isset($data['expires_at']) ? (string) $data['expires_at'] : null,
+        ];
     }
 
     public function getCheckUrl(): string

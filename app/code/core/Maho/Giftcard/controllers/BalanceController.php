@@ -30,7 +30,7 @@ class Maho_Giftcard_BalanceController extends Mage_Core_Controller_Front_Action
         parent::preDispatch();
 
         if (!$this->getRequest()->isDispatched()) {
-            return;
+            return $this;
         }
 
         $action = strtolower((string) $this->getRequest()->getActionName());
@@ -39,6 +39,8 @@ class Maho_Giftcard_BalanceController extends Mage_Core_Controller_Front_Action
         ) {
             $this->setFlag('', self::FLAG_NO_DISPATCH, true);
         }
+
+        return $this;
     }
 
     /**
@@ -89,8 +91,11 @@ class Maho_Giftcard_BalanceController extends Mage_Core_Controller_Front_Action
             return;
         }
 
+        /** @var Maho_Giftcard_Model_Giftcard $card */
         $card = Mage::getModel('giftcard/giftcard');
-        $card->getResource()->loadByCode($card, $code);
+        /** @var Maho_Giftcard_Model_Resource_Giftcard $resource */
+        $resource = $card->getResource();
+        $resource->loadByCode($card, $code);
 
         $websiteId = (int) Mage::app()->getStore()->getWebsiteId();
 

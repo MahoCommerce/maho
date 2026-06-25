@@ -225,7 +225,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Grid extends Mage_Adminhtml_Block_W
             return;
         }
         $collection->getSelect()->having(
-            new Maho\Db\Expr(sprintf('FIND_IN_SET(%d, website_ids) > 0', (int) $value)),
+            sprintf('FIND_IN_SET(%d, website_ids) > 0', (int) $value),
         );
     }
 }
