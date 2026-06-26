@@ -12,6 +12,7 @@ namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -80,10 +81,47 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Order not found');
         }
 
-        if (!$order->canShip()) {
-            throw new BadRequestHttpException('Order cannot be shipped (already fully shipped or not in a shippable state)');
+        // Serialize concurrent shipment creation on the same order. Without this,
+        // two simultaneous requests both pass canShip() and both register(),
+        // decrementing inventory twice and writing duplicate shipments. GET_LOCK
+        // gives a per-order critical section that releases on disconnect
+        // (mirrors CreditMemoProcessor and OrderService::placeAdminOrder).
+        $write = \Mage::getSingleton('core/resource')->getConnection('core_write');
+        $lockName = 'maho_shipment_order:' . (int) $order->getId();
+        $acquired = (int) $write->fetchOne('SELECT GET_LOCK(?, 5)', [$lockName]);
+        if ($acquired !== 1) {
+            throw new ConflictHttpException('A shipment is already being created for this order');
         }
 
+        try {
+            // Re-load the order under the lock so canShip() sees the live shipped
+            // quantities, not a value another request changed while we waited.
+            $order->load($orderId);
+            if (!$order->canShip()) {
+                throw new BadRequestHttpException('Order cannot be shipped (already fully shipped or not in a shippable state)');
+            }
+
+            $shipment = $this->buildAndRegisterShipment($order, $items, $tracks, $comment, $notifyCustomer);
+        } finally {
+            $write->query('SELECT RELEASE_LOCK(?)', [$lockName]);
+        }
+
+        // Send notification email outside the lock so SMTP latency does not
+        // block concurrent shipment requests for the same order.
+        if ($notifyCustomer) {
+            $shipment->sendEmail(true, $comment ?? '');
+        }
+
+        return Shipment::fromModel($shipment);
+    }
+
+    private function buildAndRegisterShipment(
+        \Mage_Sales_Model_Order $order,
+        ?array $items,
+        array $tracks,
+        ?string $comment,
+        bool $notifyCustomer,
+    ): \Mage_Sales_Model_Order_Shipment {
         // Build qty map: orderItemId => qty to ship
         $qtyMap = [];
         if ($items !== null && count($items) > 0) {
@@ -144,11 +182,6 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
             ->addObject($shipment->getOrder())
             ->save();
 
-        // Send notification email
-        if ($notifyCustomer) {
-            $shipment->sendEmail(true, $comment ?? '');
-        }
-
-        return Shipment::fromModel($shipment);
+        return $shipment;
     }
 }

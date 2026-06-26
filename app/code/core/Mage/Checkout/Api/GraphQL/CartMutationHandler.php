@@ -327,10 +327,14 @@ class CartMutationHandler
         if (!$giftcard->getId()) {
             throw NotFoundException::giftCard($code);
         }
+        $currencyCode = \Mage::app()->getStore()->getCurrentCurrencyCode();
         return ['checkGiftCardBalance' => [
             'code' => $giftcard->getCode(),
-            'currency' => \Mage::app()->getStore()->getCurrentCurrencyCode(),
-            'balance' => (float) $giftcard->getBalance(),
+            'currency' => $currencyCode,
+            // Convert to the display currency we label it with: getBalance() with
+            // no argument returns the raw base-currency amount, which would be
+            // mislabelled in a multi-currency store.
+            'balance' => (float) $giftcard->getBalance($currencyCode),
             'status' => $giftcard->getStatus(),
             'isValid' => $giftcard->isValid(),
             'expiresAt' => $giftcard->getExpiresAt(),
@@ -531,6 +535,11 @@ class CartMutationHandler
             return $giftcards;
         }
 
+        // Report the balance in the cart's currency. getBalance() with no
+        // argument returns the raw base-currency amount, which would be
+        // mislabelled against the cart currency in a multi-currency store.
+        $currencyCode = $quote->getQuoteCurrencyCode() ?: \Mage::app()->getStore()->getCurrentCurrencyCode();
+
         foreach ($codesData as $code => $appliedAmount) {
             /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
             $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
@@ -538,7 +547,7 @@ class CartMutationHandler
                 $giftcards[] = [
                     'code' => $code,
                     'appliedAmount' => (float) $appliedAmount,
-                    'balance' => (float) $giftcard->getBalance(),
+                    'balance' => (float) $giftcard->getBalance($currencyCode),
                 ];
             }
         }

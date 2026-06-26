@@ -117,6 +117,9 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
                     'timeout' => 10,
                     'follow_location' => 0,
                     'max_redirects' => 0,
+                    // Cap the buffered response so a server at the validated IP
+                    // can't stream an arbitrarily large body and OOM the worker.
+                    'max_length' => 10 * 1024 * 1024,
                 ],
                 // The URL is pinned to the validated IP, so for HTTPS the TLS
                 // layer would otherwise validate the certificate against the IP

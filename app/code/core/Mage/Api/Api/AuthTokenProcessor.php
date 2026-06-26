@@ -333,7 +333,9 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
             }
 
             if (!isset($payload->customer_id)) {
-                throw new UnauthorizedHttpException('Bearer', 'Token does not contain customer information');
+                // Refresh is only defined for customer tokens. Admin and API-user
+                // integrations must re-authenticate with their own grant instead.
+                throw new UnauthorizedHttpException('Bearer', 'Token refresh is only supported for customer tokens; re-authenticate to obtain a new token');
             }
 
             $customer = \Mage::getModel('customer/customer')->load($payload->customer_id);

@@ -43,8 +43,13 @@ class GraphQlPermissionListener
     {
         $request = $event->getRequest();
 
-        // Only intercept GraphQL endpoint
-        if ($request->getPathInfo() !== '/api/graphql' || $request->getMethod() !== 'POST') {
+        // Only intercept the GraphQL endpoint. API Platform's GraphQL entrypoint
+        // accepts GET (query passed as the `query` query-string parameter) as
+        // well as POST, so both methods must be gated here or a GET request
+        // would bypass per-resource permission enforcement entirely.
+        if ($request->getPathInfo() !== '/api/graphql'
+            || !in_array($request->getMethod(), ['GET', 'POST'], true)
+        ) {
             return;
         }
 
@@ -129,6 +134,13 @@ class GraphQlPermissionListener
      */
     private function extractQuery(Request $request): ?string
     {
+        // GET transport: API Platform reads the operation from the `query`
+        // query-string parameter. There is no request body to inspect.
+        if ($request->getMethod() === 'GET') {
+            $query = $request->query->get('query');
+            return is_string($query) && $query !== '' ? $query : null;
+        }
+
         $contentType = (string) $request->headers->get('Content-Type', '');
 
         // Raw GraphQL transport: the entire body is the query.

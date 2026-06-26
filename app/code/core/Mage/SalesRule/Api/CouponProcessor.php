@@ -92,6 +92,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
     private function doCreate(array $data): Coupon
     {
         $this->requireAdminOrApiUser('Coupon creation requires admin or API access');
+        $this->requireApiPermission('coupons/create');
 
         $code = $data['code'] ?? '';
         $this->validateCouponCode($code);
@@ -158,6 +159,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
     private function doUpdate(int $id, array $data): Coupon
     {
         $this->requireAdminOrApiUser('Coupon update requires admin or API access');
+        $this->requireApiPermission('coupons/write');
 
         /** @var \Mage_SalesRule_Model_Coupon $coupon */
         $coupon = \Mage::getModel('salesrule/coupon');
@@ -241,6 +243,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
     private function doDelete(int $id): null
     {
         $this->requireAdminOrApiUser('Coupon deletion requires admin or API access');
+        $this->requireApiPermission('coupons/delete');
 
         if (!$id) {
             throw new BadRequestHttpException('Coupon ID is required');

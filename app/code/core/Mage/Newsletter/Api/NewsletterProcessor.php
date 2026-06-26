@@ -75,6 +75,10 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Invalid email address');
         }
 
+        // IP-level cap first: the per-email bucket alone is trivially bypassed
+        // by submitting many distinct addresses from one client, turning the
+        // endpoint into an uncapped confirmation-email relay. Mirrors unsubscribe().
+        $this->checkRateLimitByIp('newsletter_subscribe', 'newsletter_subscribe', 3600);
         $this->checkRateLimit('newsletter_subscribe:email:' . strtolower($email), 'newsletter_subscribe', 3600);
 
         if ($customerId === null) {

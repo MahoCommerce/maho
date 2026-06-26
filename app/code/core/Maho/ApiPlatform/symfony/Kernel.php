@@ -240,7 +240,7 @@ class Kernel extends BaseKernel
                 '^/api/' => [
                     'allow_origin' => $corsAllowOrigin,
                     'allow_credentials' => false,
-                    'allow_headers' => ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Store-Code', 'X-Idempotency-Key'],
+                    'allow_headers' => ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Store-Code', 'X-Idempotency-Key', 'X-Order-Token'],
                     'allow_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
                     'max_age' => 3600,
                 ],

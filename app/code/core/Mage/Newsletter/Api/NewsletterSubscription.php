@@ -50,7 +50,11 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'item_query', description: 'Get newsletter subscription', security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')"),
+        // Admin/API only: the generic by-ID query has no per-record ownership
+        // check (it falls through to CrudProvider::provideItem), so exposing it
+        // to ROLE_USER would let any logged-in customer read every subscriber's
+        // email/customerId by iterating IDs. Customers use newsletterStatus.
+        new Query(name: 'item_query', description: 'Get newsletter subscription', security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')"),
         new QueryCollection(name: 'collection_query', description: 'Get newsletter subscriptions', security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')"),
         new Query(
             name: 'newsletterStatus',
