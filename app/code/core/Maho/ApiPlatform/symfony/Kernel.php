@@ -98,7 +98,8 @@ class Kernel extends BaseKernel
     /**
      * Symfony writes its compiled container/route/metadata cache here on first
      * request. The directory must be writable by the web user; deployment
-     * scripts should pre-warm it (see docs/API.md → Deployment Notes) so the
+     * scripts should pre-warm it (see https://mahocommerce.com/api/v2/extending/
+     * → Deployment Notes) so the
      * first /api/* request after a release doesn't pay container-compile cost.
      */
     #[\Override]
@@ -240,7 +241,7 @@ class Kernel extends BaseKernel
                 '^/api/' => [
                     'allow_origin' => $corsAllowOrigin,
                     'allow_credentials' => false,
-                    'allow_headers' => ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Store-Code', 'X-Idempotency-Key', 'X-Order-Token'],
+                    'allow_headers' => ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With', 'X-Store-Code', 'X-Idempotency-Key', 'X-Order-Token', 'If-None-Match'],
                     'allow_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
                     'max_age' => 3600,
                 ],
