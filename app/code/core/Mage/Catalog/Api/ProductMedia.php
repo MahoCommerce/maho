@@ -11,16 +11,17 @@ declare(strict_types=1);
 namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
-use Maho\Config\ApiResource;
+use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 
+// Writes are gated by products/write|delete in ProductMediaProcessor (a product
+// facet, not a separately-grantable resource), so this uses the plain API
+// Platform attribute and is intentionally absent from the permission registry.
 #[ApiResource(
-    mahoId: 'product-images',
-    mahoOperations: ['read' => 'View', 'write' => 'Upload & Update', 'delete' => 'Delete'],
     shortName: 'ProductMedia',
     description: 'Product media gallery images',
     provider: ProductMediaProvider::class,

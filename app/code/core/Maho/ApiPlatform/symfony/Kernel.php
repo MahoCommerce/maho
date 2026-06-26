@@ -327,6 +327,11 @@ class Kernel extends BaseKernel
         $services->load('Maho\\ApiPlatform\\', '%kernel.project_dir%/')
             ->exclude(['%kernel.project_dir%/Kernel.php', '%kernel.project_dir%/config/']);
 
+        // Expose API Platform's inflector (the instance FieldsBuilder uses) under
+        // its public interface so ApiPermissionRegistry can autowire it and derive
+        // GraphQL field names with identical pluralisation.
+        $services->alias(\ApiPlatform\Metadata\InflectorInterface::class, 'api_platform.metadata.inflector');
+
         $services->set(EventListener\ApiExceptionListener::class)
             ->arg('$debug', '%kernel.debug%')
             ->tag('kernel.event_subscriber');

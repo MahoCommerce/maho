@@ -10,6 +10,11 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Security;
 
+use ApiPlatform\Metadata\GraphQl\Query;
+use ApiPlatform\Metadata\GraphQl\QueryCollection;
+use ApiPlatform\Metadata\InflectorInterface;
+use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
+use ApiPlatform\Metadata\Resource\Factory\ResourceNameCollectionFactoryInterface;
 use GraphQL\Language\AST\FieldNode;
 use GraphQL\Language\AST\FragmentDefinitionNode;
 use GraphQL\Language\AST\FragmentSpreadNode;
@@ -33,6 +38,23 @@ use GraphQL\Language\Parser;
  */
 class ApiPermissionRegistry
 {
+    /**
+     * API Platform metadata factories, used to build the GraphQL field→resource
+     * index from resolved metadata (see graphQlFieldIndex()). Autowired in the
+     * API kernel; null when the class is instantiated with `new` outside the
+     * kernel (admin role editor), where only the compiled-file accessors are used.
+     */
+    public function __construct(
+        private readonly ?ResourceNameCollectionFactoryInterface $nameFactory = null,
+        private readonly ?ResourceMetadataCollectionFactoryInterface $metadataFactory = null,
+        private readonly ?InflectorInterface $inflector = null,
+    ) {}
+
+    /**
+     * Memoized GraphQL field index. @var array<string, array{resource: string, kind: string, name: string, public: bool}>|null
+     */
+    private ?array $graphQlIndex = null;
+
     /**
      * Path to the compiled permissions file, relative to the Maho project root.
      */
@@ -293,9 +315,35 @@ class ApiPermissionRegistry
             $operationType = $definition->operation ?? 'query';
             $topLevelFields = $this->collectTopLevelFields($definition->selectionSet, $fragments);
 
+            $runtimeIndex = $this->graphQlFieldIndex();
+
             foreach ($topLevelFields as $fieldName) {
                 // Skip introspection fields
                 if (str_starts_with($fieldName, '__')) {
+                    continue;
+                }
+
+                // Preferred path: resolve the real schema field name against the
+                // runtime index built from API Platform's resolved metadata. This
+                // is keyed by the actual exposed field name (e.g. `orders`,
+                // `customerOrdersOrders`, `createCouponCoupon`), unlike the
+                // compiled graphQlFieldMap which is keyed by operation name and
+                // therefore misses most fields. Without this, an unmapped query
+                // field fell through to "no permission required" (fail-open),
+                // letting any API user read e.g. /orders regardless of grants.
+                if (isset($runtimeIndex[$fieldName])) {
+                    $info = $runtimeIndex[$fieldName];
+                    // Public operations (security: 'true') need no grant, mirroring
+                    // REST's isPublicOperation skip, so an API user reaches public
+                    // catalog/store reads like anyone else.
+                    if ($info['public']) {
+                        continue;
+                    }
+                    if ($info['kind'] === 'read') {
+                        $permissions[] = $info['resource'] . '/read';
+                        continue;
+                    }
+                    $permissions[] = $info['resource'] . '/' . $this->classifyMutation($info['name'], $info['resource']);
                     continue;
                 }
 
@@ -367,5 +415,174 @@ class ApiPermissionRegistry
         }
 
         return $fields;
+    }
+
+    /**
+     * Build (and memoize) a map of GraphQL schema field name → resource metadata,
+     * derived from API Platform's RESOLVED resource metadata.
+     *
+     * The compiled `graphQlFieldMap` is keyed by the operation `name` (e.g.
+     * `productBySku`, `customerOrders`), but API Platform exposes those operations
+     * under field names suffixed with the (pluralized) short name (e.g.
+     * `productBySkuProduct`, `customerOrdersOrders`) and also auto-generates
+     * default operations the compiler never sees (e.g. `orders`, `createMedia`).
+     * Resolving against the live metadata closes both gaps so every GraphQL
+     * operation an API user can invoke maps back to its resource + permission.
+     *
+     * Returns an empty index outside the API kernel (factories not injected),
+     * where this method is never called.
+     *
+     * @return array<string, array{resource: string, kind: string, name: string, public: bool}>
+     */
+    private function graphQlFieldIndex(): array
+    {
+        if ($this->graphQlIndex !== null) {
+            return $this->graphQlIndex;
+        }
+        if ($this->nameFactory === null || $this->metadataFactory === null || $this->inflector === null) {
+            return $this->graphQlIndex = [];
+        }
+
+        // API Platform's own inflector instance (the one FieldsBuilder uses), so
+        // pluralisation matches the generated schema field names exactly.
+        $inflector = $this->inflector;
+        $index = [];
+
+        foreach ($this->nameFactory->create() as $resourceClass) {
+            $resourceId = $this->resolveResourceId($resourceClass);
+            if ($resourceId === null) {
+                continue;
+            }
+
+            foreach ($this->metadataFactory->create($resourceClass) as $metadata) {
+                $shortName = $metadata->getShortName();
+                if (!is_string($shortName) || $shortName === '') {
+                    continue;
+                }
+
+                foreach ($metadata->getGraphQlOperations() ?? [] as $operation) {
+                    $name = $operation->getName();
+                    if (!is_string($name) || $name === '') {
+                        continue;
+                    }
+
+                    // Replicate ApiPlatform\GraphQl\Type\FieldsBuilder field naming
+                    // (FieldsBuilder.php:88/110/136), the runtime listener matches
+                    // against these exact field names.
+                    if ($operation instanceof QueryCollection) {
+                        $base = $name === 'collection_query' ? $shortName : $name . $shortName;
+                        $field = $inflector->pluralize(lcfirst($base));
+                        $kind = 'read';
+                    } elseif ($operation instanceof Query) {
+                        $field = $name === 'item_query' ? lcfirst($shortName) : lcfirst($name . $shortName);
+                        $kind = 'read';
+                    } else {
+                        // Mutation / DeleteMutation. Internal snake_case identifiers
+                        // (e.g. add_cart_item) are not exposed as schema fields.
+                        if (str_contains($name, '_')) {
+                            continue;
+                        }
+                        $field = $name . $shortName;
+                        $kind = 'mutation';
+                    }
+
+                    $security = $operation->getSecurity();
+                    $public = is_string($security) && trim($security, '" ') === 'true';
+
+                    // First definition wins, mirrors the compiler's "canonical
+                    // operation registered before aliases" precedence.
+                    $index[$field] ??= [
+                        'resource' => $resourceId,
+                        'kind' => $kind,
+                        'name' => $name,
+                        'public' => $public,
+                    ];
+                }
+            }
+        }
+
+        return $this->graphQlIndex = $index;
+    }
+
+    /**
+     * Resolve a resource class to its Maho permission id (mahoId), reading the
+     * `#[Maho\Config\ApiResource]` attribute argument directly to avoid running
+     * the heavy parent constructor. Falls back to the same short-name derivation
+     * the compiler uses (deriveIdFromShortName) when mahoId isn't set, and
+     * returns null for resources that carry no Maho attribute at all.
+     */
+    private function resolveResourceId(string $resourceClass): ?string
+    {
+        try {
+            $reflection = new \ReflectionClass($resourceClass);
+        } catch (\ReflectionException) {
+            return null;
+        }
+
+        $attributes = $reflection->getAttributes(\Maho\Config\ApiResource::class, \ReflectionAttribute::IS_INSTANCEOF);
+        if ($attributes === []) {
+            return null;
+        }
+
+        foreach ($attributes as $attribute) {
+            $args = $attribute->getArguments();
+            if (isset($args['mahoId']) && is_string($args['mahoId']) && $args['mahoId'] !== '') {
+                return $args['mahoId'];
+            }
+            $shortName = $args['shortName'] ?? null;
+            if (is_string($shortName) && $shortName !== '') {
+                return $this->deriveResourceId($shortName);
+            }
+        }
+
+        return $this->deriveResourceId($reflection->getShortName());
+    }
+
+    /**
+     * Mirror of ApiPermissionCompiler::deriveIdFromShortName so a resource whose
+     * mahoId is auto-derived resolves to the same id the compiled registry uses.
+     */
+    private function deriveResourceId(string $shortName): ?string
+    {
+        if ($shortName === '') {
+            return null;
+        }
+        $kebab = strtolower((string) preg_replace('/(?<!^)([A-Z])/', '-$1', $shortName));
+        if (str_ends_with($kebab, 'y') && preg_match('/[aeiou]y$/', $kebab) === 0) {
+            return substr($kebab, 0, -1) . 'ies';
+        }
+        if (preg_match('/(s|x|z|ch|sh)$/', $kebab) === 1) {
+            return $kebab . 'es';
+        }
+        if (str_ends_with($kebab, 's')) {
+            return $kebab;
+        }
+        return $kebab . 's';
+    }
+
+    /**
+     * Classify a mutation operation name into a create/write/delete permission
+     * verb, mirroring the heuristic used for the compiled-map fallback path:
+     * delete is only used when the resource actually defines a delete operation,
+     * so a mutation is never gated behind an ungrantable permission.
+     */
+    private function classifyMutation(string $name, string $resource): string
+    {
+        $lower = strtolower($name);
+        // create/delete are only used when the resource actually defines that
+        // operation (mirrors ApiUserVoter::resolveOperation for REST); otherwise
+        // fall back to the catch-all write permission so a mutation is never gated
+        // behind a permission that can never be granted.
+        if (array_any(self::CREATE_PREFIXES, fn($prefix) => str_starts_with($lower, $prefix))
+            && $this->resourceHasOperation($resource, 'create')
+        ) {
+            return 'create';
+        }
+        if (array_any(self::DELETE_PREFIXES, fn($prefix) => str_starts_with($lower, $prefix))
+            && $this->resourceHasOperation($resource, 'delete')
+        ) {
+            return 'delete';
+        }
+        return 'write';
     }
 }

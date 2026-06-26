@@ -123,10 +123,28 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             $quote,
             $byMasked,
             $this->getAuthenticatedCustomerId(),
-            $this->isAdmin() || $this->isApiUser(),
+            $this->isPrivilegedCartActor(),
         );
 
         return $quote;
+    }
+
+    /**
+     * Whether the caller may bypass cart ownership and act on any cart.
+     *
+     * Admins are gated upstream by AdminAclListener (Cart::ADMIN_RESOURCE), so
+     * they're trusted here. A service token is trusted only when it actually
+     * holds the carts/write grant — a bare ROLE_API_USER token without it is
+     * treated as an ordinary caller and can't reach arbitrary carts through the
+     * enumerable numeric /carts/{id} path. This closes the gap left by the
+     * overridden process() bypassing the base Processor's requirePermission().
+     */
+    private function isPrivilegedCartActor(): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+        return $this->isApiUser() && $this->getAuthorizedUser()->hasPermission('carts/write');
     }
 
     /**
@@ -457,7 +475,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $requestedCustomerId = $args['customerId'] ?? null;
 
         // Admin/POS users can assign any customer to any cart
-        if ($this->isAdmin() || $this->isApiUser()) {
+        if ($this->isPrivilegedCartActor()) {
             if (!$requestedCustomerId) {
                 throw new \RuntimeException('Customer ID is required');
             }

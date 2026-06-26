@@ -11,15 +11,17 @@ declare(strict_types=1);
 namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
-use Maho\Config\ApiResource;
+use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 
+// Writes are gated by products/write|delete in ProductLinkProcessor (a product
+// facet, not a separately-grantable resource), so this uses the plain API
+// Platform attribute and is intentionally absent from the permission registry.
 #[ApiResource(
-    mahoOperations: ['read' => 'View', 'write' => 'Manage'],
     shortName: 'ProductLink',
     description: 'Product links (related, cross-sell, up-sell)',
     // URL segments are kebab-case (cross-sell, up-sell); the internal Magento

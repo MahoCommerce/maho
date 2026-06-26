@@ -103,7 +103,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $orderNote = $args['orderNote'] ?? null;
         // POS-only fields: only trust them from admin/api callers so a guest
         // cannot stamp an arbitrary employee id or cash amount onto the order.
-        $isPrivileged = $this->isAdmin() || $this->isApiUser();
+        $isPrivileged = $this->isPrivilegedOrderActor();
         $cashTendered = ($isPrivileged && isset($args['cashTendered'])) ? (float) $args['cashTendered'] : null;
         $employeeId = ($isPrivileged && isset($args['employeeId'])) ? (int) $args['employeeId'] : null;
         $paymentMethod = $args['paymentMethod'] ?? null;
@@ -269,8 +269,25 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             $quote,
             $accessedByMaskedId,
             $this->getAuthenticatedCustomerId(),
-            $this->isAdmin() || $this->isApiUser(),
+            $this->isPrivilegedOrderActor(),
         );
+    }
+
+    /**
+     * Whether the caller may place/manage an order on any cart, bypassing
+     * ownership. Admins are gated upstream by AdminAclListener
+     * (Order::ADMIN_RESOURCE); a service token is trusted only when it holds the
+     * orders/create grant. A bare ROLE_API_USER token without it stays subject
+     * to the guest masked-id / customer-ownership rules, so it can't place an
+     * order from an arbitrary enumerable cart id. Closes the gap left by the
+     * overridden process() bypassing the base Processor's requirePermission().
+     */
+    private function isPrivilegedOrderActor(): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+        return $this->isApiUser() && $this->getAuthorizedUser()->hasPermission('orders/create');
     }
 
 }
