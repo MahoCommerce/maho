@@ -99,6 +99,23 @@ it('requires a grantable permission for privileged GraphQL mutations', function 
 it('leaves public catalog/reference GraphQL reads open', function (): void {
     expect(authzRegistry()->resolveGraphQlPermissions('{ products { id } }'))->toBe([]);
     expect(authzRegistry()->resolveGraphQlPermissions('{ countries { id } }'))->toBe([]);
+    // A resource declared with the plain ApiPlatform attribute (no Maho
+    // permission metadata) resolves through the non-indexed fallback; its public
+    // read must stay open.
+    expect(authzRegistry()->resolveGraphQlPermissions('{ currencies { id } }'))->toBe([]);
+});
+
+it('fails closed for mutations on resources without permission metadata', function (): void {
+    $registry = authzRegistry();
+    // createBundleOption is an auto-generated mutation on a plain-attribute
+    // resource: it must require *some* permission (never fail open), and that
+    // permission must be one no role can hold, so it is denied outright rather
+    // than gated behind a grantable permission by accident.
+    $perms = $registry->resolveGraphQlPermissions('mutation { createBundleOption(input: {}) { bundleOption { id } } }');
+    expect($perms)->not->toBe([]);
+    foreach ($perms as $perm) {
+        expect($registry->getPermissionIds())->not->toContain($perm);
+    }
 });
 
 it('never leaves a non-public GraphQL field without a permission (no fail-open)', function (): void {

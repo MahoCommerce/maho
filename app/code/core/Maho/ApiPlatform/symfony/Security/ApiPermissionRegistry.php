@@ -295,8 +295,6 @@ class ApiPermissionRegistry
             throw new \RuntimeException('Unable to parse GraphQL query for permission analysis.', 0, $e);
         }
 
-        $fieldMap = self::load()['graphQlFieldMap'];
-
         // Build fragment map for resolving FragmentSpreadNode references
         $fragments = [];
         foreach ($document->definitions as $definition) {
@@ -347,29 +345,24 @@ class ApiPermissionRegistry
                     continue;
                 }
 
-                $resource = $fieldMap[$fieldName] ?? null;
-
+                // Field absent from the runtime index: only resources declared
+                // with the plain ApiPlatform attribute (no Maho permission
+                // metadata) reach here — public catalog/reference reads, plus a
+                // few auto-generated mutations on read-only resources. A read on
+                // them is public so needs no grant; a mutation resolves to a
+                // field-name-derived permission no role can hold, so it fails
+                // closed. The compiled graphQlFieldMap is deliberately not
+                // consulted: it is keyed by operation name, not schema field name,
+                // so it never matched a real field here and was the original
+                // fail-open's root cause (the runtime index above replaces it).
                 if ($operationType === 'query') {
-                    if ($resource === null) {
-                        continue;
-                    }
-                    $permissions[] = $resource . '/read';
-                } else {
-                    $fieldLower = strtolower($fieldName);
-                    if (array_any(self::CREATE_PREFIXES, fn($prefix) => str_starts_with($fieldLower, $prefix))) {
-                        $op = 'create';
-                    } elseif ($resource !== null
-                        && array_any(self::DELETE_PREFIXES, fn($prefix) => str_starts_with($fieldLower, $prefix))
-                        && $this->resourceHasOperation($resource, 'delete')
-                    ) {
-                        // Destructive mutation on a resource that defines a distinct
-                        // delete permission — require it instead of plain write.
-                        $op = 'delete';
-                    } else {
-                        $op = 'write';
-                    }
-                    $permissions[] = ($resource ?? $fieldName) . '/' . $op;
+                    continue;
                 }
+                $fieldLower = strtolower($fieldName);
+                $op = array_any(self::CREATE_PREFIXES, fn($prefix) => str_starts_with($fieldLower, $prefix))
+                    ? 'create'
+                    : 'write';
+                $permissions[] = $fieldName . '/' . $op;
             }
         }
 
