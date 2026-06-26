@@ -21,6 +21,7 @@ use ApiPlatform\Metadata\Put;
 // product facet, not a separately-grantable resource), so this uses the plain
 // API Platform attribute and is intentionally absent from the permission registry.
 #[ApiResource(
+    security: 'true',
     shortName: 'ProductTierPrice',
     description: 'Product tier prices (quantity-based pricing)',
     provider: ProductTierPriceProvider::class,
@@ -39,7 +40,7 @@ use ApiPlatform\Metadata\Put;
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
             processor: ProductTierPriceProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('products/write')",
             description: 'Replace all tier prices for a product',
         ),
         new Delete(
@@ -48,7 +49,7 @@ use ApiPlatform\Metadata\Put;
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
             processor: ProductTierPriceProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('products/delete')",
             description: 'Remove all tier prices from a product',
         ),
     ],

@@ -19,6 +19,7 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
+    security: 'true',
     mahoSection: 'System',
     mahoOperations: ['read' => 'View'],
     shortName: 'Country',

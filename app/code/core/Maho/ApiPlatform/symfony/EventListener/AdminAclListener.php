@@ -41,7 +41,8 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  * bypass cannot recur silently.
  *
  * Non-admin tokens (customer, API user) bypass this listener, they're gated
- * by the security expression and the ApiUserVoter / GraphQlPermissionListener.
+ * by each operation's `security:` expression, which API Platform evaluates for
+ * REST and GraphQL alike and routes to ApiUserVoter.
  *
  * Priority 4: after the firewall (8), after StoreContextAuthorizationListener
  * (6), and before any controller code runs.
@@ -80,7 +81,7 @@ class AdminAclListener
             return;
         }
 
-        // Only gate admin tokens. ROLE_API_USER and ROLE_USER are gated by
+        // Only gate admin tokens. Service-account and customer (ROLE_CUSTOMER) tokens are gated by
         // their own permission systems.
         if ($user->getAdminId() === null) {
             return;

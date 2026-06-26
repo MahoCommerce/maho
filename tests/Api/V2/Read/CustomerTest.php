@@ -89,7 +89,7 @@ describe('GET /api/rest/v2/customers', function (): void {
         $response = apiGet('/api/rest/v2/customers', customerToken());
 
         // CustomerProvider's collection branch enforces admin-or-api-user via
-        // requireAdmin(); a ROLE_USER token gets 403.
+        // requireAdmin(); a ROLE_CUSTOMER token gets 403.
         expect($response['status'])->toBe(403);
     });
 

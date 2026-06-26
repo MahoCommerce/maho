@@ -17,6 +17,7 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 
 #[ApiResource(
+    security: 'true',
     mahoId: 'url-resolver',
     mahoLabel: 'URL Resolver',
     mahoSection: 'System',

@@ -33,7 +33,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         new Get(
             uriTemplate: '/newsletter/status',
             name: 'status',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('newsletter/read')",
             description: 'Get subscription status for authenticated customer',
         ),
         new Post(
@@ -52,23 +52,25 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
     graphQlOperations: [
         // Admin/API only: the generic by-ID query has no per-record ownership
         // check (it falls through to CrudProvider::provideItem), so exposing it
-        // to ROLE_USER would let any logged-in customer read every subscriber's
+        // to ROLE_CUSTOMER would let any logged-in customer read every subscriber's
         // email/customerId by iterating IDs. Customers use newsletterStatus.
-        new Query(name: 'item_query', description: 'Get newsletter subscription', security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')"),
-        new QueryCollection(name: 'collection_query', description: 'Get newsletter subscriptions', security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')"),
+        new Query(name: 'item_query', description: 'Get newsletter subscription', security: "is_granted('ROLE_ADMIN') or is_granted('newsletter/read')"),
+        new QueryCollection(name: 'collection_query', description: 'Get newsletter subscriptions', security: "is_granted('ROLE_ADMIN') or is_granted('newsletter/read')"),
         new Query(
             name: 'newsletterStatus',
             args: [],
             description: 'Get subscription status for authenticated customer',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('newsletter/read')",
             resolver: CustomQueryResolver::class,
         ),
         new Mutation(
+            security: 'true',
             name: 'subscribeNewsletter',
             args: ['email' => ['type' => 'String']],
             description: 'Subscribe to newsletter',
         ),
         new Mutation(
+            security: 'true',
             name: 'unsubscribeNewsletter',
             args: ['email' => ['type' => 'String']],
             description: 'Unsubscribe from newsletter',

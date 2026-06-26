@@ -35,28 +35,35 @@ use Maho\ApiPlatform\CrudResource;
         new Post(
             uriTemplate: '/cms-pages',
             processor: CmsPageProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('cms-pages/write')",
             description: 'Creates a new CMS page',
         ),
         new Put(
             uriTemplate: '/cms-pages/{id}',
             processor: CmsPageProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('cms-pages/write')",
             description: 'Updates a CMS page',
         ),
         new Delete(
             uriTemplate: '/cms-pages/{id}',
             processor: CmsPageProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('cms-pages/delete')",
             description: 'Deletes a CMS page',
         ),
     ],
     graphQlOperations: [
         new Query(name: 'item_query', description: 'Get a CMS page by ID', security: 'true'),
         new QueryCollection(name: 'collection_query', description: 'Get CMS pages', security: 'true'),
-        new Query(name: 'cmsPage'),
-        new QueryCollection(name: 'cmsPages'),
+        new Query(
+            security: 'true',
+            name: 'cmsPage',
+        ),
         new QueryCollection(
+            security: 'true',
+            name: 'cmsPages',
+        ),
+        new QueryCollection(
+            security: 'true',
             name: 'cmsPagesByIdentifier',
             args: ['identifier' => ['type' => 'String!']],
         ),

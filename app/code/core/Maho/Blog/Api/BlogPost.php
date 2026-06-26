@@ -42,26 +42,35 @@ use Maho\ApiPlatform\CrudResource;
         new Post(
             uriTemplate: '/blog-posts',
             processor: CrudProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('blog-posts/write')",
             description: 'Creates a new blog post',
         ),
         new Put(
             uriTemplate: '/blog-posts/{id}',
             processor: CrudProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('blog-posts/write')",
             description: 'Updates a blog post',
         ),
         new Delete(
             uriTemplate: '/blog-posts/{id}',
             processor: CrudProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('blog-posts/delete')",
             description: 'Deletes a blog post',
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'item_query', description: 'Get a blog post by ID'),
-        new QueryCollection(name: 'collection_query', description: 'Get blog posts'),
+        new Query(
+            security: 'true',
+            name: 'item_query',
+            description: 'Get a blog post by ID',
+        ),
         new QueryCollection(
+            security: 'true',
+            name: 'collection_query',
+            description: 'Get blog posts',
+        ),
+        new QueryCollection(
+            security: 'true',
             name: 'blogPosts',
             args: ['urlKey' => ['type' => 'String']],
             description: 'Get blog posts, optionally filter by URL key',

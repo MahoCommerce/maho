@@ -19,6 +19,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 
 #[ApiResource(
+    security: 'true',
     shortName: 'DownloadableLink',
     description: 'Downloadable product links',
     provider: DownloadableLinkProvider::class,
@@ -37,7 +38,7 @@ use ApiPlatform\Metadata\Put;
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
             processor: DownloadableLinkProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('products/write')",
             description: 'Add a downloadable link',
         ),
         new Put(
@@ -46,7 +47,7 @@ use ApiPlatform\Metadata\Put;
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
             processor: DownloadableLinkProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('products/write')",
             description: 'Update a downloadable link',
         ),
         new Delete(
@@ -55,7 +56,7 @@ use ApiPlatform\Metadata\Put;
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
             processor: DownloadableLinkProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('products/delete')",
             description: 'Remove a downloadable link',
         ),
     ],

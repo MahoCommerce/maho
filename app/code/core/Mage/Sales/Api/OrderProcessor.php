@@ -277,7 +277,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
      * Whether the caller may place/manage an order on any cart, bypassing
      * ownership. Admins are gated upstream by AdminAclListener
      * (Order::ADMIN_RESOURCE); a service token is trusted only when it holds the
-     * orders/create grant. A bare ROLE_API_USER token without it stays subject
+     * orders/create grant. A bare service-account token without it stays subject
      * to the guest masked-id / customer-ownership rules, so it can't place an
      * order from an arbitrary enumerable cart id. Closes the gap left by the
      * overridden process() bypassing the base Processor's requirePermission().

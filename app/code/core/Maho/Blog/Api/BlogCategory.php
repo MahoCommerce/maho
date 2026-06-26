@@ -37,9 +37,18 @@ use Maho\ApiPlatform\CrudResource;
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'item_query', description: 'Get a blog category by ID'),
-        new QueryCollection(name: 'collection_query', description: 'Get blog categories'),
+        new Query(
+            security: 'true',
+            name: 'item_query',
+            description: 'Get a blog category by ID',
+        ),
         new QueryCollection(
+            security: 'true',
+            name: 'collection_query',
+            description: 'Get blog categories',
+        ),
+        new QueryCollection(
+            security: 'true',
             name: 'blogCategories',
             args: ['urlKey' => ['type' => 'String']],
             description: 'Get blog categories, optionally filter by URL key',

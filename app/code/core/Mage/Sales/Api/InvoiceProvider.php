@@ -94,10 +94,10 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
                 throw new NotFoundHttpException('Order not found');
             }
         } else {
-            // Admins and API users (permission already enforced upstream by
-            // ApiUserRestPermissionListener) may access any order's invoices,
-            // matching OrderProvider::canAccessOrder(). Customers are limited
-            // to their own orders.
+            // Admins and API users (permission already enforced upstream by the
+            // operation's `security:` expression) may access any order's
+            // invoices, matching OrderProvider::canAccessOrder(). Customers are
+            // limited to their own orders.
             if (!$this->isAdmin() && !$this->isApiUser()) {
                 $customerId = $order->getCustomerId();
                 if ($customerId) {

@@ -29,19 +29,19 @@ use Maho\ApiPlatform\CrudResource;
     operations: [
         new Get(
             uriTemplate: '/credit-memos/{id}',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/read')",
             description: 'Get a credit memo by ID',
         ),
         new GetCollection(
             uriTemplate: '/orders/{orderId}/credit-memos',
             uriVariables: ['orderId' => new Link(toProperty: 'orderId')],
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/read')",
             description: 'Get credit memos for an order',
         ),
         new Post(
             uriTemplate: '/orders/{orderId}/credit-memos',
             uriVariables: ['orderId' => new Link(toProperty: 'orderId')],
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/create')",
             description: 'Create a credit memo / refund for an order',
         ),
     ],
@@ -49,18 +49,18 @@ use Maho\ApiPlatform\CrudResource;
         new Query(
             name: 'item_query',
             description: 'Get a credit memo by ID',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/read')",
         ),
         new QueryCollection(
             name: 'collection_query',
             description: 'Get all credit memos',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/read')",
         ),
         new QueryCollection(
             name: 'orderCreditMemos',
             description: 'Get credit memos for a specific order',
             args: ['orderId' => ['type' => 'Int!']],
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/read')",
         ),
         new Mutation(
             name: 'createCreditMemo',
@@ -73,7 +73,7 @@ use Maho\ApiPlatform\CrudResource;
                 'adjustmentNegative' => ['type' => 'Float'],
                 'offlineRefund' => ['type' => 'Boolean'],
             ],
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('credit-memos/create')",
         ),
     ],
 )]

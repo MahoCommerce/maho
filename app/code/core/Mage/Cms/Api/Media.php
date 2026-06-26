@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Cms\Api;
 
 use Maho\Config\ApiResource;
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
@@ -21,6 +22,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
 // `/media/{path}` separately because the post/list flow and the delete flow
 // have different uriTemplates. Both share the same maho permission identity.
 #[ApiResource(
+    security: "is_granted('ROLE_ADMIN') or is_granted('media/read')",
     mahoId: 'media',
     uriTemplate: '/media',
     shortName: 'Media',
@@ -29,7 +31,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
             processor: MediaProcessor::class,
             inputFormats: ['multipart' => ['multipart/form-data']],
             deserialize: false,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('media/write')",
             openapi: new Operation(
                 summary: 'Upload an image',
                 description: 'Uploads an image file, auto-converts to the configured image format.',
@@ -52,7 +54,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
         ),
         new GetCollection(
             provider: MediaProvider::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('media/read')",
             openapi: new Operation(
                 summary: 'List files in folder',
                 description: 'Lists image files in a media folder within wysiwyg/',
@@ -61,6 +63,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
     ],
 )]
 #[ApiResource(
+    security: "is_granted('ROLE_ADMIN') or is_granted('media/read')",
     mahoId: 'media',
     mahoSection: 'Content',
     mahoOperations: ['read' => 'List', 'write' => 'Upload', 'delete' => 'Delete'],
@@ -69,7 +72,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
     operations: [
         new Delete(
             processor: MediaProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('media/delete')",
             openapi: new Operation(
                 summary: 'Delete a media file',
                 description: 'Deletes a file from the media folder. Path must be within wysiwyg/.',
@@ -99,5 +102,6 @@ class Media extends \Maho\ApiPlatform\Resource
     public ?string $filename = null;
 
     /** @var string|null Relative path within media directory */
+    #[ApiProperty(identifier: true)]
     public ?string $path = null;
 }

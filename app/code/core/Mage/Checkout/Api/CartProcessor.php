@@ -134,7 +134,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
      *
      * Admins are gated upstream by AdminAclListener (Cart::ADMIN_RESOURCE), so
      * they're trusted here. A service token is trusted only when it actually
-     * holds the carts/write grant — a bare ROLE_API_USER token without it is
+     * holds the carts/write grant — a bare service-account token without it is
      * treated as an ordinary caller and can't reach arbitrary carts through the
      * enumerable numeric /carts/{id} path. This closes the gap left by the
      * overridden process() bypassing the base Processor's requirePermission().
@@ -166,7 +166,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
      * Create a cart for the authenticated REST caller.
      *
      * The /carts POST operation can only be reached when the firewall has
-     * already established a ROLE_USER, ROLE_ADMIN, or ROLE_API_USER token
+     * already established a customer (ROLE_CUSTOMER), admin (ROLE_ADMIN), or service-account token
      * (see security expression on the Cart resource). We resolve the customer
      * id from the auth context rather than from the request body so a
      * customer can't try to provision a cart against someone else's account.

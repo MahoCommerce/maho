@@ -29,7 +29,7 @@ use Maho\ApiPlatform\CrudResource;
     operations: [
         new Get(
             uriTemplate: '/shipments/{id}',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('shipments/read')",
             description: 'Get a shipment by ID',
         ),
         new GetCollection(
@@ -37,7 +37,7 @@ use Maho\ApiPlatform\CrudResource;
             uriVariables: [
                 'orderId' => new Link(toProperty: 'orderId'),
             ],
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('shipments/read')",
             description: 'Get shipments for an order',
         ),
         new Post(
@@ -45,7 +45,7 @@ use Maho\ApiPlatform\CrudResource;
             uriVariables: [
                 'orderId' => new Link(toProperty: 'orderId'),
             ],
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('shipments/create')",
             description: 'Create a shipment for an order',
         ),
     ],
@@ -53,18 +53,18 @@ use Maho\ApiPlatform\CrudResource;
         new Query(
             name: 'item_query',
             description: 'Get a shipment by ID',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('shipments/read')",
         ),
         new QueryCollection(
             name: 'collection_query',
             description: 'Get shipments',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('shipments/read')",
         ),
         new QueryCollection(
             name: 'orderShipments',
             args: ['orderId' => ['type' => 'Int!']],
             description: 'Get shipments for an order',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('shipments/read')",
         ),
         new Mutation(
             name: 'createShipment',
@@ -76,7 +76,7 @@ use Maho\ApiPlatform\CrudResource;
                 'notifyCustomer' => ['type' => 'Boolean', 'description' => 'Send shipment notification email'],
             ],
             description: 'Create a shipment for an order (full or partial)',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('shipments/create')",
         ),
     ],
 )]

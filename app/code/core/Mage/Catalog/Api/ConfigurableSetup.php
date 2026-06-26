@@ -19,6 +19,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 
 #[ApiResource(
+    security: 'true',
     shortName: 'ConfigurableSetup',
     description: 'Configurable product super attributes and child assignments',
     provider: ConfigurableSetupProvider::class,
@@ -37,7 +38,7 @@ use ApiPlatform\Metadata\Put;
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
             processor: ConfigurableSetupProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('products/write')",
             description: 'Set super attributes and assign all children',
         ),
         new Post(
@@ -46,7 +47,7 @@ use ApiPlatform\Metadata\Put;
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
             processor: ConfigurableSetupProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('products/write')",
             description: 'Add a child product',
         ),
         new Delete(
@@ -55,7 +56,7 @@ use ApiPlatform\Metadata\Put;
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
             processor: ConfigurableSetupProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('products/delete')",
             description: 'Remove a child product',
         ),
     ],

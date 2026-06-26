@@ -32,27 +32,28 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
     operations: [
         new Get(
             uriTemplate: '/giftcards/{id}',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('giftcards/read')",
             description: 'Get a gift card by ID',
         ),
         new Post(
             uriTemplate: '/giftcards',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('giftcards/create')",
             description: 'Create a new gift card',
         ),
     ],
     graphQlOperations: [
         new Query(
             name: 'item_query',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('giftcards/read')",
             description: 'Get a gift card by ID',
         ),
         new QueryCollection(
             name: 'collection_query',
             description: 'List gift cards',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('giftcards/read')",
         ),
         new Query(
+            security: 'true',
             name: 'checkGiftcardBalance',
             args: ['code' => ['type' => 'String!']],
             description: 'Check gift card balance by code',
@@ -72,7 +73,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
                 'expiresAt' => ['type' => 'String', 'description' => 'Expiration date (YYYY-MM-DD)'],
             ],
             description: 'Create a new gift card',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('giftcards/create')",
         ),
         new Mutation(
             name: 'adjustGiftcardBalance',
@@ -82,7 +83,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
                 'comment' => ['type' => 'String', 'description' => 'Reason for adjustment'],
             ],
             description: 'Adjust gift card balance',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('giftcards/write')",
         ),
     ],
 )]

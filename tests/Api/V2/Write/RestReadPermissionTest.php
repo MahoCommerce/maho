@@ -11,12 +11,13 @@ declare(strict_types=1);
 /**
  * API v2 REST read-permission enforcement tests.
  *
- * Granular read permissions for API-user tokens are enforced by
- * ApiUserRestPermissionListener (via ApiUserVoter) on REST GET requests, the
- * read-side counterpart to the requirePermission() checks in the Processors.
- * A key must hold `<resource>/read` (or `<resource>/all`, or `all`) to read a
- * resource that is gated to ROLE_API_USER. Public operations (security: 'true')
- * stay reachable regardless.
+ * Granular read permissions for API-user tokens are enforced by each read
+ * operation's `security: is_granted('<resource>/read')` expression (evaluated
+ * by ApiUserVoter) on REST GET requests, the read-side counterpart to the
+ * requirePermission() checks in the Processors. A key must hold
+ * `<resource>/read` (or `<resource>/all`, or `all`) to read a resource that is
+ * gated to ROLE_API_USER. Public operations (security: 'true') stay reachable
+ * regardless.
  *
  * @group write
  */

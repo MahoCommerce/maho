@@ -152,19 +152,10 @@ class AdminUserProvider implements UserProviderInterface
      */
     public static function getAdminRoles(\Mage_Admin_Model_User $admin): array
     {
-        $roles = ['ROLE_ADMIN'];
-
-        try {
-            // Super admin is whoever the Maho ACL grants the root 'all'
-            // resource, not a role whose name happens to contain a string.
-            $acl = \Mage::getResourceModel('admin/acl')->loadAcl();
-            if ($acl->isAllowed($admin->getAclRole(), 'all')) {
-                $roles[] = 'ROLE_SUPER_ADMIN';
-            }
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-        }
-
-        return $roles;
+        // Admin tokens carry only ROLE_ADMIN. Per-resource authorization is the
+        // admin's Maho ACL, enforced by AdminAclListener (ADMIN_RESOURCE) — not a
+        // Symfony role. Super-admin ('all' ACL) is likewise resolved through that
+        // ACL, so no separate ROLE_SUPER_ADMIN is needed.
+        return ['ROLE_ADMIN'];
     }
 }

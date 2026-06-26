@@ -51,21 +51,21 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new Post(
             uriTemplate: '/products',
             processor: ProductProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('products/write')",
             description: 'Creates a new product',
             normalizationContext: ['groups' => ['product:read', 'product:detail']],
         ),
         new Put(
             uriTemplate: '/products/{id}',
             processor: ProductProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('products/write')",
             description: 'Updates a product',
             normalizationContext: ['groups' => ['product:read', 'product:detail']],
         ),
         new Delete(
             uriTemplate: '/products/{id}',
             processor: ProductProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('products/delete')",
             description: 'Deletes a product',
         ),
     ],
@@ -88,11 +88,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
             security: 'true',
         ),
         new Query(
+            security: 'true',
             name: 'product',
             description: 'Get a product by ID',
             normalizationContext: ['groups' => ['product:read', 'product:detail']],
         ),
         new QueryCollection(
+            security: 'true',
             name: 'products',
             args: [
                 'search' => ['type' => 'String', 'description' => 'Search query'],
@@ -108,6 +110,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
             description: 'Get products with filtering and sorting',
         ),
         new Query(
+            security: 'true',
             name: 'productBySku',
             args: ['sku' => ['type' => 'String!']],
             description: 'Get a product by SKU',
@@ -115,6 +118,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
             normalizationContext: ['groups' => ['product:read', 'product:detail']],
         ),
         new Query(
+            security: 'true',
             name: 'productByBarcode',
             args: ['barcode' => ['type' => 'String!']],
             description: 'Get a product by barcode',
@@ -122,6 +126,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
             normalizationContext: ['groups' => ['product:read', 'product:detail']],
         ),
         new QueryCollection(
+            security: 'true',
             name: 'categoryProducts',
             args: [
                 'categoryId' => ['type' => 'Int!', 'description' => 'Category ID'],

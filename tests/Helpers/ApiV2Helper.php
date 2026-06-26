@@ -346,7 +346,7 @@ class ApiV2Helper
             'customer_id' => $customerId,
             'email' => self::fixtures('customer_email'),
             'type' => 'customer',
-            'roles' => ['ROLE_USER'],
+            'roles' => ['ROLE_CUSTOMER'],
         ]);
     }
 
@@ -381,7 +381,7 @@ class ApiV2Helper
             ->expiresAt($past->modify('+1 day')) // expired 1 day ago
             ->withClaim('customer_id', 1)
             ->withClaim('type', 'customer')
-            ->withClaim('roles', ['ROLE_USER'])
+            ->withClaim('roles', ['ROLE_CUSTOMER'])
             ->getToken($config->signer(), $config->signingKey());
 
         return $token->toString();
@@ -396,7 +396,7 @@ class ApiV2Helper
             'sub' => 'customer_1',
             'customer_id' => 1,
             'type' => 'customer',
-            'roles' => ['ROLE_USER'],
+            'roles' => ['ROLE_CUSTOMER'],
         ], 'wrong-secret-key-that-does-not-match');
     }
 

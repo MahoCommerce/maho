@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\GetCollection;
 use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
+    security: 'true',
     shortName: 'Currency',
     description: 'Available currencies with exchange rates',
     provider: CurrencyProvider::class,

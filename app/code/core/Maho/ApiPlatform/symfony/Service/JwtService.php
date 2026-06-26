@@ -71,7 +71,7 @@ class JwtService
             ->withClaim('customer_id', (int) $customer->getId())
             ->withClaim('email', $customer->getEmail())
             ->withClaim('type', 'customer')
-            ->withClaim('roles', ['ROLE_USER'])
+            ->withClaim('roles', ['ROLE_CUSTOMER'])
             ->getToken($config->signer(), $config->signingKey());
 
         return $token->toString();
@@ -128,7 +128,9 @@ class JwtService
             ->withClaim('api_user_id', (int) $apiUser->getId())
             ->withClaim('username', $apiUser->getUsername())
             ->withClaim('type', 'api_user')
-            ->withClaim('roles', ['ROLE_API_USER'])
+            // No role claim: service accounts are authorized by their granular
+            // `resource/op` permissions, not by a role (see OAuth2Authenticator).
+            ->withClaim('roles', [])
             ->withClaim('permissions', $permissions);
 
         // Scope the token to the api user's allowed stores, when set. A

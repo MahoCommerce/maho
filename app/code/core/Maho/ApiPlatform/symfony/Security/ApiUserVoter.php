@@ -10,30 +10,36 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Security;
 
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 /**
- * Voter that enforces resource-level permissions for API users.
+ * Voter that answers `is_granted('resource/operation')` permission checks for API users.
  *
- * Maps REST endpoints to resource names via ApiPermissionRegistry and checks
- * the permissions embedded in the JWT token against the requested resource + operation.
+ * Each API Platform operation declares its required permission literally in its
+ * `security:` expression (e.g. `is_granted('products/write')`). API Platform's
+ * access checker evaluates that expression for both REST and GraphQL, which routes
+ * the `resource/operation` attribute here. The voter simply checks the permissions
+ * embedded in the authenticated API user's token — no path parsing, no operation
+ * inference, no registry lookup.
+ *
+ * A `resource/op` grant is satisfied by either the exact permission or the
+ * resource-wide `resource/all` wildcard. Admin and customer tokens carry their own
+ * roles (ROLE_ADMIN / ROLE_CUSTOMER) and are matched by those role checks in the
+ * `security:` expressions instead, so this voter abstains for them.
  *
  * @extends Voter<string, mixed>
  */
 class ApiUserVoter extends Voter
 {
-    public function __construct(
-        private readonly RequestStack $requestStack,
-        private readonly ApiPermissionRegistry $registry,
-    ) {}
-
     #[\Override]
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return $attribute === 'API_USER_PERMISSION';
+        // Permission attributes are "resource/operation" strings (e.g. "orders/read").
+        // Plain roles (ROLE_ADMIN, ROLE_CUSTOMER, ...) contain no slash and are left
+        // to Symfony's built-in role voters.
+        return str_contains($attribute, '/');
     }
 
     #[\Override]
@@ -41,54 +47,20 @@ class ApiUserVoter extends Voter
     {
         $user = $token->getUser();
 
-        if (!$user instanceof ApiUser) {
+        // Only API-key users carry granular permissions; everyone else (admins,
+        // customers, anonymous) is decided by the role checks in the expression.
+        if (!$user instanceof ApiUser || !$user->isApiUser()) {
             return false;
         }
 
-        // Only apply permission checks to API users - admins and customers bypass
-        if (!$user->isApiUser()) {
-            return true;
-        }
-
-        // 'all' permission grants unrestricted access
+        // "all" grants unrestricted access.
         if ($user->hasPermission('all')) {
             return true;
         }
 
-        $request = $this->requestStack->getCurrentRequest();
-        if (!$request) {
-            return false;
-        }
+        [$resource] = explode('/', $attribute, 2);
 
-        $resource = $this->registry->resolveRestResource($request->getPathInfo());
-        if ($resource === null) {
-            // No registered resource maps to this path, so there is no granular
-            // permission to enforce. Defer to the operation's own security
-            // expression rather than denying, which would otherwise 403 every
-            // unmapped (but legitimately role-gated) endpoint.
-            return true;
-        }
-
-        $operation = $this->resolveOperation($request->getMethod(), $resource);
-        $required = $resource . '/' . $operation;
-
-        return $user->hasPermission($required)
+        return $user->hasPermission($attribute)
             || $user->hasPermission($resource . '/all');
-    }
-
-    /**
-     * Map HTTP method to operation.
-     *
-     * For POST, checks whether the resource defines a 'create' operation.
-     * Resources without 'create' (e.g. wishlists, newsletter) map POST to 'write'.
-     */
-    private function resolveOperation(string $method, string $resource): string
-    {
-        return match (strtoupper($method)) {
-            'GET', 'HEAD', 'OPTIONS' => 'read',
-            'POST' => $this->registry->resourceHasOperation($resource, 'create') ? 'create' : 'write',
-            'DELETE' => $this->registry->resourceHasOperation($resource, 'delete') ? 'delete' : 'write',
-            default => 'write',
-        };
     }
 }

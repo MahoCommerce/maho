@@ -19,6 +19,7 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
+    security: "is_granted('ROLE_ADMIN') or is_granted('inventory/read')",
     mahoId: 'inventory',
     mahoSection: 'Catalog',
     mahoOperations: ['read' => 'View Stock', 'write' => 'Update Stock'],
@@ -28,18 +29,18 @@ use Maho\ApiPlatform\CrudResource;
     operations: [
         new Put(
             uriTemplate: '/inventory',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('inventory/write')",
             description: 'Update stock for a single product by SKU',
         ),
         new Put(
             uriTemplate: '/inventory/bulk',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('inventory/write')",
             description: 'Update stock for multiple products (max 100)',
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'item_query', description: 'Get a stock update', security: "is_granted('ROLE_API_USER')"),
-        new QueryCollection(name: 'collection_query', description: 'Get stock updates', security: "is_granted('ROLE_API_USER')"),
+        new Query(name: 'item_query', description: 'Get a stock update', security: "is_granted('ROLE_ADMIN') or is_granted('inventory/read')"),
+        new QueryCollection(name: 'collection_query', description: 'Get stock updates', security: "is_granted('ROLE_ADMIN') or is_granted('inventory/read')"),
         new Mutation(
             name: 'updateStock',
             description: 'Update stock for a single product by SKU',
@@ -49,7 +50,7 @@ use Maho\ApiPlatform\CrudResource;
                 'isInStock' => ['type' => 'Boolean'],
                 'manageStock' => ['type' => 'Boolean'],
             ],
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('inventory/write')",
         ),
         new Mutation(
             name: 'updateStockBulk',
@@ -57,7 +58,7 @@ use Maho\ApiPlatform\CrudResource;
             args: [
                 'items' => ['type' => 'Iterable!'],
             ],
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('inventory/write')",
         ),
     ],
 )]

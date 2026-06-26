@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 
 #[ApiResource(
+    security: 'true',
     shortName: 'ContactForm',
     description: 'Contact form submission and configuration',
     operations: [

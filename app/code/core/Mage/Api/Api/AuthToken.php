@@ -15,6 +15,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Post;
 
 #[ApiResource(
+    security: "is_granted('ROLE_ADMIN')",
     shortName: 'AuthToken',
     description: 'Authentication token management',
     processor: AuthTokenProcessor::class,

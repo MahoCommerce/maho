@@ -32,27 +32,27 @@ use Maho\Config\ApiResource;
     operations: [
         new Get(
             uriTemplate: '/coupons/{id}',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('coupons/read')",
             description: 'Get a coupon by ID',
         ),
         new GetCollection(
             uriTemplate: '/coupons',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('coupons/read')",
             description: 'Get all coupons',
         ),
         new Post(
             uriTemplate: '/coupons',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('coupons/create')",
             description: 'Create a new coupon with price rule',
         ),
         new Put(
             uriTemplate: '/coupons/{id}',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('coupons/write')",
             description: 'Update a coupon and its price rule',
         ),
         new Delete(
             uriTemplate: '/coupons/{id}',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('coupons/delete')",
             description: 'Delete a coupon and its price rule',
         ),
         new Post(
@@ -65,12 +65,12 @@ use Maho\Config\ApiResource;
         new Query(
             name: 'item_query',
             description: 'Get a coupon by ID',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('coupons/read')",
         ),
         new QueryCollection(
             name: 'collection_query',
             description: 'Get all coupons',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('coupons/read')",
         ),
         new Mutation(
             name: 'createCoupon',
@@ -87,7 +87,7 @@ use Maho\Config\ApiResource;
                 'toDate' => ['type' => 'String'],
                 'minimumSubtotal' => ['type' => 'Float'],
             ],
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('coupons/create')",
         ),
         new Mutation(
             name: 'updateCoupon',
@@ -105,12 +105,12 @@ use Maho\Config\ApiResource;
                 'toDate' => ['type' => 'String'],
                 'minimumSubtotal' => ['type' => 'Float'],
             ],
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('coupons/write')",
         ),
         new DeleteMutation(
             name: 'deleteCoupon',
             description: 'Delete a coupon and its price rule',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('coupons/delete')",
         ),
         new Mutation(
             name: 'validateCoupon',
@@ -119,7 +119,7 @@ use Maho\Config\ApiResource;
                 'code' => ['type' => 'String!'],
                 'cartId' => ['type' => 'Int'],
             ],
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER') or is_granted('ROLE_CUSTOMER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('coupons/write')",
         ),
     ],
 )]

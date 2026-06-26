@@ -23,6 +23,7 @@ use ApiPlatform\Metadata\Put;
 // product facet, not a separately-grantable resource), so this uses the plain
 // API Platform attribute and is intentionally absent from the permission registry.
 #[ApiResource(
+    security: 'true',
     shortName: 'ProductCustomOption',
     description: 'Product custom options (personalization, add-ons)',
     provider: ProductCustomOptionProvider::class,
@@ -47,7 +48,7 @@ use ApiPlatform\Metadata\Put;
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
             processor: ProductCustomOptionProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('products/write')",
             description: 'Add a custom option to a product',
         ),
         new Put(
@@ -57,7 +58,7 @@ use ApiPlatform\Metadata\Put;
                 'id' => new Link(fromClass: self::class, identifiers: ['id']),
             ],
             processor: ProductCustomOptionProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('products/write')",
             description: 'Update a custom option',
         ),
         new Delete(
@@ -67,7 +68,7 @@ use ApiPlatform\Metadata\Put;
                 'id' => new Link(fromClass: self::class, identifiers: ['id']),
             ],
             processor: ProductCustomOptionProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('products/delete')",
             description: 'Remove a custom option',
         ),
     ],

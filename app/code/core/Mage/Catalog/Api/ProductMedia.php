@@ -22,6 +22,7 @@ use ApiPlatform\Metadata\Put;
 // facet, not a separately-grantable resource), so this uses the plain API
 // Platform attribute and is intentionally absent from the permission registry.
 #[ApiResource(
+    security: 'true',
     shortName: 'ProductMedia',
     description: 'Product media gallery images',
     provider: ProductMediaProvider::class,
@@ -40,7 +41,7 @@ use ApiPlatform\Metadata\Put;
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
             processor: ProductMediaProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('products/write')",
             description: 'Upload an image (JSON with base64 or URL)',
         ),
         new Put(
@@ -49,7 +50,7 @@ use ApiPlatform\Metadata\Put;
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
             processor: ProductMediaProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('products/write')",
             description: 'Update image label, position, types, or disabled status',
         ),
         new Delete(
@@ -58,7 +59,7 @@ use ApiPlatform\Metadata\Put;
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
             processor: ProductMediaProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('products/delete')",
             description: 'Remove an image from the gallery',
         ),
     ],

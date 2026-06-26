@@ -18,6 +18,7 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 
 #[ApiResource(
+    security: 'true',
     shortName: 'StoreConfig',
     description: 'Store configuration for frontend initialization',
     provider: StoreConfigProvider::class,

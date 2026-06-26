@@ -17,6 +17,7 @@ use ApiPlatform\Metadata\GetCollection;
 use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
+    security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
     shortName: 'Invoice',
     description: 'Order invoice resource',
     provider: InvoiceProvider::class,
@@ -25,25 +26,25 @@ use Maho\ApiPlatform\CrudResource;
             uriTemplate: '/orders/{orderId}/invoices',
             name: 'order_invoices',
             description: 'List invoices for an order',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
         ),
         new Get(
             uriTemplate: '/orders/{orderId}/invoices/{id}/pdf',
             name: 'invoice_pdf',
             description: 'Download invoice PDF',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
         ),
         new GetCollection(
             uriTemplate: '/customers/me/orders/{orderId}/invoices',
             name: 'my_order_invoices',
             description: 'List invoices for an authenticated customer\'s order',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
         ),
         new Get(
             uriTemplate: '/customers/me/orders/{orderId}/invoices/{id}/pdf',
             name: 'my_invoice_pdf',
             description: 'Download invoice PDF for an authenticated customer\'s order',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
         ),
     ],
 )]

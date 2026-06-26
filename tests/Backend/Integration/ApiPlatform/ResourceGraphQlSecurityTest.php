@@ -16,9 +16,10 @@ uses(MahoBackendTestCase::class);
  * Server-independent regression guard for GraphQL read authorization.
  *
  * GraphQL operations are gated only by their per-operation `security:`
- * expression (the storefront /api/graphql firewall is PUBLIC_ACCESS and
- * GraphQlPermissionListener skips anonymous/customer tokens). A read query that
- * omits `security:` is therefore reachable unauthenticated, which is how the
+ * expression (the storefront /api/graphql firewall is PUBLIC_ACCESS, and
+ * API Platform's access checker evaluates the expression for GraphQL just as it
+ * does for REST). A read query that omits `security:` is therefore reachable
+ * unauthenticated, which is how the
  * gift card item_query leaked full card data (code, balance, recipient PII)
  * before this was fixed. These tests assert the security expressions are
  * present at the attribute level, no running HTTP server required.
@@ -69,10 +70,14 @@ it('requires authentication for the gift card item GraphQL query', function (): 
     $ops = graphQlOperationsOf(Maho\Giftcard\Api\GiftCard::class);
 
     expect($ops)->toHaveKey('item_query');
+    // Authorization is now granular: the role-based ROLE_API_USER check was
+    // replaced by the per-resource `giftcards/read` permission (admins keep the
+    // ROLE_ADMIN branch). The read must still be non-public to guard the gift
+    // card PII leak this test was written for.
     expect($ops['item_query']->getSecurity())
         ->not->toBeNull()
         ->toContain('ROLE_ADMIN')
-        ->toContain('ROLE_API_USER');
+        ->toContain('giftcards/read');
 });
 
 it('keeps the gift card collection GraphQL query privileged', function (): void {

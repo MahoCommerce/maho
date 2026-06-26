@@ -22,6 +22,7 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
+    security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('wishlists/read')",
     mahoId: 'wishlists',
     mahoSection: 'Customers',
     mahoOperations: ['read' => 'View', 'write' => 'Add/Remove'],
@@ -34,39 +35,39 @@ use Maho\ApiPlatform\CrudResource;
     operations: [
         new GetCollection(
             uriTemplate: '/customers/me/wishlist',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('wishlists/read')",
             description: 'Get current customer wishlist items',
         ),
         new Post(
             uriTemplate: '/customers/me/wishlist',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('wishlists/write')",
             description: 'Add product to wishlist',
         ),
         new Delete(
             uriTemplate: '/customers/me/wishlist/{id}',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('wishlists/write')",
             description: 'Remove item from wishlist',
         ),
         new Post(
             uriTemplate: '/customers/me/wishlist/{id}/move-to-cart',
             name: 'move_to_cart',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('wishlists/write')",
             description: 'Move wishlist item to cart',
         ),
         new Post(
             uriTemplate: '/customers/me/wishlist/sync',
             name: 'sync_wishlist',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('wishlists/write')",
             description: 'Sync guest wishlist (localStorage) with customer wishlist',
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'item_query', description: 'Get a wishlist item by ID', security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')"),
-        new QueryCollection(name: 'collection_query', description: 'Get wishlist items', security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')"),
+        new Query(name: 'item_query', description: 'Get a wishlist item by ID', security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('wishlists/read')"),
+        new QueryCollection(name: 'collection_query', description: 'Get wishlist items', security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('wishlists/read')"),
         new QueryCollection(
             name: 'myWishlist',
             description: 'Get current customer wishlist items',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('wishlists/read')",
         ),
         new Mutation(
             name: 'addToWishlist',
@@ -76,7 +77,7 @@ use Maho\ApiPlatform\CrudResource;
                 'qty' => ['type' => 'Int', 'description' => 'Quantity (default 1)'],
                 'description' => ['type' => 'String', 'description' => 'Optional note'],
             ],
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('wishlists/write')",
         ),
         new Mutation(
             name: 'removeFromWishlist',
@@ -84,7 +85,7 @@ use Maho\ApiPlatform\CrudResource;
             args: [
                 'itemId' => ['type' => 'Int!', 'description' => 'Wishlist item ID'],
             ],
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('wishlists/write')",
         ),
         new Mutation(
             name: 'moveWishlistItemToCart',
@@ -93,7 +94,7 @@ use Maho\ApiPlatform\CrudResource;
                 'itemId' => ['type' => 'Int!', 'description' => 'Wishlist item ID'],
                 'qty' => ['type' => 'Int', 'description' => 'Quantity to add to cart'],
             ],
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('wishlists/write')",
         ),
         new Mutation(
             name: 'syncWishlist',
@@ -101,7 +102,7 @@ use Maho\ApiPlatform\CrudResource;
             args: [
                 'productIds' => ['type' => '[Int!]!', 'description' => 'Product IDs from localStorage'],
             ],
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('wishlists/write')",
         ),
     ],
 )]

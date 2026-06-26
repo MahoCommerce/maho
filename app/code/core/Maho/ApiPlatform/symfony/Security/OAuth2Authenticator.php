@@ -187,7 +187,10 @@ class OAuth2Authenticator extends AbstractAuthenticator
             $apiUserStoreIds = array_map('intval', $this->jwtService->getApiUserAllowedStoreIds($apiUser));
             return new ApiUser(
                 identifier: (string) $payload->sub,
-                roles: ['ROLE_API_USER'],
+                // No role: service accounts are authorized by their granular
+                // `resource/op` permissions (via ApiUserVoter, keyed off
+                // apiUserId), not by a role matched in any security expression.
+                roles: [],
                 apiUserId: $apiUserId,
                 permissions: $this->jwtService->loadApiUserPermissions($apiUser),
                 allowedStoreIds: $apiUserStoreIds === [] ? null : $apiUserStoreIds,

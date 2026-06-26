@@ -204,7 +204,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
      * Check if current user can access the given order
      *
      * - Admins: full access
-     * - API users (ROLE_API_USER): full access (permission already checked by security.yaml)
+     * - API service accounts: full access (permission already checked by the operation security expression)
      * - Customers: own orders only
      */
     private function canAccessOrder(\Mage_Sales_Model_Order $order): bool
@@ -215,9 +215,10 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         }
 
         // API users with orders/read permission can access any order. The
-        // granular orders/read check is enforced upstream by
-        // ApiUserRestPermissionListener (via ApiUserVoter) before this runs, so
-        // by the time we get here the key is already authorized to read orders.
+        // granular orders/read check is enforced upstream by the operation's
+        // `security: is_granted('orders/read')` expression (via ApiUserVoter)
+        // before this runs, so by the time we get here the key is already
+        // authorized to read orders.
         $user = $this->security->getUser();
         if ($user instanceof \Maho\ApiPlatform\Security\ApiUser && $user->isApiUser()) {
             return true;

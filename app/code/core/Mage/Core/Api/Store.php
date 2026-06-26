@@ -17,6 +17,7 @@ use ApiPlatform\Metadata\Post;
 use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
+    security: 'true',
     mahoLabel: 'Stores & Store Views',
     mahoSection: 'System',
     mahoOperations: ['read' => 'View', 'write' => 'Manage'],

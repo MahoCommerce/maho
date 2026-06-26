@@ -49,7 +49,7 @@ class CustomerUserProvider implements UserProviderInterface
 
         return new ApiUser(
             identifier: $identifier,
-            roles: ['ROLE_USER'],
+            roles: ['ROLE_CUSTOMER'],
             customerId: $customerId,
         );
     }

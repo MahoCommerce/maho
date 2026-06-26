@@ -17,6 +17,7 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Query;
 
 #[ApiResource(
+    security: 'true',
     shortName: 'LayeredFilter',
     description: 'Layered navigation filters (facets) for a category',
     provider: LayeredFilterProvider::class,

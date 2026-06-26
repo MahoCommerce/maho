@@ -48,20 +48,29 @@ use Maho\ApiPlatform\CrudResource;
             uriVariables: [
                 'productId' => new Link(toProperty: 'productId'),
             ],
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('reviews/write')",
             description: 'Submit a review for a product (requires authentication)',
         ),
         new GetCollection(
             uriTemplate: '/customers/me/reviews',
             name: 'my_reviews',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('reviews/read')",
             description: 'Get current customer submitted reviews',
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'item_query', description: 'Get a review by ID'),
-        new QueryCollection(name: 'collection_query', description: 'Get reviews'),
+        new Query(
+            security: 'true',
+            name: 'item_query',
+            description: 'Get a review by ID',
+        ),
         new QueryCollection(
+            security: 'true',
+            name: 'collection_query',
+            description: 'Get reviews',
+        ),
+        new QueryCollection(
+            security: 'true',
             name: 'productReviews',
             description: 'Get reviews for a product',
             args: [
@@ -71,18 +80,19 @@ use Maho\ApiPlatform\CrudResource;
             ],
         ),
         new Query(
+            security: 'true',
             name: 'review',
             description: 'Get a single review by ID',
         ),
         new QueryCollection(
             name: 'myReviews',
             description: 'Get current customer submitted reviews',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('reviews/read')",
         ),
         new Mutation(
             name: 'submitReview',
             description: 'Submit a product review',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('reviews/write')",
             args: [
                 'productId' => ['type' => 'Int!', 'description' => 'Product ID'],
                 'title' => ['type' => 'String!', 'description' => 'Review title/summary'],

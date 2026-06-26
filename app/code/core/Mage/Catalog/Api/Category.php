@@ -44,21 +44,21 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new Post(
             uriTemplate: '/categories',
             processor: CategoryProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('categories/write')",
             description: 'Creates a new category',
             normalizationContext: ['groups' => ['category:read', 'category:detail']],
         ),
         new Put(
             uriTemplate: '/categories/{id}',
             processor: CategoryProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('categories/write')",
             description: 'Updates a category',
             normalizationContext: ['groups' => ['category:read', 'category:detail']],
         ),
         new Delete(
             uriTemplate: '/categories/{id}',
             processor: CategoryProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('categories/delete')",
             description: 'Deletes a category',
         ),
     ],
@@ -66,11 +66,13 @@ use Symfony\Component\Serializer\Attribute\Groups;
         new Query(name: 'item_query', description: 'Get a category by ID', security: 'true'),
         new QueryCollection(name: 'collection_query', description: 'Get categories', security: 'true'),
         new Query(
+            security: 'true',
             name: 'category',
             description: 'Get a category by ID',
             normalizationContext: ['groups' => ['category:read', 'category:detail']],
         ),
         new QueryCollection(
+            security: 'true',
             name: 'categories',
             args: [
                 'parentId' => ['type' => 'Int', 'description' => 'Filter by parent category ID'],
@@ -79,6 +81,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
             description: 'Get category tree',
         ),
         new Query(
+            security: 'true',
             name: 'categoryByUrlKey',
             args: ['urlKey' => ['type' => 'String!']],
             description: 'Get a category by URL key',

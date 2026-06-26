@@ -36,28 +36,35 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         new Post(
             uriTemplate: '/cms-blocks',
             processor: CmsBlockProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('cms-blocks/write')",
             description: 'Creates a new CMS block',
         ),
         new Put(
             uriTemplate: '/cms-blocks/{id}',
             processor: CmsBlockProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('cms-blocks/write')",
             description: 'Updates a CMS block',
         ),
         new Delete(
             uriTemplate: '/cms-blocks/{id}',
             processor: CmsBlockProcessor::class,
-            security: "is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('cms-blocks/delete')",
             description: 'Deletes a CMS block',
         ),
     ],
     graphQlOperations: [
         new Query(name: 'item_query', description: 'Get a CMS block by ID', security: 'true'),
         new QueryCollection(name: 'collection_query', description: 'Get CMS blocks', security: 'true'),
-        new Query(name: 'cmsBlock'),
-        new QueryCollection(name: 'cmsBlocks'),
         new Query(
+            security: 'true',
+            name: 'cmsBlock',
+        ),
+        new QueryCollection(
+            security: 'true',
+            name: 'cmsBlocks',
+        ),
+        new Query(
+            security: 'true',
             name: 'cmsBlockByIdentifier',
             args: ['identifier' => ['type' => 'String!']],
             resolver: CustomQueryResolver::class,

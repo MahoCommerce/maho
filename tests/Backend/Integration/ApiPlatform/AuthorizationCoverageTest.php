@@ -7,6 +7,8 @@
 
 declare(strict_types=1);
 
+use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
+use ApiPlatform\Metadata\Resource\Factory\ResourceNameCollectionFactoryInterface;
 use Maho\ApiPlatform\Kernel;
 use Maho\ApiPlatform\Security\ApiPermissionRegistry;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -18,20 +20,31 @@ uses(MahoBackendTestCase::class);
 /*
  * Authorization-coverage regression guard for the API platform.
  *
- * Boots the real API kernel in-process (no HTTP server) and asserts that every
- * GraphQL operation the schema exposes resolves to a concrete permission, or is
- * explicitly public. This locks shut the "the field name isn't in the permission
- * map -> no permission required -> any API key reads it" fail-open class, which
- * previously let a key scoped to products/read read every order via GraphQL.
+ * Authorization is enforced entirely by each operation's own `security:`
+ * expression: API Platform's access checker evaluates it for BOTH REST and
+ * GraphQL and routes any `resource/operation` attribute to ApiUserVoter. There
+ * is no separate permission listener or runtime field index anymore.
  *
- * The explicit cases use real schema field names so they also catch API Platform
- * changing its field-naming under us; the sweep catches anything new.
+ * That makes the `security:` expression the ONLY gate, so this test boots the
+ * real API kernel in-process (no HTTP server), enumerates every operation the
+ * metadata exposes, and asserts two invariants that together close the
+ * fail-open / phantom-permission classes of bug:
+ *
+ *   1. Every operation declares a non-empty security expression. A null/empty
+ *      one means the access checker never runs and the operation is open to any
+ *      authenticated caller — the exact hole a key scoped to products/read could
+ *      have used to read every order.
+ *   2. Every `resource/operation` permission an expression references is a real,
+ *      grantable permission id (present in ApiPermissionRegistry). A typo'd or
+ *      phantom permission can never be granted, so the operation would be
+ *      silently always-denied — a latent availability bug.
  */
 
 /**
- * Test kernel that exposes the (otherwise private) permission registry via a
- * compiler pass, so the assertions below can enumerate every operation through
- * the fully-wired service. The production container is untouched.
+ * Test kernel that exposes API Platform's (private) metadata factories and the
+ * permission registry via a compiler pass, so the assertions below can
+ * enumerate every operation through the fully-wired services. The production
+ * container is untouched.
  */
 final class AuthzCoverageKernel extends Kernel
 {
@@ -39,115 +52,151 @@ final class AuthzCoverageKernel extends Kernel
     protected function build(ContainerBuilder $container): void
     {
         // Preserve the Maho kernel's module-service/resource registration, then
-        // expose the registry so the assertions can reach the wired instance.
+        // expose the services the assertions need to reach.
         parent::build($container);
 
         $container->addCompilerPass(new class implements CompilerPassInterface {
             #[\Override]
             public function process(ContainerBuilder $container): void
             {
-                if ($container->hasDefinition(ApiPermissionRegistry::class)) {
-                    $container->getDefinition(ApiPermissionRegistry::class)->setPublic(true);
+                $expose = [
+                    ApiPermissionRegistry::class,
+                    ResourceNameCollectionFactoryInterface::class,
+                    ResourceMetadataCollectionFactoryInterface::class,
+                ];
+                foreach ($expose as $id) {
+                    if ($container->hasAlias($id)) {
+                        $container->getAlias($id)->setPublic(true);
+                    } elseif ($container->hasDefinition($id)) {
+                        $container->getDefinition($id)->setPublic(true);
+                    }
                 }
             }
         });
     }
 }
 
-function authzRegistry(): ApiPermissionRegistry
+/**
+ * Boot the API kernel once and return its container.
+ */
+function authzContainer(): \Psr\Container\ContainerInterface
 {
-    static $registry = null;
-    if ($registry === null) {
+    static $container = null;
+    if ($container === null) {
         Mage::app();
         $kernel = new AuthzCoverageKernel('test', true);
         $kernel->boot();
-        $registry = $kernel->getContainer()->get(ApiPermissionRegistry::class);
+        $container = $kernel->getContainer();
     }
-    return $registry;
+    return $container;
 }
 
-dataset('sensitive graphql reads', [
-    'orders collection'    => ['{ orders { id } }', ['orders/read']],
-    'shipments collection' => ['{ shipments { id } }', ['shipments/read']],
-    'credit memos'         => ['{ creditMemos { id } }', ['credit-memos/read']],
-    'coupons collection'   => ['{ coupons { id } }', ['coupons/read']],
-    'stock updates'        => ['{ stockUpdates { id } }', ['inventory/read']],
-    'customer orders'      => ['{ customerOrdersOrders { id } }', ['orders/read']],
-    'cart by id'           => ['{ cart(id: 1) { id } }', ['carts/read']],
-]);
-
-it('requires the matching permission for sensitive GraphQL reads', function (string $query, array $expected): void {
-    expect(authzRegistry()->resolveGraphQlPermissions($query))->toEqual($expected);
-})->with('sensitive graphql reads');
-
-dataset('privileged graphql mutations', [
-    'create coupon' => ['mutation { createCouponCoupon(input: {}) { coupon { id } } }', ['coupons/create']],
-    'place order'   => ['mutation { placeOrderOrder(input: {}) { order { id } } }', ['orders/create']],
-]);
-
-it('requires a grantable permission for privileged GraphQL mutations', function (string $query, array $expected): void {
-    // The permission must be one a role can actually be granted, otherwise the
-    // mutation is gated behind a phantom permission and silently always denied.
-    $registry = authzRegistry();
-    $perms = $registry->resolveGraphQlPermissions($query);
-    expect($perms)->toEqual($expected);
-    foreach ($perms as $perm) {
-        expect($registry->getPermissionIds())->toContain($perm);
+/**
+ * Enumerate every REST + GraphQL operation as
+ * ['label' => string, 'security' => ?string] rows, read from API Platform's
+ * fully-resolved metadata (so auto-generated operations are included too).
+ *
+ * @return list<array{label: string, security: ?string}>
+ */
+function authzOperations(): array
+{
+    static $rows = null;
+    if ($rows !== null) {
+        return $rows;
     }
-})->with('privileged graphql mutations');
 
-it('leaves public catalog/reference GraphQL reads open', function (): void {
-    expect(authzRegistry()->resolveGraphQlPermissions('{ products { id } }'))->toBe([]);
-    expect(authzRegistry()->resolveGraphQlPermissions('{ countries { id } }'))->toBe([]);
-    // A resource declared with the plain ApiPlatform attribute (no Maho
-    // permission metadata) resolves through the non-indexed fallback; its public
-    // read must stay open.
-    expect(authzRegistry()->resolveGraphQlPermissions('{ currencies { id } }'))->toBe([]);
-});
+    $container = authzContainer();
+    /** @var ResourceNameCollectionFactoryInterface $nameFactory */
+    $nameFactory = $container->get(ResourceNameCollectionFactoryInterface::class);
+    /** @var ResourceMetadataCollectionFactoryInterface $metadataFactory */
+    $metadataFactory = $container->get(ResourceMetadataCollectionFactoryInterface::class);
 
-it('fails closed for mutations on resources without permission metadata', function (): void {
-    $registry = authzRegistry();
-    // createBundleOption is an auto-generated mutation on a plain-attribute
-    // resource: it must require *some* permission (never fail open), and that
-    // permission must be one no role can hold, so it is denied outright rather
-    // than gated behind a grantable permission by accident.
-    $perms = $registry->resolveGraphQlPermissions('mutation { createBundleOption(input: {}) { bundleOption { id } } }');
-    expect($perms)->not->toBe([]);
-    foreach ($perms as $perm) {
-        expect($registry->getPermissionIds())->not->toContain($perm);
-    }
-});
-
-it('never leaves a non-public GraphQL field without a permission (no fail-open)', function (): void {
-    $registry = authzRegistry();
-
-    // The registry's field index is built from API Platform's resolved metadata,
-    // so it covers auto-generated default operations too — the place the original
-    // fail-open hid.
-    $method = new ReflectionMethod($registry, 'graphQlFieldIndex');
-    /** @var array<string, array{resource: string, kind: string, name: string, public: bool}> $index */
-    $index = $method->invoke($registry);
-    expect($index)->not->toBeEmpty();
-
-    $failOpen = [];
-    foreach ($index as $field => $info) {
-        if ($info['public']) {
+    $rows = [];
+    foreach ($nameFactory->create() as $resourceClass) {
+        // Skip API Platform's own framework resources (Error, ConstraintViolation,
+        // …): they model error/validation RESPONSE shapes, carry no application
+        // data, and legitimately have no security. We audit Maho data resources.
+        if (str_starts_with($resourceClass, 'ApiPlatform\\')) {
             continue;
         }
-        $query = $info['kind'] === 'read' ? "{ {$field} }" : "mutation { {$field} }";
-        if ($registry->resolveGraphQlPermissions($query) === []) {
-            $failOpen[] = $field;
+
+        foreach ($metadataFactory->create($resourceClass) as $metadata) {
+            $shortName = $metadata->getShortName() ?? $resourceClass;
+
+            foreach ($metadata->getOperations() ?? [] as $name => $operation) {
+                $rows[] = [
+                    'label' => "REST {$shortName}::{$name}",
+                    'security' => $operation->getSecurity(),
+                ];
+            }
+
+            foreach ($metadata->getGraphQlOperations() ?? [] as $name => $operation) {
+                $rows[] = [
+                    'label' => "GraphQL {$shortName}::{$name}",
+                    'security' => $operation->getSecurity(),
+                ];
+            }
         }
     }
 
-    expect($failOpen)->toBe([], 'GraphQL fields reachable with no permission required: ' . implode(', ', $failOpen));
+    return $rows;
+}
+
+/**
+ * Extract every `resource/operation` permission referenced by an `is_granted()`
+ * call in a security expression. Role attributes (ROLE_ADMIN, ROLE_CUSTOMER, …)
+ * carry no slash and are ignored here — they are not registry permissions.
+ *
+ * @return list<string>
+ */
+function authzReferencedPermissions(string $security): array
+{
+    if (preg_match_all("/is_granted\\(\\s*['\"]([^'\"]+)['\"]/", $security, $matches) === false) {
+        return [];
+    }
+    return array_values(array_filter($matches[1], static fn(string $attr): bool => str_contains($attr, '/')));
+}
+
+it('boots the kernel and enumerates a non-trivial set of operations', function (): void {
+    // Guards against the sweep silently passing because it found nothing to check
+    // (e.g. metadata factory wiring changed and returned an empty set).
+    expect(count(authzOperations()))->toBeGreaterThan(100);
 });
 
-it('maps nested REST read paths to their own resource, not the parent', function (): void {
-    $registry = authzRegistry();
-    expect($registry->resolveRestResource('/api/rest/v2/orders'))->toBe('orders');
-    expect($registry->resolveRestResource('/api/rest/v2/orders/5/shipments'))->toBe('shipments');
-    expect($registry->resolveRestResource('/api/rest/v2/orders/5/invoices'))->toBe('invoices');
-    expect($registry->resolveRestResource('/api/rest/v2/orders/5/credit-memos'))->toBe('credit-memos');
-    expect($registry->resolveRestResource('/api/rest/v2/customers/5/addresses'))->toBe('addresses');
+it('declares a security expression on every REST and GraphQL operation (no fail-open)', function (): void {
+    $unsecured = [];
+    foreach (authzOperations() as $op) {
+        $security = $op['security'];
+        if (!is_string($security) || trim($security) === '') {
+            $unsecured[] = $op['label'];
+        }
+    }
+
+    expect($unsecured)->toBe(
+        [],
+        'Operations with no security expression are open to any authenticated caller: ' . implode(', ', $unsecured),
+    );
+});
+
+it('references only real, grantable permissions in every security expression (no phantom gates)', function (): void {
+    $registry = authzContainer()->get(ApiPermissionRegistry::class);
+    $valid = $registry->getPermissionIds();
+
+    $phantom = [];
+    foreach (authzOperations() as $op) {
+        $security = $op['security'];
+        if (!is_string($security)) {
+            continue;
+        }
+        foreach (authzReferencedPermissions($security) as $permission) {
+            if (!in_array($permission, $valid, true)) {
+                $phantom[] = "{$op['label']} -> {$permission}";
+            }
+        }
+    }
+
+    expect($phantom)->toBe(
+        [],
+        'Security expressions referencing non-grantable permissions (never satisfiable): ' . implode(', ', $phantom),
+    );
 });

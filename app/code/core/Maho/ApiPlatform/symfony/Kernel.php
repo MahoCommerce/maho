@@ -249,17 +249,14 @@ class Kernel extends BaseKernel
         ]);
 
         $container->extension('security', [
-            // ROLE_ADMIN inherits ROLE_API_USER so admin tokens can reach the
-            // REST endpoints gated by ROLE_API_USER (products, categories,
-            // CMS, etc.), the listener AdminAclListener (default-deny via
-            // ADMIN_RESOURCE) is the actual gate, not the security
-            // expression. ROLE_USER is NOT inherited because customer-only
-            // endpoints (`/me`, `/me/orders`, etc.) shouldn't be reached by
-            // admin tokens at all; AdminAclListener default-denies those
-            // since they don't declare ADMIN_RESOURCE.
-            'role_hierarchy' => [
-                'ROLE_ADMIN' => ['ROLE_API_USER'],
-            ],
+            // No role hierarchy: authorization uses exactly two roles in the
+            // operation `security:` expressions — ROLE_CUSTOMER (customer, own data)
+            // and ROLE_ADMIN (admin, then gated per-resource by AdminAclListener
+            // via ADMIN_RESOURCE). API service accounts (ROLE_API_USER) are not
+            // matched by role at all; they're authorized by their granular
+            // `resource/op` permissions in ApiUserVoter. Admins are deliberately
+            // not granted ROLE_CUSTOMER, so customer-only `/me` endpoints stay out
+            // of reach (AdminAclListener also default-denies them).
             'password_hashers' => [
                 \Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface::class => 'auto',
             ],
@@ -327,11 +324,6 @@ class Kernel extends BaseKernel
 
         $services->load('Maho\\ApiPlatform\\', '%kernel.project_dir%/')
             ->exclude(['%kernel.project_dir%/Kernel.php', '%kernel.project_dir%/config/']);
-
-        // Expose API Platform's inflector (the instance FieldsBuilder uses) under
-        // its public interface so ApiPermissionRegistry can autowire it and derive
-        // GraphQL field names with identical pluralisation.
-        $services->alias(\ApiPlatform\Metadata\InflectorInterface::class, 'api_platform.metadata.inflector');
 
         $services->set(EventListener\ApiExceptionListener::class)
             ->arg('$debug', '%kernel.debug%')

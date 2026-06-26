@@ -35,33 +35,33 @@ use Mage\Customer\Api\Address;
     operations: [
         new Get(
             uriTemplate: '/carts/{id}',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/read')",
             description: 'Get a cart by numeric ID. CartProvider enforces per-customer ownership via verifyCartAccess(); guest masked-ID lookups go through /guest-carts/{id}.',
         ),
         new Post(
             uriTemplate: '/carts',
             name: 'create_authenticated_cart',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Create a new cart for the authenticated customer',
         ),
         new Post(
             uriTemplate: '/carts/{id}/items',
             name: 'add_cart_item',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Add item to cart by numeric ID',
         ),
         new Put(
             uriTemplate: '/carts/{id}/items/{itemId}',
             name: 'update_cart_item',
             output: false,
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Update item quantity in cart',
         ),
         new Delete(
             uriTemplate: '/carts/{id}/items/{itemId}',
             name: 'remove_cart_item',
             output: false,
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Remove item from cart',
         ),
         new Post(
@@ -152,14 +152,17 @@ use Mage\Customer\Api\Address;
     ],
     graphQlOperations: [
         new Query(
+            security: 'true',
             name: 'item_query',
             description: 'Get a cart by ID',
         ),
         new QueryCollection(
+            security: 'true',
             name: 'collection_query',
             description: 'Get carts',
         ),
         new Query(
+            security: 'true',
             name: 'getCartByMaskedId',
             args: ['maskedId' => ['type' => 'String!']],
             description: 'Get cart by masked ID',
@@ -169,15 +172,17 @@ use Mage\Customer\Api\Address;
             name: 'customerCart',
             args: [],
             description: 'Get current customer active cart',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/read')",
             resolver: CustomQueryResolver::class,
         ),
         new Mutation(
+            security: 'true',
             name: 'createCart',
             args: ['storeId' => ['type' => 'Int', 'description' => 'Optional store ID, defaults to current store']],
             description: 'Create an empty cart',
         ),
         new Mutation(
+            security: 'true',
             name: 'addToCart',
             args: [
                 'cartId' => ['type' => 'ID'],
@@ -194,11 +199,13 @@ use Mage\Customer\Api\Address;
             description: 'Add item to cart',
         ),
         new Mutation(
+            security: 'true',
             name: 'updateCartItemQty',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'itemId' => ['type' => 'ID!'], 'qty' => ['type' => 'Float!']],
             description: 'Update cart item quantity',
         ),
         new Mutation(
+            security: 'true',
             name: 'setCartItemFulfillment',
             args: [
                 'cartId' => ['type' => 'ID'],
@@ -209,21 +216,25 @@ use Mage\Customer\Api\Address;
             description: 'Set fulfillment type for a cart item (SHIP or PICKUP for BOPIS)',
         ),
         new Mutation(
+            security: 'true',
             name: 'removeCartItem',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'itemId' => ['type' => 'ID!']],
             description: 'Remove item from cart',
         ),
         new Mutation(
+            security: 'true',
             name: 'applyCouponToCart',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'couponCode' => ['type' => 'String!']],
             description: 'Apply coupon code to cart',
         ),
         new Mutation(
+            security: 'true',
             name: 'removeCouponFromCart',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String']],
             description: 'Remove coupon code from cart',
         ),
         new Mutation(
+            security: 'true',
             name: 'setShippingAddressOnCart',
             args: [
                 'cartId' => ['type' => 'ID'],
@@ -242,6 +253,7 @@ use Mage\Customer\Api\Address;
             description: 'Set shipping address on cart',
         ),
         new Mutation(
+            security: 'true',
             name: 'setBillingAddressOnCart',
             args: [
                 'cartId' => ['type' => 'ID'],
@@ -261,6 +273,7 @@ use Mage\Customer\Api\Address;
             description: 'Set billing address on cart',
         ),
         new Mutation(
+            security: 'true',
             name: 'setShippingMethodOnCart',
             args: [
                 'cartId' => ['type' => 'ID'],
@@ -271,6 +284,7 @@ use Mage\Customer\Api\Address;
             description: 'Set shipping method on cart',
         ),
         new Mutation(
+            security: 'true',
             name: 'setPaymentMethodOnCart',
             args: [
                 'cartId' => ['type' => 'ID'],
@@ -283,14 +297,16 @@ use Mage\Customer\Api\Address;
             name: 'assignCustomerToCart',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'customerId' => ['type' => 'ID!']],
             description: 'Assign customer to cart',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('carts/write')",
         ),
         new Mutation(
+            security: 'true',
             name: 'applyGiftcardToCart',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'giftcardCode' => ['type' => 'String!']],
             description: 'Apply gift card to cart',
         ),
         new Mutation(
+            security: 'true',
             name: 'removeGiftcardFromCart',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'giftcardCode' => ['type' => 'String!']],
             description: 'Remove gift card from cart',

@@ -34,18 +34,18 @@ use Mage\Customer\Api\Address;
     operations: [
         new Get(
             uriTemplate: '/orders/{id}',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/read')",
             description: 'Get an order by ID',
         ),
         new GetCollection(
             uriTemplate: '/orders',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('orders/read')",
             description: 'Get order collection (admin only)',
         ),
         new GetCollection(
             uriTemplate: '/customers/me/orders',
             name: 'my_orders',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/read')",
             description: 'Get current customer order history',
         ),
         new Post(
@@ -92,20 +92,21 @@ use Mage\Customer\Api\Address;
         new Query(
             name: 'item_query',
             description: 'Get an order by ID',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/read')",
         ),
         new QueryCollection(
             name: 'collection_query',
             description: 'Get orders',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('orders/read')",
         ),
         new Query(
             name: 'order',
             args: ['id' => ['type' => 'ID!']],
             description: 'Get order by ID',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/read')",
         ),
         new Query(
+            security: 'true',
             name: 'guestOrder',
             args: ['incrementId' => ['type' => 'String!'], 'accessToken' => ['type' => 'String!']],
             description: 'Get guest order by increment ID and access token',
@@ -115,9 +116,10 @@ use Mage\Customer\Api\Address;
             name: 'customerOrders',
             args: ['page' => ['type' => 'Int'], 'pageSize' => ['type' => 'Int'], 'status' => ['type' => 'String']],
             description: 'Get orders for authenticated customer',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/read')",
         ),
         new Mutation(
+            security: 'true',
             name: 'placeOrder',
             args: [
                 'cartId' => ['type' => 'ID'],
@@ -137,7 +139,7 @@ use Mage\Customer\Api\Address;
                 'reason' => ['type' => 'String', 'description' => 'Optional cancellation reason'],
             ],
             description: 'Cancel an order',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('orders/write')",
         ),
     ],
 )]
