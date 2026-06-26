@@ -27,7 +27,6 @@ use Maho\ApiPlatform\CrudResource;
     mahoSection: 'Customers',
     mahoOperations: ['read' => 'View', 'write' => 'Add/Remove'],
     mahoCustomerScoped: true,
-    mahoRestSegments: ['wishlist'],
     shortName: 'WishlistItem',
     description: 'View wishlist, add/remove items, move to cart',
     provider: WishlistProvider::class,

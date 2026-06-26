@@ -27,7 +27,6 @@ use Mage\Customer\Api\Address;
     mahoSection: 'Customers',
     mahoOperations: ['read' => 'View', 'write' => 'Create & Modify'],
     mahoCustomerScoped: true,
-    mahoRestSegments: ['guest-carts'],
     shortName: 'Cart',
     description: 'View cart, add/remove items, apply coupons, set shipping & payment',
     provider: CartProvider::class,

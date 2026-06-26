@@ -21,7 +21,6 @@ use Maho\ApiPlatform\CrudResource;
     mahoLabel: 'Stores & Store Views',
     mahoSection: 'System',
     mahoOperations: ['read' => 'View', 'write' => 'Manage'],
-    mahoRestSegments: ['store-config'],
     shortName: 'Store',
     description: 'Store and website listing',
     operations: [
