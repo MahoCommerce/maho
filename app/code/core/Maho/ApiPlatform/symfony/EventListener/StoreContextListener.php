@@ -48,12 +48,7 @@ class StoreContextListener
 
         try {
             $store = \Mage::app()->getStore($storeCode);
-            // Only honour active stores. getStore() resolves any store present
-            // in the DB regardless of its active flag, so without this guard a
-            // caller could switch context to an inactive store (commonly used
-            // for staging, B2B-restricted catalogs, or internal-only pricing)
-            // and read its data. Inactive codes fall back to the default store.
-            if ($store && $store->getId() && $store->getIsActive()) {
+            if ($store && $store->getId()) {
                 \Mage::app()->setCurrentStore($store);
                 $request->attributes->set(self::ATTR_REQUESTED_STORE_CODE, $storeCode);
                 $request->attributes->set(self::ATTR_RESOLVED_STORE_ID, (int) $store->getId());

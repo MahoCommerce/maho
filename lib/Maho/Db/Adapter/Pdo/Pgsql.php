@@ -211,17 +211,11 @@ class Pgsql extends AbstractPdoAdapter
             try {
                 $result = $this->query($sql);
             } catch (\Exception $e) {
-                // Convert to PDOException to maintain backwards compatibility.
-                // getPrevious() may be null (e.g. a RuntimeException thrown
-                // directly with no cause), so fall back to the original
-                // exception rather than dereferencing null.
+                // Convert to PDOException to maintain backwards compatibility
                 if ($e instanceof \RuntimeException) {
-                    $previous = $e->getPrevious();
-                    if ($previous instanceof \PDOException) {
-                        $e = $previous;
-                    } else {
-                        $source = $previous ?? $e;
-                        $e = new \PDOException($source->getMessage(), (int) $source->getCode());
+                    $e = $e->getPrevious();
+                    if (!($e instanceof \PDOException)) {
+                        $e = new \PDOException($e->getMessage(), (int) $e->getCode());
                     }
                 }
                 // Check to reconnect (PostgreSQL connection lost)
