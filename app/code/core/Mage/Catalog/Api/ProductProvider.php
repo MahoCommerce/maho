@@ -98,7 +98,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             }
         }
 
-        $dto = $this->loadVisibleProductDto($id);
+        $dto = $this->loadProductDto($id);
         if ($dto === null) {
             return null;
         }
@@ -116,7 +116,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     /**
      * Get a product by SKU
      */
-    private function getProductBySku(string $sku): ?Product
+    public function getProductBySku(string $sku, bool $visibleOnly = true): ?Product
     {
         $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $sku);
         if (!$product instanceof \Mage_Catalog_Model_Product || !$product->getId()) {
@@ -127,13 +127,13 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // returns empty and getMediaGalleryImages() is null. Re-load by ID to
         // get the full product surface (custom options, media gallery, type
         // instance data) the detail DTO needs.
-        return $this->loadVisibleProductDto((int) $product->getId());
+        return $this->loadProductDto((int) $product->getId(), $visibleOnly);
     }
 
     /**
      * Get a product by barcode
      */
-    private function getProductByBarcode(string $barcode): ?Product
+    public function getProductByBarcode(string $barcode, bool $visibleOnly = true): ?Product
     {
         $row = \Mage::getModel('catalog/product')
             ->getCollection()
@@ -144,24 +144,26 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
         // Same as getProductBySku: collection->getFirstItem() doesn't load
         // custom options or media gallery. Do a full load by id.
-        return $this->loadVisibleProductDto((int) $row->getId());
+        return $this->loadProductDto((int) $row->getId(), $visibleOnly);
     }
 
     /**
-     * Full-load a product scoped to the current store and return its detail
-     * DTO, or null when it isn't enabled. Single-item lookups (by id, sku,
-     * barcode) are public reads, so they must apply the same STATUS_ENABLED
-     * filter the collection paths do, otherwise a disabled product the
-     * listing hides could be fetched by guessing its identifier.
+     * Full-load a product scoped to the current store and return its detail DTO.
+     *
+     * Single-item public reads (by id, sku, barcode) pass $visibleOnly = true so
+     * a disabled product the listing hides can't be fetched by guessing its
+     * identifier. The admin GraphQL endpoint passes false, as admins must be able
+     * to load disabled products too.
      */
-    private function loadVisibleProductDto(int $id): ?Product
+    public function loadProductDto(int $id, bool $visibleOnly = true): ?Product
     {
         $product = \Mage::getModel('catalog/product')
             ->setStoreId(StoreContext::getStoreId())
             ->load($id);
-        if (!$product->getId()
-            || (int) $product->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED
-        ) {
+        if (!$product->getId()) {
+            return null;
+        }
+        if ($visibleOnly && (int) $product->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
             return null;
         }
         // Price models read the group off the product (falling back to the

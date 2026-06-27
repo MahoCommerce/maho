@@ -42,8 +42,8 @@ class ProductQueryHandler
         if (!$id) {
             throw ValidationException::requiredField('id');
         }
-        $product = \Mage::getModel('catalog/product')->load((int) $id);
-        return ['product' => $product->getId() ? $this->productProvider->toDto($product)->toArray() : null];
+        $dto = $this->productProvider->loadProductDto((int) $id, false);
+        return ['product' => $dto ? $dto->toArray() : null];
     }
 
     /**
@@ -56,9 +56,8 @@ class ProductQueryHandler
         if (!$sku) {
             throw ValidationException::requiredField('sku');
         }
-        $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $sku);
-        $dto = $product instanceof \Mage_Catalog_Model_Product ? $this->productProvider->toDto($product)->toArray() : null;
-        return ['productBySku' => $dto];
+        $dto = $this->productProvider->getProductBySku($sku, false);
+        return ['productBySku' => $dto ? $dto->toArray() : null];
     }
 
     /**
@@ -71,12 +70,8 @@ class ProductQueryHandler
         if (!$barcode) {
             throw ValidationException::requiredField('barcode');
         }
-        $product = \Mage::getModel('catalog/product')
-            ->getCollection()
-            ->addAttributeToFilter('barcode', $barcode)
-            ->getFirstItem();
-        /** @var \Mage_Catalog_Model_Product $product */
-        return ['productByBarcode' => $product->getId() ? $this->productProvider->toDto($product)->toArray() : null];
+        $dto = $this->productProvider->getProductByBarcode($barcode, false);
+        return ['productByBarcode' => $dto ? $dto->toArray() : null];
     }
 
     /**
@@ -145,12 +140,8 @@ class ProductQueryHandler
         if (!$sku) {
             throw ValidationException::requiredField('sku');
         }
-        $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $sku);
-        if (!$product instanceof \Mage_Catalog_Model_Product) {
-            return ['getConfigurableProduct' => null];
-        }
-
-        return ['getConfigurableProduct' => $this->productProvider->toDto($product)->toArray()];
+        $dto = $this->productProvider->getProductBySku($sku, false);
+        return ['getConfigurableProduct' => $dto ? $dto->toArray() : null];
     }
 
     /**
