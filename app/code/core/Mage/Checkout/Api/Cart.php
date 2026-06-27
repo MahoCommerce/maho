@@ -188,7 +188,6 @@ use Mage\Customer\Api\Address;
                 'maskedId' => ['type' => 'String'],
                 'sku' => ['type' => 'String!'],
                 'qty' => ['type' => 'Float!'],
-                'fulfillmentType' => ['type' => 'String', 'description' => 'SHIP (default) or PICKUP'],
                 'options' => ['type' => 'Iterable', 'description' => 'Custom options as {optionId: valueId} pairs'],
                 'links' => ['type' => '[Int]', 'description' => 'Downloadable link IDs to purchase'],
                 'superGroup' => ['type' => 'Iterable', 'description' => 'Grouped product qty map: {childProductId: qty}'],
@@ -202,17 +201,6 @@ use Mage\Customer\Api\Address;
             name: 'updateCartItemQty',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'itemId' => ['type' => 'ID!'], 'qty' => ['type' => 'Float!']],
             description: 'Update cart item quantity',
-        ),
-        new Mutation(
-            security: 'true',
-            name: 'setCartItemFulfillment',
-            args: [
-                'cartId' => ['type' => 'ID'],
-                'maskedId' => ['type' => 'String'],
-                'itemId' => ['type' => 'ID!'],
-                'fulfillmentType' => ['type' => 'String!', 'description' => 'SHIP or PICKUP'],
-            ],
-            description: 'Set fulfillment type for a cart item (SHIP or PICKUP for BOPIS)',
         ),
         new Mutation(
             security: 'true',

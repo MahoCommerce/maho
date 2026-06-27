@@ -16,6 +16,7 @@ use Mage\Checkout\Api\CartService;
 use Maho\ApiPlatform\Exception\NotFoundException;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\AdminAcl;
+use Maho\ApiPlatform\Trait\AdminQuoteTrait;
 use Maho\Giftcard\Api\GiftCard;
 
 /**
@@ -27,6 +28,8 @@ use Maho\Giftcard\Api\GiftCard;
  */
 class CartMutationHandler
 {
+    use AdminQuoteTrait;
+
     private CartService $cartService;
     private CartMapper $cartMapper;
 
@@ -73,12 +76,6 @@ class CartMutationHandler
         $cartId = $variables['cartId'] ?? $variables['input']['cartId'] ?? null;
         $sku = $variables['sku'] ?? $variables['input']['sku'] ?? null;
         $qty = $variables['qty'] ?? $variables['input']['qty'] ?? 1;
-        $fulfillmentType = strtoupper($variables['fulfillmentType'] ?? $variables['input']['fulfillmentType'] ?? 'SHIP');
-
-        // Validate fulfillment type
-        if (!in_array($fulfillmentType, ['SHIP', 'PICKUP'], true)) {
-            $fulfillmentType = 'SHIP';
-        }
 
         if (!$cartId) {
             throw ValidationException::requiredField('cartId');
@@ -90,38 +87,7 @@ class CartMutationHandler
         if (!$quote) {
             throw NotFoundException::cart($cartId);
         }
-        // Snapshot existing item IDs so we can identify the row addItem() creates.
-        // Matching by $sku is unreliable: a configurable variant added by its
-        // child SKU is promoted to the parent, so the resulting visible item
-        // carries the parent's SKU, not the child SKU the caller passed.
-        $existingItemIds = [];
-        foreach ($quote->getAllVisibleItems() as $item) {
-            $existingItemIds[(int) $item->getId()] = true;
-        }
-
         $quote = $this->cartService->addItem($quote, $sku, (float) $qty);
-
-        // Set fulfillment type on the newly added item
-        if ($fulfillmentType !== 'SHIP') {
-            $addedItem = null;
-            foreach ($quote->getAllVisibleItems() as $item) {
-                if (!isset($existingItemIds[(int) $item->getId()])) {
-                    $addedItem = $item;
-                }
-            }
-            // Fall back to SKU match when quantities merged into an existing row
-            // (no new item appears); covers simple products added repeatedly.
-            if (!$addedItem) {
-                foreach ($quote->getAllVisibleItems() as $item) {
-                    if ($item->getSku() === $sku) {
-                        $addedItem = $item;
-                    }
-                }
-            }
-            if ($addedItem) {
-                $this->setItemFulfillmentType($addedItem, $fulfillmentType);
-            }
-        }
 
         return ['addToCart' => $this->mapCart($quote)];
     }
@@ -174,51 +140,6 @@ class CartMutationHandler
         return ['removeItem' => $this->mapCart($quote)];
     }
 
-    /**
-     * Handle setItemFulfillment mutation
-     */
-    public function handleSetItemFulfillment(array $variables): array
-    {
-        AdminAcl::checkResource(Cart::class);
-        $cartId = $variables['cartId'] ?? null;
-        $itemId = $variables['itemId'] ?? null;
-        $fulfillmentType = strtoupper($variables['fulfillmentType'] ?? 'SHIP');
-
-        if (!$cartId) {
-            throw ValidationException::requiredField('cartId');
-        }
-        if (!$itemId) {
-            throw ValidationException::requiredField('itemId');
-        }
-
-        // Validate fulfillment type
-        if (!in_array($fulfillmentType, ['SHIP', 'PICKUP'], true)) {
-            throw ValidationException::invalidValue('fulfillmentType', 'must be SHIP or PICKUP');
-        }
-
-        $quote = $this->cartService->getCart((int) $cartId);
-        if (!$quote) {
-            throw NotFoundException::cart($cartId);
-        }
-
-        // Find the item
-        $targetItem = null;
-        foreach ($quote->getAllVisibleItems() as $item) {
-            if ((int) $item->getId() === (int) $itemId) {
-                $targetItem = $item;
-                break;
-            }
-        }
-
-        if (!$targetItem) {
-            throw NotFoundException::cartItem((int) $itemId);
-        }
-
-        // Set the fulfillment type
-        $this->setItemFulfillmentType($targetItem, $fulfillmentType);
-
-        return ['setItemFulfillment' => $this->mapCart($quote)];
-    }
 
     /**
      * Handle applyCoupon mutation
@@ -425,12 +346,7 @@ class CartMutationHandler
             throw ValidationException::requiredField('cartId');
         }
 
-        // Load quote without store filtering for admin/POS context
-        $quote = \Mage::getModel('sales/quote')->loadByIdWithoutStore($cartId);
-
-        if (!$quote || !$quote->getId()) {
-            throw NotFoundException::cart($cartId);
-        }
+        $quote = $this->loadAdminQuote($cartId);
 
         if ($quote->getStoreId()) {
             \Mage::app()->setCurrentStore($quote->getStoreId());
@@ -494,90 +410,8 @@ class CartMutationHandler
         // maskedId is the real, CSPRNG-generated masked_quote_id (set by CartMapper).
         // Never derive it from the quote id, that would be reversible and guessable.
 
-        // Enrich items with fulfillment type (GraphQL-specific), align by item ID
-        $quoteItemsById = [];
-        foreach ($quote->getAllVisibleItems() as $item) {
-            $quoteItemsById[(int) $item->getId()] = $item;
-        }
-        foreach ($data['items'] as &$itemData) {
-            $itemId = (int) ($itemData['id'] ?? 0);
-            if (isset($quoteItemsById[$itemId])) {
-                $itemData['fulfillmentType'] = $this->getItemFulfillmentType($quoteItemsById[$itemId]);
-            }
-        }
-        unset($itemData);
-
-        // Add giftcard data (GraphQL-specific)
-        $data['appliedGiftcards'] = $this->mapAppliedGiftcards($quote);
-
+        // appliedGiftcards and per-item data are already populated by
+        // CartMapper::mapQuoteToCart(), so REST and GraphQL share one source.
         return $data;
-    }
-
-    /**
-     * Map applied gift cards from quote
-     */
-    private function mapAppliedGiftcards(\Mage_Sales_Model_Quote $quote): array
-    {
-        $giftcards = [];
-
-        // Get gift card data from quote's giftcard_codes field
-        $giftcardCodes = $quote->getGiftcardCodes();
-        if (!$giftcardCodes) {
-            return $giftcards;
-        }
-
-        $codesData = \Mage::helper('core')->jsonDecode($giftcardCodes, true);
-        if (!is_array($codesData)) {
-            return $giftcards;
-        }
-
-        foreach ($codesData as $code => $appliedAmount) {
-            /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
-            $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
-            if ($giftcard->getId()) {
-                $giftcards[] = [
-                    'code' => $code,
-                    'appliedAmount' => (float) $appliedAmount,
-                    'balance' => (float) $giftcard->getBalance(),
-                ];
-            }
-        }
-
-        return $giftcards;
-    }
-
-    /**
-     * Set fulfillment type on a quote item using additional_data field
-     */
-    private function setItemFulfillmentType(\Mage_Sales_Model_Quote_Item $item, string $fulfillmentType): void
-    {
-        $additionalData = $item->getAdditionalData();
-        $data = $additionalData ? \Mage::helper('core')->jsonDecode($additionalData, true) : [];
-
-        if (!is_array($data)) {
-            $data = [];
-        }
-
-        $data['fulfillment_type'] = $fulfillmentType;
-
-        $item->setAdditionalData(\Mage::helper('core')->jsonEncode($data));
-        $item->save();
-    }
-
-    /**
-     * Get fulfillment type from a quote item's additional_data
-     */
-    private function getItemFulfillmentType(\Mage_Sales_Model_Quote_Item $item): string
-    {
-        $additionalData = $item->getAdditionalData();
-
-        if ($additionalData) {
-            $data = \Mage::helper('core')->jsonDecode($additionalData, true);
-            if (is_array($data) && isset($data['fulfillment_type'])) {
-                return strtoupper($data['fulfillment_type']);
-            }
-        }
-
-        return 'SHIP'; // Default
     }
 }

@@ -126,7 +126,7 @@ class CartService
             // No active cart: create one. Two concurrent first-time requests can
             // race here and each create an active cart; the loser's cart is then
             // dropped on the next load. That's a rare, low-impact outcome (an
-            // empty cart), so we don't serialize creation — the cost of a lock on
+            // empty cart), so we don't serialize creation: the cost of a lock on
             // every cart bootstrap isn't worth guarding against it.
             $quote = $this->createEmptyCart($customerId)['quote'];
         }
@@ -348,7 +348,7 @@ class CartService
 
         // If the product is still a not-visible simple at this point, it was not
         // promoted to a configurable parent (no parent, or super-attributes could
-        // not be resolved). Such a SKU must not be added directly — that would
+        // not be resolved). Such a SKU must not be added directly, as that would
         // bypass the visibility gate. Only genuine configurable variants reach the
         // cart, and always as their configurable parent.
         if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
@@ -701,42 +701,6 @@ class CartService
         return $quote;
     }
 
-    /**
-     * Set fulfillment type on a cart item (SHIP or PICKUP for BOPIS)
-     *
-     * @throws \RuntimeException
-     */
-    public function setItemFulfillmentType(\Mage_Sales_Model_Quote $quote, int $itemId, string $fulfillmentType): \Mage_Sales_Model_Quote
-    {
-        $fulfillmentType = strtoupper($fulfillmentType);
-        if (!in_array($fulfillmentType, ['SHIP', 'PICKUP'], true)) {
-            throw new \RuntimeException('Invalid fulfillment type. Must be SHIP or PICKUP');
-        }
-
-        $targetItem = null;
-        foreach ($quote->getAllVisibleItems() as $item) {
-            if ((int) $item->getId() === $itemId) {
-                $targetItem = $item;
-                break;
-            }
-        }
-
-        if (!$targetItem) {
-            throw new \RuntimeException('Cart item not found');
-        }
-
-        $additionalData = $targetItem->getAdditionalData();
-        $data = $additionalData ? \Mage::helper('core')->jsonDecode($additionalData, true) : [];
-        if (!is_array($data)) {
-            $data = [];
-        }
-        $data['fulfillment_type'] = $fulfillmentType;
-
-        $targetItem->setAdditionalData(\Mage::helper('core')->jsonEncode($data));
-        $targetItem->save();
-
-        return $quote;
-    }
 
     /**
      * Set shipping address

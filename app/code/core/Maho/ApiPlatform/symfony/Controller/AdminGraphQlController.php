@@ -230,8 +230,6 @@ class AdminGraphQlController
                 => $this->cartHandler->handleUpdateQty($variables),
             'removeItem', 'removeItemFromCart', 'RemoveItem'
                 => $this->cartHandler->handleRemoveItem($variables),
-            'setItemFulfillment', 'setCartItemFulfillment', 'SetItemFulfillment'
-                => $this->cartHandler->handleSetItemFulfillment($variables),
             'applyCoupon', 'applyCouponToCart', 'ApplyCoupon'
                 => $this->cartHandler->handleApplyCoupon($variables),
             'removeCoupon', 'removeCouponFromCart', 'RemoveCoupon'

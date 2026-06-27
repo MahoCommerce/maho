@@ -13,7 +13,6 @@ namespace Mage\Checkout\Api;
 use ApiPlatform\Metadata\Operation;
 use Symfony\Bundle\SecurityBundle\Security;
 use Maho\ApiPlatform\Service\StoreContext;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -42,20 +41,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $operationName = $operation->getName();
 
         // Bridge REST request body into context args (GraphQL populates args natively)
-        if (empty($context['args']['input'])) {
-            $context['args']['input'] = [];
-            $request = $context['request'] ?? null;
-            if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
-                try {
-                    $body = \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]');
-                } catch (\JsonException) {
-                    throw new BadRequestHttpException('Invalid JSON in request body');
-                }
-                if (is_array($body)) {
-                    $context['args']['input'] = $body;
-                }
-            }
-        }
+        $this->normalizeGraphQlInput($context);
 
         // Map uriVariables for sub-resource params. itemId is
         // declared in URI templates but not in the operation's
@@ -92,7 +78,6 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             'addToCart', 'add_guest_item', 'add_cart_item' => $this->addItemToCart($context, $uriVariables),
             'updateCartItemQty', 'update_guest_item', 'update_cart_item' => $this->updateCartItem($context, $uriVariables),
             'removeCartItem', 'remove_guest_item', 'remove_cart_item' => $this->removeItemFromCart($context, $uriVariables),
-            'setCartItemFulfillment' => $this->setCartItemFulfillment($context, $uriVariables),
             'applyCouponToCart', 'apply_guest_coupon' => $this->applyCouponToCart($context, $uriVariables),
             'removeCouponFromCart', 'remove_guest_coupon' => $this->removeCouponFromCart($context, $uriVariables),
             'setShippingAddressOnCart' => $this->setShippingAddressOnCart($context, $uriVariables),
@@ -134,7 +119,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
      *
      * Admins are gated upstream by AdminAclListener (Cart::ADMIN_RESOURCE), so
      * they're trusted here. A service token is trusted only when it actually
-     * holds the carts/write grant — a bare service-account token without it is
+     * holds the carts/write grant: a bare service-account token without it is
      * treated as an ordinary caller and can't reach arbitrary carts through the
      * enumerable numeric /carts/{id} path. This closes the gap left by the
      * overridden process() bypassing the base Processor's requirePermission().
@@ -189,7 +174,6 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
         $sku = $args['sku'] ?? '';
         $qty = (float) ($args['qty'] ?? 1);
-        $fulfillmentType = strtoupper($args['fulfillmentType'] ?? 'SHIP');
 
         // Build buy request options
         $buyOptions = [];
@@ -210,49 +194,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
-
-        // Snapshot existing item IDs so we can identify the row addItem() creates.
-        // Matching by $sku is unreliable: a configurable variant added by its
-        // child SKU is promoted to the parent, so the resulting visible item
-        // carries the parent's SKU, not the child SKU the caller passed.
-        $existingItemIds = [];
-        foreach ($quote->getAllVisibleItems() as $item) {
-            $existingItemIds[(int) $item->getId()] = true;
-        }
-
         $quote = $this->cartService->addItem($quote, $sku, $qty, $buyOptions);
-
-        // Set fulfillment type on the newly added item
-        if ($fulfillmentType !== 'SHIP') {
-            $addedItem = null;
-            foreach ($quote->getAllVisibleItems() as $item) {
-                if (!isset($existingItemIds[(int) $item->getId()])) {
-                    $addedItem = $item;
-                }
-            }
-            // Fall back to product-id match when quantities merged into an
-            // existing row (no new item appears). Match by product id, not SKU:
-            // a configurable added by child SKU merges into a row carrying the
-            // PARENT product id and parent SKU, so a child-SKU comparison never
-            // matches and the fulfillment type would be silently dropped.
-            if (!$addedItem) {
-                $productId = (int) \Mage::getModel('catalog/product')->getIdBySku($sku);
-                $candidateIds = $productId > 0 ? [$productId] : [];
-                if ($productId > 0) {
-                    foreach (\Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($productId) as $parentId) {
-                        $candidateIds[] = (int) $parentId;
-                    }
-                }
-                foreach ($quote->getAllVisibleItems() as $item) {
-                    if (in_array((int) $item->getProductId(), $candidateIds, true)) {
-                        $addedItem = $item;
-                    }
-                }
-            }
-            if ($addedItem) {
-                $this->cartService->setItemFulfillmentType($quote, (int) $addedItem->getId(), $fulfillmentType);
-            }
-        }
 
         return $this->cartMapper->mapQuoteToCart($quote, false);
     }
@@ -294,24 +236,6 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
-    /**
-     * Set fulfillment type for a cart item
-     */
-    private function setCartItemFulfillment(array $context, array $uriVariables): Cart
-    {
-        $args = $context['args']['input'] ?? [];
-        $itemId = $args['itemId'] ?? $uriVariables['itemId'] ?? null;
-        $fulfillmentType = $args['fulfillmentType'] ?? 'SHIP';
-
-        if (!$itemId) {
-            throw new \RuntimeException('Item ID is required');
-        }
-
-        $quote = $this->resolveAndVerify($context, $uriVariables);
-        $quote = $this->cartService->setItemFulfillmentType($quote, (int) $itemId, $fulfillmentType);
-
-        return $this->cartMapper->mapQuoteToCart($quote, false);
-    }
 
     /**
      * Apply coupon code to cart

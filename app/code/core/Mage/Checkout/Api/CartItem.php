@@ -41,12 +41,6 @@ class CartItem extends \Maho\ApiPlatform\Resource
     public array $options = [];
 
     /**
-     * Fulfillment type for this item: SHIP (default) or PICKUP
-     * Used for omnichannel scenarios (BOPIS, POS in-store pickup, etc.)
-     */
-    public string $fulfillmentType = 'SHIP';
-
-    /**
      * Stock status: 'in_stock' or 'out_of_stock'
      */
     public string $stockStatus = 'in_stock';

@@ -17,6 +17,7 @@ use Mage\Sales\Api\OrderService;
 use Maho\ApiPlatform\Exception\NotFoundException;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Security\AdminAcl;
+use Maho\ApiPlatform\Trait\AdminQuoteTrait;
 
 /**
  * Order Mutation Handler.
@@ -26,6 +27,8 @@ use Maho\ApiPlatform\Security\AdminAcl;
  */
 class OrderMutationHandler
 {
+    use AdminQuoteTrait;
+
     private OrderService $orderService;
     private OrderProvider $orderProvider;
 
@@ -108,8 +111,8 @@ class OrderMutationHandler
             throw ValidationException::requiredField('incrementId');
         }
 
-        $order = \Mage::getModel('sales/order')->loadByIncrementId($incrementId);
-        if (!$order->getId()) {
+        $order = $this->orderService->getOrder(incrementId: $incrementId);
+        if (!$order) {
             throw NotFoundException::order();
         }
 
@@ -129,22 +132,14 @@ class OrderMutationHandler
             throw ValidationException::requiredField('customerId');
         }
 
-        try {
-            $orders = \Mage::getModel('sales/order')->getCollection()
-                ->addFieldToFilter('customer_id', (int) $customerId)
-                ->setOrder('created_at', 'DESC')
-                ->setPageSize((int) $limit);
+        $result = $this->orderService->getCustomerOrders((int) $customerId, 1, $limit);
 
-            $result = [];
-            foreach ($orders as $order) {
-                $result[] = $this->mapOrder($order);
-            }
-
-            return ['customerOrders' => $result];
-        } catch (\Exception $e) {
-            \Mage::log('handleGetCustomerOrders error: ' . $e->getMessage() . "\n" . $e->getTraceAsString(), \Mage::LOG_ERROR, 'api.log');
-            throw $e;
+        $orders = [];
+        foreach ($result['orders'] as $order) {
+            $orders[] = $this->mapOrder($order);
         }
+
+        return ['customerOrders' => $orders];
     }
 
     /**
@@ -156,25 +151,14 @@ class OrderMutationHandler
         $storeId = $variables['storeId'] ?? null;
         $limit = max(1, min((int) ($variables['limit'] ?? 10), 100));
 
-        try {
-            $orders = \Mage::getModel('sales/order')->getCollection()
-                ->setOrder('created_at', 'DESC')
-                ->setPageSize((int) $limit);
+        $orders = $this->orderService->getRecentOrders($limit, $storeId ? (int) $storeId : null);
 
-            if ($storeId) {
-                $orders->addFieldToFilter('store_id', (int) $storeId);
-            }
-
-            $result = [];
-            foreach ($orders as $order) {
-                $result[] = $this->mapOrderSummary($order);
-            }
-
-            return ['recentOrders' => $result];
-        } catch (\Exception $e) {
-            \Mage::log('handleRecentOrders error: ' . $e->getMessage(), \Mage::LOG_ERROR, 'api.log');
-            throw $e;
+        $result = [];
+        foreach ($orders as $order) {
+            $result[] = $this->mapOrderSummary($order);
         }
+
+        return ['recentOrders' => $result];
     }
 
     /**
@@ -191,37 +175,14 @@ class OrderMutationHandler
             return ['searchOrders' => []];
         }
 
-        try {
-            $orders = \Mage::getModel('sales/order')->getCollection()
-                ->setOrder('created_at', 'DESC')
-                ->setPageSize((int) $limit);
+        $orders = $this->orderService->searchOrders($search, $storeId ? (int) $storeId : null, $limit);
 
-            if ($storeId) {
-                $orders->addFieldToFilter('store_id', (int) $storeId);
-            }
-
-            // Search by increment ID or customer name/email (OR condition)
-            $escapedSearch = addcslashes($search, '%_');
-            $orders->addFieldToFilter(
-                ['increment_id', 'customer_email', 'customer_firstname', 'customer_lastname'],
-                [
-                    ['like' => "%{$escapedSearch}%"],
-                    ['like' => "%{$escapedSearch}%"],
-                    ['like' => "%{$escapedSearch}%"],
-                    ['like' => "%{$escapedSearch}%"],
-                ],
-            );
-
-            $result = [];
-            foreach ($orders as $order) {
-                $result[] = $this->mapOrderSummary($order);
-            }
-
-            return ['searchOrders' => $result];
-        } catch (\Exception $e) {
-            \Mage::log('handleSearchOrders error: ' . $e->getMessage(), \Mage::LOG_ERROR, 'api.log');
-            throw $e;
+        $result = [];
+        foreach ($orders as $order) {
+            $result[] = $this->mapOrderSummary($order);
         }
+
+        return ['searchOrders' => $result];
     }
 
     /**
@@ -360,17 +321,6 @@ class OrderMutationHandler
         }
     }
 
-    /**
-     * Load a quote by ID without store filtering, for admin context
-     */
-    private function loadAdminQuote(int $cartId): \Mage_Sales_Model_Quote
-    {
-        $quote = \Mage::getModel('sales/quote')->loadByIdWithoutStore($cartId);
-        if (!$quote || !$quote->getId()) {
-            throw NotFoundException::cart();
-        }
-        return $quote;
-    }
 
     /**
      * Create invoice and shipment for an order, logging any failures

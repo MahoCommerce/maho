@@ -271,6 +271,44 @@ class OrderService
     }
 
     /**
+     * Recent orders for the admin dashboard, newest first, optionally store-scoped.
+     *
+     * @return \Mage_Sales_Model_Order[]
+     */
+    public function getRecentOrders(int $limit, ?int $storeId = null): array
+    {
+        $collection = $this->buildOrderCollection();
+        if ($storeId !== null) {
+            $collection->addFieldToFilter('store_id', $storeId);
+        }
+
+        return $this->paginateAndPreload($collection, 1, $limit)['orders'];
+    }
+
+    /**
+     * Multi-field order search (increment id, customer email, first/last name),
+     * newest first, optionally store-scoped.
+     *
+     * @return \Mage_Sales_Model_Order[]
+     */
+    public function searchOrders(string $query, ?int $storeId, int $limit): array
+    {
+        $collection = $this->buildOrderCollection();
+        if ($storeId !== null) {
+            $collection->addFieldToFilter('store_id', $storeId);
+        }
+
+        $escaped = addcslashes($query, '%_');
+        $like = ['like' => "%{$escaped}%"];
+        $collection->addFieldToFilter(
+            ['increment_id', 'customer_email', 'customer_firstname', 'customer_lastname'],
+            [$like, $like, $like, $like],
+        );
+
+        return $this->paginateAndPreload($collection, 1, $limit)['orders'];
+    }
+
+    /**
      * Build an order collection with billing address joined and common filters applied.
      *
      * @param int|null $customerId When set, restrict to this customer's orders

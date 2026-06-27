@@ -110,9 +110,9 @@ class CartMapper
             $giftcardCodes = \Mage::helper('core')->jsonDecode($giftcardCodesJson, true);
             if (is_array($giftcardCodes)) {
                 // giftcard_codes stores {code: applied_amount}. The live card
-                // balance must be loaded from the model — mirrors
-                // CartMutationHandler::mapAppliedGiftcards() so REST and GraphQL
-                // return identical, correct values.
+                // balance must be loaded from the model. This is the single
+                // source for applied gift cards: the GraphQL cart handler maps
+                // through here too, so REST and GraphQL return identical values.
                 foreach ($giftcardCodes as $code => $appliedAmount) {
                     /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
                     $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
@@ -164,7 +164,6 @@ class CartMapper
         $dto->productType = $item->getProductType();
         $dto->thumbnailUrl = $preloadedThumbnailUrl;
         $dto->stockStatus = $preloadedStockStatus;
-        $dto->fulfillmentType = $this->getItemFulfillmentType($item);
 
         // Get configured product options for display
         $dto->options = $this->getItemConfigurationOptions($item);
@@ -370,22 +369,6 @@ class CartMapper
         return $methods;
     }
 
-    /**
-     * Get fulfillment type from a quote item's additional_data
-     */
-    private function getItemFulfillmentType(\Mage_Sales_Model_Quote_Item $item): string
-    {
-        $additionalData = $item->getAdditionalData();
-
-        if ($additionalData) {
-            $data = \Mage::helper('core')->jsonDecode($additionalData, true);
-            if (is_array($data) && isset($data['fulfillment_type'])) {
-                return strtoupper($data['fulfillment_type']);
-            }
-        }
-
-        return 'SHIP';
-    }
 
     /**
      * Get configured product options for a cart item (works for all product types)
