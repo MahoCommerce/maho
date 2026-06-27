@@ -52,8 +52,9 @@ class ApiResource extends BaseApiResource
     /**
      * Mirrors `ApiPlatform\Metadata\ApiResource::__construct` parameter-by-parameter
      * and forwards them to `parent::__construct` so API Platform sees the same
-     * configuration. Maho-specific fields come *after* every parent parameter so
-     * positional usage (rare) still maps cleanly to the parent contract.
+     * configuration. Maho-specific fields are declared *first* so they surface at
+     * the top of IDE autocomplete and usage blocks; this doesn't affect forwarding,
+     * which is done by name (see `get_defined_vars()` below), not by position.
      *
      * If API Platform adds a new constructor parameter we haven't mirrored here,
      * `tests/Backend/Integration/ApiPlatform/ApiResourceConstructorParityTest`
