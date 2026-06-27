@@ -76,13 +76,12 @@ class OrderService
         // Serialize concurrent placement attempts on the same quote. Without
         // this, two simultaneous POSTs both pass the is_active check above and
         // submit the same cart twice, duplicate orders, double inventory
-        // decrement. GET_LOCK gives us a per-quote critical section that
+        // decrement. The lock gives us a per-quote critical section that
         // releases on disconnect, so a crashed worker can't deadlock the cart.
         $resource = \Mage::getSingleton('core/resource');
         $write = $resource->getConnection('core_write');
         $lockName = 'maho_quote_place_order:' . (int) $quote->getId();
-        $acquired = (int) $write->fetchOne('SELECT GET_LOCK(?, 5)', [$lockName]);
-        if ($acquired !== 1) {
+        if (!$write->getLock($lockName, 5)) {
             throw new \RuntimeException('Order placement is already in progress for this cart');
         }
 
@@ -160,7 +159,7 @@ class OrderService
             // surface to the caller instead of a generic placeholder.
             throw new \RuntimeException($e->getMessage() ?: 'Failed to place order', 0, $e);
         } finally {
-            $write->query('SELECT RELEASE_LOCK(?)', [$lockName]);
+            $write->releaseLock($lockName);
         }
     }
 
@@ -377,25 +376,30 @@ class OrderService
      */
     public function cancelOrder(\Mage_Sales_Model_Order $order, ?string $reason = null): \Mage_Sales_Model_Order
     {
-        if (!$order->canCancel()) {
-            throw new \RuntimeException('Order cannot be cancelled');
-        }
-
-        try {
-            $order->cancel();
-
-            if ($reason) {
-                $order->addStatusHistoryComment('Order cancelled: ' . $reason, false)
-                    ->setIsCustomerNotified(true);
+        return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
+            // Re-read under the lock so canCancel() sees live state: a concurrent
+            // invoice/ship/cancel may have transitioned the order while we waited.
+            $order->load((int) $order->getId());
+            if (!$order->canCancel()) {
+                throw new \RuntimeException('Order cannot be cancelled');
             }
 
-            $order->save();
+            try {
+                $order->cancel();
 
-            return $order;
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw new \RuntimeException('Failed to cancel order');
-        }
+                if ($reason) {
+                    $order->addStatusHistoryComment('Order cancelled: ' . $reason, false)
+                        ->setIsCustomerNotified(true);
+                }
+
+                $order->save();
+
+                return $order;
+            } catch (\Exception $e) {
+                \Mage::logException($e);
+                throw new \RuntimeException('Failed to cancel order');
+            }
+        });
     }
 
     /**
@@ -452,20 +456,25 @@ class OrderService
      */
     public function createInvoiceForOrder(\Mage_Sales_Model_Order $order, bool $capture = true): ?\Mage_Sales_Model_Order_Invoice
     {
-        if (!$order->canInvoice()) {
-            return null;
-        }
+        return $this->withOrderLock((int) $order->getId(), function () use ($order, $capture) {
+            // Re-read under the lock so canInvoice() reflects any invoice another
+            // request created while we waited, otherwise both would register one.
+            $order->load((int) $order->getId());
+            if (!$order->canInvoice()) {
+                return null;
+            }
 
-        $invoice = $order->prepareInvoice();
-        $invoice->setRequestedCaptureCase(
-            $capture ? \Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE : \Mage_Sales_Model_Order_Invoice::NOT_CAPTURE,
-        );
-        $invoice->register();
+            $invoice = $order->prepareInvoice();
+            $invoice->setRequestedCaptureCase(
+                $capture ? \Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE : \Mage_Sales_Model_Order_Invoice::NOT_CAPTURE,
+            );
+            $invoice->register();
 
-        $transactionSave = \Mage::getModel('core/resource_transaction');
-        $transactionSave->addObject($invoice)->addObject($order)->save();
+            $transactionSave = \Mage::getModel('core/resource_transaction');
+            $transactionSave->addObject($invoice)->addObject($order)->save();
 
-        return $invoice;
+            return $invoice;
+        });
     }
 
     /**
@@ -476,18 +485,47 @@ class OrderService
      */
     public function createShipmentForOrder(\Mage_Sales_Model_Order $order): ?\Mage_Sales_Model_Order_Shipment
     {
-        if (!$order->canShip()) {
-            return null;
+        return $this->withOrderLock((int) $order->getId(), function () use ($order) {
+            // Re-read under the lock so canShip() reflects any shipment another
+            // request created while we waited, otherwise both would register one
+            // and decrement inventory twice.
+            $order->load((int) $order->getId());
+            if (!$order->canShip()) {
+                return null;
+            }
+
+            $shipment = $order->prepareShipment();
+            $shipment->register();
+            $order->setIsInProcess(true);
+
+            $transactionSave = \Mage::getModel('core/resource_transaction');
+            $transactionSave->addObject($shipment)->addObject($order)->save();
+
+            return $shipment;
+        });
+    }
+
+    /**
+     * Run a state-changing operation while holding a per-order advisory lock.
+     *
+     * All order mutations (invoice, ship, cancel, refund) share one lock name so
+     * two concurrent requests can't both pass their can*() guard and both mutate
+     * the same order, duplicate invoices/shipments or double-cancel side effects.
+     * The lock releases on disconnect, so a crashed worker can't wedge the order.
+     */
+    private function withOrderLock(int $orderId, callable $operation): mixed
+    {
+        $write = \Mage::getSingleton('core/resource')->getConnection('core_write');
+        $lockName = 'maho_order_mutate:' . $orderId;
+        if (!$write->getLock($lockName, 5)) {
+            throw new \RuntimeException('Another operation is already in progress for this order');
         }
 
-        $shipment = $order->prepareShipment();
-        $shipment->register();
-        $order->setIsInProcess(true);
-
-        $transactionSave = \Mage::getModel('core/resource_transaction');
-        $transactionSave->addObject($shipment)->addObject($order)->save();
-
-        return $shipment;
+        try {
+            return $operation();
+        } finally {
+            $write->releaseLock($lockName);
+        }
     }
 
     /**

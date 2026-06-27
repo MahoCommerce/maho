@@ -89,13 +89,15 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
 
         // Serialize concurrent refunds on the same order. Without this, two
         // simultaneous requests both pass canCreditmemo() and both register(),
-        // issuing a double refund. GET_LOCK gives a per-order critical section
+        // issuing a double refund. The lock gives a per-order critical section
         // that releases on disconnect (mirrors OrderService::placeAdminOrder).
         $resource = \Mage::getSingleton('core/resource');
         $write = $resource->getConnection('core_write');
-        $lockName = 'maho_creditmemo_order:' . (int) $order->getId();
-        $acquired = (int) $write->fetchOne('SELECT GET_LOCK(?, 5)', [$lockName]);
-        if ($acquired !== 1) {
+        // Shared per-order lock: refunds must be mutually exclusive with the
+        // order's other state transitions (invoice/ship/cancel), not just with
+        // other refunds. See OrderService::withOrderLock().
+        $lockName = 'maho_order_mutate:' . (int) $order->getId();
+        if (!$write->getLock($lockName, 5)) {
             throw new ConflictHttpException('A refund is already in progress for this order');
         }
 
@@ -109,7 +111,7 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
 
             return $this->buildAndRegisterCreditMemo($order, $items, $comment, $adjustmentPositive, $adjustmentNegative, $offlineRefund);
         } finally {
-            $write->query('SELECT RELEASE_LOCK(?)', [$lockName]);
+            $write->releaseLock($lockName);
         }
     }
 

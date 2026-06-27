@@ -254,9 +254,11 @@ class OrderMutationHandler
         // Mirrors OrderService::placeAdminOrder() and CreditMemoProcessor.
         $resource = \Mage::getSingleton('core/resource');
         $write = $resource->getConnection('core_write');
-        $lockName = 'maho_creditmemo_order:' . (int) $order->getId();
-        $acquired = (int) $write->fetchOne('SELECT GET_LOCK(?, 5)', [$lockName]);
-        if ($acquired !== 1) {
+        // Shared per-order lock so refunds are mutually exclusive with the
+        // order's other state transitions (invoice/ship/cancel). Matches
+        // OrderService::withOrderLock() and CreditMemoProcessor.
+        $lockName = 'maho_order_mutate:' . (int) $order->getId();
+        if (!$write->getLock($lockName, 5)) {
             throw ValidationException::invalidValue('orderId', 'a refund is already in progress for this order');
         }
 
@@ -270,7 +272,7 @@ class OrderMutationHandler
 
             return $this->buildProcessReturn($order, $items, $comment, $adjustmentPositive, $adjustmentNegative, $refundToStoreCredit);
         } finally {
-            $write->query('SELECT RELEASE_LOCK(?)', [$lockName]);
+            $write->releaseLock($lockName);
         }
     }
 

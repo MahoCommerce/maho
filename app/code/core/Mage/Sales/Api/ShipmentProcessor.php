@@ -12,6 +12,7 @@ namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -80,6 +81,32 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Order not found');
         }
 
+        // Serialize with the order's other state transitions so two concurrent
+        // requests can't both pass canShip() and both register a shipment,
+        // decrementing inventory twice. Shared per-order lock name, see
+        // OrderService::withOrderLock().
+        $write = \Mage::getSingleton('core/resource')->getConnection('core_write');
+        $lockName = 'maho_order_mutate:' . (int) $order->getId();
+        if (!$write->getLock($lockName, 5)) {
+            throw new ConflictHttpException('Another operation is already in progress for this order');
+        }
+
+        try {
+            // Re-read under the lock so canShip() reflects the live state.
+            $order->load($orderId);
+            return $this->buildAndRegisterShipment($order, $items, $tracks, $comment, $notifyCustomer);
+        } finally {
+            $write->releaseLock($lockName);
+        }
+    }
+
+    private function buildAndRegisterShipment(
+        \Mage_Sales_Model_Order $order,
+        ?array $items,
+        array $tracks,
+        ?string $comment,
+        bool $notifyCustomer,
+    ): Shipment {
         if (!$order->canShip()) {
             throw new BadRequestHttpException('Order cannot be shipped (already fully shipped or not in a shippable state)');
         }

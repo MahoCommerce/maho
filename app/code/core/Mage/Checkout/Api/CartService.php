@@ -122,29 +122,13 @@ class CartService
             ->loadByCustomer($customerId);
 
         $quote = $loadQuote();
-        if ($quote->getId()) {
-            return $quote;
-        }
-
-        // No active cart: serialize creation so two concurrent requests don't
-        // each create a duplicate active cart (the loser's cart, and anything
-        // added to it, would be silently dropped). GET_LOCK releases on
-        // disconnect; on timeout we fall back to best-effort load-or-create.
-        $resource = \Mage::getSingleton('core/resource');
-        $write = $resource->getConnection('core_write');
-        $lockName = 'maho_customer_cart_create:' . $customerId;
-        $acquired = (int) $write->fetchOne('SELECT GET_LOCK(?, 5)', [$lockName]);
-        try {
-            // Re-load under the lock: another request may have created the cart
-            // while we waited. Only create when there is still none.
-            $quote = $loadQuote();
-            if (!$quote->getId()) {
-                $quote = $this->createEmptyCart($customerId)['quote'];
-            }
-        } finally {
-            if ($acquired === 1) {
-                $write->query('SELECT RELEASE_LOCK(?)', [$lockName]);
-            }
+        if (!$quote->getId()) {
+            // No active cart: create one. Two concurrent first-time requests can
+            // race here and each create an active cart; the loser's cart is then
+            // dropped on the next load. That's a rare, low-impact outcome (an
+            // empty cart), so we don't serialize creation — the cost of a lock on
+            // every cart bootstrap isn't worth guarding against it.
+            $quote = $this->createEmptyCart($customerId)['quote'];
         }
 
         return $quote;

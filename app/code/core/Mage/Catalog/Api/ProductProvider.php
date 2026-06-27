@@ -204,9 +204,16 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             ->setPageSize($pageSize)
             ->setCurPage($page);
 
-        // Sort configurables first so they take priority over simples with shared url_keys
+        // Sort composite products first so they take priority over simples with shared url_keys.
+        // ANSI CASE instead of MySQL's FIELD() so the ordering works on PostgreSQL and SQLite too.
         $collection->getSelect()->order(
-            new \Maho\Db\Expr("FIELD(e.type_id, '" . \Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE . "', '" . \Mage_Catalog_Model_Product_Type::TYPE_GROUPED . "', '" . \Mage_Catalog_Model_Product_Type::TYPE_BUNDLE . "') DESC"),
+            new \Maho\Db\Expr(
+                'CASE e.type_id'
+                . " WHEN '" . \Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE . "' THEN 1"
+                . " WHEN '" . \Mage_Catalog_Model_Product_Type::TYPE_GROUPED . "' THEN 2"
+                . " WHEN '" . \Mage_Catalog_Model_Product_Type::TYPE_BUNDLE . "' THEN 3"
+                . ' ELSE 0 END DESC',
+            ),
         );
 
         $storeId = StoreContext::getStoreId();
