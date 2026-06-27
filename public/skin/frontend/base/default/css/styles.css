@@ -3137,10 +3137,17 @@ body {
   position: relative;
   grid-auto-flow: row;
   justify-items: center;
+  align-self: start;
+  text-align: center;
+  width: min-content;
   padding: 0;
   gap: 0.1rem;
   border: none;
   color: var(--maho-color-text-primary)
+}
+
+.page-header-container .header-minicart {
+  align-self: start;
 }
 
 .skip-cart .count {
