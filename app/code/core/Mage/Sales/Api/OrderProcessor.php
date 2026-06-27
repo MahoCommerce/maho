@@ -41,29 +41,13 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     {
         $operationName = $operation->getName();
 
-        // Bridge raw REST body → context args. API Platform deserialises POST
+        // Bridge raw REST body into context args. API Platform deserialises POST
         // bodies into the resource DTO (Order here), but the place-order
         // endpoint receives a storefront-shaped payload (shippingAddress,
         // billingAddress, paymentData, etc.) that doesn't map onto Order
         // fields. Parse the raw body so the placeOrder handler can read it.
         // GraphQL invocations already populate $context['args']['input'].
-        if (empty($context['args']['input'])) {
-            $context['args']['input'] = [];
-            $request = $context['request'] ?? null;
-            if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
-                $content = $request->getContent();
-                if ($content !== '') {
-                    try {
-                        $body = \Mage::helper('core')->jsonDecode($content);
-                    } catch (\JsonException) {
-                        throw new BadRequestHttpException('Invalid JSON in request body');
-                    }
-                    if (is_array($body)) {
-                        $context['args']['input'] = $body;
-                    }
-                }
-            }
-        }
+        $this->normalizeGraphQlInput($context);
 
         return match ($operationName) {
             'placeOrder', '_api_/orders_post', 'place_guest_order' => $this->placeOrder($context, $uriVariables),

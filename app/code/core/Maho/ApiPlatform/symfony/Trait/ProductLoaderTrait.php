@@ -54,25 +54,44 @@ trait ProductLoaderTrait
     }
 
     /**
-     * Authorize a loaded product against a store-restricted API user: the product
-     * must belong to at least one website the user's allowed stores map to. No-op
-     * for unrestricted users (getAllowedStoreIds() === null). Mirrors the check
-     * ProductProcessor applies on the main product CRUD, so sub-resource writes
-     * (custom options, media, tier prices, links, bundle/configurable setup, …)
-     * cannot be used to reach a product outside the user's website scope.
+     * Map a store-restricted API user's allowed STORE ids to their website ids.
+     *
+     * Returns null when the user is unrestricted (getAllowedStoreIds() === null),
+     * signalling "no website restriction": callers must treat null as "allow all".
+     * Single source of truth for the store-to-website scope shared by the main
+     * product CRUD (ProductProcessor) and every product sub-resource processor.
+     *
+     * @return int[]|null
      */
-    protected function authorizeProductWebsites(Mage_Catalog_Model_Product $product, ApiUser $user): void
+    protected function getAllowedWebsiteIds(ApiUser $user): ?array
     {
         $allowedStoreIds = $user->getAllowedStoreIds();
         if ($allowedStoreIds === null) {
-            return;
+            return null;
         }
 
-        $allowedWebsiteIds = [];
+        $websiteIds = [];
         foreach ($allowedStoreIds as $storeId) {
-            $allowedWebsiteIds[] = (int) Mage::app()->getStore($storeId)->getWebsiteId();
+            $websiteIds[] = (int) Mage::app()->getStore($storeId)->getWebsiteId();
         }
-        $allowedWebsiteIds = array_values(array_unique($allowedWebsiteIds));
+
+        return array_values(array_unique($websiteIds));
+    }
+
+    /**
+     * Authorize a loaded product against a store-restricted API user: the product
+     * must belong to at least one website the user's allowed stores map to. No-op
+     * for unrestricted users (getAllowedStoreIds() === null). Applied identically
+     * by the main product CRUD and sub-resource writes (custom options, media,
+     * tier prices, links, bundle/configurable setup, …), so none can be used to
+     * reach a product outside the user's website scope.
+     */
+    protected function authorizeProductWebsites(Mage_Catalog_Model_Product $product, ApiUser $user): void
+    {
+        $allowedWebsiteIds = $this->getAllowedWebsiteIds($user);
+        if ($allowedWebsiteIds === null) {
+            return;
+        }
 
         $productWebsiteIds = array_map('intval', $product->getWebsiteIds());
 

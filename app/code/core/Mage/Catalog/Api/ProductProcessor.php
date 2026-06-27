@@ -20,6 +20,8 @@ use Mage_Catalog_Model_Product_Visibility;
 use Mage_CatalogInventory_Model_Stock_Item;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Trait\ActivityLogTrait;
+use Maho\ApiPlatform\Trait\ProductLoaderTrait;
+use Maho\ApiPlatform\Trait\StockWriterTrait;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -39,6 +41,8 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 final class ProductProcessor extends \Maho\ApiPlatform\Processor
 {
     use ActivityLogTrait;
+    use ProductLoaderTrait;
+    use StockWriterTrait;
 
     private const VISIBILITY_MAP = [
         'not_visible' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE,
@@ -374,14 +378,25 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $this->safeSave($product, 'assign categories');
     }
 
-    private function updateStockData(Mage_Catalog_Model_Product $product, Product $data): void
+    /**
+     * Resolve the stock qty / availability / manage-stock the caller supplied,
+     * coalescing the structured stockData map and the flat stockQty shortcut.
+     * Returns null when the request carries no stock change to apply (matching
+     * the original early-return: only manage_stock with no qty/availability is
+     * treated as "nothing to do").
+     *
+     * @return array{qty: ?float, isInStock: ?bool, manageStock: ?bool}|null
+     */
+    private function extractStockInput(Product $data): ?array
     {
         $qty = null;
         $isInStock = null;
+        $manageStock = null;
 
         if ($data->stockData !== null) {
             $qty = isset($data->stockData['qty']) ? (float) $data->stockData['qty'] : null;
             $isInStock = isset($data->stockData['is_in_stock']) ? (bool) $data->stockData['is_in_stock'] : null;
+            $manageStock = isset($data->stockData['manage_stock']) ? (bool) $data->stockData['manage_stock'] : null;
         }
 
         if ($qty === null && $data->stockQty !== null) {
@@ -389,25 +404,33 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if ($qty === null && $isInStock === null) {
+            return null;
+        }
+
+        return ['qty' => $qty, 'isInStock' => $isInStock, 'manageStock' => $manageStock];
+    }
+
+    private function updateStockData(Mage_Catalog_Model_Product $product, Product $data): void
+    {
+        $input = $this->extractStockInput($data);
+        if ($input === null) {
             return;
         }
+        ['qty' => $qty, 'isInStock' => $isInStock, 'manageStock' => $manageStock] = $input;
 
         /** @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
         $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
 
-        if (!$stockItem->getId()) {
+        $isNew = !$stockItem->getId();
+        if ($isNew) {
             $stockItem->setProductId($product->getId());
             $stockItem->setStockId(1);
         }
 
         if ($qty !== null) {
-            if ($qty < 0 || $qty > 99999999) {
-                throw new BadRequestHttpException('Invalid stock quantity');
-            }
+            $this->validateStockQty($qty);
             $stockItem->setQty($qty);
-            if ($isInStock === null) {
-                $isInStock = $qty > 0;
-            }
+            $isInStock ??= $qty > 0;
         }
 
         if ($isInStock !== null) {
@@ -416,9 +439,9 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
 
         // Only touch manage_stock when the caller explicitly provides it; otherwise
         // preserve the existing setting and default to enabled only for new items.
-        if ($data->stockData !== null && isset($data->stockData['manage_stock'])) {
-            $stockItem->setManageStock($data->stockData['manage_stock'] ? 1 : 0);
-        } elseif (!$stockItem->getId()) {
+        if ($manageStock !== null) {
+            $stockItem->setManageStock($manageStock ? 1 : 0);
+        } elseif ($isNew) {
             $stockItem->setManageStock(1);
         }
 
@@ -430,58 +453,18 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
      */
     private function updateStockDirect(int $productId, Product $data): void
     {
-        $qty = null;
-        $isInStock = null;
-
-        if ($data->stockData !== null) {
-            $qty = isset($data->stockData['qty']) ? (float) $data->stockData['qty'] : null;
-            $isInStock = isset($data->stockData['is_in_stock']) ? (bool) $data->stockData['is_in_stock'] : null;
-        }
-
-        if ($qty === null && $data->stockQty !== null) {
-            $qty = $data->stockQty;
-        }
-
-        if ($qty === null && $isInStock === null) {
+        $input = $this->extractStockInput($data);
+        if ($input === null) {
             return;
         }
+        ['qty' => $qty, 'isInStock' => $isInStock, 'manageStock' => $manageStock] = $input;
 
-        $resource = Mage::getSingleton('core/resource');
-        $write = $resource->getConnection('core_write');
-        $table = $resource->getTableName('cataloginventory/stock_item');
-
-        $stockData = [];
-        // Only touch manage_stock when the caller explicitly provides it; otherwise
-        // preserve the existing value (default to enabled only on INSERT below).
-        if ($data->stockData !== null && isset($data->stockData['manage_stock'])) {
-            $stockData['manage_stock'] = $data->stockData['manage_stock'] ? 1 : 0;
-        }
         if ($qty !== null) {
-            if ($qty < 0 || $qty > 99999999) {
-                throw new BadRequestHttpException('Invalid stock quantity');
-            }
-            $stockData['qty'] = $qty;
-            if ($isInStock === null) {
-                $isInStock = $qty > 0;
-            }
-        }
-        if ($isInStock !== null) {
-            $stockData['is_in_stock'] = $isInStock ? 1 : 0;
+            $this->validateStockQty($qty);
         }
 
-        $stockItemId = $write->fetchOne(
-            "SELECT item_id FROM {$table} WHERE product_id = ? AND stock_id = 1",
-            [$productId],
-        );
-
-        if ($stockItemId) {
-            $write->update($table, $stockData, 'item_id = ' . (int) $stockItemId);
-        } else {
-            $stockData['manage_stock'] ??= 1;
-            $stockData['product_id'] = $productId;
-            $stockData['stock_id'] = 1;
-            $write->insert($table, $stockData);
-        }
+        $stockData = $this->buildStockData($qty, $isInStock, $manageStock);
+        $this->upsertStockItemRow($productId, $stockData);
     }
 
     /**
@@ -550,29 +533,6 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Map the user's allowed STORE ids to their website ids.
-     *
-     * Returns null when the user is unrestricted (getAllowedStoreIds() === null),
-     * signalling "no website restriction" — callers must treat null as "allow all".
-     *
-     * @return int[]|null
-     */
-    private function getAllowedWebsiteIds(ApiUser $user): ?array
-    {
-        $allowedStoreIds = $user->getAllowedStoreIds();
-        if ($allowedStoreIds === null) {
-            return null;
-        }
-
-        $websiteIds = [];
-        foreach ($allowedStoreIds as $storeId) {
-            $websiteIds[] = (int) Mage::app()->getStore($storeId)->getWebsiteId();
-        }
-
-        return array_values(array_unique($websiteIds));
-    }
-
-    /**
      * Reject submitted website IDs that fall outside a store-restricted user's
      * allowed websites. No-op for unrestricted users.
      *
@@ -589,25 +549,6 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             if (!in_array((int) $websiteId, $allowedWebsiteIds, true)) {
                 throw new AccessDeniedHttpException("Access denied for website: {$websiteId}");
             }
-        }
-    }
-
-    /**
-     * Authorize a loaded product against a store-restricted user: the product
-     * must belong to at least one website the user is allowed to. No-op for
-     * unrestricted users.
-     */
-    private function authorizeProductWebsites(Mage_Catalog_Model_Product $product, ApiUser $user): void
-    {
-        $allowedWebsiteIds = $this->getAllowedWebsiteIds($user);
-        if ($allowedWebsiteIds === null) {
-            return;
-        }
-
-        $productWebsiteIds = array_map('intval', $product->getWebsiteIds());
-
-        if (array_intersect($productWebsiteIds, $allowedWebsiteIds) === []) {
-            throw new AccessDeniedHttpException("Access denied for this product's websites");
         }
     }
 

@@ -63,20 +63,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         // The forgot/reset/create-from-order handlers read from $context['args']['input'];
         // for REST callers API Platform does not populate that key, so the JSON body is
         // injected here to keep those endpoints working over REST.
-        if (empty($context['args']['input'])) {
-            $context['args']['input'] = [];
-            $request = $context['request'] ?? null;
-            if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
-                try {
-                    $body = \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]');
-                } catch (\JsonException) {
-                    throw new BadRequestHttpException('Invalid JSON in request body');
-                }
-                if (is_array($body)) {
-                    $context['args']['input'] = $body;
-                }
-            }
-        }
+        $this->normalizeGraphQlInput($context);
 
         // Handle REST PUT /customers/me (update profile)
         if ($operationName === 'update_profile') {

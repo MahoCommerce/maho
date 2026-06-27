@@ -20,6 +20,8 @@ use Maho\ApiPlatform\Trait\ModelPersistenceTrait;
 use Maho\ApiPlatform\Trait\RateLimitTrait;
 use Maho\ApiPlatform\Trait\StoreAccessTrait;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Base class for all API state processors.
@@ -131,4 +133,49 @@ abstract class Processor implements ProcessorInterface
 
     /** Hook: entity-level authorization after load (e.g. store access checks). */
     protected function authorizeEntity(object $model, ApiUser $user): void {}
+
+    /**
+     * Decode a JSON request body into an array.
+     *
+     * Returns an empty array when there is no request or no body, and throws
+     * a 400 when the body is present but not valid JSON. Single decode path for
+     * every processor that reads a raw REST payload.
+     *
+     * @return array<mixed>
+     */
+    protected function parseRequestBody(?Request $request): array
+    {
+        if (!$request instanceof Request) {
+            return [];
+        }
+
+        $content = $request->getContent();
+        if ($content === '') {
+            return [];
+        }
+
+        try {
+            $body = \Mage::helper('core')->jsonDecode($content);
+        } catch (\JsonException) {
+            throw new BadRequestHttpException('Invalid JSON in request body');
+        }
+
+        return is_array($body) ? $body : [];
+    }
+
+    /**
+     * Bridge a raw REST body into $context['args']['input'] so handlers that
+     * read GraphQL-style args work over REST too. GraphQL invocations already
+     * populate args natively, so an existing non-empty input is left untouched.
+     *
+     * @param array<string, mixed> $context
+     */
+    protected function normalizeGraphQlInput(array &$context): void
+    {
+        if (!empty($context['args']['input'])) {
+            return;
+        }
+
+        $context['args']['input'] = $this->parseRequestBody($context['request'] ?? null);
+    }
 }

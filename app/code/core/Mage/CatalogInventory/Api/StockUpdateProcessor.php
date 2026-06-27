@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\CatalogInventory\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Trait\StockWriterTrait;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -19,6 +20,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 {
+    use StockWriterTrait;
+
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): StockUpdate
     {
@@ -74,7 +77,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('SKU is required');
         }
 
-        $this->validateQty($qty);
+        $this->validateStockQty($qty);
 
         /** @var \Mage_Catalog_Model_Resource_Product $productResource */
         $productResource = \Mage::getResourceSingleton('catalog/product');
@@ -84,53 +87,8 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException("Product not found for SKU: {$sku}");
         }
 
-        $resource = \Mage::getSingleton('core/resource');
-        $write = $resource->getConnection('core_write');
-        $table = $resource->getTableName('cataloginventory/stock_item');
-
-        // Get current stock for previousQty
-        $currentQty = (float) $write->fetchOne(
-            "SELECT qty FROM {$table} WHERE product_id = ? AND stock_id = 1",
-            [$productId],
-        );
-
-        // Build update data
-        $stockData = [];
-        $stockData['qty'] = $qty;
-        // Only touch manage_stock when the caller explicitly provides it; otherwise
-        // preserve the product's existing setting instead of clobbering it with 1.
-        if ($manageStock !== null) {
-            $stockData['manage_stock'] = $manageStock ? 1 : 0;
-        }
-
-        if ($isInStock === null) {
-            $stockData['is_in_stock'] = $qty > 0 ? 1 : 0;
-        } else {
-            $stockData['is_in_stock'] = $isInStock ? 1 : 0;
-        }
-
-        // Check if stock item exists
-        $stockItemId = $write->fetchOne(
-            "SELECT item_id FROM {$table} WHERE product_id = ? AND stock_id = 1",
-            [$productId],
-        );
-
-        if ($stockItemId) {
-            $write->update($table, $stockData, 'item_id = ' . (int) $stockItemId);
-            $manageStockValue = $manageStock !== null
-                ? ($manageStock ? 1 : 0)
-                : (int) $write->fetchOne(
-                    "SELECT manage_stock FROM {$table} WHERE item_id = ?",
-                    [(int) $stockItemId],
-                );
-        } else {
-            // New stock item: default manage_stock to enabled when not provided.
-            $stockData['manage_stock'] ??= 1;
-            $stockData['product_id'] = $productId;
-            $stockData['stock_id'] = 1;
-            $write->insert($table, $stockData);
-            $manageStockValue = $stockData['manage_stock'];
-        }
+        $stockData = $this->buildStockData($qty, $isInStock, $manageStock);
+        $upsert = $this->upsertStockItemRow((int) $productId, $stockData);
 
         // Invalidate cache
         \Mage::app()->cleanCache(["API_PRODUCT_{$productId}"]);
@@ -144,8 +102,8 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         $dto->sku = $sku;
         $dto->qty = $qty;
         $dto->isInStock = (bool) $stockData['is_in_stock'];
-        $dto->manageStock = (bool) $manageStockValue;
-        $dto->previousQty = $currentQty;
+        $dto->manageStock = (bool) $upsert['manageStock'];
+        $dto->previousQty = $upsert['previousQty'];
         $dto->success = true;
 
         return $dto;
@@ -172,7 +130,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
                 throw new BadRequestHttpException("Item at index {$index}: SKU is required");
             }
             $qty = (float) ($item['qty'] ?? 0);
-            $this->validateQty($qty);
+            $this->validateStockQty($qty);
 
             $productId = $productResource->getIdBySku($sku);
             if (!$productId) {
@@ -181,9 +139,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             $skuToProductId[$sku] = $productId;
         }
 
-        $resource = \Mage::getSingleton('core/resource');
-        $write = $resource->getConnection('core_write');
-        $table = $resource->getTableName('cataloginventory/stock_item');
+        $write = \Mage::getSingleton('core/resource')->getConnection('core_write');
 
         $results = [];
         $cacheTags = [];
@@ -197,40 +153,8 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
                 $manageStock = isset($item['manageStock']) ? (bool) $item['manageStock'] : null;
                 $productId = $skuToProductId[$sku];
 
-                // Get current qty
-                $currentQty = (float) $write->fetchOne(
-                    "SELECT qty FROM {$table} WHERE product_id = ? AND stock_id = 1",
-                    [$productId],
-                );
-
-                $stockData = [];
-                $stockData['qty'] = $qty;
-                // Only touch manage_stock when explicitly provided; otherwise preserve it.
-                if ($manageStock !== null) {
-                    $stockData['manage_stock'] = $manageStock ? 1 : 0;
-                }
-                $stockData['is_in_stock'] = ($isInStock ?? ($qty > 0)) ? 1 : 0;
-
-                $stockItemId = $write->fetchOne(
-                    "SELECT item_id FROM {$table} WHERE product_id = ? AND stock_id = 1",
-                    [$productId],
-                );
-
-                if ($stockItemId) {
-                    $write->update($table, $stockData, 'item_id = ' . (int) $stockItemId);
-                    $manageStockValue = $manageStock !== null
-                        ? ($manageStock ? 1 : 0)
-                        : (int) $write->fetchOne(
-                            "SELECT manage_stock FROM {$table} WHERE item_id = ?",
-                            [(int) $stockItemId],
-                        );
-                } else {
-                    $stockData['manage_stock'] ??= 1;
-                    $stockData['product_id'] = $productId;
-                    $stockData['stock_id'] = 1;
-                    $write->insert($table, $stockData);
-                    $manageStockValue = $stockData['manage_stock'];
-                }
+                $stockData = $this->buildStockData($qty, $isInStock, $manageStock);
+                $upsert = $this->upsertStockItemRow((int) $productId, $stockData);
 
                 $cacheTags[] = "API_PRODUCT_{$productId}";
 
@@ -238,8 +162,8 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
                 $result->sku = $sku;
                 $result->qty = $qty;
                 $result->isInStock = (bool) $stockData['is_in_stock'];
-                $result->manageStock = (bool) $manageStockValue;
-                $result->previousQty = $currentQty;
+                $result->manageStock = (bool) $upsert['manageStock'];
+                $result->previousQty = $upsert['previousQty'];
                 $result->success = true;
                 $results[] = $result;
             }
@@ -267,13 +191,6 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         $dto->results = $results;
 
         return $dto;
-    }
-
-    private function validateQty(float $qty): void
-    {
-        if ($qty < 0 || $qty > 99999999) {
-            throw new BadRequestHttpException('Quantity must be between 0 and 99999999');
-        }
     }
 
     /**

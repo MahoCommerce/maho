@@ -53,11 +53,7 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
         $this->requirePermission($user, 'products/write');
 
         $request = $context['request'] ?? null;
-        try {
-            $body = $request ? (array) \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]') : [];
-        } catch (\JsonException) {
-            throw new BadRequestHttpException('Invalid JSON in request body');
-        }
+        $body = $this->parseRequestBody($request);
 
         if ($operation instanceof Post) {
             return $this->handleAddChild($productId, $body);

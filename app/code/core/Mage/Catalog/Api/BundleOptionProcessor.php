@@ -44,11 +44,7 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
         $this->authorizeProductWebsites($this->loadProduct($productId), $user);
 
         $request = $context['request'] ?? null;
-        try {
-            $body = $request ? (array) \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]') : [];
-        } catch (\JsonException) {
-            throw new BadRequestHttpException('Invalid JSON in request body');
-        }
+        $body = $this->parseRequestBody($request);
 
         if ($operation instanceof DeleteOperationInterface) {
             $this->requirePermission($user, 'products/delete');

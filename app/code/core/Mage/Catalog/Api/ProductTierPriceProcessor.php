@@ -52,6 +52,9 @@ final class ProductTierPriceProcessor extends \Maho\ApiPlatform\Processor
     {
         $product = $this->loadProduct($productId);
 
+        // This endpoint takes a top-level JSON array of tier prices (not the
+        // object-with-fields shape parseRequestBody() normalises for), and must
+        // reject a non-array body rather than silently treat it as empty.
         $request = $context['request'] ?? null;
         try {
             $body = $request ? \Mage::helper('core')->jsonDecode($request->getContent() ?: '[]') : [];
