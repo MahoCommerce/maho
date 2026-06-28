@@ -45,4 +45,10 @@ class CartItem extends \Maho\ApiPlatform\Resource
      */
     public string $stockStatus = 'in_stock';
 
+    /**
+     * Item-level gift message, or null when none is set.
+     * @var array{sender: string, recipient: string, message: string}|null
+     */
+    public ?array $giftMessage = null;
+
 }

@@ -50,10 +50,44 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $this->normalizeGraphQlInput($context);
 
         return match ($operationName) {
-            'placeOrder', '_api_/orders_post', 'place_guest_order' => $this->placeOrder($context, $uriVariables),
-            'cancelOrder' => $this->cancelOrder($context),
+            'placeOrder', '_api_/orders_post', 'place_guest_order', 'place_customer_order' => $this->placeOrder($context, $uriVariables),
+            'cancel', 'order_cancel' => $this->cancelOrder($context, $uriVariables),
+            'hold', 'order_hold' => $this->holdOrder($context, $uriVariables),
+            'unhold', 'order_unhold' => $this->unholdOrder($context, $uriVariables),
+            'addComment', 'order_add_comment' => $this->addOrderComment($context, $uriVariables),
             default => $data instanceof Order ? $data : new Order(),
         };
+    }
+
+    /**
+     * Resolve the target order from the request: numeric {id} in the REST URI,
+     * or orderId / incrementId in the GraphQL/body args. Enforces that a plain
+     * customer caller owns the order; admin and orders/write service tokens are
+     * trusted (gated upstream by the operation security expression).
+     */
+    private function resolveManagedOrder(array $context, array $uriVariables): \Mage_Sales_Model_Order
+    {
+        $args = $context['args']['input'] ?? [];
+        $orderId = $uriVariables['id'] ?? $args['orderId'] ?? null;
+        $incrementId = $args['incrementId'] ?? null;
+
+        $order = $this->orderService->getOrder(
+            $orderId !== null ? (int) $orderId : null,
+            $incrementId,
+        );
+        if (!$order) {
+            throw new NotFoundHttpException('Order not found');
+        }
+
+        if (!$this->isAdmin() && !$this->isApiUser()) {
+            $customerId = $this->getAuthenticatedCustomerId();
+            if (!$customerId || (int) $order->getCustomerId() !== $customerId) {
+                // Don't disclose existence to a non-owner.
+                throw new NotFoundHttpException('Order not found');
+            }
+        }
+
+        return $order;
     }
 
     /**
@@ -67,6 +101,16 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     {
         $args = $context['args']['input'] ?? $context['request_data'] ?? [];
         $cartId = $args['cartId'] ?? null;
+        // Recover the numeric cart id from the authenticated /carts/{id}/place-order
+        // path when it wasn't supplied in the body. Ownership is enforced below by
+        // verifyCartOwnership() (accessedByMaskedId=false → customer-ownership check).
+        if (!$cartId) {
+            $request = $context['request'] ?? null;
+            if ($request instanceof \Symfony\Component\HttpFoundation\Request
+                && preg_match('#/carts/(\d+)/place-order#', $request->getPathInfo(), $cm)) {
+                $cartId = $cm[1];
+            }
+        }
         // Accept the masked-id from either the request body or from the URI.
         // We pull from the Request path rather than $uriVariables because API
         // Platform casts URI placeholders to the resource identifier's PHP
@@ -190,36 +234,58 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Cancel order
      */
-    private function cancelOrder(array $context): Order
+    private function cancelOrder(array $context, array $uriVariables = []): Order
     {
         $args = $context['args']['input'] ?? [];
-        $orderId = $args['orderId'] ?? null;
-        $incrementId = $args['incrementId'] ?? null;
         $reason = $args['reason'] ?? null;
 
-        // Get order
-        $order = $this->orderService->getOrder(
-            $orderId ? (int) $orderId : null,
-            $incrementId,
-        );
-
-        if (!$order) {
-            throw new NotFoundHttpException('Order not found');
-        }
-
-        // Verify access: customers can only cancel their own orders
-        if (!$this->isAdmin() && !$this->isApiUser()) {
-            $customerId = $this->getAuthenticatedCustomerId();
-            if (!$customerId) {
-                throw new BadRequestHttpException('Authentication required to cancel orders');
-            }
-            if ((int) $order->getCustomerId() !== $customerId) {
-                throw new NotFoundHttpException('Order not found');
-            }
-        }
-
-        // Cancel order
+        $order = $this->resolveManagedOrder($context, $uriVariables);
         $order = $this->orderService->cancelOrder($order, $reason);
+
+        return $this->orderProvider->mapToDto($order);
+    }
+
+    /**
+     * Put an order on hold (admin / orders-write only).
+     */
+    private function holdOrder(array $context, array $uriVariables = []): Order
+    {
+        $reason = $context['args']['input']['reason'] ?? null;
+
+        $order = $this->resolveManagedOrder($context, $uriVariables);
+        $order = $this->orderService->holdOrder($order, $reason);
+
+        return $this->orderProvider->mapToDto($order);
+    }
+
+    /**
+     * Release an order from hold (admin / orders-write only).
+     */
+    private function unholdOrder(array $context, array $uriVariables = []): Order
+    {
+        $reason = $context['args']['input']['reason'] ?? null;
+
+        $order = $this->resolveManagedOrder($context, $uriVariables);
+        $order = $this->orderService->unholdOrder($order, $reason);
+
+        return $this->orderProvider->mapToDto($order);
+    }
+
+    /**
+     * Add a status-history comment to an order (admin / orders-write only).
+     */
+    private function addOrderComment(array $context, array $uriVariables = []): Order
+    {
+        $args = $context['args']['input'] ?? [];
+        $comment = trim((string) ($args['comment'] ?? $args['note'] ?? ''));
+        if ($comment === '') {
+            throw new BadRequestHttpException('Comment text is required');
+        }
+        $notifyCustomer = (bool) ($args['notifyCustomer'] ?? false);
+        $visibleOnFront = (bool) ($args['visibleOnFront'] ?? false);
+
+        $order = $this->resolveManagedOrder($context, $uriVariables);
+        $order = $this->orderService->addOrderNote($order, $comment, $notifyCustomer, $visibleOnFront);
 
         return $this->orderProvider->mapToDto($order);
     }

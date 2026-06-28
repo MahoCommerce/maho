@@ -185,6 +185,26 @@ class ApiV2Helper
                 // Ignore cleanup errors
             }
         }
+
+        // Delete simple config-table rows created by CRUD tests (safety net for
+        // a test that fails before its own DELETE call). Each maps a tracked
+        // type to its table + primary key.
+        $simpleTables = [
+            'customer_group' => ['customer_group', 'customer_group_id'],
+            'tax_class' => ['tax_class', 'class_id'],
+            'tax_rate' => ['tax_calculation_rate', 'tax_calculation_rate_id'],
+            'tax_rule' => ['tax_calculation_rule', 'tax_calculation_rule_id'],
+        ];
+        foreach ($simpleTables as $type => [$table, $pk]) {
+            if (!empty(self::$createdEntities[$type])) {
+                $idList = implode(',', array_map('intval', self::$createdEntities[$type]));
+                try {
+                    $write->query("DELETE FROM {$table} WHERE {$pk} IN ({$idList})");
+                } catch (\Exception $e) {
+                    // Ignore cleanup errors
+                }
+            }
+        }
         self::$createdEntities = [];
     }
 

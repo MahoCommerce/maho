@@ -352,6 +352,18 @@ class Product extends CrudResource
     public ?array $stockData = null;
 
     #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Attribute set ID', extraProperties: ['modelField' => 'attribute_set_id'])]
+    public ?int $attributeSetId = null;
+
+    #[Groups(['product:read'])]
+    #[ApiProperty(description: 'Tax class ID', extraProperties: ['modelField' => 'tax_class_id'])]
+    public ?int $taxClassId = null;
+
+    /** @var array<string, mixed>|null Arbitrary EAV attributes to set: {"attribute_code": value} (write only) */
+    #[ApiProperty(description: 'Arbitrary EAV attributes to set: {"attribute_code": value}', readable: false)]
+    public ?array $customAttributesWrite = null;
+
+    #[Groups(['product:read'])]
     #[ApiProperty(description: 'Module-provided extension data')]
     public array $extensions = [];
 
@@ -366,6 +378,11 @@ class Product extends CrudResource
         $dto->isActive = $dto->status === 'enabled';
 
         $dto->currency = \Mage::app()->getStore()->getCurrentCurrencyCode();
+
+        $dto->attributeSetId = $model->getData('attribute_set_id') !== null
+            ? (int) $model->getData('attribute_set_id') : null;
+        $dto->taxClassId = $model->getData('tax_class_id') !== null
+            ? (int) $model->getData('tax_class_id') : null;
 
         $dto->visibility = match ((int) $model->getData('visibility')) {
             \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE => 'not_visible',

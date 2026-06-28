@@ -37,6 +37,7 @@ class CartMapper
         $cart->itemsQty = (float) $quote->getItemsQty();
         $cart->createdAt = $quote->getCreatedAt();
         $cart->updatedAt = $quote->getUpdatedAt();
+        $cart->giftMessage = $this->mapGiftMessage($quote);
 
         // Batch load product thumbnails and stock status to avoid N+1 queries
         $items = $quote->getAllVisibleItems();
@@ -168,8 +169,36 @@ class CartMapper
         // Get configured product options for display
         $dto->options = $this->getItemConfigurationOptions($item);
 
+        $dto->giftMessage = $this->mapGiftMessage($item);
+
         \Mage::dispatchEvent('api_cart_item_dto_build', ['item' => $item, 'dto' => $dto]);
         return $dto;
+    }
+
+    /**
+     * Read the gift message attached to a quote or quote item into the API
+     * shape, or null when none is set. Safe to call when the GiftMessage module
+     * is absent (returns null).
+     *
+     * @return array{sender: string, recipient: string, message: string}|null
+     */
+    private function mapGiftMessage(\Maho\DataObject $entity): ?array
+    {
+        $messageId = (int) $entity->getGiftMessageId();
+        if (!$messageId) {
+            return null;
+        }
+
+        $message = \Mage::getModel('giftmessage/message')->load($messageId);
+        if (!$message->getId()) {
+            return null;
+        }
+
+        return [
+            'sender' => (string) $message->getSender(),
+            'recipient' => (string) $message->getRecipient(),
+            'message' => (string) $message->getMessage(),
+        ];
     }
 
     /**

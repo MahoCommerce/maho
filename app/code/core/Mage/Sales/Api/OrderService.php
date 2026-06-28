@@ -441,6 +441,59 @@ class OrderService
     }
 
     /**
+     * Put an order on hold. Serialized with the other state transitions through
+     * the cross-request order lock so a hold can't race an invoice/ship/cancel.
+     */
+    public function holdOrder(\Mage_Sales_Model_Order $order, ?string $reason = null): \Mage_Sales_Model_Order
+    {
+        return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
+            $order->load((int) $order->getId());
+            if (!$order->canHold()) {
+                throw new \RuntimeException('Order cannot be held');
+            }
+
+            try {
+                $order->hold();
+                if ($reason) {
+                    $order->addStatusHistoryComment('Order held: ' . $reason, false);
+                }
+                $order->save();
+
+                return $order;
+            } catch (\Exception $e) {
+                \Mage::logException($e);
+                throw new \RuntimeException('Failed to hold order');
+            }
+        });
+    }
+
+    /**
+     * Release an order from hold.
+     */
+    public function unholdOrder(\Mage_Sales_Model_Order $order, ?string $reason = null): \Mage_Sales_Model_Order
+    {
+        return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
+            $order->load((int) $order->getId());
+            if (!$order->canUnhold()) {
+                throw new \RuntimeException('Order is not on hold');
+            }
+
+            try {
+                $order->unhold();
+                if ($reason) {
+                    $order->addStatusHistoryComment('Order released from hold: ' . $reason, false);
+                }
+                $order->save();
+
+                return $order;
+            } catch (\Exception $e) {
+                \Mage::logException($e);
+                throw new \RuntimeException('Failed to unhold order');
+            }
+        });
+    }
+
+    /**
      * Add order note
      *
      * @param \Mage_Sales_Model_Order $order Order

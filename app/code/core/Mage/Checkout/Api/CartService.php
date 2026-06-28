@@ -701,6 +701,86 @@ class CartService
         return $quote;
     }
 
+    /**
+     * Set (or update) the gift message on the whole cart, or on a single cart
+     * item when $itemId is given. Mirrors the storefront
+     * Mage_GiftMessage_Model_Observer::checkoutEventCreateGiftMessage flow:
+     * a giftmessage/message row is created/loaded and the entity's
+     * gift_message_id is pointed at it. Requires the GiftMessage module and the
+     * relevant store-config toggle to be enabled.
+     *
+     * @throws \RuntimeException when gift messages are disabled for the target
+     */
+    public function setGiftMessage(
+        \Mage_Sales_Model_Quote $quote,
+        ?int $itemId,
+        string $sender,
+        string $recipient,
+        string $message,
+    ): \Mage_Sales_Model_Quote {
+        if (!\Mage::helper('core')->isModuleEnabled('Mage_GiftMessage')) {
+            throw new \RuntimeException('Gift messages are not available');
+        }
+
+        $entity = $this->resolveGiftMessageEntity($quote, $itemId);
+        $helper = \Mage::helper('giftmessage/message');
+        $type = $itemId === null ? 'quote' : 'item';
+        if (!$helper->isMessagesAvailable($type, $entity, $quote->getStoreId())) {
+            throw new \RuntimeException('Gift messages are not available for this ' . ($itemId === null ? 'cart' : 'item'));
+        }
+
+        if (trim($message) === '') {
+            return $this->removeGiftMessage($quote, $itemId);
+        }
+
+        $giftMessage = \Mage::getModel('giftmessage/message');
+        if ($entity->getGiftMessageId()) {
+            $giftMessage->load($entity->getGiftMessageId());
+        }
+        $giftMessage->setSender($sender)
+            ->setRecipient($recipient)
+            ->setMessage($message)
+            ->save();
+
+        $entity->setGiftMessageId($giftMessage->getId())->save();
+
+        return $quote;
+    }
+
+    /**
+     * Remove the gift message from the cart or a single cart item.
+     */
+    public function removeGiftMessage(\Mage_Sales_Model_Quote $quote, ?int $itemId): \Mage_Sales_Model_Quote
+    {
+        $entity = $this->resolveGiftMessageEntity($quote, $itemId);
+
+        $messageId = (int) $entity->getGiftMessageId();
+        if ($messageId) {
+            $giftMessage = \Mage::getModel('giftmessage/message')->load($messageId);
+            if ($giftMessage->getId()) {
+                $giftMessage->delete();
+            }
+            $entity->setGiftMessageId(0)->save();
+        }
+
+        return $quote;
+    }
+
+    /**
+     * Resolve the entity a gift message attaches to: the quote itself, or one of
+     * its items. Throws when the item id doesn't belong to the quote.
+     */
+    private function resolveGiftMessageEntity(\Mage_Sales_Model_Quote $quote, ?int $itemId): \Mage_Core_Model_Abstract
+    {
+        if ($itemId === null) {
+            return $quote;
+        }
+        $item = $quote->getItemById($itemId);
+        if (!$item || !$item->getId()) {
+            throw new \RuntimeException('Cart item not found');
+        }
+        return $item;
+    }
 
     /**
      * Set shipping address

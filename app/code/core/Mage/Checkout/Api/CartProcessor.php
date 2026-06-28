@@ -78,16 +78,20 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             'addToCart', 'add_guest_item', 'add_cart_item' => $this->addItemToCart($context, $uriVariables),
             'updateCartItemQty', 'update_guest_item', 'update_cart_item' => $this->updateCartItem($context, $uriVariables),
             'removeCartItem', 'remove_guest_item', 'remove_cart_item' => $this->removeItemFromCart($context, $uriVariables),
-            'applyCouponToCart', 'apply_guest_coupon' => $this->applyCouponToCart($context, $uriVariables),
-            'removeCouponFromCart', 'remove_guest_coupon' => $this->removeCouponFromCart($context, $uriVariables),
+            'applyCouponToCart', 'apply_guest_coupon', 'apply_my_coupon' => $this->applyCouponToCart($context, $uriVariables),
+            'removeCouponFromCart', 'remove_guest_coupon', 'remove_my_coupon' => $this->removeCouponFromCart($context, $uriVariables),
             'setShippingAddressOnCart' => $this->setShippingAddressOnCart($context, $uriVariables),
             'setBillingAddressOnCart' => $this->setBillingAddressOnCart($context, $uriVariables),
             'get_guest_shipping', 'get_my_shipping' => $this->getShippingMethodsForCart($context, $uriVariables),
             'setShippingMethodOnCart' => $this->setShippingMethodOnCart($context, $uriVariables),
             'setPaymentMethodOnCart' => $this->setPaymentMethodOnCart($context, $uriVariables),
             'assignCustomerToCart' => $this->assignCustomerToCart($context),
-            'applyGiftcardToCart', 'apply_guest_giftcard' => $this->applyGiftcardToCart($context, $uriVariables),
-            'removeGiftcardFromCart', 'remove_guest_giftcard' => $this->removeGiftcardFromCart($context, $uriVariables),
+            'applyGiftcardToCart', 'apply_guest_giftcard', 'apply_my_giftcard' => $this->applyGiftcardToCart($context, $uriVariables),
+            'removeGiftcardFromCart', 'remove_guest_giftcard', 'remove_my_giftcard' => $this->removeGiftcardFromCart($context, $uriVariables),
+            'setGiftMessage', 'set_my_cart_gift_message', 'set_my_item_gift_message',
+            'set_guest_cart_gift_message', 'set_guest_item_gift_message' => $this->setGiftMessage($context, $uriVariables),
+            'removeGiftMessage', 'remove_my_cart_gift_message', 'remove_my_item_gift_message',
+            'remove_guest_cart_gift_message', 'remove_guest_item_gift_message' => $this->removeGiftMessage($context, $uriVariables),
             default => $data instanceof Cart ? $data : new Cart(),
         };
     }
@@ -469,6 +473,49 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->cartService->removeGiftcard($quote, $giftcardCode);
 
         return $this->cartMapper->mapQuoteToCart($quote, false);
+    }
+
+    /**
+     * Set the gift message on the cart, or on a single item when an itemId is
+     * present (URI sub-resource or `itemId` arg).
+     */
+    private function setGiftMessage(array $context, array $uriVariables): Cart
+    {
+        $args = $context['args']['input'] ?? [];
+        $itemId = $this->resolveGiftMessageItemId($args, $uriVariables);
+        $sender = trim((string) ($args['sender'] ?? ''));
+        $recipient = trim((string) ($args['recipient'] ?? ''));
+        $message = (string) ($args['message'] ?? '');
+
+        $quote = $this->resolveAndVerify($context, $uriVariables);
+        $quote = $this->cartService->setGiftMessage($quote, $itemId, $sender, $recipient, $message);
+
+        return $this->cartMapper->mapQuoteToCart($quote, false);
+    }
+
+    /**
+     * Remove the gift message from the cart, or from a single item.
+     */
+    private function removeGiftMessage(array $context, array $uriVariables): Cart
+    {
+        $args = $context['args']['input'] ?? [];
+        $itemId = $this->resolveGiftMessageItemId($args, $uriVariables);
+
+        $quote = $this->resolveAndVerify($context, $uriVariables);
+        $quote = $this->cartService->removeGiftMessage($quote, $itemId);
+
+        return $this->cartMapper->mapQuoteToCart($quote, false);
+    }
+
+    /**
+     * Resolve the optional target item id for a gift-message operation. Present
+     * for item-level endpoints (URI {itemId} or GraphQL itemId arg), null for
+     * cart-level. process() already bridges the {itemId} route param into args.
+     */
+    private function resolveGiftMessageItemId(array $args, array $uriVariables): ?int
+    {
+        $itemId = $args['itemId'] ?? $uriVariables['itemId'] ?? null;
+        return $itemId !== null && $itemId !== '' ? (int) $itemId : null;
     }
 
     /**

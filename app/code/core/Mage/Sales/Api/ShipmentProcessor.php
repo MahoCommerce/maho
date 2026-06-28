@@ -29,8 +29,87 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
 
         return match ($operationName) {
             'createShipment' => $this->createShipment($context),
+            'add_shipment_track', 'addTrack' => $this->addTrack($uriVariables, $context),
+            'remove_shipment_track', 'removeTrack' => $this->removeTrack($uriVariables, $context),
             default => $this->createShipmentFromRest($uriVariables, $context),
         };
+    }
+
+    /**
+     * Resolve a shipment from the REST {id} URI variable or the GraphQL
+     * shipmentId arg.
+     */
+    private function resolveShipment(array $uriVariables, array $context): \Mage_Sales_Model_Order_Shipment
+    {
+        $args = $context['args']['input'] ?? [];
+        $shipmentId = (int) ($uriVariables['id'] ?? $args['shipmentId'] ?? 0);
+        if (!$shipmentId) {
+            throw new BadRequestHttpException('Shipment ID is required');
+        }
+
+        $shipment = \Mage::getModel('sales/order_shipment')->load($shipmentId);
+        if (!$shipment->getId()) {
+            throw new NotFoundHttpException('Shipment not found');
+        }
+
+        return $shipment;
+    }
+
+    /**
+     * Add a tracking number to an existing shipment.
+     */
+    private function addTrack(array $uriVariables, array $context): Shipment
+    {
+        $args = $context['args']['input'] ?? [];
+        $trackNumber = trim((string) ($args['trackNumber'] ?? ''));
+        if ($trackNumber === '') {
+            throw new BadRequestHttpException('Track number is required');
+        }
+        $carrierCode = $args['carrierCode'] ?? 'custom';
+        $title = $args['title'] ?? $carrierCode;
+
+        $shipment = $this->resolveShipment($uriVariables, $context);
+
+        $track = \Mage::getModel('sales/order_shipment_track');
+        $track->setCarrierCode($carrierCode);
+        $track->setTitle($title);
+        $track->setTrackNumber($trackNumber);
+        $shipment->addTrack($track);
+        $shipment->save();
+
+        return Shipment::fromModel($shipment->load($shipment->getId()));
+    }
+
+    /**
+     * Remove a tracking number from a shipment. The track must belong to the
+     * referenced shipment, otherwise a 404 is returned (no cross-shipment delete).
+     */
+    private function removeTrack(array $uriVariables, array $context): Shipment
+    {
+        $args = $context['args']['input'] ?? [];
+        // The {trackId} URI placeholder isn't in the operation's uriVariables map,
+        // so recover it from the route params when absent.
+        $trackId = (int) ($uriVariables['trackId'] ?? $args['trackId'] ?? 0);
+        if (!$trackId) {
+            $request = $context['request'] ?? null;
+            if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
+                $trackId = (int) ($request->attributes->get('_route_params')['trackId'] ?? 0);
+            }
+        }
+        if (!$trackId) {
+            throw new BadRequestHttpException('Track ID is required');
+        }
+
+        $shipment = $this->resolveShipment($uriVariables, $context);
+
+        $track = \Mage::getModel('sales/order_shipment_track')->load($trackId);
+        if (!$track->getId() || (int) $track->getParentId() !== (int) $shipment->getId()) {
+            throw new NotFoundHttpException('Tracking entry not found for this shipment');
+        }
+
+        $track->delete();
+
+        return Shipment::fromModel(\Mage::getModel('sales/order_shipment')->load($shipment->getId()));
     }
 
     private function createShipmentFromRest(array $uriVariables, array $context): Shipment

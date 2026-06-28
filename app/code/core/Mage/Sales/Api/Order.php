@@ -67,6 +67,50 @@ use Mage\Customer\Api\Address;
             security: 'true',
             description: 'Place order from guest cart',
         ),
+        new Post(
+            // Authenticated counterpart to place_guest_order: place an order from
+            // the customer's own numeric cart. OrderProcessor::placeOrder() recovers
+            // the cart id from the path and verifyCartOwnership() enforces that the
+            // authenticated customer (or a privileged service/admin token) owns it,
+            // so this can't be used to check out an arbitrary enumerable cart id.
+            uriTemplate: '/carts/{id}/place-order',
+            name: 'place_customer_order',
+            requirements: ['id' => '\d+'],
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/create')",
+            description: 'Place order from the authenticated customer cart',
+        ),
+        // Order lifecycle actions. hold/unhold and comments are management
+        // operations (admin or orders/write grant); cancel additionally lets a
+        // customer cancel their own order, matching the cancelOrder GraphQL
+        // mutation. All return the updated Order (statusHistory reflects the change).
+        new Post(
+            uriTemplate: '/orders/{id}/hold',
+            name: 'order_hold',
+            requirements: ['id' => '\d+'],
+            security: "is_granted('ROLE_ADMIN') or is_granted('orders/write')",
+            description: 'Put an order on hold',
+        ),
+        new Post(
+            uriTemplate: '/orders/{id}/unhold',
+            name: 'order_unhold',
+            requirements: ['id' => '\d+'],
+            security: "is_granted('ROLE_ADMIN') or is_granted('orders/write')",
+            description: 'Release an order from hold',
+        ),
+        new Post(
+            uriTemplate: '/orders/{id}/cancel',
+            name: 'order_cancel',
+            requirements: ['id' => '\d+'],
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/write')",
+            description: 'Cancel an order',
+        ),
+        new Post(
+            uriTemplate: '/orders/{id}/comments',
+            name: 'order_add_comment',
+            requirements: ['id' => '\d+'],
+            security: "is_granted('ROLE_ADMIN') or is_granted('orders/write')",
+            description: 'Add a status-history comment to an order',
+        ),
         new Get(
             // Read an order by its human-readable increment id, authenticated
             // by the one-time `guest_access_token` issued at placement
@@ -140,6 +184,41 @@ use Mage\Customer\Api\Address;
             ],
             description: 'Cancel an order',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('orders/write')",
+        ),
+        // Names omit the "Order" noun: ApiPlatform appends the resource shortName,
+        // so these surface as holdOrder / unholdOrder / addCommentOrder rather than
+        // a stuttering holdOrderOrder.
+        new Mutation(
+            name: 'hold',
+            args: [
+                'orderId' => ['type' => 'ID'],
+                'incrementId' => ['type' => 'String'],
+                'reason' => ['type' => 'String', 'description' => 'Optional reason'],
+            ],
+            description: 'Put an order on hold',
+            security: "is_granted('ROLE_ADMIN') or is_granted('orders/write')",
+        ),
+        new Mutation(
+            name: 'unhold',
+            args: [
+                'orderId' => ['type' => 'ID'],
+                'incrementId' => ['type' => 'String'],
+                'reason' => ['type' => 'String', 'description' => 'Optional reason'],
+            ],
+            description: 'Release an order from hold',
+            security: "is_granted('ROLE_ADMIN') or is_granted('orders/write')",
+        ),
+        new Mutation(
+            name: 'addComment',
+            args: [
+                'orderId' => ['type' => 'ID'],
+                'incrementId' => ['type' => 'String'],
+                'comment' => ['type' => 'String!'],
+                'notifyCustomer' => ['type' => 'Boolean'],
+                'visibleOnFront' => ['type' => 'Boolean'],
+            ],
+            description: 'Add a status-history comment to an order',
+            security: "is_granted('ROLE_ADMIN') or is_granted('orders/write')",
         ),
     ],
 )]

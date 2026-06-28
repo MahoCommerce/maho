@@ -97,14 +97,14 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             'sku' => $data->sku,
             'name' => $data->name,
             'type_id' => $data->type ?: Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
-            'attribute_set_id' => (int) Mage::getModel('catalog/product')->getDefaultAttributeSetId(),
+            'attribute_set_id' => $data->attributeSetId ?: (int) Mage::getModel('catalog/product')->getDefaultAttributeSetId(),
             'status' => ($data->isActive ?? true)
                 ? Mage_Catalog_Model_Product_Status::STATUS_ENABLED
                 : Mage_Catalog_Model_Product_Status::STATUS_DISABLED,
             'visibility' => $data->visibility !== null
                 ? (self::VISIBILITY_MAP[$data->visibility] ?? Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
                 : Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH,
-            'tax_class_id' => 0,
+            'tax_class_id' => $data->taxClassId ?? 0,
         ]);
 
         $this->applyProductData($product, $data);
@@ -167,6 +167,13 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             $product->setVisibility(
                 self::VISIBILITY_MAP[$data->visibility] ?? (int) $oldData['visibility'],
             );
+        }
+
+        if ($data->attributeSetId !== null) {
+            $product->setAttributeSetId($data->attributeSetId);
+        }
+        if ($data->taxClassId !== null) {
+            $product->setTaxClassId($data->taxClassId);
         }
 
         $this->applyProductData($product, $data);
@@ -369,6 +376,51 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         if ($data->pageLayout !== null) {
             $product->setData('page_layout', $data->pageLayout);
         }
+        if (!empty($data->customAttributesWrite)) {
+            $this->applyCustomAttributes($product, $data->customAttributesWrite);
+        }
+    }
+
+    /**
+     * Codes handled by dedicated DTO fields (or otherwise protected). They must
+     * never be written through the generic customAttributesWrite bag.
+     */
+    private const PROTECTED_ATTRIBUTE_CODES = [
+        'entity_id', 'type_id', 'sku', 'attribute_set_id', 'tax_class_id',
+        'website_ids', 'stock_data', 'status', 'visibility',
+        'created_at', 'updated_at', 'entity_type_id',
+    ];
+
+    /**
+     * Apply arbitrary EAV attribute values supplied via customAttributesWrite.
+     *
+     * Protected/system codes are rejected outright; unknown codes (not real
+     * catalog_product EAV attributes) are skipped silently so a typo can't
+     * inject an arbitrary column.
+     *
+     * @param array<string, mixed> $attributes
+     */
+    private function applyCustomAttributes(Mage_Catalog_Model_Product $product, array $attributes): void
+    {
+        $eavConfig = Mage::getSingleton('eav/config');
+
+        foreach ($attributes as $code => $value) {
+            $code = (string) $code;
+
+            if (in_array($code, self::PROTECTED_ATTRIBUTE_CODES, true)) {
+                throw new BadRequestHttpException(
+                    "Attribute '{$code}' cannot be set via customAttributes; use the dedicated field.",
+                );
+            }
+
+            $attribute = $eavConfig->getAttribute(Mage_Catalog_Model_Product::ENTITY, $code);
+            if (!$attribute || !$attribute->getId()) {
+                // Unknown attribute, skip silently.
+                continue;
+            }
+
+            $product->setData($code, $value);
+        }
     }
 
     private function assignCategories(Mage_Catalog_Model_Product $product, array $categoryIds): void
@@ -567,6 +619,8 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         // not whatever the client did or didn't send.
         $data->isActive = $data->status === 'enabled';
         $data->visibility = array_search((int) $product->getVisibility(), self::VISIBILITY_MAP, true) ?: 'catalog_search';
+        $data->attributeSetId = $product->getAttributeSetId() !== null ? (int) $product->getAttributeSetId() : null;
+        $data->taxClassId = $product->getTaxClassId() !== null ? (int) $product->getTaxClassId() : null;
         $data->createdAt = $product->getCreatedAt();
         $data->updatedAt = $product->getUpdatedAt();
         return $data;

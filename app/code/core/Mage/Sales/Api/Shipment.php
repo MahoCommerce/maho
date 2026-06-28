@@ -15,6 +15,7 @@ use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
@@ -48,6 +49,20 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_ADMIN') or is_granted('shipments/create')",
             description: 'Create a shipment for an order',
         ),
+        new Post(
+            uriTemplate: '/shipments/{id}/tracks',
+            name: 'add_shipment_track',
+            requirements: ['id' => '\d+'],
+            security: "is_granted('ROLE_ADMIN') or is_granted('shipments/create')",
+            description: 'Add a tracking number to an existing shipment',
+        ),
+        new Delete(
+            uriTemplate: '/shipments/{id}/tracks/{trackId}',
+            name: 'remove_shipment_track',
+            requirements: ['id' => '\d+', 'trackId' => '\d+'],
+            security: "is_granted('ROLE_ADMIN') or is_granted('shipments/create')",
+            description: 'Remove a tracking number from a shipment',
+        ),
     ],
     graphQlOperations: [
         new Query(
@@ -77,6 +92,29 @@ use Maho\ApiPlatform\CrudResource;
             ],
             description: 'Create a shipment for an order (full or partial)',
             security: "is_granted('shipments/create')",
+        ),
+        // Names omit "Shipment": ApiPlatform appends the resource shortName, so
+        // these read as addTrackShipment / removeTrackShipment, not the stuttering
+        // addShipmentTrackShipment.
+        new Mutation(
+            name: 'addTrack',
+            args: [
+                'shipmentId' => ['type' => 'Int!'],
+                'carrierCode' => ['type' => 'String'],
+                'title' => ['type' => 'String'],
+                'trackNumber' => ['type' => 'String!'],
+            ],
+            description: 'Add a tracking number to an existing shipment',
+            security: "is_granted('ROLE_ADMIN') or is_granted('shipments/create')",
+        ),
+        new Mutation(
+            name: 'removeTrack',
+            args: [
+                'shipmentId' => ['type' => 'Int!'],
+                'trackId' => ['type' => 'Int!'],
+            ],
+            description: 'Remove a tracking number from a shipment',
+            security: "is_granted('ROLE_ADMIN') or is_granted('shipments/create')",
         ),
     ],
 )]
