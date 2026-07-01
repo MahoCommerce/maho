@@ -49,6 +49,15 @@ SPDX-License-Identifier: AFL-3.0
                             <depends><active>1</active></depends>
                             <validate>required-entry validate-digits validate-zero-or-greater</validate>
                         </timeframe>
+                        <endpoint_limits_heading translate="label comment">
+                            <label>Per-endpoint Limits</label>
+                            <frontend_model>adminhtml/system_config_form_field_heading</frontend_model>
+                            <sort_order>100</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment><![CDATA[Throttle public endpoints that send emails or accept content. Independent of the IP-based limit above. Each value is the number of requests allowed per time-window for the named endpoint; <strong>set to 0 to disable that limit</strong>. Fields are contributed by the modules that own each feature, the list shrinks/grows with installed modules.]]></comment>
+                        </endpoint_limits_heading>
                     </fields>
                 </rate_limit>
                 <cache translate="label" module="core">

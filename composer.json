@@ -47,7 +47,7 @@
         "laminas/laminas-permissions-acl": "^2.17",
         "lbuchs/webauthn": "^2.2",
         "mahocommerce/icons": "^3",
-        "mahocommerce/maho-composer-plugin": "^4.1.1",
+        "mahocommerce/maho-composer-plugin": "^4.2",
         "matthiasmullie/minify": "^1.3",
         "monolog/monolog": "^3.9",
         "paypal/paypal-server-sdk": "^2.2",
@@ -56,6 +56,7 @@
         "spomky-labs/otphp": "^11.3",
         "symfony/cache": "^7.4",
         "symfony/console": "^7.4",
+        "symfony/expression-language": "^7.4",
         "symfony/filesystem": "^7.4",
         "symfony/http-client": "^7.4",
         "symfony/http-foundation": "^7.4",
@@ -65,7 +66,13 @@
         "symfony/polyfill-php85": "^1.32",
         "symfony/validator": "^7.4",
         "symfony/var-dumper": "^7.4",
-        "symfony/routing": "^7.4"
+        "symfony/routing": "^7.4",
+        "api-platform/core": "^4.3",
+        "nelmio/cors-bundle": "^2.6",
+        "symfony/framework-bundle": "^7.4",
+        "symfony/security-bundle": "^7.4",
+        "webonyx/graphql-php": "^15.31",
+        "lcobucci/jwt": "^5.6"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "^99.99",
@@ -101,7 +108,9 @@
         "laminas/laminas-soap": "Install this package if you need SOAP web services functionality",
         "laminas/laminas-xmlrpc": "Install this package if you need XML-RPC web services functionality",
         "mahocommerce/module-braintree": "Braintree payment gateway integration",
-        "picqer/php-barcode-generator": "Required for gift card barcode generation"
+        "picqer/php-barcode-generator": "Required for gift card barcode generation",
+        "symfony/twig-bundle": "Required (together with symfony/asset) to render the API Platform Swagger UI, ReDoc, and GraphiQL explorer pages. Without it, the JSON API and /api/docs.json still work but the human-browsable docs at /api/docs do not.",
+        "symfony/asset": "Required (together with symfony/twig-bundle) for the API Platform Swagger UI: provides the asset() function its template uses."
     },
     "conflict": {
         "colinmollenhour/cache-backend-redis": "*",
@@ -112,7 +121,8 @@
     "autoload": {
         "psr-4": {
             "MahoCLI\\": "lib/MahoCLI",
-            "Maho\\": "lib/Maho"
+            "Maho\\": "lib/Maho",
+            "Maho\\ApiPlatform\\": "app/code/core/Maho/ApiPlatform/symfony/"
         }
     },
     "autoload-dev": {

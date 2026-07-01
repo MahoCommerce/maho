@@ -22,6 +22,19 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
     {
         parent::setUp();
 
+        // Skip if no API server configured (CI environments)
+        if (empty($_ENV['API_BASE_URL'])) {
+            try {
+                $store = \Mage::app()->getStore();
+                $baseUrl = $store->getBaseUrl(\Mage_Core_Model_Store::URL_TYPE_WEB);
+                if (!$baseUrl || !filter_var($baseUrl, FILTER_VALIDATE_URL)) {
+                    $this->markTestSkipped('API server not configured');
+                }
+            } catch (\Throwable $e) {
+                $this->markTestSkipped('API server not available: ' . $e->getMessage());
+            }
+        }
+
         $this->apiConfig = $this->getApiConfig();
         $this->apiClient = new JsonRpcClient($this->apiConfig['base_url']);
 
@@ -72,8 +85,8 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
 
         try {
             // Method 1: Try to get from current store configuration
-            $store = Mage::app()->getStore();
-            $baseUrl = $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
+            $store = \Mage::app()->getStore();
+            $baseUrl = $store->getBaseUrl(\Mage_Core_Model_Store::URL_TYPE_WEB);
 
             // If we got a valid URL, use it
             if ($baseUrl && filter_var($baseUrl, FILTER_VALIDATE_URL)) {
@@ -82,8 +95,8 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
             }
 
             // Method 2: Try to get from configuration directly
-            $unsecureBaseUrl = Mage::getStoreConfig('web/unsecure/base_url');
-            $secureBaseUrl = Mage::getStoreConfig('web/secure/base_url');
+            $unsecureBaseUrl = \Mage::getStoreConfig('web/unsecure/base_url');
+            $secureBaseUrl = \Mage::getStoreConfig('web/secure/base_url');
 
             // Prefer HTTPS if available, otherwise HTTP
             $configuredUrl = $secureBaseUrl ?: $unsecureBaseUrl;
@@ -103,9 +116,9 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
                 return $scheme . '://' . $host . $baseDir . '/api.php';
             }
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // Log error but don't fail the test setup
-            error_log('Failed to detect API base URL: ' . $e->getMessage());
+            \Mage::log('Failed to detect API base URL: ' . $e->getMessage(), \Mage::LOG_WARNING);
         }
 
         // Final fallback
@@ -245,7 +258,7 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
         $password = $this->apiConfig['password'];
 
         // Check if user already exists
-        $existingUser = Mage::getModel('api/user')->loadByUsername($username);
+        $existingUser = \Mage::getModel('api/user')->loadByUsername($username);
 
         if ($existingUser->getId()) {
             // User exists, just ensure correct permissions
@@ -254,7 +267,7 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
         }
 
         // Create new API user with minimal blog permissions
-        $user = Mage::getModel('api/user');
+        $user = \Mage::getModel('api/user');
         $user->setData([
             'username' => $username,
             'firstname' => 'Blog',
@@ -266,7 +279,7 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
         $user->save();
 
         // Create minimal role with only blog API permissions
-        $role = Mage::getModel('api/role');
+        $role = \Mage::getModel('api/role');
         $role->setData([
             'role_name' => 'Blog API Test Role',
             'role_type' => 'U',
@@ -283,7 +296,7 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
      */
     private function ensureBlogApiPermissions($user): void
     {
-        $roles = Mage::getModel('api/role')->getCollection()
+        $roles = \Mage::getModel('api/role')->getCollection()
             ->addFieldToFilter('user_id', $user->getId())
             ->addFieldToFilter('role_type', 'U');
 
@@ -298,7 +311,7 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
     private function setBlogApiPermissions($role): void
     {
         // Delete existing permissions for this role
-        Mage::getModel('api/rules')->getCollection()
+        \Mage::getModel('api/rules')->getCollection()
             ->addFieldToFilter('role_id', $role->getId())
             ->walk('delete');
 
@@ -308,7 +321,7 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
         ];
 
         foreach ($blogPermissions as $permission) {
-            $rule = Mage::getModel('api/rules');
+            $rule = \Mage::getModel('api/rules');
             $rule->setData([
                 'role_id' => $role->getId(),
                 'resource_id' => $permission,

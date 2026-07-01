@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <modules>
+        <Maho_ApiPlatform>
+            <version>1.0.0</version>
+        </Maho_ApiPlatform>
+    </modules>
+    <global>
+        <helpers>
+            <apiplatform>
+                <class>Maho_ApiPlatform_Helper</class>
+            </apiplatform>
+        </helpers>
+        <models>
+            <apiplatform>
+                <class>Maho_ApiPlatform_Model</class>
+            </apiplatform>
+        </models>
+        <blocks>
+            <apiplatform>
+                <class>Maho_ApiPlatform_Block</class>
+            </apiplatform>
+        </blocks>
+        <resources>
+            <apiplatform_setup>
+                <setup>
+                    <module>Maho_ApiPlatform</module>
+                </setup>
+            </apiplatform_setup>
+        </resources>
+        <cache>
+            <types>
+                <api_data translate="label,description" module="apiplatform">
+                    <label>API Data</label>
+                    <description>REST and GraphQL API response cache (products, reviews, wishlists, etc.)</description>
+                    <tags>API_PRODUCTS,API_REVIEWS,API_WISHLIST,API_STORE_CONFIG,API_COUNTRIES,API_DISCOVERY</tags>
+                </api_data>
+            </types>
+        </cache>
+    </global>
+    <frontend>
+        <translate>
+            <modules>
+                <Maho_ApiPlatform>
+                    <files>
+                        <default>Maho_ApiPlatform.csv</default>
+                    </files>
+                </Maho_ApiPlatform>
+            </modules>
+        </translate>
+    </frontend>
+    <adminhtml>
+        <translate>
+            <modules>
+                <Maho_ApiPlatform>
+                    <files>
+                        <default>Maho_ApiPlatform.csv</default>
+                    </files>
+                </Maho_ApiPlatform>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <apiplatform>
+                    <file>apiplatform.xml</file>
+                </apiplatform>
+            </updates>
+        </layout>
+    </adminhtml>
+    <default>
+        <system>
+            <rate_limit>
+                <!--
+                    Per-key request caps for the API auth and abuse-prone endpoints.
+                    checkRateLimit() reads system/rate_limit/{key}; an unset key is
+                    0, which disables the limit, so these defaults keep brute-force
+                    and enumeration protection on out of the box. Values are max
+                    requests per the window the call site passes (60s or 3600s).
+                -->
+                <auth_token_ip>10</auth_token_ip>
+                <customer_login>5</customer_login>
+                <customer_register>5</customer_register>
+                <forgot_password>5</forgot_password>
+                <reset_password>10</reset_password>
+                <newsletter_subscribe>5</newsletter_subscribe>
+                <newsletter_unsubscribe>10</newsletter_unsubscribe>
+                <review_submit>10</review_submit>
+                <contact>5</contact>
+                <coupon_validate>20</coupon_validate>
+                <giftcard_balance>10</giftcard_balance>
+            </rate_limit>
+        </system>
+        <apiplatform>
+            <protocols>
+                <rest_v2>0</rest_v2>
+                <graphql>0</graphql>
+                <admin_graphql>0</admin_graphql>
+                <legacy_rest>0</legacy_rest>
+                <soap>0</soap>
+                <v2_soap>0</v2_soap>
+                <xmlrpc>0</xmlrpc>
+                <jsonrpc>0</jsonrpc>
+            </protocols>
+            <cache>
+                <ttl>300</ttl>
+            </cache>
+            <oauth2>
+                <token_lifetime>3600</token_lifetime>
+                <refresh_token_lifetime>86400</refresh_token_lifetime>
+            </oauth2>
+        </apiplatform>
+    </default>
+</config>

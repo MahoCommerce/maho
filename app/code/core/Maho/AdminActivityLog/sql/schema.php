@@ -18,6 +18,7 @@ return function (Schema $schema): void {
     $activity->addColumn('activity_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $activity->addColumn('action_group_id', Types::STRING, ['length' => 64, 'notnull' => false]);
     $activity->addColumn('user_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
+    $activity->addColumn('consumer_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false, 'comment' => 'OAuth Consumer ID (for API actions)']);
     $activity->addColumn('username', Types::STRING, ['length' => 40, 'notnull' => false]);
     $activity->addColumn('action_type', Types::STRING, ['length' => 50]);
     $activity->addColumn('entity_type', Types::STRING, ['length' => 255, 'notnull' => false]);
@@ -32,6 +33,7 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('activity_id')->create(),
     );
     $activity->addIndex(['user_id']);
+    $activity->addIndex(['consumer_id']);
     $activity->addIndex(['action_group_id']);
     $activity->addIndex(['action_type']);
     $activity->addIndex(['entity_type']);
@@ -41,6 +43,12 @@ return function (Schema $schema): void {
         'admin_user',
         ['user_id'],
         ['user_id'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
+    );
+    $activity->addForeignKeyConstraint(
+        'oauth_consumer',
+        ['consumer_id'],
+        ['entity_id'],
         ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
     );
     $activity->setComment('Admin Activity Log Table');

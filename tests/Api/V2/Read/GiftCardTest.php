@@ -1,0 +1,66 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Tests
+ */
+
+declare(strict_types=1);
+
+/**
+ * API v2 Gift Card Endpoint Tests
+ *
+ * Tests GET /api/rest/v2/giftcards endpoints.
+ * All tests are READ-ONLY (safe for synced database).
+ */
+
+describe('GET /api/rest/v2/giftcards/{code}', function (): void {
+
+    it('returns gift card balance for valid code', function (): void {
+        $code = fixtures('giftcard_code');
+
+        if (!$code) {
+            $this->markTestSkipped('No giftcard_code configured in fixtures');
+        }
+
+        $response = apiGet("/api/rest/v2/giftcards/{$code}", customerToken());
+
+        expect($response['status'])->toBe(200);
+        expect($response['json'])->toBeArray();
+        expect($response['json'])->toHaveKey('balance');
+    });
+
+    it('returns expected gift card fields', function (): void {
+        $code = fixtures('giftcard_code');
+
+        if (!$code) {
+            $this->markTestSkipped('No giftcard_code configured in fixtures');
+        }
+
+        $response = apiGet("/api/rest/v2/giftcards/{$code}", customerToken());
+
+        expect($response['status'])->toBe(200);
+
+        $giftcard = $response['json'];
+        expect($giftcard)->toHaveKey('code');
+        expect($giftcard)->toHaveKey('balance');
+    });
+
+    it('returns 404 for non-existent gift card code', function (): void {
+        $invalidCode = fixtures('invalid_giftcard_code');
+
+        $response = apiGet("/api/rest/v2/giftcards/{$invalidCode}", customerToken());
+
+        expect($response['status'])->toBeNotFound();
+    });
+
+    it('requires authentication', function (): void {
+        $code = fixtures('giftcard_code') ?? 'TEST123';
+
+        $response = apiGet("/api/rest/v2/giftcards/{$code}");
+
+        expect($response['status'])->toBeUnauthorized();
+    });
+
+});

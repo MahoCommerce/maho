@@ -1,0 +1,632 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
+ */
+
+declare(strict_types=1);
+
+namespace Mage\Sales\Api;
+
+use Mage\Checkout\Api\CartService;
+
+/**
+ * Order Service - Business logic for checkout and order operations.
+ */
+class OrderService
+{
+    /**
+     * Place order from quote
+     *
+     * @param \Mage_Sales_Model_Quote $quote Quote to convert to order
+     * @param string|null $guestEmail Guest email (for guest checkout)
+     * @param string|null $orderNote Order notes
+     * @param float|null $cashTendered Cash tendered (for POS)
+     * @param int|null $employeeId Employee ID (for POS)
+     * @return array [order, changeAmount]
+     */
+    public function placeAdminOrder(
+        \Mage_Sales_Model_Quote $quote,
+        ?string $guestEmail = null,
+        ?string $orderNote = null,
+        ?float $cashTendered = null,
+        ?int $employeeId = null,
+    ): array {
+        // Validate quote
+        if (!$quote->getId() || !$quote->getIsActive()) {
+            throw new \RuntimeException('Cart is not active or does not exist');
+        }
+
+        // Validate quote has items
+        if ($quote->getItemsCount() == 0) {
+            throw new \RuntimeException('Cart is empty');
+        }
+
+        // Validate addresses
+        if (!$quote->isVirtual()) {
+            $shippingAddress = $quote->getShippingAddress();
+            if (!$shippingAddress->getShippingMethod()) {
+                throw new \RuntimeException('Shipping method is not set');
+            }
+        }
+
+        $billingAddress = $quote->getBillingAddress();
+        if (!$billingAddress->getFirstname()) {
+            throw new \RuntimeException('Billing address is not set');
+        }
+
+        // Validate payment method
+        $payment = $quote->getPayment();
+        if (!$payment->getMethod()) {
+            throw new \RuntimeException('Payment method is not set');
+        }
+
+        // Set guest email if provided
+        if ($guestEmail && $quote->getCustomerIsGuest()) {
+            $quote->setCustomerEmail($guestEmail);
+        }
+
+        // Set employee ID for POS orders
+        if ($employeeId) {
+            $quote->setData('employee_id', $employeeId);
+        }
+
+        // Serialize concurrent placement attempts on the same quote. Without
+        // this, two simultaneous POSTs both pass the is_active check above and
+        // submit the same cart twice, duplicate orders, double inventory
+        // decrement. The lock gives us a per-quote critical section that
+        // releases on disconnect, so a crashed worker can't deadlock the cart.
+        $resource = \Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $lockName = 'maho_quote_place_order:' . (int) $quote->getId();
+        if (!$write->getLock($lockName, 5)) {
+            throw new \RuntimeException('Order placement is already in progress for this cart');
+        }
+
+        try {
+            // Re-read is_active under the lock, another request may have
+            // converted this quote while we were waiting.
+            $stillActive = (int) $write->fetchOne(
+                $write->select()
+                    ->from($resource->getTableName('sales/quote'), ['is_active'])
+                    ->where('entity_id = ?', (int) $quote->getId()),
+            );
+            if ($stillActive !== 1) {
+                throw new \RuntimeException('Cart is no longer active');
+            }
+
+            // Re-validate gift-card balances against the live DB under the lock,
+            // immediately before consuming them, a card spent elsewhere since
+            // apply time must not discount this order. Collect totals once more
+            // so submitAll() converts the freshly revalidated amounts.
+            (new CartService())->revalidateGiftcards($quote);
+            $quote->collectTotals();
+
+            // Convert quote to order
+            $service = \Mage::getModel('sales/service_quote', $quote);
+            $service->submitAll();
+
+            $order = $service->getOrder();
+
+            if (!$order || !$order->getId()) {
+                throw new \RuntimeException('Failed to create order');
+            }
+
+            // Generate access token for guest orders
+            $accessToken = null;
+            if (!$order->getCustomerId() || $quote->getCustomerIsGuest()) {
+                $accessToken = $this->generateAccessToken();
+                $order->setData('guest_access_token', $accessToken);
+                $order->save();
+            }
+
+            // Add order note if provided
+            if ($orderNote) {
+                $order->addStatusHistoryComment($orderNote, false)
+                    ->setIsCustomerNotified(false)
+                    ->save();
+            }
+
+            // Calculate change for cash payments
+            $changeAmount = null;
+            if ($cashTendered !== null && $payment->getMethod() === 'cashondelivery') {
+                $changeAmount = $cashTendered - $order->getGrandTotal();
+                if ($changeAmount < 0) {
+                    throw new \RuntimeException('Insufficient cash tendered');
+                }
+
+                // Store cash tendered amount
+                $payment->setAdditionalInformation('cash_tendered', $cashTendered);
+                $payment->setAdditionalInformation('change_amount', $changeAmount);
+                $payment->save();
+            }
+
+            // Deactivate quote
+            $quote->setIsActive(0);
+            $quote->save();
+
+            return [
+                'order' => $order,
+                'accessToken' => $accessToken,
+                'changeAmount' => $changeAmount,
+            ];
+        } catch (\Exception $e) {
+            \Mage::logException($e);
+            // Preserve the original message so domain validation failures
+            // (e.g. "Cart is no longer active", "Insufficient cash tendered")
+            // surface to the caller instead of a generic placeholder.
+            throw new \RuntimeException($e->getMessage() ?: 'Failed to place order', 0, $e);
+        } finally {
+            $write->releaseLock($lockName);
+        }
+    }
+
+    /**
+     * Get order by ID or increment ID (authenticated customers only)
+     *
+     * @param int|null $orderId Order ID
+     * @param string|null $incrementId Increment ID
+     */
+    public function getOrder(?int $orderId = null, ?string $incrementId = null): ?\Mage_Sales_Model_Order
+    {
+        $order = \Mage::getModel('sales/order');
+
+        if ($orderId) {
+            $order->load($orderId);
+        } elseif ($incrementId) {
+            $order->loadByIncrementId($incrementId);
+        } else {
+            return null;
+        }
+
+        if (!$order->getId()) {
+            return null;
+        }
+
+        return $order;
+    }
+
+    /**
+     * Get guest order by increment ID and access token
+     *
+     * @param string $incrementId Order increment ID
+     * @param string $accessToken Guest access token
+     */
+    public function getGuestOrder(string $incrementId, string $accessToken): ?\Mage_Sales_Model_Order
+    {
+        $order = \Mage::getModel('sales/order')->loadByIncrementId($incrementId);
+
+        if (!$order->getId()) {
+            return null;
+        }
+
+        // Verify access token matches
+        $storedToken = $order->getData('guest_access_token');
+        if (!$storedToken || !hash_equals($storedToken, $accessToken)) {
+            return null;
+        }
+
+        return $order;
+    }
+
+    /**
+     * Get all orders with billing address joined (no N+1 queries).
+     *
+     * @param int $page Page number
+     * @param int $pageSize Page size
+     * @param string|null $status Filter by status
+     * @param string|null $email Filter by customer email (exact match, uses index)
+     * @param string|null $incrementId Filter by order increment ID (exact match)
+     * @param string|null $emailLike Filter by customer email (partial LIKE match, slower on large tables)
+     * @param string|null $since Filter by updated_at >= value (ISO datetime)
+     * @return array{orders: array, total: int}
+     */
+    public function getAllOrders(
+        int $page = 1,
+        int $pageSize = 20,
+        ?string $status = null,
+        #[\SensitiveParameter]
+        ?string $email = null,
+        ?string $incrementId = null,
+        ?string $emailLike = null,
+        ?string $since = null,
+    ): array {
+        $collection = $this->buildOrderCollection(null, $status, $since);
+
+        if ($email) {
+            $collection->addFieldToFilter('customer_email', $email);
+        } elseif ($emailLike && mb_strlen($emailLike) >= 3) {
+            $collection->addFieldToFilter('customer_email', ['like' => '%' . $emailLike . '%']);
+        }
+
+        if ($incrementId) {
+            $collection->addFieldToFilter('increment_id', $incrementId);
+        }
+
+        return $this->paginateAndPreload($collection, $page, $pageSize);
+    }
+
+    /**
+     * Get customer orders with billing address joined (no N+1 queries).
+     *
+     * @param int $customerId Customer ID
+     * @param int $page Page number
+     * @param int $pageSize Page size
+     * @param string|null $status Filter by status
+     * @param string|null $since Filter by updated_at >= value (ISO datetime)
+     * @return array{orders: array, total: int}
+     */
+    public function getCustomerOrders(
+        int $customerId,
+        int $page = 1,
+        int $pageSize = 20,
+        ?string $status = null,
+        ?string $since = null,
+    ): array {
+        $collection = $this->buildOrderCollection($customerId, $status, $since);
+
+        return $this->paginateAndPreload($collection, $page, $pageSize);
+    }
+
+    /**
+     * Recent orders for the admin dashboard, newest first, optionally store-scoped.
+     *
+     * @return \Mage_Sales_Model_Order[]
+     */
+    public function getRecentOrders(int $limit, ?int $storeId = null): array
+    {
+        $collection = $this->buildOrderCollection();
+        if ($storeId !== null) {
+            $collection->addFieldToFilter('store_id', $storeId);
+        }
+
+        return $this->paginateAndPreload($collection, 1, $limit)['orders'];
+    }
+
+    /**
+     * Multi-field order search (increment id, customer email, first/last name),
+     * newest first, optionally store-scoped.
+     *
+     * @return \Mage_Sales_Model_Order[]
+     */
+    public function searchOrders(string $query, ?int $storeId, int $limit): array
+    {
+        $collection = $this->buildOrderCollection();
+        if ($storeId !== null) {
+            $collection->addFieldToFilter('store_id', $storeId);
+        }
+
+        $escaped = addcslashes($query, '%_');
+        $like = ['like' => "%{$escaped}%"];
+        $collection->addFieldToFilter(
+            ['increment_id', 'customer_email', 'customer_firstname', 'customer_lastname'],
+            [$like, $like, $like, $like],
+        );
+
+        return $this->paginateAndPreload($collection, 1, $limit)['orders'];
+    }
+
+    /**
+     * Build an order collection with billing address joined and common filters applied.
+     *
+     * @param int|null $customerId When set, restrict to this customer's orders
+     * @param string|null $status Filter by order status
+     * @param string|null $since Filter by updated_at >= value (ISO datetime)
+     */
+    private function buildOrderCollection(
+        ?int $customerId = null,
+        ?string $status = null,
+        ?string $since = null,
+    ): \Mage_Sales_Model_Resource_Order_Collection {
+        $collection = \Mage::getModel('sales/order')->getCollection()
+            ->setOrder('created_at', 'DESC');
+
+        if ($customerId !== null) {
+            $collection->addFieldToFilter('customer_id', $customerId);
+        }
+
+        if ($status) {
+            $collection->addFieldToFilter('status', $status);
+        }
+
+        if ($since) {
+            // updated_at is stored in UTC; normalize the client-supplied value
+            // so a local-offset ISO string doesn't skew the filter boundary.
+            $collection->addFieldToFilter('updated_at', [
+                'gteq' => \Mage::app()->getLocale()->formatDateForDb($since),
+            ]);
+        }
+
+        $resource = \Mage::getSingleton('core/resource');
+        $collection->getSelect()->joinLeft(
+            ['billing_addr' => $resource->getTableName('sales/order_address')],
+            "billing_addr.parent_id = main_table.entity_id AND billing_addr.address_type = 'billing'",
+            [
+                'billing_addr_id' => 'billing_addr.entity_id',
+                'billing_telephone' => 'billing_addr.telephone',
+                'billing_firstname' => 'billing_addr.firstname',
+                'billing_lastname' => 'billing_addr.lastname',
+                'billing_company' => 'billing_addr.company',
+                'billing_street' => 'billing_addr.street',
+                'billing_city' => 'billing_addr.city',
+                'billing_region' => 'billing_addr.region',
+                'billing_postcode' => 'billing_addr.postcode',
+                'billing_country_id' => 'billing_addr.country_id',
+            ],
+        );
+
+        return $collection;
+    }
+
+    /**
+     * Paginate an order collection and batch-preload visible items for the page.
+     *
+     * @return array{orders: array, total: int}
+     */
+    private function paginateAndPreload(
+        \Mage_Sales_Model_Resource_Order_Collection $collection,
+        int $page,
+        int $pageSize,
+    ): array {
+        $total = $collection->getSize();
+
+        $collection->setPageSize($pageSize);
+        $collection->setCurPage($page);
+
+        $orders = [];
+        $orderIds = [];
+        foreach ($collection as $order) {
+            $orders[] = $order;
+            $orderIds[] = $order->getId();
+        }
+
+        if (!empty($orderIds)) {
+            $itemCollection = \Mage::getModel('sales/order_item')->getCollection()
+                ->addFieldToFilter('order_id', ['in' => $orderIds])
+                ->addFieldToFilter('parent_item_id', ['null' => true]);
+
+            $itemsByOrder = [];
+            foreach ($itemCollection as $item) {
+                $itemsByOrder[$item->getOrderId()][] = $item;
+            }
+
+            foreach ($orders as $order) {
+                $oid = $order->getId();
+                if (isset($itemsByOrder[$oid])) {
+                    $order->setData('_preloaded_items', $itemsByOrder[$oid]);
+                }
+            }
+        }
+
+        return [
+            'orders' => $orders,
+            'total' => $total,
+        ];
+    }
+
+    /**
+     * Cancel order
+     *
+     * @param \Mage_Sales_Model_Order $order Order
+     * @param string|null $reason Cancellation reason
+     */
+    public function cancelOrder(\Mage_Sales_Model_Order $order, ?string $reason = null): \Mage_Sales_Model_Order
+    {
+        return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
+            // Re-read under the lock so canCancel() sees live state: a concurrent
+            // invoice/ship/cancel may have transitioned the order while we waited.
+            $order->load((int) $order->getId());
+            if (!$order->canCancel()) {
+                throw new \RuntimeException('Order cannot be cancelled');
+            }
+
+            try {
+                $order->cancel();
+
+                if ($reason) {
+                    $order->addStatusHistoryComment('Order cancelled: ' . $reason, false)
+                        ->setIsCustomerNotified(true);
+                }
+
+                $order->save();
+
+                return $order;
+            } catch (\Exception $e) {
+                \Mage::logException($e);
+                throw new \RuntimeException('Failed to cancel order');
+            }
+        });
+    }
+
+    /**
+     * Put an order on hold. Serialized with the other state transitions through
+     * the cross-request order lock so a hold can't race an invoice/ship/cancel.
+     */
+    public function holdOrder(\Mage_Sales_Model_Order $order, ?string $reason = null): \Mage_Sales_Model_Order
+    {
+        return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
+            $order->load((int) $order->getId());
+            if (!$order->canHold()) {
+                throw new \RuntimeException('Order cannot be held');
+            }
+
+            try {
+                $order->hold();
+                if ($reason) {
+                    $order->addStatusHistoryComment('Order held: ' . $reason, false);
+                }
+                $order->save();
+
+                return $order;
+            } catch (\Exception $e) {
+                \Mage::logException($e);
+                throw new \RuntimeException('Failed to hold order');
+            }
+        });
+    }
+
+    /**
+     * Release an order from hold.
+     */
+    public function unholdOrder(\Mage_Sales_Model_Order $order, ?string $reason = null): \Mage_Sales_Model_Order
+    {
+        return $this->withOrderLock((int) $order->getId(), function () use ($order, $reason) {
+            $order->load((int) $order->getId());
+            if (!$order->canUnhold()) {
+                throw new \RuntimeException('Order is not on hold');
+            }
+
+            try {
+                $order->unhold();
+                if ($reason) {
+                    $order->addStatusHistoryComment('Order released from hold: ' . $reason, false);
+                }
+                $order->save();
+
+                return $order;
+            } catch (\Exception $e) {
+                \Mage::logException($e);
+                throw new \RuntimeException('Failed to unhold order');
+            }
+        });
+    }
+
+    /**
+     * Add order note
+     *
+     * @param \Mage_Sales_Model_Order $order Order
+     * @param string $note Note text
+     * @param bool $notifyCustomer Notify customer
+     * @param bool $visibleOnFront Visible on frontend
+     */
+    public function addOrderNote(
+        \Mage_Sales_Model_Order $order,
+        string $note,
+        bool $notifyCustomer = false,
+        bool $visibleOnFront = false,
+    ): \Mage_Sales_Model_Order {
+        $order->addStatusHistoryComment($note, false)
+            ->setIsCustomerNotified($notifyCustomer)
+            ->setIsVisibleOnFront((int) $visibleOnFront);
+
+        $order->save();
+
+        return $order;
+    }
+
+    /**
+     * Get order status history
+     *
+     * @param \Mage_Sales_Model_Order $order Order
+     * @return array Order notes
+     */
+    public function getOrderNotes(\Mage_Sales_Model_Order $order): array
+    {
+        $notes = [];
+
+        foreach ($order->getStatusHistoryCollection() as $status) {
+            $notes[] = [
+                'note' => $status->getComment(),
+                'createdAt' => $status->getCreatedAt(),
+                'isCustomerNotified' => (bool) $status->getIsCustomerNotified(),
+                'isVisibleOnFront' => (bool) $status->getIsVisibleOnFront(),
+            ];
+        }
+
+        return $notes;
+    }
+
+    /**
+     * Create invoice for an order
+     *
+     * @param \Mage_Sales_Model_Order $order Order to invoice
+     * @param bool $capture Whether to capture payment (CAPTURE_OFFLINE) or not (NOT_CAPTURE)
+     * @return \Mage_Sales_Model_Order_Invoice|null Null if order cannot be invoiced
+     */
+    public function createInvoiceForOrder(\Mage_Sales_Model_Order $order, bool $capture = true): ?\Mage_Sales_Model_Order_Invoice
+    {
+        return $this->withOrderLock((int) $order->getId(), function () use ($order, $capture) {
+            // Re-read under the lock so canInvoice() reflects any invoice another
+            // request created while we waited, otherwise both would register one.
+            $order->load((int) $order->getId());
+            if (!$order->canInvoice()) {
+                return null;
+            }
+
+            $invoice = $order->prepareInvoice();
+            $invoice->setRequestedCaptureCase(
+                $capture ? \Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE : \Mage_Sales_Model_Order_Invoice::NOT_CAPTURE,
+            );
+            $invoice->register();
+
+            $transactionSave = \Mage::getModel('core/resource_transaction');
+            $transactionSave->addObject($invoice)->addObject($order)->save();
+
+            return $invoice;
+        });
+    }
+
+    /**
+     * Create shipment for an order
+     *
+     * @param \Mage_Sales_Model_Order $order Order to ship
+     * @return \Mage_Sales_Model_Order_Shipment|null Null if order cannot be shipped
+     */
+    public function createShipmentForOrder(\Mage_Sales_Model_Order $order): ?\Mage_Sales_Model_Order_Shipment
+    {
+        return $this->withOrderLock((int) $order->getId(), function () use ($order) {
+            // Re-read under the lock so canShip() reflects any shipment another
+            // request created while we waited, otherwise both would register one
+            // and decrement inventory twice.
+            $order->load((int) $order->getId());
+            if (!$order->canShip()) {
+                return null;
+            }
+
+            $shipment = $order->prepareShipment();
+            $shipment->register();
+            $order->setIsInProcess(true);
+
+            $transactionSave = \Mage::getModel('core/resource_transaction');
+            $transactionSave->addObject($shipment)->addObject($order)->save();
+
+            return $shipment;
+        });
+    }
+
+    /**
+     * Run a state-changing operation while holding a per-order advisory lock.
+     *
+     * All order mutations (invoice, ship, cancel, refund) share one lock name so
+     * two concurrent requests can't both pass their can*() guard and both mutate
+     * the same order, duplicate invoices/shipments or double-cancel side effects.
+     * The lock releases on disconnect, so a crashed worker can't wedge the order.
+     */
+    private function withOrderLock(int $orderId, callable $operation): mixed
+    {
+        $write = \Mage::getSingleton('core/resource')->getConnection('core_write');
+        $lockName = 'maho_order_mutate:' . $orderId;
+        if (!$write->getLock($lockName, 5)) {
+            throw new \RuntimeException('Another operation is already in progress for this order');
+        }
+
+        try {
+            return $operation();
+        } finally {
+            $write->releaseLock($lockName);
+        }
+    }
+
+    /**
+     * Generate secure access token for guest orders
+     *
+     * @return string Cryptographically secure random token
+     */
+    private function generateAccessToken(): string
+    {
+        // Generate 32 bytes of random data and convert to hex (64 characters)
+        return bin2hex(random_bytes(32));
+    }
+}

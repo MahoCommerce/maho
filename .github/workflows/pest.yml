@@ -8,6 +8,10 @@ on:
   workflow_call:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pest-db:
     name: Test Suite (${{ matrix.name }})
@@ -145,6 +149,21 @@ jobs:
           ./maho index:reindex:all
           ./maho cache:flush
 
+      - name: Start built-in web server
+        run: |
+          php -S 127.0.0.1:8080 -t public > /tmp/php-server.log 2>&1 < /dev/null &
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:8080/api/rest/v2/store-config -o /dev/null 2>&1 || \
+               curl -fsS http://127.0.0.1:8080/ -o /dev/null 2>&1; then
+              echo "Web server is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Web server did not start in time"
+          cat /tmp/php-server.log
+          exit 1
+
       - name: Configure PayPal sandbox credentials
         run: |
           if [ -z "$PAYPAL_SANDBOX_CLIENT_ID" ] || [ -z "$PAYPAL_SANDBOX_CLIENT_SECRET" ]; then
@@ -162,10 +181,11 @@ jobs:
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
 
       - name: Run Pest Tests
-        run: ./vendor/bin/pest --display-errors --display-warnings
         env:
+          API_BASE_URL: http://127.0.0.1:8080
           PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
+        run: ./vendor/bin/pest --display-errors --display-warnings
 
   pest-sqlite:
     name: Test Suite (sqlite)
@@ -230,6 +250,21 @@ jobs:
           ./maho index:reindex:all
           ./maho cache:flush
 
+      - name: Start built-in web server
+        run: |
+          php -S 127.0.0.1:8080 -t public > /tmp/php-server.log 2>&1 < /dev/null &
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:8080/api/rest/v2/store-config -o /dev/null 2>&1 || \
+               curl -fsS http://127.0.0.1:8080/ -o /dev/null 2>&1; then
+              echo "Web server is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Web server did not start in time"
+          cat /tmp/php-server.log
+          exit 1
+
       - name: Configure PayPal sandbox credentials
         run: |
           if [ -z "$PAYPAL_SANDBOX_CLIENT_ID" ] || [ -z "$PAYPAL_SANDBOX_CLIENT_SECRET" ]; then
@@ -247,7 +282,8 @@ jobs:
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
 
       - name: Run Pest Tests
-        run: ./vendor/bin/pest --display-errors --display-warnings
         env:
+          API_BASE_URL: http://127.0.0.1:8080
           PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
+        run: ./vendor/bin/pest --display-errors --display-warnings

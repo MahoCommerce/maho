@@ -1,0 +1,96 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
+ */
+
+declare(strict_types=1);
+
+namespace Mage\Sales\Api;
+
+use ApiPlatform\Metadata\ApiProperty;
+use Maho\Config\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use Maho\ApiPlatform\CrudResource;
+
+#[ApiResource(
+    security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
+    shortName: 'Invoice',
+    description: 'Order invoice resource',
+    provider: InvoiceProvider::class,
+    operations: [
+        new GetCollection(
+            uriTemplate: '/orders/{orderId}/invoices',
+            name: 'order_invoices',
+            description: 'List invoices for an order',
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
+        ),
+        new Get(
+            uriTemplate: '/orders/{orderId}/invoices/{id}/pdf',
+            name: 'invoice_pdf',
+            description: 'Download invoice PDF',
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
+        ),
+        new GetCollection(
+            uriTemplate: '/customers/me/orders/{orderId}/invoices',
+            name: 'my_order_invoices',
+            description: 'List invoices for an authenticated customer\'s order',
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
+        ),
+        new Get(
+            uriTemplate: '/customers/me/orders/{orderId}/invoices/{id}/pdf',
+            name: 'my_invoice_pdf',
+            description: 'Download invoice PDF for an authenticated customer\'s order',
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
+        ),
+    ],
+)]
+class Invoice extends CrudResource
+{
+    public const MODEL = 'sales/order_invoice';
+
+    /** Admin ACL gate. References backend abstract controller's constant. */
+    public const ADMIN_RESOURCE = \Mage_Adminhtml_Controller_Sales_Invoice::ADMIN_RESOURCE;
+
+    #[ApiProperty(identifier: true, writable: false)]
+    public ?int $id = null;
+
+    #[ApiProperty(writable: false)]
+    public ?string $incrementId = null;
+
+    #[ApiProperty(writable: false)]
+    public ?int $orderId = null;
+
+    #[ApiProperty(writable: false)]
+    public float $grandTotal = 0.0;
+
+    #[ApiProperty(description: 'Currency code for all amount fields', writable: false, extraProperties: ['computed' => true])]
+    public string $currency = '';
+
+    #[ApiProperty(writable: false)]
+    public ?int $state = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    public ?string $stateName = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    public ?string $pdfUrl = null;
+
+    #[ApiProperty(writable: false)]
+    public ?string $createdAt = null;
+
+    public static function afterLoad(self $dto, object $model): void
+    {
+        $dto->currency = $model->getOrderCurrencyCode() ?: \Mage::app()->getStore()->getCurrentCurrencyCode();
+
+        $dto->stateName = match ($dto->state) {
+            \Mage_Sales_Model_Order_Invoice::STATE_OPEN => 'open',
+            \Mage_Sales_Model_Order_Invoice::STATE_PAID => 'paid',
+            \Mage_Sales_Model_Order_Invoice::STATE_CANCELED => 'canceled',
+            default => 'unknown',
+        };
+    }
+}

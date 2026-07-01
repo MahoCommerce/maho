@@ -803,5 +803,22 @@ SPDX-License-Identifier: AFL-3.0
                 </crontab>
             </groups>
         </reports>
+        <system>
+            <groups>
+                <rate_limit>
+                    <fields>
+                        <guest_order_lookup translate="label comment" module="sales">
+                            <label>Guest order lookup</label>
+                            <comment>Per IP address. Default 30 per hour. 0 to disable.</comment>
+                            <sort_order>180</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </guest_order_lookup>
+                    </fields>
+                </rate_limit>
+            </groups>
+        </system>
     </sections>
 </config>

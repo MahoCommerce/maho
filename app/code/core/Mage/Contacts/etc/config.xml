@@ -56,10 +56,19 @@ SPDX-License-Identifier: AFL-3.0
         </translate>
     </adminhtml>
     <default>
+        <system>
+            <rate_limit>
+                <contact>3</contact>
+            </rate_limit>
+        </system>
         <contacts>
             <contacts>
                 <enabled>1</enabled>
             </contacts>
+            <api>
+                <enabled>1</enabled>
+                <honeypot_enabled>1</honeypot_enabled>
+            </api>
             <abuse>
                 <honeypot_enabled>1</honeypot_enabled>
                 <ip_rate_limit_per_hour>10</ip_rate_limit_per_hour>

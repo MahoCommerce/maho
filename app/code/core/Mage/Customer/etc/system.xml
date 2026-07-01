@@ -723,5 +723,40 @@ SPDX-License-Identifier: AFL-3.0
                 </security>
             </groups>
         </admin>
+        <system>
+            <groups>
+                <rate_limit>
+                    <fields>
+                        <customer_register translate="label comment" module="customer">
+                            <label>Customer registration</label>
+                            <comment>Per IP address. Default 10 per hour. 0 to disable.</comment>
+                            <sort_order>140</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </customer_register>
+                        <forgot_password translate="label comment" module="customer">
+                            <label>Forgot password</label>
+                            <comment>Per email address. Default 3 per hour. 0 to disable.</comment>
+                            <sort_order>150</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </forgot_password>
+                        <reset_password translate="label comment" module="customer">
+                            <label>Reset password</label>
+                            <comment>Per IP address (token brute-force guard). Default 10 per hour. 0 to disable.</comment>
+                            <sort_order>160</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </reset_password>
+                    </fields>
+                </rate_limit>
+            </groups>
+        </system>
     </sections>
 </config>

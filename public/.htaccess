@@ -47,6 +47,12 @@ DirectoryIndex index.php
     Options +FollowSymLinks
     RewriteEngine on
 
+    # TRACE and TRACK HTTP methods disabled to prevent XSS attacks. Must come
+    # before any [L] rule (e.g. the /api/* rewrites below) so those methods are
+    # rejected for every path, including the API endpoints, before routing.
+    RewriteCond %{REQUEST_METHOD} ^TRAC[EK]
+    RewriteRule .* - [L,R=405]
+
     # Prevent serving "hidden" files like git repository
     # Allow .thumbs directory used by WYSIWYG media storage
     RewriteCond %{REQUEST_URI} /\.
@@ -55,14 +61,35 @@ DirectoryIndex index.php
 
     # Uncomment next line to enable light API calls processing
     #RewriteRule ^api/([a-z][0-9a-z_]+)/?$ api.php?type=$1 [QSA,L]
+
+    # Maho API Platform, route /api/* to rest.php (Symfony kernel bootstrap).
+    #
+    # Routing layout:
+    #   /api/rest/v2/*    → rest.php           (new REST API, Symfony API Platform)
+    #   /api/graphql      → rest.php           (new GraphQL, public)
+    #   /api/admin/graphql→ rest.php           (new GraphQL, admin)
+    #   /api/docs         → rest.php           (OpenAPI docs / Swagger UI)
+    #   /api/rest         → api.php?type=rest  (legacy Mage_Api REST, M1 compat)
+    #   /api/soap         → Mage_Api_SoapController       (legacy, fall through)
+    #   /api/v2_soap      → Mage_Api_V2_SoapController    (legacy, fall through)
+    #   /api/xmlrpc       → Mage_Api_XmlrpcController     (legacy, fall through)
+    #   /api/jsonrpc      → Mage_Api_JsonrpcController    (legacy, fall through)
+    #
+    # Order matters: the /api/rest/v2 rule MUST come before the bare /api/rest
+    # rule, otherwise the legacy handler intercepts v2 calls.
+    #
+    # Why rest.php (not index.php → router shims): rest.php boots Symfony API
+    # Platform directly without a full Maho bootstrap → the round-trip is
+    # ~50-100ms faster per API call, which matters for chatty clients (POS
+    # terminals, headless storefronts). Maho is still inited inside rest.php
+    # so models/config/store context still work.
+    RewriteRule ^api/rest/v2 rest.php [QSA,L]
     RewriteRule ^api/rest api.php?type=rest [QSA,L]
+    RewriteCond %{REQUEST_URI} !^/api/(soap|v2_soap|xmlrpc|jsonrpc)(/|$)
+    RewriteRule ^api(/.*)?$ rest.php [QSA,L]
 
     # Workaround for HTTP authorization in CGI environment
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-
-    # TRACE and TRACK HTTP methods disabled to prevent XSS attacks
-    RewriteCond %{REQUEST_METHOD} ^TRAC[EK]
-    RewriteRule .* - [L,R=405]
 
     <IfModule mod_setenvif.c>
         # Enable Developer Mode based on OS environment variable

@@ -183,7 +183,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         bool $useTimezone = true,
     ): string {
         if (!in_array($format, $this->_allowedFormats, true)) {
-            return $date;
+            return is_string($date) ? $date : '';
         }
 
         $locale = Mage::app()->getLocale();
@@ -910,7 +910,8 @@ XML;
      * scrapes one Maho install can't blanket-target all of them).
      *
      * Defeats random spambot armies. For targeted attackers (who can
-     * scrape the rendered form), pair with captcha.
+     * scrape the rendered form), pair with captcha, that's what the
+     * `api_captcha_config` / `api_verify_captcha` events are for.
      */
     public function getHoneypotFieldName(): string
     {
