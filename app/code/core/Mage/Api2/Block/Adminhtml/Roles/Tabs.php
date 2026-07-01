@@ -16,6 +16,9 @@
  * @method Mage_Api2_Model_Acl_Global_Role getRole()
  * @method $this setRole(Mage_Api2_Model_Acl_Global_Role $role)
  */
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api2_Block_Adminhtml_Roles_Tabs extends Mage_Adminhtml_Block_Widget_Tabs
 {
     public function __construct()

@@ -10,6 +10,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_XmlrpcController extends Mage_Api_Controller_Action
 {
     #[Maho\Config\Route('/api/xmlrpc', name: 'api.xmlrpc', methods: ['POST'])]

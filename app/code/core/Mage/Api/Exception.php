@@ -7,6 +7,9 @@
  * @package Mage_Api
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_Exception extends Mage_Core_Exception
 {
     protected $_customMessage = null;

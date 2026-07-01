@@ -9,6 +9,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 interface Mage_Api2_Model_Acl_PermissionInterface
 {
     /**
