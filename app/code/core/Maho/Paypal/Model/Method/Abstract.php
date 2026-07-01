@@ -111,14 +111,21 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
         $paypalOrderId = $payment->getAdditionalInformation('paypal_order_id');
 
         if ($authId) {
+            $order = $payment->getOrder();
             $body = [];
-            if ($amount != $payment->getOrder()->getBaseGrandTotal()) {
+            if ($amount != $order->getBaseGrandTotal()) {
+                // final_capture releases the still-authorized remainder and closes the
+                // authorization. Only do that once nothing is left to invoice: the current
+                // invoice's items are already registered when capture() runs, so
+                // canInvoice() is false exactly when this is the last (or a reduced final)
+                // invoice. Setting it true on an earlier partial invoice would release the
+                // authorization and make every later capture fail.
                 $body = [
                     'amount' => [
                         'value' => number_format((float) $amount, 2, '.', ''),
-                        'currency_code' => $payment->getOrder()->getBaseCurrencyCode(),
+                        'currency_code' => $order->getBaseCurrencyCode(),
                     ],
-                    'final_capture' => true,
+                    'final_capture' => !$order->canInvoice(),
                 ];
             }
             $result = $this->_getApiClient()->captureAuthorization($authId, $body);
