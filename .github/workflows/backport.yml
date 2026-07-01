@@ -1,0 +1,46 @@
+name: Backport merged PR
+
+on:
+  pull_request_target:
+    types: [closed, labeled]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  backport:
+    name: Backport to maintenance branch
+    runs-on: ubuntu-latest
+    # Only act on a merged PR: either it was just merged carrying a backport
+    # label, or a backport label was added to an already-merged PR (retroactive).
+    if: >
+      github.event.pull_request.merged
+      && (
+        github.event.action == 'closed'
+        || (
+          github.event.action == 'labeled'
+          && startsWith(github.event.label.name, 'backport ')
+        )
+      )
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Open backport pull requests
+        uses: korthout/backport-action@66065406958f46e82238fd59546f5a99e69e22aa # v4.5.2
+        with:
+          # Pattern-based labels: the label `backport 26.7` targets branch `26.7`.
+          # No per-release config: create the branch + label and it just works.
+          label_pattern: '^backport ([^ ]+)$'
+          pull_title: '[Backport ${target_branch}] ${pull_title}'
+          pull_description: |-
+            Automated backport of #${pull_number} to `${target_branch}`.
+
+            Review and merge to ship the fix in the next `${target_branch}.x`
+            patch release.
+          # Leave the source PR's non-backport labels off the backport PR.
+          copy_labels_pattern: '^(?!backport ).*$'
