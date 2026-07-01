@@ -172,12 +172,28 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             $object->setData('publish_date', Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT));
         }
 
-        // Filter HTML content
+        // Filter HTML content. Mask {{...}} template directives first: the malicious-code filter
+        // (HTMLPurifier) and linkFilter() HTML-parse the content, which would break directives
+        // whose nested quotes (e.g. {{media url="..."}} inside an img src) are not valid HTML
+        // attribute syntax. The directives are restored after filtering and resolved by
+        // getFilteredContent() on output.
         if ($object->hasData('content')) {
-            $content = $object->getData('content');
+            $content = (string) $object->getData('content');
+
+            $directives = [];
+            $content = (string) preg_replace_callback('/\{\{.*?\}\}/s', function (array $match) use (&$directives): string {
+                $token = 'mahonbdirective' . count($directives);
+                $directives[$token] = $match[0];
+                return $token;
+            }, $content);
+
             $filter = Mage::getModel('core/input_filter_maliciousCode');
-            $filteredContent = $filter->linkFilter($filter->filter($content));
-            $object->setData('content', $filteredContent);
+            $content = $filter->linkFilter($filter->filter($content));
+
+            if ($directives !== []) {
+                $content = strtr($content, $directives);
+            }
+            $object->setData('content', $content);
         }
 
         // Auto-generate URL key from title if empty

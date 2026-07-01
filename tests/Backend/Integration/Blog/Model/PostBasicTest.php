@@ -53,6 +53,22 @@ describe('Blog Post Basic Integration', function () {
         expect($deletedPost->getId())->toBeNull();
     });
 
+    test('preserves template directives with nested quotes through save', function () {
+        // {{media url="..."}} inside an img src has quotes that are invalid HTML attribute syntax;
+        // the content filter must not mangle it (getFilteredContent resolves it on output).
+        $post = Mage::getModel('blog/post');
+        $post->setTitle('Directive Post');
+        $post->setContent('<p><img src="{{media url="wysiwyg/a.webp"}}" alt=""></p><p>{{widget type="cms/widget_page_link"}}</p>');
+        $post->setIsActive(1);
+        $post->save();
+
+        $loaded = Mage::getModel('blog/post')->load($post->getId());
+        expect($loaded->getContent())->toContain('{{media url="wysiwyg/a.webp"}}');
+        expect($loaded->getContent())->toContain('{{widget type="cms/widget_page_link"}}');
+
+        $post->delete();
+    });
+
     test('blog module models are properly registered', function () {
         // Test that blog models can be instantiated via Mage factory
         $post = Mage::getModel('blog/post');
