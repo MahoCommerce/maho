@@ -5914,12 +5914,6 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Resource.php
 
 		-
-			rawMessage: 'Call to an undefined method Maho\Data\Collection\Db::addAttributeToFilter().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Resource.php
-
-		-
 			rawMessage: 'Method Mage_Api2_Model_Resource::_create() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 1
