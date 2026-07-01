@@ -33,13 +33,7 @@ jobs:
             const note = [
               BEGIN,
               '> [!NOTE]',
-              '> **Developed with the help of AI.** As part of our commitment to GenAI',
-              '> transparency, we flag pull requests produced with AI assistance',
-              '> alongside human work. As with every change in Maho, a maintainer reviews',
-              '> and validates it before merge, we never merge purely AI-generated changes.',
-              '> See the',
-              '> [GenAI transparency](https://github.com/MahoCommerce/maho#genai-transparency)',
-              '> section for details.',
+              '> **Developed with the help of AI.** As part of our commitment to GenAI transparency, we flag pull requests produced with AI assistance alongside human work. As with every change in Maho, a maintainer reviews and validates it before merge, we never merge purely AI-generated changes. See the [GenAI transparency](https://github.com/MahoCommerce/maho#genai-transparency) section for details.',
               END,
             ].join('\n');
 
