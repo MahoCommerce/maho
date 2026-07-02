@@ -69,6 +69,19 @@ class ControllerDispatcher
             return false;
         }
 
+        // M1 BC: the standard router recorded the resolving module's class prefix (e.g.
+        // 'Mage_Adminhtml' or 'Buddy_LogViewer_Adminhtml') via setControllerModule(), and
+        // third-party code dispatched through this path may read it back. Set only after all
+        // checks pass, like M1's standard router — a dispatch that bails must not leak a
+        // module onto a request that falls through to another handler. Every resolution
+        // branch assembles or stores the class as <modulePrefix>_<UcWordsController>Controller,
+        // so the prefix is recovered by stripping the suffix (case-insensitively — PHP class
+        // names are case-insensitive, so the URL casing may differ from the declared one).
+        $suffix = '_' . uc_words($controllerName) . 'Controller';
+        if (strcasecmp(substr($controllerClass, -strlen($suffix)), $suffix) === 0) {
+            $request->setControllerModule(substr($controllerClass, 0, -strlen($suffix)));
+        }
+
         // Set routeName for event dispatching (controller_action_predispatch_<routeName>).
         // Map frontName to routeName so the admin frontName resolves to 'adminhtml', matching
         // what setAdminRequestNames() does for Symfony-matched routes. Without this, legacy
@@ -163,7 +176,10 @@ class ControllerDispatcher
         }
 
         // 4. Admin module chain — third-party admin extensions without `#[Route]`.
-        if (strtolower($frontName) === strtolower(RouteCollectionBuilder::getAdminFrontName())) {
+        //    Exact-case comparison (M1 semantics), matching normalizeFrontName() in the
+        //    compiled lookup above: a mis-cased admin frontName resolves nothing on any
+        //    dispatch path and falls through to the noroute handler.
+        if ($frontName === RouteCollectionBuilder::getAdminFrontName()) {
             foreach ($this->buildAdminModuleChain() as $chainModule) {
                 $className = $chainModule . '_' . uc_words($controllerName) . 'Controller';
                 if (class_exists($className)) {
@@ -206,13 +222,14 @@ class ControllerDispatcher
             return false;
         }
 
-        // Admin area: verify the matched frontName matches the runtime admin frontName.
-        // Without this, a request like /notadmin/... would match admin routes with any
-        // segment for `{_adminFrontName}` and dispatch as admin — rejecting at this point
-        // simply falls through to the noroute handler.
+        // Admin area: verify the matched frontName matches the runtime admin frontName
+        // exactly, including case (M1 semantics — /Admin/... 404s rather than dispatching
+        // with a mis-cased route name). Without this, a request like /notadmin/... would
+        // match admin routes with any segment for `{_adminFrontName}` and dispatch as
+        // admin — rejecting at this point simply falls through to the noroute handler.
         if ($area === 'adminhtml') {
             $matchedAdminFrontName = $params['_adminFrontName'] ?? '';
-            if (strtolower($matchedAdminFrontName) !== strtolower(RouteCollectionBuilder::getAdminFrontName())) {
+            if ($matchedAdminFrontName !== RouteCollectionBuilder::getAdminFrontName()) {
                 return false;
             }
         }
