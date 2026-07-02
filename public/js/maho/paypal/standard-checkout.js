@@ -65,10 +65,10 @@ class MahoPaypalStandardCheckout {
                 return;
             }
             try {
-                const orderId = await this.createOrder();
-                this._paymentSession.start(
+                // start() must run synchronously in the click, or Safari blocks the popup
+                await this._paymentSession.start(
                     { presentationMode: 'popup' },
-                    Promise.resolve({ orderId }),
+                    this.createOrder().then((orderId) => ({ orderId })),
                 );
             } catch (err) {
                 this.handleError(err);
