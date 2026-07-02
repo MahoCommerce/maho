@@ -1,0 +1,71 @@
+/*
+ * Maho - Books. Literary and calm: book-brown ink on paper tones, Merriweather
+ * display with Lora body (a store you read, not scan). Dark mode is a sepia
+ * reading-lamp, not plain grey.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+:root {
+    --font-display: 'Merriweather', Georgia, serif;
+    --font-body: 'Lora', Georgia, serif;
+
+    --color-base-100: #faf6ee;
+    --color-base-200: #f2ead9;
+    --color-base-300: #e0d3ba;
+    --color-base-content: #372c22;
+
+    --color-primary: #5e3023;
+    --color-primary-content: #f8efe3;
+    --color-secondary: #40513c;
+    --color-secondary-content: #f0f4ec;
+    --color-accent: #a97f2f;
+    --color-accent-content: #fdf7e9;
+    --color-neutral: #372c22;
+    --color-neutral-content: #f2ead9;
+
+    --color-success: #55693f;
+    --color-success-content: #f3f7ec;
+    --color-warning: #a97f2f;
+    --color-warning-content: #fdf7e9;
+    --color-error: #99392b;
+    --color-error-content: #fcf0ed;
+
+    /* Quiet, bookish */
+    --radius-selector: 0.25rem;
+    --radius-field: 0.25rem;
+    --radius-box: 0.5rem;
+}
+
+/* Signature: reading rhythm - roomier lines, classic italicized descriptions */
+body {
+    line-height: 1.7;
+}
+
+.category-description,
+.product-view .short-description {
+    font-style: italic;
+}
+
+/* Sepia reading-lamp dark mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --color-base-100: #221b12;
+        --color-base-200: #2c2417;
+        --color-base-300: #42371f;
+        --color-base-content: #dccfb4;
+
+        --color-primary: #c08a63;
+        --color-primary-content: #26160d;
+        --color-secondary: #a9b795;
+        --color-secondary-content: #222b1a;
+        --color-accent: #cfa64d;
+        --color-accent-content: #2b2109;
+    }
+
+}

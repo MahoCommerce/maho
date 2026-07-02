@@ -1,0 +1,81 @@
+/*
+ * Maho theme system - Tailwind CSS 4 + DaisyUI 5 build source.
+ *
+ * Compile with: npm run build:theme
+ * Output: ../css/styles.css (committed to the repo, so store owners never need
+ * Node.js - industry themes are plain CSS on top of it).
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+@import "tailwindcss";
+@import "./components.css";
+
+/* Scan every frontend theme template (base/default fallbacks + maho package) */
+@source "../../../../../../app/design/frontend";
+
+/* CMS pages, static blocks and widgets live in the database and cannot be scanned
+   at build time - keep the most useful DaisyUI components available for them */
+@source inline("btn btn-{primary,secondary,accent,neutral,ghost,outline,link,soft,sm,lg,xl,wide,block}");
+@source inline("badge badge-{primary,secondary,accent,neutral,outline,soft,success,warning,error,info}");
+@source inline("alert alert-{success,warning,error,info} divider link link-{primary,hover}");
+@source inline("card card-{body,title,actions,border} tabs tab tab-active loading loading-spinner");
+
+@plugin "daisyui" {
+    themes: false;
+}
+
+/*
+ * "maho" - the default identity. Industry themes (maho/fashion, maho/electronics, ...)
+ * override these CSS variables at runtime from a plain theme.css file - no build needed.
+ */
+@plugin "daisyui/theme" {
+    name: "maho";
+    default: true;
+    color-scheme: light;
+
+    /* Ink-first neutral palette: near-black text, quiet warm-grey surfaces */
+    --color-base-100: #ffffff;
+    --color-base-200: #f6f6f5;
+    --color-base-300: #e7e6e4;
+    --color-base-content: #1c2126;
+
+    /* Maho blue, deepened for confidence */
+    --color-primary: #0b6d9f;
+    --color-primary-content: #f4faff;
+    --color-secondary: #12303f;
+    --color-secondary-content: #eef6fb;
+    --color-accent: #0d9488;
+    --color-accent-content: #effdfa;
+    --color-neutral: #23272c;
+    --color-neutral-content: #f4f4f5;
+
+    --color-info: #0369a1;
+    --color-info-content: #f0f9ff;
+    --color-success: #217a2b;
+    --color-success-content: #f3fdf0;
+    --color-warning: #b45309;
+    --color-warning-content: #fff8f1;
+    --color-error: #c22a1e;
+    --color-error-content: #fff5f3;
+
+    /* Soft geometry, flat surfaces (no faux depth) */
+    --radius-selector: 0.5rem;
+    --radius-field: 0.5rem;
+    --radius-box: 1rem;
+    --size-selector: 0.25rem;
+    --size-field: 0.25rem;
+    --border: 1px;
+    --depth: 0;
+    --noise: 0;
+}
+
+@theme {
+    /* Matches the JS breakpoint bp.medium (770px) in app.js so CSS and JS switch together */
+    --breakpoint-nav: 771px;
+
+    /* Typography hooks - industry themes override these at runtime (plain CSS) */
+    --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}

@@ -1,0 +1,75 @@
+/*
+ * Maho - Electronics. Precise and technical: electric blue on cool grays,
+ * Space Grotesk display, tight radii, tabular numerals for prices and specs.
+ * Dark mode supported.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap');
+
+:root {
+    --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+
+    --color-base-100: #ffffff;
+    --color-base-200: #f2f5f8;
+    --color-base-300: #dbe2ea;
+    --color-base-content: #1c2733;
+
+    --color-primary: #0066cc;
+    --color-primary-content: #f2f8ff;
+    --color-secondary: #0a2540;
+    --color-secondary-content: #ecf3fa;
+    --color-accent: #00a3bf;
+    --color-accent-content: #ecfcff;
+    --color-neutral: #17212c;
+    --color-neutral-content: #eef2f6;
+
+    --color-info: #0066cc;
+    --color-info-content: #f2f8ff;
+    --color-success: #167d3e;
+    --color-success-content: #effaf3;
+    --color-warning: #c76a04;
+    --color-warning-content: #fff7ed;
+    --color-error: #cc2b1d;
+    --color-error-content: #fef2f1;
+
+    /* Tight, machined */
+    --radius-selector: 0.25rem;
+    --radius-field: 0.25rem;
+    --radius-box: 0.5rem;
+}
+
+/* Signature: spec-sheet numerals everywhere numbers matter */
+.price,
+.price-box,
+.cart-totals table,
+.data-table td {
+    font-variant-numeric: tabular-nums;
+}
+
+.page-title h1,
+.page-title h2,
+.product-view .product-shop .product-name .h1 {
+    letter-spacing: -0.02em;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --color-base-100: #0d1520;
+        --color-base-200: #15202e;
+        --color-base-300: #263547;
+        --color-base-content: #d5e0ec;
+
+        --color-primary: #3f92e8;
+        --color-primary-content: #06121f;
+        --color-secondary: #d5e0ec;
+        --color-secondary-content: #15202e;
+        --color-accent: #29c5e0;
+        --color-accent-content: #06171b;
+    }
+
+}

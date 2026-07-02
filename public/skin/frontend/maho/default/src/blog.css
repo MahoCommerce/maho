@@ -1,0 +1,98 @@
+/*
+ * Blog for the maho theme, compiled with Tailwind CSS against the shared
+ * theme (see tailwind.css). Loaded only on the pages that need it; the file
+ * name shadows the legacy base/default stylesheet via the skin fallback.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+@reference "./tailwind.css";
+
+@layer components {
+    /* ============================================
+     * Blog
+     * ============================================ */
+
+    .blog-index-view #main-content h1 {
+        @apply mb-0;
+    }
+
+    .blog-index-view #main-content p {
+        @apply mb-4;
+    }
+
+    .blog-index-view .blog_post_date {
+        @apply mb-4;
+    }
+
+    .blog_post_date {
+        @apply text-xs italic text-base-content/70;
+    }
+
+    .blog_post_excerpt {
+        @apply mt-2.5;
+    }
+
+    .blog-index-index .pager {
+        @apply mt-2.5;
+
+        .pages ol {
+            @apply justify-center;
+        }
+    }
+
+    #blog_posts {
+        --gap: 1.25rem;
+        --min-col: 15.625rem;
+        --max-cols: 4;
+
+        display: grid;
+        gap: var(--gap);
+        grid-template-columns: repeat(auto-fit, minmax(
+            clamp(
+                var(--min-col),
+                (100% - (var(--max-cols) - 1) * var(--gap)) / var(--max-cols),
+                100%
+            ),
+            1fr
+        ));
+
+        > .blog_post_item {
+            @apply block rounded-box border border-base-200 p-[0.9375rem] text-inherit no-underline transition-[border-color,box-shadow,transform] duration-200;
+
+            &:hover {
+                @apply -translate-y-0.5 border-base-300 shadow-[0_10px_28px_rgb(0_0_0/0.08)];
+            }
+        }
+    }
+
+    /* Full-bleed cover: max-w-none because preflight caps images at 100% */
+    .blog_post_item > img {
+        @apply h-50 max-w-none object-cover;
+        width: calc(100% + 1.875rem);
+        margin: -0.9375rem -0.9375rem 0.75rem;
+        border-radius: calc(var(--radius-box) - 1px) calc(var(--radius-box) - 1px) 0 0;
+    }
+
+    /* Single post view */
+    .blog_post_image {
+        @apply mx-auto mb-8 max-w-full rounded-box object-contain shadow-[0_4px_16px_rgb(0_0_0/0.10)];
+
+        @media (width <= 768px) {
+            max-width: calc(100% + 1rem);
+            margin-inline: -0.5rem;
+            border-radius: 0;
+        }
+    }
+
+    .blog-categories {
+        dd ol ol {
+            @apply pl-4;
+        }
+
+        dd ol > li.active > a {
+            @apply font-semibold text-primary;
+        }
+    }
+}

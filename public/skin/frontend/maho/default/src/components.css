@@ -1,0 +1,2689 @@
+/*
+ * Maho storefront layer.
+ *
+ * Maps the semantic class contracts used by Maho's templates, PHP blocks and JS
+ * (app.js, minicart.js, validation.js) onto Tailwind utilities and DaisyUI
+ * components via @apply - no template changes needed. Raw CSS is used only
+ * where utilities can't express it (grid areas, JS-driven states, pseudo
+ * content). Everything derives from the DaisyUI theme variables, so industry
+ * themes restyle the whole store by overriding variables in plain CSS.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+@layer base {
+    :root {
+        /* Legacy Maho variables, aliased to the DaisyUI theme so CMS content,
+           design/head/includes and per-page stylesheets stay in harmony */
+        --maho-color-primary: var(--color-primary);
+        --maho-color-primary-hover: color-mix(in oklab, var(--color-primary), white 12%);
+        --maho-color-primary-active: color-mix(in oklab, var(--color-primary), black 8%);
+        --maho-color-primary-dark: color-mix(in oklab, var(--color-primary), black 35%);
+        --maho-color-text-primary: var(--color-base-content);
+        --maho-color-text-secondary: color-mix(in oklab, var(--color-base-content), var(--color-base-100) 30%);
+        --maho-color-text-light: var(--color-base-300);
+        --maho-color-success: var(--color-success);
+        --maho-color-error: var(--color-error);
+        --maho-color-warning: var(--color-warning);
+        --maho-color-background: var(--color-base-100);
+        --maho-color-background-alt: var(--color-base-200);
+        --maho-color-background-hover: color-mix(in oklab, var(--color-base-200), var(--color-base-300) 50%);
+        --maho-color-background-dark: var(--color-neutral);
+        --maho-color-border: var(--color-base-300);
+        --maho-color-border-light: var(--color-base-200);
+        --maho-color-border-medium: var(--color-base-300);
+        --maho-color-border-dark: color-mix(in oklab, var(--color-base-300), var(--color-base-content) 15%);
+        --maho-color-price: var(--color-base-content);
+        --maho-color-old-price: var(--maho-color-text-secondary);
+        --maho-color-special-price: var(--color-error);
+        --maho-color-input-border: var(--maho-color-border-dark);
+        --maho-color-input-focus: var(--color-primary);
+        --maho-color-input-error: var(--color-error);
+
+        /* Same star shape for both layers so the fill aligns perfectly over the track */
+        --star-rating__icon-active: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23e8890c"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" /></svg>');
+        --star-rating__icon-inactive: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23dbd8d4"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" /></svg>');
+
+        /* Product tile surface: a soft studio-light falloff behind the transparent
+           product cutouts (brightest behind the subject, darker toward the edges).
+           Derived from the theme surfaces, so industry themes re-tint it for free -
+           or override this single variable for a different mood */
+        --product-tile-bg: radial-gradient(
+            130% 95% at 50% 12%,
+            color-mix(in oklab, var(--color-base-200), white 55%) 0%,
+            var(--color-base-200) 60%,
+            color-mix(in oklab, var(--color-base-200), var(--color-base-300) 55%) 100%
+        );
+
+        accent-color: var(--color-primary);
+    }
+
+    body {
+        @apply font-body bg-base-100 text-[0.9375rem] text-base-content antialiased;
+        line-height: 1.6;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        @apply font-display;
+        line-height: 1.15;
+        letter-spacing: -0.015em;
+        text-wrap: balance;
+    }
+
+    ::selection {
+        background: color-mix(in oklab, var(--color-primary), transparent 85%);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            transition-duration: 0.01ms !important;
+            animation-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+
+    svg {
+        stroke-width: 1.5;
+    }
+
+    a > svg,
+    button > svg {
+        @apply size-6;
+    }
+}
+
+@layer components {
+
+    /* ============================================
+     * Classic helper classes used across templates
+     * ============================================ */
+
+    .no-display {
+        display: none !important;
+    }
+
+    .nobr { @apply whitespace-nowrap; }
+    .a-left { @apply text-left; }
+    .a-center { @apply text-center; }
+    .a-right { @apply text-right; }
+    .clearer { @apply clear-both; }
+    .visually-hidden { @apply sr-only; }
+
+    /* ============================================
+     * Buttons
+     * ============================================ */
+
+    button.button,
+    a.button {
+        @apply btn btn-primary;
+    }
+
+    .button2,
+    .btn-link {
+        @apply btn btn-link btn-sm px-0 no-underline hover:underline;
+    }
+
+    .buttons-set {
+        @apply mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-base-200 pt-5;
+
+        .back-link {
+            @apply order-first text-sm;
+
+            a { @apply link link-hover text-primary; }
+        }
+
+        .required {
+            @apply order-last w-full text-right text-xs text-base-content/70;
+        }
+    }
+
+    /* ============================================
+     * Forms
+     * ============================================ */
+
+    input.input-text {
+        @apply input w-full;
+    }
+
+    textarea {
+        @apply textarea w-full;
+    }
+
+    select {
+        @apply select w-full;
+    }
+
+    input[type="checkbox"].checkbox {
+        @apply checkbox checkbox-sm;
+    }
+
+    input[type="radio"].radio {
+        @apply radio radio-sm;
+    }
+
+    input.input-text.validation-failed,
+    textarea.validation-failed,
+    select.validation-failed {
+        @apply border-error outline-error;
+    }
+
+    .validation-advice {
+        @apply mt-1 text-[0.8125rem] text-error;
+    }
+
+    .form-list {
+        @apply mb-4 flex list-none flex-col gap-4 p-0;
+
+        li { @apply m-0; }
+
+        .field,
+        .input-box {
+            @apply flex flex-col gap-1;
+        }
+
+        .fields {
+            @apply grid gap-4 nav:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))];
+        }
+
+        label {
+            @apply text-sm font-medium;
+        }
+
+        .control {
+            @apply flex flex-row items-center gap-2;
+
+            .input-box {
+                @apply flex-row items-center;
+            }
+
+            label { @apply font-normal; }
+        }
+    }
+
+    label.required em,
+    span.required em,
+    .form-list .required em,
+    .product-options .required em {
+        @apply mr-0.5 not-italic text-error;
+    }
+
+    p.required {
+        @apply text-xs text-base-content/70;
+    }
+
+    .fieldset {
+        @apply mb-6;
+
+        .legend {
+            @apply mb-4 block font-display text-lg font-semibold;
+        }
+    }
+
+    /* ============================================
+     * Messages
+     * ============================================ */
+
+    .messages {
+        @apply mb-5 flex list-none flex-col gap-2.5 p-0;
+
+        > li { @apply m-0; }
+
+        li li {
+            @apply alert text-sm font-medium;
+        }
+
+        .success-msg li { @apply alert-success alert-soft; }
+        .error-msg li { @apply alert-error alert-soft; }
+        .warning-msg li, .notice-msg li { @apply alert-warning alert-soft; }
+    }
+
+    .note-msg {
+        @apply rounded-box bg-base-200 px-4 py-3.5 text-sm text-base-content/70;
+    }
+
+    /* ============================================
+     * Data tables
+     * ============================================ */
+
+    .data-table {
+        @apply table;
+
+        thead th {
+            @apply text-xs uppercase tracking-wide text-base-content/70;
+        }
+    }
+
+    /* ============================================
+     * Page shell + column layouts
+     * ============================================ */
+
+    .main {
+        @apply mx-auto grid w-full max-w-7xl content-start grid-cols-[minmax(0,1fr)] gap-4 px-4 pb-12 pt-4 nav:gap-x-10 nav:gap-y-4;
+    }
+
+    .col-main {
+        @apply min-w-0;
+    }
+
+    .sidebar {
+        @apply flex min-w-0 flex-col gap-5;
+    }
+
+    .col-wrapper {
+        @apply flex min-w-0 flex-col gap-5;
+    }
+
+    @media (min-width: 771px) {
+        /* Scoped to the layouts that define these areas: a grid-area referencing
+           an undefined area would create implicit tracks and break col1 pages */
+        :is(.col2-left-layout, .col2-right-layout, .col3-layout) {
+            .main > .breadcrumbs { grid-area: crumbs; }
+            .main > .page-title { grid-area: title; }
+            .col-main { grid-area: main; }
+            .col-left-first { grid-area: first; }
+            .sidebar:not(.col-left-first):not(.col-right) { grid-area: left; }
+        }
+
+        .col2-left-layout .main {
+            grid-template-columns: 16rem minmax(0, 1fr);
+            grid-template-rows: auto auto auto auto 1fr;
+            grid-template-areas:
+                "crumbs crumbs"
+                "title  title"
+                "first  main"
+                "left   main"
+                ".      main";
+        }
+
+        .col2-right-layout .main {
+            grid-template-columns: minmax(0, 1fr) 16rem;
+            grid-template-rows: auto auto auto auto 1fr;
+            grid-template-areas:
+                "crumbs crumbs"
+                "title  title"
+                "main   first"
+                "main   left"
+                "main   .";
+        }
+
+        .col2-right-layout .col-right {
+            grid-area: first;
+        }
+
+        /* 3-column: .col-wrapper holds left sidebar(s) + main; .col-right is the right rail */
+        .col3-layout .main {
+            grid-template-columns: minmax(0, 1fr) 15rem;
+            grid-template-rows: auto auto auto 1fr;
+            grid-template-areas:
+                "crumbs  crumbs"
+                "title   title"
+                "wrapper right"
+                "wrapper .";
+        }
+
+        .col3-layout .col-wrapper {
+            grid-area: wrapper;
+            display: grid;
+            gap: 1.5rem 2.5rem;
+            grid-template-columns: 15rem minmax(0, 1fr);
+            grid-template-rows: auto auto 1fr;
+            grid-template-areas:
+                "first main"
+                "left  main"
+                ".     main";
+        }
+
+        .col3-layout .col-right {
+            grid-area: right;
+        }
+    }
+
+    /* app.js moves .col-right inside .col-wrapper below 1000px */
+    @media (min-width: 771px) and (max-width: 1000px) {
+        .col3-layout .main {
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-areas:
+                "crumbs"
+                "title"
+                "wrapper";
+        }
+
+        .col3-layout .col-wrapper {
+            grid-template-rows: auto auto auto 1fr;
+            grid-template-areas:
+                "first main"
+                "left  main"
+                "right main"
+                ".     main";
+        }
+    }
+
+    /* ============================================
+     * Accessibility helpers
+     * ============================================ */
+
+    #skip-to-main-content {
+        @apply btn btn-primary btn-sm absolute left-4 z-[100] -top-24 transition-[top] focus:top-4;
+    }
+
+    /* Skip-content panels are hidden until activated (JS toggles .skip-active)
+       or until the offcanvas drawer adopts them */
+    .skip-content {
+        display: none;
+
+        &.skip-active {
+            display: block;
+        }
+    }
+
+    .offcanvas-content .skip-content {
+        display: block;
+    }
+
+    /* ============================================
+     * Page title
+     * ============================================ */
+
+    .page-title {
+        h1, h2 {
+            @apply font-semibold;
+            font-size: clamp(1.625rem, 1.2rem + 1.6vw, 2.125rem);
+        }
+    }
+
+    /* Breadcrumbs and title read as one unit; the gap below the title stays */
+    .main > .breadcrumbs + .page-title {
+        @apply -mt-2;
+    }
+
+    /* ============================================
+     * Header
+     * ============================================ */
+
+    .page-header {
+        @apply sticky top-0 z-40 border-b border-base-200 bg-base-100/90 backdrop-blur-md;
+    }
+
+    .page-header-container {
+        /* flex-wrap exists only so the search bar can drop to its own row on
+           mobile (basis-full below); everything else must fit the first row */
+        @apply mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3.5 max-nav:gap-1.5 max-nav:px-3;
+
+        > div {
+            @apply flex items-center gap-1 max-nav:gap-0;
+        }
+
+        > div:first-child {
+            @apply shrink-0;
+        }
+
+        > div:last-child {
+            @apply ml-auto;
+        }
+
+        #search_mini_form {
+            @apply max-w-md flex-auto max-nav:order-10 max-nav:max-w-none max-nav:basis-full;
+        }
+    }
+
+    .logo {
+        @apply mx-1 inline-flex items-center;
+
+        img {
+            /* max-w-none: preflight's max-width:100% collapses inside a shrink-to-fit flex parent */
+            @apply h-10 w-auto max-w-none max-nav:h-8;
+        }
+    }
+
+    /* Language / currency / store switchers in the header */
+    .page-header-container {
+        .form-language, .currency-switcher, .store-switcher {
+            @apply inline-flex items-center;
+
+            select {
+                @apply select select-sm w-auto border-transparent bg-base-200;
+            }
+        }
+    }
+
+    /* Minimal header (checkout): centered logo over a hairline - no
+       distractions on the way to payment */
+    .page-header-minimal {
+        @apply mb-2 flex items-center justify-center border-b border-base-200 bg-base-100 py-4;
+    }
+
+    /* Icon links in the header (menu, account, wishlist, cart) */
+    .skip-link {
+        @apply btn btn-ghost btn-square relative max-nav:h-10 max-nav:min-h-0 max-nav:w-10;
+
+        .label {
+            @apply sr-only;
+        }
+
+        .count {
+            @apply badge badge-primary badge-xs absolute -right-1 -top-1 font-bold;
+
+            &.count-0 {
+                @apply hidden;
+            }
+        }
+    }
+
+    /* Menu trigger only below the nav breakpoint (JS moves #nav into the offcanvas) */
+    .skip-nav {
+        @apply nav:hidden;
+    }
+
+    /* Search */
+    #search_mini_form {
+        /* Anchor for the suggestions panel (a direct child of the form) */
+        @apply relative;
+
+        .input-box {
+            @apply relative flex items-center;
+        }
+
+        label {
+            @apply sr-only;
+        }
+
+        #search {
+            @apply input w-full rounded-full border-transparent bg-base-200 pl-5 pr-[5.5rem] transition-colors focus:bg-base-100;
+
+            /* The template ships its own clear button (same Tabler icon set);
+               the native WebKit one would double up */
+            &::-webkit-search-cancel-button {
+                -webkit-appearance: none;
+                appearance: none;
+                display: none;
+            }
+        }
+
+        /* Clear button: appears as soon as the field has text (pure CSS) */
+        .search-clear-button {
+            @apply btn btn-circle btn-sm absolute right-10 border-none bg-transparent text-base-content/70 shadow-none hover:bg-base-300/60 hover:text-base-content;
+
+            svg {
+                @apply size-5;
+            }
+        }
+
+        #search:placeholder-shown ~ .search-clear-button {
+            @apply hidden;
+        }
+
+        .search-button {
+            /* Neutralize the generic button.button -> btn-primary mapping:
+               this is a quiet icon button, not a CTA */
+            @apply btn btn-circle btn-sm absolute right-1.5 border-none bg-transparent text-base-content/70 shadow-none hover:bg-base-300/60 hover:text-base-content;
+        }
+    }
+
+    .search-autocomplete {
+        /* overscroll-none: no scroll chaining to the page and no rubber-band
+           bounce revealing what is behind the panel */
+        @apply absolute z-50 overflow-y-auto overscroll-none rounded-box border border-base-300 bg-base-100 shadow-2xl;
+        max-height: min(70dvh, 36rem);
+
+        /* Attached right under the search pill and centered on it. !important:
+           the autocomplete JS writes inline viewport-based left/top/width meant
+           for unstyled themes, which lands the panel in the wrong place here */
+        left: 50% !important;
+        top: calc(100% + 0.5rem) !important;
+        width: 100% !important;
+        transform: translateX(-50%);
+
+        /* Desktop: the panel hugs its content - at least as wide as the pill,
+           at most a comfortable reading width. max-content: fit-content would
+           cap at the containing block (the form), keeping the panel pill-sized */
+        @media (min-width: 1024px) {
+            width: max-content !important;
+            min-width: 100%;
+            max-width: min(44rem, calc(100vw - 2rem));
+        }
+
+        &:empty {
+            @apply hidden;
+        }
+
+        /* The JS opens the panel with inline display:block; coerce it to a
+           column flexbox so sections can be visually reordered (products first,
+           "view all" pinned last) regardless of markup order */
+        &[style*="display: block"] {
+            display: flex !important;
+            flex-direction: column;
+        }
+
+        li.selected {
+            @apply bg-base-200;
+        }
+
+        /* Classic term suggestions (plain list with result counts) */
+        > ul {
+            @apply m-0 list-none p-1;
+
+            li {
+                @apply flex cursor-pointer justify-between gap-4 rounded-field px-3 py-2 hover:bg-base-200;
+
+                .amount {
+                    @apply text-[0.8125rem] text-base-content/70;
+                }
+            }
+        }
+
+        /* Rich suggest panel: buyer intent first - products, then categories,
+           then editorial. "View all" is the panel's footer action, always
+           visible while the results scroll behind it */
+        .view-all {
+            @apply sticky bottom-0 z-10 order-last mt-auto block border-t border-base-200 bg-base-100 px-4 py-3 text-center text-sm font-semibold text-primary hover:bg-base-200;
+        }
+
+        .results-list {
+            @apply flex flex-col p-2;
+
+            /* Desktop: the products column hugs its content, the side rail
+               (categories + blog posts) takes the remaining width. Without a
+               rail, products get the whole panel */
+            @media (min-width: 1024px) {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-rows: auto 1fr;
+                align-items: start;
+                column-gap: 0.75rem;
+
+                &:has(.category-results, .blog-results) {
+                    grid-template-columns: fit-content(24rem) minmax(0, 1fr);
+                }
+            }
+        }
+
+        .product-results {
+            @apply order-first;
+
+            /* The divider lives here: this column spans the full grid height,
+               while the rail sections can be shorter than the products list */
+            @media (min-width: 1024px) {
+                grid-column: 1;
+                grid-row: 1 / span 2;
+                /* stretch (the grid itself is align-items: start) so the
+                   divider always runs the full panel height */
+                align-self: stretch;
+                border-right: 1px solid var(--color-base-200);
+                padding-right: 0.75rem;
+            }
+        }
+
+        .category-results {
+            @apply order-2;
+
+            @media (min-width: 1024px) {
+                grid-column: 2;
+                grid-row: 1;
+            }
+        }
+
+        .blog-results {
+            @apply order-3;
+
+            @media (min-width: 1024px) {
+                grid-column: 2;
+                grid-row: 2;
+            }
+        }
+
+        .results-list > div + div {
+            @apply mt-1.5 lg:mt-0;
+        }
+
+        :is(.category-results-title, .blog-results-title, .product-results-title) {
+            @apply px-2.5 pb-1.5 pt-2 text-[0.6875rem] font-bold uppercase tracking-[0.08em] text-base-content/65;
+        }
+
+        :is(.category-list, .blog-list) {
+            @apply m-0 list-none p-0;
+        }
+
+        .category-link {
+            @apply flex flex-wrap items-baseline gap-x-1 rounded-field px-2.5 py-2 hover:bg-base-200;
+
+            .category-path {
+                @apply text-[0.8125rem] text-base-content/65;
+
+                .path-item::after {
+                    content: "›";
+                    @apply mx-1 text-base-content/50;
+                }
+            }
+
+            .category-name {
+                @apply text-sm font-semibold;
+            }
+        }
+
+        .blog-item {
+            @apply grid cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 rounded-field px-2.5 py-2 hover:bg-base-200;
+
+            .blog-title {
+                @apply truncate text-sm font-medium;
+            }
+
+            .blog-date {
+                @apply text-xs tabular-nums text-base-content/65;
+            }
+
+            .blog-excerpt {
+                @apply col-span-full mt-0.5 truncate text-[0.8125rem] text-base-content/65;
+            }
+        }
+
+        /* Product rows reuse the products-list markup - compact rows:
+           thumb, name left, price right */
+        .products-list {
+            @apply m-0 flex list-none flex-col gap-0 p-0;
+
+            > .item {
+                @apply grid cursor-pointer grid-cols-[3.5rem_minmax(0,1fr)] items-center gap-3 rounded-field border-0 bg-transparent p-2 shadow-none hover:bg-base-200;
+            }
+
+            .product-image {
+                @apply block aspect-square w-14 overflow-hidden rounded-selector;
+                background: var(--product-tile-bg);
+
+                img {
+                    @apply h-full w-full object-contain;
+                    filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.10));
+                }
+            }
+
+            /* Stacked block: name, stars, price - all left-aligned */
+            .product-shop,
+            .f-fix {
+                @apply flex w-full flex-col items-start gap-1;
+            }
+
+            .product-name {
+                @apply m-0 text-sm font-medium leading-snug;
+
+                /* The whole row is the click target - the row hover is the
+                   signal, so the title itself stays quiet */
+                a:hover {
+                    @apply text-inherit;
+                }
+            }
+
+            .ratings {
+                @apply m-0 flex items-center;
+
+                .rating-links {
+                    @apply hidden;
+                }
+            }
+
+            .price-box {
+                @apply whitespace-nowrap text-sm font-semibold;
+
+                .price-label {
+                    @apply hidden;
+                }
+
+                .old-price {
+                    @apply mr-1 font-normal;
+                }
+            }
+
+            /* Actions and description are listing noise in a dropdown */
+            :is(.add-to-links, .desc, .discount-percent) {
+                @apply hidden;
+            }
+        }
+    }
+
+    /* While suggestions are open (JS sets inline display), the page behind
+       must not scroll - the dropdown itself scrolls (overscroll-contain above) */
+    body:has(.search-autocomplete[style*="display: block"]) {
+        @apply overflow-hidden;
+    }
+
+    /* ============================================
+     * Main navigation (markup generated by the Topmenu block)
+     * ============================================ */
+
+    /* .skip-content hides it by default; on desktop it is the always-visible menu bar */
+    #header-nav {
+        @apply mx-auto hidden w-full max-w-7xl px-2 nav:block;
+    }
+
+    #nav {
+        .nav-primary {
+            @apply m-0 flex list-none flex-wrap p-0;
+        }
+
+        li {
+            @apply relative;
+        }
+
+        a {
+            @apply flex items-center gap-1 whitespace-nowrap rounded-field px-3.5 py-2.5 text-sm font-semibold;
+        }
+
+        /* Animated underline instead of a pill background */
+        li.level0 > a::after {
+            content: "";
+            position: absolute;
+            left: 0.875rem;
+            right: 0.875rem;
+            bottom: 0.375rem;
+            height: 2px;
+            border-radius: 2px;
+            background: currentColor;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.2s ease;
+        }
+
+        li.level0:hover > a::after,
+        li.level0.menu-active > a::after {
+            transform: scaleX(1);
+        }
+
+        li.level0 > a:hover,
+        li.level0.menu-active > a {
+            @apply text-primary;
+        }
+
+        /* Dropdown panels */
+        ul {
+            @apply absolute left-0 top-full z-50 m-0 hidden min-w-56 list-none rounded-box border border-base-200 bg-base-100 p-1.5 shadow-xl;
+        }
+
+        ul ul {
+            @apply -top-1.5 left-full;
+        }
+
+        ul a {
+            @apply whitespace-normal px-3 py-2 font-medium hover:bg-base-200 hover:text-primary;
+        }
+
+        li.menu-active > ul {
+            display: block;
+        }
+
+        /* app.js measurement + overflow helpers */
+        ul.level0.position-test {
+            display: block;
+            visibility: hidden;
+        }
+
+        ul.level0.spill {
+            left: auto;
+            right: 0;
+        }
+    }
+
+    /* Navigation inside the offcanvas drawer: vertical accordion */
+    .offcanvas-content #nav {
+        .nav-primary {
+            @apply flex-col;
+        }
+
+        a {
+            @apply whitespace-normal border-b border-base-200 px-2 py-3 text-base;
+        }
+
+        ul, ul ul {
+            @apply static hidden min-w-0 border-0 bg-transparent p-0 pl-4 shadow-none;
+        }
+
+        li.menu-active > ul {
+            display: block;
+        }
+
+        a.has-children::after {
+            content: "";
+            margin-left: auto;
+            width: 0.5rem;
+            height: 0.5rem;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: rotate(45deg);
+            transition: transform 0.15s ease;
+        }
+
+        li.menu-active > a.has-children::after {
+            transform: rotate(225deg);
+        }
+    }
+
+    /* ============================================
+     * Offcanvas drawer (dialog element driven by app.js)
+     * ============================================ */
+
+    #offcanvas {
+        @apply m-0 h-dvh w-[min(85vw,22rem)] max-h-none bg-base-100 p-0 text-base-content shadow-2xl;
+        position: fixed;
+        inset: 0 auto 0 0;
+        border: 0;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease, display 0.25s ease allow-discrete, overlay 0.25s ease allow-discrete;
+
+        &.offcanvas-right {
+            inset: 0 0 0 auto;
+            transform: translateX(100%);
+        }
+
+        &[open] {
+            transform: translateX(0);
+
+            @starting-style {
+                transform: translateX(-100%);
+            }
+        }
+
+        &.offcanvas-right[open] {
+            @starting-style {
+                transform: translateX(100%);
+            }
+        }
+
+        &::backdrop {
+            background: rgb(0 0 0 / 0.45);
+        }
+    }
+
+    .offcanvas-header {
+        @apply flex items-center justify-between gap-4 border-b border-base-200 px-5 py-4;
+
+        .offcanvas-title {
+            @apply font-display text-lg font-semibold;
+        }
+
+        .offcanvas-close {
+            @apply btn btn-ghost btn-square btn-sm;
+        }
+    }
+
+    .offcanvas-content {
+        @apply max-h-[calc(100dvh-4rem)] overflow-y-auto px-5 py-4;
+    }
+
+    /* ============================================
+     * Breadcrumbs (DaisyUI component; markup already matches)
+     * ============================================ */
+
+    .main > .breadcrumbs {
+        @apply py-0 text-[0.8125rem] text-base-content/70;
+
+        a:hover {
+            @apply text-primary underline;
+        }
+
+        strong {
+            @apply font-medium text-base-content;
+        }
+    }
+
+    /* ============================================
+     * Product grids and lists (shared by category pages and CMS widgets)
+     * ============================================ */
+
+    .products-grid {
+        @apply m-0 mb-8 grid list-none grid-cols-[repeat(auto-fill,minmax(min(11rem,100%),1fr))] gap-x-4 gap-y-8 p-0 nav:grid-cols-[repeat(auto-fill,minmax(13.5rem,1fr))] nav:gap-x-6 nav:gap-y-10;
+
+        /* Image-first cards: the photo tile is the card, text sits quietly below */
+        > li {
+            @apply relative flex flex-col;
+        }
+
+        /* Studio tile: catalog images are transparent cutouts (see the
+           background-removal pipeline), so the tile provides the backdrop -
+           light falloff plus a silhouette shadow, like a real studio shot */
+        .product-image {
+            @apply block aspect-square overflow-hidden rounded-box;
+            background: var(--product-tile-bg);
+
+            img {
+                @apply h-full w-full object-contain transition-transform duration-500 ease-out;
+                filter: drop-shadow(0 10px 9px rgb(0 0 0 / 0.12)) drop-shadow(0 2px 3px rgb(0 0 0 / 0.07));
+            }
+
+            &:hover img {
+                transform: scale(1.045);
+            }
+        }
+
+        .product-info {
+            @apply flex flex-1 flex-col gap-1 px-0.5 pt-3;
+        }
+
+        .product-name {
+            @apply font-body text-[0.9375rem] font-medium leading-snug;
+
+            a:hover {
+                @apply text-primary;
+            }
+        }
+
+        .price-box {
+            @apply text-[0.9375rem];
+
+            .price {
+                @apply font-semibold;
+            }
+
+            /* Cards speak through the struck old price + red price alone */
+            .price-label {
+                @apply hidden;
+            }
+        }
+
+        .actions {
+            @apply px-0.5 pb-1 pt-2.5;
+
+            button.button, a.button {
+                @apply btn-sm btn-block;
+            }
+        }
+
+        /* Wishlist / compare quick links: appear on hover, top-right of the image */
+        > li > div:first-child {
+            @apply relative;
+
+            > ul {
+                @apply absolute right-2 top-2 m-0 flex list-none flex-col gap-1.5 p-0 opacity-0 transition-opacity duration-150;
+
+                a {
+                    @apply btn btn-circle btn-sm border-base-200 bg-base-100 text-[0] shadow-md hover:border-primary hover:text-primary;
+
+                    svg {
+                        @apply size-[1.125rem] shrink-0;
+                    }
+                }
+            }
+        }
+
+        > li:hover > div:first-child > ul,
+        > li:focus-within > div:first-child > ul {
+            @apply opacity-100;
+        }
+    }
+
+    .products-list {
+        @apply m-0 mb-6 flex list-none flex-col gap-5 p-0;
+
+        > .item {
+            @apply card card-border grid grid-cols-[minmax(6rem,14rem)_minmax(0,1fr)] gap-5 border-base-200 bg-base-100 p-5;
+        }
+
+        .product-image {
+            @apply block aspect-square overflow-hidden rounded-selector;
+            background: var(--product-tile-bg);
+
+            img {
+                @apply h-full w-full object-contain;
+                filter: drop-shadow(0 10px 9px rgb(0 0 0 / 0.12)) drop-shadow(0 2px 3px rgb(0 0 0 / 0.07));
+            }
+        }
+
+        .product-name {
+            @apply text-[1.0625rem] font-semibold;
+
+            a:hover {
+                @apply text-primary;
+            }
+        }
+
+        .product-shop, .f-fix {
+            @apply flex flex-col gap-2.5;
+        }
+
+        .desc {
+            @apply text-sm text-base-content/70;
+
+            .link-learn {
+                @apply link link-hover ml-1.5 font-medium text-primary;
+            }
+        }
+    }
+
+    /* Product names keep body ink everywhere, including inside CMS (.std) content */
+    .product-name a {
+        @apply text-inherit hover:text-primary;
+    }
+
+    .add-to-links {
+        @apply m-0 flex list-none gap-4 p-0 text-[0.8125rem];
+
+        a {
+            @apply inline-flex items-center gap-1.5 text-base-content/70 hover:text-primary;
+
+            svg {
+                @apply size-4;
+            }
+        }
+    }
+
+    /* ============================================
+     * Price box
+     * ============================================ */
+
+    .price-box {
+        @apply flex flex-wrap items-baseline gap-2 leading-tight;
+
+        .price {
+            @apply font-bold;
+            color: var(--maho-color-price);
+        }
+
+        .price-label {
+            @apply text-[0.8125rem] text-base-content/70;
+        }
+
+        .old-price {
+            .price {
+                @apply text-[0.875em] font-normal line-through;
+                color: var(--maho-color-old-price);
+            }
+
+            .price-label {
+                @apply hidden;
+            }
+        }
+
+        .special-price .price {
+            color: var(--maho-color-special-price);
+        }
+
+        .minimal-price-link {
+            @apply text-[0.8125rem] text-primary;
+        }
+    }
+
+    /* Stock status as a soft badge with a status dot - the "Availability:" label
+       is redundant once it reads as a status, keep it for screen readers only */
+    .availability {
+        @apply badge badge-soft h-auto gap-1.5 py-1 text-[0.8125rem] font-medium;
+
+        .label {
+            @apply sr-only;
+        }
+
+        &::before {
+            content: "";
+            @apply size-1.5 rounded-full bg-current;
+        }
+
+        &.in-stock { @apply badge-success; }
+        &.out-of-stock { @apply badge-error; }
+    }
+
+    /* ============================================
+     * Configurable swatches (product options, listings, layered nav)
+     * ============================================ */
+
+    .configurable-swatch-list {
+        @apply m-0 flex list-none flex-wrap items-center gap-2 p-0;
+
+        li {
+            @apply m-0 p-0;
+        }
+    }
+
+    /* PHP writes per-swatch inline sizes; take control for uniform geometry.
+       Text swatches (sizes): consistent pills. */
+    .swatch-link {
+        width: auto !important;
+        height: 2.25rem !important;
+        @apply relative box-border inline-flex min-w-9 items-center justify-center overflow-hidden rounded-field border border-base-300 bg-base-100 px-2.5 text-[0.8125rem] font-medium no-underline transition-all duration-150;
+
+        .swatch-label {
+            width: auto !important;
+            height: auto !important;
+            line-height: 1 !important;
+            @apply flex items-center justify-center;
+        }
+
+        .x {
+            @apply hidden;
+        }
+
+        &:hover, &.hover {
+            @apply border-base-content/50;
+        }
+
+        &.selected {
+            @apply border-base-content bg-base-content text-base-100;
+        }
+
+        &.not-available {
+            @apply pointer-events-auto border-dashed opacity-40;
+
+            .swatch-label {
+                text-decoration: line-through;
+            }
+        }
+    }
+
+    /* Color/image swatches: uniform circles with an inner keyline so light
+       colors stay visible */
+    .swatch-link:has(img) {
+        width: 2.25rem !important;
+        height: 2.25rem !important;
+        @apply min-w-0 rounded-full p-0;
+
+        .swatch-label {
+            width: 100% !important;
+            height: 100% !important;
+            @apply rounded-full;
+        }
+
+        img {
+            @apply size-full rounded-full object-cover;
+            outline: 1px solid rgb(0 0 0 / 0.08);
+            outline-offset: -1px;
+        }
+
+        &:hover, &.hover {
+            box-shadow: 0 0 0 2px var(--color-base-100), 0 0 0 3px color-mix(in oklab, var(--color-base-content), transparent 55%);
+        }
+
+        &.selected {
+            @apply border-transparent bg-base-100;
+            box-shadow: 0 0 0 2px var(--color-base-100), 0 0 0 3.5px var(--color-base-content);
+        }
+
+        &.not-available {
+            @apply border-solid;
+
+            &::after {
+                content: "";
+                @apply absolute inset-0 m-auto h-px w-[130%] rotate-45 bg-base-content/40;
+            }
+        }
+    }
+
+    .swatch-attr .select-label {
+        @apply ml-1 font-normal text-base-content/70;
+    }
+
+    /* ============================================
+     * Ratings
+     * ============================================ */
+
+    .ratings {
+        @apply flex flex-wrap items-center gap-2 text-[0.8125rem] text-base-content/70;
+
+        .rating-links a {
+            @apply link link-hover text-primary;
+        }
+    }
+
+    .rating-box {
+        width: 5.25rem;
+        height: 1rem;
+        background: var(--star-rating__icon-inactive) repeat-x;
+        background-size: 1.05rem;
+
+        .rating {
+            display: block;
+            height: 100%;
+            background: var(--star-rating__icon-active) repeat-x;
+            background-size: 1.05rem;
+        }
+    }
+
+    /* ============================================
+     * Toolbar + pager
+     * ============================================ */
+
+    .toolbar {
+        @apply mb-6 flex flex-wrap items-center justify-between gap-x-5 gap-y-3 border-b border-base-200 py-3 text-sm;
+    }
+
+    .toolbar select,
+    .pager select {
+        @apply select select-sm w-auto;
+    }
+
+    .sorter, .sort-by, .limiter, .count-container, .view-mode, .amount {
+        @apply m-0 inline-flex items-center gap-2;
+    }
+
+    .amount {
+        @apply text-[0.8125rem] text-base-content/70;
+    }
+
+    .sort-by .sort-by-switcher,
+    .sorter .sorter-switcher {
+        @apply btn btn-ghost btn-square btn-sm;
+    }
+
+    .view-mode {
+        @apply gap-1;
+
+        label {
+            @apply mr-1 text-base-content/70;
+        }
+
+        a, strong {
+            @apply btn btn-ghost btn-square btn-sm;
+
+            svg ~ * {
+                @apply sr-only;
+            }
+        }
+
+        strong {
+            @apply bg-base-200 text-primary;
+        }
+    }
+
+    .pager, .pages {
+        @apply flex flex-wrap items-center gap-3 text-sm;
+
+        > strong {
+            @apply hidden;
+        }
+
+        ol {
+            @apply m-0 flex list-none items-center gap-1 p-0;
+        }
+
+        li {
+            @apply m-0;
+        }
+
+        li > a {
+            @apply btn btn-ghost btn-sm min-w-[2.125rem] px-2;
+        }
+
+        li.current {
+            @apply btn btn-primary btn-sm pointer-events-none min-w-[2.125rem] px-2;
+        }
+    }
+
+    .pager.pager-no-toolbar {
+        @apply justify-between border-t border-base-200 py-2.5;
+    }
+
+    /* ============================================
+     * Sidebar blocks (layered nav, cart sidebar, compare, ...)
+     * ============================================ */
+
+    .sidebar .block,
+    .col-wrapper .block {
+        @apply card card-border overflow-hidden border-base-200 bg-base-100;
+
+        .block-title {
+            @apply border-b border-base-200 px-4 py-3.5 font-display text-[0.9375rem] font-semibold;
+        }
+
+        .block-content {
+            @apply px-4 py-4 text-sm;
+        }
+
+        .block-subtitle {
+            @apply mb-2 block text-[0.8125rem] font-semibold;
+        }
+
+        ol, ul {
+            @apply m-0 list-none p-0;
+        }
+
+        li {
+            @apply py-1;
+        }
+
+        .actions {
+            @apply mt-3 flex items-center justify-between gap-3;
+        }
+
+        .empty {
+            @apply text-base-content/70;
+        }
+    }
+
+    /* Layered navigation */
+    .block-layered-nav {
+        dl {
+            @apply m-0;
+        }
+
+        dl dt {
+            @apply mb-2 mt-4 text-[0.8125rem] font-semibold uppercase tracking-wide text-base-content/70 first:mt-0;
+        }
+
+        dl dd {
+            @apply m-0;
+        }
+
+        dl dd ol > li > a:not(.swatch-link) {
+            @apply flex justify-between gap-2 py-1 hover:text-primary;
+        }
+
+        .count {
+            @apply text-[0.8125rem] text-base-content/70;
+        }
+
+        .currently ol li {
+            @apply flex flex-wrap items-center gap-1.5;
+
+            .label {
+                @apply font-semibold;
+            }
+
+            .btn-remove {
+                @apply inline-flex text-error;
+            }
+        }
+    }
+
+    /* Price range filter */
+    .price-filter-input {
+        .price-filter-fields {
+            @apply flex items-end gap-2;
+        }
+
+        .price-field {
+            @apply flex min-w-0 flex-1 flex-col gap-1;
+
+            label {
+                @apply text-xs text-base-content/70;
+            }
+        }
+
+        .price-separator {
+            @apply pb-2.5 text-base-content/40;
+        }
+
+        .price-input-wrapper {
+            @apply relative;
+
+            .currency-symbol {
+                @apply pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[0.8125rem] text-base-content/65;
+            }
+
+            input {
+                @apply input input-sm w-full pl-6;
+            }
+        }
+
+        .price-filter-apply {
+            @apply btn btn-primary btn-square btn-sm shrink-0;
+
+            svg {
+                @apply size-4;
+            }
+        }
+    }
+
+    /* Active filters (chips) */
+    .active-filters-wrapper {
+        @apply mb-2 border-b border-base-200 pb-3;
+
+        .active-filters-header {
+            @apply mb-2 flex items-baseline justify-between gap-2;
+        }
+
+        .active-filters-title {
+            @apply text-[0.8125rem] font-semibold uppercase tracking-wide text-base-content/70;
+        }
+
+        .clear-all-filters {
+            @apply link link-hover text-[0.8125rem] text-primary;
+        }
+
+        .filter-tags {
+            @apply m-0 flex list-none flex-wrap gap-1.5 p-0;
+        }
+
+        .filter-tag {
+            @apply m-0 p-0;
+        }
+
+        .filter-tag-link {
+            @apply badge badge-lg gap-1.5 border-base-300 bg-base-200 pr-1.5 text-[0.8125rem] hover:border-error/40 hover:bg-error/10 hover:text-error;
+
+            .filter-tag-label {
+                @apply font-medium text-base-content/70;
+
+                &::after {
+                    content: ":";
+                }
+            }
+
+            .filter-tag-value {
+                @apply font-semibold;
+            }
+
+            svg {
+                @apply size-3.5;
+            }
+        }
+    }
+
+    /* ============================================
+     * Product page
+     * ============================================ */
+
+    .product-view .product-essential {
+        @apply mb-10;
+    }
+
+    /* The add-to-cart form is the layout grid */
+    .product-view .product-essential > form {
+        @apply grid grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-6;
+
+        @media (min-width: 771px) {
+            grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
+            grid-template-rows: auto auto 1fr;
+            grid-template-areas:
+                "media shop"
+                "media cart"
+                "media related";
+            align-items: start;
+
+            .product-img-box { grid-area: media; }
+            .product-shop { grid-area: shop; }
+            .add-to-cart-wrapper { grid-area: cart; }
+
+            /* Configurable/option products render their buy box as a direct form child */
+            > .product-options-bottom {
+                grid-column: 2;
+            }
+        }
+    }
+
+    .product-view {
+        /* Product name renders twice: above the image on mobile, in the buy column on desktop */
+        .product-shop > .product-name {
+            @apply hidden nav:block;
+
+            .h1 {
+                @apply block font-display text-[1.75rem] font-semibold leading-tight tracking-tight;
+            }
+        }
+
+        .product-img-box .product-name {
+            @apply nav:hidden;
+
+            h1 {
+                @apply text-2xl font-semibold tracking-tight;
+            }
+        }
+
+        .product-shop {
+            @apply flex flex-col gap-4;
+
+            .price-box {
+                @apply text-[1.625rem];
+
+                .price {
+                    @apply tracking-tight;
+                }
+
+                .old-price .price {
+                    @apply text-[1.125rem];
+                }
+            }
+
+            .short-description {
+                @apply max-w-[52ch] text-[0.9375rem] leading-relaxed;
+            }
+        }
+
+        .extra-info {
+            @apply flex flex-wrap items-center gap-x-5 gap-y-2;
+        }
+
+        /* Buy box: flush on the page (no card), separated by a hairline. Price on
+           top, then a single action row: qty + CTA with wishlist/compare squares
+           beside it (for configurable products it renders as .product-options-bottom) */
+        .add-to-cart-wrapper {
+            @apply flex flex-col gap-4 empty:hidden;
+        }
+
+        .add-to-box,
+        .product-options-bottom {
+            @apply grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-4 border-t border-base-200 pt-6;
+
+            /* The template renders a JS-updated price clone here; the price under
+               the title updates too, so showing both would duplicate it */
+            .price-box {
+                @apply hidden;
+            }
+
+            .add-to-cart {
+                grid-column: 1;
+            }
+
+            .add-to-links {
+                grid-column: 2;
+            }
+        }
+
+        /* One strong action row: qty beside a CTA that takes the full width */
+        .add-to-cart {
+            @apply flex flex-wrap items-center gap-3;
+
+            .qty-wrapper {
+                @apply flex items-center gap-2;
+            }
+
+            label {
+                @apply text-sm font-medium;
+            }
+
+            .qty {
+                @apply input h-12 w-16 text-center;
+            }
+        }
+
+        .add-to-cart-buttons {
+            @apply flex flex-1 flex-wrap items-center gap-3;
+
+            .btn-cart {
+                @apply btn-lg min-w-48 flex-1;
+            }
+        }
+
+        /* Wishlist / compare in the buy box: quiet squares the same height as the
+           CTA, sitting right beside it (the Zalando pattern) */
+        :is(.add-to-box, .product-options-bottom) .add-to-links {
+            @apply gap-2.5;
+
+            a {
+                @apply btn size-12 rounded-field border border-base-300 bg-transparent p-0 text-base-content/70 shadow-none;
+
+                &:hover {
+                    @apply border-base-content/50 bg-base-100 text-base-content;
+                }
+
+                svg {
+                    @apply size-5;
+                }
+            }
+        }
+
+        .product-options {
+            @apply flex flex-col gap-3.5;
+
+            dt label {
+                @apply mb-1 inline-block text-sm font-semibold;
+            }
+
+            dd {
+                @apply mb-2;
+            }
+        }
+
+        .product-collateral {
+            @apply flex flex-col gap-6;
+        }
+
+        /* Upsell strip below the collateral tabs */
+        .box-up-sell {
+            @apply border-t border-base-200 pt-8;
+
+            > h2 {
+                @apply mb-5 font-display text-xl font-semibold tracking-tight;
+            }
+
+            /* Upsell items have no .product-info wrapper - space the text
+               under the tile directly */
+            .products-grid {
+                .product-name {
+                    @apply mt-3 px-0.5;
+                }
+
+                .price-box,
+                .ratings {
+                    @apply mt-1 px-0.5;
+                }
+            }
+        }
+
+        /* Simple products place the buy box in the "cart" grid row, so only one
+           row-gap separates it from Related - configurables get two (their buy
+           box renders inside the shop cell). Even the rhythm out */
+        .product-essential > form:has(.add-to-box) .block-related {
+            @apply mt-6;
+        }
+
+        /* Related products: compact checkable list in the buy column */
+        .block-related {
+            @media (min-width: 771px) {
+                grid-area: related;
+            }
+
+            .block-title h2 {
+                @apply m-0 font-display text-lg font-semibold;
+            }
+
+            .block-subtitle {
+                @apply mb-1 mt-1.5 text-[0.8125rem] text-base-content/70;
+
+                a {
+                    @apply link-hover font-medium text-primary;
+                }
+            }
+
+            .mini-products-list > li.item {
+                @apply relative flex items-center gap-3 border-b border-base-200 py-3 pr-10 last:border-0;
+
+                > input.checkbox {
+                    @apply shrink-0;
+                }
+            }
+
+            .product {
+                @apply flex min-w-0 flex-1 items-center gap-3;
+            }
+
+            .product-image {
+                @apply block w-16 shrink-0 overflow-hidden rounded-selector;
+                background: var(--product-tile-bg);
+
+                img {
+                    @apply block h-auto w-full max-w-none;
+                    filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.10));
+                }
+            }
+
+            .product-details {
+                @apply min-w-0 flex-1;
+
+                .product-name {
+                    @apply m-0 text-sm font-medium leading-snug;
+                }
+
+                .price-box {
+                    @apply mt-0.5 text-sm font-semibold;
+                }
+
+                .link-wishlist {
+                    @apply absolute right-0 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full text-base-content/60 hover:bg-base-200 hover:text-primary;
+
+                    svg {
+                        @apply size-5;
+                    }
+                }
+            }
+        }
+    }
+
+    /* Gallery (driven by ProductMediaManager in app.js) */
+    .product-img-box {
+        @apply flex min-w-0 flex-col gap-3;
+    }
+
+    .product-image-gallery {
+        /* Full-width colored tile; catalog images are transparent cutouts so the
+           tile color shows through cleanly in every browser.
+           The !important cap overrides app.js's scroll-dependent inline
+           max-height with a viewport-only value, so refreshes are deterministic */
+        @apply relative grid w-full cursor-zoom-in overflow-hidden rounded-box;
+        background: var(--product-tile-bg);
+        /* Mobile: the image spans the full width and its height flows naturally.
+           The !important neutralizes app.js's scroll-dependent inline max-height */
+        max-height: none !important;
+        justify-items: center;
+
+        /* Desktop: never below the fold - viewport minus everything above the
+           gallery (banner + header + nav + breadcrumbs) plus breathing room */
+        @media (min-width: 771px) {
+            max-height: clamp(18rem, 100dvh - 14.5rem, 46rem) !important;
+        }
+
+        img {
+            @apply hidden h-auto w-full object-contain nav:h-full nav:w-auto nav:max-w-full;
+            grid-area: 1 / 1;
+            max-height: inherit;
+            /* Cutout images: the shadow follows the product silhouette */
+            filter: drop-shadow(0 16px 14px rgb(0 0 0 / 0.12)) drop-shadow(0 4px 5px rgb(0 0 0 / 0.07));
+
+            &.visible {
+                @apply block;
+            }
+        }
+
+        &.loading {
+            @apply opacity-60;
+        }
+    }
+
+    .product-image-thumbs {
+        @apply m-0 flex list-none flex-wrap gap-2 p-0;
+
+        .thumb-link {
+            @apply block w-[4.25rem] overflow-hidden rounded-selector border border-base-300 bg-base-200 hover:border-primary;
+
+            img {
+                @apply block h-auto w-full;
+            }
+        }
+    }
+
+    /* Fullscreen gallery markup injected by app.js */
+    .fullscreen-gallery {
+        @apply fixed inset-0 z-[100] flex bg-black/90;
+
+        .fg-close {
+            @apply absolute right-5 top-4 z-[2] cursor-pointer text-4xl leading-none text-white opacity-80 hover:opacity-100;
+        }
+
+        .fg-scroll {
+            @apply flex w-full snap-x snap-mandatory overflow-x-auto;
+            scrollbar-width: none;
+
+            &.dragging {
+                @apply cursor-grabbing snap-none;
+            }
+        }
+
+        .fg-slide {
+            @apply flex flex-none basis-full snap-center items-center justify-center px-6 py-12;
+
+            img {
+                @apply max-h-full max-w-full select-none object-contain;
+            }
+        }
+    }
+
+    /* Product reviews */
+    .box-reviews {
+        .rv-header {
+            @apply mb-5 flex flex-wrap items-center justify-between gap-4;
+
+            /* Sits flush with the panel's own padding, like the other tabs */
+            &.empty {
+                @apply flex-col items-center gap-4 p-0 text-center;
+            }
+
+            .no-rating {
+                @apply m-0 text-[0.9375rem] text-base-content;
+            }
+        }
+
+        .rv-count {
+            @apply text-sm font-semibold;
+        }
+
+        .rv-list {
+            @apply flex flex-col gap-4;
+        }
+
+        .rv-card {
+            @apply rounded-box border border-base-200 p-5;
+        }
+
+        .rc-header {
+            @apply mb-3 flex flex-wrap items-start justify-between gap-3;
+        }
+
+        .rc-author {
+            @apply flex items-center gap-3;
+        }
+
+        .rc-avatar {
+            @apply flex size-10 items-center justify-center rounded-full bg-base-200 text-base-content/70;
+
+            svg {
+                @apply size-5;
+            }
+        }
+
+        .rc-meta {
+            @apply flex flex-col;
+        }
+
+        .rc-name {
+            @apply text-sm font-semibold;
+        }
+
+        .rc-date {
+            @apply text-xs text-base-content/65;
+        }
+
+        .rc-title {
+            @apply mb-1 text-[0.9375rem] font-semibold;
+        }
+
+        .rc-text {
+            @apply m-0 max-w-[70ch] text-sm leading-relaxed text-base-content/80;
+        }
+
+        .rc-footer {
+            @apply mt-4 border-t border-base-200 pt-3;
+        }
+
+        .rc-ratings {
+            @apply flex flex-wrap gap-x-8 gap-y-2;
+        }
+
+        .rc-rating-item {
+            @apply flex items-center gap-2 text-xs text-base-content/70;
+        }
+    }
+
+    /* Product attributes: a tidy spec sheet (the caption repeats the tab label) */
+    #product-attribute-specs-table {
+        @apply w-full max-w-2xl;
+
+        caption {
+            @apply sr-only;
+        }
+
+        th.label {
+            @apply w-48 border-b border-base-200 py-3 pr-6 text-left align-top text-sm font-medium text-base-content/70;
+        }
+
+        td.data {
+            @apply border-b border-base-200 py-3 text-sm;
+        }
+
+        tr:last-child :is(th, td) {
+            @apply border-b-0;
+        }
+    }
+
+    /* Collateral tabs: pure CSS radio-driven (markup in catalog/product/view.phtml) */
+    .collateral-tabs-wrapper {
+        .tab-selector {
+            @apply pointer-events-none absolute opacity-0;
+        }
+
+        .collateral-tab-list {
+            @apply m-0 -mb-px flex list-none flex-wrap gap-1 border-b border-base-300 p-0;
+
+            label {
+                @apply inline-block cursor-pointer border-b-2 border-transparent px-4 py-2.5 text-[0.9375rem] font-medium text-base-content/70 hover:text-base-content;
+            }
+        }
+
+        .tab-panel {
+            @apply hidden px-1 py-5;
+        }
+    }
+
+    /* Pair each checked radio with its label + panel, up to 6 tabs */
+    .collateral-tabs-wrapper .tab-selector:nth-of-type(1):checked ~ .collateral-tab-list li:nth-child(1) label,
+    .collateral-tabs-wrapper .tab-selector:nth-of-type(2):checked ~ .collateral-tab-list li:nth-child(2) label,
+    .collateral-tabs-wrapper .tab-selector:nth-of-type(3):checked ~ .collateral-tab-list li:nth-child(3) label,
+    .collateral-tabs-wrapper .tab-selector:nth-of-type(4):checked ~ .collateral-tab-list li:nth-child(4) label,
+    .collateral-tabs-wrapper .tab-selector:nth-of-type(5):checked ~ .collateral-tab-list li:nth-child(5) label,
+    .collateral-tabs-wrapper .tab-selector:nth-of-type(6):checked ~ .collateral-tab-list li:nth-child(6) label {
+        color: var(--color-primary);
+        border-bottom-color: var(--color-primary);
+    }
+
+    .collateral-tabs-wrapper .tab-selector:nth-of-type(1):checked ~ .collateral-tabs-content .tab-panel:nth-child(1),
+    .collateral-tabs-wrapper .tab-selector:nth-of-type(2):checked ~ .collateral-tabs-content .tab-panel:nth-child(2),
+    .collateral-tabs-wrapper .tab-selector:nth-of-type(3):checked ~ .collateral-tabs-content .tab-panel:nth-child(3),
+    .collateral-tabs-wrapper .tab-selector:nth-of-type(4):checked ~ .collateral-tabs-content .tab-panel:nth-child(4),
+    .collateral-tabs-wrapper .tab-selector:nth-of-type(5):checked ~ .collateral-tabs-content .tab-panel:nth-child(5),
+    .collateral-tabs-wrapper .tab-selector:nth-of-type(6):checked ~ .collateral-tabs-content .tab-panel:nth-child(6) {
+        display: block;
+    }
+
+    /* ============================================
+     * Category page
+     * ============================================ */
+
+    .category-image {
+        @apply mb-5 overflow-hidden rounded-box;
+
+        img {
+            @apply block h-auto w-full;
+        }
+    }
+
+    .category-description {
+        @apply mb-5 max-w-[65ch] text-[0.9375rem] text-base-content/70;
+    }
+
+    /* Toolbar filter trigger (mobile only; opens layered nav in the offcanvas) */
+    .filters-trigger {
+        @apply btn btn-ghost btn-square btn-sm nav:hidden;
+    }
+
+    @media (max-width: 770px) {
+        /* Sidebar layered nav lives in the offcanvas on mobile */
+        .sidebar .block-layered-nav {
+            display: none;
+        }
+
+        .offcanvas-content .block-layered-nav {
+            display: block;
+            border: 0;
+
+            .block-title {
+                display: none;
+            }
+
+            .block-content {
+                padding: 0;
+            }
+        }
+    }
+
+    /* ============================================
+     * Cart page
+     * ============================================ */
+
+    .cart {
+        @apply grid grid-cols-[minmax(0,1fr)] gap-7;
+
+        /* Items table on the left; the whole transactional rail (discount,
+           shipping estimate, totals) stacked on the right */
+        @media (min-width: 771px) {
+            grid-template-columns: minmax(0, 1fr) 24rem;
+            grid-template-rows: auto auto 1fr auto;
+            grid-template-areas:
+                "title  title"
+                "table  forms"
+                "table  totals"
+                "cross  cross";
+            align-items: start;
+
+            > .page-title { grid-area: title; }
+            > form { grid-area: table; }
+            .cart-forms { grid-area: forms; }
+            .cart-totals-wrapper { grid-area: totals; }
+        }
+    }
+
+    .cart .page-title {
+        @apply flex flex-wrap items-center justify-between gap-4;
+    }
+
+    .checkout-types {
+        @apply m-0 flex list-none flex-col gap-2 p-0;
+
+        button.button {
+            @apply btn-lg btn-block;
+        }
+
+        &.top {
+            @apply flex-row;
+
+            button.button {
+                @apply btn-md w-auto;
+            }
+        }
+    }
+
+    .cart-table {
+        tbody td {
+            @apply py-4 align-middle;
+        }
+
+        .product-cart-image {
+            @apply w-28;
+
+            .product-image {
+                @apply block aspect-square w-24 overflow-hidden rounded-selector;
+                background: var(--product-tile-bg);
+            }
+
+            img {
+                @apply block h-full w-full object-contain;
+                filter: drop-shadow(0 3px 3px rgb(0 0 0 / 0.10));
+            }
+        }
+
+        .product-cart-info {
+            .product-name {
+                @apply text-[0.9375rem] font-semibold;
+
+                a:hover {
+                    @apply text-primary;
+                }
+            }
+
+            .product-cart-sku {
+                @apply mt-1 text-[0.8125rem] text-base-content/70;
+            }
+
+            dl {
+                @apply mt-2 text-[0.8125rem];
+
+                dt {
+                    @apply inline font-semibold;
+
+                    &::after {
+                        content: ": ";
+                    }
+                }
+
+                dd {
+                    @apply mb-0 ml-0 mr-3 inline text-base-content/70;
+                }
+            }
+
+            .item-msg {
+                @apply mt-1.5 text-[0.8125rem] text-error;
+            }
+        }
+
+        .qty {
+            @apply input input-sm h-10 w-16 text-center;
+        }
+
+        /* Per-row update: quiet, secondary to the qty box */
+        .btn-update {
+            @apply btn btn-sm mt-1.5 h-8 border border-base-300 bg-transparent px-3 text-xs font-medium text-base-content/80 shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content;
+        }
+
+        /* Edit / wishlist / remove: icon-only stack (labels stay for tooltips
+           and screen readers via the title attribute + hidden text) */
+        .product-cart-remove {
+            @apply w-14;
+
+            a, button {
+                @apply btn btn-ghost btn-square btn-sm flex text-base-content/60 hover:text-primary;
+                font-size: 0;
+                gap: 0;
+
+                svg {
+                    @apply size-[1.125rem] shrink-0;
+                }
+
+                &[onclick*="customFormSubmit"]:hover {
+                    @apply text-error;
+                }
+            }
+
+            a + a {
+                @apply mt-1;
+            }
+        }
+
+        .cart-price .price {
+            @apply font-semibold;
+        }
+
+        /* td: keep table-cell display so the colspan works; space buttons inline */
+        .cart-footer-actions {
+            @apply pt-4 text-right;
+
+            .button2 {
+                @apply btn btn-sm ml-3 h-9 border border-base-300 bg-transparent px-4 font-medium text-base-content/80 no-underline shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content hover:no-underline;
+            }
+        }
+    }
+
+    /* Discount / gift card form */
+    .coupon-input-group {
+        @apply flex items-center gap-2;
+
+        .coupon-input {
+            @apply h-11 flex-1;
+        }
+
+        .btn-apply {
+            @apply btn h-11 border border-base-300 bg-transparent px-5 font-medium text-base-content/80 no-underline shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content hover:no-underline;
+        }
+    }
+
+    .promo-message {
+        @apply mt-2 text-sm empty:hidden;
+    }
+
+    .cart-forms {
+        @apply flex flex-col gap-5;
+
+        > div, > form {
+            @apply card card-border border-base-200 bg-base-100 p-5;
+        }
+
+        h2 {
+            @apply mb-2.5 text-base font-semibold;
+        }
+
+        /* Zip and its action share a line, like the discount input + Apply */
+        .shipping-zip-row {
+            @apply flex items-end gap-2;
+
+            .zip-field {
+                @apply min-w-0 flex-1;
+            }
+        }
+
+        .btn-estimate {
+            @apply btn h-10 border border-base-300 bg-transparent px-5 font-medium text-base-content/80 no-underline shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content hover:no-underline;
+        }
+    }
+
+    .cart-totals {
+        @apply sticky top-20 rounded-box bg-base-200 p-5;
+
+        table {
+            @apply mb-4 w-full text-[0.9375rem];
+
+            td {
+                @apply px-0 py-1.5;
+            }
+
+            /* Labels read left, amounts right - a receipt, not a right-aligned blob */
+            td:first-child {
+                @apply text-left text-base-content/80;
+            }
+
+            td + td {
+                @apply pl-4;
+            }
+
+            tfoot td {
+                @apply border-t border-base-300/70 pt-3;
+            }
+
+            tfoot td, strong {
+                @apply text-[1.0625rem] font-bold text-base-content;
+            }
+        }
+    }
+
+    /* Minicart drawer content (checkout/cart/minicart.phtml + ajaxContent) */
+    .minicart-wrapper {
+        @apply flex flex-col gap-3 text-sm;
+
+        .minicart-message {
+            @apply rounded-field p-3 text-sm font-medium empty:hidden;
+        }
+
+        #minicart-success-message {
+            @apply bg-success/10 text-success;
+        }
+
+        #minicart-error-message {
+            @apply bg-error/10 text-error;
+        }
+
+        .mini-products-list {
+            @apply m-0 flex list-none flex-col p-0;
+
+            > li.item {
+                @apply flex items-start gap-3.5 border-b border-base-200 py-3.5;
+            }
+        }
+
+        .product-image {
+            @apply block w-16 shrink-0 overflow-hidden rounded-selector bg-base-200;
+
+            img {
+                @apply block h-auto w-full max-w-none;
+            }
+        }
+
+        .product-details {
+            @apply min-w-0 flex-1;
+
+            .product-name {
+                @apply m-0 mb-1 text-sm font-medium;
+
+                a:hover {
+                    @apply text-primary;
+                }
+            }
+        }
+
+        .info-wrapper {
+            @apply my-1 text-[0.8125rem] text-base-content/70;
+
+            th {
+                @apply pr-3 text-left align-middle font-medium;
+            }
+
+            .qty {
+                @apply input input-xs w-12 text-center;
+            }
+
+            .quantity-button {
+                @apply btn btn-primary btn-xs ml-1 hidden;
+
+                &.visible {
+                    @apply inline-flex;
+                }
+            }
+        }
+
+        .btn-edit, .remove, .details {
+            @apply link link-hover text-[0.8125rem] text-base-content/70;
+        }
+
+        .remove:hover {
+            @apply text-error;
+        }
+
+        /* Selected options: show inline, no hover dance in the drawer */
+        .truncated {
+            .details {
+                @apply hidden;
+            }
+
+            .item-options {
+                @apply mt-1.5 text-[0.8125rem];
+
+                dt {
+                    @apply inline font-semibold after:content-[':_'];
+                }
+
+                dd {
+                    @apply mb-0 ml-0 mr-2 inline text-base-content/70;
+                }
+            }
+        }
+
+        .block-content {
+            @apply p-0;
+        }
+
+        .subtotal {
+            @apply flex items-baseline justify-between py-2 text-base;
+
+            .label { @apply font-medium; }
+            .price { @apply font-bold; }
+        }
+
+        .minicart-actions {
+            @apply flex flex-col gap-3 pt-1;
+
+            .checkout-types {
+                @apply gap-2;
+
+                a.button {
+                    @apply btn-block btn-lg;
+                }
+            }
+
+            .cart-link {
+                @apply link link-hover text-center text-[0.8125rem];
+            }
+        }
+
+        .empty {
+            @apply py-4 text-base-content/70;
+        }
+    }
+
+    /* ============================================
+     * Slideshow (dots injected by app.js)
+     * ============================================ */
+
+    .slideshow {
+        @apply snap-x snap-mandatory overflow-x-auto overflow-y-hidden scroll-smooth rounded-box;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Each slide is one full-width column; columns overflow the ul so the
+           .slideshow container (what app.js scrolls) pans horizontally */
+        ul {
+            @apply m-0 grid list-none p-0;
+            grid-auto-flow: column;
+            grid-auto-columns: 100%;
+        }
+
+        li {
+            @apply m-0 snap-center;
+        }
+
+        a {
+            @apply block h-full;
+        }
+
+        img {
+            /* Fills the slide when CMS CSS fixes its height; intrinsic ratio otherwise */
+            @apply block h-full w-full max-w-none object-cover;
+        }
+    }
+
+    .slideshow-dots {
+        @apply flex justify-center gap-2 py-3;
+
+        .dot {
+            @apply size-2 cursor-pointer rounded-full bg-base-300 transition-all duration-150;
+
+            &.active {
+                @apply w-5 bg-primary;
+            }
+        }
+    }
+
+    /* ============================================
+     * Footer
+     * ============================================ */
+
+    .footer-container {
+        @apply mt-auto border-t border-base-300 bg-base-200;
+    }
+
+    .footer {
+        .block-title {
+            @apply mb-4 text-xs font-semibold uppercase tracking-[0.08em] text-base-content/65;
+        }
+
+        ul {
+            @apply m-0 flex list-none flex-col gap-2.5 p-0;
+        }
+
+        a {
+            @apply text-base-content/75 transition-colors hover:text-primary;
+        }
+
+        .block-subscribe {
+            @apply w-full sm:max-w-sm;
+
+            .block-title {
+                @apply font-display text-lg font-semibold normal-case tracking-normal text-base-content;
+            }
+
+            .block-content {
+                @apply flex items-start gap-2;
+            }
+
+            .input-box {
+                @apply flex-1;
+            }
+
+            input.input-text {
+                @apply rounded-full bg-base-100 px-5;
+            }
+
+            button.button {
+                @apply rounded-full;
+            }
+        }
+
+        address {
+            @apply mt-4 w-full border-t border-base-300 pt-6 text-[0.8125rem] not-italic text-base-content/65;
+        }
+    }
+
+    /* ============================================
+     * Global site notice + cookie notice
+     * ============================================ */
+
+    .global-site-notice {
+        @apply bg-neutral text-center text-[0.8125rem] text-neutral-content;
+
+        .notice-inner {
+            @apply mx-auto max-w-7xl px-4 py-2;
+        }
+    }
+
+    #global-cookie-notice {
+        @apply fixed bottom-4 left-4 right-4 z-[90] ml-auto max-w-md rounded-box border border-base-300 bg-base-100 p-5 text-sm shadow-2xl;
+    }
+
+    /* ============================================
+     * Generic rich text (CMS pages, product description)
+     * ============================================ */
+
+    .std {
+        @apply leading-relaxed;
+
+        p, ul, ol, table, blockquote {
+            @apply mb-3.5;
+        }
+
+        /* Bullets only for genuine content lists, never for component markup
+           (the CMS homepage wraps the slideshow and product widgets in .std) */
+        ul:not([class]):not(.slideshow ul) { @apply list-disc pl-5; }
+        ol:not([class]):not(.slideshow ol) { @apply list-decimal pl-5; }
+
+        h2 { @apply mb-3 mt-6 text-[1.375rem] font-semibold; }
+        h3 { @apply mb-2.5 mt-5 text-lg font-semibold; }
+
+        /* :where keeps specificity low so component rules (product cards, buttons
+           rendered inside CMS content) keep their own link colors */
+        :where(a:not(.button)) {
+            @apply text-primary hover:underline;
+        }
+    }
+
+    /* ============================================
+     * Account pages (2-column sets shared across customer templates)
+     * ============================================ */
+
+    .col2-set {
+        @apply mb-6 grid gap-6 nav:grid-cols-2;
+
+        .col-1, .col-2 {
+            @apply card card-border min-w-0 border-base-200 bg-base-100 p-5;
+        }
+
+        h2, .legend {
+            @apply mb-3.5 text-[1.0625rem] font-semibold;
+        }
+    }
+
+    .box-account {
+        @apply mb-6;
+
+        .box-head {
+            @apply mb-3 flex items-baseline justify-between gap-4;
+
+            h2 {
+                @apply text-lg font-semibold;
+            }
+
+            a {
+                @apply link link-hover text-[0.8125rem] text-primary;
+            }
+        }
+    }
+
+    .my-account .title-buttons {
+        @apply flex flex-wrap items-center justify-between gap-3;
+    }
+
+    /* Account navigation sidebar */
+    .block-account .block-content li {
+        @apply p-0;
+
+        a, strong {
+            @apply block rounded-field px-2.5 py-2;
+        }
+
+        a:hover {
+            @apply bg-base-200 text-primary;
+        }
+
+        &.current strong {
+            @apply bg-primary/10 font-semibold text-primary;
+        }
+    }
+
+    /* ============================================
+     * Modal dialogs (maho-dialog.js and template <dialog>s)
+     * ============================================ */
+
+    dialog:not(#offcanvas) {
+        @apply fixed inset-0 m-auto w-[min(92vw,30rem)] rounded-box border-0 bg-base-100 p-0 text-base-content shadow-2xl;
+
+        &::backdrop {
+            background: rgb(0 0 0 / 0.45);
+        }
+    }
+
+    .d-header,
+    .dialog-header {
+        @apply flex items-center justify-between gap-4 border-b border-base-200 px-5 py-4;
+
+        h2, h3 {
+            @apply font-display text-lg font-semibold;
+        }
+
+        button {
+            @apply btn btn-ghost btn-square btn-sm text-2xl leading-none;
+        }
+    }
+
+    .d-content,
+    .dialog-content {
+        @apply max-h-[70vh] overflow-y-auto p-5;
+    }
+
+    /* Action rows: right-aligned, primary action last, dismissals quiet */
+    .d-actions,
+    .dialog-buttons {
+        @apply flex justify-end gap-3 empty:hidden;
+    }
+
+    .dialog-buttons {
+        @apply px-5 pb-5;
+    }
+
+    .d-content .d-actions {
+        @apply mt-5 border-t border-base-200 pt-4;
+    }
+
+    .dialog-buttons .cancel,
+    .d-actions button.button[onclick*="close()"] {
+        @apply btn btn-ghost border border-base-300 bg-transparent text-base-content;
+
+        &:hover {
+            @apply border-base-content/40 bg-base-200;
+        }
+    }
+
+    /* ============================================
+     * Login / register page (radio-driven tabs)
+     * ============================================ */
+
+    .account-login {
+        @apply mx-auto w-full max-w-xl;
+
+        .tab-selector {
+            @apply pointer-events-none absolute opacity-0;
+        }
+
+        .login-tabs {
+            @apply m-0 mb-6 flex list-none gap-1 border-b border-base-300 p-0;
+
+            li {
+                @apply m-0;
+            }
+
+            label {
+                @apply -mb-px inline-block cursor-pointer border-b-2 border-transparent px-4 py-2.5 text-[1.0625rem] font-semibold text-base-content/65 hover:text-base-content;
+            }
+        }
+
+        .tab-content {
+            @apply pt-1;
+        }
+
+        &:has(#tab-login:checked) .login-tabs li:first-child label,
+        &:has(#tab-register:checked) .login-tabs li:last-child label {
+            @apply border-primary text-primary;
+        }
+
+        .remember-me-box, .forgot-word {
+            @apply text-sm;
+        }
+    }
+}
+
+/* Unlayered: ONE focus language for the whole storefront.
+   Fields: primary border + soft halo (replaces DaisyUI's double outline). */
+input:where([type="text"], [type="search"], [type="email"], [type="password"], [type="number"], [type="tel"], [type="url"]):focus,
+.input:focus, .input:focus-within,
+input.input-text:focus, input.input-text:focus-within,
+.select:focus, .select:open, select:focus, select:focus-within, select:open,
+.textarea:focus, .textarea:focus-within, textarea:focus, textarea:focus-within {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary), transparent 82%);
+}
+
+/* Buttons, links and small controls: visible primary ring on keyboard focus */
+:is(a, button, .btn, .swatch-link, .dot, input[type="checkbox"], input[type="radio"]):focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Unlayered: card quick-actions are icon-only circles; their label is a bare
+   text node - kill its font-size and the flex gap that would nudge the icon
+   off-center (the zero-width text still counts as a flex item) */
+.products-grid > li > div:first-child > ul a {
+    font-size: 0;
+    gap: 0;
+}
+
+/* Unlayered: DaisyUI opts selects into Chrome's experimental base-select
+   rendering, where long option text paints past the border and ignores the
+   select's own overflow. Opt back out: DaisyUI's classic select styling
+   (custom chevron included) works without it */
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Unlayered: DaisyUI's breadcrumbs component adds vertical padding of its own;
+   the page grid's row gap already provides the rhythm */
+.main > .breadcrumbs {
+    padding-block: 0;
+}
+
+/* Unlayered: Maho templates use semantic <span class="label"> everywhere
+   (availability, price rows, ...), which collides with the DaisyUI label
+   component - it fades currentColor to 60%, washing the text below readable
+   contrast. Keep label spans at full ink; DaisyUI's form labels use <label> */
+span.label {
+    color: inherit;
+}
+
+/* Unlayered: Maho's review stars (.rating inside .rating-box) collide with the
+   DaisyUI rating component, which forces inline-flex and drops the fill layer
+   onto the text baseline - the grey track then peeks out above the stars */
+.rating-box .rating {
+    display: block;
+    height: 100%;
+    background: var(--star-rating__icon-active) repeat-x;
+    background-size: 1.05rem;
+    opacity: 1;
+}
+
+/* Unlayered: app.js toggles a .loading class on the gallery, which collides
+   with the DaisyUI loading-spinner component */
+.product-image-gallery.loading {
+    width: 100%;
+    aspect-ratio: auto;
+    pointer-events: auto;
+    -webkit-mask: none;
+    mask: none;
+}
+
+/* Unlayered: the login page's .tab-content shares its name with the DaisyUI tabs
+   component, whose layer hides it unconditionally - pair panels to the checked
+   radio here so these rules win the cascade */
+.account-login .tab-content {
+    display: none;
+}
+
+.account-login:has(#tab-login:checked) #login-tab,
+.account-login:has(#tab-register:checked) #register-tab,
+.account-login.login-only #login-tab {
+    display: block;
+}
+
+/* Unlayered on purpose: Maho's footer markup shares the "footer" class name with
+   the DaisyUI footer component, whose layer would otherwise win the cascade */
+.footer {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: var(--container-7xl);
+    margin-inline: auto;
+    gap: 2.5rem 4.5rem;
+    padding: 4rem 1rem 2.5rem;
+    font-size: 0.875rem;
+}

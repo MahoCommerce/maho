@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<layout version="0.1.0">
+    <default>
+        <reference name="head">
+            <!-- Identity layer: plain CSS variable overrides, provided by each industry theme -->
+            <action method="addItem"><type>skin_css</type><name>css/theme.css</name></action>
+        </reference>
+    </default>
+</layout>

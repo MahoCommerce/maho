@@ -1,0 +1,52 @@
+/*
+ * Maho - Food. Warm and appetizing: terracotta on cream, Fraunces display,
+ * generous rounded shapes, pill buttons. Intentionally light-only - food
+ * photography belongs on a warm bright table.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600&display=swap');
+
+:root {
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'Source Sans 3', ui-sans-serif, system-ui, sans-serif;
+
+    --color-base-100: #fffaf4;
+    --color-base-200: #f9f0e3;
+    --color-base-300: #ecdcc6;
+    --color-base-content: #42342a;
+
+    --color-primary: #c9663d;
+    --color-primary-content: #fff5ef;
+    --color-secondary: #66783e;
+    --color-secondary-content: #f5f8ec;
+    --color-accent: #e0a03c;
+    --color-accent-content: #3c2c0e;
+    --color-neutral: #42342a;
+    --color-neutral-content: #f9f0e3;
+
+    --color-success: #5d7d3b;
+    --color-success-content: #f4f9ec;
+    --color-warning: #c47e12;
+    --color-warning-content: #fdf6e9;
+    --color-error: #bc4530;
+    --color-error-content: #fdf1ee;
+
+    /* Generous and soft; pill fields */
+    --radius-selector: 1rem;
+    --radius-field: 1.5rem;
+    --radius-box: 1.25rem;
+}
+
+/* Signature: menu-board headings with a little extra warmth */
+.page-title h1,
+.page-title h2,
+.product-view .product-shop .product-name .h1 {
+    font-weight: 600;
+}
+
+#nav > .nav-primary > li.level0 > a {
+    font-weight: 600;
+}
