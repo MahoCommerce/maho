@@ -64,20 +64,22 @@ class ControllerDispatcher
             return false;
         }
 
+        $controllerInstance = Mage::getControllerInstance($controllerClass, $request, $response);
+        if (!$controllerInstance->hasAction($actionName)) {
+            return false;
+        }
+
         // M1 BC: the standard router recorded the resolving module's class prefix (e.g.
         // 'Mage_Adminhtml' or 'Buddy_LogViewer_Adminhtml') via setControllerModule(), and
-        // third-party code dispatched through this path may read it back. Every resolution
+        // third-party code dispatched through this path may read it back. Set only after all
+        // checks pass, like M1's standard router — a dispatch that bails must not leak a
+        // module onto a request that falls through to another handler. Every resolution
         // branch assembles or stores the class as <modulePrefix>_<UcWordsController>Controller,
         // so the prefix is recovered by stripping the suffix (case-insensitively — PHP class
         // names are case-insensitive, so the URL casing may differ from the declared one).
         $suffix = '_' . uc_words($controllerName) . 'Controller';
         if (strcasecmp(substr($controllerClass, -strlen($suffix)), $suffix) === 0) {
             $request->setControllerModule(substr($controllerClass, 0, -strlen($suffix)));
-        }
-
-        $controllerInstance = Mage::getControllerInstance($controllerClass, $request, $response);
-        if (!$controllerInstance->hasAction($actionName)) {
-            return false;
         }
 
         // Set routeName for event dispatching (controller_action_predispatch_<routeName>).
@@ -115,17 +117,6 @@ class ControllerDispatcher
         $frontName = $parts[0];
         $controllerName = $parts[1] ?? 'index';
         $actionName = $parts[2] ?? 'index';
-
-        // A mis-cased admin frontName must fall through to noroute — M1 matched frontNames
-        // case-sensitively, so /Admin/... 404s rather than half-dispatching with a mis-cased
-        // route name that breaks adminhtml_* layout handles and predispatch observers.
-        // Without this guard the compiled lookup below would still resolve admin controllers
-        // (normalizeFrontName() maps any casing to the admin sentinel). Frontend frontNames
-        // stay case-insensitive: DB-persisted rewrites may carry mixed-case targets.
-        $adminFrontName = RouteCollectionBuilder::getAdminFrontName();
-        if ($frontName !== $adminFrontName && strcasecmp($frontName, $adminFrontName) === 0) {
-            return false;
-        }
 
         $controllerClass = $this->resolveControllerClass($frontName, $controllerName);
         if (!$controllerClass || !class_exists($controllerClass)) {
@@ -185,9 +176,9 @@ class ControllerDispatcher
         }
 
         // 4. Admin module chain — third-party admin extensions without `#[Route]`.
-        //    Exact-case comparison: mis-cased admin URLs are rejected before resolution
-        //    (see dispatchLegacyPath), and internal callers pass the configured frontName
-        //    verbatim, so a case-insensitive match here could only mask a broken dispatch.
+        //    Exact-case comparison (M1 semantics), matching normalizeFrontName() in the
+        //    compiled lookup above: a mis-cased admin frontName resolves nothing on any
+        //    dispatch path and falls through to the noroute handler.
         if ($frontName === RouteCollectionBuilder::getAdminFrontName()) {
             foreach ($this->buildAdminModuleChain() as $chainModule) {
                 $className = $chainModule . '_' . uc_words($controllerName) . 'Controller';

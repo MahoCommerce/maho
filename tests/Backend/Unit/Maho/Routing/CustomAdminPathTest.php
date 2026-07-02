@@ -59,14 +59,17 @@ describe('RouteCollectionBuilder::normalizeFrontName()', function () {
     beforeEach(fn() => resetAdminFrontNameCache());
     afterEach(fn() => resetAdminFrontNameCache());
 
-    it('maps the configured admin frontName to the sentinel regardless of case', function () {
+    it('maps the configured admin frontName to the sentinel only on an exact-case match', function () {
         Mage::getConfig()->setNode(AdminhtmlHelper::XML_PATH_USE_CUSTOM_ADMIN_PATH, '1');
         Mage::getConfig()->setNode(AdminhtmlHelper::XML_PATH_CUSTOM_ADMIN_PATH, 'BackOffice');
 
-        expect(RouteCollectionBuilder::normalizeFrontName('backoffice'))
+        expect(RouteCollectionBuilder::normalizeFrontName('BackOffice'))
             ->toBe(RouteCollectionBuilder::ADMIN_SENTINEL);
-        expect(RouteCollectionBuilder::normalizeFrontName('BACKOFFICE'))
-            ->toBe(RouteCollectionBuilder::ADMIN_SENTINEL);
+        // M1 semantics: a mis-cased admin frontName must not normalize to the sentinel,
+        // so it misses every compiled lookup and falls through to the noroute handler
+        // on all dispatch paths (Symfony, legacy path, forward).
+        expect(RouteCollectionBuilder::normalizeFrontName('backoffice'))->toBe('backoffice');
+        expect(RouteCollectionBuilder::normalizeFrontName('BACKOFFICE'))->toBe('backoffice');
     });
 
     it('leaves non-admin frontNames as-is (lowercased)', function () {
