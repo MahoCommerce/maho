@@ -32,11 +32,12 @@
                         <?php if ($this->helper('wishlist')->isAllow()) : ?>
                             <a href="#"
                                class="link-wishlist"
+                               title="<?= $this->quoteEscape($this->__('Add to Wishlist')) ?>"
                                onclick="customFormSubmit(
                                        '<?= $this->getAddToWishlistUrlCustom($_item, false) ?>',
                                        '<?= $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])) ?>',
                                        'post')">
-                                <?= $this->__('Add to Wishlist') ?>
+                                <?= $this->getIconSvg('heart') ?>
                             </a>
                         <?php endif ?>
                     </div>
