@@ -172,12 +172,30 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             $object->setData('publish_date', Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT));
         }
 
-        // Filter HTML content
+        // Sanitize HTML content on save so a stored value is never dangerous. The malicious-code
+        // filter (HTMLPurifier) HTML-parses the content, which would mangle a template directive
+        // whose nested quotes are invalid HTML attribute syntax (e.g. {{media url="..."}} inside
+        // an img src). So mask real directives ({{keyword ...}}) before filtering and restore them
+        // after; anything else wrapped in braces (e.g. {{<script>...}}) is left for the filter to
+        // strip. A directive's own parameters are preserved as authored and resolved on output;
+        // constraining what content directives may do is a separate, platform-wide concern.
         if ($object->hasData('content')) {
-            $content = $object->getData('content');
+            $content = (string) $object->getData('content');
+
+            $directives = [];
+            $content = (string) preg_replace_callback('/\{\{[a-z]{1,10}.*?\}\}/is', function (array $match) use (&$directives): string {
+                $token = 'MAHODIRECTIVE' . count($directives) . 'X';
+                $directives[$token] = $match[0];
+                return $token;
+            }, $content);
+
             $filter = Mage::getModel('core/input_filter_maliciousCode');
-            $filteredContent = $filter->linkFilter($filter->filter($content));
-            $object->setData('content', $filteredContent);
+            $content = $filter->linkFilter($filter->filter($content));
+
+            if ($directives !== []) {
+                $content = strtr($content, $directives);
+            }
+            $object->setData('content', $content);
         }
 
         // Auto-generate URL key from title if empty

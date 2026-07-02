@@ -53,6 +53,56 @@ describe('Blog Post Basic Integration', function () {
         expect($deletedPost->getId())->toBeNull();
     });
 
+    test('preserves template directives with nested quotes through save', function () {
+        // {{media url="..."}} inside an img src has quotes that are invalid HTML attribute syntax;
+        // the content filter must not mangle it (getFilteredContent resolves it on output).
+        $post = Mage::getModel('blog/post');
+        $post->setTitle('Directive Post');
+        $post->setContent('<p><img src="{{media url="wysiwyg/a.webp"}}" alt=""></p><p>{{widget type="cms/widget_page_link"}}</p>');
+        $post->setIsActive(1);
+        $post->save();
+
+        $loaded = Mage::getModel('blog/post')->load($post->getId());
+        expect($loaded->getContent())->toContain('{{media url="wysiwyg/a.webp"}}');
+        expect($loaded->getContent())->toContain('{{widget type="cms/widget_page_link"}}');
+
+        $post->delete();
+    });
+
+    test('resolves a media directive on output', function () {
+        // The stored directive must actually resolve to a real media URL when the
+        // post is rendered via getFilteredContent().
+        $post = Mage::getModel('blog/post');
+        $post->setTitle('Media Directive Post');
+        $post->setContent('<p><img src="{{media url="wysiwyg/a.webp"}}" alt=""></p>');
+        $post->setIsActive(1);
+        $post->save();
+
+        $rendered = Mage::getModel('blog/post')->load($post->getId())->getFilteredContent();
+
+        expect($rendered)->toContain('media/wysiwyg/a.webp')
+            ->and($rendered)->not->toContain('{{media');
+
+        $post->delete();
+    });
+
+    test('strips malicious code wrapped in a directive on output', function () {
+        // Regression: masking {{...}} spans and restoring them verbatim let arbitrary
+        // markup inside braces bypass the malicious-code filter. The rendered output
+        // must never contain executable markup, even when wrapped in braces.
+        $post = Mage::getModel('blog/post');
+        $post->setTitle('XSS Directive Post');
+        $post->setContent('{{<script>alert(document.cookie)</script>}}');
+        $post->setIsActive(1);
+        $post->save();
+
+        $rendered = Mage::getModel('blog/post')->load($post->getId())->getFilteredContent();
+
+        expect($rendered)->not->toContain('<script');
+
+        $post->delete();
+    });
+
     test('blog module models are properly registered', function () {
         // Test that blog models can be instantiated via Mage factory
         $post = Mage::getModel('blog/post');
