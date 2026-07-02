@@ -23,13 +23,6 @@ class Mage_Adminhtml_Block_Newsletter_Template_Preview extends Mage_Adminhtml_Bl
             $template->setTemplateText($this->getRequest()->getParam('text'));
             $template->setTemplateStyles($this->getRequest()->getParam('styles'));
         }
-        $template->setTemplateStyles(
-            $this->maliciousCodeFilter((string) $template->getTemplateStyles()),
-        );
-        $template->setTemplateText(
-            $this->maliciousCodeFilter($template->getTemplateText()),
-        );
-
         $storeId = (int) $this->getRequest()->getParam('store_id');
         if (!$storeId) {
             $storeId = Mage::app()->getAnyStoreView()->getId();
@@ -51,6 +44,10 @@ class Mage_Adminhtml_Block_Newsletter_Template_Preview extends Mage_Adminhtml_Bl
             $templateProcessed = '<pre>' . htmlspecialchars($templateProcessed) . '</pre>';
         }
 
+        // Sanitize the resolved output (directives are now real URLs/values), then
+        // decorate links. Sanitizing before directive resolution would mangle
+        // {{...}} directives and leave their content unsanitized.
+        $templateProcessed = $this->maliciousCodeFilter($templateProcessed);
         $templateProcessed = Mage::getSingleton('core/input_filter_maliciousCode')
             ->linkFilter($templateProcessed);
 
