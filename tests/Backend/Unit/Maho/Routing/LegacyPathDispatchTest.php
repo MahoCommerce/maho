@@ -80,11 +80,13 @@ describe('ControllerDispatcher::dispatchLegacyPath()', function () {
         $request = legacyRequest('/catalog');
 
         // Mage_Catalog_IndexController::indexAction() exists, so dispatch succeeds.
-        // We only care that parsing defaults kick in — parse is observable pre-dispatch.
         $dispatcher->dispatchLegacyPath($request, new Mage_Core_Controller_Response_Http());
 
         expect($request->getControllerName())->toBe('index');
         expect($request->getActionName())->toBe('index');
+        // M1 BC: a successful dispatch records the resolving module's class prefix via
+        // setControllerModule(); third-party code on the legacy path may read it back.
+        expect($request->getControllerModule())->toBe('Mage_Catalog');
     });
 
     it('handles a trailing key without a value by storing an empty string', function () {
@@ -109,6 +111,48 @@ describe('ControllerDispatcher::dispatchLegacyPath()', function () {
         // because the lookup is case-insensitive.
         expect($request->getModuleName())->toBe('CATALOG');
         expect($request->getControllerName())->toBe('Index');
+    });
+
+    it('rejects a mis-cased admin frontName instead of dispatching with a broken route name', function () {
+        // M1 matched frontNames case-sensitively: /ADMIN/... must fall through to noroute
+        // rather than resolve admin controllers and dispatch with routeName 'ADMIN', which
+        // would break adminhtml_* layout handles. normalizeFrontName() is exact-case on the
+        // admin frontName, so a mis-cased one misses every resolution step.
+        $dispatcher = new ControllerDispatcher();
+        $result = $dispatcher->dispatchLegacyPath(
+            legacyRequest('/ADMIN/dashboard/index'),
+            new Mage_Core_Controller_Response_Http(),
+        );
+
+        expect($result)->toBeFalse();
+    });
+
+    it('rejects a mis-cased admin frontName on the forward path', function () {
+        // dispatchForward() has no path parsing of its own — a _forward() or custom router
+        // presetting a case-variant admin module name must not resolve admin controllers
+        // via the compiled lookup either.
+        $dispatcher = new ControllerDispatcher();
+        $request = legacyRequest('/');
+        $request->setModuleName('ADMIN');
+        $request->setControllerName('dashboard');
+        $request->setActionName('index');
+
+        $result = $dispatcher->dispatchForward($request, new Mage_Core_Controller_Response_Http());
+
+        expect($result)->toBeFalse();
+        expect($request->isDispatched())->toBeFalse();
+    });
+
+    it('does not leak controllerModule onto a request whose dispatch bails at hasAction()', function () {
+        // M1's standard router set request values only after all checks passed — a failed
+        // dispatch falls through to another handler, which must not see a stale module.
+        // (The success case is asserted in the "defaults controller/action" test above.)
+        $dispatcher = new ControllerDispatcher();
+        $request = legacyRequest('/catalog/index/nonexistentAction');
+
+        $dispatcher->dispatchLegacyPath($request, new Mage_Core_Controller_Response_Http());
+
+        expect($request->getControllerModule())->toBeNull();
     });
 
     it('tolerates leading and trailing slashes', function () {
