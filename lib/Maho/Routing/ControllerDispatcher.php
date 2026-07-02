@@ -64,6 +64,17 @@ class ControllerDispatcher
             return false;
         }
 
+        // M1 BC: the standard router recorded the resolving module's class prefix (e.g.
+        // 'Mage_Adminhtml' or 'Buddy_LogViewer_Adminhtml') via setControllerModule(), and
+        // third-party code dispatched through this path may read it back. Every resolution
+        // branch assembles or stores the class as <modulePrefix>_<UcWordsController>Controller,
+        // so the prefix is recovered by stripping the suffix (case-insensitively — PHP class
+        // names are case-insensitive, so the URL casing may differ from the declared one).
+        $suffix = '_' . uc_words($controllerName) . 'Controller';
+        if (strcasecmp(substr($controllerClass, -strlen($suffix)), $suffix) === 0) {
+            $request->setControllerModule(substr($controllerClass, 0, -strlen($suffix)));
+        }
+
         $controllerInstance = Mage::getControllerInstance($controllerClass, $request, $response);
         if (!$controllerInstance->hasAction($actionName)) {
             return false;
@@ -104,6 +115,17 @@ class ControllerDispatcher
         $frontName = $parts[0];
         $controllerName = $parts[1] ?? 'index';
         $actionName = $parts[2] ?? 'index';
+
+        // A mis-cased admin frontName must fall through to noroute — M1 matched frontNames
+        // case-sensitively, so /Admin/... 404s rather than half-dispatching with a mis-cased
+        // route name that breaks adminhtml_* layout handles and predispatch observers.
+        // Without this guard the compiled lookup below would still resolve admin controllers
+        // (normalizeFrontName() maps any casing to the admin sentinel). Frontend frontNames
+        // stay case-insensitive: DB-persisted rewrites may carry mixed-case targets.
+        $adminFrontName = RouteCollectionBuilder::getAdminFrontName();
+        if ($frontName !== $adminFrontName && strcasecmp($frontName, $adminFrontName) === 0) {
+            return false;
+        }
 
         $controllerClass = $this->resolveControllerClass($frontName, $controllerName);
         if (!$controllerClass || !class_exists($controllerClass)) {
@@ -163,7 +185,10 @@ class ControllerDispatcher
         }
 
         // 4. Admin module chain — third-party admin extensions without `#[Route]`.
-        if (strtolower($frontName) === strtolower(RouteCollectionBuilder::getAdminFrontName())) {
+        //    Exact-case comparison: mis-cased admin URLs are rejected before resolution
+        //    (see dispatchLegacyPath), and internal callers pass the configured frontName
+        //    verbatim, so a case-insensitive match here could only mask a broken dispatch.
+        if ($frontName === RouteCollectionBuilder::getAdminFrontName()) {
             foreach ($this->buildAdminModuleChain() as $chainModule) {
                 $className = $chainModule . '_' . uc_words($controllerName) . 'Controller';
                 if (class_exists($className)) {
@@ -206,13 +231,14 @@ class ControllerDispatcher
             return false;
         }
 
-        // Admin area: verify the matched frontName matches the runtime admin frontName.
-        // Without this, a request like /notadmin/... would match admin routes with any
-        // segment for `{_adminFrontName}` and dispatch as admin — rejecting at this point
-        // simply falls through to the noroute handler.
+        // Admin area: verify the matched frontName matches the runtime admin frontName
+        // exactly, including case (M1 semantics — /Admin/... 404s rather than dispatching
+        // with a mis-cased route name). Without this, a request like /notadmin/... would
+        // match admin routes with any segment for `{_adminFrontName}` and dispatch as
+        // admin — rejecting at this point simply falls through to the noroute handler.
         if ($area === 'adminhtml') {
             $matchedAdminFrontName = $params['_adminFrontName'] ?? '';
-            if (strtolower($matchedAdminFrontName) !== strtolower(RouteCollectionBuilder::getAdminFrontName())) {
+            if ($matchedAdminFrontName !== RouteCollectionBuilder::getAdminFrontName()) {
                 return false;
             }
         }

@@ -111,6 +111,31 @@ describe('ControllerDispatcher::dispatchLegacyPath()', function () {
         expect($request->getControllerName())->toBe('Index');
     });
 
+    it('rejects a mis-cased admin frontName instead of dispatching with a broken route name', function () {
+        // M1 matched frontNames case-sensitively: /ADMIN/... must fall through to noroute
+        // rather than resolve admin controllers (normalizeFrontName() is case-insensitive)
+        // and dispatch with routeName 'ADMIN', which would break adminhtml_* layout handles.
+        $dispatcher = new ControllerDispatcher();
+        $result = $dispatcher->dispatchLegacyPath(
+            legacyRequest('/ADMIN/dashboard/index'),
+            new Mage_Core_Controller_Response_Http(),
+        );
+
+        expect($result)->toBeFalse();
+    });
+
+    it('records the resolving module class prefix as controllerModule (M1 BC)', function () {
+        // M1's standard router exposed the matched module via setControllerModule();
+        // third-party code dispatched through the legacy path may read it back.
+        // Dispatch bails at hasAction(), but the module is recorded at resolution time.
+        $dispatcher = new ControllerDispatcher();
+        $request = legacyRequest('/catalog/index/nonexistentAction');
+
+        $dispatcher->dispatchLegacyPath($request, new Mage_Core_Controller_Response_Http());
+
+        expect($request->getControllerModule())->toBe('Mage_Catalog');
+    });
+
     it('tolerates leading and trailing slashes', function () {
         $dispatcher = new ControllerDispatcher();
         $request = legacyRequest('/catalog/index/nonexistentAction/');
