@@ -419,12 +419,22 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         if (!$this->image) {
             $imageManager = Maho::getImageManager(['blendingColor' => $this->_backgroundColorStr]);
             $this->image = $imageManager->decodePath($this->getBaseFile());
-            if ($this->_backgroundColor) {
+            if ($this->_backgroundColor && !$this->canPreserveTransparency()) {
                 $this->image->fillTransparentAreas($this->_backgroundColorStr);
             }
         }
 
         return $this->image;
+    }
+
+    /**
+     * Transparency survives the resize only when requested AND the output
+     * format can carry an alpha channel (the cache keeps the source extension)
+     */
+    protected function canPreserveTransparency(): bool
+    {
+        $ext = strtolower(pathinfo((string) $this->getBaseFile(), PATHINFO_EXTENSION));
+        return $this->_keepTransparency && in_array($ext, ['png', 'webp', 'avif', 'gif'], true);
     }
 
     public function resize(): self
@@ -433,15 +443,17 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
             return $this;
         }
 
+        $background = $this->canPreserveTransparency() ? '#ffffff00' : $this->_backgroundColorStr;
+
         if ($this->_width && $this->_height) {
-            $this->getImage()->containDown($this->_width, $this->_height, $this->_backgroundColorStr);
+            $this->getImage()->containDown($this->_width, $this->_height, $background);
         } elseif ($this->_keepFrame) {
             if ($this->_width) {
                 $this->setHeight($this->_width);
             } else {
                 $this->setWidth($this->_height);
             }
-            $this->getImage()->containDown($this->_width, $this->_height, $this->_backgroundColorStr);
+            $this->getImage()->containDown($this->_width, $this->_height, $background);
         } else {
             $this->getImage()->scaleDown($this->_width, $this->_height);
         }
