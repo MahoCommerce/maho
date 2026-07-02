@@ -143,13 +143,20 @@ class RouteCollectionBuilder
 
     /**
      * Translate a URL frontName to its reverse-lookup key (sentinel for admin/install, identity otherwise).
+     *
+     * The admin comparison is exact-case (M1 semantics): a mis-cased admin frontName must not
+     * normalize to the sentinel, so /Admin/... misses every compiled lookup and falls through
+     * to the noroute handler on all dispatch paths — rather than half-dispatching with a
+     * mis-cased route name that breaks adminhtml_* layout handles and predispatch observers.
+     * Frontend frontNames stay case-insensitive: DB-persisted URL rewrites may carry
+     * mixed-case targets.
      */
     public static function normalizeFrontName(string $frontName): string
     {
-        $lower = strtolower($frontName);
-        if ($lower === strtolower(self::getAdminFrontName())) {
+        if ($frontName === self::getAdminFrontName()) {
             return self::ADMIN_SENTINEL;
         }
+        $lower = strtolower($frontName);
         if ($lower === 'install') {
             return self::INSTALL_SENTINEL;
         }
