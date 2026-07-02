@@ -196,6 +196,19 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         if (!empty($args['bundleOptionQty'])) {
             $buyOptions['bundle_option_qty'] = $args['bundleOptionQty'];
         }
+        foreach ([
+            'giftcardAmount' => 'giftcard_amount',
+            'giftcardSenderName' => 'giftcard_sender_name',
+            'giftcardSenderEmail' => 'giftcard_sender_email',
+            'giftcardRecipientName' => 'giftcard_recipient_name',
+            'giftcardRecipientEmail' => 'giftcard_recipient_email',
+            'giftcardMessage' => 'giftcard_message',
+            'giftcardDeliveryDate' => 'giftcard_delivery_date',
+        ] as $camel => $snake) {
+            if (!empty($args[$camel])) {
+                $buyOptions[$snake] = $args[$camel];
+            }
+        }
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->addItem($quote, $sku, $qty, $buyOptions);

@@ -618,6 +618,86 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             $dto->bundleOptions = $this->getBundleOptions($product);
         }
 
+        // Gift card
+        if ($typeId === 'giftcard') {
+            // Layered-collection listings don't load type-specific EAV attributes;
+            // lazy-load them from the model here.
+            $gcAttrs = ['giftcard_type', 'giftcard_amounts', 'giftcard_min_amount', 'giftcard_max_amount', 'allow_message', 'use_config_is_redeemable'];
+            $needsLoad = false;
+            foreach ($gcAttrs as $a) {
+                if (!$product->hasData($a)) {
+                    $needsLoad = true;
+                    break;
+                }
+            }
+            if ($needsLoad && $product->getId()) {
+                $reload = \Mage::getModel('catalog/product')->setStoreId($product->getStoreId())->load((int) $product->getId());
+                foreach ($gcAttrs as $a) {
+                    if ($reload->hasData($a)) {
+                        $product->setData($a, $reload->getData($a));
+                    }
+                }
+            }
+            $rawType = $product->getData('giftcard_type');
+            $type = null;
+            if (is_string($rawType) && in_array($rawType, ['fixed', 'range', 'combined'], true)) {
+                $type = $rawType;
+            } elseif ($rawType !== null && $rawType !== '') {
+                // EAV option id — look up label and normalise
+                $optRow = \Mage::getSingleton('core/resource')->getConnection('core_read')
+                    ->fetchOne('SELECT value FROM eav_attribute_option_value WHERE option_id = ? AND store_id = 0', [(int) $rawType]);
+                $label = strtolower((string) $optRow);
+                if (str_contains($label, 'combin')) {
+                    $type = 'combined';
+                } elseif (str_contains($label, 'range') || str_contains($label, 'custom') || str_contains($label, 'open')) {
+                    $type = 'range';
+                } else {
+                    $type = 'fixed';
+                }
+            }
+            $dto->giftcardType = $type ?: 'fixed';
+
+            $rawAmounts = $product->getData('giftcard_amounts');
+            $amounts = [];
+            if (is_string($rawAmounts) && $rawAmounts !== '') {
+                $decoded = @unserialize($rawAmounts, ['allowed_classes' => false]);
+                if ($decoded === false && !str_starts_with($rawAmounts, 'b:')) {
+                    // CSV fallback
+                    foreach (array_map('trim', explode(',', $rawAmounts)) as $piece) {
+                        if (is_numeric($piece)) {
+                            $amounts[] = (float) $piece;
+                        }
+                    }
+                } elseif (is_array($decoded)) {
+                    foreach ($decoded as $row) {
+                        if (is_array($row) && isset($row['value'])) {
+                            $amounts[] = (float) $row['value'];
+                        } elseif (is_numeric($row)) {
+                            $amounts[] = (float) $row;
+                        }
+                    }
+                }
+            } elseif (is_array($rawAmounts)) {
+                foreach ($rawAmounts as $row) {
+                    if (is_array($row) && isset($row['value'])) {
+                        $amounts[] = (float) $row['value'];
+                    } elseif (is_numeric($row)) {
+                        $amounts[] = (float) $row;
+                    }
+                }
+            }
+            sort($amounts);
+            $dto->giftcardAmounts = $amounts;
+
+            $dto->giftcardMinAmount = $product->getData('giftcard_min_amount') !== null
+                ? (float) $product->getData('giftcard_min_amount') : null;
+            $dto->giftcardMaxAmount = $product->getData('giftcard_max_amount') !== null
+                ? (float) $product->getData('giftcard_max_amount') : null;
+            $dto->giftcardIsMessageAllowed = (bool) $product->getData('use_config_is_redeemable')
+                ? (bool) \Mage::getStoreConfig('giftcard/general/allow_message')
+                : (bool) $product->getData('allow_message');
+        }
+
         // Downloadable links
         if ($typeId === \Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE) {
             /** @var \Mage_Downloadable_Model_Product_Type $typeInstance */

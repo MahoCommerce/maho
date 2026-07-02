@@ -335,6 +335,27 @@ class Product extends CrudResource
     #[ApiProperty(description: 'Bundle product options and selections', writable: false, extraProperties: ['computed' => true])]
     public array $bundleOptions = [];
 
+    #[Groups(['product:detail'])]
+    #[ApiProperty(description: 'Gift card type: fixed | range | combined', writable: false, extraProperties: ['computed' => true])]
+    public ?string $giftcardType = null;
+
+    /** @var float[] */
+    #[Groups(['product:detail'])]
+    #[ApiProperty(description: 'Preset amounts (giftcard fixed/combined types)', writable: false, extraProperties: ['computed' => true])]
+    public array $giftcardAmounts = [];
+
+    #[Groups(['product:detail'])]
+    #[ApiProperty(description: 'Minimum custom amount (giftcard range/combined)', writable: false, extraProperties: ['computed' => true])]
+    public ?float $giftcardMinAmount = null;
+
+    #[Groups(['product:detail'])]
+    #[ApiProperty(description: 'Maximum custom amount (giftcard range/combined)', writable: false, extraProperties: ['computed' => true])]
+    public ?float $giftcardMaxAmount = null;
+
+    #[Groups(['product:detail'])]
+    #[ApiProperty(description: 'Whether a personal message is allowed (giftcard)', writable: false, extraProperties: ['computed' => true])]
+    public bool $giftcardIsMessageAllowed = false;
+
     /** @var array<array{label: string, value: string, code: string}> */
     #[Groups(['product:detail'])]
     #[ApiProperty(description: 'Additional product attributes for specifications tab', writable: false, extraProperties: ['computed' => true])]

@@ -279,7 +279,7 @@ class CartService
         //   Structured: ['options' => [...], 'links' => [...], 'super_group' => [...], 'bundle_option' => [...]] (from GraphQL CartProcessor)
         //   Flat: [optionId => valueId, ...] (from REST GuestCartController)
         if (!empty($options)) {
-            if (isset($options['options']) || isset($options['links']) || isset($options['super_group']) || isset($options['bundle_option'])) {
+            if (isset($options['options']) || isset($options['links']) || isset($options['super_group']) || isset($options['bundle_option']) || isset($options['giftcard_amount'])) {
                 // Structured format
                 if (!empty($options['options'])) {
                     $buyRequest->setData('options', $options['options']);
@@ -295,6 +295,15 @@ class CartService
                 }
                 if (!empty($options['bundle_option_qty'])) {
                     $buyRequest->setData('bundle_option_qty', $options['bundle_option_qty']);
+                }
+                foreach ([
+                    'giftcard_amount', 'giftcard_sender_name', 'giftcard_sender_email',
+                    'giftcard_recipient_name', 'giftcard_recipient_email',
+                    'giftcard_message', 'giftcard_delivery_date',
+                ] as $gcKey) {
+                    if (!empty($options[$gcKey])) {
+                        $buyRequest->setData($gcKey, $options[$gcKey]);
+                    }
                 }
             } else {
                 // Flat custom options format (REST)
