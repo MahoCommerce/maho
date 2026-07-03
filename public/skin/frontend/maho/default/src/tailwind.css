@@ -22,6 +22,10 @@
 @source inline("alert alert-{success,warning,error,info} divider link link-{primary,hover}");
 @source inline("card card-{body,title,actions,border} tabs tab tab-active loading loading-spinner");
 
+/* Star ratings: emitted by Mage_Rating_Helper_Data::getStarsHtml() (app/code
+   is not scanned) */
+@source inline("rating rating-half rating-{xs,sm,md,lg} mask mask-star-2 mask-half-{1,2}");
+
 @plugin "daisyui" {
     themes: false;
 }

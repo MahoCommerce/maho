@@ -162,11 +162,16 @@
             }.bind(productAddToCartForm);
         </script>
 
-        <?php // Product details as accordion rows in the buy column; reviews render full width below ?>
+        <?php // Product details as accordion rows in the buy column. Reviews render
+              // full width below - but with none yet, the whole section demotes to
+              // one more accordion row so the invitation stays without the empty band ?>
         <?php $detailedInfoGroup = $this->getChildGroup('detailed_info', 'getChildHtml'); ?>
         <?php unset($detailedInfoGroup['reviews']); ?>
         <?php $detailedInfoGroup = array_filter($detailedInfoGroup, fn ($html) => trim((string) $html) !== ''); ?>
-        <?php if ($detailedInfoGroup): ?>
+        <?php $reviewsHtml = trim((string) $this->getChildHtml('reviews')); ?>
+        <?php $hasReviews = $reviewsHtml !== ''
+            && Mage::getModel('review/review')->getTotalReviews($_product->getId(), true, Mage::app()->getStore()->getId()) > 0; ?>
+        <?php if ($detailedInfoGroup || (!$hasReviews && $reviewsHtml !== '')): ?>
             <div class="collateral-accordions">
                 <?php foreach ($detailedInfoGroup as $alias => $html): ?>
                     <details class="collateral-accordion" id="panel-<?= $alias ?>">
@@ -177,11 +182,20 @@
                         <div class="collateral-content"><?= $html ?></div>
                     </details>
                 <?php endforeach ?>
+                <?php if (!$hasReviews && $reviewsHtml !== ''): ?>
+                    <details class="collateral-accordion" id="panel-reviews">
+                        <summary>
+                            <span><?= $this->escapeHtml($this->getChildData('reviews', 'title')) ?></span>
+                            <?= $this->getIconSvg('chevron-down') ?>
+                        </summary>
+                        <div class="collateral-content"><?= $reviewsHtml ?></div>
+                    </details>
+                <?php endif ?>
             </div>
         <?php endif ?>
     </div>
 
-    <?php if ($reviewsHtml = trim((string) $this->getChildHtml('reviews'))): ?>
+    <?php if ($hasReviews): ?>
         <div class="product-collateral">
             <h2><?= $this->escapeHtml($this->getChildData('reviews', 'title')) ?></h2>
             <?= $reviewsHtml ?>

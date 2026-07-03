@@ -226,9 +226,11 @@ Notes:
   keeps the common ones (`btn`, `badge`, `alert`, `card`, ...) available for
   CMS/database content, which cannot be scanned at build time.
 - Watch out for DaisyUI component names colliding with Maho's semantic classes
-  (`.label`, `.footer`, `.rating`, `.loading`, `.tab-content`, `.breadcrumbs`
-  are already handled): fix collisions with unlayered rules at the bottom of
-  `src/components.css`.
+  (`.label`, `.footer`, `.loading`, `.tab-content`, `.breadcrumbs` are already
+  handled): fix collisions with unlayered rules at the bottom of
+  `src/components.css`. Star ratings are the real DaisyUI rating component
+  (markup emitted by `Mage_Rating_Helper_Data::getStarsHtml()`), colored via
+  `--maho-color-rating`.
 - Both checkouts are styled: the one-step checkout lives in
   `src/onestep-checkout.css`, the classic multi-step accordion (`.opc`, used
   when one-step checkout is disabled) in `src/checkout.css`.

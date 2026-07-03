@@ -41,9 +41,9 @@
         --maho-color-input-focus: var(--color-primary);
         --maho-color-input-error: var(--color-error);
 
-        /* Same star shape for both layers so the fill aligns perfectly over the track */
-        --star-rating__icon-active: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23e8890c"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" /></svg>');
-        --star-rating__icon-inactive: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23dbd8d4"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" /></svg>');
+        /* Star color for the DaisyUI rating component (inactive stars are the
+           same color at the component's reduced opacity) */
+        --maho-color-rating: #e8890c;
 
         /* Product tile surface: a soft studio-light falloff behind the transparent
            product cutouts (brightest behind the subject, darker toward the edges).
@@ -1314,19 +1314,6 @@
         }
     }
 
-    .rating-box {
-        width: 5.25rem;
-        height: 1rem;
-        background: var(--star-rating__icon-inactive) repeat-x;
-        background-size: 1.05rem;
-
-        .rating {
-            display: block;
-            height: 100%;
-            background: var(--star-rating__icon-active) repeat-x;
-            background-size: 1.05rem;
-        }
-    }
 
     /* ============================================
      * Toolbar + pager
@@ -1939,18 +1926,48 @@
         }
     }
 
+    /* Review dialog form: rating rows, then the text fields */
+    .rd-ratings {
+        @apply mb-5 flex flex-col gap-2.5;
+
+        .rd-row {
+            @apply flex items-center justify-between gap-4;
+        }
+
+        .rd-label {
+            @apply text-sm font-medium;
+        }
+    }
+
+    .rd-fields {
+        @apply flex flex-col gap-4;
+
+        .rd-field {
+            @apply flex flex-col gap-1;
+
+            label {
+                @apply text-sm font-medium;
+            }
+
+            input[type="text"] {
+                @apply input w-full;
+            }
+        }
+    }
+
     /* Product reviews */
     .box-reviews {
         .rv-header {
             @apply mb-5 flex flex-wrap items-center justify-between gap-4;
 
-            /* Sits flush with the panel's own padding, like the other tabs */
+            /* Empty state: message and action sit together, left-aligned -
+               justify-between would strand them at opposite page edges */
             &.empty {
-                @apply flex-col items-center gap-4 p-0 text-center;
+                @apply justify-start gap-5;
             }
 
             .no-rating {
-                @apply m-0 text-[0.9375rem] text-base-content;
+                @apply m-0 text-[0.9375rem] text-base-content/70;
             }
         }
 
@@ -2795,15 +2812,11 @@ th.label {
     color: inherit;
 }
 
-/* Unlayered: Maho's review stars (.rating inside .rating-box) collide with the
-   DaisyUI rating component, which forces inline-flex and drops the fill layer
-   onto the text baseline - the grey track then peeks out above the stars */
-.rating-box .rating {
-    display: block;
-    height: 100%;
-    background: var(--star-rating__icon-active) repeat-x;
-    background-size: 1.05rem;
-    opacity: 1;
+/* Unlayered: stars use the DaisyUI rating component; paint them with the
+   theme's rating color (the component defaults to base-content, and its
+   utilities layer would beat a components-layer override) */
+.rating .mask {
+    background-color: var(--maho-color-rating);
 }
 
 /* Unlayered: app.js toggles a .loading class on the gallery, which collides
