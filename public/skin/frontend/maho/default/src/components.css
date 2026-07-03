@@ -407,8 +407,10 @@
 
     .page-header-container {
         /* flex-wrap exists only so the search bar can drop to its own row on
-           mobile (basis-full below); everything else must fit the first row */
-        @apply mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3.5 max-nav:gap-1.5 max-nav:px-3;
+           mobile (basis-full below); everything else must fit the first row.
+           Small bottom padding on desktop: the nav row below brings its own
+           link padding (mobile has no nav row, keep it symmetric there) */
+        @apply mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 pb-1 pt-3.5 max-nav:gap-1.5 max-nav:px-3 max-nav:pb-3.5;
 
         > div {
             @apply flex items-center gap-1 max-nav:gap-0;
