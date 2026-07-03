@@ -1568,12 +1568,31 @@
     /* The essential block is the layout grid; the add-to-cart form
        contributes its children as grid items via display:contents, so
        non-form content (the detail accordions, which may carry their own
-       forms) can share the buy column */
+       forms) can share the buy column. Vertical rhythm comes from margins,
+       not row gaps: any block a product doesn't have (related, cart row,
+       accordions) then costs nothing instead of leaving phantom gaps */
     .product-view .product-essential {
-        @apply mb-10 grid grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-6;
+        @apply mb-10 grid grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-0;
 
         > form {
             display: contents;
+        }
+
+        /* Contentless on products whose buy box renders inside the shop
+           column (:empty can't catch the leftover whitespace) */
+        .add-to-cart-wrapper:not(:has(*)) {
+            @apply hidden;
+        }
+
+        .product-shop {
+            @apply mt-6 nav:mt-0;
+        }
+
+        .add-to-cart-wrapper,
+        .block-related,
+        > .collateral-accordions,
+        > form > .product-options-bottom {
+            @apply mt-6;
         }
 
         @media (min-width: 771px) {

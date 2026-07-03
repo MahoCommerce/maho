@@ -89,7 +89,6 @@
 
             <?= $this->getChildHtml('related_products') ?>
 
-            <div class="clearer"></div>
             <?php if ($_product->isSaleable() && $this->hasOptions()):?>
                 <?= $this->getChildChildHtml('container2', '', true, true) ?>
             <?php endif ?>
