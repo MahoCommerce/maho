@@ -2024,7 +2024,11 @@
         }
 
         .rv-list {
-            @apply flex flex-col gap-4;
+            @apply grid gap-4;
+            /* Cards, not full-width rows: as many ~20rem columns as fit.
+               auto-fill (not auto-fit) keeps cards card-sized even when a
+               product has only one or two reviews. */
+            grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
         }
 
         .rv-card {
