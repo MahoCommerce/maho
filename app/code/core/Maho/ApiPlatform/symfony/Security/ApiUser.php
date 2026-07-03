@@ -51,7 +51,6 @@ class ApiUser implements UserInterface
      * sites (e.g. TokenInterface handling) that still invoke it
      * continue to work harmlessly.
      */
-    #[\Override]
     public function eraseCredentials(): void
     {
         // No credentials to erase for JWT-based authentication
