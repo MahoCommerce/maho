@@ -59,10 +59,10 @@
         ));
 
         > .blog_post_item {
-            @apply block rounded-box border border-base-200 p-[0.9375rem] text-inherit no-underline transition-[border-color,box-shadow,transform] duration-200;
+            @apply block rounded-box border border-line p-[0.9375rem] text-inherit no-underline transition-[border-color,box-shadow,transform] duration-200;
 
             &:hover {
-                @apply -translate-y-0.5 border-base-300 shadow-[0_10px_28px_rgb(0_0_0/0.08)];
+                @apply -translate-y-0.5 border-base-content/25 shadow-[0_10px_28px_rgb(0_0_0/0.08)];
             }
         }
     }

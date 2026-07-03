@@ -96,6 +96,10 @@ Restyle the whole store by overriding the design tokens — every component
     --color-base-300: #dfe7e2;                /* borders */
     --color-base-content: #17221d;            /* text ink */
 
+    /* Every standard border and hairline uses this one variable
+       (defaults to base-300) */
+    --maho-color-border: #dfe7e2;
+
     /* Shape */
     --radius-selector: 0.5rem;                /* swatches, badges */
     --radius-field: 0.5rem;                   /* inputs, buttons */

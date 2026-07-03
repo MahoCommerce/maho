@@ -66,7 +66,7 @@
 
             &::before {
                 content: '';
-                @apply size-2 shrink-0 rounded-full border-2 border-base-300;
+                @apply size-2 shrink-0 rounded-full border-2 border-line;
             }
 
             &.complete {
@@ -100,7 +100,7 @@
         @apply mx-0 mb-0 mt-5 flex list-none flex-col gap-3 p-0;
 
         .section {
-            @apply overflow-hidden rounded-box border border-base-200 bg-base-100;
+            @apply overflow-hidden rounded-box border border-line bg-base-100;
 
             .step-title {
                 @apply flex items-center gap-3 px-5 py-4 text-base-content/45;
@@ -134,7 +134,7 @@
 
             /* The step being filled in */
             &.active .step-title {
-                @apply border-b border-base-200 text-base-content;
+                @apply border-b border-line text-base-content;
 
                 .number {
                     @apply bg-primary text-primary-content;
@@ -249,7 +249,7 @@
             }
 
             dt:has(input[type="radio"]) {
-                @apply flex cursor-pointer items-center gap-3 rounded-field border border-base-200 bg-base-100 px-4 py-3 text-sm normal-case tracking-normal text-base-content hover:border-primary;
+                @apply flex cursor-pointer items-center gap-3 rounded-field border border-line bg-base-100 px-4 py-3 text-sm normal-case tracking-normal text-base-content hover:border-primary;
 
                 &:has(input[type="radio"]:checked) {
                     @apply border-primary;
@@ -312,7 +312,7 @@
             }
 
             > .promo-code-section {
-                @apply order-2 mt-5 border-t border-base-200 pt-5;
+                @apply order-2 mt-5 border-t border-line pt-5;
             }
 
             > .tool-tip {

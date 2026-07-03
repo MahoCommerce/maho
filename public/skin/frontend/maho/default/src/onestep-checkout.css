@@ -83,7 +83,7 @@
 
     /* Section bodies read as cards, like the cart's rail */
     .onestep-section-content {
-        @apply relative mt-4 rounded-box border border-base-200 bg-base-100;
+        @apply relative mt-4 rounded-box border border-line bg-base-100;
         padding: var(--_section-padding);
 
         /* Loading overlay - hidden by default */
@@ -99,7 +99,7 @@
 
         &::after {
             content: '';
-            @apply absolute left-1/2 top-1/2 z-[2] -ml-3 -mt-3 size-6 rounded-full border-2 border-base-300 border-t-primary;
+            @apply absolute left-1/2 top-1/2 z-[2] -ml-3 -mt-3 size-6 rounded-full border-2 border-line border-t-primary;
             animation: onestep-spin 0.6s linear infinite;
         }
 
@@ -251,7 +251,7 @@
         @apply m-0 p-0;
 
         dt {
-            @apply mb-2 flex cursor-pointer items-center gap-3 rounded-field border border-base-200 bg-base-100 px-4 py-3 font-medium hover:border-primary;
+            @apply mb-2 flex cursor-pointer items-center gap-3 rounded-field border border-line bg-base-100 px-4 py-3 font-medium hover:border-primary;
 
             &:has(input[type="radio"]:checked) {
                 @apply border-primary;
@@ -285,7 +285,7 @@
         @apply w-full border-collapse;
 
         thead th {
-            @apply whitespace-nowrap border-b border-base-200 px-2 py-3 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-base-content/65;
+            @apply whitespace-nowrap border-b border-line px-2 py-3 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-base-content/65;
 
             &:first-child {
                 @apply w-full whitespace-normal;
@@ -293,7 +293,7 @@
         }
 
         tbody td {
-            @apply overflow-hidden text-ellipsis break-words border-b border-base-200 px-2 py-3 align-top text-sm;
+            @apply overflow-hidden text-ellipsis break-words border-b border-line px-2 py-3 align-top text-sm;
 
             &:nth-child(2),
             &:nth-child(3),
@@ -312,7 +312,7 @@
 
         tfoot {
             tr:first-child td {
-                @apply border-t border-base-200;
+                @apply border-t border-line;
             }
 
             td {
@@ -324,7 +324,7 @@
             }
 
             tr:last-child td {
-                @apply border-t border-base-300 pt-3 text-base font-bold text-base-content;
+                @apply border-t border-line pt-3 text-base font-bold text-base-content;
             }
         }
     }
@@ -373,7 +373,7 @@
         }
 
         .applied-code {
-            @apply mb-1.5 flex items-center gap-2 rounded-field border border-base-300 bg-base-200 px-2.5 py-2 text-[0.8125rem] last:mb-0;
+            @apply mb-1.5 flex items-center gap-2 rounded-field border border-line bg-base-200 px-2.5 py-2 text-[0.8125rem] last:mb-0;
 
             .code-value {
                 @apply font-mono font-semibold;
@@ -414,7 +414,7 @@
         }
 
         .agreement-content {
-            @apply max-h-28 overflow-y-auto rounded-field border border-base-200 bg-base-100 px-3 py-1 text-[0.8125rem] text-base-content/75;
+            @apply max-h-28 overflow-y-auto rounded-field border border-line bg-base-100 px-3 py-1 text-[0.8125rem] text-base-content/75;
         }
 
         .agree {

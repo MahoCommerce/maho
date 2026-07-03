@@ -125,7 +125,7 @@
     }
 
     .buttons-set {
-        @apply mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-base-200 pt-5;
+        @apply mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5;
 
         .back-link {
             @apply order-first text-sm;
@@ -259,7 +259,7 @@
      * ============================================ */
 
     .main {
-        @apply mx-auto grid w-full max-w-7xl content-start grid-cols-[minmax(0,1fr)] gap-4 px-4 pb-12 pt-4 nav:gap-x-10 nav:gap-y-4;
+        @apply mx-auto grid w-full max-w-7xl content-start grid-cols-[minmax(0,1fr)] gap-4 px-4 pb-12 pt-2 nav:gap-x-10 nav:gap-y-4;
     }
 
     .col-main {
@@ -402,7 +402,7 @@
      * ============================================ */
 
     .page-header {
-        @apply sticky top-0 z-40 border-b border-base-200 bg-base-100/90 backdrop-blur-md;
+        @apply sticky top-0 z-40 bg-base-100/90 backdrop-blur-md;
     }
 
     .page-header-container {
@@ -428,7 +428,7 @@
     }
 
     .logo {
-        @apply mx-1 inline-flex items-center;
+        @apply inline-flex items-center;
 
         img {
             /* max-w-none: preflight's max-width:100% collapses inside a shrink-to-fit flex parent */
@@ -450,7 +450,7 @@
     /* Minimal header (checkout): centered logo over a hairline - no
        distractions on the way to payment */
     .page-header-minimal {
-        @apply mb-2 flex items-center justify-center border-b border-base-200 bg-base-100 py-4;
+        @apply mb-2 flex items-center justify-center border-b border-line bg-base-100 py-4;
     }
 
     /* Icon links in the header (menu, account, wishlist, cart) */
@@ -523,7 +523,7 @@
     .search-autocomplete {
         /* overscroll-none: no scroll chaining to the page and no rubber-band
            bounce revealing what is behind the panel */
-        @apply absolute z-50 overflow-y-auto overscroll-none rounded-box border border-base-300 bg-base-100 shadow-2xl;
+        @apply absolute z-50 overflow-y-auto overscroll-none rounded-box border border-line bg-base-100 shadow-2xl;
         max-height: min(70dvh, 36rem);
 
         /* Attached right under the search pill and centered on it. !important:
@@ -576,7 +576,7 @@
            then editorial. "View all" is the panel's footer action, always
            visible while the results scroll behind it */
         .view-all {
-            @apply sticky bottom-0 z-10 order-last mt-auto block border-t border-base-200 bg-base-100 px-4 py-3 text-center text-sm font-semibold text-primary hover:bg-base-200;
+            @apply sticky bottom-0 z-10 order-last mt-auto block border-t border-line bg-base-100 px-4 py-3 text-center text-sm font-semibold text-primary hover:bg-base-200;
         }
 
         .results-list {
@@ -751,12 +751,14 @@
 
     /* .skip-content hides it by default; on desktop it is the always-visible menu bar */
     #header-nav {
-        @apply mx-auto hidden w-full max-w-7xl px-2 nav:block;
+        @apply mx-auto hidden w-full max-w-7xl px-4 nav:block;
     }
 
     #nav {
+        /* Negative margin swallows the first link's own padding so the menu
+           text aligns with the logo, breadcrumbs and page title */
         .nav-primary {
-            @apply m-0 flex list-none flex-wrap p-0;
+            @apply m-0 -mx-3.5 flex list-none flex-wrap p-0;
         }
 
         li {
@@ -794,7 +796,7 @@
 
         /* Dropdown panels */
         ul {
-            @apply absolute left-0 top-full z-50 m-0 hidden min-w-56 list-none rounded-box border border-base-200 bg-base-100 p-1.5 shadow-xl;
+            @apply absolute left-0 top-full z-50 m-0 hidden min-w-56 list-none rounded-box border border-line bg-base-100 p-1.5 shadow-xl;
         }
 
         ul ul {
@@ -828,7 +830,7 @@
         }
 
         a {
-            @apply whitespace-normal border-b border-base-200 px-2 py-3 text-base;
+            @apply whitespace-normal border-b border-line px-2 py-3 text-base;
         }
 
         ul, ul ul {
@@ -892,7 +894,7 @@
     }
 
     .offcanvas-header {
-        @apply flex items-center justify-between gap-4 border-b border-base-200 px-5 py-4;
+        @apply flex items-center justify-between gap-4 border-b border-line px-5 py-4;
 
         .offcanvas-title {
             @apply font-display text-lg font-semibold;
@@ -952,7 +954,7 @@
            @apply badge is unreliable here (daisyui merges its expansion into
            one shared rule and this selector can fall out of it) */
         .price-box .minimal-price-link {
-            @apply pointer-events-none absolute right-2.5 z-[1] m-0 inline-flex h-6 w-fit items-center gap-1 rounded-selector border border-base-200 bg-base-100 px-2.5 text-xs font-medium text-base-content shadow-md;
+            @apply pointer-events-none absolute right-2.5 z-[1] m-0 inline-flex h-6 w-fit items-center gap-1 rounded-selector border border-line bg-base-100 px-2.5 text-xs font-medium text-base-content shadow-md;
             top: calc(100cqi - 2.25rem);
         }
 
@@ -1034,7 +1036,7 @@
                 @apply absolute right-2 top-2 z-[2] m-0 flex list-none flex-col gap-1.5 p-0 opacity-0 transition-opacity duration-150;
 
                 a {
-                    @apply btn btn-circle btn-sm border-base-200 bg-base-100 text-[0] shadow-md hover:border-primary hover:text-primary;
+                    @apply btn btn-circle btn-sm border-line bg-base-100 text-[0] shadow-md hover:border-primary hover:text-primary;
 
                     svg {
                         @apply size-[1.125rem] shrink-0;
@@ -1053,7 +1055,7 @@
         @apply m-0 mb-6 flex list-none flex-col gap-5 p-0;
 
         > .item {
-            @apply card card-border grid grid-cols-[minmax(6rem,14rem)_minmax(0,1fr)] gap-5 border-base-200 bg-base-100 p-5;
+            @apply card card-border grid grid-cols-[minmax(6rem,14rem)_minmax(0,1fr)] gap-5 border-line bg-base-100 p-5;
         }
 
         .product-image {
@@ -1171,7 +1173,7 @@
        mt-4 matches the buy column's row gap (it sits inside .price-info,
        flush under the price, outside the column's flex gap) */
     .tier-prices {
-        @apply m-0 mt-4 flex w-fit max-w-full list-none flex-col gap-2 rounded-box border border-base-200 bg-base-200/40 px-4 py-3 text-sm;
+        @apply m-0 mt-4 flex w-fit max-w-full list-none flex-col gap-2 rounded-box border border-line bg-base-200/40 px-4 py-3 text-sm;
 
         /* Icon out of the text flow (absolute), so word spacing stays the
            template's natural spaces - flex gaps between text nodes and the
@@ -1230,7 +1232,7 @@
     .swatch-link {
         width: auto !important;
         height: 2.25rem !important;
-        @apply relative box-border inline-flex min-w-9 items-center justify-center overflow-hidden rounded-field border border-base-300 bg-base-100 px-2.5 text-[0.8125rem] font-medium no-underline transition-all duration-150;
+        @apply relative box-border inline-flex min-w-9 items-center justify-center overflow-hidden rounded-field border border-line bg-base-100 px-2.5 text-[0.8125rem] font-medium no-underline transition-all duration-150;
 
         .swatch-label {
             width: auto !important;
@@ -1386,7 +1388,7 @@
     }
 
     .pager.pager-no-toolbar {
-        @apply justify-between border-t border-base-200 py-2.5;
+        @apply justify-between border-t border-line py-2.5;
     }
 
     /* ============================================
@@ -1395,10 +1397,10 @@
 
     .sidebar .block,
     .col-wrapper .block {
-        @apply card card-border overflow-hidden border-base-200 bg-base-100;
+        @apply card card-border overflow-hidden border-line bg-base-100;
 
         .block-title {
-            @apply border-b border-base-200 px-4 py-3.5 font-display text-[0.9375rem] font-semibold;
+            @apply border-b border-line px-4 py-3.5 font-display text-[0.9375rem] font-semibold;
         }
 
         .block-content {
@@ -1505,7 +1507,7 @@
 
     /* Active filters (chips) */
     .active-filters-wrapper {
-        @apply mb-2 border-b border-base-200 pb-3;
+        @apply mb-2 border-b border-line pb-3;
 
         .active-filters-header {
             @apply mb-2 flex items-baseline justify-between gap-2;
@@ -1528,7 +1530,7 @@
         }
 
         .filter-tag-link {
-            @apply badge badge-lg gap-1.5 border-base-300 bg-base-200 pr-1.5 text-[0.8125rem] hover:border-error/40 hover:bg-error/10 hover:text-error;
+            @apply badge badge-lg gap-1.5 border-line bg-base-200 pr-1.5 text-[0.8125rem] hover:border-error/40 hover:bg-error/10 hover:text-error;
 
             .filter-tag-label {
                 @apply font-medium text-base-content/70;
@@ -1671,7 +1673,7 @@
 
         .add-to-box,
         .product-options-bottom {
-            @apply grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-4 border-t border-base-200 pt-6;
+            @apply grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-4 border-t border-line pt-6;
 
             /* The template renders a JS-updated price clone here; the price under
                the title updates too, so showing both would duplicate it */
@@ -1719,7 +1721,7 @@
             @apply gap-2.5;
 
             a {
-                @apply btn size-12 rounded-field border border-base-300 bg-transparent p-0 text-base-content/70 shadow-none;
+                @apply btn size-12 rounded-field border border-line bg-transparent p-0 text-base-content/70 shadow-none;
 
                 &:hover {
                     @apply border-base-content/50 bg-base-100 text-base-content;
@@ -1745,7 +1747,7 @@
 
         /* Reviews section: full width below the essential block */
         .product-collateral {
-            @apply flex flex-col gap-5 border-t border-base-200 pt-8;
+            @apply flex flex-col gap-5 border-t border-line pt-8;
 
             > h2 {
                 @apply m-0 font-display text-xl font-semibold tracking-tight;
@@ -1754,7 +1756,7 @@
 
         /* Upsell strip below the collateral tabs */
         .box-up-sell {
-            @apply border-t border-base-200 pt-8;
+            @apply border-t border-line pt-8;
 
             > h2 {
                 @apply mb-5 font-display text-xl font-semibold tracking-tight;
@@ -1800,7 +1802,7 @@
             }
 
             .mini-products-list > li.item {
-                @apply relative flex items-center gap-3 border-b border-base-200 py-3 pr-10 last:border-0;
+                @apply relative flex items-center gap-3 border-b border-line py-3 pr-10 last:border-0;
 
                 > input.checkbox {
                     @apply shrink-0;
@@ -1892,7 +1894,7 @@
         @apply m-0 flex list-none flex-wrap gap-2 p-0;
 
         .thumb-link {
-            @apply block w-[4.25rem] overflow-hidden rounded-selector border border-base-300 bg-base-200 hover:border-primary;
+            @apply block w-[4.25rem] overflow-hidden rounded-selector border border-line bg-base-200 hover:border-primary;
 
             img {
                 @apply block h-auto w-full;
@@ -1960,10 +1962,10 @@
         .rv-header {
             @apply mb-5 flex flex-wrap items-center justify-between gap-4;
 
-            /* Empty state: message and action sit together, left-aligned -
+            /* Empty state: message and action sit together, centered -
                justify-between would strand them at opposite page edges */
             &.empty {
-                @apply justify-start gap-5;
+                @apply justify-center gap-5;
             }
 
             .no-rating {
@@ -1980,7 +1982,7 @@
         }
 
         .rv-card {
-            @apply rounded-box border border-base-200 p-5;
+            @apply rounded-box border border-line p-5;
         }
 
         .rc-header {
@@ -2020,7 +2022,7 @@
         }
 
         .rc-footer {
-            @apply mt-4 border-t border-base-200 pt-3;
+            @apply mt-4 border-t border-line pt-3;
         }
 
         .rc-ratings {
@@ -2041,11 +2043,11 @@
         }
 
         th.label {
-            @apply w-48 border-b border-base-200 py-3 pr-6 text-left align-top text-sm font-medium text-base-content/70;
+            @apply w-48 border-b border-line py-3 pr-6 text-left align-top text-sm font-medium text-base-content/70;
         }
 
         td.data {
-            @apply border-b border-base-200 py-3 text-sm;
+            @apply border-b border-line py-3 text-sm;
         }
 
         tr:last-child :is(th, td) {
@@ -2057,7 +2059,7 @@
        markup in catalog/product/view.phtml) */
     .collateral-accordions {
         .collateral-accordion {
-            @apply border-b border-base-200 first:border-t;
+            @apply border-b border-line first:border-t;
 
             summary {
                 @apply flex cursor-pointer list-none items-center justify-between gap-3 py-5 font-display text-[1.0625rem] font-semibold tracking-tight;
@@ -2091,6 +2093,18 @@
 
             .data-table th {
                 @apply font-medium text-base-content;
+            }
+        }
+
+        /* No-reviews invitation: a plain row in the accordion stack -
+           message and action visible directly, no title or expanding. No
+           bottom border: it is always the last row, and the next section
+           brings its own divider */
+        .collateral-review-invite {
+            @apply py-5 first:border-t first:border-line;
+
+            .rv-header {
+                @apply m-0;
             }
         }
     }
@@ -2241,7 +2255,7 @@
 
         /* Per-row update: quiet, secondary to the qty box */
         .btn-update {
-            @apply btn btn-sm mt-1.5 h-8 border border-base-300 bg-transparent px-3 text-xs font-medium text-base-content/80 shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content;
+            @apply btn btn-sm mt-1.5 h-8 border border-line bg-transparent px-3 text-xs font-medium text-base-content/80 shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content;
         }
 
         /* Edit / wishlist / remove: icon-only stack (labels stay for tooltips
@@ -2277,7 +2291,7 @@
             @apply pt-4 text-right;
 
             .button2 {
-                @apply btn btn-sm ml-3 h-9 border border-base-300 bg-transparent px-4 font-medium text-base-content/80 no-underline shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content hover:no-underline;
+                @apply btn btn-sm ml-3 h-9 border border-line bg-transparent px-4 font-medium text-base-content/80 no-underline shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content hover:no-underline;
             }
         }
     }
@@ -2291,7 +2305,7 @@
         }
 
         .btn-apply {
-            @apply btn h-11 border border-base-300 bg-transparent px-5 font-medium text-base-content/80 no-underline shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content hover:no-underline;
+            @apply btn h-11 border border-line bg-transparent px-5 font-medium text-base-content/80 no-underline shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content hover:no-underline;
         }
     }
 
@@ -2303,7 +2317,7 @@
         @apply flex flex-col gap-5;
 
         > div, > form {
-            @apply card card-border border-base-200 bg-base-100 p-5;
+            @apply card card-border border-line bg-base-100 p-5;
         }
 
         h2 {
@@ -2320,7 +2334,7 @@
         }
 
         .btn-estimate {
-            @apply btn h-10 border border-base-300 bg-transparent px-5 font-medium text-base-content/80 no-underline shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content hover:no-underline;
+            @apply btn h-10 border border-line bg-transparent px-5 font-medium text-base-content/80 no-underline shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content hover:no-underline;
         }
     }
 
@@ -2344,7 +2358,7 @@
             }
 
             tfoot td {
-                @apply border-t border-base-300/70 pt-3;
+                @apply border-t border-line/70 pt-3;
             }
 
             tfoot td, strong {
@@ -2373,7 +2387,7 @@
             @apply m-0 flex list-none flex-col p-0;
 
             > li.item {
-                @apply flex items-start gap-3.5 border-b border-base-200 py-3.5;
+                @apply flex items-start gap-3.5 border-b border-line py-3.5;
             }
         }
 
@@ -2527,7 +2541,7 @@
      * ============================================ */
 
     .footer-container {
-        @apply mt-auto border-t border-base-300 bg-base-200;
+        @apply mt-auto border-t border-line bg-base-200;
     }
 
     .footer {
@@ -2568,7 +2582,7 @@
         }
 
         address {
-            @apply mt-4 w-full border-t border-base-300 pt-6 text-[0.8125rem] not-italic text-base-content/65;
+            @apply mt-4 w-full border-t border-line pt-6 text-[0.8125rem] not-italic text-base-content/65;
         }
     }
 
@@ -2585,7 +2599,7 @@
     }
 
     #global-cookie-notice {
-        @apply fixed bottom-4 left-4 right-4 z-[90] ml-auto max-w-md rounded-box border border-base-300 bg-base-100 p-5 text-sm shadow-2xl;
+        @apply fixed bottom-4 left-4 right-4 z-[90] ml-auto max-w-md rounded-box border border-line bg-base-100 p-5 text-sm shadow-2xl;
     }
 
     /* ============================================
@@ -2622,7 +2636,7 @@
         @apply mb-6 grid gap-6 nav:grid-cols-2;
 
         .col-1, .col-2 {
-            @apply card card-border min-w-0 border-base-200 bg-base-100 p-5;
+            @apply card card-border min-w-0 border-line bg-base-100 p-5;
         }
 
         h2, .legend {
@@ -2681,7 +2695,7 @@
 
     .d-header,
     .dialog-header {
-        @apply flex items-center justify-between gap-4 border-b border-base-200 px-5 py-4;
+        @apply flex items-center justify-between gap-4 border-b border-line px-5 py-4;
 
         h2, h3 {
             @apply font-display text-lg font-semibold;
@@ -2708,12 +2722,12 @@
     }
 
     .d-content .d-actions {
-        @apply mt-5 border-t border-base-200 pt-4;
+        @apply mt-5 border-t border-line pt-4;
     }
 
     .dialog-buttons .cancel,
     .d-actions button.button[onclick*="close()"] {
-        @apply btn btn-ghost border border-base-300 bg-transparent text-base-content;
+        @apply btn btn-ghost border border-line bg-transparent text-base-content;
 
         &:hover {
             @apply border-base-content/40 bg-base-200;
@@ -2732,7 +2746,7 @@
         }
 
         .login-tabs {
-            @apply m-0 mb-6 flex list-none gap-1 border-b border-base-300 p-0;
+            @apply m-0 mb-6 flex list-none gap-1 border-b border-line p-0;
 
             li {
                 @apply m-0;

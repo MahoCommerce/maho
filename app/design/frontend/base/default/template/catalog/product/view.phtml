@@ -183,13 +183,7 @@
                     </details>
                 <?php endforeach ?>
                 <?php if (!$hasReviews && $reviewsHtml !== ''): ?>
-                    <details class="collateral-accordion" id="panel-reviews">
-                        <summary>
-                            <span><?= $this->escapeHtml($this->getChildData('reviews', 'title')) ?></span>
-                            <?= $this->getIconSvg('chevron-down') ?>
-                        </summary>
-                        <div class="collateral-content"><?= $reviewsHtml ?></div>
-                    </details>
+                    <div class="collateral-review-invite" id="panel-reviews"><?= $reviewsHtml ?></div>
                 <?php endif ?>
             </div>
         <?php endif ?>

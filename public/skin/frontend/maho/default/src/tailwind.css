@@ -82,4 +82,9 @@
     /* Typography hooks - industry themes override these at runtime (plain CSS) */
     --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    /* One color for every standard border and hairline (border-line, divide-line):
+       resolves to --maho-color-border at runtime, so themes retune ALL borders
+       by overriding that single variable */
+    --color-line: var(--maho-color-border);
 }
