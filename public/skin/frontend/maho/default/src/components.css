@@ -57,6 +57,13 @@
         );
 
         accent-color: var(--color-primary);
+
+        /* Sticky-header height: single source of truth for the offset of every
+           element pinned below the header (sidebar rails, product gallery).
+           On desktop the header is a fixed height - logo/control row (h-10 +
+           pt-3.5 + pb-1 = 3.625rem) plus the nav row (2.5rem) = 6.125rem. A
+           store that restyles the header overrides this one token. */
+        --header-height: 6.125rem;
     }
 
     body {
@@ -336,6 +343,19 @@
 
         .col3-layout .col-right {
             grid-area: right;
+        }
+
+        /* Keep the filter/side rails in view while the taller product column
+           scrolls. align-self:start stops the grid item stretching to its row
+           height so it has room to move; max-height + overflow keeps long
+           filter lists reachable when a rail is taller than the viewport. The
+           top offset clears the sticky header (see .product-img-box). */
+        .col-left-first,
+        .col-right {
+            @apply sticky self-start overflow-y-auto overscroll-contain;
+            /* Pin below the sticky header (+ a 1rem breathing gap) */
+            top: calc(var(--header-height) + 1rem);
+            max-height: calc(100dvh - var(--header-height) - 2rem);
         }
     }
 
@@ -1601,11 +1621,11 @@
             /* The gallery is fold-fitted (never taller than the viewport),
                so pinning it makes the longer buy column scroll past a
                stationary image - Zalando's two-speed columns. The offset
-               clears the sticky header (logo row + nav, ~109px) */
+               clears the sticky header via the --header-height token. */
             .product-img-box {
                 grid-area: media;
                 position: sticky;
-                top: 7.8125rem;
+                top: calc(var(--header-height) + 1rem);
             }
             .product-shop { grid-area: shop; }
             .add-to-cart-wrapper { grid-area: cart; }
