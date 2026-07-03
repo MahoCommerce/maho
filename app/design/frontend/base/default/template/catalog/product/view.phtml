@@ -162,36 +162,32 @@
                 }
             }.bind(productAddToCartForm);
         </script>
-    </div>
 
-    <div class="product-collateral">
-        <?php if ($detailedInfoGroup = $this->getChildGroup('detailed_info', 'getChildHtml')):?>
-            <?php $tabIndex = 0; ?>
-            <div class="collateral-tabs-wrapper">
-                <!-- Radio inputs for tab selection -->
+        <?php // Product details as accordion rows in the buy column; reviews render full width below ?>
+        <?php $detailedInfoGroup = $this->getChildGroup('detailed_info', 'getChildHtml'); ?>
+        <?php unset($detailedInfoGroup['reviews']); ?>
+        <?php $detailedInfoGroup = array_filter($detailedInfoGroup, fn ($html) => trim((string) $html) !== ''); ?>
+        <?php if ($detailedInfoGroup): ?>
+            <div class="collateral-accordions">
                 <?php foreach ($detailedInfoGroup as $alias => $html): ?>
-                    <input type="radio" name="collateral-tab" id="tab-<?= $alias ?>" class="tab-selector" <?= $tabIndex === 0 ? 'checked' : '' ?>>
-                    <?php $tabIndex++; ?>
+                    <details class="collateral-accordion" id="panel-<?= $alias ?>">
+                        <summary>
+                            <span><?= $this->escapeHtml($this->getChildData($alias, 'title')) ?></span>
+                            <?= $this->getIconSvg('chevron-down') ?>
+                        </summary>
+                        <div class="collateral-content"><?= $html ?></div>
+                    </details>
                 <?php endforeach ?>
-
-                <!-- Tab labels -->
-                <ul class="collateral-tab-list">
-                    <?php foreach ($detailedInfoGroup as $alias => $html): ?>
-                        <li><label for="tab-<?= $alias ?>"><?= $this->escapeHtml($this->getChildData($alias, 'title')) ?></label></li>
-                    <?php endforeach ?>
-                </ul>
-
-                <!-- Tab content panels -->
-                <div class="collateral-tabs-content">
-                    <?php foreach ($detailedInfoGroup as $alias => $html): ?>
-                        <div class="tab-panel" id="panel-<?= $alias ?>" data-title="<?= $this->escapeHtml($this->getChildData($alias, 'title')) ?>">
-                            <?= $html ?>
-                        </div>
-                    <?php endforeach ?>
-                </div>
             </div>
         <?php endif ?>
     </div>
+
+    <?php if ($reviewsHtml = trim((string) $this->getChildHtml('reviews'))): ?>
+        <div class="product-collateral">
+            <h2><?= $this->escapeHtml($this->getChildData('reviews', 'title')) ?></h2>
+            <?= $reviewsHtml ?>
+        </div>
+    <?php endif ?>
 
     <?= $this->getChildHtml('upsell_products') ?>
     <?= $this->getChildHtml('product_additional_data') ?>

@@ -930,9 +930,37 @@
     .products-grid {
         @apply m-0 mb-8 grid list-none grid-cols-[repeat(auto-fill,minmax(min(11rem,100%),1fr))] gap-x-4 gap-y-8 p-0 nav:grid-cols-[repeat(auto-fill,minmax(13.5rem,1fr))] nav:gap-x-6 nav:gap-y-10;
 
-        /* Image-first cards: the photo tile is the card, text sits quietly below */
+        /* Image-first cards: the photo tile is the card, text sits quietly below.
+           inline-size containment so cqi units can anchor the sale badge to
+           the square image */
         > li {
             @apply relative flex flex-col;
+            container-type: inline-size;
+        }
+
+        /* Sale sticker: the discount badge lives in the price markup but is
+           pinned onto the image - the image is square and full-width, so its
+           bottom edge sits at 100cqi from the card top. Click-transparent so
+           the stretched card link works underneath */
+        .price-box .discount-percent {
+            @apply pointer-events-none absolute right-2.5 z-[1] m-0 shadow-md;
+            top: calc(100cqi - 2.25rem);
+        }
+
+        /* "From €100.00" (tier / option minimal price): a quiet white sticker
+           in the same corner as the sale badge. Badge geometry written out:
+           @apply badge is unreliable here (daisyui merges its expansion into
+           one shared rule and this selector can fall out of it) */
+        .price-box .minimal-price-link {
+            @apply pointer-events-none absolute right-2.5 z-[1] m-0 inline-flex h-6 w-fit items-center gap-1 rounded-selector border border-base-200 bg-base-100 px-2.5 text-xs font-medium text-base-content shadow-md;
+            top: calc(100cqi - 2.25rem);
+        }
+
+        /* When a product carries both, the sale badge wins - the discount is
+           unconditional while "From" only applies at quantity, and two
+           stickers cover too much of the photo */
+        .price-box:has(.discount-percent) .minimal-price-link {
+            @apply hidden;
         }
 
         /* Studio tile: catalog images are transparent cutouts (see the
@@ -946,22 +974,30 @@
                 @apply h-full w-full object-contain transition-transform duration-500 ease-out;
                 filter: drop-shadow(0 10px 9px rgb(0 0 0 / 0.12)) drop-shadow(0 2px 3px rgb(0 0 0 / 0.07));
             }
+        }
 
-            &:hover img {
-                transform: scale(1.045);
-            }
+        /* The whole card is one target: hovering title or price zooms too */
+        > li:hover .product-image img {
+            transform: scale(1.045);
+        }
+
+        /* Stretched link: the title anchor covers the whole card, so every
+           point of the tile opens the product (the image anchor can't do it,
+           its overflow-hidden would clip the overlay). Interactive children
+           get lifted above it below */
+        .product-name a::after {
+            content: '';
+            @apply absolute inset-0;
         }
 
         .product-info {
             @apply flex flex-1 flex-col gap-1 px-0.5 pt-3;
         }
 
+        /* No hover color on the title: the whole card is the link, and the
+           image zoom is the hover feedback */
         .product-name {
             @apply font-body text-[0.9375rem] font-medium leading-snug;
-
-            a:hover {
-                @apply text-primary;
-            }
         }
 
         .price-box {
@@ -977,12 +1013,17 @@
             }
         }
 
+        /* Above the stretched card link */
         .actions {
-            @apply px-0.5 pb-1 pt-2.5;
+            @apply relative z-[1] px-0.5 pb-1 pt-2.5;
 
             button.button, a.button {
                 @apply btn-sm btn-block;
             }
+        }
+
+        .ratings a {
+            @apply relative z-[1];
         }
 
         /* Wishlist / compare quick links: appear on hover, top-right of the image */
@@ -990,7 +1031,7 @@
             @apply relative;
 
             > ul {
-                @apply absolute right-2 top-2 m-0 flex list-none flex-col gap-1.5 p-0 opacity-0 transition-opacity duration-150;
+                @apply absolute right-2 top-2 z-[2] m-0 flex list-none flex-col gap-1.5 p-0 opacity-0 transition-opacity duration-150;
 
                 a {
                     @apply btn btn-circle btn-sm border-base-200 bg-base-100 text-[0] shadow-md hover:border-primary hover:text-primary;
@@ -1046,9 +1087,10 @@
         }
     }
 
-    /* Product names keep body ink everywhere, including inside CMS (.std) content */
+    /* Product names keep body ink everywhere, including inside CMS (.std)
+       content - no hover color either, the card/row is the click target */
     .product-name a {
-        @apply text-inherit hover:text-primary;
+        @apply text-inherit;
     }
 
     .add-to-links {
@@ -1088,14 +1130,68 @@
             .price-label {
                 @apply hidden;
             }
+
+            .discount-percent {
+                @apply ml-1.5;
+            }
         }
 
-        .special-price .price {
-            color: var(--maho-color-special-price);
+        .special-price {
+            .price {
+                color: var(--maho-color-special-price);
+            }
+
+            /* The struck old price + red price + sale badge already tell
+               the story - "Special Price" is noise */
+            .price-label {
+                @apply hidden;
+            }
         }
 
+        /* Discount percentage as a solid sale badge (product grids pin it
+           onto the image tile, see .products-grid) */
+        .discount-percent {
+            @apply badge badge-error gap-0 text-xs font-bold;
+        }
+
+        /* Minimal price ("Buy 3 for €100.00" / "From €50.00"): a quiet
+           second line under the main price, not a blue link */
         .minimal-price-link {
-            @apply text-[0.8125rem] text-primary;
+            @apply basis-full text-[0.8125rem] font-normal text-base-content/70 no-underline;
+
+            .price {
+                @apply text-[1em] font-semibold;
+                color: inherit;
+            }
+        }
+    }
+
+    /* Quantity discounts on the product page: an offer card instead of
+       loose sentences - one tag-marked row per tier, savings in green.
+       mt-4 matches the buy column's row gap (it sits inside .price-info,
+       flush under the price, outside the column's flex gap) */
+    .tier-prices {
+        @apply m-0 mt-4 flex w-fit max-w-full list-none flex-col gap-2 rounded-box border border-base-200 bg-base-200/40 px-4 py-3 text-sm;
+
+        /* Icon out of the text flow (absolute), so word spacing stays the
+           template's natural spaces - flex gaps between text nodes and the
+           price/benefit spans render unevenly */
+        .tier-price {
+            @apply relative m-0 pl-7;
+
+            &::before {
+                content: '';
+                @apply absolute left-0 top-1/2 size-[1.125rem] -translate-y-1/2 bg-base-content/70;
+                mask: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M7.5 7.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0'/><path d='M3 6v5.172a2 2 0 0 0 .586 1.414l7.71 7.71a2.41 2.41 0 0 0 3.408 0l5.592 -5.592a2.41 2.41 0 0 0 0 -3.408l-7.71 -7.71a2 2 0 0 0 -1.414 -.586h-5.172a3 3 0 0 0 -3 3z'/></svg>") center / contain no-repeat;
+            }
+
+            .price {
+                @apply font-semibold;
+            }
+
+            .benefit {
+                @apply font-semibold text-success;
+            }
         }
     }
 
@@ -1237,7 +1333,7 @@
      * ============================================ */
 
     .toolbar {
-        @apply mb-6 flex flex-wrap items-center justify-between gap-x-5 gap-y-3 border-b border-base-200 py-3 text-sm;
+        @apply mb-4 flex flex-wrap items-center justify-between gap-x-5 gap-y-3 pb-1 pt-0 text-sm;
     }
 
     .toolbar select,
@@ -1399,8 +1495,11 @@
         .price-input-wrapper {
             @apply relative;
 
+            /* z-1: DaisyUI inputs are positioned, so without it the later
+               input paints over the symbol. Same text size as the sm input
+               so symbol and digits align optically */
             .currency-symbol {
-                @apply pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[0.8125rem] text-base-content/65;
+                @apply pointer-events-none absolute left-2.5 top-1/2 z-[1] -translate-y-1/2 text-xs text-base-content/65;
             }
 
             input {
@@ -1466,29 +1565,42 @@
      * Product page
      * ============================================ */
 
+    /* The essential block is the layout grid; the add-to-cart form
+       contributes its children as grid items via display:contents, so
+       non-form content (the detail accordions, which may carry their own
+       forms) can share the buy column */
     .product-view .product-essential {
-        @apply mb-10;
-    }
+        @apply mb-10 grid grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-6;
 
-    /* The add-to-cart form is the layout grid */
-    .product-view .product-essential > form {
-        @apply grid grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-6;
+        > form {
+            display: contents;
+        }
 
         @media (min-width: 771px) {
             grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
-            grid-template-rows: auto auto 1fr;
+            grid-template-rows: auto auto auto 1fr;
             grid-template-areas:
                 "media shop"
                 "media cart"
-                "media related";
+                "media related"
+                "media info";
             align-items: start;
 
-            .product-img-box { grid-area: media; }
+            /* The gallery is fold-fitted (never taller than the viewport),
+               so pinning it makes the longer buy column scroll past a
+               stationary image - Zalando's two-speed columns. The offset
+               clears the sticky header (logo row + nav, ~109px) */
+            .product-img-box {
+                grid-area: media;
+                position: sticky;
+                top: 7.8125rem;
+            }
             .product-shop { grid-area: shop; }
             .add-to-cart-wrapper { grid-area: cart; }
+            > .collateral-accordions { grid-area: info; }
 
             /* Configurable/option products render their buy box as a direct form child */
-            > .product-options-bottom {
+            > form > .product-options-bottom {
                 grid-column: 2;
             }
         }
@@ -1515,8 +1627,16 @@
         .product-shop {
             @apply flex flex-col gap-4;
 
+            /* Title + price read as one typographic cluster (Zalando/COS
+               pattern): the price is metadata of the title, so it sits
+               tight underneath while the 16px column gap separates the
+               cluster from the sections below */
+            .price-info {
+                @apply -mt-3;
+            }
+
             .price-box {
-                @apply text-[1.625rem];
+                @apply text-[1.5rem];
 
                 .price {
                     @apply tracking-tight;
@@ -1617,8 +1737,13 @@
             }
         }
 
+        /* Reviews section: full width below the essential block */
         .product-collateral {
-            @apply flex flex-col gap-6;
+            @apply flex flex-col gap-5 border-t border-base-200 pt-8;
+
+            > h2 {
+                @apply m-0 font-display text-xl font-semibold tracking-tight;
+            }
         }
 
         /* Upsell strip below the collateral tabs */
@@ -1699,6 +1824,11 @@
 
                 .price-box {
                     @apply mt-0.5 text-sm font-semibold;
+
+                    /* No room for the sale badge in these compact rows */
+                    .discount-percent {
+                        @apply hidden;
+                    }
                 }
 
                 .link-wishlist {
@@ -1887,43 +2017,46 @@
         }
     }
 
-    /* Collateral tabs: pure CSS radio-driven (markup in catalog/product/view.phtml) */
-    .collateral-tabs-wrapper {
-        .tab-selector {
-            @apply pointer-events-none absolute opacity-0;
-        }
+    /* Product details as accordion rows in the buy column (Zalando pattern;
+       markup in catalog/product/view.phtml) */
+    .collateral-accordions {
+        .collateral-accordion {
+            @apply border-b border-base-200 first:border-t;
 
-        .collateral-tab-list {
-            @apply m-0 -mb-px flex list-none flex-wrap gap-1 border-b border-base-300 p-0;
+            summary {
+                @apply flex cursor-pointer list-none items-center justify-between gap-3 py-5 font-display text-[1.0625rem] font-semibold tracking-tight;
 
-            label {
-                @apply inline-block cursor-pointer border-b-2 border-transparent px-4 py-2.5 text-[0.9375rem] font-medium text-base-content/70 hover:text-base-content;
+                &::-webkit-details-marker {
+                    display: none;
+                }
+
+                svg {
+                    @apply size-5 shrink-0 text-base-content/60 transition-transform duration-200;
+                }
+
+                &:hover svg {
+                    @apply text-base-content;
+                }
+            }
+
+            &[open] summary svg {
+                transform: rotate(180deg);
             }
         }
 
-        .tab-panel {
-            @apply hidden px-1 py-5;
+        .collateral-content {
+            @apply pb-6 text-[0.9375rem] leading-relaxed;
+
+            /* The attributes table aligns flush with the description text;
+               labels keep full ink - muted labels read as disabled here */
+            .data-table :is(th, td):first-child {
+                @apply pl-0;
+            }
+
+            .data-table th {
+                @apply font-medium text-base-content;
+            }
         }
-    }
-
-    /* Pair each checked radio with its label + panel, up to 6 tabs */
-    .collateral-tabs-wrapper .tab-selector:nth-of-type(1):checked ~ .collateral-tab-list li:nth-child(1) label,
-    .collateral-tabs-wrapper .tab-selector:nth-of-type(2):checked ~ .collateral-tab-list li:nth-child(2) label,
-    .collateral-tabs-wrapper .tab-selector:nth-of-type(3):checked ~ .collateral-tab-list li:nth-child(3) label,
-    .collateral-tabs-wrapper .tab-selector:nth-of-type(4):checked ~ .collateral-tab-list li:nth-child(4) label,
-    .collateral-tabs-wrapper .tab-selector:nth-of-type(5):checked ~ .collateral-tab-list li:nth-child(5) label,
-    .collateral-tabs-wrapper .tab-selector:nth-of-type(6):checked ~ .collateral-tab-list li:nth-child(6) label {
-        color: var(--color-primary);
-        border-bottom-color: var(--color-primary);
-    }
-
-    .collateral-tabs-wrapper .tab-selector:nth-of-type(1):checked ~ .collateral-tabs-content .tab-panel:nth-child(1),
-    .collateral-tabs-wrapper .tab-selector:nth-of-type(2):checked ~ .collateral-tabs-content .tab-panel:nth-child(2),
-    .collateral-tabs-wrapper .tab-selector:nth-of-type(3):checked ~ .collateral-tabs-content .tab-panel:nth-child(3),
-    .collateral-tabs-wrapper .tab-selector:nth-of-type(4):checked ~ .collateral-tabs-content .tab-panel:nth-child(4),
-    .collateral-tabs-wrapper .tab-selector:nth-of-type(5):checked ~ .collateral-tabs-content .tab-panel:nth-child(5),
-    .collateral-tabs-wrapper .tab-selector:nth-of-type(6):checked ~ .collateral-tabs-content .tab-panel:nth-child(6) {
-        display: block;
     }
 
     /* ============================================
@@ -2633,11 +2766,13 @@ select {
     padding-block: 0;
 }
 
-/* Unlayered: Maho templates use semantic <span class="label"> everywhere
-   (availability, price rows, ...), which collides with the DaisyUI label
-   component - it fades currentColor to 60%, washing the text below readable
-   contrast. Keep label spans at full ink; DaisyUI's form labels use <label> */
-span.label {
+/* Unlayered: Maho templates use semantic class="label" on spans and table
+   headers (availability, price rows, product attributes, ...), which collides
+   with the DaisyUI label component - it fades currentColor to 60%, washing
+   the text below readable contrast. Keep them at full ink; DaisyUI's form
+   labels use <label> */
+span.label,
+th.label {
     color: inherit;
 }
 
