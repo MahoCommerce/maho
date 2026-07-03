@@ -392,9 +392,11 @@
         }
     }
 
-    /* Breadcrumbs and title read as one unit; the gap below the title stays */
+    /* Breadcrumbs and title read as one unit; the gap below the title stays.
+       Cancels most of the grid row gap - the title's own line-height
+       whitespace provides the remaining optical air */
     .main > .breadcrumbs + .page-title {
-        @apply -mt-2;
+        @apply -mt-3.5;
     }
 
     /* ============================================
@@ -1617,6 +1619,28 @@
     }
 
     .product-view {
+        /* Like the product name, the trail renders twice: above the image on
+           mobile, atop the buy column on desktop */
+        .product-breadcrumbs {
+            .breadcrumbs {
+                @apply p-0 text-[0.8125rem] text-base-content/70;
+
+                a:hover {
+                    @apply text-primary underline;
+                }
+            }
+        }
+
+        /* Same rhythm as .main > .breadcrumbs + .page-title on other pages:
+           the column's 16px gap minus 14px = 2px box gap to the title */
+        .product-shop > .product-breadcrumbs {
+            @apply -mb-3.5 hidden nav:block;
+        }
+
+        .product-img-box > .product-breadcrumbs {
+            @apply mb-2 nav:hidden;
+        }
+
         /* Product name renders twice: above the image on mobile, in the buy column on desktop */
         .product-shop > .product-name {
             @apply hidden nav:block;
@@ -2814,7 +2838,8 @@ select {
 
 /* Unlayered: DaisyUI's breadcrumbs component adds vertical padding of its own;
    the page grid's row gap already provides the rhythm */
-.main > .breadcrumbs {
+.main > .breadcrumbs,
+.product-breadcrumbs .breadcrumbs {
     padding-block: 0;
 }
 

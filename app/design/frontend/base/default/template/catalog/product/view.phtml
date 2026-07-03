@@ -11,6 +11,9 @@
 ?>
 <?php $_helper = $this->helper('catalog/output'); ?>
 <?php $_product = $this->getProduct(); ?>
+<?php // Unset from the page root (see catalog.xml): the trail renders inside the
+      // columns instead - desktop in the buy column, mobile above the image ?>
+<?php $_breadcrumbsHtml = ($_breadcrumbsBlock = $this->getLayout()->getBlock('breadcrumbs')) ? trim($_breadcrumbsBlock->toHtml()) : ''; ?>
 <script>
     var optionsPrice = new Product.OptionsPrice(<?= $this->getJsonConfig() ?>);
 </script>
@@ -28,6 +31,9 @@
             </div>
 
             <div class="product-img-box">
+                <?php if ($_breadcrumbsHtml): ?>
+                    <div class="product-breadcrumbs"><?= $_breadcrumbsHtml ?></div>
+                <?php endif ?>
                 <div class="product-name">
                     <h1><?= $_helper->productAttribute($_product, $_product->getName(), 'name') ?></h1>
                 </div>
@@ -35,6 +41,9 @@
             </div>
 
             <div class="product-shop">
+                <?php if ($_breadcrumbsHtml): ?>
+                    <div class="product-breadcrumbs"><?= $_breadcrumbsHtml ?></div>
+                <?php endif ?>
                 <div class="product-name">
                     <span class="h1"><?= $_helper->productAttribute($_product, $_product->getName(), 'name') ?></span>
                 </div>

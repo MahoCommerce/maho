@@ -153,6 +153,9 @@ Product view
         <!-- Mage_Catalog -->
         <reference name="root">
             <action method="setTemplate"><template>page/1column.phtml</template></action>
+            <!-- The trail renders inside the buy column (see catalog/product/view.phtml)
+                 instead of full width above both columns -->
+            <action method="unsetChild"><alias>breadcrumbs</alias></action>
         </reference>
         <reference name="head">
             <action method="addJs"><script>varien/product.js</script></action>

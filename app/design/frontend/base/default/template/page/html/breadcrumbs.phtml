@@ -9,6 +9,20 @@
 
 /** @var Mage_Page_Block_Html_Breadcrumbs $this */
 ?>
+<?php
+// The trail shows the path, not the current position - every page announces
+// itself with its own title. Drop the (unlinked) current-page leaf, and hide
+// the whole trail when only "Home" would remain
+if (is_array($crumbs) && $crumbs) {
+    $lastKey = array_key_last($crumbs);
+    if (empty($crumbs[$lastKey]['link'])) {
+        unset($crumbs[$lastKey]);
+    }
+    if (count($crumbs) < 2) {
+        $crumbs = [];
+    }
+}
+?>
 <?php if($crumbs && is_array($crumbs)): ?>
 <div class="breadcrumbs" role="navigation" aria-label="<?= $this->__('Breadcrumbs') ?>">
     <ul>
