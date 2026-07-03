@@ -2157,11 +2157,10 @@
     }
 
     @media (max-width: 770px) {
-        /* Sidebar layered nav lives in the offcanvas on mobile */
-        .sidebar .block-layered-nav {
-            display: none;
-        }
-
+        /* Sidebar layered nav lives in the offcanvas on mobile. The hide toggle
+           itself is unlayered (see bottom of file): the wrapper's semantic
+           class="block" collides with Tailwind's .block utility, which would
+           otherwise win from the utilities layer. */
         .offcanvas-content .block-layered-nav {
             display: block;
             border: 0;
@@ -2894,4 +2893,15 @@ th.label {
     gap: 2.5rem 4.5rem;
     padding: 4rem 1rem 2.5rem;
     font-size: 0.875rem;
+}
+
+/* Unlayered: the layered-nav wrapper carries the semantic class="block", which
+   collides with Tailwind's .block display utility. That utility sits in the
+   utilities layer and beats a components-layer rule, so the mobile toggle that
+   hides the inline sidebar filters (they open in the offcanvas instead, via the
+   toolbar .filters-trigger button) must win the cascade here. */
+@media (max-width: 770px) {
+    .sidebar .block-layered-nav {
+        display: none;
+    }
 }
