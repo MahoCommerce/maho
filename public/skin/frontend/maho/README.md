@@ -146,7 +146,8 @@ theme ships its own `css/styles.css`, the skin fallback serves it **instead
 of** the default compiled one.
 
 1. Install the toolchain (in the Maho repo it's already in `package.json`;
-   in a child project run this once):
+   in a child project run this once — or skip it, the build command in step 3
+   offers to install it for you):
 
    ```bash
    npm install -D tailwindcss @tailwindcss/cli daisyui
@@ -191,15 +192,19 @@ of** the default compiled one.
    In a child project the relative paths still work, because the composer
    plugin copies `maho/default/src/` into your `public/` alongside your theme.
 
-3. Compile (add these as scripts to your `package.json`):
+3. Compile:
 
    ```bash
-   npx @tailwindcss/cli -i public/skin/frontend/maho/pharmacy/src/tailwind.css \
-       -o public/skin/frontend/maho/pharmacy/css/styles.css --minify
+   ./maho dev:frontend:theme:build
    ```
 
-   Use `--watch` while developing. Commit the compiled `styles.css` so
-   production never needs Node.js.
+   It finds every theme with build sources (top-level `src/*.css` files that
+   `@import "tailwindcss"` or `@reference` the shared theme) and compiles each
+   to `css/`. Use `--theme maho/pharmacy` to build one theme only, `--watch`
+   while developing, and `--map` to inline source maps for debugging (both
+   produce debug output — run a plain build before committing). If the
+   toolchain from step 1 is missing, the command offers to install it for
+   you. Commit the compiled `styles.css` so production never needs Node.js.
 
 Rule of thumb: **Option A for identity** (colors, fonts, shape, a handful of
 signature rules — it's what the industry themes do), **Option B when you write
@@ -210,10 +215,13 @@ new markup** that needs arbitrary Tailwind utilities or DaisyUI components.
 Only needed when editing `default/src/*.css` or upgrading Tailwind/DaisyUI:
 
 ```bash
-npm install
-npm run build:theme       # compiles all bundles into public/skin/frontend/maho/default/css/
-npm run watch:theme       # rebuild styles.css on change (run build:theme for the page bundles)
+./maho dev:frontend:theme:build            # compiles all bundles into public/skin/frontend/maho/default/css/
+./maho dev:frontend:theme:build --watch    # rebuild on change (unminified; run a plain build before committing)
 ```
+
+The command installs the npm toolchain on first run if needed. The underlying
+`npm run build:theme` / `npm run watch:theme` scripts still exist (CI uses
+them) and do the same thing.
 
 Commit the compiled CSS — it ships pre-built for everyone else. Page-specific
 sources (`src/blog.css`, ...) start with `@reference "./tailwind.css"`, which

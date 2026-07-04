@@ -93,6 +93,7 @@ $application->addCommand(new \MahoCLI\Commands\CreateCommand());
 $application->addCommand(new \MahoCLI\Commands\DevModuleList());
 
 $application->addCommand(new \MahoCLI\Commands\FrontendLayoutDebug());
+$application->addCommand(new \MahoCLI\Commands\FrontendThemeBuild());
 $application->addCommand(new \MahoCLI\Commands\FrontendThemeCreate());
 
 $discoverer = new CommandDiscoverer();
