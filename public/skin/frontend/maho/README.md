@@ -200,11 +200,11 @@ of** the default compiled one.
 
    It finds every theme with build sources (top-level `src/*.css` files that
    `@import "tailwindcss"` or `@reference` the shared theme) and compiles each
-   to `css/`. Use `--theme maho/pharmacy` to build one theme only, `--watch`
-   while developing, and `--map` to inline source maps for debugging (both
-   produce debug output — run a plain build before committing). If the
-   toolchain from step 1 is missing, the command offers to install it for
-   you. Commit the compiled `styles.css` so production never needs Node.js.
+   to `css/`. Use `--theme maho/pharmacy` to build one theme only and
+   `--watch` while developing (unminified — run a plain build before
+   committing). If the toolchain from step 1 is missing, the command offers
+   to install it for you. Commit the compiled `styles.css` so production
+   never needs Node.js.
 
 Rule of thumb: **Option A for identity** (colors, fonts, shape, a handful of
 signature rules — it's what the industry themes do), **Option B when you write
