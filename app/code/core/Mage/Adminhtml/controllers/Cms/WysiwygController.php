@@ -17,16 +17,24 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     public const ADMIN_RESOURCE = 'cms';
 
     /**
+     * Replace template directives with a non-empty placeholder before HTML validation.
+     *
+     * A directive used inside an attribute (e.g. src="{{media url="..."}}") would otherwise
+     * collapse to src="" once stripped, triggering a bogus "Must be non-empty" validator error.
+     * Match against the canonical directive pattern so exactly the constructs the template filter
+     * renders are blanked out, and the resulting placeholder (#) stays syntactically valid.
+     */
+    public static function blankDirectivesForValidation(string $html): string
+    {
+        return (string) preg_replace(\Maho\Filter\Template::CONSTRUCTION_PATTERN, '#', $html);
+    }
+
+    /**
      * Validate HTML fragment via the W3C Nu validator
      */
     public function validateHtmlAction(): void
     {
-        $html = $this->getRequest()->getPost('html', '');
-        // Replace template directives with a non-empty placeholder rather than stripping them:
-        // a directive inside an attribute (e.g. src="{{media url="..."}}") would otherwise collapse
-        // to src="" and trigger a bogus "Must be non-empty" error from the validator. Match against
-        // the canonical directive pattern so the validator blanks exactly what the filter renders.
-        $html = preg_replace(\Maho\Filter\Template::CONSTRUCTION_PATTERN, '#', $html);
+        $html = self::blankDirectivesForValidation($this->getRequest()->getPost('html', ''));
 
         $prefix = "<!DOCTYPE html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><title>v</title></head>\n<body>\n";
         $suffix = "\n</body>\n</html>";
