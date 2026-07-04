@@ -347,15 +347,15 @@
 
         /* Keep the filter/side rails in view while the taller product column
            scrolls. align-self:start stops the grid item stretching to its row
-           height so it has room to move; max-height + overflow keeps long
-           filter lists reachable when a rail is taller than the viewport. The
-           top offset clears the sticky header (see .product-img-box). */
+           height so it has room to move; the top offset clears the sticky
+           header (see .product-img-box). The rails are never scroll
+           containers: blocks keep their content-based height and the wheel
+           always scrolls the page. */
         .col-left-first,
         .col-right {
-            @apply sticky self-start overflow-y-auto overscroll-contain;
+            @apply sticky self-start;
             /* Pin below the sticky header (+ a 1rem breathing gap) */
             top: calc(var(--header-height) + 1rem);
-            max-height: calc(100dvh - var(--header-height) - 2rem);
         }
     }
 
