@@ -23,7 +23,7 @@ use Symfony\Component\Process\Process;
 
 #[AsCommand(
     name: 'dev:frontend:theme:build',
-    description: 'Compile frontend theme CSS sources (src/*.css) into their css/ bundles',
+    description: 'Compile the CSS sources (src/*.css) of every frontend theme into their css/ bundles',
 )]
 class FrontendThemeBuild extends BaseMahoCommand
 {
@@ -35,7 +35,7 @@ class FrontendThemeBuild extends BaseMahoCommand
     protected function configure(): void
     {
         $this
-            ->addOption('theme', 't', InputOption::VALUE_REQUIRED, 'Build a single theme only, as package/theme (e.g. maho/default)')
+            ->addOption('theme', 't', InputOption::VALUE_REQUIRED, 'Limit the build to one theme instead of all, as package/theme (e.g. --theme maho/pharmacy)')
             ->addOption('watch', 'w', InputOption::VALUE_NONE, 'Rebuild on change; output is unminified, run a plain build before committing');
     }
 
@@ -208,7 +208,11 @@ class FrontendThemeBuild extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        $io->success('Compiled ' . count($entries) . ' CSS bundle(s). The compiled css/ files are meant to be committed.');
+        $themes = array_unique(array_column($entries, 'theme'));
+        $io->success(
+            'Compiled ' . count($entries) . ' CSS bundle(s) for ' . implode(', ', $themes)
+            . '. The compiled css/ files are meant to be committed.',
+        );
         return Command::SUCCESS;
     }
 
@@ -217,15 +221,17 @@ class FrontendThemeBuild extends BaseMahoCommand
      */
     private function watch(array $entries, string $tailwind, SymfonyStyle $io, OutputInterface $output): int
     {
+        $themes = array_unique(array_column($entries, 'theme'));
         $io->text([
-            'Watching ' . count($entries) . ' source(s) for changes - press Ctrl+C to stop.',
+            'Watching ' . count($entries) . ' source(s) of ' . implode(', ', $themes) . ' - press Ctrl+C to stop.',
             '<comment>Watch output is unminified: run dev:frontend:theme:build (without --watch) before committing.</comment>',
             '',
         ]);
 
         $processes = [];
         foreach ($entries as $entry) {
-            $args = [$tailwind, '-i', $entry['src'], '-o', $entry['out'], '--watch'];
+            // =always keeps the watcher alive when stdin is closed, which it is under Process
+            $args = [$tailwind, '-i', $entry['src'], '-o', $entry['out'], '--watch=always'];
             $label = "{$entry['theme']}:{$entry['bundle']}";
             $process = new Process($args, MAHO_ROOT_DIR, null, null, null);
             $process->start(function ($type, $buffer) use ($output, $label) {
