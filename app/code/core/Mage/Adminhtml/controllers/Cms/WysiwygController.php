@@ -22,7 +22,10 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     public function validateHtmlAction(): void
     {
         $html = $this->getRequest()->getPost('html', '');
-        $html = preg_replace('/\{\{[^{}]*\}\}/', '', $html);
+        // Replace template directives with a non-empty placeholder rather than stripping them:
+        // a directive inside an attribute (e.g. src="{{media url="..."}}") would otherwise collapse
+        // to src="" and trigger a bogus "Must be non-empty" error from the validator.
+        $html = preg_replace('/\{\{[^{}]*\}\}/', '#', $html);
 
         $prefix = "<!DOCTYPE html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><title>v</title></head>\n<body>\n";
         $suffix = "\n</body>\n</html>";
