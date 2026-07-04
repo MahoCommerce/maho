@@ -42,15 +42,14 @@ class ApiUser implements UserInterface
     }
 
     /**
-     * Erase sensitive credentials
+     * Erase sensitive credentials (no-op for JWT-based authentication).
      *
-     * Not marked #[\Override]: as of symfony/security-core 7.x the
-     * UserInterface contract no longer declares eraseCredentials(),
-     * so the attribute would fail the compile-time override check.
-     * The method body is kept as a no-op so Symfony's internal call
-     * sites (e.g. TokenInterface handling) that still invoke it
-     * continue to work harmlessly.
+     * security-core 7.x still declares eraseCredentials() on UserInterface
+     * (deprecated since 7.3, removed in 8.0), so #[\Override] is correct for
+     * the version this project targets. Drop the attribute if/when upgrading
+     * to security-core 8.0, where the interface no longer declares it.
      */
+    #[\Override]
     public function eraseCredentials(): void
     {
         // No credentials to erase for JWT-based authentication
