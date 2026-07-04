@@ -467,7 +467,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         if ($forListing) {
-            \Mage::dispatchEvent('api_product_dto_build', ['product' => $product, 'for_listing' => true, 'dto' => $dto]);
+            \Mage::dispatchEvent('api_product_dto_build', ['product' => $product, 'for_listing' => true, 'dto' => $dto, 'customer_group_id' => $this->getCustomerGroupId()]);
             return;
         }
 
@@ -767,7 +767,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             ];
         }
 
-        \Mage::dispatchEvent('api_product_dto_build', ['product' => $product, 'for_listing' => false, 'dto' => $dto]);
+        \Mage::dispatchEvent('api_product_dto_build', ['product' => $product, 'for_listing' => false, 'dto' => $dto, 'customer_group_id' => $this->getCustomerGroupId()]);
     }
 
     /**
