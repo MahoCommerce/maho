@@ -1,0 +1,127 @@
+/*
+ * Maho - Beauty. Contemporary beauty: milky near-white surfaces, soft petal
+ * tiles, one mauve-berry voice with sage in support, Newsreader headlines in
+ * normal case over Karla, pill geometry, lowercase actions. Dark mode is a
+ * clean plum evening shelf.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&family=Karla:wght@400;500;600&display=swap');
+
+:root {
+    --font-display: 'Newsreader', Georgia, serif;
+    --font-body: 'Karla', ui-sans-serif, system-ui, sans-serif;
+
+    --color-base-100: #fdfbfa;
+    --color-base-200: #f6efec;
+    --color-base-300: #e8d8d1;
+    --color-base-content: #352b28;
+
+    --color-primary: #a94a64;
+    --color-primary-content: #fdf1f5;
+    --color-secondary: #503242;
+    --color-secondary-content: #f7edf2;
+    --color-accent: #71875f;
+    --color-accent-content: #f2f7f0;
+    --color-neutral: #352b28;
+    --color-neutral-content: #f6efec;
+
+    --color-success: #57814f;
+    --color-success-content: #f2f8f0;
+    --color-warning: #b5701c;
+    --color-warning-content: #3a2405;
+    --color-error: #b13a3a;
+    --color-error-content: #fdf1f1;
+
+    /* Honey stars */
+    --maho-color-rating: #c98a45;
+
+    /* Soft petal wash behind the products - borderless */
+    --product-tile-bg: linear-gradient(180deg, #f9efeb, #f2e2db);
+
+    /* Rounded like the packaging */
+    --radius-selector: 0.75rem;
+    --radius-field: 1.25rem;
+    --radius-box: 1.25rem;
+}
+
+/* Soft-spoken headlines */
+.page-title h1,
+.page-title h2,
+.product-view .product-shop .product-name .h1 {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+}
+
+/* Lowercase posture on actions */
+.btn,
+button.button,
+a.button {
+    text-transform: lowercase;
+}
+
+::selection {
+    background: #f0cfd9;
+    color: #4a2b3a;
+}
+
+/* Deep plum footer */
+.footer-container {
+    background: #452a38;
+    border-color: #452a38;
+}
+
+.footer,
+.footer .block-title,
+.footer address {
+    color: rgb(247 237 242 / 0.66);
+}
+
+.footer .block-subscribe .block-title {
+    color: #f7edf2;
+}
+
+.footer a {
+    color: rgb(247 237 242 / 0.84);
+}
+
+.footer a:hover {
+    color: #e3a5bd;
+}
+
+.footer address {
+    border-color: rgb(247 237 242 / 0.18);
+}
+
+/* Plum evening shelf */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --color-base-100: #201619;
+        --color-base-200: #2a1e23;
+        --color-base-300: #422f38;
+        --color-base-content: #efdfe5;
+
+        --color-primary: #dd8fa8;
+        --color-primary-content: #38101f;
+        --color-secondary: #efdfe5;
+        --color-secondary-content: #2a1e23;
+        --color-accent: #a0ba95;
+        --color-accent-content: #16220f;
+
+        --product-tile-bg: linear-gradient(180deg, #332329, #281a1f);
+    }
+
+    ::selection {
+        background: #dd8fa8;
+        color: #38101f;
+    }
+
+    .footer-container {
+        background: #181014;
+        border-top: 1px solid rgb(239 223 229 / 0.12);
+    }
+}

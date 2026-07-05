@@ -1,75 +1,144 @@
 /*
- * Maho - Fashion. Elegant and editorial: soft blush, high-contrast serif
- * display, sharp corners, tracked uppercase details. Dark mode supported.
+ * Maho - Fashion. Contemporary editorial: pure white, ink actions, oversized
+ * Instrument Serif reserved for hero titles only - everything else is a
+ * quiet modern grotesque. No rules, no borders, no ornament: whitespace and
+ * type scale carry the identity. Dark mode is a clean charcoal gallery.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600&display=swap');
 
 :root {
-    --font-display: 'Playfair Display', Georgia, serif;
-    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
 
-    --color-base-100: #fdfcfb;
-    --color-base-200: #f6f1ee;
-    --color-base-300: #e8dfda;
-    --color-base-content: #2e2726;
+    --color-base-100: #ffffff;
+    --color-base-200: #f5f5f3;
+    --color-base-300: #e5e4e0;
+    --color-base-content: #131312;
 
-    --color-primary: #d4a5a5;
-    --color-primary-content: #3d2626;
-    --color-secondary: #2e2726;
-    --color-secondary-content: #f6f1ee;
-    --color-accent: #b07878;
-    --color-accent-content: #fdf6f4;
-    --color-neutral: #2e2726;
-    --color-neutral-content: #f6f1ee;
+    --color-primary: #131312;
+    --color-primary-content: #fafaf9;
+    --color-secondary: #4c4b47;
+    --color-secondary-content: #f5f5f3;
+    --color-accent: #131312;
+    --color-accent-content: #fafaf9;
+    --color-neutral: #131312;
+    --color-neutral-content: #f5f5f3;
 
-    --color-success: #4f7942;
-    --color-success-content: #f2f8ef;
-    --color-warning: #c07b2d;
-    --color-warning-content: #fdf6ec;
-    --color-error: #b3453c;
-    --color-error-content: #fdf1ef;
+    --color-success: #2f7d43;
+    --color-success-content: #f0f9f2;
+    --color-warning: #a8641c;
+    --color-warning-content: #fdf5ec;
+    --color-error: #cf3535;
+    --color-error-content: #fdf1f1;
 
-    /* Sharp, editorial */
-    --radius-selector: 0.25rem;
+    --maho-color-rating: #131312;
+
+    /* Borderless flat gallery tiles */
+    --product-tile-bg: #f4f4f2;
+
+    --radius-selector: 0rem;
     --radius-field: 0rem;
     --radius-box: 0rem;
 }
 
-/* Signature: tracked uppercase on actions and navigation */
+/* The serif appears only oversized - hero titles, nothing smaller */
+.main > .page-title h1,
+.main > .page-title h2,
+.product-view .product-shop .product-name .h1 {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    font-size: clamp(2.25rem, 1.6rem + 2.2vw, 3.25rem);
+    line-height: 1.05;
+}
+
+/* One caps surface: actions */
 .btn,
 button.button,
-a.button,
-#nav > .nav-primary > li.level0 > a {
+a.button {
     text-transform: uppercase;
-    letter-spacing: 0.09em;
+    letter-spacing: 0.08em;
     font-size: 0.8125rem;
 }
 
-.page-title h1,
-.page-title h2 {
-    font-weight: 500;
-    letter-spacing: 0;
+/* Primary actions invert to outline on hover */
+.btn-primary:hover,
+button.button:hover,
+a.button:hover {
+    background: transparent;
+    border-color: currentColor;
+    color: var(--color-base-content);
+}
+
+::selection {
+    background: #131312;
+    color: #fafaf9;
+}
+
+/* Ink footer */
+.footer-container {
+    background: #131312;
+    border-color: #131312;
+}
+
+.footer,
+.footer .block-title,
+.footer address {
+    color: rgb(255 255 255 / 0.6);
+}
+
+.footer .block-subscribe .block-title {
+    color: #fafaf9;
+}
+
+.footer a {
+    color: rgb(255 255 255 / 0.78);
+}
+
+.footer a:hover {
+    color: #ffffff;
+}
+
+.footer address {
+    border-color: rgb(255 255 255 / 0.15);
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
         color-scheme: dark;
 
-        --color-base-100: #1c1717;
-        --color-base-200: #262020;
-        --color-base-300: #3a3232;
-        --color-base-content: #ece4e0;
+        --color-base-100: #151514;
+        --color-base-200: #1f1f1d;
+        --color-base-300: #343431;
+        --color-base-content: #ededea;
 
-        --color-primary: #d4a5a5;
-        --color-primary-content: #2e1d1d;
-        --color-secondary: #ece4e0;
-        --color-secondary-content: #262020;
-        --color-accent: #c48f8f;
-        --color-accent-content: #241717;
+        --color-primary: #ededea;
+        --color-primary-content: #1a1a19;
+        --color-secondary: #c9c8c3;
+        --color-secondary-content: #1f1f1d;
+        --color-accent: #ededea;
+        --color-accent-content: #1a1a19;
+
+        --maho-color-rating: #ededea;
+        --product-tile-bg: #222220;
     }
 
+    ::selection {
+        background: #ededea;
+        color: #1a1a19;
+    }
+
+    .btn-primary:hover,
+    button.button:hover,
+    a.button:hover {
+        color: #ededea;
+    }
+
+    .footer-container {
+        border-top: 1px solid rgb(255 255 255 / 0.12);
+    }
 }

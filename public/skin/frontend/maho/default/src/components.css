@@ -69,6 +69,12 @@
     body {
         @apply font-body bg-base-100 text-[0.9375rem] text-base-content antialiased;
         line-height: 1.6;
+        caret-color: var(--color-primary);
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    p, li, dd {
+        text-wrap: pretty;
     }
 
     h1, h2, h3, h4, h5, h6 {
@@ -2917,6 +2923,110 @@ th.label {
     gap: 2.5rem 4.5rem;
     padding: 4rem 1rem 2.5rem;
     font-size: 0.875rem;
+}
+
+/* Mid widths (below the single-row desktop, above the nav breakpoint): the
+   newsletter takes its own row and the link columns share the next row evenly,
+   so no column ever wraps alone into a hole */
+@media (min-width: 771px) and (max-width: 1279px) {
+    /* Alone on its row, the newsletter reads as one centered line: title beside form */
+    .footer .block-subscribe {
+        flex-basis: 100%;
+        max-width: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2.5rem;
+    }
+
+    .footer .block-subscribe .block-title {
+        margin: 0;
+        flex: none;
+    }
+
+    .footer .block-subscribe form {
+        flex: 1;
+        max-width: 30rem;
+    }
+
+    .footer .links {
+        flex: 1 1 0;
+        min-width: 8rem;
+    }
+}
+
+/* Below the nav breakpoint (the same point the header goes mobile) the link
+   columns collapse into an accordion - app.js toggles .open and the ARIA
+   state on .block-title. Hairlines and the chevron derive from currentColor,
+   so themed (dark) footers adapt automatically. */
+@media (max-width: 770px) {
+    .footer {
+        display: block;
+        padding-top: 2rem;
+    }
+
+    .footer .block-subscribe {
+        max-width: none;
+        margin-bottom: 1.5rem;
+    }
+
+    .footer .links {
+        /* DaisyUI's footer component turns direct children into shrink-to-fit
+           grids - the accordion rows must span the full width */
+        display: block;
+        width: 100%;
+        border-bottom: 1px solid color-mix(in oklab, currentColor 22%, transparent);
+    }
+
+    .footer .links:first-of-type {
+        border-top: 1px solid color-mix(in oklab, currentColor 22%, transparent);
+    }
+
+    .footer .links .block-title {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin: 0;
+        padding: 1rem 0.125rem;
+        cursor: pointer;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .footer .links .block-title::after {
+        content: '';
+        width: 0.5em;
+        height: 0.5em;
+        flex: none;
+        border-right: 1.5px solid currentColor;
+        border-bottom: 1.5px solid currentColor;
+        transform: rotate(45deg);
+        transition: transform 0.2s ease;
+    }
+
+    .footer .links.open .block-title::after {
+        transform: rotate(225deg);
+    }
+
+    .footer .links .block-title:focus-visible {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 2px;
+    }
+
+    .footer .links ul {
+        display: none;
+        padding-bottom: 1.25rem;
+    }
+
+    .footer .links.open ul {
+        display: flex;
+    }
+
+    .footer address {
+        margin-top: 1.5rem;
+    }
 }
 
 /* Unlayered: the layered-nav wrapper carries the semantic class="block", which

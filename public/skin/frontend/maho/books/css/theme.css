@@ -1,71 +1,127 @@
 /*
- * Maho - Books. Literary and calm: book-brown ink on paper tones, Merriweather
- * display with Lora body (a store you read, not scan). Dark mode is a sepia
- * reading-lamp, not plain grey.
+ * Maho - Books. Contemporary bookshop: paper-white page, quiet warm tiles
+ * where the covers supply the color, deep teal actions with a marigold
+ * counterpoint, Literata (a digital-native reading serif) for headings over
+ * a clean grotesque body. Dark mode is a clean warm night-reading surface.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,600;7..72,700&family=Source+Sans+3:wght@400;500;600&display=swap');
 
 :root {
-    --font-display: 'Merriweather', Georgia, serif;
-    --font-body: 'Lora', Georgia, serif;
+    --font-display: 'Literata', Georgia, serif;
+    --font-body: 'Source Sans 3', ui-sans-serif, system-ui, sans-serif;
 
-    --color-base-100: #faf6ee;
-    --color-base-200: #f2ead9;
-    --color-base-300: #e0d3ba;
-    --color-base-content: #372c22;
+    --color-base-100: #fdfcf9;
+    --color-base-200: #f4f1e9;
+    --color-base-300: #e1dbc9;
+    --color-base-content: #26221a;
 
-    --color-primary: #5e3023;
-    --color-primary-content: #f8efe3;
-    --color-secondary: #40513c;
-    --color-secondary-content: #f0f4ec;
-    --color-accent: #a97f2f;
-    --color-accent-content: #fdf7e9;
-    --color-neutral: #372c22;
-    --color-neutral-content: #f2ead9;
+    --color-primary: #12727a;
+    --color-primary-content: #ecfafb;
+    --color-secondary: #26221a;
+    --color-secondary-content: #f4f1e9;
+    --color-accent: #e0a52e;
+    --color-accent-content: #423005;
+    --color-neutral: #26221a;
+    --color-neutral-content: #f4f1e9;
 
-    --color-success: #55693f;
-    --color-success-content: #f3f7ec;
-    --color-warning: #a97f2f;
-    --color-warning-content: #fdf7e9;
-    --color-error: #99392b;
-    --color-error-content: #fcf0ed;
+    --color-info: #12727a;
+    --color-info-content: #ecfafb;
+    --color-success: #46793a;
+    --color-success-content: #f2f8ee;
+    --color-warning: #b3872a;
+    --color-warning-content: #33250a;
+    --color-error: #b23a2c;
+    --color-error-content: #fcf1ee;
 
-    /* Quiet, bookish */
-    --radius-selector: 0.25rem;
-    --radius-field: 0.25rem;
-    --radius-box: 0.5rem;
+    /* Gold-leaf stars */
+    --maho-color-rating: #c99a2e;
+
+    /* Quiet warm plates - the covers are the color */
+    --product-tile-bg: #f4f0e5;
+
+    --radius-selector: 0.375rem;
+    --radius-field: 0.5rem;
+    --radius-box: 1rem;
 }
 
-/* Signature: reading rhythm - roomier lines, classic italicized descriptions */
-body {
-    line-height: 1.7;
+/* Reading rhythm, no ornament */
+.page-title h1,
+.page-title h2,
+.product-view .product-shop .product-name .h1 {
+    font-weight: 600;
+    letter-spacing: -0.01em;
 }
 
 .category-description,
 .product-view .short-description {
+    font-family: var(--font-display);
     font-style: italic;
+    font-weight: 500;
 }
 
-/* Sepia reading-lamp dark mode */
+::selection {
+    background: #ecd9a3;
+    color: #26221a;
+}
+
+/* Deep teal-ink footer */
+.footer-container {
+    background: #123f43;
+    border-color: #123f43;
+}
+
+.footer,
+.footer .block-title,
+.footer address {
+    color: rgb(236 250 251 / 0.64);
+}
+
+.footer .block-subscribe .block-title {
+    color: #ecfafb;
+}
+
+.footer a {
+    color: rgb(236 250 251 / 0.82);
+}
+
+.footer a:hover {
+    color: #e0a52e;
+}
+
+.footer address {
+    border-color: rgb(236 250 251 / 0.16);
+}
+
 @media (prefers-color-scheme: dark) {
     :root {
         color-scheme: dark;
 
-        --color-base-100: #221b12;
-        --color-base-200: #2c2417;
-        --color-base-300: #42371f;
-        --color-base-content: #dccfb4;
+        --color-base-100: #1b1915;
+        --color-base-200: #242119;
+        --color-base-300: #3b362a;
+        --color-base-content: #e5decb;
 
-        --color-primary: #c08a63;
-        --color-primary-content: #26160d;
-        --color-secondary: #a9b795;
-        --color-secondary-content: #222b1a;
-        --color-accent: #cfa64d;
-        --color-accent-content: #2b2109;
+        --color-primary: #7fc4c9;
+        --color-primary-content: #0a2b2e;
+        --color-secondary: #e5decb;
+        --color-secondary-content: #242119;
+        --color-accent: #ecb84a;
+        --color-accent-content: #33250a;
+
+        --maho-color-rating: #d9ad4a;
+        --product-tile-bg: #26221a;
     }
 
+    ::selection {
+        background: #3b362a;
+        color: #ecdfc0;
+    }
+
+    .footer-container {
+        background: #0e2d30;
+    }
 }

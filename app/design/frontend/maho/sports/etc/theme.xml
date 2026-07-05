@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<theme>
+    <parent>maho/default</parent>
+    <title>Maho - Sports</title>
+</theme>

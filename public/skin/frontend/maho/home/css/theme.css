@@ -1,0 +1,126 @@
+/*
+ * Maho - Home. Contemporary showroom: a warm greige field with crisp white
+ * borderless product plinths, one burnt-clay voice with olive in support,
+ * quiet Scandinavian grotesques, measured motion. Dark mode is the showroom
+ * after closing.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:wght@400;500;600&display=swap');
+
+:root {
+    --font-display: 'Schibsted Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+
+    /* Warm greige field; white is reserved for the product plinths */
+    --color-base-100: #f4f1eb;
+    --color-base-200: #eae6dc;
+    --color-base-300: #d7d0bf;
+    --color-base-content: #26211a;
+
+    --color-primary: #a04620;
+    --color-primary-content: #fdf1ea;
+    --color-secondary: #2c2822;
+    --color-secondary-content: #eae6dc;
+    --color-accent: #5f6a3d;
+    --color-accent-content: #f3f6ea;
+    --color-neutral: #2c2822;
+    --color-neutral-content: #eae6dc;
+
+    --color-success: #52794a;
+    --color-success-content: #f2f8ef;
+    --color-warning: #a8751d;
+    --color-warning-content: #33240a;
+    --color-error: #a83c2e;
+    --color-error-content: #fcf1ee;
+
+    /* Brass stars */
+    --maho-color-rating: #b3823a;
+
+    /* White plinths on the greige field - borderless */
+    --product-tile-bg: #fdfdfb;
+
+    --radius-selector: 0.5rem;
+    --radius-field: 0.625rem;
+    --radius-box: 1rem;
+}
+
+/* Measured headlines, furniture is the sculpture */
+.page-title h1,
+.page-title h2,
+.product-view .product-shop .product-name .h1 {
+    font-weight: 500;
+    letter-spacing: -0.02em;
+}
+
+/* Motion like weight being set down */
+.products-grid .product-image img {
+    transition-duration: 600ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::selection {
+    background: #a04620;
+    color: #fdf1ea;
+}
+
+/* Espresso floor footer */
+.footer-container {
+    background: #241d14;
+    border-color: #241d14;
+}
+
+.footer,
+.footer .block-title,
+.footer address {
+    color: rgb(234 230 220 / 0.62);
+}
+
+.footer .block-subscribe .block-title {
+    color: #eae6dc;
+}
+
+.footer a {
+    color: rgb(234 230 220 / 0.82);
+}
+
+.footer a:hover {
+    color: #d18a60;
+}
+
+.footer address {
+    border-color: rgb(234 230 220 / 0.16);
+}
+
+/* The showroom after closing */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+
+        --color-base-100: #1b1712;
+        --color-base-200: #241f18;
+        --color-base-300: #3b3427;
+        --color-base-content: #e7e1d4;
+
+        --color-primary: #d18a60;
+        --color-primary-content: #2e1305;
+        --color-secondary: #e7e1d4;
+        --color-secondary-content: #241f18;
+        --color-accent: #a9b98a;
+        --color-accent-content: #1a220e;
+
+        --product-tile-bg: #262119;
+    }
+
+    ::selection {
+        background: #d18a60;
+        color: #2e1305;
+    }
+
+    .footer-container {
+        background: #14100a;
+        border-top: 1px solid rgb(231 225 212 / 0.12);
+    }
+}

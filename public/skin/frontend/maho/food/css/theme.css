@@ -1,52 +1,93 @@
 /*
- * Maho - Food. Warm and appetizing: terracotta on cream, Fraunces display,
- * generous rounded shapes, pill buttons. Intentionally light-only - food
- * photography belongs on a warm bright table.
+ * Maho - Food. Contemporary fresh market: white page, warm borderless food
+ * tiles, one juicy tomato-coral CTA with basil and saffron in support,
+ * chunky Bricolage Grotesque headings, friendly pill geometry. Intentionally
+ * light-only - food photography belongs in daylight.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600&display=swap');
 
 :root {
-    --font-display: 'Fraunces', Georgia, serif;
-    --font-body: 'Source Sans 3', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
 
-    --color-base-100: #fffaf4;
-    --color-base-200: #f9f0e3;
-    --color-base-300: #ecdcc6;
-    --color-base-content: #42342a;
+    --color-base-100: #ffffff;
+    --color-base-200: #f7f2e9;
+    --color-base-300: #e7dcc7;
+    --color-base-content: #2e2a22;
 
-    --color-primary: #c9663d;
-    --color-primary-content: #fff5ef;
-    --color-secondary: #66783e;
-    --color-secondary-content: #f5f8ec;
-    --color-accent: #e0a03c;
-    --color-accent-content: #3c2c0e;
-    --color-neutral: #42342a;
-    --color-neutral-content: #f9f0e3;
+    --color-primary: #d94426;
+    --color-primary-content: #fff4ef;
+    --color-secondary: #476a2e;
+    --color-secondary-content: #f2f8ec;
+    --color-accent: #eda913;
+    --color-accent-content: #453305;
+    --color-neutral: #2e2a22;
+    --color-neutral-content: #f7f2e9;
 
-    --color-success: #5d7d3b;
-    --color-success-content: #f4f9ec;
-    --color-warning: #c47e12;
-    --color-warning-content: #fdf6e9;
-    --color-error: #bc4530;
+    --color-success: #4f8629;
+    --color-success-content: #f3f9ec;
+    --color-warning: #c47c10;
+    --color-warning-content: #3d2803;
+    --color-error: #bb3220;
     --color-error-content: #fdf1ee;
 
-    /* Generous and soft; pill fields */
-    --radius-selector: 1rem;
+    /* Saffron stars */
+    --maho-color-rating: #eda913;
+
+    /* Warm borderless food tiles */
+    --product-tile-bg: #f7f1e5;
+
+    /* Friendly pills */
+    --radius-selector: 0.75rem;
     --radius-field: 1.5rem;
     --radius-box: 1.25rem;
 }
 
-/* Signature: menu-board headings with a little extra warmth */
+/* Hearty contemporary headings */
 .page-title h1,
 .page-title h2,
 .product-view .product-shop .product-name .h1 {
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: -0.01em;
 }
 
 #nav > .nav-primary > li.level0 > a {
     font-weight: 600;
+}
+
+::selection {
+    background: #eda913;
+    color: #453305;
+}
+
+/* Deep basil footer */
+.footer-container {
+    background: #2f4b26;
+    border-color: #2f4b26;
+}
+
+.footer,
+.footer .block-title,
+.footer address {
+    color: rgb(242 248 236 / 0.66);
+}
+
+.footer .block-subscribe .block-title {
+    color: #f2f8ec;
+}
+
+.footer a {
+    color: rgb(242 248 236 / 0.84);
+}
+
+.footer a:hover {
+    color: #f4c65c;
+}
+
+.footer address {
+    border-color: rgb(242 248 236 / 0.18);
 }

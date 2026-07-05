@@ -12,7 +12,13 @@ app/design/frontend/maho/
 ├── fashion/                      Industry variants (parent: maho/default)
 ├── electronics/                  Each is just an etc/theme.xml
 ├── food/
-└── books/
+├── books/
+├── jewelry/
+├── beauty/
+├── home/
+├── sports/
+├── kids/
+└── garden/
 
 public/skin/frontend/maho/
 ├── default/
@@ -31,7 +37,13 @@ public/skin/frontend/maho/
 ├── fashion/css/theme.css         Industry identities: plain CSS variable overrides
 ├── electronics/css/theme.css     + Google Fonts + optional dark mode
 ├── food/css/theme.css
-└── books/css/theme.css
+├── books/css/theme.css
+├── jewelry/css/theme.css
+├── beauty/css/theme.css
+├── home/css/theme.css
+├── sports/css/theme.css
+├── kids/css/theme.css
+└── garden/css/theme.css
 ```
 
 No `.phtml` templates are forked: the compiled CSS styles the semantic class
@@ -54,7 +66,8 @@ create your own theme instead.
 ## Picking a theme (store owners)
 
 1. **System > Configuration > Design**: package `maho`, theme `fashion` /
-   `electronics` / `food` / `books` (empty = default).
+   `electronics` / `food` / `books` / `jewelry` / `beauty` / `home` /
+   `sports` / `kids` / `garden` (empty = default).
 2. `./maho cache:flush`
 
 ## Creating your own theme
@@ -134,8 +147,9 @@ always win**, no `!important` or specificity battles needed:
 #nav a { text-transform: uppercase; letter-spacing: 0.04em; }
 ```
 
-The four industry themes (`fashion/`, `electronics/`, `food/`, `books/`) are
-real-world examples of this path — copy the closest one and edit.
+The ten industry themes (`fashion/`, `electronics/`, `food/`, `books/`,
+`jewelry/`, `beauty/`, `home/`, `sports/`, `kids/`, `garden/`) are real-world
+examples of this path — copy the closest one and edit.
 
 ### Option B — your own Tailwind / DaisyUI build
 
