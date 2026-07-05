@@ -296,7 +296,10 @@ class tiptapWysiwygSetup {
                     shouldShow: ({ editor, view, state, oldState }) => {
                         const isInTable = editor.isActive('table');
                         const isInCell = editor.isActive('tableCell') || editor.isActive('tableHeader');
-                        const shouldShow = isInTable && isInCell;
+                        // Require focus: TipTap only positions the menu while the editor is focused,
+                        // so without this the menu shows unpositioned (top-left) whenever the initial
+                        // selection happens to land in a table cell (e.g. a doc ending with a table).
+                        const shouldShow = editor.isFocused && isInTable && isInCell;
                         tableBubbleMenu.style.display = shouldShow ? 'flex' : 'none';
                         return shouldShow;
                     },
@@ -504,6 +507,7 @@ class tiptapWysiwygSetup {
 
         bubbleMenu.id = `${this.id}_table_bubble_menu`;
         bubbleMenu.className = 'tiptap-bubble-menu';
+        bubbleMenu.style.display = 'none';
         return bubbleMenu;
     }
 
