@@ -12,10 +12,11 @@ declare(strict_types=1);
 $installer = $this;
 $installer->startSetup();
 
-// The customer-address "fax" field is an anachronism. We stop offering it, but we must never
-// drop merchant data. So: on installs that hold stored fax values, keep the attribute and just
-// hide it; on installs with no fax data (fresh installs, or existing ones that never used it),
-// remove the attribute entirely. Either way it stops rendering in every EAV form.
+// The customer-address "fax" field is an anachronism, no longer created on fresh installs (it was
+// removed from Mage_Customer_Model_Resource_Setup::getDefaultEntities()). This upgrade cleans up
+// existing installs without ever dropping merchant data: where stored fax values exist we keep the
+// attribute and just hide it; where none exist (never used) we remove the attribute entirely. Fresh
+// installs never created the attribute, so this simply no-ops for them.
 $attributeId = $installer->getAttribute('customer_address', 'fax', 'attribute_id');
 if ($attributeId) {
     $connection = $installer->getConnection();
