@@ -78,6 +78,7 @@
 "Assign Order Status to State","Assign Order Status to State"
 "Assign Status to State","Assign Status to State"
 "At least a payment ID must be set.","At least a payment ID must be set."
+"Attach PDF to Email","Attach PDF to Email"
 "Authorization","Authorization"
 "Authorized amount of %s.","Authorized amount of %s."
 "Authorizing amount of %s is pending approval on gateway.","Authorizing amount of %s is pending approval on gateway."

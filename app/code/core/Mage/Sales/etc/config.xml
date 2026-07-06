@@ -1513,6 +1513,7 @@ SPDX-License-Identifier: AFL-3.0
                 <guest_template>sales_email_invoice_guest_template</guest_template>
                 <identity>sales</identity>
                 <copy_method>bcc</copy_method>
+                <attach_pdf>0</attach_pdf>
             </invoice>
             <invoice_comment>
                 <enabled>1</enabled>
@@ -1527,6 +1528,7 @@ SPDX-License-Identifier: AFL-3.0
                 <guest_template>sales_email_shipment_guest_template</guest_template>
                 <identity>sales</identity>
                 <copy_method>bcc</copy_method>
+                <attach_pdf>0</attach_pdf>
             </shipment>
             <shipment_comment>
                 <enabled>1</enabled>
@@ -1541,6 +1543,7 @@ SPDX-License-Identifier: AFL-3.0
                 <guest_template>sales_email_creditmemo_guest_template</guest_template>
                 <identity>sales</identity>
                 <copy_method>bcc</copy_method>
+                <attach_pdf>0</attach_pdf>
             </creditmemo>
             <creditmemo_comment>
                 <enabled>1</enabled>

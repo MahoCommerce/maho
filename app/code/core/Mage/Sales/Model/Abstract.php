@@ -26,6 +26,34 @@ abstract class Mage_Sales_Model_Abstract extends Mage_Core_Model_Abstract
     abstract public function getStore();
 
     /**
+     * Descriptor for attaching this document as a PDF to an email, or null when the
+     * document has no printable PDF form. Overridden by invoice/shipment/creditmemo.
+     *
+     * @return array{source_model: string, entity_model: string, filename_prefix: string}|null
+     */
+    protected function _getPdfAttachmentInfo(): ?array
+    {
+        return null;
+    }
+
+    /**
+     * Attach a PDF copy of this document to the given email info, if it has a PDF form
+     */
+    protected function _addPdfAttachment(Mage_Core_Model_Email_Info $emailInfo): void
+    {
+        $info = $this->_getPdfAttachmentInfo();
+        if ($info === null) {
+            return;
+        }
+        $emailInfo->addPdfAttachment(
+            $info['source_model'],
+            $info['entity_model'],
+            (int) $this->getId(),
+            $info['filename_prefix'] . '-' . $this->getIncrementId() . '.pdf',
+        );
+    }
+
+    /**
      * Processing object after save data
      * Updates relevant grid table records.
      *
