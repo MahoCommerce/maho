@@ -161,12 +161,6 @@ $setup->insert($installer->getTable('eav/form_element'), [
     'attribute_id'  => $installer->getAttributeId($addressEntityTypeId, 'telephone'),
     'sort_order'    => $elementSort++,
 ]);
-$setup->insert($installer->getTable('eav/form_element'), [
-    'type_id'       => $formTypeId,
-    'fieldset_id'   => null,
-    'attribute_id'  => $installer->getAttributeId($addressEntityTypeId, 'fax'),
-    'sort_order'    => $elementSort++,
-]);
 if ($showDob) {
     $setup->insert($installer->getTable('eav/form_element'), [
         'type_id'       => $formTypeId,
@@ -293,12 +287,6 @@ $setup->insert($installer->getTable('eav/form_element'), [
     'attribute_id'  => $installer->getAttributeId($addressEntityTypeId, 'telephone'),
     'sort_order'    => $elementSort++,
 ]);
-$setup->insert($installer->getTable('eav/form_element'), [
-    'type_id'       => $formTypeId,
-    'fieldset_id'   => null,
-    'attribute_id'  => $installer->getAttributeId($addressEntityTypeId, 'fax'),
-    'sort_order'    => $elementSort++,
-]);
 if ($showDob) {
     $setup->insert($installer->getTable('eav/form_element'), [
         'type_id'       => $formTypeId,
@@ -415,12 +403,6 @@ $setup->insert($installer->getTable('eav/form_element'), [
     'attribute_id'  => $installer->getAttributeId($addressEntityTypeId, 'telephone'),
     'sort_order'    => $elementSort++,
 ]);
-$setup->insert($installer->getTable('eav/form_element'), [
-    'type_id'       => $formTypeId,
-    'fieldset_id'   => null,
-    'attribute_id'  => $installer->getAttributeId($addressEntityTypeId, 'fax'),
-    'sort_order'    => $elementSort++,
-]);
 
 /**
  *****************************************************************************
@@ -519,12 +501,6 @@ $setup->insert($installer->getTable('eav/form_element'), [
     'type_id'       => $formTypeId,
     'fieldset_id'   => null,
     'attribute_id'  => $installer->getAttributeId($addressEntityTypeId, 'telephone'),
-    'sort_order'    => $elementSort++,
-]);
-$setup->insert($installer->getTable('eav/form_element'), [
-    'type_id'       => $formTypeId,
-    'fieldset_id'   => null,
-    'attribute_id'  => $installer->getAttributeId($addressEntityTypeId, 'fax'),
     'sort_order'    => $elementSort++,
 ]);
 
