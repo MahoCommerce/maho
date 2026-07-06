@@ -164,3 +164,29 @@ describe('Transaction Rollback Edge Cases', function () {
         expect($this->adapter->getTransactionLevel())->toBe(0);
     });
 });
+
+describe('Advisory Locks Inside Transactions', function () {
+    // Regression: on SQLite, getLock() used to run "CREATE TABLE IF NOT EXISTS" (a DDL
+    // statement) on every call. SQLite forbids DDL inside a transaction, so acquiring a
+    // lock while a transaction was open threw "DDL statements are not allowed in
+    // transactions" — even when the table already existed. This surfaced when saving a
+    // config section (e.g. activating SMTP) as the misleading "Unable to save the cron
+    // expression." error, because a config-section load acquires the cache-save lock
+    // inside the save transaction.
+    it('acquires and releases an advisory lock while a transaction is open', function () {
+        $lockName = 'maho_txn_lock_test';
+        $this->adapter->releaseLock($lockName);
+
+        $this->adapter->beginTransaction();
+        try {
+            $acquired = $this->adapter->getLock($lockName, 1);
+            expect($acquired)->toBeTrue();
+            expect($this->adapter->getTransactionLevel())->toBe(1);
+        } finally {
+            $this->adapter->releaseLock($lockName);
+            $this->adapter->rollBack();
+        }
+
+        expect($this->adapter->getTransactionLevel())->toBe(0);
+    });
+});

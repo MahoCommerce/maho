@@ -1122,7 +1122,14 @@ class Sqlite extends AbstractPdoAdapter
     public function getLock(string $lockName, int $timeout = 0): bool
     {
         $this->_connect();
-        $this->_ensureLocksTableExists();
+        // Only run the CREATE TABLE (a DDL statement) when the table is actually
+        // missing. SQLite forbids DDL inside a transaction, so issuing it
+        // unconditionally would throw whenever a lock is acquired mid-transaction
+        // (e.g. a config-section load during a config save) even though the table
+        // already exists. This mirrors the guard in releaseLock() and isLocked().
+        if (!$this->_locksTableExists()) {
+            $this->_ensureLocksTableExists();
+        }
 
         $lockKey = md5($lockName);
         $expireTime = time() + 3600; // Locks expire after 1 hour
