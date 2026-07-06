@@ -486,9 +486,6 @@ Validation.addAllThese([
     ['validate-phoneLax', 'Please enter a valid phone number. For example (123) 456-7890 or 123-456-7890.', v => {
         return Validation.get('IsEmpty').test(v) || /^((\d[-. ]?)?((\(\d{3}\))|\d{3}))?[-. ]?\d{3}[-. ]?\d{4}$/.test(v);
     }],
-    ['validate-fax', 'Please enter a valid fax number. For example (123) 456-7890 or 123-456-7890.', v => {
-        return Validation.get('IsEmpty').test(v) || /^(\()?\d{3}(\))?(-|\s)?\d{3}(-|\s)\d{4}$/.test(v);
-    }],
     ['validate-date', 'Please enter a valid date.', v => {
         const test = new Date(v);
         return Validation.get('IsEmpty').test(v) || !isNaN(test);

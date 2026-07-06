@@ -108,12 +108,6 @@
                             <input type="tel" name="billing[telephone]" value="<?= $this->escapeHtml($this->getAddress()->getTelephone()) ?>" title="<?= $this->quoteEscape($this->__('Telephone')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('telephone') ?>" id="billing:telephone">
                         </div>
                     </div>
-                    <div class="field">
-                        <label for="billing:fax"><?= $this->__('Fax') ?></label>
-                        <div class="input-box">
-                            <input type="tel" name="billing[fax]" value="<?= $this->escapeHtml($this->getAddress()->getFax()) ?>" title="<?= $this->quoteEscape($this->__('Fax')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('fax') ?>" id="billing:fax">
-                        </div>
-                    </div>
                 </li>
                 <?php if(!$this->isCustomerLoggedIn()): ?>
                 <input type="hidden" name="checkout_method" value="guest">
