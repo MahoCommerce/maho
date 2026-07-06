@@ -345,6 +345,7 @@
 "Sender Email","Sender Email"
 "Sender Name","Sender Name"
 "Sent","Sent"
+"Server returned status %s","Server returned status %s"
 "Services","Services"
 "Session Cookie Management","Session Cookie Management"
 "Session Lifetime (seconds)","Session Lifetime (seconds)"
