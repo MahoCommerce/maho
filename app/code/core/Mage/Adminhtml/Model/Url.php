@@ -106,11 +106,9 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
     {
         $salt = Mage::getSingleton('core/session')->getFormKey();
 
-        // Prefer the dispatched request's controller/action over positional path
-        // parsing. The path heuristic assumes the classic admin/<controller>/<action>
-        // shape and breaks for routes migrated with legacy:migrate-routes, which carry
-        // an extra leading frontName segment (e.g. /admin/<frontName>/<controller>/<action>).
-        // The path fallback stays for early calls made before the request is dispatched.
+        // Prefer the dispatched request names; positional path parsing assumes the classic
+        // admin/<controller>/<action> shape and mis-slices legacy:migrate-routes routes that
+        // carry an extra frontName segment. The path fallback stays for pre-dispatch calls.
         $p = explode('/', trim($this->getRequest()->getOriginalPathInfo(), '/'));
         if (!$controller) {
             $controller = $this->getRequest()->getControllerName() ?: (empty($p[1]) ? null : $p[1]);
