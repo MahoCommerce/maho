@@ -465,12 +465,11 @@ class Maho_FeedManager_Model_Mapper
     /**
      * Evaluate a dynamic rule-based source with parent-mode support.
      *
-     * Rules evaluate against the raw product data row. For variant children
-     * that inherit pricing (etc.) from their parent, "if_empty" re-evaluates
-     * the rule against a projection of the parent_* keys when the child
-     * evaluation produced nothing; "always" evaluates the parent projection
-     * first. Without this, rule sources silently ignored use_parent while
-     * attribute sources honoured it.
+     * Rules evaluate against a product MODEL. For variant children that inherit
+     * pricing (etc.) from their parent, "if_empty" re-evaluates the rule against
+     * the loaded parent model when the child evaluation produced nothing;
+     * "always" evaluates the parent first. Without this, rule sources silently
+     * ignored use_parent while attribute sources honoured it.
      */
     protected function _evaluateRuleWithParentMode(string $ruleCode, array $rawData, Mage_Catalog_Model_Product $product, string $useParentMode): mixed
     {
@@ -486,7 +485,7 @@ class Maho_FeedManager_Model_Mapper
         }
 
         $value = $this->_evaluateRule($ruleCode, $rawData, $product);
-        if (in_array($useParentMode, ['if_empty', '1'], true) && ($value === null || $value === '')) {
+        if ($useParentMode === 'if_empty' && ($value === null || $value === '')) {
             $parent = $this->_getParentProductModel($product);
             if ($parent !== null) {
                 return $this->_evaluateRule($ruleCode, $rawData, $parent);
@@ -1177,7 +1176,7 @@ class Maho_FeedManager_Model_Mapper
                 'source_value' => $column['source_value'] ?? '',
                 'transformers' => $transformers,
                 'conditions' => [],
-                'use_parent' => !empty($column['use_parent']),
+                'use_parent' => (string) ($column['use_parent'] ?? ''),
             ];
         }
 
