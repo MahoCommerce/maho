@@ -106,15 +106,22 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
     {
         $salt = Mage::getSingleton('core/session')->getFormKey();
 
-        // Prefer the dispatched request names; positional path parsing assumes the classic
+        // Validate against what the user actually requested: after _forward() the dispatched
+        // names change (e.g. catalog_category/index forwards to edit) but the URL's key was
+        // minted for the original action, so the before-forward snapshot takes precedence.
+        // Dispatched names come next; positional path parsing assumes the classic
         // admin/<controller>/<action> shape and mis-slices legacy:migrate-routes routes that
-        // carry an extra frontName segment. The path fallback stays for pre-dispatch calls.
+        // carry an extra frontName segment, so it stays only as a pre-dispatch fallback.
         $p = explode('/', trim($this->getRequest()->getOriginalPathInfo(), '/'));
         if (!$controller) {
-            $controller = $this->getRequest()->getControllerName() ?: (empty($p[1]) ? null : $p[1]);
+            $controller = $this->getRequest()->getBeforeForwardInfo('controller_name')
+                ?: $this->getRequest()->getControllerName()
+                ?: (empty($p[1]) ? null : $p[1]);
         }
         if (!$action) {
-            $action = $this->getRequest()->getActionName() ?: (empty($p[2]) ? null : $p[2]);
+            $action = $this->getRequest()->getBeforeForwardInfo('action_name')
+                ?: $this->getRequest()->getActionName()
+                ?: (empty($p[2]) ? null : $p[2]);
         }
 
         // Normalize case so the hash matches regardless of how the caller cased the
