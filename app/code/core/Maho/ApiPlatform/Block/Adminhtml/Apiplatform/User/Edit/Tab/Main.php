@@ -175,7 +175,13 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Edit_Tab_Main extends Ma
             ]);
         }
 
-        $form->setValues($model->getData());
+        // Never emit the stored api_key hash into the password field. For an
+        // existing user the field means "new key" (blank keeps the current one);
+        // for a new user there's no value to prefill. Mirrors how client_secret
+        // shows a "stored hashed" note instead of the value.
+        $data = $model->getData();
+        unset($data['api_key']);
+        $form->setValues($data);
         $this->setForm($form);
 
         return parent::_prepareForm();

@@ -72,7 +72,7 @@ describe('API v2 Shipments', function (): void {
                 // This is a structural test - just verify the response format
                 expect($response['json'])->toBeArray();
             } else {
-                expect(true)->toBeTrue();
+                $this->markTestSkipped('Customer orders request returned ' . $response['status']);
             }
         });
 

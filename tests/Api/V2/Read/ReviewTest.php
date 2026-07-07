@@ -33,7 +33,7 @@ describe('API v2 Product Reviews', function (): void {
                 // Should succeed even if no reviews exist
                 expect($response['status'])->toBeIn([200, 404]);
             } else {
-                expect(true)->toBeTrue();
+                $this->markTestSkipped('No products available to list reviews for');
             }
         });
 

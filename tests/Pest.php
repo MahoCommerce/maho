@@ -33,6 +33,11 @@ function apiGet(string $path, ?string $token = null, array $extraHeaders = []): 
     return ApiV2Helper::get($path, $token, $extraHeaders);
 }
 
+function apiGetRaw(string $path, ?string $token = null, array $extraHeaders = []): array
+{
+    return ApiV2Helper::getRaw($path, $token, $extraHeaders);
+}
+
 function apiPost(string $path, array $data, ?string $token = null, array $extraHeaders = []): array
 {
     return ApiV2Helper::post($path, $data, $token, $extraHeaders);
@@ -101,6 +106,21 @@ function serviceToken(array $permissions = ['all'], ?array $storeIds = null): st
         'sub' => 'api_user_test',
         'type' => 'api_user',
         // No api_user_id - use JWT-embedded permissions for testing
+        'permissions' => $permissions,
+        'allowed_store_ids' => $storeIds,
+    ]);
+}
+
+/**
+ * Like serviceToken(), but with an explicit caller identity (JWT `sub`). Two
+ * calls with different identities are two distinct API callers — used to prove
+ * per-caller scoping (e.g. idempotency replay isolation).
+ */
+function serviceTokenAs(string $identity, array $permissions = ['all'], ?array $storeIds = null): string
+{
+    return ApiV2Helper::generateToken([
+        'sub' => $identity,
+        'type' => 'api_user',
         'permissions' => $permissions,
         'allowed_store_ids' => $storeIds,
     ]);

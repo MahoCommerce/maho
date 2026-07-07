@@ -141,17 +141,51 @@ describe('PUT /api/rest/v2/revocation-requests/{id}', function (): void {
 });
 
 afterAll(function (): void {
+    restoreRevocationConfig();
     cleanupTestData();
 });
 
 /**
+ * Remember an original store-config value once (before the first overwrite) so
+ * afterAll can restore it and this file's config changes don't leak into other
+ * tests. Restores via restoreRevocationConfig().
+ *
+ * @return array<string, string|null>
+ */
+function revocationConfigBackup(?string $path = null, ?string $value = null): array
+{
+    static $backup = [];
+    if ($path !== null && !array_key_exists($path, $backup)) {
+        $backup[$path] = $value;
+    }
+    return $backup;
+}
+
+function restoreRevocationConfig(): void
+{
+    try {
+        \Mage::app();
+        $config = \Mage::getModel('core/config');
+        foreach (revocationConfigBackup() as $path => $value) {
+            $config->saveConfig($path, (string) ($value ?? ''), 'default', 0);
+        }
+        \Mage::app()->getCache()->cleanType('config');
+    } catch (\Throwable $e) {
+        // DB not available; nothing to restore.
+    }
+}
+
+/**
  * Turn the revocation channel on for the default store and disable the
- * cooling-off gate so a fixture order of any age can be revoked.
+ * cooling-off gate so a fixture order of any age can be revoked. Captures the
+ * prior values first so afterAll can restore them.
  */
 function enableRevocation(): void
 {
     try {
         \Mage::app();
+        revocationConfigBackup('revocation/general/enabled', \Mage::getStoreConfig('revocation/general/enabled'));
+        revocationConfigBackup('revocation/general/cooling_off_days', \Mage::getStoreConfig('revocation/general/cooling_off_days'));
         $config = \Mage::getModel('core/config');
         $config->saveConfig('revocation/general/enabled', '1', 'default', 0);
         $config->saveConfig('revocation/general/cooling_off_days', '0', 'default', 0);

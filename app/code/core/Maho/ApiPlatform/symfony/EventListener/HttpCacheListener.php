@@ -124,6 +124,9 @@ class HttpCacheListener
 
     private function isPublicPath(string $path): bool
     {
-        return array_any(self::PUBLIC_PATHS, fn($publicPath) => str_starts_with($path, $publicPath));
+        return array_any(
+            self::PUBLIC_PATHS,
+            fn($publicPath) => $path === $publicPath || str_starts_with($path, $publicPath . '/'),
+        );
     }
 }

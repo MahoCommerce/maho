@@ -58,19 +58,19 @@ class StoreConfig extends \Maho\ApiPlatform\Resource
     public string $storeName = '';
 
     #[ApiProperty(description: 'Base currency code')]
-    public string $baseCurrencyCode = 'AUD';
+    public string $baseCurrencyCode = 'USD';
 
     #[ApiProperty(description: 'Default display currency code')]
-    public string $defaultDisplayCurrencyCode = 'AUD';
+    public string $defaultDisplayCurrencyCode = 'USD';
 
-    #[ApiProperty(description: 'Store locale (e.g., en_AU)')]
-    public string $locale = 'en_AU';
+    #[ApiProperty(description: 'Store locale (e.g., en_US)')]
+    public string $locale = 'en_US';
 
     #[ApiProperty(description: 'Store timezone')]
-    public string $timezone = 'Australia/Melbourne';
+    public string $timezone = 'UTC';
 
     #[ApiProperty(description: 'Weight unit (lbs, kgs)')]
-    public string $weightUnit = 'kgs';
+    public string $weightUnit = 'lbs';
 
     #[ApiProperty(description: 'Store base URL')]
     public string $baseUrl = '';

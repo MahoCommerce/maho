@@ -14,6 +14,7 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
@@ -45,12 +46,16 @@ final class ProductTierPriceProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $this->requirePermission($user, 'products/write');
-        return $this->handleReplace($productId, $context);
+        return $this->handleReplace($productId, $context, $user);
     }
 
-    private function handleReplace(int $productId, array $context): array
+    private function handleReplace(int $productId, array $context, \Maho\ApiPlatform\Security\ApiUser $user): array
     {
         $product = $this->loadProduct($productId);
+
+        // Store-restricted tokens may only price websites they're scoped to;
+        // null means unrestricted (any website, including 0 = all).
+        $allowedWebsiteIds = $this->getAllowedWebsiteIds($user);
 
         // This endpoint takes a top-level JSON array of tier prices (not the
         // object-with-fields shape parseRequestBody() normalises for), and must
@@ -87,8 +92,13 @@ final class ProductTierPriceProcessor extends \Maho\ApiPlatform\Processor
                 throw new BadRequestHttpException('Quantity must be greater than 0');
             }
 
+            $websiteId = (int) ($tp['websiteId'] ?? $tp['website_id'] ?? 0);
+            if ($allowedWebsiteIds !== null && !in_array($websiteId, $allowedWebsiteIds, true)) {
+                throw new AccessDeniedHttpException('Access denied for the requested tier-price website');
+            }
+
             $tierPrices[] = [
-                'website_id' => (int) ($tp['websiteId'] ?? $tp['website_id'] ?? 0),
+                'website_id' => $websiteId,
                 'cust_group' => (int) $groupId,
                 'price_qty' => $qty,
                 'price' => $price,

@@ -293,7 +293,7 @@ class Order extends CrudResource
     public int $storeId = 1;
 
     #[ApiProperty(writable: false, description: 'Order currency code', extraProperties: ['computed' => true])]
-    public string $currency = 'AUD';
+    public string $currency = 'USD';
 
     #[ApiProperty(writable: false, description: 'Total number of distinct items')]
     public int $totalItemCount = 0;

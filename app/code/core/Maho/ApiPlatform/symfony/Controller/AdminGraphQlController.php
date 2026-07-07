@@ -17,6 +17,7 @@ use Mage\Catalog\Api\GraphQL\ProductQueryHandler;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -44,6 +45,11 @@ class AdminGraphQlController
                 'methods' => ['POST'],
             ]);
         }
+
+        // This endpoint authenticates via the admin session cookie, so it needs
+        // CSRF protection: reject any state-changing request whose Origin/Referer
+        // isn't the admin's own host (a cross-site form POST can't forge it).
+        $this->assertSameOrigin($request);
 
         // Parse request
         $content = $request->getContent();
@@ -150,6 +156,46 @@ class AdminGraphQlController
             \Mage::logException($e);
             return ['errors' => [['message' => \Mage::getIsDeveloperMode() ? $e->getMessage() : 'An error occurred processing the request']]];
         }
+    }
+
+    /**
+     * CSRF defense for the cookie-authenticated admin endpoint: require the
+     * request's Origin (or Referer, as a fallback) to match a configured store
+     * base URL. A browser attaches one of these on any cross-site POST and can't
+     * spoof them, so a forged form submission is rejected.
+     */
+    private function assertSameOrigin(Request $request): void
+    {
+        $origin = $request->headers->get('Origin')
+            ?? $this->originOf((string) $request->headers->get('Referer'));
+
+        if ($origin === null || !in_array($origin, $this->allowedOrigins(), true)) {
+            throw new AccessDeniedHttpException('Cross-origin request rejected');
+        }
+    }
+
+    /** Normalize a URL to scheme://host[:port], or null if it has no host. */
+    private function originOf(string $url): ?string
+    {
+        $parts = parse_url($url);
+        if (empty($parts['host']) || empty($parts['scheme'])) {
+            return null;
+        }
+        return $parts['scheme'] . '://' . $parts['host']
+            . (isset($parts['port']) ? ':' . $parts['port'] : '');
+    }
+
+    /** @return list<string> Origins of the store's secure/unsecure base URLs. */
+    private function allowedOrigins(): array
+    {
+        $origins = [];
+        foreach (['web/secure/base_url', 'web/unsecure/base_url'] as $path) {
+            $origin = $this->originOf((string) \Mage::getStoreConfig($path));
+            if ($origin !== null) {
+                $origins[] = $origin;
+            }
+        }
+        return array_values(array_unique($origins));
     }
 
     /**

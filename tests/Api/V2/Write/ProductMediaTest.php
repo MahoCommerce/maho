@@ -31,8 +31,48 @@ describe('Product Media Gallery, Read', function (): void {
             expect($images[0])->toHaveKey('url');
             expect($images[0])->toHaveKey('position');
         } else {
-            expect(true)->toBeTrue();
+            // No images configured for this product: the gallery must still be
+            // a well-formed empty collection, not an error shape.
+            expect($images)->toBeArray()->toBeEmpty();
         }
+    });
+
+});
+
+describe('Product Media Gallery, Permission Enforcement', function (): void {
+
+    it('denies media upload without authentication', function (): void {
+        $productId = fixtures('product_id');
+        $response = apiPost("/api/rest/v2/products/{$productId}/media", [
+            'base64' => base64_encode('not-a-real-image'),
+            'filename' => 'denied.png',
+            'label' => 'Denied',
+        ]);
+        expect($response['status'])->toBe(401);
+    });
+
+    it('denies media upload without correct permission', function (): void {
+        $productId = fixtures('product_id');
+        $token = serviceToken(['cms-pages/write']);
+        $response = apiPost("/api/rest/v2/products/{$productId}/media", [
+            'base64' => base64_encode('not-a-real-image'),
+            'filename' => 'denied.png',
+            'label' => 'Denied',
+        ], $token);
+        expect($response['status'])->toBeForbidden();
+    });
+
+    it('denies media delete without authentication', function (): void {
+        $productId = fixtures('product_id');
+        $response = apiDelete("/api/rest/v2/products/{$productId}/media?valueId=1");
+        expect($response['status'])->toBe(401);
+    });
+
+    it('denies media delete without correct permission', function (): void {
+        $productId = fixtures('product_id');
+        $token = serviceToken(['cms-pages/write']);
+        $response = apiDelete("/api/rest/v2/products/{$productId}/media?valueId=1", $token);
+        expect($response['status'])->toBeForbidden();
     });
 
 });

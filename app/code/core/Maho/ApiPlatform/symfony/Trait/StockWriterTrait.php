@@ -86,27 +86,27 @@ trait StockWriterTrait
             [$productId],
         );
 
-        $stockItemId = $write->fetchOne(
-            "SELECT item_id FROM {$table} WHERE product_id = ? AND stock_id = 1",
-            [$productId],
-        );
+        // Atomic upsert on the (product_id, stock_id) unique key. A SELECT-then-
+        // INSERT/UPDATE would race under concurrency and could double-INSERT,
+        // throwing on the unique key; INSERT ... ON DUPLICATE KEY UPDATE avoids it.
+        $manageStockProvided = array_key_exists('manage_stock', $stockData);
 
-        if ($stockItemId) {
-            $write->update($table, $stockData, 'item_id = ' . (int) $stockItemId);
-            $manageStock = array_key_exists('manage_stock', $stockData)
-                ? (int) $stockData['manage_stock']
-                : (int) $write->fetchOne(
-                    "SELECT manage_stock FROM {$table} WHERE item_id = ?",
-                    [(int) $stockItemId],
-                );
-        } else {
-            // New stock item: default manage_stock to enabled when not provided.
-            $stockData['manage_stock'] ??= 1;
-            $stockData['product_id'] = $productId;
-            $stockData['stock_id'] = 1;
-            $write->insert($table, $stockData);
-            $manageStock = (int) $stockData['manage_stock'];
-        }
+        // New rows default manage_stock to enabled; the `+` keeps the caller's
+        // value when provided and never overrides existing rows (manage_stock is
+        // only in the update column list when the caller actually set it).
+        $insertData = $stockData + [
+            'manage_stock' => 1,
+            'product_id' => $productId,
+            'stock_id' => 1,
+        ];
+        $write->insertOnDuplicate($table, $insertData, array_keys($stockData));
+
+        $manageStock = $manageStockProvided
+            ? (int) $stockData['manage_stock']
+            : (int) $write->fetchOne(
+                "SELECT manage_stock FROM {$table} WHERE product_id = ? AND stock_id = 1",
+                [$productId],
+            );
 
         return ['manageStock' => $manageStock, 'previousQty' => $previousQty];
     }

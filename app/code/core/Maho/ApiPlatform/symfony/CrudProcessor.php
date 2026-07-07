@@ -129,9 +129,9 @@ class CrudProcessor extends Processor
         if ($this->isStoreScoped()) {
             /** @var array<int>|null $stores */
             $stores = (new \ReflectionProperty($data, 'stores'))->getValue($data);
-            // A null `stores` means the field was omitted from the request: on update the
-            // existing assignment is left untouched (nothing to validate), on create the
-            // model default (all stores) is applied later and validated against [0].
+            // Null `stores` means the field was omitted: on update the existing
+            // assignment is untouched; on create the model default is applied
+            // and validated by processCreate()'s authorizeEntity() call.
             if ($stores === null) {
                 return;
             }

@@ -881,6 +881,20 @@ class CartService
      */
     public function setPaymentMethod(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData = null): \Mage_Sales_Model_Quote
     {
+        // Validate the requested method is among the store's active methods for
+        // this quote before applying it, mirroring setShippingMethod(). Without
+        // this, importData() would accept any configured method code regardless
+        // of availability (min/max totals, country, currency, enabled flag).
+        $store = $quote->getStoreId();
+        $availableCodes = array_map(
+            fn($method) => $method->getCode(),
+            \Mage::helper('payment')->getStoreMethods($store, $quote),
+        );
+
+        if (!in_array($methodCode, $availableCodes, true)) {
+            throw new \RuntimeException('Payment method is not available for this cart');
+        }
+
         $paymentData = ['method' => $methodCode];
         if ($additionalData) {
             $paymentData['additional_data'] = $additionalData;

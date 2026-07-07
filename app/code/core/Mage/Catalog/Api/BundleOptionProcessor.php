@@ -110,15 +110,26 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
                     continue;
                 }
 
+                $this->authorizeAssociatedProductWebsites($selProductId);
+
+                $qty = (float) ($sel['qty'] ?? 1);
+                if ($qty <= 0) {
+                    throw new BadRequestHttpException('Quantity must be greater than 0');
+                }
+                $price = (float) ($sel['price'] ?? 0);
+                if ($price < 0) {
+                    throw new BadRequestHttpException('Price must not be negative');
+                }
+
                 /** @var \Mage_Bundle_Model_Selection $selection */
                 $selection = Mage::getModel('bundle/selection');
                 $selection->setOptionId($option->getId());
                 $selection->setProductId($selProductId);
-                $selection->setSelectionQty((float) ($sel['qty'] ?? 1));
+                $selection->setSelectionQty($qty);
                 $selection->setSelectionCanChangeQty((int) ($sel['canChangeQty'] ?? $sel['can_change_qty'] ?? 1));
                 $selection->setIsDefault((int) ($sel['isDefault'] ?? $sel['is_default'] ?? 0));
                 $selection->setSelectionPriceType(($sel['priceType'] ?? $sel['price_type'] ?? 'fixed') === 'percent' ? 1 : 0);
-                $selection->setSelectionPriceValue((float) ($sel['price'] ?? 0));
+                $selection->setSelectionPriceValue($price);
                 $selection->setPosition((int) ($sel['position'] ?? 0));
 
                 $this->safeSave($selection, 'create selection');
@@ -197,6 +208,20 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
         $this->safeDelete($option, 'delete option');
 
         return null;
+    }
+
+    /**
+     * Guard against pulling a foreign-website product into a bundle selection: a
+     * store-restricted token may only add selections within its own website
+     * scope. No-op for unrestricted users (skips the selection-product load).
+     */
+    private function authorizeAssociatedProductWebsites(int $selProductId): void
+    {
+        $user = $this->getAuthorizedUser();
+        if ($this->getAllowedWebsiteIds($user) === null) {
+            return;
+        }
+        $this->authorizeProductWebsites($this->loadProduct($selProductId), $user);
     }
 
 }

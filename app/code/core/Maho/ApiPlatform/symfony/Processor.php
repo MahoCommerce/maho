@@ -105,6 +105,9 @@ abstract class Processor implements ProcessorInterface
     {
         $model = \Mage::getModel($this->modelAlias);
         $this->applyData($model, $data, $user);
+        // Authorize after applyData so store-scoped defaults (e.g. an omitted
+        // `stores` defaulting to all-stores) are validated, not just raw input.
+        $this->authorizeEntity($model, $user);
         $this->safeSave($model, "create {$this->entityLabel}");
         $this->logApiActivity($this->entityType, 'create', null, $model, $user);
         return $this->buildResponse($model, $data);

@@ -79,12 +79,17 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException("Invalid linkType: {$linkType}. Valid: url, file");
         }
 
+        $price = (float) ($body['price'] ?? 0);
+        if ($price < 0) {
+            throw new BadRequestHttpException('Price must not be negative');
+        }
+
         /** @var \Mage_Downloadable_Model_Link $link */
         $link = Mage::getModel('downloadable/link');
         $link->setProductId($productId);
         $link->setStoreId(0);
         $link->setTitle($title);
-        $link->setPrice((float) ($body['price'] ?? 0));
+        $link->setPrice($price);
         $link->setSortOrder((int) ($body['sortOrder'] ?? $body['sort_order'] ?? 0));
         $link->setNumberOfDownloads((int) ($body['numberOfDownloads'] ?? $body['number_of_downloads'] ?? 0));
         $link->setLinkType($linkType);
@@ -140,7 +145,11 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
             $link->setTitle($body['title']);
         }
         if (isset($body['price'])) {
-            $link->setPrice((float) $body['price']);
+            $price = (float) $body['price'];
+            if ($price < 0) {
+                throw new BadRequestHttpException('Price must not be negative');
+            }
+            $link->setPrice($price);
         }
         if (isset($body['sortOrder']) || isset($body['sort_order'])) {
             $link->setSortOrder((int) ($body['sortOrder'] ?? $body['sort_order']));

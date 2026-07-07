@@ -277,6 +277,13 @@ class OrderMutationHandler
                 throw ValidationException::invalidValue('grandTotal', 'credit memo grand total must be positive');
             }
 
+            // Cap at the order's refundable balance so an inflated adjustment
+            // can't over-refund or mint excess store credit.
+            $refundable = (float) $order->getBaseTotalPaid() - (float) $order->getBaseTotalRefunded();
+            if ((float) $creditmemo->getBaseGrandTotal() > $refundable + 0.0001) {
+                throw ValidationException::invalidValue('adjustmentPositive', 'refund amount exceeds the order\'s refundable balance');
+            }
+
             // Set refund to store credit if requested
             if ($refundToStoreCredit && $order->getCustomerId()) {
                 $creditmemo->setCustomerBalanceRefundFlag(true);

@@ -49,7 +49,7 @@ describe('API v2 Stores', function (): void {
 
                 expect($response['status'])->toBeSuccessful();
             } else {
-                expect(true)->toBeTrue();
+                $this->markTestSkipped('No stores returned to fetch individually');
             }
         });
 
@@ -90,7 +90,7 @@ describe('API v2 Stores', function (): void {
                 expect($store)->toHaveKey('code')
                     ->or->toHaveKey('name');
             } else {
-                expect(true)->toBeTrue();
+                $this->markTestSkipped('No stores in response to verify fields');
             }
         });
 

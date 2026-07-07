@@ -164,6 +164,14 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
             $creditmemo->setAdjustmentNegative($adjustmentNegative);
         }
 
+        // Cap the refund at what the order can still refund, so an inflated
+        // adjustmentPositive can't over-refund or mint excess store credit.
+        $creditmemo->collectTotals();
+        $refundable = (float) $order->getBaseTotalPaid() - (float) $order->getBaseTotalRefunded();
+        if ((float) $creditmemo->getBaseGrandTotal() > $refundable + 0.0001) {
+            throw new BadRequestHttpException('Refund amount exceeds the order\'s refundable balance');
+        }
+
         // Handle back to stock for individual items
         if (!empty($backToStockItems)) {
             foreach ($creditmemo->getAllItems() as $creditmemoItem) {

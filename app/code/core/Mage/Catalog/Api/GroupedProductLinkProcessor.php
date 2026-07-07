@@ -92,6 +92,7 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
             if ($childId <= 0) {
                 throw new BadRequestHttpException('childProductId is required and must be positive');
             }
+            $this->authorizeAssociatedProductWebsites($childId);
             $linkData[$childId] = [
                 'qty' => (float) ($link['qty'] ?? 1),
                 'position' => (int) ($link['position'] ?? 0),
@@ -113,6 +114,8 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
         if ($childId <= 0) {
             throw new BadRequestHttpException('childProductId is required and must be positive');
         }
+
+        $this->authorizeAssociatedProductWebsites($childId);
 
         // Get existing links
         $existing = $this->getExistingLinkData($product);
@@ -163,6 +166,20 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
             ];
         }
         return $links;
+    }
+
+    /**
+     * Guard against pulling a foreign-website product into the grouped set: a
+     * store-restricted token may only associate children within its own website
+     * scope. No-op for unrestricted users (skips the child load).
+     */
+    private function authorizeAssociatedProductWebsites(int $childId): void
+    {
+        $user = $this->getAuthorizedUser();
+        if ($this->getAllowedWebsiteIds($user) === null) {
+            return;
+        }
+        $this->authorizeProductWebsites($this->loadProduct($childId), $user);
     }
 
 }

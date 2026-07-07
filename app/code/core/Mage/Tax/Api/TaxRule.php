@@ -132,6 +132,13 @@ class TaxRule extends CrudResource
             return;
         }
 
+        // KNOWN N+1: getCustomerTaxClasses/getProductTaxClasses/getRates each run a
+        // getDistinct() query, so a collection read costs 3 queries per rule. A true
+        // fix means eager-loading the tax_calculation links for every rule id up
+        // front, but afterLoad() is a per-model static hook with no batch context —
+        // eliminating the N+1 would require threading the collection's id set through
+        // the shared CrudProvider iteration, out of scope here. Left as-is for now.
+
         /** @var \Mage_Tax_Model_Calculation_Rule $model */
         $dto->customerTaxClassIds = array_map('intval', $model->getCustomerTaxClasses());
         $dto->productTaxClassIds = array_map('intval', $model->getProductTaxClasses());

@@ -120,7 +120,7 @@ SPDX-License-Identifier: AFL-3.0
                     <fields>
                         <secret translate="label comment">
                             <label>Symfony App Secret</label>
-                            <comment>Used for CSRF and session signing. Auto-derived from crypt key if empty.</comment>
+                            <comment>JWT signing secret. Auto-generated (random) and stored encrypted on first use if left empty.</comment>
                             <frontend_type>obscure</frontend_type>
                             <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
                             <sort_order>5</sort_order>

@@ -361,33 +361,34 @@ class JwtService
      */
     public static function resolveSecret(): string
     {
-        $secret = (string) \Mage::getStoreConfig(self::CONFIG_PATH_SECRET);
+        // Stored encrypted at rest (the config field declares the encrypted
+        // backend model); decrypt on read so a DB-only leak can't hand over a
+        // usable signing key.
+        $stored = (string) \Mage::getStoreConfig(self::CONFIG_PATH_SECRET);
+        if ($stored !== '') {
+            return (string) \Mage::helper('core')->decrypt($stored);
+        }
 
         // First boot: generate and persist a strong random secret rather than
-        // deriving one from the encryption key (which would compound local.xml
-        // exposure into a JWT-forgery primitive). No fallback to the crypt key.
-        if ($secret === '') {
-            $secret = bin2hex(random_bytes(32));
-            \Mage::getConfig()->saveConfig(self::CONFIG_PATH_SECRET, $secret);
-            \Mage::app()->getCache()->cleanType('config');
+        // deriving one from the encryption key. No fallback to the crypt key.
+        $secret = bin2hex(random_bytes(32));
+        \Mage::getConfig()->saveConfig(self::CONFIG_PATH_SECRET, \Mage::helper('core')->encrypt($secret));
+        \Mage::app()->getCache()->cleanType('config');
 
-            // First-boot race: two concurrent workers can each generate a
-            // secret and the last saveConfig() wins in the DB. Re-read the
-            // committed value straight from core_config_data so every worker
-            // converges on the persisted secret instead of signing tokens with
-            // a local-only value that other workers would reject.
-            $resource = \Mage::getSingleton('core/resource');
-            $read = $resource->getConnection('core_read');
-            $committed = (string) $read->fetchOne(
-                $read->select()
-                    ->from($resource->getTableName('core/config_data'), ['value'])
-                    ->where('path = ?', self::CONFIG_PATH_SECRET)
-                    ->where('scope = ?', 'default')
-                    ->where('scope_id = ?', 0),
-            );
-            if ($committed !== '') {
-                $secret = $committed;
-            }
+        // First-boot race: two concurrent workers can each generate a secret and
+        // the last saveConfig() wins in the DB. Re-read the committed (encrypted)
+        // value so every worker converges on the persisted secret.
+        $resource = \Mage::getSingleton('core/resource');
+        $read = $resource->getConnection('core_read');
+        $committed = (string) $read->fetchOne(
+            $read->select()
+                ->from($resource->getTableName('core/config_data'), ['value'])
+                ->where('path = ?', self::CONFIG_PATH_SECRET)
+                ->where('scope = ?', 'default')
+                ->where('scope_id = ?', 0),
+        );
+        if ($committed !== '') {
+            $secret = (string) \Mage::helper('core')->decrypt($committed);
         }
 
         return $secret;

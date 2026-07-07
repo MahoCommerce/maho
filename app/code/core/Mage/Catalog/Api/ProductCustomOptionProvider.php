@@ -106,8 +106,11 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
         $options = $product->getProductOptionsCollection();
         $result = [];
 
+        // getProductOptionsCollection() already eager-loads every option's values
+        // (addValuesToResult), so read them off the loaded models instead of
+        // issuing a getValuesCollection() query per select-type option (N+1).
         foreach ($options as $option) {
-            $result[] = $this->mapOption($option);
+            $result[] = $this->mapOption($option, true);
         }
 
         return $result;
@@ -125,7 +128,7 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
         return $this->mapOption($option);
     }
 
-    private function mapOption(Mage_Catalog_Model_Product_Option $option): ProductCustomOption
+    private function mapOption(Mage_Catalog_Model_Product_Option $option, bool $valuesPreloaded = false): ProductCustomOption
     {
         $dto = new ProductCustomOption();
         $dto->id = (int) $option->getId();
@@ -139,7 +142,7 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
 
         if (in_array($type, $selectTypes)) {
             $values = [];
-            $optionValues = $option->getValuesCollection();
+            $optionValues = $valuesPreloaded ? $option->getValues() : $option->getValuesCollection();
             foreach ($optionValues as $value) {
                 $values[] = [
                     'id' => (int) $value->getId(),

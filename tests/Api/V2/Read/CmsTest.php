@@ -44,7 +44,7 @@ describe('API v2 CMS Pages', function (): void {
 
                 expect($response['status'])->toBeSuccessful();
             } else {
-                expect(true)->toBeTrue();
+                $this->markTestSkipped('No CMS pages available to fetch individually');
             }
         });
 
@@ -95,7 +95,7 @@ describe('API v2 CMS Blocks', function (): void {
 
                 expect($response['status'])->toBeSuccessful();
             } else {
-                expect(true)->toBeTrue();
+                $this->markTestSkipped('No CMS blocks available to fetch individually');
             }
         });
 

@@ -405,6 +405,12 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException("New password must be at least {$minPasswordLength} characters");
         }
 
+        // Per-IP cap first (matches the login flow), then a tighter per-customer
+        // cap so a stolen session token can't brute-force the current password
+        // to escalate the account takeover.
+        $this->checkRateLimitByIp('change_password', 'change_password', 3600);
+        $this->checkRateLimit('change_password:customer:' . $customerId, 'change_password', 3600);
+
         $customer = $this->customerService->getCustomerById($customerId);
         if (!$customer) {
             throw new AccessDeniedHttpException('Customer not found');

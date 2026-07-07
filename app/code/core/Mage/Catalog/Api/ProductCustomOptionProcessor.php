@@ -90,7 +90,11 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
             $option->setData('values', $cleanValues);
         } else {
             if (isset($body['price'])) {
-                $option->setPrice((float) $body['price']);
+                $price = (float) $body['price'];
+                if ($price < 0) {
+                    throw new BadRequestHttpException('Price must not be negative');
+                }
+                $option->setPrice($price);
             }
             $option->setPriceType($body['priceType'] ?? $body['price_type'] ?? 'fixed');
             if (isset($body['sku'])) {
@@ -199,7 +203,11 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         if (!in_array($type, self::SELECT_TYPES)) {
             $priceUpdate = [];
             if (isset($body['price'])) {
-                $priceUpdate['price'] = (float) $body['price'];
+                $price = (float) $body['price'];
+                if ($price < 0) {
+                    throw new BadRequestHttpException('Price must not be negative');
+                }
+                $priceUpdate['price'] = $price;
             }
             $priceType = $body['priceType'] ?? $body['price_type'] ?? null;
             if ($priceType !== null) {

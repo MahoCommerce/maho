@@ -48,8 +48,7 @@ describe('API v2 Categories', function (): void {
 
                 expect($response['status'])->toBeSuccessful();
             } else {
-                // Skip if no categories exist
-                expect(true)->toBeTrue();
+                $this->markTestSkipped('No categories available to fetch individually');
             }
         });
 
@@ -90,7 +89,7 @@ describe('API v2 Categories', function (): void {
                 expect($category)->toHaveKey('id');
                 expect($category)->toHaveKey('name');
             } else {
-                expect(true)->toBeTrue(); // Skip if no data
+                $this->markTestSkipped('No categories in response to verify fields');
             }
         });
 

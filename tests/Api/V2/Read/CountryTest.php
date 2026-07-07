@@ -80,7 +80,7 @@ describe('API v2 Countries', function (): void {
                 expect($country)->toHaveKey('id');
                 expect($country)->toHaveKey('name');
             } else {
-                expect(true)->toBeTrue();
+                $this->markTestSkipped('No countries in response to verify fields');
             }
         });
 

@@ -64,8 +64,21 @@ final class ModuleApiDiscovery
             }
             [, $nsPrefix, $moduleName] = $segments;
 
+            $nsKey = "{$nsPrefix}\\{$moduleName}\\Api\\";
+            if (isset($namespaces[$nsKey]) && $namespaces[$nsKey] !== $apiDir) {
+                \Mage::log(
+                    sprintf(
+                        'ApiPlatform discovery: namespace "%s" is declared by two Api/ directories ("%s" and "%s"); the latter wins. Rename one module to avoid the collision.',
+                        $nsKey,
+                        $namespaces[$nsKey],
+                        $apiDir,
+                    ),
+                    \Mage::LOG_WARNING,
+                );
+            }
+
             $paths[] = $apiDir;
-            $namespaces["{$nsPrefix}\\{$moduleName}\\Api\\"] = $apiDir;
+            $namespaces[$nsKey] = $apiDir;
         }
 
         self::$cache = ['paths' => $paths, 'namespaces' => $namespaces];

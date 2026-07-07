@@ -26,7 +26,7 @@ return function (Schema $schema): void {
     // Per-order one-time token for guest order lookup (getGuestOrder / /guestOrder).
     $order = $schema->getTable('sales_flat_order');
     $order->addColumn('guest_access_token', Types::STRING, ['length' => 64, 'notnull' => false, 'comment' => 'Guest order access token (hex, issued at order placement)']);
-    $order->addIndex(['guest_access_token']);
+    $order->addUniqueIndex(['guest_access_token']);
 
     // Secure masked ID for guest cart access.
     $quote = $schema->getTable('sales_flat_quote');

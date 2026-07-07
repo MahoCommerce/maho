@@ -18,6 +18,10 @@ declare(strict_types=1);
  * @group read
  */
 
+afterAll(function (): void {
+    cleanupTestData();
+});
+
 describe('API v2 Customer Cart', function (): void {
 
     describe('without authentication', function (): void {
@@ -61,6 +65,28 @@ describe('API v2 Customer Cart', function (): void {
 
             // Should succeed (200) or 404 if no cart exists
             expect($response['status'])->toBeIn([200, 404]);
+        });
+
+    });
+
+    describe('cross-tenant isolation', function (): void {
+
+        it('denies reading another customer\'s cart by id', function (): void {
+            $ownerId = (int) fixtures('customer_id');
+            $intruderId = $ownerId + 1;
+
+            // Customer A creates a cart.
+            $create = apiPost('/api/rest/v2/carts', [], customerToken($ownerId));
+            if (!in_array($create['status'], [200, 201], true) || empty($create['json']['id'])) {
+                $this->markTestSkipped('Could not create a cart for the owning customer');
+            }
+            $cartId = (int) $create['json']['id'];
+            trackCreated('quote', $cartId);
+
+            // Customer B (a distinct identity) must not be able to read it.
+            $response = apiGet("/api/rest/v2/carts/{$cartId}", customerToken($intruderId));
+
+            expect($response['status'])->toBeIn([403, 404]);
         });
 
     });

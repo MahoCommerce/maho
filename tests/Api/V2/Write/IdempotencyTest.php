@@ -19,6 +19,10 @@ declare(strict_types=1);
  * @group write
  */
 
+afterAll(function (): void {
+    cleanupTestData();
+});
+
 describe('Idempotency listener', function (): void {
 
     it('rejects an oversized idempotency key', function (): void {
@@ -88,6 +92,61 @@ describe('Idempotency listener', function (): void {
         expect($second['status'])->toBe($first['status']);
         expect(apiHeader($second, 'X-Idempotency-Replayed'))->toBe('true');
         expect($second['raw'])->toBe($first['raw']);
+    });
+
+    it('does not serve one caller\'s stored response to a different caller with the same key', function (): void {
+        // Two distinct authenticated callers (different JWT sub → different
+        // idempotency scope) using the SAME key. Caller B must never be handed
+        // caller A's stored response — the scope is per-caller, not global.
+        $callerA = serviceTokenAs('idem-caller-a-' . substr(uniqid(), -6), ['all']);
+        $callerB = serviceTokenAs('idem-caller-b-' . substr(uniqid(), -6), ['all']);
+        $key = 'pest-shared-key-' . substr(uniqid(), -10);
+
+        $idA = 'idem-cross-a-' . substr(uniqid(), -8);
+        $first = apiPost(
+            '/api/rest/v2/cms-pages',
+            [
+                'identifier' => $idA,
+                'title' => 'Caller A Page',
+                'content' => '<p>A</p>',
+                'isActive' => true,
+                'stores' => ['all'],
+            ],
+            $callerA,
+            ['X-Idempotency-Key' => $key],
+        );
+
+        if (!in_array($first['status'], [200, 201], true)) {
+            $this->markTestSkipped('cms-pages create returned ' . $first['status']);
+        }
+        if (!empty($first['json']['id'])) {
+            trackCreated('cms_page', (int) $first['json']['id']);
+        }
+
+        // Caller B replays the same key with its own body. It must be evaluated
+        // independently — no replay header, and it must not echo A's response.
+        $idB = 'idem-cross-b-' . substr(uniqid(), -8);
+        $second = apiPost(
+            '/api/rest/v2/cms-pages',
+            [
+                'identifier' => $idB,
+                'title' => 'Caller B Page',
+                'content' => '<p>B</p>',
+                'isActive' => true,
+                'stores' => ['all'],
+            ],
+            $callerB,
+            ['X-Idempotency-Key' => $key],
+        );
+
+        expect(apiHeader($second, 'X-Idempotency-Replayed'))->toBeNull();
+        expect($second['raw'])->not->toBe($first['raw']);
+
+        if (!empty($second['json']['id'])) {
+            trackCreated('cms_page', (int) $second['json']['id']);
+            // B got its own resource, not A's.
+            expect((int) $second['json']['id'])->not->toBe((int) ($first['json']['id'] ?? 0));
+        }
     });
 
     it('does not replay for unauthenticated callers (no shared anonymous scope)', function (): void {

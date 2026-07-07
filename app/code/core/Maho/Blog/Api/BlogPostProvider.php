@@ -59,6 +59,10 @@ final class BlogPostProvider extends CrudProvider
             return null;
         }
 
+        if (!$this->isPublished($post)) {
+            return null;
+        }
+
         $storeId = StoreContext::getStoreId();
         $stores = $post->getStores();
         if (!StoreContext::isAvailableForStore($stores, $storeId)) {
@@ -99,6 +103,26 @@ final class BlogPostProvider extends CrudProvider
             return null;
         }
 
+        if (!$this->isPublished($post)) {
+            return null;
+        }
+
         return $this->toDto($post);
+    }
+
+    /**
+     * A future-scheduled post must not be reachable by direct id or urlKey, so
+     * the single-item paths apply the same publish_date cutoff as the collection
+     * (applyCollectionFilters): a null publish_date is always live, otherwise it
+     * must be at or before "now". Uses the same UTC cutoff the collection does.
+     */
+    private function isPublished(object $post): bool
+    {
+        $publishDate = $post->getPublishDate();
+        if (empty($publishDate)) {
+            return true;
+        }
+
+        return $publishDate <= \Mage::app()->getLocale()->formatDateForDb('now');
     }
 }

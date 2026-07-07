@@ -66,9 +66,22 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
             $quote,
             $byMasked,
             $this->getAuthenticatedCustomerId(),
-            $this->isAdmin() || $this->isApiUser(),
+            $this->isPrivilegedCartReader(),
         );
 
         return $this->cartMapper->mapQuoteToCart($quote);
+    }
+
+    /**
+     * Admin, or an API service account holding carts/read. A bare api_user token
+     * without the grant must NOT bypass cart ownership (mirrors the write side's
+     * isPrivilegedCartActor()).
+     */
+    private function isPrivilegedCartReader(): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+        return $this->isApiUser() && $this->getAuthorizedUser()->hasPermission('carts/read');
     }
 }

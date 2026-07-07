@@ -66,9 +66,9 @@ final class StoreConfigProvider extends \Maho\ApiPlatform\Provider
             ?: $store->getName();
         $dto->baseCurrencyCode = $store->getBaseCurrencyCode();
         $dto->defaultDisplayCurrencyCode = $store->getDefaultCurrencyCode();
-        $dto->locale = \Mage::getStoreConfig('general/locale/code', $storeId) ?: 'en_AU';
-        $dto->timezone = \Mage::getStoreConfig('general/locale/timezone', $storeId) ?: 'Australia/Melbourne';
-        $dto->weightUnit = \Mage::getStoreConfig('general/locale/weight_unit', $storeId) ?: 'kgs';
+        $dto->locale = \Mage::getStoreConfig('general/locale/code', $storeId) ?: 'en_US';
+        $dto->timezone = \Mage::getStoreConfig('general/locale/timezone', $storeId) ?: 'UTC';
+        $dto->weightUnit = \Mage::getStoreConfig('general/locale/weight_unit', $storeId) ?: 'lbs';
         $dto->baseUrl = $store->getBaseUrl(\Mage_Core_Model_Store::URL_TYPE_WEB);
         $dto->baseMediaUrl = $store->getBaseUrl(\Mage_Core_Model_Store::URL_TYPE_MEDIA);
 
@@ -148,11 +148,11 @@ final class StoreConfigProvider extends \Maho\ApiPlatform\Provider
         $dto->id = $data['id'] ?? 'default';
         $dto->storeCode = $data['storeCode'] ?? 'default';
         $dto->storeName = $data['storeName'] ?? '';
-        $dto->baseCurrencyCode = $data['baseCurrencyCode'] ?? 'AUD';
-        $dto->defaultDisplayCurrencyCode = $data['defaultDisplayCurrencyCode'] ?? 'AUD';
-        $dto->locale = $data['locale'] ?? 'en_AU';
-        $dto->timezone = $data['timezone'] ?? 'Australia/Melbourne';
-        $dto->weightUnit = $data['weightUnit'] ?? 'kgs';
+        $dto->baseCurrencyCode = $data['baseCurrencyCode'] ?? 'USD';
+        $dto->defaultDisplayCurrencyCode = $data['defaultDisplayCurrencyCode'] ?? 'USD';
+        $dto->locale = $data['locale'] ?? 'en_US';
+        $dto->timezone = $data['timezone'] ?? 'UTC';
+        $dto->weightUnit = $data['weightUnit'] ?? 'lbs';
         $dto->baseUrl = $data['baseUrl'] ?? '';
         $dto->baseMediaUrl = $data['baseMediaUrl'] ?? '';
         $dto->allowedCountries = $data['allowedCountries'] ?? [];

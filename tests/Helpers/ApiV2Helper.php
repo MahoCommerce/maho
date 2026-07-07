@@ -186,6 +186,28 @@ class ApiV2Helper
             }
         }
 
+        // Delete admin users (and their role-assignment rows in admin_role)
+        if (!empty(self::$createdEntities['admin_user'])) {
+            $idList = implode(',', array_map('intval', self::$createdEntities['admin_user']));
+            try {
+                $write->query("DELETE FROM admin_role WHERE user_id IN ({$idList})");
+                $write->query("DELETE FROM admin_user WHERE user_id IN ({$idList})");
+            } catch (\Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
+
+        // Delete admin roles (group rows) and any ACL rules attached to them
+        if (!empty(self::$createdEntities['admin_role'])) {
+            $idList = implode(',', array_map('intval', self::$createdEntities['admin_role']));
+            try {
+                $write->query("DELETE FROM admin_rule WHERE role_id IN ({$idList})");
+                $write->query("DELETE FROM admin_role WHERE role_id IN ({$idList})");
+            } catch (\Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
+
         // Delete simple config-table rows created by CRUD tests (safety net for
         // a test that fails before its own DELETE call). Each maps a tracked
         // type to its table + primary key.
@@ -227,6 +249,37 @@ class ApiV2Helper
     public static function get(string $path, ?string $token = null, array $extraHeaders = []): array
     {
         return self::request('GET', $path, null, $token, $extraHeaders);
+    }
+
+    /**
+     * HTTP GET for binary/non-JSON bodies (e.g. PDF downloads).
+     *
+     * Skips JSON decoding and normalizes the raw header lines into a
+     * lowercased name => list-of-values map so callers can assert on
+     * headers like content-type without re-parsing.
+     *
+     * @param array<string, string> $extraHeaders
+     * @return array{status: int, raw: string, headers: array<string, list<string>>}
+     */
+    public static function getRaw(string $path, ?string $token = null, array $extraHeaders = []): array
+    {
+        $response = self::request('GET', $path, null, $token, $extraHeaders);
+
+        $headers = [];
+        foreach ($response['headers'] as $line) {
+            $pos = strpos($line, ':');
+            if ($pos === false) {
+                continue; // status line or malformed header
+            }
+            $name = strtolower(trim(substr($line, 0, $pos)));
+            $headers[$name][] = trim(substr($line, $pos + 1));
+        }
+
+        return [
+            'status' => $response['status'],
+            'raw' => $response['raw'],
+            'headers' => $headers,
+        ];
     }
 
     /**
@@ -548,6 +601,12 @@ class ApiV2Helper
      */
     public static function fixtures(string $key): mixed
     {
+        // Resolved on demand (needs a live API round-trip) so it doesn't slow
+        // every unrelated test that touches fixtures().
+        if ($key === 'existing_cart_id') {
+            return self::ensureExistingGuestCart();
+        }
+
         static $fixtures = null;
 
         if ($fixtures === null) {
@@ -556,19 +615,31 @@ class ApiV2Helper
             $productData = self::lookupProduct();
             $configurableSku = self::lookupConfigurableSku();
             $categoryId = self::lookupCategoryId();
+            $customerId = self::lookupCustomerId();
+
+            // Invoice fixtures: an invoice owned by the test customer enables the
+            // customer PDF path; one owned by a *different* account (or a guest
+            // order) drives the cross-tenant deny path. Any may be null on a DB
+            // without matching data, in which case the dependent tests skip.
+            $ownInvoice = self::lookupCustomerOwnedInvoice($customerId);
+            $foreignInvoice = self::lookupForeignInvoice($customerId);
 
             $fixtures = [
-                'customer_id' => self::lookupCustomerId(),
-                'customer_email' => self::lookupCustomerEmail(self::lookupCustomerId()),
+                'customer_id' => $customerId,
+                'customer_email' => self::lookupCustomerEmail($customerId),
                 'invalid_customer_id' => 999999,
                 'product_id' => $productData['id'],
                 'product_sku' => $productData['sku'],
                 'configurable_sku' => $configurableSku,
                 'category_id' => $categoryId,
                 'invalid_product_id' => 999999,
-                'existing_cart_id' => null,
                 'order_id' => self::lookupOrderId(),
                 'invalid_order_id' => 999999,
+                'invoice_id' => self::lookupInvoiceId(),
+                'customer_order_id' => $ownInvoice['orderId'] ?? null,
+                'customer_invoice_id' => $ownInvoice['invoiceId'] ?? null,
+                'other_customer_order_id' => $foreignInvoice['orderId'] ?? null,
+                'other_customer_invoice_id' => $foreignInvoice['invoiceId'] ?? null,
                 'write_test_sku' => $productData['sku'],
                 'write_test_qty' => 1,
                 'blog_post_url_key' => null,
@@ -576,6 +647,43 @@ class ApiV2Helper
         }
 
         return $fixtures[$key] ?? null;
+    }
+
+    /**
+     * Create (once) a guest cart with a single item via the API and return its
+     * masked id, for the guest-cart read tests that need a populated cart. The
+     * quote is tracked for cleanup. Returns null if the cart can't be created.
+     */
+    private static function ensureExistingGuestCart(): ?string
+    {
+        static $resolved = false;
+        static $maskedId = null;
+
+        if ($resolved) {
+            return $maskedId;
+        }
+        $resolved = true;
+
+        try {
+            $create = self::post('/api/rest/v2/guest-carts', []);
+            if ($create['status'] !== 201 || empty($create['json']['maskedId'])) {
+                return null;
+            }
+            if (!empty($create['json']['id'])) {
+                self::trackCreated('quote', (int) $create['json']['id']);
+            }
+            $maskedId = (string) $create['json']['maskedId'];
+
+            // Add an item so structure/totals assertions have data to inspect.
+            $sku = self::fixtures('write_test_sku');
+            if ($sku) {
+                self::post("/api/rest/v2/guest-carts/{$maskedId}/items", ['sku' => $sku, 'qty' => 1]);
+            }
+        } catch (\Throwable $e) {
+            $maskedId = null;
+        }
+
+        return $maskedId;
     }
 
     /**
@@ -785,6 +893,65 @@ class ApiV2Helper
         } catch (\Throwable $e) {
             return null;
         }
+    }
+
+    private static function lookupInvoiceId(): ?int
+    {
+        try {
+            $read = \Mage::getSingleton('core/resource')->getConnection('core_read');
+            $id = $read->fetchOne('SELECT entity_id FROM sales_flat_invoice ORDER BY entity_id ASC LIMIT 1');
+            return $id ? (int) $id : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * An invoice whose order is owned by the given customer (not a guest).
+     *
+     * @return array{orderId: int, invoiceId: int}|null
+     */
+    private static function lookupCustomerOwnedInvoice(?int $customerId): ?array
+    {
+        if (!$customerId) {
+            return null;
+        }
+        return self::lookupInvoiceRow("o.customer_is_guest = 0 AND o.customer_id = {$customerId}");
+    }
+
+    /**
+     * An invoice whose order does NOT belong to the given customer (a guest
+     * order, or one owned by a different account). Drives cross-tenant deny.
+     *
+     * @return array{orderId: int, invoiceId: int}|null
+     */
+    private static function lookupForeignInvoice(?int $customerId): ?array
+    {
+        $customerId = (int) $customerId;
+        return self::lookupInvoiceRow("o.customer_id IS NULL OR o.customer_id <> {$customerId}");
+    }
+
+    /**
+     * @return array{orderId: int, invoiceId: int}|null
+     */
+    private static function lookupInvoiceRow(string $whereOrderCondition): ?array
+    {
+        try {
+            $read = \Mage::getSingleton('core/resource')->getConnection('core_read');
+            $row = $read->fetchRow(
+                'SELECT i.entity_id AS invoice_id, i.order_id
+                 FROM sales_flat_invoice i
+                 JOIN sales_flat_order o ON o.entity_id = i.order_id
+                 WHERE ' . $whereOrderCondition . '
+                 ORDER BY i.entity_id ASC LIMIT 1',
+            );
+            if ($row) {
+                return ['orderId' => (int) $row['order_id'], 'invoiceId' => (int) $row['invoice_id']];
+            }
+        } catch (\Throwable $e) {
+            // Fall through to null.
+        }
+        return null;
     }
 
     private static function lookupCustomerEmail(int $customerId): string

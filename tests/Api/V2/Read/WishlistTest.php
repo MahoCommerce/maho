@@ -87,3 +87,52 @@ describe('API v2 Wishlist - Listing', function (): void {
     });
 
 });
+
+describe('API v2 Wishlist - cross-tenant isolation', function (): void {
+
+    it('does not let another customer read or delete an item', function (): void {
+        $ownerId = (int) fixtures('customer_id');
+        $intruderId = $ownerId + 1;
+        $productId = fixtures('product_id');
+        if (!$productId) {
+            $this->markTestSkipped('No product_id configured in fixtures');
+        }
+
+        // Customer A adds an item to their own wishlist.
+        $add = apiPost('/api/rest/v2/customers/me/wishlist', [
+            'productId' => $productId,
+            'qty' => 1,
+        ], customerToken($ownerId));
+        if (!in_array($add['status'], [200, 201], true) || empty($add['json']['id'])) {
+            $this->markTestSkipped('Could not add a wishlist item for the owning customer');
+        }
+        $itemId = (int) $add['json']['id'];
+        trackCreated('wishlist_item', $itemId);
+
+        // Customer B's own wishlist must not contain A's item.
+        $intruderList = apiGet('/api/rest/v2/customers/me/wishlist', customerToken($intruderId));
+        expect($intruderList['status'])->toBe(200);
+        $intruderIds = array_map(
+            static fn($m) => (int) ($m['id'] ?? 0),
+            $intruderList['json']['member'] ?? [],
+        );
+        expect($intruderIds)->not->toContain($itemId);
+
+        // Customer B must not be able to delete A's item.
+        $delete = apiDelete("/api/rest/v2/customers/me/wishlist/{$itemId}", customerToken($intruderId));
+        expect($delete['status'])->toBeIn([403, 404]);
+
+        // The item must still exist for its owner.
+        $ownerList = apiGet('/api/rest/v2/customers/me/wishlist', customerToken($ownerId));
+        $ownerIds = array_map(
+            static fn($m) => (int) ($m['id'] ?? 0),
+            $ownerList['json']['member'] ?? [],
+        );
+        expect($ownerIds)->toContain($itemId);
+    });
+
+});
+
+afterAll(function (): void {
+    cleanupTestData();
+});

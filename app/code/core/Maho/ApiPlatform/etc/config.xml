@@ -86,6 +86,7 @@ SPDX-License-Identifier: AFL-3.0
                 <customer_register>5</customer_register>
                 <forgot_password>5</forgot_password>
                 <reset_password>10</reset_password>
+                <change_password>10</change_password>
                 <newsletter_subscribe>5</newsletter_subscribe>
                 <newsletter_unsubscribe>10</newsletter_unsubscribe>
                 <review_submit>10</review_submit>

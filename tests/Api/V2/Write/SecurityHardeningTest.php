@@ -24,8 +24,38 @@ declare(strict_types=1);
 use Tests\Helpers\ApiV2Helper;
 
 afterAll(function (): void {
+    restoreSecurityHardeningConfig();
     cleanupTestData();
 });
+
+/**
+ * Remember an original store-config value once so afterAll can restore it and
+ * this file's config changes don't leak into other tests.
+ *
+ * @return array<string, string|null>
+ */
+function securityHardeningConfigBackup(?string $path = null, ?string $value = null): array
+{
+    static $backup = [];
+    if ($path !== null && !array_key_exists($path, $backup)) {
+        $backup[$path] = $value;
+    }
+    return $backup;
+}
+
+function restoreSecurityHardeningConfig(): void
+{
+    try {
+        \Mage::app();
+        $config = \Mage::getModel('core/config');
+        foreach (securityHardeningConfigBackup() as $path => $value) {
+            $config->saveConfig($path, (string) ($value ?? ''), 'default', 0);
+        }
+        \Mage::app()->getCache()->cleanType('config');
+    } catch (\Throwable $e) {
+        // DB not available; nothing to restore.
+    }
+}
 
 describe('Wishlist move-to-cart ownership (IDOR)', function (): void {
 
@@ -116,6 +146,11 @@ describe('Newsletter guest subscribe disclosure', function (): void {
         ApiV2Helper::ensureMahoBootstrapped();
 
         // Guest subscription must be allowed for this path to be exercised.
+        // Capture the prior value first so afterAll can restore it.
+        securityHardeningConfigBackup(
+            Mage_Newsletter_Model_Subscriber::XML_PATH_ALLOW_GUEST_SUBSCRIBE_FLAG,
+            Mage::getStoreConfig(Mage_Newsletter_Model_Subscriber::XML_PATH_ALLOW_GUEST_SUBSCRIBE_FLAG),
+        );
         Mage::getModel('core/config')->saveConfig(
             Mage_Newsletter_Model_Subscriber::XML_PATH_ALLOW_GUEST_SUBSCRIBE_FLAG,
             '1',

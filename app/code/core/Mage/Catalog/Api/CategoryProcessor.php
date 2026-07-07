@@ -17,6 +17,7 @@ use Mage_Catalog_Model_Category;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Trait\ActivityLogTrait;
 use Maho\ApiPlatform\Service\StoreContext;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -71,6 +72,11 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Parent category not found');
         }
 
+        // A store-restricted token may only create under a category in one of
+        // its own stores' root trees. The new category inherits the parent's
+        // path, so authorizing the parent scopes the child too.
+        $this->authorizeCategoryStore($parentCategory, $user);
+
         /** @var Mage_Catalog_Model_Category $category */
         $category = Mage::getModel('catalog/category');
 
@@ -115,6 +121,8 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Category not found');
         }
 
+        $this->authorizeCategoryStore($category, $user);
+
         $oldData = $category->getData();
 
         if ($data->name !== '') {
@@ -133,7 +141,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if ($data->parentId !== null && $data->parentId !== (int) $category->getParentId()) {
-            $this->moveCategory($category, $data->parentId);
+            $this->moveCategory($category, $data->parentId, $user);
         }
 
         $this->applyCategoryData($category, $data);
@@ -153,6 +161,8 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         if (!$category->getId()) {
             throw new NotFoundHttpException('Category not found');
         }
+
+        $this->authorizeCategoryStore($category, $user);
 
         // Prevent deletion of root categories
         if ((int) $category->getLevel() <= 1) {
@@ -193,7 +203,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
-    private function moveCategory(Mage_Catalog_Model_Category $category, int $newParentId): void
+    private function moveCategory(Mage_Catalog_Model_Category $category, int $newParentId, ApiUser $user): void
     {
         /** @var Mage_Catalog_Model_Category $newParent */
         $newParent = Mage::getModel('catalog/category')->load($newParentId);
@@ -201,10 +211,41 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('New parent category not found');
         }
 
+        // The destination must also be within the caller's store tree, otherwise
+        // a store-restricted token could move a category into another store's root.
+        $this->authorizeCategoryStore($newParent, $user);
+
         try {
             $category->move($newParentId, 0);
         } catch (\Exception $e) {
             throw new UnprocessableEntityHttpException('Failed to move category: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Authorize a category against a store-restricted API user: the category
+     * must live under the root-category tree of at least one store the user may
+     * access. No-op for unrestricted users (getAllowedStoreIds() === null).
+     * Mirrors the root-tree scoping the read-side CategoryProvider applies, so a
+     * store-scoped write token cannot create/update/delete/move categories
+     * belonging to a store it was never granted.
+     */
+    private function authorizeCategoryStore(Mage_Catalog_Model_Category $category, ApiUser $user): void
+    {
+        $allowedStoreIds = $user->getAllowedStoreIds();
+        if ($allowedStoreIds === null) {
+            return;
+        }
+
+        $allowedRootIds = [];
+        foreach ($allowedStoreIds as $storeId) {
+            $allowedRootIds[] = (int) Mage::app()->getStore($storeId)->getRootCategoryId();
+        }
+
+        // The store root and every descendant carry the root id in their path.
+        $pathIds = array_map('intval', explode('/', (string) $category->getPath()));
+        if (array_intersect($pathIds, $allowedRootIds) === []) {
+            throw new AccessDeniedHttpException("Access denied for this category's store");
         }
     }
 

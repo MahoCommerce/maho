@@ -44,7 +44,7 @@ describe('API v2 Blog Posts', function (): void {
 
                 expect($response['status'])->toBeSuccessful();
             } else {
-                expect(true)->toBeTrue();
+                $this->markTestSkipped('No blog posts available to fetch individually');
             }
         });
 
@@ -84,7 +84,7 @@ describe('API v2 Blog Posts', function (): void {
                 expect($post)->toHaveKey('id');
                 expect($post)->toHaveKey('title');
             } else {
-                expect(true)->toBeTrue();
+                $this->markTestSkipped('No blog posts in response to verify fields');
             }
         });
 

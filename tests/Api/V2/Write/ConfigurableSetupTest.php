@@ -30,9 +30,7 @@ describe('Configurable Setup, Read', function (): void {
         $configurable = array_filter($items, fn($p) => ($p['sku'] ?? '') === $sku);
 
         if (empty($configurable)) {
-            // Skip if no configurable product found
-            expect(true)->toBeTrue();
-            return;
+            $this->markTestSkipped("No configurable product found for SKU {$sku}");
         }
 
         $configProduct = array_values($configurable)[0];
@@ -80,8 +78,7 @@ describe('Configurable Setup, Child Management', function (): void {
         $configurable = array_filter($items, fn($p) => ($p['sku'] ?? '') === $sku);
 
         if (empty($configurable)) {
-            expect(true)->toBeTrue();
-            return;
+            $this->markTestSkipped("No configurable product found for SKU {$sku}");
         }
 
         $configId = array_values($configurable)[0]['id'];

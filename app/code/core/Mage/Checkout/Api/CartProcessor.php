@@ -468,6 +468,14 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
         $giftcardCode = trim($args['giftcardCode'] ?? '');
 
+        // Throttle anonymous/customer callers by IP: applying a gift card to a
+        // cart is otherwise an oracle for enumerating gift card codes, which
+        // carry monetary value and whose apply errors differ per code-state.
+        // POS/API callers are exempt (legitimate high-volume checkout).
+        if (!$this->isAdmin() && !$this->isApiUser()) {
+            $this->checkRateLimitByIp('cart_giftcard', 'giftcard_balance', 60);
+        }
+
         $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->applyGiftcard($quote, $giftcardCode);
 

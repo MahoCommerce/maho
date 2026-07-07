@@ -280,6 +280,14 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         // auto-generated coupon batches.
         $this->checkRateLimitByIp('coupon_validate', 'coupon_validate', 60);
 
+        // Add a per-customer cap on top of the IP limiter: a trivially-created
+        // account behind a rotating-IP pool would otherwise bypass the IP cap
+        // and still enumerate codes. Guests (no customer id) rely on IP alone.
+        $customerId = $this->getAuthenticatedCustomerId();
+        if ($customerId !== null) {
+            $this->checkRateLimit('coupon_validate:customer:' . $customerId, 'coupon_validate', 60);
+        }
+
         // Anonymous callers get a yes/no answer only, the concrete discount
         // type/amount would let an unauthenticated client harvest the value of
         // every code before redeeming it. Customers/admins/API users still see

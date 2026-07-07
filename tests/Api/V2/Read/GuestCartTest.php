@@ -15,8 +15,15 @@ declare(strict_types=1);
  * All tests are READ-ONLY (safe for synced database).
  *
  * Note: To properly test cart items, we need a cart with items.
- * These tests verify the API contract and response structure.
+ * These tests verify the API contract and response structure. The
+ * existing_cart_id fixture lazily creates a real guest cart (with an item)
+ * via the API, so the structure/totals/shipping assertions run for real;
+ * the created quote is cleaned up afterAll.
  */
+
+afterAll(function (): void {
+    cleanupTestData();
+});
 
 describe('GET /api/rest/v2/guest-carts/{id}', function (): void {
 

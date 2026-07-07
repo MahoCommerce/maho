@@ -91,6 +91,7 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
             if ($linkedId <= 0) {
                 throw new BadRequestHttpException('linkedProductId is required and must be positive');
             }
+            $this->authorizeAssociatedProductWebsites($linkedId);
             $linkData[$linkedId] = ['position' => (int) ($link['position'] ?? 0)];
         }
 
@@ -110,6 +111,8 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
         if ($linkedId <= 0) {
             throw new BadRequestHttpException('linkedProductId is required and must be positive');
         }
+
+        $this->authorizeAssociatedProductWebsites($linkedId);
 
         // Get existing links
         $existingLinks = $this->getExistingLinkData($product, $linkType);
@@ -164,6 +167,20 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
             $links[(int) $linked->getId()] = ['position' => (int) $linked->getPosition()];
         }
         return $links;
+    }
+
+    /**
+     * Guard against linking a foreign-website product: a store-restricted token
+     * may only relate/cross-sell/up-sell products within its own website scope.
+     * No-op for unrestricted users (skips the linked-product load).
+     */
+    private function authorizeAssociatedProductWebsites(int $linkedId): void
+    {
+        $user = $this->getAuthorizedUser();
+        if ($this->getAllowedWebsiteIds($user) === null) {
+            return;
+        }
+        $this->authorizeProductWebsites($this->loadProduct($linkedId), $user);
     }
 
 }
