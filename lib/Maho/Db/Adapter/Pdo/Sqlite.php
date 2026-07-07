@@ -111,6 +111,12 @@ class Sqlite extends AbstractPdoAdapter
         // Store temp tables in memory
         $this->_connection->executeStatement('PRAGMA temp_store = MEMORY');
 
+        // Ensure the advisory locks table exists up front, while the fresh connection
+        // is guaranteed to be outside any transaction. SQLite forbids DDL inside a
+        // transaction, so creating it here means getLock() never has to issue DDL
+        // mid-transaction (e.g. a config-section load during a config save).
+        $this->_ensureLocksTableExists();
+
         // Register custom REGEXP function for SQLite (required for REGEXP queries)
         $this->_registerCustomFunctions();
     }
@@ -1116,20 +1122,13 @@ class Sqlite extends AbstractPdoAdapter
      * Acquire a named lock using a locks table
      *
      * SQLite doesn't have advisory locks, so we implement using a table.
-     * The locks table is created on first use.
+     * The locks table is created at connection init (see _initConnection), so no
+     * DDL is issued here — acquiring a lock is safe inside an open transaction.
      */
     #[\Override]
     public function getLock(string $lockName, int $timeout = 0): bool
     {
         $this->_connect();
-        // Only run the CREATE TABLE (a DDL statement) when the table is actually
-        // missing. SQLite forbids DDL inside a transaction, so issuing it
-        // unconditionally would throw whenever a lock is acquired mid-transaction
-        // (e.g. a config-section load during a config save) even though the table
-        // already exists. This mirrors the guard in releaseLock() and isLocked().
-        if (!$this->_locksTableExists()) {
-            $this->_ensureLocksTableExists();
-        }
 
         $lockKey = md5($lockName);
         $expireTime = time() + 3600; // Locks expire after 1 hour

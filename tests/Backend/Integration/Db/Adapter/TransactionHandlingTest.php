@@ -173,6 +173,25 @@ describe('Advisory Locks Inside Transactions', function () {
     // config section (e.g. activating SMTP) as the misleading "Unable to save the cron
     // expression." error, because a config-section load acquires the cache-save lock
     // inside the save transaction.
+    //
+    // The fix creates the locks table once at connection init (outside any transaction),
+    // so getLock() never issues DDL — even the very first acquisition of a process, and
+    // even inside an open transaction, is safe.
+    it('creates the SQLite locks table at connection init, before any lock is acquired', function () {
+        if (!($this->adapter instanceof \Maho\Db\Adapter\Pdo\Sqlite)) {
+            expect(true)->toBeTrue(); // native advisory locks on MySQL/PostgreSQL — nothing to assert
+            return;
+        }
+
+        // The connection is already established (beforeEach). Without ever calling
+        // getLock(), the table must already exist thanks to _initConnection(). This is
+        // what lets the first getLock() of a process run inside a transaction safely.
+        $tableExists = $this->adapter->fetchOne(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='maho_advisory_locks'",
+        );
+        expect((bool) $tableExists)->toBeTrue();
+    });
+
     it('acquires and releases an advisory lock while a transaction is open', function () {
         $lockName = 'maho_txn_lock_test';
         $this->adapter->releaseLock($lockName);
