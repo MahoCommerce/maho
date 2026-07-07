@@ -82,6 +82,9 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     protected ?string $_replyToEmail = null;
     protected ?string $_returnPathEmail = null;
 
+    /** @var Mage_Core_Model_Email_Attachment[] */
+    protected array $_attachments = [];
+
     protected static $_defaultTemplates;
 
     #[\Override]
@@ -400,6 +403,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
                 'from_name'         => $this->getSenderName(),
                 'reply_to'          => $this->_replyToEmail,
                 'return_to'         => $this->_returnPathEmail,
+                'attachments'       => array_map(fn($a) => $a->toArray(), $this->_attachments),
             ])
                 ->addRecipients($emails, $names, Mage_Core_Model_Email_Queue::EMAIL_TYPE_TO)
                 ->addRecipients($this->_bccEmails, [], Mage_Core_Model_Email_Queue::EMAIL_TYPE_BCC);
@@ -438,6 +442,11 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             if ($this->getTemplateId()) {
                 $email->getHeaders()->addTextHeader('X-Maho-Template', (string) $this->getTemplateId());
             }
+
+            Mage_Core_Model_Email_Attachment::applyDescriptors(
+                $email,
+                array_map(fn($a) => $a->toArray(), $this->_attachments),
+            );
 
             $transport = Mage::helper('core')->getMailTransport();
             if (!$transport) {
@@ -562,6 +571,26 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             $this->_bccEmails[] = $bcc;
         }
         return $this;
+    }
+
+    /**
+     * Set the attachments to add to the email
+     *
+     * @param Mage_Core_Model_Email_Attachment[] $attachments
+     * @return $this
+     */
+    public function setAttachments(array $attachments)
+    {
+        $this->_attachments = $attachments;
+        return $this;
+    }
+
+    /**
+     * @return Mage_Core_Model_Email_Attachment[]
+     */
+    public function getAttachments()
+    {
+        return $this->_attachments;
     }
 
     /**

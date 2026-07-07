@@ -161,7 +161,7 @@ class Mage_Core_Model_Encryption
 
     public function decrypt(#[\SensitiveParameter] ?string $data): string
     {
-        if ($data === null) {
+        if ($data === null || $data === '') {
             return '';
         }
 
