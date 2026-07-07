@@ -39,6 +39,7 @@ class Maho_FeedManager_Model_Mapper
         'max_price',
         'tier_price',
         'group_price',
+        'sale_price',
         'msrp',
         'cost',
     ];
@@ -403,6 +404,12 @@ class Maho_FeedManager_Model_Mapper
             $data['special_to_date'],
         );
         $data['url'] = $this->_getProductSeoUrl($parent);
+        // Computed category keys, mirroring the child row assembly - without
+        // these, parent_category_path never exists and use_parent=if_empty on
+        // category-derived fields silently yields nothing for variant children.
+        $data['category_ids'] = $parent->getCategoryIds();
+        $data['category_names'] = $this->_getCategoryNames($parent);
+        $data['category_path'] = $this->_getCategoryPath($parent);
         $data['image'] = $this->_getImageUrl($parent, 'image');
         $data['small_image'] = $this->_getImageUrl($parent, 'small_image');
         $data['thumbnail'] = $this->_getImageUrl($parent, 'thumbnail');
@@ -448,11 +455,71 @@ class Maho_FeedManager_Model_Mapper
         return match ($sourceType) {
             self::SOURCE_TYPE_ATTRIBUTE => self::getValueWithParentMode($sourceValue, $rawData, $useParentMode),
             self::SOURCE_TYPE_STATIC => $sourceValue,
-            self::SOURCE_TYPE_RULE => $this->_evaluateRule($sourceValue, $rawData, $product),
+            self::SOURCE_TYPE_RULE => $this->_evaluateRuleWithParentMode($sourceValue, $rawData, $product, $useParentMode),
             self::SOURCE_TYPE_COMBINED => $this->_evaluateCombined($sourceValue, $rawData),
             self::SOURCE_TYPE_TAXONOMY => $this->_getTaxonomyForProduct($sourceValue, $product, $useParentMode),
             default => null,
         };
+    }
+
+    /**
+     * Evaluate a dynamic rule-based source with parent-mode support.
+     *
+     * Rules evaluate against a product MODEL. For variant children that inherit
+     * pricing (etc.) from their parent, "if_empty" re-evaluates the rule against
+     * the loaded parent model when the child evaluation produced nothing;
+     * "always" evaluates the parent first. Without this, rule sources silently
+     * ignored use_parent while attribute sources honoured it.
+     */
+    protected function _evaluateRuleWithParentMode(string $ruleCode, array $rawData, Mage_Catalog_Model_Product $product, string $useParentMode): mixed
+    {
+        if ($useParentMode === 'always') {
+            $parent = $this->_getParentProductModel($product);
+            if ($parent !== null) {
+                $value = $this->_evaluateRule($ruleCode, $rawData, $parent);
+                if ($value !== null && $value !== '') {
+                    return $value;
+                }
+            }
+            return $this->_evaluateRule($ruleCode, $rawData, $product);
+        }
+
+        $value = $this->_evaluateRule($ruleCode, $rawData, $product);
+        if ($useParentMode === 'if_empty' && ($value === null || $value === '')) {
+            $parent = $this->_getParentProductModel($product);
+            if ($parent !== null) {
+                return $this->_evaluateRule($ruleCode, $rawData, $parent);
+            }
+        }
+        return $value;
+    }
+
+    /** @var array<int, Mage_Catalog_Model_Product|null> Parent product models keyed by parent ID */
+    protected array $_parentModelCache = [];
+
+    /**
+     * Load (and cache) the configurable parent model for a child product.
+     * Rule conditions validate against a product MODEL, so parent fallback
+     * for rule sources needs the parent model, not the parent_* raw keys.
+     */
+    protected function _getParentProductModel(Mage_Catalog_Model_Product $product): ?Mage_Catalog_Model_Product
+    {
+        $childId = (int) $product->getId();
+        if (array_key_exists($childId, $this->_childParentMap)) {
+            $parentId = $this->_childParentMap[$childId];
+        } else {
+            $parentIds = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($childId);
+            $parentId = empty($parentIds) ? null : (int) $parentIds[0];
+            $this->_childParentMap[$childId] = $parentId;
+        }
+        if ($parentId === null) {
+            return null;
+        }
+        if (!array_key_exists($parentId, $this->_parentModelCache)) {
+            $parent = Mage::getModel('catalog/product')->setStoreId($this->_storeId)->load($parentId);
+            $this->_parentModelCache[$parentId] = $parent->getId() ? $parent : null;
+        }
+        return $this->_parentModelCache[$parentId];
     }
 
     /**
@@ -1109,7 +1176,7 @@ class Maho_FeedManager_Model_Mapper
                 'source_value' => $column['source_value'] ?? '',
                 'transformers' => $transformers,
                 'conditions' => [],
-                'use_parent' => !empty($column['use_parent']),
+                'use_parent' => (string) ($column['use_parent'] ?? ''),
             ];
         }
 
