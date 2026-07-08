@@ -218,6 +218,11 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                         $email->returnPath($parameters->getReturnTo());
                     }
 
+                    Mage_Core_Model_Email_Attachment::applyDescriptors(
+                        $email,
+                        (array) $parameters->getAttachments(),
+                    );
+
                     $transport = new \Maho\DataObject();
                     Mage::dispatchEvent('email_queue_send_before', [
                         'mail'      => $email,

@@ -757,6 +757,7 @@ abstract class Mage_Api2_Model_Resource
             unset($filterEntry['attribute']);
 
             try {
+                // EAV collections filter by attribute; flat collections by field
                 if (method_exists($collection, 'addAttributeToFilter')) {
                     $collection->addAttributeToFilter($attributeCode, $filterEntry);
                 } else {
