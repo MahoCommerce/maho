@@ -92,7 +92,26 @@ describe('GET /api/rest/v2/products - Basic', function (): void {
 
 describe('GET /api/rest/v2/products - Sorting by Name', function (): void {
 
-    it('sorts products by name ascending (A-Z)', function (): void {
+    // The database performs the ORDER BY, and collations legitimately differ on how
+    // punctuation/spacing tie-breaks: MySQL/SQLite compare byte-wise (space precedes
+    // letters, so "A Tale" sorts before "Alice"), while PostgreSQL's dictionary
+    // collation ignores spacing ("A Tale" sorts as "ATale"). Both are valid ascending
+    // orders, so accept either rather than pinning one engine's collation.
+    $isNameSorted = function (array $names, bool $descending): bool {
+        $byteOrder = $names;
+        $descending ? rsort($byteOrder, SORT_STRING | SORT_FLAG_CASE) : sort($byteOrder, SORT_STRING | SORT_FLAG_CASE);
+
+        $dictionary = $names;
+        $cmp = static fn(string $a, string $b): int => strcmp(
+            (string) preg_replace('/[^a-z0-9]/', '', strtolower($a)),
+            (string) preg_replace('/[^a-z0-9]/', '', strtolower($b)),
+        );
+        usort($dictionary, $descending ? static fn($a, $b) => $cmp($b, $a) : $cmp);
+
+        return $names === $byteOrder || $names === $dictionary;
+    };
+
+    it('sorts products by name ascending (A-Z)', function () use ($isNameSorted): void {
         $response = apiGet('/api/rest/v2/products?pageSize=10&sortBy=name&sortDir=asc');
 
         expect($response['status'])->toBe(200);
@@ -100,14 +119,10 @@ describe('GET /api/rest/v2/products - Sorting by Name', function (): void {
         $items = getItems($response);
         expect($items)->not->toBeEmpty();
 
-        $names = array_column($items, 'name');
-        $sortedNames = $names;
-        sort($sortedNames, SORT_STRING | SORT_FLAG_CASE);
-
-        expect($names)->toBe($sortedNames);
+        expect($isNameSorted(array_column($items, 'name'), false))->toBeTrue();
     });
 
-    it('sorts products by name descending (Z-A)', function (): void {
+    it('sorts products by name descending (Z-A)', function () use ($isNameSorted): void {
         $response = apiGet('/api/rest/v2/products?pageSize=10&sortBy=name&sortDir=desc');
 
         expect($response['status'])->toBe(200);
@@ -115,11 +130,7 @@ describe('GET /api/rest/v2/products - Sorting by Name', function (): void {
         $items = getItems($response);
         expect($items)->not->toBeEmpty();
 
-        $names = array_column($items, 'name');
-        $sortedNames = $names;
-        rsort($sortedNames, SORT_STRING | SORT_FLAG_CASE);
-
-        expect($names)->toBe($sortedNames);
+        expect($isNameSorted(array_column($items, 'name'), true))->toBeTrue();
     });
 
     it('returns different first product for asc vs desc name sort', function (): void {
