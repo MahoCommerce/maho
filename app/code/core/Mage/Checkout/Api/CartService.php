@@ -165,15 +165,21 @@ class CartService
         $maskedId = $args['maskedId'] ?? null;
 
         // Priority 2: maskedId from REST guest-cart URI (regex to bypass int cast)
-        if (!$maskedId && $request instanceof \Symfony\Component\HttpFoundation\Request) {
-            if (preg_match('#/guest-carts/([a-f0-9]{32})#i', $request->getPathInfo(), $m)) {
+        $isGuestCartRoute = false;
+        if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
+            $isGuestCartRoute = str_contains($request->getPathInfo(), '/guest-carts/');
+            if (!$maskedId && preg_match('#/guest-carts/([a-f0-9]{32})#i', $request->getPathInfo(), $m)) {
                 $maskedId = $m[1];
             }
         }
 
-        // Priority 3: cartId from GraphQL args or uriVariables
+        // Priority 3: cartId from GraphQL args or uriVariables. On the guest-carts
+        // route the {id} is a masked id, never a numeric quote id — if it wasn't a
+        // valid masked id above, the cart simply doesn't exist. Falling back to
+        // numeric loading there would resolve an unrelated quote and leak its
+        // existence (404 vs 401) to an enumerating caller.
         $cartId = isset($args['cartId']) ? (int) $args['cartId'] : null;
-        if (!$cartId && !$maskedId && isset($uriVariables['id'])) {
+        if (!$cartId && !$maskedId && !$isGuestCartRoute && isset($uriVariables['id'])) {
             $cartId = (int) $uriVariables['id'];
         }
 
