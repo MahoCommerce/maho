@@ -40,7 +40,7 @@ final class ProductAttributeProvider extends CrudProvider
     protected function provideItem(int|string $id): ?ProductAttribute
     {
         /** @var \Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
-        $attribute = \Mage::getModel('catalog/resource_eav_attribute')->load($id);
+        $attribute = $this->loadById('catalog/resource_eav_attribute', $id);
         if (!$attribute->getId() || (int) $attribute->getEntityTypeId() !== $this->getProductEntityTypeId()) {
             return null;
         }

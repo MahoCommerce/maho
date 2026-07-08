@@ -133,6 +133,7 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
                 /** @var \Mage_Bundle_Model_Selection $selection */
                 $selection = Mage::getModel('bundle/selection');
                 $selection->setOptionId($option->getId());
+                $selection->setParentProductId($productId);
                 $selection->setProductId($selProductId);
                 $selection->setSelectionQty($qty);
                 $selection->setSelectionCanChangeQty((int) ($sel['canChangeQty'] ?? $sel['can_change_qty'] ?? 1));

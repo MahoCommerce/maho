@@ -40,7 +40,7 @@ final class AttributeSetProvider extends CrudProvider
     protected function provideItem(int|string $id): ?AttributeSet
     {
         /** @var \Mage_Eav_Model_Entity_Attribute_Set $set */
-        $set = \Mage::getModel('eav/entity_attribute_set')->load($id);
+        $set = $this->loadById('eav/entity_attribute_set', $id);
         if (!$set->getId() || (int) $set->getEntityTypeId() !== $this->getProductEntityTypeId()) {
             return null;
         }

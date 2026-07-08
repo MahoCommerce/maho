@@ -71,6 +71,15 @@ class CrudProcessor extends Processor
             $this->validate($data, $model, $isNew);
             $data->applyToModel($model);
             $this->validateStoreAccess($data, $user);
+            // Normalize the store-scope input ('all' plus store codes/IDs) to integer store
+            // IDs before save. MySQL silently coerces a stray 'all' to 0, but Postgres and
+            // SQLite reject it against the smallint store_id columns, so resolve it here.
+            if ($this->isStoreScoped()) {
+                $stores = (new \ReflectionProperty($data, 'stores'))->getValue($data);
+                if ($stores !== null) {
+                    $model->setData('stores', $this->resolveStoreIds($stores, $user));
+                }
+            }
             $this->beforeSave($model, $data, $user);
         }
     }

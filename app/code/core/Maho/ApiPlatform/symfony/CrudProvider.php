@@ -50,7 +50,7 @@ class CrudProvider extends Provider
     #[\Override]
     protected function provideItem(int|string $id): ?Resource
     {
-        $model = \Mage::getModel($this->modelAlias)->load($id);
+        $model = $this->loadById($this->modelAlias, $id);
         if (!$model->getId()) {
             return null;
         }

@@ -23,7 +23,7 @@ class StoreProvider extends \Maho\ApiPlatform\Provider
         // ("Invalid store code requested.") for an unknown id — surfacing as a
         // 422 instead of the expected 404.
         if (isset($uriVariables['id'])) {
-            $store = \Mage::getModel('core/store')->load((int) $uriVariables['id']);
+            $store = $this->loadById('core/store', (int) $uriVariables['id']);
             if (!$store->getId() || !$store->getIsActive()) {
                 throw new NotFoundHttpException('Store not found');
             }

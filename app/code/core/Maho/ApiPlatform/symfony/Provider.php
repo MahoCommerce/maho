@@ -106,8 +106,26 @@ abstract class Provider implements ProviderInterface
      */
     protected function provideItem(int|string $id): ?Resource
     {
-        $model = \Mage::getModel($this->modelAlias)->load($id);
+        $model = $this->loadById($this->modelAlias, $id);
         return $model->getId() ? $this->toDto($model) : null;
+    }
+
+    /**
+     * Load a model by primary key, treating an id the database can't represent as
+     * "not found" instead of a 500. A value that overflows the column type (e.g. a
+     * huge id against a SMALLINT primary key) makes Postgres/SQLite raise a driver
+     * error, whereas MySQL silently matches zero rows; swallow that one case so a
+     * non-existent id yields a clean 404 on every engine.
+     */
+    protected function loadById(string $modelAlias, int|string $id): \Mage_Core_Model_Abstract
+    {
+        $model = \Mage::getModel($modelAlias);
+        try {
+            $model->load($id);
+        } catch (\Doctrine\DBAL\Exception\DriverException) {
+            // id cannot correspond to any row on this column type → not found
+        }
+        return $model;
     }
 
     /**
