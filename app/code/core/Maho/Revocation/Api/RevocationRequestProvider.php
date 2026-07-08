@@ -36,7 +36,7 @@ final class RevocationRequestProvider extends Provider
 
         $name = $operation->getName();
 
-        if ($name === 'my_revocation_requests' || $name === 'myRevocationRequests') {
+        if ($name === 'my_revocation_requests' || $name === 'my') {
             return $this->provideMyCollection($context);
         }
 

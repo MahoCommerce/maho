@@ -51,7 +51,12 @@ final class ProductTierPriceProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleReplace(int $productId, array $context, \Maho\ApiPlatform\Security\ApiUser $user): array
     {
-        $product = $this->loadProduct($productId);
+        // Load in the admin/default (store 0) scope. Tier prices are global
+        // (website 0) here, and the group-price backend only reconciles — i.e.
+        // deletes removed rows — against the scope the product is loaded in.
+        // Loading in a store-view scope leaves the previous global rows behind,
+        // so a "replace" would silently accumulate instead of replacing.
+        $product = $this->loadProductForGlobalPrice($productId);
 
         // Store-restricted tokens may only price websites they're scoped to;
         // null means unrestricted (any website, including 0 = all).
@@ -105,9 +110,17 @@ final class ProductTierPriceProcessor extends \Maho\ApiPlatform\Processor
             ];
         }
 
-        $product->getTierPrice();
+        // True replace, in two steps. A minimally-loaded product carries no
+        // existing tier prices in origData, so a single save of the new set would
+        // leave the previous rows behind (the group-price backend only deletes
+        // rows present in "old"). Saving an empty set first makes the backend
+        // clear every existing tier price (its documented empty-set behaviour),
+        // then the second save inserts the new set onto a clean slate.
+        if (!empty($tierPrices)) {
+            $product->setTierPrice([]);
+            $this->safeSave($product, 'save tier prices');
+        }
         $product->setTierPrice($tierPrices);
-
         $this->safeSave($product, 'save tier prices');
 
         // Re-read and return
@@ -120,12 +133,28 @@ final class ProductTierPriceProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleDeleteAll(int $productId): null
     {
-        $product = $this->loadProduct($productId);
+        $product = $this->loadProductForGlobalPrice($productId);
         $product->getTierPrice();
         $product->setTierPrice([]);
         $this->safeSave($product, 'delete tier prices');
 
         return null;
+    }
+
+    /**
+     * Load a product in the admin/default (store 0) scope so global tier-price
+     * reconciliation deletes removed rows on save (see handleReplace).
+     */
+    private function loadProductForGlobalPrice(int $productId): \Mage_Catalog_Model_Product
+    {
+        /** @var \Mage_Catalog_Model_Product $product */
+        $product = \Mage::getModel('catalog/product');
+        $product->setStoreId(0);
+        $product->load($productId);
+        if (!$product->getId()) {
+            throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException('Product not found');
+        }
+        return $product;
     }
 
 }

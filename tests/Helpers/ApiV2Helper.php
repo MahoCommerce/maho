@@ -333,13 +333,18 @@ class ApiV2Helper
      */
     public static function headerValue(array $response, string $name): ?string
     {
+        // A header may appear on multiple lines (e.g. several `Vary:` entries from
+        // CORS + the cache listener). HTTP treats repeated headers as a single
+        // comma-joined value, so aggregate every matching line rather than
+        // returning only the first.
         $needle = strtolower($name) . ':';
+        $values = [];
         foreach ($response['headers'] as $line) {
             if (stripos($line, $needle) === 0) {
-                return trim(substr($line, strlen($needle)));
+                $values[] = trim(substr($line, strlen($needle)));
             }
         }
-        return null;
+        return $values === [] ? null : implode(', ', $values);
     }
 
     /**
@@ -390,6 +395,10 @@ class ApiV2Helper
             ->permittedFor($claims['aud'] ?? 'maho-api')
             ->identifiedBy($claims['jti'] ?? bin2hex(random_bytes(16)))
             ->issuedAt($now)
+            // The server validates with StrictValidAt, which REQUIRES the nbf
+            // claim; JwtService sets it via canOnlyBeUsedAfter(). Without it every
+            // token is rejected as '"Not Before" claim missing'.
+            ->canOnlyBeUsedAfter($now)
             ->expiresAt($now->modify('+' . (($claims['exp'] ?? time() + 86400) - time()) . ' seconds'));
 
         if (isset($claims['sub'])) {
@@ -489,6 +498,106 @@ class ApiV2Helper
         }
 
         return self::buildToken($payload, $secret);
+    }
+
+    /** @var array<string, int> Cache of API user ids keyed by permission signature. */
+    private static array $apiUserCache = [];
+
+    /**
+     * Build a service (api_user) token backed by a REAL API user. The server
+     * re-reads permissions and store scope from the DB (it ignores JWT-embedded
+     * permission claims and requires a valid api_user_id), so the token must
+     * reference an actual api/user row with the requested `resource/op` rules.
+     *
+     * @param array<int, string> $permissions e.g. ['products/write'] or ['all']
+     * @param array<int, int>|null $storeIds   null = unrestricted
+     */
+    public static function generateServiceToken(array $permissions, ?array $storeIds = null, string $identity = 'api_user_test'): string
+    {
+        self::ensureMahoBootstrapped();
+        $userId = self::ensureApiUser($permissions, $storeIds);
+
+        return self::generateToken([
+            'sub' => $identity,
+            'type' => 'api_user',
+            'api_user_id' => $userId,
+            'allowed_store_ids' => $storeIds,
+        ]);
+    }
+
+    /**
+     * Create (or reuse) an API user with a group role granting $permissions,
+     * mirroring the writes the admin Role/User controllers perform.
+     *
+     * @param array<int, string> $permissions
+     * @param array<int, int>|null $storeIds
+     */
+    private static function ensureApiUser(array $permissions, ?array $storeIds): int
+    {
+        sort($permissions);
+        $key = md5((string) json_encode([$permissions, $storeIds]));
+        if (isset(self::$apiUserCache[$key])) {
+            return self::$apiUserCache[$key];
+        }
+
+        $resource = \Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $roleTable = $resource->getTableName('api/role');
+        $ruleTable = $resource->getTableName('api/rule');
+        $suffix = substr($key, 0, 8);
+
+        // Group role.
+        $write->insert($roleTable, [
+            'parent_id' => 0,
+            'tree_level' => 1,
+            'sort_order' => 0,
+            'role_type' => 'G',
+            'user_id' => 0,
+            'role_name' => 'apitest-role-' . $suffix,
+        ]);
+        $roleId = (int) $write->lastInsertId();
+
+        // Permission rules (resource_id = 'all' or 'resource/op' strings).
+        foreach ($permissions as $permission) {
+            if ($permission === '') {
+                continue;
+            }
+            $write->insert($ruleTable, [
+                'role_id' => $roleId,
+                'resource_id' => $permission,
+                'api_privileges' => null,
+                'assert_id' => 0,
+                'role_type' => 'G',
+                'api_permission' => 'allow',
+            ]);
+        }
+
+        // API user.
+        $user = \Mage::getModel('api/user');
+        $user->setUsername('apitest_' . $suffix)
+            ->setFirstname('API')
+            ->setLastname('Service')
+            ->setEmail('apitest_' . $suffix . '@example.com')
+            ->setApiKey('ApiTest' . $suffix . 'Secret123')
+            ->setIsActive(1);
+        if ($storeIds !== null) {
+            $user->setData('allowed_store_ids', (string) json_encode($storeIds));
+        }
+        $user->save();
+        $userId = (int) $user->getId();
+
+        // Link user → role (role_type 'U'); Mage_Api_Model_User::getRoles() reads this.
+        $write->insert($roleTable, [
+            'parent_id' => $roleId,
+            'tree_level' => 2,
+            'sort_order' => 0,
+            'role_type' => 'U',
+            'user_id' => $userId,
+            'role_name' => $user->getUsername(),
+        ]);
+
+        self::$apiUserCache[$key] = $userId;
+        return $userId;
     }
 
     /**
@@ -627,6 +736,7 @@ class ApiV2Helper
             $fixtures = [
                 'customer_id' => $customerId,
                 'customer_email' => self::lookupCustomerEmail($customerId),
+                'second_customer_id' => self::lookupSecondCustomerId(),
                 'invalid_customer_id' => 999999,
                 'product_id' => $productData['id'],
                 'product_sku' => $productData['sku'],
@@ -783,8 +893,16 @@ class ApiV2Helper
             return self::$baseUrl;
         }
 
-        if (!empty($_ENV['API_BASE_URL'])) {
-            self::$baseUrl = rtrim($_ENV['API_BASE_URL'], '/');
+        // Read via getenv() as well as $_ENV: PHP CLI's default variables_order
+        // ("GPCS") does not populate $_ENV from the environment, so a workflow
+        // that exports API_BASE_URL is only visible through getenv(). Without
+        // this the whole Api/V2 suite silently self-skips in CI.
+        $envBaseUrl = $_ENV['API_BASE_URL'] ?? '';
+        if ($envBaseUrl === '') {
+            $envBaseUrl = getenv('API_BASE_URL') ?: '';
+        }
+        if ($envBaseUrl !== '') {
+            self::$baseUrl = rtrim($envBaseUrl, '/');
             return self::$baseUrl;
         }
 
@@ -825,14 +943,52 @@ class ApiV2Helper
 
     private static function lookupCustomerId(): ?int
     {
+        // Use a dedicated, known-good API test customer rather than whatever
+        // the sample data ships (an existing account may carry a pending
+        // confirmation key, which the API auth path rejects → every
+        // customer-token test 401s). Load-or-create it, and force it active
+        // with no confirmation so the server accepts its token.
+        return self::loadOrCreateTestCustomer('api.tester@example.com', 'API', 'Tester') ?? 1;
+    }
+
+    /**
+     * A second real, active customer used by cross-tenant ownership tests: the
+     * "intruder" that must be denied access to another customer's cart/order.
+     * Must be a genuine account (not just id+1) or the JWT auth layer rejects
+     * its token with 401 before the ownership check ever runs.
+     */
+    private static function lookupSecondCustomerId(): ?int
+    {
+        return self::loadOrCreateTestCustomer('api.tester2@example.com', 'API', 'Intruder');
+    }
+
+    /** Load-or-create an active, confirmed customer by email; returns its id or null on failure. */
+    private static function loadOrCreateTestCustomer(string $email, string $firstname, string $lastname): ?int
+    {
         try {
-            $customer = \Mage::getModel('customer/customer')->getCollection()
-                ->addFieldToFilter('is_active', 1)
-                ->setPageSize(1)
-                ->getFirstItem();
-            return $customer->getId() ? (int) $customer->getId() : 1;
+            $websiteId = (int) \Mage::app()->getStore(1)->getWebsiteId() ?: 1;
+
+            $customer = \Mage::getModel('customer/customer')
+                ->setWebsiteId($websiteId)
+                ->loadByEmail($email);
+
+            if (!$customer->getId()) {
+                $customer->setWebsiteId($websiteId)
+                    ->setStoreId(1)
+                    ->setFirstname($firstname)
+                    ->setLastname($lastname)
+                    ->setEmail($email)
+                    ->setPassword('ApiTester12345!');
+            }
+
+            $customer->setIsActive(1)
+                ->setForceConfirmed(true)
+                ->setConfirmation(null)
+                ->save();
+
+            return (int) $customer->getId();
         } catch (\Throwable $e) {
-            return 1;
+            return null;
         }
     }
 

@@ -12,7 +12,6 @@ namespace Mage\Cms\Api;
 
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
-use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\CrudProvider;
 use Maho\ApiPlatform\Service\StoreContext;
 
@@ -43,30 +42,11 @@ final class CmsPageProvider extends CrudProvider
         if ($operation instanceof CollectionOperationInterface) {
             $identifier = $context['args']['identifier'] ?? $context['filters']['identifier'] ?? null;
             if ($identifier) {
-                $page = $this->getPageByIdentifier($identifier);
-                $items = $page ? [$page] : [];
-                return new TraversablePaginator(new \ArrayIterator($items), 1, 1, count($items));
+                return $this->singleItemPaginator($this->getPageByIdentifier($identifier));
             }
         }
 
         return parent::provide($operation, $uriVariables, $context);
-    }
-
-    #[\Override]
-    protected function handleOperation(string $name, array $context, array $uriVariables): mixed
-    {
-        if ($name === 'cmsPagesByIdentifier') {
-            $identifier = $context['args']['identifier'] ?? null;
-            if (!$identifier) {
-                return new TraversablePaginator(new \ArrayIterator([]), 1, 1, 0);
-            }
-
-            $page = $this->getPageByIdentifier($identifier);
-            $items = $page ? [$page] : [];
-            return new TraversablePaginator(new \ArrayIterator($items), 1, 1, count($items));
-        }
-
-        return null;
     }
 
     #[\Override]

@@ -109,10 +109,13 @@ class HttpCacheListener
                 $response->headers->set('Cache-Control', 'public, max-age=3600');
             }
         } elseif ($isAuthenticated) {
-            // Authenticated reads (collections and single resources): moderate
-            // cache. Tag invalidation bounds staleness on writes regardless of
-            // TTL, so there's no benefit to a shorter window for collections.
-            $response->headers->set('Cache-Control', 'private, max-age=300, must-revalidate');
+            // Authenticated reads (cart, wishlist, /customers/me, orders): the
+            // browser may store the body but MUST revalidate before every reuse.
+            // A max-age here would let a private cache serve a stale cart/wishlist
+            // for the whole window after a write to a *different* URI (POST
+            // /wishlist-items), which server-side tag invalidation cannot reach.
+            // The ETag/304 path still gives the bandwidth win without staleness.
+            $response->headers->set('Cache-Control', 'private, no-cache');
         } else {
             // Unauthenticated non-public: no store
             $response->headers->set('Cache-Control', 'no-store');

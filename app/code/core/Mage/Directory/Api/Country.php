@@ -38,14 +38,10 @@ use Maho\ApiPlatform\CrudResource;
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'item_query', description: 'Get a country', security: 'true'),
-        new QueryCollection(name: 'collection_query', description: 'Get countries', security: 'true'),
-        new QueryCollection(name: 'countries', description: 'Get all available countries with regions'),
-        new Query(
-            name: 'country',
-            args: ['id' => ['type' => 'String!', 'description' => 'ISO 2-letter country code']],
-            description: 'Get a country by ISO code',
-        ),
+        // Fields `country` / `countries`. The Country identifier is the ISO code,
+        // so item_query already serves `country(id: "US")` — no custom ops needed.
+        new Query(name: 'item_query', description: 'Get a country by ISO code', security: 'true'),
+        new QueryCollection(name: 'collection_query', description: 'Get all available countries with regions', security: 'true'),
     ],
 )]
 class Country extends CrudResource

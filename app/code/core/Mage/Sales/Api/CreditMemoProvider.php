@@ -27,7 +27,7 @@ final class CreditMemoProvider extends CrudProvider
 
         $operationName = $operation->getName();
 
-        if ($operationName === 'orderCreditMemos') {
+        if ($operationName === 'order') {
             $orderId = (int) ($context['args']['orderId'] ?? 0);
             return $this->getCreditMemosForOrder($orderId, $context);
         }

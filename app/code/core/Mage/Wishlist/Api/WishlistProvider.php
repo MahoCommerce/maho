@@ -40,7 +40,7 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
         $operationName = $operation->getName();
 
         // GraphQL collection operations need TraversablePaginator
-        if ($operationName === 'myWishlist' || $operationName === 'collection_query') {
+        if ($operationName === 'my' || $operationName === 'collection_query') {
             $items = $this->getWishlistItems();
             return new TraversablePaginator(new \ArrayIterator($items), 1, max(count($items), 50), count($items));
         }

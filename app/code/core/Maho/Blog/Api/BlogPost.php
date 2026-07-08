@@ -67,11 +67,6 @@ use Maho\ApiPlatform\CrudResource;
         new QueryCollection(
             security: 'true',
             name: 'collection_query',
-            description: 'Get blog posts',
-        ),
-        new QueryCollection(
-            security: 'true',
-            name: 'blogPosts',
             args: ['urlKey' => ['type' => 'String']],
             description: 'Get blog posts, optionally filter by URL key',
         ),

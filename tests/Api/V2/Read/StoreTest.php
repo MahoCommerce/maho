@@ -87,8 +87,10 @@ describe('API v2 Stores', function (): void {
                 $store = $stores[0];
 
                 expect($store)->toHaveKey('id');
-                expect($store)->toHaveKey('code')
-                    ->or->toHaveKey('name');
+                // A store view exposes both a code and a name; assert the pair
+                // directly. (The `->or->` higher-order form misreports here even
+                // when both keys are present.)
+                expect(array_key_exists('code', $store) || array_key_exists('name', $store))->toBeTrue();
             } else {
                 $this->markTestSkipped('No stores in response to verify fields');
             }

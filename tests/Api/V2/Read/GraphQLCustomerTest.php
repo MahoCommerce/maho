@@ -25,12 +25,12 @@ describe('GraphQL Me Query', function (): void {
 
         $query = <<<'GRAPHQL'
         {
-            meCustomer {
+            currentCustomer {
                 id
                 _id
                 email
-                firstName
-                lastName
+                firstname
+                lastname
                 fullName
             }
         }
@@ -41,13 +41,13 @@ describe('GraphQL Me Query', function (): void {
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
 
-        $customer = $response['json']['data']['meCustomer'];
-        // meCustomer may return null if the authenticator doesn't set the customer
+        $customer = $response['json']['data']['currentCustomer'];
+        // currentCustomer may return null if the authenticator doesn't set the customer
         // in the security context for direct JWT tokens; if it works, validate it
         if ($customer !== null) {
             expect($customer['email'])->toBeString();
-            expect($customer['firstName'])->toBeString();
-            expect($customer['lastName'])->toBeString();
+            expect($customer['firstname'])->toBeString();
+            expect($customer['lastname'])->toBeString();
             expect($customer['_id'])->toBe($customerId);
         }
     });
@@ -55,7 +55,7 @@ describe('GraphQL Me Query', function (): void {
     it('returns null for me query with admin token', function (): void {
         $query = <<<'GRAPHQL'
         {
-            meCustomer {
+            currentCustomer {
                 id
                 email
             }
@@ -65,8 +65,8 @@ describe('GraphQL Me Query', function (): void {
         $response = gqlQuery($query, [], adminToken());
 
         expect($response['status'])->toBe(200);
-        // Admin has no customer_id, so meCustomer should be null or error
-        $data = $response['json']['data']['meCustomer'] ?? null;
+        // Admin has no customer_id, so currentCustomer should be null or error
+        $data = $response['json']['data']['currentCustomer'] ?? null;
         $errors = $response['json']['errors'] ?? [];
         expect($data === null || !empty($errors))->toBeTrue();
     });
@@ -81,11 +81,11 @@ describe('GraphQL Customer By ID Query', function (): void {
 
         $query = <<<GRAPHQL
         {
-            customerCustomer(id: "{$iri}") {
+            customer(id: "{$iri}") {
                 _id
                 email
-                firstName
-                lastName
+                firstname
+                lastname
             }
         }
         GRAPHQL;
@@ -93,12 +93,12 @@ describe('GraphQL Customer By ID Query', function (): void {
         $response = gqlQuery($query, [], adminToken());
 
         expect($response['status'])->toBe(200);
-        expect($response['json']['data']['customerCustomer'])->not->toBeNull();
+        expect($response['json']['data']['customer'])->not->toBeNull();
 
-        $customer = $response['json']['data']['customerCustomer'];
+        $customer = $response['json']['data']['customer'];
         expect($customer['_id'])->toBe($customerId);
         expect($customer['email'])->toBeString();
-        expect($customer['firstName'])->toBeString();
+        expect($customer['firstname'])->toBeString();
     });
 
     it('denies customer by ID for regular customer', function (): void {
@@ -107,7 +107,7 @@ describe('GraphQL Customer By ID Query', function (): void {
 
         $query = <<<GRAPHQL
         {
-            customerCustomer(id: "{$iri}") {
+            customer(id: "{$iri}") {
                 _id
                 email
             }
@@ -128,7 +128,7 @@ describe('GraphQL Customer Orders Query', function (): void {
     it('returns customer orders when authenticated', function (): void {
         $query = <<<'GRAPHQL'
         {
-            customerOrdersOrders(pageSize: 5) {
+            customerOrders(pageSize: 5) {
                 edges {
                     node {
                         id
@@ -147,7 +147,7 @@ describe('GraphQL Customer Orders Query', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('customerOrdersOrders');
+        expect($response['json']['data'])->toHaveKey('customerOrders');
     });
 
 });
@@ -157,13 +157,13 @@ describe('GraphQL Customer Addresses Query', function (): void {
     it('returns customer addresses when authenticated', function (): void {
         $query = <<<'GRAPHQL'
         {
-            myAddressesAddresses {
+            myAddresses {
                 edges {
                     node {
                         id
                         _id
-                        firstName
-                        lastName
+                        firstname
+                        lastname
                         city
                         postcode
                         countryId
@@ -179,18 +179,18 @@ describe('GraphQL Customer Addresses Query', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('myAddressesAddresses');
+        expect($response['json']['data'])->toHaveKey('myAddresses');
     });
 
     it('returns addresses with expected field types', function (): void {
         $query = <<<'GRAPHQL'
         {
-            myAddressesAddresses {
+            myAddresses {
                 edges {
                     node {
                         _id
-                        firstName
-                        lastName
+                        firstname
+                        lastname
                         city
                         postcode
                         countryId
@@ -206,11 +206,11 @@ describe('GraphQL Customer Addresses Query', function (): void {
 
         expect($response['status'])->toBe(200);
 
-        $edges = $response['json']['data']['myAddressesAddresses']['edges'] ?? [];
+        $edges = $response['json']['data']['myAddresses']['edges'] ?? [];
         if (!empty($edges)) {
             $address = $edges[0]['node'];
-            expect($address['firstName'])->toBeString();
-            expect($address['lastName'])->toBeString();
+            expect($address['firstname'])->toBeString();
+            expect($address['lastname'])->toBeString();
             expect($address['countryId'])->toBeString();
             expect($address['isDefaultBilling'])->toBeBool();
             expect($address['isDefaultShipping'])->toBeBool();

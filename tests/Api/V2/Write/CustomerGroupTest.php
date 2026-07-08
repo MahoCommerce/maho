@@ -114,7 +114,7 @@ describe('GraphQL customer groups', function (): void {
         // ApiPlatform names a collection query field {name}{PluralShortName}.
         $query = <<<'GRAPHQL'
         {
-            customerGroupsCustomerGroups {
+            customerGroups {
                 id
                 code
                 taxClassId
@@ -126,7 +126,7 @@ describe('GraphQL customer groups', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->not->toHaveKey('errors');
-        expect($response['json']['data']['customerGroupsCustomerGroups'])->toBeArray();
+        expect($response['json']['data']['customerGroups'])->toBeArray();
     });
 
 });

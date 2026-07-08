@@ -12,6 +12,7 @@ namespace Mage\Core\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
 use Maho\Config\ApiResource;
+use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use Maho\ApiPlatform\CrudResource;
@@ -30,6 +31,14 @@ use Maho\ApiPlatform\CrudResource;
             provider: StoreProvider::class,
             security: 'true',
             description: 'List all active stores and websites',
+        ),
+        new Get(
+            uriTemplate: '/stores/{id}',
+            name: 'get_store',
+            requirements: ['id' => '\d+'],
+            provider: StoreProvider::class,
+            security: 'true',
+            description: 'Get a single active store by ID',
         ),
         new Post(
             uriTemplate: '/stores/switch/{storeCode}',

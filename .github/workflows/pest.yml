@@ -151,7 +151,14 @@ jobs:
 
       - name: Start built-in web server
         run: |
-          php -S 127.0.0.1:8080 -t public > /tmp/php-server.log 2>&1 < /dev/null &
+          # Serve the API at the URL the JWT issuer is pinned to, and pre-seed a
+          # deterministic signing secret, so tokens the test helper signs validate
+          # against the server (otherwise every authenticated API test 401s).
+          ./maho config:set web/unsecure/base_url http://127.0.0.1:8080/ --scope default --scope-id 0 --silent
+          ./maho config:set web/secure/base_url http://127.0.0.1:8080/ --scope default --scope-id 0 --silent
+          ./maho config:set apiplatform/oauth2/secret 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef --encrypt --scope default --scope-id 0 --silent
+          ./maho cache:flush
+          php -S 127.0.0.1:8080 -t public tests/router.php > /tmp/php-server.log 2>&1 < /dev/null &
           for i in $(seq 1 20); do
             if curl -fsS http://127.0.0.1:8080/api/rest/v2/store-config -o /dev/null 2>&1 || \
                curl -fsS http://127.0.0.1:8080/ -o /dev/null 2>&1; then
@@ -252,7 +259,14 @@ jobs:
 
       - name: Start built-in web server
         run: |
-          php -S 127.0.0.1:8080 -t public > /tmp/php-server.log 2>&1 < /dev/null &
+          # Serve the API at the URL the JWT issuer is pinned to, and pre-seed a
+          # deterministic signing secret, so tokens the test helper signs validate
+          # against the server (otherwise every authenticated API test 401s).
+          ./maho config:set web/unsecure/base_url http://127.0.0.1:8080/ --scope default --scope-id 0 --silent
+          ./maho config:set web/secure/base_url http://127.0.0.1:8080/ --scope default --scope-id 0 --silent
+          ./maho config:set apiplatform/oauth2/secret 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef --encrypt --scope default --scope-id 0 --silent
+          ./maho cache:flush
+          php -S 127.0.0.1:8080 -t public tests/router.php > /tmp/php-server.log 2>&1 < /dev/null &
           for i in $(seq 1 20); do
             if curl -fsS http://127.0.0.1:8080/api/rest/v2/store-config -o /dev/null 2>&1 || \
                curl -fsS http://127.0.0.1:8080/ -o /dev/null 2>&1; then

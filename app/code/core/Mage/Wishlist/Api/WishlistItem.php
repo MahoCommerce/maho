@@ -64,12 +64,12 @@ use Maho\ApiPlatform\CrudResource;
         new Query(name: 'item_query', description: 'Get a wishlist item by ID', security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('wishlists/read')"),
         new QueryCollection(name: 'collection_query', description: 'Get wishlist items', security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('wishlists/read')"),
         new QueryCollection(
-            name: 'myWishlist',
+            name: 'my',
             description: 'Get current customer wishlist items',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('wishlists/read')",
         ),
         new Mutation(
-            name: 'addToWishlist',
+            name: 'addTo',
             description: 'Add product to wishlist',
             args: [
                 'productId' => ['type' => 'Int!', 'description' => 'Product ID to add'],
@@ -79,7 +79,7 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_CUSTOMER') or is_granted('wishlists/write')",
         ),
         new Mutation(
-            name: 'removeFromWishlist',
+            name: 'removeFrom',
             description: 'Remove item from wishlist',
             args: [
                 'itemId' => ['type' => 'Int!', 'description' => 'Wishlist item ID'],
@@ -87,7 +87,7 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_CUSTOMER') or is_granted('wishlists/write')",
         ),
         new Mutation(
-            name: 'moveWishlistItemToCart',
+            name: 'moveToCart',
             description: 'Move wishlist item to cart',
             args: [
                 'itemId' => ['type' => 'Int!', 'description' => 'Wishlist item ID'],
@@ -96,7 +96,7 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_CUSTOMER') or is_granted('wishlists/write')",
         ),
         new Mutation(
-            name: 'syncWishlist',
+            name: 'sync',
             description: 'Sync guest wishlist with customer account',
             args: [
                 'productIds' => ['type' => '[Int!]!', 'description' => 'Product IDs from localStorage'],

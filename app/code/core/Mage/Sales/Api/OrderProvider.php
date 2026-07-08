@@ -45,7 +45,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         }
 
         // Handle REST collection endpoint (GET /orders)
-        if ($operation instanceof CollectionOperationInterface && !in_array($operationName, ['customerOrders', 'my_orders'])) {
+        if ($operation instanceof CollectionOperationInterface && !in_array($operationName, ['customer', 'my_orders'])) {
             return $this->getCollection($context);
         }
 
@@ -106,7 +106,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         }
 
         // Handle guestOrder query - get order by increment ID and access token
-        if ($operationName === 'guestOrder') {
+        if ($operationName === 'guest') {
             // Same public token-lookup surface as the REST path above; throttle
             // by IP so the one-time token can't be brute-forced via GraphQL.
             $this->checkRateLimitByIp('guest_order_token', 'guest_order_lookup', 3600);
@@ -154,7 +154,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         }
 
         // Handle customerOrders collection query
-        if ($operationName === 'customerOrders') {
+        if ($operationName === 'customer') {
             // Bind strictly to the authenticated JWT identity (mirrors getMyOrders).
             // Never trust a request/context-supplied id here, that would be an IDOR.
             $customerId = $this->getAuthenticatedCustomerId();

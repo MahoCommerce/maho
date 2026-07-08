@@ -30,8 +30,8 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         $operationName = $operation->getName();
 
         return match ($operationName) {
-            'updateStock' => $this->updateStockFromGraphQl($context),
-            'updateStockBulk' => $this->updateStockBulkFromGraphQl($context),
+            'update' => $this->updateStockFromGraphQl($context),
+            'updateBulk' => $this->updateStockBulkFromGraphQl($context),
             default => $this->handleRestRequest($operation, $context),
         };
     }
@@ -47,7 +47,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 
         return $this->doSingleUpdate(
             $body['sku'] ?? '',
-            (float) ($body['qty'] ?? 0),
+            isset($body['qty']) ? (float) $body['qty'] : null,
             isset($body['isInStock']) ? (bool) $body['isInStock'] : null,
             isset($body['manageStock']) ? (bool) $body['manageStock'] : null,
         );
@@ -59,7 +59,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 
         return $this->doSingleUpdate(
             $args['sku'] ?? '',
-            (float) ($args['qty'] ?? 0),
+            isset($args['qty']) ? (float) $args['qty'] : null,
             isset($args['isInStock']) ? (bool) $args['isInStock'] : null,
             isset($args['manageStock']) ? (bool) $args['manageStock'] : null,
         );
@@ -71,13 +71,22 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         return $this->doBulkUpdate($args['items'] ?? []);
     }
 
-    private function doSingleUpdate(string $sku, float $qty, ?bool $isInStock, ?bool $manageStock): StockUpdate
+    private function doSingleUpdate(string $sku, ?float $qty, ?bool $isInStock, ?bool $manageStock): StockUpdate
     {
         if (empty($sku)) {
             throw new BadRequestHttpException('SKU is required');
         }
 
-        $this->validateStockQty($qty);
+        // A missing qty must leave the stored quantity untouched (partial update
+        // of availability/manage flags). Coercing it to 0 would silently wipe a
+        // product's stock when the caller only flips isInStock/manageStock.
+        if ($qty === null && $isInStock === null && $manageStock === null) {
+            throw new BadRequestHttpException('At least one of qty, isInStock or manageStock must be provided');
+        }
+
+        if ($qty !== null) {
+            $this->validateStockQty($qty);
+        }
 
         /** @var \Mage_Catalog_Model_Resource_Product $productResource */
         $productResource = \Mage::getResourceSingleton('catalog/product');
@@ -100,13 +109,36 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 
         $dto = new StockUpdate();
         $dto->sku = $sku;
-        $dto->qty = $qty;
-        $dto->isInStock = (bool) $stockData['is_in_stock'];
+        // Report the persisted qty: the new value when set, otherwise the value
+        // that was already stored (an untouched partial update).
+        $dto->qty = $qty ?? $upsert['previousQty'];
+        $dto->isInStock = $this->resolveIsInStock($stockData, (int) $productId);
         $dto->manageStock = (bool) $upsert['manageStock'];
         $dto->previousQty = $upsert['previousQty'];
         $dto->success = true;
 
         return $dto;
+    }
+
+    /**
+     * Availability to report back: the value this write set, or the row's
+     * current value when neither qty nor isInStock was provided (a manage_stock-
+     * only update leaves is_in_stock out of the column map).
+     *
+     * @param array<string, mixed> $stockData
+     */
+    private function resolveIsInStock(array $stockData, int $productId): bool
+    {
+        if (array_key_exists('is_in_stock', $stockData)) {
+            return (bool) $stockData['is_in_stock'];
+        }
+
+        $resource = \Mage::getSingleton('core/resource');
+        $table = $resource->getTableName('cataloginventory/stock_item');
+        return (bool) $resource->getConnection('core_read')->fetchOne(
+            "SELECT is_in_stock FROM {$table} WHERE product_id = ? AND stock_id = 1",
+            [$productId],
+        );
     }
 
     private function doBulkUpdate(array $items): StockUpdate
@@ -129,8 +161,9 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             if (empty($sku)) {
                 throw new BadRequestHttpException("Item at index {$index}: SKU is required");
             }
-            $qty = (float) ($item['qty'] ?? 0);
-            $this->validateStockQty($qty);
+            if (isset($item['qty'])) {
+                $this->validateStockQty((float) $item['qty']);
+            }
 
             $productId = $productResource->getIdBySku($sku);
             if (!$productId) {
@@ -148,7 +181,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         try {
             foreach ($items as $item) {
                 $sku = $item['sku'];
-                $qty = (float) $item['qty'];
+                $qty = isset($item['qty']) ? (float) $item['qty'] : null;
                 $isInStock = isset($item['isInStock']) ? (bool) $item['isInStock'] : null;
                 $manageStock = isset($item['manageStock']) ? (bool) $item['manageStock'] : null;
                 $productId = $skuToProductId[$sku];
@@ -160,8 +193,8 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 
                 $result = new StockUpdate();
                 $result->sku = $sku;
-                $result->qty = $qty;
-                $result->isInStock = (bool) $stockData['is_in_stock'];
+                $result->qty = $qty ?? $upsert['previousQty'];
+                $result->isInStock = $this->resolveIsInStock($stockData, (int) $productId);
                 $result->manageStock = (bool) $upsert['manageStock'];
                 $result->previousQty = $upsert['previousQty'];
                 $result->success = true;

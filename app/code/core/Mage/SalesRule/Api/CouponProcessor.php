@@ -35,10 +35,10 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $operationName = $operation->getName();
 
         return match (true) {
-            $operationName === 'createCoupon' => $this->createFromGraphQl($context),
-            $operationName === 'updateCoupon' => $this->updateFromGraphQl($context),
-            $operationName === 'deleteCoupon' => $this->deleteFromGraphQl($context),
-            $operationName === 'validateCoupon' => $this->validateFromGraphQl($context),
+            $operationName === 'create' => $this->createFromGraphQl($context),
+            $operationName === 'update' => $this->updateFromGraphQl($context),
+            $operationName === 'delete' => $this->deleteFromGraphQl($context),
+            $operationName === 'validate' => $this->validateFromGraphQl($context),
             $operation instanceof Delete => $this->doDelete((int) ($uriVariables['id'] ?? 0)),
             str_contains($operationName, 'validate') => $this->doValidateFromRest($context),
             isset($uriVariables['id']) => $this->doUpdate((int) $uriVariables['id'], $context['request']?->toArray() ?? []),

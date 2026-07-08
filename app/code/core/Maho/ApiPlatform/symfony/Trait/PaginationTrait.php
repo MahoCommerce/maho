@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Trait;
 
+use ApiPlatform\State\Pagination\TraversablePaginator;
+
 /**
  * Extracts pagination parameters (page, pageSize) from API Platform context.
  *
@@ -33,5 +35,18 @@ trait PaginationTrait
         ));
 
         return ['page' => $page, 'pageSize' => $pageSize];
+    }
+
+    /**
+     * Wrap a single (or absent) item as a 0-or-1 element paginator.
+     *
+     * @template T of object
+     * @param  T|null $item
+     * @return TraversablePaginator<T>
+     */
+    protected function singleItemPaginator(?object $item): TraversablePaginator
+    {
+        $items = $item ? [$item] : [];
+        return new TraversablePaginator(new \ArrayIterator($items), 1, 1, count($items));
     }
 }

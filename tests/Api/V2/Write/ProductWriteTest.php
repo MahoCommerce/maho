@@ -304,15 +304,17 @@ describe('Product Type Fields - Read Verification', function (): void {
         $sku = fixtures('product_sku');
         $query = <<<GRAPHQL
         {
-            productBySkuProduct(sku: "{$sku}") {
-                _id
-                sku
-                name
-                price
-                type
-                stockStatus
-                customOptions
-                mediaGallery
+            products(sku: "{$sku}") {
+                edges { node {
+                    _id
+                    sku
+                    name
+                    price
+                    type
+                    stockStatus
+                    customOptions
+                    mediaGallery
+                } }
             }
         }
         GRAPHQL;
@@ -320,11 +322,11 @@ describe('Product Type Fields - Read Verification', function (): void {
         $response = gqlQuery($query);
         expect($response['status'])->toBe(200);
 
-        $data = $response['json']['data']['productBySkuProduct'] ?? null;
+        $data = $response['json']['data']['products']['edges'][0]['node'] ?? null;
         if ($data === null) {
             // May need auth for this query
             $response = gqlQuery($query, [], customerToken());
-            $data = $response['json']['data']['productBySkuProduct'] ?? null;
+            $data = $response['json']['data']['products']['edges'][0]['node'] ?? null;
         }
 
         if ($data !== null) {

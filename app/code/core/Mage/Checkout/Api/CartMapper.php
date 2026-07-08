@@ -164,7 +164,10 @@ class CartMapper
         $dto->productId = $item->getProductId() ? (int) $item->getProductId() : null;
         $dto->productType = $item->getProductType();
         $dto->thumbnailUrl = $preloadedThumbnailUrl;
-        $dto->stockStatus = $preloadedStockStatus;
+        // Products with no stock row (e.g. unmanaged items) aren't in the
+        // batch-loaded map; fall back to the DTO's non-nullable default rather
+        // than assigning null to the typed string property (TypeError).
+        $dto->stockStatus = $preloadedStockStatus ?? 'in_stock';
 
         // Get configured product options for display
         $dto->options = $this->getItemConfigurationOptions($item);
@@ -319,7 +322,7 @@ class CartMapper
     /**
      * Get available shipping methods for address
      *
-     * @return array<array{carrierCode: string, methodCode: string, carrierTitle: string, methodTitle: string, price: float}>
+     * @return array<array{code: string, title: string, carrierCode: string, methodCode: string, carrierTitle: string, methodTitle: string, price: float}>
      */
     public function getAvailableShippingMethods(\Mage_Sales_Model_Quote_Address $address): array
     {
@@ -329,11 +332,20 @@ class CartMapper
             $address->collectShippingRates();
 
             foreach ($address->getAllShippingRates() as $rate) {
+                $carrierCode = (string) $rate->getCarrier();
+                $methodCode = (string) $rate->getMethod();
+                $carrierTitle = (string) $rate->getCarrierTitle();
+                $methodTitle = (string) $rate->getMethodTitle();
                 $methods[] = [
-                    'carrierCode' => $rate->getCarrier(),
-                    'methodCode' => $rate->getMethod(),
-                    'carrierTitle' => $rate->getCarrierTitle(),
-                    'methodTitle' => $rate->getMethodTitle(),
+                    // `code`/`title` are the flat, client-facing pair (carrier_method
+                    // and a human label); carrier/method parts are kept for callers
+                    // that need them separately (e.g. setShippingMethodOnCart).
+                    'code' => $carrierCode . '_' . $methodCode,
+                    'title' => trim($carrierTitle . ' - ' . $methodTitle, ' -'),
+                    'carrierCode' => $carrierCode,
+                    'methodCode' => $methodCode,
+                    'carrierTitle' => $carrierTitle,
+                    'methodTitle' => $methodTitle,
                     'price' => (float) $rate->getPrice(),
                 ];
             }
@@ -373,7 +385,7 @@ class CartMapper
     /**
      * Get available payment methods for quote
      *
-     * @return array<array{code: string, title: string}>
+     * @return array<array{code: string, title: string, sortOrder: int, isOffline: bool}>
      */
     public function getAvailablePaymentMethods(\Mage_Sales_Model_Quote $quote): array
     {
@@ -388,9 +400,15 @@ class CartMapper
                     $methods[] = [
                         'code' => $method->getCode(),
                         'title' => $method->getTitle(),
+                        'sortOrder' => (int) $method->getConfigData('sort_order'),
+                        // Offline methods declare <group>offline</group> in config
+                        // (checkmo, banktransfer, cashondelivery, purchaseorder, free).
+                        'isOffline' => $method->getConfigData('group') === 'offline',
                     ];
                 }
             }
+
+            usort($methods, fn(array $a, array $b): int => $a['sortOrder'] <=> $b['sortOrder']);
         } catch (\Exception $e) {
             \Mage::log('Error getting payment methods: ' . $e->getMessage(), \Mage::LOG_ERROR);
         }

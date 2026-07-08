@@ -10,14 +10,15 @@ declare(strict_types=1);
 
 namespace Mage\Cms\Api;
 
+use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\CrudProvider;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
- * CMS Block Provider, extends CrudProvider with block-specific filters and named queries.
+ * CMS Block Provider, extends CrudProvider with block-specific filters.
  *
  * All field mapping and DTO construction is handled by CrudResource/CrudProvider.
- * This class only adds collection filters and the cmsBlockByIdentifier query.
+ * This class only adds collection filters and the exact-identifier lookup.
  */
 final class CmsBlockProvider extends CrudProvider
 {
@@ -48,26 +49,36 @@ final class CmsBlockProvider extends CrudProvider
         return $this->toDto($block);
     }
 
+    /**
+     * cmsBlocks(identifier:) is an exact-match lookup returning 0 or 1 block.
+     *
+     * @return TraversablePaginator<CmsBlock>
+     */
     #[\Override]
-    protected function handleOperation(string $name, array $context, array $uriVariables): mixed
+    protected function provideCollection(array $context): TraversablePaginator
     {
-        if ($name === 'cmsBlockByIdentifier') {
-            $identifier = $context['args']['identifier'] ?? null;
-            if (!$identifier) {
-                return null;
-            }
-
-            $collection = \Mage::getModel('cms/block')->getCollection();
-            $collection->addStoreFilter(StoreContext::getStoreId());
-            $collection->addFieldToFilter('identifier', $identifier);
-            $collection->addFieldToFilter('is_active', 1);
-            $collection->setPageSize(1);
-
-            $block = $collection->getFirstItem();
-
-            return $block->getId() ? $this->toDto($block) : null;
+        $identifier = $context['args']['identifier'] ?? null;
+        if ($identifier) {
+            return $this->singleItemPaginator($this->getByIdentifier((string) $identifier));
         }
-        return null;
+
+        /** @var TraversablePaginator<CmsBlock> $paginator */
+        $paginator = parent::provideCollection($context);
+        return $paginator;
+    }
+
+    private function getByIdentifier(string $identifier): ?CmsBlock
+    {
+        $collection = \Mage::getModel('cms/block')->getCollection();
+        $collection->addStoreFilter(StoreContext::getStoreId());
+        $collection->addFieldToFilter('identifier', $identifier);
+        $collection->addFieldToFilter('is_active', 1);
+        $collection->setPageSize(1);
+
+        $block = $collection->getFirstItem();
+
+        /** @var CmsBlock|null */
+        return $block->getId() ? $this->toDto($block) : null;
     }
 
     #[\Override]

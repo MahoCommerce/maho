@@ -20,7 +20,6 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\CrudResource;
-use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ApiResource(
@@ -84,18 +83,8 @@ use Symfony\Component\Serializer\Attribute\Groups;
         ),
         new QueryCollection(
             name: 'collection_query',
-            description: 'Get product collection (canonical)',
+            description: 'Get products with filtering and sorting',
             security: 'true',
-        ),
-        new Query(
-            security: 'true',
-            name: 'product',
-            description: 'Get a product by ID',
-            normalizationContext: ['groups' => ['product:read', 'product:detail']],
-        ),
-        new QueryCollection(
-            security: 'true',
-            name: 'products',
             args: [
                 'search' => ['type' => 'String', 'description' => 'Search query'],
                 'categoryId' => ['type' => 'Int', 'description' => 'Filter by category ID'],
@@ -106,28 +95,14 @@ use Symfony\Component\Serializer\Attribute\Groups;
                 'pageSize' => ['type' => 'Int', 'description' => 'Items per page (max 100)'],
                 'page' => ['type' => 'Int', 'description' => 'Page number'],
                 'attributeFilters' => ['type' => 'String', 'description' => 'JSON-encoded attribute filters: {"brand_id":"10","series":"1877"}'],
+                'sku' => ['type' => 'String', 'description' => 'Exact SKU lookup (returns 0 or 1 product)'],
+                'barcode' => ['type' => 'String', 'description' => 'Exact barcode lookup (returns 0 or 1 product)'],
             ],
-            description: 'Get products with filtering and sorting',
         ),
-        new Query(
-            security: 'true',
-            name: 'productBySku',
-            args: ['sku' => ['type' => 'String!']],
-            description: 'Get a product by SKU',
-            resolver: CustomQueryResolver::class,
-            normalizationContext: ['groups' => ['product:read', 'product:detail']],
-        ),
-        new Query(
-            security: 'true',
-            name: 'productByBarcode',
-            args: ['barcode' => ['type' => 'String!']],
-            description: 'Get a product by barcode',
-            resolver: CustomQueryResolver::class,
-            normalizationContext: ['groups' => ['product:read', 'product:detail']],
-        ),
+        // Named 'category' → field `categoryProducts` (not `categoryProductsProducts`).
         new QueryCollection(
             security: 'true',
-            name: 'categoryProducts',
+            name: 'category',
             args: [
                 'categoryId' => ['type' => 'Int!', 'description' => 'Category ID'],
                 'sortBy' => ['type' => 'String', 'description' => 'Sort field (name, price, position, created_at)'],

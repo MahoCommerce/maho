@@ -30,7 +30,7 @@ describe('GraphQL Wishlist - My Wishlist Query', function (): void {
     it('returns wishlist collection for authenticated customer', function (): void {
         $query = <<<'GRAPHQL'
         {
-            myWishlistWishlistItems {
+            myWishlistItems {
                 edges {
                     node {
                         id
@@ -50,13 +50,13 @@ describe('GraphQL Wishlist - My Wishlist Query', function (): void {
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
         expect($response['json'])->not->toHaveKey('errors');
-        expect($response['json']['data'])->toHaveKey('myWishlistWishlistItems');
+        expect($response['json']['data'])->toHaveKey('myWishlistItems');
     });
 
     it('rejects query without authentication', function (): void {
         $query = <<<'GRAPHQL'
         {
-            myWishlistWishlistItems {
+            myWishlistItems {
                 edges { node { id } }
             }
         }
@@ -80,7 +80,7 @@ describe('GraphQL Wishlist - Add To Wishlist Mutation', function (): void {
 
         $query = <<<GRAPHQL
         mutation {
-            addToWishlistWishlistItem(input: {productId: {$productId}, qty: 1}) {
+            addToWishlistItem(input: {productId: {$productId}, qty: 1}) {
                 wishlistItem {
                     id
                     _id
@@ -100,9 +100,9 @@ describe('GraphQL Wishlist - Add To Wishlist Mutation', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->not->toHaveKey('errors');
-        expect($response['json']['data']['addToWishlistWishlistItem'])->not->toBeNull();
+        expect($response['json']['data']['addToWishlistItem'])->not->toBeNull();
 
-        $item = $response['json']['data']['addToWishlistWishlistItem']['wishlistItem'];
+        $item = $response['json']['data']['addToWishlistItem']['wishlistItem'];
         expect($item['productId'])->toBe($productId);
         expect($item['productName'])->toBeString()->not->toBeEmpty();
         expect($item['productSku'])->toBeString()->not->toBeEmpty();
@@ -133,7 +133,7 @@ describe('GraphQL Wishlist - Add Then Query Round-Trip (Regression)', function (
         // Add via mutation
         $addQuery = <<<GRAPHQL
         mutation {
-            addToWishlistWishlistItem(input: {productId: {$productId}, qty: 1}) {
+            addToWishlistItem(input: {productId: {$productId}, qty: 1}) {
                 wishlistItem {
                     _id
                     productId
@@ -146,13 +146,13 @@ describe('GraphQL Wishlist - Add Then Query Round-Trip (Regression)', function (
         expect($addResponse['status'])->toBe(200);
         expect($addResponse['json'])->not->toHaveKey('errors');
 
-        $addedId = $addResponse['json']['data']['addToWishlistWishlistItem']['wishlistItem']['_id'];
+        $addedId = $addResponse['json']['data']['addToWishlistItem']['wishlistItem']['_id'];
         trackCreated('wishlist_item', (int) $addedId);
 
         // Query listing
         $listQuery = <<<'GRAPHQL'
         {
-            myWishlistWishlistItems {
+            myWishlistItems {
                 edges {
                     node {
                         _id
@@ -168,7 +168,7 @@ describe('GraphQL Wishlist - Add Then Query Round-Trip (Regression)', function (
         expect($listResponse['status'])->toBe(200);
         expect($listResponse['json'])->not->toHaveKey('errors');
 
-        $edges = $listResponse['json']['data']['myWishlistWishlistItems']['edges'] ?? [];
+        $edges = $listResponse['json']['data']['myWishlistItems']['edges'] ?? [];
         expect($edges)->not->toBeEmpty();
 
         // Verify the added item is present
@@ -187,7 +187,7 @@ describe('GraphQL Wishlist - Remove From Wishlist Mutation', function (): void {
         // Add first
         $addQuery = <<<GRAPHQL
         mutation {
-            addToWishlistWishlistItem(input: {productId: {$productId}, qty: 1}) {
+            addToWishlistItem(input: {productId: {$productId}, qty: 1}) {
                 wishlistItem { _id }
             }
         }
@@ -197,12 +197,12 @@ describe('GraphQL Wishlist - Remove From Wishlist Mutation', function (): void {
         expect($addResponse['status'])->toBe(200);
         expect($addResponse['json'])->not->toHaveKey('errors');
 
-        $itemId = $addResponse['json']['data']['addToWishlistWishlistItem']['wishlistItem']['_id'];
+        $itemId = $addResponse['json']['data']['addToWishlistItem']['wishlistItem']['_id'];
 
         // Remove
         $removeQuery = <<<GRAPHQL
         mutation {
-            removeFromWishlistWishlistItem(input: {itemId: {$itemId}}) {
+            removeFromWishlistItem(input: {itemId: {$itemId}}) {
                 wishlistItem { _id }
             }
         }
@@ -221,7 +221,7 @@ describe('GraphQL Wishlist - Remove From Wishlist Mutation', function (): void {
         // Add
         $addQuery = <<<GRAPHQL
         mutation {
-            addToWishlistWishlistItem(input: {productId: {$productId}, qty: 1}) {
+            addToWishlistItem(input: {productId: {$productId}, qty: 1}) {
                 wishlistItem { _id }
             }
         }
@@ -229,12 +229,12 @@ describe('GraphQL Wishlist - Remove From Wishlist Mutation', function (): void {
 
         $addResponse = gqlQuery($addQuery, [], $token);
         expect($addResponse['status'])->toBe(200);
-        $itemId = $addResponse['json']['data']['addToWishlistWishlistItem']['wishlistItem']['_id'];
+        $itemId = $addResponse['json']['data']['addToWishlistItem']['wishlistItem']['_id'];
 
         // Remove
         $removeQuery = <<<GRAPHQL
         mutation {
-            removeFromWishlistWishlistItem(input: {itemId: {$itemId}}) {
+            removeFromWishlistItem(input: {itemId: {$itemId}}) {
                 wishlistItem { _id }
             }
         }
@@ -244,7 +244,7 @@ describe('GraphQL Wishlist - Remove From Wishlist Mutation', function (): void {
         // Verify gone
         $listQuery = <<<'GRAPHQL'
         {
-            myWishlistWishlistItems {
+            myWishlistItems {
                 edges { node { _id } }
             }
         }
@@ -255,7 +255,7 @@ describe('GraphQL Wishlist - Remove From Wishlist Mutation', function (): void {
 
         $foundIds = array_map(
             fn($edge) => $edge['node']['_id'],
-            $listResponse['json']['data']['myWishlistWishlistItems']['edges'] ?? [],
+            $listResponse['json']['data']['myWishlistItems']['edges'] ?? [],
         );
         expect($foundIds)->not->toContain((int) $itemId);
     });
@@ -271,7 +271,7 @@ describe('GraphQL Wishlist - Sync Wishlist Mutation', function (): void {
     it('does not crash on empty product list (regression: null getItemCollection)', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
-            syncWishlistWishlistItem(input: {productIds: []}) {
+            syncWishlistItem(input: {productIds: []}) {
                 wishlistItem { _id }
             }
         }
@@ -288,7 +288,7 @@ describe('GraphQL Wishlist - Sync Wishlist Mutation', function (): void {
 
         $query = <<<GRAPHQL
         mutation {
-            syncWishlistWishlistItem(input: {productIds: [{$productId}]}) {
+            syncWishlistItem(input: {productIds: [{$productId}]}) {
                 wishlistItem {
                     _id
                     productId

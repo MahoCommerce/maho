@@ -112,20 +112,18 @@ use Maho\ApiPlatform\CrudResource;
     graphQlOperations: [
         new Query(name: 'item_query', description: 'Get an address by ID', security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('addresses/read')"),
         new QueryCollection(name: 'collection_query', description: 'Get addresses', security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('addresses/read')"),
+        // Named 'my' → field `myAddresses` (not `myAddressesAddresses`).
         new QueryCollection(
-            name: 'myAddresses',
+            name: 'my',
             args: [],
             description: 'Get all addresses for the authenticated customer',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('addresses/read')",
         ),
-        new Query(
-            name: 'address',
-            args: ['id' => ['type' => 'ID!']],
-            description: 'Get a single address by ID',
-            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('addresses/read')",
-        ),
+        // Names omit the "Address" noun (shortName appends it): create/update/delete
+        // → createAddress / updateAddress / deleteAddress. A by-id lookup is served
+        // by the built-in `address` item query (item_query), so no custom op here.
         new Mutation(
-            name: 'createAddress',
+            name: 'create',
             args: [
                 'firstName' => ['type' => 'String!'],
                 'lastName' => ['type' => 'String!'],
@@ -144,7 +142,7 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_CUSTOMER') or is_granted('addresses/write')",
         ),
         new Mutation(
-            name: 'updateAddress',
+            name: 'update',
             args: [
                 'id' => ['type' => 'ID!'],
                 'firstName' => ['type' => 'String'],
@@ -164,7 +162,7 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_CUSTOMER') or is_granted('addresses/write')",
         ),
         new DeleteMutation(
-            name: 'deleteAddress',
+            name: 'delete',
             args: ['id' => ['type' => 'ID!']],
             description: 'Delete an address',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('addresses/write')",

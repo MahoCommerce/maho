@@ -623,6 +623,16 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $data->taxClassId = $product->getTaxClassId() !== null ? (int) $product->getTaxClassId() : null;
         $data->createdAt = $product->getCreatedAt();
         $data->updatedAt = $product->getUpdatedAt();
+        // Reflect the persisted detail fields back from the model, not the
+        // request DTO: a value can arrive through the generic customAttributesWrite
+        // bag (e.g. meta_title) rather than its dedicated field, so echoing the
+        // input alone would drop it from the response.
+        $data->metaTitle = $product->getMetaTitle();
+        $data->metaDescription = $product->getMetaDescription();
+        $data->metaKeywords = $product->getData('meta_keyword');
+        $data->description = $product->getDescription();
+        $data->shortDescription = $product->getShortDescription();
+        $data->urlKey = $product->getData('url_key');
         return $data;
     }
 

@@ -79,8 +79,8 @@ describe('Bundle Options, CRUD Lifecycle', function (): void {
         expect($option['type'])->toBe('radio');
         expect(count($option['selections']))->toBe(2);
 
-        // Delete the option
-        $delete = apiDelete("/api/rest/v2/products/{$bundleId}/bundle-options?optionId={$optionId}", $token);
+        // Delete the option (RESTful path-param id, matching the PUT route)
+        $delete = apiDelete("/api/rest/v2/products/{$bundleId}/bundle-options/{$optionId}", $token);
         expect($delete['status'])->toBeIn([200, 204]);
 
         // Verify empty

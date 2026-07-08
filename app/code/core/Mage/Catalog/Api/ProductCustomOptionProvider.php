@@ -65,7 +65,12 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
 
         $value = Mage::helper('core/unserializeArray')->unserialize($option->getValue());
         if (!isset($value['secret_key']) || !hash_equals($value['secret_key'], $key)) {
-            throw new HttpException(403, 'Invalid key');
+            // Deliberate 403: this public endpoint authenticates via the URL
+            // secret key, not a Bearer token, so a wrong key is "forbidden", not
+            // "authenticate". The X-Api-Error-Code marker tells ApiExceptionListener
+            // to keep the 403 rather than downgrading it to 401 (its usual
+            // no-Bearer heuristic).
+            throw new HttpException(403, 'Invalid key', null, ['X-Api-Error-Code' => 'forbidden']);
         }
 
         $filePath = null;

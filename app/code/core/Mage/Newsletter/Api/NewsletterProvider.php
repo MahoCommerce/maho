@@ -15,14 +15,14 @@ use Maho\ApiPlatform\CrudProvider;
 /**
  * Newsletter Provider, extends CrudProvider with subscription status lookup.
  *
- * Handles the newsletterStatus and status named operations.
+ * Handles the `status` (GraphQL) and `status_rest` (REST) named operations.
  */
 final class NewsletterProvider extends CrudProvider
 {
     #[\Override]
     protected function handleOperation(string $name, array $context, array $uriVariables): mixed
     {
-        if ($name === 'newsletterStatus' || $name === 'status') {
+        if ($name === 'status' || $name === 'status_rest') {
             return $this->getSubscriptionStatus();
         }
 

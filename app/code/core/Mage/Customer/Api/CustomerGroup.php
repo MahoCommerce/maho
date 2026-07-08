@@ -66,15 +66,10 @@ use Maho\ApiPlatform\CrudResource;
         new QueryCollection(
             name: 'collection_query',
             description: 'Get customer groups',
+            // Customer groups are a small, fixed enumerable set — expose them as
+            // a plain GraphQL list rather than a paginated cursor connection.
+            paginationEnabled: false,
             security: "is_granted('ROLE_ADMIN') or is_granted('customer-groups/read')",
-        ),
-        new Query(
-            security: "is_granted('ROLE_ADMIN') or is_granted('customer-groups/read')",
-            name: 'customerGroup',
-        ),
-        new QueryCollection(
-            security: "is_granted('ROLE_ADMIN') or is_granted('customer-groups/read')",
-            name: 'customerGroups',
         ),
     ],
 )]

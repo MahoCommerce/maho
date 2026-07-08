@@ -48,7 +48,7 @@ final class ReviewProvider extends CrudProvider
 
         $operationName = $operation->getName();
 
-        if ($operationName === 'productReviews') {
+        if ($operationName === 'product') {
             ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 10, 100);
             return $this->getProductReviews(
                 (int) ($context['args']['productId'] ?? 0),
@@ -57,7 +57,7 @@ final class ReviewProvider extends CrudProvider
             );
         }
 
-        if ($operationName === 'myReviews' || $operationName === 'my_reviews') {
+        if ($operationName === 'my' || $operationName === 'my_reviews') {
             return $this->getCustomerReviews();
         }
 

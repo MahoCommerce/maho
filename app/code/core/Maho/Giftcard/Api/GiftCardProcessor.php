@@ -13,16 +13,19 @@ namespace Maho\Giftcard\Api;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\CrudResource;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
 {
+    private const MAX_BALANCE = 10000;
+
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
     {
         return match ($operation->getName()) {
-            'createGiftcard' => $this->createGiftcardFromGraphQl($context),
-            'adjustGiftcardBalance' => $this->adjustBalance($context),
+            'create' => $this->createGiftcardFromGraphQl($context),
+            'adjustBalance' => $this->adjustBalance($context),
             default => parent::process($data, $operation, $uriVariables, $context),
         };
     }
@@ -33,11 +36,54 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
         $this->sendEmailToRecipient($model);
     }
 
+    /** Balance bounds and duplicate-code check for the REST CRUD create/update path. */
+    #[\Override]
+    protected function validate(CrudResource $data, object $model, bool $isNew): void
+    {
+        // validate() runs BEFORE the DTO is applied to the model, so read the
+        // incoming values from the DTO. The create field is initialBalance.
+        if (!$data instanceof GiftCard) {
+            return;
+        }
+        $balance = $data->initialBalance ?: $data->balance;
+        $this->assertValidGiftcard(
+            $balance,
+            ($data->code !== null && $data->code !== '') ? $data->code : null,
+            $model->getId() ? (int) $model->getId() : null,
+        );
+    }
+
+    /**
+     * Reject a non-positive or over-limit balance, and a custom code that
+     * collides with an existing card. Shared by the REST and GraphQL paths.
+     */
+    private function assertValidGiftcard(float $balance, ?string $code, ?int $excludeId): void
+    {
+        if ($balance <= 0) {
+            throw new BadRequestHttpException('Gift card balance must be greater than zero');
+        }
+        if ($balance > self::MAX_BALANCE) {
+            throw new BadRequestHttpException('Gift card balance cannot exceed ' . self::MAX_BALANCE);
+        }
+        if ($code !== null && $code !== '') {
+            $existing = \Mage::getModel('giftcard/giftcard')->loadByCode($code);
+            if ($existing->getId() && (int) $existing->getId() !== $excludeId) {
+                throw new ConflictHttpException("Gift card code '{$code}' already exists");
+            }
+        }
+    }
+
     private function createGiftcardFromGraphQl(array $context): GiftCard
     {
         $this->requireAdminOrApiUser('Gift card management requires admin or API access');
         $this->requireApiPermission('giftcards/create');
         $args = $context['args']['input'] ?? [];
+
+        $this->assertValidGiftcard(
+            (float) ($args['initialBalance'] ?? 0),
+            $args['code'] ?? null,
+            null,
+        );
 
         $giftcard = \Mage::getModel('giftcard/giftcard');
         $giftcard->setData([

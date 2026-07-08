@@ -46,9 +46,18 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);
 
+        // The PUT/DELETE routes carry the option id in {id}, but the operation's
+        // uriVariables only declare the productId Link, so API Platform doesn't
+        // reliably surface {id}. Recover it from the request path as a fallback.
+        $pathOptionId = 0;
+        if ($request instanceof \Symfony\Component\HttpFoundation\Request
+            && preg_match('#/bundle-options/(\d+)#', $request->getPathInfo(), $m)) {
+            $pathOptionId = (int) $m[1];
+        }
+
         if ($operation instanceof DeleteOperationInterface) {
             $this->requirePermission($user, 'products/delete');
-            $optionId = (int) ($uriVariables['id'] ?? $body['optionId'] ?? $body['option_id'] ?? 0);
+            $optionId = (int) ($uriVariables['id'] ?? $body['optionId'] ?? $body['option_id'] ?? 0) ?: $pathOptionId;
             return $this->handleDelete($productId, $optionId);
         }
 
@@ -58,7 +67,7 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
             return $this->handleCreate($productId, $body);
         }
 
-        return $this->handleUpdate($productId, $body);
+        return $this->handleUpdate($productId, $body, $pathOptionId);
     }
 
     private function handleCreate(int $productId, array $body): BundleOption
@@ -153,11 +162,11 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
         return $dto;
     }
 
-    private function handleUpdate(int $productId, array $body): array
+    private function handleUpdate(int $productId, array $body, int $pathOptionId = 0): array
     {
         $this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_BUNDLE);
 
-        $optionId = (int) ($body['optionId'] ?? $body['option_id'] ?? $body['id'] ?? 0);
+        $optionId = (int) ($body['optionId'] ?? $body['option_id'] ?? $body['id'] ?? 0) ?: $pathOptionId;
         if ($optionId <= 0) {
             throw new BadRequestHttpException('optionId is required');
         }

@@ -73,12 +73,15 @@ use Maho\Config\ApiResource;
             security: "is_granted('ROLE_ADMIN') or is_granted('revocation-requests/read')",
         ),
         new QueryCollection(
-            name: 'myRevocationRequests',
+            // Named 'my' (not 'myRevocationRequests') so ApiPlatform's appended
+            // resource shortName yields the field `myRevocationRequests` rather
+            // than a stuttering `myRevocationRequestsRevocationRequests`.
+            name: 'my',
             description: 'List the current customer revocation declarations',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('revocation-requests/read')",
         ),
         new Mutation(
-            name: 'submitRevocation',
+            name: 'submit',
             args: [
                 'orderId' => ['type' => 'Int', 'description' => 'Entity ID of one of your own orders'],
                 'orderReference' => ['type' => 'String', 'description' => 'Order increment ID (alternative to orderId)'],

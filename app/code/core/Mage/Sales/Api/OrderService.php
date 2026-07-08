@@ -104,6 +104,17 @@ class OrderService
             (new CartService())->revalidateGiftcards($quote);
             $quote->collectTotals();
 
+            // Validate cash tendered covers the total BEFORE creating the order.
+            // Checking after submitAll() would place the order and decrement
+            // inventory, then throw, leaving an orphaned order that a retry can't
+            // recover (the quote is already inactive).
+            if ($cashTendered !== null
+                && $payment->getMethod() === 'cashondelivery'
+                && $cashTendered < (float) $quote->getGrandTotal()
+            ) {
+                throw new \RuntimeException('Insufficient cash tendered');
+            }
+
             // Convert quote to order
             $service = \Mage::getModel('sales/service_quote', $quote);
             $service->submitAll();
@@ -129,18 +140,17 @@ class OrderService
                     ->save();
             }
 
-            // Calculate change for cash payments
+            // Calculate change and persist cash details on the ORDER payment.
+            // $payment above is the quote's payment, which is discarded once the
+            // quote is deactivated; receipts read $order->getPayment(). Sufficiency
+            // was already validated before submitAll(), so change is never negative.
             $changeAmount = null;
             if ($cashTendered !== null && $payment->getMethod() === 'cashondelivery') {
-                $changeAmount = $cashTendered - $order->getGrandTotal();
-                if ($changeAmount < 0) {
-                    throw new \RuntimeException('Insufficient cash tendered');
-                }
-
-                // Store cash tendered amount
-                $payment->setAdditionalInformation('cash_tendered', $cashTendered);
-                $payment->setAdditionalInformation('change_amount', $changeAmount);
-                $payment->save();
+                $changeAmount = $cashTendered - (float) $order->getGrandTotal();
+                $orderPayment = $order->getPayment();
+                $orderPayment->setAdditionalInformation('cash_tendered', $cashTendered);
+                $orderPayment->setAdditionalInformation('change_amount', $changeAmount);
+                $orderPayment->save();
             }
 
             // Deactivate quote

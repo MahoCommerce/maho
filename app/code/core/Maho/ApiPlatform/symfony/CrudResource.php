@@ -37,6 +37,22 @@ use ApiPlatform\Metadata\ApiResource;
  * Constants:
  *   MODEL        = 'module/model'   (required) Mage model alias
  *   PRIMARY_KEY  = 'page_id'        (optional) model PK field, auto-detected by default
+ *
+ * Serialization & IRIs (read before adding action endpoints):
+ *   Whatever a provider/processor returns is serialized as *this resource*
+ *   (JSON-LD). The kernel sets `gen_id`/`force_iri_generation` to false so a DTO
+ *   whose identifier isn't populated won't 500 during IRI generation — but a
+ *   sub-resource endpoint that returns a *different* shape (a flat totals object,
+ *   a plain list of methods) must NOT be normalized as the resource. Return a
+ *   `Response` from the provider/processor for those — use
+ *   `RawResponseTrait::respondRaw()` (both base classes have it) — and widen the
+ *   method return type to `<Resource>|Response`.
+ *
+ *   Operation-name rules enforced by tests/Backend/.../OperationNamingTest:
+ *   a GraphQL op and a REST op on the same resource must not share a `name`
+ *   (collision breaks the whole GraphQL schema), and a custom GraphQL op name
+ *   must not contain the resource noun (the shortName is appended, so it would
+ *   stutter: `order` → `orderOrder`).
  */
 abstract class CrudResource extends Resource
 {

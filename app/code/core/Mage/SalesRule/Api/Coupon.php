@@ -73,7 +73,7 @@ use Maho\Config\ApiResource;
             security: "is_granted('ROLE_ADMIN') or is_granted('coupons/read')",
         ),
         new Mutation(
-            name: 'createCoupon',
+            name: 'create',
             description: 'Create a new coupon with price rule',
             args: [
                 'code' => ['type' => 'String!'],
@@ -90,7 +90,7 @@ use Maho\Config\ApiResource;
             security: "is_granted('coupons/create')",
         ),
         new Mutation(
-            name: 'updateCoupon',
+            name: 'update',
             description: 'Update a coupon and its price rule',
             args: [
                 'id' => ['type' => 'Int!'],
@@ -108,12 +108,12 @@ use Maho\Config\ApiResource;
             security: "is_granted('coupons/write')",
         ),
         new DeleteMutation(
-            name: 'deleteCoupon',
+            name: 'delete',
             description: 'Delete a coupon and its price rule',
             security: "is_granted('coupons/delete')",
         ),
         new Mutation(
-            name: 'validateCoupon',
+            name: 'validate',
             description: 'Validate a coupon code',
             args: [
                 'code' => ['type' => 'String!'],

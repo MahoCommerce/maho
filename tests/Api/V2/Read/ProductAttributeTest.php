@@ -78,13 +78,15 @@ describe('GraphQL product attribute metadata', function (): void {
 
     it('resolves an attribute by code', function (): void {
         // `name` is a core product attribute present in every install.
-        // ApiPlatform names a custom item-query field {name}{ShortName}.
+        // Alternate-key lookup folded into the collection: productAttributes(code:).
         $query = <<<'GRAPHQL'
         query GetAttr($code: String!) {
-            productAttributeProductAttribute(code: $code) {
-                attributeCode
-                frontendInput
-                backendType
+            productAttributes(code: $code) {
+                edges { node {
+                    attributeCode
+                    frontendInput
+                    backendType
+                } }
             }
         }
         GRAPHQL;
@@ -93,7 +95,7 @@ describe('GraphQL product attribute metadata', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->not->toHaveKey('errors');
-        expect($response['json']['data']['productAttributeProductAttribute']['attributeCode'])->toBe('name');
+        expect($response['json']['data']['productAttributes']['edges'][0]['node']['attributeCode'])->toBe('name');
     });
 
 });

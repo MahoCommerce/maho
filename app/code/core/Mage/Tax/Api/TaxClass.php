@@ -68,14 +68,6 @@ use Maho\ApiPlatform\CrudResource;
             description: 'Get tax classes',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-classes/read')",
         ),
-        new Query(
-            security: "is_granted('ROLE_ADMIN') or is_granted('tax-classes/read')",
-            name: 'taxClass',
-        ),
-        new QueryCollection(
-            security: "is_granted('ROLE_ADMIN') or is_granted('tax-classes/read')",
-            name: 'taxClasses',
-        ),
     ],
 )]
 class TaxClass extends CrudResource

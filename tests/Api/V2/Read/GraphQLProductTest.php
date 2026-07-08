@@ -23,7 +23,7 @@ describe('GraphQL Products Collection Query', function (): void {
     it('returns a list of products', function (): void {
         $query = <<<'GRAPHQL'
         {
-            productsProducts(pageSize: 5) {
+            products(pageSize: 5) {
                 edges {
                     node {
                         id
@@ -43,9 +43,9 @@ describe('GraphQL Products Collection Query', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('productsProducts');
+        expect($response['json']['data'])->toHaveKey('products');
 
-        $edges = $response['json']['data']['productsProducts']['edges'] ?? [];
+        $edges = $response['json']['data']['products']['edges'] ?? [];
         expect($edges)->not->toBeEmpty();
 
         $product = $edges[0]['node'];
@@ -59,7 +59,7 @@ describe('GraphQL Products Collection Query', function (): void {
     it('returns product IDs as IRI strings', function (): void {
         $query = <<<'GRAPHQL'
         {
-            productsProducts(pageSize: 1) {
+            products(pageSize: 1) {
                 edges {
                     node {
                         id
@@ -75,7 +75,7 @@ describe('GraphQL Products Collection Query', function (): void {
 
         expect($response['status'])->toBe(200);
 
-        $edges = $response['json']['data']['productsProducts']['edges'] ?? [];
+        $edges = $response['json']['data']['products']['edges'] ?? [];
         expect($edges)->not->toBeEmpty();
 
         $product = $edges[0]['node'];
@@ -88,7 +88,7 @@ describe('GraphQL Products Collection Query', function (): void {
     it('supports search filter', function (): void {
         $query = <<<'GRAPHQL'
         {
-            productsProducts(search: "dress", pageSize: 5) {
+            products(search: "dress", pageSize: 5) {
                 edges {
                     node {
                         sku
@@ -102,7 +102,7 @@ describe('GraphQL Products Collection Query', function (): void {
         $response = gqlQuery($query, [], customerToken());
 
         expect($response['status'])->toBe(200);
-        expect($response['json']['data'])->toHaveKey('productsProducts');
+        expect($response['json']['data'])->toHaveKey('products');
     });
 
     it('supports category filter', function (): void {
@@ -110,7 +110,7 @@ describe('GraphQL Products Collection Query', function (): void {
 
         $query = <<<GRAPHQL
         {
-            productsProducts(categoryId: {$categoryId}, pageSize: 5) {
+            products(categoryId: {$categoryId}, pageSize: 5) {
                 edges {
                     node {
                         sku
@@ -126,14 +126,14 @@ describe('GraphQL Products Collection Query', function (): void {
 
         expect($response['status'])->toBe(200);
 
-        $edges = $response['json']['data']['productsProducts']['edges'] ?? [];
+        $edges = $response['json']['data']['products']['edges'] ?? [];
         expect($edges)->not->toBeEmpty();
     });
 
     it('supports price range filter', function (): void {
         $query = <<<'GRAPHQL'
         {
-            productsProducts(priceMin: 50, priceMax: 200, pageSize: 5) {
+            products(priceMin: 50, priceMax: 200, pageSize: 5) {
                 edges {
                     node {
                         sku
@@ -149,7 +149,7 @@ describe('GraphQL Products Collection Query', function (): void {
 
         expect($response['status'])->toBe(200);
 
-        $edges = $response['json']['data']['productsProducts']['edges'] ?? [];
+        $edges = $response['json']['data']['products']['edges'] ?? [];
         foreach ($edges as $edge) {
             $price = (float) $edge['node']['price'];
             expect($price)->toBeGreaterThanOrEqual(50);
@@ -167,7 +167,7 @@ describe('GraphQL Single Product Query', function (): void {
 
         $query = <<<GRAPHQL
         {
-            productProduct(id: "{$iri}") {
+            product(id: "{$iri}") {
                 id
                 _id
                 sku
@@ -184,9 +184,9 @@ describe('GraphQL Single Product Query', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data']['productProduct'])->not->toBeNull();
+        expect($response['json']['data']['product'])->not->toBeNull();
 
-        $product = $response['json']['data']['productProduct'];
+        $product = $response['json']['data']['product'];
         expect($product['_id'])->toBe($productId);
         expect($product['sku'])->toBeString();
         expect($product['name'])->toBeString();
@@ -198,7 +198,7 @@ describe('GraphQL Single Product Query', function (): void {
 
         $query = <<<GRAPHQL
         {
-            productProduct(id: "{$iri}") {
+            product(id: "{$iri}") {
                 id
                 sku
                 name
@@ -209,7 +209,7 @@ describe('GraphQL Single Product Query', function (): void {
         $response = gqlQuery($query, [], customerToken());
 
         expect($response['status'])->toBe(200);
-        $data = $response['json']['data']['productProduct'] ?? null;
+        $data = $response['json']['data']['product'] ?? null;
         $errors = $response['json']['errors'] ?? [];
         expect($data === null || !empty($errors))->toBeTrue();
     });
@@ -223,12 +223,14 @@ describe('GraphQL Product By SKU Query', function (): void {
 
         $query = <<<GRAPHQL
         {
-            productBySkuProduct(sku: "{$sku}") {
-                id
-                _id
-                sku
-                name
-                price
+            products(sku: "{$sku}") {
+                edges { node {
+                    id
+                    _id
+                    sku
+                    name
+                    price
+                } }
             }
         }
         GRAPHQL;
@@ -238,10 +240,9 @@ describe('GraphQL Product By SKU Query', function (): void {
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
 
-        $product = $response['json']['data']['productBySkuProduct'];
+        $product = $response['json']['data']['products']['edges'][0]['node'] ?? null;
         if ($product === null) {
-            // Known issue: productBySku custom query may return null
-            $this->markTestSkipped('productBySkuProduct returns null, provider may not be implemented for this operation');
+            $this->markTestSkipped('products(sku:) returned no match for the fixture SKU');
         }
 
         expect($product['sku'])->toBe($sku);
@@ -258,7 +259,7 @@ describe('GraphQL Category Products Query', function (): void {
 
         $query = <<<GRAPHQL
         {
-            categoryProductsProducts(categoryId: {$categoryId}, pageSize: 5) {
+            categoryProducts(categoryId: {$categoryId}, pageSize: 5) {
                 edges {
                     node {
                         sku
@@ -273,9 +274,9 @@ describe('GraphQL Category Products Query', function (): void {
         $response = gqlQuery($query, [], customerToken());
 
         expect($response['status'])->toBe(200);
-        expect($response['json']['data'])->toHaveKey('categoryProductsProducts');
+        expect($response['json']['data'])->toHaveKey('categoryProducts');
 
-        $edges = $response['json']['data']['categoryProductsProducts']['edges'] ?? [];
+        $edges = $response['json']['data']['categoryProducts']['edges'] ?? [];
         expect($edges)->not->toBeEmpty();
     });
 

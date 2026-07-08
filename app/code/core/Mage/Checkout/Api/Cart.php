@@ -46,20 +46,25 @@ use Mage\Customer\Api\Address;
         new Post(
             uriTemplate: '/carts/{id}/items',
             name: 'add_cart_item',
+            // Returns the updated cart representation (200 OK), not a newly
+            // created addressable resource with a Location (which would be 201).
+            status: 200,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Add item to cart by numeric ID',
         ),
         new Put(
             uriTemplate: '/carts/{id}/items/{itemId}',
             name: 'update_cart_item',
-            output: false,
+            // Returns the updated cart representation (200 OK with body) so the
+            // client sees the new item/total state in one round-trip.
+            status: 200,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Update item quantity in cart',
         ),
         new Delete(
             uriTemplate: '/carts/{id}/items/{itemId}',
             name: 'remove_cart_item',
-            output: false,
+            status: 200,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Remove item from cart',
         ),
@@ -83,6 +88,7 @@ use Mage\Customer\Api\Address;
         new Post(
             uriTemplate: '/carts/{id}/giftcards',
             name: 'apply_my_giftcard',
+            status: 200,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Apply gift card to cart',
         ),
@@ -101,6 +107,9 @@ use Mage\Customer\Api\Address;
         new Post(
             uriTemplate: '/carts/{id}/shipping-methods',
             name: 'get_my_shipping',
+            // A query-by-POST (address in the body); returns the method list as
+            // a representation (200), not a newly created resource (201).
+            status: 200,
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/write')",
             description: 'Get available shipping methods for cart',
         ),
@@ -181,6 +190,7 @@ use Mage\Customer\Api\Address;
         new Post(
             uriTemplate: '/guest-carts/{id}/items',
             name: 'add_guest_item',
+            status: 200,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Add item to guest cart',
@@ -188,20 +198,20 @@ use Mage\Customer\Api\Address;
         new Put(
             uriTemplate: '/guest-carts/{id}/items/{itemId}',
             name: 'update_guest_item',
+            status: 200,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
-            output: false,
             security: 'true',
             description: 'Update item quantity in guest cart',
         ),
         new Delete(
             uriTemplate: '/guest-carts/{id}/items/{itemId}',
             name: 'remove_guest_item',
+            status: 200,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
-            output: false,
             security: 'true',
             description: 'Remove item from guest cart',
         ),
-        new Post(
+        new Put(
             uriTemplate: '/guest-carts/{id}/coupon',
             name: 'apply_guest_coupon',
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
@@ -218,6 +228,7 @@ use Mage\Customer\Api\Address;
         new Post(
             uriTemplate: '/guest-carts/{id}/giftcards',
             name: 'apply_guest_giftcard',
+            status: 200,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Apply gift card to guest cart',
@@ -239,6 +250,7 @@ use Mage\Customer\Api\Address;
         new Post(
             uriTemplate: '/guest-carts/{id}/shipping-methods',
             name: 'get_guest_shipping',
+            status: 200,
             uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Get available shipping methods for guest cart',
@@ -264,13 +276,13 @@ use Mage\Customer\Api\Address;
         ),
         new Query(
             security: 'true',
-            name: 'getCartByMaskedId',
+            name: 'byMaskedId',
             args: ['maskedId' => ['type' => 'String!']],
             description: 'Get cart by masked ID',
             resolver: CustomQueryResolver::class,
         ),
         new Query(
-            name: 'customerCart',
+            name: 'customer',
             args: [],
             description: 'Get current customer active cart',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('carts/read')",
@@ -278,13 +290,13 @@ use Mage\Customer\Api\Address;
         ),
         new Mutation(
             security: 'true',
-            name: 'createCart',
+            name: 'create',
             args: ['storeId' => ['type' => 'Int', 'description' => 'Optional store ID, defaults to current store']],
             description: 'Create an empty cart',
         ),
         new Mutation(
             security: 'true',
-            name: 'addToCart',
+            name: 'addTo',
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -307,31 +319,31 @@ use Mage\Customer\Api\Address;
         ),
         new Mutation(
             security: 'true',
-            name: 'updateCartItemQty',
+            name: 'updateItemQty',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'itemId' => ['type' => 'ID!'], 'qty' => ['type' => 'Float!']],
             description: 'Update cart item quantity',
         ),
         new Mutation(
             security: 'true',
-            name: 'removeCartItem',
+            name: 'removeItem',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'itemId' => ['type' => 'ID!']],
             description: 'Remove item from cart',
         ),
         new Mutation(
             security: 'true',
-            name: 'applyCouponToCart',
+            name: 'applyCoupon',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'couponCode' => ['type' => 'String!']],
             description: 'Apply coupon code to cart',
         ),
         new Mutation(
             security: 'true',
-            name: 'removeCouponFromCart',
+            name: 'removeCoupon',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String']],
             description: 'Remove coupon code from cart',
         ),
         new Mutation(
             security: 'true',
-            name: 'setShippingAddressOnCart',
+            name: 'setShippingAddress',
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -350,7 +362,7 @@ use Mage\Customer\Api\Address;
         ),
         new Mutation(
             security: 'true',
-            name: 'setBillingAddressOnCart',
+            name: 'setBillingAddress',
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -370,7 +382,7 @@ use Mage\Customer\Api\Address;
         ),
         new Mutation(
             security: 'true',
-            name: 'setShippingMethodOnCart',
+            name: 'setShippingMethod',
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -381,7 +393,7 @@ use Mage\Customer\Api\Address;
         ),
         new Mutation(
             security: 'true',
-            name: 'setPaymentMethodOnCart',
+            name: 'setPaymentMethod',
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -390,20 +402,20 @@ use Mage\Customer\Api\Address;
             description: 'Set payment method on cart',
         ),
         new Mutation(
-            name: 'assignCustomerToCart',
+            name: 'assignCustomer',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'customerId' => ['type' => 'ID!']],
             description: 'Assign customer to cart',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('carts/write')",
         ),
         new Mutation(
             security: 'true',
-            name: 'applyGiftcardToCart',
+            name: 'applyGiftcard',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'giftcardCode' => ['type' => 'String!']],
             description: 'Apply gift card to cart',
         ),
         new Mutation(
             security: 'true',
-            name: 'removeGiftcardFromCart',
+            name: 'removeGiftcard',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'giftcardCode' => ['type' => 'String!']],
             description: 'Remove gift card from cart',
         ),
@@ -455,6 +467,9 @@ class Cart extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Whether the cart is active (not yet ordered)', writable: false)]
     public bool $isActive = true;
 
+    #[ApiProperty(description: 'True when a stale/expired guest cart was transparently recreated for this add-to-cart', writable: false)]
+    public bool $cartRecreated = false;
+
     /**
      * Cart line items. Typed as untyped array so ApiPlatform's GraphQL exposes
      * this as Iterable scalar (queryable bare, returns JSON array of CartItem
@@ -482,7 +497,7 @@ class Cart extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Shipping address', writable: false)]
     public ?Address $shippingAddress = null;
 
-    /** @var array<array{carrierCode: string, methodCode: string, carrierTitle: string, methodTitle: string, price: float}> */
+    /** @var array<array{code: string, title: string, carrierCode: string, methodCode: string, carrierTitle: string, methodTitle: string, price: float}> */
     #[ApiProperty(description: 'Available shipping methods for current address', writable: false)]
     public array $availableShippingMethods = [];
 
@@ -490,7 +505,7 @@ class Cart extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Currently selected shipping method', writable: false)]
     public ?array $selectedShippingMethod = null;
 
-    /** @var array<array{code: string, title: string}> */
+    /** @var array<array{code: string, title: string, sortOrder: int, isOffline: bool}> */
     #[ApiProperty(description: 'Available payment methods', writable: false)]
     public array $availablePaymentMethods = [];
 

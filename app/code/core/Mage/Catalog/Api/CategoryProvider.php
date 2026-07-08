@@ -31,15 +31,12 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         // Ensure valid store context
         StoreContext::ensureStore();
 
-        $operationName = $operation->getName();
-
-        // Handle categoryByUrlKey query
-        if ($operationName === 'categoryByUrlKey') {
-            $urlKey = $context['args']['urlKey'] ?? null;
-            return $urlKey ? $this->getCategoryByUrlKey($urlKey) : null;
-        }
 
         if ($operation instanceof CollectionOperationInterface) {
+            $urlKey = $context['args']['urlKey'] ?? null;
+            if ($urlKey) {
+                return $this->singleItemPaginator($this->getCategoryByUrlKey($urlKey));
+            }
             return $this->getCollection($context);
         }
 
@@ -69,12 +66,22 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
      */
     private function getCategoryByUrlKey(string $urlKey): ?Category
     {
-        $category = \Mage::getModel('catalog/category')
+        // url_key is not unique across store trees. Constrain the lookup to the
+        // current store's root tree so we resolve THIS store's category, rather
+        // than picking the first global match (a lower-id category from another
+        // store) and then rejecting it — which returned null even when the
+        // current store had a valid category with that key.
+        $collection = \Mage::getModel('catalog/category')
             ->getCollection()
             ->addAttributeToFilter('url_key', $urlKey)
-            ->addAttributeToFilter('is_active', 1)
-            ->setPageSize(1)
-            ->getFirstItem();
+            ->addAttributeToFilter('is_active', 1);
+
+        $rootCategoryId = (int) StoreContext::getRootCategoryId();
+        if ($rootCategoryId > 0) {
+            $collection->addAttributeToFilter('path', ['like' => "%/{$rootCategoryId}/%"]);
+        }
+
+        $category = $collection->setPageSize(1)->getFirstItem();
 
         if (!$category->getId()) {
             return null;
@@ -147,14 +154,15 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         if ($search) {
             $escapedSearch = addcslashes($search, '%_');
             $collection->addAttributeToFilter('name', ['like' => "%{$escapedSearch}%"]);
+        }
 
-            // Search has no parent filter, so without this it would return
-            // categories from every store's tree. Constrain to the current
-            // store root so cross-store categories aren't leaked via search.
-            $rootCategoryId = (int) StoreContext::getRootCategoryId();
-            if ($rootCategoryId > 0) {
-                $collection->addAttributeToFilter('path', ['like' => "%/{$rootCategoryId}/%"]);
-            }
+        // Always constrain to the current store's root tree. A client-supplied
+        // parentId would otherwise return another store's active categories
+        // (including their rendered landing_page CMS blocks); the search path
+        // needs it too since it applies no parent filter at all.
+        $rootCategoryId = (int) StoreContext::getRootCategoryId();
+        if ($rootCategoryId > 0) {
+            $collection->addAttributeToFilter('path', ['like' => "%/{$rootCategoryId}/%"]);
         }
 
         if ($includeInMenu !== null) {

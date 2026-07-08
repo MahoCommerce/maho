@@ -76,13 +76,15 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_ADMIN') or is_granted('shipments/read')",
         ),
         new QueryCollection(
-            name: 'orderShipments',
+            // Named 'order' so ApiPlatform's appended shortName yields the field
+            // `orderShipments`, not a stuttering `orderShipmentsShipments`.
+            name: 'order',
             args: ['orderId' => ['type' => 'Int!']],
             description: 'Get shipments for an order',
             security: "is_granted('ROLE_ADMIN') or is_granted('shipments/read')",
         ),
         new Mutation(
-            name: 'createShipment',
+            name: 'create',
             args: [
                 'orderId' => ['type' => 'Int!', 'description' => 'Order ID to ship'],
                 'items' => ['type' => 'Iterable', 'description' => 'Items to ship: [{orderItemId: ID!, qty: Float!}]. Ships all if omitted.'],

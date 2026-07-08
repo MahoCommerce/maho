@@ -54,13 +54,13 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         ),
         new Query(
             security: 'true',
-            name: 'checkGiftcardBalance',
+            name: 'checkBalance',
             args: ['code' => ['type' => 'String!']],
             description: 'Check gift card balance by code',
             resolver: CustomQueryResolver::class,
         ),
         new Mutation(
-            name: 'createGiftcard',
+            name: 'create',
             args: [
                 'initialBalance' => ['type' => 'Float!', 'description' => 'Initial balance amount'],
                 'code' => ['type' => 'String', 'description' => 'Custom code (auto-generated if omitted)'],
@@ -73,17 +73,17 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
                 'expiresAt' => ['type' => 'String', 'description' => 'Expiration date (YYYY-MM-DD)'],
             ],
             description: 'Create a new gift card',
-            security: "is_granted('giftcards/create')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('giftcards/create')",
         ),
         new Mutation(
-            name: 'adjustGiftcardBalance',
+            name: 'adjustBalance',
             args: [
                 'code' => ['type' => 'String!', 'description' => 'Gift card code'],
                 'newBalance' => ['type' => 'Float!', 'description' => 'New balance amount'],
                 'comment' => ['type' => 'String', 'description' => 'Reason for adjustment'],
             ],
             description: 'Adjust gift card balance',
-            security: "is_granted('giftcards/write')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('giftcards/write')",
         ),
     ],
 )]

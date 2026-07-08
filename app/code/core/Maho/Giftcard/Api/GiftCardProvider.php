@@ -24,7 +24,7 @@ final class GiftCardProvider extends CrudProvider
     #[\Override]
     protected function handleOperation(string $name, array $context, array $uriVariables): mixed
     {
-        if ($name === 'checkGiftcardBalance') {
+        if ($name === 'checkBalance') {
             // Public balance check: throttle to stop code probing / enumeration.
             $this->checkRateLimitByIp('giftcard_balance', 'giftcard_balance', 60);
 

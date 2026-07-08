@@ -49,9 +49,16 @@ use Mage\Customer\Api\Address;
             description: 'Get current customer order history',
         ),
         new Post(
+            // Numeric-cart checkout is for authenticated customers (or admin /
+            // orders-create service tokens); guests place orders through the
+            // dedicated /guest-carts/{maskedQuoteId}/place-order endpoint, whose
+            // masked id is the unguessable credential. Requiring auth here means
+            // an anonymous caller gets 401 rather than being able to probe
+            // enumerable numeric cart ids.
             uriTemplate: '/orders',
-            security: 'true',
-            description: 'Place a new order from cart',
+            name: 'place_order',
+            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/create')",
+            description: 'Place a new order from an authenticated customer cart',
         ),
         new Post(
             // The placeholder is named `maskedQuoteId` rather than `id` so
@@ -144,27 +151,25 @@ use Mage\Customer\Api\Address;
             security: "is_granted('ROLE_ADMIN') or is_granted('orders/read')",
         ),
         new Query(
-            name: 'order',
-            args: ['id' => ['type' => 'ID!']],
-            description: 'Get order by ID',
-            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/read')",
-        ),
-        new Query(
+            // Named 'guest' → field `guestOrder` (not `guestOrderOrder`).
             security: 'true',
-            name: 'guestOrder',
+            name: 'guest',
             args: ['incrementId' => ['type' => 'String!'], 'accessToken' => ['type' => 'String!']],
             description: 'Get guest order by increment ID and access token',
             resolver: CustomQueryResolver::class,
         ),
         new QueryCollection(
-            name: 'customerOrders',
+            // Named 'customer' → field `customerOrders` (not `customerOrdersOrders`).
+            name: 'customer',
             args: ['page' => ['type' => 'Int'], 'pageSize' => ['type' => 'Int'], 'status' => ['type' => 'String']],
             description: 'Get orders for authenticated customer',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/read')",
         ),
+        // Names omit the "Order" noun: ApiPlatform appends the resource shortName,
+        // so `place` → field `placeOrder` and `cancel` → `cancelOrder`.
         new Mutation(
             security: 'true',
-            name: 'placeOrder',
+            name: 'place',
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -176,7 +181,7 @@ use Mage\Customer\Api\Address;
             description: 'Place order from cart (requires maskedId for guest, or authentication for customer carts)',
         ),
         new Mutation(
-            name: 'cancelOrder',
+            name: 'cancel',
             args: [
                 'orderId' => ['type' => 'ID'],
                 'incrementId' => ['type' => 'String'],

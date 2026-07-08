@@ -28,7 +28,7 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         $operationName = $operation->getName();
 
         return match ($operationName) {
-            'createCreditMemo' => $this->createCreditMemoFromGraphQl($context),
+            'create' => $this->createCreditMemoFromGraphQl($context),
             default => $this->createCreditMemoFromRest($uriVariables, $context),
         };
     }
@@ -124,7 +124,17 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
         bool $offlineRefund,
     ): CreditMemo {
         // Build qty data array: ['qtys' => [orderItemId => qty]]
+        // Adjustments go through $data so prepareCreditmemo() applies them before
+        // its single collectTotals() pass. Setting them afterwards and collecting
+        // again would double every total (the creditmemo collectors accumulate
+        // into grand total and never reset), over-refunding the order.
         $data = ['qtys' => []];
+        if ($adjustmentPositive !== null) {
+            $data['adjustment_positive'] = $adjustmentPositive;
+        }
+        if ($adjustmentNegative !== null) {
+            $data['adjustment_negative'] = $adjustmentNegative;
+        }
         $backToStockItems = [];
 
         if (!empty($items)) {
@@ -156,17 +166,9 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Cannot create credit memo: no items to refund');
         }
 
-        // Set adjustments
-        if ($adjustmentPositive !== null) {
-            $creditmemo->setAdjustmentPositive($adjustmentPositive);
-        }
-        if ($adjustmentNegative !== null) {
-            $creditmemo->setAdjustmentNegative($adjustmentNegative);
-        }
-
         // Cap the refund at what the order can still refund, so an inflated
         // adjustmentPositive can't over-refund or mint excess store credit.
-        $creditmemo->collectTotals();
+        // Totals were already collected by prepareCreditmemo() above.
         $refundable = (float) $order->getBaseTotalPaid() - (float) $order->getBaseTotalRefunded();
         if ((float) $creditmemo->getBaseGrandTotal() > $refundable + 0.0001) {
             throw new BadRequestHttpException('Refund amount exceeds the order\'s refundable balance');

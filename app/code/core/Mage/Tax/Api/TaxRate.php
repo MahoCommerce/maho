@@ -68,14 +68,6 @@ use Maho\ApiPlatform\CrudResource;
             description: 'Get tax rates',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-rates/read')",
         ),
-        new Query(
-            security: "is_granted('ROLE_ADMIN') or is_granted('tax-rates/read')",
-            name: 'taxRate',
-        ),
-        new QueryCollection(
-            security: "is_granted('ROLE_ADMIN') or is_granted('tax-rates/read')",
-            name: 'taxRates',
-        ),
     ],
 )]
 class TaxRate extends CrudResource

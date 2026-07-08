@@ -217,7 +217,9 @@ describe('PUT /api/rest/v2/guest-carts/{id}/items/{itemId} (Update Item)', funct
             'qty' => 2,
         ]);
 
-        expect($response['status'])->toBe(400);
+        // The item resource being updated does not exist → 404 (matches this
+        // test's own title and REST semantics for a missing sub-resource).
+        expect($response['status'])->toBe(404);
         expect($response['json'])->toHaveKey('error');
     });
 

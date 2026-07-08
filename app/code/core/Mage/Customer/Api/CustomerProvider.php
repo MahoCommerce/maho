@@ -41,8 +41,11 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
     {
         $operationName = $operation->getName();
 
-        // Handle 'me' query - get current authenticated customer
-        if ($operationName === 'me') {
+        // Current authenticated customer. REST uses op name 'me_rest'
+        // (GET /customers/me); GraphQL uses 'current' (field `currentCustomer`).
+        // They must differ: a REST and GraphQL op sharing a name collide in the
+        // resource metadata and break the schema (see OperationNamingTest).
+        if ($operationName === 'current' || $operationName === 'me_rest') {
             $customerId = $this->getAuthenticatedCustomerId();
             return $customerId ? $this->getItem($customerId) : null;
         }

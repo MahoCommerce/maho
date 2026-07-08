@@ -27,12 +27,16 @@ describe('GET /api/rest/v2/custom-option-file/{optionId}/{key}', function (): vo
         $product = Mage::getModel('catalog/product')->load((int) fixtures('product_id'));
         expect($product->getId())->not->toBeNull();
 
-        // A quote item to satisfy the option's FK.
+        // A quote item to satisfy the option's FK. The API bootstraps Mage in the
+        // admin ('0') store; a quote must carry a real store view or its items
+        // don't persist, leaving the option's item_id FK dangling.
         $quote = Mage::getModel('sales/quote');
+        $quote->setStoreId((int) Mage::app()->getDefaultStoreView()->getId());
         $quote->addProduct($product, 1);
         $quote->save();
         $item = $quote->getAllItems()[0] ?? null;
         expect($item)->not->toBeNull();
+        expect((int) $item->getId())->toBeGreaterThan(0);
 
         // A real file on disk under the Maho base dir.
         $relPath = '/public/media/custom_options/test_' . uniqid() . '.txt';

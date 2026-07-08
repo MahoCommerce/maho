@@ -107,7 +107,10 @@ describe('POST /api/rest/v2/orders', function (): void {
 
     it('rejects placing an order from another customer\'s cart', function (): void {
         $ownerId = (int) fixtures('customer_id');
-        $intruderId = $ownerId + 1;
+        $intruderId = (int) fixtures('second_customer_id');
+        if ($intruderId === 0 || $intruderId === $ownerId) {
+            $this->markTestSkipped('Could not provision a distinct second customer for the intruder');
+        }
 
         $cartId = makeOrderCartWithItem($ownerId);
         if ($cartId === null) {

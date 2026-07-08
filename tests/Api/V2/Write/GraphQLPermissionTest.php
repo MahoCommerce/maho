@@ -14,7 +14,7 @@ declare(strict_types=1);
  * Tests that GraphQL queries and mutations enforce permissions correctly.
  * Verifies public queries work without auth and mutations require correct tokens.
  *
- * Note: Custom QueryCollection operations (productsProducts, categoriesCategories, etc.)
+ * Note: Custom QueryCollection operations (products, categories, etc.)
  * do NOT support Relay pagination args (first/last/before/after). Only default
  * collection_query operations get those automatically.
  *
@@ -30,7 +30,7 @@ describe('GraphQL Public Queries', function (): void {
     it('allows public product query without auth', function (): void {
         $query = <<<'GRAPHQL'
         {
-            productsProducts {
+            products {
                 edges {
                     node {
                         _id
@@ -45,13 +45,13 @@ describe('GraphQL Public Queries', function (): void {
         $response = gqlQuery($query);
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('productsProducts');
+        expect($response['json']['data'])->toHaveKey('products');
     });
 
     it('allows public category query without auth', function (): void {
         $query = <<<'GRAPHQL'
         {
-            categoriesCategories {
+            categories {
                 edges {
                     node {
                         _id
@@ -65,13 +65,13 @@ describe('GraphQL Public Queries', function (): void {
         $response = gqlQuery($query);
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('categoriesCategories');
+        expect($response['json']['data'])->toHaveKey('categories');
     });
 
     it('allows public CMS page query without auth', function (): void {
         $query = <<<'GRAPHQL'
         {
-            cmsPagesCmsPages {
+            cmsPages {
                 edges {
                     node {
                         _id
@@ -85,13 +85,13 @@ describe('GraphQL Public Queries', function (): void {
         $response = gqlQuery($query);
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('cmsPagesCmsPages');
+        expect($response['json']['data'])->toHaveKey('cmsPages');
     });
 
     it('allows public blog post query without auth', function (): void {
         $query = <<<'GRAPHQL'
         {
-            blogPostsBlogPosts {
+            blogPosts {
                 edges {
                     node {
                         _id
@@ -105,7 +105,7 @@ describe('GraphQL Public Queries', function (): void {
         $response = gqlQuery($query);
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('blogPostsBlogPosts');
+        expect($response['json']['data'])->toHaveKey('blogPosts');
     });
 
 });
@@ -115,7 +115,7 @@ describe('GraphQL Mutation Permissions', function (): void {
     it('denies cart creation without valid masked ID', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
-            createCartCart(input: { maskedId: "invalid" }) {
+            createCart(input: { maskedId: "invalid" }) {
                 _id
             }
         }
@@ -131,7 +131,7 @@ describe('GraphQL Mutation Permissions', function (): void {
     it('denies review submission without auth', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
-            submitReviewReview(input: {
+            submitReview(input: {
                 productId: 421
                 title: "Test Review"
                 detail: "Test detail"
@@ -154,7 +154,7 @@ describe('GraphQL Mutation Permissions', function (): void {
 
         $query = <<<'GRAPHQL'
         {
-            productsProducts {
+            products {
                 edges {
                     node {
                         _id
@@ -176,7 +176,7 @@ describe('GraphQL Mutation Permissions', function (): void {
 
         $query = <<<'GRAPHQL'
         {
-            productsProducts {
+            products {
                 edges {
                     node {
                         _id
@@ -197,7 +197,7 @@ describe('GraphQL Mutation Permissions', function (): void {
 
         $query = <<<'GRAPHQL'
         {
-            productsProducts {
+            products {
                 edges {
                     node {
                         _id
@@ -223,7 +223,7 @@ describe('GraphQL Mutation Permissions', function (): void {
 
         $query = <<<'GRAPHQL'
         {
-            productsProducts {
+            products {
                 edges {
                     node {
                         _id

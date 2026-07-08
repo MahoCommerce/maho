@@ -29,7 +29,7 @@ describe('GraphQL Review - Product Reviews Query', function (): void {
 
         $query = <<<GRAPHQL
         {
-            productReviewsReviews(productId: {$productId}, pageSize: 5) {
+            productReviews(productId: {$productId}, pageSize: 5) {
                 edges {
                     node {
                         id
@@ -49,7 +49,7 @@ describe('GraphQL Review - Product Reviews Query', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('productReviewsReviews');
+        expect($response['json']['data'])->toHaveKey('productReviews');
     });
 
 });
@@ -65,7 +65,7 @@ describe('GraphQL Review - Submit Review Mutation', function (): void {
 
         $query = <<<GRAPHQL
         mutation {
-            submitReviewReview(input: {
+            submitReview(input: {
                 productId: {$productId},
                 title: "Test Review {$timestamp}",
                 detail: "This is an automated test review created at {$timestamp}.",
@@ -90,9 +90,9 @@ describe('GraphQL Review - Submit Review Mutation', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->not->toHaveKey('errors');
-        expect($response['json']['data']['submitReviewReview'])->not->toBeNull();
+        expect($response['json']['data']['submitReview'])->not->toBeNull();
 
-        $review = $response['json']['data']['submitReviewReview']['review'];
+        $review = $response['json']['data']['submitReview']['review'];
         expect($review['productId'])->toBe($productId);
         expect($review['title'])->toContain('Test Review');
         expect($review['nickname'])->toBe('TestUser');
@@ -109,7 +109,7 @@ describe('GraphQL Review - Submit Review Mutation', function (): void {
     it('returns error when required fields are missing', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
-            submitReviewReview(input: {
+            submitReview(input: {
                 productId: 421,
                 title: "",
                 detail: "",
@@ -136,7 +136,7 @@ describe('GraphQL Review - My Reviews Query', function (): void {
     it('returns customer reviews when authenticated', function (): void {
         $query = <<<'GRAPHQL'
         {
-            myReviewsReviews {
+            myReviews {
                 edges {
                     node {
                         id
@@ -156,7 +156,7 @@ describe('GraphQL Review - My Reviews Query', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('myReviewsReviews');
+        expect($response['json']['data'])->toHaveKey('myReviews');
     });
 
 });

@@ -932,7 +932,10 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
                     default => imagejpeg($srcImage, null, 90),
                 };
                 $reRendered = ob_get_clean();
-                imagedestroy($srcImage);
+                // imagedestroy() is a no-op since PHP 8.0 (GdImage is GC-managed)
+                // and is deprecated as of 8.5, where it would surface as a fatal
+                // in strict error handlers; unset the handle instead.
+                unset($srcImage);
                 if (!empty($reRendered)) {
                     $decodedData = $reRendered;
                 }

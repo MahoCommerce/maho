@@ -16,7 +16,6 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\ApiPlatform\CrudResource;
-use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 use Maho\Config\ApiResource;
 
 #[ApiResource(
@@ -49,18 +48,9 @@ use Maho\Config\ApiResource;
             name: 'collection_query',
             description: 'Get product attributes (canonical)',
             security: "is_granted('ROLE_ADMIN') or is_granted('product-attributes/read')",
-        ),
-        new QueryCollection(
-            name: 'productAttributes',
-            description: 'Get product attributes',
-            security: "is_granted('ROLE_ADMIN') or is_granted('product-attributes/read')",
-        ),
-        new Query(
-            name: 'productAttribute',
-            description: 'Get a product attribute by code',
-            args: ['code' => ['type' => 'String!']],
-            resolver: CustomQueryResolver::class,
-            security: "is_granted('ROLE_ADMIN') or is_granted('product-attributes/read')",
+            args: [
+                'code' => ['type' => 'String', 'description' => 'Exact attribute-code lookup (returns 0 or 1 attribute)'],
+            ],
         ),
     ],
 )]
@@ -68,6 +58,9 @@ class ProductAttribute extends CrudResource
 {
     public const MODEL = 'catalog/resource_eav_attribute';
     public const PRIMARY_KEY = 'attribute_id';
+
+    /** Admin ACL gate. Mirrors backend Mage_Adminhtml_Catalog_Product_AttributeController. */
+    public const ADMIN_RESOURCE = \Mage_Adminhtml_Catalog_Product_AttributeController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

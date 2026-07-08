@@ -13,6 +13,7 @@ namespace Mage\Api\Api;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Post;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 
 #[ApiResource(
     security: "is_granted('ROLE_ADMIN')",
@@ -23,12 +24,14 @@ use ApiPlatform\Metadata\Post;
         new Post(
             uriTemplate: '/auth/token',
             name: 'get_token',
+            status: 200,
             security: 'true',
             description: 'Authenticate and get JWT token (grant types: customer, client_credentials, api_user)',
         ),
         new Post(
             uriTemplate: '/auth/refresh',
             name: 'refresh_token',
+            status: 200,
             security: 'true',
             description: 'Refresh a customer JWT token',
         ),
@@ -48,10 +51,13 @@ class AuthToken extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'JWT token')]
     public ?string $token = null;
 
+    // OAuth2 token responses use snake_case field names (RFC 6749 §5.1).
     #[ApiProperty(description: 'Token type (Bearer)')]
+    #[SerializedName('token_type')]
     public ?string $tokenType = null;
 
     #[ApiProperty(description: 'Token expiry in seconds')]
+    #[SerializedName('expires_in')]
     public ?int $expiresIn = null;
 
     #[ApiProperty(description: 'Authenticated customer info')]

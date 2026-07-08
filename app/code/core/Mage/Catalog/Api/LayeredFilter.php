@@ -30,13 +30,14 @@ use ApiPlatform\Metadata\GraphQl\Query;
     ],
     graphQlOperations: [
         new Query(name: 'item_query', description: 'Get a layered filter', security: 'true'),
-        new QueryCollection(name: 'collection_query', description: 'Get layered filters', security: 'true'),
+        // Field `layeredFilters`; category-scoped navigation filters.
         new QueryCollection(
-            name: 'layeredFilters',
+            name: 'collection_query',
+            description: 'Get available layered navigation filters for a category',
+            security: 'true',
             args: [
                 'categoryId' => ['type' => 'Int!', 'description' => 'Category ID to get filters for'],
             ],
-            description: 'Get available layered navigation filters for a category',
         ),
     ],
 )]

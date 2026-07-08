@@ -135,7 +135,7 @@ describe('GraphQL Gift Card mutations', function (): void {
     it('creates a gift card via GraphQL', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
-            createGiftcardGiftCard(input: {
+            createGiftCard(input: {
                 initialBalance: 75.0
             }) {
                 giftCard {
@@ -156,7 +156,7 @@ describe('GraphQL Gift Card mutations', function (): void {
         expect($response['status'])->toBe(200);
         expect($response['json'])->not->toHaveKey('errors');
 
-        $gc = $response['json']['data']['createGiftcardGiftCard']['giftCard'];
+        $gc = $response['json']['data']['createGiftCard']['giftCard'];
         expect((float) $gc['balance'])->toBe(75.0);
         expect((float) $gc['initialBalance'])->toBe(75.0);
         expect($gc['status'])->toBe('active');
@@ -170,7 +170,7 @@ describe('GraphQL Gift Card mutations', function (): void {
 
         $query = <<<GRAPHQL
         mutation {
-            createGiftcardGiftCard(input: {
+            createGiftCard(input: {
                 initialBalance: 50.0,
                 code: "{$code}",
                 recipientName: "Jane Doe",
@@ -195,7 +195,7 @@ describe('GraphQL Gift Card mutations', function (): void {
         expect($response['status'])->toBe(200);
         expect($response['json'])->not->toHaveKey('errors');
 
-        $gc = $response['json']['data']['createGiftcardGiftCard']['giftCard'];
+        $gc = $response['json']['data']['createGiftCard']['giftCard'];
         expect($gc['code'])->toBe($code);
         expect($gc['recipientName'])->toBe('Jane Doe');
         expect($gc['senderName'])->toBe('John Smith');
@@ -210,7 +210,7 @@ describe('GraphQL Gift Card mutations', function (): void {
 
         $createQuery = <<<GRAPHQL
         mutation {
-            createGiftcardGiftCard(input: {
+            createGiftCard(input: {
                 initialBalance: 100.0,
                 code: "{$code}"
             }) {
@@ -229,7 +229,7 @@ describe('GraphQL Gift Card mutations', function (): void {
         // Now adjust balance
         $adjustQuery = <<<GRAPHQL
         mutation {
-            adjustGiftcardBalanceGiftCard(input: {
+            adjustBalanceGiftCard(input: {
                 code: "{$code}",
                 newBalance: 50.0,
                 comment: "Test adjustment"
@@ -248,7 +248,7 @@ describe('GraphQL Gift Card mutations', function (): void {
         expect($adjustResponse['status'])->toBe(200);
         expect($adjustResponse['json'])->not->toHaveKey('errors');
 
-        $gc = $adjustResponse['json']['data']['adjustGiftcardBalanceGiftCard']['giftCard'];
+        $gc = $adjustResponse['json']['data']['adjustBalanceGiftCard']['giftCard'];
         expect($gc['code'])->toBe($code);
         expect((float) $gc['balance'])->toBe(50.0);
         expect((float) $gc['initialBalance'])->toBe(100.0);
@@ -257,7 +257,7 @@ describe('GraphQL Gift Card mutations', function (): void {
     it('rejects adjusting non-existent gift card', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
-            adjustGiftcardBalanceGiftCard(input: {
+            adjustBalanceGiftCard(input: {
                 code: "NONEXISTENT-999",
                 newBalance: 50.0
             }) {
@@ -276,7 +276,7 @@ describe('GraphQL Gift Card mutations', function (): void {
     it('rejects unauthenticated gift card creation', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
-            createGiftcardGiftCard(input: {
+            createGiftCard(input: {
                 initialBalance: 25.0
             }) {
                 giftCard {
@@ -294,7 +294,7 @@ describe('GraphQL Gift Card mutations', function (): void {
     it('rejects customer-only token for gift card creation', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
-            createGiftcardGiftCard(input: {
+            createGiftCard(input: {
                 initialBalance: 25.0
             }) {
                 giftCard {

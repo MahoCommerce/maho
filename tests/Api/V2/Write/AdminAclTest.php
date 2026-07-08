@@ -119,7 +119,12 @@ describe('Admin ACL, REST', function (): void {
         // ADMIN_RESOURCE constant. Even with full admin ACL, default-deny
         // must apply on a resource that hasn't opted in.
         $token = adminTokenWithAcl(['all'], 'pest_acl_default_deny');
-        $response = apiGet('/api/rest/v2/wishlist-items', $token);
+        // The customer wishlist collection admits ROLE_ADMIN at the security
+        // layer, so the request clears the firewall and reaches the ACL gate —
+        // where default-deny applies because WishlistItem declares no
+        // ADMIN_RESOURCE. (/wishlist-items is not a real route; use the actual
+        // customer wishlist endpoint.)
+        $response = apiGet('/api/rest/v2/customers/me/wishlist', $token);
         expect($response['status'])->toBe(403);
     });
 

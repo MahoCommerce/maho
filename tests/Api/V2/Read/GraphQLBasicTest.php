@@ -27,7 +27,7 @@ describe('GraphQL Endpoint - Authentication', function (): void {
     });
 
     it('denies unauthenticated access to protected operations', function (): void {
-        $query = '{ myWishlistWishlistItems(first: 1) { edges { node { _id } } } }';
+        $query = '{ myWishlistItems(first: 1) { edges { node { _id } } } }';
         $response = gqlQuery($query);
 
         expect($response['status'])->toBe(200);
@@ -148,11 +148,16 @@ describe('GraphQL Endpoint - Error Handling', function (): void {
         // Bare scalars where an IRI is expected used to escape the GraphQL
         // pipeline as a 500. They should resolve to null, same shape as
         // a valid-IRI-but-missing-item query.
-        $response = gqlQuery('{ orderOrder(id: 1) { _id } }');
+        $response = gqlQuery('{ order(id: 1) { _id } }');
 
+        // The bare-int arg must resolve gracefully to a null field (HTTP 200 with
+        // a null node), not blow up the pipeline as a 500. `?? 'missing'` would be
+        // self-defeating here — `null ?? 'missing'` is 'missing' — so assert the
+        // null node directly.
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data']['orderOrder'] ?? 'missing')->toBeNull();
+        expect($response['json']['data'])->toHaveKey('order');
+        expect($response['json']['data']['order'])->toBeNull();
     });
 
 });

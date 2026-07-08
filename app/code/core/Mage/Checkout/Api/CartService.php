@@ -12,6 +12,8 @@ namespace Mage\Checkout\Api;
 
 use Maho\ApiPlatform\Service\StoreDefaults;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Cart Service - Business logic for cart operations.
@@ -229,17 +231,17 @@ class CartService
     {
         // Validate quantity
         if ($qty <= 0) {
-            throw new \RuntimeException('Quantity must be greater than zero');
+            throw new BadRequestHttpException('Quantity must be greater than zero');
         }
         if ($qty > self::MAX_ITEM_QTY) {
-            throw new \RuntimeException('Quantity cannot exceed 10,000');
+            throw new BadRequestHttpException('Quantity cannot exceed 10,000');
         }
 
         // First find product ID by SKU
         $productId = \Mage::getResourceModel('catalog/product')->getIdBySku($sku);
 
         if (!$productId) {
-            throw new \RuntimeException("Product with SKU '{$sku}' not found");
+            throw new BadRequestHttpException("Product with SKU '{$sku}' not found");
         }
 
         $this->logDebug("Adding product {$sku} (ID: {$productId}) to quote {$quote->getId()}, quote store_id: {$quote->getStoreId()}");
@@ -250,13 +252,13 @@ class CartService
             ->load($productId);
 
         if (!$product->getId()) {
-            throw new \RuntimeException("Product with SKU '{$sku}' not found");
+            throw new BadRequestHttpException("Product with SKU '{$sku}' not found");
         }
 
         // Status gate, addProduct does not check this itself, so without an
         // explicit guard a disabled SKU is addable through the public API.
         if ((int) $product->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
-            throw new \RuntimeException("Product '{$sku}' is not available");
+            throw new BadRequestHttpException("Product '{$sku}' is not available");
         }
 
         // Visibility gate: refuse 'not_visible_individually' simples that
@@ -267,7 +269,7 @@ class CartService
         if ($visibility === \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
             && $product->getTypeId() !== \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
         ) {
-            throw new \RuntimeException("Product '{$sku}' is not available");
+            throw new BadRequestHttpException("Product '{$sku}' is not available");
         }
 
         // Check if this simple product is a child of a configurable
@@ -336,7 +338,7 @@ class CartService
                     // product actually added to the cart is the configurable parent.
                     // A disabled parent with an enabled child must not be addable.
                     if ((int) $configurableProduct->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
-                        throw new \RuntimeException("Product '{$sku}' is not available");
+                        throw new BadRequestHttpException("Product '{$sku}' is not available");
                     }
 
                     // Get the super_attribute values for this simple product
@@ -363,7 +365,7 @@ class CartService
         if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE
             && (int) $product->getVisibility() === \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE
         ) {
-            throw new \RuntimeException("Product '{$sku}' is not available");
+            throw new BadRequestHttpException("Product '{$sku}' is not available");
         }
 
         $this->logDebug("Product loaded: ID={$product->getId()}, StoreId={$product->getStoreId()}, Price={$product->getPrice()}, FinalPrice={$product->getFinalPrice()}");
@@ -401,10 +403,10 @@ class CartService
                 // Verify this option ID belongs to a file-type option on this product
                 $productOption = $product->getOptionById((string) $optionId);
                 if (!$productOption || $productOption->getType() !== \Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE) {
-                    throw new \RuntimeException("Option ID {$optionId} is not a valid file-type option for this product");
+                    throw new BadRequestHttpException("Option ID {$optionId} is not a valid file-type option for this product");
                 }
                 if (!is_array($fileData) || empty($fileData['base64_encoded_data']) || empty($fileData['name'])) {
-                    throw new \RuntimeException("File option {$optionId} requires 'name' and 'base64_encoded_data'");
+                    throw new BadRequestHttpException("File option {$optionId} requires 'name' and 'base64_encoded_data'");
                 }
                 $optionsFiles[$optionId] = $fileData;
             }
@@ -422,7 +424,7 @@ class CartService
         // addProduct returns a string error message on failure
         if (is_string($result)) {
             $this->logDebug("Failed to add product: {$result}");
-            throw new \RuntimeException("Failed to add product: {$result}");
+            throw new BadRequestHttpException("Failed to add product: {$result}");
         }
 
         $this->collectAndVerifyTotals($quote);
@@ -443,10 +445,10 @@ class CartService
     {
         // Validate quantity
         if ($qty <= 0) {
-            throw new \RuntimeException('Quantity must be greater than zero');
+            throw new BadRequestHttpException('Quantity must be greater than zero');
         }
         if ($qty > self::MAX_ITEM_QTY) {
-            throw new \RuntimeException('Quantity cannot exceed 10,000');
+            throw new BadRequestHttpException('Quantity cannot exceed 10,000');
         }
 
         $item = $quote->getItemById($itemId);
@@ -498,7 +500,12 @@ class CartService
         /** @var \Mage_SalesRule_Model_Coupon $coupon */
         $coupon = \Mage::getModel('salesrule/coupon')->load($couponCode, 'code');
         if (!$coupon->getId()) {
-            throw new \RuntimeException("Coupon code '{$couponCode}' is not valid");
+            throw new BadRequestHttpException(
+                "Coupon code '{$couponCode}' is not valid",
+                null,
+                0,
+                ['X-Api-Error-Code' => 'invalid_coupon'],
+            );
         }
 
         $quote->setCouponCode($couponCode);
@@ -513,7 +520,12 @@ class CartService
             $quote->setCouponCode('');
             $quote->setTotalsCollectedFlag(false);
             $quote->collectTotals()->save();
-            throw new \RuntimeException("Coupon code '{$couponCode}' could not be applied");
+            throw new BadRequestHttpException(
+                "Coupon code '{$couponCode}' could not be applied",
+                null,
+                0,
+                ['X-Api-Error-Code' => 'invalid_coupon'],
+            );
         }
 
         return $quote;
@@ -562,13 +574,13 @@ class CartService
     public function applyGiftcard(\Mage_Sales_Model_Quote $quote, string $giftcardCode, ?float $amount = null): \Mage_Sales_Model_Quote
     {
         if (!$giftcardCode) {
-            throw new \RuntimeException('Gift card code is required');
+            throw new BadRequestHttpException('Gift card code is required');
         }
 
         // Check if cart has gift card products
         foreach ($quote->getAllItems() as $item) {
             if ($item->getProductType() === 'giftcard') {
-                throw new \RuntimeException('Gift cards cannot be used to purchase gift card products');
+                throw new BadRequestHttpException('Gift cards cannot be used to purchase gift card products');
             }
         }
 
@@ -576,26 +588,26 @@ class CartService
         $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($giftcardCode);
 
         if (!$giftcard->getId()) {
-            throw new \RuntimeException('Gift card "' . $giftcardCode . '" is not valid');
+            throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is not valid');
         }
 
         if (!$giftcard->isValid()) {
             $status = $giftcard->getStatus();
             if ($status === 'pending') {
-                throw new \RuntimeException('Gift card "' . $giftcardCode . '" is pending activation');
+                throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is pending activation');
             }
             if ($status === 'expired') {
-                throw new \RuntimeException('Gift card "' . $giftcardCode . '" has expired');
+                throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" has expired');
             }
             if ($status === 'used') {
-                throw new \RuntimeException('Gift card "' . $giftcardCode . '" has been fully used');
+                throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" has been fully used');
             }
-            throw new \RuntimeException('Gift card "' . $giftcardCode . '" is not active');
+            throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is not active');
         }
 
         // Gift cards are scoped to the website that issued them
         if (!$giftcard->isValidForWebsite((int) $quote->getStore()->getWebsiteId())) {
-            throw new \RuntimeException('Gift card "' . $giftcardCode . '" is not valid for this store');
+            throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is not valid for this store');
         }
 
         // Get currently applied codes
@@ -604,7 +616,7 @@ class CartService
 
         // Check if already applied
         if (isset($appliedCodes[$giftcardCode])) {
-            throw new \RuntimeException('Gift card "' . $giftcardCode . '" is already applied');
+            throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is already applied');
         }
 
         // Apply gift card - store the requested amount capped at the live
@@ -647,12 +659,12 @@ class CartService
         foreach ($applied as $code => $snapshotBalance) {
             $card = \Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
             if (!$card->getId() || !$card->isValidForWebsite($websiteId)) {
-                throw new \RuntimeException('Gift card "' . $code . '" is no longer valid');
+                throw new BadRequestHttpException('Gift card "' . $code . '" is no longer valid');
             }
 
             $live = (float) $card->getBalance($quoteCurrency);
             if ($live <= 0) {
-                throw new \RuntimeException('Gift card "' . $code . '" has no remaining balance');
+                throw new BadRequestHttpException('Gift card "' . $code . '" has no remaining balance');
             }
 
             // Cap the applied amount at the live balance
@@ -679,7 +691,7 @@ class CartService
     public function removeGiftcard(\Mage_Sales_Model_Quote $quote, string $giftcardCode): \Mage_Sales_Model_Quote
     {
         if (!$giftcardCode) {
-            throw new \RuntimeException('Gift card code is required');
+            throw new BadRequestHttpException('Gift card code is required');
         }
 
         // Get currently applied codes
@@ -688,7 +700,7 @@ class CartService
 
         // Check if gift card is applied
         if (!isset($appliedCodes[$giftcardCode])) {
-            throw new \RuntimeException('Gift card "' . $giftcardCode . '" is not applied to this cart');
+            throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is not applied to this cart');
         }
 
         // Remove the code
@@ -728,14 +740,14 @@ class CartService
         string $message,
     ): \Mage_Sales_Model_Quote {
         if (!\Mage::helper('core')->isModuleEnabled('Mage_GiftMessage')) {
-            throw new \RuntimeException('Gift messages are not available');
+            throw new BadRequestHttpException('Gift messages are not available');
         }
 
         $entity = $this->resolveGiftMessageEntity($quote, $itemId);
         $helper = \Mage::helper('giftmessage/message');
         $type = $itemId === null ? 'quote' : 'item';
         if (!$helper->isMessagesAvailable($type, $entity, $quote->getStoreId())) {
-            throw new \RuntimeException('Gift messages are not available for this ' . ($itemId === null ? 'cart' : 'item'));
+            throw new BadRequestHttpException('Gift messages are not available for this ' . ($itemId === null ? 'cart' : 'item'));
         }
 
         if (trim($message) === '') {
@@ -786,7 +798,7 @@ class CartService
         }
         $item = $quote->getItemById($itemId);
         if (!$item || !$item->getId()) {
-            throw new \RuntimeException('Cart item not found');
+            throw new NotFoundHttpException('Cart item not found');
         }
         return $item;
     }
@@ -860,7 +872,7 @@ class CartService
             );
 
             if (!in_array($shippingMethod, $availableCodes, true)) {
-                throw new \RuntimeException('Shipping method is not available for this address');
+                throw new BadRequestHttpException('Shipping method is not available for this address');
             }
         }
 
@@ -892,7 +904,7 @@ class CartService
         );
 
         if (!in_array($methodCode, $availableCodes, true)) {
-            throw new \RuntimeException('Payment method is not available for this cart');
+            throw new BadRequestHttpException('Payment method is not available for this cart');
         }
 
         $paymentData = ['method' => $methodCode];
@@ -903,7 +915,7 @@ class CartService
         try {
             $quote->getPayment()->importData($paymentData);
         } catch (\Exception $e) {
-            throw new \RuntimeException('Payment method is not available: ' . $e->getMessage());
+            throw new BadRequestHttpException('Payment method is not available: ' . $e->getMessage());
         }
 
         $quote->setTotalsCollectedFlag(false);
@@ -971,7 +983,7 @@ class CartService
     {
         $guestCartId = $this->getCartIdFromMaskedId($guestMaskedId);
         if (!$guestCartId) {
-            throw new \RuntimeException('Guest cart not found');
+            throw new NotFoundHttpException('Guest cart not found');
         }
         // Use loadByIdWithoutStore, admin context may sit on a different store
         // than the guest cart, and store-scoped load() would return an empty
@@ -979,7 +991,7 @@ class CartService
         $guestCart = \Mage::getModel('sales/quote')->loadByIdWithoutStore($guestCartId);
 
         if (!$guestCart->getId()) {
-            throw new \RuntimeException('Guest cart not found');
+            throw new NotFoundHttpException('Guest cart not found');
         }
 
         // Reject any masked ID that resolves to a cart owned by a different
@@ -988,7 +1000,7 @@ class CartService
         // previous guard let slip through and allowed to be absorbed.
         $sourceCustomerId = $guestCart->getCustomerId();
         if ($sourceCustomerId && (int) $sourceCustomerId !== $customerId) {
-            throw new \RuntimeException('Guest cart not found');
+            throw new NotFoundHttpException('Guest cart not found');
         }
 
         $customerCart = $this->getCustomerCart($customerId);

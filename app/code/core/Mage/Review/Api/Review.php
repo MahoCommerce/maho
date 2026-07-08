@@ -69,9 +69,10 @@ use Maho\ApiPlatform\CrudResource;
             name: 'collection_query',
             description: 'Get reviews',
         ),
+        // Named 'product' → field `productReviews` (not `productReviewsReviews`).
         new QueryCollection(
             security: 'true',
-            name: 'productReviews',
+            name: 'product',
             description: 'Get reviews for a product',
             args: [
                 'productId' => ['type' => 'Int!', 'description' => 'Product ID'],
@@ -79,18 +80,14 @@ use Maho\ApiPlatform\CrudResource;
                 'pageSize' => ['type' => 'Int', 'description' => 'Reviews per page'],
             ],
         ),
-        new Query(
-            security: 'true',
-            name: 'review',
-            description: 'Get a single review by ID',
-        ),
+        // Named 'my' → field `myReviews`; 'submit' → `submitReview`.
         new QueryCollection(
-            name: 'myReviews',
+            name: 'my',
             description: 'Get current customer submitted reviews',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('reviews/read')",
         ),
         new Mutation(
-            name: 'submitReview',
+            name: 'submit',
             description: 'Submit a product review',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('reviews/write')",
             args: [

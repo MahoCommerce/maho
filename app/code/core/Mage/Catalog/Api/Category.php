@@ -20,7 +20,6 @@ use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\ApiPlatform\CrudResource;
-use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ApiResource(
@@ -63,30 +62,21 @@ use Symfony\Component\Serializer\Attribute\Groups;
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'item_query', description: 'Get a category by ID', security: 'true'),
-        new QueryCollection(name: 'collection_query', description: 'Get categories', security: 'true'),
         new Query(
-            security: 'true',
-            name: 'category',
+            name: 'item_query',
             description: 'Get a category by ID',
+            security: 'true',
             normalizationContext: ['groups' => ['category:read', 'category:detail']],
         ),
         new QueryCollection(
+            name: 'collection_query',
+            description: 'Get category tree',
             security: 'true',
-            name: 'categories',
             args: [
                 'parentId' => ['type' => 'Int', 'description' => 'Filter by parent category ID'],
                 'includeInMenu' => ['type' => 'Boolean', 'description' => 'Only include categories in menu'],
+                'urlKey' => ['type' => 'String', 'description' => 'Exact URL-key lookup (returns 0 or 1 category)'],
             ],
-            description: 'Get category tree',
-        ),
-        new Query(
-            security: 'true',
-            name: 'categoryByUrlKey',
-            args: ['urlKey' => ['type' => 'String!']],
-            description: 'Get a category by URL key',
-            resolver: CustomQueryResolver::class,
-            normalizationContext: ['groups' => ['category:read', 'category:detail']],
         ),
     ],
 )]

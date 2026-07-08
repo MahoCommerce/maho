@@ -28,7 +28,7 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
         $operationName = $operation->getName();
 
         return match ($operationName) {
-            'createShipment' => $this->createShipment($context),
+            'create' => $this->createShipment($context),
             'add_shipment_track', 'addTrack' => $this->addTrack($uriVariables, $context),
             'remove_shipment_track', 'removeTrack' => $this->removeTrack($uriVariables, $context),
             default => $this->createShipmentFromRest($uriVariables, $context),

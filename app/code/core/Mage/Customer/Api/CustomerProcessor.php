@@ -93,10 +93,10 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
 
         // Handle GraphQL mutations
         return match ($operationName) {
-            'createCustomerQuick' => $this->createCustomerQuick($context),
-            'customerLogin' => $this->customerLogin($context),
-            'customerLogout' => $this->customerLogout($context),
-            'updateCustomer' => $this->updateCustomerGraphQl($context),
+            'quickCreate' => $this->createCustomerQuick($context),
+            'login' => $this->customerLogin($context),
+            'logout' => $this->customerLogout($context),
+            'update' => $this->updateCustomerGraphQl($context),
             'changePassword' => $this->changePasswordGraphQl($context),
             'forgotPassword' => $this->forgotPassword($context),
             'resetPassword' => $this->resetPassword($context),

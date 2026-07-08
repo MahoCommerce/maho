@@ -49,22 +49,15 @@ use Maho\Config\ApiResource;
             description: 'Get attribute sets (canonical)',
             security: "is_granted('ROLE_ADMIN') or is_granted('attribute-sets/read')",
         ),
-        new Query(
-            name: 'attributeSet',
-            description: 'Get an attribute set by ID',
-            security: "is_granted('ROLE_ADMIN') or is_granted('attribute-sets/read')",
-        ),
-        new QueryCollection(
-            name: 'attributeSets',
-            description: 'Get attribute sets',
-            security: "is_granted('ROLE_ADMIN') or is_granted('attribute-sets/read')",
-        ),
     ],
 )]
 class AttributeSet extends CrudResource
 {
     public const MODEL = 'eav/entity_attribute_set';
     public const PRIMARY_KEY = 'attribute_set_id';
+
+    /** Admin ACL gate. Mirrors backend Mage_Adminhtml_Catalog_Product_SetController. */
+    public const ADMIN_RESOURCE = \Mage_Adminhtml_Catalog_Product_SetController::ADMIN_RESOURCE;
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

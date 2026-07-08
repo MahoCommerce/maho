@@ -118,7 +118,7 @@ describe('Category via GraphQL (read)', function (): void {
     it('reads categories via GraphQL', function (): void {
         $query = <<<'GRAPHQL'
         {
-            categoriesCategories {
+            categories {
                 edges {
                     node {
                         id
@@ -134,15 +134,17 @@ describe('Category via GraphQL (read)', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('categoriesCategories');
+        expect($response['json']['data'])->toHaveKey('categories');
     });
 
     it('reads single category by URL key via GraphQL', function (): void {
         $query = <<<'GRAPHQL'
         {
-            categoryByUrlKeyCategory(urlKey: "audio") {
-                _id
-                name
+            categories(urlKey: "audio") {
+                edges { node {
+                    _id
+                    name
+                } }
             }
         }
         GRAPHQL;

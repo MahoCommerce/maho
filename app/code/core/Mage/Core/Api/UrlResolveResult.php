@@ -36,7 +36,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         new Query(name: 'item_query', description: 'Get a URL resolve result', security: 'true'),
         new QueryCollection(name: 'collection_query', description: 'Get URL resolve results', security: 'true'),
         new Query(
-            name: 'resolveUrl',
+            name: 'resolve',
             args: ['path' => ['type' => 'String!']],
             description: 'Resolve a URL path to its target',
             resolver: CustomQueryResolver::class,

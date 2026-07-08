@@ -53,19 +53,11 @@ use Maho\ApiPlatform\CrudResource;
     ],
     graphQlOperations: [
         new Query(name: 'item_query', description: 'Get a CMS page by ID', security: 'true'),
-        new QueryCollection(name: 'collection_query', description: 'Get CMS pages', security: 'true'),
-        new Query(
-            security: 'true',
-            name: 'cmsPage',
-        ),
         new QueryCollection(
+            name: 'collection_query',
+            description: 'Get CMS pages',
             security: 'true',
-            name: 'cmsPages',
-        ),
-        new QueryCollection(
-            security: 'true',
-            name: 'cmsPagesByIdentifier',
-            args: ['identifier' => ['type' => 'String!']],
+            args: ['identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup (returns 0 or 1 page)']],
         ),
     ],
 )]

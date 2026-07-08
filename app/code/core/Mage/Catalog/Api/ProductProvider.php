@@ -53,17 +53,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // Handle custom GraphQL queries
         $operationName = $operation->getName();
 
-        if ($operationName === 'productBySku') {
-            $sku = $context['args']['sku'] ?? null;
-            return $sku ? $this->getProductBySku($sku) : null;
-        }
-
-        if ($operationName === 'productByBarcode') {
-            $barcode = $context['args']['barcode'] ?? null;
-            return $barcode ? $this->getProductByBarcode($barcode) : null;
-        }
-
-        if ($operationName === 'categoryProducts') {
+        if ($operationName === 'category') {
             $categoryId = $context['args']['categoryId'] ?? null;
             if ($categoryId === null) {
                 return new TraversablePaginator(new \ArrayIterator([]), 1, 20, 0);
@@ -74,6 +64,14 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         if ($operation instanceof CollectionOperationInterface) {
+            $sku = $context['args']['sku'] ?? null;
+            if ($sku) {
+                return $this->singleItemPaginator($this->getProductBySku($sku));
+            }
+            $barcode = $context['args']['barcode'] ?? null;
+            if ($barcode) {
+                return $this->singleItemPaginator($this->getProductByBarcode($barcode));
+            }
             return $this->getCollection($context);
         }
 
@@ -162,6 +160,16 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             ->load($id);
         if (!$product->getId()) {
             return null;
+        }
+        // Scope to the current store's website. setStoreId() only scopes EAV
+        // attribute values, not website assignment, so without this check a
+        // caller could read a product that exists solely on another website by
+        // guessing its id/sku/barcode (the collection path already filters this).
+        if ($visibleOnly) {
+            $websiteId = (int) StoreContext::getStore()->getWebsiteId();
+            if (!in_array($websiteId, array_map('intval', $product->getWebsiteIds()), true)) {
+                return null;
+            }
         }
         if ($visibleOnly && (int) $product->getStatus() !== \Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
             return null;
@@ -264,10 +272,19 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             return $this->getByUrlKey((string) $requestFilters['urlKey'], $page, $pageSize);
         }
 
-        // Use search layer for text queries, catalog layer for browsing.
-        // Use a fresh instance instead of the singleton, under FPM workers
-        // (and in the test runner) singletons retain state across requests,
-        // so the previous request's category/query would leak into this one.
+        // Pick the collection source by intent. Use a fresh layer instance
+        // instead of the singleton: under FPM workers (and the test runner)
+        // singletons retain state across requests, so a previous request's
+        // category/query would leak into this one.
+        //
+        // - Text search  → catalogsearch layer (fulltext relevance).
+        // - Category browse → catalog layer scoped to that category (layered nav).
+        // - Plain "browse all" (no search, no category) → a plain visible product
+        //   collection. The catalog layer defaults to the store ROOT category,
+        //   whose product collection resolves to essentially nothing here (the
+        //   root category isn't a normal browsable node), so it must NOT back the
+        //   full-catalog listing.
+        $layer = null;
         if (!empty($search)) {
             // Fulltext prepareResult() reads the term from the catalogsearch
             // helper's getQueryText() (request 'q'); feed it in and reset the
@@ -277,18 +294,24 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             \Mage::app()->getRequest()->setParam($searchHelper->getQueryParamName(), $search);
             $searchHelper->getQuery()->setStoreId((int) \Mage::app()->getStore()->getId());
             $layer = \Mage::getModel('catalogsearch/layer');
-        } else {
+        } elseif (!empty($requestFilters['categoryId'])) {
             $layer = \Mage::getModel('catalog/layer');
         }
 
-        if (!empty($requestFilters['categoryId'])) {
-            $category = \Mage::getModel('catalog/category')->load((int) $requestFilters['categoryId']);
-            if ($category->getId()) {
-                $layer->setCurrentCategory($category);
+        if ($layer !== null) {
+            if (!empty($requestFilters['categoryId'])) {
+                $category = \Mage::getModel('catalog/category')->load((int) $requestFilters['categoryId']);
+                if ($category->getId()) {
+                    $layer->setCurrentCategory($category);
+                }
             }
+            $collection = $layer->getProductCollection();
+        } else {
+            $collection = \Mage::getResourceModel('catalog/product_collection');
+            $collection->addAttributeToSelect('*');
+            $collection->setVisibility(\Mage::getSingleton('catalog/product_visibility')->getVisibleInCatalogIds());
         }
 
-        $collection = $layer->getProductCollection();
         $collection->addAttributeToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
 
         // Re-target the price index to this customer group so price filters,
@@ -297,15 +320,16 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // is idempotent and just overrides the group on the existing join.
         $collection->addPriceData($this->getCustomerGroupId());
 
-        if (!empty($requestFilters['priceMin']) || !empty($requestFilters['priceMax'])) {
-            $priceFilter = [];
-            if (!empty($requestFilters['priceMin'])) {
-                $priceFilter['from'] = (string) (float) $requestFilters['priceMin'];
-            }
-            if (!empty($requestFilters['priceMax'])) {
-                $priceFilter['to'] = (string) (float) $requestFilters['priceMax'];
-            }
-            $collection->addAttributeToFilter('price', $priceFilter);
+        // Filter on the price index (price_index.min_price), NOT the EAV `price`
+        // attribute. addPriceData() joined the index above, and the listing DTO
+        // reports index min_price as `price` for products whose own EAV price is
+        // 0 (configurable/bundle/grouped). Filtering the EAV attribute would drop
+        // every such product and mismatch the value the client sees.
+        if (!empty($requestFilters['priceMin'])) {
+            $collection->getSelect()->where('price_index.min_price >= ?', (float) $requestFilters['priceMin']);
+        }
+        if (!empty($requestFilters['priceMax'])) {
+            $collection->getSelect()->where('price_index.min_price <= ?', (float) $requestFilters['priceMax']);
         }
 
         // Extract attribute filters, REST uses attr_ prefix, GraphQL uses JSON string
@@ -337,9 +361,22 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 throw new BadRequestHttpException('Invalid sortBy field. Allowed: ' . implode(', ', self::SORTABLE_FIELDS));
             }
             $sortDir = ($requestFilters['sortDir'] ?? 'asc') === 'desc' ? 'DESC' : 'ASC';
-            $collection->setOrder($sortBy, $sortDir);
+            // addPriceData() leaves a default ORDER BY price_index.min_price on
+            // the layer collection; clear it so the requested sort is the sole,
+            // authoritative ordering. addAttributeToSort() (not setOrder) joins
+            // the EAV attribute, so name/other attribute sorts actually apply.
+            $collection->getSelect()->reset(\Maho\Db\Select::ORDER);
+            if ($sortBy === 'price') {
+                // Sort by the index min_price (what the DTO reports as `price`),
+                // not the EAV price attribute which is 0 for configurables/bundles
+                // and would collapse the ordering.
+                $collection->getSelect()->order('price_index.min_price ' . $sortDir);
+            } else {
+                $collection->addAttributeToSort($sortBy, $sortDir);
+            }
         } else {
-            $collection->setOrder('name', 'ASC');
+            $collection->getSelect()->reset(\Maho\Db\Select::ORDER);
+            $collection->addAttributeToSort('name', 'ASC');
         }
 
         $total = $collection->getSize();

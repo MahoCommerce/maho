@@ -150,7 +150,7 @@ describe('GraphQL Shipment mutations', function (): void {
 
         $query = <<<GRAPHQL
         mutation {
-            createShipmentShipment(input: {
+            createShipment(input: {
                 orderId: {$orderId},
                 notifyCustomer: false,
                 comment: "GraphQL shipment test"
@@ -171,9 +171,9 @@ describe('GraphQL Shipment mutations', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->not->toHaveKey('errors');
-        expect($response['json']['data']['createShipmentShipment'])->not->toBeNull();
+        expect($response['json']['data']['createShipment'])->not->toBeNull();
 
-        $shipment = $response['json']['data']['createShipmentShipment']['shipment'];
+        $shipment = $response['json']['data']['createShipment']['shipment'];
         expect($shipment['orderId'])->toBe($orderId);
         expect($shipment['totalQty'])->toBeGreaterThan(0);
         expect($shipment['items'])->toBeArray();
@@ -182,7 +182,7 @@ describe('GraphQL Shipment mutations', function (): void {
     it('rejects unauthenticated shipment creation', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
-            createShipmentShipment(input: {
+            createShipment(input: {
                 orderId: 1
             }) {
                 shipment {

@@ -157,7 +157,7 @@ describe('CMS Block via GraphQL (read)', function (): void {
     it('reads blocks collection via GraphQL', function (): void {
         $query = <<<'GRAPHQL'
         {
-            cmsBlocksCmsBlocks {
+            cmsBlocks {
                 edges {
                     node {
                         id
@@ -175,7 +175,7 @@ describe('CMS Block via GraphQL (read)', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('cmsBlocksCmsBlocks');
+        expect($response['json']['data'])->toHaveKey('cmsBlocks');
     });
 
     it('creates block via REST then reads by identifier via GraphQL', function (): void {
@@ -197,11 +197,13 @@ describe('CMS Block via GraphQL (read)', function (): void {
         // Read by identifier via GraphQL
         $query = <<<'GRAPHQL'
         {
-            cmsBlockByIdentifierCmsBlock(identifier: "test-pest-gql-verify-block") {
-                _id
-                identifier
-                title
-                content
+            cmsBlocks(identifier: "test-pest-gql-verify-block") {
+                edges { node {
+                    _id
+                    identifier
+                    title
+                    content
+                } }
             }
         }
         GRAPHQL;
@@ -209,8 +211,9 @@ describe('CMS Block via GraphQL (read)', function (): void {
         $response = gqlQuery($query);
 
         expect($response['status'])->toBe(200);
-        expect($response['json']['data']['cmsBlockByIdentifierCmsBlock'])->not->toBeNull();
-        expect($response['json']['data']['cmsBlockByIdentifierCmsBlock']['identifier'])->toBe('test-pest-gql-verify-block');
+        $node = $response['json']['data']['cmsBlocks']['edges'][0]['node'] ?? null;
+        expect($node)->not->toBeNull();
+        expect($node['identifier'])->toBe('test-pest-gql-verify-block');
 
         // Cleanup via REST
         $delete = apiDelete("/api/rest/v2/cms-blocks/{$blockId}", $token);

@@ -39,7 +39,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         new Query(name: 'item_query', description: 'Get a store config', security: 'true'),
         new QueryCollection(name: 'collection_query', description: 'Get store configs', security: 'true'),
         new Query(
-            name: 'storeConfig',
+            name: 'current',
             args: [],
             description: 'Get current store configuration',
             resolver: CustomQueryResolver::class,

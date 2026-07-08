@@ -32,11 +32,11 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
 
         $operationName = $operation->getName();
 
-        if ($operationName === 'subscribeNewsletter' || $operationName === 'subscribe') {
+        if ($operationName === 'subscribe' || $operationName === 'subscribe_rest') {
             return $this->subscribe($data, $context);
         }
 
-        if ($operationName === 'unsubscribeNewsletter' || $operationName === 'unsubscribe') {
+        if ($operationName === 'unsubscribe' || $operationName === 'unsubscribe_rest') {
             return $this->unsubscribe($data);
         }
 

@@ -18,6 +18,7 @@ use Maho\ApiPlatform\Trait\ActivityLogTrait;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Maho\ApiPlatform\Trait\ModelPersistenceTrait;
 use Maho\ApiPlatform\Trait\RateLimitTrait;
+use Maho\ApiPlatform\Trait\RawResponseTrait;
 use Maho\ApiPlatform\Trait\StoreAccessTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,6 +42,7 @@ abstract class Processor implements ProcessorInterface
     use AuthenticationTrait;
     use ModelPersistenceTrait;
     use ActivityLogTrait;
+    use RawResponseTrait;
     use StoreAccessTrait;
     use RateLimitTrait;
 

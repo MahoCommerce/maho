@@ -154,17 +154,31 @@ class ApiExceptionListener implements EventSubscriberInterface
             // Convert 403 → 401 when no Bearer token present
             // (correct HTTP semantics: 401 = "provide credentials", 403 = "credentials insufficient")
             // Basic auth is site-level access (dev/staging), not API authentication
+            // Endpoints that need a domain-specific error code (e.g. the OAuth2
+            // token endpoint returning invalid_client / unsupported_grant_type)
+            // set the X-Api-Error-Code header on the thrown exception. When
+            // present it overrides the generic status-derived code, and the
+            // exception's own message is preserved (even for 401).
+            $customErrorCode = $exception->getHeaders()['X-Api-Error-Code'] ?? null;
+
             $hasBearerToken = $request !== null
                 && str_starts_with($request->headers->get('Authorization', ''), 'Bearer ');
-            if ($statusCode === 403 && !$hasBearerToken) {
+            // A bare 403 with no Bearer token usually means "authenticate"
+            // (Basic auth is site-level, not API auth), so surface it as 401.
+            // But an endpoint that deliberately chose 403 — e.g. a public,
+            // URL-key-authenticated download rejecting a wrong key — signals that
+            // by setting X-Api-Error-Code; honour its status instead of downgrading.
+            if ($statusCode === 403 && !$hasBearerToken && $customErrorCode === null) {
                 $statusCode = 401;
             }
 
             $data = [
-                'error' => $this->getErrorCodeFromStatusCode($statusCode),
-                'message' => $statusCode === 401
-                    ? 'Authentication required'
-                    : ($exception->getMessage() ?: $this->getDefaultMessageForStatusCode($statusCode)),
+                'error' => $customErrorCode ?: $this->getErrorCodeFromStatusCode($statusCode),
+                'message' => $customErrorCode
+                    ? ($exception->getMessage() ?: $this->getDefaultMessageForStatusCode($statusCode))
+                    : ($statusCode === 401
+                        ? 'Authentication required'
+                        : ($exception->getMessage() ?: $this->getDefaultMessageForStatusCode($statusCode))),
                 'code' => $statusCode,
             ];
 

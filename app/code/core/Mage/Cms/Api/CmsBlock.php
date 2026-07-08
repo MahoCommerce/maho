@@ -20,7 +20,6 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\CrudResource;
-use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 
 #[ApiResource(
     mahoLabel: 'CMS Blocks',
@@ -54,20 +53,13 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
     ],
     graphQlOperations: [
         new Query(name: 'item_query', description: 'Get a CMS block by ID', security: 'true'),
-        new QueryCollection(name: 'collection_query', description: 'Get CMS blocks', security: 'true'),
-        new Query(
-            security: 'true',
-            name: 'cmsBlock',
-        ),
         new QueryCollection(
+            name: 'collection_query',
+            description: 'Get CMS blocks',
             security: 'true',
-            name: 'cmsBlocks',
-        ),
-        new Query(
-            security: 'true',
-            name: 'cmsBlockByIdentifier',
-            args: ['identifier' => ['type' => 'String!']],
-            resolver: CustomQueryResolver::class,
+            args: [
+                'identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup (returns 0 or 1 block)'],
+            ],
         ),
     ],
 )]

@@ -39,7 +39,7 @@ final class RevocationRequestProcessor extends Processor
             return $this->processAdminUpdate((int) $uriVariables['id'], $data);
         }
 
-        if ($name === 'submitRevocation') {
+        if ($name === 'submit') {
             $args = $context['args']['input'] ?? [];
             return $this->submit(
                 isset($args['orderId']) ? (int) $args['orderId'] : null,

@@ -34,7 +34,7 @@ function createGqlCart(?string $token = null): array
 {
     $query = <<<'GRAPHQL'
     mutation {
-        createCartCart(input: {}) {
+        createCart(input: {}) {
             cart {
                 id
                 _id
@@ -50,7 +50,7 @@ function createGqlCart(?string $token = null): array
     $response = gqlQuery($query, [], $token ?? customerToken());
 
     if ($response['status'] === 200 && !isset($response['json']['errors'])) {
-        $id = $response['json']['data']['createCartCart']['cart']['_id'] ?? null;
+        $id = $response['json']['data']['createCart']['cart']['_id'] ?? null;
         if ($id) {
             trackCreated('quote', (int) $id);
         }
@@ -66,9 +66,9 @@ describe('GraphQL Cart - Create Cart Mutation', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data']['createCartCart'])->not->toBeNull();
+        expect($response['json']['data']['createCart'])->not->toBeNull();
 
-        $cart = $response['json']['data']['createCartCart']['cart'];
+        $cart = $response['json']['data']['createCart']['cart'];
         expect($cart)->toHaveKey('maskedId');
         expect($cart['maskedId'])->toBeString();
         expect($cart['maskedId'])->not->toBeEmpty();
@@ -84,11 +84,11 @@ describe('GraphQL Cart - Query Cart', function (): void {
         $createResponse = createGqlCart();
         expect($createResponse['status'])->toBe(200);
 
-        $maskedId = $createResponse['json']['data']['createCartCart']['cart']['maskedId'];
+        $maskedId = $createResponse['json']['data']['createCart']['cart']['maskedId'];
 
         $query = <<<GRAPHQL
         {
-            getCartByMaskedIdCart(maskedId: "{$maskedId}") {
+            byMaskedIdCart(maskedId: "{$maskedId}") {
                 id
                 _id
                 maskedId
@@ -103,7 +103,7 @@ describe('GraphQL Cart - Query Cart', function (): void {
 
         expect($response['status'])->toBe(200);
 
-        $cart = $response['json']['data']['getCartByMaskedIdCart'] ?? null;
+        $cart = $response['json']['data']['byMaskedIdCart'] ?? null;
         if ($cart === null) {
             $this->markTestSkipped('GraphQL Query operations do not invoke the state provider, known API Platform limitation');
         }
@@ -122,12 +122,12 @@ describe('GraphQL Cart - Add To Cart Mutation', function (): void {
         $createResponse = createGqlCart();
         expect($createResponse['status'])->toBe(200);
 
-        $maskedId = $createResponse['json']['data']['createCartCart']['cart']['maskedId'];
+        $maskedId = $createResponse['json']['data']['createCart']['cart']['maskedId'];
         $sku = fixtures('write_test_sku');
 
         $addQuery = <<<GRAPHQL
         mutation {
-            addToCartCart(input: {maskedId: "{$maskedId}", sku: "{$sku}", qty: 1}) {
+            addToCart(input: {maskedId: "{$maskedId}", sku: "{$sku}", qty: 1}) {
                 cart {
                     _id
                     maskedId
@@ -143,9 +143,9 @@ describe('GraphQL Cart - Add To Cart Mutation', function (): void {
         $response = gqlQuery($addQuery, [], customerToken());
 
         expect($response['status'])->toBe(200);
-        expect($response['json']['data']['addToCartCart'])->not->toBeNull();
+        expect($response['json']['data']['addToCart'])->not->toBeNull();
 
-        $cart = $response['json']['data']['addToCartCart']['cart'];
+        $cart = $response['json']['data']['addToCart']['cart'];
 
         expect($cart['itemsCount'])->toBeGreaterThan(0);
 
@@ -166,11 +166,11 @@ describe('GraphQL Cart - Add To Cart Mutation', function (): void {
         $createResponse = createGqlCart();
         expect($createResponse['status'])->toBe(200);
 
-        $maskedId = $createResponse['json']['data']['createCartCart']['cart']['maskedId'];
+        $maskedId = $createResponse['json']['data']['createCart']['cart']['maskedId'];
 
         $addQuery = <<<GRAPHQL
         mutation {
-            addToCartCart(input: {maskedId: "{$maskedId}", sku: "NONEXISTENT-SKU-999", qty: 1}) {
+            addToCart(input: {maskedId: "{$maskedId}", sku: "NONEXISTENT-SKU-999", qty: 1}) {
                 cart {
                     _id
                 }
@@ -210,7 +210,7 @@ describe('GraphQL Cart - Update Item Quantity', function (): void {
 
         $updateQuery = <<<GRAPHQL
         mutation {
-            updateCartItemQtyCart(input: {maskedId: "{$maskedId}", itemId: {$itemId}, qty: 3}) {
+            updateItemQtyCart(input: {maskedId: "{$maskedId}", itemId: {$itemId}, qty: 3}) {
                 cart {
                     items
                     prices
@@ -250,7 +250,7 @@ describe('GraphQL Cart - Remove Item', function (): void {
 
         $removeQuery = <<<GRAPHQL
         mutation {
-            removeCartItemCart(input: {maskedId: "{$maskedId}", itemId: {$itemId}}) {
+            removeItemCart(input: {maskedId: "{$maskedId}", itemId: {$itemId}}) {
                 cart {
                     itemsCount
                     items
@@ -271,11 +271,11 @@ describe('GraphQL Cart - Apply Coupon', function (): void {
 
     it('returns error for invalid coupon', function (): void {
         $createResponse = createGqlCart();
-        $maskedId = $createResponse['json']['data']['createCartCart']['cart']['maskedId'];
+        $maskedId = $createResponse['json']['data']['createCart']['cart']['maskedId'];
 
         $couponQuery = <<<GRAPHQL
         mutation {
-            applyCouponToCartCart(input: {maskedId: "{$maskedId}", couponCode: "INVALID-COUPON-CODE-12345"}) {
+            applyCouponCart(input: {maskedId: "{$maskedId}", couponCode: "INVALID-COUPON-CODE-12345"}) {
                 cart {
                     appliedCoupon
                 }

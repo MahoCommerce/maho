@@ -31,7 +31,7 @@ final class UrlResolverProvider extends \Maho\ApiPlatform\Provider
         $operationName = $operation->getName();
 
         // Handle GraphQL query
-        if ($operationName === 'resolveUrl') {
+        if ($operationName === 'resolve') {
             $path = $context['args']['path'] ?? '';
         } else {
             // REST endpoint - path comes from query parameter

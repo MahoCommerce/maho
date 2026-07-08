@@ -24,7 +24,7 @@ describe('GraphQL CMS Pages', function (): void {
     it('returns CMS pages collection', function (): void {
         $query = <<<'GRAPHQL'
         {
-            cmsPagesCmsPages {
+            cmsPages {
                 edges {
                     node {
                         id
@@ -42,9 +42,9 @@ describe('GraphQL CMS Pages', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('cmsPagesCmsPages');
+        expect($response['json']['data'])->toHaveKey('cmsPages');
 
-        $edges = $response['json']['data']['cmsPagesCmsPages']['edges'] ?? [];
+        $edges = $response['json']['data']['cmsPages']['edges'] ?? [];
         expect($edges)->not->toBeEmpty();
 
         $page = $edges[0]['node'];
@@ -59,7 +59,7 @@ describe('GraphQL CMS Pages', function (): void {
     it('supports identifier filter on custom query (regression)', function (): void {
         $query = <<<'GRAPHQL'
         {
-            cmsPagesCmsPages(identifier: "home") {
+            cmsPages(identifier: "home") {
                 edges {
                     node {
                         id
@@ -78,7 +78,7 @@ describe('GraphQL CMS Pages', function (): void {
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
 
-        $edges = $response['json']['data']['cmsPagesCmsPages']['edges'] ?? [];
+        $edges = $response['json']['data']['cmsPages']['edges'] ?? [];
         if (!empty($edges)) {
             expect($edges[0]['node']['identifier'])->toBe('home');
         }
@@ -88,7 +88,7 @@ describe('GraphQL CMS Pages', function (): void {
         // First get a page ID
         $listQuery = <<<'GRAPHQL'
         {
-            cmsPagesCmsPages {
+            cmsPages {
                 edges {
                     node {
                         id
@@ -104,7 +104,7 @@ describe('GraphQL CMS Pages', function (): void {
         $listResponse = gqlQuery($listQuery, [], customerToken());
         expect($listResponse['status'])->toBe(200);
 
-        $edges = $listResponse['json']['data']['cmsPagesCmsPages']['edges'] ?? [];
+        $edges = $listResponse['json']['data']['cmsPages']['edges'] ?? [];
         if (empty($edges)) {
             $this->markTestSkipped('No CMS pages available');
         }
@@ -136,7 +136,7 @@ describe('GraphQL Blog Posts', function (): void {
     it('returns blog posts collection', function (): void {
         $query = <<<'GRAPHQL'
         {
-            blogPostsBlogPosts {
+            blogPosts {
                 edges {
                     node {
                         id
@@ -154,7 +154,7 @@ describe('GraphQL Blog Posts', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('blogPostsBlogPosts');
+        expect($response['json']['data'])->toHaveKey('blogPosts');
     });
 
     /**
@@ -165,7 +165,7 @@ describe('GraphQL Blog Posts', function (): void {
         // First get an existing blog post URL key
         $listQuery = <<<'GRAPHQL'
         {
-            blogPostsBlogPosts {
+            blogPosts {
                 edges {
                     node {
                         id
@@ -181,7 +181,7 @@ describe('GraphQL Blog Posts', function (): void {
         $listResponse = gqlQuery($listQuery, [], customerToken());
         expect($listResponse['status'])->toBe(200);
 
-        $edges = $listResponse['json']['data']['blogPostsBlogPosts']['edges'] ?? [];
+        $edges = $listResponse['json']['data']['blogPosts']['edges'] ?? [];
         if (empty($edges)) {
             $this->markTestSkipped('No blog posts available');
         }
@@ -190,7 +190,7 @@ describe('GraphQL Blog Posts', function (): void {
 
         $query = <<<GRAPHQL
         {
-            blogPostsBlogPosts(urlKey: "{$urlKey}") {
+            blogPosts(urlKey: "{$urlKey}") {
                 edges {
                     node {
                         id
@@ -206,7 +206,7 @@ describe('GraphQL Blog Posts', function (): void {
         $response = gqlQuery($query, [], customerToken());
 
         expect($response['status'])->toBe(200);
-        $filteredEdges = $response['json']['data']['blogPostsBlogPosts']['edges'] ?? [];
+        $filteredEdges = $response['json']['data']['blogPosts']['edges'] ?? [];
         expect($filteredEdges)->not->toBeEmpty();
         expect($filteredEdges[0]['node']['urlKey'])->toBe($urlKey);
     });
@@ -214,7 +214,7 @@ describe('GraphQL Blog Posts', function (): void {
     it('returns single blog post by IRI', function (): void {
         $listQuery = <<<'GRAPHQL'
         {
-            blogPostsBlogPosts {
+            blogPosts {
                 edges {
                     node {
                         id
@@ -229,7 +229,7 @@ describe('GraphQL Blog Posts', function (): void {
         $listResponse = gqlQuery($listQuery, [], customerToken());
         expect($listResponse['status'])->toBe(200);
 
-        $edges = $listResponse['json']['data']['blogPostsBlogPosts']['edges'] ?? [];
+        $edges = $listResponse['json']['data']['blogPosts']['edges'] ?? [];
         if (empty($edges)) {
             $this->markTestSkipped('No blog posts available');
         }

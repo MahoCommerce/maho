@@ -9,6 +9,22 @@ declare(strict_types=1);
 
 use Tests\Helpers\ApiV2Helper;
 
+// Autoload module API classes (Mage\Foo\Api\Bar, Maho\Foo\Api\Bar) in tests.
+// At runtime the Symfony API kernel registers this PSR-4-style mapping; the
+// plain Mage bootstrap used by Backend/Frontend tests does not, so without this
+// model-level integration tests cannot instantiate API services/processors.
+// Namespace mirrors the path under app/code/core/. Maho\ApiPlatform\* base
+// classes are composer-PSR-4 and are intentionally not matched here.
+spl_autoload_register(function (string $class): void {
+    if (!preg_match('#^(Mage|Maho)\\\\[A-Za-z0-9_]+\\\\Api\\\\#', $class)) {
+        return;
+    }
+    $file = dirname(__DIR__) . '/app/code/core/' . str_replace('\\', '/', $class) . '.php';
+    if (is_file($file)) {
+        require_once $file;
+    }
+});
+
 // For frontend tests:
 // uses(Tests\MahoFrontendTestCase::class);
 
@@ -102,13 +118,7 @@ function invalidToken(): string
  */
 function serviceToken(array $permissions = ['all'], ?array $storeIds = null): string
 {
-    return ApiV2Helper::generateToken([
-        'sub' => 'api_user_test',
-        'type' => 'api_user',
-        // No api_user_id - use JWT-embedded permissions for testing
-        'permissions' => $permissions,
-        'allowed_store_ids' => $storeIds,
-    ]);
+    return ApiV2Helper::generateServiceToken($permissions, $storeIds);
 }
 
 /**
@@ -118,12 +128,7 @@ function serviceToken(array $permissions = ['all'], ?array $storeIds = null): st
  */
 function serviceTokenAs(string $identity, array $permissions = ['all'], ?array $storeIds = null): string
 {
-    return ApiV2Helper::generateToken([
-        'sub' => $identity,
-        'type' => 'api_user',
-        'permissions' => $permissions,
-        'allowed_store_ids' => $storeIds,
-    ]);
+    return ApiV2Helper::generateServiceToken($permissions, $storeIds, $identity);
 }
 
 function fixtures(string $key): mixed

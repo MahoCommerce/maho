@@ -158,7 +158,7 @@ describe('CMS Page via GraphQL (read)', function (): void {
     it('reads pages collection via GraphQL', function (): void {
         $query = <<<'GRAPHQL'
         {
-            cmsPagesCmsPages {
+            cmsPages {
                 edges {
                     node {
                         id
@@ -176,9 +176,9 @@ describe('CMS Page via GraphQL (read)', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('cmsPagesCmsPages');
+        expect($response['json']['data'])->toHaveKey('cmsPages');
 
-        $edges = $response['json']['data']['cmsPagesCmsPages']['edges'] ?? [];
+        $edges = $response['json']['data']['cmsPages']['edges'] ?? [];
         expect($edges)->not->toBeEmpty();
     });
 

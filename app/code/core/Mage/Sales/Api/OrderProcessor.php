@@ -50,7 +50,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $this->normalizeGraphQlInput($context);
 
         return match ($operationName) {
-            'placeOrder', '_api_/orders_post', 'place_guest_order', 'place_customer_order' => $this->placeOrder($context, $uriVariables),
+            'place', 'place_order', 'place_guest_order', 'place_customer_order' => $this->placeOrder($context, $uriVariables),
             'cancel', 'order_cancel' => $this->cancelOrder($context, $uriVariables),
             'hold', 'order_hold' => $this->holdOrder($context, $uriVariables),
             'unhold', 'order_unhold' => $this->unholdOrder($context, $uriVariables),
@@ -169,6 +169,19 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // payment_intent_id) into the payment's additional_information so the
         // payment-method module can finalise the charge at order placement.
         if ($paymentMethod) {
+            // Validate the method is actually available for this quote (enabled,
+            // and within its min/max total, country and currency constraints)
+            // before applying it. setMethod() alone accepts any configured code,
+            // so without this a client could force e.g. "free" on a paid cart
+            // and place an unpaid order. Mirrors CartService::setPaymentMethod().
+            $availableCodes = array_map(
+                fn($method) => $method->getCode(),
+                \Mage::helper('payment')->getStoreMethods($quote->getStoreId(), $quote),
+            );
+            if (!in_array($paymentMethod, $availableCodes, true)) {
+                throw new BadRequestHttpException('Payment method is not available for this cart');
+            }
+
             $payment = $quote->getPayment();
             $payment->setMethod($paymentMethod);
             if (isset($args['paymentData']) && is_array($args['paymentData'])) {

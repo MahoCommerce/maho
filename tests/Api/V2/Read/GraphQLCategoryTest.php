@@ -23,7 +23,7 @@ describe('GraphQL Categories Collection Query', function (): void {
     it('returns a list of categories', function (): void {
         $query = <<<'GRAPHQL'
         {
-            categoriesCategories {
+            categories {
                 edges {
                     node {
                         id
@@ -43,9 +43,9 @@ describe('GraphQL Categories Collection Query', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('categoriesCategories');
+        expect($response['json']['data'])->toHaveKey('categories');
 
-        $edges = $response['json']['data']['categoriesCategories']['edges'] ?? [];
+        $edges = $response['json']['data']['categories']['edges'] ?? [];
         expect($edges)->not->toBeEmpty();
 
         $category = $edges[0]['node'];
@@ -57,7 +57,7 @@ describe('GraphQL Categories Collection Query', function (): void {
     it('supports parentId filter', function (): void {
         $query = <<<'GRAPHQL'
         {
-            categoriesCategories(parentId: 2) {
+            categories(parentId: 2) {
                 edges {
                     node {
                         id
@@ -74,7 +74,7 @@ describe('GraphQL Categories Collection Query', function (): void {
 
         expect($response['status'])->toBe(200);
 
-        $edges = $response['json']['data']['categoriesCategories']['edges'] ?? [];
+        $edges = $response['json']['data']['categories']['edges'] ?? [];
         foreach ($edges as $edge) {
             expect($edge['node']['parentId'])->toBe(2);
         }
@@ -90,7 +90,7 @@ describe('GraphQL Single Category Query', function (): void {
 
         $query = <<<GRAPHQL
         {
-            categoryCategory(id: "{$iri}") {
+            category(id: "{$iri}") {
                 id
                 _id
                 name
@@ -107,9 +107,9 @@ describe('GraphQL Single Category Query', function (): void {
         $response = gqlQuery($query, [], customerToken());
 
         expect($response['status'])->toBe(200);
-        expect($response['json']['data']['categoryCategory'])->not->toBeNull();
+        expect($response['json']['data']['category'])->not->toBeNull();
 
-        $category = $response['json']['data']['categoryCategory'];
+        $category = $response['json']['data']['category'];
         expect($category['_id'])->toBe($categoryId);
         expect($category['name'])->toBeString();
     });
@@ -119,7 +119,7 @@ describe('GraphQL Single Category Query', function (): void {
 
         $query = <<<GRAPHQL
         {
-            categoryCategory(id: "{$iri}") {
+            category(id: "{$iri}") {
                 id
                 name
             }
@@ -130,7 +130,7 @@ describe('GraphQL Single Category Query', function (): void {
 
         expect($response['status'])->toBe(200);
 
-        $data = $response['json']['data']['categoryCategory'] ?? null;
+        $data = $response['json']['data']['category'] ?? null;
         $errors = $response['json']['errors'] ?? [];
         expect($data === null || !empty($errors))->toBeTrue();
     });
@@ -143,7 +143,7 @@ describe('GraphQL Category By URL Key Query', function (): void {
         // First get a category to know a valid URL key
         $query = <<<'GRAPHQL'
         {
-            categoriesCategories {
+            categories {
                 edges {
                     node {
                         _id
@@ -158,7 +158,7 @@ describe('GraphQL Category By URL Key Query', function (): void {
         $response = gqlQuery($query, [], customerToken());
         expect($response['status'])->toBe(200);
 
-        $edges = $response['json']['data']['categoriesCategories']['edges'] ?? [];
+        $edges = $response['json']['data']['categories']['edges'] ?? [];
         $urlKey = null;
         foreach ($edges as $edge) {
             if (!empty($edge['node']['urlKey'])) {
@@ -173,11 +173,13 @@ describe('GraphQL Category By URL Key Query', function (): void {
 
         $lookupQuery = <<<GRAPHQL
         {
-            categoryByUrlKeyCategory(urlKey: "{$urlKey}") {
-                id
-                _id
-                name
-                urlKey
+            categories(urlKey: "{$urlKey}") {
+                edges { node {
+                    id
+                    _id
+                    name
+                    urlKey
+                } }
             }
         }
         GRAPHQL;
@@ -187,10 +189,9 @@ describe('GraphQL Category By URL Key Query', function (): void {
         expect($lookupResponse['status'])->toBe(200);
         expect($lookupResponse['json'])->toHaveKey('data');
 
-        $result = $lookupResponse['json']['data']['categoryByUrlKeyCategory'];
+        $result = $lookupResponse['json']['data']['categories']['edges'][0]['node'] ?? null;
         if ($result === null) {
-            // Known issue: categoryByUrlKey custom query may return null
-            $this->markTestSkipped('categoryByUrlKeyCategory returns null, provider may not be implemented for this operation');
+            $this->markTestSkipped('categories(urlKey:) returned no match');
         }
 
         expect($result['urlKey'])->toBe($urlKey);

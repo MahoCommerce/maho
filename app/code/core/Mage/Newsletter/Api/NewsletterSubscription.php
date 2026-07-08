@@ -32,19 +32,19 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
     operations: [
         new Get(
             uriTemplate: '/newsletter/status',
-            name: 'status',
+            name: 'status_rest',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('newsletter/read')",
             description: 'Get subscription status for authenticated customer',
         ),
         new Post(
             uriTemplate: '/newsletter/subscribe',
-            name: 'subscribe',
+            name: 'subscribe_rest',
             security: 'true',
             description: 'Subscribe to newsletter',
         ),
         new Post(
             uriTemplate: '/newsletter/unsubscribe',
-            name: 'unsubscribe',
+            name: 'unsubscribe_rest',
             security: 'true',
             description: 'Unsubscribe from newsletter',
         ),
@@ -53,11 +53,11 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         // Admin/API only: the generic by-ID query has no per-record ownership
         // check (it falls through to CrudProvider::provideItem), so exposing it
         // to ROLE_CUSTOMER would let any logged-in customer read every subscriber's
-        // email/customerId by iterating IDs. Customers use newsletterStatus.
+        // email/customerId by iterating IDs. Customers use the `status` query.
         new Query(name: 'item_query', description: 'Get newsletter subscription', security: "is_granted('ROLE_ADMIN') or is_granted('newsletter/read')"),
         new QueryCollection(name: 'collection_query', description: 'Get newsletter subscriptions', security: "is_granted('ROLE_ADMIN') or is_granted('newsletter/read')"),
         new Query(
-            name: 'newsletterStatus',
+            name: 'status',
             args: [],
             description: 'Get subscription status for authenticated customer',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('newsletter/read')",
@@ -65,13 +65,13 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         ),
         new Mutation(
             security: 'true',
-            name: 'subscribeNewsletter',
+            name: 'subscribe',
             args: ['email' => ['type' => 'String']],
             description: 'Subscribe to newsletter',
         ),
         new Mutation(
             security: 'true',
-            name: 'unsubscribeNewsletter',
+            name: 'unsubscribe',
             args: ['email' => ['type' => 'String']],
             description: 'Unsubscribe from newsletter',
         ),

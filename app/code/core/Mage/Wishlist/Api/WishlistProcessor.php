@@ -43,7 +43,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         $operationName = $operation->getName();
 
         // GraphQL mutations
-        if ($operationName === 'addToWishlist') {
+        if ($operationName === 'addTo') {
             $args = $context['args']['input'] ?? [];
             return $this->addToWishlist(
                 (int) $args['productId'],
@@ -52,12 +52,12 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
             );
         }
 
-        if ($operationName === 'removeFromWishlist') {
+        if ($operationName === 'removeFrom') {
             $args = $context['args']['input'] ?? [];
             return $this->removeFromWishlist((int) $args['itemId']);
         }
 
-        if ($operationName === 'moveWishlistItemToCart') {
+        if ($operationName === 'moveToCart') {
             $args = $context['args']['input'] ?? [];
             return $this->moveToCart(
                 (int) $args['itemId'],
@@ -65,7 +65,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
             );
         }
 
-        if ($operationName === 'syncWishlist') {
+        if ($operationName === 'sync') {
             $args = $context['args']['input'] ?? [];
             $addedItems = $this->syncWishlist($args['productIds'] ?? []);
             // GraphQL mutation expects a single WishlistItem
@@ -86,7 +86,8 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
             $itemId = (int) ($uriVariables['id'] ?? 0);
             $body = $context['request']?->toArray() ?? [];
             $qty = (int) ($body['qty'] ?? $data->qty);
-            $cartId = $body['cartId'] ?? null;
+            // JSON numbers arrive as int; moveToCart types $cartId as ?string.
+            $cartId = isset($body['cartId']) ? (string) $body['cartId'] : null;
             return $this->moveToCart($itemId, $qty, $cartId);
         }
 
@@ -119,6 +120,13 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
     {
         /** @var \Mage_Wishlist_Model_Wishlist $wishlist */
         $wishlist = \Mage::getModel('wishlist/wishlist')->loadByCustomer($customerId, true);
+        // loadByCustomer(create: true) instantiates but does NOT persist a new
+        // wishlist, so its id is null. Attaching an item now would set
+        // wishlist_id = (int) null = 0, orphaning it from the customer's real
+        // wishlist. Persist first so the item binds to a valid wishlist id.
+        if (!$wishlist->getId()) {
+            $wishlist->save();
+        }
         return $wishlist;
     }
 
@@ -149,12 +157,16 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
             ->getFirstItem();
 
         if ($existingItem && $existingItem->getId()) {
-            $existingItem->setQty($existingItem->getQty() + $qty);
+            // Re-load the item as a clean standalone model. The collection-loaded
+            // instance carries joined product data and reset-changed flags whose
+            // save() round-trip drops the row; a fresh load updates cleanly.
+            /** @var \Mage_Wishlist_Model_Item $item */
+            $item = \Mage::getModel('wishlist/item')->load((int) $existingItem->getId());
+            $item->setQty($item->getQty() + $qty);
             if ($description !== null) {
-                $existingItem->setDescription($description);
+                $item->setDescription($description);
             }
-            $existingItem->save();
-            $item = $existingItem;
+            $item->save();
         } else {
             // Add new item directly (skip core's addNewItem which has its own flawed dedup)
             /** @var \Mage_Wishlist_Model_Item $item */

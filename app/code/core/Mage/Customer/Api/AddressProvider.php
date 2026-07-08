@@ -43,7 +43,7 @@ final class AddressProvider extends \Maho\ApiPlatform\Provider
         $operationName = $operation->getName() ?? '';
 
         // Handle GraphQL operations
-        if ($operationName === 'myAddresses') {
+        if ($operationName === 'my') {
             $customerId = $this->getAuthenticatedCustomerId();
             if (!$customerId) {
                 throw new NotFoundHttpException('Authentication required');
@@ -54,21 +54,6 @@ final class AddressProvider extends \Maho\ApiPlatform\Provider
                 throw new NotFoundHttpException('Customer not found');
             }
             return $this->getCollection($customer);
-        }
-
-        if ($operationName === 'address') {
-            $addressId = (int) ($context['args']['id'] ?? $uriVariables['id'] ?? 0);
-            if (!$addressId) {
-                throw new NotFoundHttpException('Address ID is required');
-            }
-            $address = \Mage::getModel('customer/address')->load($addressId);
-            if (!$address->getId()) {
-                return null;
-            }
-            $customerId = (int) $address->getCustomerId();
-            $this->authorizeCustomerAccess($customerId);
-            $customer = \Mage::getModel('customer/customer')->load($customerId);
-            return $this->mapToDto($address, $customer);
         }
 
         $customerId = (int) ($uriVariables['customerId'] ?? 0);

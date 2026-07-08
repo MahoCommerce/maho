@@ -58,6 +58,11 @@ final class ProductAttributeProvider extends CrudProvider
     #[\Override]
     protected function provideCollection(array $context): TraversablePaginator
     {
+        $code = $context['args']['code'] ?? null;
+        if ($code) {
+            return $this->singleItemPaginator($this->getByCode((string) $code));
+        }
+
         $collection = \Mage::getResourceModel('catalog/product_attribute_collection');
 
         $this->applyCollectionFilters($collection, $context['filters'] ?? []);
@@ -104,26 +109,18 @@ final class ProductAttributeProvider extends CrudProvider
     }
 
     /**
-     * Resolve the productAttribute(code: …) GraphQL query.
+     * Resolve a single product attribute by its code (catalog_product scope).
      */
-    #[\Override]
-    protected function handleOperation(string $name, array $context, array $uriVariables): mixed
+    private function getByCode(string $code): ?ProductAttribute
     {
-        if ($name === 'productAttribute') {
-            $code = $context['args']['code'] ?? null;
-            if (!$code) {
-                return null;
-            }
-
-            $attribute = \Mage::getSingleton('eav/config')
-                ->getAttribute(\Mage_Catalog_Model_Product::ENTITY, $code);
-            if (!$attribute || !$attribute->getId()) {
-                return null;
-            }
-
-            return $this->toDto($attribute);
+        $attribute = \Mage::getSingleton('eav/config')
+            ->getAttribute(\Mage_Catalog_Model_Product::ENTITY, $code);
+        if (!$attribute || !$attribute->getId()) {
+            return null;
         }
-        return null;
+
+        /** @var ProductAttribute */
+        return $this->toDto($attribute);
     }
 
     /**

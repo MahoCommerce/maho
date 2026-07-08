@@ -35,7 +35,7 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         StoreContext::ensureStore();
         $operationName = $operation->getName();
 
-        if ($operationName === 'submitReview') {
+        if ($operationName === 'submit') {
             $args = $context['args']['input'] ?? [];
             return $this->submitReview(
                 (int) $args['productId'],

@@ -57,13 +57,15 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/read')",
         ),
         new QueryCollection(
-            name: 'orderCreditMemos',
+            // Named 'order' so ApiPlatform's appended shortName yields the field
+            // `orderCreditMemos`, not a stuttering `orderCreditMemosCreditMemos`.
+            name: 'order',
             description: 'Get credit memos for a specific order',
             args: ['orderId' => ['type' => 'Int!']],
             security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/read')",
         ),
         new Mutation(
-            name: 'createCreditMemo',
+            name: 'create',
             description: 'Create a credit memo / refund for an order',
             args: [
                 'orderId' => ['type' => 'Int!'],

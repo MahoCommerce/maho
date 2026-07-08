@@ -32,7 +32,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
     operations: [
         new Get(
             uriTemplate: '/customers/me',
-            name: 'me',
+            name: 'me_rest',
             description: 'Get current authenticated customer',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('customers/read')",
         ),
@@ -84,10 +84,8 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
     ],
     graphQlOperations: [
         new Query(name: 'item_query', description: 'Get a customer by ID', security: "is_granted('ROLE_ADMIN') or is_granted('customers/read')"),
-        new QueryCollection(name: 'collection_query', description: 'Get customers', security: "is_granted('ROLE_ADMIN') or is_granted('customers/read')"),
-        new Query(name: 'customer', description: 'Get a customer by ID', security: "is_granted('ROLE_ADMIN') or is_granted('customers/read')"),
         new QueryCollection(
-            name: 'customers',
+            name: 'collection_query',
             description: 'Search customers by email, phone, or name',
             args: [
                 'search' => ['type' => 'String', 'description' => 'Search by name, email, or phone'],
@@ -98,8 +96,21 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             ],
             security: "is_granted('ROLE_ADMIN') or is_granted('customers/read')",
         ),
+        // Field `currentCustomer` (name + shortName) — closest reachable to
+        // Magento 2's bare `customer`=me without colliding with our admin by-ID
+        // `customer` item query. No `id` arg — resolved from the authenticated
+        // customer token via CustomQueryResolver, mirroring `customerCart`.
+        // ROLE_CUSTOMER only: an admin/API token has no "self" customer, so it is
+        // denied (GraphQL surfaces a 403 error) rather than returning an empty node.
+        new Query(
+            name: 'current',
+            args: [],
+            description: 'Get the current authenticated customer',
+            security: "is_granted('ROLE_CUSTOMER')",
+            resolver: CustomQueryResolver::class,
+        ),
         new Mutation(
-            name: 'createCustomerQuick',
+            name: 'quickCreate',
             description: 'Quick customer creation by an admin or API integration',
             args: [
                 'email' => ['type' => 'String!', 'description' => 'Customer email'],
@@ -111,16 +122,16 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         ),
         new Mutation(
             security: 'true',
-            name: 'customerLogin',
+            name: 'login',
             description: 'Customer login',
         ),
         new Mutation(
-            name: 'customerLogout',
+            name: 'logout',
             description: 'Customer logout',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('customers/write')",
         ),
         new Mutation(
-            name: 'updateCustomer',
+            name: 'update',
             args: [
                 'firstName' => ['type' => 'String'],
                 'lastName' => ['type' => 'String'],

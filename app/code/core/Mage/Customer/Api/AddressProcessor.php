@@ -44,13 +44,13 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         $operationName = $operation->getName() ?? '';
 
         // Handle GraphQL mutations
-        if ($operationName === 'createAddress') {
+        if ($operationName === 'create') {
             return $this->handleGraphQlCreate($data, $context);
         }
-        if ($operationName === 'updateAddress') {
+        if ($operationName === 'update') {
             return $this->handleGraphQlUpdate($data, $context);
         }
-        if ($operationName === 'deleteAddress') {
+        if ($operationName === 'delete') {
             $this->handleGraphQlDelete($context);
             return null;
         }

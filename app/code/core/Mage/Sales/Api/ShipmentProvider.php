@@ -30,7 +30,7 @@ final class ShipmentProvider extends CrudProvider
 
         $operationName = $operation->getName();
 
-        if ($operationName === 'orderShipments') {
+        if ($operationName === 'order') {
             $orderId = (int) ($context['args']['orderId'] ?? 0);
             if (!$orderId) {
                 throw new \RuntimeException('Order ID is required');

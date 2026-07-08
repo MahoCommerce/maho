@@ -55,6 +55,41 @@ class IdempotencyListener
         private readonly TokenStorageInterface $tokenStorage,
     ) {}
 
+    // Key FORMAT validation runs BEFORE the security firewall (priority 8) so a
+    // malformed key is rejected with 400 regardless of authentication — an
+    // unauthenticated caller with a bad key should learn the key is invalid, not
+    // get a blanket 401. This check needs no user identity. The scope/replay
+    // logic still runs post-firewall (onRequest, priority 5), where the
+    // authenticated user is available.
+    #[AsEventListener(event: KernelEvents::REQUEST, priority: 100)]
+    public function validateKeyFormat(RequestEvent $event): void
+    {
+        $request = $event->getRequest();
+
+        if (!in_array($request->getMethod(), ['POST', 'PUT', 'PATCH'], true)) {
+            return;
+        }
+
+        $idempotencyKey = $request->headers->get(self::HEADER_KEY);
+        if ($idempotencyKey === null) {
+            return;
+        }
+
+        // Auth endpoints ignore the header entirely (see onRequest), so don't
+        // reject a malformed one there either.
+        if (str_contains($request->getPathInfo(), '/auth/')) {
+            return;
+        }
+
+        if (strlen($idempotencyKey) < 1 || strlen($idempotencyKey) > self::MAX_KEY_LENGTH) {
+            throw new BadRequestHttpException('X-Idempotency-Key must be between 1 and 255 characters');
+        }
+
+        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $idempotencyKey)) {
+            throw new BadRequestHttpException('X-Idempotency-Key may only contain alphanumeric characters, dashes, and underscores');
+        }
+    }
+
     // Must run AFTER Symfony's security firewall (priority 8) so the security
     // token is populated; getUserScope() relies on the authenticated user.
     // Running before the firewall (e.g. at priority 100) makes getUserScope()
@@ -83,14 +118,7 @@ class IdempotencyListener
             return;
         }
 
-        // Validate key format
-        if (strlen($idempotencyKey) < 1 || strlen($idempotencyKey) > self::MAX_KEY_LENGTH) {
-            throw new BadRequestHttpException('X-Idempotency-Key must be between 1 and 255 characters');
-        }
-
-        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $idempotencyKey)) {
-            throw new BadRequestHttpException('X-Idempotency-Key may only contain alphanumeric characters, dashes, and underscores');
-        }
+        // Key format was already validated pre-firewall (validateKeyFormat).
 
         // Without a stable caller identity we can't safely scope replays:
         // every unauthenticated request would share the same bucket, so guest

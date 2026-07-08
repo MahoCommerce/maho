@@ -74,7 +74,7 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
             'customer' => $this->handleCustomerGrant($body),
             'client_credentials' => $this->handleClientCredentialsGrant($body),
             'api_user' => $this->handleApiUserGrant($body),
-            default => throw new BadRequestHttpException('Unsupported grant type. Use: customer, client_credentials, api_user'),
+            default => throw new BadRequestHttpException('Unsupported grant type. Use: customer, client_credentials, api_user', null, 0, ['X-Api-Error-Code' => 'unsupported_grant_type']),
         };
     }
 
@@ -86,11 +86,11 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         $coreHelper = \Mage::helper('core');
 
         if (!$coreHelper->isValidNotBlank($email) || !$coreHelper->isValidNotBlank($password)) {
-            throw new BadRequestHttpException('Email and password are required');
+            throw new BadRequestHttpException('Email and password are required', null, 0, ['X-Api-Error-Code' => 'invalid_request']);
         }
 
         if (!$coreHelper->isValidEmail($email)) {
-            throw new BadRequestHttpException('Invalid email format');
+            throw new BadRequestHttpException('Invalid email format', null, 0, ['X-Api-Error-Code' => 'invalid_request']);
         }
 
         $this->checkRateLimit('auth_token:email:' . strtolower($email), 'customer_login', 60);
@@ -196,7 +196,7 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         if ($confirmation !== null) {
             throw new HttpException(403, 'This account is not confirmed. Please check your email for the confirmation link.');
         }
-        throw new UnauthorizedHttpException('Bearer', 'Invalid email or password');
+        throw new UnauthorizedHttpException('Bearer', 'Invalid email or password', null, 0, ['X-Api-Error-Code' => 'invalid_credentials']);
     }
 
     private function handleClientCredentialsGrant(array $data): AuthToken
@@ -205,7 +205,7 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         $clientSecret = $data['client_secret'] ?? '';
 
         if (empty($clientId) || empty($clientSecret)) {
-            throw new BadRequestHttpException('client_id and client_secret are required');
+            throw new BadRequestHttpException('client_id and client_secret are required', null, 0, ['X-Api-Error-Code' => 'invalid_request']);
         }
 
         // Per-client cap mirrors the customer/api_user grants so an attacker
@@ -231,7 +231,7 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
             $secretValid = password_verify($clientSecret, $hash);
 
             if (!$row || !$secretValid) {
-                throw new UnauthorizedHttpException('Bearer', 'Invalid client credentials');
+                throw new UnauthorizedHttpException('Bearer', 'Invalid client credentials', null, 0, ['X-Api-Error-Code' => 'invalid_client']);
             }
 
             // Only disclose account state once the secret is proven correct.
@@ -256,7 +256,7 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         $apiKey = $data['api_key'] ?? '';
 
         if (empty($username) || empty($apiKey)) {
-            throw new BadRequestHttpException('username and api_key are required');
+            throw new BadRequestHttpException('username and api_key are required', null, 0, ['X-Api-Error-Code' => 'invalid_request']);
         }
 
         $this->checkRateLimit('auth_token:api_user:' . strtolower($username), 'customer_login', 60);
@@ -274,7 +274,7 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
             $keyValid = \Mage::helper('core')->validateHash($apiKey, $storedHash);
 
             if (!$apiUser->getId() || !$keyValid) {
-                throw new UnauthorizedHttpException('Bearer', 'Invalid API credentials');
+                throw new UnauthorizedHttpException('Bearer', 'Invalid API credentials', null, 0, ['X-Api-Error-Code' => 'invalid_client']);
             }
 
             // Only disclose account state once the key is proven correct.

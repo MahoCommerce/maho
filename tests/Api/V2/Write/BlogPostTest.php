@@ -161,7 +161,7 @@ describe('Blog Post via GraphQL (read)', function (): void {
     it('reads blog posts collection via GraphQL', function (): void {
         $query = <<<'GRAPHQL'
         {
-            blogPostsBlogPosts {
+            blogPosts {
                 edges {
                     node {
                         id
@@ -179,7 +179,7 @@ describe('Blog Post via GraphQL (read)', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
-        expect($response['json']['data'])->toHaveKey('blogPostsBlogPosts');
+        expect($response['json']['data'])->toHaveKey('blogPosts');
     });
 
     it('creates post via REST then reads via GraphQL', function (): void {
@@ -221,7 +221,7 @@ describe('Blog Post via GraphQL (read)', function (): void {
         // Read via urlKey filter
         $filterQuery = <<<'GRAPHQL'
         {
-            blogPostsBlogPosts(urlKey: "test-pest-gql-verify-post") {
+            blogPosts(urlKey: "test-pest-gql-verify-post") {
                 edges {
                     node {
                         _id
@@ -235,7 +235,7 @@ describe('Blog Post via GraphQL (read)', function (): void {
 
         $filterResponse = gqlQuery($filterQuery);
         expect($filterResponse['status'])->toBe(200);
-        $edges = $filterResponse['json']['data']['blogPostsBlogPosts']['edges'] ?? [];
+        $edges = $filterResponse['json']['data']['blogPosts']['edges'] ?? [];
         expect($edges)->not->toBeEmpty();
         expect($edges[0]['node']['urlKey'])->toBe('test-pest-gql-verify-post');
 

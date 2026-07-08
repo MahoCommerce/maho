@@ -190,14 +190,38 @@ class Kernel extends BaseKernel
                 'cache_headers' => [
                     'vary' => ['Accept', 'Authorization', 'X-Store-Code'],
                 ],
+                // Maho's API is body-first: resources are computed DTOs returned by
+                // custom providers/processors, and many mutation responses live at
+                // action sub-URIs (…/items/{itemId}/gift-message, …/giftcards/{code})
+                // or are non-addressable altogether (media upload, auth token). For
+                // JSON-LD the item normalizer tries to build an `@id` for every one
+                // of these, resolving the operation's URI variables against the DTO —
+                // and throws "Unable to generate an IRI" (HTTP 500) whenever a path
+                // variable (itemId, code, path) has no matching DTO property or no
+                // item GET exists. Clients read the JSON body, not the `@id`, so we
+                // disable IRI generation globally rather than annotate every action
+                // operation. Hydra collections keep their `member`/`totalItems`
+                // shape; nested relations (addresses, etc.) embed as objects.
+                'normalization_context' => [
+                    'gen_id' => false,
+                    // gen_id alone isn't enough: the JSON-LD ItemNormalizer gates
+                    // the root `@id` on output.gen_id (a per-property/child flag)
+                    // and on force_iri_generation, which it reads straight from the
+                    // serialization context. Set force_iri_generation:false so the
+                    // root `@id` is never emitted and IriConverter is never called
+                    // for an unaddressable action response.
+                    'force_iri_generation' => false,
+                ],
             ],
             'graphql' => [
                 'enabled' => true,
                 'graphiql' => ['enabled' => $twigAvailable && $this->isDebug()],
                 // Introspection lets any unauthenticated client enumerate the
-                // full schema, we only enable it in debug so dev tools work,
-                // but keep the production attack surface minimal.
-                'introspection' => ['enabled' => $this->isDebug()],
+                // full schema. Enable it in dev (kernel debug) and under the test
+                // harness (MAHO_GRAPHQL_INTROSPECTION) so GraphQL tooling and the
+                // integration suite work, but keep it off in production to
+                // minimise the attack surface.
+                'introspection' => ['enabled' => $this->isDebug() || (bool) getenv('MAHO_GRAPHQL_INTROSPECTION')],
                 'max_query_depth' => 12,
                 'max_query_complexity' => 500,
             ],
@@ -332,6 +356,16 @@ class Kernel extends BaseKernel
         $services->set(GraphQl\CustomQueryResolver::class)
             ->arg('$providerLocator', tagged_locator('maho.api.state_provider'))
             ->tag('api_platform.graphql.query_resolver');
+
+        // Tolerate un-generatable self-IRIs during serialization. Action
+        // operations return computed DTOs at sub-URIs whose path variables
+        // (itemId, code, path) don't map to a DTO property, so the core
+        // normalizer's unconditional getIriFromResource() throws and 500s an
+        // otherwise-successful response. The decorator downgrades that to a
+        // null IRI (the interface already allows it). See the class docblock.
+        $services->set(Serializer\TolerantIriConverter::class)
+            ->decorate('api_platform.iri_converter')
+            ->arg('$inner', new Reference(Serializer\TolerantIriConverter::class . '.inner'));
 
         // Translate IriConverter input errors (bare `id: 1` instead of an IRI)
         // into proper GraphQL null-results / 404s instead of HTTP 500. See the

@@ -13,6 +13,7 @@ namespace Mage\Checkout\Api;
 use ApiPlatform\Metadata\Operation;
 use Symfony\Bundle\SecurityBundle\Security;
 use Maho\ApiPlatform\Service\StoreContext;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -34,7 +35,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
      * Process cart mutations
      */
     #[\Override]
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Cart
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Cart|Response
     {
         StoreContext::ensureStore();
 
@@ -73,21 +74,22 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         }
 
         return match ($operationName) {
-            'createCart', 'create_guest_cart' => $this->createEmptyCart($context),
+            'create', 'create_guest_cart' => $this->createEmptyCart($context),
             'create_authenticated_cart' => $this->createAuthenticatedCart($context),
-            'addToCart', 'add_guest_item', 'add_cart_item' => $this->addItemToCart($context, $uriVariables),
-            'updateCartItemQty', 'update_guest_item', 'update_cart_item' => $this->updateCartItem($context, $uriVariables),
-            'removeCartItem', 'remove_guest_item', 'remove_cart_item' => $this->removeItemFromCart($context, $uriVariables),
-            'applyCouponToCart', 'apply_guest_coupon', 'apply_my_coupon' => $this->applyCouponToCart($context, $uriVariables),
-            'removeCouponFromCart', 'remove_guest_coupon', 'remove_my_coupon' => $this->removeCouponFromCart($context, $uriVariables),
-            'setShippingAddressOnCart' => $this->setShippingAddressOnCart($context, $uriVariables),
-            'setBillingAddressOnCart' => $this->setBillingAddressOnCart($context, $uriVariables),
-            'get_guest_shipping', 'get_my_shipping' => $this->getShippingMethodsForCart($context, $uriVariables),
-            'setShippingMethodOnCart' => $this->setShippingMethodOnCart($context, $uriVariables),
-            'setPaymentMethodOnCart' => $this->setPaymentMethodOnCart($context, $uriVariables),
-            'assignCustomerToCart' => $this->assignCustomerToCart($context),
-            'applyGiftcardToCart', 'apply_guest_giftcard', 'apply_my_giftcard' => $this->applyGiftcardToCart($context, $uriVariables),
-            'removeGiftcardFromCart', 'remove_guest_giftcard', 'remove_my_giftcard' => $this->removeGiftcardFromCart($context, $uriVariables),
+            'addTo', 'add_guest_item', 'add_cart_item' => $this->addItemToCart($context, $uriVariables),
+            'updateItemQty', 'update_guest_item', 'update_cart_item' => $this->updateCartItem($context, $uriVariables),
+            'removeItem', 'remove_guest_item', 'remove_cart_item' => $this->removeItemFromCart($context, $uriVariables),
+            'applyCoupon', 'apply_guest_coupon', 'apply_my_coupon' => $this->applyCouponToCart($context, $uriVariables),
+            'removeCoupon', 'remove_guest_coupon', 'remove_my_coupon' => $this->removeCouponFromCart($context, $uriVariables),
+            'setShippingAddress' => $this->setShippingAddressOnCart($context, $uriVariables),
+            'setBillingAddress' => $this->setBillingAddressOnCart($context, $uriVariables),
+            'get_guest_shipping' => $this->getShippingMethodsForCart($context, $uriVariables, focused: true),
+            'get_my_shipping' => $this->getShippingMethodsForCart($context, $uriVariables, focused: false),
+            'setShippingMethod' => $this->setShippingMethodOnCart($context, $uriVariables),
+            'setPaymentMethod' => $this->setPaymentMethodOnCart($context, $uriVariables),
+            'assignCustomer' => $this->assignCustomerToCart($context),
+            'applyGiftcard', 'apply_guest_giftcard', 'apply_my_giftcard' => $this->applyGiftcardToCart($context, $uriVariables),
+            'removeGiftcard', 'remove_guest_giftcard', 'remove_my_giftcard' => $this->removeGiftcardFromCart($context, $uriVariables),
             'setGiftMessage', 'set_my_cart_gift_message', 'set_my_item_gift_message',
             'set_guest_cart_gift_message', 'set_guest_item_gift_message' => $this->setGiftMessage($context, $uriVariables),
             'removeGiftMessage', 'remove_my_cart_gift_message', 'remove_my_item_gift_message',
@@ -184,6 +186,13 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         if (!empty($args['options'])) {
             $buyOptions['options'] = $args['options'];
         }
+        // File-type custom options: the base64 uploads must be forwarded to
+        // CartService::addItem, which injects them into the buy request. Without
+        // this they're dropped and a provided file reads as a missing required
+        // option (add-to-cart 400s).
+        if (!empty($args['options_files'])) {
+            $buyOptions['options_files'] = $args['options_files'];
+        }
         if (!empty($args['links'])) {
             $buyOptions['links'] = $args['links'];
         }
@@ -210,10 +219,51 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        $quote = $this->resolveAndVerify($context, $uriVariables);
+        $recreated = false;
+        $quote = $this->resolveCartForItemAdd($context, $uriVariables, $recreated);
         $quote = $this->cartService->addItem($quote, $sku, $qty, $buyOptions);
 
-        return $this->cartMapper->mapQuoteToCart($quote, false);
+        $cart = $this->cartMapper->mapQuoteToCart($quote, false);
+        $cart->cartRecreated = $recreated;
+        return $cart;
+    }
+
+    /**
+     * Resolve the target cart for an add-to-cart. On the public guest path a
+     * stale/expired/non-existent masked cart is transparently replaced with a
+     * fresh guest cart (flagged via $recreated) so a returning shopper whose
+     * quote was pruned can keep shopping instead of hitting a 404. Authenticated
+     * and numeric /carts/{id} adds still 404 on a missing cart.
+     */
+    private function resolveCartForItemAdd(array $context, array $uriVariables, bool &$recreated): \Mage_Sales_Model_Quote
+    {
+        ['quote' => $quote, 'accessedByMaskedId' => $byMasked] =
+            $this->cartService->resolveCartFromRequest($uriVariables, $context);
+
+        if ($quote) {
+            $this->cartService->verifyCartAccess(
+                $quote,
+                $byMasked,
+                $this->getAuthenticatedCustomerId(),
+                $this->isPrivilegedCartActor(),
+            );
+            return $quote;
+        }
+
+        if ($this->isGuestCartRequest($context)) {
+            $recreated = true;
+            return $this->cartService->createEmptyCart()['quote'];
+        }
+
+        throw new NotFoundHttpException('Cart not found');
+    }
+
+    /** True when the request targets the public /guest-carts/… path. */
+    private function isGuestCartRequest(array $context): bool
+    {
+        $request = $context['request'] ?? null;
+        return $request instanceof \Symfony\Component\HttpFoundation\Request
+            && str_contains($request->getPathInfo(), '/guest-carts/');
     }
 
     /**
@@ -260,10 +310,12 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function applyCouponToCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $couponCode = $args['couponCode'] ?? '';
+        // Accept both field names: GraphQL/authenticated callers send couponCode,
+        // the guest REST body uses code.
+        $couponCode = $args['couponCode'] ?? $args['code'] ?? '';
 
         if (!$couponCode) {
-            throw new \RuntimeException('Coupon code is required');
+            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('Coupon code is required');
         }
 
         // Throttle anonymous/customer callers by IP: applying a coupon to a cart
@@ -325,7 +377,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
      * cart first so the rate calculator has something to evaluate. Returns
      * the cart (the mapper populates availableShippingMethods).
      */
-    private function getShippingMethodsForCart(array $context, array $uriVariables): Cart
+    private function getShippingMethodsForCart(array $context, array $uriVariables, bool $focused): Cart|Response
     {
         $args = $context['args']['input'] ?? [];
         $address = $args['address'] ?? null;
@@ -335,6 +387,17 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         if (is_array($address) && !empty($address)) {
             $address = $this->resolveRegionIdFromText($address);
             $quote = $this->cartService->setShippingAddress($quote, $this->mapInputToAddressData($address));
+        }
+
+        // Guest storefront contract: return the plain list of available shipping
+        // methods (code/title/price). The authenticated /carts/{id} variant
+        // returns the full Cart (availableShippingMethods included).
+        if ($focused) {
+            $shippingAddress = $quote->getShippingAddress();
+            $methods = $shippingAddress && $shippingAddress->getId()
+                ? $this->cartMapper->getAvailableShippingMethods($shippingAddress)
+                : [];
+            return $this->respondRaw($methods);
         }
 
         return $this->cartMapper->mapQuoteToCart($quote, false);

@@ -42,7 +42,7 @@ use Maho\ApiPlatform\CrudResource;
         new Query(name: 'item_query', description: 'Get a stock update', security: "is_granted('ROLE_ADMIN') or is_granted('inventory/read')"),
         new QueryCollection(name: 'collection_query', description: 'Get stock updates', security: "is_granted('ROLE_ADMIN') or is_granted('inventory/read')"),
         new Mutation(
-            name: 'updateStock',
+            name: 'update',
             description: 'Update stock for a single product by SKU',
             args: [
                 'sku' => ['type' => 'String!'],
@@ -53,7 +53,7 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('inventory/write')",
         ),
         new Mutation(
-            name: 'updateStockBulk',
+            name: 'updateBulk',
             description: 'Update stock for multiple products',
             args: [
                 'items' => ['type' => 'Iterable!'],
