@@ -93,7 +93,7 @@ use Maho\ApiPlatform\CrudResource;
                 'notifyCustomer' => ['type' => 'Boolean', 'description' => 'Send shipment notification email'],
             ],
             description: 'Create a shipment for an order (full or partial)',
-            security: "is_granted('shipments/create')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('shipments/create')",
         ),
         // Names omit "Shipment": ApiPlatform appends the resource shortName, so
         // these read as addTrackShipment / removeTrackShipment, not the stuttering

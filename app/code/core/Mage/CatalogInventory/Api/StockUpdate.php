@@ -50,7 +50,7 @@ use Maho\ApiPlatform\CrudResource;
                 'isInStock' => ['type' => 'Boolean'],
                 'manageStock' => ['type' => 'Boolean'],
             ],
-            security: "is_granted('inventory/write')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('inventory/write')",
         ),
         new Mutation(
             name: 'updateBulk',
@@ -58,7 +58,7 @@ use Maho\ApiPlatform\CrudResource;
             args: [
                 'items' => ['type' => 'Iterable!'],
             ],
-            security: "is_granted('inventory/write')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('inventory/write')",
         ),
     ],
 )]

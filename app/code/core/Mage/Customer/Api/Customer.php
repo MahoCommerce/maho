@@ -118,7 +118,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
                 'lastname' => ['type' => 'String!', 'description' => 'Last name'],
                 'telephone' => ['type' => 'String', 'description' => 'Phone number'],
             ],
-            security: "is_granted('customers/create')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('customers/create')",
         ),
         new Mutation(
             security: 'true',

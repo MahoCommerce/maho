@@ -87,7 +87,7 @@ use Maho\Config\ApiResource;
                 'toDate' => ['type' => 'String'],
                 'minimumSubtotal' => ['type' => 'Float'],
             ],
-            security: "is_granted('coupons/create')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('coupons/create')",
         ),
         new Mutation(
             name: 'update',
@@ -105,12 +105,12 @@ use Maho\Config\ApiResource;
                 'toDate' => ['type' => 'String'],
                 'minimumSubtotal' => ['type' => 'Float'],
             ],
-            security: "is_granted('coupons/write')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('coupons/write')",
         ),
         new DeleteMutation(
             name: 'delete',
             description: 'Delete a coupon and its price rule',
-            security: "is_granted('coupons/delete')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('coupons/delete')",
         ),
         new Mutation(
             name: 'validate',

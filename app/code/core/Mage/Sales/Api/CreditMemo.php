@@ -75,7 +75,7 @@ use Maho\ApiPlatform\CrudResource;
                 'adjustmentNegative' => ['type' => 'Float'],
                 'offlineRefund' => ['type' => 'Boolean'],
             ],
-            security: "is_granted('credit-memos/create')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/create')",
         ),
     ],
 )]
