@@ -34,6 +34,7 @@ class Maho_FeedManager_Model_Transformer
         'combine_fields' => Maho_FeedManager_Model_Transformer_CombineFields::class, // Internal only - used by Mapper
         'conditional' => Maho_FeedManager_Model_Transformer_Conditional::class,
         'round' => Maho_FeedManager_Model_Transformer_Round::class,
+        'currency_convert' => Maho_FeedManager_Model_Transformer_CurrencyConvert::class,
         'uppercase' => Maho_FeedManager_Model_Transformer_Uppercase::class,
         'lowercase' => Maho_FeedManager_Model_Transformer_Lowercase::class,
         'capitalise' => Maho_FeedManager_Model_Transformer_Capitalise::class,
@@ -61,7 +62,7 @@ class Maho_FeedManager_Model_Transformer
     protected static array $_categories = [
         'text_formatting' => ['uppercase', 'lowercase', 'capitalise', 'strip_tags', 'truncate', 'replace'],
         'values_defaults' => ['default_value', 'map_values', 'conditional'],
-        'numbers_prices' => ['format_price', 'round'],
+        'numbers_prices' => ['format_price', 'round', 'currency_convert'],
         'dates_urls' => ['format_date', 'relative_date_range', 'url_encode'],
         'advanced' => ['prepend_append'],
     ];

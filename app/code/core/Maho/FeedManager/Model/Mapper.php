@@ -476,10 +476,11 @@ class Maho_FeedManager_Model_Mapper
         if ($useParentMode === 'always') {
             $parent = $this->_getParentProductModel($product);
             if ($parent !== null) {
-                $value = $this->_evaluateRule($ruleCode, $rawData, $parent);
-                if ($value !== null && $value !== '') {
-                    return $value;
-                }
+                // Strict parent semantics: when a parent exists its result IS
+                // the answer, even when empty. Configurable storefront pricing
+                // ignores child specials entirely, so falling back to the
+                // child here would advertise sales the customer never gets.
+                return $this->_evaluateRule($ruleCode, $rawData, $parent);
             }
             return $this->_evaluateRule($ruleCode, $rawData, $product);
         }
