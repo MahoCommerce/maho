@@ -99,12 +99,6 @@
                                 <input type="tel" name="shipping[telephone]" value="<?= $this->escapeHtml($this->getAddress()->getTelephone()) ?>" title="<?= $this->quoteEscape($this->__('Telephone')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('telephone') ?>" id="shipping:telephone" onchange="shipping.setSameAsBilling(false);">
                             </div>
                         </div>
-                        <div class="field">
-                            <label for="shipping:fax"><?= $this->__('Fax') ?></label>
-                            <div class="input-box">
-                                <input type="tel" name="shipping[fax]" value="<?= $this->escapeHtml($this->getAddress()->getFax()) ?>" title="<?= $this->quoteEscape($this->__('Fax')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('fax') ?>" id="shipping:fax" onchange="shipping.setSameAsBilling(false);">
-                            </div>
-                        </div>
                     </li>
                 <?php if ($this->isCustomerLoggedIn() && $this->customerHasAddresses()):?>
                     <li class="control">

@@ -49,9 +49,6 @@ SPDX-License-Identifier: AFL-3.0
         <validate-phone-lax translate="message">
             <message>Please enter a valid phone number. For example (123) 456-7890 or 123-456-7890.</message>
         </validate-phone-lax>
-        <validate-fax translate="message">
-            <message>Please enter a valid fax number. For example (123) 456-7890 or 123-456-7890.</message>
-        </validate-fax>
         <validate-date translate="message">
             <message>Please enter a valid date.</message>
         </validate-date>

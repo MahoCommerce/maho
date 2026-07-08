@@ -60,6 +60,14 @@ class MahoPaypalStandardCheckout {
         button.removeAttribute('hidden');
         await new Promise(r => setTimeout(r, 500));
         hideLoader();
+
+        // Never bind twice on the same button.
+        if (button._mahoPaypalBound) {
+            this._mounted = true;
+            return;
+        }
+        button._mahoPaypalBound = true;
+
         button.addEventListener('click', async () => {
             if (this.reviewMode && !this._validateAgreements()) {
                 return;
@@ -214,9 +222,12 @@ document.addEventListener('payment-method:switched', function(e) {
     if (!isPaypalStandard || !isOnestep) return;
 
     const formDiv = e.target;
-    // Always re-create on new DOM elements (checkout may re-render payment HTML)
-    const checkout = new MahoPaypalStandardCheckout(formDiv);
-    formDiv._paypalCheckout = checkout;
+    // Reuse the instance bound to this element; re-creating stacks a second click listener.
+    let checkout = formDiv._paypalCheckout;
+    if (!checkout) {
+        checkout = new MahoPaypalStandardCheckout(formDiv);
+        formDiv._paypalCheckout = checkout;
+    }
     checkout.loadSdkAndMount();
 }, true);
 
