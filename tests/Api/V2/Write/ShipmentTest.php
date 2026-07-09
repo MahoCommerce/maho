@@ -240,10 +240,12 @@ function findShippableOrderId(): ?int
     try {
         // Any open order that canShip() qualifies - offline-payment orders may
         // stay in 'new' after invoicing yet still be shippable, so filter on
-        // shippability, not a specific state.
+        // shippability, not a specific state. Scan newest-first so freshly seeded
+        // orders are reached even when the suite has created many older ones.
         $collection = Mage::getResourceModel('sales/order_collection');
         $collection->addFieldToFilter('state', ['in' => ['new', 'processing', 'pending']]);
-        $collection->setPageSize(20);
+        $collection->setOrder('entity_id', 'DESC');
+        $collection->setPageSize(50);
 
         foreach ($collection as $order) {
             if ($order->canShip()) {
