@@ -41,7 +41,10 @@ describe('GET /api/rest/v2/custom-option-file/{optionId}/{key}', function (): vo
         // A real file on disk under the Maho base dir.
         $relPath = '/public/media/custom_options/test_' . uniqid() . '.txt';
         $fullPath = Mage::getBaseDir() . $relPath;
-        @mkdir(dirname($fullPath), 0o777, true);
+        $dir = dirname($fullPath);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0o777, true);
+        }
         file_put_contents($fullPath, 'custom-option-file-contents');
 
         // Mirror the real flow: a 20-char hex secret key.
