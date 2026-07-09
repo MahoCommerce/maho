@@ -238,9 +238,12 @@ describe('GraphQL Shipment queries', function (): void {
 function findShippableOrderId(): ?int
 {
     try {
+        // Any open order that canShip() qualifies - offline-payment orders may
+        // stay in 'new' after invoicing yet still be shippable, so filter on
+        // shippability, not a specific state.
         $collection = Mage::getResourceModel('sales/order_collection');
-        $collection->addFieldToFilter('state', 'processing');
-        $collection->setPageSize(10);
+        $collection->addFieldToFilter('state', ['in' => ['new', 'processing', 'pending']]);
+        $collection->setPageSize(20);
 
         foreach ($collection as $order) {
             if ($order->canShip()) {

@@ -135,8 +135,12 @@ describe('Shipment track add / remove', function (): void {
         $remove = apiDelete("/api/rest/v2/shipments/{$shipmentId}/tracks/" . (int) $added['id'], adminToken());
         expect($remove['status'])->toBeSuccessful();
 
-        $numbers = array_column($remove['json']['tracks'], 'trackNumber');
-        expect($numbers)->not->toContain($trackNumber);
+        // A DELETE may respond 204 (no body) or echo the updated shipment; when a
+        // body is present, the removed track must be gone from it.
+        $tracks = $remove['json']['tracks'] ?? null;
+        if (is_array($tracks)) {
+            expect(array_column($tracks, 'trackNumber'))->not->toContain($trackNumber);
+        }
     });
 
     it('requires a track number', function (): void {

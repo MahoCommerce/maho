@@ -23,11 +23,12 @@ describe('API v2 Product Reviews', function (): void {
     describe('public access - product reviews', function (): void {
 
         it('allows listing reviews for a product without authentication', function (): void {
-            // First get a product
-            $products = apiGet('/api/rest/v2/products');
+            // First get a product (collection shape varies: member / hydra:member
+            // / plain array — getItems() normalises them).
+            $items = getItems(apiGet('/api/rest/v2/products'));
 
-            if (isset($products['json']['hydra:member'][0]['id'])) {
-                $productId = $products['json']['hydra:member'][0]['id'];
+            if (isset($items[0]['id'])) {
+                $productId = $items[0]['id'];
                 $response = apiGet("/api/rest/v2/products/{$productId}/reviews");
 
                 // Should succeed even if no reviews exist

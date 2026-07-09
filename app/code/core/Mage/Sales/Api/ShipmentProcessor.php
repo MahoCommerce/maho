@@ -27,6 +27,10 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
         $this->requireApiPermission('shipments/create');
         $operationName = $operation->getName();
 
+        // Bridge the raw REST body into $context['args']['input'] so the track /
+        // shipment handlers read it uniformly; GraphQL already populates it.
+        $this->normalizeGraphQlInput($context);
+
         return match ($operationName) {
             'create' => $this->createShipment($context),
             'add_shipment_track', 'addTrack' => $this->addTrack($uriVariables, $context),

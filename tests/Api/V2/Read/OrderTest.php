@@ -68,14 +68,13 @@ describe('GET /api/rest/v2/orders', function (): void {
     });
 
     it('prevents a customer from reading another account\'s order by id', function (): void {
-        $orderId = fixtures('order_id');
+        // A guest/other-account order: the test customer must not be able to read
+        // it, never a 200 leaking the order body (the IDOR property this needs).
+        $orderId = fixtures('other_customer_order_id');
         if (!$orderId) {
-            $this->markTestSkipped('No order_id configured in fixtures');
+            $this->markTestSkipped('No other_customer_order_id configured in fixtures');
         }
 
-        // The fixture order is sourced independently of the test customer, so a
-        // customer token must not be able to read it: expect a hard deny, never
-        // a 200 leaking the order body (the IDOR property this endpoint needs).
         $response = apiGet("/api/rest/v2/orders/{$orderId}", customerToken());
 
         expect($response['status'])->toBeIn([403, 404]);

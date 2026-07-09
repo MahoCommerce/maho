@@ -96,8 +96,8 @@ describe('API v2 Customer Addresses', function (): void {
 
             // Customer A creates an address.
             $create = apiPost('/api/rest/v2/customers/me/addresses', [
-                'firstName' => 'Owner',
-                'lastName' => 'Tenant',
+                'firstname' => 'Owner',
+                'lastname' => 'Tenant',
                 'street' => ['123 Owner Street'],
                 'city' => 'Melbourne',
                 'postcode' => '3000',

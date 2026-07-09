@@ -726,6 +726,11 @@ class ApiV2Helper
             $categoryId = self::lookupCategoryId();
             $customerId = self::lookupCustomerId();
 
+            // Sample data ships no sales records, so seed a small, self-consistent
+            // set (orders, invoices, a shipment, a gift card, a review) once, so the
+            // read/lifecycle tests have real data to act on instead of skipping.
+            $seed = self::seedSalesData($customerId, $productData['sku']);
+
             // Invoice fixtures: an invoice owned by the test customer enables the
             // customer PDF path; one owned by a *different* account (or a guest
             // order) drives the cross-tenant deny path. Any may be null on a DB
@@ -752,6 +757,8 @@ class ApiV2Helper
                 'other_customer_invoice_id' => $foreignInvoice['invoiceId'] ?? null,
                 'write_test_sku' => $productData['sku'],
                 'write_test_qty' => 1,
+                'giftcard_code' => $seed['giftcard_code'],
+                'giftcard_id' => $seed['giftcard_id'],
                 'blog_post_url_key' => null,
             ];
         }
@@ -1108,6 +1115,239 @@ class ApiV2Helper
             // Fall through to null.
         }
         return null;
+    }
+
+    /**
+     * Seed sales data the read/lifecycle tests act on. Sample data ships no
+     * orders, so create (once) a small, self-consistent set via the model layer:
+     * a fresh customer order (holdable/cancellable), an invoiced+shipped customer
+     * order, a guest order+invoice (the cross-tenant "foreign" fixture), a gift
+     * card and an approved product review. Every step is best-effort - a failure
+     * leaves the corresponding fixtures null and the dependent tests skip, exactly
+     * as before, rather than erroring the suite.
+     *
+     * @return array<string, mixed>
+     */
+    private static function seedSalesData(?int $customerId, ?string $sku): array
+    {
+        $seed = [
+            'giftcard_code' => null,
+            'giftcard_id' => null,
+            'review_product_id' => null,
+        ];
+        if (!$customerId || !$sku) {
+            return $seed;
+        }
+
+        try {
+            \Mage::app()->getStore(1)->resetConfig();
+
+            // A fresh order: holdable, cancellable, and the generic order_id.
+            self::placeSeedOrder($customerId, $sku, false);
+
+            // An invoiced-but-unshipped customer order: drives customer_order_id
+            // AND stays shippable for the shipment-creation tests.
+            $invoiced = self::placeSeedOrder($customerId, $sku, false);
+            if ($invoiced) {
+                self::invoiceSeedOrder($invoiced);
+            }
+
+            // An invoiced + shipped order so shipment-track tests find a shipment.
+            $shipped = self::placeSeedOrder($customerId, $sku, false);
+            if ($shipped) {
+                self::invoiceSeedOrder($shipped);
+                self::shipSeedOrder($shipped);
+            }
+
+            // A guest order + invoice: the cross-tenant "foreign" fixture.
+            $guest = self::placeSeedOrder($customerId, $sku, true);
+            if ($guest) {
+                self::invoiceSeedOrder($guest);
+            }
+        } catch (\Throwable $e) {
+            // Best effort - dependent tests skip if an order couldn't be seeded.
+        }
+
+        $giftcard = self::seedGiftcard();
+        $seed['giftcard_code'] = $giftcard['code'];
+        $seed['giftcard_id'] = $giftcard['id'];
+        $seed['review_product_id'] = self::seedProductReview($sku);
+        self::seedRevocationRequest();
+
+        return $seed;
+    }
+
+    /**
+     * Seed a revocation ("right to be forgotten") request with a foreign email so
+     * the admin-read and cross-customer-hide read tests have a row to act on.
+     */
+    private static function seedRevocationRequest(): void
+    {
+        if (!class_exists('Maho_Revocation_Model_Request')) {
+            return;
+        }
+        try {
+            \Mage::getModel('revocation/request')
+                ->setStoreId(1)
+                ->setOrderReference('SEED-REV-1')
+                ->setCustomerName('Seed Foreign')
+                ->setEmail('seed.foreign.revoke@example.com')
+                ->setReason('Seeded for API read coverage')
+                ->setVerified(0)
+                ->setReceivedAt((string) \Mage::app()->getLocale()->formatDateForDb(time()))
+                ->save();
+        } catch (\Throwable $e) {
+            // best effort
+        }
+    }
+
+    /**
+     * Place a real order for a customer (or a guest) through the quote service,
+     * mirroring a storefront checkout. Returns the order, or null on any failure.
+     */
+    private static function placeSeedOrder(?int $customerId, string $sku, bool $guest): ?\Mage_Sales_Model_Order
+    {
+        try {
+            $productId = \Mage::getModel('catalog/product')->getIdBySku($sku);
+            if (!$productId) {
+                return null;
+            }
+            $product = \Mage::getModel('catalog/product')->load($productId);
+
+            $regionId = (int) \Mage::getModel('directory/region')->loadByCode('CA', 'US')->getId();
+            $email = 'seed.' . ($guest ? 'guest' : 'cust') . '@example.com';
+            $address = [
+                'firstname' => 'Seed',
+                'lastname' => 'Buyer',
+                'street' => '123 Seed St',
+                'city' => 'Los Angeles',
+                'region_id' => $regionId,
+                'region' => 'California',
+                'postcode' => '90210',
+                'country_id' => 'US',
+                'telephone' => '5550100',
+                'email' => $email,
+            ];
+
+            $quote = \Mage::getModel('sales/quote')->setStoreId(1);
+            if ($guest) {
+                $quote->setCustomerIsGuest(true)->setCustomerEmail($email);
+            } else {
+                $customer = \Mage::getModel('customer/customer')->load($customerId);
+                if (!$customer->getId()) {
+                    return null;
+                }
+                $quote->assignCustomer($customer);
+                // Be explicit so the placed order is unambiguously customer-owned
+                // (customer_id set, not a guest) for the ownership-scoped tests.
+                $quote->setCustomerId((int) $customer->getId())
+                    ->setCustomerIsGuest(false)
+                    ->setCustomerEmail($customer->getEmail());
+            }
+            $quote->addProduct($product, new \Maho\DataObject(['qty' => 1]));
+            $quote->getBillingAddress()->addData($address);
+            $shipping = $quote->getShippingAddress()->addData($address);
+            $shipping->setCollectShippingRates(true)->setShippingMethod('freeshipping_freeshipping');
+            $quote->getPayment()->importData(['method' => 'cashondelivery']);
+            $quote->collectTotals()->save();
+
+            $service = new \Mage_Sales_Model_Service_Quote($quote);
+            $service->submitOrder();
+            $order = $service->getOrder();
+
+            return $order && $order->getId() ? $order : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    private static function invoiceSeedOrder(\Mage_Sales_Model_Order $order): void
+    {
+        try {
+            if (!$order->canInvoice()) {
+                return;
+            }
+            $invoice = \Mage::getModel('sales/service_order', $order)->prepareInvoice();
+            if (!$invoice->getTotalQty()) {
+                return;
+            }
+            $invoice->setRequestedCaptureCase(\Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
+            $invoice->register();
+            \Mage::getModel('core/resource_transaction')
+                ->addObject($invoice)
+                ->addObject($order)
+                ->save();
+        } catch (\Throwable $e) {
+            // best effort
+        }
+    }
+
+    private static function shipSeedOrder(\Mage_Sales_Model_Order $order): void
+    {
+        try {
+            if (!$order->canShip()) {
+                return;
+            }
+            $shipment = $order->prepareShipment();
+            if (!$shipment || !$shipment->getTotalQty()) {
+                return;
+            }
+            $shipment->register();
+            \Mage::getModel('core/resource_transaction')
+                ->addObject($shipment)
+                ->addObject($order)
+                ->save();
+        } catch (\Throwable $e) {
+            // best effort
+        }
+    }
+
+    /**
+     * @return array{code: ?string, id: ?int}
+     */
+    private static function seedGiftcard(): array
+    {
+        if (!class_exists('Maho_Giftcard_Model_Giftcard')) {
+            return ['code' => null, 'id' => null];
+        }
+        try {
+            $code = \Mage::helper('giftcard')->generateCode();
+            $giftcard = \Mage::getModel('giftcard/giftcard')
+                ->setCode($code)
+                ->setStatus(\Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE)
+                ->setWebsiteId(1)
+                ->setBalance(100.00)
+                ->setInitialBalance(100.00);
+            $giftcard->save();
+            return ['code' => $code, 'id' => (int) $giftcard->getId()];
+        } catch (\Throwable $e) {
+            return ['code' => null, 'id' => null];
+        }
+    }
+
+    private static function seedProductReview(string $sku): ?int
+    {
+        try {
+            $productId = (int) \Mage::getModel('catalog/product')->getIdBySku($sku);
+            if (!$productId) {
+                return null;
+            }
+            $review = \Mage::getModel('review/review')->setData([
+                'title' => 'Seeded review',
+                'nickname' => 'Seed Reviewer',
+                'detail' => 'A seeded, approved review for API read coverage.',
+            ]);
+            $review->setEntityId($review->getEntityIdByCode(\Mage_Review_Model_Review::ENTITY_PRODUCT_CODE))
+                ->setEntityPkValue($productId)
+                ->setStatusId(\Mage_Review_Model_Review::STATUS_APPROVED)
+                ->setStoreId(1)
+                ->setStores([1])
+                ->save();
+            $review->aggregate();
+            return $productId;
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     private static function lookupCustomerEmail(int $customerId): string
