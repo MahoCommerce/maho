@@ -48,11 +48,10 @@ describe('CORS', function (): void {
             'Access-Control-Request-Method' => 'GET',
         ]);
 
+        // Either no CORS header at all, or a header that is NOT the attacker's
+        // origin echoed back. Reflecting any Origin would be the bug.
         $allowOrigin = apiHeader($response, 'Access-Control-Allow-Origin');
-        if ($allowOrigin !== null) {
-            // If a header is sent, it must not be the attacker's origin echoed back.
-            expect($allowOrigin)->not->toBe('https://attacker.example');
-        }
+        expect($allowOrigin)->not->toBe('https://attacker.example');
     });
 
 });

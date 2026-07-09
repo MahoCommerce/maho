@@ -120,7 +120,6 @@ describe('\Maho\Io Security Methods', function () {
             $this->testImage = $this->testDir . '/test.png';
             $img = imagecreatetruecolor(1, 1);
             imagepng($img, $this->testImage);
-            imagedestroy($img);
         });
 
         afterEach(function () {

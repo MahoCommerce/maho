@@ -28,7 +28,6 @@ describe('Media Upload Permission Enforcement (REST)', function (): void {
         $tmpFile = tempnam(sys_get_temp_dir(), 'test_') . '.png';
         $img = imagecreatetruecolor(1, 1);
         imagepng($img, $tmpFile);
-        imagedestroy($img);
 
         $response = apiPostMultipart('/api/rest/v2/media', ['folder' => 'test'], ['file' => $tmpFile]);
         unlink($tmpFile);
@@ -40,7 +39,6 @@ describe('Media Upload Permission Enforcement (REST)', function (): void {
         $tmpFile = tempnam(sys_get_temp_dir(), 'test_') . '.png';
         $img = imagecreatetruecolor(1, 1);
         imagepng($img, $tmpFile);
-        imagedestroy($img);
 
         $response = apiPostMultipart('/api/rest/v2/media', ['folder' => 'test'], ['file' => $tmpFile], customerToken());
         unlink($tmpFile);
@@ -52,7 +50,6 @@ describe('Media Upload Permission Enforcement (REST)', function (): void {
         $tmpFile = tempnam(sys_get_temp_dir(), 'test_') . '.png';
         $img = imagecreatetruecolor(1, 1);
         imagepng($img, $tmpFile);
-        imagedestroy($img);
 
         $token = serviceToken(['cms-pages/write']);
         $response = apiPostMultipart('/api/rest/v2/media', ['folder' => 'test'], ['file' => $tmpFile], $token);
@@ -71,7 +68,6 @@ describe('Media Upload (REST)', function (): void {
         $red = imagecolorallocate($img, 255, 0, 0);
         imagefill($img, 0, 0, $red);
         imagepng($img, $tmpFile);
-        imagedestroy($img);
 
         $token = serviceToken(['media/write']);
         $response = apiPostMultipart(
@@ -106,7 +102,6 @@ describe('Media Upload (REST)', function (): void {
         $tmpFile = tempnam(sys_get_temp_dir(), 'pest_media_') . '.png';
         $img = imagecreatetruecolor(1, 1);
         imagepng($img, $tmpFile);
-        imagedestroy($img);
 
         $token = serviceToken(['media/write']);
         $response = apiPostMultipart(
@@ -125,7 +120,6 @@ describe('Media Upload (REST)', function (): void {
         $tmpFile = tempnam(sys_get_temp_dir(), 'pest_media_') . '.png';
         $img = imagecreatetruecolor(1, 1);
         imagepng($img, $tmpFile);
-        imagedestroy($img);
 
         $token = serviceToken(['all']);
         $response = apiPostMultipart(
@@ -145,7 +139,6 @@ describe('Media Upload (REST)', function (): void {
         $tmpFile = tempnam(sys_get_temp_dir(), 'pest_media_') . '.png';
         $img = imagecreatetruecolor(1, 1);
         imagepng($img, $tmpFile);
-        imagedestroy($img);
 
         $token = serviceToken(['all']);
         $upload = apiPostMultipart(

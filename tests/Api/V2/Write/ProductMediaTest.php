@@ -100,7 +100,6 @@ describe('Product Media Gallery, Upload & Manage', function (): void {
         ob_start();
         imagepng($img);
         $pngData = ob_get_clean();
-        imagedestroy($img);
         $base64 = base64_encode($pngData);
 
         // Upload image

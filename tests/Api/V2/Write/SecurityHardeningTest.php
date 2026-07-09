@@ -209,9 +209,10 @@ describe('Gift card balance disclosure (GraphQL)', function (): void {
             $this->markTestSkipped('Gift card has no code to query');
         }
 
+        // ApiPlatform names the field lcfirst(opName + ShortName) => checkBalanceGiftCard.
         $query = <<<'GRAPHQL'
         query ($code: String!) {
-            checkGiftcardBalance(code: $code) {
+            checkBalanceGiftCard(code: $code) {
                 balance
                 recipientEmail
                 senderEmail
@@ -221,13 +222,15 @@ describe('Gift card balance disclosure (GraphQL)', function (): void {
         GRAPHQL;
 
         $response = gqlQuery($query, ['code' => $code]);
-        $data = $response['json']['data']['checkGiftcardBalance'] ?? null;
+        expect($response['json'])->not->toHaveKey('errors');
+        $data = $response['json']['data']['checkBalanceGiftCard'] ?? null;
+        expect($data)->not->toBeNull();
 
-        if ($data !== null) {
-            expect($data['recipientEmail'] ?? null)->toBeNull();
-            expect($data['senderEmail'] ?? null)->toBeNull();
-            expect($data['message'] ?? null)->toBeNull();
-        }
+        // Balance is public, but recipient/sender PII must never be disclosed.
+        expect((float) $data['balance'])->toBe(50.0);
+        expect($data['recipientEmail'] ?? null)->toBeNull();
+        expect($data['senderEmail'] ?? null)->toBeNull();
+        expect($data['message'] ?? null)->toBeNull();
 
         Mage::register('isSecureArea', true, true);
         $giftcard->delete();

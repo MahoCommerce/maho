@@ -159,7 +159,6 @@ function generateMinimalPng(): string
     ob_start();
     imagepng($img);
     $data = ob_get_clean();
-    imagedestroy($img);
     return $data;
 }
 
@@ -174,7 +173,6 @@ function generatePngWithSize(int $width, int $height): string
     ob_start();
     imagepng($img);
     $data = ob_get_clean();
-    imagedestroy($img);
     return $data;
 }
 

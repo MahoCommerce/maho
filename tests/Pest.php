@@ -179,25 +179,32 @@ function getItems(array $response): array
 
 
 uses()
+    // API protocols default to disabled (opt-in security model). Tests need them
+    // on, so flip every flag once at suite start. Writes to core_config_data
+    // persist for the test run; the suite assumes an ephemeral test database.
+    //
+    // This runs in beforeAll (setUpBeforeClass), not beforeEach, on purpose:
+    // Mage::app() registers a custom error handler via _initEnvironment(), and
+    // PHPUnit's per-test snapshot flags a test as risky if the error-handler
+    // stack changes during setUp/test/tearDown. beforeAll runs outside that
+    // snapshot, so the one-time bootstrap doesn't leak into any single test.
+    ->beforeAll(function (): void {
+        static $protocolsEnabled = false;
+        if ($protocolsEnabled) {
+            return;
+        }
+        // Frontend/Backend tearDown calls Mage::reset(), so re-bootstrap before DB writes.
+        \Mage::app();
+        $protocols = ['rest_v2', 'graphql', 'admin_graphql', 'legacy_rest', 'soap', 'v2_soap', 'xmlrpc', 'jsonrpc'];
+        $config = \Mage::getModel('core/config');
+        foreach ($protocols as $protocol) {
+            $config->saveConfig('apiplatform/protocols/' . $protocol, '1', 'default', 0);
+        }
+        \Mage::app()->getCache()->cleanType('config');
+        $protocolsEnabled = true;
+    })
     ->beforeEach(function (): void {
         static $apiAvailable = null;
-        static $protocolsEnabled = false;
-
-        // API protocols default to disabled (opt-in security model). Tests
-        // need them on, so flip every flag once at suite start. Writes to
-        // core_config_data persist for the test run; the suite assumes an
-        // ephemeral test database anyway.
-        if (!$protocolsEnabled) {
-            // Frontend/Backend tearDown calls Mage::reset(), so re-bootstrap before DB writes.
-            \Mage::app();
-            $protocols = ['rest_v2', 'graphql', 'admin_graphql', 'legacy_rest', 'soap', 'v2_soap', 'xmlrpc', 'jsonrpc'];
-            $config = \Mage::getModel('core/config');
-            foreach ($protocols as $protocol) {
-                $config->saveConfig('apiplatform/protocols/' . $protocol, '1', 'default', 0);
-            }
-            \Mage::app()->getCache()->cleanType('config');
-            $protocolsEnabled = true;
-        }
 
         if ($apiAvailable === null) {
             try {
@@ -209,7 +216,6 @@ uses()
                 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
                 curl_exec($ch);
                 $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                curl_close($ch);
                 $apiAvailable = ($code !== 0);
             } catch (\Throwable) {
                 $apiAvailable = false;

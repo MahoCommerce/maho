@@ -123,7 +123,6 @@ describe('Permission Boundaries - Cross-Resource Denial', function (): void {
         $tmpFile = tempnam(sys_get_temp_dir(), 'test_') . '.png';
         $img = imagecreatetruecolor(1, 1);
         imagepng($img, $tmpFile);
-        imagedestroy($img);
 
         $token = serviceToken(['cms-pages/write', 'cms-blocks/write']);
         $response = apiPostMultipart('/api/rest/v2/media', ['folder' => 'test'], ['file' => $tmpFile], $token);

@@ -3,6 +3,10 @@
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          colors="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnTestsThatTriggerNotices="true"
+         displayDetailsOnTestsThatTriggerErrors="true"
 >
     <testsuites>
         <testsuite name="Install">
@@ -21,7 +25,15 @@
             <directory suffix="Test.php">./tests/Browser</directory>
         </testsuite>
     </testsuites>
-    <source>
+    <!--
+        restrictNotices/restrictWarnings limit surfaced notices/warnings to those
+        triggered by our own code (app, lib). This filters benign, intentionally
+        @-suppressed framework internals we don't own and can't fix - e.g. the
+        Symfony FilesystemTagAwareAdapter symlink race ("File exists") that its own
+        is_link() fallback already handles - while still surfacing any notice or
+        warning originating in Maho code.
+    -->
+    <source restrictNotices="true" restrictWarnings="true">
         <include>
             <directory>app</directory>
             <directory>lib</directory>

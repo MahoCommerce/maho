@@ -95,6 +95,7 @@ describe('API v2 Invoices', function (): void {
 
             $response = apiGet("/api/rest/v2/orders/{$orderId}/invoices", adminToken());
 
+            expect($response['status'])->toBeIn([200, 404]);
             if ($response['status'] === 200) {
                 expect($response['json'])->toHaveKey('invoices');
                 expect($response['json']['invoices'])->toBeArray();
