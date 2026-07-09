@@ -31,7 +31,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 
         return match ($operationName) {
             'update' => $this->updateStockFromGraphQl($context),
-            'updateBulk' => $this->updateStockBulkFromGraphQl($context),
+            'bulkUpdate' => $this->updateStockBulkFromGraphQl($context),
             default => $this->handleRestRequest($operation, $context),
         };
     }

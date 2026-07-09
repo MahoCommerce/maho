@@ -69,7 +69,7 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('wishlists/read')",
         ),
         new Mutation(
-            name: 'addTo',
+            name: 'add',
             description: 'Add product to wishlist',
             args: [
                 'productId' => ['type' => 'Int!', 'description' => 'Product ID to add'],
@@ -79,7 +79,7 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_CUSTOMER') or is_granted('wishlists/write')",
         ),
         new Mutation(
-            name: 'removeFrom',
+            name: 'remove',
             description: 'Remove item from wishlist',
             args: [
                 'itemId' => ['type' => 'Int!', 'description' => 'Wishlist item ID'],

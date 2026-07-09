@@ -276,7 +276,7 @@ use Mage\Customer\Api\Address;
         ),
         new Query(
             security: 'true',
-            name: 'byMaskedId',
+            name: 'guest',
             args: ['maskedId' => ['type' => 'String!']],
             description: 'Get cart by masked ID',
             resolver: CustomQueryResolver::class,
@@ -319,31 +319,31 @@ use Mage\Customer\Api\Address;
         ),
         new Mutation(
             security: 'true',
-            name: 'updateItemQty',
+            name: 'updateItemQtyIn',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'itemId' => ['type' => 'ID!'], 'qty' => ['type' => 'Float!']],
             description: 'Update cart item quantity',
         ),
         new Mutation(
             security: 'true',
-            name: 'removeItem',
+            name: 'removeItemFrom',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'itemId' => ['type' => 'ID!']],
             description: 'Remove item from cart',
         ),
         new Mutation(
             security: 'true',
-            name: 'applyCoupon',
+            name: 'applyCouponTo',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'couponCode' => ['type' => 'String!']],
             description: 'Apply coupon code to cart',
         ),
         new Mutation(
             security: 'true',
-            name: 'removeCoupon',
+            name: 'removeCouponFrom',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String']],
             description: 'Remove coupon code from cart',
         ),
         new Mutation(
             security: 'true',
-            name: 'setShippingAddress',
+            name: 'setShippingAddressOn',
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -362,7 +362,7 @@ use Mage\Customer\Api\Address;
         ),
         new Mutation(
             security: 'true',
-            name: 'setBillingAddress',
+            name: 'setBillingAddressOn',
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -382,7 +382,7 @@ use Mage\Customer\Api\Address;
         ),
         new Mutation(
             security: 'true',
-            name: 'setShippingMethod',
+            name: 'setShippingMethodOn',
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -393,7 +393,7 @@ use Mage\Customer\Api\Address;
         ),
         new Mutation(
             security: 'true',
-            name: 'setPaymentMethod',
+            name: 'setPaymentMethodOn',
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -402,20 +402,20 @@ use Mage\Customer\Api\Address;
             description: 'Set payment method on cart',
         ),
         new Mutation(
-            name: 'assignCustomer',
+            name: 'assignCustomerTo',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'customerId' => ['type' => 'ID!']],
             description: 'Assign customer to cart',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('carts/write')",
         ),
         new Mutation(
             security: 'true',
-            name: 'applyGiftcard',
+            name: 'applyGiftcardTo',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'giftcardCode' => ['type' => 'String!']],
             description: 'Apply gift card to cart',
         ),
         new Mutation(
             security: 'true',
-            name: 'removeGiftcard',
+            name: 'removeGiftcardFrom',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'giftcardCode' => ['type' => 'String!']],
             description: 'Remove gift card from cart',
         ),
@@ -424,7 +424,7 @@ use Mage\Customer\Api\Address;
             // Named without a leading "Cart" so ApiPlatform's auto-appended
             // resource suffix reads as `setGiftMessageCart`, not a stuttering
             // `setCartGiftMessageCart`.
-            name: 'setGiftMessage',
+            name: 'setGiftMessageOn',
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],
@@ -437,7 +437,7 @@ use Mage\Customer\Api\Address;
         ),
         new Mutation(
             security: 'true',
-            name: 'removeGiftMessage',
+            name: 'removeGiftMessageFrom',
             args: [
                 'cartId' => ['type' => 'ID'],
                 'maskedId' => ['type' => 'String'],

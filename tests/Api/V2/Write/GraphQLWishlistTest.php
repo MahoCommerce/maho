@@ -80,7 +80,7 @@ describe('GraphQL Wishlist - Add To Wishlist Mutation', function (): void {
 
         $query = <<<GRAPHQL
         mutation {
-            addToWishlistItem(input: {productId: {$productId}, qty: 1}) {
+            addWishlistItem(input: {productId: {$productId}, qty: 1}) {
                 wishlistItem {
                     id
                     _id
@@ -100,9 +100,9 @@ describe('GraphQL Wishlist - Add To Wishlist Mutation', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->not->toHaveKey('errors');
-        expect($response['json']['data']['addToWishlistItem'])->not->toBeNull();
+        expect($response['json']['data']['addWishlistItem'])->not->toBeNull();
 
-        $item = $response['json']['data']['addToWishlistItem']['wishlistItem'];
+        $item = $response['json']['data']['addWishlistItem']['wishlistItem'];
         expect($item['productId'])->toBe($productId);
         expect($item['productName'])->toBeString()->not->toBeEmpty();
         expect($item['productSku'])->toBeString()->not->toBeEmpty();
@@ -133,7 +133,7 @@ describe('GraphQL Wishlist - Add Then Query Round-Trip (Regression)', function (
         // Add via mutation
         $addQuery = <<<GRAPHQL
         mutation {
-            addToWishlistItem(input: {productId: {$productId}, qty: 1}) {
+            addWishlistItem(input: {productId: {$productId}, qty: 1}) {
                 wishlistItem {
                     _id
                     productId
@@ -146,7 +146,7 @@ describe('GraphQL Wishlist - Add Then Query Round-Trip (Regression)', function (
         expect($addResponse['status'])->toBe(200);
         expect($addResponse['json'])->not->toHaveKey('errors');
 
-        $addedId = $addResponse['json']['data']['addToWishlistItem']['wishlistItem']['_id'];
+        $addedId = $addResponse['json']['data']['addWishlistItem']['wishlistItem']['_id'];
         trackCreated('wishlist_item', (int) $addedId);
 
         // Query listing
@@ -187,7 +187,7 @@ describe('GraphQL Wishlist - Remove From Wishlist Mutation', function (): void {
         // Add first
         $addQuery = <<<GRAPHQL
         mutation {
-            addToWishlistItem(input: {productId: {$productId}, qty: 1}) {
+            addWishlistItem(input: {productId: {$productId}, qty: 1}) {
                 wishlistItem { _id }
             }
         }
@@ -197,12 +197,12 @@ describe('GraphQL Wishlist - Remove From Wishlist Mutation', function (): void {
         expect($addResponse['status'])->toBe(200);
         expect($addResponse['json'])->not->toHaveKey('errors');
 
-        $itemId = $addResponse['json']['data']['addToWishlistItem']['wishlistItem']['_id'];
+        $itemId = $addResponse['json']['data']['addWishlistItem']['wishlistItem']['_id'];
 
         // Remove
         $removeQuery = <<<GRAPHQL
         mutation {
-            removeFromWishlistItem(input: {itemId: {$itemId}}) {
+            removeWishlistItem(input: {itemId: {$itemId}}) {
                 wishlistItem { _id }
             }
         }
@@ -221,7 +221,7 @@ describe('GraphQL Wishlist - Remove From Wishlist Mutation', function (): void {
         // Add
         $addQuery = <<<GRAPHQL
         mutation {
-            addToWishlistItem(input: {productId: {$productId}, qty: 1}) {
+            addWishlistItem(input: {productId: {$productId}, qty: 1}) {
                 wishlistItem { _id }
             }
         }
@@ -229,12 +229,12 @@ describe('GraphQL Wishlist - Remove From Wishlist Mutation', function (): void {
 
         $addResponse = gqlQuery($addQuery, [], $token);
         expect($addResponse['status'])->toBe(200);
-        $itemId = $addResponse['json']['data']['addToWishlistItem']['wishlistItem']['_id'];
+        $itemId = $addResponse['json']['data']['addWishlistItem']['wishlistItem']['_id'];
 
         // Remove
         $removeQuery = <<<GRAPHQL
         mutation {
-            removeFromWishlistItem(input: {itemId: {$itemId}}) {
+            removeWishlistItem(input: {itemId: {$itemId}}) {
                 wishlistItem { _id }
             }
         }

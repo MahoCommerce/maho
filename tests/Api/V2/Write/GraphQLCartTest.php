@@ -88,7 +88,7 @@ describe('GraphQL Cart - Query Cart', function (): void {
 
         $query = <<<GRAPHQL
         {
-            byMaskedIdCart(maskedId: "{$maskedId}") {
+            guestCart(maskedId: "{$maskedId}") {
                 id
                 _id
                 maskedId
@@ -103,7 +103,7 @@ describe('GraphQL Cart - Query Cart', function (): void {
 
         expect($response['status'])->toBe(200);
 
-        $cart = $response['json']['data']['byMaskedIdCart'] ?? null;
+        $cart = $response['json']['data']['guestCart'] ?? null;
         if ($cart === null) {
             $this->markTestSkipped('GraphQL Query operations do not invoke the state provider, known API Platform limitation');
         }
@@ -210,7 +210,7 @@ describe('GraphQL Cart - Update Item Quantity', function (): void {
 
         $updateQuery = <<<GRAPHQL
         mutation {
-            updateItemQtyCart(input: {maskedId: "{$maskedId}", itemId: {$itemId}, qty: 3}) {
+            updateItemQtyInCart(input: {maskedId: "{$maskedId}", itemId: {$itemId}, qty: 3}) {
                 cart {
                     items
                     prices
@@ -250,7 +250,7 @@ describe('GraphQL Cart - Remove Item', function (): void {
 
         $removeQuery = <<<GRAPHQL
         mutation {
-            removeItemCart(input: {maskedId: "{$maskedId}", itemId: {$itemId}}) {
+            removeItemFromCart(input: {maskedId: "{$maskedId}", itemId: {$itemId}}) {
                 cart {
                     itemsCount
                     items
@@ -275,7 +275,7 @@ describe('GraphQL Cart - Apply Coupon', function (): void {
 
         $couponQuery = <<<GRAPHQL
         mutation {
-            applyCouponCart(input: {maskedId: "{$maskedId}", couponCode: "INVALID-COUPON-CODE-12345"}) {
+            applyCouponToCart(input: {maskedId: "{$maskedId}", couponCode: "INVALID-COUPON-CODE-12345"}) {
                 cart {
                     appliedCoupon
                 }

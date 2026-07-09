@@ -23,7 +23,7 @@ use Maho\ApiPlatform\CrudResource;
     mahoId: 'inventory',
     mahoSection: 'Catalog',
     mahoOperations: ['read' => 'View Stock', 'write' => 'Update Stock'],
-    shortName: 'StockUpdate',
+    shortName: 'Stock',
     description: 'Fast inventory / stock update resource',
     processor: StockUpdateProcessor::class,
     operations: [
@@ -53,7 +53,7 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_ADMIN') or is_granted('inventory/write')",
         ),
         new Mutation(
-            name: 'updateBulk',
+            name: 'bulkUpdate',
             description: 'Update stock for multiple products',
             args: [
                 'items' => ['type' => 'Iterable!'],

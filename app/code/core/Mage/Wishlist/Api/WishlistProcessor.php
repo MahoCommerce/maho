@@ -43,7 +43,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         $operationName = $operation->getName();
 
         // GraphQL mutations
-        if ($operationName === 'addTo') {
+        if ($operationName === 'add') {
             $args = $context['args']['input'] ?? [];
             return $this->addToWishlist(
                 (int) $args['productId'],
@@ -52,7 +52,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
             );
         }
 
-        if ($operationName === 'removeFrom') {
+        if ($operationName === 'remove') {
             $args = $context['args']['input'] ?? [];
             return $this->removeFromWishlist((int) $args['itemId']);
         }

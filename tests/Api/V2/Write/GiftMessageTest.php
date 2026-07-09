@@ -143,7 +143,7 @@ describe('GraphQL gift message mutations', function (): void {
         // ApiPlatform names a custom mutation field {name}{ShortName}.
         $query = <<<'GRAPHQL'
         mutation SetGm($maskedId: String!, $sender: String!, $recipient: String!, $message: String!) {
-            setGiftMessageCart(input: {
+            setGiftMessageOnCart(input: {
                 maskedId: $maskedId,
                 sender: $sender,
                 recipient: $recipient,
@@ -163,7 +163,7 @@ describe('GraphQL gift message mutations', function (): void {
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->not->toHaveKey('errors');
-        expect($response['json']['data']['setGiftMessageCart']['cart']['giftMessage'])->not->toBeNull();
+        expect($response['json']['data']['setGiftMessageOnCart']['cart']['giftMessage'])->not->toBeNull();
     });
 
 });
