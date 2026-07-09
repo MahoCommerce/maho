@@ -309,16 +309,33 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
      */
     private function mapPlaceOrderAddress(array $input): array
     {
+        $countryId = $input['countryId'] ?? '';
+        $regionName = $input['region'] ?? '';
+        $regionId = $input['regionId'] ?? null;
+
+        // Countries with a fixed region list (US, CA, ...) reject an address
+        // without a numeric region_id. Storefront clients commonly send only the
+        // region name, so resolve the id from the name/code when it's missing.
+        if (empty($regionId) && $regionName !== '' && $countryId !== '') {
+            $region = \Mage::getModel('directory/region')->loadByName($regionName, $countryId);
+            if (!$region->getId()) {
+                $region = \Mage::getModel('directory/region')->loadByCode($regionName, $countryId);
+            }
+            if ($region->getId()) {
+                $regionId = (int) $region->getId();
+            }
+        }
+
         return [
             'firstname' => $input['firstName'] ?? '',
             'lastname' => $input['lastName'] ?? '',
             'company' => $input['company'] ?? null,
             'street' => $input['street'] ?? [],
             'city' => $input['city'] ?? '',
-            'region' => $input['region'] ?? '',
-            'region_id' => $input['regionId'] ?? null,
+            'region' => $regionName,
+            'region_id' => $regionId,
             'postcode' => $input['postcode'] ?? '',
-            'country_id' => $input['countryId'] ?? '',
+            'country_id' => $countryId,
             'telephone' => $input['telephone'] ?? '',
         ];
     }

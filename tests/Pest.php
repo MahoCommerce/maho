@@ -195,11 +195,26 @@ uses()
         }
         // Frontend/Backend tearDown calls Mage::reset(), so re-bootstrap before DB writes.
         \Mage::app();
-        $protocols = ['rest_v2', 'graphql', 'admin_graphql', 'legacy_rest', 'soap', 'v2_soap', 'xmlrpc', 'jsonrpc'];
         $config = \Mage::getModel('core/config');
+
+        $protocols = ['rest_v2', 'graphql', 'admin_graphql', 'legacy_rest', 'soap', 'v2_soap', 'xmlrpc', 'jsonrpc'];
         foreach ($protocols as $protocol) {
             $config->saveConfig('apiplatform/protocols/' . $protocol, '1', 'default', 0);
         }
+
+        // Enable a minimal offline checkout path (free shipping + cash on
+        // delivery) so the order-placement / credit-memo / shipment write tests
+        // can drive a real checkout instead of skipping. These default off.
+        $checkout = [
+            'carriers/freeshipping/active' => '1',
+            'carriers/flatrate/active' => '1',
+            'payment/cashondelivery/active' => '1',
+            'payment/checkmo/active' => '1',
+        ];
+        foreach ($checkout as $path => $value) {
+            $config->saveConfig($path, $value, 'default', 0);
+        }
+
         \Mage::app()->getCache()->cleanType('config');
         $protocolsEnabled = true;
     })
