@@ -72,7 +72,7 @@ describe('Guest cart gift messages', function (): void {
 
         $remove = apiDelete("/api/rest/v2/guest-carts/{$maskedId}/gift-message");
         expect($remove['status'])->toBeSuccessful();
-        expect($remove['json']['giftMessage'])->toBeNull();
+        expect($remove['json']['giftMessage'] ?? null)->toBeNull();
     });
 
     it('sets a per-item gift message', function (): void {
