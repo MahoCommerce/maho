@@ -62,7 +62,7 @@ class Maho_Giftcard_Block_Catalog_Product_Price extends Mage_Catalog_Block_Produ
 
         // Check custom amount max
         $giftcardType = $product->getData('giftcard_type');
-        if ($giftcardType === 'custom' || $giftcardType === 'combined') {
+        if ($giftcardType === 'range' || $giftcardType === 'combined') {
             $customMax = (float) $product->getData('giftcard_max_amount');
             if ($customMax > 0) {
                 $maxPrice = max($maxPrice, $customMax);
