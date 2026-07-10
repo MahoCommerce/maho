@@ -65,9 +65,9 @@ class Maho_Giftcard_Model_Product_Price extends Mage_Catalog_Model_Product_Type_
             }
         }
 
-        // For combined/custom type, also check min_amount and take the lower value
+        // For combined/range type, also check min_amount and take the lower value
         $giftcardType = $product->getData('giftcard_type');
-        if ($giftcardType === 'custom' || $giftcardType === 'combined') {
+        if ($giftcardType === 'range' || $giftcardType === 'combined') {
             $customMin = (float) $product->getData('giftcard_min_amount');
             if ($customMin > 0) {
                 $minPrice = ($minPrice > 0) ? min($minPrice, $customMin) : $customMin;
