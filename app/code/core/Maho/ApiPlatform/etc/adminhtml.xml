@@ -33,7 +33,7 @@ SPDX-License-Identifier: AFL-3.0
                             <config>
                                 <children>
                                     <apiplatform translate="title" module="apiplatform">
-                                        <title>API Platform</title>
+                                        <title>API</title>
                                     </apiplatform>
                                 </children>
                             </config>
