@@ -43,6 +43,16 @@ class IdempotencyListener
     private const STATUS_IN_PROGRESS = 0;
 
     /**
+     * How long an in-progress reservation may sit before a retry can take it
+     * over. Covers requests that died without ever emitting a response (worker
+     * OOM-kill, fatal error, max_execution_time): without a reclaim window the
+     * key would stay pinned as a 409 for the full TTL_HOURS. Must comfortably
+     * exceed the longest legitimate request runtime so a retry never runs the
+     * same operation in parallel with a slow-but-alive original.
+     */
+    private const IN_PROGRESS_RECLAIM_MINUTES = 10;
+
+    /**
      * Cap stored response bodies to keep `maho_api_idempotency_keys` from
      * growing unboundedly. Above the cap we skip storage entirely, a duplicate
      * request will re-run the operation rather than replay; given idempotency
@@ -144,7 +154,12 @@ class IdempotencyListener
 
         $existing = $this->fetchRecord($read, $table, $idempotencyKey, $scope, $path, $method, $cutoff);
         if ($existing) {
-            $this->replayExisting($event, $existing);
+            if (!$this->resolveExisting($event, $write, $table, $existing, $idempotencyKey, $scope, $path, $method)) {
+                return;
+            }
+            // Reclaimed an abandoned reservation; we now own it.
+            $request->attributes->set('_idempotency_key', $idempotencyKey);
+            $request->attributes->set('_idempotency_scope', $scope);
             return;
         }
 
@@ -172,7 +187,12 @@ class IdempotencyListener
             // window) still occupies the unique slot.
             $existing = $this->fetchRecord($read, $table, $idempotencyKey, $scope, $path, $method, $cutoff);
             if ($existing) {
-                $this->replayExisting($event, $existing);
+                if (!$this->resolveExisting($event, $write, $table, $existing, $idempotencyKey, $scope, $path, $method)) {
+                    return;
+                }
+                // Reclaimed an abandoned reservation; proceed as the new owner.
+                $request->attributes->set('_idempotency_key', $idempotencyKey);
+                $request->attributes->set('_idempotency_scope', $scope);
                 return;
             }
 
@@ -245,18 +265,79 @@ class IdempotencyListener
     }
 
     /**
-     * Replay a stored response, or reject when the key is still in progress.
+     * Handle a fetched idempotency record.
+     *
+     * Finalized rows are replayed (sets the response, returns false). For
+     * in-progress rows: a reservation older than IN_PROGRESS_RECLAIM_MINUTES
+     * belongs to a request that died before onResponse could finalize or drop
+     * it — take it over atomically and return true so the caller proceeds as
+     * the new owner; a fresh one means a concurrent request is genuinely still
+     * running, so reject with 409 rather than execute the operation twice.
+     *
+     * @param array<string, mixed> $existing
+     */
+    private function resolveExisting(
+        RequestEvent $event,
+        \Maho\Db\Adapter\AdapterInterface $write,
+        string $table,
+        array $existing,
+        string $key,
+        string $scope,
+        string $path,
+        string $method,
+    ): bool {
+        if ((int) $existing['response_code'] !== self::STATUS_IN_PROGRESS) {
+            $this->replayExisting($event, $existing);
+            return false;
+        }
+
+        if ($this->tryReclaimAbandoned($write, $table, $key, $scope, $path, $method)) {
+            return true;
+        }
+
+        throw new ConflictHttpException('A request with this idempotency key is already being processed');
+    }
+
+    /**
+     * Atomically take over an in-progress reservation abandoned by a request
+     * that died without emitting a response (worker OOM-kill, fatal error,
+     * max_execution_time). The created_at guard restricts the takeover to rows
+     * older than IN_PROGRESS_RECLAIM_MINUTES, and of N concurrent retries
+     * exactly one UPDATE matches the stale timestamp and wins; the losers
+     * match nothing (the row is fresh again) and get the 409.
+     */
+    private function tryReclaimAbandoned(
+        \Maho\Db\Adapter\AdapterInterface $write,
+        string $table,
+        string $key,
+        string $scope,
+        string $path,
+        string $method,
+    ): bool {
+        $where = $this->recordWhere($key, $scope, $path, $method);
+        $where['response_code = ?'] = self::STATUS_IN_PROGRESS;
+        $where['created_at < ?'] = \Mage::app()->getLocale()->formatDateForDb(
+            '-' . self::IN_PROGRESS_RECLAIM_MINUTES . ' minutes',
+        );
+
+        return $write->update(
+            $table,
+            [
+                'response_body' => null,
+                'response_headers' => null,
+                'created_at' => \Mage::app()->getLocale()->formatDateForDb('now'),
+            ],
+            $where,
+        ) > 0;
+    }
+
+    /**
+     * Replay a stored (finalized) response.
      *
      * @param array<string, mixed> $existing
      */
     private function replayExisting(RequestEvent $event, array $existing): void
     {
-        // A reservation that has not been finalized means a concurrent request
-        // is still executing the operation. Reject rather than run it twice.
-        if ((int) $existing['response_code'] === self::STATUS_IN_PROGRESS) {
-            throw new ConflictHttpException('A request with this idempotency key is already being processed');
-        }
-
         try {
             $headers = (array) \Mage::helper('core')->jsonDecode($existing['response_headers'] ?? '{}');
         } catch (\JsonException) {
