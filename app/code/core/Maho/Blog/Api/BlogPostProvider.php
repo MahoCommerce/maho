@@ -12,7 +12,6 @@ namespace Maho\Blog\Api;
 
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
-use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\CrudProvider;
 use Maho\ApiPlatform\Resource;
 use Maho\ApiPlatform\Service\StoreContext;
@@ -40,9 +39,7 @@ final class BlogPostProvider extends CrudProvider
         if ($operation instanceof CollectionOperationInterface) {
             $urlKey = $context['args']['urlKey'] ?? $context['filters']['urlKey'] ?? null;
             if ($urlKey) {
-                $post = $this->getPostByUrlKey($urlKey);
-                $items = $post ? [$post] : [];
-                return new TraversablePaginator(new \ArrayIterator($items), 1, 1, count($items));
+                return $this->singleItemPaginator($this->getPostByUrlKey($urlKey));
             }
             return $this->provideCollection($context);
         }
