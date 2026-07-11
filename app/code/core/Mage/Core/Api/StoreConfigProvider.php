@@ -99,7 +99,8 @@ final class StoreConfigProvider extends \Maho\ApiPlatform\Provider
         // cached payload, not just on the instance returned this request.
         \Mage::dispatchEvent('api_store_config_dto_build', ['dto' => $dto]);
 
-        // Cache for 24 hours (store config rarely changes, auto-cleaned on save)
+        // Cache for 24 hours; invalidated on config/store saves by
+        // Maho_ApiPlatform_Model_Observer::invalidateStoreConfigCache()
         \Mage::app()->getCache()->save(
             (string) \Mage::helper('core')->jsonEncode($this->dtoToArray($dto)),
             $cacheKey,

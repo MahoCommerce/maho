@@ -80,6 +80,10 @@ class ProductQueryHandler
     public function handleSearchProducts(array $variables, array $context): array
     {
         AdminAcl::checkResource(Product::class);
+        // Honor the requested store like handleGetCategories does: pricing,
+        // visibility, and name overrides are store-scoped, and the search layer
+        // below reads the current store.
+        \Mage::app()->setCurrentStore($context['store_id'] ?? 1);
         $search = $variables['search'] ?? $variables['query'] ?? '';
         $page = $variables['page'] ?? 1;
         $pageSize = $variables['pageSize'] ?? $variables['limit'] ?? 20;

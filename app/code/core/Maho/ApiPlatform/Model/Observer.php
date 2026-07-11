@@ -143,6 +143,20 @@ class Maho_ApiPlatform_Model_Observer
     }
 
     /**
+     * Invalidate config-derived API caches when configuration or store metadata
+     * changes. StoreConfigProvider caches for 24h and CountryProvider for 1h;
+     * without this, edits (store name, base URLs, allowed countries) would be
+     * served stale until the TTL lapses.
+     */
+    #[Maho\Config\Observer('core_config_data_save_after')]
+    #[Maho\Config\Observer('core_config_data_delete_after')]
+    #[Maho\Config\Observer('core_store_save_after')]
+    public function invalidateStoreConfigCache(\Maho\Event\Observer $_observer): void
+    {
+        $this->cleanApiCache(['API_STORE_CONFIG', 'API_COUNTRIES']);
+    }
+
+    /**
      * Purge idempotency-key rows older than the listener's TTL window.
      *
      * The IdempotencyListener stores response replays for 24 hours; rows beyond
