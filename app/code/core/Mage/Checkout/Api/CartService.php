@@ -810,6 +810,50 @@ class CartService
     }
 
     /**
+     * Map a storefront address payload (camelCase) into the snake_case keys
+     * the quote address model expects, resolving region_id from region text
+     * when the client didn't send one.
+     *
+     * Single source of truth for every API address write (cart addresses and
+     * place-order, REST and GraphQL), so all paths share the same lookup
+     * precedence: region codes are the more precise identifier, so try
+     * loadByCode first, then loadByName; on a match the region text is
+     * normalised to the canonical name. Countries with a fixed region list
+     * (US, CA, ...) reject an address without a numeric region_id, and
+     * storefront clients commonly send only the region name/code.
+     */
+    public function mapAddressInput(array $input): array
+    {
+        $regionId = $input['regionId'] ?? null;
+        $regionText = $input['region'] ?? null;
+        $countryId = $input['countryId'] ?? '';
+
+        if (!$regionId && $regionText && $countryId !== '') {
+            $region = \Mage::getModel('directory/region')->loadByCode($regionText, $countryId);
+            if (!$region->getId()) {
+                $region = \Mage::getModel('directory/region')->loadByName($regionText, $countryId);
+            }
+            if ($region->getId()) {
+                $regionId = (int) $region->getId();
+                $regionText = $region->getName();
+            }
+        }
+
+        return [
+            'firstname' => $input['firstName'] ?? '',
+            'lastname' => $input['lastName'] ?? '',
+            'company' => $input['company'] ?? null,
+            'street' => $input['street'] ?? [],
+            'city' => $input['city'] ?? '',
+            'region' => $regionText,
+            'region_id' => $regionId,
+            'postcode' => $input['postcode'] ?? '',
+            'country_id' => $countryId,
+            'telephone' => $input['telephone'] ?? '',
+        ];
+    }
+
+    /**
      * Set shipping address
      *
      * @param \Mage_Sales_Model_Quote $quote Quote

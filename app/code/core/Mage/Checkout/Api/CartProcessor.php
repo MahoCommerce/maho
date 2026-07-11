@@ -351,7 +351,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
-        $quote = $this->cartService->setShippingAddress($quote, $this->mapInputToAddressData($args));
+        $quote = $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($args));
 
         return $this->cartMapper->mapQuoteToCart($quote, false);
     }
@@ -365,7 +365,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $sameAsShipping = $args['sameAsShipping'] ?? false;
 
         $quote = $this->resolveAndVerify($context, $uriVariables);
-        $addressData = $sameAsShipping ? [] : $this->mapInputToAddressData($args);
+        $addressData = $sameAsShipping ? [] : $this->cartService->mapAddressInput($args);
         $quote = $this->cartService->setBillingAddress($quote, $addressData, $sameAsShipping);
 
         return $this->cartMapper->mapQuoteToCart($quote, false);
@@ -385,8 +385,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $quote = $this->resolveAndVerify($context, $uriVariables);
 
         if (is_array($address) && !empty($address)) {
-            $address = $this->resolveRegionIdFromText($address);
-            $quote = $this->cartService->setShippingAddress($quote, $this->mapInputToAddressData($address));
+            $quote = $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($address));
         }
 
         // Guest storefront contract: return the plain list of available shipping
@@ -401,33 +400,6 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         }
 
         return $this->cartMapper->mapQuoteToCart($quote, false);
-    }
-
-    /**
-     * If the client sent a region as text (without a regionId), look up
-     * the matching directory_country_region row by code or name and fill in
-     * regionId. Also normalises region text to the canonical name. Mirrors
-     * the lookup the removed Symfony GuestCartController used to do.
-     */
-    private function resolveRegionIdFromText(array $address): array
-    {
-        $regionId = $address['regionId'] ?? null;
-        $regionText = $address['region'] ?? '';
-        $countryId = $address['countryId'] ?? '';
-
-        if ($regionId || !$regionText || !$countryId) {
-            return $address;
-        }
-
-        $region = \Mage::getModel('directory/region')->loadByCode($regionText, $countryId);
-        if (!$region->getId()) {
-            $region = \Mage::getModel('directory/region')->loadByName($regionText, $countryId);
-        }
-        if ($region->getId()) {
-            $address['regionId'] = (int) $region->getId();
-            $address['region'] = $region->getName();
-        }
-        return $address;
     }
 
     /**
@@ -600,25 +572,6 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     {
         $itemId = $args['itemId'] ?? $uriVariables['itemId'] ?? null;
         return $itemId !== null && $itemId !== '' ? (int) $itemId : null;
-    }
-
-    /**
-     * Map input array to address data array
-     */
-    private function mapInputToAddressData(array $input): array
-    {
-        return [
-            'firstname' => $input['firstName'] ?? '',
-            'lastname' => $input['lastName'] ?? '',
-            'company' => $input['company'] ?? null,
-            'street' => $input['street'] ?? [],
-            'city' => $input['city'] ?? '',
-            'region' => $input['region'] ?? null,
-            'region_id' => $input['regionId'] ?? null,
-            'postcode' => $input['postcode'] ?? '',
-            'country_id' => $input['countryId'] ?? '',
-            'telephone' => $input['telephone'] ?? '',
-        ];
     }
 
 }

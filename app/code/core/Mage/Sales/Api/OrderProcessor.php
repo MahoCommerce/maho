@@ -154,10 +154,10 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // any provided addresses to the quote before order placement so the
         // rate calculator and address validations see the right data.
         if (isset($args['shippingAddress']) && is_array($args['shippingAddress'])) {
-            $this->cartService->setShippingAddress($quote, $this->mapPlaceOrderAddress($args['shippingAddress']));
+            $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($args['shippingAddress']));
         }
         if (isset($args['billingAddress']) && is_array($args['billingAddress'])) {
-            $this->cartService->setBillingAddress($quote, $this->mapPlaceOrderAddress($args['billingAddress']));
+            $this->cartService->setBillingAddress($quote, $this->cartService->mapAddressInput($args['billingAddress']));
         }
 
         // Set customer email from the body if provided (guest checkout)
@@ -301,43 +301,6 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $order = $this->orderService->addOrderNote($order, $comment, $notifyCustomer, $visibleOnFront);
 
         return $this->orderProvider->mapToDto($order);
-    }
-
-    /**
-     * Map a place-order address payload (camelCase, as sent by the storefront)
-     * into the snake_case keys the legacy quote address model expects.
-     */
-    private function mapPlaceOrderAddress(array $input): array
-    {
-        $countryId = $input['countryId'] ?? '';
-        $regionName = $input['region'] ?? '';
-        $regionId = $input['regionId'] ?? null;
-
-        // Countries with a fixed region list (US, CA, ...) reject an address
-        // without a numeric region_id. Storefront clients commonly send only the
-        // region name, so resolve the id from the name/code when it's missing.
-        if (empty($regionId) && $regionName !== '' && $countryId !== '') {
-            $region = \Mage::getModel('directory/region')->loadByName($regionName, $countryId);
-            if (!$region->getId()) {
-                $region = \Mage::getModel('directory/region')->loadByCode($regionName, $countryId);
-            }
-            if ($region->getId()) {
-                $regionId = (int) $region->getId();
-            }
-        }
-
-        return [
-            'firstname' => $input['firstName'] ?? '',
-            'lastname' => $input['lastName'] ?? '',
-            'company' => $input['company'] ?? null,
-            'street' => $input['street'] ?? [],
-            'city' => $input['city'] ?? '',
-            'region' => $regionName,
-            'region_id' => $regionId,
-            'postcode' => $input['postcode'] ?? '',
-            'country_id' => $countryId,
-            'telephone' => $input['telephone'] ?? '',
-        ];
     }
 
     /**
