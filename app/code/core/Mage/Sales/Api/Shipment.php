@@ -155,11 +155,18 @@ class Shipment extends CrudResource
 
     public static function afterLoad(self $dto, object $model): void
     {
-        $order = $model->getOrder();
-        $dto->orderIncrementId = $order ? $order->getIncrementId() : null;
+        // List paths batch-preload these three relations (see
+        // ShipmentProvider::getAllShipments()); fall back to the lazy per-model
+        // loads only for single-shipment and per-order views.
+        if ($model->hasData('_preloaded_order_increment_id')) {
+            $dto->orderIncrementId = $model->getData('_preloaded_order_increment_id');
+        } else {
+            $order = $model->getOrder();
+            $dto->orderIncrementId = $order ? $order->getIncrementId() : null;
+        }
 
         $dto->tracks = [];
-        foreach ($model->getAllTracks() as $track) {
+        foreach ($model->getData('_preloaded_tracks') ?? $model->getAllTracks() as $track) {
             $trackDto = new ShipmentTrack();
             $trackDto->id = (int) $track->getId();
             $trackDto->carrier = $track->getCarrierCode();
@@ -169,7 +176,7 @@ class Shipment extends CrudResource
         }
 
         $dto->items = [];
-        foreach ($model->getAllItems() as $item) {
+        foreach ($model->getData('_preloaded_items') ?? $model->getAllItems() as $item) {
             $itemDto = new ShipmentItem();
             $itemDto->sku = $item->getSku();
             $itemDto->name = $item->getName();

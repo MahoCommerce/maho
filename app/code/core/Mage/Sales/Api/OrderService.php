@@ -371,7 +371,10 @@ class OrderService
     }
 
     /**
-     * Paginate an order collection and batch-preload visible items for the page.
+     * Paginate an order collection and batch-preload visible items and
+     * payments for the page. Without the payment preload, mapToDto's
+     * $order->getPayment() lazy-loads a payment collection per order — one
+     * extra query per row on every list response.
      *
      * @return array{orders: array, total: int}
      */
@@ -402,10 +405,23 @@ class OrderService
                 $itemsByOrder[$item->getOrderId()][] = $item;
             }
 
+            $paymentCollection = \Mage::getModel('sales/order_payment')->getCollection()
+                ->addFieldToFilter('parent_id', ['in' => $orderIds]);
+
+            // Keep the first payment per order, mirroring
+            // Mage_Sales_Model_Order::getPayment()'s first-not-deleted pick.
+            $paymentsByOrder = [];
+            foreach ($paymentCollection as $payment) {
+                $paymentsByOrder[$payment->getParentId()] ??= $payment;
+            }
+
             foreach ($orders as $order) {
                 $oid = $order->getId();
                 if (isset($itemsByOrder[$oid])) {
                     $order->setData('_preloaded_items', $itemsByOrder[$oid]);
+                }
+                if (isset($paymentsByOrder[$oid])) {
+                    $order->setData('_preloaded_payment', $paymentsByOrder[$oid]->setOrder($order));
                 }
             }
         }

@@ -367,8 +367,10 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $dto->shippingMethod = $order->getShippingMethod();
         $dto->shippingDescription = $order->getShippingDescription();
 
-        // Map payment method
-        $payment = $order->getPayment();
+        // Map payment method. List paths batch-load payments in
+        // OrderService::paginateAndPreload(); fall back to the lazy per-order
+        // load only for single-order views.
+        $payment = $order->getData('_preloaded_payment') ?? $order->getPayment();
         if ($payment) {
             $dto->paymentMethod = $payment->getMethod();
             if (!$isCollectionOrder) {

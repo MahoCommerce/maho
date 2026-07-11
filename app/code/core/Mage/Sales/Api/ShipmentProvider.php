@@ -82,7 +82,9 @@ final class ShipmentProvider extends CrudProvider
 
         $shipments = [];
         foreach ($order->getShipmentsCollection() as $shipment) {
-            $shipments[] = Shipment::fromModel($shipment);
+            // Reuse the already-loaded order so afterLoad's getOrder() doesn't
+            // re-load it per shipment.
+            $shipments[] = Shipment::fromModel($shipment->setOrder($order));
         }
 
         return new ArrayPaginator($shipments, 0, count($shipments));
@@ -103,10 +105,44 @@ final class ShipmentProvider extends CrudProvider
         $collection->setOrder('created_at', 'DESC');
         $collection->setPageSize($perPage)->setCurPage($page);
 
-        $shipments = [];
-        foreach ($collection as $shipment) {
-            $shipments[] = Shipment::fromModel($shipment);
+        // Batch-preload the order increment ids, tracks, and items for the
+        // page; Shipment::afterLoad() would otherwise lazy-load all three per
+        // shipment (~3 extra queries per row on every list response).
+        $models = array_values(iterator_to_array($collection));
+        if ($models !== []) {
+            $shipmentIds = array_map(static fn($s) => (int) $s->getId(), $models);
+            $orderIds = array_unique(array_map(static fn($s) => (int) $s->getOrderId(), $models));
+
+            $read = \Mage::getSingleton('core/resource')->getConnection('core_read');
+            $incrementIds = $read->fetchPairs(
+                $read->select()
+                    ->from(\Mage::getSingleton('core/resource')->getTableName('sales/order'), ['entity_id', 'increment_id'])
+                    ->where('entity_id IN (?)', $orderIds),
+            );
+
+            $tracksByShipment = [];
+            $trackCollection = \Mage::getResourceModel('sales/order_shipment_track_collection')
+                ->addFieldToFilter('parent_id', ['in' => $shipmentIds]);
+            foreach ($trackCollection as $track) {
+                $tracksByShipment[(int) $track->getParentId()][] = $track;
+            }
+
+            $itemsByShipment = [];
+            $itemCollection = \Mage::getResourceModel('sales/order_shipment_item_collection')
+                ->addFieldToFilter('parent_id', ['in' => $shipmentIds]);
+            foreach ($itemCollection as $item) {
+                $itemsByShipment[(int) $item->getParentId()][] = $item;
+            }
+
+            foreach ($models as $shipment) {
+                $sid = (int) $shipment->getId();
+                $shipment->setData('_preloaded_order_increment_id', $incrementIds[$shipment->getOrderId()] ?? null);
+                $shipment->setData('_preloaded_tracks', $tracksByShipment[$sid] ?? []);
+                $shipment->setData('_preloaded_items', $itemsByShipment[$sid] ?? []);
+            }
         }
+
+        $shipments = array_map(Shipment::fromModel(...), $models);
 
         return new TraversablePaginator(new \ArrayIterator($shipments), $page, $perPage, (int) $collection->getSize());
     }
