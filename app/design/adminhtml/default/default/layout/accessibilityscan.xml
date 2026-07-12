@@ -17,9 +17,15 @@ SPDX-License-Identifier: AFL-3.0
             <action method="setTitle" translate="title"><title>Accessibility Scan</title></action>
         </reference>
         <reference name="content">
-            <block type="accessibilityscan/adminhtml_dashboard" name="accessibilityscan_dashboard"/>
+            <block type="accessibilityscan/adminhtml_dashboard" name="accessibilityscan_dashboard">
+                <block type="accessibilityscan/adminhtml_dashboard_grid" name="accessibilityscan_dashboard.grid" as="grid"/>
+            </block>
         </reference>
     </adminhtml_accessibilityscan_dashboard_index>
+
+    <adminhtml_accessibilityscan_dashboard_grid>
+        <block type="accessibilityscan/adminhtml_dashboard_grid" name="root" output="toHtml"/>
+    </adminhtml_accessibilityscan_dashboard_grid>
 
     <adminhtml_accessibilityscan_scan_index>
         <update handle="accessibilityscan_default"/>

@@ -172,12 +172,6 @@ try {
 
     const title = await page.title();
 
-    let screenshotPath = null;
-    if (config.screenshotDir) {
-        screenshotPath = join(config.screenshotDir, config.screenshotName ?? 'scan.png');
-        await page.screenshot({ path: screenshotPath, fullPage: true });
-    }
-
     // Capture the HTML with template hints intact for the source-mapping step
     const rawHtml = await page.evaluate(() => document.documentElement.outerHTML);
 
@@ -200,14 +194,61 @@ try {
         }
     });
 
+    // Screenshot after the hint strip so the stored image shows the page
+    // as visitors see it, not the debug overlays
+    let screenshotPath = null;
+    if (config.screenshotDir) {
+        screenshotPath = join(config.screenshotDir, config.screenshotName ?? 'scan.png');
+        await page.screenshot({ path: screenshotPath, fullPage: true });
+    }
+
     const results = await new AxeBuilder({ page })
         .withTags(config.wcagTags ?? ['wcag2a', 'wcag2aa'])
         .analyze();
 
+    // Measure each violating element so the UI can highlight it on the
+    // screenshot. Coordinates are absolute page CSS pixels in the same DOM
+    // state the screenshot captured; multi-step targets (iframe/shadow DOM
+    // chains) cannot be resolved with querySelector and are skipped.
+    const nodeRects = await page.evaluate(
+        (targets) => targets.map((target) => {
+            if (!Array.isArray(target) || target.length !== 1 || typeof target[0] !== 'string') {
+                return null;
+            }
+            try {
+                const el = document.querySelector(target[0]);
+                if (!el) {
+                    return null;
+                }
+                const rect = el.getBoundingClientRect();
+                if (rect.width < 1 || rect.height < 1) {
+                    return null;
+                }
+                return {
+                    x: Math.round(rect.x + window.scrollX),
+                    y: Math.round(rect.y + window.scrollY),
+                    width: Math.round(rect.width),
+                    height: Math.round(rect.height),
+                };
+            } catch {
+                return null;
+            }
+        }),
+        results.violations.flatMap((violation) => violation.nodes.map((node) => node.target)),
+    );
+
+    const pageSize = await page.evaluate(() => ({
+        width: Math.max(document.documentElement.scrollWidth, document.documentElement.clientWidth),
+        height: Math.max(document.documentElement.scrollHeight, document.documentElement.clientHeight),
+    }));
+
+    let rectIndex = 0;
     const output = {
         url: config.url,
         title,
         screenshotPath,
+        pageWidth: pageSize.width,
+        pageHeight: pageSize.height,
         rawHtml,
         violations: results.violations.map((violation) => ({
             ruleId: violation.id,
@@ -220,6 +261,7 @@ try {
                 cssSelector: Array.isArray(node.target) ? node.target.join(' ') : String(node.target),
                 html: node.html,
                 failureSummary: node.failureSummary,
+                boundingBox: nodeRects[rectIndex++] ?? null,
             })),
         })),
     };

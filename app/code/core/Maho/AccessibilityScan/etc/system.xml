@@ -44,6 +44,57 @@ SPDX-License-Identifier: AFL-3.0
                         </timeout>
                     </fields>
                 </general>
+                <scheduled translate="label">
+                    <label>Scheduled Scans</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>15</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <enabled translate="label comment">
+                            <label>Enabled</label>
+                            <frontend_type>boolean</frontend_type>
+                            <comment>Periodically scan the URLs below via cron, using the default WCAG level.</comment>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </enabled>
+                        <urls translate="label comment">
+                            <label>URLs to Scan</label>
+                            <frontend_type>textarea</frontend_type>
+                            <backend_model>accessibilityscan/system_config_backend_scheduledUrls</backend_model>
+                            <comment>One URL per line. Every URL must belong to one of the configured store base URLs.</comment>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </urls>
+                        <schedule translate="label comment">
+                            <label>Cron Schedule</label>
+                            <frontend_type>text</frontend_type>
+                            <comment><![CDATA[Cron expression. Default: <strong>0 3 * * *</strong> (daily at 3am).]]></comment>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </schedule>
+                        <retention translate="label comment">
+                            <label>Keep Last Scans per URL</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits</validate>
+                            <comment>Scheduled scans older than the newest N per URL are deleted automatically. 0 keeps everything.</comment>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </retention>
+                    </fields>
+                </scheduled>
                 <advanced translate="label">
                     <label>Advanced</label>
                     <frontend_type>text</frontend_type>

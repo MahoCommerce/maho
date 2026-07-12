@@ -60,6 +60,7 @@ class AccessibilityScan extends BaseMahoCommand
         $scan->setUrl($url)
             ->setStoreId((int) $input->getOption('store'))
             ->setWcagLevel($level)
+            ->setTriggeredBy(Maho_AccessibilityScan_Model_Scan::TRIGGER_CLI)
             ->setStatus(Maho_AccessibilityScan_Model_Scan::STATUS_PENDING)
             ->save();
 

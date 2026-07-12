@@ -183,6 +183,8 @@ class Maho_AccessibilityScan_Model_Runner
             ->setPageTitle(isset($result['title']) ? mb_substr((string) $result['title'], 0, 255) : null)
             ->setStatus('complete')
             ->setScreenshotPath(isset($result['screenshotPath']) ? (string) $result['screenshotPath'] : null)
+            ->setPageWidth(isset($result['pageWidth']) ? (int) $result['pageWidth'] : null)
+            ->setPageHeight(isset($result['pageHeight']) ? (int) $result['pageHeight'] : null)
             ->setScannedAt($locale->formatDateForDb('now'))
             ->save();
 
@@ -209,6 +211,7 @@ class Maho_AccessibilityScan_Model_Runner
                 }
                 $snippet = isset($node['html']) ? (string) $node['html'] : null;
                 [$templateFile, $templateLine] = $mapper->mapSnippet($snippet);
+                $box = is_array($node['boundingBox'] ?? null) ? $node['boundingBox'] : null;
 
                 Mage::getModel('accessibilityscan/violation')
                     ->setPageId((int) $page->getId())
@@ -224,6 +227,10 @@ class Maho_AccessibilityScan_Model_Runner
                     ->setFailureSummary(isset($node['failureSummary']) ? (string) $node['failureSummary'] : null)
                     ->setTemplateFile($templateFile)
                     ->setTemplateLine($templateLine)
+                    ->setElementX($box !== null ? (int) ($box['x'] ?? 0) : null)
+                    ->setElementY($box !== null ? (int) ($box['y'] ?? 0) : null)
+                    ->setElementWidth($box !== null ? (int) ($box['width'] ?? 0) : null)
+                    ->setElementHeight($box !== null ? (int) ($box['height'] ?? 0) : null)
                     ->save();
 
                 $counts[$impact]++;

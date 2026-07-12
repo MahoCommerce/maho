@@ -35,6 +35,10 @@ declare(strict_types=1);
  * @method $this setTemplateFile(?string $value)
  * @method ?int getTemplateLine()
  * @method $this setTemplateLine(?int $value)
+ * @method $this setElementX(?int $value)
+ * @method $this setElementY(?int $value)
+ * @method $this setElementWidth(?int $value)
+ * @method $this setElementHeight(?int $value)
  */
 class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
 {
@@ -55,5 +59,26 @@ class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
     protected function _construct(): void
     {
         $this->_init('accessibilityscan/violation');
+    }
+
+    /**
+     * Bounding box of the offending element in absolute page CSS pixels,
+     * or null when the scanner could not measure it
+     *
+     * @return ?array{x: int, y: int, width: int, height: int}
+     */
+    public function getElementRect(): ?array
+    {
+        if ($this->getData('element_x') === null || $this->getData('element_y') === null
+            || (int) $this->getData('element_width') < 1 || (int) $this->getData('element_height') < 1
+        ) {
+            return null;
+        }
+        return [
+            'x' => (int) $this->getData('element_x'),
+            'y' => (int) $this->getData('element_y'),
+            'width' => (int) $this->getData('element_width'),
+            'height' => (int) $this->getData('element_height'),
+        ];
     }
 }

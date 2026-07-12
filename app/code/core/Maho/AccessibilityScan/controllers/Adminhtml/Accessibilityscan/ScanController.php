@@ -96,6 +96,7 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
             $scan->setUrl($url)
                 ->setStoreId((int) $this->getRequest()->getParam('store_id'))
                 ->setWcagLevel($helper->normalizeWcagLevel($this->getRequest()->getParam('wcag_level')))
+                ->setTriggeredBy(Maho_AccessibilityScan_Model_Scan::TRIGGER_MANUAL)
                 ->setStatus(Maho_AccessibilityScan_Model_Scan::STATUS_PENDING)
                 ->save();
 
@@ -131,13 +132,7 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
         }
 
         try {
-            $screenshot = $scan->getPageCollection()->getColumnValues('screenshot_path');
-            $scan->delete();
-            foreach ($screenshot as $path) {
-                if (is_string($path) && $path !== '' && str_starts_with($path, Mage::helper('accessibilityscan')->getScreenshotDir())) {
-                    @unlink($path);
-                }
-            }
+            $scan->deleteWithScreenshots();
             Mage::getSingleton('adminhtml/session')->addSuccess($this->__('The scan has been deleted.'));
         } catch (Throwable $e) {
             Mage::logException($e);
@@ -145,6 +140,25 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
         }
 
         $this->_redirect('*/*/');
+    }
+
+    /**
+     * Serve the scan's page screenshot inline (it lives in var/, outside the docroot)
+     */
+    #[Maho\Config\Route('/admin/accessibilityscan_scan/screenshot')]
+    public function screenshotAction(): void
+    {
+        $scan = Mage::getModel('accessibilityscan/scan')->load((int) $this->getRequest()->getParam('id'));
+        $file = $scan->getId() ? $scan->getFirstPage()?->getScreenshotFile() : null;
+        if ($file === null) {
+            $this->getResponse()->setHttpResponseCode(404);
+            return;
+        }
+
+        $this->getResponse()
+            ->setHeader('Content-Type', 'image/png', true)
+            ->setHeader('Content-Length', (string) filesize($file), true)
+            ->setBody((string) file_get_contents($file));
     }
 
     #[Maho\Config\Route('/admin/accessibilityscan_scan/exportPdf')]

@@ -31,6 +31,22 @@ async function accessibilityScanStart(form) {
     button.disabled = false;
 }
 
+function accessibilityScanShowMarker(violationId) {
+    const details = document.querySelector('details.a11yscan-screenshot');
+    const marker = document.getElementById('a11yscan-marker-' + violationId);
+    if (!details || !marker) {
+        return;
+    }
+    details.open = true;
+    for (const el of document.querySelectorAll('.a11yscan-marker.flash')) {
+        el.classList.remove('flash');
+    }
+    // Force a reflow so re-clicking the same violation restarts the pulse
+    void marker.offsetWidth;
+    marker.classList.add('flash');
+    marker.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+
 function accessibilityScanDelete(url, message) {
     if (!confirm(message)) {
         return;

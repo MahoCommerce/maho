@@ -25,4 +25,11 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_DashboardController ext
 
         $this->renderLayout();
     }
+
+    #[Maho\Config\Route('/admin/accessibilityscan_dashboard/grid')]
+    public function gridAction(): void
+    {
+        $this->loadLayout(false);
+        $this->renderLayout();
+    }
 }

@@ -36,6 +36,18 @@ class Maho_AccessibilityScan_Block_Pdf_Report extends Mage_Core_Block_Pdf
     }
 
     /**
+     * Page screenshot as a data URI (DomPdf cannot fetch admin URLs)
+     */
+    public function getScreenshotDataUri(): ?string
+    {
+        $file = $this->getScan()->getFirstPage()?->getScreenshotFile();
+        if ($file === null) {
+            return null;
+        }
+        return 'data:image/png;base64,' . base64_encode((string) file_get_contents($file));
+    }
+
+    /**
      * The report ships its own styles inline in the template
      */
     #[\Override]

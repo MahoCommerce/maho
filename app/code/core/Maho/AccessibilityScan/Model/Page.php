@@ -19,6 +19,8 @@ declare(strict_types=1);
  * @method $this setStatus(string $value)
  * @method ?string getScreenshotPath()
  * @method $this setScreenshotPath(?string $value)
+ * @method $this setPageWidth(?int $value)
+ * @method $this setPageHeight(?int $value)
  * @method $this setViolationCount(int $value)
  * @method $this setScannedAt(string $value)
  */
@@ -33,5 +35,20 @@ class Maho_AccessibilityScan_Model_Page extends Mage_Core_Model_Abstract
     public function getViolationCount(): int
     {
         return (int) $this->getData('violation_count');
+    }
+
+    /**
+     * Absolute path of the page screenshot, or null when the stored path
+     * does not resolve to a file inside the screenshot directory
+     */
+    public function getScreenshotFile(): ?string
+    {
+        $path = (string) $this->getScreenshotPath();
+        if ($path === '' || !is_file($path)) {
+            return null;
+        }
+        $real = realpath($path);
+        $dir = Mage::helper('accessibilityscan')->getScreenshotDir();
+        return $real !== false && str_starts_with($real, $dir . DS) ? $real : null;
     }
 }

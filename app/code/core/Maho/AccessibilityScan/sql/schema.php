@@ -19,6 +19,7 @@ return function (Schema $schema): void {
     $scan->addColumn('store_id', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $scan->addColumn('status', Types::STRING, ['length' => 20, 'default' => 'pending']);
     $scan->addColumn('wcag_level', Types::STRING, ['length' => 3, 'default' => 'AA']);
+    $scan->addColumn('triggered_by', Types::STRING, ['length' => 16, 'default' => 'manual']);
     $scan->addColumn('url', Types::STRING, ['length' => 2048]);
     $scan->addColumn('total_violations', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $scan->addColumn('violations_critical', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
@@ -44,6 +45,8 @@ return function (Schema $schema): void {
     $page->addColumn('page_title', Types::STRING, ['length' => 255, 'notnull' => false]);
     $page->addColumn('status', Types::STRING, ['length' => 20, 'default' => 'pending']);
     $page->addColumn('screenshot_path', Types::STRING, ['length' => 255, 'notnull' => false]);
+    $page->addColumn('page_width', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
+    $page->addColumn('page_height', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $page->addColumn('violation_count', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $page->addColumn('scanned_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $page->addPrimaryKeyConstraint(
@@ -72,6 +75,10 @@ return function (Schema $schema): void {
     $violation->addColumn('failure_summary', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $violation->addColumn('template_file', Types::STRING, ['length' => 255, 'notnull' => false]);
     $violation->addColumn('template_line', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
+    $violation->addColumn('element_x', Types::INTEGER, ['notnull' => false]);
+    $violation->addColumn('element_y', Types::INTEGER, ['notnull' => false]);
+    $violation->addColumn('element_width', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
+    $violation->addColumn('element_height', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
     $violation->addColumn('ai_suggestion', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $violation->addColumn('ai_diff', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $violation->addPrimaryKeyConstraint(

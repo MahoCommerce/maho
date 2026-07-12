@@ -122,7 +122,7 @@ class Maho_AccessibilityScan_Model_TemplateMapper
      */
     protected function findLineInTemplate(string $template, string $snippet): ?int
     {
-        $file = MAHO_ROOT_DIR . '/' . $template;
+        $file = Mage::getBaseDir() . '/' . $template;
         if (str_contains($template, '..') || !is_file($file)) {
             return null;
         }

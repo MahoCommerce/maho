@@ -69,32 +69,7 @@ $latestScan = $this->getLatestScan();
     <?php endif; ?>
 </div>
 
-<?php if ($this->getRecentScans()->getSize()): ?>
-    <div class="a11yscan-recent entry-edit">
-        <div class="entry-edit-head"><h4 class="icon-head"><?= $helper->__('Recent Scans') ?></h4></div>
-        <fieldset>
-            <table class="data" cellspacing="0">
-                <thead>
-                    <tr class="headings">
-                        <th><?= $helper->__('URL') ?></th>
-                        <th><?= $helper->__('WCAG Level') ?></th>
-                        <th><?= $helper->__('Status') ?></th>
-                        <th><?= $helper->__('Violations') ?></th>
-                        <th><?= $helper->__('Date') ?></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($this->getRecentScans() as $scan): ?>
-                        <tr>
-                            <td><a href="<?= $this->escapeUrl($this->getScanViewUrl($scan)) ?>"><?= $this->escapeHtml($scan->getUrl()) ?></a></td>
-                            <td><?= $this->escapeHtml($scan->getWcagLevel()) ?></td>
-                            <td><span class="a11yscan-badge status-<?= $this->escapeHtml($scan->getStatus()) ?>"><?= $this->escapeHtml($scan->getStatus()) ?></span></td>
-                            <td><?= $scan->getTotalViolations() ?></td>
-                            <td><?= $this->escapeHtml(Mage::helper('core')->formatDate($scan->getData('created_at'), 'medium', true)) ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </fieldset>
-    </div>
-<?php endif; ?>
+<div class="a11yscan-recent entry-edit">
+    <div class="entry-edit-head"><h4 class="icon-head"><?= $helper->__('Recent Scans') ?></h4></div>
+    <?= $this->getChildHtml('grid') ?>
+</div>

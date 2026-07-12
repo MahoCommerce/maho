@@ -56,6 +56,11 @@ SPDX-License-Identifier: AFL-3.0
                 <wcag_level>AA</wcag_level>
                 <timeout>60</timeout>
             </general>
+            <scheduled>
+                <enabled>0</enabled>
+                <schedule>0 3 * * *</schedule>
+                <retention>30</retention>
+            </scheduled>
             <advanced>
                 <node_path>node</node_path>
                 <npm_path>npm</npm_path>

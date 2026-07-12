@@ -17,6 +17,8 @@ declare(strict_types=1);
  * @method $this setWcagLevel(string $value)
  * @method string getUrl()
  * @method $this setUrl(string $value)
+ * @method string getTriggeredBy()
+ * @method $this setTriggeredBy(string $value)
  * @method $this setTotalViolations(int $value)
  * @method $this setViolationsCritical(int $value)
  * @method $this setViolationsSerious(int $value)
@@ -34,6 +36,10 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
     public const STATUS_COMPLETE = 'complete';
     public const STATUS_FAILED   = 'failed';
 
+    public const TRIGGER_MANUAL   = 'manual';
+    public const TRIGGER_CLI      = 'cli';
+    public const TRIGGER_SCHEDULE = 'schedule';
+
     #[\Override]
     protected function _construct(): void
     {
@@ -44,6 +50,12 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
     {
         return Mage::getResourceModel('accessibilityscan/page_collection')
             ->addFieldToFilter('scan_id', $this->getId());
+    }
+
+    public function getFirstPage(): ?Maho_AccessibilityScan_Model_Page
+    {
+        $page = $this->getPageCollection()->getFirstItem();
+        return $page instanceof Maho_AccessibilityScan_Model_Page && $page->getId() ? $page : null;
     }
 
     public function getViolationCollection(): Maho_AccessibilityScan_Model_Resource_Violation_Collection
@@ -98,5 +110,23 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
     public function isFailed(): bool
     {
         return $this->getStatus() === self::STATUS_FAILED;
+    }
+
+    /**
+     * Delete the scan together with its page screenshots on disk
+     * (page and violation rows cascade at the database level)
+     */
+    public function deleteWithScreenshots(): self
+    {
+        $screenshots = $this->getPageCollection()->getColumnValues('screenshot_path');
+        $this->delete();
+
+        $screenshotDir = Mage::helper('accessibilityscan')->getScreenshotDir();
+        foreach ($screenshots as $path) {
+            if (is_string($path) && $path !== '' && str_starts_with($path, $screenshotDir)) {
+                @unlink($path);
+            }
+        }
+        return $this;
     }
 }

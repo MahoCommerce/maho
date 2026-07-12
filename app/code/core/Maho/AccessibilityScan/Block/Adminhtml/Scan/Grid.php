@@ -69,6 +69,19 @@ class Maho_AccessibilityScan_Block_Adminhtml_Scan_Grid extends Mage_Adminhtml_Bl
             ],
         ]);
 
+        $this->addColumn('triggered_by', [
+            'header' => $helper->__('Source'),
+            'align' => 'center',
+            'width' => '90px',
+            'index' => 'triggered_by',
+            'type' => 'options',
+            'options' => [
+                Maho_AccessibilityScan_Model_Scan::TRIGGER_MANUAL => $helper->__('Manual'),
+                Maho_AccessibilityScan_Model_Scan::TRIGGER_CLI => $helper->__('CLI'),
+                Maho_AccessibilityScan_Model_Scan::TRIGGER_SCHEDULE => $helper->__('Scheduled'),
+            ],
+        ]);
+
         $this->addColumn('total_violations', [
             'header' => $helper->__('Violations'),
             'align' => 'center',

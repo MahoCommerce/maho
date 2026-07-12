@@ -39,6 +39,7 @@ $logoUrl = $this->getLogoUrl();
     .violation pre { background: #f6f6f6; border: 1px solid #ddd; padding: 6px; font-size: 9px; white-space: pre-wrap; word-break: break-all; }
     .violation .label { font-weight: bold; margin: 6px 0 2px; }
     .help-url { color: #666; font-size: 9px; word-break: break-all; }
+    img.screenshot { max-width: 100%; border: 1px solid #ccc; }
 </style>
 
 <div class="report-header">
@@ -102,7 +103,7 @@ $logoUrl = $this->getLogoUrl();
             <h3>
                 <?= $this->escapeHtml($violation->getAxeRuleId()) ?>
                 <?php if ($violation->getWcagCriteria()): ?>
-                    &mdash; <?= $helper->__('WCAG %s', $violation->getWcagCriteria()) ?>
+                    (<?= $helper->__('WCAG %s', $violation->getWcagCriteria()) ?>)
                 <?php endif; ?>
             </h3>
             <p><?= $this->escapeHtml((string) $violation->getDescription()) ?></p>
@@ -124,3 +125,8 @@ $logoUrl = $this->getLogoUrl();
         </div>
     <?php endforeach; ?>
 <?php endforeach; ?>
+
+<?php if ($screenshot = $this->getScreenshotDataUri()): ?>
+    <h2><?= $helper->__('Page Screenshot') ?></h2>
+    <img class="screenshot" src="<?= $screenshot ?>" alt="">
+<?php endif; ?>
