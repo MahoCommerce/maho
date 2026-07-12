@@ -29,6 +29,7 @@
 "Node.js Binary Path","Node.js Binary Path"
 "No violations were found on this page.","No violations were found on this page."
 "No violations were found on this page. Well done!","No violations were found on this page. Well done!"
+"npm Binary Path","npm Binary Path"
 "Page Title","Page Title"
 "Path to the node executable. Default: node","Path to the node executable. Default: node"
 "Path to the npm executable. Default: npm","Path to the npm executable. Default: npm"
@@ -71,4 +72,3 @@
 "WCAG 2.1 Level AA","WCAG 2.1 Level AA"
 "WCAG 2.1 Level AAA","WCAG 2.1 Level AAA"
 "WCAG Level","WCAG Level"
-"npm Binary Path","npm Binary Path"
