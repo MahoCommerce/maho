@@ -148,6 +148,19 @@ class Mage_Page_Block_Html extends Mage_Core_Block_Template
     }
 
     /**
+     * data-theme attribute for the <html> element (design/theme/color_scheme).
+     * Empty string when no color scheme is configured.
+     */
+    public function getSchemeHtmlAttribute(): string
+    {
+        $scheme = Mage::getStoreConfig('design/theme/color_scheme');
+        if (!$scheme) {
+            return '';
+        }
+        return ' data-theme="' . $this->escapeHtml($scheme) . '"';
+    }
+
+    /**
      * @param string $theme
      * @return $this
      * @throws Mage_Core_Exception

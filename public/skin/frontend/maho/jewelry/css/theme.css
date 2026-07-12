@@ -24,14 +24,14 @@
     --color-primary-content: #f8f5ee;
     --color-secondary: #6b5c40;
     --color-secondary-content: #f7f2e6;
-    --color-accent: #91702c;
+    --color-accent: #896a2a;
     --color-accent-content: #faf4e2;
     --color-neutral: #1e1a13;
     --color-neutral-content: #f7f4ee;
 
     --color-success: #3c7350;
     --color-success-content: #f0f7f2;
-    --color-warning: #a37b24;
+    --color-warning: #af8427;
     --color-warning-content: #2c2005;
     --color-error: #a13a2e;
     --color-error-content: #fcf1ef;
@@ -132,6 +132,10 @@ a.button {
         --color-secondary-content: #1f1a12;
         --color-accent: #d4b678;
         --color-accent-content: #251b07;
+
+        /* Light error hue reads too dark on these surfaces (WCAG AA) */
+        --color-error: #cd594d;
+        --color-error-content: #1d0c0c;
 
         --maho-color-rating: #d4b678;
 

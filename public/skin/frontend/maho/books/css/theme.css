@@ -112,6 +112,10 @@
         --color-accent: #ecb84a;
         --color-accent-content: #33250a;
 
+        /* Light error hue reads too dark on these surfaces (WCAG AA) */
+        --color-error: #d45e50;
+        --color-error-content: #2e110b;
+
         --maho-color-rating: #d9ad4a;
         --product-tile-bg: #26221a;
     }

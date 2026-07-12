@@ -70,6 +70,29 @@ create your own theme instead.
    `sports` / `kids` / `garden` (empty = default).
 2. `./maho cache:flush`
 
+## Color schemes (DaisyUI)
+
+**System > Configuration > Design > Themes > Color Scheme** applies one of
+DaisyUI's stock palettes on top of the active theme (rendered as the
+`data-theme` attribute on `<html>`). Eight schemes are compiled in: `coffee`,
+`dim`, `dracula`, `forest`, `luxury`, `night`, `sunset`, `synthwave`.
+
+Why only eight: accessibility is a hard requirement for this package. Every
+token pair Maho renders as text (body text on surfaces, button/badge text on
+its color, links and error text on page backgrounds) must reach WCAG AA
+(4.5:1). Of DaisyUI's 35 built-in themes only these eight pass; the rest fail
+on at least one pair, so they are not shipped. Re-audit before adding one to
+the list in `default/src/tailwind.css`.
+
+Schemes are palettes, not identities: they change colors only, while the
+industry themes also carry typography, shape and product-imagery treatments —
+that is why the industry themes are hand-built rather than DaisyUI themes, and
+why all eleven of them (plus their dark variants) are contrast-audited to the
+same AA bar. Combining a scheme with an industry theme is possible but the
+industry theme's own palette pins every variable it defines (its `theme.css`
+is unlayered and loads last), so schemes are most useful on the default
+identity or on custom themes that don't pin a full palette.
+
 ## Creating your own theme
 
 Both paths start the same way (example theme name: `pharmacy`):

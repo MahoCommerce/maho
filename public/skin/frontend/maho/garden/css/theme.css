@@ -33,7 +33,7 @@
     --color-info-content: #e9f5f2;
     --color-success: #41772c;
     --color-success-content: #f0f8ea;
-    --color-warning: #b3861c;
+    --color-warning: #b7891d;
     --color-warning-content: #332608;
     --color-error: #ab3527;
     --color-error-content: #fdf1ee;
@@ -120,6 +120,10 @@
         --color-secondary-content: #1b2316;
         --color-accent: #d99068;
         --color-accent-content: #331103;
+
+        /* Light error hue reads too dark on these surfaces (WCAG AA) */
+        --color-error: #d65a4c;
+        --color-error-content: #2b0f07;
 
         --maho-color-rating: #e0a63c;
         --product-tile-bg: #232a1b;

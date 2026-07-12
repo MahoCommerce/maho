@@ -30,7 +30,7 @@
 
     --color-success: #2f7d43;
     --color-success-content: #f0f9f2;
-    --color-warning: #a8641c;
+    --color-warning: #a05e1a;
     --color-warning-content: #fdf5ec;
     --color-error: #cf3535;
     --color-error-content: #fdf1f1;
@@ -122,6 +122,10 @@ a.button:hover {
         --color-secondary-content: #1f1f1d;
         --color-accent: #ededea;
         --color-accent-content: #1a1a19;
+
+        /* Light error hue reads too dark on these surfaces (WCAG AA) */
+        --color-error: #d75555;
+        --color-error-content: #2e0909;
 
         --maho-color-rating: #ededea;
         --product-tile-bg: #222220;

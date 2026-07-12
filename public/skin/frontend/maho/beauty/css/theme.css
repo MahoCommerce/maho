@@ -23,14 +23,14 @@
     --color-primary-content: #fdf1f5;
     --color-secondary: #503242;
     --color-secondary-content: #f7edf2;
-    --color-accent: #71875f;
+    --color-accent: #627553;
     --color-accent-content: #f2f7f0;
     --color-neutral: #352b28;
     --color-neutral-content: #f6efec;
 
-    --color-success: #57814f;
+    --color-success: #517849;
     --color-success-content: #f2f8f0;
-    --color-warning: #b5701c;
+    --color-warning: #c97f21;
     --color-warning-content: #3a2405;
     --color-error: #b13a3a;
     --color-error-content: #fdf1f1;
@@ -111,6 +111,10 @@ a.button {
         --color-secondary-content: #2a1e23;
         --color-accent: #a0ba95;
         --color-accent-content: #16220f;
+
+        /* Light error hue reads too dark on these surfaces (WCAG AA) */
+        --color-error: #ca6262;
+        --color-error-content: #291111;
 
         --product-tile-bg: linear-gradient(180deg, #332329, #281a1f);
     }

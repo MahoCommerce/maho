@@ -136,6 +136,10 @@ a.button {
         --color-accent: #79b8ff;
         --color-accent-content: #06213a;
 
+        /* Light error hue reads too dark on these surfaces (WCAG AA) */
+        --color-error: #e03f33;
+        --color-error-content: #1c0603;
+
         --product-tile-bg: #1b1b1f;
     }
 

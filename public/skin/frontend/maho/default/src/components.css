@@ -51,7 +51,12 @@
            or override this single variable for a different mood */
         --product-tile-bg: radial-gradient(
             130% 95% at 50% 12%,
-            color-mix(in oklab, var(--color-base-200), white 55%) 0%,
+            /* the studio-light hotspot: a strong lift toward white reads as
+               glare on dark schemes, so dark surfaces get a gentle one */
+            light-dark(
+                color-mix(in oklab, var(--color-base-200), white 55%),
+                color-mix(in oklab, var(--color-base-200), white 7%)
+            ) 0%,
             var(--color-base-200) 60%,
             color-mix(in oklab, var(--color-base-200), var(--color-base-300) 55%) 100%
         );
@@ -199,6 +204,13 @@
             @apply grid gap-4 nav:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))];
         }
 
+        /* The name widget wraps its .field divs in a single .customer-name
+           container, so the li.fields grid gap never reaches them - give the
+           container the same rhythm as the list itself */
+        .customer-name {
+            @apply grid gap-4;
+        }
+
         label {
             @apply text-sm font-medium;
         }
@@ -231,6 +243,12 @@
         .legend {
             @apply mb-4 block font-display text-lg font-semibold;
         }
+
+        /* Don't stack the list's bottom margin on top of the fieldset's own -
+           keeps the gap between consecutive fieldsets a single 1.5rem step */
+        > .form-list:last-child {
+            @apply mb-0;
+        }
     }
 
     /* ============================================
@@ -243,7 +261,14 @@
         > li { @apply m-0; }
 
         li li {
-            @apply alert text-sm font-medium;
+            /* block, not the alert's grid: notices mix text and inline links,
+               and grid would spread each inline node into its own column */
+            @apply alert block text-sm font-medium;
+
+            a { @apply link font-semibold text-current; }
+
+            /* Action link on its own line, slightly separated from the prose */
+            a.action { @apply mt-1.5 inline-block; }
         }
 
         .success-msg li { @apply alert-success alert-soft; }
@@ -1418,7 +1443,13 @@
     }
 
     .pager.pager-no-toolbar {
-        @apply justify-between border-t border-line py-2.5;
+        @apply justify-between py-2.5;
+    }
+
+    /* Only the pager that closes a list gets a separating hairline - the one
+       rendered above the table would draw a stray line under the page title */
+    :is(table, ol, ul) + .pager.pager-no-toolbar {
+        @apply border-t border-line;
     }
 
     /* ============================================
@@ -1430,7 +1461,9 @@
         @apply card card-border overflow-hidden border-line bg-base-100;
 
         .block-title {
-            @apply border-b border-line px-4 py-3.5 font-display text-[0.9375rem] font-semibold;
+            /* Sometimes a <button> (offcanvas trigger) - stretch it so the
+               bottom hairline spans the card, not just the text */
+            @apply block w-full border-b border-line px-4 py-3.5 text-left font-display text-[0.9375rem] font-semibold;
         }
 
         .block-content {
@@ -2591,6 +2624,15 @@
         }
     }
 
+    /* Every stock color scheme we ship is dark (the 8 WCAG-passing DaisyUI
+       themes) - keep the ink logo readable on them. Scoped per scheme so a
+       future light scheme isn't inverted by accident */
+    :root:is([data-theme="coffee"], [data-theme="dim"], [data-theme="dracula"], [data-theme="forest"], [data-theme="luxury"], [data-theme="night"], [data-theme="sunset"], [data-theme="synthwave"]) :is(.page-header, .page-header-minimal) .logo img {
+        /* solid white: any hue-preserving inversion would darken the light
+           brand mark; monochrome is the safe treatment on dark surfaces */
+        filter: brightness(0) invert(1);
+    }
+
     /* ============================================
      * Footer
      * ============================================ */
@@ -2699,6 +2741,30 @@
         }
     }
 
+    /* Every account page: air between the title row and the content below it
+       (the title is otherwise flush against cards, tables and forms) */
+    .my-account .page-title {
+        @apply mb-4;
+    }
+
+    /* Newsletter management: description reads as intro copy, button follows */
+    .newsletter-description {
+        @apply mb-5 max-w-3xl text-[0.9375rem] leading-relaxed text-base-content/80;
+    }
+
+    /* Dashboard greeting: air between the title, welcome copy and first section */
+    .dashboard .welcome-msg {
+        @apply mb-8;
+
+        .hello {
+            @apply mb-1.5 text-[1.0625rem];
+        }
+
+        p:not(.hello) {
+            @apply max-w-3xl text-[0.9375rem] leading-relaxed text-base-content/80;
+        }
+    }
+
     .box-account {
         @apply mb-6;
 
@@ -2715,11 +2781,245 @@
         }
     }
 
-    .my-account .title-buttons {
-        @apply flex flex-wrap items-center justify-between gap-3;
+    /* Addresses are structured data, not emphasis - kill the browser italic */
+    address {
+        @apply not-italic;
     }
 
-    /* Account navigation sidebar */
+    /* Card headings carry an inline edit link (pencil icon) - keep it on the
+       heading line as a quiet icon button instead of a full-size block svg */
+    :is(.box-title, .box-head) :is(h2, h3) {
+        @apply flex items-center gap-1.5;
+
+        a {
+            @apply inline-flex size-7 shrink-0 items-center justify-center rounded-field text-base-content/45 transition-colors hover:bg-base-200 hover:text-primary;
+
+            svg { @apply size-4; }
+        }
+    }
+
+    .box .box-title :is(h2, h3) {
+        @apply mb-2.5 text-[1.0625rem] font-semibold;
+    }
+
+    .box .box-content {
+        @apply text-sm leading-relaxed;
+
+        a { @apply text-primary hover:underline; }
+    }
+
+    /* Page titles with actions (order view, wishlist, address book):
+       title left, quiet secondary actions right */
+    .title-buttons {
+        @apply flex flex-wrap items-center gap-x-2 gap-y-3;
+
+        h1 { @apply mr-auto; }
+
+        .separator { @apply hidden; }
+
+        > a:not(.button),
+        .link-reorder, .link-print, .link-rss {
+            @apply btn btn-ghost btn-sm border border-line font-medium;
+        }
+
+        .link-rss { @apply order-last; }
+    }
+
+    /* Address book lists */
+    .addresses-list {
+        ol {
+            @apply m-0 flex list-none flex-col gap-5 p-0;
+        }
+
+        .item h3 {
+            @apply mb-1.5 text-sm font-semibold;
+        }
+
+        address {
+            @apply text-sm leading-relaxed;
+        }
+
+        .item p {
+            @apply mt-2 text-sm;
+        }
+
+        .item a {
+            @apply link link-hover font-medium text-primary;
+        }
+
+        .item a.link-remove:hover {
+            @apply text-error;
+        }
+
+        .separator {
+            @apply mx-1 text-base-content/30;
+        }
+    }
+
+    /* Order view: header meta (tab links + date) */
+    .order-info {
+        @apply m-0 flex flex-wrap items-center gap-x-3 gap-y-2;
+
+        dt { @apply text-sm font-medium text-base-content/70; }
+        dd { @apply m-0; }
+    }
+
+    #order-info-tabs {
+        @apply m-0 flex list-none flex-wrap gap-1.5 p-0;
+
+        li { @apply m-0; }
+
+        li.current {
+            @apply rounded-full bg-primary/10 px-3 py-1 text-[0.8125rem] font-semibold text-primary;
+        }
+
+        li a {
+            @apply block rounded-full border border-line px-3 py-1 text-[0.8125rem] text-base-content/75 transition-colors hover:border-primary/40 hover:text-primary;
+        }
+    }
+
+    .order-date {
+        @apply mb-2 mt-3 text-sm text-base-content/70;
+    }
+
+    /* Order status cell: quiet badge instead of italic text */
+    .data-table td.status em {
+        @apply badge badge-ghost h-auto py-1 text-[0.8125rem] font-medium not-italic;
+    }
+
+    .order-comments {
+        .sub-title { @apply mb-2 mt-6 text-[1.0625rem] font-semibold; }
+
+        .order-about {
+            @apply m-0;
+
+            dt { @apply text-sm font-semibold; }
+            dd { @apply mb-3 text-sm text-base-content/80; }
+        }
+    }
+
+    /* Wishlist table */
+    #wishlist-table {
+        @apply table;
+
+        thead th {
+            @apply text-xs uppercase tracking-wide text-base-content/70;
+        }
+
+        tbody td {
+            @apply py-4 align-top;
+        }
+
+        .product-image {
+            @apply block w-[4.5rem] overflow-hidden rounded-box border border-line;
+
+            img { @apply block h-auto w-full; }
+        }
+
+        .product-name {
+            @apply m-0 mb-0.5 text-[0.9375rem] font-medium;
+
+            a { @apply hover:text-primary; }
+        }
+
+        .wishlist-sku {
+            @apply mb-2.5 text-xs text-base-content/60;
+        }
+
+        textarea {
+            @apply textarea textarea-sm min-h-16 w-full max-w-sm text-sm;
+        }
+
+        .item-manage {
+            @apply mt-2;
+
+            button, .button {
+                @apply btn btn-ghost btn-xs border border-line;
+            }
+        }
+
+        input.qty {
+            @apply input input-sm w-16 text-center;
+        }
+
+        .cart-cell {
+            @apply flex flex-col items-start gap-2;
+
+            .price { @apply text-[0.9375rem] font-semibold; }
+        }
+
+        .link-edit {
+            @apply btn btn-ghost btn-xs border border-line;
+        }
+
+        .customer-wishlist-item-remove a {
+            @apply inline-flex items-center gap-1 whitespace-nowrap text-[0.8125rem] text-base-content/60 transition-colors hover:text-error;
+
+            svg { @apply size-4; }
+        }
+    }
+
+    /* Wishlist footer actions: one right-aligned row, not spread edge-to-edge */
+    .buttons-set.buttons-set2 {
+        @apply justify-end;
+    }
+
+    /* Order sub-pages (invoices, shipments): per-document headings + print links */
+    .order-details {
+        .order-links {
+            @apply mb-0 flex justify-end gap-4 text-sm;
+
+            .separator { @apply hidden; }
+
+            a { @apply link link-hover font-medium text-primary; }
+        }
+
+        h2.sub-title,
+        h2.table-caption {
+            @apply mb-3 mt-4 flex flex-wrap items-baseline gap-x-3 text-[1.0625rem] font-semibold;
+
+            .separator { @apply hidden; }
+
+            a { @apply link link-hover text-sm font-medium text-primary; }
+        }
+
+        h3.table-caption {
+            @apply mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-base-content/60;
+        }
+    }
+
+    /* 2FA setup: frame the raw QR code. w-fit matters: div.fieldset picks up
+       DaisyUI's fieldset grid, which would stretch this to full width */
+    .twofa-qr-code {
+        @apply mb-2 mt-4 w-fit rounded-box border border-line bg-white p-3;
+
+        :is(img, svg, canvas) { @apply block size-44; }
+    }
+
+    /* Enable flow: QR left, fields right on desktop - see the unlayered
+       #twofa-form grid rules at the end of this file */
+    #twofa-form {
+        @apply max-w-3xl;
+
+        .fieldset:has(.twofa-qr-code) .form-list {
+            @apply mb-0;
+        }
+    }
+
+    /* Account navigation sidebar - mirror the layered nav's look: a small
+       uppercase section label inside the card instead of a bordered header row.
+       (:is(.sidebar, .col-wrapper) matches the generic sidebar-block rule's
+       specificity so these overrides win by source order) */
+    :is(.sidebar, .col-wrapper) .block-account {
+        .block-title {
+            @apply border-0 px-4 pb-0 pt-4 font-body text-[0.8125rem] font-semibold uppercase tracking-wide text-base-content/70;
+        }
+
+        .block-content {
+            @apply pt-2;
+        }
+    }
+
     .block-account .block-content li {
         @apply p-0;
 
@@ -2879,6 +3179,51 @@ select {
    labels use <label> */
 span.label,
 th.label {
+    color: inherit;
+}
+
+/* Unlayered: the 2FA enable form lays out QR left / fields right on desktop.
+   div.fieldset picks up the DaisyUI fieldset component whose grid + gap would
+   override a components-layer rule, so the layout lives here. The first track
+   is fixed: an auto track would absorb the min-content of the column-spanning
+   intro paragraph and squeeze the fields. :has keeps the disable flow (no QR)
+   on a single column */
+@media (min-width: 771px) {
+    #twofa-form .fieldset:has(.twofa-qr-code) {
+        grid-template-columns: 13rem minmax(0, 1fr);
+        column-gap: 2.5rem;
+        align-items: center;
+    }
+
+    #twofa-form .fieldset:has(.twofa-qr-code) > :is(h2, p) {
+        grid-column: span 2;
+    }
+}
+
+/* Unlayered: sales templates use class="table-caption" on section headings,
+   which collides with Tailwind's display utility of the same name (the heading
+   would render as an orphaned table-caption box and wrap word-by-word) */
+h2.table-caption {
+    display: flex;
+}
+
+h3.table-caption {
+    display: block;
+}
+
+/* Unlayered: order tables use class="status" on header/data cells, which
+   collides with the DaisyUI status-dot component (a tiny gray disc) - restore
+   normal table-cell rendering */
+table th.status,
+table td.status {
+    display: table-cell;
+    aspect-ratio: auto;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    vertical-align: inherit;
     color: inherit;
 }
 
