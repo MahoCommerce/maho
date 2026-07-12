@@ -9,7 +9,9 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: OSL-3.0
 
+import { lookup } from 'node:dns/promises';
 import { readFileSync } from 'node:fs';
+import net from 'node:net';
 import { join } from 'node:path';
 import { chromium } from 'playwright';
 import { AxeBuilder } from '@axe-core/playwright';
@@ -21,6 +23,9 @@ try {
     const context = await browser.newContext({
         ignoreHTTPSErrors: true,
         viewport: { width: 1280, height: 1024 },
+        // Service workers can issue fetches that bypass page.route(), which
+        // would sidestep the SSRF guards below
+        serviceWorkers: 'block',
     });
 
     if (config.scanCookie?.name) {
@@ -32,10 +37,138 @@ try {
     }
 
     const page = await context.newPage();
+
+    // SSRF guards. The target URL was validated against the store base URLs
+    // before this process started, but page content could still steer the
+    // server-side browser at the internal network:
+    // - Navigations (redirects, meta refresh, JS, iframes) are pinned to the
+    //   target host in every frame: only http(s) on the original port (or
+    //   the standard 80/443, so http -> https upgrades keep working).
+    // - Subresources (images, scripts, fetch, ...) may legitimately load
+    //   from CDNs and other third-party hosts, but never from private,
+    //   loopback, link-local or cloud-metadata addresses — except the target
+    //   host itself, which is often private and was validated upstream.
+    // Residual risk: hostnames are vetted with our own DNS lookup, while
+    // Chromium resolves them again itself, so a fast-flux DNS-rebinding
+    // response window remains; raw WebSocket connections are not intercepted
+    // by page.route().
+    const targetUrl = new URL(config.url);
+    const defaultPort = (protocol) => (protocol === 'https:' ? '443' : '80');
+    const targetPort = targetUrl.port || defaultPort(targetUrl.protocol);
+    // Allow the target's own port, plus the opposite scheme's default port only
+    // when the target is itself on a default port, so a plain http -> https
+    // upgrade keeps working without opening arbitrary ports on the same host.
+    const allowedPorts = new Set([targetPort]);
+    if (targetPort === '80') allowedPorts.add('443');
+    if (targetPort === '443') allowedPorts.add('80');
+    const isAllowedNavigation = (url) => (url.protocol === 'http:' || url.protocol === 'https:')
+        && url.hostname === targetUrl.hostname
+        && allowedPorts.has(url.port || defaultPort(url.protocol));
+
+    // Expand any valid IPv6 literal to its eight 16-bit groups, first converting
+    // a trailing embedded IPv4 (::ffff:1.2.3.4) into two hex groups.
+    const expandIPv6 = (ip) => {
+        let s = ip.split('%')[0]; // drop any zone id
+        const v4 = s.match(/(\d{1,3}(?:\.\d{1,3}){3})$/);
+        if (v4) {
+            const o = v4[1].split('.').map(Number);
+            if (o.some((n) => n > 255)) return null;
+            s = s.slice(0, -v4[1].length)
+                + (((o[0] << 8) | o[1]).toString(16)) + ':'
+                + (((o[2] << 8) | o[3]).toString(16));
+        }
+        const halves = s.split('::');
+        if (halves.length > 2) return null;
+        const head = halves[0] ? halves[0].split(':') : [];
+        const tail = halves.length === 2 ? (halves[1] ? halves[1].split(':') : []) : null;
+        const groups = tail === null
+            ? head
+            : [...head, ...Array(8 - head.length - tail.length).fill('0'), ...tail];
+        if (groups.length !== 8) return null;
+        return groups.map((g) => Number.parseInt(g, 16) & 0xffff);
+    };
+
+    const isPrivateAddress = (ip) => {
+        if (net.isIPv4(ip)) {
+            const [a, b] = ip.split('.').map(Number);
+            return a === 0 || a === 10 || a === 127
+                || (a === 100 && b >= 64 && b <= 127)   // 100.64.0.0/10 CGNAT
+                || (a === 169 && b === 254)             // link-local / cloud metadata
+                || (a === 172 && b >= 16 && b <= 31)
+                || (a === 192 && b === 168);
+        }
+        if (net.isIPv6(ip)) {
+            const g = expandIPv6(ip);
+            if (g === null) return false;
+            // IPv4-mapped (::ffff:a.b.c.d) and IPv4-compatible (::a.b.c.d, which
+            // also covers :: and ::1): the low 32 bits are an IPv4 address, so
+            // re-check them through the IPv4 rules. The WHATWG URL parser
+            // canonicalizes these to hex-group form (e.g. ::ffff:7f00:1), so a
+            // dotted-decimal string match would never fire — parse the groups.
+            if (g[0] === 0 && g[1] === 0 && g[2] === 0 && g[3] === 0 && g[4] === 0
+                && (g[5] === 0 || g[5] === 0xffff)) {
+                const v4 = `${g[6] >> 8}.${g[6] & 0xff}.${g[7] >> 8}.${g[7] & 0xff}`;
+                return isPrivateAddress(v4);
+            }
+            return (g[0] & 0xfe00) === 0xfc00     // fc00::/7 unique local
+                || (g[0] & 0xffc0) === 0xfe80;    // fe80::/10 link-local
+        }
+        return false;
+    };
+
+    const privateHostCache = new Map();
+    const isPrivateHost = async (hostname) => {
+        const bare = hostname.replace(/^\[|\]$/g, '').replace(/\.$/, '').toLowerCase();
+        if (net.isIP(bare)) {
+            return isPrivateAddress(bare);
+        }
+        if (bare === 'localhost' || bare.endsWith('.localhost') || bare.endsWith('.internal')) {
+            return true;
+        }
+        if (!privateHostCache.has(bare)) {
+            privateHostCache.set(bare, lookup(bare, { all: true }).then(
+                (addresses) => addresses.some(({ address }) => isPrivateAddress(address)),
+                () => true, // unresolvable for us -> block (Chromium could not load it anyway)
+            ));
+        }
+        return privateHostCache.get(bare);
+    };
+
+    await page.route('**/*', async (route) => {
+        const request = route.request();
+        let url;
+        try {
+            url = new URL(request.url());
+        } catch {
+            return route.abort('blockedbyclient');
+        }
+        if (request.isNavigationRequest()) {
+            return isAllowedNavigation(url) ? route.continue() : route.abort('blockedbyclient');
+        }
+        // Same-host subresources are pinned to the target's own port(s): the
+        // target host may itself be a private address (validated upstream), so
+        // without a port check page content could reach other services bound to
+        // that private IP (Redis, Elasticsearch, internal admin panels) on
+        // arbitrary ports.
+        if (url.hostname === targetUrl.hostname) {
+            return allowedPorts.has(url.port || defaultPort(url.protocol))
+                ? route.continue()
+                : route.abort('blockedbyclient');
+        }
+        if (!(await isPrivateHost(url.hostname))) {
+            return route.continue();
+        }
+        return route.abort('blockedbyclient');
+    });
+
     await page.goto(config.url, {
         waitUntil: 'networkidle',
         timeout: config.timeout ?? 30000,
     });
+
+    if (!isAllowedNavigation(new URL(page.url()))) {
+        throw new Error(`Navigation escaped the target host: ${page.url()}`);
+    }
 
     const title = await page.title();
 

@@ -79,6 +79,13 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
             ]);
             return;
         }
+        if (!Mage::helper('accessibilityscan')->isAllowedScanUrl($url)) {
+            $this->getResponse()->setBodyJson([
+                'error' => true,
+                'message' => $this->__('The URL to scan must belong to one of the configured store base URLs'),
+            ]);
+            return;
+        }
 
         // First run downloads Playwright + Chromium and can take several minutes
         @set_time_limit(0);

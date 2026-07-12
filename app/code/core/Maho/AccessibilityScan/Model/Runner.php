@@ -62,33 +62,67 @@ class Maho_AccessibilityScan_Model_Runner
     {
         $dir = $this->helper->getPlaywrightDir();
 
-        $packageJson = $dir . DS . 'package.json';
-        if ($force || !is_file($packageJson)) {
-            file_put_contents($packageJson, Mage::helper('core')->jsonEncode([
-                'name' => 'maho-accessibility-scanner',
-                'private' => true,
-                'type' => 'module',
-                'dependencies' => [
-                    'playwright' => '^1',
-                    '@axe-core/playwright' => '^4',
-                ],
-            ]));
+        // The working directory is shared; serialize install/update across
+        // concurrent scans so npm install and the scanner copy cannot race
+        $lock = fopen($dir . DS . '.install.lock', 'c');
+        if ($lock === false || !flock($lock, LOCK_EX)) {
+            Mage::throwException($this->helper->__('Unable to acquire the scanner install lock in %s', $dir));
         }
 
-        if (!$force && is_file($dir . DS . 'node_modules' . DS . '.package-lock.json')) {
+        try {
+            $packageJson = $dir . DS . 'package.json';
+            if ($force || !is_file($packageJson)) {
+                file_put_contents($packageJson, Mage::helper('core')->jsonEncode([
+                    'name' => 'maho-accessibility-scanner',
+                    'private' => true,
+                    'type' => 'module',
+                    'dependencies' => [
+                        'playwright' => '^1',
+                        '@axe-core/playwright' => '^4',
+                    ],
+                ]));
+            }
+
+            $this->copyScannerScript($dir);
+
+            if (!$force && is_file($dir . DS . 'node_modules' . DS . '.package-lock.json')) {
+                return;
+            }
+
+            $this->execProcess(
+                [$this->helper->getNpmPath(), 'install', '--no-audit', '--no-fund'],
+                $dir,
+                self::INSTALL_TIMEOUT,
+            );
+            $this->execProcess(
+                [$this->helper->getNodePath(), $dir . DS . 'node_modules' . DS . 'playwright' . DS . 'cli.js', 'install', 'chromium'],
+                $dir,
+                self::INSTALL_TIMEOUT,
+            );
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
+    }
+
+    /**
+     * Copy the scanner next to node_modules (so its imports resolve) when
+     * missing or outdated. The write is atomic (temp file + rename) so a
+     * concurrent scan never sees a partially written script.
+     */
+    protected function copyScannerScript(string $dir): void
+    {
+        $source = __DIR__ . DS . '..' . DS . 'scanner' . DS . 'scan.mjs';
+        $target = $dir . DS . 'scan.mjs';
+        if (is_file($target) && hash_file('xxh128', $target) === hash_file('xxh128', $source)) {
             return;
         }
 
-        $this->execProcess(
-            [$this->helper->getNpmPath(), 'install', '--no-audit', '--no-fund'],
-            $dir,
-            self::INSTALL_TIMEOUT,
-        );
-        $this->execProcess(
-            [$this->helper->getNodePath(), $dir . DS . 'node_modules' . DS . 'playwright' . DS . 'cli.js', 'install', 'chromium'],
-            $dir,
-            self::INSTALL_TIMEOUT,
-        );
+        $tmp = $target . '.' . bin2hex(random_bytes(6)) . '.tmp';
+        if (!copy($source, $tmp) || !rename($tmp, $target)) {
+            @unlink($tmp);
+            Mage::throwException($this->helper->__('Unable to copy the scanner script to %s', $dir));
+        }
     }
 
     /**
@@ -99,12 +133,7 @@ class Maho_AccessibilityScan_Model_Runner
     protected function executeScanner(Maho_AccessibilityScan_Model_Scan $scan): array
     {
         $dir = $this->helper->getPlaywrightDir();
-
-        // Copy the scanner next to node_modules so its imports resolve
         $script = $dir . DS . 'scan.mjs';
-        if (!copy(__DIR__ . DS . '..' . DS . 'scanner' . DS . 'scan.mjs', $script)) {
-            Mage::throwException($this->helper->__('Unable to copy the scanner script to %s', $dir));
-        }
 
         // One-time token; the frontend observer force-enables template hints for it
         $token = bin2hex(random_bytes(16));

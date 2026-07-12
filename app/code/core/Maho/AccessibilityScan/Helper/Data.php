@@ -24,6 +24,50 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * The scanner fetches the URL server-side with a headless browser, so
+     * arbitrary targets would allow SSRF into the internal network. Only
+     * allow URLs whose host and port match a configured store base URL.
+     */
+    public function isAllowedScanUrl(string $url): bool
+    {
+        $authority = $this->getUrlAuthority($url);
+        if ($authority === null) {
+            return false;
+        }
+
+        foreach (Mage::app()->getStores(true) as $store) {
+            foreach ([false, true] as $secure) {
+                // getBaseUrl() resolves {{base_url}}-style placeholders that the
+                // raw store config may still contain on default installs
+                $baseAuthority = $this->getUrlAuthority($store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB, $secure));
+                if ($baseAuthority !== null && $baseAuthority === $authority) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Normalized "host:port" for an http(s) URL (default port filled in from
+     * the scheme), or null when the URL is not a valid absolute http(s) URL.
+     */
+    protected function getUrlAuthority(string $url): ?string
+    {
+        $parts = parse_url($url);
+        if ($parts === false) {
+            return null;
+        }
+        $scheme = strtolower((string) ($parts['scheme'] ?? ''));
+        $host = strtolower((string) ($parts['host'] ?? ''));
+        if ($host === '' || !in_array($scheme, ['http', 'https'], true)) {
+            return null;
+        }
+        $port = $parts['port'] ?? ($scheme === 'https' ? 443 : 80);
+        return $host . ':' . $port;
+    }
+
+    /**
      * Scan timeout in seconds
      */
     public function getScanTimeout(): int

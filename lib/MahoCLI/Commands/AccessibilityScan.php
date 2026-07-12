@@ -11,6 +11,7 @@ namespace MahoCLI\Commands;
 
 use Mage;
 use Maho_AccessibilityScan_Model_Scan;
+use Maho_AccessibilityScan_Model_Violation;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
@@ -48,6 +49,10 @@ class AccessibilityScan extends BaseMahoCommand
         }
 
         $helper = Mage::helper('accessibilityscan');
+        if (!$helper->isAllowedScanUrl($url)) {
+            $output->writeln('<error>The URL to scan must belong to one of the configured store base URLs</error>');
+            return 2;
+        }
         $level = $helper->normalizeWcagLevel($input->getOption('level') ?? $helper->getDefaultWcagLevel());
         $format = (string) $input->getOption('format');
 
@@ -78,10 +83,20 @@ class AccessibilityScan extends BaseMahoCommand
             return 2;
         }
 
-        $violations = $scan->getViolationCollection()->setOrder('impact', 'ASC');
+        // Flatten grouped violations so both outputs list them by severity,
+        // consistent with the admin UI and PDF report
+        $violations = [];
+        foreach ($scan->getViolationsGroupedByImpact() as $group) {
+            foreach ($group as $violation) {
+                $violations[] = $violation;
+            }
+        }
 
         if ($format === 'json') {
-            $this->outputJson($output, $scan, $violations->toArray()['items'] ?? []);
+            $this->outputJson($output, $scan, array_map(
+                fn(Maho_AccessibilityScan_Model_Violation $violation) => $violation->getData(),
+                $violations,
+            ));
         } else {
             $this->outputTable($output, $scan, $violations);
         }
@@ -117,10 +132,13 @@ class AccessibilityScan extends BaseMahoCommand
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
 
+    /**
+     * @param list<Maho_AccessibilityScan_Model_Violation> $violations
+     */
     private function outputTable(
         OutputInterface $output,
         Maho_AccessibilityScan_Model_Scan $scan,
-        \Maho_AccessibilityScan_Model_Resource_Violation_Collection $violations,
+        array $violations,
     ): void {
         $rows = [];
         foreach ($violations as $violation) {
