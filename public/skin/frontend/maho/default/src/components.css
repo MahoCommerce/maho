@@ -474,11 +474,13 @@
         }
 
         > div:last-child {
-            @apply ml-auto;
+            /* desktop: the search bar carries the auto margin instead, so it
+               right-aligns together with these controls */
+            @apply max-nav:ml-auto;
         }
 
         #search_mini_form {
-            @apply max-w-md flex-auto max-nav:order-10 max-nav:max-w-none max-nav:basis-full;
+            @apply max-w-md flex-auto nav:ml-auto max-nav:order-10 max-nav:max-w-none max-nav:basis-full;
         }
     }
 
@@ -2410,8 +2412,10 @@
     .cart-forms {
         @apply flex flex-col gap-5;
 
+        /* same tonal surface as .cart-totals below - one card language for
+           the whole transactional rail */
         > div, > form {
-            @apply card card-border border-line bg-base-100 p-5;
+            @apply card bg-base-200 p-5;
         }
 
         h2 {
