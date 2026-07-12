@@ -1,0 +1,113 @@
+/*
+ * Form styling shared by the classic multi-step checkout (checkout.css) and
+ * the one-step checkout (onestep-checkout.css). Imported by both bundles at
+ * build time - each compiled file stays standalone. The selectors name both
+ * flows' scopes; only the active page's markup matches.
+ *
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+@layer components {
+    /* Address form grid. The width/float resets carry !important to beat
+       legacy inline styles; the fields themselves use the theme's global
+       styling */
+    :is(.opc, .onestep-checkout) .form-list {
+        @apply m-0 p-0;
+
+        fieldset,
+        ul,
+        .field,
+        .input-box {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            float: none !important;
+        }
+
+        fieldset {
+            @apply m-0;
+        }
+
+        fieldset > ul {
+            @apply m-0 grid list-none grid-cols-1 gap-x-4 gap-y-4 p-0 nav:grid-cols-2;
+        }
+
+        li {
+            @apply m-0;
+        }
+
+        li.wide {
+            grid-column: 1 / -1;
+        }
+
+        li.fields {
+            grid-column: 1 / -1;
+            @apply grid grid-cols-1 gap-x-4 gap-y-4 nav:grid-cols-2;
+
+            .field {
+                @apply m-0;
+            }
+
+            .field:only-child,
+            > .fields:only-child {
+                grid-column: 1 / -1;
+            }
+        }
+
+        .customer-name {
+            @apply flex gap-4;
+
+            .field {
+                @apply flex flex-1 flex-col justify-end;
+            }
+
+            .name-prefix,
+            .name-suffix {
+                flex: 0 0 6rem;
+            }
+        }
+
+        li.fields:has(.customer-name) {
+            @apply block;
+        }
+
+        .field,
+        .input-box {
+            @apply mb-0;
+        }
+
+        label {
+            @apply block text-13 font-medium text-base-content/75;
+        }
+
+        .required em {
+            @apply not-italic text-error;
+        }
+
+        /* Ship-to-this-address radios after the address grid */
+        > li.control label {
+            @apply cursor-pointer;
+        }
+    }
+
+    /* Payment methods as selectable option cards. The multi-step flow keeps
+       them inside .sp-methods (the radio sits in the dt); the one-step flow
+       marks the list .payment-methods */
+    :is(.opc .sp-methods, .onestep-checkout .payment-methods) dt:has(input[type="radio"]) {
+        @apply mb-2 flex cursor-pointer items-center gap-3 rounded-field border border-line bg-base-100 px-4 py-3 text-sm font-medium normal-case tracking-normal text-base-content hover:border-primary;
+
+        &:has(input[type="radio"]:checked) {
+            @apply border-primary;
+            background: color-mix(in oklab, var(--color-primary), transparent 94%);
+        }
+
+        input[type="radio"] {
+            @apply m-0 size-4;
+        }
+
+        label {
+            @apply m-0 cursor-pointer font-medium;
+        }
+    }
+}

@@ -44,18 +44,20 @@
     /* Soft putty ground behind the plants - borderless */
     --product-tile-bg: #f1ecdd;
 
+    /* Botanical-plate titles: italic serif, nothing else added */
+    --title-weight: 500;
+    --title-style: italic;
+    --title-tracking: -0.01em;
+
+    /* Deep fir footer */
+    --footer-bg: #24361d;
+    --footer-border: #24361d;
+    --footer-ink: #e9f1e0;
+    --footer-link-hover: #e0946a;
+
     --radius-selector: 0.5rem;
     --radius-field: 0.75rem;
     --radius-box: 1rem;
-}
-
-/* Botanical-plate titles: italic serif, nothing else added */
-.page-title h1,
-.page-title h2,
-.product-view .product-shop .product-name .h1 {
-    font-weight: 500;
-    font-style: italic;
-    letter-spacing: -0.01em;
 }
 
 .category-description,
@@ -74,34 +76,6 @@
 ::selection {
     background: #dce7c4;
     color: #23301f;
-}
-
-/* Deep fir footer */
-.footer-container {
-    background: #24361d;
-    border-color: #24361d;
-}
-
-.footer,
-.footer .block-title,
-.footer address {
-    color: rgb(233 241 224 / 0.64);
-}
-
-.footer .block-subscribe .block-title {
-    color: #e9f1e0;
-}
-
-.footer a {
-    color: rgb(233 241 224 / 0.82);
-}
-
-.footer a:hover {
-    color: #e0946a;
-}
-
-.footer address {
-    border-color: rgb(233 241 224 / 0.16);
 }
 
 /* Conservatory at night */
@@ -127,15 +101,13 @@
 
         --maho-color-rating: #e0a63c;
         --product-tile-bg: #232a1b;
+
+        --footer-bg: #0f1509;
+        --footer-border: rgb(223 230 209 / 0.12);
     }
 
     ::selection {
         background: #3c4d2c;
         color: #eaf1de;
-    }
-
-    .footer-container {
-        background: #0f1509;
-        border-top: 1px solid rgb(223 230 209 / 0.12);
     }
 }

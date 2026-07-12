@@ -8,6 +8,7 @@
  */
 
 @reference "./tailwind.css";
+@import "./checkout-forms.css";
 
 @layer components {
     /* ============================================
@@ -148,84 +149,14 @@
         }
     }
 
-    /* Address form grid. The floats/widths carry !important to beat legacy
-       inline styles; the fields themselves use the theme's global styling */
-    .onestep-checkout .form-list {
-        @apply m-0 p-0;
-
-        fieldset,
-        ul,
-        .field,
-        .input-box {
-            width: 100% !important;
-            max-width: 100% !important;
-            min-width: 0 !important;
-            float: none !important;
-        }
-
-        fieldset > ul {
-            @apply m-0 grid list-none grid-cols-1 gap-x-4 gap-y-3 p-0 nav:grid-cols-2;
-        }
-
-        li {
-            @apply m-0;
-        }
-
-        li.wide {
-            grid-column: 1 / -1;
-        }
-
-        li.fields {
-            grid-column: 1 / -1;
-            @apply grid grid-cols-1 gap-x-4 gap-y-3 nav:grid-cols-2;
-
-            .field {
-                @apply m-0;
-            }
-
-            .field:only-child,
-            > .fields:only-child {
-                grid-column: 1 / -1;
-            }
-        }
-
-        .customer-name {
-            @apply flex gap-x-4 gap-y-3;
-
-            .field {
-                @apply flex flex-1 flex-col justify-end;
-            }
-
-            .name-prefix,
-            .name-suffix {
-                flex: 0 0 6rem;
-            }
-        }
-
-        li.fields:has(.customer-name) {
-            @apply block;
-        }
-
-        .field,
-        .input-box {
-            @apply mb-0;
-        }
-
-        label {
-            @apply block text-[0.8125rem] font-medium text-base-content/75;
-        }
-
-        .required em {
-            @apply not-italic text-error;
-        }
-    }
+    /* Address form grid: shared with the multi-step flow, see checkout-forms.css */
 
     /* Shipping methods */
     .onestep-checkout .sp-methods {
         @apply m-0 list-none p-0;
 
         dt {
-            @apply mb-2 text-[0.8125rem] font-semibold uppercase tracking-wide;
+            @apply mb-2 text-13 font-semibold uppercase tracking-wide;
         }
 
         dd {
@@ -246,22 +177,9 @@
         }
     }
 
-    /* Payment methods: selectable option cards */
+    /* Payment methods: selectable option cards (shared recipe in checkout-forms.css) */
     .onestep-checkout .payment-methods {
         @apply m-0 p-0;
-
-        dt {
-            @apply mb-2 flex cursor-pointer items-center gap-3 rounded-field border border-line bg-base-100 px-4 py-3 font-medium hover:border-primary;
-
-            &:has(input[type="radio"]:checked) {
-                @apply border-primary;
-                background: color-mix(in oklab, var(--color-primary), transparent 94%);
-            }
-
-            input[type="radio"] {
-                @apply m-0 size-4;
-            }
-        }
 
         dd {
             @apply m-0 p-0 pb-4;
@@ -373,7 +291,7 @@
         }
 
         .applied-code {
-            @apply mb-1.5 flex items-center gap-2 rounded-field border border-line bg-base-200 px-2.5 py-2 text-[0.8125rem] last:mb-0;
+            @apply mb-1.5 flex items-center gap-2 rounded-field border border-line bg-base-200 px-2.5 py-2 text-13 last:mb-0;
 
             .code-value {
                 @apply font-mono font-semibold;
@@ -393,7 +311,7 @@
         }
 
         .promo-message {
-            @apply mt-2 text-[0.8125rem] leading-snug empty:hidden;
+            @apply mt-2 text-13 leading-snug empty:hidden;
 
             &.success {
                 @apply text-success;
@@ -414,7 +332,7 @@
         }
 
         .agreement-content {
-            @apply max-h-28 overflow-y-auto rounded-field border border-line bg-base-100 px-3 py-1 text-[0.8125rem] text-base-content/75;
+            @apply max-h-28 overflow-y-auto rounded-field border border-line bg-base-100 px-3 py-1 text-13 text-base-content/75;
         }
 
         .agree {

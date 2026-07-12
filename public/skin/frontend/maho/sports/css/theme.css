@@ -42,31 +42,40 @@
     /* Flat track-surface tiles - borderless */
     --product-tile-bg: #f0f2f2;
 
+    /* Headlines lean forward mid-sprint (font-stretch rides the rule below) */
+    --title-weight: 850;
+    --title-style: italic;
+    --title-case: uppercase;
+    --title-tracking: 0;
+    --title-leading: 1.02;
+    --title-size: clamp(2rem, 1.4rem + 2vw, 2.875rem);
+
+    --btn-case: uppercase;
+    --btn-tracking: 0.02em;
+
+    /* Blackout footer */
+    --footer-bg: #101214;
+    --footer-border: #101214;
+    --footer-ink: #f2f4f4;
+    --footer-link-hover: #c8e600;
+
     /* Pill CTAs, athletic and current */
     --radius-selector: 0.5rem;
     --radius-field: 999px;
     --radius-box: 0.875rem;
 }
 
-/* Headlines lean forward mid-sprint */
+/* Condensed cut - the only title property without a theme hook */
 .page-title h1,
 .page-title h2,
 .product-view .product-shop .product-name .h1 {
     font-stretch: 72%;
-    font-style: italic;
-    font-weight: 850;
-    text-transform: uppercase;
-    letter-spacing: 0;
-    line-height: 1.02;
-    font-size: clamp(2rem, 1.4rem + 2vw, 2.875rem);
 }
 
 .btn,
 button.button,
 a.button {
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
 }
 
 /* Race pace */
@@ -100,34 +109,6 @@ a.button,
     color: #101214;
 }
 
-/* Blackout footer */
-.footer-container {
-    background: #101214;
-    border-color: #101214;
-}
-
-.footer,
-.footer .block-title,
-.footer address {
-    color: rgb(242 244 244 / 0.6);
-}
-
-.footer .block-subscribe .block-title {
-    color: #f2f4f4;
-}
-
-.footer a {
-    color: rgb(242 244 244 / 0.8);
-}
-
-.footer a:hover {
-    color: #c8e600;
-}
-
-.footer address {
-    border-color: rgb(255 255 255 / 0.12);
-}
-
 /* Night session */
 @media (prefers-color-scheme: dark) {
     :root {
@@ -151,6 +132,9 @@ a.button,
 
         --maho-color-rating: #e2e6e7;
         --product-tile-bg: #191d1e;
+
+        --footer-bg: #0a0c0d;
+        --footer-border: rgb(255 255 255 / 0.1);
     }
 
     ::selection {
@@ -160,10 +144,5 @@ a.button,
 
     .price-box .discount-percent {
         background: #d7ea52;
-    }
-
-    .footer-container {
-        background: #0a0c0d;
-        border-top: 1px solid rgb(255 255 255 / 0.1);
     }
 }

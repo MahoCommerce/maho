@@ -61,6 +61,13 @@
             color-mix(in oklab, var(--color-base-200), var(--color-base-300) 55%) 100%
         );
 
+        /* Silhouette shadows for the transparent product cutouts, one size per
+           context (cards/lists, compact rows, the product gallery). Themes can
+           retune or disable them (--product-cutout-shadow: none) */
+        --product-cutout-shadow: drop-shadow(0 10px 9px rgb(0 0 0 / 0.12)) drop-shadow(0 2px 3px rgb(0 0 0 / 0.07));
+        --product-cutout-shadow-sm: drop-shadow(0 2px 2px rgb(0 0 0 / 0.10));
+        --product-cutout-shadow-lg: drop-shadow(0 16px 14px rgb(0 0 0 / 0.12)) drop-shadow(0 4px 5px rgb(0 0 0 / 0.07));
+
         accent-color: var(--color-primary);
 
         /* Sticky-header height: single source of truth for the offset of every
@@ -72,7 +79,7 @@
     }
 
     body {
-        @apply font-body bg-base-100 text-[0.9375rem] text-base-content antialiased;
+        @apply font-body bg-base-100 text-15 text-base-content antialiased;
         line-height: 1.6;
         caret-color: var(--color-primary);
         -webkit-tap-highlight-color: transparent;
@@ -89,8 +96,11 @@
         text-wrap: balance;
     }
 
+    /* Solid primary selection; themes that select in another color (accent,
+       a soft tint) override these two properties in plain CSS */
     ::selection {
-        background: color-mix(in oklab, var(--color-primary), transparent 85%);
+        background: var(--color-primary);
+        color: var(--color-primary-content);
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -142,6 +152,17 @@
         @apply btn btn-link btn-sm px-0 no-underline hover:underline;
     }
 
+    /* Quiet secondary actions (cart row update, footer actions, coupon apply,
+       shipping estimate): one bordered-ghost recipe, sized at each call site.
+       button.btn-update: the row button also carries class="button", so this
+       must match the button.button -> btn-primary mapping's specificity */
+    button.btn-update,
+    .cart-footer-actions .button2,
+    .coupon-input-group .btn-apply,
+    .btn-estimate {
+        @apply btn border border-line bg-transparent font-medium text-base-content/80 no-underline shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content hover:no-underline;
+    }
+
     .buttons-set {
         @apply mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5;
 
@@ -187,7 +208,7 @@
     }
 
     .validation-advice {
-        @apply mt-1 text-[0.8125rem] text-error;
+        @apply mt-1 text-13 text-error;
     }
 
     .form-list {
@@ -284,7 +305,8 @@
      * Data tables
      * ============================================ */
 
-    .data-table {
+    .data-table,
+    #wishlist-table {
         @apply table;
 
         thead th {
@@ -436,10 +458,18 @@
      * Page title
      * ============================================ */
 
+    /* Page titles and the desktop product title expose the --title-* hooks:
+       industry themes retune every hero heading with plain variables instead
+       of repeating selector lists (see README "Theme variables") */
     .page-title {
         h1, h2 {
-            @apply font-semibold;
-            font-size: clamp(1.625rem, 1.2rem + 1.6vw, 2.125rem);
+            font-family: var(--font-title, var(--font-display));
+            font-weight: var(--title-weight, 600);
+            font-size: var(--title-size, clamp(1.625rem, 1.2rem + 1.6vw, 2.125rem));
+            line-height: var(--title-leading, 1.15);
+            letter-spacing: var(--title-tracking, -0.015em);
+            font-style: var(--title-style, normal);
+            text-transform: var(--title-case, none);
         }
     }
 
@@ -466,7 +496,9 @@
         @apply mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 pb-1 pt-3.5 max-nav:gap-1.5 max-nav:px-3 max-nav:pb-3.5;
 
         > div {
-            @apply flex items-center gap-1 max-nav:gap-0;
+            /* gap-0: the icon buttons' own padding (40px tile around a 24px
+               glyph) already provides the visual spacing between them */
+            @apply flex items-center gap-0;
         }
 
         > div:first-child {
@@ -500,10 +532,10 @@
 
     /* Language / currency / store switchers in the header */
     .page-header-container {
-        /* mr-1 (mobile): these are always-visible pills - keep the ghost
-           icons' hover tile from touching them (same as .skip-nav / logo) */
+        /* mr-1: these are always-visible pills - keep the ghost icons' hover
+           tile from touching them (same as .skip-nav / logo) */
         .form-language, .currency-switcher, .store-switcher {
-            @apply inline-flex items-center max-nav:mr-1;
+            @apply inline-flex items-center mr-1;
 
             select {
                 @apply select select-sm w-auto border-transparent bg-base-200;
@@ -565,9 +597,17 @@
             }
         }
 
+        /* Both in-pill icon buttons share the quiet circle treatment (for the
+           submit button this neutralizes the button.button -> btn-primary
+           mapping: it is not a CTA) */
+        .search-clear-button,
+        .search-button {
+            @apply btn btn-circle btn-sm absolute border-none bg-transparent text-base-content/70 shadow-none hover:bg-base-300/60 hover:text-base-content;
+        }
+
         /* Clear button: appears as soon as the field has text (pure CSS) */
         .search-clear-button {
-            @apply btn btn-circle btn-sm absolute right-10 border-none bg-transparent text-base-content/70 shadow-none hover:bg-base-300/60 hover:text-base-content;
+            @apply right-10;
 
             svg {
                 @apply size-5;
@@ -579,9 +619,7 @@
         }
 
         .search-button {
-            /* Neutralize the generic button.button -> btn-primary mapping:
-               this is a quiet icon button, not a CTA */
-            @apply btn btn-circle btn-sm absolute right-1.5 border-none bg-transparent text-base-content/70 shadow-none hover:bg-base-300/60 hover:text-base-content;
+            @apply right-1.5;
         }
     }
 
@@ -632,7 +670,7 @@
                 @apply flex cursor-pointer justify-between gap-4 rounded-field px-3 py-2 hover:bg-base-200;
 
                 .amount {
-                    @apply text-[0.8125rem] text-base-content/70;
+                    @apply text-13 text-base-content/70;
                 }
             }
         }
@@ -713,7 +751,7 @@
             @apply flex flex-wrap items-baseline gap-x-1 rounded-field px-2.5 py-2 hover:bg-base-200;
 
             .category-path {
-                @apply text-[0.8125rem] text-base-content/65;
+                @apply text-13 text-base-content/65;
 
                 .path-item::after {
                     content: "›";
@@ -738,7 +776,7 @@
             }
 
             .blog-excerpt {
-                @apply col-span-full mt-0.5 truncate text-[0.8125rem] text-base-content/65;
+                @apply col-span-full mt-0.5 truncate text-13 text-base-content/65;
             }
         }
 
@@ -757,7 +795,7 @@
 
                 img {
                     @apply h-full w-full object-contain;
-                    filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.10));
+                    filter: var(--product-cutout-shadow-sm);
                 }
             }
 
@@ -987,7 +1025,7 @@
      * ============================================ */
 
     .main > .breadcrumbs {
-        @apply py-0 text-[0.8125rem] text-base-content/70;
+        @apply py-0 text-13 text-base-content/70;
 
         a:hover {
             @apply text-primary underline;
@@ -1047,7 +1085,7 @@
 
             img {
                 @apply h-full w-full object-contain transition-transform duration-500 ease-out;
-                filter: drop-shadow(0 10px 9px rgb(0 0 0 / 0.12)) drop-shadow(0 2px 3px rgb(0 0 0 / 0.07));
+                filter: var(--product-cutout-shadow);
             }
         }
 
@@ -1072,11 +1110,11 @@
         /* No hover color on the title: the whole card is the link, and the
            image zoom is the hover feedback */
         .product-name {
-            @apply font-body text-[0.9375rem] font-medium leading-snug;
+            @apply font-body text-15 font-medium leading-snug;
         }
 
         .price-box {
-            @apply text-[0.9375rem];
+            @apply text-15;
 
             .price {
                 @apply font-semibold;
@@ -1137,12 +1175,12 @@
 
             img {
                 @apply h-full w-full object-contain;
-                filter: drop-shadow(0 10px 9px rgb(0 0 0 / 0.12)) drop-shadow(0 2px 3px rgb(0 0 0 / 0.07));
+                filter: var(--product-cutout-shadow);
             }
         }
 
         .product-name {
-            @apply text-[1.0625rem] font-semibold;
+            @apply text-17 font-semibold;
 
             a:hover {
                 @apply text-primary;
@@ -1169,7 +1207,7 @@
     }
 
     .add-to-links {
-        @apply m-0 flex list-none gap-4 p-0 text-[0.8125rem];
+        @apply m-0 flex list-none gap-4 p-0 text-13;
 
         a {
             @apply inline-flex items-center gap-1.5 text-base-content/70 hover:text-primary;
@@ -1193,7 +1231,7 @@
         }
 
         .price-label {
-            @apply text-[0.8125rem] text-base-content/70;
+            @apply text-13 text-base-content/70;
         }
 
         .old-price {
@@ -1232,7 +1270,7 @@
         /* Minimal price ("Buy 3 for €100.00" / "From €50.00"): a quiet
            second line under the main price, not a blue link */
         .minimal-price-link {
-            @apply basis-full text-[0.8125rem] font-normal text-base-content/70 no-underline;
+            @apply basis-full text-13 font-normal text-base-content/70 no-underline;
 
             .price {
                 @apply text-[1em] font-semibold;
@@ -1273,7 +1311,7 @@
     /* Stock status as a soft badge with a status dot - the "Availability:" label
        is redundant once it reads as a status, keep it for screen readers only */
     .availability {
-        @apply badge badge-soft h-auto gap-1.5 py-1 text-[0.8125rem] font-medium;
+        @apply badge badge-soft h-auto gap-1.5 py-1 text-13 font-medium;
 
         .label {
             @apply sr-only;
@@ -1305,7 +1343,7 @@
     .swatch-link {
         width: auto !important;
         height: 2.25rem !important;
-        @apply relative box-border inline-flex min-w-9 items-center justify-center overflow-hidden rounded-field border border-line bg-base-100 px-2.5 text-[0.8125rem] font-medium no-underline transition-all duration-150;
+        @apply relative box-border inline-flex min-w-9 items-center justify-center overflow-hidden rounded-field border border-line bg-base-100 px-2.5 text-13 font-medium no-underline transition-all duration-150;
 
         .swatch-label {
             width: auto !important;
@@ -1385,7 +1423,7 @@
      * ============================================ */
 
     .ratings {
-        @apply flex flex-wrap items-center gap-2 text-[0.8125rem] text-base-content/70;
+        @apply flex flex-wrap items-center gap-2 text-13 text-base-content/70;
 
         .rating-links a {
             @apply link link-hover text-primary;
@@ -1411,7 +1449,7 @@
     }
 
     .amount {
-        @apply text-[0.8125rem] text-base-content/70;
+        @apply text-13 text-base-content/70;
     }
 
     .sort-by .sort-by-switcher,
@@ -1487,7 +1525,7 @@
         .block-title {
             /* Sometimes a <button> (offcanvas trigger) - stretch it so the
                bottom hairline spans the card, not just the text */
-            @apply block w-full border-b border-line px-4 py-3.5 text-left font-display text-[0.9375rem] font-semibold;
+            @apply block w-full border-b border-line px-4 py-3.5 text-left font-display text-15 font-semibold;
         }
 
         .block-content {
@@ -1495,7 +1533,7 @@
         }
 
         .block-subtitle {
-            @apply mb-2 block text-[0.8125rem] font-semibold;
+            @apply mb-2 block text-13 font-semibold;
         }
 
         ol, ul {
@@ -1522,7 +1560,7 @@
         }
 
         dl dt {
-            @apply mb-2 mt-4 text-[0.8125rem] font-semibold uppercase tracking-wide text-base-content/70 first:mt-0;
+            @apply mb-2 mt-4 text-13 font-semibold uppercase tracking-wide text-base-content/70 first:mt-0;
         }
 
         dl dd {
@@ -1534,7 +1572,7 @@
         }
 
         .count {
-            @apply text-[0.8125rem] text-base-content/70;
+            @apply text-13 text-base-content/70;
         }
 
         .currently ol li {
@@ -1601,11 +1639,11 @@
         }
 
         .active-filters-title {
-            @apply text-[0.8125rem] font-semibold uppercase tracking-wide text-base-content/70;
+            @apply text-13 font-semibold uppercase tracking-wide text-base-content/70;
         }
 
         .clear-all-filters {
-            @apply link link-hover text-[0.8125rem] text-primary;
+            @apply link link-hover text-13 text-primary;
         }
 
         .filter-tags {
@@ -1617,7 +1655,7 @@
         }
 
         .filter-tag-link {
-            @apply badge badge-lg gap-1.5 border-line bg-base-200 pr-1.5 text-[0.8125rem] hover:border-error/40 hover:bg-error/10 hover:text-error;
+            @apply badge badge-lg gap-1.5 border-line bg-base-200 pr-1.5 text-13 hover:border-error/40 hover:bg-error/10 hover:text-error;
 
             .filter-tag-label {
                 @apply font-medium text-base-content/70;
@@ -1706,7 +1744,7 @@
            mobile, atop the buy column on desktop */
         .product-breadcrumbs {
             .breadcrumbs {
-                @apply p-0 text-[0.8125rem] text-base-content/70;
+                @apply p-0 text-13 text-base-content/70;
 
                 a:hover {
                     @apply text-primary underline;
@@ -1728,8 +1766,16 @@
         .product-shop > .product-name {
             @apply hidden nav:block;
 
+            /* Same --title-* hooks as .page-title */
             .h1 {
-                @apply block font-display text-[1.75rem] font-semibold leading-tight tracking-tight;
+                @apply block;
+                font-family: var(--font-title, var(--font-display));
+                font-weight: var(--title-weight, 600);
+                font-size: var(--title-size, 1.75rem);
+                line-height: var(--title-leading, 1.25);
+                letter-spacing: var(--title-tracking, -0.025em);
+                font-style: var(--title-style, normal);
+                text-transform: var(--title-case, none);
             }
         }
 
@@ -1765,7 +1811,7 @@
             }
 
             .short-description {
-                @apply max-w-[52ch] text-[0.9375rem] leading-relaxed;
+                @apply max-w-[52ch] text-15 leading-relaxed;
             }
         }
 
@@ -1903,7 +1949,7 @@
             }
 
             .block-subtitle {
-                @apply mb-1 mt-1.5 text-[0.8125rem] text-base-content/70;
+                @apply mb-1 mt-1.5 text-13 text-base-content/70;
 
                 a {
                     @apply link-hover font-medium text-primary;
@@ -1928,7 +1974,7 @@
 
                 img {
                     @apply block h-auto w-full max-w-none;
-                    filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.10));
+                    filter: var(--product-cutout-shadow-sm);
                 }
             }
 
@@ -1987,7 +2033,7 @@
             grid-area: 1 / 1;
             max-height: inherit;
             /* Cutout images: the shadow follows the product silhouette */
-            filter: drop-shadow(0 16px 14px rgb(0 0 0 / 0.12)) drop-shadow(0 4px 5px rgb(0 0 0 / 0.07));
+            filter: var(--product-cutout-shadow-lg);
 
             &.visible {
                 @apply block;
@@ -2078,7 +2124,7 @@
             }
 
             .no-rating {
-                @apply m-0 text-[0.9375rem] text-base-content/70;
+                @apply m-0 text-15 text-base-content/70;
             }
         }
 
@@ -2127,7 +2173,7 @@
         }
 
         .rc-title {
-            @apply mb-1 text-[0.9375rem] font-semibold;
+            @apply mb-1 text-15 font-semibold;
         }
 
         .rc-text {
@@ -2175,7 +2221,7 @@
             @apply border-b border-line first:border-t;
 
             summary {
-                @apply flex cursor-pointer list-none items-center justify-between gap-3 py-5 font-display text-[1.0625rem] font-semibold tracking-tight;
+                @apply flex cursor-pointer list-none items-center justify-between gap-3 py-5 font-display text-17 font-semibold tracking-tight;
 
                 &::-webkit-details-marker {
                     display: none;
@@ -2196,7 +2242,7 @@
         }
 
         .collateral-content {
-            @apply pb-6 text-[0.9375rem] leading-relaxed;
+            @apply pb-6 text-15 leading-relaxed;
 
             /* The attributes table aligns flush with the description text;
                labels keep full ink - muted labels read as disabled here */
@@ -2235,7 +2281,7 @@
     }
 
     .category-description {
-        @apply mb-5 max-w-[65ch] text-[0.9375rem] text-base-content/70;
+        @apply mb-5 max-w-[65ch] text-15 text-base-content/70;
     }
 
     /* Toolbar filter trigger (mobile only; opens layered nav in the offcanvas) */
@@ -2323,13 +2369,13 @@
 
             img {
                 @apply block h-full w-full object-contain;
-                filter: drop-shadow(0 3px 3px rgb(0 0 0 / 0.10));
+                filter: var(--product-cutout-shadow-sm);
             }
         }
 
         .product-cart-info {
             .product-name {
-                @apply text-[0.9375rem] font-semibold;
+                @apply text-15 font-semibold;
 
                 a:hover {
                     @apply text-primary;
@@ -2337,11 +2383,11 @@
             }
 
             .product-cart-sku {
-                @apply mt-1 text-[0.8125rem] text-base-content/70;
+                @apply mt-1 text-13 text-base-content/70;
             }
 
             dl {
-                @apply mt-2 text-[0.8125rem];
+                @apply mt-2 text-13;
 
                 dt {
                     @apply inline font-semibold;
@@ -2357,7 +2403,7 @@
             }
 
             .item-msg {
-                @apply mt-1.5 text-[0.8125rem] text-error;
+                @apply mt-1.5 text-13 text-error;
             }
         }
 
@@ -2365,9 +2411,10 @@
             @apply input input-sm h-10 w-16 text-center;
         }
 
-        /* Per-row update: quiet, secondary to the qty box */
+        /* Per-row update: quiet, secondary to the qty box (recipe shared with
+           the other rail actions, see the Buttons section) */
         .btn-update {
-            @apply btn btn-sm mt-1.5 h-8 border border-line bg-transparent px-3 text-xs font-medium text-base-content/80 shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content;
+            @apply btn-sm mt-1.5 h-8 px-3 text-xs;
         }
 
         /* Edit / wishlist / remove: icon-only stack (labels stay for tooltips
@@ -2403,7 +2450,7 @@
             @apply pt-4 text-right;
 
             .button2 {
-                @apply btn btn-sm ml-3 h-9 border border-line bg-transparent px-4 font-medium text-base-content/80 no-underline shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content hover:no-underline;
+                @apply btn-sm ml-3 h-9 px-4;
             }
         }
     }
@@ -2417,7 +2464,7 @@
         }
 
         .btn-apply {
-            @apply btn h-11 border border-line bg-transparent px-5 font-medium text-base-content/80 no-underline shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content hover:no-underline;
+            @apply h-11 px-5;
         }
     }
 
@@ -2448,7 +2495,7 @@
         }
 
         .btn-estimate {
-            @apply btn h-10 border border-line bg-transparent px-5 font-medium text-base-content/80 no-underline shadow-none hover:border-base-content/40 hover:bg-base-100 hover:text-base-content hover:no-underline;
+            @apply h-10 px-5;
         }
     }
 
@@ -2491,7 +2538,7 @@
         @apply sticky top-20 rounded-box bg-base-200 p-5;
 
         table {
-            @apply mb-4 w-full text-[0.9375rem];
+            @apply mb-4 w-full text-15;
 
             td {
                 @apply px-0 py-1.5;
@@ -2511,7 +2558,7 @@
             }
 
             tfoot td, strong {
-                @apply text-[1.0625rem] font-bold text-base-content;
+                @apply text-17 font-bold text-base-content;
             }
         }
     }
@@ -2541,10 +2588,12 @@
         }
 
         .product-image {
-            @apply block w-16 shrink-0 overflow-hidden rounded-selector bg-base-200;
+            @apply block w-16 shrink-0 overflow-hidden rounded-selector;
+            background: var(--product-tile-bg);
 
             img {
                 @apply block h-auto w-full max-w-none;
+                filter: var(--product-cutout-shadow-sm);
             }
         }
 
@@ -2561,7 +2610,7 @@
         }
 
         .info-wrapper {
-            @apply my-1 text-[0.8125rem] text-base-content/70;
+            @apply my-1 text-13 text-base-content/70;
 
             th {
                 @apply pr-3 text-left align-middle font-medium;
@@ -2581,7 +2630,7 @@
         }
 
         .btn-edit, .remove, .details {
-            @apply link link-hover text-[0.8125rem] text-base-content/70;
+            @apply link link-hover text-13 text-base-content/70;
         }
 
         .remove:hover {
@@ -2595,7 +2644,7 @@
             }
 
             .item-options {
-                @apply mt-1.5 text-[0.8125rem];
+                @apply mt-1.5 text-13;
 
                 dt {
                     @apply inline font-semibold after:content-[':_'];
@@ -2630,7 +2679,7 @@
             }
 
             .cart-link {
-                @apply link link-hover text-center text-[0.8125rem];
+                @apply link link-hover text-center text-13;
             }
         }
 
@@ -2685,6 +2734,141 @@
         }
     }
 
+    /* ============================================
+     * WYSIWYG content - grid layouts (columns & bento)
+     * Structural contract of the TipTap editor (extensions/bento.js and
+     * columns.js write these data attributes; presets add inline styles).
+     * Ported from base/default styles.css, tokenized: hairlines on
+     * --color-line, cards on the theme radius.
+     * ============================================ */
+
+    [data-type="maho-columns"],
+    [data-type="maho-bento"] {
+        display: grid;
+        margin: 1rem 0;
+    }
+
+    /* Shared gap sizes */
+    [data-type="maho-columns"][data-gap="none"],
+    [data-type="maho-bento"][data-gap="none"] {
+        gap: 0;
+    }
+    [data-type="maho-columns"][data-gap="small"],
+    [data-type="maho-bento"][data-gap="small"] {
+        gap: 0.5rem;
+    }
+    [data-type="maho-columns"][data-gap="medium"],
+    [data-type="maho-bento"][data-gap="medium"] {
+        gap: 1rem;
+    }
+    [data-type="maho-columns"][data-gap="large"],
+    [data-type="maho-bento"][data-gap="large"] {
+        gap: 2rem;
+    }
+
+    /* Shared cell base */
+    [data-type="maho-column"],
+    [data-type="maho-bento-cell"] {
+        min-width: 0;
+    }
+
+    /* Columns presets */
+    [data-type="maho-columns"][data-preset="2-equal"] {
+        grid-template-columns: 1fr 1fr;
+    }
+    [data-type="maho-columns"][data-preset="3-equal"] {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    [data-type="maho-columns"][data-preset="4-equal"] {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    [data-type="maho-columns"][data-preset="sidebar-left"] {
+        grid-template-columns: 1fr 2fr;
+    }
+    [data-type="maho-columns"][data-preset="sidebar-right"] {
+        grid-template-columns: 2fr 1fr;
+    }
+    [data-type="maho-columns"][data-preset="wide-center"] {
+        grid-template-columns: 1fr 2fr 1fr;
+    }
+
+    /* Grid style: cards */
+    [data-type="maho-columns"][data-style="cards"] [data-type="maho-column"],
+    [data-type="maho-bento"][data-style="cards"] [data-type="maho-bento-cell"] {
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius-box);
+        padding: 1rem;
+    }
+
+    /* Column style: separated - uses gap for spacing, border centered in gap */
+    [data-type="maho-columns"][data-style="separated"] {
+        gap: 0 !important;
+    }
+    [data-type="maho-columns"][data-style="separated"] [data-type="maho-column"] {
+        padding: 0 1rem;
+        border-right: 1px solid var(--color-line);
+    }
+    [data-type="maho-columns"][data-style="separated"] [data-type="maho-column"]:first-child {
+        padding-left: 0;
+    }
+    [data-type="maho-columns"][data-style="separated"] [data-type="maho-column"]:last-child {
+        border-right: none;
+        padding-right: 0;
+    }
+
+    /* Bento cell specifics */
+    [data-type="maho-bento-cell"] {
+        min-height: 0;
+        overflow: hidden;
+    }
+    [data-type="maho-bento-cell"] img,
+    [data-type="maho-bento-cell"] svg {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Responsive collapse: container queries so grids respond to their parent */
+    :has(> [data-type="maho-columns"]),
+    :has(> [data-type="maho-bento"]) {
+        container-type: inline-size;
+    }
+
+    @container (max-width: 32rem) {
+        [data-type="maho-columns"],
+        [data-type="maho-bento"] {
+            grid-template-columns: 1fr !important;
+        }
+        [data-type="maho-bento"] {
+            grid-template-areas: none !important;
+            grid-template-rows: auto !important;
+        }
+        [data-type="maho-bento-cell"][style] {
+            grid-area: auto !important;
+        }
+    }
+
+    /* ============================================
+     * AJAX loader overlay (injected by varien/js.js showLoader())
+     * ============================================ */
+
+    .maho-loader-overlay {
+        @apply absolute inset-0 z-[100] flex items-center justify-center bg-base-100/70 transition-opacity duration-200;
+    }
+
+    /* Theme-native spinner (the legacy loading.svg lives in base/default,
+       out of this stylesheet's reach) - same language as the checkout loader */
+    .maho-loader-spinner {
+        @apply size-8 rounded-full border-2 border-line border-t-primary;
+        animation: maho-loader-spin 0.6s linear infinite;
+    }
+
+    @keyframes maho-loader-spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
     /* Every stock color scheme we ship is dark (the 8 WCAG-passing DaisyUI
        themes) - keep the ink logo readable on them. Scoped per scheme so a
        future light scheme isn't inverted by accident */
@@ -2698,13 +2882,20 @@
      * Footer
      * ============================================ */
 
+    /* The footer palette runs on the --footer-* hooks: themes get a branded
+       (usually dark) footer by setting --footer-bg / --footer-ink /
+       --footer-link-hover / --footer-border in plain CSS - no selectors.
+       Defaults reproduce the quiet base-200 footer. */
     .footer-container {
-        @apply mt-auto border-t border-line bg-base-200;
+        @apply mt-auto border-t;
+        background: var(--footer-bg, var(--color-base-200));
+        border-color: var(--footer-border, var(--color-line));
     }
 
     .footer {
         .block-title {
-            @apply mb-4 text-xs font-semibold uppercase tracking-[0.08em] text-base-content/65;
+            @apply mb-4 text-xs font-semibold uppercase tracking-[0.08em];
+            color: color-mix(in oklab, var(--footer-ink, var(--color-base-content)) 65%, transparent);
         }
 
         ul {
@@ -2712,14 +2903,20 @@
         }
 
         a {
-            @apply text-base-content/75 transition-colors hover:text-primary;
+            @apply transition-colors;
+            color: color-mix(in oklab, var(--footer-ink, var(--color-base-content)) 80%, transparent);
+
+            &:hover {
+                color: var(--footer-link-hover, var(--color-primary));
+            }
         }
 
         .block-subscribe {
             @apply w-full sm:max-w-sm;
 
             .block-title {
-                @apply font-display text-lg font-semibold normal-case tracking-normal text-base-content;
+                @apply font-display text-lg font-semibold normal-case tracking-normal;
+                color: var(--footer-ink, var(--color-base-content));
             }
 
             .block-content {
@@ -2740,7 +2937,10 @@
         }
 
         address {
-            @apply mt-4 w-full border-t border-line pt-6 text-[0.8125rem] not-italic text-base-content/65;
+            @apply mt-4 w-full border-t pt-6 text-13 not-italic;
+            color: color-mix(in oklab, var(--footer-ink, var(--color-base-content)) 65%, transparent);
+            /* currentColor-derived hairline adapts to any footer palette */
+            border-color: color-mix(in oklab, currentColor 24%, transparent);
         }
     }
 
@@ -2749,7 +2949,7 @@
      * ============================================ */
 
     .global-site-notice {
-        @apply bg-neutral text-center text-[0.8125rem] text-neutral-content;
+        @apply bg-neutral text-center text-13 text-neutral-content;
 
         .notice-inner {
             @apply mx-auto max-w-7xl px-4 py-2;
@@ -2779,7 +2979,7 @@
         }
 
         span {
-            @apply block bg-neutral px-4 py-3 text-center text-[0.8125rem] font-semibold uppercase tracking-[0.08em] text-neutral-content;
+            @apply block bg-neutral px-4 py-3 text-center text-13 font-semibold uppercase tracking-[0.08em] text-neutral-content;
         }
 
         a:hover span {
@@ -2826,7 +3026,7 @@
         }
 
         h2, .legend {
-            @apply mb-3.5 text-[1.0625rem] font-semibold;
+            @apply mb-3.5 text-17 font-semibold;
         }
     }
 
@@ -2838,7 +3038,7 @@
 
     /* Newsletter management: description reads as intro copy, button follows */
     .newsletter-description {
-        @apply mb-5 max-w-3xl text-[0.9375rem] leading-relaxed text-base-content/80;
+        @apply mb-5 max-w-3xl text-15 leading-relaxed text-base-content/80;
     }
 
     /* Dashboard greeting: air between the title, welcome copy and first section */
@@ -2846,11 +3046,11 @@
         @apply mb-8;
 
         .hello {
-            @apply mb-1.5 text-[1.0625rem];
+            @apply mb-1.5 text-17;
         }
 
         p:not(.hello) {
-            @apply max-w-3xl text-[0.9375rem] leading-relaxed text-base-content/80;
+            @apply max-w-3xl text-15 leading-relaxed text-base-content/80;
         }
     }
 
@@ -2865,7 +3065,7 @@
             }
 
             a {
-                @apply link link-hover text-[0.8125rem] text-primary;
+                @apply link link-hover text-13 text-primary;
             }
         }
     }
@@ -2888,7 +3088,7 @@
     }
 
     .box .box-title :is(h2, h3) {
-        @apply mb-2.5 text-[1.0625rem] font-semibold;
+        @apply mb-2.5 text-17 font-semibold;
     }
 
     .box .box-content {
@@ -2959,11 +3159,11 @@
         li { @apply m-0; }
 
         li.current {
-            @apply rounded-full bg-primary/10 px-3 py-1 text-[0.8125rem] font-semibold text-primary;
+            @apply rounded-full bg-primary/10 px-3 py-1 text-13 font-semibold text-primary;
         }
 
         li a {
-            @apply block rounded-full border border-line px-3 py-1 text-[0.8125rem] text-base-content/75 transition-colors hover:border-primary/40 hover:text-primary;
+            @apply block rounded-full border border-line px-3 py-1 text-13 text-base-content/75 transition-colors hover:border-primary/40 hover:text-primary;
         }
     }
 
@@ -2973,11 +3173,11 @@
 
     /* Order status cell: quiet badge instead of italic text */
     .data-table td.status em {
-        @apply badge badge-ghost h-auto py-1 text-[0.8125rem] font-medium not-italic;
+        @apply badge badge-ghost h-auto py-1 text-13 font-medium not-italic;
     }
 
     .order-comments {
-        .sub-title { @apply mb-2 mt-6 text-[1.0625rem] font-semibold; }
+        .sub-title { @apply mb-2 mt-6 text-17 font-semibold; }
 
         .order-about {
             @apply m-0;
@@ -2987,14 +3187,8 @@
         }
     }
 
-    /* Wishlist table */
+    /* Wishlist table (chrome shared with .data-table above) */
     #wishlist-table {
-        @apply table;
-
-        thead th {
-            @apply text-xs uppercase tracking-wide text-base-content/70;
-        }
-
         tbody td {
             @apply py-4 align-top;
         }
@@ -3006,7 +3200,7 @@
         }
 
         .product-name {
-            @apply m-0 mb-0.5 text-[0.9375rem] font-medium;
+            @apply m-0 mb-0.5 text-15 font-medium;
 
             a { @apply hover:text-primary; }
         }
@@ -3034,7 +3228,7 @@
         .cart-cell {
             @apply flex flex-col items-start gap-2;
 
-            .price { @apply text-[0.9375rem] font-semibold; }
+            .price { @apply text-15 font-semibold; }
         }
 
         .link-edit {
@@ -3042,7 +3236,7 @@
         }
 
         .customer-wishlist-item-remove a {
-            @apply inline-flex items-center gap-1 whitespace-nowrap text-[0.8125rem] text-base-content/60 transition-colors hover:text-error;
+            @apply inline-flex items-center gap-1 whitespace-nowrap text-13 text-base-content/60 transition-colors hover:text-error;
 
             svg { @apply size-4; }
         }
@@ -3065,7 +3259,7 @@
 
         h2.sub-title,
         h2.table-caption {
-            @apply mb-3 mt-4 flex flex-wrap items-baseline gap-x-3 text-[1.0625rem] font-semibold;
+            @apply mb-3 mt-4 flex flex-wrap items-baseline gap-x-3 text-17 font-semibold;
 
             .separator { @apply hidden; }
 
@@ -3101,7 +3295,7 @@
        specificity so these overrides win by source order) */
     :is(.sidebar, .col-wrapper) .block-account {
         .block-title {
-            @apply border-0 px-4 pb-0 pt-4 font-body text-[0.8125rem] font-semibold uppercase tracking-wide text-base-content/70;
+            @apply border-0 px-4 pb-0 pt-4 font-body text-13 font-semibold uppercase tracking-wide text-base-content/70;
         }
 
         .block-content {
@@ -3197,7 +3391,7 @@
             }
 
             label {
-                @apply -mb-px inline-block cursor-pointer border-b-2 border-transparent px-4 py-2.5 text-[1.0625rem] font-semibold text-base-content/65 hover:text-base-content;
+                @apply -mb-px inline-block cursor-pointer border-b-2 border-transparent px-4 py-2.5 text-17 font-semibold text-base-content/65 hover:text-base-content;
             }
         }
 
@@ -3233,6 +3427,18 @@ input.input-text:focus, input.input-text:focus-within,
 :is(a, button, .btn, .swatch-link, .dot, input[type="checkbox"], input[type="radio"]):focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
+}
+
+/* Unlayered: typography hooks so themes set the buttons' case and tracking
+   with two variables instead of repeating the .btn/button.button/a.button
+   selector list (the elements only share styles via @apply, not a class).
+   Only these two properties: weight and size hooks would fight the sizing
+   utilities individual buttons carry */
+.btn,
+button.button,
+a.button {
+    text-transform: var(--btn-case, none);
+    letter-spacing: var(--btn-tracking, normal);
 }
 
 /* Unlayered: card quick-actions are icon-only circles; their label is a bare
@@ -3363,7 +3569,9 @@ table td.status {
 }
 
 /* Unlayered on purpose: Maho's footer markup shares the "footer" class name with
-   the DaisyUI footer component, whose layer would otherwise win the cascade */
+   the DaisyUI footer component, whose layer would otherwise win the cascade.
+   The base ink also lives here: the accordion hairlines and chevron below
+   derive from it via currentColor, so one --footer-ink retunes everything */
 .footer {
     display: flex;
     flex-wrap: wrap;
@@ -3373,6 +3581,7 @@ table td.status {
     gap: 2.5rem 4.5rem;
     padding: 4rem 1rem 2.5rem;
     font-size: 0.875rem;
+    color: color-mix(in oklab, var(--footer-ink, var(--color-base-content)) 72%, transparent);
 }
 
 /* Mid widths (below the single-row desktop, above the nav breakpoint): the

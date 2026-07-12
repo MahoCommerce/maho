@@ -41,18 +41,20 @@
     /* Warm borderless food tiles */
     --product-tile-bg: #f7f1e5;
 
+    /* Hearty contemporary headings */
+    --title-weight: 700;
+    --title-tracking: -0.01em;
+
+    /* Deep basil footer */
+    --footer-bg: #2f4b26;
+    --footer-border: #2f4b26;
+    --footer-ink: #f2f8ec;
+    --footer-link-hover: #f4c65c;
+
     /* Friendly pills */
     --radius-selector: 0.75rem;
     --radius-field: 1.5rem;
     --radius-box: 1.25rem;
-}
-
-/* Hearty contemporary headings */
-.page-title h1,
-.page-title h2,
-.product-view .product-shop .product-name .h1 {
-    font-weight: 700;
-    letter-spacing: -0.01em;
 }
 
 #nav > .nav-primary > li.level0 > a {
@@ -62,32 +64,4 @@
 ::selection {
     background: #eda913;
     color: #453305;
-}
-
-/* Deep basil footer */
-.footer-container {
-    background: #2f4b26;
-    border-color: #2f4b26;
-}
-
-.footer,
-.footer .block-title,
-.footer address {
-    color: rgb(242 248 236 / 0.66);
-}
-
-.footer .block-subscribe .block-title {
-    color: #f2f8ec;
-}
-
-.footer a {
-    color: rgb(242 248 236 / 0.84);
-}
-
-.footer a:hover {
-    color: #f4c65c;
-}
-
-.footer address {
-    border-color: rgb(242 248 236 / 0.18);
 }

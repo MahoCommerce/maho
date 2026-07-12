@@ -43,18 +43,22 @@
     /* Warm paper backdrop for gallery / cart cutouts */
     --product-tile-bg: #f6efe0;
 
+    /* Rounded-terminal headings, confident but not shouty */
+    --title-weight: 600;
+    --title-tracking: 0.005em;
+
+    --btn-tracking: 0.01em;
+
+    /* Deep spruce footer: the calm, adult end of the toy shop */
+    --footer-bg: #22423a;
+    --footer-border: #22423a;
+    --footer-ink: #f4efe3;
+    --footer-link-hover: #f7b32b;
+
     /* Friendly and round */
     --radius-selector: 0.75rem;
     --radius-field: 1.5rem;
     --radius-box: 1.25rem;
-}
-
-/* Rounded-terminal headings, confident but not shouty */
-.page-title h1,
-.page-title h2,
-.product-view .product-shop .product-name .h1 {
-    font-weight: 600;
-    letter-spacing: 0.005em;
 }
 
 #nav > .nav-primary > li.level0 > a {
@@ -105,7 +109,6 @@
 button.button,
 a.button {
     font-weight: 800;
-    letter-spacing: 0.01em;
     box-shadow: 0 0.22rem 0 0 rgb(74 46 16 / 0.24);
     transition:
         transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -119,32 +122,4 @@ button.button:active,
 a.button:active {
     transform: translateY(0.18rem);
     box-shadow: 0 0.04rem 0 0 rgb(74 46 16 / 0.24);
-}
-
-/* Deep spruce footer: the calm, adult end of the toy shop */
-.footer-container {
-    background: #22423a;
-    border-color: #22423a;
-}
-
-.footer,
-.footer .block-title,
-.footer address {
-    color: rgb(244 239 227 / 0.72);
-}
-
-.footer .block-subscribe .block-title {
-    color: #f4efe3;
-}
-
-.footer a {
-    color: rgb(244 239 227 / 0.88);
-}
-
-.footer a:hover {
-    color: #f7b32b;
-}
-
-.footer address {
-    border-color: rgb(244 239 227 / 0.18);
 }

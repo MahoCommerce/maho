@@ -42,56 +42,25 @@
     /* White plinths on the greige field - borderless */
     --product-tile-bg: #fdfdfb;
 
+    /* Measured headlines, furniture is the sculpture */
+    --title-weight: 500;
+    --title-tracking: -0.02em;
+
+    /* Espresso floor footer */
+    --footer-bg: #241d14;
+    --footer-border: #241d14;
+    --footer-ink: #eae6dc;
+    --footer-link-hover: #d18a60;
+
     --radius-selector: 0.5rem;
     --radius-field: 0.625rem;
     --radius-box: 1rem;
-}
-
-/* Measured headlines, furniture is the sculpture */
-.page-title h1,
-.page-title h2,
-.product-view .product-shop .product-name .h1 {
-    font-weight: 500;
-    letter-spacing: -0.02em;
 }
 
 /* Motion like weight being set down */
 .products-grid .product-image img {
     transition-duration: 600ms;
     transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-::selection {
-    background: #a04620;
-    color: #fdf1ea;
-}
-
-/* Espresso floor footer */
-.footer-container {
-    background: #241d14;
-    border-color: #241d14;
-}
-
-.footer,
-.footer .block-title,
-.footer address {
-    color: rgb(234 230 220 / 0.62);
-}
-
-.footer .block-subscribe .block-title {
-    color: #eae6dc;
-}
-
-.footer a {
-    color: rgb(234 230 220 / 0.82);
-}
-
-.footer a:hover {
-    color: #d18a60;
-}
-
-.footer address {
-    border-color: rgb(234 230 220 / 0.16);
 }
 
 /* The showroom after closing */
@@ -116,15 +85,8 @@
         --color-error-content: #2c110f;
 
         --product-tile-bg: #262119;
-    }
 
-    ::selection {
-        background: #d18a60;
-        color: #2e1305;
-    }
-
-    .footer-container {
-        background: #14100a;
-        border-top: 1px solid rgb(231 225 212 / 0.12);
+        --footer-bg: #14100a;
+        --footer-border: rgb(231 225 212 / 0.12);
     }
 }

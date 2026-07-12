@@ -25,5 +25,13 @@
      * Shape:    --radius-box (cards, dropdowns), --radius-field (buttons, inputs),
      *           --radius-selector (small controls)
      * Type:     --font-body, --font-display
+     * Titles:   --font-title, --title-size, --title-weight, --title-tracking,
+     *           --title-leading, --title-style, --title-case
+     * Buttons:  --btn-case, --btn-tracking
+     * Footer:   --footer-bg, --footer-ink, --footer-link-hover, --footer-border
+     * Products: --product-tile-bg, --product-cutout-shadow[-sm|-lg],
+     *           --maho-color-rating (stars)
+     *
+     * See the README in this package for a commented example of each.
      */
 }

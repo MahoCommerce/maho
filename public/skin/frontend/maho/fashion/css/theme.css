@@ -40,28 +40,31 @@
     /* Borderless flat gallery tiles */
     --product-tile-bg: #f4f4f2;
 
+    /* The serif appears only oversized - hero titles, nothing smaller */
+    --font-title: 'Instrument Serif', Georgia, serif;
+    --title-weight: 400;
+    --title-tracking: -0.01em;
+    --title-size: clamp(2.25rem, 1.6rem + 2.2vw, 3.25rem);
+    --title-leading: 1.05;
+
+    /* One caps surface: actions */
+    --btn-case: uppercase;
+    --btn-tracking: 0.08em;
+
+    /* Ink footer */
+    --footer-bg: #131312;
+    --footer-border: #131312;
+    --footer-ink: #ffffff;
+    --footer-link-hover: #ffffff;
+
     --radius-selector: 0rem;
     --radius-field: 0rem;
     --radius-box: 0rem;
 }
 
-/* The serif appears only oversized - hero titles, nothing smaller */
-.main > .page-title h1,
-.main > .page-title h2,
-.product-view .product-shop .product-name .h1 {
-    font-family: 'Instrument Serif', Georgia, serif;
-    font-weight: 400;
-    letter-spacing: -0.01em;
-    font-size: clamp(2.25rem, 1.6rem + 2.2vw, 3.25rem);
-    line-height: 1.05;
-}
-
-/* One caps surface: actions */
 .btn,
 button.button,
 a.button {
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
     font-size: 0.8125rem;
 }
 
@@ -72,39 +75,6 @@ a.button:hover {
     background: transparent;
     border-color: currentColor;
     color: var(--color-base-content);
-}
-
-::selection {
-    background: #131312;
-    color: #fafaf9;
-}
-
-/* Ink footer */
-.footer-container {
-    background: #131312;
-    border-color: #131312;
-}
-
-.footer,
-.footer .block-title,
-.footer address {
-    color: rgb(255 255 255 / 0.6);
-}
-
-.footer .block-subscribe .block-title {
-    color: #fafaf9;
-}
-
-.footer a {
-    color: rgb(255 255 255 / 0.78);
-}
-
-.footer a:hover {
-    color: #ffffff;
-}
-
-.footer address {
-    border-color: rgb(255 255 255 / 0.15);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -129,20 +99,13 @@ a.button:hover {
 
         --maho-color-rating: #ededea;
         --product-tile-bg: #222220;
-    }
 
-    ::selection {
-        background: #ededea;
-        color: #1a1a19;
+        --footer-border: rgb(255 255 255 / 0.12);
     }
 
     .btn-primary:hover,
     button.button:hover,
     a.button:hover {
         color: #ededea;
-    }
-
-    .footer-container {
-        border-top: 1px solid rgb(255 255 255 / 0.12);
     }
 }

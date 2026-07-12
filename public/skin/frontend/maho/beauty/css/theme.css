@@ -41,58 +41,28 @@
     /* Soft petal wash behind the products - borderless */
     --product-tile-bg: linear-gradient(180deg, #f9efeb, #f2e2db);
 
+    /* Soft-spoken headlines */
+    --title-weight: 500;
+    --title-tracking: -0.01em;
+
+    /* Lowercase posture on actions */
+    --btn-case: lowercase;
+
+    /* Deep plum footer */
+    --footer-bg: #452a38;
+    --footer-border: #452a38;
+    --footer-ink: #f7edf2;
+    --footer-link-hover: #e3a5bd;
+
     /* Rounded like the packaging */
     --radius-selector: 0.75rem;
     --radius-field: 1.25rem;
     --radius-box: 1.25rem;
 }
 
-/* Soft-spoken headlines */
-.page-title h1,
-.page-title h2,
-.product-view .product-shop .product-name .h1 {
-    font-weight: 500;
-    letter-spacing: -0.01em;
-}
-
-/* Lowercase posture on actions */
-.btn,
-button.button,
-a.button {
-    text-transform: lowercase;
-}
-
 ::selection {
     background: #f0cfd9;
     color: #4a2b3a;
-}
-
-/* Deep plum footer */
-.footer-container {
-    background: #452a38;
-    border-color: #452a38;
-}
-
-.footer,
-.footer .block-title,
-.footer address {
-    color: rgb(247 237 242 / 0.66);
-}
-
-.footer .block-subscribe .block-title {
-    color: #f7edf2;
-}
-
-.footer a {
-    color: rgb(247 237 242 / 0.84);
-}
-
-.footer a:hover {
-    color: #e3a5bd;
-}
-
-.footer address {
-    border-color: rgb(247 237 242 / 0.18);
 }
 
 /* Plum evening shelf */
@@ -117,15 +87,15 @@ a.button {
         --color-error-content: #291111;
 
         --product-tile-bg: linear-gradient(180deg, #332329, #281a1f);
+
+        --footer-bg: #181014;
+        --footer-border: rgb(239 223 229 / 0.12);
     }
 
+    /* The light-mode petal override above would persist here - re-point it
+       at the dark rose */
     ::selection {
         background: #dd8fa8;
         color: #38101f;
-    }
-
-    .footer-container {
-        background: #181014;
-        border-top: 1px solid rgb(239 223 229 / 0.12);
     }
 }

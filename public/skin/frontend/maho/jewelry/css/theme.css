@@ -47,28 +47,31 @@
         #ede7d8 100%
     );
 
+    /* The serif appears only large, in normal case */
+    --font-title: 'Bodoni Moda', 'Didot', Georgia, serif;
+    --title-weight: 500;
+    --title-tracking: 0.005em;
+    --title-size: clamp(2rem, 1.5rem + 1.8vw, 2.875rem);
+    --title-leading: 1.08;
+
+    /* One quiet caps surface: actions */
+    --btn-case: uppercase;
+    --btn-tracking: 0.09em;
+
+    /* Warm velvet footer */
+    --footer-bg: #17130d;
+    --footer-border: #17130d;
+    --footer-ink: #e9dfc6;
+    --footer-link-hover: #d4b678;
+
     --radius-selector: 0.25rem;
     --radius-field: 0.25rem;
     --radius-box: 0.75rem;
 }
 
-/* The serif appears only large, in normal case */
-.main > .page-title h1,
-.main > .page-title h2,
-.product-view .product-shop .product-name .h1 {
-    font-family: 'Bodoni Moda', 'Didot', Georgia, serif;
-    font-weight: 500;
-    letter-spacing: 0.005em;
-    font-size: clamp(2rem, 1.5rem + 1.8vw, 2.875rem);
-    line-height: 1.08;
-}
-
-/* One quiet caps surface: actions */
 .btn,
 button.button,
 a.button {
-    text-transform: uppercase;
-    letter-spacing: 0.09em;
     font-size: 0.78rem;
     font-weight: 500;
 }
@@ -86,34 +89,6 @@ a.button {
 ::selection {
     background: #e9d9b4;
     color: #241a06;
-}
-
-/* Warm velvet footer */
-.footer-container {
-    background: #17130d;
-    border-color: #17130d;
-}
-
-.footer,
-.footer .block-title,
-.footer address {
-    color: rgb(233 223 198 / 0.62);
-}
-
-.footer .block-subscribe .block-title {
-    color: #e9dfc6;
-}
-
-.footer a {
-    color: rgb(233 223 198 / 0.82);
-}
-
-.footer a:hover {
-    color: #d4b678;
-}
-
-.footer address {
-    border-color: rgb(233 223 198 / 0.16);
 }
 
 /* After-hours boutique */
@@ -145,15 +120,15 @@ a.button {
             #211b10 55%,
             #17130b 100%
         );
+
+        --footer-bg: #100d08;
+        --footer-border: rgb(233 223 198 / 0.12);
     }
 
+    /* The light-mode champagne override above would persist here - re-point
+       it at the dark gold */
     ::selection {
         background: #d4b678;
         color: #251b07;
-    }
-
-    .footer-container {
-        background: #100d08;
-        border-top: 1px solid rgb(233 223 198 / 0.12);
     }
 }

@@ -151,6 +151,32 @@ Restyle the whole store by overriding the design tokens — every component
        colors; product photos with transparent backgrounds look best on it.
        Accepts any background value: */
     --product-tile-bg: #f6f4f1;
+
+    /* Silhouette shadows under the product cutouts (three sizes; set to
+       none for flat tiles) */
+    --product-cutout-shadow: none;
+    --product-cutout-shadow-sm: none;
+    --product-cutout-shadow-lg: none;
+
+    /* Hero titles (page titles + the product page title) - all optional */
+    --font-title: 'Fraunces', serif;          /* defaults to --font-display */
+    --title-weight: 500;                      /* default 600 */
+    --title-size: clamp(2rem, 1.5rem + 1.8vw, 2.875rem);
+    --title-tracking: -0.01em;
+    --title-leading: 1.1;
+    --title-style: italic;                    /* default normal */
+    --title-case: uppercase;                  /* default none */
+
+    /* Button typography */
+    --btn-case: uppercase;                    /* default none */
+    --btn-tracking: 0.06em;                   /* default normal */
+
+    /* Footer palette (defaults to the quiet base-200 footer). Titles, links
+       and hairlines derive their opacities from --footer-ink automatically */
+    --footer-bg: #10231c;
+    --footer-ink: #eef6f2;
+    --footer-link-hover: #7fd0b4;
+    --footer-border: #10231c;                 /* top hairline; match the bg to hide it */
 }
 
 /* Optional dark mode */
