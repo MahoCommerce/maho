@@ -23,6 +23,8 @@ $application = new class ('Maho', Mage::getVersion()) extends Application {
     }
 };
 
+$application->addCommand(new \MahoCLI\Commands\AccessibilityScan());
+
 $application->addCommand(new \MahoCLI\Commands\AdminUserList());
 $application->addCommand(new \MahoCLI\Commands\AdminUserCreate());
 $application->addCommand(new \MahoCLI\Commands\AdminUserChangepassword());

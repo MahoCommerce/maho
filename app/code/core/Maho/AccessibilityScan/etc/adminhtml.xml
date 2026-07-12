@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <menu>
+        <system>
+            <children>
+                <accessibilityscan translate="title" module="accessibilityscan">
+                    <title>Accessibility Scan</title>
+                    <sort_order>110</sort_order>
+                    <children>
+                        <dashboard translate="title" module="accessibilityscan">
+                            <title>Dashboard</title>
+                            <action>adminhtml/accessibilityscan_dashboard</action>
+                            <sort_order>10</sort_order>
+                        </dashboard>
+                        <scans translate="title" module="accessibilityscan">
+                            <title>Scan History</title>
+                            <action>adminhtml/accessibilityscan_scan</action>
+                            <sort_order>20</sort_order>
+                        </scans>
+                    </children>
+                </accessibilityscan>
+            </children>
+        </system>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <system>
+                        <children>
+                            <accessibilityscan translate="title" module="accessibilityscan">
+                                <title>Accessibility Scan</title>
+                                <sort_order>110</sort_order>
+                                <children>
+                                    <dashboard translate="title" module="accessibilityscan">
+                                        <title>Dashboard</title>
+                                    </dashboard>
+                                    <scans translate="title" module="accessibilityscan">
+                                        <title>Scan History</title>
+                                    </scans>
+                                </children>
+                            </accessibilityscan>
+                            <config>
+                                <children>
+                                    <accessibilityscan translate="title" module="accessibilityscan">
+                                        <title>Accessibility Scan</title>
+                                    </accessibilityscan>
+                                </children>
+                            </config>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

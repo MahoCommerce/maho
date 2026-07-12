@@ -1,0 +1,156 @@
+/*
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: OSL-3.0
+*/
+
+.a11yscan-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.a11yscan-card {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 14px 16px;
+}
+
+.a11yscan-card .a11yscan-card-value {
+    display: block;
+    font-size: 26px;
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+.a11yscan-card .a11yscan-card-label {
+    color: #666;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.a11yscan-form {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.a11yscan-form .a11yscan-form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.a11yscan-form input[type="url"] {
+    flex: 1;
+    min-width: 280px;
+}
+
+.a11yscan-status {
+    margin-top: 10px;
+    color: #666;
+}
+
+.a11yscan-status.error {
+    color: #d40707;
+}
+
+.a11yscan-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.a11yscan-badge.critical { background: #d40707; }
+.a11yscan-badge.serious { background: #e07c00; }
+.a11yscan-badge.moderate { background: #b8a000; }
+.a11yscan-badge.minor { background: #777; }
+.a11yscan-badge.status-complete { background: #2f855a; }
+.a11yscan-badge.status-failed { background: #d40707; }
+.a11yscan-badge.status-running,
+.a11yscan-badge.status-pending { background: #3182ce; }
+
+.a11yscan-meta {
+    margin-bottom: 20px;
+}
+
+.a11yscan-meta td {
+    padding: 3px 16px 3px 0;
+}
+
+.a11yscan-group {
+    margin-bottom: 24px;
+}
+
+.a11yscan-group > h4 {
+    margin: 0 0 10px;
+    font-size: 14px;
+}
+
+.a11yscan-violation {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-left-width: 4px;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+}
+
+.a11yscan-violation.critical { border-left-color: #d40707; }
+.a11yscan-violation.serious { border-left-color: #e07c00; }
+.a11yscan-violation.moderate { border-left-color: #b8a000; }
+.a11yscan-violation.minor { border-left-color: #777; }
+
+.a11yscan-violation h5 {
+    margin: 0 0 6px;
+    font-size: 13px;
+}
+
+.a11yscan-violation dl {
+    margin: 8px 0 0;
+}
+
+.a11yscan-violation dt {
+    font-weight: bold;
+    margin-top: 6px;
+}
+
+.a11yscan-violation dd {
+    margin: 2px 0 0;
+}
+
+.a11yscan-violation pre {
+    background: #f6f6f6;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 8px;
+    margin: 4px 0 0;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 11px;
+}
+
+.a11yscan-error {
+    background: #fbeae5;
+    border: 1px solid #d40707;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+}
+
+.a11yscan-recent table {
+    width: 100%;
+}
+
+.content-header table {
+    width: 100%;
+}

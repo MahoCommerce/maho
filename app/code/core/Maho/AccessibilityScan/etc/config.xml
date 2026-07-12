@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <modules>
+        <Maho_AccessibilityScan>
+            <version>1.0.0</version>
+        </Maho_AccessibilityScan>
+    </modules>
+    <global>
+        <models>
+            <accessibilityscan>
+                <class>Maho_AccessibilityScan_Model</class>
+                <resourceModel>accessibilityscan_resource</resourceModel>
+            </accessibilityscan>
+            <accessibilityscan_resource>
+                <class>Maho_AccessibilityScan_Model_Resource</class>
+                <entities>
+                    <scan>
+                        <table>accessibilityscan_scan</table>
+                    </scan>
+                    <page>
+                        <table>accessibilityscan_page</table>
+                    </page>
+                    <violation>
+                        <table>accessibilityscan_violation</table>
+                    </violation>
+                </entities>
+            </accessibilityscan_resource>
+        </models>
+        <helpers>
+            <accessibilityscan>
+                <class>Maho_AccessibilityScan_Helper</class>
+            </accessibilityscan>
+        </helpers>
+        <blocks>
+            <accessibilityscan>
+                <class>Maho_AccessibilityScan_Block</class>
+            </accessibilityscan>
+        </blocks>
+    </global>
+    <adminhtml>
+        <layout>
+            <updates>
+                <accessibilityscan>
+                    <file>accessibilityscan.xml</file>
+                </accessibilityscan>
+            </updates>
+        </layout>
+    </adminhtml>
+    <default>
+        <accessibilityscan>
+            <general>
+                <wcag_level>AA</wcag_level>
+                <timeout>60</timeout>
+            </general>
+            <advanced>
+                <node_path>node</node_path>
+                <npm_path>npm</npm_path>
+            </advanced>
+        </accessibilityscan>
+    </default>
+</config>

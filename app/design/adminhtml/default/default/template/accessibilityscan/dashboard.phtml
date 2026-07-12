@@ -1,0 +1,100 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package Maho_AccessibilityScan
+ */
+
+/**
+ * @var Maho_AccessibilityScan_Block_Adminhtml_Dashboard $this
+ */
+
+$helper = Mage::helper('accessibilityscan');
+$latestScan = $this->getLatestScan();
+?>
+<div class="content-header">
+    <table cellspacing="0">
+        <tr>
+            <td><h3 class="icon-head"><?= $helper->__('Accessibility Scan') ?></h3></td>
+            <td class="form-buttons">
+                <button type="button" class="scalable" onclick="setLocation('<?= $this->escapeUrl($this->getScanHistoryUrl()) ?>')">
+                    <span><?= $helper->__('Scan History') ?></span>
+                </button>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="a11yscan-form">
+    <h4><?= $helper->__('Run a New Scan') ?></h4>
+    <form id="a11yscan-form" action="<?= $this->escapeUrl($this->getStartUrl()) ?>" onsubmit="accessibilityScanStart(this); return false;">
+        <div class="a11yscan-form-row">
+            <input type="url" name="url" class="input-text required-entry" required
+                   placeholder="<?= $this->quoteEscape($helper->__('URL to scan, e.g. https://store.example.com/')) ?>">
+            <select name="wcag_level" class="select">
+                <?php foreach ($this->getWcagLevelOptions() as $option): ?>
+                    <option value="<?= $this->escapeHtml($option['value']) ?>"<?= $option['value'] === $this->getDefaultWcagLevel() ? ' selected' : '' ?>>
+                        <?= $this->escapeHtml($option['label']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <select name="store_id" class="select">
+                <?php foreach ($this->getStores() as $store): ?>
+                    <option value="<?= (int) $store->getId() ?>"><?= $this->escapeHtml($store->getName()) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <button type="submit" class="scalable add"><span><?= $helper->__('Start Scan') ?></span></button>
+        </div>
+        <p id="a11yscan-status" class="a11yscan-status"
+           data-running-message="<?= $this->quoteEscape($helper->__('Scanning... the first run downloads Playwright and Chromium and can take a few minutes.')) ?>"></p>
+    </form>
+</div>
+
+<div class="a11yscan-cards">
+    <div class="a11yscan-card">
+        <span class="a11yscan-card-value"><?= (int) $this->getTotalScans() ?></span>
+        <span class="a11yscan-card-label"><?= $helper->__('Total Scans') ?></span>
+    </div>
+    <?php if ($latestScan): ?>
+        <div class="a11yscan-card">
+            <span class="a11yscan-card-value"><?= $latestScan->getTotalViolations() ?></span>
+            <span class="a11yscan-card-label"><?= $helper->__('Violations (Latest Scan)') ?></span>
+        </div>
+        <?php foreach ($latestScan->getViolationCounts() as $impact => $count): ?>
+            <div class="a11yscan-card">
+                <span class="a11yscan-card-value"><?= (int) $count ?></span>
+                <span class="a11yscan-card-label"><span class="a11yscan-badge <?= $this->escapeHtml($impact) ?>"><?= $this->escapeHtml($impact) ?></span></span>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</div>
+
+<?php if ($this->getRecentScans()->getSize()): ?>
+    <div class="a11yscan-recent entry-edit">
+        <div class="entry-edit-head"><h4 class="icon-head"><?= $helper->__('Recent Scans') ?></h4></div>
+        <fieldset>
+            <table class="data" cellspacing="0">
+                <thead>
+                    <tr class="headings">
+                        <th><?= $helper->__('URL') ?></th>
+                        <th><?= $helper->__('WCAG Level') ?></th>
+                        <th><?= $helper->__('Status') ?></th>
+                        <th><?= $helper->__('Violations') ?></th>
+                        <th><?= $helper->__('Date') ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($this->getRecentScans() as $scan): ?>
+                        <tr>
+                            <td><a href="<?= $this->escapeUrl($this->getScanViewUrl($scan)) ?>"><?= $this->escapeHtml($scan->getUrl()) ?></a></td>
+                            <td><?= $this->escapeHtml($scan->getWcagLevel()) ?></td>
+                            <td><span class="a11yscan-badge status-<?= $this->escapeHtml($scan->getStatus()) ?>"><?= $this->escapeHtml($scan->getStatus()) ?></span></td>
+                            <td><?= $scan->getTotalViolations() ?></td>
+                            <td><?= $this->escapeHtml(Mage::helper('core')->formatDate($scan->getData('created_at'), 'medium', true)) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </fieldset>
+    </div>
+<?php endif; ?>
