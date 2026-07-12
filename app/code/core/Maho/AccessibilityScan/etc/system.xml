@@ -42,6 +42,16 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </timeout>
+                        <cleanup_days translate="label comment">
+                            <label>Delete Scans After</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits</validate>
+                            <comment>Scans older than this many days are deleted automatically. 0 keeps everything.</comment>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </cleanup_days>
                     </fields>
                 </general>
                 <scheduled translate="label">
@@ -82,17 +92,6 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>0</show_in_store>
                             <depends><enabled>1</enabled></depends>
                         </schedule>
-                        <retention translate="label comment">
-                            <label>Keep Last Scans per URL</label>
-                            <frontend_type>text</frontend_type>
-                            <validate>validate-digits</validate>
-                            <comment>Scheduled scans older than the newest N per URL are deleted automatically. 0 keeps everything.</comment>
-                            <sort_order>40</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </retention>
                     </fields>
                 </scheduled>
                 <advanced translate="label">

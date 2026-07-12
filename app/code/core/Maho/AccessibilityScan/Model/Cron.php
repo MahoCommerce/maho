@@ -57,41 +57,33 @@ class Maho_AccessibilityScan_Model_Cron
             }
         }
 
-        $this->pruneScheduledScans();
-
         if ($failed !== []) {
             $schedule->setMessages('Failed URLs: ' . implode(', ', $failed));
         }
     }
 
     /**
-     * Keep only the newest N scheduled scans per URL. Covers every URL that
-     * ever ran on a schedule (not just the currently configured list), so
-     * removing a URL from the list does not leave its history behind forever.
+     * Delete scans older than the configured age, regardless of how they
+     * were triggered. Runs on its own schedule so cleanup works even when
+     * scheduled scans are disabled.
      */
-    protected function pruneScheduledScans(): void
+    #[Maho\Config\CronJob('accessibilityscan_cleanup', schedule: '30 3 * * *')]
+    public function cleanupOldScans(): void
     {
-        $keep = Mage::helper('accessibilityscan')->getScheduledScanRetention();
-        if ($keep === 0) {
+        $days = Mage::helper('accessibilityscan')->getCleanupDays();
+        if ($days === 0) {
             return;
         }
 
+        $cutoff = Mage::app()->getLocale()->formatDateForDb("-{$days} days");
         $collection = Mage::getResourceModel('accessibilityscan/scan_collection')
-            ->addFieldToFilter('triggered_by', Maho_AccessibilityScan_Model_Scan::TRIGGER_SCHEDULE)
-            ->setOrder('created_at', 'DESC');
+            ->addFieldToFilter('created_at', ['lt' => $cutoff]);
 
-        $grouped = [];
         foreach ($collection as $scan) {
-            $grouped[$scan->getUrl()][] = $scan;
-        }
-
-        foreach ($grouped as $scans) {
-            foreach (array_slice($scans, $keep) as $scan) {
-                try {
-                    $scan->deleteWithScreenshots();
-                } catch (Throwable $e) {
-                    Mage::logException($e);
-                }
+            try {
+                $scan->deleteWithScreenshots();
+            } catch (Throwable $e) {
+                Mage::logException($e);
             }
         }
     }

@@ -103,11 +103,11 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * How many scheduled scans to keep per URL; 0 disables pruning
+     * Age in days after which scans are deleted; 0 keeps everything
      */
-    public function getScheduledScanRetention(): int
+    public function getCleanupDays(): int
     {
-        return max(Mage::getStoreConfigAsInt('accessibilityscan/scheduled/retention'), 0);
+        return max(Mage::getStoreConfigAsInt('accessibilityscan/general/cleanup_days'), 0);
     }
 
     /**

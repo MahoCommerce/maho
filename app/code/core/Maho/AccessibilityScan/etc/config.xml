@@ -55,11 +55,11 @@ SPDX-License-Identifier: AFL-3.0
             <general>
                 <wcag_level>AA</wcag_level>
                 <timeout>60</timeout>
+                <cleanup_days>90</cleanup_days>
             </general>
             <scheduled>
                 <enabled>0</enabled>
                 <schedule>0 3 * * *</schedule>
-                <retention>30</retention>
             </scheduled>
             <advanced>
                 <node_path>node</node_path>
