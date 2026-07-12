@@ -470,13 +470,18 @@
         }
 
         > div:first-child {
-            @apply shrink-0;
+            /* -ml-2 (mobile): the menu trigger is a 40px square button around
+               a 24px glyph - pull it left so the glyph, not the invisible hit
+               area, aligns with the search pill below */
+            @apply shrink-0 max-nav:-ml-2;
         }
 
         > div:last-child {
             /* desktop: the search bar carries the auto margin instead, so it
-               right-aligns together with these controls */
-            @apply max-nav:ml-auto;
+               right-aligns together with these controls.
+               -mr-2 (mobile): same optical alignment as the menu trigger, for
+               the cart icon on the right edge */
+            @apply max-nav:-mr-2 max-nav:ml-auto;
         }
 
         #search_mini_form {
@@ -495,8 +500,10 @@
 
     /* Language / currency / store switchers in the header */
     .page-header-container {
+        /* mr-1 (mobile): these are always-visible pills - keep the ghost
+           icons' hover tile from touching them (same as .skip-nav / logo) */
         .form-language, .currency-switcher, .store-switcher {
-            @apply inline-flex items-center;
+            @apply inline-flex items-center max-nav:mr-1;
 
             select {
                 @apply select select-sm w-auto border-transparent bg-base-200;
@@ -527,9 +534,10 @@
         }
     }
 
-    /* Menu trigger only below the nav breakpoint (JS moves #nav into the offcanvas) */
+    /* Menu trigger only below the nav breakpoint (JS moves #nav into the offcanvas).
+       mr-1: its hover tile must not touch the always-visible logo */
     .skip-nav {
-        @apply nav:hidden;
+        @apply nav:hidden max-nav:mr-1;
     }
 
     /* Search */
@@ -887,7 +895,7 @@
         }
 
         a {
-            @apply whitespace-normal border-b border-line px-2 py-3 text-base;
+            @apply whitespace-normal rounded-none border-b border-line px-2 py-3 text-base;
         }
 
         ul, ul ul {
@@ -898,11 +906,19 @@
             display: block;
         }
 
+        /* The desktop animated-underline pseudo has no role in the drawer */
+        a:not(.has-children)::after {
+            content: none;
+        }
+
         a.has-children::after {
             content: "";
+            position: static;
             margin-left: auto;
             width: 0.5rem;
             height: 0.5rem;
+            border-radius: 0;
+            background: transparent;
             border-right: 2px solid currentColor;
             border-bottom: 2px solid currentColor;
             transform: rotate(45deg);
