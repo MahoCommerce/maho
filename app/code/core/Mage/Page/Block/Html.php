@@ -149,12 +149,16 @@ class Mage_Page_Block_Html extends Mage_Core_Block_Template
 
     /**
      * data-theme attribute for the <html> element (design/theme/color_scheme).
-     * Empty string when no color scheme is configured.
+     *
+     * Empty when no scheme is configured or when a non-default skin identity
+     * is active: industry/custom theme.css files pin their own palette
+     * variables, and a scheme underneath them would produce a broken half-mix
+     * (the scheme's color-scheme declaration with the identity's colors).
      */
     public function getSchemeHtmlAttribute(): string
     {
         $scheme = Mage::getStoreConfig('design/theme/color_scheme');
-        if (!$scheme) {
+        if (!$scheme || Mage::getDesign()->getTheme('skin') !== 'default') {
             return '';
         }
         return ' data-theme="' . $this->escapeHtml($scheme) . '"';

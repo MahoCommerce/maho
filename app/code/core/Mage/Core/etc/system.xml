@@ -332,11 +332,20 @@ SPDX-License-Identifier: AFL-3.0
                             <label>Color Scheme</label>
                             <frontend_type>select</frontend_type>
                             <source_model>page/source_scheme</source_model>
+                            <depends>
+                                <condition operator="AND">
+                                    <name>
+                                        <fieldset>package</fieldset>
+                                        <value>maho</value>
+                                    </name>
+                                    <skin separator="|">|default</skin>
+                                </condition>
+                            </depends>
                             <sort_order>40</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <comment>Optional color scheme rendered as the data-theme attribute on the storefront. The maho design package ships eight accessibility-audited schemes; the default identity and the industry themes already pass WCAG AA without one.</comment>
+                            <comment>Applies to the default theme only, other themes define their own colors and ignore this setting.</comment>
                         </color_scheme>
                         <layout translate="label">
                             <label>Layout</label>

@@ -2436,6 +2436,41 @@
         }
     }
 
+    /* Shipping estimate form: its own field markup (form-field/zip-field),
+       give it the same rhythm as .form-list - label tight to its input,
+       a clear step between fields */
+    .shipping .shipping-form {
+        form {
+            @apply flex flex-col gap-4;
+        }
+
+        .shipping-fields-grid {
+            @apply grid gap-4;
+        }
+
+        .form-field,
+        .shipping-city-field,
+        .zip-field {
+            @apply flex flex-col gap-1;
+        }
+
+        label {
+            @apply text-sm font-medium;
+        }
+
+        .shipping-zip-row {
+            @apply flex items-end gap-3;
+
+            .zip-field {
+                @apply flex-1;
+            }
+        }
+
+        #co-shipping-method-form-container {
+            @apply mt-4;
+        }
+    }
+
     .cart-totals {
         @apply sticky top-20 rounded-box bg-base-200 p-5;
 

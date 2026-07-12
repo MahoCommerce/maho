@@ -88,10 +88,15 @@ Schemes are palettes, not identities: they change colors only, while the
 industry themes also carry typography, shape and product-imagery treatments —
 that is why the industry themes are hand-built rather than DaisyUI themes, and
 why all eleven of them (plus their dark variants) are contrast-audited to the
-same AA bar. Combining a scheme with an industry theme is possible but the
-industry theme's own palette pins every variable it defines (its `theme.css`
-is unlayered and loads last), so schemes are most useful on the default
-identity or on custom themes that don't pin a full palette.
+same AA bar.
+
+Schemes therefore apply **only while the default skin identity is active**: an
+industry (or custom) `theme.css` pins its own palette variables, and a scheme
+underneath it would produce a broken half-mix. The storefront skips the
+`data-theme` attribute whenever the skin theme is not `default`, and the admin
+hides the Color Scheme field in the same situations. A custom theme that wants
+a dark palette should set its own tokens (see the industry themes' dark-mode
+blocks) rather than rely on a scheme.
 
 ## Creating your own theme
 
