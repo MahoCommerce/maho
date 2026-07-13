@@ -112,11 +112,11 @@ $page = $this->getPage();
     </div>
 
     <?php if (!$scan->getTotalViolations()): ?>
-        <p><?= $helper->__('No automatically detectable violations were found. Automated checks cover only part of WCAG — manual testing with a keyboard and a screen reader is still recommended.') ?></p>
+        <p><?= $helper->__('No automatically detectable violations were found. Automated checks cover only part of WCAG, so manual testing with a keyboard and a screen reader is still recommended.') ?></p>
     <?php endif; ?>
 
     <?php if ($scan->getIncompleteCount()): ?>
-        <p><?= $helper->__('axe-core could not automatically evaluate %s check(s) (for example, color contrast over an image) — review them manually.', $scan->getIncompleteCount()) ?></p>
+        <p><?= $helper->__('axe-core could not automatically evaluate %s check(s) (for example, color contrast over an image). Review them manually.', $scan->getIncompleteCount()) ?></p>
     <?php endif; ?>
 
     <?php foreach ($this->getViolationsByImpact() as $impact => $violations): ?>

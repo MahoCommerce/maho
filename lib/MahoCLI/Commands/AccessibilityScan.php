@@ -167,7 +167,7 @@ class AccessibilityScan extends BaseMahoCommand
         }
 
         if ($rows === []) {
-            $output->writeln('<info>No automatically detectable violations found. Automated checks cover only part of WCAG — manual testing is still recommended.</info>');
+            $output->writeln('<info>No automatically detectable violations found. Automated checks cover only part of WCAG, so manual testing is still recommended.</info>');
         } else {
             $table = new Table($output);
             $table->setHeaders(['Rule', 'Impact', 'Viewport', 'WCAG', 'Selector', 'Template']);

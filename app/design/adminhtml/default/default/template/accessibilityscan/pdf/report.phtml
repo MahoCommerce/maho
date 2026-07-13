@@ -40,6 +40,7 @@ $logoUrl = $this->getLogoUrl();
     .violation .label { font-weight: bold; margin: 6px 0 2px; }
     .help-url { color: #666; font-size: 9px; word-break: break-all; }
     img.screenshot { max-width: 100%; border: 1px solid #ccc; }
+    .screenshot-page, .violations-start { page-break-before: always; }
     .coverage-note { margin-top: 24px; padding-top: 8px; border-top: 1px solid #ccc; color: #666; font-size: 9px; }
 </style>
 
@@ -93,13 +94,25 @@ $logoUrl = $this->getLogoUrl();
 </table>
 
 <?php if (!$scan->getTotalViolations()): ?>
-    <p><?= $helper->__('No automatically detectable violations were found. Automated checks cover only part of WCAG — manual testing with a keyboard and a screen reader is still recommended.') ?></p>
+    <p><?= $helper->__('No automatically detectable violations were found. Automated checks cover only part of WCAG, so manual testing with a keyboard and a screen reader is still recommended.') ?></p>
 <?php endif; ?>
 
 <?php if ($scan->getIncompleteCount()): ?>
-    <p><?= $helper->__('axe-core could not automatically evaluate %s check(s) (for example, color contrast over an image) — review them manually.', $scan->getIncompleteCount()) ?></p>
+    <p><?= $helper->__('axe-core could not automatically evaluate %s check(s) (for example, color contrast over an image). Review them manually.', $scan->getIncompleteCount()) ?></p>
 <?php endif; ?>
 
+<?php $hasScreenshots = false; ?>
+<?php foreach ($this->getPages() as $page): ?>
+    <?php if ($screenshot = $this->getScreenshotDataUri($page)): ?>
+        <?php $hasScreenshots = true; ?>
+        <div class="screenshot-page">
+            <h2><?= $helper->__('%s Screenshot', $this->getViewportLabel($page->getViewport())) ?></h2>
+            <img class="screenshot" style="<?= $this->getScreenshotStyle($page) ?>" src="<?= $screenshot ?>" alt="">
+        </div>
+    <?php endif; ?>
+<?php endforeach; ?>
+
+<?php if ($hasScreenshots && $scan->getTotalViolations()): ?><div class="violations-start"></div><?php endif; ?>
 <?php foreach ($this->getViolationsByImpact() as $impact => $violations): ?>
     <h2>
         <span class="badge <?= $this->escapeHtml($impact) ?>"><?= $this->escapeHtml($impact) ?></span>
@@ -113,7 +126,7 @@ $logoUrl = $this->getLogoUrl();
                 <?php if ($violation->getWcagCriteria()): ?>
                     (<?= $helper->__('WCAG %s', $violation->getWcagCriteria()) ?>)
                 <?php endif; ?>
-                — <?= $this->escapeHtml($this->getViewportLabel($this->getPageViewport($violation))) ?>
+                - <?= $this->escapeHtml($this->getViewportLabel($this->getPageViewport($violation))) ?>
             </h3>
             <p><?= $this->escapeHtml((string) $violation->getDescription()) ?></p>
             <?php if ($violation->getTemplateFile()): ?>
@@ -135,11 +148,4 @@ $logoUrl = $this->getLogoUrl();
     <?php endforeach; ?>
 <?php endforeach; ?>
 
-<?php foreach ($this->getPages() as $page): ?>
-    <?php if ($screenshot = $this->getScreenshotDataUri($page)): ?>
-        <h2><?= $helper->__('%s Screenshot', $this->getViewportLabel($page->getViewport())) ?></h2>
-        <img class="screenshot" src="<?= $screenshot ?>" alt="">
-    <?php endif; ?>
-<?php endforeach; ?>
-
-<p class="coverage-note"><?= $helper->__('This report was generated with automated checks (axe-core), which detect only a subset of WCAG success criteria. A report with no violations does not guarantee conformance — manual testing with a keyboard and a screen reader is still required.') ?></p>
+<p class="coverage-note"><?= $helper->__('This report was generated with automated checks (axe-core), which detect only a subset of WCAG success criteria. A report with no violations does not guarantee conformance; manual testing with a keyboard and a screen reader is still required.') ?></p>

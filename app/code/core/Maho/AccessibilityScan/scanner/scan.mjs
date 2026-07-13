@@ -51,7 +51,7 @@ try {
     //   the standard 80/443, so http -> https upgrades keep working).
     // - Subresources (images, scripts, fetch, ...) may legitimately load
     //   from CDNs and other third-party hosts, but never from private,
-    //   loopback, link-local or cloud-metadata addresses — except the target
+    //   loopback, link-local or cloud-metadata addresses, except the target
     //   host itself, which is often private and was validated upstream.
     // Residual risk: hostnames are vetted with our own DNS lookup, while
     // Chromium resolves them again itself, so a fast-flux DNS-rebinding
@@ -109,7 +109,7 @@ try {
             // also covers :: and ::1): the low 32 bits are an IPv4 address, so
             // re-check them through the IPv4 rules. The WHATWG URL parser
             // canonicalizes these to hex-group form (e.g. ::ffff:7f00:1), so a
-            // dotted-decimal string match would never fire — parse the groups.
+            // dotted-decimal string match would never fire, so parse the groups.
             if (g[0] === 0 && g[1] === 0 && g[2] === 0 && g[3] === 0 && g[4] === 0
                 && (g[5] === 0 || g[5] === 0xffff)) {
                 const v4 = `${g[6] >> 8}.${g[6] & 0xff}.${g[7] >> 8}.${g[7] & 0xff}`;
