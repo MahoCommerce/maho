@@ -48,7 +48,7 @@ use Maho\Config\ApiResource;
             name: 'collection_query',
             description: 'Get product attributes (canonical)',
             security: "is_granted('ROLE_ADMIN') or is_granted('product-attributes/read')",
-            args: [
+            extraArgs: [
                 'code' => ['type' => 'String', 'description' => 'Exact attribute-code lookup (returns 0 or 1 attribute)'],
             ],
         ),

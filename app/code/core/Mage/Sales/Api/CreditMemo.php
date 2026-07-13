@@ -61,7 +61,7 @@ use Maho\ApiPlatform\CrudResource;
             // `orderCreditMemos`, not a stuttering `orderCreditMemosCreditMemos`.
             name: 'order',
             description: 'Get credit memos for a specific order',
-            args: ['orderId' => ['type' => 'Int!']],
+            extraArgs: ['orderId' => ['type' => 'Int!']],
             security: "is_granted('ROLE_ADMIN') or is_granted('credit-memos/read')",
         ),
         new Mutation(

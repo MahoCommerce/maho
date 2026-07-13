@@ -35,7 +35,7 @@ use ApiPlatform\Metadata\GraphQl\Query;
             name: 'collection_query',
             description: 'Get available layered navigation filters for a category',
             security: 'true',
-            args: [
+            extraArgs: [
                 'categoryId' => ['type' => 'Int!', 'description' => 'Category ID to get filters for'],
             ],
         ),

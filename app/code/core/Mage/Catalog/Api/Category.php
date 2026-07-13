@@ -72,7 +72,9 @@ use Symfony\Component\Serializer\Attribute\Groups;
             name: 'collection_query',
             description: 'Get category tree',
             security: 'true',
-            args: [
+            // extraArgs (not args) so the auto-generated cursor pagination
+            // args (first/last/before/after) survive alongside the filters.
+            extraArgs: [
                 'parentId' => ['type' => 'Int', 'description' => 'Filter by parent category ID'],
                 'includeInMenu' => ['type' => 'Boolean', 'description' => 'Only include categories in menu'],
                 'urlKey' => ['type' => 'String', 'description' => 'Exact URL-key lookup (returns 0 or 1 category)'],

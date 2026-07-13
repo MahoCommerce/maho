@@ -79,7 +79,7 @@ use Maho\ApiPlatform\CrudResource;
             // Named 'order' so ApiPlatform's appended shortName yields the field
             // `orderShipments`, not a stuttering `orderShipmentsShipments`.
             name: 'order',
-            args: ['orderId' => ['type' => 'Int!']],
+            extraArgs: ['orderId' => ['type' => 'Int!']],
             description: 'Get shipments for an order',
             security: "is_granted('ROLE_ADMIN') or is_granted('shipments/read')",
         ),

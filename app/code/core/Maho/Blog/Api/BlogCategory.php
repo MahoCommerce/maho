@@ -45,7 +45,7 @@ use Maho\ApiPlatform\CrudResource;
         new QueryCollection(
             security: 'true',
             name: 'collection_query',
-            args: ['urlKey' => ['type' => 'String']],
+            extraArgs: ['urlKey' => ['type' => 'String']],
             description: 'Get blog categories, optionally filter by URL key',
         ),
     ],

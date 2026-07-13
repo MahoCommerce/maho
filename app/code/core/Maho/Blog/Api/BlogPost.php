@@ -67,7 +67,9 @@ use Maho\ApiPlatform\CrudResource;
         new QueryCollection(
             security: 'true',
             name: 'collection_query',
-            args: ['urlKey' => ['type' => 'String']],
+            // extraArgs (not args) so the auto-generated cursor pagination
+            // args (first/last/before/after) survive alongside the lookup arg.
+            extraArgs: ['urlKey' => ['type' => 'String']],
             description: 'Get blog posts, optionally filter by URL key',
         ),
     ],
