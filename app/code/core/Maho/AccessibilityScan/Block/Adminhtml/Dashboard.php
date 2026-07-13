@@ -44,14 +44,6 @@ class Maho_AccessibilityScan_Block_Adminhtml_Dashboard extends Mage_Adminhtml_Bl
         return Mage::helper('accessibilityscan')->getDefaultWcagLevel();
     }
 
-    /**
-     * @return array<int|string, Mage_Core_Model_Store>
-     */
-    public function getStores(): array
-    {
-        return Mage::app()->getStores();
-    }
-
     public function getStartUrl(): string
     {
         return $this->getUrl('*/accessibilityscan_scan/start');

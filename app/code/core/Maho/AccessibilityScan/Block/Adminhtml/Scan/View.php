@@ -33,12 +33,57 @@ class Maho_AccessibilityScan_Block_Adminhtml_Scan_View extends Mage_Adminhtml_Bl
         return $this->getScan()->getFirstPage();
     }
 
-    public function getScreenshotUrl(): ?string
+    /**
+     * @return list<Maho_AccessibilityScan_Model_Page>
+     */
+    public function getPages(): array
     {
-        if ($this->getPage()?->getScreenshotFile() === null) {
+        return $this->getScan()->getPages();
+    }
+
+    public function getScreenshotUrl(Maho_AccessibilityScan_Model_Page $page): ?string
+    {
+        if ($page->getScreenshotFile() === null) {
             return null;
         }
-        return $this->getUrl('*/*/screenshot', ['id' => $this->getScan()->getId()]);
+        return $this->getUrl('*/*/screenshot', ['id' => $this->getScan()->getId(), 'page_id' => $page->getId()]);
+    }
+
+    /**
+     * Viewport (device) name of the page a violation was found on
+     */
+    public function getPageViewport(Maho_AccessibilityScan_Model_Violation $violation): string
+    {
+        foreach ($this->getPages() as $page) {
+            if ((int) $page->getId() === (int) $violation->getPageId()) {
+                return (string) $page->getViewport();
+            }
+        }
+        return Maho_AccessibilityScan_Helper_Data::VIEWPORT_DESKTOP;
+    }
+
+    public function getViewportLabel(string $viewport): string
+    {
+        $helper = Mage::helper('accessibilityscan');
+        return $viewport === Maho_AccessibilityScan_Helper_Data::VIEWPORT_MOBILE
+            ? $helper->__('Mobile')
+            : $helper->__('Desktop');
+    }
+
+    /**
+     * Whether a violation can be highlighted on its page's screenshot
+     */
+    public function hasMarker(Maho_AccessibilityScan_Model_Violation $violation): bool
+    {
+        if ($violation->getElementRect() === null) {
+            return false;
+        }
+        foreach ($this->getPages() as $page) {
+            if ((int) $page->getId() === (int) $violation->getPageId()) {
+                return $page->getScreenshotFile() !== null;
+            }
+        }
+        return false;
     }
 
     /**
@@ -68,16 +113,15 @@ class Maho_AccessibilityScan_Block_Adminhtml_Scan_View extends Mage_Adminhtml_Bl
     }
 
     /**
-     * Screenshot overlay markers for violations that carry element
-     * coordinates, as percentages of the captured page dimensions
+     * Screenshot overlay markers for the given page's violations that carry
+     * element coordinates, as percentages of the captured page dimensions
      *
      * @return list<array{id: int, number: int, impact: string, title: string, left: float, top: float, width: float, height: float}>
      */
-    public function getScreenshotMarkers(): array
+    public function getScreenshotMarkers(Maho_AccessibilityScan_Model_Page $page): array
     {
-        $page = $this->getPage();
-        $pageWidth = (int) $page?->getData('page_width');
-        $pageHeight = (int) $page?->getData('page_height');
+        $pageWidth = (int) $page->getData('page_width');
+        $pageHeight = (int) $page->getData('page_height');
         if ($pageWidth < 1 || $pageHeight < 1) {
             return [];
         }
@@ -85,6 +129,9 @@ class Maho_AccessibilityScan_Block_Adminhtml_Scan_View extends Mage_Adminhtml_Bl
         $markers = [];
         foreach ($this->getViolationsByImpact() as $impact => $violations) {
             foreach ($violations as $violation) {
+                if ((int) $violation->getPageId() !== (int) $page->getId()) {
+                    continue;
+                }
                 $rect = $violation->getElementRect();
                 if ($rect === null) {
                     continue;

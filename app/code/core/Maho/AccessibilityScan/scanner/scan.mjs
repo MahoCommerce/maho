@@ -22,7 +22,12 @@ const browser = await chromium.launch({ headless: true });
 try {
     const context = await browser.newContext({
         ignoreHTTPSErrors: true,
-        viewport: { width: 1280, height: 1024 },
+        viewport: {
+            width: config.viewport?.width ?? 1280,
+            height: config.viewport?.height ?? 1024,
+        },
+        isMobile: config.viewport?.mobile ?? false,
+        hasTouch: config.viewport?.mobile ?? false,
         // Service workers can issue fetches that bypass page.route(), which
         // would sidestep the SSRF guards below
         serviceWorkers: 'block',
@@ -250,6 +255,9 @@ try {
         pageWidth: pageSize.width,
         pageHeight: pageSize.height,
         rawHtml,
+        // Checks axe-core could not decide on its own (e.g. contrast over an
+        // image); they need a human review and are reported as a counter
+        incompleteCount: results.incomplete.reduce((count, item) => count + item.nodes.length, 0),
         violations: results.violations.map((violation) => ({
             ruleId: violation.id,
             impact: violation.impact,

@@ -32,8 +32,8 @@ async function accessibilityScanStart(form) {
 }
 
 function accessibilityScanShowMarker(violationId) {
-    const details = document.querySelector('details.a11yscan-screenshot');
     const marker = document.getElementById('a11yscan-marker-' + violationId);
+    const details = marker?.closest('details.a11yscan-screenshot');
     if (!details || !marker) {
         return;
     }

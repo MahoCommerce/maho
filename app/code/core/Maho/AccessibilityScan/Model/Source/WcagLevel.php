@@ -18,9 +18,9 @@ class Maho_AccessibilityScan_Model_Source_WcagLevel
     public function toOptionArray(): array
     {
         return [
-            ['value' => 'A', 'label' => Mage::helper('accessibilityscan')->__('WCAG 2.1 Level A')],
-            ['value' => 'AA', 'label' => Mage::helper('accessibilityscan')->__('WCAG 2.1 Level AA')],
-            ['value' => 'AAA', 'label' => Mage::helper('accessibilityscan')->__('WCAG 2.1 Level AAA')],
+            ['value' => 'A', 'label' => Mage::helper('accessibilityscan')->__('WCAG 2.2 Level A')],
+            ['value' => 'AA', 'label' => Mage::helper('accessibilityscan')->__('WCAG 2.2 Level AA')],
+            ['value' => 'AAA', 'label' => Mage::helper('accessibilityscan')->__('WCAG 2.2 Level AAA')],
         ];
     }
 }

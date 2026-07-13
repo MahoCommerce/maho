@@ -55,6 +55,8 @@ SPDX-License-Identifier: AFL-3.0
             <general>
                 <wcag_level>AA</wcag_level>
                 <timeout>60</timeout>
+                <viewport_desktop>1280x1024</viewport_desktop>
+                <viewport_mobile>390x844</viewport_mobile>
                 <cleanup_days>90</cleanup_days>
             </general>
             <scheduled>

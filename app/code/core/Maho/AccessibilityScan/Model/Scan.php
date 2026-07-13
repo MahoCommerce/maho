@@ -24,6 +24,7 @@ declare(strict_types=1);
  * @method $this setViolationsSerious(int $value)
  * @method $this setViolationsModerate(int $value)
  * @method $this setViolationsMinor(int $value)
+ * @method $this setIncompleteCount(int $value)
  * @method $this setErrorMessage(?string $value)
  * @method $this setStartedAt(string $value)
  * @method $this setCompletedAt(string $value)
@@ -56,6 +57,16 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
     {
         $page = $this->getPageCollection()->getFirstItem();
         return $page instanceof Maho_AccessibilityScan_Model_Page && $page->getId() ? $page : null;
+    }
+
+    /**
+     * Pages of this scan in insert order (one per scanned viewport)
+     *
+     * @return list<Maho_AccessibilityScan_Model_Page>
+     */
+    public function getPages(): array
+    {
+        return array_values($this->getPageCollection()->getItems());
     }
 
     public function getViolationCollection(): Maho_AccessibilityScan_Model_Resource_Violation_Collection
@@ -100,6 +111,15 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
     public function getTotalViolations(): int
     {
         return (int) $this->getData('total_violations');
+    }
+
+    /**
+     * Number of checks axe-core could not evaluate automatically ("incomplete"
+     * results, e.g. contrast over an image) that need a manual review
+     */
+    public function getIncompleteCount(): int
+    {
+        return (int) $this->getData('incomplete_count');
     }
 
     public function isComplete(): bool

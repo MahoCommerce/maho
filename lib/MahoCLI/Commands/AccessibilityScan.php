@@ -33,7 +33,6 @@ class AccessibilityScan extends BaseMahoCommand
             ->addOption('level', null, InputOption::VALUE_REQUIRED, 'WCAG conformance level (A, AA, AAA)')
             ->addOption('threshold', null, InputOption::VALUE_REQUIRED, 'Maximum number of violations for exit code 0')
             ->addOption('format', null, InputOption::VALUE_REQUIRED, 'Output format (table, json)', 'table')
-            ->addOption('store', null, InputOption::VALUE_REQUIRED, 'Store ID', '1')
             ->addOption('reinstall-playwright', null, InputOption::VALUE_NONE, 'Force a reinstall of Playwright and Chromium');
     }
 
@@ -49,7 +48,8 @@ class AccessibilityScan extends BaseMahoCommand
         }
 
         $helper = Mage::helper('accessibilityscan');
-        if (!$helper->isAllowedScanUrl($url)) {
+        $storeId = $helper->resolveScanUrlStoreId($url);
+        if ($storeId === null) {
             $output->writeln('<error>The URL to scan must belong to one of the configured store base URLs</error>');
             return 2;
         }
@@ -58,7 +58,7 @@ class AccessibilityScan extends BaseMahoCommand
 
         $scan = Mage::getModel('accessibilityscan/scan');
         $scan->setUrl($url)
-            ->setStoreId((int) $input->getOption('store'))
+            ->setStoreId($storeId)
             ->setWcagLevel($level)
             ->setTriggeredBy(Maho_AccessibilityScan_Model_Scan::TRIGGER_CLI)
             ->setStatus(Maho_AccessibilityScan_Model_Scan::STATUS_PENDING)
@@ -93,13 +93,21 @@ class AccessibilityScan extends BaseMahoCommand
             }
         }
 
+        $pageViewports = [];
+        foreach ($scan->getPages() as $page) {
+            $pageViewports[(int) $page->getId()] = (string) $page->getViewport();
+        }
+
         if ($format === 'json') {
             $this->outputJson($output, $scan, array_map(
-                fn(Maho_AccessibilityScan_Model_Violation $violation) => $violation->getData(),
+                fn(Maho_AccessibilityScan_Model_Violation $violation) => array_merge(
+                    $violation->getData(),
+                    ['viewport' => $pageViewports[(int) $violation->getPageId()] ?? null],
+                ),
                 $violations,
             ));
         } else {
-            $this->outputTable($output, $scan, $violations);
+            $this->outputTable($output, $scan, $violations, $pageViewports);
         }
 
         $threshold = $input->getOption('threshold');
@@ -129,23 +137,27 @@ class AccessibilityScan extends BaseMahoCommand
             'status' => $scan->getStatus(),
             'total_violations' => $scan->getTotalViolations(),
             'violations_by_impact' => $scan->getViolationCounts(),
+            'incomplete_count' => $scan->getIncompleteCount(),
             'violations' => array_values($violations),
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
 
     /**
      * @param list<Maho_AccessibilityScan_Model_Violation> $violations
+     * @param array<int, string> $pageViewports
      */
     private function outputTable(
         OutputInterface $output,
         Maho_AccessibilityScan_Model_Scan $scan,
         array $violations,
+        array $pageViewports,
     ): void {
         $rows = [];
         foreach ($violations as $violation) {
             $rows[] = [
                 $violation->getAxeRuleId(),
                 $violation->getImpact(),
+                $pageViewports[(int) $violation->getPageId()] ?? '-',
                 $violation->getWcagCriteria() ?: '-',
                 mb_substr((string) $violation->getCssSelector(), 0, 60),
                 $violation->getTemplateFile()
@@ -155,22 +167,23 @@ class AccessibilityScan extends BaseMahoCommand
         }
 
         if ($rows === []) {
-            $output->writeln('<info>No violations found.</info>');
+            $output->writeln('<info>No automatically detectable violations found. Automated checks cover only part of WCAG — manual testing is still recommended.</info>');
         } else {
             $table = new Table($output);
-            $table->setHeaders(['Rule', 'Impact', 'WCAG', 'Selector', 'Template']);
+            $table->setHeaders(['Rule', 'Impact', 'Viewport', 'WCAG', 'Selector', 'Template']);
             $table->setRows($rows);
             $table->render();
         }
 
         $counts = $scan->getViolationCounts();
         $output->writeln(sprintf(
-            'Total: <comment>%d</comment> (critical: %d, serious: %d, moderate: %d, minor: %d)',
+            'Total: <comment>%d</comment> (critical: %d, serious: %d, moderate: %d, minor: %d), needs manual review: %d',
             $scan->getTotalViolations(),
             $counts['critical'],
             $counts['serious'],
             $counts['moderate'],
             $counts['minor'],
+            $scan->getIncompleteCount(),
         ));
     }
 }

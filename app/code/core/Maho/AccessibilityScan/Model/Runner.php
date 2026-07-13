@@ -41,8 +41,11 @@ class Maho_AccessibilityScan_Model_Runner
 
         try {
             $this->installPlaywright($reinstallPlaywright);
-            $result = $this->executeScanner($scan);
-            $this->saveResults($scan, $result);
+            $results = [];
+            foreach ($this->helper->getViewports() as $device => $viewport) {
+                $results[$device] = $this->executeScanner($scan, $device, $viewport);
+            }
+            $this->saveResults($scan, $results);
             $scan->setStatus(Maho_AccessibilityScan_Model_Scan::STATUS_COMPLETE);
         } catch (Throwable $e) {
             Mage::logException($e);
@@ -126,11 +129,12 @@ class Maho_AccessibilityScan_Model_Runner
     }
 
     /**
-     * Spawn the Node.js scanner and return its decoded JSON result
+     * Spawn the Node.js scanner for one viewport and return its decoded JSON result
      *
+     * @param array{width: int, height: int, mobile: bool} $viewport
      * @return array<string, mixed>
      */
-    protected function executeScanner(Maho_AccessibilityScan_Model_Scan $scan): array
+    protected function executeScanner(Maho_AccessibilityScan_Model_Scan $scan, string $device, array $viewport): array
     {
         $dir = $this->helper->getPlaywrightDir();
         $script = $dir . DS . 'scan.mjs';
@@ -140,14 +144,15 @@ class Maho_AccessibilityScan_Model_Runner
         Mage::app()->saveCache('1', self::CACHE_KEY_PREFIX . $token, [], self::TOKEN_LIFETIME);
 
         $timeout = $this->helper->getScanTimeout();
-        $inputFile = $this->helper->getBaseDir() . DS . 'input-' . $scan->getId() . '.json';
+        $inputFile = $this->helper->getBaseDir() . DS . 'input-' . $scan->getId() . '-' . $device . '.json';
         file_put_contents($inputFile, Mage::helper('core')->jsonEncode([
             'url' => $scan->getUrl(),
             'wcagTags' => $this->helper->getWcagTags($scan->getWcagLevel()),
             'scanCookie' => ['name' => self::COOKIE_NAME, 'value' => $token],
             'screenshotDir' => $this->helper->getScreenshotDir(),
-            'screenshotName' => 'scan-' . $scan->getId() . '.png',
+            'screenshotName' => 'scan-' . $scan->getId() . '-' . $device . '.png',
             'timeout' => $timeout * 1000,
+            'viewport' => $viewport,
         ]));
 
         try {
@@ -169,77 +174,87 @@ class Maho_AccessibilityScan_Model_Runner
     }
 
     /**
-     * Persist page and violation rows and update the scan counters
+     * Persist one page row per scanned viewport with its violations, and
+     * update the scan counters with the totals across all viewports
      *
-     * @param array<string, mixed> $result
+     * @param array<string, array<string, mixed>> $results scanner results keyed by device name
      */
-    protected function saveResults(Maho_AccessibilityScan_Model_Scan $scan, array $result): void
+    protected function saveResults(Maho_AccessibilityScan_Model_Scan $scan, array $results): void
     {
         $locale = Mage::app()->getLocale();
 
-        $page = Mage::getModel('accessibilityscan/page');
-        $page->setScanId((int) $scan->getId())
-            ->setUrl((string) ($result['url'] ?? $scan->getUrl()))
-            ->setPageTitle(isset($result['title']) ? mb_substr((string) $result['title'], 0, 255) : null)
-            ->setStatus('complete')
-            ->setScreenshotPath(isset($result['screenshotPath']) ? (string) $result['screenshotPath'] : null)
-            ->setPageWidth(isset($result['pageWidth']) ? (int) $result['pageWidth'] : null)
-            ->setPageHeight(isset($result['pageHeight']) ? (int) $result['pageHeight'] : null)
-            ->setScannedAt($locale->formatDateForDb('now'))
-            ->save();
-
-        $mapper = new Maho_AccessibilityScan_Model_TemplateMapper((string) ($result['rawHtml'] ?? ''));
-
         $counts = array_fill_keys(Maho_AccessibilityScan_Model_Violation::IMPACT_LEVELS, 0);
         $total = 0;
+        $incomplete = 0;
 
-        $violations = $result['violations'] ?? [];
-        foreach (is_array($violations) ? $violations : [] as $violation) {
-            if (!is_array($violation)) {
-                continue;
-            }
-            $wcagTags = is_array($violation['wcagTags'] ?? null) ? $violation['wcagTags'] : [];
-            $impact = (string) ($violation['impact'] ?? '');
-            if (!in_array($impact, Maho_AccessibilityScan_Model_Violation::IMPACT_LEVELS, true)) {
-                $impact = Maho_AccessibilityScan_Model_Violation::IMPACT_MINOR;
-            }
+        foreach ($results as $device => $result) {
+            $page = Mage::getModel('accessibilityscan/page');
+            $page->setScanId((int) $scan->getId())
+                ->setViewport((string) $device)
+                ->setUrl((string) ($result['url'] ?? $scan->getUrl()))
+                ->setPageTitle(isset($result['title']) ? mb_substr((string) $result['title'], 0, 255) : null)
+                ->setStatus('complete')
+                ->setScreenshotPath(isset($result['screenshotPath']) ? (string) $result['screenshotPath'] : null)
+                ->setPageWidth(isset($result['pageWidth']) ? (int) $result['pageWidth'] : null)
+                ->setPageHeight(isset($result['pageHeight']) ? (int) $result['pageHeight'] : null)
+                ->setScannedAt($locale->formatDateForDb('now'))
+                ->save();
 
-            $nodes = $violation['nodes'] ?? [];
-            foreach (is_array($nodes) ? $nodes : [] as $node) {
-                if (!is_array($node)) {
+            $mapper = new Maho_AccessibilityScan_Model_TemplateMapper((string) ($result['rawHtml'] ?? ''));
+            $pageTotal = 0;
+
+            $violations = $result['violations'] ?? [];
+            foreach (is_array($violations) ? $violations : [] as $violation) {
+                if (!is_array($violation)) {
                     continue;
                 }
-                $snippet = isset($node['html']) ? (string) $node['html'] : null;
-                [$templateFile, $templateLine] = $mapper->mapSnippet($snippet);
-                $box = is_array($node['boundingBox'] ?? null) ? $node['boundingBox'] : null;
+                $wcagTags = is_array($violation['wcagTags'] ?? null) ? $violation['wcagTags'] : [];
+                $impact = (string) ($violation['impact'] ?? '');
+                if (!in_array($impact, Maho_AccessibilityScan_Model_Violation::IMPACT_LEVELS, true)) {
+                    $impact = Maho_AccessibilityScan_Model_Violation::IMPACT_MINOR;
+                }
 
-                Mage::getModel('accessibilityscan/violation')
-                    ->setPageId((int) $page->getId())
-                    ->setScanId((int) $scan->getId())
-                    ->setAxeRuleId(mb_substr((string) ($violation['ruleId'] ?? ''), 0, 64))
-                    ->setImpact($impact)
-                    ->setWcagLevel($this->wcagLevelFromTags($wcagTags))
-                    ->setWcagCriteria($this->wcagCriteriaFromTags($wcagTags))
-                    ->setDescription(isset($violation['description']) ? (string) $violation['description'] : null)
-                    ->setHelpUrl(isset($violation['helpUrl']) ? mb_substr((string) $violation['helpUrl'], 0, 512) : null)
-                    ->setHtmlSnippet($snippet)
-                    ->setCssSelector(isset($node['cssSelector']) ? (string) $node['cssSelector'] : null)
-                    ->setFailureSummary(isset($node['failureSummary']) ? (string) $node['failureSummary'] : null)
-                    ->setTemplateFile($templateFile)
-                    ->setTemplateLine($templateLine)
-                    ->setElementX($box !== null ? (int) ($box['x'] ?? 0) : null)
-                    ->setElementY($box !== null ? (int) ($box['y'] ?? 0) : null)
-                    ->setElementWidth($box !== null ? (int) ($box['width'] ?? 0) : null)
-                    ->setElementHeight($box !== null ? (int) ($box['height'] ?? 0) : null)
-                    ->save();
+                $nodes = $violation['nodes'] ?? [];
+                foreach (is_array($nodes) ? $nodes : [] as $node) {
+                    if (!is_array($node)) {
+                        continue;
+                    }
+                    $snippet = isset($node['html']) ? (string) $node['html'] : null;
+                    [$templateFile, $templateLine] = $mapper->mapSnippet($snippet);
+                    $box = is_array($node['boundingBox'] ?? null) ? $node['boundingBox'] : null;
 
-                $counts[$impact]++;
-                $total++;
+                    Mage::getModel('accessibilityscan/violation')
+                        ->setPageId((int) $page->getId())
+                        ->setScanId((int) $scan->getId())
+                        ->setAxeRuleId(mb_substr((string) ($violation['ruleId'] ?? ''), 0, 64))
+                        ->setImpact($impact)
+                        ->setWcagLevel($this->wcagLevelFromTags($wcagTags))
+                        ->setWcagCriteria($this->wcagCriteriaFromTags($wcagTags))
+                        ->setDescription(isset($violation['description']) ? (string) $violation['description'] : null)
+                        ->setHelpUrl(isset($violation['helpUrl']) ? mb_substr((string) $violation['helpUrl'], 0, 512) : null)
+                        ->setHtmlSnippet($snippet)
+                        ->setCssSelector(isset($node['cssSelector']) ? (string) $node['cssSelector'] : null)
+                        ->setFailureSummary(isset($node['failureSummary']) ? (string) $node['failureSummary'] : null)
+                        ->setTemplateFile($templateFile)
+                        ->setTemplateLine($templateLine)
+                        ->setElementX($box !== null ? (int) ($box['x'] ?? 0) : null)
+                        ->setElementY($box !== null ? (int) ($box['y'] ?? 0) : null)
+                        ->setElementWidth($box !== null ? (int) ($box['width'] ?? 0) : null)
+                        ->setElementHeight($box !== null ? (int) ($box['height'] ?? 0) : null)
+                        ->save();
+
+                    $counts[$impact]++;
+                    $total++;
+                    $pageTotal++;
+                }
             }
+
+            $page->setViolationCount($pageTotal)->save();
+            $incomplete += max((int) ($result['incompleteCount'] ?? 0), 0);
         }
 
-        $page->setViolationCount($total)->save();
         $scan->setTotalViolations($total)
+            ->setIncompleteCount($incomplete)
             ->setViolationsCritical($counts[Maho_AccessibilityScan_Model_Violation::IMPACT_CRITICAL])
             ->setViolationsSerious($counts[Maho_AccessibilityScan_Model_Violation::IMPACT_SERIOUS])
             ->setViolationsModerate($counts[Maho_AccessibilityScan_Model_Violation::IMPACT_MODERATE])

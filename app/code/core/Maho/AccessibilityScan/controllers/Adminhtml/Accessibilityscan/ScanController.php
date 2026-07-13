@@ -79,7 +79,10 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
             ]);
             return;
         }
-        if (!Mage::helper('accessibilityscan')->isAllowedScanUrl($url)) {
+        // The store is derived from the URL: the scanner renders whatever the
+        // URL serves, so a separate store selector could only contradict it
+        $storeId = Mage::helper('accessibilityscan')->resolveScanUrlStoreId($url);
+        if ($storeId === null) {
             $this->getResponse()->setBodyJson([
                 'error' => true,
                 'message' => $this->__('The URL to scan must belong to one of the configured store base URLs'),
@@ -94,7 +97,7 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
             $helper = Mage::helper('accessibilityscan');
             $scan = Mage::getModel('accessibilityscan/scan');
             $scan->setUrl($url)
-                ->setStoreId((int) $this->getRequest()->getParam('store_id'))
+                ->setStoreId($storeId)
                 ->setWcagLevel($helper->normalizeWcagLevel($this->getRequest()->getParam('wcag_level')))
                 ->setTriggeredBy(Maho_AccessibilityScan_Model_Scan::TRIGGER_MANUAL)
                 ->setStatus(Maho_AccessibilityScan_Model_Scan::STATUS_PENDING)
@@ -143,13 +146,25 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
     }
 
     /**
-     * Serve the scan's page screenshot inline (it lives in var/, outside the docroot)
+     * Serve a page screenshot of the scan inline (it lives in var/, outside
+     * the docroot). The page_id parameter selects the viewport's page;
+     * without it the scan's first page is served.
      */
     #[Maho\Config\Route('/admin/accessibilityscan_scan/screenshot')]
     public function screenshotAction(): void
     {
         $scan = Mage::getModel('accessibilityscan/scan')->load((int) $this->getRequest()->getParam('id'));
-        $file = $scan->getId() ? $scan->getFirstPage()?->getScreenshotFile() : null;
+        $page = $scan->getId() ? $scan->getFirstPage() : null;
+        if ($scan->getId() && ($pageId = (int) $this->getRequest()->getParam('page_id'))) {
+            $page = null;
+            foreach ($scan->getPages() as $scanPage) {
+                if ((int) $scanPage->getId() === $pageId) {
+                    $page = $scanPage;
+                    break;
+                }
+            }
+        }
+        $file = $page?->getScreenshotFile();
         if ($file === null) {
             $this->getResponse()->setHttpResponseCode(404);
             return;

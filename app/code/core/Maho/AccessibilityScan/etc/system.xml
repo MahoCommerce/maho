@@ -42,6 +42,24 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </timeout>
+                        <viewport_desktop translate="label comment">
+                            <label>Desktop Viewport</label>
+                            <frontend_type>text</frontend_type>
+                            <comment>Width x height in CSS pixels. Every scan runs one pass per viewport. Default: 1280x1024</comment>
+                            <sort_order>22</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </viewport_desktop>
+                        <viewport_mobile translate="label comment">
+                            <label>Mobile Viewport</label>
+                            <frontend_type>text</frontend_type>
+                            <comment>Width x height in CSS pixels, scanned with mobile emulation. Default: 390x844</comment>
+                            <sort_order>24</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </viewport_mobile>
                         <cleanup_days translate="label comment">
                             <label>Delete Scans After</label>
                             <frontend_type>text</frontend_type>

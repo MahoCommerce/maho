@@ -11,6 +11,8 @@ declare(strict_types=1);
 /**
  * @method int getScanId()
  * @method $this setScanId(int $value)
+ * @method string getViewport()
+ * @method $this setViewport(string $value)
  * @method string getUrl()
  * @method $this setUrl(string $value)
  * @method ?string getPageTitle()

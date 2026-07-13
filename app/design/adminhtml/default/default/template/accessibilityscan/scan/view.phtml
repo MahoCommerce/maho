@@ -12,7 +12,6 @@
 $helper = Mage::helper('accessibilityscan');
 $scan = $this->getScan();
 $page = $this->getPage();
-$screenshotUrl = $this->getScreenshotUrl();
 ?>
 <div class="content-header">
     <table cellspacing="0">
@@ -70,25 +69,29 @@ $screenshotUrl = $this->getScreenshotUrl();
     <?php endif; ?>
 </table>
 
-<?php if ($screenshotUrl): ?>
-    <details class="a11yscan-screenshot">
-        <summary><?= $helper->__('Page Screenshot') ?></summary>
-        <div class="a11yscan-screenshot-frame">
-            <div class="a11yscan-screenshot-canvas">
-                <a href="<?= $this->escapeUrl($screenshotUrl) ?>" target="_blank" rel="noopener">
-                    <img src="<?= $this->escapeUrl($screenshotUrl) ?>" alt="<?= $this->quoteEscape($helper->__('Page Screenshot')) ?>">
-                </a>
-                <?php foreach ($this->getScreenshotMarkers() as $marker): ?>
-                    <a id="a11yscan-marker-<?= $marker['id'] ?>"
-                       class="a11yscan-marker <?= $this->escapeHtml($marker['impact']) ?>"
-                       href="#violation-<?= $marker['id'] ?>"
-                       style="left:<?= sprintf('%.3F', $marker['left']) ?>%;top:<?= sprintf('%.3F', $marker['top']) ?>%;width:<?= sprintf('%.3F', $marker['width']) ?>%;height:<?= sprintf('%.3F', $marker['height']) ?>%"
-                       title="#<?= $marker['number'] ?> <?= $this->escapeHtml($marker['title']) ?>"><span><?= $marker['number'] ?></span></a>
-                <?php endforeach; ?>
+<?php foreach ($this->getPages() as $screenshotPage): ?>
+    <?php $screenshotUrl = $this->getScreenshotUrl($screenshotPage); ?>
+    <?php if ($screenshotUrl): ?>
+        <?php $screenshotLabel = $helper->__('%s Screenshot', $this->getViewportLabel($screenshotPage->getViewport())) ?>
+        <details class="a11yscan-screenshot">
+            <summary><?= $screenshotLabel ?></summary>
+            <div class="a11yscan-screenshot-frame">
+                <div class="a11yscan-screenshot-canvas">
+                    <a href="<?= $this->escapeUrl($screenshotUrl) ?>" target="_blank" rel="noopener">
+                        <img src="<?= $this->escapeUrl($screenshotUrl) ?>" alt="<?= $this->quoteEscape($screenshotLabel) ?>">
+                    </a>
+                    <?php foreach ($this->getScreenshotMarkers($screenshotPage) as $marker): ?>
+                        <a id="a11yscan-marker-<?= $marker['id'] ?>"
+                           class="a11yscan-marker <?= $this->escapeHtml($marker['impact']) ?>"
+                           href="#violation-<?= $marker['id'] ?>"
+                           style="left:<?= sprintf('%.3F', $marker['left']) ?>%;top:<?= sprintf('%.3F', $marker['top']) ?>%;width:<?= sprintf('%.3F', $marker['width']) ?>%;height:<?= sprintf('%.3F', $marker['height']) ?>%"
+                           title="#<?= $marker['number'] ?> <?= $this->escapeHtml($marker['title']) ?>"><span><?= $marker['number'] ?></span></a>
+                    <?php endforeach; ?>
+                </div>
             </div>
-        </div>
-    </details>
-<?php endif; ?>
+        </details>
+    <?php endif; ?>
+<?php endforeach; ?>
 
 <?php if ($scan->isComplete()): ?>
     <div class="a11yscan-cards">
@@ -102,10 +105,18 @@ $screenshotUrl = $this->getScreenshotUrl();
                 <span class="a11yscan-card-label"><span class="a11yscan-badge <?= $this->escapeHtml($impact) ?>"><?= $this->escapeHtml($impact) ?></span></span>
             </div>
         <?php endforeach; ?>
+        <div class="a11yscan-card">
+            <span class="a11yscan-card-value"><?= $scan->getIncompleteCount() ?></span>
+            <span class="a11yscan-card-label"><?= $helper->__('Needs Review') ?></span>
+        </div>
     </div>
 
     <?php if (!$scan->getTotalViolations()): ?>
-        <p><?= $helper->__('No violations were found on this page. Well done!') ?></p>
+        <p><?= $helper->__('No automatically detectable violations were found. Automated checks cover only part of WCAG — manual testing with a keyboard and a screen reader is still recommended.') ?></p>
+    <?php endif; ?>
+
+    <?php if ($scan->getIncompleteCount()): ?>
+        <p><?= $helper->__('axe-core could not automatically evaluate %s check(s) (for example, color contrast over an image) — review them manually.', $scan->getIncompleteCount()) ?></p>
     <?php endif; ?>
 
     <?php foreach ($this->getViolationsByImpact() as $impact => $violations): ?>
@@ -122,7 +133,8 @@ $screenshotUrl = $this->getScreenshotUrl();
                         <?php if ($violation->getWcagCriteria()): ?>
                             <span class="a11yscan-chip"><?= $helper->__('WCAG %s', $violation->getWcagCriteria()) ?></span>
                         <?php endif; ?>
-                        <?php if ($screenshotUrl && $violation->getElementRect()): ?>
+                        <span class="a11yscan-chip"><?= $this->escapeHtml($this->getViewportLabel($this->getPageViewport($violation))) ?></span>
+                        <?php if ($this->hasMarker($violation)): ?>
                             <a class="a11yscan-show-marker" href="#a11yscan-marker-<?= (int) $violation->getId() ?>"
                                onclick="accessibilityScanShowMarker(<?= (int) $violation->getId() ?>); return false;"><?= $helper->__('Show on screenshot') ?></a>
                         <?php endif; ?>
@@ -144,7 +156,7 @@ $screenshotUrl = $this->getScreenshotUrl();
                             <?php if ($violation->getCssSelector()): ?>
                                 <div>
                                     <span class="a11yscan-label"><?= $helper->__('Selector') ?></span>
-                                    <?php if ($screenshotUrl && $violation->getElementRect()): ?>
+                                    <?php if ($this->hasMarker($violation)): ?>
                                         <a class="a11yscan-selector-link" href="#a11yscan-marker-<?= (int) $violation->getId() ?>"
                                            onclick="accessibilityScanShowMarker(<?= (int) $violation->getId() ?>); return false;"
                                            title="<?= $this->quoteEscape($helper->__('Show on screenshot')) ?>"><code><?= $this->escapeHtml($violation->getCssSelector()) ?></code></a>

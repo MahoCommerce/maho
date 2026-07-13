@@ -26,6 +26,7 @@ return function (Schema $schema): void {
     $scan->addColumn('violations_serious', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $scan->addColumn('violations_moderate', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $scan->addColumn('violations_minor', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
+    $scan->addColumn('incomplete_count', Types::INTEGER, ['unsigned' => true, 'default' => 0]);
     $scan->addColumn('error_message', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $scan->addColumn('started_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $scan->addColumn('completed_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
@@ -41,6 +42,7 @@ return function (Schema $schema): void {
     $page = $schema->createTable('accessibilityscan_page');
     $page->addColumn('page_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $page->addColumn('scan_id', Types::INTEGER, ['unsigned' => true]);
+    $page->addColumn('viewport', Types::STRING, ['length' => 16, 'default' => 'desktop']);
     $page->addColumn('url', Types::STRING, ['length' => 2048]);
     $page->addColumn('page_title', Types::STRING, ['length' => 255, 'notnull' => false]);
     $page->addColumn('status', Types::STRING, ['length' => 20, 'default' => 'pending']);

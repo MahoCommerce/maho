@@ -12,6 +12,9 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const WCAG_LEVELS = ['A', 'AA', 'AAA'];
 
+    public const VIEWPORT_DESKTOP = 'desktop';
+    public const VIEWPORT_MOBILE = 'mobile';
+
     public function getDefaultWcagLevel(): string
     {
         return $this->normalizeWcagLevel(Mage::getStoreConfig('accessibilityscan/general/wcag_level'));
@@ -118,6 +121,35 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
         return max(Mage::getStoreConfigAsInt('accessibilityscan/general/timeout'), 10);
     }
 
+    /**
+     * Viewports every scan runs, keyed by device name. Each page is scanned
+     * once per viewport; the mobile pass also enables mobile emulation.
+     *
+     * @return array<string, array{width: int, height: int, mobile: bool}>
+     */
+    public function getViewports(): array
+    {
+        return [
+            self::VIEWPORT_DESKTOP => $this->parseViewport('accessibilityscan/general/viewport_desktop', 1280, 1024, false),
+            self::VIEWPORT_MOBILE => $this->parseViewport('accessibilityscan/general/viewport_mobile', 390, 844, true),
+        ];
+    }
+
+    /**
+     * Parse a "WIDTHxHEIGHT" config value, falling back to the given defaults
+     *
+     * @return array{width: int, height: int, mobile: bool}
+     */
+    protected function parseViewport(string $configPath, int $defaultWidth, int $defaultHeight, bool $mobile): array
+    {
+        if (preg_match('/^\s*(\d+)\s*[x×]\s*(\d+)\s*$/iu', (string) Mage::getStoreConfig($configPath), $m)
+            && (int) $m[1] > 0 && (int) $m[2] > 0
+        ) {
+            return ['width' => (int) $m[1], 'height' => (int) $m[2], 'mobile' => $mobile];
+        }
+        return ['width' => $defaultWidth, 'height' => $defaultHeight, 'mobile' => $mobile];
+    }
+
     public function getNodePath(): string
     {
         return trim((string) Mage::getStoreConfig('accessibilityscan/advanced/node_path')) ?: 'node';
@@ -152,18 +184,20 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * axe-core tags for a WCAG conformance level (levels are cumulative)
+     * axe-core tags for a WCAG conformance level (levels are cumulative,
+     * covering WCAG 2.0 through 2.2). Tags without matching axe-core rules
+     * are simply ignored by the scanner.
      *
      * @return list<string>
      */
     public function getWcagTags(string $level): array
     {
-        $tags = ['wcag2a', 'wcag21a'];
+        $tags = ['wcag2a', 'wcag21a', 'wcag22a'];
         if ($level === 'AA' || $level === 'AAA') {
-            $tags = [...$tags, 'wcag2aa', 'wcag21aa'];
+            $tags = [...$tags, 'wcag2aa', 'wcag21aa', 'wcag22aa'];
         }
         if ($level === 'AAA') {
-            $tags[] = 'wcag2aaa';
+            $tags = [...$tags, 'wcag2aaa', 'wcag21aaa', 'wcag22aaa'];
         }
         return $tags;
     }

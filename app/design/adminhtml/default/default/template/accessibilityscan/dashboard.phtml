@@ -38,11 +38,6 @@ $latestScan = $this->getLatestScan();
                     </option>
                 <?php endforeach; ?>
             </select>
-            <select name="store_id" class="select">
-                <?php foreach ($this->getStores() as $store): ?>
-                    <option value="<?= (int) $store->getId() ?>"><?= $this->escapeHtml($store->getName()) ?></option>
-                <?php endforeach; ?>
-            </select>
             <button type="submit" class="scalable add"><span><?= $helper->__('Start Scan') ?></span></button>
         </div>
         <p id="a11yscan-status" class="a11yscan-status"

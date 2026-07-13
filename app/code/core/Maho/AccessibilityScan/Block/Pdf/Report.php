@@ -1,6 +1,12 @@
 <?php
 
 /**
+ * PDF export of a scan report, rendered with DomPdf.
+ *
+ * DomPdf produces untagged PDFs (no structure tree, reading order or document
+ * language), so the exported file itself is not an accessible document; the
+ * admin scan detail view is the canonical accessible report.
+ *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Maho_AccessibilityScan
@@ -36,15 +42,44 @@ class Maho_AccessibilityScan_Block_Pdf_Report extends Mage_Core_Block_Pdf
     }
 
     /**
-     * Page screenshot as a data URI (DomPdf cannot fetch admin URLs)
+     * @return list<Maho_AccessibilityScan_Model_Page>
      */
-    public function getScreenshotDataUri(): ?string
+    public function getPages(): array
     {
-        $file = $this->getScan()->getFirstPage()?->getScreenshotFile();
+        return $this->getScan()->getPages();
+    }
+
+    /**
+     * A page's screenshot as a data URI (DomPdf cannot fetch admin URLs)
+     */
+    public function getScreenshotDataUri(Maho_AccessibilityScan_Model_Page $page): ?string
+    {
+        $file = $page->getScreenshotFile();
         if ($file === null) {
             return null;
         }
         return 'data:image/png;base64,' . base64_encode((string) file_get_contents($file));
+    }
+
+    /**
+     * Viewport (device) name of the page a violation was found on
+     */
+    public function getPageViewport(Maho_AccessibilityScan_Model_Violation $violation): string
+    {
+        foreach ($this->getPages() as $page) {
+            if ((int) $page->getId() === (int) $violation->getPageId()) {
+                return (string) $page->getViewport();
+            }
+        }
+        return Maho_AccessibilityScan_Helper_Data::VIEWPORT_DESKTOP;
+    }
+
+    public function getViewportLabel(string $viewport): string
+    {
+        $helper = Mage::helper('accessibilityscan');
+        return $viewport === Maho_AccessibilityScan_Helper_Data::VIEWPORT_MOBILE
+            ? $helper->__('Mobile')
+            : $helper->__('Desktop');
     }
 
     /**
