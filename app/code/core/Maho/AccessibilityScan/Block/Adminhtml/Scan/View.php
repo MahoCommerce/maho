@@ -100,15 +100,7 @@ class Maho_AccessibilityScan_Block_Adminhtml_Scan_View extends Mage_Adminhtml_Bl
      */
     public function getViolationNumber(Maho_AccessibilityScan_Model_Violation $violation): int
     {
-        if ($this->violationNumbers === null) {
-            $this->violationNumbers = [];
-            $number = 1;
-            foreach ($this->getViolationsByImpact() as $violations) {
-                foreach ($violations as $item) {
-                    $this->violationNumbers[(int) $item->getId()] = $number++;
-                }
-            }
-        }
+        $this->violationNumbers ??= $this->getScan()->getViolationNumbers();
         return $this->violationNumbers[(int) $violation->getId()] ?? 0;
     }
 

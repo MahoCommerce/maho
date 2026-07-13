@@ -41,6 +41,9 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
     public const TRIGGER_CLI      = 'cli';
     public const TRIGGER_SCHEDULE = 'schedule';
 
+    /** @var array<string, list<Maho_AccessibilityScan_Model_Violation>>|null */
+    protected ?array $violationsGroupedByImpact = null;
+
     #[\Override]
     protected function _construct(): void
     {
@@ -91,21 +94,44 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Violations grouped by impact, most severe first; empty groups omitted
+     * Violations grouped by impact, most severe first; empty groups omitted.
+     * Cached for the lifetime of the model instance.
      *
      * @return array<string, list<Maho_AccessibilityScan_Model_Violation>>
      */
     public function getViolationsGroupedByImpact(): array
     {
-        $grouped = array_fill_keys(Maho_AccessibilityScan_Model_Violation::IMPACT_LEVELS, []);
-        foreach ($this->getViolationCollection() as $violation) {
-            $impact = $violation->getImpact();
-            if (!in_array($impact, Maho_AccessibilityScan_Model_Violation::IMPACT_LEVELS, true)) {
-                $impact = Maho_AccessibilityScan_Model_Violation::IMPACT_MINOR;
+        if ($this->violationsGroupedByImpact === null) {
+            $grouped = array_fill_keys(Maho_AccessibilityScan_Model_Violation::IMPACT_LEVELS, []);
+            foreach ($this->getViolationCollection() as $violation) {
+                $impact = $violation->getImpact();
+                if (!in_array($impact, Maho_AccessibilityScan_Model_Violation::IMPACT_LEVELS, true)) {
+                    $impact = Maho_AccessibilityScan_Model_Violation::IMPACT_MINOR;
+                }
+                $grouped[$impact][] = $violation;
             }
-            $grouped[$impact][] = $violation;
+            $this->violationsGroupedByImpact = array_filter($grouped, fn(array $violations) => $violations !== []);
         }
-        return array_filter($grouped, fn(array $violations) => $violations !== []);
+        return $this->violationsGroupedByImpact;
+    }
+
+    /**
+     * Sequential violation numbers as rendered grouped by impact, indexed by
+     * violation id; shared by the admin view, its screenshot markers and the
+     * PDF report so a number always refers to the same violation
+     *
+     * @return array<int, int>
+     */
+    public function getViolationNumbers(): array
+    {
+        $numbers = [];
+        $number = 1;
+        foreach ($this->getViolationsGroupedByImpact() as $violations) {
+            foreach ($violations as $violation) {
+                $numbers[(int) $violation->getId()] = $number++;
+            }
+        }
+        return $numbers;
     }
 
     public function getTotalViolations(): int

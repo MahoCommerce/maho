@@ -108,6 +108,7 @@ $logoUrl = $this->getLogoUrl();
     <?php foreach ($violations as $violation): ?>
         <div class="violation <?= $this->escapeHtml($impact) ?>">
             <h3>
+                #<?= $this->getViolationNumber($violation) ?>
                 <?= $this->escapeHtml($violation->getAxeRuleId()) ?>
                 <?php if ($violation->getWcagCriteria()): ?>
                     (<?= $helper->__('WCAG %s', $violation->getWcagCriteria()) ?>)
