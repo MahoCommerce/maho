@@ -14,25 +14,21 @@ $scan = $this->getScan();
 $page = $this->getPage();
 ?>
 <div class="content-header">
-    <table cellspacing="0">
-        <tr>
-            <td><h3 class="icon-head"><?= $helper->__('Scan #%s', $scan->getId()) ?></h3></td>
-            <td class="form-buttons">
-                <button type="button" class="scalable back" onclick="setLocation('<?= $this->escapeUrl($this->getBackUrl()) ?>')">
-                    <span><?= $helper->__('Back') ?></span>
-                </button>
-                <?php if ($scan->isComplete()): ?>
-                    <button type="button" class="scalable" onclick="setLocation('<?= $this->escapeUrl($this->getExportPdfUrl()) ?>')">
-                        <span><?= $helper->__('Export PDF') ?></span>
-                    </button>
-                <?php endif; ?>
-                <button type="button" class="scalable delete"
-                        onclick="accessibilityScanDelete('<?= $this->escapeUrl($this->getDeleteUrl()) ?>', '<?= $this->quoteEscape($helper->__('Are you sure you want to delete this scan?')) ?>')">
-                    <span><?= $helper->__('Delete') ?></span>
-                </button>
-            </td>
-        </tr>
-    </table>
+    <h3 class="icon-head"><?= $helper->__('Scan #%s', $scan->getId()) ?></h3>
+    <p class="content-buttons form-buttons">
+        <button type="button" class="scalable back" onclick="setLocation('<?= $this->escapeUrl($this->getBackUrl()) ?>')">
+            <span><?= $helper->__('Back') ?></span>
+        </button>
+        <?php if ($scan->isComplete()): ?>
+            <button type="button" class="scalable" onclick="setLocation('<?= $this->escapeUrl($this->getExportPdfUrl()) ?>')">
+                <span><?= $helper->__('Export PDF') ?></span>
+            </button>
+        <?php endif; ?>
+        <button type="button" class="scalable delete"
+                onclick="accessibilityScanDelete('<?= $this->escapeUrl($this->getDeleteUrl()) ?>', '<?= $this->quoteEscape($helper->__('Are you sure you want to delete this scan?')) ?>')">
+            <span><?= $helper->__('Delete') ?></span>
+        </button>
+    </p>
 </div>
 
 <?php if ($scan->isFailed()): ?>
