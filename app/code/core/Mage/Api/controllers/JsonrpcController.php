@@ -10,6 +10,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_JsonrpcController extends Mage_Api_Controller_Action
 {
     // No #[Route] here: /api/jsonrpc is owned by Maho_ApiPlatform_IndexController,

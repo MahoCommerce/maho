@@ -242,6 +242,37 @@ uses()
     })
     ->in('Api/V2');
 
+uses()
+    // The Api/V2 suite above runs before this one in the same test database and
+    // enables extra carriers, payment methods and gift options for its checkout
+    // write tests (see its beforeAll and GiftMessageTest). The storefront one-step
+    // checkout auto-selects the shipping method only when exactly one rate comes
+    // back, so a leaked freeshipping carrier leaves two unselected methods and the
+    // payment step never loads. Delete the default-scope overrides so the real
+    // storefront drives on install defaults again.
+    ->beforeAll(function (): void {
+        static $reverted = false;
+        if ($reverted) {
+            return;
+        }
+        \Mage::app();
+        $config = \Mage::getModel('core/config');
+        $leaked = [
+            'carriers/freeshipping/active',
+            'carriers/flatrate/active',
+            'payment/cashondelivery/active',
+            'payment/checkmo/active',
+            'sales/gift_options/allow_order',
+            'sales/gift_options/allow_items',
+        ];
+        foreach ($leaked as $path) {
+            $config->deleteConfig($path, 'default', 0);
+        }
+        \Mage::app()->getCache()->cleanType('config');
+        $reverted = true;
+    })
+    ->in('Browser');
+
 /*
 |--------------------------------------------------------------------------
 | Custom Expectations

@@ -8,6 +8,9 @@
  * @package Mage_Api
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_V2_SoapController extends Mage_Api_Controller_Action
 {
     // No #[Route] here: /api/v2_soap is owned by Maho_ApiPlatform_IndexController,

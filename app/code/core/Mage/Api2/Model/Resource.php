@@ -21,6 +21,8 @@
  * @method void _multiUpdate() _multiUpdate(array $filteredData) update of a collection
  * @method void _delete() deletion of an entity
  * @method void _multidelete() _multidelete(array $requestData) deletion of a collection
+ *
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
 abstract class Mage_Api2_Model_Resource
 {
