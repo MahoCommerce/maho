@@ -15,7 +15,9 @@ declare(strict_types=1);
  */
 class Mage_Api_XmlrpcController extends Mage_Api_Controller_Action
 {
-    #[Maho\Config\Route('/api/xmlrpc', name: 'api.xmlrpc', methods: ['POST'])]
+    // No #[Route] here: /api/xmlrpc is owned by Maho_ApiPlatform_IndexController,
+    // which gates the protocol behind apiplatform/protocols/xmlrpc and dispatches
+    // to this controller only when enabled. A route here would shadow the gate.
     public function indexAction(): void
     {
         $this->_getServer()->init($this, 'xmlrpc')

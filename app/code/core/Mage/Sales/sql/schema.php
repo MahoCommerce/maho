@@ -212,7 +212,6 @@ return function (Schema $schema): void {
     $orderAddress->addColumn('quote_address_id', Types::INTEGER, ['notnull' => false]);
     $orderAddress->addColumn('region_id', Types::INTEGER, ['notnull' => false]);
     $orderAddress->addColumn('customer_id', Types::INTEGER, ['notnull' => false]);
-    $orderAddress->addColumn('fax', Types::STRING, ['length' => 255, 'notnull' => false]);
     $orderAddress->addColumn('region', Types::STRING, ['length' => 255, 'notnull' => false]);
     $orderAddress->addColumn('postcode', Types::STRING, ['length' => 255, 'notnull' => false]);
     $orderAddress->addColumn('lastname', Types::STRING, ['length' => 255, 'notnull' => false]);
@@ -897,7 +896,6 @@ return function (Schema $schema): void {
     $quoteAddress->addColumn('postcode', Types::STRING, ['length' => 255, 'notnull' => false]);
     $quoteAddress->addColumn('country_id', Types::STRING, ['length' => 255, 'notnull' => false]);
     $quoteAddress->addColumn('telephone', Types::STRING, ['length' => 255, 'notnull' => false]);
-    $quoteAddress->addColumn('fax', Types::STRING, ['length' => 255, 'notnull' => false]);
     $quoteAddress->addColumn('same_as_billing', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $quoteAddress->addColumn('free_shipping', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);
     $quoteAddress->addColumn('collect_shipping_rates', Types::SMALLINT, ['unsigned' => true, 'default' => 0]);

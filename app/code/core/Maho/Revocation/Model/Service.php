@@ -87,6 +87,29 @@ class Maho_Revocation_Model_Service
         return $sent;
     }
 
+    public function isValidProcessedStatus(string $status): bool
+    {
+        return array_key_exists(
+            $status,
+            Mage::getModel('revocation/source_processedStatus')->toOptionHash(),
+        );
+    }
+
+    /**
+     * Records a processing decision on the request: sets the status and stamps
+     * processed_at. Does not save (the caller persists). Throws on an unknown status.
+     *
+     * @throws Mage_Core_Exception
+     */
+    public function applyProcessedStatus(Maho_Revocation_Model_Request $request, string $status): void
+    {
+        if (!$this->isValidProcessedStatus($status)) {
+            Mage::throwException(Mage::helper('revocation')->__('Invalid processing status.'));
+        }
+        $request->setProcessedStatus($status);
+        $request->setProcessedAt(Mage::app()->getLocale()->formatDateForDb('now'));
+    }
+
     /**
      * @return array{0: ?int, 1: int} [order entity id or null, verified flag]
      */

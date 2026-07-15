@@ -15,7 +15,9 @@ declare(strict_types=1);
  */
 class Mage_Api_JsonrpcController extends Mage_Api_Controller_Action
 {
-    #[Maho\Config\Route('/api/jsonrpc', name: 'api.jsonrpc', methods: ['POST'])]
+    // No #[Route] here: /api/jsonrpc is owned by Maho_ApiPlatform_IndexController,
+    // which gates the protocol behind apiplatform/protocols/jsonrpc and dispatches
+    // to this controller only when enabled. A route here would shadow the gate.
     public function indexAction(): void
     {
         $this->_getServer()->init($this, 'jsonrpc')

@@ -60,9 +60,6 @@ SPDX-License-Identifier: AFL-3.0
                 <telephone>
                     <to_order>*</to_order>
                 </telephone>
-                <fax>
-                    <to_order>*</to_order>
-                </fax>
                 <region_id>
                     <to_order>*</to_order>
                 </region_id>
@@ -107,9 +104,6 @@ SPDX-License-Identifier: AFL-3.0
                 <telephone>
                     <to_order>*</to_order>
                 </telephone>
-                <fax>
-                    <to_order>*</to_order>
-                </fax>
                 <region_id>
                     <to_order>*</to_order>
                 </region_id>
@@ -339,10 +333,6 @@ SPDX-License-Identifier: AFL-3.0
                     <to_order_address>*</to_order_address>
                     <to_customer_address>*</to_customer_address>
                 </telephone>
-                <fax>
-                    <to_order_address>*</to_order_address>
-                    <to_customer_address>*</to_customer_address>
-                </fax>
                 <email>
                     <to_order_address>*</to_order_address>
                     <to_customer_address>*</to_customer_address>
@@ -681,9 +671,6 @@ SPDX-License-Identifier: AFL-3.0
                 <telephone>
                     <to_quote_address>*</to_quote_address>
                 </telephone>
-                <fax>
-                    <to_quote_address>*</to_quote_address>
-                </fax>
             </sales_convert_order_address>
             <sales_convert_order_payment>
                 <method>
@@ -883,9 +870,6 @@ SPDX-License-Identifier: AFL-3.0
                 <telephone>
                     <to_quote_address>*</to_quote_address>
                 </telephone>
-                <fax>
-                    <to_quote_address>*</to_quote_address>
-                </fax>
             </customer_address>
         </fieldsets>
         <models>
@@ -1496,6 +1480,11 @@ SPDX-License-Identifier: AFL-3.0
         </layout>
     </adminhtml>
     <default>
+        <system>
+            <rate_limit>
+                <guest_order_lookup>30</guest_order_lookup>
+            </rate_limit>
+        </system>
         <sales>
             <totals_sort>
                 <discount>20</discount>
@@ -1529,6 +1518,7 @@ SPDX-License-Identifier: AFL-3.0
                 <guest_template>sales_email_invoice_guest_template</guest_template>
                 <identity>sales</identity>
                 <copy_method>bcc</copy_method>
+                <attach_pdf>0</attach_pdf>
             </invoice>
             <invoice_comment>
                 <enabled>1</enabled>
@@ -1543,6 +1533,7 @@ SPDX-License-Identifier: AFL-3.0
                 <guest_template>sales_email_shipment_guest_template</guest_template>
                 <identity>sales</identity>
                 <copy_method>bcc</copy_method>
+                <attach_pdf>0</attach_pdf>
             </shipment>
             <shipment_comment>
                 <enabled>1</enabled>
@@ -1557,6 +1548,7 @@ SPDX-License-Identifier: AFL-3.0
                 <guest_template>sales_email_creditmemo_guest_template</guest_template>
                 <identity>sales</identity>
                 <copy_method>bcc</copy_method>
+                <attach_pdf>0</attach_pdf>
             </creditmemo>
             <creditmemo_comment>
                 <enabled>1</enabled>

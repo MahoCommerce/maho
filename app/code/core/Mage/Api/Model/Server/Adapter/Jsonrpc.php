@@ -81,6 +81,9 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends \Maho\DataObject implements 
     {
         $this->_jsonRpc = new Laminas\Json\Server\Server();
         $this->_jsonRpc->setClass($this->getHandler());
+        // Return the response object from handle() instead of echoing it and
+        // returning null (which would make setBody() below fatal on null).
+        $this->_jsonRpc->setReturnResponse(true);
 
         // Allow soap_v2 style request.
         $request = $this->_jsonRpc->getRequest();
@@ -100,7 +103,7 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends \Maho\DataObject implements 
         $this->getController()->getResponse()
             ->clearHeaders()
             ->setHeader('Content-Type', 'application/json; charset=utf8')
-            ->setBody($this->_jsonRpc->handle());
+            ->setBody((string) $this->_jsonRpc->handle());
 
         Mage::dispatchEvent('api_server_adapter_jsonrpc_run_after', [
             'method' => $method,

@@ -137,6 +137,11 @@ SPDX-License-Identifier: AFL-3.0
         </translate>
     </frontend>
     <default>
+        <system>
+            <rate_limit>
+                <coupon_validate>60</coupon_validate>
+            </rate_limit>
+        </system>
         <promo>
             <auto_generated_coupon_codes>
                 <length>12</length>

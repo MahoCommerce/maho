@@ -18,7 +18,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     #[\Override]
     public function preDispatch()
     {
-        $this->_setForcedFormKeyActions(['delete', 'massDelete', 'massStatus']);
+        $this->_setForcedFormKeyActions(['save', 'delete', 'massDelete', 'massStatus']);
         return parent::preDispatch();
     }
 
@@ -123,26 +123,6 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             }
 
             try {
-                // Generate code if creating new
-                if (!$model->getId() && (!isset($data['code']) || $data['code'] === '')) {
-                    $data['code'] = Mage::helper('giftcard')->generateCode();
-                }
-
-                // Set website_id for new gift cards
-                if (!$model->getId() && (!isset($data['website_id']) || $data['website_id'] === '')) {
-                    $data['website_id'] = Mage::app()->getWebsite()->getId();
-                }
-
-                // Set expiration if not set
-                if (!$model->getId() && (!isset($data['expires_at']) || $data['expires_at'] === '')) {
-                    $data['expires_at'] = Mage::helper('giftcard')->calculateExpirationDate();
-                }
-
-                // For new gift cards, set initial_balance = balance
-                if (!$model->getId() && isset($data['balance'])) {
-                    $data['initial_balance'] = $data['balance'];
-                }
-
                 // If balance changed on existing card, record as adjustment
                 $oldBalance = (float) $model->getBalance();
                 $newBalance = isset($data['balance']) ? (float) $data['balance'] : $oldBalance;
@@ -259,7 +239,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
         } else {
             try {
                 foreach ($giftcardIds as $giftcardId) {
-                    $giftcard = Mage::getModel('giftcard/giftcard')
+                    Mage::getModel('giftcard/giftcard')
                         ->load($giftcardId)
                         ->setStatus($status)
                         ->save();
@@ -290,7 +270,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
         $code = $this->getRequest()->getParam('code');
 
         if ($code === null || $code === '') {
-            $this->getResponse()->setBody(json_encode([
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
                 'success' => false,
                 'message' => 'Please enter a gift card code.',
             ]));
@@ -300,14 +280,14 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
         $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
 
         if (!$giftcard->getId()) {
-            $this->getResponse()->setBody(json_encode([
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
                 'success' => false,
                 'message' => 'Gift card not found.',
             ]));
             return;
         }
 
-        $this->getResponse()->setBody(json_encode([
+        $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
             'success' => true,
             'giftcard_id' => $giftcard->getId(),
             'code' => $giftcard->getCode(),

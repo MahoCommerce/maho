@@ -33,6 +33,7 @@ class PestTestRunner
     private array $dbConfig = [];
     private string $testDbName;
     private string $dbType;
+    private ?int $apiServerPid = null;
 
     public function __construct()
     {
@@ -120,6 +121,9 @@ class PestTestRunner
             echo "Setting up fresh test database for local testing ({$this->dbType})...\n";
             $this->setupTestDatabase();
             $this->injectPaypalSandboxConfig();
+            // Serve the freshly-installed app so the Api/V2 HTTP suite can reach
+            // it (mirrors CI). Non-fatal: if it can't start, those tests skip.
+            $this->startApiServer();
             $exitCode = $this->runPest($pestArgs);
 
             // Flush cache after tests complete
@@ -132,6 +136,7 @@ class PestTestRunner
             echo 'Error: ' . $e->getMessage() . "\n";
             return 1;
         } finally {
+            $this->stopApiServer();
             $this->restoreLocalXml();
         }
     }
@@ -423,6 +428,87 @@ class PestTestRunner
 
         if ($returnVar !== 0) {
             throw new Exception("Command failed: $command");
+        }
+    }
+
+    /**
+     * Start PHP's built-in server on the app so the Api/V2 HTTP tests can reach
+     * it. Sets API_BASE_URL for the Pest subprocess (inherited via passthru).
+     * Non-fatal: a failure to bind just leaves the API suite skipping.
+     */
+    private function startApiServer(): void
+    {
+        $host = getenv('MAHO_API_TEST_HOST') ?: '127.0.0.1';
+        $port = (int) (getenv('MAHO_API_TEST_PORT') ?: 8080);
+        $baseUrl = "http://{$host}:{$port}";
+
+        // The JWT issuer is pinned to the store base_url (JwtService::getIssuer),
+        // and redirect_to_base bounces any request whose host doesn't match it.
+        // So point the store base_url at the API server URL: this aligns the
+        // issuer with the tokens the helper signs (iss = API_BASE_URL) and stops
+        // the 301 redirect. The test DB is thrown away afterwards, so this is safe.
+        foreach (['web/unsecure/base_url', 'web/secure/base_url'] as $path) {
+            $this->executeCommand(sprintf(
+                './maho config:set %s %s --scope default --scope-id 0 --silent',
+                escapeshellarg($path),
+                escapeshellarg($baseUrl . '/'),
+            ));
+        }
+
+        // Pre-seed a deterministic JWT signing secret. Otherwise the Pest process
+        // (signing tokens via the helper) and the API server process each lazily
+        // generate their own random secret — with separate config caches they can
+        // diverge, so every authenticated request 401s. Seeding it once, encrypted,
+        // makes both processes read the same persisted secret.
+        $this->executeCommand(sprintf(
+            './maho config:set apiplatform/oauth2/secret %s --encrypt --scope default --scope-id 0 --silent',
+            escapeshellarg(str_repeat('0123456789abcdef', 4)),
+        ));
+        $this->executeCommand('./maho cache:flush --ansi');
+
+        // The API Platform container (routes, resource metadata) is compiled once
+        // into var/cache/api_platform and never invalidated by cache:flush, so a
+        // change to any Api resource would otherwise be served stale.
+        $this->executeCommand('rm -rf var/cache/api_platform');
+
+        putenv("API_BASE_URL={$baseUrl}");
+
+        $router = escapeshellarg(__DIR__ . '/router.php');
+        // Enable GraphQL introspection for the test server (off in production):
+        // the schema/tooling tests rely on it. Set inline so it lands in the
+        // server process environment regardless of parent inheritance.
+        $cmd = sprintf(
+            'MAHO_GRAPHQL_INTROSPECTION=1 php -S %s:%d -t public %s > /tmp/maho-test-api-server.log 2>&1 & echo $!',
+            $host,
+            $port,
+            $router,
+        );
+        $pid = (int) trim((string) shell_exec($cmd));
+        if ($pid <= 0) {
+            echo "⚠ Could not start API test server; Api/V2 HTTP tests will skip.\n";
+            return;
+        }
+        $this->apiServerPid = $pid;
+
+        for ($i = 0; $i < 40; $i++) {
+            $probe = shell_exec(sprintf(
+                'curl -s -o /dev/null -w "%%{http_code}" %s/api/rest/v2/store-config 2>/dev/null',
+                escapeshellarg($baseUrl),
+            ));
+            if ((int) trim((string) $probe) > 0) {
+                echo "✓ API test server up at {$baseUrl}\n";
+                return;
+            }
+            usleep(250000);
+        }
+        echo "⚠ API test server did not become ready; Api/V2 HTTP tests may skip.\n";
+    }
+
+    private function stopApiServer(): void
+    {
+        if ($this->apiServerPid !== null) {
+            shell_exec('kill ' . $this->apiServerPid . ' 2>/dev/null');
+            $this->apiServerPid = null;
         }
     }
 

@@ -238,7 +238,7 @@ class Maho_Giftcard_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Reso
 
             // Check custom amount range
             $giftcardType = $product->getData('giftcard_type');
-            if ($giftcardType === 'custom' || $giftcardType === 'combined') {
+            if ($giftcardType === 'range' || $giftcardType === 'combined') {
                 $customMin = (float) $product->getData('giftcard_min_amount');
                 $customMax = (float) $product->getData('giftcard_max_amount');
 

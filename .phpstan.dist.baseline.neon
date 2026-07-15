@@ -5737,6 +5737,33 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Tax/RuleController.php
 
 		-
+			rawMessage: '''
+				Call to method getId() of deprecated class Mage_Api_Model_User:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: app/code/core/Mage/Api/Api/AuthTokenProcessor.php
+
+		-
+			rawMessage: '''
+				Call to method loadByUsername() of deprecated class Mage_Api_Model_User:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Api/Api/AuthTokenProcessor.php
+
+		-
+			rawMessage: '''
+				Parameter $apiUser of method Mage\Api\Api\AuthTokenProcessor::generateApiUserTokenResponse() has typehint with deprecated class Mage_Api_Model_User:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: parameter.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Api/Api/AuthTokenProcessor.php
+
+		-
 			rawMessage: Property Mage_Api_Exception::$_customMessage has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -6205,12 +6232,6 @@ parameters:
 			path: app/code/core/Mage/Api2/Model/Resource.php
 
 		-
-			rawMessage: 'Call to an undefined method Maho\Data\Collection\Db::addAttributeToFilter().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Api2/Model/Resource.php
-
-		-
 			rawMessage: 'Method Mage_Api2_Model_Resource::_critical() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -6361,7 +6382,16 @@ parameters:
 			'''
 			identifier: varTag.deprecatedClass
 			count: 1
-			path: app/code/core/Mage/Api2/sql/api2_setup/install-1.0.0.0.php
+			path: app/code/core/Mage/Api2/data/api2_setup/data-install-1.0.0.0.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Api2_Model_Resource_Setup:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: varTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Api2/data/api2_setup/data-upgrade-1.0.0.0-2.0.0.php
 
 		-
 			rawMessage: 'Method Mage_Authorizenet_Helper_Data::updateOrderEditIncrements() has no return type specified.'
@@ -16432,6 +16462,12 @@ parameters:
 			path: app/code/core/Mage/GiftMessage/Model/Resource/Message.php
 
 		-
+			rawMessage: 'Parameter #2 $arguments of static method Mage::getResourceModel() expects array, string given.'
+			identifier: argument.type
+			count: 1
+			path: app/code/core/Mage/GiftMessage/data/giftmessage_setup/data-install-1.6.0.0.php
+
+		-
 			rawMessage: 'Method Mage_GoogleAnalytics_Helper_Data::isDebugModeEnabled() has parameter $store with no type specified.'
 			identifier: missingType.parameter
 			count: 1
@@ -20872,12 +20908,6 @@ parameters:
 			rawMessage: 'Parameter #2 $arguments of static method Mage::getResourceModel() expects array, string given.'
 			identifier: argument.type
 			count: 1
-			path: app/code/core/Mage/GiftMessage/data/giftmessage_setup/data-install-1.6.0.0.php
-
-		-
-			rawMessage: 'Parameter #2 $arguments of static method Mage::getResourceModel() expects array, string given.'
-			identifier: argument.type
-			count: 1
 			path: app/code/core/Mage/Tax/data/tax_setup/data-install-1.6.0.0.php
 
 		-
@@ -21860,6 +21890,132 @@ parameters:
 
 		-
 			rawMessage: '''
+				Call to method delete() of deprecated class Mage_Api_Model_User:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Maho/ApiPlatform/controllers/Adminhtml/Apiplatform/UserController.php
+
+		-
+			rawMessage: '''
+				Call to method getId() of deprecated class Mage_Api_Model_User:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 9
+			path: app/code/core/Maho/ApiPlatform/controllers/Adminhtml/Apiplatform/UserController.php
+
+		-
+			rawMessage: '''
+				Call to method save() of deprecated class Mage_Api_Model_User:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Maho/ApiPlatform/controllers/Adminhtml/Apiplatform/UserController.php
+
+		-
+			rawMessage: '''
+				Parameter $user of method Maho_ApiPlatform_Adminhtml_Apiplatform_UserController::_saveRoleAssignment() has typehint with deprecated class Mage_Api_Model_User:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: parameter.deprecatedClass
+			count: 1
+			path: app/code/core/Maho/ApiPlatform/controllers/Adminhtml/Apiplatform/UserController.php
+
+		-
+			rawMessage: '''
+				Access to constant on deprecated class Mage_Api_JsonrpcController:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Maho/ApiPlatform/controllers/IndexController.php
+
+		-
+			rawMessage: '''
+				Access to constant on deprecated class Mage_Api_SoapController:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Maho/ApiPlatform/controllers/IndexController.php
+
+		-
+			rawMessage: '''
+				Access to constant on deprecated class Mage_Api_V2_SoapController:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Maho/ApiPlatform/controllers/IndexController.php
+
+		-
+			rawMessage: '''
+				Access to constant on deprecated class Mage_Api_XmlrpcController:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Maho/ApiPlatform/controllers/IndexController.php
+
+		-
+			rawMessage: '''
+				Call to method getId() of deprecated class Mage_Api_Model_User:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Maho/ApiPlatform/symfony/Security/OAuth2Authenticator.php
+
+		-
+			rawMessage: '''
+				Call to method getId() of deprecated class Mage_Api_Model_User:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Maho/ApiPlatform/symfony/Service/JwtService.php
+
+		-
+			rawMessage: '''
+				Call to method getRoles() of deprecated class Mage_Api_Model_User:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Maho/ApiPlatform/symfony/Service/JwtService.php
+
+		-
+			rawMessage: '''
+				Parameter $apiUser of method Maho\ApiPlatform\Service\JwtService::generateApiUserToken() has typehint with deprecated class Mage_Api_Model_User:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: parameter.deprecatedClass
+			count: 1
+			path: app/code/core/Maho/ApiPlatform/symfony/Service/JwtService.php
+
+		-
+			rawMessage: '''
+				Parameter $apiUser of method Maho\ApiPlatform\Service\JwtService::getApiUserAllowedStoreIds() has typehint with deprecated class Mage_Api_Model_User:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: parameter.deprecatedClass
+			count: 1
+			path: app/code/core/Maho/ApiPlatform/symfony/Service/JwtService.php
+
+		-
+			rawMessage: '''
+				Parameter $apiUser of method Maho\ApiPlatform\Service\JwtService::loadApiUserPermissions() has typehint with deprecated class Mage_Api_Model_User:
+				since 26.7 Use Maho_ApiPlatform instead.
+			'''
+			identifier: parameter.deprecatedClass
+			count: 1
+			path: app/code/core/Maho/ApiPlatform/symfony/Service/JwtService.php
+
+		-
+			rawMessage: '''
 				Call to method _applyCollectionModifiers() of deprecated class Mage_Api2_Model_Resource:
 				since 26.7 Use Maho_ApiPlatform instead.
 			'''
@@ -21909,7 +22065,7 @@ parameters:
 				since 26.7 Use Maho_ApiPlatform instead.
 			'''
 			identifier: method.deprecatedClass
-			count: 11
+			count: 12
 			path: app/code/core/Maho/Blog/Model/Post/Api.php
 
 		-
@@ -22301,7 +22457,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/design/adminhtml/default/default/template/system/autocomplete.phtml
-
 
 		-
 			rawMessage: Variable $this might not be defined.

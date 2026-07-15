@@ -416,6 +416,15 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <depends><enabled>1</enabled></depends>
                         </copy_method>
+                        <attach_pdf translate="label">
+                            <label>Attach PDF to Email</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </attach_pdf>
                     </fields>
                 </invoice>
                 <invoice_comment translate="label">
@@ -548,6 +557,15 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <depends><enabled>1</enabled></depends>
                         </copy_method>
+                        <attach_pdf translate="label">
+                            <label>Attach PDF to Email</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </attach_pdf>
                     </fields>
                 </shipment>
                 <shipment_comment translate="label">
@@ -680,6 +698,15 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <depends><enabled>1</enabled></depends>
                         </copy_method>
+                        <attach_pdf translate="label">
+                            <label>Attach PDF to Email</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </attach_pdf>
                     </fields>
                 </creditmemo>
                 <creditmemo_comment translate="label">
@@ -803,5 +830,22 @@ SPDX-License-Identifier: AFL-3.0
                 </crontab>
             </groups>
         </reports>
+        <system>
+            <groups>
+                <rate_limit>
+                    <fields>
+                        <guest_order_lookup translate="label comment" module="sales">
+                            <label>Guest order lookup</label>
+                            <comment>Per IP address. Default 30 per hour. 0 to disable.</comment>
+                            <sort_order>180</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </guest_order_lookup>
+                    </fields>
+                </rate_limit>
+            </groups>
+        </system>
     </sections>
 </config>

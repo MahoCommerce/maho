@@ -31,8 +31,8 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
     protected function _initAction()
     {
         $this->loadLayout()
-            ->_setActiveMenu('system/api/users')
-            ->_addBreadcrumb($this->__('Web Services'), $this->__('Web Services'))
+            ->_setActiveMenu('system/api/soap/users')
+            ->_addBreadcrumb($this->__('API'), $this->__('API'))
             ->_addBreadcrumb($this->__('Permissions'), $this->__('Permissions'))
             ->_addBreadcrumb($this->__('Users'), $this->__('Users'))
         ;
@@ -43,7 +43,7 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
-             ->_title($this->__('Web Services'))
+             ->_title($this->__('API'))
              ->_title($this->__('Users'));
 
         $this->_initAction()
@@ -61,7 +61,7 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
     public function editAction(): void
     {
         $this->_title($this->__('System'))
-             ->_title($this->__('Web Services'))
+             ->_title($this->__('API'))
              ->_title($this->__('Users'));
 
         $id = $this->getRequest()->getParam('user_id');
