@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "34942bf88fd51d18e68b2824fae85816",
+    "content-hash": "25a06e35d524dcd1762ac040bf81534c",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -8036,25 +8036,25 @@
         },
         {
             "name": "brick/math",
-            "version": "0.13.1",
+            "version": "0.14.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/brick/math.git",
-                "reference": "fc7ed316430118cc7836bf45faff18d5dfc8de04"
+                "reference": "63422359a44b7f06cae63c3b429b59e8efcc0629"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/brick/math/zipball/fc7ed316430118cc7836bf45faff18d5dfc8de04",
-                "reference": "fc7ed316430118cc7836bf45faff18d5dfc8de04",
+                "url": "https://api.github.com/repos/brick/math/zipball/63422359a44b7f06cae63c3b429b59e8efcc0629",
+                "reference": "63422359a44b7f06cae63c3b429b59e8efcc0629",
                 "shasum": ""
             },
             "require": {
-                "php": "^8.1"
+                "php": "^8.2"
             },
             "require-dev": {
                 "php-coveralls/php-coveralls": "^2.2",
-                "phpunit/phpunit": "^10.1",
-                "vimeo/psalm": "6.8.8"
+                "phpstan/phpstan": "2.1.22",
+                "phpunit/phpunit": "^11.5"
             },
             "type": "library",
             "autoload": {
@@ -8084,7 +8084,7 @@
             ],
             "support": {
                 "issues": "https://github.com/brick/math/issues",
-                "source": "https://github.com/brick/math/tree/0.13.1"
+                "source": "https://github.com/brick/math/tree/0.14.8"
             },
             "funding": [
                 {
@@ -8092,7 +8092,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-03-29T13:50:30+00:00"
+            "time": "2026-02-10T14:33:43+00:00"
         },
         {
             "name": "brick/varexporter",
@@ -8643,16 +8643,16 @@
         },
         {
             "name": "friendsofphp/php-cs-fixer",
-            "version": "v3.95.14",
+            "version": "v3.95.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer.git",
-                "reference": "beee27417f1361199c51217ccd61451fb3809ce0"
+                "reference": "3e47e5d50046f87e3244acde2fe655d1a3b72555"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/beee27417f1361199c51217ccd61451fb3809ce0",
-                "reference": "beee27417f1361199c51217ccd61451fb3809ce0",
+                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/3e47e5d50046f87e3244acde2fe655d1a3b72555",
+                "reference": "3e47e5d50046f87e3244acde2fe655d1a3b72555",
                 "shasum": ""
             },
             "require": {
@@ -8736,7 +8736,7 @@
             ],
             "support": {
                 "issues": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/issues",
-                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.95.14"
+                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.95.15"
             },
             "funding": [
                 {
@@ -8744,7 +8744,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-07-15T07:05:33+00:00"
+            "time": "2026-07-15T09:51:47+00:00"
         },
         {
             "name": "jean85/pretty-package-versions",
@@ -9705,36 +9705,42 @@
         },
         {
             "name": "laminas/laminas-xmlrpc",
-            "version": "2.22.0",
+            "version": "3.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laminas/laminas-xmlrpc.git",
-                "reference": "f251670ce1b7add203a6cfd91d5e58a724cec27a"
+                "reference": "a18f1c14d67c917ffb51e13f4e9b63fc1a9f29f0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laminas/laminas-xmlrpc/zipball/f251670ce1b7add203a6cfd91d5e58a724cec27a",
-                "reference": "f251670ce1b7add203a6cfd91d5e58a724cec27a",
+                "url": "https://api.github.com/repos/laminas/laminas-xmlrpc/zipball/a18f1c14d67c917ffb51e13f4e9b63fc1a9f29f0",
+                "reference": "a18f1c14d67c917ffb51e13f4e9b63fc1a9f29f0",
                 "shasum": ""
             },
             "require": {
-                "brick/math": "^0.13.1",
+                "brick/math": "^0.14.1",
+                "ext-dom": "*",
+                "ext-iconv": "*",
+                "ext-libxml": "*",
                 "ext-simplexml": "*",
-                "laminas/laminas-code": "^4.4",
-                "laminas/laminas-http": "^2.15",
-                "laminas/laminas-server": "^2.11",
-                "laminas/laminas-stdlib": "^3.10.1",
-                "laminas/laminas-xml": "^1.4.0",
-                "php": "~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0"
+                "ext-xmlwriter": "*",
+                "laminas/laminas-code": "^4.17",
+                "laminas/laminas-server": "^2.18",
+                "laminas/laminas-stdlib": "^3.21.0",
+                "laminas/laminas-xml": "^1.7.0",
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
+                "psr/http-client": "^1.0"
             },
             "conflict": {
                 "zendframework/zend-xmlrpc": "*"
             },
             "require-dev": {
                 "laminas/laminas-coding-standard": "~3.1.0",
-                "phpunit/phpunit": "^10.5.36",
-                "psalm/plugin-phpunit": "^0.19.0",
-                "vimeo/psalm": "^5.26.1"
+                "laminas/laminas-diactoros": "^3.8",
+                "php-http/mock-client": "^1.6",
+                "phpunit/phpunit": "^11.5.50 || ^12.5.8",
+                "psalm/plugin-phpunit": "^0.19.5",
+                "vimeo/psalm": "^6.14.3"
             },
             "suggest": {
                 "laminas/laminas-cache": "To support Laminas\\XmlRpc\\Server\\Cache usage"
@@ -9765,11 +9771,11 @@
             },
             "funding": [
                 {
-                    "url": "https://funding.communitybridge.org/projects/laminas-project",
-                    "type": "community_bridge"
+                    "url": "https://crowdfunding.linuxfoundation.org/initiatives/laminas-project",
+                    "type": "custom"
                 }
             ],
-            "time": "2025-11-11T22:34:06+00:00"
+            "time": "2026-07-08T16:55:28+00:00"
         },
         {
             "name": "league/uri",
