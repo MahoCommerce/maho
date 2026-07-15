@@ -26,8 +26,7 @@
  * @method string getName()
  * @method $this setName(string $name)
  * @method int getPid()
- */
-/**
+ *
  * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
 class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract

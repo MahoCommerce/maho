@@ -16,8 +16,7 @@
  * - Regex requirements for variables
  * - Default values
  * - URL path matching
- */
-/**
+ *
  * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
 class Mage_Api2_Model_Route_Base
