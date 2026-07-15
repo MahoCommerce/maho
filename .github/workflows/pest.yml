@@ -196,6 +196,17 @@ jobs:
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
         run: ./vendor/bin/pest --display-errors --display-warnings
 
+      - name: Upload browser test failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browser-failure-${{ matrix.name }}
+          path: |
+            Tests/Browser/Screenshots/
+            tests/Browser/Screenshots/
+            var/log/
+          if-no-files-found: ignore
+
   pest-sqlite:
     name: Test Suite (sqlite)
     runs-on: ubuntu-latest
@@ -305,3 +316,14 @@ jobs:
           PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
         run: ./vendor/bin/pest --display-errors --display-warnings
+
+      - name: Upload browser test failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browser-failure-sqlite
+          path: |
+            Tests/Browser/Screenshots/
+            tests/Browser/Screenshots/
+            var/log/
+          if-no-files-found: ignore
