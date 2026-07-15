@@ -5,6 +5,10 @@ on:
     - cron: '0 9 * * 1' # Every Monday at 9:00 UTC
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check-eol:
     name: Check for EOL versions

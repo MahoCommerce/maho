@@ -44,7 +44,9 @@ class JsonRpcClient
 
     public function login(string $username, string $password): string
     {
-        $response = $this->call('login', [$username, $password]);
+        // login is a top-level JSON-RPC method, not a resource call, so it is
+        // invoked directly rather than wrapped in the `call` dispatcher.
+        $response = $this->invoke('login', [$username, $password]);
 
         if (!$response->isSuccess()) {
             throw new \Exception('Login failed: ' . $response->getError()['message'] ?? 'Unknown error');
@@ -53,16 +55,14 @@ class JsonRpcClient
         return $response->getResult();
     }
 
+    /**
+     * Invoke an API resource method through the `call` dispatcher:
+     * call($sessionId, $apiPath, $args). Without a session id the request is
+     * still well-formed JSON-RPC (used for reachability probes).
+     */
     public function call(string $method, array $params = [], ?string $sessionId = null): JsonRpcResponse
     {
-        $payload = [
-            'jsonrpc' => '2.0',
-            'method' => 'call',
-            'params' => $sessionId ? [$sessionId, $method, $params] : [$method, $params],
-            'id' => $this->requestId++,
-        ];
-
-        return $this->makeRequest($payload);
+        return $this->invoke('call', $sessionId ? [$sessionId, $method, $params] : [$method, $params]);
     }
 
     public function multiCall(array $calls, ?string $sessionId = null): array
@@ -72,7 +72,8 @@ class JsonRpcClient
             $multiCallParams[] = [$call[0], $call[1] ?? []];
         }
 
-        $response = $this->call('multiCall', [$multiCallParams], $sessionId);
+        // multiCall is a top-level method taking ($sessionId, $calls).
+        $response = $this->invoke('multiCall', $sessionId ? [$sessionId, $multiCallParams] : [$multiCallParams]);
 
         if (!$response->isSuccess()) {
             throw new \Exception('MultiCall failed: ' . $response->getError()['message'] ?? 'Unknown error');
@@ -81,9 +82,25 @@ class JsonRpcClient
         return $response->getResult();
     }
 
+    /**
+     * Send a raw JSON-RPC 2.0 request for the named server method.
+     */
+    private function invoke(string $rpcMethod, array $params): JsonRpcResponse
+    {
+        return $this->makeRequest([
+            'jsonrpc' => '2.0',
+            'method' => $rpcMethod,
+            'params' => $params,
+            'id' => $this->requestId++,
+        ]);
+    }
+
     private function makeRequest(array $payload): JsonRpcResponse
     {
-        $url = $this->baseUrl . '/jsonrpc';
+        // The base URL is the api.php entry point; the legacy JSON-RPC adapter
+        // is selected via the ?type=jsonrpc query parameter (mirrors the
+        // /api/jsonrpc .htaccess rewrite that maps to api.php?type=jsonrpc).
+        $url = $this->baseUrl . '?type=jsonrpc';
 
         $context = [
             'http' => [

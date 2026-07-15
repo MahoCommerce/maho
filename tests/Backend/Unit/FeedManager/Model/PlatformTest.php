@@ -122,6 +122,7 @@ describe('AdapterInterface compliance', function () {
             $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
             $all = $adapter->getAllAttributes();
             $required = $adapter->getRequiredAttributes();
+            expect($all)->toBeArray();
             foreach (array_keys($required) as $key) {
                 expect($all)->toHaveKey($key);
             }
@@ -131,6 +132,7 @@ describe('AdapterInterface compliance', function () {
             $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
             $all = $adapter->getAllAttributes();
             $optional = $adapter->getOptionalAttributes();
+            expect($all)->toBeArray();
             foreach (array_keys($optional) as $key) {
                 expect($all)->toHaveKey($key);
             }

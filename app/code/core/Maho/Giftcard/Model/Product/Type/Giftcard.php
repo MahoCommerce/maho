@@ -123,7 +123,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
 
             // Validate custom amount against min/max if type allows custom
             $giftcardType = $productInstance->getGiftcardType();
-            if ($giftcardType === 'custom' || $giftcardType === 'combined') {
+            if ($giftcardType === 'range' || $giftcardType === 'combined') {
                 $minAmount = $productInstance->getGiftcardMinAmount();
                 $maxAmount = $productInstance->getGiftcardMaxAmount();
 

@@ -151,11 +151,6 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             }
 
             try {
-                // Generate code if creating new
-                if (!$model->getId() && (!isset($data['code']) || $data['code'] === '')) {
-                    $data['code'] = Mage::helper('giftcard')->generateCode();
-                }
-
                 // Normalise the multiselect post: the form sends website_ids[]
                 // (or, if the JS is bypassed, sometimes a single value).
                 $websiteIds = $data['website_ids'] ?? [];
@@ -170,16 +165,6 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
                     $websiteIds = [(int) Mage::app()->getWebsite()->getId()];
                 }
                 $data['website_ids'] = $websiteIds;
-
-                // Set expiration if not set
-                if (!$model->getId() && (!isset($data['expires_at']) || $data['expires_at'] === '')) {
-                    $data['expires_at'] = Mage::helper('giftcard')->calculateExpirationDate();
-                }
-
-                // For new gift cards, set initial_balance = balance
-                if (!$model->getId() && isset($data['balance'])) {
-                    $data['initial_balance'] = $data['balance'];
-                }
 
                 // If balance changed on existing card, record as adjustment
                 $oldBalance = (float) $model->getBalance();
@@ -306,7 +291,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
         } else {
             try {
                 foreach ($giftcardIds as $giftcardId) {
-                    $giftcard = Mage::getModel('giftcard/giftcard')
+                    Mage::getModel('giftcard/giftcard')
                         ->load($giftcardId)
                         ->setStatus($status)
                         ->save();

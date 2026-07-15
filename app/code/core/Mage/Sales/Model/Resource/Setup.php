@@ -288,7 +288,6 @@ class Mage_Sales_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
                     'postcode'                  => ['type' => 'static'],
                     'country_id'                => ['type' => 'static'],
                     'telephone'                 => ['type' => 'static'],
-                    'fax'                       => ['type' => 'static'],
 
                     'same_as_billing'           => ['type' => 'static'],
                     'free_shipping'             => ['type' => 'static'],
@@ -543,7 +542,6 @@ class Mage_Sales_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
                     'postcode'              => [],
                     'country_id'            => ['type' => 'varchar'],
                     'telephone'             => [],
-                    'fax'                   => [],
 
                 ],
             ],

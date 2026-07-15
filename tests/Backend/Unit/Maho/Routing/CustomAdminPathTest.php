@@ -59,14 +59,17 @@ describe('RouteCollectionBuilder::normalizeFrontName()', function () {
     beforeEach(fn() => resetAdminFrontNameCache());
     afterEach(fn() => resetAdminFrontNameCache());
 
-    it('maps the configured admin frontName to the sentinel regardless of case', function () {
+    it('maps the configured admin frontName to the sentinel only on an exact-case match', function () {
         Mage::getConfig()->setNode(AdminhtmlHelper::XML_PATH_USE_CUSTOM_ADMIN_PATH, '1');
         Mage::getConfig()->setNode(AdminhtmlHelper::XML_PATH_CUSTOM_ADMIN_PATH, 'BackOffice');
 
-        expect(RouteCollectionBuilder::normalizeFrontName('backoffice'))
+        expect(RouteCollectionBuilder::normalizeFrontName('BackOffice'))
             ->toBe(RouteCollectionBuilder::ADMIN_SENTINEL);
-        expect(RouteCollectionBuilder::normalizeFrontName('BACKOFFICE'))
-            ->toBe(RouteCollectionBuilder::ADMIN_SENTINEL);
+        // M1 semantics: a mis-cased admin frontName must not normalize to the sentinel,
+        // so it misses every compiled lookup and falls through to the noroute handler
+        // on all dispatch paths (Symfony, legacy path, forward).
+        expect(RouteCollectionBuilder::normalizeFrontName('backoffice'))->toBe('backoffice');
+        expect(RouteCollectionBuilder::normalizeFrontName('BACKOFFICE'))->toBe('backoffice');
     });
 
     it('leaves non-admin frontNames as-is (lowercased)', function () {
@@ -121,6 +124,27 @@ describe('ControllerDispatcher::dispatch() admin frontName forgery rejection', f
         $result = $dispatcher->dispatch($params, $request, $response);
 
         expect($result)->toBeFalse();
+    });
+
+    it('rejects an admin frontName that differs only by case', function () {
+        // Exact-case match (M1 semantics): /Admin/... must fall through to noroute rather
+        // than dispatch — a lenient match would still be caught later by the mis-cased
+        // route name breaking adminhtml_* layout handles, just with a worse failure mode.
+        $dispatcher = new ControllerDispatcher();
+        $request = makeRequest();
+        $response = new Mage_Core_Controller_Response_Http();
+
+        $params = [
+            '_maho_controller' => Mage_Adminhtml_IndexController::class,
+            '_maho_action' => 'indexAction',
+            '_maho_module' => 'Mage_Adminhtml',
+            '_maho_controller_name' => 'index',
+            '_maho_area' => 'adminhtml',
+            '_adminFrontName' => 'Admin',
+        ];
+
+        expect($dispatcher->dispatch($params, $request, $response))->toBeFalse();
+        expect($request->isDispatched())->toBeFalse();
     });
 
     it('rejects the default admin frontName when a custom path is configured', function () {

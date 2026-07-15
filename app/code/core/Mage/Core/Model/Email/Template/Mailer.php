@@ -48,6 +48,8 @@ class Mage_Core_Model_Email_Template_Mailer extends \Maho\DataObject
             $emailInfo = array_pop($this->_emailInfos);
             // Handle "Bcc" recipients of the current email
             $emailTemplate->addBcc($emailInfo->getBccEmails());
+            // Set (reset) the current email's attachments so they don't leak to the next recipient
+            $emailTemplate->setAttachments($emailInfo->getAttachments());
             // Set required design parameters and delegate email sending to Mage_Core_Model_Email_Template
             $emailTemplate
                 ->setDesignConfig(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND, 'store' => $this->getStoreId()])

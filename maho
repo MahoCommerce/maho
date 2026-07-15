@@ -91,9 +91,17 @@ $application->addCommand(new \MahoCLI\Commands\TranslationsUnused());
 $application->addCommand(new \MahoCLI\Commands\CreateCommand());
 
 $application->addCommand(new \MahoCLI\Commands\DevModuleList());
+$application->addCommand(new \MahoCLI\Commands\DevLspStart());
+$application->addCommand(new \MahoCLI\Commands\DevMcpStart());
+$application->addCommand(new \MahoCLI\Commands\PaypalWebhookSimulate());
 
 $application->addCommand(new \MahoCLI\Commands\FrontendLayoutDebug());
 $application->addCommand(new \MahoCLI\Commands\FrontendThemeCreate());
+
+$application->addCommand(new \MahoCLI\Commands\FeedList());
+$application->addCommand(new \MahoCLI\Commands\FeedGenerate());
+$application->addCommand(new \MahoCLI\Commands\FeedGenerateAll());
+$application->addCommand(new \MahoCLI\Commands\FeedValidate());
 
 $discoverer = new CommandDiscoverer();
 $commands = array_merge(

@@ -33,23 +33,12 @@ class Mage_Install_Helper_Data extends Mage_Core_Helper_Abstract
         }
         self::$phpChecked = true;
 
-        $searchDirs = array_filter(array_unique([
-            PHP_BINDIR,
-            dirname(PHP_BINDIR) . '/bin',
-            '/usr/local/bin',
-            '/usr/bin',
-            '/opt/homebrew/bin',
-        ]));
+        // Prefer PHP's own bindir over $PATH: in a web (fpm/apache) context PHP_BINARY points
+        // at php-fpm, so we look up the "php" CLI sibling rather than reusing the SAPI binary.
+        self::$phpBinary = (new \Symfony\Component\Process\ExecutableFinder())
+            ->find('php', null, [PHP_BINDIR, dirname(PHP_BINDIR) . '/bin', '/opt/homebrew/bin']);
 
-        foreach ($searchDirs as $dir) {
-            $path = $dir . '/php';
-            if (is_file($path) && is_executable($path)) {
-                self::$phpBinary = $path;
-                return self::$phpBinary;
-            }
-        }
-
-        return null;
+        return self::$phpBinary;
     }
 
     /**
@@ -69,24 +58,11 @@ class Mage_Install_Helper_Data extends Mage_Core_Helper_Abstract
             return self::$composerBinary;
         }
 
-        // Search common locations for the composer binary
-        $searchDirs = array_filter(array_unique([
-            PHP_BINDIR,
-            dirname(PHP_BINDIR) . '/bin',
-            '/usr/local/bin',
-            '/usr/bin',
-            '/opt/homebrew/bin',
-        ]));
+        // Search $PATH and common locations for the composer binary
+        self::$composerBinary = (new \Symfony\Component\Process\ExecutableFinder())
+            ->find('composer', null, [PHP_BINDIR, dirname(PHP_BINDIR) . '/bin', '/opt/homebrew/bin']);
 
-        foreach ($searchDirs as $dir) {
-            $path = $dir . '/composer';
-            if (is_file($path) && is_executable($path)) {
-                self::$composerBinary = $path;
-                return self::$composerBinary;
-            }
-        }
-
-        return null;
+        return self::$composerBinary;
     }
 
     public function isComposerAvailable(): bool

@@ -1,0 +1,122 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_ApiPlatform
+ */
+
+declare(strict_types=1);
+
+namespace Maho\ApiPlatform\Service;
+
+use Symfony\Contracts\Service\ResetInterface;
+
+/**
+ * Store Context Service.
+ *
+ * Manages store context for API requests. Ensures a valid store is set
+ * for multi-store configurations and provides store switching capability.
+ *
+ * Implements ResetInterface so the Symfony DI container clears static
+ * state between requests when the kernel runs in a long-lived process
+ * (tests, CLI commands, async workers).
+ */
+final class StoreContext implements ResetInterface
+{
+    private static ?int $currentStoreId = null;
+
+    /**
+     * Ensure a valid store context is set
+     *
+     * @param int|null $storeId Specific store ID, or null for default
+     * @return int The active store ID
+     */
+    public static function ensureStore(?int $storeId = null): int
+    {
+        if ($storeId !== null) {
+            self::setStore($storeId);
+            return $storeId;
+        }
+
+        // Get current store
+        $currentStoreId = (int) \Mage::app()->getStore()->getId();
+
+        // If we're on admin store (0), switch to default store
+        if ($currentStoreId === 0) {
+            $currentStoreId = self::getDefaultStoreId();
+            self::setStore($currentStoreId);
+        }
+
+        self::$currentStoreId = $currentStoreId;
+        return $currentStoreId;
+    }
+
+    /**
+     * Set the current store
+     */
+    public static function setStore(int $storeId): void
+    {
+        \Mage::app()->setCurrentStore($storeId);
+        self::$currentStoreId = $storeId;
+    }
+
+    /**
+     * Get the current store ID
+     */
+    public static function getStoreId(): int
+    {
+        if (self::$currentStoreId === null) {
+            return self::ensureStore();
+        }
+        return self::$currentStoreId;
+    }
+
+    /**
+     * Get the current store object
+     */
+    public static function getStore(): \Mage_Core_Model_Store
+    {
+        return \Mage::app()->getStore(self::getStoreId());
+    }
+
+    /**
+     * Get the root category ID for the current store
+     */
+    public static function getRootCategoryId(): int
+    {
+        return (int) self::getStore()->getRootCategoryId();
+    }
+
+    /**
+     * Get default store ID (first active store)
+     */
+    public static function getDefaultStoreId(): int
+    {
+        $defaultStore = \Mage::app()->getDefaultStoreView();
+        if ($defaultStore && $defaultStore->getId()) {
+            return (int) $defaultStore->getId();
+        }
+
+        return 1;
+    }
+
+    /**
+     * Reset static state between requests in long-lived processes.
+     */
+    #[\Override]
+    public function reset(): void
+    {
+        self::$currentStoreId = null;
+    }
+
+    /**
+     * Check if an entity is available for a given store.
+     *
+     * @param array<int|string> $entityStoreIds Store IDs assigned to the entity
+     */
+    public static function isAvailableForStore(array $entityStoreIds, int $storeId): bool
+    {
+        return in_array(0, $entityStoreIds) || in_array($storeId, $entityStoreIds);
+    }
+}

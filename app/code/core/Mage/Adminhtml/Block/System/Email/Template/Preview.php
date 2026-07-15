@@ -36,14 +36,6 @@ class Mage_Adminhtml_Block_System_Email_Template_Preview extends Mage_Adminhtml_
             $template->setTemplateStyles($this->getRequest()->getParam('styles'));
         }
 
-        $template->setTemplateStyles(
-            $this->maliciousCodeFilter($template->getTemplateStyles()),
-        );
-
-        $template->setTemplateText(
-            $this->maliciousCodeFilter($template->getTemplateText()),
-        );
-
         \Maho\Profiler::start('email_template_proccessing');
         $vars = [];
 
@@ -51,6 +43,11 @@ class Mage_Adminhtml_Block_System_Email_Template_Preview extends Mage_Adminhtml_
 
         if ($template->isPlain()) {
             $templateProcessed = '<pre>' . htmlspecialchars($templateProcessed) . '</pre>';
+        } else {
+            // Sanitize the resolved output (directives are now real URLs/values).
+            // Sanitizing before directive resolution would mangle {{...}}
+            // directives and leave their content unsanitized.
+            $templateProcessed = $this->maliciousCodeFilter($templateProcessed);
         }
 
         \Maho\Profiler::stop('email_template_proccessing');

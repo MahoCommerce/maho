@@ -8,6 +8,9 @@
  * @package Mage_Api
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_Model_Resource_Role extends Mage_Core_Model_Resource_Db_Abstract
 {
     #[\Override]

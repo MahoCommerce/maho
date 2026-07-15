@@ -55,6 +55,12 @@ class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
 
     public function create(array $postData): int
     {
+        foreach (['title', 'content'] as $required) {
+            if (empty($postData[$required])) {
+                $this->_fault('data_invalid', ucfirst($required) . ' is required.');
+            }
+        }
+
         try {
             $post = Mage::getModel('blog/post')
                 ->setData($postData)
