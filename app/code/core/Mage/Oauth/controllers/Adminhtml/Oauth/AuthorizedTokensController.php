@@ -33,7 +33,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizedTokensController extends Mage_Adminht
     {
         $this
             ->loadLayout()
-            ->_setActiveMenu('system/api/oauth_authorized_tokens')
+            ->_setActiveMenu('system/api/rest_legacy/oauth_authorized_tokens')
             ->renderLayout();
     }
 

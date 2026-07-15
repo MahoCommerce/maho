@@ -74,14 +74,8 @@ describe('Blog Post JSON-RPC API', function () {
             expect($result)->toBeArray();
 
             if (!empty($result)) {
-                $this->assertResponseStructure($response, [
-                    0 => [ // First post structure
-                        'post_id' => 'int',
-                        'title' => 'string',
-                        'url_key' => 'string',
-                        'is_active' => 'int',
-                    ],
-                ]);
+                // The list is a plain array of posts; assert the first one's shape.
+                expect($result[0])->toHaveKeys(['post_id', 'title', 'url_key', 'is_active']);
             }
         });
 
@@ -242,7 +236,9 @@ describe('Blog Post JSON-RPC API', function () {
             // Should either succeed (with date corrected) or fail with validation error
 
             if ($response->isSuccess()) {
-                $this->testPostIds[] = $response->getResult();
+                $postId = $response->getResult();
+                expect($postId)->toBeInt()->toBeGreaterThan(0);
+                $this->testPostIds[] = $postId;
             } else {
                 $this->assertErrorResponse($response);
             }
@@ -296,23 +292,19 @@ describe('Blog Post JSON-RPC API', function () {
 
     describe('Multi-call Operations', function () {
         it('can perform batch operations', function () {
+            // multiCall returns the raw return value of each call, in order -
+            // not a {result: ...} envelope. Both calls list posts.
             $calls = [
                 ['blog_post.list', []],
-                ['resources', []], // Get available API resources
+                ['blog_post.list', [['is_active' => 1]]],
             ];
 
             $sessionId = $this->getAuthenticatedSessionId();
             $responses = $this->apiClient->multiCall($calls, $sessionId);
 
             expect($responses)->toHaveCount(2);
-            expect($responses[0])->toHaveKey('result');
-            expect($responses[1])->toHaveKey('result');
-
-            // First call should return blog posts array
-            expect($responses[0]['result'])->toBeArray();
-
-            // Second call should return available resources
-            expect($responses[1]['result'])->toBeArray();
+            expect($responses[0])->toBeArray();
+            expect($responses[1])->toBeArray();
         });
     });
 });

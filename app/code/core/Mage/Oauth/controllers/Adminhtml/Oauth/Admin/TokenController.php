@@ -39,7 +39,7 @@ class Mage_Oauth_Adminhtml_Oauth_Admin_TokenController extends Mage_Adminhtml_Co
     {
         $this
             ->loadLayout()
-            ->_setActiveMenu('system/api/oauth_admin_token')
+            ->_setActiveMenu('system/api/rest_legacy/oauth_admin_token')
             ->renderLayout();
     }
 
