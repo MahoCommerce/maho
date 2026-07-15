@@ -33,11 +33,20 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Renderer_Currency extends Mage_Admi
     }
 
     /**
-     * Get currency code for the gift card row
+     * Get currency code for the gift card row.
+     *
+     * Grid collections carry the card's website associations either as the
+     * aggregated `website_ids` CSV (main grid GROUP_CONCAT) or as a single
+     * representative `website_id` (history grid subquery). All associated
+     * websites share one base currency (enforced on save), so the first id
+     * of either form is a valid currency source.
      */
     protected function _getCurrencyCode(Maho\DataObject $row): string
     {
         $websiteId = $row->getData('website_id');
+        if (!$websiteId && ($csv = (string) $row->getData('website_ids')) !== '') {
+            $websiteId = (int) explode(',', $csv)[0];
+        }
         if ($websiteId) {
             try {
                 return Mage::app()->getWebsite($websiteId)->getBaseCurrencyCode();

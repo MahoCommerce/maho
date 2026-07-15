@@ -124,7 +124,7 @@ describe('Integration: Quote → Order → Admin Totals with Gift Card', functio
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->save();
@@ -261,7 +261,7 @@ describe('Integration: Quote → Order → Admin Totals with Gift Card', functio
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(99999.00);
         $giftcard->setInitialBalance(99999.00);
         $giftcard->save();
@@ -376,7 +376,7 @@ describe('Integration: Quote → Order → Admin Totals with Gift Card', functio
         $giftcard1 = Mage::getModel('giftcard/giftcard');
         $giftcard1->setCode($this->helper->generateCode());
         $giftcard1->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard1->setWebsiteId(1);
+        $giftcard1->setWebsiteIds([1]);
         $giftcard1->setBalance(60.00);
         $giftcard1->setInitialBalance(60.00);
         $giftcard1->save();
@@ -384,7 +384,7 @@ describe('Integration: Quote → Order → Admin Totals with Gift Card', functio
         $giftcard2 = Mage::getModel('giftcard/giftcard');
         $giftcard2->setCode($this->helper->generateCode());
         $giftcard2->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard2->setWebsiteId(1);
+        $giftcard2->setWebsiteIds([1]);
         $giftcard2->setBalance(40.00);
         $giftcard2->setInitialBalance(40.00);
         $giftcard2->save();
@@ -713,7 +713,7 @@ describe('Observer: Admin Order Gift Card Processing', function () {
         $this->giftcard = Mage::getModel('giftcard/giftcard');
         $this->giftcard->setCode($this->helper->generateCode());
         $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->giftcard->setWebsiteId(1);
+        $this->giftcard->setWebsiteIds([1]);
         $this->giftcard->setBalance(100.00);
         $this->giftcard->setInitialBalance(100.00);
         $this->giftcard->save();
@@ -769,23 +769,22 @@ describe('Observer: Admin Order Gift Card Processing', function () {
 
         $websiteId = (int) $quote->getStore()->getWebsiteId();
 
-        // Card's website
-        $cardWebsiteId = (int) $this->giftcard->getWebsiteId();
+        // Card's website associations
+        $cardWebsiteIds = $this->giftcard->getWebsiteIds();
 
-        // For this test, they should match
-        expect($websiteId)->toBe($cardWebsiteId);
+        // For this test, the quote's website should be associated
+        expect($cardWebsiteIds)->toContain($websiteId);
 
-        // Test the isValidForWebsite method with a different website ID
+        // Test the isValidForWebsite method with a different website set
         // without actually saving to avoid foreign key constraint
-        // We set the data without persisting
-        $this->giftcard->setData('website_id', 999);
+        $this->giftcard->setWebsiteIds([999]);
 
-        // The isValidForWebsite method should return false because card's website (999)
-        // doesn't match the quote's website (1)
+        // The isValidForWebsite method should return false because the quote's
+        // website (1) is not in the card's association set (999)
         expect($this->giftcard->isValidForWebsite($websiteId))->toBeFalse();
 
         // Also verify a valid website ID would pass
-        $this->giftcard->setData('website_id', $websiteId);
+        $this->giftcard->setWebsiteIds([$websiteId]);
         expect($this->giftcard->isValidForWebsite($websiteId))->toBeTrue();
     });
 });
@@ -798,7 +797,7 @@ describe('Observer: Refund Gift Card on Order Cancel', function () {
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->save();
 
         $code = $giftcard->getCode();
@@ -863,7 +862,7 @@ describe('Observer: Refund Gift Card on Order Cancel', function () {
         $giftcard1->setBalance(100.00);
         $giftcard1->setInitialBalance(100.00);
         $giftcard1->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard1->setWebsiteId(1);
+        $giftcard1->setWebsiteIds([1]);
         $giftcard1->save();
 
         $giftcard2 = Mage::getModel('giftcard/giftcard');
@@ -871,7 +870,7 @@ describe('Observer: Refund Gift Card on Order Cancel', function () {
         $giftcard2->setBalance(75.00);
         $giftcard2->setInitialBalance(75.00);
         $giftcard2->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard2->setWebsiteId(1);
+        $giftcard2->setWebsiteIds([1]);
         $giftcard2->save();
 
         $code1 = $giftcard1->getCode();
@@ -953,7 +952,7 @@ describe('Observer: Refund Gift Card on Order Cancel', function () {
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setExpiresAt($expiresAt->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
         $giftcard->save();
 

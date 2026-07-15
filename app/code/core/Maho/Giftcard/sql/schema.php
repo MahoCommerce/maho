@@ -17,12 +17,10 @@ return function (Schema $schema): void {
     $giftcard->addColumn('giftcard_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $giftcard->addColumn('code', Types::STRING, ['length' => 64]);
     $giftcard->addColumn('status', Types::STRING, ['length' => 32, 'default' => 'active']);
-    // 1.0.0 single-website column, kept nullable for backward compatibility during
-    // the multi-website migration. The authoritative association is the
-    // giftcard_website junction table introduced in 1.1.0; this column is left in
-    // place so existing reads (and the FK back to core_website) keep working.
-    // Scheduled for removal once consumers have moved off it.
-    $giftcard->addColumn('website_id', Types::SMALLINT, ['unsigned' => true, 'notnull' => false]);
+    // Website associations live in the giftcard_website junction (1.1.0). The
+    // pre-1.1.0 single `website_id` column is intentionally undeclared: the
+    // declarative pass preserves it (additive merge) until the 1.0.0-1.1.0
+    // upgrade script backfills the junction from it and drops it.
     $giftcard->addColumn('balance', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
     $giftcard->addColumn('initial_balance', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
     $giftcard->addColumn('recipient_name', Types::STRING, ['length' => 255, 'notnull' => false]);
@@ -41,17 +39,10 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('giftcard_id')->create(),
     );
     $giftcard->addUniqueIndex(['code']);
-    $giftcard->addIndex(['website_id']);
     $giftcard->addIndex(['status']);
     $giftcard->addIndex(['status', 'expires_at']);
     $giftcard->addIndex(['purchase_order_id']);
     $giftcard->addIndex(['email_scheduled_at', 'email_sent_at']);
-    $giftcard->addForeignKeyConstraint(
-        'core_website',
-        ['website_id'],
-        ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
     $giftcard->addForeignKeyConstraint(
         'sales_flat_order',
         ['purchase_order_id'],
@@ -141,8 +132,8 @@ return function (Schema $schema): void {
     ]);
 
     // Junction table for multi-website gift card associations (1.1.0+).
-    // A card can be valid on any subset of websites; lookup at apply-time joins
-    // here instead of comparing the legacy giftcard.website_id scalar.
+    // A card can be valid on any subset of websites; apply-time validation is
+    // a membership check against these rows.
     $website = $schema->createTable('giftcard_website');
     $website->addColumn('giftcard_id', Types::INTEGER, ['unsigned' => true]);
     $website->addColumn('website_id', Types::SMALLINT, ['unsigned' => true]);

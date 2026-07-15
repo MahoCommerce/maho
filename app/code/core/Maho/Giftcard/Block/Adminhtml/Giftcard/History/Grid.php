@@ -24,11 +24,22 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_History_Grid extends Mage_Adminhtml
     {
         $collection = Mage::getModel('giftcard/history')->getCollection();
 
-        // Join gift card table to get code and website_id (for currency lookup)
+        // Join gift card table to get code, plus a representative website id
+        // for the currency lookup: the card's associated websites all share
+        // one base currency (enforced on save), so MIN() over the junction is
+        // a valid currency source. A scalar subquery instead of a join keeps
+        // history rows from being duplicated per associated website.
         $collection->getSelect()->join(
             ['gc' => $collection->getTable('giftcard/giftcard')],
             'main_table.giftcard_id = gc.giftcard_id',
-            ['code', 'recipient_email', 'website_id'],
+            [
+                'code',
+                'recipient_email',
+                'website_id' => new Maho\Db\Expr(sprintf(
+                    '(SELECT MIN(gw.website_id) FROM %s gw WHERE gw.giftcard_id = gc.giftcard_id)',
+                    $collection->getTable('giftcard/website'),
+                )),
+            ],
         );
 
         // Join order table to get increment_id

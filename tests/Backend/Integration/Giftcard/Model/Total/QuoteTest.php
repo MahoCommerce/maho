@@ -42,7 +42,7 @@ describe('Quote Total Collection with Gift Cards', function () {
         $this->giftcard = Mage::getModel('giftcard/giftcard');
         $this->giftcard->setCode($this->helper->generateCode());
         $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->giftcard->setWebsiteId(1);
+        $this->giftcard->setWebsiteIds([1]);
         $this->giftcard->setBalance(100.00);
         $this->giftcard->setInitialBalance(100.00);
         $this->giftcard->save();
@@ -84,7 +84,7 @@ describe('Quote Total Collection with Gift Cards', function () {
         $smallCard = Mage::getModel('giftcard/giftcard');
         $smallCard->setCode($this->helper->generateCode());
         $smallCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $smallCard->setWebsiteId(1);
+        $smallCard->setWebsiteIds([1]);
         $smallCard->setBalance(5.00); // Very small balance
         $smallCard->setInitialBalance(5.00);
         $smallCard->save();
@@ -117,7 +117,7 @@ describe('Quote Total Collection with Gift Cards', function () {
         $card2 = Mage::getModel('giftcard/giftcard');
         $card2->setCode($this->helper->generateCode());
         $card2->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $card2->setWebsiteId(1);
+        $card2->setWebsiteIds([1]);
         $card2->setBalance(50.00);
         $card2->setInitialBalance(50.00);
         $card2->save();
@@ -153,7 +153,7 @@ describe('Quote Total Collection with Gift Cards', function () {
         $bigCard = Mage::getModel('giftcard/giftcard');
         $bigCard->setCode($this->helper->generateCode());
         $bigCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $bigCard->setWebsiteId(1);
+        $bigCard->setWebsiteIds([1]);
         $bigCard->setBalance(10000.00); // Much more than any product
         $bigCard->setInitialBalance(10000.00);
         $bigCard->save();
@@ -186,7 +186,7 @@ describe('Quote Total Collection with Gift Cards', function () {
         $invalidCard = Mage::getModel('giftcard/giftcard');
         $invalidCard->setCode($this->helper->generateCode());
         $invalidCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_DISABLED);
-        $invalidCard->setWebsiteId(1);
+        $invalidCard->setWebsiteIds([1]);
         $invalidCard->setBalance(100.00);
         $invalidCard->setInitialBalance(100.00);
         $invalidCard->save();
@@ -256,7 +256,7 @@ describe('Quote Total Fetch Method', function () {
         $this->giftcard = Mage::getModel('giftcard/giftcard');
         $this->giftcard->setCode($this->helper->generateCode());
         $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->giftcard->setWebsiteId(1);
+        $this->giftcard->setWebsiteIds([1]);
         $this->giftcard->setBalance(100.00);
         $this->giftcard->setInitialBalance(100.00);
         $this->giftcard->save();
@@ -325,7 +325,7 @@ describe('Quote Total Website Validation', function () {
         $this->giftcard = Mage::getModel('giftcard/giftcard');
         $this->giftcard->setCode($this->helper->generateCode());
         $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->giftcard->setWebsiteId(1);
+        $this->giftcard->setWebsiteIds([1]);
         $this->giftcard->setBalance(100.00);
         $this->giftcard->setInitialBalance(100.00);
         $this->giftcard->save();
@@ -402,7 +402,7 @@ describe('Giftcard Product Exclusion', function () {
         $this->giftcard = Mage::getModel('giftcard/giftcard');
         $this->giftcard->setCode($this->helper->generateCode());
         $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->giftcard->setWebsiteId(1);
+        $this->giftcard->setWebsiteIds([1]);
         $this->giftcard->setBalance(500.00);
         $this->giftcard->setInitialBalance(500.00);
         $this->giftcard->save();

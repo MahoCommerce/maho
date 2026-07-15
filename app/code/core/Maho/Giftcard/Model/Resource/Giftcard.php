@@ -79,6 +79,19 @@ class Maho_Giftcard_Model_Resource_Giftcard extends Mage_Core_Model_Resource_Db_
                 );
             }
 
+            // A card's balance is denominated in one currency, so every
+            // associated website must share the same base currency — otherwise
+            // the balance would silently mean different amounts per website.
+            $currencies = [];
+            foreach ($ids as $websiteId) {
+                $currencies[Mage::app()->getWebsite((int) $websiteId)->getBaseCurrencyCode()] = true;
+            }
+            if (count($currencies) > 1) {
+                throw new Mage_Core_Exception(
+                    Mage::helper('giftcard')->__('A gift card can only be assigned to websites that share the same base currency.'),
+                );
+            }
+
             $adapter = $this->_getWriteAdapter();
             $table = $this->getTable('giftcard/website');
             $giftcardId = (int) $object->getId();

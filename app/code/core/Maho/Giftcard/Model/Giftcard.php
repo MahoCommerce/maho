@@ -15,8 +15,6 @@ declare(strict_types=1);
  * @method $this setCode(string $value)
  * @method string getStatus()
  * @method $this setStatus(string $value)
- * @method int getWebsiteId()
- * @method $this setWebsiteId(int $value)
  * @method $this setBalance(float $value)
  * @method float getInitialBalance()
  * @method $this setInitialBalance(float $value)
@@ -70,11 +68,16 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Get website
+     * Get the card's website: the first (lowest-id) website it is associated
+     * with. All associated websites are required to share one base currency
+     * (enforced on save), so any of them is a valid currency source; the
+     * lowest id keeps the choice deterministic. Falls back to the default
+     * website for an orphaned card with no associations.
      */
     public function getWebsite(): Mage_Core_Model_Website
     {
-        return Mage::app()->getWebsite($this->getWebsiteId());
+        $websiteIds = $this->getWebsiteIds();
+        return Mage::app()->getWebsite($websiteIds[0] ?? null);
     }
 
     /**
@@ -153,39 +156,39 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Lazily-loaded snapshot of the card's junction rows. Deliberately kept
+     * out of the `website_ids` data key: that key means "pending change to
+     * persist" to the resource's _afterSave sync, so caching a mere read
+     * there would re-sync the junction on every subsequent save (checkout
+     * and refund call getWebsiteIds() before saving balance changes).
+     *
+     * @var int[]|null
+     */
+    private ?array $loadedWebsiteIds = null;
+
+    /**
      * Get the list of website IDs this card is valid on.
      *
-     * Loaded lazily from the giftcard_website junction and memoised on the
-     * model under the `website_ids` data key. Setting an array via
-     * setWebsiteIds() (e.g. from the admin form) replaces the memoised list;
-     * the resource model's _afterSave hook then syncs the junction.
-     *
-     * Falls back to the legacy `website_id` scalar when the junction is
-     * empty. Preserves pre-1.1.0 semantics for code paths that still set
-     * the scalar directly (programmatic creation, imports, fixtures, tests)
-     * without populating the junction — the 1.0.0→1.1.0 upgrade backfills
-     * existing rows so this fallback only matters for new unmigrated saves.
+     * Returns the pending set from setWebsiteIds() when one exists, otherwise
+     * lazy-loads the current associations from the giftcard_website junction.
      *
      * @return int[]
      */
     public function getWebsiteIds(): array
     {
         $ids = $this->getData('website_ids');
-        if ($ids === null) {
-            if ($this->getId()) {
-                /** @var Maho_Giftcard_Model_Resource_Giftcard $resource */
-                $resource = $this->getResource();
-                $ids = $resource->getWebsiteIds((int) $this->getId());
-            } else {
-                $ids = [];
-            }
-            $this->setData('website_ids', $ids);
+        if ($ids !== null) {
+            return array_map('intval', (array) $ids);
         }
-        $ids = array_map('intval', (array) $ids);
-        if ($ids === [] && $this->getWebsiteId()) {
-            return [(int) $this->getWebsiteId()];
+        if (!$this->getId()) {
+            return [];
         }
-        return $ids;
+        if ($this->loadedWebsiteIds === null) {
+            /** @var Maho_Giftcard_Model_Resource_Giftcard $resource */
+            $resource = $this->getResource();
+            $this->loadedWebsiteIds = $resource->getWebsiteIds((int) $this->getId());
+        }
+        return $this->loadedWebsiteIds;
     }
 
     /**
@@ -205,6 +208,22 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         }
         $this->setData('website_ids', array_keys($clean));
         return $this;
+    }
+
+    /**
+     * A new card saved without explicit website associations defaults to the
+     * current website (matching the pre-1.1.0 behaviour of the `website_id`
+     * scalar), so programmatic creations and imports never produce an
+     * orphaned card that fails closed on every website.
+     */
+    #[\Override]
+    protected function _beforeSave()
+    {
+        if (!$this->getId() && $this->getData('website_ids') === null) {
+            $this->setWebsiteIds([(int) Mage::app()->getStore()->getWebsiteId()]);
+        }
+
+        return parent::_beforeSave();
     }
 
     /**

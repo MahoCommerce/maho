@@ -37,4 +37,22 @@ class Maho_Giftcard_Model_Resource_Giftcard_Collection extends Mage_Core_Model_R
         $this->addFieldToFilter('purchase_order_id', $orderId);
         return $this;
     }
+
+    /**
+     * Filter to cards valid on the given website, by membership in the
+     * giftcard_website junction. A correlated subquery instead of a join, so
+     * the filter composes with unqualified addFieldToFilter() column names
+     * (a join would make shared columns like giftcard_id ambiguous).
+     *
+     * @return $this
+     */
+    public function addWebsiteFilter(int $websiteId): self
+    {
+        $this->getSelect()->where(
+            'main_table.giftcard_id IN (SELECT giftcard_id FROM '
+            . $this->getTable('giftcard/website') . ' WHERE website_id = ?)',
+            $websiteId,
+        );
+        return $this;
+    }
 }

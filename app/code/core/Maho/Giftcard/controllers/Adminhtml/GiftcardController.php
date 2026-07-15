@@ -157,9 +157,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
                 }
 
                 // Normalise the multiselect post: the form sends website_ids[]
-                // (or, if the JS is bypassed, sometimes a single value). Keep
-                // the legacy website_id scalar in sync with the first selection
-                // so currency derivation and the back-compat FK keep working.
+                // (or, if the JS is bypassed, sometimes a single value).
                 $websiteIds = $data['website_ids'] ?? [];
                 if (!is_array($websiteIds)) {
                     $websiteIds = $websiteIds === '' ? [] : [$websiteIds];
@@ -172,7 +170,6 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
                     $websiteIds = [(int) Mage::app()->getWebsite()->getId()];
                 }
                 $data['website_ids'] = $websiteIds;
-                $data['website_id'] = $websiteIds[0];
 
                 // Set expiration if not set
                 if (!$model->getId() && (!isset($data['expires_at']) || $data['expires_at'] === '')) {
@@ -364,7 +361,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             'balance' => $giftcard->getBalance(),
             'initial_balance' => $giftcard->getInitialBalance(),
             'currency_code' => $giftcard->getCurrencyCode(),
-            'website_id' => $giftcard->getWebsiteId(),
+            'website_ids' => $giftcard->getWebsiteIds(),
             'status' => $giftcard->getStatus(),
             'is_valid' => $giftcard->isValid(),
             'expires_at' => $giftcard->getExpiresAt(),

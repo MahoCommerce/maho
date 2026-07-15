@@ -48,7 +48,7 @@ describe('Multistore Gift Card Isolation', function () {
         $this->cardWebsite1 = Mage::getModel('giftcard/giftcard');
         $this->cardWebsite1->setCode($this->helper->generateCode());
         $this->cardWebsite1->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->cardWebsite1->setWebsiteId(1);
+        $this->cardWebsite1->setWebsiteIds([1]);
         $this->cardWebsite1->setBalance(100.00);
         $this->cardWebsite1->setInitialBalance(100.00);
         $this->cardWebsite1->save();
@@ -57,7 +57,7 @@ describe('Multistore Gift Card Isolation', function () {
         $this->cardWebsite2 = Mage::getModel('giftcard/giftcard');
         $this->cardWebsite2->setCode($this->helper->generateCode());
         $this->cardWebsite2->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->cardWebsite2->setWebsiteId($this->testWebsite->getId());
+        $this->cardWebsite2->setWebsiteIds([$this->testWebsite->getId()]);
         $this->cardWebsite2->setBalance(75.00);
         $this->cardWebsite2->setInitialBalance(75.00);
         $this->cardWebsite2->save();
@@ -191,7 +191,7 @@ describe('Multicurrency Gift Card Conversion', function () {
         $this->giftcard = Mage::getModel('giftcard/giftcard');
         $this->giftcard->setCode($this->helper->generateCode());
         $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->giftcard->setWebsiteId(1);
+        $this->giftcard->setWebsiteIds([1]);
         $this->giftcard->setBalance(100.00); // Stored in website's base currency
         $this->giftcard->setInitialBalance(100.00);
         $this->giftcard->save();
@@ -228,7 +228,7 @@ describe('Multicurrency Gift Card Conversion', function () {
     });
 
     test('gift card getCurrencyCode returns website base currency', function () {
-        $website = Mage::app()->getWebsite($this->giftcard->getWebsiteId());
+        $website = $this->giftcard->getWebsite();
         $expectedCurrency = $website->getBaseCurrencyCode();
 
         expect($this->giftcard->getCurrencyCode())->toBe($expectedCurrency);
@@ -243,7 +243,7 @@ describe('Multicurrency Quote Total Collection', function () {
         $this->giftcard = Mage::getModel('giftcard/giftcard');
         $this->giftcard->setCode($this->helper->generateCode());
         $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->giftcard->setWebsiteId(1);
+        $this->giftcard->setWebsiteIds([1]);
         $this->giftcard->setBalance(100.00); // In base currency
         $this->giftcard->setInitialBalance(100.00);
         $this->giftcard->save();
@@ -335,7 +335,7 @@ describe('Full Order Flow with Multistore Validation', function () {
         $this->giftcard = Mage::getModel('giftcard/giftcard');
         $this->giftcard->setCode($this->helper->generateCode());
         $this->giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $this->giftcard->setWebsiteId(1);
+        $this->giftcard->setWebsiteIds([1]);
         $this->giftcard->setBalance(50.00);
         $this->giftcard->setInitialBalance(50.00);
         $this->giftcard->save();
@@ -430,7 +430,7 @@ describe('Edge Cases: Multistore and Multicurrency', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setExpiresAt($pastDate);
@@ -445,7 +445,7 @@ describe('Edge Cases: Multistore and Multicurrency', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_DISABLED);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->save();
@@ -458,7 +458,7 @@ describe('Edge Cases: Multistore and Multicurrency', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(0.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->save();
@@ -470,7 +470,7 @@ describe('Edge Cases: Multistore and Multicurrency', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($this->helper->generateCode());
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1); // Keep FK valid
+        $giftcard->setWebsiteIds([1]); // Keep FK valid
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->save();
@@ -479,9 +479,9 @@ describe('Edge Cases: Multistore and Multicurrency', function () {
         expect($giftcard->isValidForWebsite(1))->toBeTrue();
 
         // Test the core validation logic by checking a hypothetical mismatch
-        // The isValidForWebsite method checks: isValid() && (websiteId === $websiteId)
-        // We verify the website matching logic works correctly
+        // The isValidForWebsite method checks: isValid() && junction membership
+        // We verify the website association is persisted correctly
         expect($giftcard->isValid())->toBeTrue();
-        expect((int) $giftcard->getWebsiteId())->toBe(1);
+        expect($giftcard->getWebsiteIds())->toBe([1]);
     });
 });

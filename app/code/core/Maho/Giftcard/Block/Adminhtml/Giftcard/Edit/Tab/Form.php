@@ -81,8 +81,6 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
         // Website selector with currency mapping. Multiselect so a card can
         // be valid on more than one website; on save the controller persists
         // these via setWebsiteIds() into the giftcard_website junction.
-        // The legacy single `website_id` scalar is still written for back-compat
-        // (currency derivation, FK constraint) — set to the first selection.
         $websites = Mage::app()->getWebsites();
         $websiteCurrencies = [];
         $websiteValues = [];
@@ -100,11 +98,6 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
             // Existing card — pre-select the websites already associated via
             // the junction. Editable so an admin can re-scope after the fact.
             $defaultSelection = $model->getWebsiteIds();
-            if (empty($defaultSelection) && $model->getWebsiteId()) {
-                // Pre-1.1.0 row that hasn't been backfilled yet — fall back
-                // to the legacy scalar so the multiselect isn't blank.
-                $defaultSelection = [(int) $model->getWebsiteId()];
-            }
             $currencyNote = '[' . $model->getCurrencyCode() . ']';
         }
 
@@ -119,7 +112,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
                 $websiteValues,
             ),
             'value'    => $defaultSelection,
-            'note'     => Mage::helper('giftcard')->__('Hold Ctrl/Cmd to select multiple. Card balance is in the first selected website\'s base currency.'),
+            'note'     => Mage::helper('giftcard')->__('Hold Ctrl/Cmd to select multiple. All selected websites must share the same base currency; the card balance is denominated in it.'),
             'after_element_html' => $this->_getWebsiteCurrencyScript($websiteCurrencies),
         ]);
 
@@ -139,7 +132,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Tab_Form extends Mage_Adminhtm
             ]);
         } else {
             // Existing gift card - show initial balance as read-only reference
-            $website = Mage::app()->getWebsite($model->getWebsiteId());
+            $website = $model->getWebsite();
             $formattedInitialBalance = $website->getBaseCurrency()->formatPrecision(
                 $model->getInitialBalance(),
                 2,

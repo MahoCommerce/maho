@@ -17,7 +17,7 @@ describe('Giftcard CRUD Operations', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setRecipientName('Test Recipient');
@@ -39,7 +39,7 @@ describe('Giftcard CRUD Operations', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(75.50);
         $giftcard->setInitialBalance(75.50);
         $giftcard->save();
@@ -59,7 +59,7 @@ describe('Giftcard CRUD Operations', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(200.00);
         $giftcard->setInitialBalance(200.00);
         $giftcard->save();
@@ -83,7 +83,7 @@ describe('Giftcard CRUD Operations', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setMessage('Original message');
@@ -110,7 +110,7 @@ describe('Giftcard CRUD Operations', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->save();
@@ -131,7 +131,7 @@ describe('Giftcard Balance Operations with Database', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->save();
@@ -161,7 +161,7 @@ describe('Giftcard Balance Operations with Database', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(50.00);
         $giftcard->setInitialBalance(50.00);
         $giftcard->save();
@@ -180,7 +180,7 @@ describe('Giftcard Balance Operations with Database', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(25.00);
         $giftcard->setInitialBalance(25.00);
         $giftcard->save();
@@ -196,7 +196,7 @@ describe('Giftcard Balance Operations with Database', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_DISABLED);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->save();
@@ -212,7 +212,7 @@ describe('Giftcard Balance Operations with Database', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->save();
@@ -231,7 +231,7 @@ describe('Giftcard Balance Operations with Database', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(0.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->save();
@@ -256,7 +256,7 @@ describe('Giftcard Balance Operations with Database', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(0.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->save();
@@ -275,7 +275,7 @@ describe('Giftcard Balance Operations with Database', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->save();
@@ -300,7 +300,7 @@ describe('Giftcard Balance Operations with Database', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->save();
@@ -317,7 +317,7 @@ describe('Giftcard Balance Operations with Database', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(0.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->save();
@@ -339,7 +339,7 @@ describe('Giftcard Expiration Validation', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setExpiresAt($pastDate);
@@ -362,7 +362,7 @@ describe('Giftcard Expiration Validation', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->setExpiresAt($futureDate);
@@ -380,7 +380,7 @@ describe('Giftcard Collection Operations', function () {
         $activeCard = Mage::getModel('giftcard/giftcard');
         $activeCard->setCode($helper->generateCode());
         $activeCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $activeCard->setWebsiteId(1);
+        $activeCard->setWebsiteIds([1]);
         $activeCard->setBalance(100.00);
         $activeCard->setInitialBalance(100.00);
         $activeCard->save();
@@ -388,7 +388,7 @@ describe('Giftcard Collection Operations', function () {
         $usedCard = Mage::getModel('giftcard/giftcard');
         $usedCard->setCode($helper->generateCode());
         $usedCard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_USED);
-        $usedCard->setWebsiteId(1);
+        $usedCard->setWebsiteIds([1]);
         $usedCard->setBalance(0.00);
         $usedCard->setInitialBalance(50.00);
         $usedCard->save();
@@ -408,16 +408,24 @@ describe('Giftcard Collection Operations', function () {
         $card1 = Mage::getModel('giftcard/giftcard');
         $card1->setCode($helper->generateCode());
         $card1->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $card1->setWebsiteId(1);
+        $card1->setWebsiteIds([1]);
         $card1->setBalance(100.00);
         $card1->setInitialBalance(100.00);
         $card1->save();
 
         $collection = Mage::getResourceModel('giftcard/giftcard_collection')
-            ->addFieldToFilter('website_id', 1)
+            ->addWebsiteFilter(1)
             ->addFieldToFilter('giftcard_id', $card1->getId());
 
         expect($collection->getSize())->toBe(1);
+
+        // Membership filtering: the same card is not returned for a website
+        // it is not associated with.
+        $otherWebsite = Mage::getResourceModel('giftcard/giftcard_collection')
+            ->addWebsiteFilter(999)
+            ->addFieldToFilter('giftcard_id', $card1->getId());
+
+        expect($otherWebsite->getSize())->toBe(0);
     });
 });
 
@@ -429,7 +437,7 @@ describe('Giftcard History Integration', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->save();
@@ -461,7 +469,7 @@ describe('Giftcard History Integration', function () {
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setCode($code);
         $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
-        $giftcard->setWebsiteId(1);
+        $giftcard->setWebsiteIds([1]);
         $giftcard->setBalance(100.00);
         $giftcard->setInitialBalance(100.00);
         $giftcard->save();
