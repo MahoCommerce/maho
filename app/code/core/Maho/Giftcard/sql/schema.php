@@ -17,10 +17,6 @@ return function (Schema $schema): void {
     $giftcard->addColumn('giftcard_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $giftcard->addColumn('code', Types::STRING, ['length' => 64]);
     $giftcard->addColumn('status', Types::STRING, ['length' => 32, 'default' => 'active']);
-    // Website associations live in the giftcard_website junction (1.1.0). The
-    // pre-1.1.0 single `website_id` column is intentionally undeclared: the
-    // declarative pass preserves it (additive merge) until the 1.0.0-1.1.0
-    // upgrade script backfills the junction from it and drops it.
     $giftcard->addColumn('balance', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
     $giftcard->addColumn('initial_balance', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
     $giftcard->addColumn('recipient_name', Types::STRING, ['length' => 255, 'notnull' => false]);
