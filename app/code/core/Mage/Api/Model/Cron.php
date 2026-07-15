@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2023 The OpenMage Contributors <https://openmage.org>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Api
