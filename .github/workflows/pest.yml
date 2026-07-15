@@ -206,6 +206,7 @@ jobs:
             tests/Browser/Screenshots/
             var/log/
           if-no-files-found: ignore
+          retention-days: 7
 
   pest-sqlite:
     name: Test Suite (sqlite)
@@ -327,3 +328,4 @@ jobs:
             tests/Browser/Screenshots/
             var/log/
           if-no-files-found: ignore
+          retention-days: 7
