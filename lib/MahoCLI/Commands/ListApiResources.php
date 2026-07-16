@@ -140,19 +140,19 @@ class ListApiResources extends BaseMahoCommand
      * @param array<string, array{label: string, section: string, operations: array<string, string>}> $registryResources
      * @return array{module: string, resource: string, id: string, section: string, route: ?string, methods: list<string>, graphql: bool, access: string, provider: ?string}
      */
-    private function describe(\ReflectionClass $ref, object $attr, array $registryResources, ApiPermissionRegistry $registry): array
+    private function describe(\ReflectionClass $ref, ApiResource $attr, array $registryResources, ApiPermissionRegistry $registry): array
     {
         $class = $ref->getName();
-        $shortName = (method_exists($attr, 'getShortName') ? $attr->getShortName() : null) ?: $ref->getShortName();
+        $shortName = $attr->getShortName() ?: $ref->getShortName();
         $module = str_replace('\\', '_', explode('\\Api\\', $class)[0]);
 
-        $explicitId = property_exists($attr, 'mahoId') ? $attr->mahoId : null;
-        $customerScoped = property_exists($attr, 'mahoCustomerScoped') && $attr->mahoCustomerScoped;
+        $explicitId = $attr->mahoId;
+        $customerScoped = $attr->mahoCustomerScoped;
 
         // Collect HTTP methods + a base route from the operations.
         $methods = [];
         $route = null;
-        $operations = method_exists($attr, 'getOperations') ? $attr->getOperations() : null;
+        $operations = $attr->getOperations();
         if ($operations !== null) {
             foreach ($operations as $op) {
                 if (!$op instanceof HttpOperation) {
@@ -169,11 +169,15 @@ class ListApiResources extends BaseMahoCommand
                 }
             }
         }
-        // Stable, familiar ordering.
+        // Stable, familiar ordering; methods outside the list (e.g. HEAD) sort last.
         $order = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
-        usort($methods, fn($a, $b) => array_search($a, $order, true) <=> array_search($b, $order, true));
+        $rank = function (string $m) use ($order): int {
+            $pos = array_search($m, $order, true);
+            return $pos === false ? count($order) : $pos;
+        };
+        usort($methods, fn($a, $b) => $rank($a) <=> $rank($b));
 
-        $graphql = method_exists($attr, 'getGraphQlOperations') && !empty($attr->getGraphQlOperations());
+        $graphql = !empty($attr->getGraphQlOperations());
 
         // Permission id: explicit mahoId, else the compiler's exact derivation, so
         // the id we display/look up matches the registry key the compiler baked in.
@@ -192,13 +196,11 @@ class ListApiResources extends BaseMahoCommand
             $displayId = $lookupId;
         }
 
-        $section = (property_exists($attr, 'mahoSection') ? $attr->mahoSection : null)
+        $section = $attr->mahoSection
             ?? ($registryResources[$lookupId]['section'] ?? null)
             ?? (str_contains($module, '_') ? substr($module, (int) strpos($module, '_') + 1) : $module);
 
-        $provider = method_exists($attr, 'getProvider') && is_string($attr->getProvider())
-            ? $attr->getProvider()
-            : null;
+        $provider = is_string($attr->getProvider()) ? $attr->getProvider() : null;
 
         return [
             'module' => $module,

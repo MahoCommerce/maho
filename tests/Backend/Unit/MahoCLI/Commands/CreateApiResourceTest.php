@@ -32,10 +32,6 @@ function createApiResourceTester(): CommandTester
     return new CommandTester($command);
 }
 
-afterEach(function (): void {
-    Mage::unregister('isSecureArea');
-});
-
 it('scaffolds a CRUD resource from a flat-table model with introspected properties', function () {
     $tester = createApiResourceTester();
     $tester->execute([
@@ -76,6 +72,24 @@ it('derives the permission id via the compiler inflector for irregular names', f
     expect($out)->toContain("uriTemplate: '/people',")
         ->and($out)->toContain("is_granted('people/read')")
         ->and($out)->not->toContain('persons');
+});
+
+it('generates a processor stub and wires the operations to it with --with-processor', function () {
+    $tester = createApiResourceTester();
+    $tester->execute([
+        '--module' => 'Mage_Cms',
+        '--resource' => 'Sample',
+        '--model' => 'cms/page',
+        '--with-processor' => true,
+        '--dry-run' => true,
+    ]);
+
+    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
+    $out = $tester->getDisplay();
+    expect($out)->toContain('final class SampleProcessor extends CrudProcessor')
+        // the operations reference the generated processor, not the shared one
+        ->and($out)->toContain('processor: SampleProcessor::class,')
+        ->and($out)->not->toContain('processor: CrudProcessor::class,');
 });
 
 it('falls back to a property stub for EAV entities', function () {

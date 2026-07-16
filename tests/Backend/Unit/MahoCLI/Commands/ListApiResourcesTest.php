@@ -30,10 +30,6 @@ function listApiResourcesTester(): CommandTester
     return new CommandTester($command);
 }
 
-afterEach(function (): void {
-    Mage::unregister('isSecureArea');
-});
-
 it('lists discovered resources as JSON with resolved routes and permission ids', function () {
     $tester = listApiResourcesTester();
     $tester->execute(['--module' => 'Maho_Blog', '--json' => true]);

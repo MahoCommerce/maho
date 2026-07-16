@@ -32,8 +32,8 @@ class CreateApiResource extends BaseMahoCommand
             ->addOption('module', 'm', InputOption::VALUE_REQUIRED, 'Module name (e.g., Maho_Blog)')
             ->addOption('resource', 'r', InputOption::VALUE_REQUIRED, 'Resource short name in StudlyCase (e.g., BlogPost)')
             ->addOption('model', null, InputOption::VALUE_REQUIRED, 'Model alias (e.g., blog/post)')
-            ->addOption('route', null, InputOption::VALUE_OPTIONAL, 'REST URI base (e.g., /blog-posts); defaults to the kebab-cased plural of the resource')
-            ->addOption('section', null, InputOption::VALUE_OPTIONAL, 'Admin permission section (defaults to the module name)')
+            ->addOption('route', null, InputOption::VALUE_REQUIRED, 'REST URI base (e.g., /blog-posts); defaults to the kebab-cased plural of the resource')
+            ->addOption('section', null, InputOption::VALUE_REQUIRED, 'Admin permission section (defaults to the module name)')
             ->addOption('with-processor', null, InputOption::VALUE_NONE, 'Also generate a custom Processor stub instead of reusing the shared CrudProcessor')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Overwrite existing files')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Print the generated files to stdout instead of writing them');
@@ -54,6 +54,10 @@ class CreateApiResource extends BaseMahoCommand
                 }
                 return $v;
             });
+        if (!preg_match('/^[A-Z][A-Za-z0-9]+_[A-Z][A-Za-z0-9]+$/', (string) $module)) {
+            $io->error('Module name must look like Vendor_Module (e.g., Maho_Blog)');
+            return Command::INVALID;
+        }
 
         $moduleConfig = Mage::getConfig()->getNode('modules/' . $module);
         if (!$moduleConfig) {
@@ -75,7 +79,7 @@ class CreateApiResource extends BaseMahoCommand
                 }
                 return $v;
             });
-        if (!preg_match('/^[A-Z][A-Za-z0-9]+$/', $resourceName)) {
+        if (!preg_match('/^[A-Z][A-Za-z0-9]+$/', (string) $resourceName)) {
             $io->error('Resource name must be StudlyCase (e.g., BlogPost)');
             return Command::INVALID;
         }
@@ -88,6 +92,12 @@ class CreateApiResource extends BaseMahoCommand
                 }
                 return $v;
             });
+        // Re-validate option-supplied values too: the alias is emitted verbatim
+        // into the generated MODEL constant, so it must be quote-safe.
+        if (!preg_match('#^[a-z0-9_]+/[a-z0-9_]+$#', (string) $modelAlias)) {
+            $io->error('Model alias must look like group/model (e.g., blog/post)');
+            return Command::INVALID;
+        }
 
         $model = Mage::getModel($modelAlias);
         if (!is_object($model)) {
@@ -121,7 +131,10 @@ class CreateApiResource extends BaseMahoCommand
         $processorImport = $withProcessor ? '' : "use Maho\\ApiPlatform\\CrudProcessor;\n";
 
         $tokens = [
-            '{{YEAR}}' => date('Y'),
+            // Copyright holder for the generated headers: the vendor segment of
+            // the module name ('Maho_Blog' → 'Maho'), a bare year is not a valid
+            // SPDX-FileCopyrightText value.
+            '{{COPYRIGHT}}' => date('Y') . ' ' . substr($module, 0, (int) strpos($module, '_')),
             '{{PACKAGE}}' => $module,
             '{{NAMESPACE}}' => $namespace,
             '{{SHORT_NAME}}' => $resourceName,
@@ -262,7 +275,8 @@ class CreateApiResource extends BaseMahoCommand
     {
         $t = strtolower($dataType);
         return match (true) {
-            str_contains($t, 'int') => 'int',
+            // Anchored so spatial types ('point') don't false-match 'int'
+            (bool) preg_match('/^(?:big|medium|small|tiny)?int(?:eger)?$/', $t) => 'int',
             in_array($t, ['decimal', 'float', 'double', 'numeric', 'real'], true) => 'float',
             default => 'string',
         };
@@ -288,7 +302,7 @@ class CreateApiResource extends BaseMahoCommand
 <?php
 
 /**
- * SPDX-FileCopyrightText: {{YEAR}}
+ * SPDX-FileCopyrightText: {{COPYRIGHT}}
  * SPDX-License-Identifier: OSL-3.0
  * @package {{PACKAGE}}
  */
@@ -305,8 +319,8 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
-use Maho\ApiPlatform\CrudResource;
-{{PROCESSOR_IMPORT}}use Maho\Config\ApiResource;
+{{PROCESSOR_IMPORT}}use Maho\ApiPlatform\CrudResource;
+use Maho\Config\ApiResource;
 
 #[ApiResource(
     shortName: '{{SHORT_NAME}}',
@@ -375,7 +389,7 @@ TPL;
 <?php
 
 /**
- * SPDX-FileCopyrightText: {{YEAR}}
+ * SPDX-FileCopyrightText: {{COPYRIGHT}}
  * SPDX-License-Identifier: OSL-3.0
  * @package {{PACKAGE}}
  */
@@ -416,7 +430,7 @@ TPL;
 <?php
 
 /**
- * SPDX-FileCopyrightText: {{YEAR}}
+ * SPDX-FileCopyrightText: {{COPYRIGHT}}
  * SPDX-License-Identifier: OSL-3.0
  * @package {{PACKAGE}}
  */
