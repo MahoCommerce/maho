@@ -88,6 +88,7 @@ describe('GraphQL Wishlist - Add To Wishlist Mutation', function (): void {
                     productName
                     productSku
                     productPrice
+                    productFinalPrice
                     productType
                     qty
                     inStock
@@ -107,6 +108,7 @@ describe('GraphQL Wishlist - Add To Wishlist Mutation', function (): void {
         expect($item['productName'])->toBeString()->not->toBeEmpty();
         expect($item['productSku'])->toBeString()->not->toBeEmpty();
         expect($item['productPrice'])->toBeNumeric();
+        expect($item['productFinalPrice'])->toBeNumeric();
         expect($item['qty'])->toBeGreaterThanOrEqual(1);
 
         if ($item['_id'] ?? null) {

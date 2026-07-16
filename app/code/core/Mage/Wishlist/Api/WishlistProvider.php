@@ -150,6 +150,7 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
             'productName' => $item->productName,
             'productSku' => $item->productSku,
             'productPrice' => $item->productPrice,
+            'productFinalPrice' => $item->productFinalPrice,
             'productImageUrl' => $item->productImageUrl,
             'productUrl' => $item->productUrl,
             'productType' => $item->productType,
@@ -167,7 +168,8 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
         $item->productId = (int) $data['productId'];
         $item->productName = $data['productName'];
         $item->productSku = $data['productSku'];
-        $item->productPrice = (float) $data['productPrice'];
+        $item->productPrice = isset($data['productPrice']) ? (float) $data['productPrice'] : null;
+        $item->productFinalPrice = isset($data['productFinalPrice']) ? (float) $data['productFinalPrice'] : null;
         $item->productImageUrl = $data['productImageUrl'] ?? '';
         $item->productUrl = $data['productUrl'] ?? '';
         $item->productType = $data['productType'] ?? 'simple';
