@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
+use Maho\ComposerPlugin\ApiPermissionCompiler;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,8 +24,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class CreateApiResource extends BaseMahoCommand
 {
-    use ApiResourceNaming;
-
     #[\Override]
     protected function configure(): void
     {
@@ -109,12 +108,11 @@ class CreateApiResource extends BaseMahoCommand
         $namespace = str_replace('_', '\\', $module) . '\\Api';
         $providerClass = $resourceName . 'Provider';
         $processorClass = $resourceName . 'Processor';
-        // Derive the id exactly as ApiPermissionCompiler will, so the security
-        // expressions below reference the same permission id the compiler bakes
-        // into vendor/composer/maho_api_permissions.php (route base == id, as in
-        // the core resources). Irregular plurals should pass an explicit --route
-        // and set mahoId in the generated attribute afterwards.
-        $mahoId = $this->deriveApiResourceId($resourceName);
+        // Derive the id exactly as ApiPermissionCompiler will (it is the single
+        // source of truth, baking the id into vendor/composer/maho_api_permissions.php),
+        // so the security expressions below reference the same permission id the
+        // compiler registers (route base == id, as in the core resources).
+        $mahoId = ApiPermissionCompiler::deriveIdFromShortName($resourceName);
         $route = $input->getOption('route') ?: '/' . $mahoId;
         $route = '/' . ltrim((string) $route, '/');
         $section = $input->getOption('section') ?: substr($module, (int) strpos($module, '_') + 1);

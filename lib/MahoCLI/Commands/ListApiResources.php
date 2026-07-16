@@ -13,6 +13,7 @@ use ApiPlatform\Metadata\HttpOperation;
 use Mage;
 use Maho\ApiPlatform\Discovery\ModuleApiDiscovery;
 use Maho\ApiPlatform\Security\ApiPermissionRegistry;
+use Maho\ComposerPlugin\ApiPermissionCompiler;
 use Maho\Config\ApiResource;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -27,8 +28,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class ListApiResources extends BaseMahoCommand
 {
-    use ApiResourceNaming;
-
     #[\Override]
     protected function configure(): void
     {
@@ -179,9 +178,11 @@ class ListApiResources extends BaseMahoCommand
 
         $graphql = !empty($attr->getGraphQlOperations());
 
-        // Permission id: explicit mahoId, else the compiler's exact derivation, so
-        // the id we display/look up matches the registry key the compiler baked in.
-        $lookupId = $explicitId ?? $this->deriveApiResourceId($shortName);
+        // Permission id: explicit mahoId, else the compiler's exact derivation
+        // (the single source of truth for the ids baked into
+        // vendor/composer/maho_api_permissions.php), so the id we display/look up
+        // matches the registry key the compiler registered.
+        $lookupId = $explicitId ?? ApiPermissionCompiler::deriveIdFromShortName($shortName);
 
         // Customer-scoped resources are JWT-gated and register no admin grant, so
         // they don't appear in the registry's resource map, so classify accordingly.
