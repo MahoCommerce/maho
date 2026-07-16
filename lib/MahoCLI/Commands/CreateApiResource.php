@@ -115,7 +115,17 @@ class CreateApiResource extends BaseMahoCommand
         $mahoId = ApiPermissionCompiler::deriveIdFromShortName($resourceName);
         $route = $input->getOption('route') ?: '/' . $mahoId;
         $route = '/' . ltrim((string) $route, '/');
+        // Like the model alias above, route and section are emitted verbatim into
+        // single-quoted strings in the generated files, so they must be quote-safe.
+        if (!preg_match('#^/[a-z0-9_-]+(?:/[a-z0-9_-]+)*$#', $route)) {
+            $io->error('Route must be lowercase kebab-case segments (e.g., /blog-posts)');
+            return Command::INVALID;
+        }
         $section = $input->getOption('section') ?: substr($module, (int) strpos($module, '_') + 1);
+        if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9 _-]*$/', (string) $section)) {
+            $io->error('Section must be alphanumeric (spaces, dashes and underscores allowed), e.g., Catalog');
+            return Command::INVALID;
+        }
         $withProcessor = (bool) $input->getOption('with-processor');
 
         // ---- Introspect the model to pre-fill typed properties ----
@@ -249,7 +259,7 @@ class CreateApiResource extends BaseMahoCommand
             }
 
             $prop = $this->snakeToCamel($name);
-            $phpType = $this->mapType((string) $col['DATA_TYPE']);
+            $phpType = $this->mapType((string) $col['DATA_TYPE'], $col['LENGTH'] ?? null);
             $readOnly = in_array($name, ['created_at', 'updated_at'], true);
 
             if ($readOnly) {
@@ -269,10 +279,14 @@ class CreateApiResource extends BaseMahoCommand
         return [implode("\n", $lines), null];
     }
 
-    private function mapType(string $dataType): string
+    private function mapType(string $dataType, mixed $length): string
     {
         $t = strtolower($dataType);
         return match (true) {
+            // MySQL flag columns: Doctrine introspects tinyint(1) as boolean and
+            // the adapter reports it as tinyint with LENGTH 1
+            in_array($t, ['boolean', 'bool'], true) => 'bool',
+            $t === 'tinyint' && (int) $length === 1 => 'bool',
             // Anchored so spatial types ('point') don't false-match 'int'
             (bool) preg_match('/^(?:big|medium|small|tiny)?int(?:eger)?$/', $t) => 'int',
             in_array($t, ['decimal', 'float', 'double', 'numeric', 'real'], true) => 'float',
@@ -283,6 +297,7 @@ class CreateApiResource extends BaseMahoCommand
     private function typeDefault(string $phpType): string
     {
         return match ($phpType) {
+            'bool' => 'false',
             'int' => '0',
             'float' => '0.0',
             default => "''",

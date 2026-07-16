@@ -81,7 +81,8 @@ function scaffoldSmokeSecurity(ApiUser $user): Security
     return new Security($container);
 }
 
-afterEach(function (): void {
+function scaffoldSmokeCleanup(): void
+{
     foreach (glob(scaffoldSmokeApiDir() . '/' . SCAFFOLD_SMOKE_RESOURCE . '*.php') ?: [] as $file) {
         unlink($file);
     }
@@ -96,6 +97,22 @@ afterEach(function (): void {
         $resource->getTableName('core/config_data'),
         $adapter->quoteInto('path LIKE ?', SCAFFOLD_SMOKE_PATH_PREFIX . '%'),
     );
+}
+
+// Cleanup runs before each test too, so debris from a hard-killed earlier run
+// can't fail the next one.
+beforeEach(function (): void {
+    scaffoldSmokeCleanup();
+
+    // These tests assume Mage_Log ships without an Api/ directory (that's what
+    // exercises the mkdir branch). If it ever gains one, pick another module.
+    if (is_dir(scaffoldSmokeApiDir())) {
+        $this->markTestSkipped(SCAFFOLD_SMOKE_MODULE . ' now has an Api/ directory; update SCAFFOLD_SMOKE_MODULE to a module without one.');
+    }
+});
+
+afterEach(function (): void {
+    scaffoldSmokeCleanup();
 });
 
 it('writes syntactically valid files to disk and enforces the overwrite guard', function () {

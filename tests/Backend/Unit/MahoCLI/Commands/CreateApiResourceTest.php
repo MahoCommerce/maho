@@ -106,3 +106,58 @@ it('falls back to a property stub for EAV entities', function () {
     expect($out)->toContain('EAV entity')
         ->and($out)->toContain('TODO: declare typed public properties');
 });
+
+it('honours --route and --section overrides', function () {
+    $tester = createApiResourceTester();
+    $tester->execute([
+        '--module' => 'Mage_Cms',
+        '--resource' => 'Sample',
+        '--model' => 'cms/page',
+        '--route' => '/custom/sample-routes',
+        '--section' => 'Custom Section',
+        '--dry-run' => true,
+    ]);
+
+    expect($tester->getStatusCode())->toBe(Command::SUCCESS);
+    $out = $tester->getDisplay();
+    expect($out)->toContain("uriTemplate: '/custom/sample-routes',")
+        ->and($out)->toContain("uriTemplate: '/custom/sample-routes/{id}',")
+        ->and($out)->toContain("mahoSection: 'Custom Section',")
+        // the permission id still comes from the short name, not the route
+        ->and($out)->toContain("is_granted('samples/read')");
+});
+
+it('rejects options that are not quote-safe for the generated code', function (array $options) {
+    $tester = createApiResourceTester();
+    $tester->execute($options + [
+        '--module' => 'Mage_Cms',
+        '--resource' => 'Sample',
+        '--model' => 'cms/page',
+        '--dry-run' => true,
+    ]);
+
+    expect($tester->getStatusCode())->toBe(Command::INVALID);
+})->with([
+    'route with a quote' => [['--route' => "/foo's"]],
+    'route with invalid chars' => [['--route' => '/Foo Bar']],
+    'section with a quote' => [['--section' => "Bob's"]],
+    'malformed module' => [['--module' => 'not a module']],
+    'malformed resource' => [['--resource' => 'lowercase']],
+    'malformed model alias' => [['--model' => "cms/page'"]],
+]);
+
+it('maps boolean-ish columns to bool properties', function () {
+    $command = new CreateApiResource();
+    $mapType = new ReflectionMethod($command, 'mapType');
+
+    // Platform-dependent boolean reporting: Doctrine 'boolean', MySQL tinyint(1)
+    expect($mapType->invoke($command, 'boolean', null))->toBe('bool')
+        ->and($mapType->invoke($command, 'tinyint', 1))->toBe('bool')
+        // wider tinyints stay int
+        ->and($mapType->invoke($command, 'tinyint', null))->toBe('int')
+        ->and($mapType->invoke($command, 'tinyint', 4))->toBe('int')
+        ->and($mapType->invoke($command, 'smallint', null))->toBe('int');
+
+    $typeDefault = new ReflectionMethod($command, 'typeDefault');
+    expect($typeDefault->invoke($command, 'bool'))->toBe('false');
+});
