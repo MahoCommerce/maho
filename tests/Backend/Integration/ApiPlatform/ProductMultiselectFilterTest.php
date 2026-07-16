@@ -29,22 +29,11 @@ const MS_SKU_PREFIX = 'apitest-ms-';
 beforeEach(function (): void {
     StoreContext::ensureStore();
 
-    // The Mage\<Module>\Api\ autoloader is only registered by the API kernel's
-    // boot(), which doesn't run in a plain backend test. Register an equivalent
-    // PSR-4 mapping (app/code/core/) so these namespaced classes resolve here.
-    static $registered = false;
-    if (!$registered) {
-        spl_autoload_register(function (string $class): void {
-            if (!str_starts_with($class, 'Mage\\')) {
-                return;
-            }
-            $file = Mage::getBaseDir() . '/app/code/core/' . str_replace('\\', '/', $class) . '.php';
-            if (is_file($file)) {
-                require $file;
-            }
-        });
-        $registered = true;
-    }
+    // The Mage\<Module>\Api\ classes (app/code/core/) are autoloaded only by the
+    // API kernel's boot(), which doesn't run in a plain backend test. Load the two
+    // this test drives directly - their parents are Composer-autoloaded Maho\ classes.
+    require_once Mage::getBaseDir() . '/app/code/core/Mage/Catalog/Api/ProductProvider.php';
+    require_once Mage::getBaseDir() . '/app/code/core/Mage/Catalog/Api/Product.php';
 
     msFixture();
 });
