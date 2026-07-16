@@ -150,16 +150,18 @@ it('rejects options that are not quote-safe for the generated code', function (a
 ]);
 
 it('skips columns whose names are not valid PHP identifiers instead of emitting them', function () {
-    // MySQL allows nearly any character in quoted column names; such names must
+    // SQL allows nearly any character in quoted column names; such names must
     // never be interpolated into the generated PHP source.
     $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
     $table = 'cli_scaffold_hostile_cols_test';
-    $adapter->query("DROP TABLE IF EXISTS `{$table}`");
+    $quotedTable = $adapter->quoteIdentifier($table);
+    $hostileCol = $adapter->quoteIdentifier('bad col = null; } eval');
+    $adapter->query("DROP TABLE IF EXISTS {$quotedTable}");
     $adapter->query(
-        "CREATE TABLE `{$table}` ("
-        . '`entity_id` INTEGER NOT NULL PRIMARY KEY, '
-        . '`good_col` VARCHAR(32) NULL, '
-        . '`bad col = null; } eval` VARCHAR(32) NULL'
+        "CREATE TABLE {$quotedTable} ("
+        . 'entity_id INTEGER NOT NULL PRIMARY KEY, '
+        . 'good_col VARCHAR(32) NULL, '
+        . "{$hostileCol} VARCHAR(32) NULL"
         . ')',
     );
 
@@ -190,7 +192,7 @@ it('skips columns whose names are not valid PHP identifiers instead of emitting 
             ->and($properties)->not->toContain('eval')
             ->and($note)->toContain('not valid PHP identifiers');
     } finally {
-        $adapter->query("DROP TABLE IF EXISTS `{$table}`");
+        $adapter->query("DROP TABLE IF EXISTS {$quotedTable}");
     }
 });
 
