@@ -48,13 +48,4 @@ class Mage_Review_Block_Product_View_List extends Mage_Review_Block_Product_View
             ->addRateVotes();
         return parent::_beforeToHtml();
     }
-
-    /**
-     * @param int $id
-     * @return string
-     */
-    public function getReviewUrl($id)
-    {
-        return Mage::getUrl('review/product/view', ['id' => $id]);
-    }
 }
