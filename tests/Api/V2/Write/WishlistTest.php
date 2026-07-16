@@ -59,9 +59,10 @@ describe('REST Wishlist - Add Item', function (): void {
         $item = $response['json'];
         expect($item)->toHaveKeys([
             'id', 'productId', 'productName', 'productSku',
-            'productPrice', 'productType', 'qty', 'addedAt', 'inStock',
+            'productPrice', 'productFinalPrice', 'productType', 'qty', 'addedAt', 'inStock',
         ]);
         expect($item['productPrice'])->toBeNumeric();
+        expect($item['productFinalPrice'])->toBeNumeric();
         expect($item['inStock'])->toBeBool();
 
         trackCreated('wishlist_item', (int) $item['id']);
