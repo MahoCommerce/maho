@@ -1,8 +1,9 @@
 <?php
 
 /**
- * SPDX-FileCopyrightText: 2026
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
+ * @package MahoCLI
  */
 
 declare(strict_types=1);
