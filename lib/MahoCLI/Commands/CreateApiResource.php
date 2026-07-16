@@ -138,11 +138,16 @@ class CreateApiResource extends BaseMahoCommand
         $processorRef = $withProcessor ? $processorClass : 'CrudProcessor';
         $processorImport = $withProcessor ? '' : "use Maho\\ApiPlatform\\CrudProcessor;\n";
 
+        // Copyright holder for the generated headers: first-party modules
+        // (Maho_*/Mage_*) get the canonical 'Maho <https://mahocommerce.com>'
+        // holder used across the codebase; third-party modules keep the vendor
+        // segment of the module name ('Acme_Blog' → 'Acme') — there is no URL
+        // to invent for them. A bare year is not a valid SPDX-FileCopyrightText.
+        $vendor = substr($module, 0, (int) strpos($module, '_'));
+        $holder = in_array($vendor, ['Maho', 'Mage'], true) ? 'Maho <https://mahocommerce.com>' : $vendor;
+
         $tokens = [
-            // Copyright holder for the generated headers: the vendor segment of
-            // the module name ('Maho_Blog' → 'Maho'), a bare year is not a valid
-            // SPDX-FileCopyrightText value.
-            '{{COPYRIGHT}}' => date('Y') . ' ' . substr($module, 0, (int) strpos($module, '_')),
+            '{{COPYRIGHT}}' => date('Y') . ' ' . $holder,
             '{{PACKAGE}}' => $module,
             '{{NAMESPACE}}' => $namespace,
             '{{SHORT_NAME}}' => $resourceName,
@@ -180,13 +185,20 @@ class CreateApiResource extends BaseMahoCommand
             return Command::FAILURE;
         }
 
+        // Check every target for collisions before writing anything, so a clash
+        // on the second file can't leave a half-scaffolded resource behind.
         $force = (bool) $input->getOption('force');
+        if (!$force) {
+            foreach (array_keys($files) as $name) {
+                $path = $apiDir . '/' . $name;
+                if (file_exists($path)) {
+                    $io->error("File already exists (use --force to overwrite): {$path}");
+                    return Command::FAILURE;
+                }
+            }
+        }
         foreach ($files as $name => $content) {
             $path = $apiDir . '/' . $name;
-            if (file_exists($path) && !$force) {
-                $io->error("File already exists (use --force to overwrite): {$path}");
-                return Command::FAILURE;
-            }
             if (file_put_contents($path, $content) === false) {
                 $io->error("Failed to write: {$path}");
                 return Command::FAILURE;
@@ -252,6 +264,7 @@ class CreateApiResource extends BaseMahoCommand
         }
 
         $lines = [];
+        $skipped = [];
         foreach ($columns as $col) {
             $name = $col['COLUMN_NAME'];
             if ($name === $pk || !empty($col['PRIMARY'])) {
@@ -259,7 +272,15 @@ class CreateApiResource extends BaseMahoCommand
             }
 
             $prop = $this->snakeToCamel($name);
-            $phpType = $this->mapType((string) $col['DATA_TYPE'], $col['LENGTH'] ?? null);
+            // The property name is emitted verbatim into generated PHP, so it must
+            // be a plain identifier. MySQL allows nearly any character in quoted
+            // column names; skip anything that doesn't camelize cleanly rather
+            // than injecting it into source code.
+            if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $prop)) {
+                $skipped[] = $name;
+                continue;
+            }
+            $phpType = $this->mapType((string) $col['DATA_TYPE']);
             $readOnly = in_array($name, ['created_at', 'updated_at'], true);
 
             if ($readOnly) {
@@ -272,24 +293,33 @@ class CreateApiResource extends BaseMahoCommand
             }
         }
 
+        $note = $skipped === []
+            ? null
+            : 'Skipped column(s) whose names are not valid PHP identifiers: ' . implode(', ', $skipped) . '. Declare them manually if needed.';
+
         if ($lines === []) {
-            return [$stub, null];
+            return [$stub, $note];
         }
 
-        return [implode("\n", $lines), null];
+        return [implode("\n", $lines), $note];
     }
 
-    private function mapType(string $dataType, mixed $length): string
+    /**
+     * Map a describeTable() DATA_TYPE to a PHP property type. The adapter derives
+     * DATA_TYPE from the Doctrine DBAL type class (lowercased short name, 'Type'
+     * stripped), so the values seen here are Doctrine type names ('boolean',
+     * 'integer', 'smallint', 'bigint', 'smallfloat', ...), not native ones:
+     * Doctrine's MySQL platform maps every tinyint to boolean (the declared
+     * width is not recoverable), and native FLOAT introspects as 'smallfloat'.
+     */
+    private function mapType(string $dataType): string
     {
         $t = strtolower($dataType);
         return match (true) {
-            // MySQL flag columns: Doctrine introspects tinyint(1) as boolean and
-            // the adapter reports it as tinyint with LENGTH 1
             in_array($t, ['boolean', 'bool'], true) => 'bool',
-            $t === 'tinyint' && (int) $length === 1 => 'bool',
             // Anchored so spatial types ('point') don't false-match 'int'
             (bool) preg_match('/^(?:big|medium|small|tiny)?int(?:eger)?$/', $t) => 'int',
-            in_array($t, ['decimal', 'float', 'double', 'numeric', 'real'], true) => 'float',
+            in_array($t, ['decimal', 'float', 'smallfloat', 'double', 'numeric', 'real'], true) => 'float',
             default => 'string',
         };
     }

@@ -43,7 +43,10 @@ it('scaffolds a CRUD resource from a flat-table model with introspected properti
 
     expect($tester->getStatusCode())->toBe(Command::SUCCESS);
     $out = $tester->getDisplay();
-    expect($out)->toContain('class Sample extends CrudResource')
+    // First-party modules (Mage_*/Maho_*) get the canonical project copyright holder
+    expect($out)->toContain('SPDX-FileCopyrightText: ' . date('Y') . ' Maho <https://mahocommerce.com>')
+        ->and($out)->toContain('SPDX-License-Identifier: OSL-3.0')
+        ->and($out)->toContain('class Sample extends CrudResource')
         ->and($out)->toContain("public const MODEL = 'cms/page';")
         ->and($out)->toContain("uriTemplate: '/samples',")
         ->and($out)->toContain("uriTemplate: '/samples/{id}',")
@@ -146,18 +149,74 @@ it('rejects options that are not quote-safe for the generated code', function (a
     'malformed model alias' => [['--model' => "cms/page'"]],
 ]);
 
-it('maps boolean-ish columns to bool properties', function () {
+it('skips columns whose names are not valid PHP identifiers instead of emitting them', function () {
+    // MySQL allows nearly any character in quoted column names; such names must
+    // never be interpolated into the generated PHP source.
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $table = 'cli_scaffold_hostile_cols_test';
+    $adapter->query("DROP TABLE IF EXISTS `{$table}`");
+    $adapter->query(
+        "CREATE TABLE `{$table}` ("
+        . '`entity_id` INTEGER NOT NULL PRIMARY KEY, '
+        . '`good_col` VARCHAR(32) NULL, '
+        . '`bad col = null; } eval` VARCHAR(32) NULL'
+        . ')',
+    );
+
+    try {
+        $resourceStub = new class {
+            public function getMainTable(): string
+            {
+                return 'cli_scaffold_hostile_cols_test';
+            }
+            public function getIdFieldName(): string
+            {
+                return 'entity_id';
+            }
+        };
+        $modelStub = new class ($resourceStub) {
+            public function __construct(private readonly object $resource) {}
+            public function getResource(): object
+            {
+                return $this->resource;
+            }
+        };
+
+        $command = new CreateApiResource();
+        $buildProperties = new ReflectionMethod($command, 'buildProperties');
+        [$properties, $note] = $buildProperties->invoke($command, $modelStub, 'test/hostile');
+
+        expect($properties)->toContain('public ?string $goodCol = null;')
+            ->and($properties)->not->toContain('eval')
+            ->and($note)->toContain('not valid PHP identifiers');
+    } finally {
+        $adapter->query("DROP TABLE IF EXISTS `{$table}`");
+    }
+});
+
+it('maps the DATA_TYPE names describeTable() actually emits to PHP types', function () {
     $command = new CreateApiResource();
     $mapType = new ReflectionMethod($command, 'mapType');
 
-    // Platform-dependent boolean reporting: Doctrine 'boolean', MySQL tinyint(1)
-    expect($mapType->invoke($command, 'boolean', null))->toBe('bool')
-        ->and($mapType->invoke($command, 'tinyint', 1))->toBe('bool')
-        // wider tinyints stay int
-        ->and($mapType->invoke($command, 'tinyint', null))->toBe('int')
-        ->and($mapType->invoke($command, 'tinyint', 4))->toBe('int')
-        ->and($mapType->invoke($command, 'smallint', null))->toBe('int');
+    // describeTable() derives DATA_TYPE from the Doctrine type class, so these
+    // are Doctrine names: every MySQL tinyint introspects as 'boolean', and a
+    // native FLOAT introspects as 'smallfloat'.
+    expect($mapType->invoke($command, 'boolean'))->toBe('bool')
+        ->and($mapType->invoke($command, 'integer'))->toBe('int')
+        ->and($mapType->invoke($command, 'smallint'))->toBe('int')
+        ->and($mapType->invoke($command, 'bigint'))->toBe('int')
+        ->and($mapType->invoke($command, 'decimal'))->toBe('float')
+        ->and($mapType->invoke($command, 'float'))->toBe('float')
+        ->and($mapType->invoke($command, 'smallfloat'))->toBe('float')
+        ->and($mapType->invoke($command, 'datetime'))->toBe('string')
+        ->and($mapType->invoke($command, 'text'))->toBe('string')
+        ->and($mapType->invoke($command, 'string'))->toBe('string')
+        // spatial types must not false-match the int pattern
+        ->and($mapType->invoke($command, 'point'))->toBe('string');
 
     $typeDefault = new ReflectionMethod($command, 'typeDefault');
-    expect($typeDefault->invoke($command, 'bool'))->toBe('false');
+    expect($typeDefault->invoke($command, 'bool'))->toBe('false')
+        ->and($typeDefault->invoke($command, 'int'))->toBe('0')
+        ->and($typeDefault->invoke($command, 'float'))->toBe('0.0')
+        ->and($typeDefault->invoke($command, 'string'))->toBe("''");
 });
