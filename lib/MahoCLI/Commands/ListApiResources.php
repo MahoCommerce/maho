@@ -101,31 +101,22 @@ class ListApiResources extends BaseMahoCommand
     {
         $discovery = ModuleApiDiscovery::discover();
 
-        // Register a runtime autoloader for the discovered Api/ namespaces, exactly
-        // as the API Platform kernel does on a web request (these classes are not
-        // PSR-4 registered in the Composer autoloader).
-        spl_autoload_register(function (string $class) use ($discovery): void {
-            foreach ($discovery['namespaces'] as $ns => $dir) {
-                if (str_starts_with($class, $ns)) {
-                    $rel = str_replace('\\', '/', substr($class, strlen($ns)));
-                    $file = "{$dir}/{$rel}.php";
-                    if (is_file($file)) {
-                        require $file;
-                    }
-                    return;
-                }
-            }
-        });
-
         $registry = new ApiPermissionRegistry();
         $registryResources = $registry->getResources();
 
+        // The discovered Api/ classes are not PSR-4 registered in the Composer
+        // autoloader (the API Platform kernel loads them per-request). We already
+        // hold each file path from the glob, so require it directly instead of
+        // registering a process-wide autoloader as a side effect.
         $out = [];
         foreach ($discovery['namespaces'] as $ns => $dir) {
             foreach (glob("{$dir}/*.php") ?: [] as $file) {
                 $class = $ns . basename($file, '.php');
                 try {
-                    if (!class_exists($class)) {
+                    if (!class_exists($class, autoload: false)) {
+                        require_once $file;
+                    }
+                    if (!class_exists($class, autoload: false)) {
                         continue;
                     }
                     $ref = new \ReflectionClass($class);
