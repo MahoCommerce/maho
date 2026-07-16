@@ -68,6 +68,37 @@ describe('REST Wishlist - Add Item', function (): void {
         trackCreated('wishlist_item', (int) $item['id']);
     });
 
+    it('exposes base and final price separately for a discounted product', function (): void {
+        // Create a product with a special price, wish it, and verify the API returns
+        // the regular-vs-sale pair clients derive "on sale" from.
+        $token = serviceToken(['products/write', 'products/delete']);
+        $suffix = substr(uniqid(), -8);
+
+        $create = apiPost('/api/rest/v2/products', [
+            'sku' => "PEST-WISHSALE-{$suffix}",
+            'name' => 'Pest Wishlist Sale Product',
+            'price' => 49.99,
+            'specialPrice' => 39.99,
+            'websiteIds' => [1],
+        ], $token);
+
+        expect($create['status'])->toBeIn([200, 201]);
+        trackCreated('product', $create['json']['id']);
+
+        $response = apiPost('/api/rest/v2/customers/me/wishlist', [
+            'productId' => $create['json']['id'],
+            'qty' => 1,
+        ], customerToken());
+
+        expect($response['status'])->toBeSuccessful();
+        $item = $response['json'];
+        trackCreated('wishlist_item', (int) $item['id']);
+
+        expect($item['productPrice'])->toBe(49.99);
+        expect($item['productFinalPrice'])->toBe(39.99);
+        expect($item['productPrice'])->toBeGreaterThan($item['productFinalPrice']);
+    });
+
     it('rejects adding to wishlist without authentication', function (): void {
         $response = apiPost('/api/rest/v2/customers/me/wishlist', [
             'productId' => fixtures('product_id'),
