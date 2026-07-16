@@ -183,21 +183,33 @@ function msFilterSkus(array $filters): array
 
 function msCleanup(): void
 {
+    // Product deletion requires the secure area. Register it gracefully and
+    // ALWAYS unregister in finally: this runs after the last tearDown() (which
+    // Mage::reset()s the registry), so a leaked key would make the next test
+    // file's setUp() throw "isSecureArea already exists". Each delete is guarded
+    // independently so one failure can't abort the rest (or skip the unregister).
+    Mage::register('isSecureArea', true, true);
     try {
-        Mage::register('isSecureArea', true, true);
-        $collection = Mage::getModel('catalog/product')->getCollection()
-            ->addAttributeToFilter('sku', ['like' => MS_SKU_PREFIX . '%']);
-        foreach ($collection as $product) {
-            $product->delete();
+        try {
+            $collection = Mage::getModel('catalog/product')->getCollection()
+                ->addAttributeToFilter('sku', ['like' => MS_SKU_PREFIX . '%']);
+            foreach ($collection as $product) {
+                $product->delete();
+            }
+        } catch (\Throwable $e) {
+            // Best effort - the runner rebuilds a fresh test DB each run anyway.
         }
-        Mage::unregister('isSecureArea');
 
-        $attribute = Mage::getModel('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, MS_ATTR_CODE);
-        if ($attribute->getId()) {
-            $attribute->delete();
+        try {
+            $attribute = Mage::getModel('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, MS_ATTR_CODE);
+            if ($attribute->getId()) {
+                $attribute->delete();
+            }
+        } catch (\Throwable $e) {
+            // Best effort.
         }
-    } catch (\Throwable $e) {
-        // Best effort - the runner rebuilds a fresh test DB each run anyway.
+    } finally {
+        Mage::unregister('isSecureArea');
     }
 }
 
