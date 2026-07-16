@@ -124,6 +124,9 @@ class WishlistItem extends CrudResource
     public ?float $productPrice = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    public ?float $productFinalPrice = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $productImageUrl = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
@@ -151,7 +154,15 @@ class WishlistItem extends CrudResource
 
         $dto->productName = $product->getName();
         $dto->productSku = $product->getSku();
-        $dto->productPrice = (float) $product->getFinalPrice();
+        // Mirrors the products API: productPrice = base price (null when the type carries
+        // no own price, e.g. configurable parents), productFinalPrice = effective price
+        // after catalog rules and specials (null when the type yields none).
+        $dto->productPrice = $product->getData('price') !== null ? (float) $product->getPrice() : null;
+        try {
+            $dto->productFinalPrice = $product->getFinalPrice() ? (float) $product->getFinalPrice() : null;
+        } catch (\Throwable) {
+            $dto->productFinalPrice = $dto->productPrice;
+        }
         $dto->productImageUrl = self::getProductImageUrl($product);
         $dto->productUrl = '/' . ($product->getUrlKey() ?: $product->formatUrlKey($product->getName()));
         $dto->productType = $product->getTypeId();
