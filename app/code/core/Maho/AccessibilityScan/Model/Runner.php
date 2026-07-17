@@ -361,6 +361,8 @@ class Maho_AccessibilityScan_Model_Runner
 
             if (microtime(true) > $deadline) {
                 proc_terminate($process, 9);
+                fclose($pipes[1]);
+                fclose($pipes[2]);
                 proc_close($process);
                 Mage::throwException($this->helper->__(
                     'Command timed out after %s seconds: %s',

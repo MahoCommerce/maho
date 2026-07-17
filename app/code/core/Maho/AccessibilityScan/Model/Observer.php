@@ -24,9 +24,15 @@ class Maho_AccessibilityScan_Model_Observer
         if (!preg_match('/^[a-f0-9]{32}$/', $token)) {
             return;
         }
-        if (!Mage::app()->loadCache(Maho_AccessibilityScan_Model_Runner::CACHE_KEY_PREFIX . $token)) {
+        $cacheKey = Maho_AccessibilityScan_Model_Runner::CACHE_KEY_PREFIX . $token;
+        if (!Mage::app()->loadCache($cacheKey)) {
             return;
         }
+        // Consume the token on first use: the scanner performs exactly one
+        // page load per token, so a captured cookie (e.g. sniffed on a plain
+        // http store) cannot be replayed to re-enable template hints later.
+        // The runner's finally-block cleanup remains as a backstop.
+        Mage::app()->removeCache($cacheKey);
 
         $store = Mage::app()->getStore();
         $store->setConfig(Mage_Core_Block_Template::XML_PATH_DEBUG_TEMPLATE_HINTS, '1');
