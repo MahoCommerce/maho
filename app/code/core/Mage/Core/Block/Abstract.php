@@ -898,10 +898,10 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      */
     final public function toHtml()
     {
-        $blockName = $this->getNameInLayout() ?: get_class($this);
+        $blockName = $this->getNameInLayout() ?: static::class;
         $timerName = 'BLOCK:' . $blockName;
         \Maho\Profiler::start($timerName, [
-            'block.class' => get_class($this),
+            'block.class' => static::class,
             'block.name' => $blockName,
             'block.template' => $this->getTemplate() ?: '',
         ]);
