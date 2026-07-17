@@ -89,6 +89,8 @@ $application->addCommand(new \MahoCLI\Commands\TranslationsMissing());
 $application->addCommand(new \MahoCLI\Commands\TranslationsUnused());
 
 $application->addCommand(new \MahoCLI\Commands\CreateCommand());
+$application->addCommand(new \MahoCLI\Commands\CreateApiResource());
+$application->addCommand(new \MahoCLI\Commands\ListApiResources());
 
 $application->addCommand(new \MahoCLI\Commands\DevModuleList());
 $application->addCommand(new \MahoCLI\Commands\DevLspStart());
