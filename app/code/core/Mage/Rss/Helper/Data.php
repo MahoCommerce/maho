@@ -1,12 +1,10 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Rss
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2021-2026 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Rss
  */
 
 class Mage_Rss_Helper_Data extends Mage_Core_Helper_Abstract
@@ -41,7 +39,7 @@ class Mage_Rss_Helper_Data extends Mage_Core_Helper_Abstract
             [$username, $password] = $this->authValidate();
             $customer = Mage::getModel('customer/customer')->authenticate($username, $password);
             if ($customer && $customer->getId()) {
-                $this->_rssSession->settCustomer($customer);
+                $this->_rssSession->setCustomer($customer);
             } else {
                 $this->authFailed();
             }

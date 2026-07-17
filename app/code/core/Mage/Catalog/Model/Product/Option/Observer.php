@@ -1,12 +1,10 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 class Mage_Catalog_Model_Product_Option_Observer
@@ -17,6 +15,7 @@ class Mage_Catalog_Model_Product_Option_Observer
      * @param \Maho\DataObject $observer
      * @return $this
      */
+    #[Maho\Config\Observer('sales_convert_quote_item_to_order_item', area: 'frontend')]
     public function copyQuoteFilesToOrderFiles($observer)
     {
         /** @var Mage_Sales_Model_Quote_Item $quoteItem */

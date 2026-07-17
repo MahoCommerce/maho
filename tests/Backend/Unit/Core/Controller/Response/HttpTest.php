@@ -1,13 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
+
+declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -115,7 +113,8 @@ describe('Mage_Core_Controller_Response_Http', function () {
         it('clears headers', function () {
             $this->response->setHeader('X-Header', 'value');
             $this->response->clearHeaders();
-            expect($this->response->getHeaders())->toBe([]);
+            // the header bag keeps its Cache-Control and Date defaults
+            expect($this->response->hasHeader('X-Header'))->toBeFalse();
         });
 
         it('handles raw headers', function () {
@@ -136,7 +135,7 @@ describe('Mage_Core_Controller_Response_Http', function () {
             $this->response->setRawHeader('HTTP/1.1 200 OK');
             $this->response->clearAllHeaders();
 
-            expect($this->response->getHeaders())->toBe([]);
+            expect($this->response->hasHeader('X-Header'))->toBeFalse();
             expect($this->response->getRawHeaders())->toBe([]);
         });
     });
@@ -208,6 +207,25 @@ describe('Mage_Core_Controller_Response_Http', function () {
             $this->response->setRedirect('https://example.com');
             expect($this->response->isRedirect())->toBeTrue();
         });
+
+        it('makes permanent redirects browser-cacheable', function () {
+            $this->response->setRedirect('https://example.com', 301);
+            expect($this->response->getSymfonyResponse()->headers->get('Cache-Control'))
+                ->toBe('max-age=86400, private');
+        });
+
+        it('keeps temporary redirects uncacheable', function () {
+            $this->response->setRedirect('https://example.com', 302);
+            expect($this->response->getSymfonyResponse()->headers->get('Cache-Control'))
+                ->toBe('no-cache, private');
+        });
+
+        it('lets an explicit Cache-Control set after a permanent redirect win', function () {
+            $this->response->setRedirect('https://example.com', 301);
+            $this->response->setHeader('Cache-Control', 'no-store');
+            expect($this->response->getSymfonyResponse()->headers->get('Cache-Control'))
+                ->toBe('no-store, private');
+        });
     });
 
     describe('Cookie Management', function () {
@@ -250,8 +268,9 @@ describe('Mage_Core_Controller_Response_Http', function () {
             }
 
             expect($cookieHeader)->toContain('custom_cookie');
-            expect($cookieHeader)->toContain('Secure');
-            expect($cookieHeader)->toContain('HttpOnly');
+            // Symfony emits the attributes lowercase
+            expect($cookieHeader)->toContain('secure');
+            expect($cookieHeader)->toContain('httponly');
         });
 
         it('clears cookies', function () {
@@ -370,13 +389,85 @@ describe('Mage_Core_Controller_Response_Http', function () {
     });
 
     describe('HTTP Protocol Version', function () {
-        it('defaults to HTTP/1.1', function () {
-            // Check via raw headers or default behavior
-            $this->response->setHttpResponseCode(200);
+        it('upgrades to HTTP/1.1 on send via prepare()', function () {
+            $this->response->sendHeaders();
+            expect($this->response->getSymfonyResponse()->getProtocolVersion())->toBe('1.1');
+        });
 
-            // The response should use HTTP/1.1 by default
-            $symfonyResponse = $this->response->getSymfonyResponse();
-            expect($symfonyResponse->getProtocolVersion())->toBe('1.1');
+        it('upgrades an injected Symfony response on send', function () {
+            $response = new Mage_Core_Controller_Response_Http(new SymfonyResponse('content'));
+            $response->sendHeaders();
+            expect($response->getSymfonyResponse()->getProtocolVersion())->toBe('1.1');
+        });
+    });
+
+    describe('Default Cache-Control', function () {
+        it('defaults to no-cache, private when no caching headers are set', function () {
+            expect($this->response->getSymfonyResponse()->headers->get('Cache-Control'))
+                ->toBe('no-cache, private');
+        });
+
+        it('switches to private, must-revalidate when Last-Modified is set', function () {
+            $this->response->setHeader('Last-Modified', gmdate('D, d M Y H:i:s') . ' GMT');
+            expect($this->response->getSymfonyResponse()->headers->get('Cache-Control'))
+                ->toBe('private, must-revalidate');
+        });
+
+        it('switches to private, must-revalidate when Expires is set', function () {
+            $this->response->setHeader('Expires', 'Thu, 01 Jan 1970 00:00:00 GMT');
+            expect($this->response->getSymfonyResponse()->headers->get('Cache-Control'))
+                ->toBe('private, must-revalidate');
+        });
+
+        it('keeps an explicitly set Cache-Control header', function () {
+            $this->response->setHeader('Cache-Control', 'public, max-age=3600');
+            // Symfony normalizes directive order
+            expect($this->response->getSymfonyResponse()->headers->get('Cache-Control'))
+                ->toBe('max-age=3600, public');
+        });
+
+        it('does not wipe bag cookies when a raw Set-Cookie header is sent', function () {
+            $this->response->setCookie('keep_me', 'value');
+            $this->response->setRawHeader('Set-Cookie: raw_cookie=1');
+            $this->response->sendHeaders();
+            expect($this->response->getSymfonyResponse()->headers->getCookies())->toHaveCount(1);
+        });
+
+        it('removes a bag header shadowed by a raw header on send', function () {
+            $this->response->setRawHeader('Cache-Control: no-store');
+            $this->response->sendHeaders();
+            expect($this->response->getSymfonyResponse()->headers->has('Cache-Control'))->toBeFalse();
+        });
+
+        it('prepares the response against the request on send', function () {
+            $this->response->sendHeaders();
+            // prepare() supplies a default Content-Type with charset
+            expect($this->response->getSymfonyResponse()->headers->get('Content-Type'))
+                ->toBe('text/html; charset=utf-8');
+        });
+
+        it('appends the charset to a text Content-Type on send', function () {
+            $this->response->setHeader('Content-Type', 'text/xml');
+            $this->response->sendHeaders();
+            expect($this->response->getSymfonyResponse()->headers->get('Content-Type'))
+                ->toBe('text/xml; charset=utf-8');
+        });
+
+        it('strips body and entity headers from a 304 response on send', function () {
+            $this->response->setBody('stale content');
+            $this->response->setHttpResponseCode(304);
+            $this->response->sendHeaders();
+            expect($this->response->getSymfonyResponse()->getContent())->toBe('')
+                ->and($this->response->getSymfonyResponse()->headers->has('Content-Type'))->toBeFalse();
+        });
+
+        it('is a no-op on a second sendHeaders call', function () {
+            $this->response->sendHeaders();
+            $this->response->setRawHeader('X-Test: raw');
+            $this->response->setHeader('X-Test', 'bag');
+            $this->response->sendHeaders();
+            // raw-header shadowing did not run, proving the second call was skipped
+            expect($this->response->getSymfonyResponse()->headers->has('X-Test'))->toBeTrue();
         });
     });
 

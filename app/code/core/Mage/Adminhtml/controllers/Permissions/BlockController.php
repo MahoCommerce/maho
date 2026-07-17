@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controller_Action
@@ -34,6 +32,7 @@ class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controll
     /**
      * Index action
      */
+    #[Maho\Config\Route('/admin/permissions_block/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -50,6 +49,7 @@ class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controll
     /**
      * New action
      */
+    #[Maho\Config\Route('/admin/permissions_block/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -58,6 +58,7 @@ class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controll
     /**
      * Edit action
      */
+    #[Maho\Config\Route('/admin/permissions_block/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('System'))
@@ -86,7 +87,7 @@ class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controll
 
         Mage::register('permissions_block', $model);
 
-        if (isset($id)) {
+        if ($id) {
             $breadcrumb = $this->__('Edit Block');
         } else {
             $breadcrumb = $this->__('New Block');
@@ -105,6 +106,7 @@ class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controll
      *
      * @return $this|void
      */
+    #[Maho\Config\Route('/admin/permissions_block/save')]
     public function saveAction()
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -154,6 +156,7 @@ class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controll
     /**
      * Delete action
      */
+    #[Maho\Config\Route('/admin/permissions_block/delete')]
     public function deleteAction(): void
     {
         $id = (int) $this->getRequest()->getParam('block_id');
@@ -178,6 +181,7 @@ class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controll
     /**
      * Grid action
      */
+    #[Maho\Config\Route('/admin/permissions_block/blockGrid')]
     public function blockGridAction(): void
     {
         $this->getResponse()

@@ -1,10 +1,5 @@
-/**
- * Maho
- *
- * @package     Mage_Adminhtml
- * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+// SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+// SPDX-License-Identifier: AFL-3.0
 
 import * as TiptapModules from './extensions.js';
 import { html_beautify } from 'https://esm.sh/js-beautify@1.15.4/js/lib/beautify-html.js';
@@ -128,6 +123,18 @@ class tiptapWysiwygSetup {
     }
 
     convertToPlain(content) {
+        // ProseMirror's schema requires the cursor to live inside a block node, so
+        // editor.getHTML() emits a trailing empty <p></p> that's just "where the
+        // cursor is parked" — not content. Strip a single trailing empty paragraph
+        // so it doesn't leak into saved content. User-authored blank lines (a
+        // second Enter beyond the cursor's home paragraph) survive.
+        const doc = new DOMParser().parseFromString(content, 'text/html');
+        if (doc.body.lastElementChild?.tagName === 'P'
+            && doc.body.lastElementChild.innerHTML.trim() === '') {
+            doc.body.lastElementChild.remove();
+        }
+        content = doc.body.innerHTML;
+
         // TipTap generates minified HTML, so when switching to the plain editor beautify it
         content = html_beautify(content, { indent_size: 4 });
 
@@ -289,7 +296,10 @@ class tiptapWysiwygSetup {
                     shouldShow: ({ editor, view, state, oldState }) => {
                         const isInTable = editor.isActive('table');
                         const isInCell = editor.isActive('tableCell') || editor.isActive('tableHeader');
-                        const shouldShow = isInTable && isInCell;
+                        // Require focus: TipTap only positions the menu while the editor is focused,
+                        // so without this the menu shows unpositioned (top-left) whenever the initial
+                        // selection happens to land in a table cell (e.g. a doc ending with a table).
+                        const shouldShow = editor.isFocused && isInTable && isInCell;
                         tableBubbleMenu.style.display = shouldShow ? 'flex' : 'none';
                         return shouldShow;
                     },
@@ -497,6 +507,7 @@ class tiptapWysiwygSetup {
 
         bubbleMenu.id = `${this.id}_table_bubble_menu`;
         bubbleMenu.className = 'tiptap-bubble-menu';
+        bubbleMenu.style.display = 'none';
         return bubbleMenu;
     }
 

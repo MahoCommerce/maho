@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_CatalogIndex
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_CatalogIndex
  */
 
 class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_Db_Abstract
@@ -201,7 +199,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
         $attributeIndex = $this->getTierData($products, $store);
         foreach ($attributeIndex as $index) {
             $type = $index['type_id'];
-            $id = (is_null($forcedId) ? $index['entity_id'] : $forcedId);
+            $id = ($forcedId ?? $index['entity_id']);
             if ($id && $index['value']) {
                 if ($index['all_groups'] == 1) {
                     foreach (Mage::getSingleton('catalogindex/retreiver')->getCustomerGroups() as $group) {
@@ -406,7 +404,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
         $attributeIndex = $this->getProductData($products, $attributeIds, $store);
         foreach ($attributeIndex as $index) {
             $type = $index['type_id'];
-            $id = (is_null($forcedId) ? $index['entity_id'] : $forcedId);
+            $id = ($forcedId ?? $index['entity_id']);
 
             if ($id && $index['attribute_id'] && isset($index['value'])) {
                 $attribute = $this->_loadAttribute($index['attribute_id']);
@@ -420,7 +418,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
                             $id,
                             $index['attribute_id'],
                             $value,
-                            (is_null($websiteId) ? $store->getId() : $websiteId),
+                            ($websiteId ?? $store->getId()),
                         ]);
                     }
                 } else {
@@ -428,7 +426,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
                         $id,
                         $index['attribute_id'],
                         $index['value'],
-                        (is_null($websiteId) ? $store->getId() : $websiteId),
+                        ($websiteId ?? $store->getId()),
                     ]);
                 }
             }

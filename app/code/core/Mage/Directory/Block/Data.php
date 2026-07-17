@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Directory
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Directory
  */
 
 /**
@@ -21,23 +19,25 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
     /**
      * @codeCoverageIgnore
      * @return string
-     * @deprecated
      */
+    #[\Deprecated]
     public function getLoadrRegionUrl()
     {
         return $this->getUrl('directory/json/childRegion');
     }
 
     /**
+     * @param string|null $type Address type ('shipping' or 'billing') to filter the country list
      * @return Mage_Directory_Model_Resource_Country_Collection
      */
-    public function getCountryCollection()
+    public function getCountryCollection(?string $type = null)
     {
-        $collection = $this->getData('country_collection');
+        $dataKey = 'country_collection' . ($type ? '_' . $type : '');
+        $collection = $this->getData($dataKey);
         if (is_null($collection)) {
             $collection = Mage::getModel('directory/country')->getResourceCollection()
-                ->loadByStore();
-            $this->setData('country_collection', $collection);
+                ->loadByStore(null, $type);
+            $this->setData($dataKey, $collection);
         }
 
         return $collection;
@@ -48,20 +48,21 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
      * @param string $name
      * @param string $id
      * @param string $title
+     * @param string|null $type Address type ('shipping' or 'billing') to filter the country list
      * @return string
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function getCountryHtmlSelect($defValue = null, $name = 'country_id', $id = 'country', $title = 'Country')
+    public function getCountryHtmlSelect($defValue = null, $name = 'country_id', $id = 'country', $title = 'Country', ?string $type = null)
     {
-        \Maho\Profiler::start('TEST: ' . __METHOD__);
         if (is_null($defValue)) {
             $defValue = $this->getCountryId();
         }
-        $cacheKey = 'DIRECTORY_COUNTRY_SELECT_STORE_' . Mage::app()->getStore()->getCode();
+        $cacheKey = 'DIRECTORY_COUNTRY_SELECT_STORE_' . Mage::app()->getStore()->getCode()
+            . ($type ? '_' . strtoupper($type) : '');
         if (Mage::app()->useCache('config') && $cache = Mage::app()->loadCache($cacheKey)) {
             $options = $cache;
         } else {
-            $options = $this->getCountryCollection()->toOptionArray();
+            $options = $this->getCountryCollection($type)->toOptionArray();
             if (Mage::app()->useCache('config')) {
                 Mage::app()->saveCache($options, $cacheKey, ['config']);
             }
@@ -75,7 +76,6 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
             ->setOptions($this->sortCountryOptions($options))
             ->getHtml();
 
-        \Maho\Profiler::stop('TEST: ' . __METHOD__);
         return $html;
     }
 
@@ -101,7 +101,6 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
      */
     public function getRegionHtmlSelect()
     {
-        \Maho\Profiler::start('TEST: ' . __METHOD__);
         $cacheKey = 'DIRECTORY_REGION_SELECT_STORE' . Mage::app()->getStore()->getId();
         if (Mage::app()->useCache('config') && $cache = Mage::app()->loadCache($cacheKey)) {
             $options = $cache;
@@ -119,7 +118,6 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
             ->setValue((int) $this->getRegionId())
             ->setOptions($options)
             ->getHtml();
-        \Maho\Profiler::start('TEST: ' . __METHOD__);
         return $html;
     }
 
@@ -140,7 +138,6 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
      */
     public function getRegionsJs()
     {
-        \Maho\Profiler::start('TEST: ' . __METHOD__);
         $regionsJs = $this->getData('regions_js');
         if (!$regionsJs) {
             $countryIds = [];
@@ -163,7 +160,6 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
             }
             $regionsJs = Mage::helper('core')->jsonEncode($regions);
         }
-        \Maho\Profiler::stop('TEST: ' . __METHOD__);
         return $regionsJs;
     }
 

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Controller_Sales_Creditmemo
@@ -127,7 +125,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
                 $parentId = $orderItem->getParentItemId();
                 if (isset($backToStock[$orderItem->getId()])) {
                     $creditmemoItem->setBackToStock(true);
-                } elseif ($orderItem->getParentItem() && isset($backToStock[$parentId]) && $backToStock[$parentId]) {
+                } elseif ($orderItem->getParentItem() && isset($backToStock[$parentId])) {
                     $creditmemoItem->setBackToStock(true);
                 } elseif (empty($savedData)) {
                     $creditmemoItem->setBackToStock(Mage::helper('cataloginventory')->isAutoReturnEnabled());
@@ -167,6 +165,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
      * creditmemo information page
      */
     #[\Override]
+    #[Maho\Config\Route('/admin/sales_order_creditmemo/view')]
     public function viewAction(): void
     {
         $creditmemo = $this->_initCreditmemo();
@@ -189,6 +188,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
     /**
      * Start create creditmemo action
      */
+    #[Maho\Config\Route('/admin/sales_order_creditmemo/start')]
     public function startAction(): void
     {
         /**
@@ -200,6 +200,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
     /**
      * creditmemo create page
      */
+    #[Maho\Config\Route('/admin/sales_order_creditmemo/new')]
     public function newAction(): void
     {
         if ($creditmemo = $this->_initCreditmemo()) {
@@ -224,6 +225,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
     /**
      * Update items qty action
      */
+    #[Maho\Config\Route('/admin/sales_order_creditmemo/updateQty')]
     public function updateQtyAction(): void
     {
         try {
@@ -250,6 +252,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
      * Save creditmemo
      * We can save only new creditmemo. Existing creditmemos are not editable
      */
+    #[Maho\Config\Route('/admin/sales_order_creditmemo/save')]
     public function saveAction(): void
     {
         $data = $this->getRequest()->getPost('creditmemo');
@@ -313,6 +316,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
     /**
      * Cancel creditmemo action
      */
+    #[Maho\Config\Route('/admin/sales_order_creditmemo/cancel')]
     public function cancelAction(): void
     {
         $creditmemo = $this->_initCreditmemo();
@@ -335,6 +339,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
     /**
      * Void creditmemo action
      */
+    #[Maho\Config\Route('/admin/sales_order_creditmemo/void')]
     public function voidAction(): void
     {
         $creditmemo = $this->_initCreditmemo();
@@ -357,6 +362,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
     /**
      * Add comment to creditmemo history
      */
+    #[Maho\Config\Route('/admin/sales_order_creditmemo/addComment')]
     public function addCommentAction(): void
     {
         try {
@@ -399,6 +405,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
      * Create pdf for current creditmemo
      */
     #[\Override]
+    #[Maho\Config\Route('/admin/sales_order_creditmemo/print')]
     public function printAction(): void
     {
         $this->_initCreditmemo();

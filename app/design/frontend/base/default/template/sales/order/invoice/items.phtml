@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 
 /** @var Mage_Sales_Block_Order_Invoice_Items $this */
@@ -17,11 +15,11 @@
     <h2 class="sub-title"><?= $this->__('Invoice #') ?><?= $_invoice->getIncrementId() ?> <span class="separator">|</span> <a href="<?= $this->getPrintInvoiceUrl($_invoice) ?>" onclick="this.target='_blank'" class="link-print"><?= $this->__('Print Invoice') ?></a></h2>
     <h3 class="table-caption"><?= $this->__('Items Invoiced') ?></h3>
     <table class="data-table linearize-table" id="my-invoice-table-<?= $_invoice->getId() ?>">
-        <col />
-        <col width="1" />
-        <col width="1" />
-        <col width="1" />
-        <col width="1" />
+        <col>
+        <col width="1">
+        <col width="1">
+        <col width="1">
+        <col width="1">
         <thead>
         <tr>
             <th><?= $this->__('Product Name') ?></th>

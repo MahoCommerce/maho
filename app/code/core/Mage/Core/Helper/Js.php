@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2015-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2015-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
@@ -67,7 +65,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
      */
     public function getScript($script)
     {
-        return '<script type="text/javascript">' . $script . '</script>' . "\n";
+        return '<script>' . $script . '</script>' . "\n";
     }
 
     /**
@@ -78,7 +76,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
      */
     public function includeScript($file)
     {
-        return '<script type="text/javascript" src="' . $this->getJsUrl($file) . '"></script>' . "\n";
+        return '<script src="' . $this->getJsUrl($file) . '"></script>' . "\n";
     }
 
     /**
@@ -89,7 +87,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
      */
     public function includeSkinScript($file)
     {
-        return '<script type="text/javascript" src="' . $this->getJsSkinUrl($file) . '"></script>';
+        return '<script src="' . $this->getJsSkinUrl($file) . '"></script>';
     }
 
     /**

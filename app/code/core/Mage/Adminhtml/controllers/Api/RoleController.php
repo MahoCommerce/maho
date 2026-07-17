@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
@@ -33,17 +31,18 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
     protected function _initAction()
     {
         $this->loadLayout();
-        $this->_setActiveMenu('system/api/roles');
+        $this->_setActiveMenu('system/api/soap/roles');
         $this->_addBreadcrumb($this->__('Web services'), $this->__('Web services'));
         $this->_addBreadcrumb($this->__('Permissions'), $this->__('Permissions'));
         $this->_addBreadcrumb($this->__('Roles'), $this->__('Roles'));
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/api_role/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
-             ->_title($this->__('Web Services'))
+             ->_title($this->__('API'))
              ->_title($this->__('Roles'));
 
         $this->_initAction();
@@ -53,6 +52,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/api_role/roleGrid')]
     public function roleGridAction(): void
     {
         $this->getResponse()
@@ -61,10 +61,11 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
             ->toHtml());
     }
 
+    #[Maho\Config\Route('/admin/api_role/editRole')]
     public function editRoleAction(): void
     {
         $this->_title($this->__('System'))
-             ->_title($this->__('Web Services'))
+             ->_title($this->__('API'))
              ->_title($this->__('Roles'));
 
         $this->_initAction();
@@ -97,6 +98,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/api_role/delete')]
     public function deleteAction(): void
     {
         $rid = $this->getRequest()->getParam('role_id', false);
@@ -124,6 +126,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/api_role/saveRole')]
     public function saveRoleAction(): void
     {
         $rid        = $this->getRequest()->getParam('role_id', false);
@@ -190,6 +193,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/editrole', ['rid' => $rid]);
     }
 
+    #[Maho\Config\Route('/admin/api_role/editrolegrid')]
     public function editrolegridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/api_role_grid_user')->toHtml());

@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Attributes $this */
@@ -22,10 +20,9 @@
 <form action="<?= $this->getSaveUrl() ?>" method="post" id="attributes_edit_form" enctype="multipart/form-data">
     <?= $this->getBlockHtml('formkey') ?>
 </form>
-<script type="text/javascript">
+<script>
 var attributesForm = new varienForm('attributes_edit_form', '<?= $this->getValidationUrl() ?>');
-attributesForm._processValidationResult = function(transport) {
-    var response = JSON.parse(transport.responseText);
+attributesForm._processValidationResult = function(response) {
 
     if (response.error){
         if (response.attribute && document.getElementById(response.attribute)) {

@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 ?>
 <?php
@@ -21,8 +19,8 @@
     <div class="cart-msrp-totals"><?= $this->__('ORDER TOTAL WILL BE DISPLAYED BEFORE YOU SUBMIT THE ORDER') ?></div>
 <?php else: ?>
     <table id="shopping-cart-totals-table">
-        <col />
-        <col width="1" />
+        <col>
+        <col width="1">
         <tfoot>
             <?= $this->renderTotals('footer') ?>
         </tfoot>

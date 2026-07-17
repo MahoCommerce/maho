@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Maho Pest Test Runner with Automatic Test Database Setup
  *
@@ -21,9 +19,11 @@ declare(strict_types=1);
  * - MAHO_PGSQL_HOST, MAHO_PGSQL_USER, MAHO_PGSQL_PASS, MAHO_PGSQL_DBNAME: PostgreSQL credentials
  * - MAHO_SQLITE_PATH: SQLite database file path (defaults to var/db/maho_test.sqlite)
  *
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
+
+declare(strict_types=1);
 
 class PestTestRunner
 {
@@ -33,6 +33,7 @@ class PestTestRunner
     private array $dbConfig = [];
     private string $testDbName;
     private string $dbType;
+    private ?int $apiServerPid = null;
 
     public function __construct()
     {
@@ -41,13 +42,88 @@ class PestTestRunner
         $this->testDbName = $this->dbConfig['name'] . '_test';
     }
 
+    /**
+     * Canonical base URL the test store is installed with. Browser tests serve the app on
+     * this exact host:port (see Tests\Browser\MahoServer), so there is no runtime base_url
+     * rewrite, so all suites share one configuration. The host is `localhost`, deliberately:
+     * Playwright's bundled Chromium uses Chromium's built-in DNS resolver, which ignores
+     * /etc/hosts (so .test names don't resolve in-browser) and, on CI Linux runners, even
+     * reports ERR_NAME_NOT_RESOLVED for the bare loopback IP `127.0.0.1`. It does resolve
+     * `localhost` via its built-in RFC 6761 rule. The port must match the dev server or
+     * Maho's redirect_to_base bounces the browser to an unserved origin.
+     */
+    public static function testBaseUrl(): string
+    {
+        $host = getenv('MAHO_BROWSER_HOST') ?: 'localhost';
+        $port = (int) (getenv('MAHO_BROWSER_PORT') ?: 8901);
+        return "http://{$host}:{$port}/";
+    }
+
+    /**
+     * Read a value from the environment, falling back to a gitignored .env.testing
+     * file so local runs and CI (secrets) share the same variable names.
+     */
+    private static function envValue(string $key): string
+    {
+        $value = getenv($key);
+        if ($value !== false && $value !== '') {
+            return $value;
+        }
+        $file = __DIR__ . '/../.env.testing';
+        if (is_file($file)) {
+            foreach (file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+                $line = trim($line);
+                if ($line === '' || $line[0] === '#' || !str_contains($line, '=')) {
+                    continue;
+                }
+                [$k, $v] = explode('=', $line, 2);
+                if (trim($k) === $key) {
+                    return trim($v);
+                }
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Inject PayPal sandbox credentials into the test store right after install, so
+     * every suite shares one configuration (matching how a real store is set up).
+     * Skipped silently when no credentials are available. Credentials are stored
+     * encrypted (--encrypt) exactly as the admin would, and never echoed to the log.
+     */
+    private function injectPaypalSandboxConfig(): void
+    {
+        $clientId = self::envValue('PAYPAL_SANDBOX_CLIENT_ID');
+        $clientSecret = self::envValue('PAYPAL_SANDBOX_CLIENT_SECRET');
+        if ($clientId === '' || $clientSecret === '') {
+            return;
+        }
+
+        echo "Injecting PayPal sandbox configuration...\n";
+        $set = function (string $path, string $value, bool $encrypt = false) {
+            $cmd = './maho config:set ' . escapeshellarg($path) . ' ' . escapeshellarg($value)
+                . ' --scope default --scope-id 0 --silent' . ($encrypt ? ' --encrypt' : '');
+            // shell_exec (not the echoing executeCommand) so secrets never reach the log.
+            shell_exec($cmd);
+        };
+        $set('paypal/credentials/client_id', $clientId, true);
+        $set('paypal/credentials/client_secret', $clientSecret, true);
+        $set('paypal/credentials/sandbox', '1');
+        $set('payment/paypal_standard_checkout/active', '1');
+        $set('payment/paypal_advanced_checkout/active', '1');
+        echo "✓ PayPal sandbox configured\n";
+    }
+
     public function run(array $pestArgs = []): int
     {
-        echo "Setting up fresh test database for local testing ({$this->dbType})...\n";
-
         try {
             $this->backupLocalXml();
+            echo "Setting up fresh test database for local testing ({$this->dbType})...\n";
             $this->setupTestDatabase();
+            $this->injectPaypalSandboxConfig();
+            // Serve the freshly-installed app so the Api/V2 HTTP suite can reach
+            // it (mirrors CI). Non-fatal: if it can't start, those tests skip.
+            $this->startApiServer();
             $exitCode = $this->runPest($pestArgs);
 
             // Flush cache after tests complete
@@ -60,6 +136,7 @@ class PestTestRunner
             echo 'Error: ' . $e->getMessage() . "\n";
             return 1;
         } finally {
+            $this->stopApiServer();
             $this->restoreLocalXml();
         }
     }
@@ -251,8 +328,8 @@ class PestTestRunner
             ' --timezone Europe/London' .
             ' --default_currency USD' .
             ' --db_engine ' . escapeshellarg($dbEngine) .
-            ' --url http://maho.test/' .
-            ' --secure_base_url http://maho.test/' .
+            ' --url ' . escapeshellarg(self::testBaseUrl()) .
+            ' --secure_base_url ' . escapeshellarg(self::testBaseUrl()) .
             ' --use_secure 0' .
             ' --use_secure_admin 0' .
             ' --admin_lastname admin' .
@@ -354,11 +431,107 @@ class PestTestRunner
         }
     }
 
+    /**
+     * Start PHP's built-in server on the app so the Api/V2 HTTP tests can reach
+     * it. Sets API_BASE_URL for the Pest subprocess (inherited via passthru).
+     * Non-fatal: a failure to bind just leaves the API suite skipping.
+     */
+    private function startApiServer(): void
+    {
+        $host = getenv('MAHO_API_TEST_HOST') ?: '127.0.0.1';
+        $port = (int) (getenv('MAHO_API_TEST_PORT') ?: 8080);
+        $baseUrl = "http://{$host}:{$port}";
+
+        // The JWT issuer is pinned to the store base_url (JwtService::getIssuer),
+        // and redirect_to_base bounces any request whose host doesn't match it.
+        // So point the store base_url at the API server URL: this aligns the
+        // issuer with the tokens the helper signs (iss = API_BASE_URL) and stops
+        // the 301 redirect. The test DB is thrown away afterwards, so this is safe.
+        foreach (['web/unsecure/base_url', 'web/secure/base_url'] as $path) {
+            $this->executeCommand(sprintf(
+                './maho config:set %s %s --scope default --scope-id 0 --silent',
+                escapeshellarg($path),
+                escapeshellarg($baseUrl . '/'),
+            ));
+        }
+
+        // Pre-seed a deterministic JWT signing secret. Otherwise the Pest process
+        // (signing tokens via the helper) and the API server process each lazily
+        // generate their own random secret — with separate config caches they can
+        // diverge, so every authenticated request 401s. Seeding it once, encrypted,
+        // makes both processes read the same persisted secret.
+        $this->executeCommand(sprintf(
+            './maho config:set apiplatform/oauth2/secret %s --encrypt --scope default --scope-id 0 --silent',
+            escapeshellarg(str_repeat('0123456789abcdef', 4)),
+        ));
+        $this->executeCommand('./maho cache:flush --ansi');
+
+        // The API Platform container (routes, resource metadata) is compiled once
+        // into var/cache/api_platform and never invalidated by cache:flush, so a
+        // change to any Api resource would otherwise be served stale.
+        $this->executeCommand('rm -rf var/cache/api_platform');
+
+        putenv("API_BASE_URL={$baseUrl}");
+
+        $router = escapeshellarg(__DIR__ . '/router.php');
+        // Enable GraphQL introspection for the test server (off in production):
+        // the schema/tooling tests rely on it. Set inline so it lands in the
+        // server process environment regardless of parent inheritance.
+        $cmd = sprintf(
+            'MAHO_GRAPHQL_INTROSPECTION=1 php -S %s:%d -t public %s > /tmp/maho-test-api-server.log 2>&1 & echo $!',
+            $host,
+            $port,
+            $router,
+        );
+        $pid = (int) trim((string) shell_exec($cmd));
+        if ($pid <= 0) {
+            echo "⚠ Could not start API test server; Api/V2 HTTP tests will skip.\n";
+            return;
+        }
+        $this->apiServerPid = $pid;
+
+        for ($i = 0; $i < 40; $i++) {
+            $probe = shell_exec(sprintf(
+                'curl -s -o /dev/null -w "%%{http_code}" %s/api/rest/v2/store-config 2>/dev/null',
+                escapeshellarg($baseUrl),
+            ));
+            if ((int) trim((string) $probe) > 0) {
+                echo "✓ API test server up at {$baseUrl}\n";
+                return;
+            }
+            usleep(250000);
+        }
+        echo "⚠ API test server did not become ready; Api/V2 HTTP tests may skip.\n";
+    }
+
+    private function stopApiServer(): void
+    {
+        if ($this->apiServerPid !== null) {
+            shell_exec('kill ' . $this->apiServerPid . ' 2>/dev/null');
+            $this->apiServerPid = null;
+        }
+    }
+
     private function runPest(array $args): int
     {
         $pestCmd = './vendor/bin/pest --colors=always';
         if (!empty($args)) {
             $pestCmd .= ' ' . implode(' ', array_map('escapeshellarg', $args));
+        }
+
+        // The Browser suite needs Playwright; the plugin aborts the whole run when it isn't
+        // installed, even just from loading the browser test files. So when Playwright is
+        // absent and the caller didn't pick a suite explicitly, run only the non-browser
+        // suites, keeping the default run working for contributors without the toolchain.
+        $explicitSuite = false;
+        foreach ($args as $arg) {
+            if (str_contains($arg, 'testsuite')) {
+                $explicitSuite = true;
+                break;
+            }
+        }
+        if (!$explicitSuite && !is_file(__DIR__ . '/../node_modules/.bin/playwright')) {
+            $pestCmd .= ' --testsuite ' . escapeshellarg('Install,Backend,Frontend');
         }
 
         echo "\nRunning Pest tests...\n";

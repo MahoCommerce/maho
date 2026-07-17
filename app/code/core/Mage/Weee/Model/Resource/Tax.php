@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Weee
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Weee
  */
 
 class Mage_Weee_Model_Resource_Tax extends Mage_Core_Model_Resource_Db_Abstract
@@ -69,7 +67,7 @@ class Mage_Weee_Model_Resource_Tax extends Mage_Core_Model_Resource_Db_Abstract
      */
     protected function _updateDiscountPercents($productCondition = null)
     {
-        $now     = strtotime(Mage_Core_Model_Locale::now());
+        $now     = strtotime(Mage::app()->getLocale()->nowUtc());
         $adapter = $this->_getWriteAdapter();
 
         $select  = $this->_getReadAdapter()->select();
@@ -103,7 +101,7 @@ class Mage_Weee_Model_Resource_Tax extends Mage_Core_Model_Resource_Db_Abstract
         $prevKey     = false;
         while ($row = $data->fetch()) {
             $key = "{$row['product_id']}-{$row['website_id']}-{$row['customer_group_id']}";
-            if (isset($stops[$key]) && $stops[$key]) {
+            if (isset($stops[$key])) {
                 continue;
             }
 

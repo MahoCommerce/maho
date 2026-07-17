@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 ?>
 <?php /** @var Mage_Shipping_Block_Tracking_Popup $this */ ?>
@@ -25,8 +23,8 @@
         $_id = 0;
         foreach($_result as $track): ?>
             <table class="tracking-table-popup data-table" id="tracking-table-popup-<?= $_id ?>">
-                <col width="15%" />
-                <col />
+                <col width="15%">
+                <col>
                 <tbody>
                 <?php if(is_object($track)): ?>
                     <tr>
@@ -114,12 +112,12 @@
                 </tbody>
             </table>
             <?php if (is_object($track) && is_array($track->getProgressdetail()) && count($track->getProgressdetail()) > 0): ?>
-                <br />
+                <br>
                 <table class="data-table" id="track-history-table-<?= $track->getTracking() ?>">
-                    <col />
-                    <col width="1" />
-                    <col width="1" />
-                    <col />
+                    <col>
+                    <col width="1">
+                    <col width="1">
+                    <col>
                     <thead>
                         <tr>
                             <th><?= $this->__('Location') ?></th>

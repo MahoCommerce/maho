@@ -10,21 +10,21 @@ jobs:
     steps:
       - name: Generate token
         id: generate_token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          app-id: ${{ secrets.SYNC_L10N_APP_ID }}
+          client-id: ${{ secrets.SYNC_L10N_APP_CLIENT_ID }}
           private-key: ${{ secrets.SYNC_L10N_APP_PRIVATE_KEY }}
           owner: MahoCommerce
       - name: Set date
         id: date
         run: echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
       - name: Checkout main repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           path: maho
           fetch-depth: 0
       - name: Checkout l10n repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           repository: MahoCommerce/maho-l10n
           path: maho-l10n

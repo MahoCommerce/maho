@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Rss
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Rss
  */
 
 class Mage_Rss_Block_Order_New extends Mage_Core_Block_Template
@@ -40,7 +38,7 @@ class Mage_Rss_Block_Order_New extends Mage_Core_Block_Template
         $storeId = $this->getRequest()->getParam('store');
         $order = Mage::getModel('sales/order');
         $period = Mage::helper('rss')->getRssAdminOrderNewPeriod($storeId);
-        $passDate = $order->getResource()->formatDate(
+        $passDate = Mage::app()->getLocale()->formatDateForDb(
             mktime(0, 0, 0, (int) date('m'), (int) date('d') - $period),
         );
 

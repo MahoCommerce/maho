@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Websites $this */
@@ -29,7 +27,7 @@
         <div class="tree-store-scope">
             <?php foreach ($this->getWebsiteCollection() as $_website): ?>
             <div class="website-name">
-                <input name="product[website_ids][]" value="<?= $_website->getId() ?>" <?php if ($this->isReadonly()):?> disabled="disabled"<?php endif ?> class="checkbox website-checkbox" id="product_website_<?= $_website->getId() ?>" type="checkbox"<?php if($this->hasWebsite($_website->getId())): ?> checked="checked"<?php endif ?> />
+                <input name="product[website_ids][]" value="<?= $_website->getId() ?>" <?php if ($this->isReadonly()):?> disabled="disabled"<?php endif ?> class="checkbox website-checkbox" id="product_website_<?= $_website->getId() ?>" type="checkbox"<?php if($this->hasWebsite($_website->getId())): ?> checked="checked"<?php endif ?>>
                 <big><strong><label for="product_website_<?= $_website->getId() ?>"><?= $this->escapeHtml($_website->getName()) ?></label></strong></big>
             </div>
             <div class="webiste-groups" id="product_website_<?= $_website->getId() ?>_data">
@@ -58,7 +56,7 @@
     </div>
     </fieldset>
 </div>
-<script type="text/javascript">
+<script>
     const productWebsiteCheckboxes = document.querySelectorAll('.website-checkbox');
 
     productWebsiteCheckboxes.forEach(checkbox => {

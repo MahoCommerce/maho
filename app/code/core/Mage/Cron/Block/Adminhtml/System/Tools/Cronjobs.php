@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Cron
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Cron
  */
 
 class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs extends Mage_Adminhtml_Block_Widget_Grid_Container
@@ -17,5 +15,11 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs extends Mage_Adminhtml_Blo
         $this->_headerText = Mage::helper('cron')->__('Cron Jobs');
         parent::__construct();
         $this->_removeButton('add');
+
+        $this->_addButton('clear_history', [
+            'label' => Mage::helper('cron')->__('Clear History'),
+            'onclick' => "setLocation('{$this->getUrl('*/*/clearHistory')}')",
+            'class' => 'delete',
+        ]);
     }
 }

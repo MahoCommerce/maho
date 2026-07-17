@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Dataflow
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Dataflow
  */
 
 class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert_Adapter_Abstract
@@ -22,8 +20,6 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
             $type = $this->getVar('type', 'file');
             $className = '\Maho\Io\\' . ucwords($type);
             $this->_resource = new $className();
-
-            $isError = false;
 
             $ioConfig = $this->getVars();
             switch (strtolower($this->getVar('type', 'file'))) {
@@ -47,19 +43,17 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
 
                     $realPath = realpath($path);
 
-                    if (!$isError && $realPath === false) {
+                    if ($realPath === false) {
                         $message = Mage::helper('dataflow')->__('The destination folder "%s" does not exist or there is no access to create it.', $ioConfig['path']);
                         Mage::throwException($message);
-                    } elseif (!$isError && !is_dir($realPath)) {
+                    } elseif (!is_dir($realPath)) {
                         $message = Mage::helper('dataflow')->__('Destination folder "%s" is not a directory.', $realPath);
                         Mage::throwException($message);
-                    } elseif (!$isError) {
-                        if ($forWrite && !is_writable($realPath)) {
-                            $message = Mage::helper('dataflow')->__('Destination folder "%s" is not writable.', $realPath);
-                            Mage::throwException($message);
-                        } else {
-                            $ioConfig['path'] = rtrim($realPath, DS);
-                        }
+                    } elseif ($forWrite && !is_writable($realPath)) {
+                        $message = Mage::helper('dataflow')->__('Destination folder "%s" is not writable.', $realPath);
+                        Mage::throwException($message);
+                    } else {
+                        $ioConfig['path'] = rtrim($realPath, DS);
                     }
                     break;
                 default:
@@ -67,9 +61,6 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
                     break;
             }
 
-            if ($isError) {
-                return false;
-            }
             try {
                 $this->_resource->open($ioConfig);
             } catch (Exception $e) {

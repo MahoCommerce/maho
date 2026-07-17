@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2022 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 ?>
 <?php $_shippingCarrier = $this->getOrder()->getShippingCarrier(); ?>
@@ -20,11 +18,11 @@
             <?php if ($_numbers): ?>
                 <?php foreach ($_numbers as $_number): ?>
                     <a href="#" onclick="<?= $this->getViewLinkHtml($_number) ?>"><?= $_number ?></a>
-                    <a href="#" onclick="<?= $this->getRemoveLinkHtml($_number) ?>"><?= Mage::helper('sales')->__('Delete') ?></a><br/>
+                    <a href="#" onclick="<?= $this->getRemoveLinkHtml($_number) ?>"><?= Mage::helper('sales')->__('Delete') ?></a><br>
                     <span id="order_tracking_info_response_<?= $_number ?>"></span>
                 <?php endforeach ?>
             <?php endif ?>
-            <input class="input-text" type="text" id="tracking_number" name="tracking_number" value="" style="width:120px;"/>
+            <input class="input-text" type="text" id="tracking_number" name="tracking_number" value="" style="width:120px;">
             <?= $this->getSaveButtonHtml() ?>
         </td>
     </tr>

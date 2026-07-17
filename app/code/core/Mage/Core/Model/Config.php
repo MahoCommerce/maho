@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
@@ -40,7 +38,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         'Mage_Usa' => 24,
         'Mage_Paygate' => 25,
         'Mage_Checkout' => 27,
-        'Mage_Paypal' => 28,
         'Mage_Log' => 30,
         'Mage_Poll' => 31,
         'Mage_Review' => 32,
@@ -51,7 +48,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         'Mage_Widget' => 37,
         'Mage_Tax' => 38,
         'Mage_Wishlist' => 39,
-        'Mage_PaypalUk' => 41,
         'Mage_Contacts' => 42,
         'Mage_GiftMessage' => 43,
         'Mage_Sitemap' => 45,
@@ -89,7 +85,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * @var array
      */
     protected $_cacheSections = [
-        'admin'     => 0,
         'adminhtml' => 0,
         'crontab'   => 0,
         'install'   => 0,
@@ -1021,7 +1016,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                     if ($mergeModel->loadFile($configFile)) {
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_GLOBAL, $mergeModel);
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_FRONTEND, $mergeModel);
-                        $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_ADMIN, $mergeModel);
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_ADMINHTML, $mergeModel);
 
                         $mergeToObject->extend($mergeModel, true);
@@ -1118,12 +1112,12 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      *
      * If $moduleName is specified retrieves specific value for the module.
      *
-     * @deprecated in favor of Mage_Core_Model_Config_Options
      * @todo get global dir config
      * @param string $type
      * @return string
      * @throws Mage_Core_Exception
      */
+    #[\Deprecated(message: 'in favor of Mage_Core_Model_Config_Options')]
     public function getBaseDir($type = 'base')
     {
         return $this->getOptions()->getDir($type);
@@ -1216,11 +1210,10 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                         Mage::getSingleton((string) $observer->class),
                         (string) $observer->method,
                     ],
-                    'object', 'model' => [
+                    default => [
                         Mage::getModel((string) $observer->class),
                         (string) $observer->method,
                     ],
-                    default => [$observer->getClassName(), (string) $observer->method],
                 };
 
                 $args = (array) $observer->args;
@@ -1334,6 +1327,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         $className = $this->getHelperClassName($helperAlias);
         if (!class_exists($className)) {
+            Mage::log("Helper class '$className' (alias: '$helperAlias') could not be loaded.", Mage::LOG_WARNING);
             return false;
         }
         \Maho\Profiler::start('CORE::create_object_of::' . $className);
@@ -1362,9 +1356,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      *
      * @param string $moduleAlias
      * @return Mage_Core_Model_Resource_Helper_Abstract|false
-     * @deprecated Use getResourceHelperInstance() method instead
      * @see Mage_Core_Model_Config::getResourceHelperInstance()
      */
+    #[\Deprecated(message: 'Use getResourceHelperInstance() method instead')]
     public function getResourceHelper($moduleAlias)
     {
         return $this->getResourceHelperInstance($moduleAlias);
@@ -1407,6 +1401,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         $className = $this->getModelClassName($modelAlias);
         if (!class_exists($className)) {
+            Mage::log("Model class '$className' (alias: '$modelAlias') could not be loaded.", Mage::LOG_WARNING);
             return false;
         }
         \Maho\Profiler::start('CORE::create_object_of::' . $className);
@@ -1661,7 +1656,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Get fieldset from configuration
      *
      * @param string $name fieldset name
-     * @param string $root fieldset area, could be 'admin'
+     * @param string $root fieldset area, could be 'adminhtml'
      * @return null|Mage_Core_Model_Config_Element[]|SimpleXMLElement
      */
     public function getFieldset($name, $root = 'global')

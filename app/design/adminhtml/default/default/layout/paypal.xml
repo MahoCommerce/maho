@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: OSL-3.0
+-->
+<layout>
+    <adminhtml_sales_order_create_index>
+        <reference name="head">
+            <action method="addJs"><script>maho/paypal/vault-checkout.js</script></action>
+        </reference>
+    </adminhtml_sales_order_create_index>
+</layout>

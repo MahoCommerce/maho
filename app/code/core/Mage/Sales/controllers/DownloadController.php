@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
  */
 
 class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
@@ -21,7 +19,7 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
     {
         $secretKey = $this->getRequest()->getParam('key');
         try {
-            if ($secretKey != $info['secret_key']) {
+            if (!isset($info['secret_key']) || !hash_equals($info['secret_key'], (string) $secretKey)) {
                 throw new Exception();
             }
 
@@ -60,6 +58,7 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
     /**
      * Profile custom options download action
      */
+    #[Maho\Config\Route('/sales/download/downloadProfileCustomOption', name: 'sales.download.downloadprofilecustomoption', methods: ['GET'])]
     public function downloadProfileCustomOptionAction(): void
     {
         $recurringProfile = Mage::getModel('sales/recurring_profile')->load($this->getRequest()->getParam('id'));
@@ -103,6 +102,7 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
     /**
      * Custom options download action
      */
+    #[Maho\Config\Route('/sales/download/downloadCustomOption', name: 'sales.download.downloadcustomoption', methods: ['GET'])]
     public function downloadCustomOptionAction(): void
     {
         $quoteItemOptionId = $this->getRequest()->getParam('id');
@@ -114,18 +114,38 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
             return;
         }
 
-        // Verify the quote belongs to the current customer or session
+        // Verify access: session-based (logged-in customer or checkout session)
+        // OR secret key validation (for admin view or headless/API flows without frontend sessions)
         $quoteItem = Mage::getModel('sales/quote_item')->load($option->getItemId());
         $quote = Mage::getModel('sales/quote')->load($quoteItem->getQuoteId());
         $customerSession = Mage::getSingleton('customer/session');
         $checkoutQuoteId = Mage::getSingleton('checkout/session')->getQuoteId();
 
+        $hasSessionAccess = false;
         if ($quote->getCustomerId()) {
-            if (!$customerSession->isLoggedIn() || $quote->getCustomerId() != $customerSession->getCustomerId()) {
-                $this->_forward('noRoute');
-                return;
+            $hasSessionAccess = $customerSession->isLoggedIn()
+                && $quote->getCustomerId() == $customerSession->getCustomerId();
+        } else {
+            $hasSessionAccess = $quote->getId() == $checkoutQuoteId;
+        }
+
+        // Fallback: validate secret key from URL against the stored file data.
+        // This allows downloads from admin order view and headless storefronts
+        // where no frontend customer/checkout session exists.
+        $hasKeyAccess = false;
+        if (!$hasSessionAccess) {
+            $requestKey = $this->getRequest()->getParam('key');
+            if ($requestKey) {
+                try {
+                    $info = Mage::helper('core/unserializeArray')->unserialize($option->getValue());
+                    $hasKeyAccess = isset($info['secret_key']) && hash_equals($info['secret_key'], $requestKey);
+                } catch (Exception $e) {
+                    // Invalid data — deny access
+                }
             }
-        } elseif ($quote->getId() != $checkoutQuoteId) {
+        }
+
+        if (!$hasSessionAccess && !$hasKeyAccess) {
             $this->_forward('noRoute');
             return;
         }

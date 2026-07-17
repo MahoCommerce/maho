@@ -1,15 +1,16 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
+/**
+ * @deprecated since 26.5 Flat Catalog will be removed in a future version
+ */
 class Mage_Adminhtml_Block_System_Config_Form_Field_Select_Flatproduct extends Mage_Adminhtml_Block_System_Config_Form_Field
 {
     /**
@@ -30,6 +31,13 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Select_Flatproduct extends M
             $element->setDisabled(true)
                 ->setValue(0);
         }
+
+        if ($element->getValue()) {
+            $deprecation = 'Flat Catalog is deprecated and will be removed in a future version. Please consider disabling it.';
+            $comment = $element->getComment();
+            $element->setComment('<span style="color:red; font-weight:bold;">' . $deprecation . '</span>' . ($comment ? '<br>' . $comment : ''));
+        }
+
         return parent::_getElementHtml($element);
     }
 }

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Controller_Action
@@ -47,6 +45,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
     /**
      * Profiles list action
      */
+    #[Maho\Config\Route('/admin/system_convert_profile/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -86,6 +85,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/system_convert_profile/grid')]
     public function gridAction(): void
     {
         $this->getResponse()->setBody(
@@ -96,6 +96,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
     /**
      * Profile edit action
      */
+    #[Maho\Config\Route('/admin/system_convert_profile/edit')]
     public function editAction(): void
     {
         $this->_initProfile();
@@ -129,6 +130,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
     /**
      * Create new profile action
      */
+    #[Maho\Config\Route('/admin/system_convert_profile/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -137,6 +139,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
     /**
      * Delete profile action
      */
+    #[Maho\Config\Route('/admin/system_convert_profile/delete')]
     public function deleteAction(): void
     {
         $this->_initProfile();
@@ -157,6 +160,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
     /**
      * Save profile action
      */
+    #[Maho\Config\Route('/admin/system_convert_profile/save')]
     public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -166,9 +170,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
             $profile = Mage::registry('current_convert_profile');
 
             // Prepare profile saving data
-            if (isset($data)) {
-                $profile->addData($data);
-            }
+            $profile->addData($data);
 
             try {
                 $profile->save();
@@ -196,6 +198,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
         }
     }
 
+    #[Maho\Config\Route('/admin/system_convert_profile/run')]
     public function runAction(): void
     {
         $this->_initProfile();
@@ -203,6 +206,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/system_convert_profile/batchRun')]
     public function batchRunAction(): void
     {
         if ($this->getRequest()->isPost()) {
@@ -268,6 +272,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
         }
     }
 
+    #[Maho\Config\Route('/admin/system_convert_profile/batchFinish')]
     public function batchFinishAction(): void
     {
         $batchId = $this->getRequest()->getParam('id');
@@ -293,6 +298,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
     /**
      * Customer orders grid
      */
+    #[Maho\Config\Route('/admin/system_convert_profile/history')]
     public function historyAction(): void
     {
         $this->_initProfile();

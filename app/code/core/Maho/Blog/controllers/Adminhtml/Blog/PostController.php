@@ -1,17 +1,14 @@
 <?php
 
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Blog
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Blog
  */
 
 class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'cms/blog_posts';
+    public const ADMIN_RESOURCE = 'cms/blog/posts';
 
     #[\Override]
     public function preDispatch()
@@ -23,10 +20,11 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
     protected function _initAction(): self
     {
         $this->loadLayout()
-            ->_setActiveMenu('cms/blog_posts');
+            ->_setActiveMenu('cms/blog/posts');
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/blog_post/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Blog Posts'));
@@ -34,11 +32,13 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/blog_post/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
+    #[Maho\Config\Route('/admin/blog_post/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('Blog Post'));
@@ -74,6 +74,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
             ->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/blog_post/save')]
     public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -86,7 +87,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
 
             try {
                 $model->addData($data)
-                    ->setUpdatedAt(Mage::getSingleton('core/date')->gmtDate())
+                    ->setUpdatedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                     ->save();
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(
@@ -111,6 +112,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/blog_post/delete')]
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -131,6 +133,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/blog_post/massDelete')]
     public function massDeleteAction(): void
     {
         $postIds = $this->getRequest()->getParam('post');
@@ -157,6 +160,6 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
     #[\Override]
     protected function _isAllowed(): bool
     {
-        return Mage::getSingleton('admin/session')->isAllowed('cms/blog_posts');
+        return Mage::getSingleton('admin/session')->isAllowed('cms/blog/posts');
     }
 }

@@ -1,18 +1,13 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Rss
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_Rss>
-            <version>1.6.0.0</version>
+            <version>2.0.0</version>
         </Mage_Rss>
     </modules>
     <global>
@@ -30,13 +25,6 @@
                 <class>Mage_Rss_Block</class>
             </rss>
         </blocks>
-        <resources>
-            <rss_setup>
-                <setup>
-                    <module>Mage_Rss</module>
-                </setup>
-            </rss_setup>
-        </resources>
     </global>
     <adminhtml>
         <translate>
@@ -57,24 +45,6 @@
         </layout>
     </adminhtml>
     <frontend>
-        <events>
-            <sales_order_save_after>
-                <observers>
-                    <notifystock>
-                        <class>rss/observer</class>
-                        <method>salesOrderItemSaveAfterNotifyStock</method>
-                    </notifystock>
-                </observers>
-            </sales_order_save_after>
-            <sales_order_save_after>
-                <observers>
-                    <ordernew>
-                        <class>rss/observer</class>
-                        <method>salesOrderItemSaveAfterOrderNew</method>
-                    </ordernew>
-                </observers>
-            </sales_order_save_after>
-        </events>
         <translate>
             <modules>
                 <Mage_Rss>
@@ -89,15 +59,6 @@
             <rss_order_new>/rss/order/new</rss_order_new>
             <rss_catalog_notifystock>/rss/catalog/notifystock</rss_catalog_notifystock>
         </secure_url>
-        <routers>
-            <rss>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Rss</module>
-                    <frontName>rss</frontName>
-                </args>
-            </rss>
-        </routers>
         <layout>
             <updates>
                 <rss>

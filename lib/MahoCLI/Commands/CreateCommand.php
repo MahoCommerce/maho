@@ -1,11 +1,8 @@
 <?php
 
 /**
- * Maho
- *
- * @package    MahoCLI
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 declare(strict_types=1);
@@ -20,7 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'create-command',
+    name: 'dev:create-command',
     description: 'Create a new command that will integrate into your project\'s Maho CLI set of commands',
 )]
 class CreateCommand extends BaseMahoCommand

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_CatalogSearch
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_CatalogSearch
  */
 
 class Mage_CatalogSearch_ResultController extends Mage_Core_Controller_Front_Action
@@ -24,6 +22,7 @@ class Mage_CatalogSearch_ResultController extends Mage_Core_Controller_Front_Act
     /**
      * Display search result
      */
+    #[Maho\Config\Route('/catalogsearch/result', name: 'catalogsearch.result.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $query = Mage::helper('catalogsearch')->getQuery();

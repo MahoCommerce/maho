@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: OSL-3.0
+-->
+<layout>
+    <adminhtml_sales_revocation_index>
+        <reference name="head">
+            <action method="setTitle" translate="title" module="revocation"><title>Revocation Requests</title></action>
+        </reference>
+        <reference name="content">
+            <block type="revocation/adminhtml_request" name="revocation_request"/>
+        </reference>
+    </adminhtml_sales_revocation_index>
+
+    <adminhtml_sales_revocation_grid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="revocation/adminhtml_request_grid" name="revocation.request.grid"/>
+        </block>
+    </adminhtml_sales_revocation_grid>
+
+    <adminhtml_sales_revocation_view>
+        <reference name="head">
+            <action method="setTitle" translate="title" module="revocation"><title>Revocation Request</title></action>
+        </reference>
+        <reference name="content">
+            <block type="revocation/adminhtml_request_view" name="revocation_request_view"/>
+        </reference>
+    </adminhtml_sales_revocation_view>
+</layout>

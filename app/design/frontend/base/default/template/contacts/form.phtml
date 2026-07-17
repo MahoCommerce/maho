@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 
 /** @var Mage_Core_Block_Template $this */
@@ -15,28 +13,31 @@
 <div class="page-title">
     <h1><?= Mage::helper('contacts')->__('Contact Us') ?></h1>
 </div>
-<form action="<?= $this->getFormAction() ?>" id="contactForm" method="post" class="scaffold-form">
+<form action="<?= $this->getFormAction() ?>" id="contactForm" method="post" class="scaffold-form" autocomplete="off">
     <?= $this->getBlockHtml('formkey') ?>
+    <?php if (Mage::getStoreConfigFlag(Mage_Contacts_IndexController::XML_PATH_HONEYPOT_ENABLED)): ?>
+        <?= Mage::helper('core')->getHoneypotFieldHtml() ?>
+    <?php endif ?>
     <div class="fieldset">
         <ul class="form-list">
             <li class="fields">
                 <div class="field">
                     <label for="name" class="required"><?= Mage::helper('contacts')->__('Name') ?></label>
                     <div class="input-box">
-                        <input name="name" id="name" title="<?= $this->quoteEscape(Mage::helper('contacts')->__('Name')) ?>" value="<?= $this->escapeHtml($this->helper('contacts')->getUserName()) ?>" class="input-text required-entry" type="text" />
+                        <input name="name" id="name" title="<?= $this->quoteEscape(Mage::helper('contacts')->__('Name')) ?>" value="<?= $this->escapeHtml($this->helper('contacts')->getUserName()) ?>" class="input-text required-entry" type="text">
                     </div>
                 </div>
                 <div class="field">
                     <label for="email" class="required"><?= Mage::helper('contacts')->__('Email') ?></label>
                     <div class="input-box">
-                        <input name="email" id="email" title="<?= $this->quoteEscape(Mage::helper('contacts')->__('Email')) ?>" value="<?= $this->escapeHtml($this->helper('contacts')->getUserEmail()) ?>" class="input-text required-entry validate-email" type="email" autocapitalize="off" autocorrect="off" spellcheck="false" />
+                        <input name="email" id="email" title="<?= $this->quoteEscape(Mage::helper('contacts')->__('Email')) ?>" value="<?= $this->escapeHtml($this->helper('contacts')->getUserEmail()) ?>" class="input-text required-entry validate-email" type="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false">
                     </div>
                 </div>
             </li>
             <li>
                 <label for="telephone"><?= Mage::helper('contacts')->__('Telephone') ?></label>
                 <div class="input-box">
-                    <input name="telephone" id="telephone" title="<?= $this->quoteEscape(Mage::helper('contacts')->__('Telephone')) ?>" value="" class="input-text" type="tel" />
+                    <input name="telephone" id="telephone" title="<?= $this->quoteEscape(Mage::helper('contacts')->__('Telephone')) ?>" value="" class="input-text" type="tel">
                 </div>
             </li>
             <li class="wide">
@@ -51,6 +52,6 @@
         <button type="submit" title="<?= $this->quoteEscape(Mage::helper('contacts')->__('Submit')) ?>" class="button"><?= Mage::helper('contacts')->__('Submit') ?></button>
     </div>
 </form>
-<script type="text/javascript">
+<script>
     var contactForm = new VarienForm('contactForm', true);
 </script>

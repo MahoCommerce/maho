@@ -1,15 +1,5 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
-
 Supported layout update handles (action):
 - customer_account_index
 - customer_address_index
@@ -24,6 +14,10 @@ Supported layout update handles (action):
 Supported layout update handles (special):
 - default
 
+SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+SPDX-FileCopyrightText: 2022 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <layout version="0.1.0">
 
@@ -34,11 +28,11 @@ Default layout, loads most of the pages
     <default>
         <!-- Mage_Customer -->
         <reference name="top.links">
-            <action method="addLink" translate="label title" module="customer"><label>My Account</label><url helper="customer/getAccountUrl"/><title>My Account</title><prepare/><urlParams/><position>10</position></action>
-            <action method="addLink" translate="label title before_text" module="customer"><label>Register</label><url helper="customer/getRegisterUrl" /><title>Register</title><prepare/><urlParams/><position>100</position><li/><a/></action>
+            <action method="addLink" translate="label title" module="customer" ifconfig="customer/account/enabled_in_frontend"><label>My Account</label><url helper="customer/getAccountUrl"/><title>My Account</title><prepare/><urlParams/><position>10</position></action>
+            <action method="addLink" translate="label title before_text" module="customer" ifconfig="customer/account/enabled_in_frontend"><label>Register</label><url helper="customer/getRegisterUrl" /><title>Register</title><prepare/><urlParams/><position>100</position><li/><a/></action>
         </reference>
         <reference name="footer_links2">
-            <action method="addLink" translate="label title" module="catalog"><label>My Account</label><url helper="customer/getAccountUrl" /><title>My Account</title></action>
+            <action method="addLink" translate="label title" module="catalog" ifconfig="customer/account/enabled_in_frontend"><label>My Account</label><url helper="customer/getAccountUrl" /><title>My Account</title></action>
         </reference>
     </default>
 
@@ -48,8 +42,8 @@ Load this update on every page when customer is logged in
 
     <customer_logged_in>
         <reference name="top.links">
-            <action method="removeLinkByUrl"><url helper="customer/getRegisterUrl" /></action>
-            <action method="addLink" translate="label title" module="customer"><label>Log Out</label><url helper="customer/getLogoutUrl"/><title>Log Out</title><prepare/><urlParams/><position>100</position></action>
+            <action method="removeLinkByUrl" ifconfig="customer/account/enabled_in_frontend"><url helper="customer/getRegisterUrl" /></action>
+            <action method="addLink" translate="label title" module="customer" ifconfig="customer/account/enabled_in_frontend"><label>Log Out</label><url helper="customer/getLogoutUrl"/><title>Log Out</title><prepare/><urlParams/><position>100</position></action>
         </reference>
     </customer_logged_in>
 
@@ -62,7 +56,7 @@ Load this update on every page when customer is logged out
             <block type="customer/form_login" name="customer_form_mini_login" before="-" template="customer/form/mini.login.phtml"/>
         </reference>-->
         <reference name="top.links">
-            <action method="addLink" translate="label title" module="customer"><label>Log In</label><url helper="customer/getLoginUrl"/><title>Log In</title><prepare/><urlParams/><position>100</position></action>
+            <action method="addLink" translate="label title" module="customer" ifconfig="customer/account/enabled_in_frontend"><label>Log In</label><url helper="customer/getLoginUrl"/><title>Log In</title><prepare/><urlParams/><position>100</position></action>
         </reference>
     </customer_logged_out>
 
@@ -204,6 +198,34 @@ New customer registration
           <action method="unsetChild"><name>left.permanent.callout</name></action>
         </reference>
     </customer_account_edit>
+
+    <customer_account_twofa translate="label">
+        <label>Customer Account Two-Factor Authentication</label>
+        <update handle="customer_account"/>
+        <reference name="root">
+            <action method="setHeaderTitle" translate="title" module="customer"><title>Two-Factor Authentication</title></action>
+        </reference>
+        <reference name="my.account.wrapper">
+            <block type="customer/account_twofa" name="customer_twofa" template="customer/form/twofa.phtml"/>
+        </reference>
+
+        <reference name="left">
+          <action method="unsetChild"><name>left.permanent.callout</name></action>
+        </reference>
+    </customer_account_twofa>
+
+    <customer_account_twofachallenge translate="label">
+        <label>Customer Account Two-Factor Authentication Challenge</label>
+        <remove name="right"/>
+        <remove name="left"/>
+
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+        </reference>
+        <reference name="content">
+            <block type="core/template" name="customer_twofa_challenge" template="customer/form/twofa_challenge.phtml"/>
+        </reference>
+    </customer_account_twofachallenge>
 
 <!--
 Customer account pages, rendered for all tabs in dashboard

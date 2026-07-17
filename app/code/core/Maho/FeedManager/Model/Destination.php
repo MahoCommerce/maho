@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Maho_FeedManager
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_FeedManager
  */
+
+declare(strict_types=1);
 
 /**
  * Upload Destination model
@@ -68,15 +66,7 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
         }
 
         $helper = Mage::helper('core');
-
-        // Try to decrypt (config from database is encrypted)
-        $decrypted = $helper->decrypt($config);
-        if ($decrypted !== '') {
-            return $helper->jsonDecode($decrypted) ?: [];
-        }
-
-        // If decryption failed, config might be plaintext JSON (before save)
-        return $helper->jsonDecode($config) ?: [];
+        return $helper->jsonDecode($helper->tryDecrypt($config) ?? $config) ?: [];
     }
 
     /**
@@ -238,45 +228,17 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _beforeSave(): self
     {
-        $this->_encryptConfig();
+        $config = $this->getConfig();
+        if (!empty($config)) {
+            $this->setData('config', Mage::helper('core')->encryptIdempotent($config));
+        }
 
-        $now = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+        $now = Mage::app()->getLocale()->formatDateForDb('now');
         if (!$this->getCreatedAt()) {
             $this->setCreatedAt($now);
         }
         $this->setUpdatedAt($now);
 
         return parent::_beforeSave();
-    }
-
-    /**
-     * Encrypt the entire config JSON before saving
-     */
-    protected function _encryptConfig(): void
-    {
-        $config = $this->getConfig();
-        if (empty($config)) {
-            return;
-        }
-
-        $helper = Mage::helper('core');
-
-        // Check if config is already encrypted (re-saving without changes)
-        // If decryption succeeds, we have JSON to work with
-        $decrypted = $helper->decrypt($config);
-        if ($decrypted !== '') {
-            $configArray = $helper->jsonDecode($decrypted);
-        } else {
-            // Config is plaintext JSON (new or modified)
-            $configArray = $helper->jsonDecode($config);
-        }
-
-        if (!is_array($configArray)) {
-            return;
-        }
-
-        // Encrypt the entire config JSON
-        $json = $helper->jsonEncode($configArray);
-        $this->setData('config', $helper->encrypt($json));
     }
 }

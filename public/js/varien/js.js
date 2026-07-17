@@ -1,12 +1,7 @@
-/**
- * Maho
- *
- * @package     js
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+// SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+// SPDX-FileCopyrightText: 2020-2023 The OpenMage Contributors <https://openmage.org>
+// SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+// SPDX-License-Identifier: AFL-3.0
 
 /**
  * Custom error with translated message
@@ -39,10 +34,25 @@ async function mahoFetch(url, options) {
         if (loaderArea !== false && typeof showLoader === 'function') {
             showLoader(loaderArea)
         }
-        if (fetchOptions?.method?.toUpperCase() === 'POST' && typeof FORM_KEY !== 'undefined') {
-            fetchOptions.body ??= new URLSearchParams();
-            if (fetchOptions.body instanceof URLSearchParams || fetchOptions.body instanceof FormData) {
-                fetchOptions.body.set('form_key', fetchOptions.body.get('form_key') ?? FORM_KEY);
+        if (fetchOptions?.method?.toUpperCase() === 'POST') {
+            const formKey = typeof FORM_KEY !== 'undefined'
+                ? FORM_KEY
+                : document.querySelector('input[name="form_key"]')?.value;
+            if (formKey) {
+                fetchOptions.body ??= new URLSearchParams();
+                if (fetchOptions.body instanceof URLSearchParams || fetchOptions.body instanceof FormData) {
+                    fetchOptions.body.set('form_key', fetchOptions.body.get('form_key') ?? formKey);
+                } else if (typeof fetchOptions.body === 'string') {
+                    try {
+                        const parsed = JSON.parse(fetchOptions.body);
+                        if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed) && !('form_key' in parsed)) {
+                            parsed.form_key = formKey;
+                            fetchOptions.body = JSON.stringify(parsed);
+                        }
+                    } catch (e) {
+                        // Not JSON, skip
+                    }
+                }
             }
         }
 
@@ -161,6 +171,9 @@ function generateRandomString(length) {
  * @param {Object} params - key value pairs to add, update, or remove
  */
 function setRouteParams(url, params = {}) {
+    if (!url) {
+        return url;
+    }
     url = new URL(url);
 
     const noTrailingSlash = !url.pathname.endsWith('/');
@@ -190,6 +203,9 @@ function setRouteParams(url, params = {}) {
  * @param {Object} params - key value pairs to add, update, or remove
  */
 function setQueryParams(url, params = {}) {
+    if (!url) {
+        return url;
+    }
     url = new URL(url);
     for (const [ key, val ] of Object.entries(params)) {
         if (val === null || val === false) {

@@ -1,16 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Mage_Install
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Install
  */
+
+declare(strict_types=1);
 
 class Mage_Install_Helper_Data extends Mage_Core_Helper_Abstract
 {
@@ -35,23 +33,12 @@ class Mage_Install_Helper_Data extends Mage_Core_Helper_Abstract
         }
         self::$phpChecked = true;
 
-        $searchDirs = array_filter(array_unique([
-            PHP_BINDIR,
-            dirname(PHP_BINDIR) . '/bin',
-            '/usr/local/bin',
-            '/usr/bin',
-            '/opt/homebrew/bin',
-        ]));
+        // Prefer PHP's own bindir over $PATH: in a web (fpm/apache) context PHP_BINARY points
+        // at php-fpm, so we look up the "php" CLI sibling rather than reusing the SAPI binary.
+        self::$phpBinary = (new \Symfony\Component\Process\ExecutableFinder())
+            ->find('php', null, [PHP_BINDIR, dirname(PHP_BINDIR) . '/bin', '/opt/homebrew/bin']);
 
-        foreach ($searchDirs as $dir) {
-            $path = $dir . '/php';
-            if (is_file($path) && is_executable($path)) {
-                self::$phpBinary = $path;
-                return self::$phpBinary;
-            }
-        }
-
-        return null;
+        return self::$phpBinary;
     }
 
     /**
@@ -71,24 +58,11 @@ class Mage_Install_Helper_Data extends Mage_Core_Helper_Abstract
             return self::$composerBinary;
         }
 
-        // Search common locations for the composer binary
-        $searchDirs = array_filter(array_unique([
-            PHP_BINDIR,
-            dirname(PHP_BINDIR) . '/bin',
-            '/usr/local/bin',
-            '/usr/bin',
-            '/opt/homebrew/bin',
-        ]));
+        // Search $PATH and common locations for the composer binary
+        self::$composerBinary = (new \Symfony\Component\Process\ExecutableFinder())
+            ->find('composer', null, [PHP_BINDIR, dirname(PHP_BINDIR) . '/bin', '/opt/homebrew/bin']);
 
-        foreach ($searchDirs as $dir) {
-            $path = $dir . '/composer';
-            if (is_file($path) && is_executable($path)) {
-                self::$composerBinary = $path;
-                return self::$composerBinary;
-            }
-        }
-
-        return null;
+        return self::$composerBinary;
     }
 
     public function isComposerAvailable(): bool

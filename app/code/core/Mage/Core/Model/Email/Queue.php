@@ -1,16 +1,13 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
-use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Address;
@@ -170,6 +167,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[Maho\Config\CronJob('core_email_queue_send_all', schedule: '*/1 * * * *')]
     public function send()
     {
         $collection = Mage::getModel('core/email_queue')->getCollection()
@@ -181,16 +179,16 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
         /** @var Mage_Core_Model_Email_Queue $message */
         foreach ($collection as $message) {
             if ($message->getId()) {
-                $dsn = Mage::helper('core')->getMailerDsn();
-                if (!$dsn) {
-                    $message->setProcessedAt(Mage_Core_Model_Locale::now());
+                $transport = Mage::helper('core')->getMailTransport();
+                if (!$transport) {
+                    $message->setProcessedAt(Mage::app()->getLocale()->formatDateForDb('now'));
                     $message->save();
                     continue;
                 }
 
                 try {
                     $parameters = new \Maho\DataObject($message->getMessageParameters());
-                    $mailer = new Mailer(Transport::fromDsn($dsn));
+                    $mailer = new Mailer($transport);
                     $email = new Email();
                     $email->subject($parameters->getSubject());
                     $email->from(new Address($parameters->getFromEmail(), $parameters->getFromName()));
@@ -220,6 +218,11 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                         $email->returnPath($parameters->getReturnTo());
                     }
 
+                    Mage_Core_Model_Email_Attachment::applyDescriptors(
+                        $email,
+                        (array) $parameters->getAttachments(),
+                    );
+
                     $transport = new \Maho\DataObject();
                     Mage::dispatchEvent('email_queue_send_before', [
                         'mail'      => $email,
@@ -228,7 +231,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                     ]);
 
                     $mailer->send($email);
-                    $message->setProcessedAt(Mage_Core_Model_Locale::now());
+                    $message->setProcessedAt(Mage::app()->getLocale()->formatDateForDb('now'));
                     $message->save();
 
                     foreach ($message->getRecipients() as $recipient) {
@@ -254,6 +257,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[Maho\Config\CronJob('core_email_queue_clean_up', schedule: '0 0 * * *')]
     public function cleanQueue()
     {
         $this->_getResource()->removeSentMessages();

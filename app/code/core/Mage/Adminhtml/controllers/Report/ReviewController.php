@@ -1,17 +1,16 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_Action
 {
+    #[Maho\Config\Route('/admin/report_review/_init')]
     public function _initAction()
     {
         $act = $this->getRequest()->getActionName();
@@ -25,6 +24,7 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/report_review/customer')]
     public function customerAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -41,6 +41,7 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     /**
      * Export review customer report to CSV format
      */
+    #[Maho\Config\Route('/admin/report_review/exportCustomerCsv')]
     public function exportCustomerCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_customer_grid');
@@ -50,12 +51,14 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     /**
      * Export review customer report to Excel XML format
      */
+    #[Maho\Config\Route('/admin/report_review/exportCustomerExcel')]
     public function exportCustomerExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_customer_grid');
         $this->_prepareDownloadResponse(...$grid->getExcel('review_customer.xml', -1));
     }
 
+    #[Maho\Config\Route('/admin/report_review/product')]
     public function productAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -72,6 +75,7 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     /**
      * Export review product report to CSV format
      */
+    #[Maho\Config\Route('/admin/report_review/exportProductCsv')]
     public function exportProductCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_product_grid');
@@ -81,12 +85,14 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     /**
      * Export review product report to Excel XML format
      */
+    #[Maho\Config\Route('/admin/report_review/exportProductExcel')]
     public function exportProductExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_product_grid');
         $this->_prepareDownloadResponse(...$grid->getExcel('review_product.xml', -1));
     }
 
+    #[Maho\Config\Route('/admin/report_review/productDetail')]
     public function productDetailAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -105,6 +111,7 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     /**
      * Export review product detail report to CSV format
      */
+    #[Maho\Config\Route('/admin/report_review/exportProductDetailCsv')]
     public function exportProductDetailCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_detail_grid');
@@ -114,6 +121,7 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     /**
      * Export review product detail report to ExcelXML format
      */
+    #[Maho\Config\Route('/admin/report_review/exportProductDetailExcel')]
     public function exportProductDetailExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_review_detail_grid');

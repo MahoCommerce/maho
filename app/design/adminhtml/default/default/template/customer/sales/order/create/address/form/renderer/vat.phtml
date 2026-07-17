@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Adminhtml_Block_Customer_Sales_Order_Address_Form_Renderer_Vat $this */
@@ -32,6 +30,19 @@ $_validateButton = $this->getValidateButton();
         <div class="validate-vat">
             <?= $_validateButton->toHtml() ?>
         </div>
+        <?php if (Mage::helper('customer')->isVatValidationEnabled()): ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var elm = document.getElementById('<?= $this->jsQuoteEscape($this->getVatFieldId()) ?>');
+                if (elm) {
+                    elm.classList.add('validate-vat');
+                    elm.dataset.validateVatUrl = '<?= $this->jsQuoteEscape($this->getAjaxValidateUrl()) ?>';
+                    elm.dataset.validateVatCountry = '<?= $this->jsQuoteEscape($this->getCountryFieldId()) ?>';
+                    Validation.initVatValidation(elm);
+                }
+            });
+        </script>
+        <?php endif ?>
     </td>
     <?php endif ?>
 

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Eav
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Eav
  */
 
 class Mage_Eav_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_Helper_Mysql
@@ -19,14 +17,15 @@ class Mage_Eav_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_Help
      */
     protected $_ddlColumnTypes      = [
         Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'bool',
+        Maho\Db\Ddl\Table::TYPE_TINYINT       => 'tinyint',
         Maho\Db\Ddl\Table::TYPE_SMALLINT      => 'smallint',
         Maho\Db\Ddl\Table::TYPE_INTEGER       => 'int',
         Maho\Db\Ddl\Table::TYPE_BIGINT        => 'bigint',
         Maho\Db\Ddl\Table::TYPE_FLOAT         => 'float',
         Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'decimal',
-        Maho\Db\Ddl\Table::TYPE_NUMERIC       => 'decimal',
         Maho\Db\Ddl\Table::TYPE_DATE          => 'date',
-        Maho\Db\Ddl\Table::TYPE_TIMESTAMP     => 'timestamp',
+        Maho\Db\Ddl\Table::TYPE_TIME          => 'time',
+        // TYPE_TIMESTAMP is a value-equal alias for TYPE_DATETIME — both fall here.
         Maho\Db\Ddl\Table::TYPE_DATETIME      => 'datetime',
         Maho\Db\Ddl\Table::TYPE_TEXT          => 'text',
         Maho\Db\Ddl\Table::TYPE_BLOB          => 'blob',

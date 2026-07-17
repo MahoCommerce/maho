@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 class Mage_Catalog_Block_Product_List_Related extends Mage_Catalog_Block_Product_Abstract
@@ -32,6 +30,7 @@ class Mage_Catalog_Block_Product_List_Related extends Mage_Catalog_Block_Product
         $this->_itemCollection = $product->getRelatedProductCollection()
             ->addAttributeToSelect('required_options')
             ->setPositionOrder()
+            ->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds())
             ->addStoreFilter()
         ;
 
@@ -42,7 +41,10 @@ class Mage_Catalog_Block_Product_List_Related extends Mage_Catalog_Block_Product
             );
             $this->_addProductAttributesAndPrices($this->_itemCollection);
         }
-        Mage::getSingleton('catalog/product_visibility')->addVisibleInCatalogFilterToCollection($this->_itemCollection);
+
+        if (!Mage::helper('cataloginventory')->isShowOutOfStock()) {
+            Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($this->_itemCollection);
+        }
 
         $this->_itemCollection->load();
 

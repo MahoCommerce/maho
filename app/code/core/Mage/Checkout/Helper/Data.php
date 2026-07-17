@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Checkout
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Checkout
  */
 
 class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
@@ -168,10 +166,6 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function sendPaymentFailedEmail($checkout, $message, $checkoutType = 'onepage')
     {
-        $translate = Mage::getSingleton('core/translate');
-        /** @var Mage_Core_Model_Translate $translate */
-        $translate->setTranslateInline(false);
-
         $mailTemplate = Mage::getModel('core/email_template');
         /** @var Mage_Core_Model_Email_Template $mailTemplate */
 
@@ -233,7 +227,7 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
                     [
                         'reason'          => $message,
                         'checkoutType'    => $checkoutType,
-                        'dateAndTime'     => Mage::app()->getLocale()->dateImmutable(),
+                        'dateAndTime'     => Mage::app()->getLocale()->utcToStore(null, new DateTime())->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT),
                         'customer'        => Mage::helper('customer')->getFullCustomerName($checkout),
                         'customerEmail'   => $checkout->getCustomerEmail(),
                         'billingAddress'  => $checkout->getBillingAddress(),
@@ -245,8 +239,6 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
                     ],
                 );
         }
-
-        $translate->setTranslateInline(true);
 
         return $this;
     }
@@ -263,29 +255,6 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
             return explode(',', $data);
         }
         return false;
-    }
-
-    /**
-     * Check if multishipping checkout is available.
-     * There should be a valid quote in checkout session. If not, only the config value will be returned.
-     *
-     * @return bool
-     */
-    public function isMultishippingCheckoutAvailable()
-    {
-        $quote = $this->getQuote();
-        $isMultiShipping = Mage::getStoreConfigFlag('shipping/option/checkout_multiple');
-        if ((!$quote) || !$quote->hasItems()) {
-            return $isMultiShipping;
-        }
-        $maximumQty = Mage::getStoreConfigAsInt('shipping/option/checkout_multiple_maximum_qty');
-        return $isMultiShipping
-            && !$quote->hasItemsWithDecimalQty()
-            && $quote->validateMinimumAmount(true)
-            && (($quote->getItemsSummaryQty() - $quote->getItemVirtualQty()) > 0)
-            && ($quote->getItemsSummaryQty() <= $maximumQty)
-            && !$quote->hasNominalItems()
-        ;
     }
 
     /**

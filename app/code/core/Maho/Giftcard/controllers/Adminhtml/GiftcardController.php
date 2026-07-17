@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Giftcard
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Giftcard
  */
+
+declare(strict_types=1);
 
 class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controller_Action
 {
@@ -21,7 +18,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     #[\Override]
     public function preDispatch()
     {
-        $this->_setForcedFormKeyActions(['delete', 'massDelete', 'massStatus']);
+        $this->_setForcedFormKeyActions(['save', 'delete', 'massDelete', 'massStatus']);
         return parent::preDispatch();
     }
 
@@ -49,6 +46,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Index action - gift card grid
      */
+    #[Maho\Config\Route('/admin/giftcard/index')]
     public function indexAction(): void
     {
         $this->_initAction();
@@ -59,6 +57,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Grid action for AJAX
      */
+    #[Maho\Config\Route('/admin/giftcard/grid')]
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -68,6 +67,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * New gift card
      */
+    #[Maho\Config\Route('/admin/giftcard/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -76,6 +76,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Edit gift card
      */
+    #[Maho\Config\Route('/admin/giftcard/edit')]
     public function editAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -110,6 +111,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Save gift card
      */
+    #[Maho\Config\Route('/admin/giftcard/save')]
     public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -121,26 +123,6 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             }
 
             try {
-                // Generate code if creating new
-                if (!$model->getId() && (!isset($data['code']) || $data['code'] === '')) {
-                    $data['code'] = Mage::helper('giftcard')->generateCode();
-                }
-
-                // Set website_id for new gift cards
-                if (!$model->getId() && (!isset($data['website_id']) || $data['website_id'] === '')) {
-                    $data['website_id'] = Mage::app()->getWebsite()->getId();
-                }
-
-                // Set expiration if not set
-                if (!$model->getId() && (!isset($data['expires_at']) || $data['expires_at'] === '')) {
-                    $data['expires_at'] = Mage::helper('giftcard')->calculateExpirationDate();
-                }
-
-                // For new gift cards, set initial_balance = balance
-                if (!$model->getId() && isset($data['balance'])) {
-                    $data['initial_balance'] = $data['balance'];
-                }
-
                 // If balance changed on existing card, record as adjustment
                 $oldBalance = (float) $model->getBalance();
                 $newBalance = isset($data['balance']) ? (float) $data['balance'] : $oldBalance;
@@ -180,6 +162,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Delete gift card
      */
+    #[Maho\Config\Route('/admin/giftcard/delete')]
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -210,6 +193,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Mass delete action
      */
+    #[Maho\Config\Route('/admin/giftcard/massDelete')]
     public function massDeleteAction(): void
     {
         $giftcardIds = $this->getRequest()->getParam('giftcard');
@@ -242,6 +226,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Mass status change action
      */
+    #[Maho\Config\Route('/admin/giftcard/massStatus')]
     public function massStatusAction(): void
     {
         $giftcardIds = $this->getRequest()->getParam('giftcard');
@@ -254,7 +239,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
         } else {
             try {
                 foreach ($giftcardIds as $giftcardId) {
-                    $giftcard = Mage::getModel('giftcard/giftcard')
+                    Mage::getModel('giftcard/giftcard')
                         ->load($giftcardId)
                         ->setStatus($status)
                         ->save();
@@ -277,6 +262,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Check balance action (AJAX)
      */
+    #[Maho\Config\Route('/admin/giftcard/checkBalance')]
     public function checkBalanceAction(): void
     {
         $this->getResponse()->setHeader('Content-Type', 'application/json', true);
@@ -284,7 +270,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
         $code = $this->getRequest()->getParam('code');
 
         if ($code === null || $code === '') {
-            $this->getResponse()->setBody(json_encode([
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
                 'success' => false,
                 'message' => 'Please enter a gift card code.',
             ]));
@@ -294,14 +280,14 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
         $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
 
         if (!$giftcard->getId()) {
-            $this->getResponse()->setBody(json_encode([
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
                 'success' => false,
                 'message' => 'Gift card not found.',
             ]));
             return;
         }
 
-        $this->getResponse()->setBody(json_encode([
+        $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
             'success' => true,
             'giftcard_id' => $giftcard->getId(),
             'code' => $giftcard->getCode(),

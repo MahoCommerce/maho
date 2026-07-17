@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
@@ -32,6 +30,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Display cache management grid
      */
+    #[Maho\Config\Route('/admin/cache/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))->_title($this->__('Cache Management'));
@@ -44,6 +43,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Flush cache storage
      */
+    #[Maho\Config\Route('/admin/cache/flushAll')]
     public function flushAllAction(): void
     {
         Mage::app()->getCache()->flush();
@@ -55,6 +55,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Flush all Maho caches
      */
+    #[Maho\Config\Route('/admin/cache/flushSystem')]
     public function flushSystemAction(): void
     {
         Mage::app()->getCache()->banUse('config');
@@ -64,7 +65,6 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
             Mage::app()->cleanCache();
             Mage_Core_Model_Resource_Setup::applyAllUpdates();
             Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
-            Mage_Core_Model_Resource_Setup::applyAllMahoUpdates();
             Mage::app()->getCache()->unbanUse('config');
             Mage::getConfig()->saveCache();
         } finally {
@@ -78,6 +78,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Mass action for cache enabling
      */
+    #[Maho\Config\Route('/admin/cache/massEnable')]
     public function massEnableAction(): void
     {
         $types = $this->getRequest()->getParam('types');
@@ -100,6 +101,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Mass action for cache disabling
      */
+    #[Maho\Config\Route('/admin/cache/massDisable')]
     public function massDisableAction(): void
     {
         $types = $this->getRequest()->getParam('types');
@@ -123,6 +125,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Mass action for cache refresh
      */
+    #[Maho\Config\Route('/admin/cache/massRefresh')]
     public function massRefreshAction(): void
     {
         $types = $this->getRequest()->getParam('types');
@@ -141,8 +144,29 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     }
 
     /**
+     * Recompile PHP attributes (observers, cron jobs, routes, API permissions)
+     * by shelling out to `composer dump-autoload`.
+     */
+    #[Maho\Config\Route('/admin/cache/recompileAttributes')]
+    public function recompileAttributesAction(): void
+    {
+        [$ok, $message] = Maho::recompilePhpAttributes();
+        if ($ok) {
+            $this->_getSession()->addSuccess(
+                Mage::helper('adminhtml')->__('PHP attributes were recompiled.'),
+            );
+        } else {
+            $this->_getSession()->addError(
+                Mage::helper('adminhtml')->__('PHP attribute recompilation failed: %s', $message),
+            );
+        }
+        $this->_redirect('*/*');
+    }
+
+    /**
      * Clean catalog files cache
      */
+    #[Maho\Config\Route('/admin/cache/cleanImages')]
     public function cleanImagesAction(): void
     {
         try {
@@ -165,6 +189,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Clean configurable swatches files cache
      */
+    #[Maho\Config\Route('/admin/cache/cleanSwatches')]
     public function cleanSwatchesAction(): void
     {
         try {
@@ -184,6 +209,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*');
     }
 
+    #[Maho\Config\Route('/admin/cache/cleanMinifiedFiles')]
     public function cleanMinifiedFilesAction(): void
     {
         try {

@@ -1,12 +1,7 @@
-/**
- * Maho
- *
- * @package     Mage_Adminhtml
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+// SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+// SPDX-FileCopyrightText: 2022-2023 The OpenMage Contributors <https://openmage.org>
+// SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+// SPDX-License-Identifier: AFL-3.0
 
 const widgetTools = {
     dialogWindow: null,
@@ -33,7 +28,6 @@ const widgetTools = {
                 id: this.dialogWindowId,
                 title: 'Insert Widget...',
                 className: 'magento',
-                windowClassName: 'popup-window',
                 width: 950,
                 ...opts, // TipTap options come first
             };
@@ -327,7 +321,6 @@ WysiwygWidget.chooser = class {
             id: 'widget-chooser',
             title: this.config.buttons.open,
             className: 'magento',
-            windowClassName: 'popup-window',
             width:950,
             onClose: this.closeDialogWindow.bind(this)
         });

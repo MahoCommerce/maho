@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Index
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Index
  */
 
 class Mage_Index_Model_Resource_Process extends Mage_Core_Model_Resource_Db_Abstract
@@ -46,7 +44,7 @@ class Mage_Index_Model_Resource_Process extends Mage_Core_Model_Resource_Db_Abst
     {
         $data = [
             'status'    => Mage_Index_Model_Process::STATUS_PENDING,
-            'ended_at'  => $this->formatDate(time()),
+            'ended_at'  => Mage::app()->getLocale()->formatDateForDb('now'),
         ];
         $this->_updateProcessData($process->getId(), $data);
         return $this;
@@ -61,7 +59,7 @@ class Mage_Index_Model_Resource_Process extends Mage_Core_Model_Resource_Db_Abst
     {
         $data = [
             'status'        => Mage_Index_Model_Process::STATUS_RUNNING,
-            'started_at'    => $this->formatDate(time()),
+            'started_at'    => Mage::app()->getLocale()->formatDateForDb('now'),
         ];
         $this->_updateProcessData($process->getId(), $data);
         return $this;
@@ -76,7 +74,7 @@ class Mage_Index_Model_Resource_Process extends Mage_Core_Model_Resource_Db_Abst
     {
         $data = [
             'status'   => Mage_Index_Model_Process::STATUS_REQUIRE_REINDEX,
-            'ended_at' => $this->formatDate(time()),
+            'ended_at' => Mage::app()->getLocale()->formatDateForDb('now'),
         ];
         $this->_updateProcessData($process->getId(), $data);
         return $this;
@@ -117,7 +115,7 @@ class Mage_Index_Model_Resource_Process extends Mage_Core_Model_Resource_Db_Abst
      */
     public function updateProcessStartDate(Mage_Index_Model_Process $process)
     {
-        $this->_updateProcessData($process->getId(), ['started_at' => $this->formatDate(time())]);
+        $this->_updateProcessData($process->getId(), ['started_at' => Mage::app()->getLocale()->formatDateForDb('now')]);
         return $this;
     }
 
@@ -128,7 +126,7 @@ class Mage_Index_Model_Resource_Process extends Mage_Core_Model_Resource_Db_Abst
      */
     public function updateProcessEndDate(Mage_Index_Model_Process $process)
     {
-        $this->_updateProcessData($process->getId(), ['ended_at' => $this->formatDate(time())]);
+        $this->_updateProcessData($process->getId(), ['ended_at' => Mage::app()->getLocale()->formatDateForDb('now')]);
         return $this;
     }
 

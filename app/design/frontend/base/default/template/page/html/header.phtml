@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 
 /** @var Mage_Page_Block_Html_Header $this */
@@ -20,7 +18,7 @@
             </a>
 
             <a class="logo" href="<?= $this->getUrl('') ?>" title="<?= $this->__('Go to Home Page') ?>" aria-label="<?= $this->__('%s - Go to Home Page', $this->getLogoAlt()) ?>">
-                <img src="<?= $this->getLogoSrc() ?>" alt="<?= $this->getLogoAlt() ?>" width="<?= $this->getLogoWidth() ?>" height="<?= $this->getLogoHeight() ?>" />
+                <img src="<?= $this->getLogoSrc() ?>" alt="<?= $this->getLogoAlt() ?>" width="<?= $this->getLogoWidth() ?>" height="<?= $this->getLogoHeight() ?>">
             </a>
         </div>
 
@@ -30,12 +28,14 @@
             <?= $this->getChildHtml('store_language') ?>
             <?= $this->getChildHtml('currency_switcher') ?>
 
+            <?php if (Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')): ?>
             <a href="<?= $this->helper('customer')->getAccountUrl() ?>" class="skip-link skip-account" title="<?= $this->__('Account') ?>">
                 <?= $this->getIconSvg('user') ?>
                 <span class="label"><?= $this->__('Account') ?></span>
             </a>
+            <?php endif ?>
 
-            <?php if ($this->isModuleOutputEnabled('Mage_Wishlist') && Mage::getStoreConfig('wishlist/general/active')): ?>
+            <?php if ($this->isModuleOutputEnabled('Mage_Wishlist') && Mage::getStoreConfig('wishlist/general/active') && Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')): ?>
             <a href="<?= $this->helper('customer')->getWishlistUrl() ?>" class="skip-link skip-wishlist" title="<?= $this->__('Wishlist') ?>">
                 <?= $this->getIconSvg('heart') ?>
                 <span class="label"><?= $this->__('Wishlist') ?></span>

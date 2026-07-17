@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Usa
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2024-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2024-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Usa
  */
 
 class Mage_Usa_Model_Shipping_Carrier_UpsAuth extends Mage_Usa_Model_Shipping_Carrier_Abstract implements Mage_Shipping_Model_Carrier_Interface
@@ -48,15 +46,11 @@ class Mage_Usa_Model_Shipping_Carrier_UpsAuth extends Mage_Usa_Model_Shipping_Ca
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->getConfigFlag('verify_peer'));
         $responseData = curl_exec($ch);
-        try {
-            if ($responseData === false) {
-                $code = curl_errno($ch);
-                $description = curl_strerror($ch);
-                $message = curl_error($ch);
-                Mage::throwException("cURL Error: ($code) $description - \"$message\"");
-            }
-        } finally {
-            curl_close($ch);
+        if ($responseData === false) {
+            $code = curl_errno($ch);
+            $description = curl_strerror($ch);
+            $message = curl_error($ch);
+            Mage::throwException("cURL Error: ($code) $description - \"$message\"");
         }
 
         $responseData = json_decode($responseData);

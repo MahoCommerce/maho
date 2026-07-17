@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Permissions_VariableController extends Mage_Adminhtml_Controller_Action
@@ -34,6 +32,7 @@ class Mage_Adminhtml_Permissions_VariableController extends Mage_Adminhtml_Contr
     /**
      * Index action
      */
+    #[Maho\Config\Route('/admin/permissions_variable/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -49,6 +48,7 @@ class Mage_Adminhtml_Permissions_VariableController extends Mage_Adminhtml_Contr
     /**
      * New action
      */
+    #[Maho\Config\Route('/admin/permissions_variable/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -57,6 +57,7 @@ class Mage_Adminhtml_Permissions_VariableController extends Mage_Adminhtml_Contr
     /**
      * Edit action
      */
+    #[Maho\Config\Route('/admin/permissions_variable/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('System'))
@@ -85,7 +86,7 @@ class Mage_Adminhtml_Permissions_VariableController extends Mage_Adminhtml_Contr
 
         Mage::register('permissions_variable', $model);
 
-        if (isset($id)) {
+        if ($id) {
             $breadcrumb = $this->__('Edit Variable');
         } else {
             $breadcrumb = $this->__('New Variable');
@@ -104,6 +105,7 @@ class Mage_Adminhtml_Permissions_VariableController extends Mage_Adminhtml_Contr
      *
      * @return $this|void
      */
+    #[Maho\Config\Route('/admin/permissions_variable/save')]
     public function saveAction()
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -153,6 +155,7 @@ class Mage_Adminhtml_Permissions_VariableController extends Mage_Adminhtml_Contr
     /**
      * Delete action
      */
+    #[Maho\Config\Route('/admin/permissions_variable/delete')]
     public function deleteAction(): void
     {
         $id = (int) $this->getRequest()->getParam('variable_id');
@@ -177,6 +180,7 @@ class Mage_Adminhtml_Permissions_VariableController extends Mage_Adminhtml_Contr
     /**
      * Grid action
      */
+    #[Maho\Config\Route('/admin/permissions_variable/variableGrid')]
     public function variableGridAction(): void
     {
         $this->getResponse()

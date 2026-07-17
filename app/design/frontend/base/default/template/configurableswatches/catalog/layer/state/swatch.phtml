@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 
 /** @var Mage_ConfigurableSwatches_Block_Catalog_Layer_State_Swatch $this */
@@ -28,7 +26,7 @@ $_swatchUrl = $this->getSwatchUrl();
         <span class="filter-tag-value">
             <span class="swatch-link" style="height:<?= $_swatchOuterHeight ?>px; width:<?= $_swatchOuterWidth ?>px;">
                 <span class="swatch-label" style="height:<?= $_swatchInnerHeight ?>px; width:<?= $_swatchInnerWidth ?>px; line-height:<?= $_swatchInnerHeight ?>px;">
-                    <img src="<?= $_swatchUrl ?>" alt="<?= $_label ?>" title="<?= $_label ?>" width="<?= $_swatchInnerWidth ?>" height="<?= $_swatchInnerHeight ?>" />
+                    <img src="<?= $_swatchUrl ?>" alt="<?= $_label ?>" title="<?= $_label ?>" width="<?= $_swatchInnerWidth ?>" height="<?= $_swatchInnerHeight ?>">
                 </span>
             </span>
             <?= $_label ?>

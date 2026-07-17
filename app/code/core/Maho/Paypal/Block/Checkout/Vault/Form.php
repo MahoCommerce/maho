@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Paypal
+ */
+
+declare(strict_types=1);
+
+class Maho_Paypal_Block_Checkout_Vault_Form extends Mage_Payment_Block_Form
+{
+    #[\Override]
+    protected function _construct(): void
+    {
+        parent::_construct();
+        if (Mage::app()->getStore()->isAdmin()) {
+            $this->setTemplate('maho/paypal/order/create/vault-form.phtml');
+        } else {
+            $this->setTemplate('maho/paypal/checkout/vault/form.phtml');
+        }
+    }
+
+    public function getCustomerTokens(): Maho_Paypal_Model_Resource_Vault_Token_Collection
+    {
+        if (Mage::app()->getStore()->isAdmin()) {
+            $customerId = (int) Mage::getSingleton('adminhtml/session_quote')->getCustomerId();
+        } else {
+            $customerId = (int) Mage::getSingleton('customer/session')->getCustomerId();
+        }
+
+        /** @var Maho_Paypal_Model_Resource_Vault_Token_Collection $collection */
+        $collection = Mage::getResourceModel('paypal/vault_token_collection');
+        $collection->addCustomerFilter($customerId)->addActiveFilter();
+
+        return $collection;
+    }
+
+    public function getCreateOrderUrl(): string
+    {
+        return Mage::getUrl('paypal/checkout/createOrder', ['_secure' => true]);
+    }
+
+    public function getApproveOrderUrl(): string
+    {
+        return Mage::getUrl('paypal/checkout/approveOrder', ['_secure' => true]);
+    }
+}

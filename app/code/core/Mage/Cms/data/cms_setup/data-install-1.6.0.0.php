@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Cms
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Cms
  */
 
 $cmsBlocks = [
@@ -50,7 +48,7 @@ $cmsPages = [
         <ul class="disc">
             <li><a href="#" onclick="history.go(-1); return false;">Go back</a> to the previous page.</li>
             <li>Use the search bar at the top of the page to search for your products.</li>
-            <li>Follow these links to get you back on track!<br /><a href="{{store url=""}}">Store Home</a>
+            <li>Follow these links to get you back on track!<br><a href="{{store url=""}}">Store Home</a>
             <span class="separator">|</span> <a href="{{store url="customer/account"}}">My Account</a></li>
         </ul>
     </dd>
@@ -106,7 +104,7 @@ sit amet aliquet lectus dolor et quam. Pellentesque consequat luctus purus.</str
 <p>Nunc et risus. Etiam a nibh. Phasellus dignissim metus eget nisi.</p>
 <div class="divider"></div>
 <p>To all of you, from all of us at Maho Store - Thank you and Happy eCommerce!</p>
-<p style="line-height:1.2em;"><strong style="font:italic 2em Georgia, serif;">John Doe</strong><br />
+<p style="line-height:1.2em;"><strong style="font:italic 2em Georgia, serif;">John Doe</strong><br>
 <small>Some important guy</small></p></div>
 </div>',
         'is_active'     => 1,

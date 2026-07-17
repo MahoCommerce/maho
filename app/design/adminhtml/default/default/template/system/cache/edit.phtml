@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Adminhtml_Block_System_Cache_Edit $this */
@@ -18,7 +16,7 @@
 <form action="<?= $this->getSaveUrl() ?>" method="post" id="config_edit_form" enctype="multipart/form-data">
     <?= $this->getBlockHtml('formkey') ?>
 
-    <script type="text/javascript">
+    <script>
     function setCacheAction(id, button)
     {
         document.getElementById(id).value = button.id;
@@ -26,8 +24,8 @@
     }
     </script>
 
-    <input type="hidden" id="catalog_action" name="catalog_action" value="" />
-    <input type="hidden" id="jscss_action" name="jscss_action" value="" />
+    <input type="hidden" id="catalog_action" name="catalog_action" value="">
+    <input type="hidden" id="jscss_action" name="jscss_action" value="">
 
     <?= $this->getChildHtml('form') ?>
     <div class="entry-edit">
@@ -49,7 +47,7 @@
                                     <?php $clickAction = "if (confirm('".addslashes($_button['warning'])."')) {{$clickAction}}"; ?>
                                 <?php endif ?>
                                 <button <?php if (!isset($_button['disabled']) || !$_button['disabled']):?>onclick="<?= $clickAction ?>"<?php endif ?> id="<?= $_button['name'] ?>" type="button" class="scalable <?php if (isset($_button['disabled']) && $_button['disabled']):?>disabled<?php endif ?>" style=""><span><?= $_button['action'] ?></span></button>
-                                <?php if (isset($_button['comment'])): ?> <br /> <small><?= $_button['comment'] ?></small> <?php endif ?>
+                                <?php if (isset($_button['comment'])): ?> <br> <small><?= $_button['comment'] ?></small> <?php endif ?>
                             <?php endforeach ?>
                         </td>
                         <td><small>&nbsp;</small></td>
@@ -79,6 +77,6 @@
         </fieldset>
     </div>
 </form>
-<script type="text/javascript">
+<script>
     var configForm = new varienForm('config_edit_form');
 </script>

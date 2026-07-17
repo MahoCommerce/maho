@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_Convert_ProfileController
@@ -22,6 +20,7 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
      * Profiles list action
      */
     #[\Override]
+    #[Maho\Config\Route('/admin/system_convert_gui/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -56,6 +55,7 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
     }
 
     #[\Override]
+    #[Maho\Config\Route('/admin/system_convert_gui/grid')]
     public function gridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/system_convert_gui_grid')->toHtml());
@@ -65,6 +65,7 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
      * Profile edit action
      */
     #[\Override]
+    #[Maho\Config\Route('/admin/system_convert_gui/edit')]
     public function editAction(): void
     {
         $this->_initProfile();
@@ -95,18 +96,21 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/system_convert_gui/upload')]
     public function uploadAction(): void
     {
         $this->_initProfile();
         $profile = Mage::registry('current_convert_profile');
     }
 
+    #[Maho\Config\Route('/admin/system_convert_gui/uploadPost')]
     public function uploadPostAction(): void
     {
         $this->_initProfile();
         $profile = Mage::registry('current_convert_profile');
     }
 
+    #[Maho\Config\Route('/admin/system_convert_gui/download')]
     public function downloadAction(): void
     {
         $filename = $this->getRequest()->getParam('filename');

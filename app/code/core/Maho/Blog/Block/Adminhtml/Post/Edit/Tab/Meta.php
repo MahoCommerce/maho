@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Blog
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Blog
  */
+
+declare(strict_types=1);
 
 class Maho_Blog_Block_Adminhtml_Post_Edit_Tab_Meta extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
@@ -50,10 +47,10 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Tab_Meta extends Mage_Adminhtml_Block_
             'title' => Mage::helper('blog')->__('Meta Robots'),
             'options' => [
                 '' => Mage::helper('blog')->__('-- Use System Default --'),
-                'index,follow' => Mage::helper('blog')->__('INDEX, FOLLOW'),
-                'noindex,follow' => Mage::helper('blog')->__('NOINDEX, FOLLOW'),
-                'index,nofollow' => Mage::helper('blog')->__('INDEX, NOFOLLOW'),
-                'noindex,nofollow' => Mage::helper('blog')->__('NOINDEX, NOFOLLOW'),
+                'index,follow' => 'INDEX, FOLLOW',
+                'noindex,follow' => 'NOINDEX, FOLLOW',
+                'index,nofollow' => 'INDEX, NOFOLLOW',
+                'noindex,nofollow' => 'NOINDEX, NOFOLLOW',
             ],
         ]);
 

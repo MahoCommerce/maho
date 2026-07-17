@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Review
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Review
  */
 
 class Mage_Review_CustomerController extends Mage_Core_Controller_Front_Action
@@ -21,6 +19,11 @@ class Mage_Review_CustomerController extends Mage_Core_Controller_Front_Action
     public function preDispatch()
     {
         parent::preDispatch();
+        if (!Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')) {
+            $this->norouteAction();
+            $this->setFlag('', self::FLAG_NO_DISPATCH, true);
+            return $this;
+        }
         if (!Mage::getSingleton('customer/session')->authenticate($this)) {
             $this->setFlag('', self::FLAG_NO_DISPATCH, true);
         }
@@ -49,6 +52,7 @@ class Mage_Review_CustomerController extends Mage_Core_Controller_Front_Action
         return $review;
     }
 
+    #[Maho\Config\Route('/review/customer', name: 'review.customer.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->loadLayout();
@@ -66,6 +70,7 @@ class Mage_Review_CustomerController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/review/customer/view/{id}', name: 'review.customer.view', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function viewAction(): void
     {
         $review = $this->_loadReview((int) $this->getRequest()->getParam('id'));

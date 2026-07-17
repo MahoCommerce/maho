@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Bundle
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Bundle
  */
 
 /**
@@ -66,7 +64,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes_Extend ext
             $html .= '<span class="next-toselect">' . $elementHtml . '</span>';
         }
         if ($this->getDisableChild() && !$this->getElement()->getReadonly()) {
-            $html .= '<script type="text/javascript">
+            $html .= '<script>
                 function ' . $switchAttributeCode . "_change() {
                     if (document.getElementById('" . $switchAttributeCode . "').value == '" . self::DYNAMIC . "') {
                         if (document.getElementById('" . $this->getAttribute()->getAttributeCode() . "')) {

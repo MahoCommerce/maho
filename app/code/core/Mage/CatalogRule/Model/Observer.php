@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_CatalogRule
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_CatalogRule
  */
 
 class Mage_CatalogRule_Model_Observer
@@ -33,6 +31,7 @@ class Mage_CatalogRule_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
+    #[Maho\Config\Observer('catalog_product_save_commit_after', area: 'adminhtml', type: 'singleton')]
     public function applyAllRulesOnProduct($observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -53,6 +52,7 @@ class Mage_CatalogRule_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
+    #[Maho\Config\Observer('catalog_product_save_before', area: 'adminhtml', type: 'singleton')]
     public function loadProductRules($observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -72,6 +72,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return  $this
      */
+    #[Maho\Config\Observer('catalog_product_import_after', area: 'adminhtml', type: 'singleton')]
     public function applyAllRules($observer)
     {
         /** @var Mage_CatalogRule_Model_Resource_Rule $resource */
@@ -89,11 +90,12 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return  $this
      */
+    #[Maho\Config\Observer('sales_quote_collect_totals_before', area: 'frontend', type: 'singleton', id: 'preload_price_rules')]
     public function preloadPriceRules(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */
         $quote = $observer->getQuote();
-        $date = Mage::app()->getLocale()->storeDate($quote->getStoreId());
+        $date = Mage::app()->getLocale()->utcToStore($quote->getStoreId())->format(Mage_Core_Model_Locale::DATE_FORMAT);
         $wId = $quote->getStore()->getWebsiteId();
         $gId = $quote->getCustomerGroupId();
 
@@ -124,6 +126,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return  $this
      */
+    #[Maho\Config\Observer('catalog_product_get_final_price', area: 'frontend', type: 'singleton')]
     public function processFrontFinalPrice($observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -134,7 +137,7 @@ class Mage_CatalogRule_Model_Observer
         if ($observer->hasDate()) {
             $date = $observer->getEvent()->getDate();
         } else {
-            $date = Mage::app()->getLocale()->storeDate($storeId);
+            $date = Mage::app()->getLocale()->utcToStore($storeId)->format(Mage_Core_Model_Locale::DATE_FORMAT);
         }
 
         if ($observer->hasWebsiteId()) {
@@ -171,12 +174,14 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return  $this
      */
+    #[Maho\Config\Observer('catalog_product_get_final_price', area: 'adminhtml', type: 'singleton')]
+    #[Maho\Config\Observer('catalog_product_get_final_price', area: 'crontab', type: 'singleton')]
     public function processAdminFinalPrice($observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
         $product = $observer->getEvent()->getProduct();
         $storeId = $product->getStoreId();
-        $date = Mage::app()->getLocale()->storeDate($storeId);
+        $date = Mage::app()->getLocale()->utcToStore($storeId)->format(Mage_Core_Model_Locale::DATE_FORMAT);
         $key = false;
 
         if ($ruleData = Mage::registry('rule_data')) {
@@ -212,6 +217,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_product_type_configurable_price', type: 'singleton')]
     public function catalogProductTypeConfigurablePrice(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -239,6 +245,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return  $this
      */
+    #[Maho\Config\CronJob('catalogrule_apply_all', schedule: '0 1 * * *')]
     public function dailyCatalogUpdate($observer)
     {
         /** @var Mage_CatalogRule_Model_Rule $model */
@@ -261,6 +268,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('prepare_catalog_product_price_index_table', type: 'singleton')]
     public function prepareCatalogProductPriceIndexTable(\Maho\Event\Observer $observer)
     {
         $select             = $observer->getEvent()->getSelect();
@@ -349,6 +357,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_entity_attribute_save_after', area: 'adminhtml', type: 'singleton')]
     public function catalogAttributeSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
@@ -365,6 +374,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_entity_attribute_delete_after', area: 'adminhtml', type: 'singleton')]
     public function catalogAttributeDeleteAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
@@ -380,6 +390,7 @@ class Mage_CatalogRule_Model_Observer
      * @return $this
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[Maho\Config\Observer('prepare_catalog_product_collection_prices', area: 'frontend', type: 'singleton')]
     public function prepareCatalogProductCollectionPrices(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
@@ -400,7 +411,7 @@ class Mage_CatalogRule_Model_Observer
         if ($observer->getEvent()->hasDate()) {
             $date = $observer->getEvent()->getDate();
         } else {
-            $date = Mage::app()->getLocale()->storeDate($store);
+            $date = Mage::app()->getLocale()->utcToStore($store)->format(Mage_Core_Model_Locale::DATE_FORMAT);
         }
 
         $productIds = [];
@@ -427,6 +438,7 @@ class Mage_CatalogRule_Model_Observer
     /**
      * Create catalog rule relations for imported products
      */
+    #[Maho\Config\Observer('catalog_product_import_finish_before', area: 'adminhtml', type: 'singleton')]
     public function createCatalogRulesRelations(\Maho\Event\Observer $observer)
     {
         /** @var Mage_ImportExport_Model_Import_Entity_Product $adapter */
@@ -469,7 +481,7 @@ class Mage_CatalogRule_Model_Observer
         // Convert DateTime objects to date strings for key generation
         $processedInfo = [];
         foreach ($keyInfo as $info) {
-            if ($info instanceof DateTime) {
+            if ($info instanceof DateTimeInterface) {
                 $processedInfo[] = $info->format(Mage_Core_Model_Locale::DATE_FORMAT);
             } else {
                 $processedInfo[] = $info;

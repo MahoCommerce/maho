@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Adminhtml_Block_System_Store_Tree $this */
@@ -28,14 +26,9 @@
             <?php if (count($webSiteData['storeGroups']) == 0): ?>
 
                 <tr>
-                    <?php if (!$printedWebsite): ?>
-                        <td class="a-left" rowspan="<?= $webSiteData['count'] ?>"><?= $this->renderWebsite($webSiteData['object']) ?></td>
-                    <?php endif ?>
-
+                    <td class="a-left" rowspan="<?= $webSiteData['count'] ?>"><?= $this->renderWebsite($webSiteData['object']) ?></td>
                     <td colspan="2" class="a-left last"><span class="not-available"></span></td>
                 </tr>
-
-                <?php $printedWebsite = false; ?>
                 <?php continue ?>
             <?php endif ?>
 
@@ -47,13 +40,9 @@
                             <?php $printedWebsite = true; ?>
                         <?php endif ?>
 
-                        <?php if (!$printedStoreGroup): ?>
                         <td class="a-left" rowspan="<?= $storeGroupData['count'] ?>"><?= $this->renderStoreGroup($storeGroupData['object']) ?></td>
-                        <?php endif ?>
-
                         <td class="a-left last"><span class="not-available"></span></td>
                     </tr>
-                    <?php $printedStoreGroup = false; ?>
                     <?php continue ?>
                 <?php endif ?>
 

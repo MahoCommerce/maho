@@ -1,14 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    MahoLib
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
+
+declare(strict_types=1);
 
 namespace Maho\Db\Adapter\Pdo;
 
@@ -35,6 +32,15 @@ class Pgsql extends AbstractPdoAdapter
     protected string|int|null $_lastInsertedId = null;
 
     /**
+     * Cache of "table.column" => backing sequence name (or null when the column
+     * has no sequence). Lets bumpIdentitySequencesForBind() resolve each column
+     * once instead of issuing a pg_get_serial_sequence query on every insert.
+     *
+     * @var array<string, string|null>
+     */
+    private array $_serialSequenceCache = [];
+
+    /**
      * Log file name for SQL debug data (override parent's default)
      */
     protected string $_debugFile = 'pdo_pgsql.log';
@@ -44,14 +50,25 @@ class Pgsql extends AbstractPdoAdapter
      */
     protected array $_ddlColumnTypes = [
         \Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'boolean',
+        // PgSQL has no 1-byte integer — TINYINT downgrades to smallint (2 bytes).
+        // The MySQL byte-saving doesn't apply, but the column still works correctly.
+        \Maho\Db\Ddl\Table::TYPE_TINYINT       => 'smallint',
         \Maho\Db\Ddl\Table::TYPE_SMALLINT      => 'smallint',
         \Maho\Db\Ddl\Table::TYPE_INTEGER       => 'integer',
         \Maho\Db\Ddl\Table::TYPE_BIGINT        => 'bigint',
         \Maho\Db\Ddl\Table::TYPE_FLOAT         => 'real',
         \Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'numeric',
-        \Maho\Db\Ddl\Table::TYPE_NUMERIC       => 'numeric',
         \Maho\Db\Ddl\Table::TYPE_DATE          => 'date',
-        \Maho\Db\Ddl\Table::TYPE_TIMESTAMP     => 'timestamp',
+        // Maps to TIME WITHOUT TIME ZONE (PgSQL's default — TIME WITH TIME ZONE is
+        // the SQL spec's mistake and the PgSQL docs themselves call it "of questionable
+        // usefulness" because a time-of-day with a TZ but no date is ambiguous around
+        // DST boundaries).
+        \Maho\Db\Ddl\Table::TYPE_TIME          => 'time',
+        // PostgreSQL has no `datetime` type — its `timestamp` (i.e. `timestamp without
+        // time zone`) is the semantic equivalent of MySQL's `DATETIME`: literal date+time
+        // with no TZ conversion. The name collision with MySQL's TIMESTAMP type is
+        // unfortunate but correct: TYPE_TIMESTAMP (a value-equal alias for TYPE_DATETIME)
+        // also lands here via the shared 'datetime' value.
         \Maho\Db\Ddl\Table::TYPE_DATETIME      => 'timestamp',
         \Maho\Db\Ddl\Table::TYPE_TEXT          => 'text',
         \Maho\Db\Ddl\Table::TYPE_VARCHAR       => 'varchar',
@@ -103,6 +120,7 @@ class Pgsql extends AbstractPdoAdapter
         $this->_connection->executeStatement("SET client_encoding = 'UTF8'");
         // Set standard conforming strings
         $this->_connection->executeStatement('SET standard_conforming_strings = on');
+        $this->_connection->executeStatement("SET TIME ZONE 'UTC'");
     }
 
     /**
@@ -168,6 +186,9 @@ class Pgsql extends AbstractPdoAdapter
         // (libpq checks for Kerberos credentials after fork which causes SIGSEGV)
         $params['gssencmode'] = $this->_config['gssencmode'] ?? 'disable';
 
+        // Doctrine's Params shape doesn't list PG-specific keys (sslmode,
+        // gssencmode) even though their own PgSQL driver reads them at runtime.
+        // @phpstan-ignore argument.type
         $this->_connection = \Doctrine\DBAL\DriverManager::getConnection($params);
         $this->_debugStat(self::DEBUG_CONNECT, '');
 
@@ -881,6 +902,86 @@ class Pgsql extends AbstractPdoAdapter
     // =========================================================================
 
     /**
+     * Cache of bytea (binary) column-name sets per table, keyed lowercase.
+     *
+     * @var array<string, array<string, true>>
+     */
+    protected array $_binaryColumns = [];
+
+    /**
+     * Lowercased set of bytea columns for $tableName (value `true` per column).
+     *
+     * describeTable() reports a column's DATA_TYPE as the Doctrine type name,
+     * and DBAL introspects a PostgreSQL bytea as BlobType, so the marker is
+     * 'blob' (not 'bytea'); 'binary' is matched too for safety. describeTable()
+     * is itself cached, so after the first call this is an in-memory lookup, and
+     * almost every table returns an empty set, letting the write methods skip
+     * binary handling entirely.
+     *
+     * @return array<string, true>
+     */
+    protected function getBinaryColumns(string $tableName): array
+    {
+        $key = strtolower($tableName);
+        if (!isset($this->_binaryColumns[$key])) {
+            $binary = [];
+            foreach ($this->describeTable($tableName) as $column => $info) {
+                if (in_array(strtolower((string) ($info['DATA_TYPE'] ?? '')), ['blob', 'binary', 'bytea'], true)) {
+                    $binary[strtolower((string) $column)] = true;
+                }
+            }
+            $this->_binaryColumns[$key] = $binary;
+        }
+        return $this->_binaryColumns[$key];
+    }
+
+    /**
+     * Hex-encode bytea parameter values as PostgreSQL `\x...` literals so they
+     * bind as ordinary text. pdo_pgsql sends bound parameters in text format,
+     * so a raw packed IP (bytes from inet_pton) would be UTF-8-validated and
+     * Postgres would reject any byte >= 0x80. The hex form is pure ASCII and
+     * bytea_in decodes it back to the original bytes on insert. Returns $params
+     * unchanged when $tableName has no binary columns, so the common write path
+     * is untouched.
+     *
+     * @param list<string> $boundColumns column name for each positional value, in order
+     * @param list<mixed> $params positional bound values aligned to $boundColumns
+     * @return list<mixed>
+     */
+    protected function _encodeBinaryBindValues(string $tableName, array $boundColumns, array $params): array
+    {
+        $binary = $this->getBinaryColumns($tableName);
+        if ($binary === []) {
+            return $params;
+        }
+        foreach ($boundColumns as $position => $column) {
+            if (isset($binary[strtolower($column)], $params[$position]) && is_string($params[$position])) {
+                $params[$position] = '\x' . bin2hex($params[$position]);
+            }
+        }
+        return $params;
+    }
+
+    /**
+     * Column name for each non-Expr value in an associative insert row, in the
+     * order _prepareInsertData() binds them. Expr values are inlined into the
+     * SQL and never bound, so they are skipped to keep positions aligned.
+     *
+     * @param array<string, mixed> $row
+     * @return list<string>
+     */
+    protected function _boundColumnsFromRow(array $row): array
+    {
+        $columns = [];
+        foreach ($row as $column => $value) {
+            if (!($value instanceof \Maho\Db\Expr)) {
+                $columns[] = (string) $column;
+            }
+        }
+        return $columns;
+    }
+
+    /**
      * Inserts a table row with specified data using RETURNING clause
      *
      * PostgreSQL's RETURNING clause allows us to get the inserted ID directly
@@ -900,6 +1001,7 @@ class Pgsql extends AbstractPdoAdapter
         $cols = [];
         $vals = [];
         $params = [];
+        $boundColumns = [];
         foreach ($bind as $col => $value) {
             $cols[] = $this->quoteIdentifier($col);
             if ($value instanceof \Maho\Db\Expr) {
@@ -907,6 +1009,7 @@ class Pgsql extends AbstractPdoAdapter
             } else {
                 $vals[] = '?';
                 $params[] = $value;
+                $boundColumns[] = (string) $col;
             }
         }
 
@@ -929,6 +1032,7 @@ class Pgsql extends AbstractPdoAdapter
         }
 
         // Execute the statement
+        $params = $this->_encodeBinaryBindValues($tableName, $boundColumns, $params);
         $stmt = $this->query($sql, $params);
 
         // Capture the returned ID if available
@@ -939,7 +1043,80 @@ class Pgsql extends AbstractPdoAdapter
             }
         }
 
+        // PostgreSQL does not advance the backing sequence of an IDENTITY column
+        // when an explicit value is provided. Subsequent non-explicit inserts
+        // (e.g. the next model save() in the same data-install script) would
+        // then collide on the primary key. Bump every sequence we just wrote
+        // an explicit value to.
+        $this->bumpIdentitySequencesForBind($tableName, $bind);
+
         return 1; // INSERT always affects 1 row on success
+    }
+
+    /**
+     * Hex-encode bytea values for the base update()/insert() bound-param path so
+     * they bind as text rather than being UTF-8 validated. See
+     * _encodeBinaryBindValues(); only SET values reach here, WHERE terms are
+     * inlined by _whereExpr().
+     */
+    #[\Override]
+    protected function _prepareBoundParams(string $tableName, array $boundColumns, array $params): array
+    {
+        return $this->_encodeBinaryBindValues($tableName, $boundColumns, $params);
+    }
+
+    /**
+     * Advance the sequence backing every auto-incrementing column in $bind we
+     * wrote an explicit numeric value to. Used by every insert variant that
+     * can carry explicit values: insert(), insertForce(), insertOnDuplicate(),
+     * insertIgnore() and insertArray()/insertMultiple().
+     *
+     * We do NOT gate on describeTable()'s IDENTITY flag: DBAL 4 only sets
+     * autoincrement=true for GENERATED ... AS IDENTITY columns and skips
+     * legacy SERIAL columns (which Maho's legacy DDL still emits via
+     * `identity: true` → SERIAL). pg_get_serial_sequence is the source of
+     * truth: it returns the backing sequence for both SERIAL columns (default
+     * "nextval(...)") and IDENTITY columns (sequence attached via pg_depend),
+     * and NULL for everything else.
+     *
+     * insert() runs on the write hot path, so each (table, column) lookup is
+     * cached: the pg_get_serial_sequence probe happens once per column, and
+     * subsequent inserts only issue the setval for columns actually backed by
+     * a sequence (normally none, since auto-increment PKs aren't in $bind).
+     */
+    private function bumpIdentitySequencesForBind(string $table, array $bind): void
+    {
+        foreach ($bind as $column => $value) {
+            if ($value instanceof \Maho\Db\Expr || !is_numeric($value)) {
+                continue;
+            }
+
+            $cacheKey = $table . '.' . $column;
+            if (!array_key_exists($cacheKey, $this->_serialSequenceCache)) {
+                $resolved = $this->fetchOne(
+                    'SELECT pg_get_serial_sequence(?, ?)',
+                    [$table, $column],
+                );
+                $this->_serialSequenceCache[$cacheKey] = is_string($resolved) && $resolved !== ''
+                    ? $resolved
+                    : null;
+            }
+
+            $sequenceName = $this->_serialSequenceCache[$cacheKey];
+            if ($sequenceName === null) {
+                continue;
+            }
+
+            // pg_get_serial_sequence returns a properly schema-qualified identifier
+            // (e.g. "public.core_website_website_id_seq"); embed it directly in
+            // the FROM clause and pass the same string as a literal to setval.
+            $this->raw_query(sprintf(
+                "SELECT setval('%s', GREATEST((SELECT last_value FROM %s), %d))",
+                str_replace("'", "''", $sequenceName),
+                $sequenceName,
+                (int) $value,
+            ));
+        }
     }
 
     /**
@@ -953,6 +1130,7 @@ class Pgsql extends AbstractPdoAdapter
         $row = reset($data);
         $bind = [];
         $values = [];
+        $boundColumns = [];
 
         if (is_array($row)) {
             $cols = array_keys($row);
@@ -961,11 +1139,13 @@ class Pgsql extends AbstractPdoAdapter
                     throw new \Maho\Db\Exception('Invalid data for insert');
                 }
                 $values[] = $this->_prepareInsertData($row, $bind);
+                $boundColumns = array_merge($boundColumns, $this->_boundColumnsFromRow($row));
             }
             unset($row);
         } else {
             $cols = array_keys($data);
             $values[] = $this->_prepareInsertData($data, $bind);
+            $boundColumns = $this->_boundColumnsFromRow($data);
         }
 
         $updateFields = [];
@@ -1031,7 +1211,8 @@ class Pgsql extends AbstractPdoAdapter
             $insertSql .= sprintf(' RETURNING %s', $this->quoteIdentifier($returningColumn));
         }
 
-        $stmt = $this->query($insertSql, array_values($bind));
+        $params = $this->_encodeBinaryBindValues($tableName, $boundColumns, array_values($bind));
+        $stmt = $this->query($insertSql, $params);
 
         // Capture the returned ID if available
         if ($returningColumn !== null) {
@@ -1039,6 +1220,16 @@ class Pgsql extends AbstractPdoAdapter
             if ($row && isset($row[$returningColumn])) {
                 $this->_lastInsertedId = $row[$returningColumn];
             }
+        }
+
+        // Explicit values bypass the sequence; bump it so the next
+        // auto-increment insert does not collide (see insert()).
+        if (is_array(reset($data))) {
+            foreach ($data as $dataRow) {
+                $this->bumpIdentitySequencesForBind($tableName, $dataRow);
+            }
+        } else {
+            $this->bumpIdentitySequencesForBind($tableName, $data);
         }
 
         return $stmt->rowCount() ?: 1;
@@ -1171,17 +1362,41 @@ class Pgsql extends AbstractPdoAdapter
     {
         $values = [];
         $bind = [];
+        $boundColumns = [];
+        $columnNames = array_values($columns);
         $columnsCount = count($columns);
         foreach ($data as $row) {
             if ($columnsCount != count($row)) {
                 throw new \Maho\Db\Exception('Invalid data for insert');
             }
             $values[] = $this->_prepareInsertData($row, $bind);
+            foreach (array_values($row) as $i => $value) {
+                if (!($value instanceof \Maho\Db\Expr)) {
+                    $boundColumns[] = (string) $columnNames[$i];
+                }
+            }
         }
 
         $insertQuery = $this->_getInsertSqlQuery($table, $columns, $values);
 
+        $bind = $this->_encodeBinaryBindValues($table, $boundColumns, $bind);
         $stmt = $this->query($insertQuery, $bind);
+
+        // Explicit values bypass the sequence; bump it once per column with
+        // the highest value written (see insert()).
+        $maxValues = [];
+        foreach ($data as $row) {
+            foreach (array_values($row) as $i => $value) {
+                $column = $columnNames[$i];
+                if (is_numeric($value) && (!isset($maxValues[$column]) || $value > $maxValues[$column])) {
+                    $maxValues[$column] = $value;
+                }
+            }
+        }
+        if ($maxValues !== []) {
+            $this->bumpIdentitySequencesForBind($table, $maxValues);
+        }
+
         return $stmt->rowCount();
     }
 
@@ -1225,8 +1440,11 @@ class Pgsql extends AbstractPdoAdapter
             $sql .= sprintf(' RETURNING %s', $this->quoteIdentifier($returningColumn));
         }
 
-        $bind = array_values($bind);
-        $stmt = $this->query($sql, $bind);
+        // $bind keys still align with their placeholders here (Expr entries were
+        // unset above), so column names map positionally to array_values($bind).
+        $boundColumns = array_map('strval', array_keys($bind));
+        $params = $this->_encodeBinaryBindValues($tableName, $boundColumns, array_values($bind));
+        $stmt = $this->query($sql, $params);
 
         // Capture the returned ID if available (only returns a row if insert succeeded)
         if ($returningColumn !== null) {
@@ -1236,7 +1454,15 @@ class Pgsql extends AbstractPdoAdapter
             }
         }
 
-        return $stmt->rowCount();
+        // Explicit values bypass the sequence; bump it so the next
+        // auto-increment insert does not collide (see insert()). A conflict
+        // inserted nothing, so there is no written value to cover.
+        $rowCount = $stmt->rowCount();
+        if ($rowCount > 0) {
+            $this->bumpIdentitySequencesForBind($tableName, $bind);
+        }
+
+        return $rowCount;
     }
 
     /**
@@ -1453,12 +1679,7 @@ class Pgsql extends AbstractPdoAdapter
     public function tableColumnExists(string $tableName, string $columnName, ?string $schemaName = null): bool
     {
         $describe = $this->describeTable($tableName, $schemaName);
-        foreach ($describe as $column) {
-            if ($column['COLUMN_NAME'] == $columnName) {
-                return true;
-            }
-        }
-        return false;
+        return array_any($describe, fn($column) => $column['COLUMN_NAME'] == $columnName);
     }
 
     /**
@@ -1479,6 +1700,15 @@ class Pgsql extends AbstractPdoAdapter
                 throw new \Maho\Db\Exception('Impossible to create a column without comment.');
             }
             $definition = $this->_getColumnDefinition($definition);
+        } else {
+            // Translate bare Maho type constants ('datetime', 'decimal', 'blob' etc.) to
+            // their PgSQL physical type ('timestamp', 'numeric', 'bytea'). Legacy install
+            // scripts call `addColumn(..., Maho\Db\Ddl\Table::TYPE_TIMESTAMP)` which used
+            // to accidentally work because the constant value happened to be a valid
+            // PgSQL type name; after the TYPE_TIMESTAMP→TYPE_DATETIME alias it doesn't.
+            if (isset($this->_ddlColumnTypes[$definition])) {
+                $definition = $this->_ddlColumnTypes[$definition];
+            }
         }
 
         $sql = sprintf(
@@ -1562,7 +1792,9 @@ class Pgsql extends AbstractPdoAdapter
     }
 
     /**
-     * Modify the column definition
+     * Modify the column definition via DBAL's surgical diff. String definitions take a
+     * legacy ALTER COLUMN ... TYPE path because PgSQL needs an explicit USING clause
+     * that DBAL's diff can't synthesize from raw SQL.
      *
      * @throws \Maho\Db\Exception
      */
@@ -1573,18 +1805,13 @@ class Pgsql extends AbstractPdoAdapter
             throw new \Maho\Db\Exception(sprintf('Column "%s" does not exist in table "%s".', $columnName, $tableName));
         }
 
-        $qualifiedTable = $this->quoteIdentifier($this->_getTableName($tableName, $schemaName));
-        $quotedColumn = $this->quoteIdentifier($columnName);
+        if (is_string($definition)) {
+            // Translate bare Maho type constants to PgSQL physical type (see addColumn
+            // for the rationale). Anything else is passed through as raw type SQL.
+            $typeOnly = $this->_ddlColumnTypes[$definition] ?? trim($definition);
 
-        // If definition is an array, we can handle type, nullable, and default separately
-        if (is_array($definition)) {
-            $definition = array_change_key_case($definition, CASE_UPPER);
-            $ddlType = $this->_getDdlType($definition);
-
-            // Get the type-only definition (without NULL/NOT NULL and DEFAULT)
-            $typeOnly = $this->_getColumnTypeOnly($definition, $ddlType);
-
-            // Change the column type
+            $qualifiedTable = $this->quoteIdentifier($this->_getTableName($tableName, $schemaName));
+            $quotedColumn = $this->quoteIdentifier($columnName);
             $this->raw_query(sprintf(
                 'ALTER TABLE %s ALTER COLUMN %s TYPE %s USING %s::%s',
                 $qualifiedTable,
@@ -1593,71 +1820,9 @@ class Pgsql extends AbstractPdoAdapter
                 $quotedColumn,
                 $typeOnly,
             ));
-
-            // Handle nullability
-            $nullable = !isset($definition['NULLABLE']) || (bool) $definition['NULLABLE'];
-            if ($nullable) {
-                $this->raw_query(sprintf(
-                    'ALTER TABLE %s ALTER COLUMN %s DROP NOT NULL',
-                    $qualifiedTable,
-                    $quotedColumn,
-                ));
-            } else {
-                $this->raw_query(sprintf(
-                    'ALTER TABLE %s ALTER COLUMN %s SET NOT NULL',
-                    $qualifiedTable,
-                    $quotedColumn,
-                ));
-            }
-
-            // Handle default value
-            if (array_key_exists('DEFAULT', $definition)) {
-                $default = $definition['DEFAULT'];
-                if ($default === null || $default === '') {
-                    $this->raw_query(sprintf(
-                        'ALTER TABLE %s ALTER COLUMN %s DROP DEFAULT',
-                        $qualifiedTable,
-                        $quotedColumn,
-                    ));
-                } else {
-                    $this->raw_query(sprintf(
-                        'ALTER TABLE %s ALTER COLUMN %s SET DEFAULT %s',
-                        $qualifiedTable,
-                        $quotedColumn,
-                        $this->quote($default),
-                    ));
-                }
-            }
         } else {
-            // String definition - parse out the type only (strip NULL/NOT NULL/DEFAULT/COMMENT)
-            // Handle various MySQL patterns like:
-            // - "VARCHAR(255) default NULL COMMENT 'Remote Ip'"
-            // - "VARCHAR(255) NOT NULL DEFAULT ''"
-            // - "INT(11) UNSIGNED NOT NULL"
-            $typeOnly = $definition;
-
-            // Remove COMMENT clause (MySQL-specific)
-            $typeOnly = preg_replace('/\s+COMMENT\s+[\'"].*?[\'"]\s*$/i', '', $typeOnly);
-
-            // Remove DEFAULT clause
-            $typeOnly = preg_replace('/\s+DEFAULT\s+(NULL|[\'"].*?[\'"]|[\d.]+)\s*/i', ' ', $typeOnly);
-
-            // Remove NULL / NOT NULL
-            $typeOnly = preg_replace('/\s+(NOT\s+)?NULL\s*/i', ' ', $typeOnly);
-
-            // Remove UNSIGNED (PostgreSQL doesn't support it but we can ignore it)
-            $typeOnly = preg_replace('/\s+UNSIGNED\s*/i', ' ', $typeOnly);
-
-            $typeOnly = trim($typeOnly);
-
-            $this->raw_query(sprintf(
-                'ALTER TABLE %s ALTER COLUMN %s TYPE %s USING %s::%s',
-                $qualifiedTable,
-                $quotedColumn,
-                $typeOnly,
-                $quotedColumn,
-                $typeOnly,
-            ));
+            $definition = array_change_key_case($definition, CASE_UPPER);
+            $this->_applySurgicalColumnModification($tableName, $columnName, $definition, $schemaName);
         }
 
         $this->resetDdlCache($tableName, $schemaName);
@@ -1682,7 +1847,6 @@ class Pgsql extends AbstractPdoAdapter
 
         switch ($ddlType) {
             case \Maho\Db\Ddl\Table::TYPE_DECIMAL:
-            case \Maho\Db\Ddl\Table::TYPE_NUMERIC:
                 $precision = 10;
                 $scale = 0;
                 $match = [];
@@ -2290,7 +2454,6 @@ class Pgsql extends AbstractPdoAdapter
         // Column size/precision handling
         switch ($ddlType) {
             case \Maho\Db\Ddl\Table::TYPE_DECIMAL:
-            case \Maho\Db\Ddl\Table::TYPE_NUMERIC:
                 $precision = 10;
                 $scale = 0;
                 $match = [];
@@ -2339,11 +2502,17 @@ class Pgsql extends AbstractPdoAdapter
             $cDefault = str_replace("'", '', $cDefault);
         }
 
-        // Handle timestamp defaults
-        if ($ddlType == \Maho\Db\Ddl\Table::TYPE_TIMESTAMP) {
+        // Branch covers both TYPE_DATETIME and TYPE_TIMESTAMP (value-equal aliases).
+        if ($ddlType == \Maho\Db\Ddl\Table::TYPE_DATETIME) {
             if ($cDefault === null) {
                 $cDefault = new \Maho\Db\Expr('NULL');
-            } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT || $cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE) {
+            } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT) {
+                $cDefault = new \Maho\Db\Expr('CURRENT_TIMESTAMP');
+            } elseif ($cDefault == 'TIMESTAMP_INIT_UPDATE') {
+                @trigger_error(
+                    'TIMESTAMP_INIT_UPDATE is deprecated because it is MySQL-only (PgSQL has no equivalent on-update syntax); use TIMESTAMP_INIT plus an explicit _beforeSave() that sets updated_at for cross-engine parity.',
+                    E_USER_DEPRECATED,
+                );
                 $cDefault = new \Maho\Db\Expr('CURRENT_TIMESTAMP');
             } elseif ($cNullable && !$cDefault) {
                 $cDefault = new \Maho\Db\Expr('NULL');
@@ -2928,8 +3097,8 @@ class Pgsql extends AbstractPdoAdapter
         $conditionKeyMap = [
             'eq'            => '{{fieldName}} = ?',
             'neq'           => '{{fieldName}} != ?',
-            'like'          => '{{fieldName}} LIKE ?',
-            'nlike'         => '{{fieldName}} NOT LIKE ?',
+            'like'          => '{{fieldName}} ILIKE ?',
+            'nlike'         => '{{fieldName}} NOT ILIKE ?',
             'in'            => '{{fieldName}} IN(?)',
             'nin'           => '{{fieldName}} NOT IN(?)',
             'is'            => '{{fieldName}} IS ?',
@@ -3141,47 +3310,16 @@ class Pgsql extends AbstractPdoAdapter
     }
 
     /**
-     * Insert data with explicit ID (force insert even with 0 values)
+     * Insert data with explicit ID (force insert even with 0 values).
      *
-     * In PostgreSQL, when inserting with an explicit ID value, the sequence is not
-     * automatically updated. This can cause conflicts on subsequent inserts that
-     * use the sequence. We need to manually advance the sequence to be at least
-     * as high as the inserted ID.
+     * PostgreSQL accepts explicit values for IDENTITY columns without any
+     * mode toggle, so this delegates straight to insert(). The sequence
+     * bump that prevents subsequent collisions lives in insert() itself.
      */
     #[\Override]
     public function insertForce(string $table, array $bind): int
     {
-        $result = $this->insert($table, $bind);
-
-        // After inserting with explicit IDs, update any sequences to avoid conflicts
-        // Find serial/identity columns and update their sequences
-        $tableInfo = $this->describeTable($table);
-        foreach ($bind as $column => $value) {
-            if (!isset($tableInfo[$column])) {
-                continue;
-            }
-
-            $columnInfo = $tableInfo[$column];
-
-            // Check if this column has an identity/serial (has a sequence default)
-            if (isset($columnInfo['DEFAULT']) && is_string($columnInfo['DEFAULT'])
-                && str_starts_with($columnInfo['DEFAULT'], 'nextval(')) {
-                // Extract sequence name from default like "nextval('tablename_column_seq'::regclass)"
-                if (preg_match("/nextval\('([^']+)'/", $columnInfo['DEFAULT'], $matches)) {
-                    $sequenceName = $matches[1];
-                    // Update sequence to be at least as high as the inserted value
-                    // Use setval with is_called=true so next call returns value+1
-                    $this->raw_query(sprintf(
-                        "SELECT setval('%s', GREATEST((SELECT last_value FROM %s), %d))",
-                        $sequenceName,
-                        $this->quoteIdentifier($sequenceName),
-                        (int) $value,
-                    ));
-                }
-            }
-        }
-
-        return $result;
+        return $this->insert($table, $bind);
     }
 
     /**

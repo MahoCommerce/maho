@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Controller_Action
@@ -46,6 +44,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Statuses grid page
      */
+    #[Maho\Config\Route('/admin/sales_order_status/index')]
     public function indexAction(): void
     {
         $this
@@ -58,6 +57,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * New status form
      */
+    #[Maho\Config\Route('/admin/sales_order_status/new')]
     public function newAction(): void
     {
         $data = $this->_getSession()->getFormData(true);
@@ -76,6 +76,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Editing existing status form
      */
+    #[Maho\Config\Route('/admin/sales_order_status/edit')]
     public function editAction(): void
     {
         $status = $this->_initStatus();
@@ -97,6 +98,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Save status form processing
      */
+    #[Maho\Config\Route('/admin/sales_order_status/save')]
     public function saveAction(): void
     {
         $data = $this->getRequest()->getPost();
@@ -156,6 +158,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Assign status to state form
      */
+    #[Maho\Config\Route('/admin/sales_order_status/assign')]
     public function assignAction(): void
     {
         $this
@@ -168,6 +171,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Save status assignment to state
      */
+    #[Maho\Config\Route('/admin/sales_order_status/assignPost')]
     public function assignPostAction(): void
     {
         $data = $this->getRequest()->getPost();
@@ -201,6 +205,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Unassign the status from a specific state
      */
+    #[Maho\Config\Route('/admin/sales_order_status/unassign')]
     public function unassignAction(): void
     {
         $state  = $this->getRequest()->getParam('state');

@@ -1,14 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2024 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
+
+declare(strict_types=1);
 
 class Mage_Adminhtml_Block_Permissions_OrphanedResource_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
@@ -23,10 +22,7 @@ class Mage_Adminhtml_Block_Permissions_OrphanedResource_Grid extends Mage_Adminh
     #[\Override]
     protected function _prepareCollection()
     {
-        $collection = Mage::getResourceModel('admin/rules_collection')
-            ->addFieldToFilter('resource_id', ['nin' => Mage::getSingleton('admin/session')->getAcl()->getResources()])
-            ->addFieldToSelect('resource_id');
-        $collection->getSelect()->group('resource_id');
+        $collection = Mage::getResourceModel('admin/rules')->getOrphanedResourcesCollection();
 
         /**
          * In order for mass action selection to work properly, we need to overwrite

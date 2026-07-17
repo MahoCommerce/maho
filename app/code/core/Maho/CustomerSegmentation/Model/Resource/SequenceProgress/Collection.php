@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_CustomerSegmentation
  */
+
+declare(strict_types=1);
 
 class Maho_CustomerSegmentation_Model_Resource_SequenceProgress_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
@@ -70,7 +67,7 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress_Collection exten
     public function addReadyToSendFilter(): self
     {
         $this->addFieldToFilter('status', Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED)
-             ->addFieldToFilter('scheduled_at', ['lteq' => Mage::getSingleton('core/date')->gmtDate()]);
+             ->addFieldToFilter('scheduled_at', ['lteq' => Mage::app()->getLocale()->formatDateForDb('now')]);
         return $this;
     }
 

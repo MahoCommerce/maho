@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <modules>
+        <Maho_MediaCleaner>
+            <version>1.0.0</version>
+        </Maho_MediaCleaner>
+    </modules>
+    <global>
+        <models>
+            <mediacleaner>
+                <class>Maho_MediaCleaner_Model</class>
+                <resourceModel>mediacleaner_resource</resourceModel>
+            </mediacleaner>
+            <mediacleaner_resource>
+                <class>Maho_MediaCleaner_Model_Resource</class>
+                <entities>
+                    <image>
+                        <table>mediacleaner_image</table>
+                    </image>
+                </entities>
+            </mediacleaner_resource>
+        </models>
+        <helpers>
+            <mediacleaner>
+                <class>Maho_MediaCleaner_Helper</class>
+            </mediacleaner>
+        </helpers>
+        <blocks>
+            <mediacleaner>
+                <class>Maho_MediaCleaner_Block</class>
+            </mediacleaner>
+        </blocks>
+    </global>
+    <adminhtml>
+        <layout>
+            <updates>
+                <mediacleaner>
+                    <file>mediacleaner.xml</file>
+                </mediacleaner>
+            </updates>
+        </layout>
+    </adminhtml>
+    <default>
+        <admin>
+            <mediacleaner>
+                <thumbnail_max_width>200</thumbnail_max_width>
+                <enable_image_click>1</enable_image_click>
+            </mediacleaner>
+        </admin>
+    </default>
+</config>

@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Giftcard
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Giftcard
  */
+
+declare(strict_types=1);
 
 class Maho_Giftcard_Adminhtml_Giftcard_HistoryController extends Mage_Adminhtml_Controller_Action
 {
@@ -34,6 +31,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_HistoryController extends Mage_Adminhtml_
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/giftcard_history/index')]
     public function indexAction(): void
     {
         $this->_initAction();
@@ -41,6 +39,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_HistoryController extends Mage_Adminhtml_
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/giftcard_history/grid')]
     public function gridAction(): void
     {
         $this->loadLayout();

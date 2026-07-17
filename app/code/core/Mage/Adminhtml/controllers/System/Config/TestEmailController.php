@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 declare(strict_types=1);
@@ -28,6 +26,7 @@ class Mage_Adminhtml_System_Config_TestEmailController extends Mage_Adminhtml_Co
     /**
      * Send test email action
      */
+    #[Maho\Config\Route('/admin/system_config_testemail/send')]
     public function sendAction(): void
     {
         $recipient = $this->getRequest()->getParam('recipient');

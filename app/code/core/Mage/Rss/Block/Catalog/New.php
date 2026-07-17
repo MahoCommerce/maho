@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Rss
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Rss
  */
 
 class Mage_Rss_Block_Catalog_New extends Mage_Rss_Block_Catalog_Abstract
@@ -41,11 +39,11 @@ class Mage_Rss_Block_Catalog_New extends Mage_Rss_Block_Catalog_Abstract
 
         $product = Mage::getModel('catalog/product');
 
-        $todayStartOfDayDate  = Mage::app()->getLocale()->dateImmutable()
+        $todayStartOfDayDate  = Mage::app()->getLocale()->utcToStore()
             ->setTime(0, 0, 0)
             ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
 
-        $todayEndOfDayDate  = Mage::app()->getLocale()->dateImmutable()
+        $todayEndOfDayDate  = Mage::app()->getLocale()->utcToStore()
             ->setTime(23, 59, 59)
             ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
 
@@ -78,7 +76,7 @@ class Mage_Rss_Block_Catalog_New extends Mage_Rss_Block_Catalog_Abstract
             ->applyFrontendPriceLimitations()
         ;
 
-        $products->setVisibility(Mage::getSingleton('catalog/product_visibility')->getVisibleInCatalogIds());
+        $products->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds());
 
         /*
         using resource iterator to load the data one by one

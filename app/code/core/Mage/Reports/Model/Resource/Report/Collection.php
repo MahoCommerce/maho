@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Reports
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Reports
  */
 
 class Mage_Reports_Model_Resource_Report_Collection
@@ -248,7 +246,7 @@ class Mage_Reports_Model_Resource_Report_Collection
      *
      * @param string $from
      * @param string $to
-     * @return Mage_Reports_Model_Report
+     * @return Maho\Data\Collection
      */
     public function getReportFull($from, $to)
     {
@@ -260,7 +258,7 @@ class Mage_Reports_Model_Resource_Report_Collection
      *
      * @param string $from
      * @param string $to
-     * @return Mage_Reports_Model_Report
+     * @return Maho\Data\Collection
      */
     public function getReport($from, $to)
     {
@@ -276,7 +274,7 @@ class Mage_Reports_Model_Resource_Report_Collection
     public function timeShift($datetime)
     {
         return Mage::app()->getLocale()
-            ->utcDate(null, $datetime, true, Mage_Core_Model_Locale::DATETIME_FORMAT)
+            ->storeToUtc(null, $datetime)
             ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
     }
 }

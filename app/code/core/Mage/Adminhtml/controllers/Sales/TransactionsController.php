@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Sales_TransactionsController extends Mage_Adminhtml_Controller_Action
@@ -40,6 +38,7 @@ class Mage_Adminhtml_Sales_TransactionsController extends Mage_Adminhtml_Control
         return $txn;
     }
 
+    #[Maho\Config\Route('/admin/sales_transactions/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -53,6 +52,7 @@ class Mage_Adminhtml_Sales_TransactionsController extends Mage_Adminhtml_Control
     /**
      * Ajax grid action
      */
+    #[Maho\Config\Route('/admin/sales_transactions/grid')]
     public function gridAction(): void
     {
         $this->loadLayout(false);
@@ -62,6 +62,7 @@ class Mage_Adminhtml_Sales_TransactionsController extends Mage_Adminhtml_Control
     /**
      * View Transaction Details action
      */
+    #[Maho\Config\Route('/admin/sales_transactions/view')]
     public function viewAction(): void
     {
         $txn = $this->_initTransaction();
@@ -80,6 +81,7 @@ class Mage_Adminhtml_Sales_TransactionsController extends Mage_Adminhtml_Control
     /**
      * Fetch transaction details action
      */
+    #[Maho\Config\Route('/admin/sales_transactions/fetch')]
     public function fetchAction(): void
     {
         $txn = $this->_initTransaction();

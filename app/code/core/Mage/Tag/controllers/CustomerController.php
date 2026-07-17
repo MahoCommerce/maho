@@ -1,17 +1,27 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Tag
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Tag
  */
 
 class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
 {
+    #[\Override]
+    public function preDispatch()
+    {
+        parent::preDispatch();
+        if (!Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')) {
+            $this->norouteAction();
+            $this->setFlag('', self::FLAG_NO_DISPATCH, true);
+            return $this;
+        }
+        return $this;
+    }
+
     /**
      * @return int|false
      * @throws Mage_Core_Exception
@@ -29,6 +39,7 @@ class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
         return false;
     }
 
+    #[Maho\Config\Route('/tag/customer', name: 'tag.customer.index', methods: ['GET'])]
     public function indexAction(): void
     {
         if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
@@ -54,6 +65,7 @@ class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/tag/customer/view/{tagId}', name: 'tag.customer.view', methods: ['GET'], requirements: ['tagId' => '\d+'])]
     public function viewAction(): void
     {
         if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
@@ -80,6 +92,7 @@ class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
         }
     }
 
+    #[Maho\Config\Route('/tag/customer/remove/{tagId}', name: 'tag.customer.remove', methods: ['POST'], requirements: ['tagId' => '\d+'])]
     public function removeAction(): void
     {
         if (!Mage::getSingleton('customer/session')->isLoggedIn()) {

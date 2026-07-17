@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Shipping
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Shipping
  */
 
 /**
@@ -191,7 +189,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
         if (empty($containersFilter)) {
             return $containersAll;
         }
-        if (!$params || !$method || !$countryShipper || !$countryRecipient) {
+        if (!$method || !$countryShipper || !$countryRecipient) {
             return $containersAll;
         }
 
@@ -258,8 +256,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
             if ($availableCountries && in_array($request->getDestCountryId(), $availableCountries)) {
                 return $this;
             }
-            if ($showMethod && (!$availableCountries || ($availableCountries
-                 && !in_array($request->getDestCountryId(), $availableCountries)))) {
+            if ($showMethod) {
                 $error = Mage::getModel('shipping/rate_result_error');
                 $error->setCarrier($this->_code);
                 $error->setCarrierTitle($this->getConfigData('title'));

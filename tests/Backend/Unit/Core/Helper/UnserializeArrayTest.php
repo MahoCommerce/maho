@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 declare(strict_types=1);
@@ -96,6 +94,37 @@ describe('UnserializeArray helper with JSON scalar edge cases', function () {
         // '"hello"' is valid JSON — a quoted string
         $result = $this->helper->unserialize('"hello"');
         expect($result)->toBeString()->toBe('hello');
+    });
+});
+
+/**
+ * Non-string input passes through unchanged. This protects callers like
+ * Mage_Admin_Model_Resource_User::_unserializeExtraData where _afterLoad
+ * can run twice on the same model — the second pass sees the already-decoded
+ * array, and json_validate() would fatal with TypeError on non-string input.
+ */
+describe('UnserializeArray helper passthrough for already-decoded input', function () {
+    beforeEach(function () {
+        $this->helper = Mage::helper('core/unserializeArray');
+    });
+
+    it('returns array input unchanged', function () {
+        $decoded = ['configState' => ['foo' => '1']];
+        expect($this->helper->unserialize($decoded))->toBe($decoded);
+    });
+
+    it('returns int input unchanged', function () {
+        expect($this->helper->unserialize(42))->toBe(42);
+    });
+
+    it('returns bool input unchanged', function () {
+        expect($this->helper->unserialize(true))->toBeTrue();
+        expect($this->helper->unserialize(false))->toBeFalse();
+    });
+
+    it('returns object input unchanged', function () {
+        $obj = (object) ['a' => 1];
+        expect($this->helper->unserialize($obj))->toBe($obj);
     });
 });
 

@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Log_Block_Dashboard_Devices $this */
@@ -25,7 +23,7 @@ $chartId = rand(100, 999);
             <?php endforeach ?>
         </select>
     </p>
-    <br/>
+    <br>
 
     <?php if ($this->getCount()): ?>
         <div class="devices-browsers-charts">
@@ -39,7 +37,7 @@ $chartId = rand(100, 999);
             </div>
         </div>
 
-        <script type="text/javascript">
+        <script>
             window.chartsLoaded = window.chartsLoaded || false;
             function loadCharts(callback) {
                 if (window.chartsLoaded && window.Chart) {

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Admin
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Admin
  */
 
 /**
@@ -140,7 +138,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             'firstname' => $this->getFirstname(),
             'lastname'  => $this->getLastname(),
             'email'     => $this->getEmail(),
-            'modified'  => Mage_Core_Model_Locale::now(),
+            'modified'  => Mage::app()->getLocale()->formatDateForDb('now'),
             'extra'     => Mage::helper('core')->jsonEncode($this->getExtra()),
         ];
 
@@ -441,7 +439,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
             if ($needsTwofa && $this->getTwofaEnabled()) {
                 $secret = $this->getTwofaSecret();
-                if (!Mage::helper('admin/auth')->verifyTwofaCode($secret, $twofaVerificationCode ?? '')) {
+                if (!Mage::helper('core/security')->verifyTotpCode($secret, $twofaVerificationCode ?? '')) {
                     throw new Mage_Core_Exception(
                         Mage::helper('adminhtml')->__('2FA verification code is invalid.'),
                         self::AUTH_ERR_2FA_INVALID,
@@ -799,7 +797,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             throw Mage::exception('Mage_Core', Mage::helper('adminhtml')->__('Invalid password reset token.'));
         }
         $this->setRpToken($newResetPasswordLinkToken);
-        $currentDate = Mage_Core_Model_Locale::now();
+        $currentDate = Mage::app()->getLocale()->formatDateForDb('now');
         $this->setRpTokenCreatedAt($currentDate);
 
         return $this;
@@ -821,7 +819,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
 
         $tokenExpirationPeriod = Mage::helper('admin')->getResetPasswordLinkExpirationPeriod();
 
-        $currentDate = Mage_Core_Model_Locale::now();
+        $currentDate = Mage::app()->getLocale()->nowUtc();
         $currentTimestamp = strtotime($currentDate);
         $tokenTimestamp = strtotime($resetPasswordLinkTokenCreatedAt);
         if ($tokenTimestamp > $currentTimestamp) {

@@ -1,18 +1,13 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_ImportExport
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2022 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_ImportExport>
-            <version>1.6.0.2</version>
+            <version>2.0.0</version>
         </Mage_ImportExport>
     </modules>
     <global>
@@ -40,14 +35,6 @@
                 <class>Mage_ImportExport_Helper</class>
             </importexport>
         </helpers>
-        <resources>
-            <importexport_setup>
-                <setup>
-                    <module>Mage_ImportExport</module>
-                    <class>Mage_ImportExport_Model_Resource_Setup</class>
-                </setup>
-            </importexport_setup>
-        </resources>
         <importexport module="importexport">
             <import_entities>
                 <catalog_product translate="label">
@@ -106,17 +93,6 @@
             </import>
         </importexport>
     </global>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <importexport before="Mage_Adminhtml">Mage_ImportExport_Adminhtml</importexport>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
     <adminhtml>
         <translate>
             <modules>

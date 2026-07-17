@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Rss
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Rss
  */
 
 class Mage_Rss_Model_Observer
@@ -35,6 +33,7 @@ class Mage_Rss_Model_Observer
     /**
      * Clean cache for catalog review rss
      */
+    #[Maho\Config\Observer('review_save_after', area: 'frontend')]
     public function reviewSaveAfter(\Maho\Event\Observer $observer)
     {
         $this->_cleanCache(Mage_Rss_Block_Catalog_Review::CACHE_TAG);
@@ -43,6 +42,7 @@ class Mage_Rss_Model_Observer
     /**
      * Clean cache for notify stock rss
      */
+    #[Maho\Config\Observer('sales_order_save_after', area: 'frontend', id: 'notifystock')]
     public function salesOrderItemSaveAfterNotifyStock(\Maho\Event\Observer $observer)
     {
         $this->_cleanCache(Mage_Rss_Block_Catalog_NotifyStock::CACHE_TAG);
@@ -51,6 +51,7 @@ class Mage_Rss_Model_Observer
     /**
      * Clean cache for catalog new orders rss
      */
+    #[Maho\Config\Observer('sales_order_save_after', area: 'frontend', id: 'ordernew')]
     public function salesOrderItemSaveAfterOrderNew(\Maho\Event\Observer $observer)
     {
         $this->_cleanCache(Mage_Rss_Block_Order_New::CACHE_TAG);

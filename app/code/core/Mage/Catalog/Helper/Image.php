@@ -1,20 +1,25 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
-class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
+class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract implements \Stringable
 {
     public const XML_NODE_PRODUCT_BASE_IMAGE_WIDTH = 'catalog/product_image/base_width';
     public const XML_NODE_PRODUCT_SMALL_IMAGE_WIDTH = 'catalog/product_image/small_width';
     public const XML_NODE_PRODUCT_MAX_DIMENSION = 'catalog/product_image/max_dimension';
+
+    /**
+     * Set to true when a deferred resize URL is returned instead of a direct
+     * cache URL.  Block caching must be suppressed for the rest of the request
+     * so that the temporary resize URLs are not persisted in the block cache.
+     */
+    public bool $hasDeferredImages = false;
 
     protected $_moduleName = 'Mage_Catalog';
 
@@ -342,11 +347,9 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
 
     /**
      * Return Image URL
-     *
-     * @return string
      */
     #[\Override]
-    public function __toString()
+    public function __toString(): string
     {
         if ($this->getImageFile() && str_ends_with($this->getImageFile(), '.svg')) {
             return $this->getImageFile();
@@ -368,16 +371,13 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
             if ($model->isCached()) {
                 return $model->getUrl();
             }
-            if ($this->_scheduleRotate) {
-                $model->rotate($this->getAngle());
-            }
-            if ($this->_scheduleResize) {
-                $model->resize();
-            }
-            if ($this->getWatermark()) {
-                $model->setWatermark($this->getWatermark());
-            }
-            $url = $model->saveFile()->getUrl();
+
+            // Return a signed URL for deferred generation instead of
+            // processing the image synchronously during page render.
+            $this->hasDeferredImages = true;
+            $params = $model->getTransformParams();
+            $query = Maho::signImageResizeRequest($params, Mage::getEncryptionKeyAsHex());
+            $url = Mage::getUrl('core/index/resize', ['_query' => $query, '_nosid' => true]);
         } catch (Exception $e) {
             Mage::logException($e);
             $url = Mage::getDesign()->getSkinUrl($this->getPlaceholder());

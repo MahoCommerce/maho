@@ -1,12 +1,7 @@
-/**
- * Maho
- *
- * @package     Mage_Adminhtml
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+// SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+// SPDX-FileCopyrightText: 2017-2023 The OpenMage Contributors <https://openmage.org>
+// SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+// SPDX-License-Identifier: AFL-3.0
 
 class AdminOrder
 {
@@ -720,8 +715,15 @@ class AdminOrder
         if (this.collectElementsValue) {
             var elems = document.getElementById(this.getAreaId('sidebar')).querySelectorAll('input');
             for (var i=0; i < elems.length; i++) {
-                if (elems[i].value) {
-                    data[elems[i].name] = elems[i].value;
+                var el = elems[i];
+                if (!el.name) continue;
+                // Checkboxes/radios always have a .value attribute regardless
+                // of whether the user ticked them. Skip them when not :checked
+                // so unticked sidebar items don't get auto-added to the order.
+                if ((el.type === 'checkbox' || el.type === 'radio')) {
+                    if (el.checked && el.value) data[el.name] = el.value;
+                } else if (el.value) {
+                    data[el.name] = el.value;
                 }
             }
         }
@@ -1096,6 +1098,12 @@ class AdminOrder
         }
         const data = {};
         for (const field of container.querySelectorAll('input, select, textarea')) {
+            // Skip unchecked radios/checkboxes: otherwise the last radio in DOM order
+            // overwrites the selected one (e.g. payment[method] on any billing_method
+            // reload always became the last payment method, ignoring the user's choice).
+            if ((field.type === 'radio' || field.type === 'checkbox') && !field.checked) {
+                continue;
+            }
             data[field.name] = field.value;
         }
         return data;

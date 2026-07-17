@@ -1,15 +1,16 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Api
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Api
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_API_WSI = 'api/config/compliance_wsi';
@@ -177,13 +178,7 @@ class Mage_Api_Helper_Data extends Mage_Core_Helper_Abstract
     {
         if (is_array($mixed)) {
             $arrKeys = array_keys($mixed);
-            $isDigit = false;
-            foreach ($arrKeys as $key) {
-                if (is_int($key)) {
-                    $isDigit = true;
-                    break;
-                }
-            }
+            $isDigit = array_any($arrKeys, fn($key) => is_int($key));
             if ($isDigit) {
                 $mixed = $this->packArrayToObject($mixed);
             } else {

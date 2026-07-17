@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 /**
@@ -15,8 +13,10 @@
  *
  * @package    Mage_Adminhtml
  */
+
 class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller_Action
 {
+    #[Maho\Config\Route('/admin/report_customer/_init')]
     public function _initAction()
     {
         $act = $this->getRequest()->getActionName();
@@ -30,6 +30,7 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/report_customer/accounts')]
     public function accountsAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -46,6 +47,7 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     /**
      * Export new accounts report grid to CSV format
      */
+    #[Maho\Config\Route('/admin/report_customer/exportAccountsCsv')]
     public function exportAccountsCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_accounts_grid');
@@ -55,12 +57,14 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     /**
      * Export new accounts report grid to Excel XML format
      */
+    #[Maho\Config\Route('/admin/report_customer/exportAccountsExcel')]
     public function exportAccountsExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_accounts_grid');
         $this->_prepareDownloadResponse(...$grid->getExcel('accounts.xml', -1));
     }
 
+    #[Maho\Config\Route('/admin/report_customer/orders')]
     public function ordersAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -80,6 +84,7 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     /**
      * Export customers most ordered report to CSV format
      */
+    #[Maho\Config\Route('/admin/report_customer/exportOrdersCsv')]
     public function exportOrdersCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_orders_grid');
@@ -89,12 +94,14 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     /**
      * Export customers most ordered report to Excel XML format
      */
+    #[Maho\Config\Route('/admin/report_customer/exportOrdersExcel')]
     public function exportOrdersExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_orders_grid');
         $this->_prepareDownloadResponse(...$grid->getExcel('customers_orders.xml', -1));
     }
 
+    #[Maho\Config\Route('/admin/report_customer/totals')]
     public function totalsAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -114,6 +121,7 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     /**
      * Export customers biggest totals report to CSV format
      */
+    #[Maho\Config\Route('/admin/report_customer/exportTotalsCsv')]
     public function exportTotalsCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_totals_grid');
@@ -123,6 +131,7 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     /**
      * Export customers biggest totals report to Excel XML format
      */
+    #[Maho\Config\Route('/admin/report_customer/exportTotalsExcel')]
     public function exportTotalsExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_totals_grid');

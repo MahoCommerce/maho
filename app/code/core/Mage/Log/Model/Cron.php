@@ -1,12 +1,10 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Log
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Log
  */
 
 class Mage_Log_Model_Cron extends Mage_Core_Model_Abstract
@@ -37,10 +35,6 @@ class Mage_Log_Model_Cron extends Mage_Core_Model_Abstract
             return $this;
         }
 
-        $translate = Mage::getSingleton('core/translate');
-        /** @var Mage_Core_Model_Translate $translate */
-        $translate->setTranslateInline(false);
-
         $emailTemplate = Mage::getModel('core/email_template');
         /** @var Mage_Core_Model_Email_Template $emailTemplate */
         $emailTemplate->setDesignConfig(['area' => 'backend'])
@@ -52,8 +46,6 @@ class Mage_Log_Model_Cron extends Mage_Core_Model_Abstract
                 ['warnings' => implode("\n", $this->_errors)],
             );
 
-        $translate->setTranslateInline(true);
-
         return $this;
     }
 
@@ -62,6 +54,7 @@ class Mage_Log_Model_Cron extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[Maho\Config\CronJob('log_clean', configPath: 'crontab/jobs/log_clean/schedule/cron_expr')]
     public function logClean()
     {
         if (!Mage::getStoreConfigFlag(self::XML_PATH_LOG_CLEAN_ENABLED)) {

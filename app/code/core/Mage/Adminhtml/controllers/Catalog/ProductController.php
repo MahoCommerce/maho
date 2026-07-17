@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller_Action
@@ -173,6 +171,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     /**
      * Product list page
      */
+    #[Maho\Config\Route('/admin/catalog_product/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -185,6 +184,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     /**
      * Create new product page
      */
+    #[Maho\Config\Route('/admin/catalog_product/new')]
     public function newAction(): void
     {
         $product = $this->_initProduct();
@@ -223,6 +223,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     /**
      * Product edit form
      */
+    #[Maho\Config\Route('/admin/catalog_product/edit')]
     public function editAction(): void
     {
         $productId  = (int) $this->getRequest()->getParam('id');
@@ -276,6 +277,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      *
      * @throws Mage_Core_Model_Store_Exception|Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product/wysiwyg')]
     public function wysiwygAction(): void
     {
         $elementId = $this->getRequest()->getParam('element_id', md5(microtime()));
@@ -293,6 +295,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     /**
      * Product grid for AJAX request
      */
+    #[Maho\Config\Route('/admin/catalog_product/grid')]
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -303,6 +306,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      * Get specified tab grid
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product/gridOnly')]
     public function gridOnlyAction(): void
     {
         $this->_initProduct();
@@ -319,6 +323,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      *
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product/categories')]
     public function categoriesAction(): void
     {
         $this->_initProduct();
@@ -331,6 +336,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      *
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product/options')]
     public function optionsAction(): void
     {
         $this->_initProduct();
@@ -342,6 +348,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      * Get related products grid and serializer block
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product/related')]
     public function relatedAction(): void
     {
         $this->_initProduct();
@@ -355,6 +362,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      * Get upsell products grid and serializer block
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product/upsell')]
     public function upsellAction(): void
     {
         $this->_initProduct();
@@ -368,6 +376,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      * Get crosssell products grid and serializer block
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product/crosssell')]
     public function crosssellAction(): void
     {
         $this->_initProduct();
@@ -381,6 +390,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      * Get related products grid
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product/relatedGrid')]
     public function relatedGridAction(): void
     {
         $this->_initProduct();
@@ -394,6 +404,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      * Get upsell products grid
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product/upsellGrid')]
     public function upsellGridAction(): void
     {
         $this->_initProduct();
@@ -407,6 +418,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      * Get crosssell products grid
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product/crosssellGrid')]
     public function crosssellGridAction(): void
     {
         $this->_initProduct();
@@ -420,6 +432,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      * Get parent products grid (configurable, grouped, bundle products that use this product)
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product/parentProducts')]
     public function parentProductsAction(): void
     {
         $this->_initProduct();
@@ -431,6 +444,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      * Get parent products grid for AJAX reload
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product/parentProductsGrid')]
     public function parentProductsGridAction(): void
     {
         $this->_initProduct();
@@ -442,6 +456,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      * Get associated grouped products grid and serializer block
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product/superGroup')]
     public function superGroupAction(): void
     {
         $this->_initProduct();
@@ -456,6 +471,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      *
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product/superGroupGridOnly')]
     public function superGroupGridOnlyAction(): void
     {
         $this->_initProduct();
@@ -470,6 +486,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      *
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product/reviews')]
     public function reviewsAction(): void
     {
         $this->_initProduct();
@@ -485,6 +502,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      *
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product/superConfig')]
     public function superConfigAction(): void
     {
         $this->_initProduct();
@@ -495,6 +513,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     /**
      * Validate product
      */
+    #[Maho\Config\Route('/admin/catalog_product/validate')]
     public function validateAction(): void
     {
         $response = new \Maho\DataObject();
@@ -701,6 +720,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         }
     }
 
+    #[Maho\Config\Route('/admin/catalog_product/categoriesJson')]
     public function categoriesJsonAction(): void
     {
         $product = $this->_initProduct();
@@ -714,6 +734,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     /**
      * Save product action
      */
+    #[Maho\Config\Route('/admin/catalog_product/save')]
     public function saveAction(): void
     {
         $storeId        = $this->getRequest()->getParam('store');
@@ -801,6 +822,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      * Create product duplicate
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/admin/catalog_product/duplicate')]
     public function duplicateAction(): void
     {
         $product = $this->_initProduct();
@@ -819,6 +841,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     /**
      * Delete product action
      */
+    #[Maho\Config\Route('/admin/catalog_product/delete')]
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -838,6 +861,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     /**
      * Get tag grid
      */
+    #[Maho\Config\Route('/admin/catalog_product/tagGrid')]
     public function tagGridAction(): void
     {
         $this->loadLayout();
@@ -849,6 +873,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     /**
      * Get alerts price grid
      */
+    #[Maho\Config\Route('/admin/catalog_product/alertsPriceGrid')]
     public function alertsPriceGridAction(): void
     {
         $this->loadLayout(false);
@@ -858,12 +883,14 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     /**
      * Get alerts stock grid
      */
+    #[Maho\Config\Route('/admin/catalog_product/alertsStockGrid')]
     public function alertsStockGridAction(): void
     {
         $this->loadLayout(false);
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/catalog_product/created')]
     public function createdAction(): void
     {
         $this->_getSession()->addNotice(
@@ -876,6 +903,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/catalog_product/massDelete')]
     public function massDeleteAction(): void
     {
         $productIds = $this->getRequest()->getParam('product');
@@ -903,6 +931,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     /**
      * Update product(s) status action
      */
+    #[Maho\Config\Route('/admin/catalog_product/massStatus')]
     public function massStatusAction(): void
     {
         $productIds = (array) $this->getRequest()->getParam('product');
@@ -948,6 +977,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     /**
      * Get tag customer grid
      */
+    #[Maho\Config\Route('/admin/catalog_product/tagCustomerGrid')]
     public function tagCustomerGridAction(): void
     {
         $this->loadLayout();
@@ -956,6 +986,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/catalog_product/quickCreate')]
     public function quickCreateAction(): void
     {
         $result = [];

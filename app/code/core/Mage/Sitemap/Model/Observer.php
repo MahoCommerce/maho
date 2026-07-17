@@ -1,12 +1,10 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Sitemap
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2020-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sitemap
  */
 
 class Mage_Sitemap_Model_Observer
@@ -19,7 +17,7 @@ class Mage_Sitemap_Model_Observer
     /**
      * Cronjob expression configuration
      */
-    public const XML_PATH_CRON_EXPR = 'crontab/jobs/generate_sitemaps/schedule/cron_expr';
+    public const XML_PATH_CRON_EXPR = 'crontab/jobs/sitemap_generate/schedule/cron_expr';
 
     /**
      * Error email template configuration
@@ -41,6 +39,7 @@ class Mage_Sitemap_Model_Observer
      *
      * @param Mage_Cron_Model_Schedule $schedule
      */
+    #[Maho\Config\CronJob('sitemap_generate', configPath: 'crontab/jobs/sitemap_generate/schedule/cron_expr')]
     public function scheduledGenerateSitemaps($schedule)
     {
         $errors = [];
@@ -63,10 +62,6 @@ class Mage_Sitemap_Model_Observer
         }
 
         if ($errors && Mage::getStoreConfig(self::XML_PATH_ERROR_RECIPIENT)) {
-            $translate = Mage::getSingleton('core/translate');
-            /** @var Mage_Core_Model_Translate $translate */
-            $translate->setTranslateInline(false);
-
             $emailTemplate = Mage::getModel('core/email_template');
             /** @var Mage_Core_Model_Email_Template $emailTemplate */
             $emailTemplate->setDesignConfig(['area' => 'backend'])
@@ -77,8 +72,6 @@ class Mage_Sitemap_Model_Observer
                     null,
                     ['warnings' => implode("\n", $errors)],
                 );
-
-            $translate->setTranslateInline(true);
         }
     }
 }

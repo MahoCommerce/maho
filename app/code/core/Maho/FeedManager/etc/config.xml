@@ -1,12 +1,7 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Maho_FeedManager
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- */
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: OSL-3.0
 -->
 <config>
     <modules>
@@ -75,30 +70,7 @@
                 </feedmanager_feed_failure>
             </email>
         </template>
-
-        <events>
-            <encryption_key_regenerated>
-                <observers>
-                    <feedmanager_encryption_key_regenerated>
-                        <class>feedmanager/observer</class>
-                        <method>encryptionKeyRegenerated</method>
-                    </feedmanager_encryption_key_regenerated>
-                </observers>
-            </encryption_key_regenerated>
-        </events>
     </global>
-
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <maho_feedmanager before="Mage_Adminhtml">Maho_FeedManager_Adminhtml</maho_feedmanager>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
 
     <adminhtml>
         <translate>
@@ -113,32 +85,11 @@
         <layout>
             <updates>
                 <feedmanager>
-                    <file>maho/feedmanager.xml</file>
+                    <file>feedmanager.xml</file>
                 </feedmanager>
             </updates>
         </layout>
     </adminhtml>
-
-    <crontab>
-        <jobs>
-            <feedmanager_generate_scheduled>
-                <schedule>
-                    <cron_expr>0 * * * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>feedmanager/cron::generateScheduledFeeds</model>
-                </run>
-            </feedmanager_generate_scheduled>
-            <feedmanager_cleanup_logs>
-                <schedule>
-                    <cron_expr>30 3 * * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>feedmanager/cron::cleanupOldLogs</model>
-                </run>
-            </feedmanager_cleanup_logs>
-        </jobs>
-    </crontab>
 
     <default>
         <feedmanager>

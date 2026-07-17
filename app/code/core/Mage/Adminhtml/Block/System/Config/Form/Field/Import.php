@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Block_System_Config_Form_Field_Import extends \Maho\Data\Form\Element\AbstractElement
@@ -29,10 +27,10 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Import extends \Maho\Data\Fo
     {
         $html = '';
 
-        $html .= '<input id="time_condition" type="hidden" name="' . $this->getName() . '" value="' . time() . '" />';
+        $html .= '<input id="time_condition" type="hidden" name="' . $this->getName() . '" value="' . time() . '">';
 
         $html .= <<<EndHTML
-        <script type="text/javascript">
+        <script>
         document.getElementById('carriers_tablerate_condition_name').addEventListener('change', checkConditionName);
         function checkConditionName(event)
         {

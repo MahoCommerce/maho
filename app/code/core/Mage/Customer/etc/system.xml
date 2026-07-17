@@ -1,14 +1,9 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Customer
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+SPDX-FileCopyrightText: 2017-2024 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <tabs>
@@ -27,6 +22,25 @@
             <show_in_website>1</show_in_website>
             <show_in_store>1</show_in_store>
             <groups>
+                <account translate="label">
+                    <label>Account Options</label>
+                    <sort_order>1</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled_in_frontend translate="label comment">
+                            <label>Enable Customer Accounts in Frontend</label>
+                            <frontend_type>boolean</frontend_type>
+                            <backend_model>customer/config_account_enabled</backend_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>When disabled, only guest checkout is available. Customer registration, login, and account pages are disabled.</comment>
+                        </enabled_in_frontend>
+                    </fields>
+                </account>
                 <account_share translate="label">
                     <label>Account Sharing Options</label>
                     <sort_order>10</sort_order>
@@ -315,6 +329,25 @@
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </min_password_length>
+                        <allow_2fa translate="label comment">
+                            <label>Allow Two-Factor Authentication</label>
+                            <comment>Let customers enable TOTP-based two-factor authentication on their account.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </allow_2fa>
+                        <require_2fa translate="label comment">
+                            <label>Require Two-Factor Authentication</label>
+                            <comment>Force all customers to set up two-factor authentication before they can use their account.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><allow_2fa>1</allow_2fa></depends>
+                        </require_2fa>
                     </fields>
                 </password>
                 <password_link translate="label">
@@ -386,7 +419,7 @@
                         <prefix_options translate="label comment">
                             <label>Prefix Dropdown Options</label>
                             <sort_order>30</sort_order>
-                            <comment><![CDATA[Semicolon (;) separated values.<br/>Put semicolon in the beginning for empty first option.<br/>Leave empty for open text field.]]></comment>
+                            <comment><![CDATA[Semicolon (;) separated values.<br>Put semicolon in the beginning for empty first option.<br>Leave empty for open text field.]]></comment>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -415,7 +448,7 @@
                         <suffix_options translate="label comment">
                             <label>Suffix Dropdown Options</label>
                             <sort_order>60</sort_order>
-                            <comment><![CDATA[Semicolon (;) separated values.<br/>Put semicolon in the beginning for empty first option.<br/>Leave empty for open text field.]]></comment>
+                            <comment><![CDATA[Semicolon (;) separated values.<br>Put semicolon in the beginning for empty first option.<br>Leave empty for open text field.]]></comment>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
@@ -452,6 +485,42 @@
                         </gender_show>
                     </fields>
                 </address>
+                <vat_validation translate="label">
+                    <label>VAT Number Validation</label>
+                    <sort_order>45</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <enabled translate="label comment">
+                            <label>Enable Real-time VAT Validation</label>
+                            <comment>Validate VAT numbers against the EU VIES service in real time on address forms.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </enabled>
+                        <cache_lifetime translate="label comment">
+                            <label>Cache Lifetime (hours)</label>
+                            <comment>How long to cache VIES validation results. Set to 0 to disable caching.</comment>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </cache_lifetime>
+                        <offline_fallback translate="label comment">
+                            <label>Accept Format-valid VAT When VIES Unavailable</label>
+                            <comment>If VIES service is down, accept VAT numbers that pass format validation.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </offline_fallback>
+                    </fields>
+                </vat_validation>
                 <login translate="label">
                     <label>Login Options</label>
                     <sort_order>90</sort_order>
@@ -654,5 +723,40 @@
                 </security>
             </groups>
         </admin>
+        <system>
+            <groups>
+                <rate_limit>
+                    <fields>
+                        <customer_register translate="label comment" module="customer">
+                            <label>Customer registration</label>
+                            <comment>Per IP address. Default 10 per hour. 0 to disable.</comment>
+                            <sort_order>140</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </customer_register>
+                        <forgot_password translate="label comment" module="customer">
+                            <label>Forgot password</label>
+                            <comment>Per email address. Default 3 per hour. 0 to disable.</comment>
+                            <sort_order>150</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </forgot_password>
+                        <reset_password translate="label comment" module="customer">
+                            <label>Reset password</label>
+                            <comment>Per IP address (token brute-force guard). Default 10 per hour. 0 to disable.</comment>
+                            <sort_order>160</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </reset_password>
+                    </fields>
+                </rate_limit>
+            </groups>
+        </system>
     </sections>
 </config>

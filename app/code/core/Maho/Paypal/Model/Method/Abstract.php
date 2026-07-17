@@ -1,0 +1,316 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Paypal
+ */
+
+declare(strict_types=1);
+
+abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Method_Abstract
+{
+    protected $_infoBlockType = 'paypal/payment_info';
+
+    protected $_isGateway = false;
+    protected $_canOrder = false;
+    protected $_canAuthorize = true;
+    protected $_canCapture = true;
+    protected $_canCapturePartial = true;
+    protected $_canRefund = true;
+    protected $_canRefundInvoicePartial = true;
+    protected $_canVoid = true;
+    protected $_canUseCheckout = true;
+    protected $_canFetchTransactionInfo = true;
+    protected $_isInitializeNeeded = true;
+
+    protected ?Maho_Paypal_Model_Api_Client $_apiClient = null;
+    protected ?Maho_Paypal_Model_Config $_config = null;
+
+    #[\Override]
+    public function isAvailable($quote = null): bool
+    {
+        $config = $this->_getConfig();
+        if (!$config->hasCredentials($quote?->getStoreId())) {
+            return false;
+        }
+        return parent::isAvailable($quote);
+    }
+
+    #[\Override]
+    public function initialize($paymentAction, $stateObject): self
+    {
+        $payment = $this->getInfoInstance();
+        $captureId = $payment->getAdditionalInformation('paypal_capture_id');
+        $authId = $payment->getAdditionalInformation('paypal_authorization_id');
+        $paypalOrderId = $payment->getAdditionalInformation('paypal_order_id');
+
+        if (!$captureId && !$authId && !$paypalOrderId) {
+            Mage::throwException(
+                Mage::helper('paypal')->__('Please complete the PayPal payment before placing the order.'),
+            );
+        }
+
+        if ($captureId || $authId) {
+            if ($captureId) {
+                $payment->setTransactionId($captureId);
+                $payment->setIsTransactionClosed(true);
+                $payment->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE);
+                $this->_createCaptureInvoice($payment, $captureId);
+            } else {
+                $payment->setTransactionId($authId);
+                $payment->setIsTransactionClosed(false);
+                $payment->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_AUTH);
+            }
+
+            $stateObject->setState(Mage_Sales_Model_Order::STATE_PROCESSING);
+            $stateObject->setStatus('processing');
+            $stateObject->setIsNotified(true);
+        } else {
+            $stateObject->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
+            $stateObject->setStatus('pending_payment');
+            $stateObject->setIsNotified(false);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Mage_Sales_Model_Order_Payment $payment
+     */
+    #[\Override]
+    public function authorize(\Maho\DataObject $payment, $amount): self
+    {
+        $paypalOrderId = $payment->getAdditionalInformation('paypal_order_id');
+        if (!$paypalOrderId) {
+            Mage::throwException(Mage::helper('paypal')->__('PayPal order ID not found.'));
+        }
+
+        $result = $this->_getApiClient()->authorizeOrder($paypalOrderId);
+
+        $authId = $result['purchase_units'][0]['payments']['authorizations'][0]['id'] ?? null;
+        if ($authId) {
+            $payment->setTransactionId($authId);
+            $payment->setIsTransactionClosed(false);
+            $payment->setAdditionalInformation('paypal_authorization_id', $authId);
+        }
+
+        $this->_importPaymentInfo($result, $payment);
+
+        return $this;
+    }
+
+    /**
+     * @param Mage_Sales_Model_Order_Payment $payment
+     */
+    #[\Override]
+    public function capture(\Maho\DataObject $payment, $amount): self
+    {
+        $authId = $payment->getAdditionalInformation('paypal_authorization_id')
+            ?: $payment->getParentTransactionId();
+        $paypalOrderId = $payment->getAdditionalInformation('paypal_order_id');
+
+        if ($authId) {
+            $order = $payment->getOrder();
+            $body = [];
+            if ($amount != $order->getBaseGrandTotal()) {
+                // final_capture releases the still-authorized remainder and closes the
+                // authorization, so it may only be sent when no further capture will run:
+                // nothing left to invoice AND no other pending invoice awaiting capture.
+                // canInvoice() alone is not enough — items are registered when an invoice
+                // is created, not captured, so "Not Capture" invoices consume the
+                // remaining-to-invoice quantities while their captures are still to come.
+                $isFinalCapture = !$order->canInvoice() && !$this->_hasOtherPendingInvoices($payment);
+                $body = [
+                    'amount' => [
+                        'value' => number_format((float) $amount, 2, '.', ''),
+                        'currency_code' => $order->getBaseCurrencyCode(),
+                    ],
+                    'final_capture' => $isFinalCapture,
+                ];
+                if ($isFinalCapture) {
+                    // keep the local authorization transaction in step with the gateway:
+                    // on a reduced final capture _isCaptureFinal() sees amount < grand
+                    // total and would leave the parent transaction open while PayPal
+                    // has already released the authorization
+                    $payment->setShouldCloseParentTransaction(true);
+                }
+            }
+            $result = $this->_getApiClient()->captureAuthorization($authId, $body);
+            $captureId = $result['id'] ?? null;
+        } elseif ($paypalOrderId) {
+            $result = $this->_getApiClient()->captureOrder($paypalOrderId);
+            $captureId = $result['purchase_units'][0]['payments']['captures'][0]['id'] ?? null;
+        } else {
+            Mage::throwException(Mage::helper('paypal')->__('No PayPal authorization or order ID found for capture.'));
+        }
+
+        if (!$captureId) {
+            Mage::throwException(Mage::helper('paypal')->__('PayPal capture failed: no capture ID returned.'));
+        }
+
+        $payment->setTransactionId($captureId);
+        $payment->setIsTransactionClosed(true);
+        $payment->setAdditionalInformation('paypal_capture_id', $captureId);
+
+        return $this;
+    }
+
+    /**
+     * @param Mage_Sales_Model_Order_Payment $payment
+     */
+    #[\Override]
+    public function refund(\Maho\DataObject $payment, $amount): self
+    {
+        $captureId = $payment->getAdditionalInformation('paypal_capture_id')
+            ?: $payment->getParentTransactionId();
+
+        if (!$captureId) {
+            Mage::throwException(Mage::helper('paypal')->__('No PayPal capture ID found for refund.'));
+        }
+
+        $body = [
+            'amount' => [
+                'value' => number_format((float) $amount, 2, '.', ''),
+                'currency_code' => $payment->getOrder()->getBaseCurrencyCode(),
+            ],
+        ];
+
+        $result = $this->_getApiClient()->refundCapture($captureId, $body);
+        $refundId = $result['id'] ?? null;
+        if ($refundId) {
+            $payment->setTransactionId($refundId);
+            $payment->setIsTransactionClosed(true);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Mage_Sales_Model_Order_Payment $payment
+     */
+    #[\Override]
+    public function void(\Maho\DataObject $payment): self
+    {
+        $authId = $payment->getAdditionalInformation('paypal_authorization_id')
+            ?: $payment->getParentTransactionId();
+
+        if (!$authId) {
+            Mage::throwException(Mage::helper('paypal')->__('No PayPal authorization ID found for void.'));
+        }
+
+        $this->_getApiClient()->voidAuthorization($authId);
+        $payment->setIsTransactionClosed(true);
+
+        return $this;
+    }
+
+    /**
+     * @param Mage_Sales_Model_Order_Payment $payment
+     */
+    #[\Override]
+    public function cancel(\Maho\DataObject $payment): self
+    {
+        return $this->void($payment);
+    }
+
+    /**
+     * Whether another still-open invoice awaits its own capture against the same
+     * authorization. The invoice currently being captured is itself open at this
+     * point, so it is excluded; a freshly created invoice has no id yet and is not
+     * in the collection at all.
+     */
+    protected function _hasOtherPendingInvoices(Mage_Sales_Model_Order_Payment $payment): bool
+    {
+        $currentInvoiceId = $payment->getInvoice()?->getId();
+        foreach ($payment->getOrder()->getInvoiceCollection() as $invoice) {
+            if ($invoice->getState() == Mage_Sales_Model_Order_Invoice::STATE_OPEN
+                && (!$currentInvoiceId || $invoice->getId() != $currentInvoiceId)
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected function _createCaptureInvoice(Mage_Sales_Model_Order_Payment $payment, string $captureId): void
+    {
+        $order = $payment->getOrder();
+        if (!$order->canInvoice()) {
+            return;
+        }
+        $invoice = $order->prepareInvoice();
+        $invoice->setTransactionId($captureId);
+        $invoice->register();
+        $order->addRelatedObject($invoice);
+    }
+
+    protected function _importPaymentInfo(array $result, Mage_Payment_Model_Info $payment): void
+    {
+        $payer = $result['payer'] ?? [];
+        if (!empty($payer['email_address'])) {
+            $payment->setAdditionalInformation('payer_email', $payer['email_address']);
+        }
+        if (!empty($payer['payer_id'])) {
+            $payment->setAdditionalInformation('payer_id', $payer['payer_id']);
+        }
+
+        $authorization = $result['purchase_units'][0]['payments']['authorizations'][0] ?? null;
+        $capture = $result['purchase_units'][0]['payments']['captures'][0] ?? null;
+        $paymentDetails = $authorization ?? $capture;
+
+        if ($paymentDetails) {
+            $processorResponse = $paymentDetails['processor_response'] ?? [];
+            if (!empty($processorResponse['avs_code'])) {
+                $payment->setAdditionalInformation('avs_code', $processorResponse['avs_code']);
+            }
+            if (!empty($processorResponse['cvv_code'])) {
+                $payment->setAdditionalInformation('cvv_code', $processorResponse['cvv_code']);
+            }
+            if (!empty($processorResponse['response_code'])) {
+                $payment->setAdditionalInformation('processor_response_code', $processorResponse['response_code']);
+            }
+        }
+
+        $authResult = $result['payment_source']['card']['authentication_result'] ?? [];
+        if (!empty($authResult['three_d_secure'])) {
+            $payment->setAdditionalInformation('three_d_secure', $authResult['three_d_secure']);
+        }
+
+        $card = $result['payment_source']['card'] ?? [];
+        if (!empty($card['last_digits'])) {
+            $payment->setCcLast4($card['last_digits']);
+        }
+        if (!empty($card['brand'])) {
+            $payment->setCcType($card['brand']);
+        }
+    }
+
+    protected function _getConfig(): Maho_Paypal_Model_Config
+    {
+        if ($this->_config === null) {
+            $this->_config = Mage::getModel('paypal/config');
+        }
+        return $this->_config;
+    }
+
+    public function setApiClient(Maho_Paypal_Model_Api_Client $client): self
+    {
+        $this->_apiClient = $client;
+        return $this;
+    }
+
+    protected function _getApiClient(): Maho_Paypal_Model_Api_Client
+    {
+        if ($this->_apiClient === null) {
+            $storeId = null;
+            if ($this->getInfoInstance()) {
+                $storeId = (int) $this->getInfoInstance()->getOrder()->getStoreId();
+            }
+            /** @var Maho_Paypal_Model_Api_Client $client */
+            $client = Mage::getModel('paypal/api_client', $storeId ? ['store_id' => $storeId] : []);
+            $this->_apiClient = $client;
+        }
+        return $this->_apiClient;
+    }
+}

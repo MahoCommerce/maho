@@ -1,18 +1,19 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Api
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Api
  */
 
 use Laminas\Soap\Server as LaminasSoapServer;
 use Laminas\Soap\Exception\ExceptionInterface as LaminasSoapException;
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_Model_Server_Adapter_Soap extends \Maho\DataObject implements Mage_Api_Model_Server_Adapter_Interface
 {
     /**
@@ -126,10 +127,10 @@ class Mage_Api_Model_Server_Adapter_Soap extends \Maho\DataObject implements Mag
 
         if ($this->getController()->getRequest()->getParam('wsdl') !== null) {
             // Generating wsdl content from template
+            $wsdlFile = Maho::findFile(Mage::getModuleDir('etc', 'Mage_Api') . DS . 'wsdl.xml');
             $io = new \Maho\Io\File();
-            $io->open(['path' => Mage::getModuleDir('etc', 'Mage_Api')]);
-
-            $wsdlContent = $io->read('wsdl.xml');
+            $io->open(['path' => dirname($wsdlFile)]);
+            $wsdlContent = $io->read($wsdlFile);
 
             $template = Mage::getModel('core/email_template_filter');
 

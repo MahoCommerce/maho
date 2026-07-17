@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Model_System_Config_Source_Email_Transport
@@ -80,14 +78,11 @@ class Mage_Adminhtml_Model_System_Config_Source_Email_Transport
                 continue;
             }
 
-            $scheme = explode('+', $option['value']);
-            $scheme = $scheme[0];
-
+            $scheme = explode('+', $option['value'])[0];
             if (isset(self::SCHEME_TO_PACKAGE_MAP[$scheme])) {
-                $package = self::SCHEME_TO_PACKAGE_MAP[$scheme];
-                if (!\Composer\InstalledVersions::isInstalled($package)) {
-                    $options[$k]['label'] .= " ⚠️ Install $package";
-                }
+                $options[$k]['label'] .= Mage::helper('core')->packageInstallWarning(
+                    self::SCHEME_TO_PACKAGE_MAP[$scheme],
+                );
             }
         }
 

@@ -1,16 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
+
+declare(strict_types=1);
 
 class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Controller_Action
 {
@@ -31,6 +29,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/index')]
     public function indexAction()
     {
         if ($this->getRequest()->isAjax()) {
@@ -60,6 +59,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/popup')]
     public function popupAction(): void
     {
         $storeId = (int) $this->getRequest()->getParam('store');
@@ -82,6 +82,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/treeJson')]
     public function treeJsonAction(): void
     {
         try {
@@ -94,6 +95,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         }
     }
 
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/contents')]
     public function contentsAction(): void
     {
         try {
@@ -105,6 +107,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         }
     }
 
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/newFolder')]
     public function newFolderAction(): void
     {
         try {
@@ -118,6 +121,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         }
     }
 
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/deleteFolder')]
     public function deleteFolderAction(): void
     {
         try {
@@ -132,6 +136,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Delete file from media storage
      */
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/deleteFiles')]
     public function deleteFilesAction(): void
     {
         try {
@@ -161,6 +166,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Files upload processing
      */
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/upload')]
     public function uploadAction(): void
     {
         try {
@@ -176,6 +182,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Fire when select image
      */
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/onInsert')]
     public function onInsertAction(): void
     {
         $helper = Mage::helper('cms/wysiwyg_images');
@@ -196,6 +203,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Generate image thumbnail on the fly
      */
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/thumbnail')]
     public function thumbnailAction(): void
     {
         try {
@@ -207,7 +215,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
                 Mage::throwException('Thumbnail image could not be generated');
             }
 
-            $image = Maho::getImageManager()->read($thumb)->encode();
+            $image = Maho::getImageManager()->decodePath($thumb)->encodeUsingPath($thumb);
 
             $this->getResponse()
                 ->setHttpResponseCode(200)
@@ -231,6 +239,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Get image URL for editing
      */
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/getImageUrl')]
     public function getImageUrlAction(): void
     {
         try {
@@ -265,7 +274,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             // Construct URL
             $mediaUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA);
             $relativePath = str_replace($helper->getStorageRoot(), '', $filePath);
-            $imageUrl = $mediaUrl . 'wysiwyg' . str_replace(DS, '/', $relativePath);
+            $imageUrl = $mediaUrl . 'wysiwyg/' . ltrim(str_replace(DS, '/', $relativePath), '/');
 
             $this->getResponse()->setBodyJson([
                 'success' => true,
@@ -283,6 +292,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Save edited image from image editor
      */
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/editImage')]
     public function editImageAction(): void
     {
         try {
@@ -328,14 +338,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             $originalPathInfo = pathinfo($originalFilePath);
 
             // Get configured image file type and extension
-            $configuredType = (int) Mage::getStoreConfig('system/media_storage_configuration/image_file_type');
-            $configuredExtension = match ($configuredType) {
-                IMAGETYPE_AVIF => 'avif',
-                IMAGETYPE_GIF  => 'gif',
-                IMAGETYPE_JPEG => 'jpg',
-                IMAGETYPE_PNG  => 'png',
-                default        => 'webp',
-            };
+            $configuredExtension = ltrim(Maho::getConfiguredImageExtension(), '.');
 
             if ($newFilename) {
                 // Always replace extension with configured type
@@ -428,8 +431,8 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
      * Save current path in session
      *
      * @return $this
-     * @deprecated since 25.7.0 current path is no longer stored in session
      */
+    #[\Deprecated(message: 'since 25.7.0 current path is no longer stored in session')]
     protected function _saveSessionCurrentPath()
     {
         return $this;

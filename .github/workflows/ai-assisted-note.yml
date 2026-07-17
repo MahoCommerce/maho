@@ -1,0 +1,67 @@
+# SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+# SPDX-License-Identifier: OSL-3.0
+
+name: AI-assisted PR note
+
+on:
+  pull_request_target:
+    types: [labeled, unlabeled]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+permissions:
+  pull-requests: write
+
+jobs:
+  note:
+    name: Add or remove the GenAI transparency note
+    runs-on: ubuntu-latest
+    # Only react to the `✨ ai-assisted` label being added or removed.
+    if: github.event.label.name == '✨ ai-assisted'
+    steps:
+      - name: Update PR body
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const BEGIN = '<!-- ai-assisted-note:begin -->';
+            const END = '<!-- ai-assisted-note:end -->';
+
+            // The standardized note. Keep it in sync with the "GenAI
+            // transparency" section of the README.
+            const note = [
+              BEGIN,
+              '> [!NOTE]',
+              '> **Developed with the help of AI.**<br>As part of our commitment to GenAI transparency, we flag pull requests produced with AI assistance alongside human work. As with every change in Maho, a maintainer reviews and validates it before merge, we never merge purely AI-generated changes. See the [GenAI transparency](https://github.com/MahoCommerce/maho#genai-transparency) section for details.',
+              END,
+            ].join('\n');
+
+            const pr = context.payload.pull_request;
+            let body = pr.body || '';
+
+            // Strip any existing note block so we never duplicate it and can
+            // cleanly remove it when the label goes away.
+            const stripped = body
+              .replace(new RegExp(`\\n*${BEGIN}[\\s\\S]*?${END}\\n*`), '')
+              .trimEnd();
+
+            let newBody;
+            if (context.payload.action === 'labeled') {
+              newBody = stripped ? `${stripped}\n\n${note}` : note;
+            } else {
+              // unlabeled: leave the body without the note
+              newBody = stripped;
+            }
+
+            if (newBody === body) {
+              core.info('PR body already in the desired state, nothing to do.');
+              return;
+            }
+
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              body: newBody,
+            });

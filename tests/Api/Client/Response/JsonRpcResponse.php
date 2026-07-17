@@ -1,13 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
+
+declare(strict_types=1);
 
 namespace Tests\Api\Client\Response;
 
@@ -89,8 +87,10 @@ class JsonRpcResponse
             throw new \InvalidArgumentException('Invalid JSON-RPC version');
         }
 
-        // Validate ID matches
-        if (isset($this->data['id']) && $this->data['id'] !== $this->expectedId) {
+        // Validate ID matches. A JSON-RPC id may be a number or a string, and
+        // the server may echo it back as a different scalar type (Laminas returns
+        // "1" for a request id of 1), so compare by value, not by strict type.
+        if (isset($this->data['id']) && (string) $this->data['id'] !== (string) $this->expectedId) {
             throw new \InvalidArgumentException(
                 sprintf('Response ID mismatch: expected %s, got %s', $this->expectedId, $this->data['id']),
             );

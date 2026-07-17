@@ -1,13 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
+
+declare(strict_types=1);
 
 use Maho\Db\Adapter\AdapterInterface;
 
@@ -66,8 +64,8 @@ describe('Nested Transaction Handling', function () {
             'firstname' => 'Test',
             'lastname' => 'Nested',
             'email' => 'nested@test.com',
-            'created' => Mage_Core_Model_Locale::now(),
-            'modified' => Mage_Core_Model_Locale::now(),
+            'created' => Mage::app()->getLocale()->nowUtc(),
+            'modified' => Mage::app()->getLocale()->nowUtc(),
             'is_active' => 1,
         ]);
 
@@ -97,8 +95,8 @@ describe('Nested Transaction Handling', function () {
             'firstname' => 'Test',
             'lastname' => 'Rollback',
             'email' => 'rollback@test.com',
-            'created' => Mage_Core_Model_Locale::now(),
-            'modified' => Mage_Core_Model_Locale::now(),
+            'created' => Mage::app()->getLocale()->nowUtc(),
+            'modified' => Mage::app()->getLocale()->nowUtc(),
             'is_active' => 1,
         ]);
 
@@ -163,6 +161,51 @@ describe('Transaction Rollback Edge Cases', function () {
         expect($this->adapter->getTransactionLevel())->toBe(1);
 
         $this->adapter->commit();
+        expect($this->adapter->getTransactionLevel())->toBe(0);
+    });
+});
+
+describe('Advisory Locks Inside Transactions', function () {
+    // Regression: on SQLite, getLock() used to run "CREATE TABLE IF NOT EXISTS" (a DDL
+    // statement) on every call. SQLite forbids DDL inside a transaction, so acquiring a
+    // lock while a transaction was open threw "DDL statements are not allowed in
+    // transactions" — even when the table already existed. This surfaced when saving a
+    // config section (e.g. activating SMTP) as the misleading "Unable to save the cron
+    // expression." error, because a config-section load acquires the cache-save lock
+    // inside the save transaction.
+    //
+    // The fix creates the locks table once at connection init (outside any transaction),
+    // so getLock() never issues DDL — even the very first acquisition of a process, and
+    // even inside an open transaction, is safe.
+    it('creates the SQLite locks table at connection init, before any lock is acquired', function () {
+        if (!($this->adapter instanceof \Maho\Db\Adapter\Pdo\Sqlite)) {
+            expect(true)->toBeTrue(); // native advisory locks on MySQL/PostgreSQL — nothing to assert
+            return;
+        }
+
+        // The connection is already established (beforeEach). Without ever calling
+        // getLock(), the table must already exist thanks to _initConnection(). This is
+        // what lets the first getLock() of a process run inside a transaction safely.
+        $tableExists = $this->adapter->fetchOne(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='maho_advisory_locks'",
+        );
+        expect((bool) $tableExists)->toBeTrue();
+    });
+
+    it('acquires and releases an advisory lock while a transaction is open', function () {
+        $lockName = 'maho_txn_lock_test';
+        $this->adapter->releaseLock($lockName);
+
+        $this->adapter->beginTransaction();
+        try {
+            $acquired = $this->adapter->getLock($lockName, 1);
+            expect($acquired)->toBeTrue();
+            expect($this->adapter->getTransactionLevel())->toBe(1);
+        } finally {
+            $this->adapter->releaseLock($lockName);
+            $this->adapter->rollBack();
+        }
+
         expect($this->adapter->getTransactionLevel())->toBe(0);
     });
 });

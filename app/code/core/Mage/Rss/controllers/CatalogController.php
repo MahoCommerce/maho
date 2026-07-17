@@ -1,17 +1,16 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Rss
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Rss
  */
 
 class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
 {
+    #[Maho\Config\Route('/rss/catalog/new', name: 'rss.catalog.new', methods: ['GET'])]
     public function newAction(): void
     {
         if ($this->checkFeedEnable('catalog/new')) {
@@ -20,6 +19,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         }
     }
 
+    #[Maho\Config\Route('/rss/catalog/special', name: 'rss.catalog.special', methods: ['GET'])]
     public function specialAction(): void
     {
         if ($this->checkFeedEnable('catalog/special')) {
@@ -28,6 +28,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         }
     }
 
+    #[Maho\Config\Route('/rss/catalog/salesrule', name: 'rss.catalog.salesrule', methods: ['GET'])]
     public function salesruleAction(): void
     {
         if ($this->checkFeedEnable('catalog/salesrule')) {
@@ -36,6 +37,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         }
     }
 
+    #[Maho\Config\Route('/rss/catalog/tag', name: 'rss.catalog.tag', methods: ['GET'])]
     public function tagAction(): void
     {
         if ($this->isFeedEnable('catalog/tag')) {
@@ -53,6 +55,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         $this->_forward('nofeed', 'index', 'rss');
     }
 
+    #[Maho\Config\Route('/rss/catalog/notifystock', name: 'rss.catalog.notifystock', methods: ['GET'])]
     public function notifystockAction(): void
     {
         if ($this->checkFeedEnable('catalog/notifystock')) {
@@ -61,6 +64,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         }
     }
 
+    #[Maho\Config\Route('/rss/catalog/review', name: 'rss.catalog.review', methods: ['GET'])]
     public function reviewAction(): void
     {
         if ($this->checkFeedEnable('catalog/review')) {
@@ -69,6 +73,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         }
     }
 
+    #[Maho\Config\Route('/rss/catalog/category', name: 'rss.catalog.category', methods: ['GET'])]
     public function categoryAction(): void
     {
         if ($this->checkFeedEnable('catalog/category')) {

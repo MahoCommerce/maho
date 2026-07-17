@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
@@ -31,6 +29,7 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
     /**
      * Index action
      */
+    #[Maho\Config\Route('/admin/cms_page/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('CMS'))
@@ -41,9 +40,17 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/cms_page/grid')]
+    public function gridAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
     /**
      * Create new CMS page
      */
+    #[Maho\Config\Route('/admin/cms_page/new')]
     public function newAction(): void
     {
         // the same form is used to create and edit
@@ -53,6 +60,7 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
     /**
      * Edit CMS page
      */
+    #[Maho\Config\Route('/admin/cms_page/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('CMS'))
@@ -102,6 +110,7 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
     /**
      * Save action
      */
+    #[Maho\Config\Route('/admin/cms_page/save')]
     public function saveAction(): void
     {
         // check if data sent
@@ -166,6 +175,7 @@ class Mage_Adminhtml_Cms_PageController extends Mage_Adminhtml_Controller_Action
     /**
      * Delete action
      */
+    #[Maho\Config\Route('/admin/cms_page/delete')]
     public function deleteAction(): void
     {
         // check if we know what should be deleted

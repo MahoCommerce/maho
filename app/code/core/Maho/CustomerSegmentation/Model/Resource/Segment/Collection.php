@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_CustomerSegmentation
  */
+
+declare(strict_types=1);
 
 class Maho_CustomerSegmentation_Model_Resource_Segment_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
@@ -96,9 +93,9 @@ class Maho_CustomerSegmentation_Model_Resource_Segment_Collection extends Mage_C
 
     public function addNeedsRefreshFilter(int $hoursAgo = 24): self
     {
-        $cutoffDateTime = Mage::app()->getLocale()->utcDate(null, null, true);
-        $cutoffDateTime->sub(new DateInterval("PT{$hoursAgo}H"));
-        $cutoffDate = $cutoffDateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+        $cutoffDate = Mage::app()->getLocale()->storeToUtc()
+            ->sub(new DateInterval("PT{$hoursAgo}H"))
+            ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
 
         $this->addFieldToFilter(
             'last_refresh_at',

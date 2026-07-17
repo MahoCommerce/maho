@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Widget
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Widget
  */
 
 class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Controller_Action
@@ -85,6 +83,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Widget Instances Grid
      */
+    #[Maho\Config\Route('/admin/widget_instance/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('CMS'))->_title($this->__('Widgets'));
@@ -96,6 +95,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * New widget instance action (forward to edit action)
      */
+    #[Maho\Config\Route('/admin/widget_instance/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -104,6 +104,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Edit widget instance action
      */
+    #[Maho\Config\Route('/admin/widget_instance/edit')]
     public function editAction(): void
     {
         $widgetInstance = $this->_initWidgetInstance();
@@ -119,19 +120,9 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     }
 
     /**
-     * Set body to response
-     *
-     * @param string $body
-     */
-    private function setBody($body)
-    {
-        Mage::getSingleton('core/translate_inline')->processResponseBody($body);
-        $this->getResponse()->setBody($body);
-    }
-
-    /**
      * Validate action
      */
+    #[Maho\Config\Route('/admin/widget_instance/validate')]
     public function validateAction(): void
     {
         $result = $this->_initWidgetInstance()->validate();
@@ -148,6 +139,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Save action
      */
+    #[Maho\Config\Route('/admin/widget_instance/save')]
     public function saveAction(): void
     {
         $widgetInstance = $this->_initWidgetInstance();
@@ -187,6 +179,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
      * Delete Action
      * @throws Mage_Core_Exception|Throwable
      */
+    #[Maho\Config\Route('/admin/widget_instance/delete')]
     public function deleteAction(): void
     {
         $widgetInstance = $this->_initWidgetInstance();
@@ -206,6 +199,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Categories chooser Action (Ajax request)
      */
+    #[Maho\Config\Route('/admin/widget_instance/categories')]
     public function categoriesAction(): void
     {
         $selected = $this->getRequest()->getParam('selected', '');
@@ -216,12 +210,13 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
             ->setId(Mage::helper('core')->uniqHash('categories'))
             ->setIsAnchorOnly($isAnchorOnly)
             ->setSelectedCategories(explode(',', $selected));
-        $this->setBody($chooser->toHtml());
+        $this->getResponse()->setBody($chooser->toHtml());
     }
 
     /**
      * Products chooser Action (Ajax request)
      */
+    #[Maho\Config\Route('/admin/widget_instance/products')]
     public function productsAction(): void
     {
         $selected = $this->getRequest()->getParam('selected', '');
@@ -235,12 +230,13 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
         /** @var Mage_Adminhtml_Block_Widget_Grid_Serializer $serializer */
         $serializer = $this->getLayout()->createBlock('adminhtml/widget_grid_serializer');
         $serializer->initSerializerBlock($chooser, 'getSelectedProducts', 'selected_products', 'selected_products');
-        $this->setBody($chooser->toHtml() . $serializer->toHtml());
+        $this->getResponse()->setBody($chooser->toHtml() . $serializer->toHtml());
     }
 
     /**
      * Blocks Action (Ajax request)
      */
+    #[Maho\Config\Route('/admin/widget_instance/blocks')]
     public function blocksAction(): void
     {
         /** @var Mage_Widget_Model_Widget_Instance $widgetInstance */
@@ -255,12 +251,13 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
             ->setLayoutHandle($layout)
             ->setSelected($selected)
             ->setAllowedBlocks($widgetInstance->getWidgetSupportedBlocks());
-        $this->setBody($blocksChooser->toHtml());
+        $this->getResponse()->setBody($blocksChooser->toHtml());
     }
 
     /**
      * Templates Chooser Action (Ajax request)
      */
+    #[Maho\Config\Route('/admin/widget_instance/template')]
     public function templateAction(): void
     {
         /** @var Mage_Widget_Model_Widget_Instance $widgetInstance */
@@ -271,7 +268,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
             ->createBlock('widget/adminhtml_widget_instance_edit_chooser_template')
             ->setSelected($selected)
             ->setWidgetTemplates($widgetInstance->getWidgetSupportedTemplatesByBlock($block));
-        $this->setBody($templateChooser->toHtml());
+        $this->getResponse()->setBody($templateChooser->toHtml());
     }
 
     /**

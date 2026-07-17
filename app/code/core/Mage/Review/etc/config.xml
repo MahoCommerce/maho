@@ -1,18 +1,13 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Review
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2022 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_Review>
-            <version>1.6.0.0</version>
+            <version>2.0.0</version>
         </Mage_Review>
     </modules>
     <global>
@@ -45,13 +40,6 @@
                 </entities>
             </review_resource>
         </models>
-        <resources>
-            <review_setup>
-                <setup>
-                    <module>Mage_Review</module>
-                </setup>
-            </review_setup>
-        </resources>
         <blocks>
             <review>
                 <class>Mage_Review_Block</class>
@@ -68,37 +56,8 @@
                 </Mage_Review>
             </modules>
         </translate>
-        <events>
-            <catalog_product_delete_after_done>
-                <observers>
-                    <review>
-                        <class>review/observer</class>
-                        <method>processProductAfterDeleteEvent</method>
-                    </review>
-                </observers>
-            </catalog_product_delete_after_done>
-        </events>
     </adminhtml>
     <frontend>
-        <routers>
-            <review>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Review</module>
-                    <frontName>review</frontName>
-                </args>
-            </review>
-        </routers>
-        <events>
-            <review_save_after>
-                <observers>
-                    <rss>
-                        <class>rss/observer</class>
-                        <method>reviewSaveAfter</method>
-                    </rss>
-                </observers>
-            </review_save_after>
-        </events>
         <translate>
             <modules>
                 <Mage_Review>
@@ -115,31 +74,16 @@
                 </review>
             </updates>
         </layout>
-        <events>
-            <tag_tag_product_collection_load_after>
-                <observers>
-                    <review>
-                        <type>model</type>
-                        <class>review/observer</class>
-                        <method>tagProductCollectionLoadAfter</method>
-                    </review>
-                </observers>
-            </tag_tag_product_collection_load_after>
-            <catalog_block_product_list_collection>
-                <observers>
-                    <review>
-                        <type>model</type>
-                        <class>review/observer</class>
-                        <method>catalogBlockProductCollectionBeforeToHtml</method>
-                    </review>
-                </observers>
-            </catalog_block_product_list_collection>
-        </events>
         <secure_url>
             <review_customer>/review/customer/</review_customer>
         </secure_url>
     </frontend>
     <default>
+        <system>
+            <rate_limit>
+                <review_submit>5</review_submit>
+            </rate_limit>
+        </system>
         <catalog>
             <review>
                 <allow_guest>1</allow_guest>

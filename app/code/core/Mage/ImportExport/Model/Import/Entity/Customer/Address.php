@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_ImportExport
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_ImportExport
  */
 
 class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_ImportExport_Model_Import_Entity_Abstract
@@ -204,7 +202,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
                     || $rowScope == Mage_ImportExport_Model_Import_Entity_Customer::SCOPE_ADDRESS
                 ) {
                     // entity table data
-                    $now = Mage_Core_Model_Locale::now();
+                    $now = Mage::app()->getLocale()->formatDateForDb('now');
                     $entityRows[] = [
                         'entity_id'      => $entityId,
                         'entity_type_id' => $this->_entityTypeId,
@@ -314,12 +312,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
      */
     protected function _isRowWithAddress(array $rowData)
     {
-        foreach (array_keys($this->_attributes) as $colName) {
-            if (isset($rowData[$colName]) && strlen($rowData[$colName])) {
-                return true;
-            }
-        }
-        return false;
+        return array_any(array_keys($this->_attributes), fn($colName) => isset($rowData[$colName]) && strlen($rowData[$colName]));
     }
 
     /**

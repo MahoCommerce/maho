@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Newsletter
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Newsletter
  */
 
 /** @var Mage_Core_Model_Resource_Setup $this */
@@ -107,7 +105,7 @@ $newsletterContent = <<<EOD
                                     </tr>
                                     <tr>
                                         <td>
-                                            <hr/>
+                                            <hr>
                                         </td>
                                     </tr>
                                     <tr>
@@ -117,7 +115,7 @@ $newsletterContent = <<<EOD
                                     </tr>
                                     <tr>
                                         <td>
-                                            <hr/>
+                                            <hr>
                                         </td>
                                     </tr>
                                     <tr>
@@ -127,7 +125,7 @@ $newsletterContent = <<<EOD
                                     </tr>
                                     <tr>
                                         <td>
-                                            <hr/>
+                                            <hr>
                                         </td>
                                     </tr>
                                     <tr>
@@ -137,7 +135,7 @@ $newsletterContent = <<<EOD
                                     </tr>
                                     <tr>
                                         <td>
-                                            <hr/>
+                                            <hr>
                                         </td>
                                     </tr>
                                     <tr>
@@ -147,7 +145,7 @@ $newsletterContent = <<<EOD
                                     </tr>
                                     <tr>
                                         <td>
-                                            <hr/>
+                                            <hr>
                                         </td>
                                     </tr>
                                     <tr>
@@ -157,7 +155,7 @@ $newsletterContent = <<<EOD
                                     </tr>
                                     <tr>
                                         <td>
-                                            <hr/>
+                                            <hr>
                                         </td>
                                     </tr>
                                     <tr>
@@ -260,8 +258,8 @@ $data = [
     'template_sender_name' => Mage::getStoreConfig('trans_email/ident_general/name'),
     'template_sender_email' => Mage::getStoreConfig('trans_email/ident_general/email'),
     'template_actual' => 1,
-    'added_at' => Mage::getSingleton('core/date')->gmtDate(),
-    'modified_at' => Mage::getSingleton('core/date')->gmtDate(),
+    'added_at' => Mage::app()->getLocale()->formatDateForDb('now'),
+    'modified_at' => Mage::app()->getLocale()->formatDateForDb('now'),
 ];
 
 $model = Mage::getModel('newsletter/template')->setData($data);

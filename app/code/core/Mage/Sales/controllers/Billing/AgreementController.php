@@ -1,23 +1,23 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
  */
 
 /**
  * @method int getAgreementId()
  */
+
 class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_Action
 {
     /**
      * View billing agreements
      */
+    #[Maho\Config\Route('/sales/billing_agreement', name: 'sales.billing_agreement.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->_title($this->__('Billing Agreements'));
@@ -40,6 +40,11 @@ class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_
         if (!$this->getRequest()->isDispatched()) {
             return;
         }
+        if (!Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')) {
+            $this->norouteAction();
+            $this->setFlag('', self::FLAG_NO_DISPATCH, true);
+            return $this;
+        }
         if (!$this->_getSession()->authenticate($this)) {
             $this->setFlag('', 'no-dispatch', true);
         }
@@ -49,6 +54,7 @@ class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_
     /**
      * View billing agreement
      */
+    #[Maho\Config\Route('/sales/billing_agreement/view/{agreement}', name: 'sales.billing_agreement.view', methods: ['GET'], requirements: ['agreement' => '\d+'])]
     public function viewAction(): void
     {
         $agreement = $this->_initAgreement();
@@ -79,6 +85,7 @@ class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_
      *
      * @return $this|void
      */
+    #[Maho\Config\Route('/sales/billing_agreement/startWizard', name: 'sales.billing_agreement.startWizard', methods: ['GET'])]
     public function startWizardAction()
     {
         $agreement = Mage::getModel('sales/billing_agreement');
@@ -105,6 +112,7 @@ class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_
     /**
      * Wizard return action
      */
+    #[Maho\Config\Route('/sales/billing_agreement/returnWizard', name: 'sales.billing_agreement.returnWizard', methods: ['GET'])]
     public function returnWizardAction(): void
     {
         $agreement = Mage::getModel('sales/billing_agreement');
@@ -135,6 +143,7 @@ class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_
     /**
      * Wizard cancel action
      */
+    #[Maho\Config\Route('/sales/billing_agreement/cancelWizard', name: 'sales.billing_agreement.cancelWizard', methods: ['GET'])]
     public function cancelWizardAction(): void
     {
         $this->_redirect('*/*/index');
@@ -144,6 +153,7 @@ class Mage_Sales_Billing_AgreementController extends Mage_Core_Controller_Front_
      * Cancel action
      * Set billing agreement status to 'Canceled'
      */
+    #[Maho\Config\Route('/sales/billing_agreement/cancel', name: 'sales.billing_agreement.cancel', methods: ['POST'])]
     public function cancelAction(): void
     {
         $agreement = $this->_initAgreement();

@@ -1,11 +1,8 @@
 <?php
 
 /**
- * Maho
- *
- * @package    MahoCLI
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 declare(strict_types=1);
@@ -27,7 +24,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'frontend:layout:debug',
+    name: 'dev:frontend:layout:debug',
     description: 'Debug layout for a given URL showing handles, XML files, and block tree',
 )]
 class FrontendLayoutDebug extends BaseMahoCommand
@@ -138,20 +135,15 @@ class FrontendLayoutDebug extends BaseMahoCommand
         $front = Mage::app()->getFrontController();
         $front->init();
 
-        // Apply URL rewrites (determines store and rewrites path)
-        /** @var \Mage_Core_Model_Url_Rewrite_Request $rewriteRequest */
-        $rewriteRequest = Mage::getModel('core/url_rewrite_request', [
-            'request' => $request,
-            'routers' => $front->getRouters(),
-        ]);
-        $rewriteRequest->rewrite();
+        $response = Mage::app()->getResponse();
 
-        // Dispatch with output buffering to capture/discard HTML output
+        // Run pre-dispatch checks (store resolution, URL rewrites, etc.) then route matching
         ob_start();
 
         try {
+            Mage::dispatchEvent('controller_front_dispatch_before', ['front' => $front]);
+
             foreach ($front->getRouters() as $router) {
-                /** @var \Mage_Core_Controller_Varien_Router_Abstract $router */
                 if ($router->match($request)) {
                     break;
                 }

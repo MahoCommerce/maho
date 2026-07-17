@@ -1,13 +1,10 @@
 <?php
 
 /**
- * Maho
- *
- * @package    MahoLib
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 namespace Maho\File;
@@ -371,7 +368,7 @@ class Uploader
         try {
             if (count($validTypes) > 0) {
                 $validator = Validation::createValidator();
-                $constraint = new Assert\File(['mimeTypes' => $validTypes]);
+                $constraint = new Assert\File(mimeTypes: $validTypes);
                 $violations = $validator->validate($this->_file['tmp_name'], $constraint);
                 return count($violations) === 0;
             }
@@ -481,12 +478,12 @@ class Uploader
         return in_array(strtolower($extension), $this->_allowedExtensions);
     }
 
-    private function _getMimeType()
+    private function _getMimeType(): string
     {
         return $this->_file['type'];
     }
 
-    private function _setUploadFileId($fileId): void
+    private function _setUploadFileId(string|array $fileId): void
     {
         if (empty($_FILES)) {
             throw new \Exception('$_FILES array is empty', UPLOAD_ERR_NO_FILE);
@@ -518,7 +515,7 @@ class Uploader
         }
     }
 
-    private function _createDestinationFolder($destinationFolder)
+    private function _createDestinationFolder(string $destinationFolder): self
     {
         if (!$destinationFolder) {
             return $this;

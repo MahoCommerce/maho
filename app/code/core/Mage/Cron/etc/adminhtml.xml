@@ -8,7 +8,7 @@
                         <cronjobs translate="title" module="cron">
                             <title>Cron Jobs</title>
                             <action>adminhtml/system_tools_cronjobs</action>
-                            <sort_order>100</sort_order>
+                            <sort_order>10</sort_order>
                         </cronjobs>
                     </children>
                 </tools>

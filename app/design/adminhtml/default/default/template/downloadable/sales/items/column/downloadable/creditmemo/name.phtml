@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Downloadable_Block_Adminhtml_Sales_Items_Column_Downloadable_Name $this */
@@ -14,7 +12,7 @@
 
 <?php if ($_item = $this->getItem()): ?>
     <h5 class="title"><?= $_item->getName() ?></h5>
-    <div><strong><?= $this->helper('sales')->__('SKU') ?>:</strong> <?= implode('<br />', Mage::helper('catalog')->splitSku($this->escapeHtml($this->getSku()))) ?></div>
+    <div><strong><?= $this->helper('sales')->__('SKU') ?>:</strong> <?= implode('<br>', Mage::helper('catalog')->splitSku($this->escapeHtml($this->getSku()))) ?></div>
     <?php if ($this->getOrderOptions()): ?>
         <dl class="item-options">
         <?php foreach ($this->getOrderOptions() as $_option): ?>
@@ -26,7 +24,7 @@
                 <?= Mage::helper('core/string')->truncate($_option['value'], 55, '', $_remainder) ?>
                 <?php if ($_remainder):?>
                     ... <span id="<?= $_id = 'id' . uniqid()?>"><?= $_remainder ?></span>
-                    <script type="text/javascript">
+                    <script>
                     document.getElementById('<?= $_id ?>').style.display = 'none';
                     document.getElementById('<?= $_id ?>').parentElement.addEventListener('mouseover', function(){document.getElementById('<?= $_id ?>').style.display = '';});
                     document.getElementById('<?= $_id ?>').parentElement.addEventListener('mouseout', function(){document.getElementById('<?= $_id ?>').style.display = 'none';});

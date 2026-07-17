@@ -1,13 +1,10 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Maho
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 namespace Maho;
@@ -613,7 +610,7 @@ class DataObject implements ArrayAccess, JsonSerializable
         } else {
             preg_match_all('/\{\{([a-z0-9_]+)\}\}/is', $format, $matches);
             foreach ($matches[1] as $var) {
-                $replace = is_null($this->getData($var)) ? '' : $this->getData($var);
+                $replace = $this->getData($var) ?? '';
                 $format = str_replace('{{' . $var . '}}', $replace, $format);
             }
             $str = $format;

@@ -1,16 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Mage
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage
  */
+
+declare(strict_types=1);
 
 // Require the autoloader if not already loaded
 if (!class_exists('Mage')) {
@@ -130,7 +128,7 @@ if (($_ENV['MAHO_ENABLE_VARIEN_ALIASES'] ?? $_SERVER['MAHO_ENABLE_VARIEN_ALIASES
     class_alias(\Maho\Io\Sftp::class, 'Varien_Io_Sftp');
     class_alias(\Maho\DataObject::class, 'Varien_Object');
     class_alias(\Maho\DataObject\Cache::class, 'Varien_Object_Cache');
-    class_alias(\Maho\DataObject\Mapper::class, 'Varien_Object_Mapper');
+    class_alias(\Maho\DataObject\Mapper::class, 'Varien_Object_Mapper'); // @phpstan-ignore classConstant.deprecatedClass
     class_alias(\Maho\Simplexml\Config::class, 'Varien_Simplexml_Config');
     class_alias(\Maho\Simplexml\Element::class, 'Varien_Simplexml_Element');
     class_alias(\Maho\Exception::class, 'Varien_Exception');

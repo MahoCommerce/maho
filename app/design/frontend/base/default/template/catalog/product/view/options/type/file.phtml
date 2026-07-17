@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 
 /** @var Mage_Catalog_Block_Product_View_Options_Type_File $this */
@@ -33,14 +31,14 @@ $jsVarName = 'opFile' . rand();
     </a>
     <?php if (!$option->getIsRequired()): ?>
         <label>
-            <input type="checkbox" onclick="<?= $jsVarName ?>.toggleFileDelete(this, this.closest('dd').querySelector('.input-box'))" />
+            <input type="checkbox" onclick="<?= $jsVarName ?>.toggleFileDelete(this, this.closest('dd').querySelector('.input-box'))">
             <?= Mage::helper('catalog')->__('Delete') ?>
         </label>
     <?php endif ?>
 <?php endif ?>
     <div class="input-box<?= $fileExists ? ' no-display' : '' ?>">
-        <input type="file" id="option_<?= $optionId ?>" name="<?= $fileName ?>" class="product-custom-option<?= $option->getIsRequired() ? ' required-entry' : '' ?>" <?= $fileExists ? 'disabled="disabled"' : '' ?> onchange="opConfig.reloadPrice()" />
-        <input type="hidden" name="<?= $fieldNameAction ?>" value="<?= $fieldValueAction ?>" />
+        <input type="file" id="option_<?= $optionId ?>" name="<?= $fileName ?>" class="product-custom-option<?= $option->getIsRequired() ? ' required-entry' : '' ?>" <?= $fileExists ? 'disabled="disabled"' : '' ?> onchange="opConfig.reloadPrice()">
+        <input type="hidden" name="<?= $fieldNameAction ?>" value="<?= $fieldValueAction ?>">
         <?php $sanitizedExtensions = $this->getSanitizedFileExtension(); ?>
         <?php if ($sanitizedExtensions): ?>
         <p class="no-margin"><?= Mage::helper('catalog')->__('Allowed file extensions to upload')?>: <strong><?= $sanitizedExtensions ?></strong></p>

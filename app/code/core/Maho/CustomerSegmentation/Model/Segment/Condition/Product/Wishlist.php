@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_CustomerSegmentation
  */
+
+declare(strict_types=1);
 
 class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends Maho_CustomerSegmentation_Model_Segment_Condition_Abstract
 {
@@ -206,7 +203,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
 
     protected function buildDaysSinceAddedCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string
     {
-        $currentDate = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+        $currentDate = Mage::app()->getLocale()->formatDateForDb('now');
         $dateDiff = $adapter->getDateDiffSql("'{$currentDate}'", 'MAX(wi.added_at)');
         $subselect = $adapter->select()
             ->from(['wi' => $this->getWishlistItemTable()], [])

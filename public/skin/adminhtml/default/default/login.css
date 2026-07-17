@@ -1,216 +1,225 @@
-.form-button {
-  background-image: none;
-  background-color: #71798e;
-  padding: 0 13px;
-  color: #fff;
-  border: 0;
-  cursor: pointer;
-  display: inline-block;
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 26px;
-  box-sizing: border-box;
-  margin: 0;
-  vertical-align: middle;
-}
+@import url(tokens.css);
+
+/*
+SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+SPDX-FileCopyrightText: 2017-2023 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
+*/
 
 * {
-  margin: 0;
-  padding: 0;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-body {
-  background: #e6e6e6;
-  color: #2f2f2f;
-  font: 400 12px/1.33 ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  background: #ebedef;
-  font-size: 13px;
-  overflow-x: hidden;
-}
 body#page-login {
-  background-color: #eee;
-}
-
-a {
-  display: inline;
-  color: #269de7;
-  text-decoration: none;
-}
-a:visited {
-  color: #269de7;
-}
-a:focus {
-  color: #3378a3;
-  text-decoration: none;
-}
-a:hover {
-  color: #3378a3;
-  text-decoration: none;
-}
-a:active {
-  color: #3378a3;
-  text-decoration: none;
-}
-a.error span {
-  color: #fa4545 !important;
-}
-
-:focus {
-  outline: 0;
-}
-
-h2 {
-  margin-bottom: .5em;
-  line-height: 1.4em;
-  font-size: 1.7em;
-}
-
-p {
-  margin-bottom: .5em;
-}
-
-form {
-  display: inline;
-}
-
-label {
-  color: #2f2f2f;
-}
-
-input {
-  vertical-align: middle;
-}
-input.input-text {
-  background: #fff;
-  font-size: 12px;
-  border-width: 1px;
-  border-style: solid;
-  border-color: #aaa;
-  padding: 2px 2px 3px;
-  line-height: 18px;
-}
-input.input-text:hover {
-  outline: 2px solid rgba(117, 146, 163, 0.1);
-}
-input.input-text:focus {
-  box-shadow: 0 0 0 2px rgba(117, 146, 163, 0.25);
-}
-input.input-text:disabled {
-  outline: none;
-  opacity: 0.5;
-}
-input.input-text.validation-failed {
-    border-color: #d6340e;
-}
-
-.form-button {
-  background-color: #0090FF;
-}
-
-#page-login {
-  background: #f8f8f8;
-  text-align: center;
-}
-
-.login-container {
-  width: 345px;
-  background: url(images/logo.svg) top center no-repeat;
-  background-size: 70%;
-  padding-top: 100px;
-  margin: 50px auto 0 auto;
-}
-.login-container .legal {
-  margin: 0;
-  font-size: .95em;
-  background: none;
-  padding: 0;
-  border-style: none;
-  position: fixed;
-  bottom: 30px;
-  left: 0;
-  width: 100%;
-  color: white;
-  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-}
-
-.login-form {
-  text-align: left;
-  background: white;
-  border: none;
-  padding: 40px 50px;
-  box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5);
-}
-.login-form .input-box {
-  margin: 10px 0;
-}
-.login-form .input-box input.input-text {
-  width: calc(100% - 18px) !important;
-  padding: 8px;
-}
-.login-form h2 {
-  font-size: 1.7em;
-  font-weight: normal;
-}
-.login-form label {
-  font-weight: bold;
-}
-.login-form .form-buttons {
-  clear: both;
-  text-align: right;
-  margin: 20px 0 0;
-}
-.login-form .form-buttons:after {
-  display: block;
-  clear: both;
-  content: ".";
-  font-size: 0;
-  line-height: 0;
-  height: 0;
-  overflow: hidden;
-}
-.login-form .form-buttons .left {
-  line-height: 32px;
-}
-.login-form input[type="submit"] {
-  height: 32px;
-}
-
-.left {
-  float: left;
-}
-
-.login-box .bottom {
-  width: 581px;
-  height: 5px;
-  overflow: hidden;
-  display: none;
-}
-
-.clear:after {
-  display: block;
-  clear: both;
-  content: ".";
-  font-size: 0;
-  line-height: 0;
-  height: 0;
-  overflow: hidden;
-}
-
-ul.messages {
-  list-style-type: none;
-}
-ul.messages ul {
-  list-style-type: none;
+    background: #121212;
+    color: var(--maho-ink);
+    font: var(--maho-text-md)/1.5 var(--maho-font-sans);
 }
 
 .no-display {
-  display: none;
+    display: none;
 }
 
-#passkey-login-button {
+.clear {
+    clear: both;
+}
+
+.login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: var(--maho-space-6);
+}
+
+.login-box {
     width: 100%;
-    height: 32px;
-    margin-top: 10px;
+    max-width: 400px;
+
+    /* The card stays light in both schemes so the full-color wordmark always reads */
+    --maho-surface: #fff;
+    --maho-ink: #1c1c1c;
+    --maho-ink-soft: #404040;
+    --maho-ink-muted: #6e6e6e;
+    --maho-ink-faint: #9e9e9e;
+    --maho-border-soft: rgba(0, 0, 0, .12);
+    --maho-control-bg: #fff;
+    --maho-control-ink: #1c1c1c;
+    --maho-control-border: rgba(0, 0, 0, .26);
+    --maho-focus-ring: #8a920f;
+    --maho-btn2-bg: #fff;
+    --maho-btn2-bg-hover: #f1f1f1;
+    --maho-btn2-border: rgba(0, 0, 0, .28);
+    --maho-btn2-ink: #1c1c1c;
+    --maho-error: #c8401e;
+    --maho-error-strong: #a23218;
+    --maho-error-bg: #faece6;
+    --maho-error-border: #e2a18c;
 }
 
-/*# sourceMappingURL=login.css.map */
+.login-form {
+    background: var(--maho-surface);
+    border: 1px solid var(--maho-border-soft);
+    border-radius: var(--maho-radius-lg);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, .35);
+    padding: var(--maho-space-8) var(--maho-space-8) var(--maho-space-7);
+}
+
+.login-form h2 {
+    text-align: center;
+    font-size: var(--maho-text-xl);
+    font-weight: 600;
+    letter-spacing: -.01em;
+    color: var(--maho-ink);
+    margin-bottom: var(--maho-space-6);
+}
+
+.login-form h2:before {
+    content: "";
+    display: block;
+    width: 170px;
+    height: 46px;
+    margin: 0 auto var(--maho-space-5);
+    background: url(images/logo.svg) no-repeat center / contain;
+}
+
+.login-form label {
+    display: inline-block;
+    margin-bottom: var(--maho-space-2);
+    font-weight: 500;
+    color: var(--maho-ink-soft);
+}
+
+.input-box {
+    margin-bottom: var(--maho-space-4);
+}
+
+.login-form input.input-text {
+    width: 100%;
+    height: 2.25rem;
+    padding: 0 var(--maho-space-3);
+    font: 400 var(--maho-text-md)/1.4 var(--maho-font-sans);
+    color: var(--maho-control-ink);
+    background: var(--maho-control-bg);
+    border: 1px solid var(--maho-control-border);
+    border-radius: var(--maho-radius-sm);
+    transition: border-color var(--maho-duration-fast) var(--maho-ease), box-shadow var(--maho-duration-fast) var(--maho-ease);
+}
+
+.login-form input.input-text:focus {
+    border-color: var(--maho-focus-ring);
+    outline: 0;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--maho-focus-ring) 25%, transparent);
+}
+
+.login-form input.input-text.validation-failed {
+    border-color: var(--maho-error);
+}
+
+.validation-advice {
+    margin-top: var(--maho-space-1);
+    font-size: var(--maho-text-xs);
+    color: var(--maho-error);
+}
+
+#messages {
+    color: var(--maho-error);
+}
+
+#messages:not(:empty) {
+    margin-bottom: var(--maho-space-3);
+}
+
+#messages ul {
+    list-style: none;
+}
+
+#messages > ul > li {
+    padding: var(--maho-space-3) var(--maho-space-3);
+    margin-bottom: var(--maho-space-3);
+    border-radius: var(--maho-radius-sm);
+    background: var(--maho-error-bg);
+    border: 1px solid var(--maho-error-border);
+    color: var(--maho-error-strong);
+}
+
+#messages > ul > li.success-msg {
+    background: var(--maho-success-bg);
+    border-color: var(--maho-success-border);
+    color: var(--maho-success);
+}
+
+#messages > ul > li.warning-msg {
+    background: var(--maho-warning-bg);
+    border-color: var(--maho-warning-border);
+    color: var(--maho-warning);
+}
+
+#messages > ul > li.notice-msg {
+    background: var(--maho-info-bg);
+    border-color: var(--maho-info-border);
+    color: var(--maho-info);
+}
+
+.form-buttons {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: var(--maho-space-3);
+    margin-top: var(--maho-space-5);
+}
+
+.form-buttons a {
+    margin-right: auto;
+    order: 10;
+    color: var(--maho-ink-muted);
+    text-decoration: none;
+}
+
+.form-buttons a:hover {
+    color: var(--maho-ink);
+    text-decoration: underline;
+}
+
+.form-button {
+    display: inline-block;
+    padding: 0 var(--maho-space-4);
+    height: 34px;
+    white-space: nowrap;
+    font: 600 var(--maho-text-md)/32px var(--maho-font-sans);
+    color: var(--maho-btn2-ink);
+    background: var(--maho-btn2-bg);
+    border: 1px solid var(--maho-btn2-border);
+    border-radius: var(--maho-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--maho-duration-fast) var(--maho-ease), border-color var(--maho-duration-fast) var(--maho-ease);
+}
+
+.form-button:hover {
+    background: var(--maho-btn2-bg-hover);
+}
+
+input.form-button {
+    background: #d7df22;
+    border-color: transparent;
+    color: #121212;
+}
+
+input.form-button:hover {
+    background: #e3ea56;
+}
+
+.form-button:focus-visible {
+    outline: 2px solid var(--maho-focus-ring);
+    outline-offset: 1px;
+}
+
+.legal {
+    margin-top: var(--maho-space-5);
+    text-align: center;
+    font-size: var(--maho-text-xs);
+    color: var(--maho-ink-faint);
+}

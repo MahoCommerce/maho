@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Giftcard
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Giftcard
  */
+
+declare(strict_types=1);
 
 class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
 {
@@ -184,7 +181,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
             return null; // No expiration
         }
 
-        $expirationDate = Mage::app()->getLocale()->utcDate(null, "+{$lifetime} days", true);
+        $expirationDate = Mage::app()->getLocale()->storeToUtc(null, "+{$lifetime} days");
 
         return $expirationDate->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
     }
@@ -361,7 +358,7 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
                 ->send();
 
             // Mark email as sent on giftcard
-            $giftcard->setEmailSentAt(Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+            $giftcard->setEmailSentAt(Mage::app()->getLocale()->formatDateForDb('now'));
             $giftcard->save();
 
             return true;

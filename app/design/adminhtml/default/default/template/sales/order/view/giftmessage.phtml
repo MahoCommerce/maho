@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Adminhtml_Block_Sales_Order_View_Giftmessage $this */
@@ -15,18 +13,18 @@
 <?php $_required = $this->getMessage()->getMessage() != ''?>
 <div id="<?= $this->getHtmlId() ?>" class="box-left giftmessage-whole-order-container">
     <div class="entry-edit">
-        <div><?= Mage::helper('sales')->__('Gift Message for the Entire Order') ?></div><br />
+        <div><?= Mage::helper('sales')->__('Gift Message for the Entire Order') ?></div><br>
         <form id="<?= $this->getFieldId('form') ?>" action="<?= $this->getSaveUrl() ?>">
           <fieldset>
-              <input type="hidden" id="<?= $this->getFieldId('type') ?>" name="<?= $this->getFieldName('type') ?>" value="order" />
+              <input type="hidden" id="<?= $this->getFieldId('type') ?>" name="<?= $this->getFieldName('type') ?>" value="order">
               <table width="100%" cellspacing="0">
                 <tbody>
                   <tr>
                       <td class="label"><label><?= Mage::helper('sales')->__('From Name') ?><?= $_required ? '&nbsp;<span class="required">*</span>' : '' ?></label></td>
-                      <td class="input-ele"><input class="input-text" type="text" id="<?= $this->getFieldId('sender') ?>" name="<?= $this->getFieldName('sender') ?>" value="<?= $this->escapeHtml($this->getMessage()->getSender()) ?>" /></td>
+                      <td class="input-ele"><input class="input-text" type="text" id="<?= $this->getFieldId('sender') ?>" name="<?= $this->getFieldName('sender') ?>" value="<?= $this->escapeHtml($this->getMessage()->getSender()) ?>"></td>
                       <td>&nbsp;</td>
                       <td class="label"><label><?= Mage::helper('sales')->__('To Name') ?><?= $_required ? '&nbsp;<span class="required">*</span>' : '' ?></label></td>
-                      <td class="input-ele"><input class="input-text" type="text" id="<?= $this->getFieldId('recipient') ?>" name="<?= $this->getFieldName('recipient') ?>"  value="<?= $this->escapeHtml($this->getMessage()->getRecipient()) ?>" /></td>
+                      <td class="input-ele"><input class="input-text" type="text" id="<?= $this->getFieldId('recipient') ?>" name="<?= $this->getFieldName('recipient') ?>"  value="<?= $this->escapeHtml($this->getMessage()->getRecipient()) ?>"></td>
                   </tr>
                   <tr>
                       <td class="label" colspan="6"><label for="<?= $this->getFieldId('message') ?>"><?= Mage::helper('sales')->__('Gift Message') ?></label></td>

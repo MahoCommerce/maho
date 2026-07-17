@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_ConfigurableSwatches
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_ConfigurableSwatches
  */
 
 class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstract
@@ -33,7 +31,17 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
     public const SWATCH_LABEL_SUFFIX = '-swatch';
     public const SWATCH_FALLBACK_MEDIA_DIR = 'wysiwyg/swatches';
     public const SWATCH_CACHE_DIR = 'catalog/swatches';
+
+    #[\Deprecated(message: 'since 26.3 — use {@see getSwatchFileExt()} instead')]
     public const SWATCH_FILE_EXT = '.png';
+
+    /**
+     * Get the configured swatch file extension based on system image type setting
+     */
+    public static function getSwatchFileExt(): string
+    {
+        return Maho::getConfiguredImageExtension();
+    }
 
     public const MEDIA_IMAGE_TYPE_BASE = 'base_image';
     public const MEDIA_IMAGE_TYPE_SMALL = 'small_image';
@@ -65,7 +73,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         if (!is_null($type) && array_key_exists($type, $resultImages)) {
             $image = $resultImages[$type];
         } else {
-            $image = (is_null($resultImages['swatch'])) ? $resultImages['standard'] : $resultImages['swatch'];
+            $image = $resultImages['swatch'] ?? $resultImages['standard'];
         }
 
         return $image;
@@ -218,7 +226,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         $fileExt = null,
     ) {
         if (is_null($fileExt)) {
-            $fileExt = self::SWATCH_FILE_EXT;
+            $fileExt = self::getSwatchFileExt();
         }
 
         // normalize to all lower case so that value can be used as array key below
@@ -268,7 +276,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
      */
     public function createSwatchImage($value, $width, $height)
     {
-        $filename = Mage::helper('configurableswatches')->getHyphenatedString($value) . self::SWATCH_FILE_EXT;
+        $filename = Mage::helper('configurableswatches')->getHyphenatedString($value) . self::getSwatchFileExt();
         $optionSwatch = Mage::getModel('eav/entity_attribute_option_swatch')
             ->load($filename, 'filename');
         if (!$optionSwatch->getValue()) {
@@ -284,17 +292,14 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
             trim($filename, '/'),
         ];
         $destPath = implode('/', $destPathArr);
-        if (!is_dir(Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . DS . dirname($destPath))) {
+        $fullDestPath = Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . DS . $destPath;
+        if (!is_dir(dirname($fullDestPath))) {
             $io = new \Maho\Io\File();
-            $io->mkdir(Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . DS . dirname($destPath), 0777, true);
+            $io->mkdir(dirname($fullDestPath), 0777, true);
         }
 
-        $newImage = imagecreatetruecolor($width, $height);
-        [$r, $g, $b] = sscanf($optionSwatch->getValue(), '#%02x%02x%02x');
-        $backgroundColor = imagecolorallocate($newImage, (int) $r, (int) $g, (int) $b);
-        imagefill($newImage, 0, 0, $backgroundColor);
-        imagepng($newImage, Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . DS . $destPath);
-        imagedestroy($newImage);
+        $image = Maho::getImageManager()->createImage($width, $height)->fill($optionSwatch->getValue());
+        Maho::encodeImage($image)->save($fullDestPath);
 
         return $destPath;
     }
@@ -347,7 +352,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
             }
 
             // Do resize and save
-            $image = Maho::getImageManager()->read($sourceFilePath);
+            $image = Maho::getImageManager()->decodePath($sourceFilePath);
             $image->resize($width, $height);
             $image->save($destPath);
         }

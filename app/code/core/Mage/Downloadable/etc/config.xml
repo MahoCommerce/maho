@@ -1,18 +1,13 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Downloadable
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2022 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_Downloadable>
-            <version>1.6.0.0.3</version>
+            <version>2.0.0</version>
         </Mage_Downloadable>
     </modules>
     <global>
@@ -134,7 +129,7 @@
             <product>
                 <type>
                     <downloadable translate="label" module="downloadable">
-                        <label>Downloadable Product</label>
+                        <label>Downloadable</label>
                         <model>downloadable/product_type</model>
                         <is_qty>1</is_qty>
                         <price_model>downloadable/product_price</price_model>
@@ -196,43 +191,8 @@
                 </downloadable>
             </updates>
         </layout>
-        <events>
-            <catalog_product_prepare_save>
-                <observers>
-                    <downloadable_observer>
-                        <class>downloadable/observer</class>
-                        <method>prepareProductSave</method>
-                    </downloadable_observer>
-                </observers>
-            </catalog_product_prepare_save>
-            <sales_order_item_save_commit_after>
-                <observers>
-                    <downloadable_observer>
-                        <class>downloadable/observer</class>
-                        <method>saveDownloadableOrderItem</method>
-                    </downloadable_observer>
-                </observers>
-            </sales_order_item_save_commit_after>
-            <sales_order_save_commit_after>
-                <observers>
-                    <downloadable_observer>
-                        <class>downloadable/observer</class>
-                        <method>setLinkStatus</method>
-                    </downloadable_observer>
-                </observers>
-            </sales_order_save_commit_after>
-        </events>
     </adminhtml>
     <frontend>
-        <routers>
-            <downloadable>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Downloadable</module>
-                    <frontName>downloadable</frontName>
-                </args>
-            </downloadable>
-        </routers>
         <secure_url>
             <downloadable>/downloadable/customer/</downloadable>
             <downloadable_download>/downloadable/download/</downloadable_download>
@@ -253,56 +213,6 @@
                 </downloadable>
             </updates>
         </layout>
-        <events>
-            <sales_order_item_save_commit_after>
-                <observers>
-                    <downloadable_observer>
-                        <class>downloadable/observer</class>
-                        <method>saveDownloadableOrderItem</method>
-                    </downloadable_observer>
-                </observers>
-            </sales_order_item_save_commit_after>
-            <sales_order_save_commit_after>
-                <observers>
-                    <downloadable_observer>
-                        <class>downloadable/observer</class>
-                        <method>setLinkStatus</method>
-                    </downloadable_observer>
-                </observers>
-            </sales_order_save_commit_after>
-            <checkout_type_onepage_save_order_after>
-                <observers>
-                    <checkout_type_onepage_save_order_after>
-                        <class>downloadable/observer</class>
-                        <method>setHasDownloadableProducts</method>
-                    </checkout_type_onepage_save_order_after>
-                </observers>
-            </checkout_type_onepage_save_order_after>
-            <checkout_type_multishipping_create_orders_single>
-                <observers>
-                    <checkout_type_multishipping_create_orders_single>
-                        <class>downloadable/observer</class>
-                        <method>setHasDownloadableProducts</method>
-                    </checkout_type_multishipping_create_orders_single>
-                </observers>
-            </checkout_type_multishipping_create_orders_single>
-            <checkout_allow_guest>
-                <observers>
-                    <checkout_allow_guest>
-                        <class>downloadable/observer</class>
-                        <method>isAllowedGuestCheckout</method>
-                    </checkout_allow_guest>
-                </observers>
-            </checkout_allow_guest>
-            <product_option_renderer_init>
-                <observers>
-                    <downloadable_observer>
-                        <class>downloadable/observer</class>
-                        <method>initOptionRenderer</method>
-                    </downloadable_observer>
-                </observers>
-            </product_option_renderer_init>
-        </events>
     </frontend>
     <admin>
         <fieldsets>
@@ -354,15 +264,6 @@
                 </manage_stock>
             </catalog_product_dataflow>
         </fieldsets>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <Mage_Downloadable before="Mage_Adminhtml">Mage_Downloadable_Adminhtml</Mage_Downloadable>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
     </admin>
     <default>
         <catalog>

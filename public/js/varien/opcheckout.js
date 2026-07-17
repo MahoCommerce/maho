@@ -1,12 +1,7 @@
-/**
- * Maho
- *
- * @package     js
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2015-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+// SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+// SPDX-FileCopyrightText: 2015-2024 The OpenMage Contributors <https://openmage.org>
+// SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+// SPDX-License-Identifier: AFL-3.0
 
 class Checkout
 {
@@ -87,7 +82,10 @@ class Checkout
 
     async reloadReviewBlock() {
         try {
-            const response = await fetch(this.reviewUrl);
+            const response = await fetch(this.reviewUrl, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            });
             if (!response.ok) {
                 throw new Error(`Server returned status ${response.status}`);
             }
@@ -551,7 +549,7 @@ class ShippingMethod {
     validate() {
         const methods = document.getElementsByName('shipping_method');
         if (methods.length === 0) {
-            alert(Translator.translate('Your order cannot be completed at this time as there is no shipping methods available for it. Please make necessary changes in your shipping address.'));
+            alert(Translator.translate('Your order cannot be completed at this time as there are no shipping methods available for it. Please make necessary changes in your shipping address.'));
             return false;
         }
 
@@ -792,7 +790,7 @@ class Payment {
 
         const methods = document.getElementsByName('payment[method]');
         if (methods.length === 0) {
-            alert(Translator.translate('Your order cannot be completed at this time as there is no payment methods available for it.'));
+            alert(Translator.translate('Your order cannot be completed at this time as there are no payment methods available for it.'));
             return false;
         }
 

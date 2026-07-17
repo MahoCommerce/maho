@@ -1,18 +1,16 @@
 <?php
 
 /**
- * Maho
- *
- * @package    MahoLib
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 namespace Maho\Data\Form\Element;
 
 use DateTime;
+use DateTimeInterface;
 use Maho\Data\Form\Element\AbstractElement;
 
 /**
@@ -26,7 +24,7 @@ use Maho\Data\Form\Element\AbstractElement;
 class Date extends AbstractElement
 {
     /**
-     * @var DateTime|string
+     * @var DateTimeInterface|string
      */
     protected $_value;
 
@@ -84,7 +82,7 @@ class Date extends AbstractElement
             return $this;
         }
 
-        if ($value instanceof DateTime) {
+        if ($value instanceof DateTimeInterface) {
             $this->_value = $value;
             return $this;
         }
@@ -151,7 +149,7 @@ class Date extends AbstractElement
         if (null === $format) {
             $format = $this->getFormat();
         }
-        if ($this->_value instanceof DateTime) {
+        if ($this->_value instanceof DateTimeInterface) {
             return $this->_value->format($format);
         }
         return (string) $this->_value;
@@ -160,7 +158,7 @@ class Date extends AbstractElement
     /**
      * Get value instance, if any
      *
-     * @return DateTime|string|null
+     * @return DateTimeInterface|string|null
      */
     public function getValueInstance()
     {
@@ -185,7 +183,7 @@ class Date extends AbstractElement
 
         // Convert the value to ISO format for native date input
         $isoValue = '';
-        if ($this->_value instanceof DateTime) {
+        if ($this->_value instanceof DateTimeInterface) {
             // Validate that the date has a valid year (not from MySQL zero date)
             if ($this->_value->format('Y') >= 1) {
                 if ($this->getTime()) {
@@ -200,7 +198,7 @@ class Date extends AbstractElement
         $inputType = $this->getTime() ? 'datetime-local' : 'date';
 
         $html = sprintf(
-            '<input type="%s" name="%s" id="%s" value="%s" %s style="width:auto !important;" />',
+            '<input type="%s" name="%s" id="%s" value="%s" %s style="width:auto !important;">',
             $inputType,
             $this->getName(),
             $this->getHtmlId(),

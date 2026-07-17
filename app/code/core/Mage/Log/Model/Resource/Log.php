@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Log
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Log
  */
 
 class Mage_Log_Model_Resource_Log extends Mage_Core_Model_Resource_Db_Abstract
@@ -53,7 +51,7 @@ class Mage_Log_Model_Resource_Log extends Mage_Core_Model_Resource_Db_Abstract
         $readAdapter    = $this->_getReadAdapter();
         $writeAdapter   = $this->_getWriteAdapter();
 
-        $timeLimit = $this->formatDate(Mage::getModel('core/date')->gmtTimestamp() - $time);
+        $timeLimit = Mage::app()->getLocale()->formatDateForDb(time() - $time);
 
         while (true) {
             $select = $readAdapter->select()
@@ -104,7 +102,7 @@ class Mage_Log_Model_Resource_Log extends Mage_Core_Model_Resource_Db_Abstract
         $readAdapter    = $this->_getReadAdapter();
         $writeAdapter   = $this->_getWriteAdapter();
 
-        $timeLimit = $this->formatDate(Mage::getModel('core/date')->gmtTimestamp() - $time);
+        $timeLimit = Mage::app()->getLocale()->formatDateForDb(time() - $time);
 
         // retrieve last active customer log id
         $lastLogId = (int) $readAdapter->fetchOne(

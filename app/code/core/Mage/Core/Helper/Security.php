@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 class Mage_Core_Helper_Security extends Mage_Core_Helper_Abstract
@@ -37,11 +35,47 @@ class Mage_Core_Helper_Security extends Mage_Core_Helper_Abstract
         }
     }
 
-    /**
-     * @deprecated since 26.1, use ensureBlockMethodAllowed() instead
-     */
+    #[\Deprecated(message: 'since 26.1, use ensureBlockMethodAllowed() instead')]
     public function validateAgainstBlockMethodBlacklist(Mage_Core_Block_Abstract $block, string $method, array $args): void
     {
         $this->ensureBlockMethodAllowed($block, $method, $args);
+    }
+
+    /**
+     * Generate a new random TOTP secret.
+     */
+    public function generateTotpSecret(): string
+    {
+        return \OTPHP\TOTP::generate()->getSecret();
+    }
+
+    /**
+     * Build an SVG QR code for the given TOTP secret, ready to be scanned by an authenticator app.
+     */
+    public function getTotpQrCode(#[\SensitiveParameter] string $label, #[\SensitiveParameter] string $secret, ?string $issuer = null): string
+    {
+        $issuer ??= Mage::getStoreConfig('general/store_information/name') ?: 'Maho';
+
+        $otp = \OTPHP\TOTP::createFromSecret($secret)
+            ->withLabel($label)
+            ->withIssuer($issuer)
+            ->withParameter('image', 'https://mahocommerce.com/assets/maho-logo-square.png');
+
+        $qrWriter = new \BaconQrCode\Writer(
+            new \BaconQrCode\Renderer\ImageRenderer(
+                new \BaconQrCode\Renderer\RendererStyle\RendererStyle(300),
+                new \BaconQrCode\Renderer\Image\SvgImageBackEnd(),
+            ),
+        );
+        return $qrWriter->writeString($otp->getProvisioningUri());
+    }
+
+    /**
+     * Verify a 6-digit TOTP code against the given secret.
+     */
+    public function verifyTotpCode(#[\SensitiveParameter] string $secret, #[\SensitiveParameter] string $code): bool
+    {
+        $otp = \OTPHP\TOTP::createFromSecret($secret);
+        return $otp->verify($code);
     }
 }

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Eav
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Eav
  */
 
 class Mage_Eav_Model_Config
@@ -55,7 +53,7 @@ class Mage_Eav_Model_Config
 
     /**
      * Attribute set relation information. Structure:
-     * <br/>
+     * <br>
      * [
      *  int attribute_id => [
      *      int set_id => [
@@ -523,8 +521,12 @@ class Mage_Eav_Model_Config
         $entityType = $this->getEntityType($entityType);
         $attributes = [];
         $storeId = $this->_storeId();
+        // Ensure the per-store attribute index is loaded (getAttribute() does the same). Without
+        // this, a caller in a context that has not yet initialized the store — e.g. an API request
+        // whose first EAV access is getAttributes() — hits array_keys(null) below.
+        $this->_initializeStore($storeId);
         // need to access attributes to ensure they are hydrated and initialized
-        foreach (array_keys($this->_entityTypeAttributes[$storeId][$entityType->getId()]) as $attributeId) {
+        foreach (array_keys($this->_entityTypeAttributes[$storeId][$entityType->getId()] ?? []) as $attributeId) {
             $attributes[] = $this->getAttribute($entityType, $attributeId, $storeId);
         }
 

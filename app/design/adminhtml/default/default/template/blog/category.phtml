@@ -1,0 +1,18 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
+ */
+
+/** @var Maho_Blog_Block_Adminhtml_Category $this */
+?>
+<div class="content-header">
+    <h3><?= Mage::helper('blog')->__('Blog Categories') ?></h3>
+    <p class="content-buttons a-right">
+        <?= $this->getButtonsHtml() ?>
+    </p>
+</div>
+<div>
+    <?= $this->getChildHtml('grid') ?>
+</div>

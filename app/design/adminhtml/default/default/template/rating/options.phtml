@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2022 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 ?>
 <div class="entry-edit-head">
@@ -17,14 +15,14 @@
     <?php for( $_i=1;$_i<=5;$_i++ ): ?>
         <span class="field-row">
             <label for="option_<?= $_i ?>"><?= Mage::helper('rating')->__('Option Title:') ?></label>
-            <input id="option_<?= $_i ?>" name="option[<?= $_i ?>][code]" value="<?= $_i ?>" class="input-text" type="text" />
+            <input id="option_<?= $_i ?>" name="option[<?= $_i ?>][code]" value="<?= $_i ?>" class="input-text" type="text">
         </span>
     <?php endfor ?>
 <?php elseif( $options->getSize() > 0 ): ?>
     <?php foreach($options->getItems() as $_item): ?>
         <span class="field-row">
             <label for="option_<?= $_item->getId() ?>"><?= Mage::helper('rating')->__('Option Title:') ?></label>
-            <input id="option_<?= $_item->getId() ?>" name="option[<?= $_item->getId() ?>][code]" value="<?= $_item->getCode() ?>" class="input-text" type="text" />
+            <input id="option_<?= $_item->getId() ?>" name="option[<?= $_item->getId() ?>][code]" value="<?= $_item->getCode() ?>" class="input-text" type="text">
         </span>
     <?php endforeach ?>
 <?php endif ?>

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Action
@@ -17,6 +15,13 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
      * @see Mage_Adminhtml_Controller_Action::_isAllowed()
      */
     public const ADMIN_RESOURCE = 'catalog/urlrewrite';
+
+    #[\Override]
+    public function preDispatch(): Mage_Adminhtml_Controller_Action
+    {
+        $this->_setForcedFormKeyActions(['delete', 'massDelete']);
+        return parent::preDispatch();
+    }
 
     /**
      * Instantiate urlrewrite, product and category
@@ -49,6 +54,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Show urlrewrites index page
      */
+    #[Maho\Config\Route('/admin/urlrewrite/index')]
     public function indexAction(): void
     {
         $this->_initRegistry();
@@ -60,9 +66,18 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/urlrewrite/grid')]
+    public function gridAction(): void
+    {
+        $this->getResponse()->setBody(
+            $this->getLayout()->createBlock('adminhtml/urlrewrite_grid')->toHtml(),
+        );
+    }
+
     /**
      * Show urlrewrite edit/create page
      */
+    #[Maho\Config\Route('/admin/urlrewrite/edit')]
     public function editAction(): void
     {
         $this->_initRegistry();
@@ -78,6 +93,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Ajax products grid action
      */
+    #[Maho\Config\Route('/admin/urlrewrite/productGrid')]
     public function productGridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/urlrewrite_product_grid')->toHtml());
@@ -86,6 +102,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Ajax categories tree loader action
      */
+    #[Maho\Config\Route('/admin/urlrewrite/categoriesJson')]
     public function categoriesJsonAction(): void
     {
         $this->getResponse()->setBodyJson(
@@ -97,6 +114,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Urlrewrite save action
      */
+    #[Maho\Config\Route('/admin/urlrewrite/save')]
     public function saveAction(): void
     {
         $this->_initRegistry();
@@ -180,6 +198,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Urlrewrite delete action
      */
+    #[Maho\Config\Route('/admin/urlrewrite/delete')]
     public function deleteAction(): void
     {
         $this->_initRegistry();
@@ -195,6 +214,33 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
                     ->addException($e, Mage::helper('adminhtml')->__('An error occurred while deleting URL Rewrite.'));
                 $this->_redirect('*/*/edit/', ['id' => Mage::registry('current_urlrewrite')->getId()]);
                 return;
+            }
+        }
+        $this->_redirect('*/*/');
+    }
+
+    /**
+     * Urlrewrite mass delete action
+     */
+    #[Maho\Config\Route('/admin/urlrewrite/massDelete')]
+    public function massDeleteAction(): void
+    {
+        $ids = $this->getRequest()->getParam('url_rewrite');
+        if (!is_array($ids)) {
+            Mage::getSingleton('adminhtml/session')->addError(
+                Mage::helper('adminhtml')->__('Please select URL rewrite(s).'),
+            );
+        } else {
+            try {
+                $model = Mage::getSingleton('core/factory')->getUrlRewriteInstance();
+                foreach ($ids as $id) {
+                    $model->load($id)->delete();
+                }
+                Mage::getSingleton('adminhtml/session')->addSuccess(
+                    Mage::helper('adminhtml')->__('Total of %d URL rewrite(s) have been deleted.', count($ids)),
+                );
+            } catch (Exception $e) {
+                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
             }
         }
         $this->_redirect('*/*/');

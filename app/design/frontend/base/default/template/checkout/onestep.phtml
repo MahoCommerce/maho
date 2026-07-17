@@ -1,10 +1,8 @@
 <?php
 /**
- * Maho
- *
- * @package    base_default
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 
 /** @var Mage_Checkout_Block_Onepage $this */
@@ -101,7 +99,7 @@ $isLoggedIn = $this->isCustomerLoggedIn();
 </div>
 
 <script src="<?= $this->getSkinUrl('js/mage/promocode.js') ?>"></script>
-<script type="text/javascript">
+<script>
     // Initialize the one-step checkout
     const onestepCheckout = new OneStepCheckout({
         progress: '<?= $this->getUrl('checkout/onepage/progress') ?>',
@@ -123,7 +121,9 @@ $isLoggedIn = $this->isCustomerLoggedIn();
             selectMethodsError: <?= Mage::helper('core')->jsonEncode($this->__('Please select shipping and payment methods before placing your order.')) ?>,
             selectShippingMethodError: <?= Mage::helper('core')->jsonEncode($this->__('Please select a shipping method.')) ?>,
             selectPaymentMethodError: <?= Mage::helper('core')->jsonEncode($this->__('Please select a payment method.')) ?>,
-            genericError: <?= Mage::helper('core')->jsonEncode($this->__('An error occurred while placing your order. Please try again.')) ?>
+            noPaymentMethodsError: <?= Mage::helper('core')->jsonEncode($this->__('Your order cannot be completed at this time as there are no payment methods available for it.')) ?>,
+            genericError: <?= Mage::helper('core')->jsonEncode($this->__('An error occurred while placing your order. Please try again.')) ?>,
+            saveBillingError: <?= Mage::helper('core')->jsonEncode($this->__('Failed to save billing address. Please try again.')) ?>
         }
     });
 

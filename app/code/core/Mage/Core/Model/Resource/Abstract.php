@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 abstract class Mage_Core_Model_Resource_Abstract
@@ -112,32 +110,19 @@ abstract class Mage_Core_Model_Resource_Abstract
     /**
      * Format date to internal format
      *
+     * @see Mage_Core_Model_Locale::formatDateForDb()
+     *
      * @param int|string|DateTime|bool|null $date
-     * @param bool $includeTime
+     * @param bool $withTime
      * @return string|null
      */
-    public function formatDate($date, $includeTime = true)
+    #[\Deprecated(message: 'since 26.5 Use Mage::app()->getLocale()->formatDateForDb() instead')]
+    public function formatDate($date, $withTime = true)
     {
         if ($date === true) {
-            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
-            return date($format);
+            return Mage::app()->getLocale()->formatDateForDb('now', $withTime);
         }
-
-        if ($date instanceof DateTime) {
-            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
-            return $date->format($format);
-        }
-
-        if (empty($date)) {
-            return null;
-        }
-
-        if (!is_numeric($date)) {
-            $date = strtotime($date);
-        }
-
-        $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
-        return date($format, $date);
+        return Mage::app()->getLocale()->formatDateForDb($date, $withTime);
     }
 
     /**

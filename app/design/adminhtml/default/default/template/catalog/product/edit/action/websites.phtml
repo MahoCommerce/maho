@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Websites $this */
@@ -19,7 +17,7 @@
     <?php foreach ($this->getWebsiteCollection() as $_website): ?>
     <div>
         <div class="website-name">
-            <input name="add_website_ids[]" value="<?= $_website->getId() ?>" <?php if($this->getWebsitesReadonly()): ?>disabled="disabled"<?php endif ?> class="checkbox website-checkbox" id="add_product_website_<?= $_website->getId() ?>" type="checkbox" />
+            <input name="add_website_ids[]" value="<?= $_website->getId() ?>" <?php if($this->getWebsitesReadonly()): ?>disabled="disabled"<?php endif ?> class="checkbox website-checkbox" id="add_product_website_<?= $_website->getId() ?>" type="checkbox">
             <big><strong><label for="add_product_website_<?= $_website->getId() ?>"><?= $this->escapeHtml($_website->getName()) ?></label></strong></big>
         </div>
         <div class="webiste-groups" id="add_product_website_<?= $_website->getId() ?>_data">
@@ -57,7 +55,7 @@
     <?php foreach ($this->getWebsiteCollection() as $_website): ?>
     <div>
         <div class="website-name">
-            <input name="remove_website_ids[]" value="<?= $_website->getId() ?>" <?php if($this->getWebsitesReadonly()): ?>disabled="disabled"<?php endif ?> class="checkbox website-checkbox" id="remove_product_website_<?= $_website->getId() ?>" type="checkbox"/>
+            <input name="remove_website_ids[]" value="<?= $_website->getId() ?>" <?php if($this->getWebsitesReadonly()): ?>disabled="disabled"<?php endif ?> class="checkbox website-checkbox" id="remove_product_website_<?= $_website->getId() ?>" type="checkbox">
             <big><strong><label for="remove_product_website_<?= $_website->getId() ?>"><?= $this->escapeHtml($_website->getName()) ?></label></strong></big>
         </div>
         <div class="webiste-groups" id="remove_product_website_<?= $_website->getId() ?>_data">
@@ -79,7 +77,7 @@
     <?php endforeach ?>
     </fieldset>
 </div>
-<script type="text/javascript">
+<script>
     const productWebsiteCheckboxes = document.querySelectorAll('.website-checkbox');
 
     productWebsiteCheckboxes.forEach(checkbox => {

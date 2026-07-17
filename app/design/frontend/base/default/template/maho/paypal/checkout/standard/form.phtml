@@ -1,0 +1,36 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Paypal
+ */
+
+/** @var Maho_Paypal_Block_Checkout_Standard_Form $this */
+$containerId = 'paypal-button-container-' . $this->getMethodCode();
+// In multistep checkout the smart button (and order placement) moves to the review step,
+// so the payment step only shows a hint. Onestep keeps the button here as the terminal action.
+$isMultistep = !Mage::getStoreConfigFlag('checkout/options/onestep_checkout_enabled');
+?>
+<div id="payment_form_<?= $this->escapeHtml($this->getMethodCode()) ?>" style="display:none"
+    data-sdk-url="<?= $this->escapeUrl($this->getJsSdkUrl()) ?>"
+    data-client-token-url="<?= $this->escapeUrl($this->getClientTokenUrl()) ?>"
+    data-currency-code="<?= $this->escapeHtml($this->getCurrencyCode()) ?>"
+    data-create-order-url="<?= $this->escapeUrl($this->getCreateOrderUrl()) ?>"
+    data-approve-order-url="<?= $this->escapeUrl($this->getApproveOrderUrl()) ?>"
+    data-container-id="<?= $this->escapeHtml($containerId) ?>"
+    data-method-code="<?= $this->escapeHtml($this->getMethodCode()) ?>">
+    <?php if ($isMultistep): ?>
+    <p class="paypal-multistep-hint"><?= $this->escapeHtml($this->__('Review your order on the next step to confirm your payment with PayPal.')) ?></p>
+    <?php else: ?>
+    <div id="<?= $this->escapeHtml($containerId) ?>" class="paypal-button-container">
+        <paypal-button hidden></paypal-button>
+    </div>
+    <?php if ($this->isVaultAvailable()): ?>
+    <label class="paypal-save-vault" for="paypal_standard_save_vault">
+        <input type="checkbox" id="paypal_standard_save_vault" name="payment[save_vault]" value="1">
+        <span class="paypal-save-vault-icon"><?= Mage::helper('core')->getIconSvg('lock', 'outline') ?></span>
+        <span><?= $this->escapeHtml($this->__('Save this payment method for future purchases')) ?></span>
+    </label>
+    <?php endif; ?>
+    <?php endif; ?>
+</div>

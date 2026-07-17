@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 class Mage_Core_Model_Resource_Email_Template extends Mage_Core_Model_Resource_Db_Abstract
@@ -75,9 +73,9 @@ class Mage_Core_Model_Resource_Email_Template extends Mage_Core_Model_Resource_D
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if ($object->isObjectNew()) {
-            $object->setCreatedAt($this->formatDate(true));
+            $object->setCreatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         }
-        $object->setModifiedAt($this->formatDate(true));
+        $object->setModifiedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         $object->setTemplateType((int) $object->getTemplateType());
 
         return parent::_beforeSave($object);

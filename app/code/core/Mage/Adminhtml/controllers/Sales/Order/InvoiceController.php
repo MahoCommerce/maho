@@ -1,17 +1,27 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Controller_Sales_Invoice
 {
+    /**
+     * Controller pre-dispatch method
+     *
+     * @return Mage_Adminhtml_Controller_Action
+     */
+    #[\Override]
+    public function preDispatch()
+    {
+        $this->_setForcedFormKeyActions(['capture', 'cancel', 'void']);
+        return parent::preDispatch();
+    }
+
     /**
      * Get requested items qty's from request
      */
@@ -118,6 +128,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
      * Invoice information page
      */
     #[\Override]
+    #[Maho\Config\Route('/admin/sales_order_invoice/view')]
     public function viewAction(): void
     {
         $invoice = $this->_initInvoice();
@@ -140,6 +151,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Start create invoice action
      */
+    #[Maho\Config\Route('/admin/sales_order_invoice/start')]
     public function startAction(): void
     {
         /**
@@ -152,6 +164,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Invoice create page
      */
+    #[Maho\Config\Route('/admin/sales_order_invoice/new')]
     public function newAction(): void
     {
         $invoice = $this->_initInvoice();
@@ -173,6 +186,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Update items qty action
      */
+    #[Maho\Config\Route('/admin/sales_order_invoice/updateQty')]
     public function updateQtyAction(): void
     {
         try {
@@ -204,6 +218,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
      * Save invoice
      * We can save only new invoice. Existing invoices are not editable
      */
+    #[Maho\Config\Route('/admin/sales_order_invoice/save')]
     public function saveAction(): void
     {
         $data = $this->getRequest()->getPost('invoice');
@@ -250,9 +265,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
                 }
                 $transactionSave->save();
 
-                if (isset($shippingResponse) && $shippingResponse->hasErrors()) {
-                    $this->_getSession()->addError($this->__('The invoice and the shipment  have been created. The shipping label cannot be created at the moment.'));
-                } elseif (!empty($data['do_shipment'])) {
+                if (!empty($data['do_shipment'])) {
                     $this->_getSession()->addSuccess($this->__('The invoice and shipment have been created.'));
                 } else {
                     $this->_getSession()->addSuccess($this->__('The invoice has been created.'));
@@ -295,10 +308,14 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Capture invoice action
      */
+    #[Maho\Config\Route('/admin/sales_order_invoice/capture')]
     public function captureAction(): void
     {
         if ($invoice = $this->_initInvoice()) {
             try {
+                if (!$invoice->canCapture()) {
+                    Mage::throwException($this->__('The invoice cannot be captured.'));
+                }
                 $invoice->capture();
                 $this->_saveInvoice($invoice);
                 $this->_getSession()->addSuccess($this->__('The invoice has been captured.'));
@@ -316,10 +333,14 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Cancel invoice action
      */
+    #[Maho\Config\Route('/admin/sales_order_invoice/cancel')]
     public function cancelAction(): void
     {
         if ($invoice = $this->_initInvoice()) {
             try {
+                if (!$invoice->canCancel()) {
+                    Mage::throwException($this->__('The invoice cannot be canceled.'));
+                }
                 $invoice->cancel();
                 $this->_saveInvoice($invoice);
                 $this->_getSession()->addSuccess($this->__('The invoice has been canceled.'));
@@ -337,10 +358,14 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Void invoice action
      */
+    #[Maho\Config\Route('/admin/sales_order_invoice/void')]
     public function voidAction(): void
     {
         if ($invoice = $this->_initInvoice()) {
             try {
+                if (!$invoice->canVoid()) {
+                    Mage::throwException($this->__('The invoice cannot be voided.'));
+                }
                 $invoice->void();
                 $this->_saveInvoice($invoice);
                 $this->_getSession()->addSuccess($this->__('The invoice has been voided.'));
@@ -355,6 +380,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
         }
     }
 
+    #[Maho\Config\Route('/admin/sales_order_invoice/addComment')]
     public function addCommentAction(): void
     {
         try {
@@ -394,6 +420,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
      * Create pdf for current invoice
      */
     #[\Override]
+    #[Maho\Config\Route('/admin/sales_order_invoice/print')]
     public function printAction(): void
     {
         $this->_initInvoice();

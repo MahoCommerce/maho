@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Block_Widget_Form
@@ -67,7 +65,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Bloc
 
             // @codingStandardsIgnoreStart
             $form->getElement('website_id')->setAfterElementHtml(
-                '<script type="text/javascript">'
+                '<script>'
                 . "
                 var {$prefix}_websites = " . Mage::helper('core')->jsonEncode($websites) . ";
                 Validation.add(
@@ -254,7 +252,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Bloc
                 $disableStoreField = "document.getElementById('{$prefix}sendemail_store_id').disabled=(''==this.value || '0'==this.value);";
             }
             $sendEmail->setAfterElementHtml(
-                '<script type="text/javascript">'
+                '<script>'
                 . "
                 document.getElementById('{$prefix}website_id').disableSendemail = function() {
                     document.getElementById('{$prefix}sendemail').disabled = ('' == this.value || '0' == this.value);" .

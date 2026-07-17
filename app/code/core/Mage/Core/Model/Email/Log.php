@@ -1,0 +1,63 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
+ */
+
+declare(strict_types=1);
+
+/**
+ * @method string getSubject()
+ * @method $this setSubject(string $value)
+ * @method string getEmailTo()
+ * @method $this setEmailTo(string $value)
+ * @method string getEmailFrom()
+ * @method $this setEmailFrom(string $value)
+ * @method string|null getEmailCc()
+ * @method $this setEmailCc(?string $value)
+ * @method string|null getEmailBcc()
+ * @method $this setEmailBcc(?string $value)
+ * @method string|null getTemplate()
+ * @method $this setTemplate(?string $value)
+ * @method string getContentType()
+ * @method $this setContentType(string $value)
+ * @method string getEmailBody()
+ * @method $this setEmailBody(string $value)
+ * @method string getStatus()
+ * @method $this setStatus(string $value)
+ * @method string|null getErrorMessage()
+ * @method $this setErrorMessage(?string $value)
+ * @method string getCreatedAt()
+ * @method $this setCreatedAt(string $value)
+ */
+class Mage_Core_Model_Email_Log extends Mage_Core_Model_Abstract
+{
+    #[\Override]
+    protected function _construct(): void
+    {
+        $this->_init('core/email_log');
+    }
+
+    /**
+     * Cron job: clean old log entries
+     */
+    #[Maho\Config\CronJob('core_email_log_clean', schedule: '0 2 * * *')]
+    public function cleanOldLogs(): void
+    {
+        $days = (int) Mage::getStoreConfig('system/smtp/log_clean_after_days');
+        if ($days <= 0) {
+            $days = 30;
+        }
+
+        $cutoff = new \DateTimeImmutable("-{$days} days", new \DateTimeZone('UTC'));
+
+        $resource = $this->getResource();
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $connection->delete(
+            $resource->getMainTable(),
+            ['created_at < ?' => $cutoff->format('Y-m-d H:i:s')],
+        );
+    }
+}

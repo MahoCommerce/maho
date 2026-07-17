@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Maho
- *
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 declare(strict_types=1);
@@ -124,6 +122,7 @@ describe('AdapterInterface compliance', function () {
             $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
             $all = $adapter->getAllAttributes();
             $required = $adapter->getRequiredAttributes();
+            expect($all)->toBeArray();
             foreach (array_keys($required) as $key) {
                 expect($all)->toHaveKey($key);
             }
@@ -133,6 +132,7 @@ describe('AdapterInterface compliance', function () {
             $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
             $all = $adapter->getAllAttributes();
             $optional = $adapter->getOptionalAttributes();
+            expect($all)->toBeArray();
             foreach (array_keys($optional) as $key) {
                 expect($all)->toHaveKey($key);
             }

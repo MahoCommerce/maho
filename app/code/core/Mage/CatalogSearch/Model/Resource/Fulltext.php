@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_CatalogSearch
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_CatalogSearch
  */
 
 class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resource_Db_Abstract
@@ -354,11 +352,36 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
             $where = $likeCond;
         }
 
+        $boostSku = Mage::getStoreConfigFlag(Mage_CatalogSearch_Model_Fulltext::XML_PATH_CATALOG_SEARCH_BOOST_SKU, $query->getStoreId())
+            && $this->_getSearchableAttribute('sku');
+
+        if ($boostSku) {
+            $select->columns(['sku' => 'e.sku']);
+        }
+
         if ($where != '') {
             $select->where($where);
         }
 
-        $this->_foundData = $adapter->fetchPairs($select, $bind);
+        if ($boostSku) {
+            $rows = $adapter->fetchAll($select, $bind);
+            $this->_foundData = [];
+            $queryLower = mb_strtolower($queryText);
+            foreach ($rows as $row) {
+                $relevance = (float) $row['relevance'];
+                $skuLower = mb_strtolower($row['sku']);
+                if ($skuLower === $queryLower) {
+                    $relevance += 10000;
+                } elseif (str_starts_with($skuLower, $queryLower)) {
+                    $relevance += 1000;
+                } elseif (str_contains($skuLower, $queryLower)) {
+                    $relevance += 100;
+                }
+                $this->_foundData[$row['product_id']] = $relevance;
+            }
+        } else {
+            $this->_foundData = $adapter->fetchPairs($select, $bind);
+        }
 
         return $this;
     }

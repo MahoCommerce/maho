@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_CatalogSearch
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_CatalogSearch
  */
 
 /**
@@ -16,8 +14,10 @@
  * @package    Mage_CatalogSearch
  * @module     Catalog
  */
+
 class Mage_CatalogSearch_AdvancedController extends Mage_Core_Controller_Front_Action
 {
+    #[Maho\Config\Route('/catalogsearch/advanced', name: 'catalogsearch.advanced.index', methods: ['GET'])]
     public function indexAction(): void
     {
         if (!Mage::helper('catalogsearch')->isAdvancedSearchEnabled()) {
@@ -30,6 +30,7 @@ class Mage_CatalogSearch_AdvancedController extends Mage_Core_Controller_Front_A
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/catalogsearch/advanced/result', name: 'catalogsearch.advanced.result', methods: ['GET'])]
     public function resultAction(): void
     {
         if (!Mage::helper('catalogsearch')->isAdvancedSearchEnabled()) {

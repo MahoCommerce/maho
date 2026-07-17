@@ -1,12 +1,7 @@
-/**
- * Maho
- *
- * @package     Mage_Adminhtml
- * @copyright   Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+// SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+// SPDX-License-Identifier: AFL-3.0
 
-import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.20.0';
+import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.27.1';
 import { findParentNodeOfType, createGridNodeView } from './grid-utils.js';
 
 /**

@@ -1,15 +1,16 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Api
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Api
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_Model_Server_Adapter_Xmlrpc extends \Maho\DataObject implements Mage_Api_Model_Server_Adapter_Interface
 {
     /**
@@ -88,6 +89,7 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends \Maho\DataObject implements M
         $this->_xmlRpc = new Laminas\XmlRpc\Server();
         $this->_xmlRpc->setEncoding($apiConfigCharset)
             ->setClass($this->getHandler());
+        $this->_xmlRpc->setReturnResponse();
         $this->getController()->getResponse()
             ->clearHeaders()
             ->setHeader('Content-Type', 'text/xml; charset=' . $apiConfigCharset)

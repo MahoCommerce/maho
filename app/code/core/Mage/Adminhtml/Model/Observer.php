@@ -1,17 +1,16 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Model_Observer
 {
+    #[Maho\Config\Observer('controller_action_layout_generate_blocks_before', area: 'adminhtml')]
     public function displayBootupWarnings($observer)
     {
         $bootupWarnings = Mage::registry('bootup_warnings') ?? [];
@@ -20,6 +19,7 @@ class Mage_Adminhtml_Model_Observer
         }
     }
 
+    #[Maho\Config\Observer('core_locale_set_locale', area: 'adminhtml')]
     public function bindLocale($observer)
     {
         if ($locale = $observer->getEvent()->getLocale()) {
@@ -30,6 +30,7 @@ class Mage_Adminhtml_Model_Observer
         return $this;
     }
 
+    #[Maho\Config\Observer('adminhtml_controller_action_predispatch_start', id: 'store')]
     public function bindStore()
     {
         Mage::app()->setCurrentStore('admin');
@@ -41,6 +42,7 @@ class Mage_Adminhtml_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('adminhtml_controller_action_predispatch_start', id: 'massaction')]
     public function massactionPrepareKey()
     {
         $request = Mage::app()->getFrontController()->getRequest();
@@ -54,6 +56,7 @@ class Mage_Adminhtml_Model_Observer
     /**
      * Set the admin's session lifetime based on config
      */
+    #[Maho\Config\Observer('session_before_renew_cookie')]
     public function setCookieLifetime(\Maho\Event\Observer $observer): void
     {
         if ($observer->getSessionName() === Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE) {

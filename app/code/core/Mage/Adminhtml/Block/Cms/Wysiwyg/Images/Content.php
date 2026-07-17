@@ -1,16 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
+
+declare(strict_types=1);
 
 class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Block_Widget_Container
 {
@@ -91,6 +89,7 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
             'deleteFilesUrl'  => $this->getDeleteFilesUrl(),
             'editImageUrl'    => $this->getEditImageUrl(),
             'getImageUrl'     => $this->getImageUrl(),
+            'editorModuleUrl' => Mage::getBaseUrl('js') . 'mage/adminhtml/image-editor/editor.js',
             'headerText'      => $this->getHeaderText(),
             'canInsertImage'  => $this->getCanInsertImage(),
             'imageFileType'   => $this->getConfiguredImageFileType(),
@@ -213,7 +212,7 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
     {
         $quality = (int) Mage::getStoreConfig('system/media_storage_configuration/image_quality');
 
-        // Convert to 0-1 scale for filerobot-image-editor
+        // Convert to 0-1 scale for canvas.toBlob() quality parameter
         return $quality / 100;
     }
 }

@@ -13,10 +13,10 @@
     --tt-color-bg-active: #d1d5db;
     --tt-color-bg-subtle: #fafafa;
     --tt-color-bg-code: #f3f4f6;
-    --tt-color-primary: #3b82f6;
-    --tt-color-primary-dark: #1d4ed8;
-    --tt-color-link: #2563eb;
-    --tt-color-danger: #dc3545;
+    --tt-color-primary: var(--maho-accent, #3b82f6);
+    --tt-color-primary-dark: var(--maho-accent-strong, #1d4ed8);
+    --tt-color-link: var(--maho-link, #2563eb);
+    --tt-color-danger: var(--maho-error, #dc3545);
 
     /* Shadows */
     --tt-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -153,6 +153,16 @@
         &[title]:hover::after {
             opacity: 1;
             transform: translateX(-50%) translateY(4px);
+        }
+
+        &:last-child[title]::after {
+            left: auto;
+            right: 0;
+            transform: translateY(8px);
+        }
+
+        &:last-child[title]:hover::after {
+            transform: translateY(4px);
         }
     }
 
@@ -496,6 +506,7 @@
             position: absolute;
             width: 10px;
             height: 10px;
+            margin: -5px;
             background: var(--tt-color-primary);
             border: 1px solid white;
             display: none;
@@ -505,10 +516,10 @@
             display: block;
         }
 
-        .resize-handle-nw { cursor: nw-resize; top: -5px; left: -5px; }
-        .resize-handle-ne { cursor: ne-resize; top: -5px; right: -5px; }
-        .resize-handle-sw { cursor: sw-resize; bottom: -5px; left: -5px; }
-        .resize-handle-se { cursor: se-resize; bottom: -5px; right: -5px; }
+        [data-resize-handle="top-left"] { cursor: nw-resize; }
+        [data-resize-handle="top-right"] { cursor: ne-resize; }
+        [data-resize-handle="bottom-left"] { cursor: sw-resize; }
+        [data-resize-handle="bottom-right"] { cursor: se-resize; }
     }
 
     /* Slideshow */
@@ -801,6 +812,8 @@
     left: 0;
     z-index: 1000;
     min-width: 180px;
+    max-height: 50vh;
+    overflow-y: auto;
     background-color: var(--tt-color-bg);
     border: 1px solid var(--tt-color-border);
     border-radius: var(--tt-radius-lg);

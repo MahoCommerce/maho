@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Giftcard
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Giftcard
  */
+
+declare(strict_types=1);
 
 /**
  * Gift Card Product Price Model
@@ -68,9 +65,9 @@ class Maho_Giftcard_Model_Product_Price extends Mage_Catalog_Model_Product_Type_
             }
         }
 
-        // For combined/custom type, also check min_amount and take the lower value
+        // For combined/range type, also check min_amount and take the lower value
         $giftcardType = $product->getData('giftcard_type');
-        if ($giftcardType === 'custom' || $giftcardType === 'combined') {
+        if ($giftcardType === 'range' || $giftcardType === 'combined') {
             $customMin = (float) $product->getData('giftcard_min_amount');
             if ($customMin > 0) {
                 $minPrice = ($minPrice > 0) ? min($minPrice, $customMin) : $customMin;

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Usa
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Usa
  */
 
 class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carrier_Abstract implements Mage_Shipping_Model_Carrier_Interface
@@ -529,9 +527,27 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         // Map REST API descriptions back to our method codes
         // Order matters: most specific patterns first!
         $mapping = [
-            // International (must come before domestic)
+            // International (most specific first, must come before domestic)
+            'Priority Mail Express International Padded Flat Rate Envelope' => 'INT_27',
+            'Priority Mail Express International Legal Flat Rate Envelope' => 'INT_17',
+            'Priority Mail Express International Flat Rate Envelope' => 'INT_10',
             'Priority Mail Express International' => 'INT_1',
+            'Priority Mail International Padded Flat Rate Envelope' => 'INT_23',
+            'Priority Mail International Legal Flat Rate Envelope' => 'INT_22',
+            'Priority Mail International Gift Card Flat Rate Envelope' => 'INT_18',
+            'Priority Mail International Window Flat Rate Envelope' => 'INT_19',
+            'Priority Mail International Small Flat Rate Envelope' => 'INT_20',
+            'Priority Mail International Flat Rate Envelope' => 'INT_8',
+            'Priority Mail International Large Flat Rate Box' => 'INT_11',
+            'Priority Mail International Medium Flat Rate Box' => 'INT_9',
+            'Priority Mail International Small Flat Rate Box' => 'INT_16',
             'Priority Mail International' => 'INT_2',
+            'First-Class Package International Service' => 'INT_15',
+            'First-Class Mail International Large Envelope' => 'INT_14',
+            'First-Class Mail International Postcard' => 'INT_21',
+            'First-Class Mail International Letter' => 'INT_13',
+            'First-Class Mail International' => 'INT_13',
+            'Global Express Guaranteed' => 'INT_4',
 
             // Priority Mail Express variations (must come before regular Priority Mail)
             'Priority Mail Express Padded Flat Rate Envelope' => '62',
@@ -583,10 +599,11 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                     foreach ($pricingOption['shippingOptions'] as $shippingOption) {
                         if (!empty($shippingOption['rateOptions'])) {
                             foreach ($shippingOption['rateOptions'] as $rateOption) {
-                                if (!empty($rateOption['rates'])) {
+                                $totalPrice = $rateOption['totalBasePrice'] ?? $rateOption['totalPrice'] ?? null;
+                                if (!empty($rateOption['rates']) && $totalPrice !== null && (float) $totalPrice > 0) {
                                     foreach ($rateOption['rates'] as $rateData) {
                                         $allRates[] = array_merge($rateData, [
-                                            'totalPrice' => $rateOption['totalPrice'],
+                                            'totalPrice' => (float) $totalPrice,
                                         ]);
                                     }
                                 }
@@ -1928,17 +1945,13 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         return [$zip5, $zip4];
     }
 
-    /**
-     * @deprecated
-     */
+    #[\Deprecated]
     protected function _methodsMapper($method, $valuesToLabels = true)
     {
         return $method;
     }
 
-    /**
-     * @deprecated
-     */
+    #[\Deprecated]
     public function getMethodLabel($value)
     {
         return $this->_methodsMapper($value, true);
@@ -1946,16 +1959,14 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
 
     /**
      * Get value of method by its label
-     * @deprecated
      */
+    #[\Deprecated]
     public function getMethodValue($label)
     {
         return $this->_methodsMapper($label, false);
     }
 
-    /**
-     * @deprecated
-     */
+    #[\Deprecated]
     protected function setTrackingReqeust()
     {
         $this->setTrackingRequest();

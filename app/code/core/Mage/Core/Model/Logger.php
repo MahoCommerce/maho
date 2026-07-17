@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 use Monolog\Handler\RotatingFileHandler;
@@ -381,12 +379,7 @@ class Mage_Core_Model_Logger
      */
     protected static function isRotatingFileHandler(Logger $logger): bool
     {
-        foreach ($logger->getHandlers() as $handler) {
-            if ($handler instanceof \Monolog\Handler\RotatingFileHandler) {
-                return true;
-            }
-        }
-        return false;
+        return array_any($logger->getHandlers(), fn($handler) => $handler instanceof \Monolog\Handler\RotatingFileHandler);
     }
 
     /**

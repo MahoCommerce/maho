@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <menu>
+        <system>
+            <children>
+                <tools>
+                    <children>
+                        <mediacleaner translate="title" module="mediacleaner">
+                            <title>Media Cleaner</title>
+                            <action>adminhtml/mediacleaner</action>
+                            <sort_order>40</sort_order>
+                        </mediacleaner>
+                    </children>
+                </tools>
+            </children>
+        </system>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <system>
+                        <children>
+                            <tools>
+                                <children>
+                                    <mediacleaner translate="title" module="mediacleaner">
+                                        <title>Media Cleaner</title>
+                                    </mediacleaner>
+                                </children>
+                            </tools>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

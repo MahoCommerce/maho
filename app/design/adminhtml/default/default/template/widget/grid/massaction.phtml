@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Adminhtml_Block_Widget_Grid_Massaction $this */
@@ -14,20 +12,19 @@
 <div id="<?= $this->getHtmlId() ?>">
 <table cellspacing="0" cellpadding="0" class="massaction">
 <tr>
-    <td><?php if ($this->getUseSelectAll()):?>
-        <a href="#" onclick="return <?= $this->getJsObjectName() ?>.selectAll()"><?= $this->__('Select All') ?></a>
-        <span class="separator">|</span>
-        <a href="#" onclick="return <?= $this->getJsObjectName() ?>.unselectAll()"><?= $this->__('Unselect All') ?></a>
+    <td><span class="massaction-label"><?= $this->__('Select') ?>:</span>
+        <?php if ($this->getUseSelectAll()):?>
+        <a href="#" onclick="return <?= $this->getJsObjectName() ?>.selectAll()"><?= $this->__('All') ?></a>
         <span class="separator">|</span>
         <?php endif ?>
-        <a href="#" onclick="return <?= $this->getJsObjectName() ?>.selectVisible()"><?= $this->__('Select Visible') ?></a>
+        <a href="#" onclick="return <?= $this->getJsObjectName() ?>.selectVisible()"><?= $this->__('Visible') ?></a>
         <span class="separator">|</span>
-        <a href="#" onclick="return <?= $this->getJsObjectName() ?>.unselectVisible()"><?= $this->__('Unselect Visible') ?></a>
+        <a href="#" onclick="return <?= $this->getJsObjectName() ?>.unselectAll()"><?= $this->__('None') ?></a>
         <span class="separator">|</span>
-        <strong id="<?= $this->getHtmlId() ?>-count">0</strong> <?= $this->__('items selected') ?>
+        <span id="<?= $this->getHtmlId() ?>-count">0</span> <?= $this->__('selected') ?>
     </td>
     <td>
-        <div class="right">
+        <div class="massaction-actions">
             <div class="entry-edit">
                 <?php if ($this->getHideFormElement() !== true):?>
                 <form action="" id="<?= $this->getHtmlId() ?>-form" method="post">
@@ -81,7 +78,7 @@
 /** @var Mage_Adminhtml_Block_Widget_Grid $parent */
 $parent = $this->getParentBlock();
 if (!$parent->canDisplayContainer()): ?>
-<script type="text/javascript">
+<script>
     <?= $this->getJsObjectName() ?>.setGridIds('<?= $this->getGridIdsJson() ?>');
 </script>
 <?php endif ?>

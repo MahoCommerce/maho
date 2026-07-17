@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Sitemap
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2016-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2016-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sitemap
  */
 
 /**
@@ -128,7 +126,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     public function generateXml()
     {
         $storeId = $this->getStoreId();
-        $date = Mage::getSingleton('core/date')->gmtDate(Mage_Core_Model_Locale::DATE_FORMAT);
+        $date = Mage::app()->getLocale()->todayUtc();
         $baseUrl = Mage::app()->getStore($storeId)->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK);
         $maxUrlsPerFile = (int) Mage::getStoreConfig('sitemap/generate/max_urls_per_file', $storeId);
 
@@ -156,9 +154,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         // Generate sitemap index
         $this->generateSitemapIndex($storeId, $baseUrl, $date);
 
-        $this->setSitemapTime(
-            Mage::getSingleton('core/date')->gmtDate(Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT),
-        );
+        $this->setSitemapTime(Mage::app()->getLocale()->formatDateForDb('now'));
         $this->save();
 
         return $this;
@@ -361,7 +357,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
 
         $this->_sitemapFiles[] = [
             'filename' => $filename,
-            'lastmod' => Mage::getSingleton('core/date')->gmtDate(Mage_Core_Model_Locale::DATE_FORMAT),
+            'lastmod' => Mage::app()->getLocale()->todayUtc(),
         ];
 
         foreach ($items as $item) {
@@ -478,7 +474,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     public function addSitemapFile(string $filename, ?string $lastmod = null): void
     {
         if (!$lastmod) {
-            $lastmod = Mage::getSingleton('core/date')->gmtDate(Mage_Core_Model_Locale::DATE_FORMAT);
+            $lastmod = Mage::app()->getLocale()->todayUtc();
         }
 
         $this->_sitemapFiles[] = [

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Rss
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Rss
  */
 
 class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
@@ -29,6 +27,7 @@ class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
     /**
      * Index action
      */
+    #[Maho\Config\Route('/rss', name: 'rss.index', methods: ['GET'])]
     public function indexAction(): void
     {
         /** @var Mage_Rss_Helper_Data $helper */
@@ -46,6 +45,7 @@ class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
     /**
      * Display feed not found message
      */
+    #[Maho\Config\Route('/rss/index/nofeed', name: 'rss.index.nofeed', methods: ['GET'])]
     public function nofeedAction(): void
     {
         $this->getResponse()->setHeader('HTTP/1.1', '404 Not Found');
@@ -58,6 +58,7 @@ class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
      * Wishlist rss feed action
      * Show all public wishlists and private wishlists that belong to current user
      */
+    #[Maho\Config\Route('/rss/index/wishlist', name: 'rss.index.wishlist', methods: ['GET'])]
     public function wishlistAction(): void
     {
         if (!$this->isFeedEnable('wishlist/active')) {

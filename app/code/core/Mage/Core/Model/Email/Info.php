@@ -1,12 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 /**
@@ -48,6 +47,13 @@ class Mage_Core_Model_Email_Info extends \Maho\DataObject
     protected $_toEmails = [];
 
     /**
+     * List of attachments to add to the email
+     *
+     * @var Mage_Core_Model_Email_Attachment[]
+     */
+    protected $_attachments = [];
+
+    /**
      * Add new "Bcc" recipient to current email
      *
      * @param string $email
@@ -73,6 +79,39 @@ class Mage_Core_Model_Email_Info extends \Maho\DataObject
         $this->_toNames[] = $name;
         $this->_toEmails[] = $email;
         return $this;
+    }
+
+    /**
+     * Add an attachment to the current email
+     *
+     * @return $this
+     */
+    public function addAttachment(Mage_Core_Model_Email_Attachment $attachment)
+    {
+        $this->_attachments[] = $attachment;
+        return $this;
+    }
+
+    /**
+     * Add a lazily-generated PDF document attachment
+     *
+     * @return $this
+     */
+    public function addPdfAttachment(string $sourceModel, string $entityModel, int $entityId, string $filename)
+    {
+        return $this->addAttachment(
+            new Mage_Core_Model_Email_Attachment($sourceModel, $entityModel, $entityId, $filename),
+        );
+    }
+
+    /**
+     * Get the list of attachments
+     *
+     * @return Mage_Core_Model_Email_Attachment[]
+     */
+    public function getAttachments()
+    {
+        return $this->_attachments;
     }
 
     /**

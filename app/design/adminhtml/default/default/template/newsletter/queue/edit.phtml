@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Adminhtml_Block_Newsletter_Queue_Edit $this */
@@ -28,17 +26,17 @@
 <form action="<?= $this->getSaveUrl() ?>" method="post" id="queue_edit_form">
     <?= $this->getBlockHtml('formkey') ?>
     <div class="no-display">
-        <input type="hidden" name="_resume" id="_resume_flag" value="" />
+        <input type="hidden" name="_resume" id="_resume_flag" value="">
     </div>
     <?= $this->getChildHtml('form') ?>
 </form>
 <form action="<?= $this->getPreviewUrl() ?>" method="post" id="newsletter_queue_preview_form" target="_blank">
     <?= $this->getBlockHtml('formkey') ?>
     <div class="no-display">
-        <input type="hidden" id="preview_type" name="type" value="<?= $this->getIsTextType()?1:2 ?>" />
-        <input type="hidden" id="preview_text" name="text" value="" />
-        <input type="hidden" id="preview_styles" name="styles" value="" />
-        <input type="hidden" id="preview_id" name="id" value="" />
+        <input type="hidden" id="preview_type" name="type" value="<?= $this->getIsTextType()?1:2 ?>">
+        <input type="hidden" id="preview_text" name="text" value="">
+        <input type="hidden" id="preview_styles" name="styles" value="">
+        <input type="hidden" id="preview_id" name="id" value="">
     </div>
 </form>
 <script>

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Eav
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Eav
  */
 
 abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Collection\Db
@@ -29,7 +27,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
     /**
      * Entity object to define collection's attributes
      *
-     * @var Mage_Eav_Model_Entity_Abstract
+     * @var Mage_Eav_Model_Entity_Abstract|null
      */
     protected $_entity;
 
@@ -1013,8 +1011,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
             $rows = $this->_fetchAll($query);
         } catch (Exception $e) {
             Mage::printException($e, $query);
-            $this->printLogQuery(true, true, $query);
-            throw $e;
         }
 
         foreach ($rows as $v) {
@@ -1088,8 +1084,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
                     $values = $this->getConnection()->fetchAll($select);
                 } catch (Exception $e) {
                     Mage::printException($e, $select);
-                    $this->printLogQuery(true, true, $select);
-                    throw $e;
                 }
 
                 foreach ($values as $value) {

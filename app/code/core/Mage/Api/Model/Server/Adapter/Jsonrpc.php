@@ -1,15 +1,16 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_Model_Server_Adapter_Jsonrpc extends \Maho\DataObject implements Mage_Api_Model_Server_Adapter_Interface
 {
     protected $_jsonRpc = null;
@@ -80,6 +81,9 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends \Maho\DataObject implements 
     {
         $this->_jsonRpc = new Laminas\Json\Server\Server();
         $this->_jsonRpc->setClass($this->getHandler());
+        // Return the response object from handle() instead of echoing it and
+        // returning null (which would make setBody() below fatal on null).
+        $this->_jsonRpc->setReturnResponse(true);
 
         // Allow soap_v2 style request.
         $request = $this->_jsonRpc->getRequest();
@@ -99,7 +103,7 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends \Maho\DataObject implements 
         $this->getController()->getResponse()
             ->clearHeaders()
             ->setHeader('Content-Type', 'application/json; charset=utf8')
-            ->setBody($this->_jsonRpc->handle());
+            ->setBody((string) $this->_jsonRpc->handle());
 
         Mage::dispatchEvent('api_server_adapter_jsonrpc_run_after', [
             'method' => $method,

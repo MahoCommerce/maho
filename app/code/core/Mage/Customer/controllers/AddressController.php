@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Customer
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Customer
  */
 
 class Mage_Customer_AddressController extends Mage_Core_Controller_Front_Action
@@ -26,6 +24,11 @@ class Mage_Customer_AddressController extends Mage_Core_Controller_Front_Action
     public function preDispatch()
     {
         parent::preDispatch();
+        if (!Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')) {
+            $this->norouteAction();
+            $this->setFlag('', self::FLAG_NO_DISPATCH, true);
+            return $this;
+        }
         if (!Mage::getSingleton('customer/session')->authenticate($this)) {
             $this->setFlag('', 'no-dispatch', true);
         }
@@ -35,6 +38,7 @@ class Mage_Customer_AddressController extends Mage_Core_Controller_Front_Action
     /**
      * Customer addresses list
      */
+    #[Maho\Config\Route('/customer/address', name: 'customer.address.index', methods: ['GET'])]
     public function indexAction(): void
     {
         if (count($this->_getSession()->getCustomer()->getAddresses())) {
@@ -52,11 +56,13 @@ class Mage_Customer_AddressController extends Mage_Core_Controller_Front_Action
         }
     }
 
+    #[Maho\Config\Route('/customer/address/edit/{id}', name: 'customer.address.edit', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function editAction(): void
     {
         $this->_forward('form');
     }
 
+    #[Maho\Config\Route('/customer/address/new', name: 'customer.address.new', methods: ['GET'])]
     public function newAction(): void
     {
         $this->_forward('form');
@@ -65,6 +71,7 @@ class Mage_Customer_AddressController extends Mage_Core_Controller_Front_Action
     /**
      * Address book form
      */
+    #[Maho\Config\Route('/customer/address/form', name: 'customer.address.form', methods: ['GET'])]
     public function formAction(): void
     {
         $this->loadLayout();
@@ -79,6 +86,7 @@ class Mage_Customer_AddressController extends Mage_Core_Controller_Front_Action
     /**
      * @return Mage_Core_Controller_Varien_Action|void
      */
+    #[Maho\Config\Route('/customer/address/formPost', name: 'customer.address.formPost', methods: ['POST'])]
     public function formPostAction()
     {
         if (!$this->_validateFormKey()) {
@@ -149,6 +157,7 @@ class Mage_Customer_AddressController extends Mage_Core_Controller_Front_Action
     /**
      * @return Mage_Core_Controller_Varien_Action|void
      */
+    #[Maho\Config\Route('/customer/address/delete', name: 'customer.address.delete', methods: ['POST'])]
     public function deleteAction()
     {
         if (!$this->_validateFormKey()) {

@@ -1,18 +1,16 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Helper_Data extends Mage_Adminhtml_Helper_Help_Mapping
 {
-    public const XML_PATH_ADMINHTML_ROUTER_FRONTNAME   = 'admin/routers/adminhtml/args/frontName';
+    public const XML_PATH_ADMINHTML_ROUTER_FRONTNAME   = 'admin/base_path';
     public const XML_PATH_USE_CUSTOM_ADMIN_URL         = 'default/admin/url/use_custom';
     public const XML_PATH_USE_CUSTOM_ADMIN_PATH        = 'default/admin/url/use_custom_path';
     public const XML_PATH_CUSTOM_ADMIN_PATH            = 'default/admin/url/custom_path';
@@ -99,13 +97,17 @@ class Mage_Adminhtml_Helper_Data extends Mage_Adminhtml_Helper_Help_Mapping
             }
             $this->adminFrontNames = [$adminPath];
 
-            // Check for other modules that can use admin router (a lot of Magento extensions do that)
-            $adminFrontNameNodes = Mage::getConfig()->getNode('admin/routers')
-                ->xpath('*[not(self::adminhtml) and use = "admin"]/args/frontName');
-
-            if (is_array($adminFrontNameNodes)) {
-                foreach ($adminFrontNameNodes as $frontNameNode) {
-                    $this->adminFrontNames[] = (string) $frontNameNode;
+            // Check for other modules that can use admin router (a lot of Magento extensions do that).
+            // The <admin><routers> node may be absent on fresh installs that only declare <admin><base_path>.
+            $adminRoutersNode = Mage::getConfig()->getNode('admin/routers');
+            if ($adminRoutersNode) {
+                $adminFrontNameNodes = $adminRoutersNode->xpath(
+                    '*[not(self::adminhtml) and use = "admin"]/args/frontName',
+                );
+                if (is_array($adminFrontNameNodes)) {
+                    foreach ($adminFrontNameNodes as $frontNameNode) {
+                        $this->adminFrontNames[] = (string) $frontNameNode;
+                    }
                 }
             }
         }

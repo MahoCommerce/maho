@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Wishlist
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Wishlist
  */
 
 class Mage_Wishlist_Model_Observer extends Mage_Core_Model_Abstract
@@ -32,6 +30,7 @@ class Mage_Wishlist_Model_Observer extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return  Mage_Wishlist_Model_Observer
      */
+    #[Maho\Config\Observer('checkout_cart_update_items_before')]
     public function processCartUpdateBefore($observer)
     {
         $cart = $observer->getEvent()->getCart();
@@ -73,6 +72,7 @@ class Mage_Wishlist_Model_Observer extends Mage_Core_Model_Abstract
     /**
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('checkout_cart_add_product_complete')]
     public function processAddToCart($observer)
     {
         /** @var Mage_Core_Controller_Request_Http $request */
@@ -129,6 +129,7 @@ class Mage_Wishlist_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[Maho\Config\Observer('customer_login', area: 'frontend')]
     public function customerLogin(\Maho\Event\Observer $observer)
     {
         Mage::helper('wishlist')->calculate();
@@ -141,6 +142,7 @@ class Mage_Wishlist_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[Maho\Config\Observer('customer_logout', area: 'frontend')]
     public function customerLogout(\Maho\Event\Observer $observer)
     {
         Mage::getSingleton('customer/session')->setWishlistItemCount(0);

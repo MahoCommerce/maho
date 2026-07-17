@@ -1,12 +1,7 @@
-/**
- * Maho
- *
- * @package     Mage_Adminhtml
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+// SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+// SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+// SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+// SPDX-License-Identifier: AFL-3.0
 class varienGrid {
     constructor(containerId, url, pageVar, sortVar, dirVar, filterVar) {
         this.containerId = containerId;
@@ -77,6 +72,14 @@ class varienGrid {
         }
     }
     initGridAjax() {
+        const container = document.getElementById(this.containerId);
+        if (container) {
+            container.querySelectorAll('script').forEach(oldScript => {
+                const newScript = document.createElement('script');
+                newScript.textContent = oldScript.textContent;
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+        }
         this.initGrid();
         this.initGridRows();
     }
@@ -179,7 +182,11 @@ class varienGrid {
             const formData = new FormData();
 
             Object.entries(this.reloadParams || {}).forEach(([key, value]) => {
-                formData.append(key, value);
+                if (Array.isArray(value)) {
+                    value.forEach(v => formData.append(key, v));
+                } else {
+                    formData.append(key, value);
+                }
             });
 
             mahoFetch(ajaxUrl, {
@@ -304,7 +311,12 @@ class varienGrid {
             // Serialize elements manually since we don't have prototypejs Form.serializeElements
             const formData = new FormData();
             elements.forEach(element => {
-                formData.append(element.name, element.value);
+                if (element.tagName === 'SELECT' && element.multiple) {
+                    const vals = Array.from(element.selectedOptions).map(o => o.value);
+                    formData.append(element.name, vals.join(','));
+                } else {
+                    formData.append(element.name, element.value);
+                }
             });
             const serialized = new URLSearchParams(formData).toString();
             this.reload(this.addVarToUrl(this.filterVar, btoa(serialized)));
@@ -396,7 +408,7 @@ class varienGridMassaction {
         this.useSelectAll = false;
         this.currentItem = false;
         this.lastChecked = { left: false, top: false, checkbox: false };
-        this.fieldTemplate = (data) => `<input type="hidden" name="${data.name}" value="${data.value}" />`;
+        this.fieldTemplate = (data) => `<input type="hidden" name="${data.name}" value="${data.value}">`;
 
         // Initialize
         this.setOldCallback('row_click', grid.rowClickCallback);

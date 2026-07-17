@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
+
+use Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract as MassAction;
 
 class Mage_Adminhtml_Block_Urlrewrite_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
@@ -17,6 +17,14 @@ class Mage_Adminhtml_Block_Urlrewrite_Grid extends Mage_Adminhtml_Block_Widget_G
         parent::__construct();
         $this->setId('urlrewriteGrid');
         $this->setDefaultSort('url_rewrite_id');
+        $this->setSaveParametersInSession(true);
+        $this->setUseAjax(true);
+    }
+
+    #[\Override]
+    public function getGridUrl()
+    {
+        return $this->getUrl('*/*/grid', ['_current' => true]);
     }
 
     #[\Override]
@@ -25,6 +33,21 @@ class Mage_Adminhtml_Block_Urlrewrite_Grid extends Mage_Adminhtml_Block_Widget_G
         $collection = Mage::getResourceModel('core/url_rewrite_collection');
         $this->setCollection($collection);
         return parent::_prepareCollection();
+    }
+
+    #[\Override]
+    protected function _prepareMassaction()
+    {
+        $this->setMassactionIdField('url_rewrite_id');
+        $this->getMassactionBlock()->setFormFieldName('url_rewrite');
+
+        $this->getMassactionBlock()->addItem(MassAction::DELETE, [
+            'label'   => Mage::helper('adminhtml')->__('Delete'),
+            'url'     => $this->getUrl('*/*/massDelete'),
+            'confirm' => Mage::helper('adminhtml')->__('Are you sure you want to delete the selected URL rewrites?'),
+        ]);
+
+        return $this;
     }
 
     #[\Override]

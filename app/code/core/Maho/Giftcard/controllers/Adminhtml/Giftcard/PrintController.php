@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Giftcard
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Giftcard
  */
+
+declare(strict_types=1);
 
 class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Controller_Action
 {
@@ -18,6 +15,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
     /**
      * Print gift card as PDF
      */
+    #[Maho\Config\Route('/admin/giftcard_print/pdf')]
     public function pdfAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -47,6 +45,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
     /**
      * Print multiple gift cards as PDF
      */
+    #[Maho\Config\Route('/admin/giftcard_print/massPdf')]
     public function massPdfAction(): void
     {
         $giftcardIds = $this->getRequest()->getParam('giftcard');
@@ -87,6 +86,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
     /**
      * Email gift card to recipient
      */
+    #[Maho\Config\Route('/admin/giftcard_print/email')]
     public function emailAction(): void
     {
         $id = $this->getRequest()->getParam('id');

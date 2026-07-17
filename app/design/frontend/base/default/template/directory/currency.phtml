@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 
 /** @var Mage_Directory_Block_Currency $this */
@@ -14,7 +12,8 @@
 <?php if ($this->getCurrencyCount() > 1): ?>
 <div class="currency-switcher">
     <label for="select-currency" class="visually-hidden"><?= $this->__('Your Currency:') ?></label>
-    <select id="select-currency" name="currency" title="<?= $this->quoteEscape($this->__('Your Currency')) ?>" onchange="setLocation(this.value)">
+    <?php /* Navigate directly: the option value is already a fully-encoded URL, and setLocation()'s encodeURI() would double-encode the uenc back-URL (%2C -> %252C). */ ?>
+    <select id="select-currency" name="currency" title="<?= $this->quoteEscape($this->__('Your Currency')) ?>" onchange="window.location.href=this.value">
         <?php foreach ($this->getCurrencies() as $_code => $_name): ?>
         <option value="<?= $this->getSwitchCurrencyUrl($_code) ?>"<?php if($_code==$this->getCurrentCurrencyCode()): ?> selected="selected"<?php endif ?>>
             <?= Mage::app()->getLocale()->getCurrencySymbol($_code) ?>

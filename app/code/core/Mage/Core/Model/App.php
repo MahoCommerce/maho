@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 /**
@@ -181,14 +179,14 @@ class Mage_Core_Model_App
     /**
      * Request object
      *
-     * @var Mage_Core_Controller_Request_Http
+     * @var Mage_Core_Controller_Request_Http|null
      */
     protected $_request;
 
     /**
      * Response object
      *
-     * @var Mage_Core_Controller_Response_Http
+     * @var Mage_Core_Controller_Response_Http|null
      */
     protected $_response;
 
@@ -340,7 +338,6 @@ class Mage_Core_Model_App
             $this->_initCurrentStore($scopeCode, $scopeType);
             $this->_initRequest();
             Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
-            Mage_Core_Model_Resource_Setup::applyAllMahoUpdates();
         }
 
         // OpenTelemetry: start root span for request
@@ -962,25 +959,6 @@ class Mage_Core_Model_App
     }
 
     /**
-     * Retrieve application store object without Store_Exception
-     *
-     * @param string|int|Mage_Core_Model_Store $id
-     * @return Mage_Core_Model_Store|\Maho\DataObject
-     */
-    public function getSafeStore($id = null)
-    {
-        try {
-            return $this->getStore($id);
-        } catch (Exception $e) {
-            if ($this->_currentStore) {
-                $this->getRequest()->setActionName('noRoute');
-                return new \Maho\DataObject();
-            }
-            Mage::throwException(Mage::helper('core')->__('Requested invalid store "%s"', $id));
-        }
-    }
-
-    /**
      * Retrieve stores array
      *
      * @param bool $withDefault
@@ -1220,9 +1198,7 @@ class Mage_Core_Model_App
         return $this->_frontController;
     }
 
-    /**
-     * @deprecated since 25.5, use getCache()
-     */
+    #[\Deprecated(message: 'since 25.5, use getCache()')]
     public function getCacheInstance(): Mage_Core_Model_Cache
     {
         return $this->getCache();
@@ -1423,36 +1399,6 @@ class Mage_Core_Model_App
     /**
      * Dispatch event to observers
      *
-     * Default arguments can be defined in `config.xml` using the `<args>` node. These are merged with the $args parameter.
-     *
-     * For example, this defines `is_ajax=1` for the `controller_action_predispatch` event:
-     * ```xml
-     * <global>
-     *     <events>
-     *         <controller_action_predispatch>
-     *             <observers>
-     *                 <my_event_observer>
-     *                     <class>Company_Name_Model_Observer</class>
-     *                     <method>process</method>
-     *                     <args>
-     *                         <is_ajax>1</is_ajax>
-     *                     </args>
-     *                 </my_event_observer>
-     *             </observers>
-     *         </controller_action_predispatch>
-     *     </events>
-     * </global>
-     * ```
-     *
-     * In the observer method, `Company_Name_Model_Observer->process()`, access the args with:
-     * ```php
-     * public function process(\Maho\Event\Observer $observer): void
-     * {
-     *     $isAjax = (bool) $observer->getIsAjax();
-     *     // ...
-     * }
-     * ```
-     *
      * @param string $eventName
      * @param array $args
      * @return $this
@@ -1463,24 +1409,45 @@ class Mage_Core_Model_App
         $eventName = strtolower($eventName);
         foreach ($this->_events as $area => $events) {
             if (!isset($events[$eventName])) {
+                $observers = [];
+
                 $eventConfig = $this->getConfig()->getEventConfig($area, $eventName);
-                if (!$eventConfig) {
+                if ($eventConfig) {
+                    /**
+                     * @var string $obsName
+                     * @var Mage_Core_Model_Config_Element $obsConfig
+                     */
+                    foreach ($eventConfig->observers->children() as $obsName => $obsConfig) {
+                        $observers[$obsName] = [
+                            'type'  => (string) $obsConfig->type,
+                            'model' => $obsConfig->class ? (string) $obsConfig->class : $obsConfig->getClassName(),
+                            'method' => (string) $obsConfig->method,
+                            'args'  => (array) $obsConfig->args,
+                        ];
+                    }
+                }
+
+                foreach (Maho::getCompiledAttributes()['observers'][$area][$eventName] ?? [] as $entry) {
+                    if (!empty($entry['module']) && !Mage::helper('core')->isModuleEnabled($entry['module'])) {
+                        continue;
+                    }
+                    $observers[$entry['name']] = [
+                        'type'   => $entry['type'],
+                        'model'  => $entry['alias'],
+                        'module' => $entry['module'],
+                        'method' => $entry['method'],
+                    ];
+                }
+
+                $this->_applyCompiledReplaces($area, $eventName, $observers);
+
+                if ($observers === []) {
                     $this->_events[$area][$eventName] = false;
                     continue;
                 }
-                $observers = [];
-                /**
-                 * @var string $obsName
-                 * @var Mage_Core_Model_Config_Element $obsConfig
-                 */
-                foreach ($eventConfig->observers->children() as $obsName => $obsConfig) {
-                    $observers[$obsName] = [
-                        'type'  => (string) $obsConfig->type,
-                        'model' => $obsConfig->class ? (string) $obsConfig->class : $obsConfig->getClassName(),
-                        'method' => (string) $obsConfig->method,
-                        'args'  => (array) $obsConfig->args,
-                    ];
-                }
+
+                uasort($observers, fn(array $a, array $b) =>
+                    $this->_getObserverModulePosition($a) <=> $this->_getObserverModulePosition($b));
                 $events[$eventName]['observers'] = $observers;
                 $this->_events[$area][$eventName]['observers'] = $observers;
             }
@@ -1489,28 +1456,28 @@ class Mage_Core_Model_App
             }
 
             foreach ($events[$eventName]['observers'] as $obsName => $obs) {
+                $obsArgs = $obs['args'] ?? [];
                 $observer = new \Maho\Event\Observer([
                     'event' => new \Maho\Event([
-                        ...$obs['args'], // Default config.xml <args>
-                        ...$args,        // Mage::dispatchEvent() $args
+                        ...$obsArgs, // Default config.xml <args>
+                        ...$args,    // Mage::dispatchEvent() $args
                         'name' => $eventName,
                     ]),
-                    ...$obs['args'], // Default config.xml <args>
-                    ...$args,        // Mage::dispatchEvent() $args
+                    ...$obsArgs, // Default config.xml <args>
+                    ...$args,    // Mage::dispatchEvent() $args
                 ]);
                 \Maho\Profiler::start('OBSERVER: ' . $obsName);
                 switch ($obs['type']) {
                     case 'disabled':
                         break;
-                    case 'object':
-                    case 'model':
+                    case 'singleton':
                         $method = $obs['method'];
-                        $object = Mage::getModel($obs['model']);
+                        $object = Mage::getSingleton($obs['model']);
                         $this->_callObserverMethod($object, $method, $observer, $obsName);
                         break;
                     default:
                         $method = $obs['method'];
-                        $object = Mage::getSingleton($obs['model']);
+                        $object = Mage::getModel($obs['model']);
                         $this->_callObserverMethod($object, $method, $observer, $obsName);
                         break;
                 }
@@ -1544,6 +1511,48 @@ class Mage_Core_Model_App
             Mage::throwException($message);
         }
         return $this;
+    }
+
+    protected function _getObserverModulePosition(array $observer): int
+    {
+        static $positions = null;
+        if ($positions === null) {
+            $positions = [];
+            $pos = 0;
+            $modules = $this->getConfig()->getNode('modules');
+            if ($modules) {
+                foreach ($modules->children() as $moduleName => $module) {
+                    $positions[$moduleName] = $pos++;
+                }
+            }
+        }
+
+        if (isset($observer['module'])) {
+            return $positions[$observer['module']] ?? PHP_INT_MAX;
+        }
+
+        static $groupCache = [];
+        $alias = $observer['model'];
+
+        if (str_contains($alias, '/')) {
+            $group = explode('/', $alias)[0];
+            if (!isset($groupCache[$group])) {
+                $classPrefix = (string) $this->getConfig()->getNode("global/models/{$group}/class");
+                $groupCache[$group] = ($classPrefix && preg_match('/^(.+)_[^_]+$/', $classPrefix, $m))
+                    ? ($positions[$m[1]] ?? PHP_INT_MAX)
+                    : PHP_INT_MAX;
+            }
+            return $groupCache[$group];
+        }
+
+        return PHP_INT_MAX;
+    }
+
+    protected function _applyCompiledReplaces(string $area, string $eventName, array &$observers): void
+    {
+        foreach (Maho::getCompiledAttributes()['replaces'][$area][$eventName] ?? [] as $replace) {
+            unset($observers[$replace['target']]);
+        }
     }
 
     /**

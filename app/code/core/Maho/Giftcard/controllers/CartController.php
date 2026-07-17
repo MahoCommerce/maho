@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Giftcard
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Giftcard
  */
+
+declare(strict_types=1);
 
 /**
  * Gift Card cart controller
@@ -58,31 +55,21 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Check if rate limited (session-based bucket)
+     * Check if rate limited via the shared core helper. The Client scope keys by IP so balance-code
+     * enumeration cannot be reset by dropping the session cookie, falling back to the session id
+     * when the IP is unknown. Silent: the action returns its own JSON message.
      */
     protected function _isRateLimited(): bool
     {
-        $session = Mage::getSingleton('core/session');
-        $attempts = (array) $session->getGiftcardCheckAttempts();
-        $now = time();
-
-        // Clean old attempts outside the window
-        $attempts = array_filter($attempts, fn($timestamp) => ($now - $timestamp) < self::RATE_LIMIT_WINDOW);
-
-        if (count($attempts) >= self::RATE_LIMIT_MAX_ATTEMPTS) {
-            return true;
-        }
-
-        // Record this attempt
-        $attempts[] = $now;
-        $session->setGiftcardCheckAttempts($attempts);
-
-        return false;
+        return !Mage::helper('core')
+            ->rateLimiter('giftcard_balance', self::RATE_LIMIT_MAX_ATTEMPTS, self::RATE_LIMIT_WINDOW)
+            ->attempt();
     }
 
     /**
      * Check gift card balance (AJAX)
      */
+    #[Maho\Config\Route('/giftcard/cart/checkBalance', methods: ['POST'])]
     public function checkBalanceAction(): void
     {
         $result = ['success' => false, 'message' => ''];
@@ -150,6 +137,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Apply gift card to cart
      */
+    #[Maho\Config\Route('/giftcard/cart/apply', methods: ['POST'])]
     public function applyAction(): void
     {
         $code = trim((string) $this->getRequest()->getParam('giftcard_code'));
@@ -235,6 +223,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Remove gift card from cart
      */
+    #[Maho\Config\Route('/giftcard/cart/remove', methods: ['POST'])]
     public function removeAction(): void
     {
         $code = $this->getRequest()->getPost('code');
@@ -286,6 +275,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     /**
      * AJAX apply gift card (for checkout payment step)
      */
+    #[Maho\Config\Route('/giftcard/cart/ajaxApply', methods: ['POST'])]
     public function ajaxApplyAction(): void
     {
         $result = ['success' => false, 'message' => '', 'html' => ''];
@@ -388,6 +378,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     /**
      * AJAX remove gift card (for checkout payment step)
      */
+    #[Maho\Config\Route('/giftcard/cart/ajaxRemove', methods: ['POST'])]
     public function ajaxRemoveAction(): void
     {
         $result = ['success' => false, 'message' => ''];

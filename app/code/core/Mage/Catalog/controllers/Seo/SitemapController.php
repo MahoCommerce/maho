@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 class Mage_Catalog_Seo_SitemapController extends Mage_Core_Controller_Front_Action
@@ -31,6 +29,7 @@ class Mage_Catalog_Seo_SitemapController extends Mage_Core_Controller_Front_Acti
     /**
      * Display categories listing
      */
+    #[Maho\Config\Route('/catalog/seo_sitemap/category', name: 'catalog.seo.sitemap.category', methods: ['GET'])]
     public function categoryAction(): void
     {
         $update = $this->getLayout()->getUpdate();
@@ -47,6 +46,7 @@ class Mage_Catalog_Seo_SitemapController extends Mage_Core_Controller_Front_Acti
     /**
      * Display products listing
      */
+    #[Maho\Config\Route('/catalog/seo_sitemap/product', name: 'catalog.seo.sitemap.product', methods: ['GET'])]
     public function productAction(): void
     {
         $this->loadLayout();

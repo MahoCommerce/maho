@@ -1,18 +1,13 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_SalesRule
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2020-2023 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_SalesRule>
-            <version>1.6.0.3</version>
+            <version>2.0.0</version>
         </Mage_SalesRule>
     </modules>
     <global>
@@ -86,40 +81,6 @@
                 </base_shipping_discount_amount>
             </sales_convert_quote_address>
         </fieldsets>
-        <events>
-            <sales_order_place_after>
-                <observers>
-                    <salesrule>
-                        <class>salesrule/observer</class>
-                        <method>sales_order_afterPlace</method>
-                    </salesrule>
-                </observers>
-            </sales_order_place_after>
-            <sales_order_payment_cancel>
-                <observers>
-                    <salesrule>
-                        <class>salesrule/observer</class>
-                        <method>sales_order_paymentCancel</method>
-                    </salesrule>
-                </observers>
-            </sales_order_payment_cancel>
-            <sales_quote_config_get_product_attributes>
-                <observers>
-                    <salesrule>
-                        <class>salesrule/observer</class>
-                        <method>addProductAttributes</method>
-                    </salesrule>
-                </observers>
-            </sales_quote_config_get_product_attributes>
-            <sales_convert_quote_to_order>
-                <observers>
-                    <salesrule>
-                        <class>salesrule/observer</class>
-                        <method>addSalesRuleNameToOrder</method>
-                    </salesrule>
-                </observers>
-            </sales_convert_quote_to_order>
-        </events>
         <sales>
             <quote>
                 <totals>
@@ -163,24 +124,6 @@
                 </Mage_SalesRule>
             </modules>
         </translate>
-        <events>
-            <catalog_entity_attribute_delete_after>
-                <observers>
-                    <salesrule>
-                        <class>salesrule/observer</class>
-                        <method>catalogAttributeDeleteAfter</method>
-                    </salesrule>
-                </observers>
-            </catalog_entity_attribute_delete_after>
-            <catalog_entity_attribute_save_after>
-                <observers>
-                    <salesrule>
-                        <class>salesrule/observer</class>
-                        <method>catalogAttributeSaveAfter</method>
-                    </salesrule>
-                </observers>
-            </catalog_entity_attribute_save_after>
-        </events>
     </adminhtml>
     <frontend>
         <translate>
@@ -193,19 +136,12 @@
             </modules>
         </translate>
     </frontend>
-    <crontab>
-        <jobs>
-            <aggregate_sales_report_coupons_data>
-                <schedule>
-                    <config_path>reports/crontab/coupons_expr</config_path>
-                </schedule>
-                <run>
-                    <model>salesrule/observer::aggregateSalesReportCouponsData</model>
-                </run>
-            </aggregate_sales_report_coupons_data>
-        </jobs>
-    </crontab>
     <default>
+        <system>
+            <rate_limit>
+                <coupon_validate>60</coupon_validate>
+            </rate_limit>
+        </system>
         <promo>
             <auto_generated_coupon_codes>
                 <length>12</length>

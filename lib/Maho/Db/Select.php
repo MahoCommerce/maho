@@ -1,20 +1,17 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    MahoLib
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
+
+declare(strict_types=1);
 
 namespace Maho\Db;
 
-class Select
+class Select implements \Stringable
 {
     // Query part constants
     public const DISTINCT       = 'distinct';
@@ -592,7 +589,7 @@ class Select
      * @param string $correlationName Correlation name or table alias
      * @return $this
      */
-    public function columns(array|string $cols = '*', ?string $correlationName = null): self
+    public function columns(array|string|Expr $cols = '*', ?string $correlationName = null): self
     {
         if ($correlationName === null && count($this->_parts[self::FROM])) {
             $correlationNameKeys = array_keys($this->_parts[self::FROM]);
@@ -1068,10 +1065,10 @@ class Select
                     // Set flag so child Select adds explicit column aliases for SQLite compatibility
                     $target->_forceExplicitAliases = true;
                     $target = $target->assemble();
-                } elseif (is_string($target)) {
-                    // Strip outer parentheses from string SQL - DBAL handles wrapping internally
+                } elseif ($target instanceof Expr || is_string($target)) {
+                    // Convert to string and strip outer parentheses - DBAL handles wrapping internally
                     // This fixes SQLite compatibility where explicit parentheses cause syntax errors
-                    $target = trim($target);
+                    $target = trim((string) $target);
                     if (str_starts_with($target, '(') && str_ends_with($target, ')')) {
                         $target = substr($target, 1, -1);
                     }

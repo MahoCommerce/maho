@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Tax
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Tax
  */
 
 class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
@@ -793,23 +791,27 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
         $request = Mage::getSingleton('tax/calculation')->getRateRequest();
         $currentTaxes = Mage::getSingleton('tax/calculation')->getRatesForAllProductTaxClasses($request);
 
-        $defaultTaxString = $currentTaxString = '';
+        $defaultTaxString = '';
+        if (is_array($defaultTaxes)) {
+            foreach ($defaultTaxes as $classId => $rate) {
+                if ($rate) {
+                    $defaultTaxString .= sprintf('WHEN %d THEN %12.4f ', $classId, $rate / 100);
+                }
+            }
+            if ($defaultTaxString) {
+                $defaultTaxString = "CASE {$taxClassField} {$defaultTaxString} ELSE 0 END";
+            }
+        }
 
-        $rateToVariable = [
-            'defaultTaxString' => 'defaultTaxes',
-            'currentTaxString' => 'currentTaxes',
-        ];
-        foreach ($rateToVariable as $rateVariable => $rateArray) {
-            if (${$rateArray} && is_array(${$rateArray})) {
-                ${$rateVariable} = '';
-                foreach (${$rateArray} as $classId => $rate) {
-                    if ($rate) {
-                        ${$rateVariable} .= sprintf('WHEN %d THEN %12.4f ', $classId, $rate / 100);
-                    }
+        $currentTaxString = '';
+        if (is_array($currentTaxes)) {
+            foreach ($currentTaxes as $classId => $rate) {
+                if ($rate) {
+                    $currentTaxString .= sprintf('WHEN %d THEN %12.4f ', $classId, $rate / 100);
                 }
-                if (${$rateVariable}) {
-                    ${$rateVariable} = "CASE {$taxClassField} {${$rateVariable}} ELSE 0 END";
-                }
+            }
+            if ($currentTaxString) {
+                $currentTaxString = "CASE {$taxClassField} {$currentTaxString} ELSE 0 END";
             }
         }
 

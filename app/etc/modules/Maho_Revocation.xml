@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: OSL-3.0
+-->
+<config>
+    <modules>
+        <Maho_Revocation>
+            <active>true</active>
+            <codePool>core</codePool>
+            <depends>
+                <Mage_Sales/>
+            </depends>
+        </Maho_Revocation>
+    </modules>
+</config>

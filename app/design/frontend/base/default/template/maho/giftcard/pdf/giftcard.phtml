@@ -1,14 +1,11 @@
 <?php
 /**
- * Maho
- *
  * Gift Card PDF Template
  * Override this file in your theme to customize gift card layout
  *
- * @category   design
- * @package    base_default
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package base_default
  */
 
 /** @var Maho_Giftcard_Block_Pdf_Giftcard $this */
@@ -29,7 +26,7 @@ $css = $this->getCssContent();
     <div class="giftcard">
         <?php if ($logoSrc): ?>
         <div class="giftcard-header">
-            <img src="<?= $logoSrc ?>" alt="Logo" />
+            <img src="<?= $logoSrc ?>" alt="Logo">
         </div>
         <?php endif; ?>
 
@@ -50,7 +47,7 @@ $css = $this->getCssContent();
                 <?php $qrCode = $helper->getQrCodeDataUrl($giftcard->getCode()); ?>
                 <?php if ($qrCode): ?>
                 <div class="giftcard-qr">
-                    <img src="<?= $qrCode ?>" alt="QR" />
+                    <img src="<?= $qrCode ?>" alt="QR">
                 </div>
                 <?php endif; ?>
             </div>
@@ -82,7 +79,7 @@ $css = $this->getCssContent();
         </div>
 
         <div class="giftcard-footer">
-            <a href="<?= $this->escapeHtml($storeUrl) ?>"><?= $this->escapeHtml($storeUrl) ?></a><br />
+            <a href="<?= $this->escapeHtml($storeUrl) ?>"><?= $this->escapeHtml($storeUrl) ?></a><br>
             <?= $this->__('Not redeemable for cash') ?> &bull; <?= $this->__('Lost cards not replaced') ?>
         </div>
     </div>

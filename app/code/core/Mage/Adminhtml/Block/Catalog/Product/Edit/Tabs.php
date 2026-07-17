@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2026 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tabs
@@ -53,20 +51,21 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Bloc
 
                 $this->addTab('group_' . $group->getId(), [
                     'label'     => Mage::helper('catalog')->__($group->getAttributeGroupName()),
-                    'content'   => $this->_translateHtml($this->getLayout()->createBlock(
+                    'code'      => $group->getAttributeGroupName(),
+                    'content'   => $this->getLayout()->createBlock(
                         $this->getAttributeTabBlock(),
                         'adminhtml.catalog.product.edit.tab.attributes',
                     )->setGroup($group)
                             ->setGroupAttributes($attributes)
-                            ->toHtml()),
+                            ->toHtml(),
                 ]);
             }
 
             if ($this->isModuleEnabled('Mage_CatalogInventory')) {
                 $this->addTab('inventory', [
                     'label'     => Mage::helper('catalog')->__('Inventory'),
-                    'content'   => $this->_translateHtml($this->getLayout()
-                        ->createBlock('adminhtml/catalog_product_edit_tab_inventory')->toHtml()),
+                    'content'   => $this->getLayout()
+                        ->createBlock('adminhtml/catalog_product_edit_tab_inventory')->toHtml(),
                 ]);
             }
 
@@ -76,8 +75,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Bloc
             if (!Mage::app()->isSingleStoreMode()) {
                 $this->addTab('websites', [
                     'label'     => Mage::helper('catalog')->__('Websites'),
-                    'content'   => $this->_translateHtml($this->getLayout()
-                        ->createBlock('adminhtml/catalog_product_edit_tab_websites')->toHtml()),
+                    'content'   => $this->getLayout()
+                        ->createBlock('adminhtml/catalog_product_edit_tab_websites')->toHtml(),
                 ]);
             }
 
@@ -125,8 +124,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Bloc
             if (($alertPriceAllow || $alertStockAllow) && !$product->isGrouped()) {
                 $this->addTab('productalert', [
                     'label'     => Mage::helper('catalog')->__('Product Alerts'),
-                    'content'   => $this->_translateHtml($this->getLayout()
-                        ->createBlock('adminhtml/catalog_product_edit_tab_alerts', 'admin.alerts.products')->toHtml()),
+                    'content'   => $this->getLayout()
+                        ->createBlock('adminhtml/catalog_product_edit_tab_alerts', 'admin.alerts.products')->toHtml(),
                 ]);
             }
 
@@ -172,8 +171,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Bloc
         } else {
             $this->addTab('set', [
                 'label'     => Mage::helper('catalog')->__('Settings'),
-                'content'   => $this->_translateHtml($this->getLayout()
-                    ->createBlock('adminhtml/catalog_product_edit_tab_settings')->toHtml()),
+                'content'   => $this->getLayout()
+                    ->createBlock('adminhtml/catalog_product_edit_tab_settings')->toHtml(),
                 'active'    => true,
             ]);
         }
@@ -210,17 +209,5 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Bloc
     {
         $this->_attributeTabBlock = $attributeTabBlock;
         return $this;
-    }
-
-    /**
-     * Translate html content
-     *
-     * @param string $html
-     * @return string
-     */
-    protected function _translateHtml($html)
-    {
-        Mage::getSingleton('core/translate_inline')->processResponseBody($html);
-        return $html;
     }
 }

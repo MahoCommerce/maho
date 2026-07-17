@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <modules>
+        <Maho_StructuredData>
+            <version>1.0.0</version>
+        </Maho_StructuredData>
+    </modules>
+    <global>
+        <blocks>
+            <structureddata>
+                <class>Maho_StructuredData_Block</class>
+            </structureddata>
+        </blocks>
+        <helpers>
+            <structureddata>
+                <class>Maho_StructuredData_Helper</class>
+            </structureddata>
+        </helpers>
+        <models>
+            <structureddata>
+                <class>Maho_StructuredData_Model</class>
+            </structureddata>
+        </models>
+        <translate>
+            <modules>
+                <Maho_StructuredData>
+                    <files>
+                        <default>Maho_StructuredData.csv</default>
+                    </files>
+                </Maho_StructuredData>
+            </modules>
+        </translate>
+    </global>
+    <frontend>
+        <layout>
+            <updates>
+                <structureddata>
+                    <file>structureddata.xml</file>
+                </structureddata>
+            </updates>
+        </layout>
+    </frontend>
+    <default>
+        <catalog>
+            <structured_data>
+                <enabled>1</enabled>
+                <product>
+                    <include_reviews>1</include_reviews>
+                    <brand_attribute>manufacturer</brand_attribute>
+                    <gtin_attribute>gtin</gtin_attribute>
+                    <mpn_attribute>mpn</mpn_attribute>
+                </product>
+                <organization>
+                    <type>OnlineStore</type>
+                </organization>
+            </structured_data>
+        </catalog>
+    </default>
+</config>

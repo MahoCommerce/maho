@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model_Resource_Abstract
@@ -560,10 +558,10 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
 
             $store = Mage::app()->getStore($item['store_id']);
             if ($store) {
-                $timestamp = Mage::app()->getLocale()->storeTimeStamp($store);
+                $storeNow = Mage::app()->getLocale()->utcToStore($store);
                 $data[] = [
                     'website_id' => $website->getId(),
-                    'website_date'       => $this->formatDate($timestamp, false),
+                    'website_date'       => Mage::app()->getLocale()->formatDateForDb($storeNow, withTime: false),
                     'rate'       => $rate,
                 ];
             }

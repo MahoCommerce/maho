@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Payment
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Payment
  */
 
 /**
@@ -73,7 +71,6 @@ class Mage_Payment_Model_Info extends Mage_Core_Model_Abstract
      * Retrieve payment method model object
      *
      * @return Mage_Payment_Model_Method_Abstract
-     * @throws Mage_Core_Exception
      */
     public function getMethodInstance()
     {
@@ -86,7 +83,10 @@ class Mage_Payment_Model_Info extends Mage_Core_Model_Abstract
                     return $instance;
                 }
             }
-            Mage::throwException(Mage::helper('payment')->__('The requested Payment Method is not available.'));
+            $unavailable = Mage::getModel('payment/method_unavailable');
+            $unavailable->setOriginalCode($this->getMethod() ?: 'unknown');
+            $unavailable->setInfoInstance($this);
+            $this->setMethodInstance($unavailable);
         }
 
         return $this->_getData('method_instance');

@@ -1,18 +1,13 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Eav
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_Eav>
-            <version>1.6.0.2</version>
+            <version>2.0.0</version>
         </Mage_Eav>
     </modules>
     <global>
@@ -99,16 +94,6 @@
         </eav_frontendclasses>
         <eav_attributes>
         </eav_attributes>
-        <events>
-            <controller_action_predispatch>
-                <observers>
-                    <eav>
-                        <class>eav/observer</class>
-                        <method>onControllerActionPredispatch</method>
-                    </eav>
-                </observers>
-            </controller_action_predispatch>
-        </events>
     </global>
     <adminhtml>
         <translate>
@@ -132,18 +117,6 @@
             </modules>
         </translate>
     </frontend>
-    <crontab>
-        <jobs>
-            <eav_clean_orphaned_records>
-                <schedule>
-                    <cron_expr>0 0 * * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>eav/observer::cleanOrphanedRecords</model>
-                </run>
-            </eav_clean_orphaned_records>
-        </jobs>
-    </crontab>
     <default>
         <general>
             <validator_data>

@@ -1,13 +1,10 @@
 <?php
 
 /**
- * Maho
- *
- * @package    MahoLib
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 namespace Maho\Data\Form\Element;
@@ -63,16 +60,16 @@ class Gallery extends AbstractElement
                     $url = $image->setType($type)->getSourceUrl();
                     $html .= '<td class="gallery" align="center" style="vertical-align:bottom;">';
                     $html .= '<a href="' . $url . '" target="_blank" onclick="imagePreview(\'' . $this->getHtmlId() . '_image_' . $type . '_' . $image->getValueId() . '\');return false;">
-                    <img id="' . $this->getHtmlId() . '_image_' . $type . '_' . $image->getValueId() . '" src="' . $url . '" alt="' . $image->getValue() . '" height="25" align="absmiddle" class="small-image-preview"></a><br/>';
+                    <img id="' . $this->getHtmlId() . '_image_' . $type . '_' . $image->getValueId() . '" src="' . $url . '" alt="' . $image->getValue() . '" height="25" align="absmiddle" class="small-image-preview"></a><br>';
                     $html .= '<input type="file" name="' . $this->getName() . '_' . $type . '[' . $image->getValueId() . ']" size="1"></td>';
                 }
-                $html .= '<td class="gallery" align="center" style="vertical-align:bottom;"><input type="input" name="' . parent::getName() . '[position][' . $image->getValueId() . ']" value="' . $image->getPosition() . '" id="' . $this->getHtmlId() . '_position_' . $image->getValueId() . '" size="3"/></td>';
-                $html .= '<td class="gallery" align="center" style="vertical-align:bottom;"><input type="checkbox" name="' . parent::getName() . '[delete][' . $image->getValueId() . ']" value="' . $image->getValueId() . '" id="' . $this->getHtmlId() . '_delete_' . $image->getValueId() . '"/></td>';
+                $html .= '<td class="gallery" align="center" style="vertical-align:bottom;"><input type="input" name="' . parent::getName() . '[position][' . $image->getValueId() . ']" value="' . $image->getPosition() . '" id="' . $this->getHtmlId() . '_position_' . $image->getValueId() . '" size="3"></td>';
+                $html .= '<td class="gallery" align="center" style="vertical-align:bottom;"><input type="checkbox" name="' . parent::getName() . '[delete][' . $image->getValueId() . ']" value="' . $image->getValueId() . '" id="' . $this->getHtmlId() . '_delete_' . $image->getValueId() . '"></td>';
                 $html .= '</tr>';
             }
         }
         if ($i == 0) {
-            $html .= '<script type="text/javascript">document.getElementById("gallery_thead").style.visibility="hidden";</script>';
+            $html .= '<script>document.getElementById("gallery_thead").style.visibility="hidden";</script>';
         }
 
         $html .= '</tbody></table>';
@@ -84,7 +81,7 @@ class Gallery extends AbstractElement
                             -1,
                                 \'<a href="file:///%file%" target="_blank" onclick="imagePreview(\\\''.$this->getHtmlId().'_image_new_%id%\\\');return false;"><img src="file:///%file%" width="50" align="absmiddle" class="small-image-preview" style="padding-bottom:3px; width:"></a> <div id="'.$this->getHtmlId().'_image_new_%id%" style="display:none" class="image-preview"><img src="file:///%file%"></div>\',
                                 "",
-                                \'<input type="file" name="'.parent::getName().'[new_image][%id%][%j%]" size="1" />\'
+                                \'<input type="file" name="'.parent::getName().'[new_image][%id%][%j%]" size="1">\'
                             );
                             multi_selector.addElement( document.getElementById( "'.$this->getHtmlId().'" ) );
                             </script>';
@@ -103,7 +100,7 @@ class Gallery extends AbstractElement
             document.getElementById("gallery_thead").style.visibility="visible";
 
             id--;
-            new_file_input = '<input type="file" name="{$name}_%j%[%id%]" size="1" />';
+            new_file_input = '<input type="file" name="{$name}_%j%[%id%]" size="1">';
 
             // Sort order input
             var new_row_input = document.createElement( 'input' );

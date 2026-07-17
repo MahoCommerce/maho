@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
  */
 
 class Mage_Sales_Model_Observer
@@ -25,6 +23,7 @@ class Mage_Sales_Model_Observer
      * @return $this
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\CronJob('sales_clean_quotes', schedule: '0 0 * * *')]
     public function cleanExpiredQuotes()
     {
         Mage::dispatchEvent('clear_expired_quotes_before', ['sales_observer' => $this]);
@@ -81,6 +80,7 @@ class Mage_Sales_Model_Observer
      * @throws Exception
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_product_delete_before', area: 'adminhtml', id: 'sales_quote_observer')]
     public function substractQtyFromQuotes(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -94,6 +94,7 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalogrule_after_apply', area: 'adminhtml', id: 'sales_quote_observer')]
     public function markQuotesRecollectOnCatalogRules(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -123,6 +124,7 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_product_save_after', area: 'adminhtml', id: 'sales_quote')]
     public function catalogProductSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -141,6 +143,7 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_product_status_update', area: 'adminhtml', id: 'sales_quote')]
     public function catalogProductStatusUpdate(\Maho\Event\Observer $observer)
     {
         $status     = $observer->getEvent()->getStatus();
@@ -158,10 +161,11 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\CronJob('aggregate_sales_report_order_data', configPath: 'reports/crontab/sales_expr')]
     public function aggregateSalesReportOrderData()
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->dateMutable();
+        $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_order')->aggregate($date);
         Mage::app()->getLocale()->revert();
@@ -173,10 +177,11 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\CronJob('aggregate_sales_report_shipment_data', configPath: 'reports/crontab/shipping_expr')]
     public function aggregateSalesReportShipmentData()
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->dateMutable();
+        $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_shipping')->aggregate($date);
         Mage::app()->getLocale()->revert();
@@ -188,10 +193,11 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\CronJob('aggregate_sales_report_invoiced_data', configPath: 'reports/crontab/invoiced_expr')]
     public function aggregateSalesReportInvoicedData()
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->dateMutable();
+        $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_invoiced')->aggregate($date);
         Mage::app()->getLocale()->revert();
@@ -203,10 +209,11 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\CronJob('aggregate_sales_report_refunded_data', configPath: 'reports/crontab/refunded_expr')]
     public function aggregateSalesReportRefundedData()
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->dateMutable();
+        $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_refunded')->aggregate($date);
         Mage::app()->getLocale()->revert();
@@ -218,10 +225,11 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\CronJob('aggregate_sales_report_bestsellers_data', configPath: 'reports/crontab/bestsellers_expr')]
     public function aggregateSalesReportBestsellersData()
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->dateMutable();
+        $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_bestsellers')->aggregate($date);
         Mage::app()->getLocale()->revert();
@@ -233,6 +241,7 @@ class Mage_Sales_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('catalog_product_edit_form_render_recurring', area: 'adminhtml', id: 'payment')]
     public function prepareProductEditFormRecurringProfile($observer)
     {
         // replace the element of recurring payment profile field with a form
@@ -262,6 +271,7 @@ class Mage_Sales_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('payment_method_is_active', area: 'adminhtml', id: 'sales_billing_agreement')]
     public function restrictAdminBillingAgreementUsage($observer)
     {
         $methodInstance = $observer->getEvent()->getMethodInstance();
@@ -278,6 +288,7 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('customer_save_after', area: 'adminhtml', id: 'customer')]
     public function customerSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Customer_Model_Customer $customer */
@@ -313,6 +324,7 @@ class Mage_Sales_Model_Observer
     /**
      * Set Quote information about MSRP price enabled
      */
+    #[Maho\Config\Observer('sales_quote_collect_totals_after', area: 'frontend', id: 'catalog_msrp')]
     public function setQuoteCanApplyMsrp(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */
@@ -334,6 +346,7 @@ class Mage_Sales_Model_Observer
     /**
      * Add VAT validation request date and identifier to order comments
      */
+    #[Maho\Config\Observer('sales_order_place_after', id: 'sales_vat_request_params_order_comment')]
     public function addVatRequestParamsOrderComment(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order $orderInstance */
@@ -350,7 +363,7 @@ class Mage_Sales_Model_Observer
             && !empty($vatRequestDate)
         ) {
             $orderHistoryComment = Mage::helper('customer')->__('VAT Request Identifier')
-                . ': ' . $vatRequestId . '<br />' . Mage::helper('customer')->__('VAT Request Date')
+                . ': ' . $vatRequestId . '<br>' . Mage::helper('customer')->__('VAT Request Date')
                 . ': ' . $vatRequestDate;
             $orderInstance->addStatusHistoryComment($orderHistoryComment, false);
         }
@@ -394,6 +407,7 @@ class Mage_Sales_Model_Observer
     /**
      * Handle customer VAT number if needed on collect_totals_before event of quote address
      */
+    #[Maho\Config\Observer('sales_quote_address_collect_totals_before', area: 'frontend', id: 'sales_customer_validate_vat_number')]
     public function changeQuoteCustomerGroupId(\Maho\Event\Observer $observer)
     {
         $addressHelper = Mage::helper('customer/address');
@@ -494,6 +508,7 @@ class Mage_Sales_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('sales_quote_address_collect_totals_after', area: 'frontend', id: 'sales_customer_validate_vat_number')]
     public function restoreQuoteCustomerGroupId($observer)
     {
         /** @var Mage_Sales_Model_Quote_Address $quoteAddress */

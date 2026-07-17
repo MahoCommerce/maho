@@ -1,12 +1,12 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- *
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
+ */
+
+/**
  * @method int getRuleId()
  * @method $this setRuleId(int $value)
  * @method int getCategoryId()
@@ -65,9 +65,9 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     }
 
     #[\Override]
-    public function getConditionsInstance(): Mage_CatalogRule_Model_Rule_Condition_Combine
+    public function getConditionsInstance(): Mage_Catalog_Model_Rule_Condition_Combine
     {
-        return Mage::getModel('catalogrule/rule_condition_combine');
+        return Mage::getModel('catalog/rule_condition_combine');
     }
 
     #[\Override]

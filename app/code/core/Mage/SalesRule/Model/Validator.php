@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_SalesRule
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_SalesRule
  */
 
 /**
@@ -164,8 +162,8 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                         $rule->setIsValidForAddress($address, false);
                         return false;
                     }
-                    // check coupon expiration
-                    if ($coupon->hasExpirationDate() && ($coupon->getExpirationDate() < Mage::getModel('core/date')->date())) {
+                    // check coupon expiration — admin-entered as store-local datetime, compare in store TZ
+                    if ($coupon->hasExpirationDate() && ($coupon->getExpirationDate() < Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATETIME_FORMAT))) {
                         $rule->setIsValidForAddress($address, false);
                         return false;
                     }
@@ -364,17 +362,6 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                         Mage::throwException(Mage::helper('salesrule')->__('Item totals are not set for rule.'));
                     }
 
-                    /**
-                     * prevent applying whole cart discount for every shipping order, but only for first order
-                     */
-                    if ($quote->getIsMultiShipping()) {
-                        $usedForAddressId = $this->getCartFixedRuleUsedForAddress($rule->getId());
-                        if ($usedForAddressId && $usedForAddressId != $address->getId()) {
-                            break;
-                        } else {
-                            $this->setCartFixedRuleUsedForAddress($rule->getId(), $address->getId());
-                        }
-                    }
                     $cartRules = $address->getCartFixedRules();
                     if (!isset($cartRules[$rule->getId()])) {
                         $cartRules[$rule->getId()] = $rule->getDiscountAmount();
@@ -1044,8 +1031,8 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
      *
      * @param string $name
      * @return Mage_Core_Model_Abstract|false
-     * @deprecated use Mage::getSingleton()
      */
+    #[\Deprecated(message: 'use Mage::getSingleton()')]
     protected function _getSingleton($name)
     {
         return Mage::getSingleton($name);
@@ -1056,8 +1043,8 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
      *
      * @param string $name
      * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
      */
+    #[\Deprecated(message: 'use Mage::helper()')]
     protected function _getHelper($name)
     {
         return Mage::helper($name);

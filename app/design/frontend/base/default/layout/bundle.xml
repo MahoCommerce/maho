@@ -1,15 +1,9 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
-
+SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+SPDX-FileCopyrightText: 2022 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <layout version="0.1.0">
 
@@ -123,49 +117,6 @@ Onepage Checkout Review Page
             <action method="addItemRender"><type>bundle</type><block>bundle/checkout_cart_item_renderer</block><template>checkout/onepage/review/item.phtml</template></action>
         </reference>
     </checkout_onepage_review>
-
-    <checkout_multishipping_addresses>
-        <reference name="checkout_addresses">
-            <action method="addItemRender"><type>bundle</type><block>bundle/checkout_cart_item_renderer</block><template>checkout/multishipping/item/default.phtml</template></action>
-        </reference>
-    </checkout_multishipping_addresses>
-
-    <checkout_multishipping_shipping>
-        <reference name="checkout_shipping">
-            <action method="addItemRender"><type>bundle</type><block>bundle/checkout_cart_item_renderer</block><template>checkout/multishipping/item/default.phtml</template></action>
-        </reference>
-        <reference name="checkout_billing_items">
-            <action method="addItemRender"><type>bundle</type><block>bundle/checkout_cart_item_renderer</block><template>checkout/multishipping/item/default.phtml</template></action>
-        </reference>
-    </checkout_multishipping_shipping>
-
-    <checkout_multishipping_overview>
-        <reference name="checkout_overview">
-            <action method="addItemRender"><type>bundle</type><block>bundle/checkout_cart_item_renderer</block><template>checkout/multishipping/item/default.phtml</template></action>
-        </reference>
-    </checkout_multishipping_overview>
-
-    <paypal_express_review>
-        <reference name="paypal.express.review.details">
-            <action method="addItemRender"><type>bundle</type><block>bundle/checkout_cart_item_renderer</block><template>checkout/onepage/review/item.phtml</template></action>
-        </reference>
-    </paypal_express_review>
-    <paypal_express_review_details>
-        <reference name="root">
-            <action method="addItemRender"><type>bundle</type><block>bundle/checkout_cart_item_renderer</block><template>checkout/onepage/review/item.phtml</template></action>
-        </reference>
-    </paypal_express_review_details>
-
-    <paypaluk_express_review>
-        <reference name="paypal.express.review.details">
-            <action method="addItemRender"><type>bundle</type><block>bundle/checkout_cart_item_renderer</block><template>checkout/onepage/review/item.phtml</template></action>
-        </reference>
-    </paypaluk_express_review>
-    <paypaluk_express_review_details>
-        <reference name="root">
-            <action method="addItemRender"><type>bundle</type><block>bundle/checkout_cart_item_renderer</block><template>checkout/onepage/review/item.phtml</template></action>
-        </reference>
-    </paypaluk_express_review_details>
 
 <!--
 Additional block for bundle product type

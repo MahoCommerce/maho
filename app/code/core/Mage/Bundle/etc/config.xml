@@ -1,18 +1,13 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Bundle
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2022 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_Bundle>
-            <version>1.6.0.0.1</version>
+            <version>2.0.0</version>
         </Mage_Bundle>
     </modules>
     <global>
@@ -80,7 +75,7 @@
             <product>
                 <type>
                     <bundle translate="label" module="bundle">
-                        <label>Bundle Product</label>
+                        <label>Bundle</label>
                         <model>bundle/product_type</model>
                         <composite>1</composite>
                         <allowed_selection_types>
@@ -138,16 +133,6 @@
                 <bundle>bundle/sales_order_pdf_items_creditmemo</bundle>
             </creditmemo>
         </pdf>
-        <events>
-            <catalogindex_plain_reindex_after>
-                <observers>
-                    <bundle>
-                        <class>bundle/observer</class>
-                        <method>catalogIndexPlainReindexAfter</method>
-                    </bundle>
-                </observers>
-            </catalogindex_plain_reindex_after>
-        </events>
     </global>
     <frontend>
         <translate>
@@ -174,40 +159,6 @@
                 </attributes>
             </collection>
         </product>
-        <events>
-            <catalog_product_upsell>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>appendUpsellProducts</method>
-                    </bundle_observer>
-                </observers>
-            </catalog_product_upsell>
-            <sales_convert_quote_item_to_order_item>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>appendBundleSelectionData</method>
-                    </bundle_observer>
-                </observers>
-            </sales_convert_quote_item_to_order_item>
-            <catalog_product_collection_load_after>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>loadProductOptions</method>
-                    </bundle_observer>
-                </observers>
-            </catalog_product_collection_load_after>
-            <product_option_renderer_init>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>initOptionRenderer</method>
-                    </bundle_observer>
-                </observers>
-            </product_option_renderer_init>
-        </events>
     </frontend>
     <admin>
         <fieldsets>
@@ -224,15 +175,6 @@
                 </manage_stock>
             </catalog_product_dataflow>
         </fieldsets>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <Mage_Bundle before="Mage_Adminhtml">Mage_Bundle_Adminhtml</Mage_Bundle>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
     </admin>
     <adminhtml>
         <translate>
@@ -260,47 +202,5 @@
                 </create>
             </order>
         </sales>
-        <events>
-            <catalog_product_prepare_save>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>prepareProductSave</method>
-                    </bundle_observer>
-                </observers>
-            </catalog_product_prepare_save>
-            <sales_convert_quote_item_to_order_item>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>appendBundleSelectionData</method>
-                    </bundle_observer>
-                </observers>
-            </sales_convert_quote_item_to_order_item>
-            <catalog_model_product_duplicate>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>duplicateProduct</method>
-                    </bundle_observer>
-                </observers>
-            </catalog_model_product_duplicate>
-            <catalog_product_edit_action>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>setAttributeTabBlock</method>
-                    </bundle_observer>
-                </observers>
-            </catalog_product_edit_action>
-            <catalog_product_new_action>
-                <observers>
-                    <bundle_observer>
-                        <class>bundle/observer</class>
-                        <method>setAttributeTabBlock</method>
-                    </bundle_observer>
-                </observers>
-            </catalog_product_new_action>
-        </events>
     </adminhtml>
 </config>

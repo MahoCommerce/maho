@@ -1,12 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_AdminActivityLog
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_AdminActivityLog
  */
 
 class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
@@ -23,10 +20,16 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
             return $this;
         }
 
-        $adminUser = Mage::getSingleton('admin/session')->getUser();
-        if ($adminUser) {
-            $data['user_id'] = $adminUser->getId();
-            $data['username'] = $adminUser->getUsername();
+        // Support both admin user and API consumer
+        if (isset($data['consumer_id'])) {
+            $data['user_id'] = null;
+            // Username will be set by caller as "API: ConsumerName"
+        } else {
+            $adminUser = Mage::getSingleton('admin/session')->getUser();
+            if ($adminUser) {
+                $data['user_id'] = $adminUser->getId();
+                $data['username'] = $adminUser->getUsername();
+            }
         }
 
         $data['ip_address'] ??= Mage::helper('core/http')->getRemoteAddr();
@@ -38,15 +41,12 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
             $this->setActionGroupId($data['action_group_id']);
         }
 
-        $encryption = Mage::getModel('core/encryption');
-
+        $helper = Mage::helper('core');
         if (isset($data['old_data']) && is_array($data['old_data'])) {
-            $jsonData = json_encode($data['old_data']);
-            $data['old_data'] = $encryption->encrypt($jsonData);
+            $data['old_data'] = $helper->jsonEncode($data['old_data']);
         }
         if (isset($data['new_data']) && is_array($data['new_data'])) {
-            $jsonData = json_encode($data['new_data']);
-            $data['new_data'] = $encryption->encrypt($jsonData);
+            $data['new_data'] = $helper->jsonEncode($data['new_data']);
         }
 
         $this->setData($data);
@@ -59,10 +59,8 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
     {
         $data = $this->getData('old_data');
         if ($data) {
-            $decrypted = Mage::getModel('core/encryption')->decrypt($data);
-            if ($decrypted && json_validate($decrypted)) {
-                return json_decode($decrypted, true);
-            }
+            $helper = Mage::helper('core');
+            return $helper->jsonDecode($helper->tryDecrypt($data) ?? $data) ?: [];
         }
         return [];
     }
@@ -71,10 +69,8 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
     {
         $data = $this->getData('new_data');
         if ($data) {
-            $decrypted = Mage::getModel('core/encryption')->decrypt($data);
-            if ($decrypted && json_validate($decrypted)) {
-                return json_decode($decrypted, true);
-            }
+            $helper = Mage::helper('core');
+            return $helper->jsonDecode($helper->tryDecrypt($data) ?? $data) ?: [];
         }
         return [];
     }
@@ -83,8 +79,17 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
     protected function _beforeSave()
     {
         if (!$this->getId()) {
-            $this->setCreatedAt(Mage::getModel('core/date')->gmtDate());
+            $this->setCreatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         }
+
+        $helper = Mage::helper('core');
+        foreach (['old_data', 'new_data'] as $field) {
+            $value = $this->getData($field);
+            if ($value !== null && $value !== '') {
+                $this->setData($field, $helper->encryptIdempotent($value));
+            }
+        }
+
         return parent::_beforeSave();
     }
 

@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 
 /** @var Mage_Rss_Block_List $this */
@@ -21,8 +19,8 @@
 <?php if ($_categories || $_misc): ?>
 <?php if($_misc): ?>
 <table class="data-table rss-table" id="rss-table-misc">
-    <col />
-    <col width="1" />
+    <col>
+    <col width="1">
     <thead>
         <tr>
             <th colspan="2"><?= $this->__('Miscellaneous Feeds') ?></th>
@@ -39,12 +37,12 @@
 </table>
 <?php endif ?>
 <?php if ($_categories && $_misc): ?>
-<br />
+<br>
 <?php endif ?>
 <?php if($_categories): ?>
 <table class="data-table rss-table" id="rss-table-category">
-    <col />
-    <col width="1" />
+    <col>
+    <col width="1">
     <thead>
         <tr>
             <th colspan="2"><?= $this->__('Category Feeds') ?></th>

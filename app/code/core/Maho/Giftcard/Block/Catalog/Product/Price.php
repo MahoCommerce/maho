@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Giftcard
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Giftcard
  */
+
+declare(strict_types=1);
 
 /**
  * Gift Card Price Block for catalog listings
@@ -65,7 +62,7 @@ class Maho_Giftcard_Block_Catalog_Product_Price extends Mage_Catalog_Block_Produ
 
         // Check custom amount max
         $giftcardType = $product->getData('giftcard_type');
-        if ($giftcardType === 'custom' || $giftcardType === 'combined') {
+        if ($giftcardType === 'range' || $giftcardType === 'combined') {
             $customMax = (float) $product->getData('giftcard_max_amount');
             if ($customMax > 0) {
                 $maxPrice = max($maxPrice, $customMax);

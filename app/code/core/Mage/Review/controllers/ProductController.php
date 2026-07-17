@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Review
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Review
  */
 
 class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
@@ -101,32 +99,9 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Load review model with data by passed id.
-     * Return false if review was not loaded or review is not approved.
-     *
-     * @param int $reviewId
-     * @return bool|Mage_Review_Model_Review
-     */
-    protected function _loadReview($reviewId)
-    {
-        if (!$reviewId) {
-            return false;
-        }
-
-        $review = Mage::getModel('review/review')->load($reviewId);
-        /** @var Mage_Review_Model_Review $review */
-        if (!$review->getId() || !$review->isApproved() || !$review->isAvailableOnStore(Mage::app()->getStore())) {
-            return false;
-        }
-
-        Mage::register('current_review', $review);
-
-        return $review;
-    }
-
-    /**
      * Submit new review action
      */
+    #[Maho\Config\Route('/review/product/post', name: 'review.product.post', methods: ['POST'])]
     public function postAction(): void
     {
         if (!$this->_validateFormKey()) {
@@ -193,29 +168,6 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
             return;
         }
         $this->_redirectReferer();
-    }
-
-    /**
-     * Show details of one review
-     */
-    public function viewAction(): void
-    {
-        $review = $this->_loadReview((int) $this->getRequest()->getParam('id'));
-        if (!$review) {
-            $this->_forward('noroute');
-            return;
-        }
-
-        $product = $this->_loadProduct($review->getEntityPkValue());
-        if (!$product) {
-            $this->_forward('noroute');
-            return;
-        }
-
-        $this->loadLayout();
-        $this->_initLayoutMessages('review/session');
-        $this->_initLayoutMessages('catalog/session');
-        $this->renderLayout();
     }
 
     /**

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage
  */
 
 use Monolog\Level;
@@ -29,24 +27,16 @@ final class Mage
     public const LOG_INFO      = Level::Info;
     public const LOG_DEBUG     = Level::Debug;
 
-    /**
-     * @deprecated Use LOG_EMERGENCY instead
-     */
+    #[\Deprecated(message: 'Use LOG_EMERGENCY instead')]
     public const LOG_EMERG = self::LOG_EMERGENCY;
 
-    /**
-     * @deprecated Use LOG_CRITICAL instead
-     */
+    #[\Deprecated(message: 'Use LOG_CRITICAL instead')]
     public const LOG_CRIT = self::LOG_CRITICAL;
 
-    /**
-     * @deprecated Use LOG_ERROR instead
-     */
+    #[\Deprecated(message: 'Use LOG_ERROR instead')]
     public const LOG_ERR = self::LOG_ERROR;
 
-    /**
-     * @deprecated Use LOG_WARNING instead
-     */
+    #[\Deprecated(message: 'Use LOG_WARNING instead')]
     public const LOG_WARN = self::LOG_WARNING;
 
     /**
@@ -134,7 +124,7 @@ final class Mage
      */
     public static function getVersion(): string
     {
-        return '26.3.0';
+        return '26.7.0';
     }
 
     /**
@@ -599,9 +589,8 @@ final class Mage
      * @param string $code
      * @param string $type
      * @param string|array $options
-     * @return Mage_Core_Model_App
      */
-    public static function app($code = '', $type = 'store', $options = [])
+    public static function app($code = '', $type = 'store', $options = []): Mage_Core_Model_App
     {
         if (self::$_app === null) {
             self::$_app = new Mage_Core_Model_App();
@@ -642,11 +631,9 @@ final class Mage
             header('Location: ' . self::getBaseUrl());
             die;
         } catch (Mage_Core_Model_Store_Exception $e) {
-            Maho::errorReport([], 404);
-            die;
+            self::printException($e, '', 404);
         } catch (Exception $e) {
             self::printException($e);
-            die;
         }
     }
 
@@ -682,17 +669,15 @@ final class Mage
             header('Location: ' . self::getBaseUrl());
             die();
         } catch (Mage_Core_Model_Store_Exception $e) {
-            Maho::errorReport([], 404);
-            die();
+            self::printException($e, '', 404);
         } catch (Exception $e) {
             if (self::isInstalled()) {
                 self::dispatchEvent('mage_run_installed_exception', ['exception' => $e]);
                 self::printException($e);
-                exit();
             }
             try {
                 self::dispatchEvent('mage_run_exception', ['exception' => $e]);
-                if (!headers_sent() && self::isInstalled()) {
+                if (!headers_sent()) {
                     header('Location:' . self::getUrl('install'));
                 } else {
                     self::printException($e);
@@ -925,7 +910,7 @@ final class Mage
     /**
      * Display exception
      */
-    public static function printException(Throwable $e, $extra = '')
+    public static function printException(Throwable $e, string $extra = '', int $httpResponseCode = 503): never
     {
         if (self::$_isDeveloperMode) {
             print '<pre>';
@@ -951,7 +936,7 @@ final class Mage
                 $reportData['script_name'] = $_SERVER['SCRIPT_NAME'];
             }
 
-            Maho::errorReport($reportData);
+            Maho::errorReport($reportData, $httpResponseCode);
         }
 
         die();

@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2016-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2016-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -137,32 +137,38 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Format date using current locale options and time zone.
+     * Format date for display using the store's locale and timezone.
      *
-     * @param   string|int|DateTime|null   $date If empty, return current datetime.
+     * Produces locale-aware output (e.g. "April 16, 2026" in en_US, "16 avril 2026" in fr_FR).
+     * For machine-readable formats, use DateTime::format() directly instead.
+     *
+     * @param   string|int|DateTimeInterface|null   $date If empty, return current datetime.
      * @param   string                      $format   See Mage_Core_Model_Locale::FORMAT_TYPE_* constants
-     * @param   bool                        $showTime Whether to include time
+     * @param   bool                        $withTime Whether to include time
      * @return  string
      */
-    public function formatDate($date = null, $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT, $showTime = false)
+    public function formatDate($date = null, $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT, $withTime = false)
     {
-        return $this->formatTimezoneDate($date, $format, $showTime);
+        return $this->formatTimezoneDate($date, $format, $withTime);
     }
 
     /**
-     * Format date using current locale options and time zone.
+     * Format date for display using the store's locale and timezone.
      *
-     * @param   string|int|DateTime|null   $date The date to format. Can be:
+     * Produces locale-aware output (e.g. "April 16, 2026" in en_US, "16 avril 2026" in fr_FR).
+     * For machine-readable formats, use DateTime::format() directly instead.
+     *
+     * @param   string|int|DateTimeInterface|null   $date The date to format. Can be:
      *                                            - null: Uses current time
      *                                            - int: Unix timestamp (assumes UTC)
      *                                            - string: Date string (e.g., "2025-08-01 09:24:18")
-     *                                            - DateTime: Existing DateTime object
+     *                                            - DateTimeInterface: Existing DateTime/DateTimeImmutable object
      * @param   string                      $format Display format constant:
      *                                            - FORMAT_TYPE_SHORT: Brief format (e.g., "8/1/25")
      *                                            - FORMAT_TYPE_MEDIUM: Standard format (e.g., "Aug 1, 2025")
      *                                            - FORMAT_TYPE_LONG: Detailed format (e.g., "August 1, 2025")
      *                                            - FORMAT_TYPE_FULL: Complete format (e.g., "Thursday, August 1, 2025")
-     * @param   bool                        $showTime Whether to include time in the output
+     * @param   bool                        $withTime Whether to include time in the output
      *                                            - true: "Aug 1, 2025, 10:24:18 AM"
      *                                            - false: "Aug 1, 2025"
      * @param   bool                        $useTimezone Whether to convert the date to store timezone
@@ -171,23 +177,29 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      * @return  string                      Formatted date string according to locale settings
      */
     public function formatTimezoneDate(
-        string|int|DateTime|null $date = null,
+        string|int|DateTimeInterface|null $date = null,
         string $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT,
-        bool $showTime = false,
+        bool $withTime = false,
         bool $useTimezone = true,
     ): string {
         if (!in_array($format, $this->_allowedFormats, true)) {
-            return $date;
+            return is_string($date) ? $date : '';
         }
 
         $locale = Mage::app()->getLocale();
         if (empty($date)) {
-            $date = $locale->date(Mage::getSingleton('core/date')->gmtTimestamp(), null, null, $useTimezone);
+            $date = $useTimezone
+                ? $locale->utcToStore(null, time())
+                : new DateTime('@' . time());
         } elseif (is_int($date)) {
-            $date = $locale->date($date, null, null, $useTimezone);
-        } elseif (!$date instanceof DateTime) {
+            $date = $useTimezone
+                ? $locale->utcToStore(null, $date)
+                : new DateTime('@' . $date);
+        } elseif (!$date instanceof DateTimeInterface) {
             if (($time = strtotime($date)) !== false) {
-                $date = $locale->date($time, null, null, $useTimezone);
+                $date = $useTimezone
+                    ? $locale->utcToStore(null, $time)
+                    : new DateTime('@' . $time);
             } else {
                 return '';
             }
@@ -200,7 +212,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
             Mage_Core_Model_Locale::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
             default => IntlDateFormatter::SHORT,
         };
-        $timeStyle = $showTime ? $dateStyle : IntlDateFormatter::NONE;
+        $timeStyle = $withTime ? $dateStyle : IntlDateFormatter::NONE;
 
         $formatter = new IntlDateFormatter(
             $locale->getLocaleCode(),
@@ -215,9 +227,9 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Format time using current locale options
      *
-     * @param   string|DateTime|null $time
-     * @param   string              $format
-     * @param   bool                $showDate
+     * @param   string|DateTimeInterface|null $time
+     * @param   string                        $format
+     * @param   bool                          $showDate
      * @return  string
      */
     public function formatTime($time = null, $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT, $showDate = false)
@@ -228,11 +240,11 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
 
         $locale = Mage::app()->getLocale();
         if (is_null($time)) {
-            $date = $locale->date(time());
-        } elseif ($time instanceof DateTime) {
+            $date = $locale->utcToStore(null, time());
+        } elseif ($time instanceof DateTimeInterface) {
             $date = $time;
         } else {
-            $date = $locale->date(strtotime($time));
+            $date = $locale->utcToStore(null, strtotime($time));
         }
 
         // Use IntlDateFormatter to format with locale-specific patterns
@@ -281,6 +293,36 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
             return $data;
         }
         return $this->getEncryptor()->decrypt($data);
+    }
+
+    /**
+     * Idempotent encryption: decrypts first to get plaintext, then encrypts.
+     * Safe to call on both plaintext and already-encrypted values.
+     */
+    public function encryptIdempotent(string $data): string
+    {
+        $decrypted = $this->tryDecrypt($data);
+        $plaintext = $decrypted ?? $data;
+        return $this->encrypt($plaintext);
+    }
+
+    /**
+     * Attempt to decrypt data, returning null on failure instead of logging exceptions.
+     * Useful when the value may or may not be encrypted.
+     */
+    public function tryDecrypt(?string $data): ?string
+    {
+        if ($data === null || $data === '' || !Mage::isInstalled()) {
+            return null;
+        }
+
+        $minBase64Len = (int) ceil((SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + SODIUM_CRYPTO_SECRETBOX_MACBYTES) * 4 / 3);
+        if (strlen($data) < $minBase64Len || !preg_match('#^[A-Za-z0-9+/=]+$#', $data)) {
+            return null;
+        }
+
+        $result = $this->getEncryptor()->decrypt($data);
+        return ($result !== '') ? $result : null;
     }
 
     public function validateKey(string $key): bool
@@ -636,24 +678,12 @@ XML;
      * Encode the mixed $valueToEncode into the JSON format
      *
      * @param mixed $valueToEncode
-     * @param bool $cycleCheck Optional; whether or not to check for object recursion; off by default
-     * @param  array $options Additional options used during encoding
      * @return string
      * @throws JsonException
      */
-    public function jsonEncode($valueToEncode, $cycleCheck = false, $options = [])
+    public function jsonEncode($valueToEncode)
     {
-        $json = json_encode($valueToEncode, JSON_THROW_ON_ERROR);
-
-        /** @var Mage_Core_Model_Translate_Inline $inline */
-        $inline = Mage::getSingleton('core/translate_inline');
-        if ($inline->isAllowed()) {
-            $inline->setIsJson(true);
-            $inline->processResponseBody($json);
-            $inline->setIsJson(false);
-        }
-
-        return $json;
+        return json_encode($valueToEncode, JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -809,50 +839,120 @@ XML;
         return $data;
     }
 
-    /**
-     * @deprecated since 25.5.0
-     */
+    #[\Deprecated(message: 'since 25.5.0')]
     public function isFormKeyEnabled(): bool
     {
         return true;
     }
 
     /**
-     * Returns true if the rate limit of the current client is exceeded
-     * @param bool $setErrorMessage Adds a predefined error message to the 'core/session' object
-     * @return bool is rate limit exceeded
+     * Rate limiter scoped to the request client. Core resolves the identity (IP/session) from
+     * $scope, so callers never read the remote address or session id themselves. $namespace
+     * separates one feature's budget from another's. A non-positive $maxAttempts disables it.
      */
-    public function isRateLimitExceeded(bool $setErrorMessage = true, bool $recordRateLimitHit = true): bool
-    {
-        $active = Mage::getStoreConfigFlag('system/rate_limit/active');
-        if ($active && $remoteAddr = Mage::helper('core/http')->getRemoteAddr()) {
-            $cacheTag = 'rate_limit_' . $remoteAddr;
-            if (Mage::app()->testCache($cacheTag)) {
-                if ($setErrorMessage) {
-                    $errorMessage = $this->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.');
-                    Mage::getSingleton('core/session')->addError($errorMessage);
-                }
-                return true;
-            }
-
-            if ($recordRateLimitHit) {
-                $this->recordRateLimitHit();
-            }
-        }
-
-        return false;
+    public function rateLimiter(
+        string $namespace,
+        int $maxAttempts,
+        int $windowSeconds,
+        \Maho\Security\RateLimitScope $scope = \Maho\Security\RateLimitScope::Client,
+    ): \Maho\Security\RateLimiter {
+        $identity = $this->resolveRateLimitIdentity($scope);
+        return new \Maho\Security\RateLimiter("{$namespace}:{$identity}", $maxAttempts, $windowSeconds);
     }
 
     /**
-     * Save the client rate limit hit to the cache
+     * Rate limiter keyed by a caller-owned domain value (email, store id, order reference) rather
+     * than by request identity. The caller passes a value it already holds; nothing is read from
+     * the request. A non-positive $maxAttempts disables it.
      */
-    public function recordRateLimitHit(): void
+    public function rateLimiterBy(
+        string $namespace,
+        string $value,
+        int $maxAttempts,
+        int $windowSeconds,
+    ): \Maho\Security\RateLimiter {
+        return new \Maho\Security\RateLimiter("{$namespace}:{$value}", $maxAttempts, $windowSeconds);
+    }
+
+    /**
+     * Config-governed IP limiter (system/rate_limit/*). Returns null when rate limiting is
+     * disabled or the client IP is unknown; callers treat null as "not limited".
+     */
+    public function ipRateLimiter(): ?\Maho\Security\RateLimiter
     {
-        $active = Mage::getStoreConfigFlag('system/rate_limit/active');
-        if ($active && $remoteAddr = Mage::helper('core/http')->getRemoteAddr()) {
-            $cacheTag = 'rate_limit_' . $remoteAddr;
-            Mage::app()->saveCache(1, $cacheTag, ['brute_force'], Mage::getStoreConfig('system/rate_limit/timeframe'));
+        if (!Mage::getStoreConfigFlag('system/rate_limit/active')) {
+            return null;
         }
+        $ip = Mage::helper('core/http')->getRemoteAddr();
+        if (!$ip) {
+            return null;
+        }
+        $window = max(1, (int) Mage::getStoreConfig('system/rate_limit/timeframe'));
+        return new \Maho\Security\RateLimiter("ip:{$ip}", 1, $window);
+    }
+
+    protected function resolveRateLimitIdentity(\Maho\Security\RateLimitScope $scope): string
+    {
+        return match ($scope) {
+            \Maho\Security\RateLimitScope::Ip => (string) Mage::helper('core/http')->getRemoteAddr(),
+            \Maho\Security\RateLimitScope::Session => (string) Mage::getSingleton('core/session')->getSessionId(),
+            \Maho\Security\RateLimitScope::Client => (string) (Mage::helper('core/http')->getRemoteAddr()
+                ?: Mage::getSingleton('core/session')->getSessionId()),
+        };
+    }
+
+    /**
+     * Per-install hidden trap field name for honeypot anti-spam.
+     *
+     * Derived deterministically from the encryption key, so the same
+     * install always returns the same name (frontend can cache it),
+     * and different installs return different names (so a bot that
+     * scrapes one Maho install can't blanket-target all of them).
+     *
+     * Defeats random spambot armies. For targeted attackers (who can
+     * scrape the rendered form), pair with captcha, that's what the
+     * `api_captcha_config` / `api_verify_captcha` events are for.
+     */
+    public function getHoneypotFieldName(): string
+    {
+        return '_h_' . substr(hash('sha256', Mage::getEncryptionKeyAsHex() . 'honeypot'), 0, 8);
+    }
+
+    /**
+     * Honeypot check: returns true when the request body contains a
+     * non-empty value in the install-specific trap field returned by
+     * `getHoneypotFieldName()`.
+     *
+     * The enable/disable toggle is the caller's concern: gate this call
+     * behind your own module setting. Works for any request shape that
+     * exposes form data as an array, so it's usable from web controllers
+     * (`$request->getPost()`) and API processors (decoded JSON body) alike.
+     */
+    public function isHoneypotTriggered(array $body): bool
+    {
+        $field = $this->getHoneypotFieldName();
+        $value = $body[$field] ?? null;
+        if (is_array($value)) {
+            return $value !== [];
+        }
+        return trim((string) $value) !== '';
+    }
+
+    /**
+     * Visually-hidden honeypot trap field markup, ready to echo inside a `<form>`.
+     *
+     * Renders the install-specific field from `getHoneypotFieldName()` so every
+     * caller emits an identical, correctly-named trap. The enable/disable toggle
+     * stays the caller's concern: gate this behind your own module setting.
+     */
+    public function getHoneypotFieldHtml(): string
+    {
+        $field = $this->getHoneypotFieldName();
+        $label = $this->escapeHtml($this->__('Leave this field empty'));
+        return '<div aria-hidden="true" style="position:absolute;left:-9999px;height:0;overflow:hidden;">'
+            . '<label for="' . $field . '">' . $label . '</label>'
+            . '<input name="' . $field . '" id="' . $field . '" value="" type="text" tabindex="-1" autocomplete="off">'
+            . '</div>';
     }
 
     /**
@@ -951,8 +1051,8 @@ XML;
     {
         $coreHelper = Mage::helper('core');
         $emailTransport = Mage::getStoreConfig('system/smtp/enabled');
-        $user = $coreHelper->decrypt(Mage::getStoreConfig('system/smtp/username'));
-        $pass = $coreHelper->decrypt(Mage::getStoreConfig('system/smtp/password'));
+        $user = urlencode($coreHelper->decrypt(Mage::getStoreConfig('system/smtp/username')));
+        $pass = urlencode($coreHelper->decrypt(Mage::getStoreConfig('system/smtp/password')));
         $host = Mage::getStoreConfig('system/smtp/host');
         $port = Mage::getStoreConfig('system/smtp/port');
         $region = Mage::getStoreConfig('system/smtp/region');
@@ -993,7 +1093,7 @@ XML;
             'sendgrid+api' => "$emailTransport://$pass@default",
             'sweego+smtp' => "$emailTransport://$user:$pass@$host:$port",
             'sweego+api' => "$emailTransport://$pass@default",
-            'sendmail' => "$emailTransport://default",
+            'sendmail' => 'native://default',
             default => '',
         };
 
@@ -1002,6 +1102,22 @@ XML;
         }
 
         return $dsn;
+    }
+
+    public function getMailTransport(): ?TransportInterface
+    {
+        $dsn = $this->getMailerDsn();
+        if (!$dsn) {
+            return null;
+        }
+
+        $transport = Transport::fromDsn($dsn);
+
+        if (Mage::getStoreConfigFlag('system/smtp/log_enabled')) {
+            $transport = new Mage_Core_Model_Email_LoggingTransport($transport);
+        }
+
+        return $transport;
     }
 
     /**
@@ -1043,7 +1159,7 @@ XML;
      */
     public function isValidRegex(string $value, string $pattern): bool
     {
-        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Regex(['pattern' => $pattern]));
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Regex(pattern: $pattern));
         return count($violations) === 0;
     }
 
@@ -1052,15 +1168,7 @@ XML;
      */
     public function isValidLength(string $value, ?int $min = null, ?int $max = null): bool
     {
-        $options = [];
-        if ($min !== null) {
-            $options['min'] = $min;
-        }
-        if ($max !== null) {
-            $options['max'] = $max;
-        }
-
-        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Length($options));
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Length(min: $min, max: $max));
         return count($violations) === 0;
     }
 
@@ -1069,15 +1177,7 @@ XML;
      */
     public function isValidRange(mixed $value, int|float|null $min = null, int|float|null $max = null): bool
     {
-        $options = [];
-        if ($min !== null) {
-            $options['min'] = $min;
-        }
-        if ($max !== null) {
-            $options['max'] = $max;
-        }
-
-        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Range($options));
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Range(min: $min, max: $max));
         return count($violations) === 0;
     }
 
@@ -1116,6 +1216,25 @@ XML;
     {
         $violations = $this->getSymfonyValidator()->validate($value, $constraint);
         return count($violations) === 0;
+    }
+
+    /**
+     * Return a "⚠️ Install <package>" hint when the given Composer package
+     * isn't installed, or '' when it is. Used by system-config sources that
+     * surface optional dependencies inline (SMTP transports, AI providers).
+     *
+     * @param string $separator string inserted before the warning - " " for
+     *                          dropdown labels, "<br>" for heading rows.
+     */
+    public function packageInstallWarning(string $package, string $separator = ' '): string
+    {
+        if (\Composer\InstalledVersions::isInstalled($package)) {
+            return '';
+        }
+        // Result lands in raw admin <option> labels and config UI strings;
+        // escape so a community provider supplying an arbitrary package
+        // name can't inject HTML.
+        return $separator . '⚠️ Install ' . htmlspecialchars($package, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 
     /**
@@ -1176,10 +1295,22 @@ XML;
         callable $encryptCallback,
         callable $decryptCallback,
         int $batchSize = 1000,
-    ): void {
+        ?\Symfony\Component\Console\Output\OutputInterface $output = null,
+    ): bool {
         $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
         $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
         $lastId = 0;
+
+        $tableColumns = array_keys($readConnection->describeTable($table));
+        foreach (array_diff($columns, $tableColumns) as $column) {
+            $message = "recryptTable: column '$column' not found in table '$table', skipping";
+            Mage::log($message, Mage::LOG_WARNING);
+            $output?->writeln("<comment>WARNING: $message</comment>");
+        }
+        $columns = array_values(array_intersect($columns, $tableColumns));
+        if (empty($columns)) {
+            return false;
+        }
 
         $quotedPk = $readConnection->quoteIdentifier($primaryKey);
 
@@ -1224,5 +1355,74 @@ XML;
 
             unset($rows);
         }
+
+        return true;
+    }
+
+    /**
+     * Validate that all encrypted values in a table can be decrypted successfully.
+     * Returns an array of failures (empty array = all good).
+     *
+     * @param string[] $columns
+     * @return array<int, array{table: string, primary_key: mixed, column: string}>
+     */
+    public function validateDecryptTable(
+        string $table,
+        string $primaryKey,
+        array $columns,
+        callable $decryptCallback,
+        int $batchSize = 1000,
+    ): array {
+        $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $lastId = 0;
+        $failures = [];
+
+        $tableColumns = array_keys($readConnection->describeTable($table));
+        $columns = array_values(array_intersect($columns, $tableColumns));
+        if (empty($columns)) {
+            return [];
+        }
+
+        $quotedPk = $readConnection->quoteIdentifier($primaryKey);
+
+        while (true) {
+            $select = $readConnection->select()
+                ->from($table, array_merge([$primaryKey], $columns))
+                ->where("$quotedPk > ?", $lastId)
+                ->order("$quotedPk ASC")
+                ->limit($batchSize);
+
+            $conditions = [];
+            foreach ($columns as $column) {
+                $conditions[] = $readConnection->quoteIdentifier($column) . ' IS NOT NULL AND '
+                    . $readConnection->quoteIdentifier($column) . " != ''";
+            }
+            $select->where(implode(' OR ', $conditions));
+
+            $rows = $readConnection->fetchAll($select);
+            if (empty($rows)) {
+                break;
+            }
+
+            foreach ($rows as $row) {
+                foreach ($columns as $column) {
+                    if ($row[$column] !== null && $row[$column] !== '') {
+                        $decrypted = $decryptCallback($row[$column]);
+                        if ($decrypted === '') {
+                            $failures[] = [
+                                'table' => $table,
+                                'primary_key' => $row[$primaryKey],
+                                'column' => $column,
+                            ];
+                        }
+                    }
+                }
+                $lastId = $row[$primaryKey];
+            }
+
+            unset($rows);
+        }
+
+        return $failures;
     }
 }

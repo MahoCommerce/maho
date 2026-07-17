@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Maho
- *
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 declare(strict_types=1);
@@ -182,7 +180,7 @@ describe('Blog Helper Data', function () {
             ->addFieldToFilter('entity_id', $currentStorePost->getId());
         $storeFilteredCollection->getSelect()->where(
             'publish_date IS NULL OR publish_date <= ?',
-            Mage_Core_Model_Locale::today(),
+            Mage::app()->getLocale()->todayUtc(),
         );
 
         expect($storeFilteredCollection->getSize())->toBe(1); // Post visible with store filter

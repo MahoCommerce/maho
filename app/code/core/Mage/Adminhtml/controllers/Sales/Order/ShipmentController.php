@@ -1,17 +1,27 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2026 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Controller_Sales_Shipment
 {
+    /**
+     * Controller pre-dispatch method
+     *
+     * @return Mage_Adminhtml_Controller_Action
+     */
+    #[\Override]
+    public function preDispatch()
+    {
+        $this->_setForcedFormKeyActions(['cancel']);
+        return parent::preDispatch();
+    }
+
     /**
      * Initialize shipment items QTY
      */
@@ -107,6 +117,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      * Shipment information page
      */
     #[\Override]
+    #[Maho\Config\Route('/admin/sales_order_shipment/view')]
     public function viewAction(): void
     {
         $shipment = $this->_initShipment();
@@ -129,6 +140,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Start create shipment action
      */
+    #[Maho\Config\Route('/admin/sales_order_shipment/start')]
     public function startAction(): void
     {
         /**
@@ -140,6 +152,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Shipment create page
      */
+    #[Maho\Config\Route('/admin/sales_order_shipment/new')]
     public function newAction(): void
     {
         if ($shipment = $this->_initShipment()) {
@@ -162,6 +175,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      * Save shipment
      * We can save only new shipment. Existing shipments are not editable
      */
+    #[Maho\Config\Route('/admin/sales_order_shipment/save')]
     public function saveAction(): void
     {
         $data = $this->getRequest()->getPost('shipment');
@@ -239,9 +253,29 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
         }
     }
 
+    #[Maho\Config\Route('/admin/sales_order_shipment/cancel')]
+    public function cancelAction(): void
+    {
+        if ($shipment = $this->_initShipment()) {
+            try {
+                $shipment->cancel();
+                $this->_saveShipment($shipment);
+                $this->_getSession()->addSuccess($this->__('The shipment has been canceled.'));
+            } catch (Mage_Core_Exception $e) {
+                $this->_getSession()->addError($e->getMessage());
+            } catch (Exception $e) {
+                $this->_getSession()->addError($this->__('Cannot cancel the shipment.'));
+            }
+            $this->_redirect('*/*/view', ['shipment_id' => $shipment->getId()]);
+        } else {
+            $this->_forward('noRoute');
+        }
+    }
+
     /**
      * Send email with shipment data to customer
      */
+    #[Maho\Config\Route('/admin/sales_order_shipment/email')]
     public function emailAction(): void
     {
         try {
@@ -271,6 +305,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Add new tracking number action
      */
+    #[Maho\Config\Route('/admin/sales_order_shipment/addTrack')]
     public function addTrackAction(): void
     {
         try {
@@ -320,6 +355,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Remove tracking number from shipment
      */
+    #[Maho\Config\Route('/admin/sales_order_shipment/removeTrack')]
     public function removeTrackAction(): void
     {
         $trackId    = $this->getRequest()->getParam('track_id');
@@ -359,6 +395,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * View shipment tracking information
      */
+    #[Maho\Config\Route('/admin/sales_order_shipment/viewTrack')]
     public function viewTrackAction(): void
     {
         $trackId    = $this->getRequest()->getParam('track_id');
@@ -402,6 +439,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Add comment to shipment history
      */
+    #[Maho\Config\Route('/admin/sales_order_shipment/addComment')]
     public function addCommentAction(): void
     {
         try {
@@ -447,9 +485,6 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      */
     protected function _createShippingLabel(Mage_Sales_Model_Order_Shipment $shipment)
     {
-        if (!$shipment) {
-            return false;
-        }
         $carrier = $shipment->getOrder()->getShippingCarrier();
         if (!$carrier->isShippingLabelsAvailable()) {
             return false;
@@ -508,6 +543,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Create shipping label action for specific shipment
      */
+    #[Maho\Config\Route('/admin/sales_order_shipment/createLabel')]
     public function createLabelAction(): void
     {
         $response = new \Maho\DataObject();
@@ -533,6 +569,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Print label for one specific shipment
      */
+    #[Maho\Config\Route('/admin/sales_order_shipment/printLabel')]
     public function printLabelAction()
     {
         try {
@@ -583,6 +620,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Create pdf document with information about packages
      */
+    #[Maho\Config\Route('/admin/sales_order_shipment/printPackage')]
     public function printPackageAction(): void
     {
         $shipment = $this->_initShipment();
@@ -590,7 +628,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
         if ($shipment) {
             $pdf = Mage::getModel('sales/order_pdf_shipment_packaging')->getPdf([$shipment]);
             $this->_prepareDownloadResponse(
-                'packingslip' . Mage::getSingleton('core/date')->date('Y-m-d_H-i-s') . '.pdf',
+                'packingslip' . Mage::app()->getLocale()->utcToStore()->format('Y-m-d_H-i-s') . '.pdf',
                 $pdf,
                 'application/pdf',
             );
@@ -603,6 +641,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      * Batch print shipping labels for whole shipments.
      * Push pdf document with shipping labels to user browser
      */
+    #[Maho\Config\Route('/admin/sales_order_shipment/massPrintShippingLabel')]
     public function massPrintShippingLabelAction(): void
     {
         $request = $this->getRequest();
@@ -613,7 +652,8 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
         switch ($request->getParam('massaction_prepare_key')) {
             case 'shipment_ids':
                 $ids = $request->getParam('shipment_ids');
-                array_filter($ids, '\intval');
+                // Keep only values that are non-zero when cast to int
+                $ids = array_filter($ids, fn(mixed $o) => (int) $o !== 0);
                 if (!empty($ids)) {
                     $shipments = Mage::getResourceModel('sales/order_shipment_collection')
                         ->addFieldToFilter('entity_id', ['in' => $ids]);
@@ -621,7 +661,8 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
                 break;
             case 'order_ids':
                 $ids = $request->getParam('order_ids');
-                array_filter($ids, '\intval');
+                // Keep only values that are non-zero when cast to int
+                $ids = array_filter($ids, fn(mixed $o) => (int) $o !== 0);
                 if (!empty($ids)) {
                     $shipments = Mage::getResourceModel('sales/order_shipment_collection')
                         ->setOrderFilter(['in' => $ids]);
@@ -814,7 +855,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     </style>
 </head>
 <body>
-    <img src="' . $dataUri . '" class="shipping-label" alt="Shipping Label" />
+    <img src="' . $dataUri . '" class="shipping-label" alt="Shipping Label">
 </body>
 </html>';
 
@@ -838,6 +879,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      *
      * @return Mage_Core_Controller_Response_Http
      */
+    #[Maho\Config\Route('/admin/sales_order_shipment/getShippingItemsGrid')]
     public function getShippingItemsGridAction()
     {
         $this->_initShipment();

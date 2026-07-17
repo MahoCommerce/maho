@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 class Mage_Core_Block_Messages extends Mage_Core_Block_Template
@@ -190,7 +188,7 @@ class Mage_Core_Block_Messages extends Mage_Core_Block_Template
         $html = '<' . $this->_messagesFirstLevelTagName . ' id="admin_messages">';
         foreach ($this->getMessages($type) as $message) {
             $html .= '<' . $this->_messagesSecondLevelTagName . ' class="' . $message->getType() . '-msg">'
-                . ($this->_escapeMessageFlag) ? $this->escapeHtml($message->getText()) : $message->getText()
+                . ($this->_escapeMessageFlag ? $this->escapeHtml($message->getText()) : $message->getText())
                 . '</' . $this->_messagesSecondLevelTagName . '>';
         }
         $html .= '</' . $this->_messagesFirstLevelTagName . '>';

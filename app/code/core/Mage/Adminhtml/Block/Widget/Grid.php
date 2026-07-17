@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2026 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 /**
@@ -70,12 +68,16 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * @var string
      */
-    protected $_defaultDir      = 'desc';
+    protected $_defaultDir      = 'DESC';
 
     /**
      * @var array
      */
     protected $_defaultFilter   = [];
+
+    protected bool $_enableEntityNavigation = false;
+
+    protected string $_entityIdField = 'entity_id';
 
     /**
      * Export flag
@@ -226,6 +228,11 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      * @var null|array[][]
      */
     protected ?array $defaultColumnSettings = null;
+
+    /**
+     * @var array<string, bool>
+     */
+    protected array $isAllowedCache = [];
 
     /**
      * Mage_Adminhtml_Block_Widget_Grid constructor.
@@ -757,8 +764,10 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     protected function _prepareGrid()
     {
         $this->_prepareColumns();
+        Mage::dispatchEvent('adminhtml_block_widget_grid_prepare_columns_after', ['grid' => $this, 'grid_block_id' => $this->getId()]);
         $this->_prepareMassactionBlock();
         $this->_prepareCollection();
+        Mage::dispatchEvent('adminhtml_block_widget_grid_prepare_collection_after', ['grid' => $this, 'collection' => $this->getCollection()]);
         return $this;
     }
 
@@ -780,7 +789,56 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      */
     protected function _afterLoadCollection()
     {
+        if ($this->_enableEntityNavigation && $this->_saveParametersInSession) {
+            $this->_storeNavigationQuery();
+        }
         return $this;
+    }
+
+    protected function _storeNavigationQuery(): void
+    {
+        if (!$this->getCollection()) {
+            return;
+        }
+
+        $select = clone $this->getCollection()->getSelect();
+        $orderParts = $select->getPart(\Maho\Db\Select::ORDER);
+
+        $orderExprs = [];
+        $hasIdInOrder = false;
+        foreach ($orderParts as $term) {
+            if (!$term instanceof \Maho\Db\Expr && $term[0] === $this->_entityIdField) {
+                $hasIdInOrder = true;
+            }
+            $orderExprs[] = $term instanceof \Maho\Db\Expr ? $term->__toString() : ($term[0] . ' ' . $term[1]);
+        }
+        if (!$orderExprs) {
+            $orderExprs[] = $this->_entityIdField . ' DESC';
+        } elseif (!$hasIdInOrder) {
+            $lastTerm = end($orderParts);
+            $dir = (!$lastTerm instanceof \Maho\Db\Expr && strtoupper($lastTerm[1]) === 'ASC') ? 'ASC' : 'DESC';
+            $orderExprs[] = $this->_entityIdField . ' ' . $dir;
+        }
+        $orderSql = implode(', ', $orderExprs);
+
+        $id = $this->_entityIdField;
+        $w = "ORDER BY {$orderSql}";
+        $select->reset(\Maho\Db\Select::LIMIT_COUNT);
+        $select->reset(\Maho\Db\Select::LIMIT_OFFSET);
+        $select->reset(\Maho\Db\Select::COLUMNS);
+        $select->columns([
+            $id,
+            'prev_id'  => new \Maho\Db\Expr("LAG({$id}) OVER ({$w})"),
+            'next_id'  => new \Maho\Db\Expr("LEAD({$id}) OVER ({$w})"),
+            'position' => new \Maho\Db\Expr("ROW_NUMBER() OVER ({$w})"),
+            'total'    => new \Maho\Db\Expr('COUNT(*) OVER ()'),
+        ]);
+
+        Mage::getSingleton('adminhtml/session')->setData($this->getId() . '_nav', [
+            'sql' => $select->assemble(),
+            'bind' => [],
+            'id_field' => $id,
+        ]);
     }
 
     /**
@@ -1246,7 +1304,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
             'rm'    => true, // can delete file after use
         ];
 
-        return (!empty($fileName) && ($limit != 0)) ? [str_replace('.csv', '-' . $count . '-' . Mage::getModel('core/date')->date('Ymd-His') . '.csv', $fileName), $data, 'text/csv'] : $data;
+        return (!empty($fileName) && ($limit != 0)) ? [str_replace('.csv', '-' . $count . '-' . Mage::app()->getLocale()->utcToStore()->format('Ymd-His') . '.csv', $fileName), $data, 'text/csv'] : $data;
     }
 
     /**
@@ -1312,7 +1370,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
             $csv .= implode(',', $data) . "\n";
         }
 
-        return (!empty($fileName) && ($limit != 0)) ? [str_replace('.csv', '-' . $count . '-' . Mage::getModel('core/date')->date('Ymd-His') . '.csv', $fileName), $csv, 'text/csv'] : $csv;
+        return (!empty($fileName) && ($limit != 0)) ? [str_replace('.csv', '-' . $count . '-' . Mage::app()->getLocale()->utcToStore()->format('Ymd-His') . '.csv', $fileName), $csv, 'text/csv'] : $csv;
     }
 
     /**
@@ -1421,7 +1479,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
             'rm'    => true, // can delete file after use
         ];
 
-        return (!empty($sheetName) && ($limit != 0)) ? [str_replace('.xml', '-' . $count . '-' . Mage::getModel('core/date')->date('Ymd-His') . '.xml', $sheetName), $data, 'application/vnd.ms-excel'] : $data;
+        return (!empty($sheetName) && ($limit != 0)) ? [str_replace('.xml', '-' . $count . '-' . Mage::app()->getLocale()->utcToStore()->format('Ymd-His') . '.xml', $sheetName), $data, 'application/vnd.ms-excel'] : $data;
     }
 
     /**
@@ -1484,7 +1542,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         $xmlObj->setData($data);
         $xmlObj->unparse();
 
-        return (!empty($fileName) && ($limit != 0)) ? [str_replace('.xml', '-' . $count . '-' . Mage::getModel('core/date')->date('Ymd-His') . '.xml', $fileName), $xmlObj->getData(), 'application/vnd.ms-excel'] : $xmlObj->getData();
+        return (!empty($fileName) && ($limit != 0)) ? [str_replace('.xml', '-' . $count . '-' . Mage::app()->getLocale()->utcToStore()->format('Ymd-His') . '.xml', $fileName), $xmlObj->getData(), 'application/vnd.ms-excel'] : $xmlObj->getData();
     }
 
     /**
@@ -1956,5 +2014,15 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     public function getLimitOptions(): array
     {
         return [20, 30, 50, 100, 200, 500, 1000];
+    }
+
+    protected function isAllowed(string $aclPath): bool
+    {
+        if (!isset($this->isAllowedCache[$aclPath])) {
+            /** @var Mage_Admin_Model_Session $session */
+            $session = Mage::getSingleton('admin/session');
+            $this->isAllowedCache[$aclPath] = $session->isAllowed($aclPath);
+        }
+        return $this->isAllowedCache[$aclPath];
     }
 }

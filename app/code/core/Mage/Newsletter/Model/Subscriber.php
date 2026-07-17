@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Newsletter
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Newsletter
  */
 
 /**
@@ -499,10 +497,6 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
             return $this;
         }
 
-        $translate = Mage::getSingleton('core/translate');
-        /** @var Mage_Core_Model_Translate $translate */
-        $translate->setTranslateInline(false);
-
         $email = Mage::getModel('core/email_template');
         $email->setDesignConfig(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND, 'store' => $this->getStoreId()]);
 
@@ -513,8 +507,6 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
             $this->getName(),
             ['subscriber' => $this],
         );
-
-        $translate->setTranslateInline(true);
 
         return $this;
     }
@@ -536,10 +528,6 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
             return $this;
         }
 
-        $translate = Mage::getSingleton('core/translate');
-        /** @var Mage_Core_Model_Translate $translate */
-        $translate->setTranslateInline(false);
-
         $email = Mage::getModel('core/email_template');
         $email->setDesignConfig(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND, 'store' => $this->getStoreId()]);
 
@@ -550,8 +538,6 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
             $this->getName(),
             ['subscriber' => $this],
         );
-
-        $translate->setTranslateInline(true);
 
         return $this;
     }
@@ -572,10 +558,6 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
             return $this;
         }
 
-        $translate = Mage::getSingleton('core/translate');
-        /** @var Mage_Core_Model_Translate $translate */
-        $translate->setTranslateInline(false);
-
         $email = Mage::getModel('core/email_template');
         $email->setDesignConfig(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND, 'store' => $this->getStoreId()]);
 
@@ -586,8 +568,6 @@ class Mage_Newsletter_Model_Subscriber extends Mage_Core_Model_Abstract
             $this->getName(),
             ['subscriber' => $this],
         );
-
-        $translate->setTranslateInline(true);
 
         return $this;
     }

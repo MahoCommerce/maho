@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 /**
@@ -49,7 +47,6 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     public const XML_PATH_STORE_STORE_PHONE         = 'general/store_information/phone';
     public const XML_PATH_STORE_STORE_HOURS         = 'general/store_information/hours';
     public const XML_PATH_STORE_IN_URL              = 'web/url/use_store';
-    public const XML_PATH_USE_REWRITES              = 'web/seo/use_rewrites';
     public const XML_PATH_UNSECURE_BASE_URL         = 'web/unsecure/base_url';
     public const XML_PATH_UNSECURE_BASE_JS_URL      = 'web/unsecure/base_js_url';
     public const XML_PATH_UNSECURE_BASE_LINK_URL    = 'web/unsecure/base_link_url';
@@ -252,7 +249,6 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
             self::XML_PATH_SECURE_IN_FRONTEND,
             self::XML_PATH_STORE_IN_URL,
             self::XML_PATH_UNSECURE_BASE_URL,
-            self::XML_PATH_USE_REWRITES,
             self::XML_PATH_UNSECURE_BASE_LINK_URL,
             self::XML_PATH_SECURE_BASE_LINK_URL,
             'general/locale/code',
@@ -514,24 +510,19 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
                 case self::URL_TYPE_LINK:
                     $secure = (bool) $secure;
                     $url = $this->getConfig('web/' . ($secure ? 'secure' : 'unsecure') . '/base_link_url');
-                    $url = $this->_updatePathUseRewrites($url);
                     $url = $this->_updatePathUseStoreView($url);
                     break;
 
                 case self::URL_TYPE_DIRECT_LINK:
                     $secure = (bool) $secure;
                     $url = $this->getConfig('web/' . ($secure ? 'secure' : 'unsecure') . '/base_link_url');
-                    $url = $this->_updatePathUseRewrites($url);
                     break;
 
                 case self::URL_TYPE_SKIN:
                 case self::URL_TYPE_JS:
+                case self::URL_TYPE_MEDIA:
                     $secure = is_null($secure) ? Mage::app()->isCurrentlySecure() : (bool) $secure;
                     $url = $this->getConfig('web/' . ($secure ? 'secure' : 'unsecure') . '/base_' . $type . '_url');
-                    break;
-
-                case self::URL_TYPE_MEDIA:
-                    $url = $this->_updateMediaPathUseRewrites($secure);
                     break;
 
                 default:
@@ -554,45 +545,6 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Remove script file name from url in case when server rewrites are enabled
-     *
-     * @param   string $url
-     * @return  string
-     */
-    protected function _updatePathUseRewrites($url)
-    {
-        if ($this->isAdmin() || !$this->getConfig(self::XML_PATH_USE_REWRITES) || !Mage::isInstalled()) {
-            $indexFileName = $this->_isCustomEntryPoint() ? 'index.php' : basename($_SERVER['SCRIPT_FILENAME']);
-            $url .= $indexFileName . '/';
-        }
-        return $url;
-    }
-
-    /**
-     * Check if used entry point is custom
-     *
-     * @return bool
-     */
-    protected function _isCustomEntryPoint()
-    {
-        return (bool) Mage::registry('custom_entry_point');
-    }
-
-    /**
-     * Retrieve URL for media catalog
-     *
-     * @param null|bool $secure
-     * @param string $type
-     * @return string
-     */
-    protected function _updateMediaPathUseRewrites($secure = null, $type = self::URL_TYPE_MEDIA)
-    {
-        $secure = is_null($secure) ? Mage::app()->isCurrentlySecure() : (bool) $secure;
-        $secureStringFlag = $secure ? 'secure' : 'unsecure';
-        return $this->getConfig('web/' . $secureStringFlag . '/base_' . $type . '_url');
-    }
-
-    /**
      * Add store code to url in case if it is enabled in configuration
      *
      * @param   string $url
@@ -607,13 +559,21 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Returns whether url forming scheme prepends url path with store view code
+     * Returns whether url forming scheme prepends url path with store view code.
+     *
+     * The admin store is always exempt: admin URLs are prefixed with the admin
+     * frontName (configured via admin/base_path or use_custom_admin_path) at the
+     * routing layer, not with the store code. Adding the admin store's code on
+     * top would produce doubled URLs like /admin/admin/index/index/.
      *
      * @return bool
      */
     public function getStoreInUrl()
     {
-        return Mage::isInstalled() && $this->getConfig(self::XML_PATH_STORE_IN_URL);
+        if (!Mage::isInstalled() || $this->isAdmin()) {
+            return false;
+        }
+        return (bool) $this->getConfig(self::XML_PATH_STORE_IN_URL);
     }
 
     /**

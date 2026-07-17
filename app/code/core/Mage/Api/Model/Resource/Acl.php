@@ -1,15 +1,16 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Api
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Api
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_Model_Resource_Acl extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
@@ -90,6 +91,7 @@ class Mage_Api_Model_Resource_Acl extends Mage_Core_Model_Resource_Db_Abstract
      */
     public function loadRules(Mage_Api_Model_Acl $acl, array $rulesArr)
     {
+        $orphanedResources = [];
         foreach ($rulesArr as $rule) {
             $role = $rule['role_type'] . $rule['role_id'];
             $resource = $rule['resource_id'];
@@ -106,10 +108,33 @@ class Mage_Api_Model_Resource_Acl extends Mage_Core_Model_Resource_Db_Abstract
                 } elseif ($rule['api_permission'] == 'deny') {
                     $acl->deny($role, $resource, $privileges, $assert);
                 }
+            } catch (\Laminas\Permissions\Acl\Exception\InvalidArgumentException $e) {
+                if (!in_array($resource, $orphanedResources) && str_contains($e->getMessage(), "Resource '$resource' not found")) {
+                    $orphanedResources[] = $resource;
+                }
             } catch (Exception $e) {
-                Mage::logException($e);
+                if (Mage::getIsDeveloperMode()) {
+                    Mage::logException($e);
+                }
             }
         }
+
+        if ($orphanedResources !== []) {
+            try {
+                $adminAcl = Mage::getSingleton('admin/session')->getAcl();
+                if ($adminAcl && $adminAcl->isAllowed(Mage::getSingleton('admin/session')->getUser()->getAclRole(), 'admin/system/api/orphaned_resources')) {
+                    Mage::getSingleton('adminhtml/session')->addNotice(
+                        Mage::helper('adminhtml')->__(
+                            'The following API role resources are no longer available in the system: %s. You can delete them by <a href="%s">clicking here</a>.',
+                            implode(', ', $orphanedResources),
+                            Mage::helper('adminhtml')->getUrl('adminhtml/api_orphanedResource'),
+                        ),
+                    );
+                }
+            } catch (Exception $e) {
+            }
+        }
+
         return $this;
     }
 }

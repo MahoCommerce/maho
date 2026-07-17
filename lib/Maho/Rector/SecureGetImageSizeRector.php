@@ -1,11 +1,8 @@
 <?php
 
 /**
- * Maho
- *
- * @package    MahoLib
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 declare(strict_types=1);
@@ -57,7 +54,7 @@ final class SecureGetImageSizeRector extends AbstractRector
         }
 
         // Skip Maho\Io itself - it contains the safe wrapper implementation
-        $filePath = $this->file->getFilePath();
+        $filePath = $this->getFile()->getFilePath();
         if (str_contains($filePath, 'lib/Maho/Io.php')) {
             return null;
         }

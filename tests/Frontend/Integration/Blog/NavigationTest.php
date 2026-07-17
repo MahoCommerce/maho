@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Maho
- *
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 declare(strict_types=1);
@@ -85,7 +83,7 @@ describe('Blog Navigation Integration', function () {
         $post->save();
 
         // Test filtering by current date (should exclude future posts)
-        $today = Mage_Core_Model_Locale::today();
+        $today = Mage::app()->getLocale()->todayUtc();
         $pastCollection = Mage::getResourceModel('blog/post_collection')
             ->addStoreFilter(Mage::app()->getStore())
             ->addFieldToFilter('is_active', 1)
@@ -164,7 +162,7 @@ describe('Blog Navigation Integration', function () {
 
         $collection->getSelect()->where(
             'publish_date IS NULL OR publish_date <= ?',
-            Mage_Core_Model_Locale::today(),
+            Mage::app()->getLocale()->todayUtc(),
         );
 
         expect($collection->getSize())->toBeGreaterThan(0);
@@ -223,7 +221,7 @@ describe('Blog Navigation Integration', function () {
             ->addFieldToFilter('entity_id', $currentStorePost->getId());
         $currentStoreCollection->getSelect()->where(
             'publish_date IS NULL OR publish_date <= ?',
-            Mage_Core_Model_Locale::today(),
+            Mage::app()->getLocale()->todayUtc(),
         );
 
         // Should find the post we just created
@@ -249,7 +247,7 @@ describe('Blog Navigation Integration', function () {
             ->addFieldToFilter('entity_id', $futurePost->getId());
         $futureFilteredCollection->getSelect()->where(
             'publish_date <= ?',
-            Mage_Core_Model_Locale::today(),
+            Mage::app()->getLocale()->todayUtc(),
         );
 
         expect($futureFilteredCollection->getSize())->toBe(0); // Future post filtered out

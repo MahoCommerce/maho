@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 class Mage_Catalog_Model_Resource_Product_Link_Product_Collection extends Mage_Catalog_Model_Resource_Product_Collection
@@ -46,6 +44,19 @@ class Mage_Catalog_Model_Resource_Product_Link_Product_Collection extends Mage_C
      * @var bool
      */
     protected $_hasLinkFilter  = false;
+
+    /**
+     * Skip duplicate items when DISTINCT deduplication is active, which can happen
+     * when multiple parent products link to the same target (e.g. cart cross-sells)
+     */
+    #[\Override]
+    public function addItem(Maho\DataObject $item)
+    {
+        if ($this->getSelect()->getPart(Maho\Db\Select::DISTINCT) && isset($this->_items[$item->getId()])) {
+            return $this;
+        }
+        return parent::addItem($item);
+    }
 
     /**
      * Declare link model and initialize type attributes join
@@ -90,7 +101,7 @@ class Mage_Catalog_Model_Resource_Product_Link_Product_Collection extends Mage_C
     public function setProduct(Mage_Catalog_Model_Product $product)
     {
         $this->_product = $product;
-        if ($product && $product->getId()) {
+        if ($product->getId()) {
             $this->_hasLinkFilter = true;
             $this->setStore($product->getStore());
         }
@@ -163,11 +174,7 @@ class Mage_Catalog_Model_Resource_Product_Link_Product_Collection extends Mage_C
      */
     public function setGroupBy($groupBy = 'e.entity_id')
     {
-        // Use DISTINCT instead of GROUP BY for cross-database compatibility
-        // GROUP BY requires all selected columns in PostgreSQL, but DISTINCT
-        // achieves the same goal of eliminating duplicates without this restriction
         $this->getSelect()->distinct(true);
-
         return $this;
     }
 

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Checkout
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Checkout
  */
 
 class Mage_Checkout_Model_Type_Onepage
@@ -37,7 +35,7 @@ class Mage_Checkout_Model_Type_Onepage
     protected $_checkoutSession;
 
     /**
-     * @var Mage_Sales_Model_Quote
+     * @var Mage_Sales_Model_Quote|null
      */
     protected $_quote = null;
 
@@ -121,15 +119,6 @@ class Mage_Checkout_Model_Type_Onepage
         $collectTotals = false;
 
         /**
-         * Reset multishipping flag before any manipulations with quote address
-         * addAddress method for quote object related on this flag
-         */
-        if ($this->getQuote()->getIsMultiShipping()) {
-            $this->getQuote()->setIsMultiShipping(false);
-            $quoteSave = true;
-        }
-
-        /**
          *  Reset customer balance
          */
         if ($this->getQuote()->getUseCustomerBalance()) {
@@ -161,6 +150,13 @@ class Mage_Checkout_Model_Type_Onepage
         $customer = $customerSession->getCustomer();
         if ($customer) {
             $this->getQuote()->assignCustomer($customer);
+
+            // Single saved address used for both: default the shipping radio to
+            // "same as billing". Render-scoped flag, the quote is not re-saved here.
+            $defaultBilling = $customer->getDefaultBilling();
+            if ($defaultBilling && $defaultBilling == $customer->getDefaultShipping()) {
+                $this->getQuote()->getShippingAddress()->setSameAsBilling(1);
+            }
         }
         return $this;
     }
@@ -567,9 +563,6 @@ class Mage_Checkout_Model_Type_Onepage
     public function validate()
     {
         $quote  = $this->getQuote();
-        if ($quote->getIsMultiShipping()) {
-            Mage::throwException(Mage::helper('checkout')->__('Invalid checkout type.'));
-        }
 
         if ($quote->getCheckoutMethod() == self::METHOD_GUEST && !$quote->isAllowedGuestCheckout()) {
             Mage::throwException(Mage::helper('checkout')->__('Sorry, guest checkout is not enabled. Please try again or contact store owner.'));
@@ -634,6 +627,9 @@ class Mage_Checkout_Model_Type_Onepage
         $shipping   = $quote->isVirtual() ? null : $quote->getShippingAddress();
 
         $customer = $this->getCustomerSession()->getCustomer();
+        if (!$customer->getId() && $quote->getCustomerId()) {
+            $customer = Mage::getModel('customer/customer')->load($quote->getCustomerId());
+        }
         if (!$billing->getCustomerId() || $billing->getSaveInAddressBook()) {
             $customerBilling = $billing->exportCustomerAddress();
             $customer->addAddress($customerBilling);

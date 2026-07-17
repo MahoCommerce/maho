@@ -2,10 +2,15 @@
 <layout version="0.1.0">
     <blog_index_index>
         <reference name="root">
-            <action method="setTemplate"><template>page/1column.phtml</template></action>
+            <action method="setTemplate"><template>page/2columns-left.phtml</template></action>
         </reference>
         <reference name="head">
             <action method="addCss"><stylesheet>css/blog.css</stylesheet></action>
+        </reference>
+        <reference name="left">
+            <block type="blog/category_sidebar" name="blog.category.sidebar">
+                <action method="setTemplate"><template>blog/category/sidebar.phtml</template></action>
+            </block>
         </reference>
         <reference name="content">
             <block type="blog/post_list" name="blog.post.list">
@@ -15,10 +20,15 @@
     </blog_index_index>
     <blog_index_view>
         <reference name="root">
-            <action method="setTemplate"><template>page/1column.phtml</template></action>
+            <action method="setTemplate"><template>page/2columns-left.phtml</template></action>
         </reference>
         <reference name="head">
             <action method="addCss"><stylesheet>css/blog.css</stylesheet></action>
+        </reference>
+        <reference name="left">
+            <block type="blog/category_sidebar" name="blog.category.sidebar">
+                <action method="setTemplate"><template>blog/category/sidebar.phtml</template></action>
+            </block>
         </reference>
         <reference name="content">
             <block type="blog/post_view" name="blog.post.view">
@@ -26,4 +36,22 @@
             </block>
         </reference>
     </blog_index_view>
+    <blog_index_category>
+        <reference name="root">
+            <action method="setTemplate"><template>page/2columns-left.phtml</template></action>
+        </reference>
+        <reference name="head">
+            <action method="addCss"><stylesheet>css/blog.css</stylesheet></action>
+        </reference>
+        <reference name="left">
+            <block type="blog/category_sidebar" name="blog.category.sidebar">
+                <action method="setTemplate"><template>blog/category/sidebar.phtml</template></action>
+            </block>
+        </reference>
+        <reference name="content">
+            <block type="blog/category_view" name="blog.category.view">
+                <action method="setTemplate"><template>blog/category/view.phtml</template></action>
+            </block>
+        </reference>
+    </blog_index_category>
 </layout>

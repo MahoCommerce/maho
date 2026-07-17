@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Admin
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Admin
  */
 
 class Mage_Admin_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstract
@@ -39,16 +37,22 @@ class Mage_Admin_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstra
     {
         $data = Mage::app()->getCache()->load(self::CACHE_ID);
         if ($data === false) {
-            $this->_generateCache();
+            $types = $this->_generateCache();
             $data = Mage::app()->getCache()->load(self::CACHE_ID);
+            if ($data === false) {
+                // Cache backend is disabled or could not persist the entry;
+                // fall back to the freshly built data instead of dropping it.
+                return $types;
+            }
         }
-        return Mage::helper('core')->jsonDecode($data);
+        $decoded = Mage::helper('core')->jsonDecode($data);
+        return is_array($decoded) ? $decoded : [];
     }
 
     /**
-     * Regenerate cache
+     * Regenerate cache and return the freshly built allowlist, indexed by block name.
      */
-    protected function _generateCache()
+    protected function _generateCache(): array
     {
         /** @var Mage_Admin_Model_Resource_Block_Collection $collection */
         $collection = Mage::getResourceModel('admin/block_collection');
@@ -64,6 +68,7 @@ class Mage_Admin_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstra
             self::CACHE_ID,
             [Mage_Core_Model_Resource_Db_Collection_Abstract::CACHE_TAG],
         );
+        return $data;
     }
 
     #[\Override]

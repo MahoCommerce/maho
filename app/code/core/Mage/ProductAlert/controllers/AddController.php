@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_ProductAlert
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_ProductAlert
  */
 
 class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
@@ -29,6 +27,7 @@ class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
         return $this;
     }
 
+    #[Maho\Config\Route('/productalert/add/testObserver', name: 'productalert.add.testobserver')]
     public function testObserverAction(): void
     {
         $object = new \Maho\DataObject();
@@ -36,6 +35,7 @@ class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
         $observer->process($object);
     }
 
+    #[Maho\Config\Route('/productalert/add/price', name: 'productalert.add.price')]
     public function priceAction(): void
     {
         $session = Mage::getSingleton('catalog/session');
@@ -72,6 +72,7 @@ class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
         $this->_redirectReferer();
     }
 
+    #[Maho\Config\Route('/productalert/add/stock', name: 'productalert.add.stock')]
     public function stockAction(): void
     {
         $session = Mage::getSingleton('catalog/session');
@@ -84,7 +85,6 @@ class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
         }
 
         if (!$product = Mage::getModel('catalog/product')->load($productId)) {
-            /** @var Mage_Catalog_Model_Product $product */
             $session->addError($this->__('Not enough parameters.'));
             $this->_redirectUrl($backUrl);
             return ;

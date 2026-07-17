@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
@@ -376,9 +374,13 @@ class Mage_Core_Controller_Request_Http
     public function getPost(string|null $key = null, mixed $default = null): mixed
     {
         if ($key === null) {
-            return $_POST;
+            return $this->symfonyRequest->request->all();
         }
-        return $_POST[$key] ?? $default;
+        if ($this->symfonyRequest->request->has($key)) {
+            // Use all() to support array values
+            return $this->symfonyRequest->request->all()[$key];
+        }
+        return $default;
     }
 
     public function getCookie(string|null $key = null, mixed $default = null): mixed
@@ -493,11 +495,25 @@ class Mage_Core_Controller_Request_Http
                 $pathInfo = $requestUri;
             }
 
-            if ($this->_canBeStoreCodeInUrl()) {
+            // Strip the store-code prefix here (rather than in the dispatch_before
+            // observer) so that _requestString stays in sync with _pathInfo.
+            // Mage_Core_Model_Store::getCurrentUrl() and other consumers read
+            // _requestString to build cross-store URLs; leaving the prefix in
+            // would produce broken URLs like /fr/en/... when switching stores.
+            if (Mage::isInstalled()
+                && Mage::getStoreConfigFlag(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL)
+            ) {
                 $pathParts = explode('/', ltrim($pathInfo, '/'), 2);
                 $storeCode = $pathParts[0];
 
-                if (!$this->isDirectAccessFrontendName($storeCode)) {
+                // The admin frontName collides with the admin store code
+                // (both are 'admin' by default). Skip stripping when the path
+                // is an admin URL — otherwise /admin/dashboard becomes /dashboard
+                // and ends up rendering the frontend home page.
+                $adminFrontName = \Maho\Routing\RouteCollectionBuilder::getAdminFrontName();
+                $isAdminUrl = $adminFrontName !== '' && strcasecmp($storeCode, $adminFrontName) === 0;
+
+                if (!$isAdminUrl && !$this->isDirectAccessFrontendName($storeCode)) {
                     $stores = Mage::app()->getStores(true, true);
                     if ($storeCode !== '' && isset($stores[$storeCode])) {
                         Mage::app()->setCurrentStore($storeCode);
@@ -800,14 +816,8 @@ class Mage_Core_Controller_Request_Http
     public function setRouteName(string $route): self
     {
         $this->_route = $route;
-        $router = Mage::app()->getFrontController()->getRouterByRoute($route);
-        if (!$router) {
-            return $this;
-        }
-        $module = $router->getFrontNameByRoute($route);
-        if ($module) {
-            $this->setModuleName($module);
-        }
+        $module = \Maho\Routing\RouteCollectionBuilder::getFrontNameByRoute($route) ?? $route;
+        $this->setModuleName($module);
         return $this;
     }
 
@@ -844,8 +854,7 @@ class Mage_Core_Controller_Request_Http
         if ($this->_requestedRouteName === null) {
             if ($this->_rewritedPathInfo !== null && isset($this->_rewritedPathInfo[0])) {
                 $fronName = $this->_rewritedPathInfo[0];
-                $router = Mage::app()->getFrontController()->getRouterByFrontName($fronName);
-                $this->_requestedRouteName = $router->getRouteByFrontName($fronName);
+                $this->_requestedRouteName = \Maho\Routing\RouteCollectionBuilder::getRouteByFrontName($fronName) ?? $fronName;
             } else {
                 // no rewritten path found, use default route name
                 return $this->getRouteName();

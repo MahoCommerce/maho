@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 /**
@@ -67,11 +65,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Startdate extends Mage_Eav_Mo
         }
 
         if ($maxDate) {
-            $date     = Mage::getModel('core/date');
-            $value    = $date->timestamp($startDate);
-            $maxValue = $date->timestamp($maxDate);
-
-            if ($value > $maxValue) {
+            if (strtotime($startDate) > strtotime($maxDate)) {
                 $message = Mage::helper('catalog')->__('The From Date value should be less than or equal to the To Date value.');
                 $eavExc  = new Mage_Eav_Model_Entity_Attribute_Exception($message);
                 $eavExc->setAttributeCode($attr->getName());

@@ -1,12 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_AdminActivityLog
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_AdminActivityLog
  */
 
 class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid extends Mage_Adminhtml_Block_Widget_Grid
@@ -16,7 +13,6 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid extends Mage_Adminhtml
         parent::__construct();
         $this->setId('adminActivityLogGrid');
         $this->setDefaultSort('created_at');
-        $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(true);
         $this->setUseAjax(true);
     }
@@ -28,7 +24,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid extends Mage_Adminhtml
 
         // Group by action_group_id to show only one entry per group
         $collection->getSelect()
-            ->group('COALESCE(main_table.action_group_id, main_table.activity_id)')
+            ->group(new Maho\Db\Expr('COALESCE(main_table.action_group_id, main_table.activity_id)'))
             ->columns([
                 'activity_count' => new Maho\Db\Expr('COUNT(*)'),
             ]);

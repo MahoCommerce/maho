@@ -1,16 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    MahoLib
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
+
+declare(strict_types=1);
 
 namespace Maho\Db\Adapter;
 
@@ -507,7 +504,7 @@ interface AdapterInterface
     /**
      * Format Date to internal database date format
      */
-    public function formatDate(int|string|\DateTime $date, bool $includeTime = true): \Maho\Db\Expr;
+    public function formatDate(int|string|\DateTime $date, bool $withTime = true): \Maho\Db\Expr;
 
     /**
      * Run additional environment before setup
@@ -833,12 +830,6 @@ interface AdapterInterface
      * Some DB drivers return blobs as hex-coded strings, so we need to process them.
      */
     public function decodeVarbinary(mixed $value): mixed;
-
-    /**
-     * Returns date that fits into TYPE_DATETIME range and is suggested to act as default 'zero' value
-     * for a column for current RDBMS.
-     */
-    public function getSuggestedZeroDate(): string;
 
     /**
      * Drop trigger

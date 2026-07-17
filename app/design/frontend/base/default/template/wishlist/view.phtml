@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 /** @var Mage_Wishlist_Block_Customer_Wishlist $this */
 ?>
@@ -39,12 +37,12 @@
         <form id="wishlist-allcart-form" action="<?= $this->getUrl('*/*/allcart') ?>" method="post">
             <?= $this->getBlockHtml('formkey') ?>
             <div class="no-display">
-                <input type="hidden" name="wishlist_id" id="wishlist_id" value="<?= $this->getWishlistInstance()->getId() ?>" />
-                <input type="hidden" name="qty" id="qty" value="" />
+                <input type="hidden" name="wishlist_id" id="wishlist_id" value="<?= $this->getWishlistInstance()->getId() ?>">
+                <input type="hidden" name="qty" id="qty" value="">
             </div>
         </form>
 
-        <script type="text/javascript">
+        <script>
             const wishlistForm = new Validation(document.getElementById('wishlist-view-form'));
             const wishlistAllCartForm = new Validation(document.getElementById('wishlist-allcart-form'));
 

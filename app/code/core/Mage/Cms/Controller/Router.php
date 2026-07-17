@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Cms
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Cms
  */
 
 class Mage_Cms_Controller_Router extends Mage_Core_Controller_Varien_Router_Abstract
@@ -17,6 +15,7 @@ class Mage_Cms_Controller_Router extends Mage_Core_Controller_Varien_Router_Abst
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('controller_front_init_routers')]
     public function initControllerRouters($observer)
     {
         /** @var Mage_Core_Controller_Varien_Front $front */
@@ -32,6 +31,13 @@ class Mage_Cms_Controller_Router extends Mage_Core_Controller_Varien_Router_Abst
     public function match(Mage_Core_Controller_Request_Http $request): bool
     {
         if (!Mage::isInstalled()) {
+            // The install URL would loop if we redirected here: let the default
+            // router's Symfony matcher dispatch /install/... natively, since the
+            // legacy Mage_Install_Controller_Router_Install no longer runs ahead
+            // of us in the chain.
+            if (preg_match('#^/install(/|$)#', $request->getPathInfo()) === 1) {
+                return false;
+            }
             Mage::app()->getFrontController()->getResponse()
                 ->setRedirect(Mage::getUrl('install'))
                 ->sendResponse();
@@ -77,6 +83,7 @@ class Mage_Cms_Controller_Router extends Mage_Core_Controller_Varien_Router_Abst
             $identifier,
         );
 
-        return true;
+        $dispatcher = new \Maho\Routing\ControllerDispatcher();
+        return $dispatcher->dispatchForward($request, Mage::app()->getFrontController()->getResponse());
     }
 }

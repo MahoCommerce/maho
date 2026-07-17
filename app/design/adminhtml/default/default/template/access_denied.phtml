@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Adminhtml_Block_Denied $this */
@@ -14,7 +12,7 @@
 <h1 class="page-heading"><?= $this->helper('adminhtml')->__('Access denied') ?></h1>
 <?php if (!$this->hasAvailaleResources()): ?>
 <p>
-<?= $this->helper('adminhtml')->__('Please try to logout and sign in again.') ?><br/>
+<?= $this->helper('adminhtml')->__('Please try to logout and sign in again.') ?><br>
 <?= $this->helper('adminhtml')->__('If this message persists, please contact the store owner.') ?>
 </p>
 <?php else: ?>

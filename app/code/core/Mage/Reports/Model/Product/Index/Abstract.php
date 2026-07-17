@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Reports
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Reports
  */
 
 /**
@@ -50,7 +48,7 @@ abstract class Mage_Reports_Model_Product_Index_Abstract extends Mage_Core_Model
             $this->setStoreId($this->getStoreId());
         }
         if (!$this->hasAddedAt()) {
-            $this->setAddedAt(Mage_Core_Model_Locale::now());
+            $this->setAddedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         }
 
         // Thanks to new performance tweaks it is possible to switch off visitor logging
@@ -157,10 +155,8 @@ abstract class Mage_Reports_Model_Product_Index_Abstract extends Mage_Core_Model
     {
         $collection = $this->getCollection()
             ->setCustomerId($this->getCustomerId())
+            ->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInSiteIds())
             ->addIndexFilter();
-
-        Mage::getSingleton('catalog/product_visibility')
-            ->addVisibleInSiteFilterToCollection($collection);
 
         $count = $collection->getSize();
         $this->_getSession()->setData($this->_countCacheKey, $count);

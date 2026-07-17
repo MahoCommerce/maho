@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Downloadable
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Downloadable
  */
 
 class Mage_Downloadable_CustomerController extends Mage_Core_Controller_Front_Action
@@ -19,6 +17,11 @@ class Mage_Downloadable_CustomerController extends Mage_Core_Controller_Front_Ac
     public function preDispatch()
     {
         parent::preDispatch();
+        if (!Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')) {
+            $this->norouteAction();
+            $this->setFlag('', self::FLAG_NO_DISPATCH, true);
+            return $this;
+        }
 
         $loginUrl = Mage::helper('customer')->getLoginUrl();
 
@@ -31,6 +34,7 @@ class Mage_Downloadable_CustomerController extends Mage_Core_Controller_Front_Ac
     /**
      * Display downloadable links bought by customer
      */
+    #[Maho\Config\Route('/downloadable/customer/products', name: 'downloadable.customer.products', methods: ['GET'])]
     public function productsAction(): void
     {
         $this->loadLayout();

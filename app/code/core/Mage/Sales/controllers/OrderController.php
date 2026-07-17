@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
  */
 
 class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
@@ -21,7 +19,11 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
     public function preDispatch()
     {
         parent::preDispatch();
-        $action = $this->getRequest()->getActionName();
+        if (!Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')) {
+            $this->norouteAction();
+            $this->setFlag('', self::FLAG_NO_DISPATCH, true);
+            return $this;
+        }
         $loginUrl = Mage::helper('customer')->getLoginUrl();
 
         if (!Mage::getSingleton('customer/session')->authenticate($this, $loginUrl)) {
@@ -33,6 +35,7 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
     /**
      * Customer order history
      */
+    #[Maho\Config\Route('/sales/order/history', name: 'sales.order.history', methods: ['GET'])]
     public function historyAction(): void
     {
         $this->loadLayout();
@@ -49,6 +52,7 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
     /**
      * Associate guest orders with current customer
      */
+    #[Maho\Config\Route('/sales/order/associateGuestOrders', name: 'sales.order.associateguestorders', methods: ['POST'])]
     public function associateGuestOrdersAction(): void
     {
         $session = Mage::getSingleton('customer/session');

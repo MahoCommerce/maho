@@ -1,13 +1,9 @@
-/**
- * Maho
- *
- * @package     Maho_Captcha
- * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+// SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+// SPDX-License-Identifier: AFL-3.0
 
 const MahoCaptcha = {
     loadingImageUrl: null,
+    verifyingText: 'Verifying...',
     altchaWidget: null,
     altchaState: null,
     frontendSelectors: '',
@@ -19,6 +15,7 @@ const MahoCaptcha = {
         this.altchaWidget = document.querySelector('altcha-widget');
         this.frontendSelectors = config.frontendSelectors ?? '';
         this.loadingImageUrl = config.loadingImageUrl ?? '';
+        this.verifyingText = config.verifyingText ?? 'Verifying...';
 
         if (document.readyState === 'loadingImageUrl') {
             document.addEventListener('DOMContentLoaded', this.initForms.bind(this));
@@ -46,20 +43,18 @@ const MahoCaptcha = {
     async loadAltchaScripts() {
         if (typeof customElements.get('altcha-widget') === 'function') return;
 
-        await Promise.all([
-            new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = '/js/altcha.min.js';
-                script.type = 'module';
-                script.onload = resolve;
-                script.onerror = () => reject(`${script.src} Not Found`);
-                document.head.appendChild(script);
-            }),
-        ]);
+        await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = '/js/altcha-i18n.min.js';
+            script.type = 'module';
+            script.onload = resolve;
+            script.onerror = () => reject(`${script.src} Not Found`);
+            document.head.appendChild(script);
+        });
 
         const styleEl = document.createElement('style');
         styleEl.textContent = `
-        altcha-widget {display: flex;position: fixed;bottom: 0;right: 0}
+        altcha-widget {display: flex;position: fixed;bottom: 0;right: 0;z-index: 9999}
         dialog.maho-captcha-verifying {
             margin: auto;
             display: flex;
@@ -115,7 +110,10 @@ const MahoCaptcha = {
         this.altchaState = state;
 
         // Fix for error `An invalid form control with name='' is not focusable.`
-        document.querySelector('#maho_captcha input[type=checkbox]').disabled = state === 'verifying';
+        const checkbox = document.querySelector('#maho_captcha input[type=checkbox]');
+        if (checkbox) {
+            checkbox.disabled = state === 'verifying';
+        }
 
         // Replicate maho_captcha input into all forms
         if (state === 'verified' && typeof payload === 'string') {
@@ -149,7 +147,7 @@ const MahoCaptcha = {
         this.loaderTimeoutId = setTimeout(() => {
             this.loaderEl = document.createElement('dialog');
             this.loaderEl.className = 'maho-captcha-verifying';
-            this.loaderEl.innerHTML = (this.loadingImageUrl ? '<img src="' + this.loadingImageUrl + '">' : '') + ' Verifying...';
+            this.loaderEl.innerHTML = (this.loadingImageUrl ? '<img src="' + this.loadingImageUrl + '">' : '') + ' ' + this.verifyingText;
             this.loaderEl.addEventListener('close', () => {
                 this.onVerifiedCallback = null;
                 this.hideLoader();

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controller_Action
@@ -25,6 +23,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
      */
     protected $_adminSession = null;
 
+    #[Maho\Config\Route('/admin/report_statistics/_init')]
     public function _initAction()
     {
         $act = $this->getRequest()->getActionName();
@@ -38,6 +37,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/report_statistics/_initReport')]
     public function _initReportAction($blocks)
     {
         if (!is_array($blocks)) {
@@ -105,11 +105,12 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
      *
      * @return $this
      */
+    #[Maho\Config\Route('/admin/report_statistics/refreshRecent')]
     public function refreshRecentAction()
     {
         try {
             $collectionsNames = $this->_getCollectionNames();
-            $currentDate = Mage::app()->getLocale()->dateImmutable();
+            $currentDate = Mage::app()->getLocale()->utcToStore();
             $date = $currentDate->modify('-25 hours');
             foreach ($collectionsNames as $collectionName) {
                 Mage::getResourceModel($collectionName)->aggregate($date);
@@ -135,6 +136,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
      *
      * @return $this
      */
+    #[Maho\Config\Route('/admin/report_statistics/refreshLifetime')]
     public function refreshLifetimeAction()
     {
         try {
@@ -159,6 +161,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/report_statistics/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Reports'))->_title($this->__('Sales'))->_title($this->__('Refresh Statistics'));

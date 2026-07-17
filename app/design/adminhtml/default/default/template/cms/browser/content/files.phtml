@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 ?>
 <?php
@@ -23,14 +21,14 @@ $_height = $this->getImagesHeight();
 ?>
 <?php if ($this->getFilesCount() > 0): ?>
     <?php foreach ($this->getFiles() as $file): ?>
-    <div class="filecnt" id="<?= $this->getFileId($file) ?>">
+    <div class="filecnt" id="<?= $this->getFileId($file) ?>" data-filename="<?= $this->escapeHtml($this->getFileName($file)) ?>">
         <p class="nm" style="height:<?= $_height ?>px;width:<?= $_width ?>px;">
         <?php if($this->getFileThumbUrl($file)):?>
-            <img src="<?= $this->getFileThumbUrl($file) ?>" alt="<?= $this->escapeHtml($this->getFileName($file)) ?>"/>
+            <img src="<?= $this->getFileThumbUrl($file) ?>" alt="<?= $this->escapeHtml($this->getFileName($file)) ?>">
         <?php endif ?>
         </p>
         <?php if($this->getFileWidth($file)): ?>
-            <small><?= $this->getFileWidth($file) ?>x<?= $this->getFileHeight($file) ?> <?= $this->helper('cms')->__('px.') ?></small><br/>
+            <small><?= $this->getFileWidth($file) ?>x<?= $this->getFileHeight($file) ?> <?= $this->helper('cms')->__('px.') ?></small><br>
         <?php endif ?>
         <small><?= $this->getFileShortName($file) ?></small>
     </div>

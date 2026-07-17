@@ -1,21 +1,24 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 
 /** @var Mage_Catalog_Block_Layer_Filter_Attribute $this */
+?>
+<?php
+$_seoHelper = $this->helper('catalog/category');
+$addNofollow = $_seoHelper->canUseNofollowForFilterLinks()
+    && !$_seoHelper->isLayeredNavigationLandingPage();
 ?>
 <ol>
 <?php foreach ($this->getItems() as $_item): ?>
     <li>
         <?php if ($_item->getCount() > 0): ?>
-            <a href="<?= $this->escapeUrl($_item->getUrl()) ?>">
+            <a href="<?= $this->escapeUrl($_item->getUrl()) ?>"<?php if ($addNofollow): ?> rel="nofollow"<?php endif ?>>
                 <?= $_item->getLabel() ?>
                 <?php if ($this->shouldDisplayProductCount()): ?>
                 <span class="count">(<?= $_item->getCount() ?>)</span>

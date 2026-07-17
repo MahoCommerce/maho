@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Admin
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Admin
  */
 
 class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstract
@@ -47,7 +45,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
         $adapter = $this->_getWriteAdapter();
 
         $data = [
-            'logdate' => Mage_Core_Model_Locale::now(),
+            'logdate' => Mage::app()->getLocale()->formatDateForDb('now'),
             'lognum'  => $user->getLognum() + 1,
         ];
 
@@ -123,9 +121,9 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     protected function _beforeSave(Mage_Core_Model_Abstract $user)
     {
         if ($user->isObjectNew()) {
-            $user->setCreated($this->formatDate(true));
+            $user->setCreated(Mage::app()->getLocale()->formatDateForDb('now'));
         }
-        $user->setModified($this->formatDate(true));
+        $user->setModified(Mage::app()->getLocale()->formatDateForDb('now'));
 
         return parent::_beforeSave($user);
     }
@@ -446,7 +444,11 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
         try {
             $unsterilizedData = Mage::helper('core/unserializeArray')->unserialize($user->getExtra());
             $user->setExtra($unsterilizedData);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
+            // Catch Throwable, not Exception — PHP 8's TypeError extends
+            // Error (not Exception), and the helper called above can throw
+            // TypeError (json_validate requires string) on a re-load where
+            // setExtra(array) was already called by a previous pass.
             $user->setExtra(false);
         }
         return $user;

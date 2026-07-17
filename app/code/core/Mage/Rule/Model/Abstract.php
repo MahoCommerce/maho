@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Rule
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Rule
  */
 
 /**
@@ -34,7 +32,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Store rule combine conditions model
      *
-     * @var Mage_Rule_Model_Condition_Combine
+     * @var Mage_Rule_Model_Condition_Combine|null
      */
     protected $_conditions;
 
@@ -356,12 +354,8 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
                  * Convert dates into DateTime
                  */
                 if (in_array($key, ['from_date', 'to_date']) && $value) {
-                    $value = Mage::app()->getLocale()->dateMutable(
-                        $value,
-                        Mage_Core_Model_Locale::DATE_FORMAT,
-                        null,
-                        false,
-                    );
+                    $parsed = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $value);
+                    $value = $parsed !== false ? $parsed : new DateTime($value);
                 }
                 $this->setData($key, $value);
             }

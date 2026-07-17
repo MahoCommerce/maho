@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_ProductAlert
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_ProductAlert
  */
 
 class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front_Action
@@ -26,6 +24,7 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
         return $this;
     }
 
+    #[Maho\Config\Route('/productalert/unsubscribe/price', name: 'productalert.unsubscribe.price')]
     public function priceAction(): void
     {
         $productId  = (int) $this->getRequest()->getParam('product');
@@ -62,6 +61,7 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
         $this->_redirectUrl($product->getProductUrl());
     }
 
+    #[Maho\Config\Route('/productalert/unsubscribe/priceAll', name: 'productalert.unsubscribe.priceall')]
     public function priceAllAction(): void
     {
         $session = Mage::getSingleton('customer/session');
@@ -79,6 +79,7 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
         $this->_redirect('customer/account/');
     }
 
+    #[Maho\Config\Route('/productalert/unsubscribe/stock', name: 'productalert.unsubscribe.stock')]
     public function stockAction(): void
     {
         $productId  = (int) $this->getRequest()->getParam('product');
@@ -113,6 +114,7 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
         $this->_redirectUrl($product->getProductUrl());
     }
 
+    #[Maho\Config\Route('/productalert/unsubscribe/stockAll', name: 'productalert.unsubscribe.stockall')]
     public function stockAllAction(): void
     {
         $session = Mage::getSingleton('customer/session');

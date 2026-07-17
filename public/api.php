@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage
  */
 
 define('MAHO_ROOT_DIR', dirname(__DIR__));
@@ -25,13 +23,18 @@ Mage::init('admin');
 Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
 Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_ADMINHTML, Mage_Core_Model_App_Area::PART_EVENTS);
 
+// Legacy Magento 1 REST is opt-in via apiplatform/protocols/legacy_rest.
+// Disabled by default; operators must enable it consciously.
+if (!Mage::helper('apiplatform')->isProtocolEnabled(Maho_ApiPlatform_Helper_Data::PROTOCOL_LEGACY_REST)) {
+    http_response_code(404);
+    exit;
+}
+
 // query parameter "type" is set by .htaccess rewrite rule
 $apiAlias = Mage::app()->getRequest()->getParam('type');
 
 // check request could be processed by API2
 if (in_array($apiAlias, Mage_Api2_Model_Server::getApiTypes())) {
-    // emulate index.php entry point for correct URLs generation in API
-    Mage::register('custom_entry_point', true);
     /** @var Mage_Api2_Model_Server $server */
     $server = Mage::getSingleton('api2/server');
     $server->run();
@@ -53,8 +56,6 @@ if ($adapterCode === null) {
 
 try {
     $server->initialize($adapterCode);
-    // emulate index.php entry point for correct URLs generation in API
-    Mage::register('custom_entry_point', true);
     $server->run();
     Mage::app()->getResponse()->sendResponse();
 } catch (Exception $e) {

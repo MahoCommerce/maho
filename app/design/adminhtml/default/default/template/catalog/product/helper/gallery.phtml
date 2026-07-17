@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Gallery_Content $this */
@@ -23,14 +21,14 @@
     </ul>
     <div class="grid">
         <table cellspacing="0" class="data border" id="<?= $this->getHtmlId() ?>_grid" width="100%">
-            <col width="1"/>
-            <col/>
-            <col width="70"/>
+            <col width="1">
+            <col>
+            <col width="70">
             <?php foreach ($this->getImageTypes() as $typeId => $type): ?>
-                <col/>
+                <col>
             <?php endforeach ?>
-            <col width="70"/>
-            <col width="70"/>
+            <col width="70">
+            <col width="70">
             <thead>
             <tr class="headings">
                 <th><?= Mage::helper('catalog')->__('Image') ?></th>
@@ -109,8 +107,8 @@
             <?php endif ?>
             <tr id="<?= $this->getHtmlId() ?>-image-0">
                 <td class="cell-image"><?= Mage::helper('catalog')->__('No image') ?></td>
-                <td class="cell-label"><input type="hidden"/>&nbsp;</td>
-                <td class="cell-position"><input type="hidden"/>&nbsp;</td>
+                <td class="cell-label"><input type="hidden">&nbsp;</td>
+                <td class="cell-position"><input type="hidden">&nbsp;</td>
                 <?php foreach ($this->getImageTypes() as $typeId => $type): ?>
                     <td class="cell-<?= $typeId ?> a-center"><input
                                 type="radio" <?php if ($this->getElement()->getAttributeReadonly($typeId)) : ?> disabled="disabled" <?php endif ?>
@@ -118,8 +116,8 @@
                                 onclick="<?= $this->getJsObjectName() ?>.setProductImages('no_selection')"
                                 value="no_selection"/></td>
                 <?php endforeach ?>
-                <td class="cell-disable"><input type="hidden"/>&nbsp;</td>
-                <td class="cell-remove last"><input type="hidden"/>&nbsp;</td>
+                <td class="cell-disable"><input type="hidden">&nbsp;</td>
+                <td class="cell-remove last"><input type="hidden">&nbsp;</td>
             </tr>
             </tbody>
             <?php if (!$this->getElement()->getReadonly()): ?>
@@ -141,7 +139,7 @@
 <input type="hidden" id="<?= $this->getHtmlId() ?>_save_image"
        name="<?= $this->getElement()->getName() ?>[values]"
        value="<?= $this->escapeHtml($this->getImagesValuesJson()) ?>"/>
-<script type="text/javascript">
+<script>
 //<![CDATA[
 var <?= $this->getJsObjectName() ?> = new Product.Gallery('<?= $this->getHtmlId() ?>', <?= $this->getImageTypesJson() ?>);
 //]]>

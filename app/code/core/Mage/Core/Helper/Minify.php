@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Mage
- * @package    Mage_Core
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
+
+declare(strict_types=1);
 
 use MatthiasMullie\Minify\CSS as CSSMinifier;
 use MatthiasMullie\Minify\JS as JSMinifier;
@@ -152,14 +149,11 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
         try {
             $this->ensureCacheDirectory($type);
 
-            $lockFile = $cachedFile . '.lock';
-            $lockHandle = fopen($lockFile, 'c');
+            $lockName = 'minify_' . md5($absolutePath);
+            $lock = Mage::getSingleton('core/lock');
 
-            if (!$lockHandle || !flock($lockHandle, LOCK_EX | LOCK_NB)) {
+            if (!$lock->acquire($lockName)) {
                 // If we can't get a lock, return original file (another process is minifying)
-                if ($lockHandle) {
-                    fclose($lockHandle);
-                }
                 return $filePath;
             }
 
@@ -167,15 +161,17 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
                 if ($this->isAlreadyMinified($filePath)) {
                     // Copy already-minified files to maintain consistent URL/caching
                     copy($absolutePath, $cachedFile);
+                } elseif ($type === 'css') {
+                    $minifier = new CSSMinifier($absolutePath);
+                    $minifier->setImportExtensions([]);
+                    $minifier->minify($cachedFile);
                 } else {
-                    $minifiedContent = $this->minifyContent(file_get_contents($absolutePath), $type);
+                    $minifiedContent = (new JSMinifier(file_get_contents($absolutePath)))->minify();
                     file_put_contents($cachedFile, $minifiedContent);
                 }
                 return $cachedUrl;
             } finally {
-                flock($lockHandle, LOCK_UN);
-                fclose($lockHandle);
-                @unlink($lockFile);
+                $lock->release($lockName);
             }
 
         } catch (Exception $e) {
@@ -203,18 +199,6 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
     {
         return file_exists($cachedFile) &&
                filemtime($cachedFile) >= filemtime($sourceFile);
-    }
-
-    /**
-     * Minify content based on type
-     */
-    private function minifyContent(string $content, string $type): string
-    {
-        return match ($type) {
-            'css' => (new CSSMinifier($content))->minify(),
-            'js' => (new JSMinifier($content))->minify(),
-            default => $content,
-        };
     }
 
     /**
@@ -304,6 +288,14 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
     {
         // Only send preload hints on frontend and if headers haven't been sent
         if (Mage::app()->getStore()->isAdmin() || headers_sent()) {
+            return;
+        }
+
+        // Don't send preload hints for JS when load-on-intent is active,
+        // as it would defeat the purpose of deferring script downloads
+        if ($as === 'script'
+            && (int) Mage::getStoreConfig('dev/js/defer_mode') === Mage_Core_Model_Source_Js_Defer::MODE_LOAD_ON_INTENT
+        ) {
             return;
         }
 

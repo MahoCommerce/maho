@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 /**
@@ -85,6 +83,13 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     protected $_watermarkWidth;
     protected $_watermarkHeigth;
     protected $_watermarkImageOpacity = 70;
+
+    /**
+     * Relative file path (e.g. /c/a/image.jpg) as originally passed to setBaseFile().
+     * Stored separately from _baseFile (which is absolute) to avoid exposing
+     * server filesystem paths in signed URL tokens.
+     */
+    protected ?string $_sourceFile = null;
 
     /**
      * @var string directory
@@ -331,46 +336,66 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
             return $this;
         }
 
-        // build new filename (most important params)
-        $path = [
+        // Store the relative file path for signed URL tokens
+        $this->_sourceFile = $file;
+
+        // build cache file path from transform params
+        $this->_newFile = Maho::buildImageResizeCachePath(
+            $this->getTransformParams(),
             self::$_baseMediaPath,
-            'cache',
-            Mage::app()->getStore()->getId(),
-            $path[] = $this->getDestinationSubdir(),
-        ];
-        if ((!empty($this->_width)) || (!empty($this->_height))) {
-            $path[] = "{$this->_width}x{$this->_height}";
-        }
-
-        // add misc params as a hash
-        $miscParams = [
-            ($this->_keepAspectRatio ? '' : 'non') . 'proportional',
-            ($this->_keepFrame ? '' : 'no') . 'frame',
-            ($this->_keepTransparency ? '' : 'no') . 'transparency',
-            ($this->_constrainOnly ? 'do' : 'not') . 'constrainonly',
-            $this->_backgroundColorStr,
-            'angle' . $this->_angle,
-            'quality' . $this->_quality,
-        ];
-
-        if ($this->getWatermarkFile()) {
-            $miscParams[] = $this->getWatermarkFile();
-            $miscParams[] = $this->getWatermarkImageOpacity();
-            $miscParams[] = $this->getWatermarkPosition();
-            $miscParams[] = $this->getWatermarkWidth();
-            $miscParams[] = $this->getWatermarkHeigth();
-        }
-
-        $path[] = md5(implode('_', $miscParams));
-
-        // replacing file extension based on target file type
-        $targetFileExtension = image_type_to_extension(Mage::getStoreConfig('system/media_storage_configuration/image_file_type'));
-        $file = preg_replace('/\.[^.]+$/', $targetFileExtension, $file);
-
-        // append prepared filename
-        $this->_newFile = implode('/', $path) . $file; // the $file contains heading slash
+            $file,
+        );
 
         return $this;
+    }
+
+    /**
+     * Allowlist of properties that define the image transformation.
+     * Used by both getTransformParams() and setTransformParams().
+     */
+    private const TRANSFORM_PARAMS = [
+        '_width',
+        '_height',
+        '_quality',
+        '_keepAspectRatio',
+        '_keepFrame',
+        '_keepTransparency',
+        '_constrainOnly',
+        '_backgroundColorStr',
+        '_sourceFile',
+        '_destinationSubdir',
+        '_angle',
+        '_watermarkFile',
+        '_watermarkPosition',
+        '_watermarkWidth',
+        '_watermarkHeigth',
+        '_watermarkImageOpacity',
+    ];
+
+    /**
+     * Hydrate the model from a transform params array (inverse of getTransformParams).
+     */
+    public function setTransformParams(array $params): self
+    {
+        foreach (self::TRANSFORM_PARAMS as $prop) {
+            if (array_key_exists($prop, $params)) {
+                $this->$prop = $params[$prop];
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Return all transformation parameters that define the output image.
+     * Used both for building cache path hashes and for signed URL token payloads.
+     */
+    public function getTransformParams(): array
+    {
+        $params = [];
+        foreach (self::TRANSFORM_PARAMS as $prop) {
+            $params[$prop] = $this->$prop;
+        }
+        return $params;
     }
 
     /**
@@ -393,9 +418,9 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     {
         if (!$this->image) {
             $imageManager = Maho::getImageManager(['blendingColor' => $this->_backgroundColorStr]);
-            $this->image = $imageManager->read($this->getBaseFile());
+            $this->image = $imageManager->decodePath($this->getBaseFile());
             if ($this->_backgroundColor) {
-                $this->image->blendTransparency($this->_backgroundColorStr);
+                $this->image->fillTransparentAreas($this->_backgroundColorStr);
             }
         }
 
@@ -409,14 +434,14 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         }
 
         if ($this->_width && $this->_height) {
-            $this->getImage()->pad($this->_width, $this->_height, $this->_backgroundColorStr);
+            $this->getImage()->containDown($this->_width, $this->_height, $this->_backgroundColorStr);
         } elseif ($this->_keepFrame) {
             if ($this->_width) {
                 $this->setHeight($this->_width);
             } else {
                 $this->setWidth($this->_height);
             }
-            $this->getImage()->pad($this->_width, $this->_height, $this->_backgroundColorStr);
+            $this->getImage()->containDown($this->_width, $this->_height, $this->_backgroundColorStr);
         } else {
             $this->getImage()->scaleDown($this->_width, $this->_height);
         }
@@ -427,6 +452,9 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     public function rotate(float $angle): self
     {
         $angle = (int) $angle;
+        if ($angle % 360 === 0) {
+            return $this;
+        }
         $this->getImage()->rotate($angle, $this->_backgroundColorStr);
         return $this;
     }
@@ -479,28 +507,32 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
         $filePath = $this->_getWatermarkFilePath();
         if ($filePath) {
-            if ($this->getWatermarkPosition() === 'stretch') {
+            $position = $this->getWatermarkPosition();
+
+            if ($position === 'stretch') {
                 $element = Maho::getImageManager()
-                    ->read($filePath)
+                    ->decodePath($filePath)
                     ->resize($this->getOriginalWidth(), $this->getOriginalHeight());
-            } elseif ($this->getWatermarkPosition() === 'tile') {
+                $position = 'top-left';
+            } elseif ($position === 'tile') {
                 $tile = Maho::getImageManager()
-                    ->read($filePath);
+                    ->decodePath($filePath);
                 $element = Maho::getImageManager()
-                    ->create($this->getOriginalWidth(), $this->getOriginalHeight());
+                    ->createImage($this->getOriginalWidth(), $this->getOriginalHeight());
                 for ($x = 0; $x < ceil($element->width() / $tile->width()); $x++) {
                     for ($y = 0; $y < ceil($element->height() / $tile->height()); $y++) {
-                        $element->place($tile, 'top-left', $x * $tile->width(), $y * $tile->height());
+                        $element->insert($tile, $x * $tile->width(), $y * $tile->height(), 'top-left');
                     }
                 }
+                $position = 'top-left';
             } else {
                 $element = $filePath;
             }
 
-            $this->getImage()->place(
+            $this->getImage()->insert(
                 $element,
-                position: $this->getWatermarkPosition(),
-                opacity: $this->getWatermarkImageOpacity(),
+                alignment: $position,
+                transparency: $this->getWatermarkImageOpacity() / 100,
             );
         }
 
@@ -516,20 +548,19 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         ]);
 
         try {
-            match (Mage::getStoreConfig('system/media_storage_configuration/image_file_type')) {
-                IMAGETYPE_AVIF => $this->getImage()->toAvif($this->getQuality()),
-                IMAGETYPE_GIF => $this->getImage()->toGif(),
-                IMAGETYPE_JPEG => $this->getImage()->toJpeg($this->getQuality()),
-                IMAGETYPE_PNG  => $this->getImage()->toPng(),
-                default => $this->getImage()->toWebp($this->getQuality()),
-            };
+            $this->rotate($this->_angle);
+            $this->resize();
+            $this->setWatermark($this->_watermarkFile);
+
+            $encoded = Maho::encodeImage($this->getImage(), $this->getQuality());
 
             $filename = $this->getNewFile();
             @mkdir(dirname($filename), recursive: true);
-            $this->getImage()->save($filename);
+            $encoded->save($filename);
         } finally {
             \Maho\Profiler::stop('image.process');
         }
+
         return $this;
     }
 

@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 
 /** @var Mage_Checkout_Block_Cart $this */
@@ -30,15 +28,15 @@
     <form action="<?= $this->getFormActionUrl() ?>" method="post">
         <?= $this->getBlockHtml('formkey') ?>
         <table id="shopping-cart-table" class="cart-table data-table" role="table" aria-label="<?= $this->__('Shopping cart items') ?>">
-            <col width="1" />
-            <col width="999" />
-            <col width="1" />
-            <col width="1" />
-            <col width="1" />
-            <col width="1" />
+            <col width="1">
+            <col width="999">
+            <col width="1">
+            <col width="1">
+            <col width="1">
+            <col width="1">
             <?php if ($this->helper('tax')->displayCartBothPrices()): ?>
-            <col width="1" />
-            <col width="1" />
+            <col width="1">
+            <col width="1">
             <?php endif ?>
 
         <?php $mergedCells = ($this->helper('tax')->displayCartBothPrices() ? 2 : 1); ?>

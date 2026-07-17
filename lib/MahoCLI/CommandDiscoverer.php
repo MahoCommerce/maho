@@ -1,11 +1,8 @@
 <?php
 
 /**
- * Maho
- *
- * @package    MahoCLI
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 declare(strict_types=1);
@@ -21,24 +18,42 @@ class CommandDiscoverer
 
     public function discover(string $baseDir, string $namespace = 'MahoCLI\\Commands\\'): array
     {
-        $this->baseDir = $baseDir;
         $this->namespace = $namespace;
 
         $commands = [];
-        $files = glob("{$this->baseDir}/lib/MahoCLI/Commands/*.php");
+        $baseDirs = glob($baseDir) ?: [$baseDir];
 
-        foreach ($files as $file) {
-            if (str_contains($file, 'vendor/mahocommerce/maho')) {
+        foreach ($baseDirs as $dir) {
+            $this->baseDir = $dir;
+            $commandsDir = "{$dir}/lib/MahoCLI/Commands";
+
+            if (!is_dir($commandsDir)) {
                 continue;
             }
 
-            if (str_ends_with($file, 'BaseMahoCommand.php')) {
-                continue;
-            }
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($commandsDir, \FilesystemIterator::SKIP_DOTS),
+            );
 
-            $className = $this->getFullyQualifiedClassName($file);
-            if (is_subclass_of($className, Command::class)) {
-                $commands[] = new $className();
+            foreach ($iterator as $file) {
+                if (!$file->isFile() || $file->getExtension() !== 'php') {
+                    continue;
+                }
+
+                $path = $file->getPathname();
+
+                if (str_contains($path, 'vendor/mahocommerce/maho')) {
+                    continue;
+                }
+
+                if (str_ends_with($path, 'BaseMahoCommand.php')) {
+                    continue;
+                }
+
+                $className = $this->getFullyQualifiedClassName($path);
+                if (is_subclass_of($className, Command::class)) {
+                    $commands[] = new $className();
+                }
             }
         }
 

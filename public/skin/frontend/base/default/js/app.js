@@ -1,12 +1,7 @@
-/**
- * Maho
- *
- * @package     base_default
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+// SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+// SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+// SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+// SPDX-License-Identifier: AFL-3.0
 
 // =============================================
 // Primary Break Points
@@ -756,14 +751,46 @@ var ProductMediaManager = {
     },
 
     swapImage: function(target) {
-        document.querySelectorAll('.product-image-gallery .gallery-image').forEach(img => img.classList.remove('visible'));
-        target.classList.add('gallery-image', 'visible');
+        const gallery = document.querySelector('.product-image-gallery');
+        const current = gallery?.querySelector('.gallery-image.visible');
+        if (!gallery || target === current) return;
+
         target.removeAttribute('loading');
+
+        const doSwap = () => {
+            gallery.classList.remove('loading');
+            if (current) current.classList.remove('visible');
+            target.classList.add('gallery-image', 'visible');
+        };
+
+        if (target.complete && target.naturalWidth > 0) {
+            doSwap();
+        } else {
+            gallery.classList.add('loading');
+            target.addEventListener('load', doSwap, { once: true });
+            target.addEventListener('error', doSwap, { once: true });
+        }
+    },
+
+    preloadImage: function(target) {
+        if (target && !target.complete) {
+            target.removeAttribute('loading');
+        }
+    },
+
+    capHeight: function() {
+        const g = document.querySelector('.product-image-gallery');
+        const t = document.querySelector('.more-views');
+        if (!g) return;
+        g.style.maxHeight = Math.max(200, window.innerHeight - g.getBoundingClientRect().top - (t ? t.offsetHeight : 0) - 20) + 'px';
     },
 
     init: function() {
         const gallery = document.querySelector('.product-image-gallery');
         if (!gallery) return;
+
+        this.capHeight();
+        window.addEventListener('resize', () => this.capHeight());
 
         gallery.addEventListener('click', () => {
             const match = gallery.querySelector('.gallery-image.visible')?.id?.match(/image-(\d+)/);
@@ -774,6 +801,9 @@ var ProductMediaManager = {
             link.addEventListener('click', e => {
                 e.preventDefault();
                 ProductMediaManager.swapImage(document.querySelector('#image-' + link.dataset.imageIndex));
+            });
+            link.addEventListener('mouseenter', () => {
+                ProductMediaManager.preloadImage(document.querySelector('#image-' + link.dataset.imageIndex));
             });
         });
 

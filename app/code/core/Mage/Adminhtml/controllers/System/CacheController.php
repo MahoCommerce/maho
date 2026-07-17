@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Action
@@ -32,6 +30,7 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
     /**
      * Display cache management form
      */
+    #[Maho\Config\Route('/admin/system_cache/index')]
     public function indexAction(): void
     {
         /** @var Mage_Adminhtml_Block_System_Cache_Edit $block */
@@ -45,6 +44,7 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
     /**
      * Seva cache settings
      */
+    #[Maho\Config\Route('/admin/system_cache/save')]
     public function saveAction(): void
     {
         /**
@@ -238,6 +238,7 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
         $this->_redirect('*/*');
     }
 
+    #[Maho\Config\Route('/admin/system_cache/refreshCatalogRewrites')]
     public function refreshCatalogRewritesAction(): void
     {
         try {
@@ -254,6 +255,7 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
         $this->_redirect('*/*');
     }
 
+    #[Maho\Config\Route('/admin/system_cache/clearImagesCache')]
     public function clearImagesCacheAction(): void
     {
         try {
@@ -270,6 +272,7 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
         $this->_redirect('*/*');
     }
 
+    #[Maho\Config\Route('/admin/system_cache/refreshLayeredNavigation')]
     public function refreshLayeredNavigationAction(): void
     {
         try {

@@ -1,20 +1,18 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Maho_FeedManager
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_FeedManager
  */
+
+declare(strict_types=1);
 
 /**
  * Feed Generator
  *
  * Orchestrates feed generation with streaming/batching support for large catalogs.
- * Uses the shared output engine from ProductProcessorTrait for all format handling.
+ * Uses the shared output engine from ProductWriterTrait for all format handling.
  *
  * Error Handling Pattern:
  * - generate(): Returns Log model with status, catches all exceptions internally
@@ -24,7 +22,7 @@ declare(strict_types=1);
  */
 class Maho_FeedManager_Model_Generator
 {
-    use Maho_FeedManager_Model_Generator_ProductProcessorTrait;
+    use Maho_FeedManager_Model_Generator_ProductWriterTrait;
 
     protected Maho_FeedManager_Model_Feed $_feed;
     protected Maho_FeedManager_Model_Mapper $_mapper;

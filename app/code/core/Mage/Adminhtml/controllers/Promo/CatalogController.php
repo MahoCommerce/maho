@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_Action
@@ -48,6 +46,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/promo_catalog/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Promotions'))->_title($this->__('Catalog Price Rules'));
@@ -65,11 +64,13 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
             ->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/promo_catalog/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
+    #[Maho\Config\Route('/admin/promo_catalog/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('Promotions'))->_title($this->__('Catalog Price Rules'));
@@ -108,6 +109,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         $this->_addBreadcrumb($breadcrumb, $breadcrumb)->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/promo_catalog/save')]
     public function saveAction(): void
     {
         if ($this->getRequest()->getPost()) {
@@ -187,6 +189,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/promo_catalog/delete')]
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -226,6 +229,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/promo_catalog/newConditionHtml')]
     public function newConditionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -250,6 +254,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         $this->getResponse()->setBody($html);
     }
 
+    #[Maho\Config\Route('/admin/promo_catalog/newActionHtml')]
     public function newActionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -277,6 +282,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
     /**
      * Apply all active catalog price rules
      */
+    #[Maho\Config\Route('/admin/promo_catalog/applyRules')]
     public function applyRulesAction(): void
     {
         $errorMessage = Mage::helper('catalogrule')->__('Unable to apply rules.');

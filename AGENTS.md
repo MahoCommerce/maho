@@ -9,9 +9,12 @@ Maho is an open-source ecommerce platform forked from OpenMage, designed for med
 ## Essential Commands
 
 ```bash
-vendor/bin/php-cs-fixer fix        # Fix code style (lint)
-vendor/bin/phpstan analyze         # Run static analysis (level 6)
-vendor/bin/rector -c .rector.php
+composer lint                      # Run all linters (cs-fixer, rector, phpstan)
+composer lint:cs-fixer             # Code style only (dry-run)
+composer lint:rector               # Rector only (dry-run)
+composer lint:phpstan              # PHPStan only (level 6)
+vendor/bin/php-cs-fixer fix        # Apply code style fixes (writes changes)
+vendor/bin/rector -c .rector.php   # Apply rector fixes (writes changes)
 ./maho cache:flush                 # Flush all caches
 composer test                        # Run all tests (Install → Backend → Frontend)
 composer test -- --testsuite=Frontend # Run frontend tests only
@@ -80,12 +83,68 @@ $adapter->delete('table_name', 'id = 1');
 ```
 
 ### Other Key Systems
-- **Events**: `Mage::dispatchEvent('event_name', ['data' => $data])` - Observers in `config.xml`
+- **Events**: `Mage::dispatchEvent('event_name', ['data' => $data])` - Observers defined via PHP attributes (see below)
 - **Layout**: XML-based configuration with block hierarchy and template assignment
 - **Sessions**: `Mage::getSingleton('customer/session')`, `'admin/session'`, `'checkout/session'`
 - **Translations**: CSV files in `app/locale/[locale]/` - Use `$this->__('Text')` in code
 - **Collections**: `Mage::getResourceModel('catalog/product_collection')->addAttributeToSelect('*')->addFieldToFilter('status', 1)`
 - **Errors**: `Mage::throwException()` for user-facing errors, `Mage::log()` for logging
+
+### Observers and Cron Jobs (PHP Attributes)
+Observers and cron jobs are defined via `#[Maho\Config\Observer]` and `#[Maho\Config\CronJob]` PHP attributes on methods — **not** in XML. Run `composer dump-autoload` after any changes. See the attribute class docblocks in `lib/Maho/Config/` for all parameters.
+
+```php
+#[Maho\Config\Observer('catalog_product_save_after')]
+public function handleEvent(\Maho\Event\Observer $observer) {}
+
+#[Maho\Config\Observer('event_name', area: 'frontend')]
+public function handleFrontendEvent(\Maho\Event\Observer $observer) {}
+
+#[Maho\Config\CronJob('my_cron_job', schedule: '0 2 * * *')]
+public function runJob(Mage_Cron_Model_Schedule $schedule) {}
+```
+
+- Prefer global area (default, omit `area:`) unless the observer must be restricted to a specific area
+- Do **not** define observers or cron jobs in `config.xml`
+
+### Routing (#[Route] attributes)
+Routes are defined via the `#[Maho\Config\Route]` attribute (`lib/Maho/Config/Route.php`) on controller action methods — **not** in `<frontend><routers>` XML. The attribute is repeatable: stack multiple attributes on the same method for multiple paths or method lists. Run `composer dump-autoload` after any change; routes compile to `vendor/composer/maho_url_matcher.php`, `maho_url_generator.php`, and `maho_attributes.php`.
+
+Parameters:
+- `path` (required): URL pattern, e.g. `/catalog/product/view/{id}`
+- `name`: route name for URL generation — auto-derived from `class::method` if omitted
+- `methods`: HTTP method allow-list (e.g. `['GET', 'POST']`); empty = any
+- `defaults`: default parameter values
+- `requirements`: regex constraints per param (e.g. `['id' => '\d+']`)
+- `area`: `frontend` | `adminhtml` | `install` — auto-detected from the controller base class, override only when needed
+
+Area auto-detection walks the class hierarchy: descendants of `Mage_Adminhtml_Controller_Action` or `Maho\Controller\AdminAction` → `adminhtml`; `Mage_Install_Controller_Action` or `Maho\Controller\InstallAction` → `install`; everything else → `frontend`.
+
+Admin routes: the compiler resolves the admin frontName at runtime (`use_custom_admin_path`), so you don't need to hard-code it. Two equivalent forms work:
+- Bare path — `#[Route('/catalog/product/edit/{id}')]` — compiler prepends `{_adminFrontName}/`.
+- `/admin`-prefixed — `#[Route('/admin/catalog/product/edit/{id}')]` — compiler substitutes the leading `/admin` with `{_adminFrontName}`.
+
+Both compile to the same route. Existing core admin controllers use the `/admin`-prefixed form for visual continuity with the URL.
+
+```php
+#[Maho\Config\Route('/catalog/product/view/{id}', name: 'catalog.product.view', methods: ['GET'], requirements: ['id' => '\d+'])]
+public function viewAction() { ... }
+```
+
+- Back-compat: modules still declaring `<frontend><routers>` in `config.xml` keep working via a legacy-XML match path that runs **before** the Symfony matcher, preserving M1's "first declared wins" precedence. A single `LOG_NOTICE` is emitted once per process listing legacy frontNames, encouraging migration.
+
+#### Overriding controllers
+Preferred (no XML): **subclass the controller you want to override.** The compiler detects, at `composer dump-autoload`, any controller that extends a route-owning controller and declares no `#[Route]` of its own, and points the route at the subclass. This works in every area (frontend, admin, install).
+
+```php
+// Just works — no XML, no attribute. Run `composer dump-autoload` after adding it.
+class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /* override actions */ }
+```
+
+- **Precedence is structural.** When several modules override the same controller they should form a single inheritance chain (B extends A extends Core); the most-derived class wins, deterministically and regardless of module load order. Two *sibling* subclasses extending the same base independently are a conflict: the compiler logs an error and falls back to module load order (local/community over core) — resolve it by having one override extend the other.
+- A subclass that adds **new** actions needs its own `#[Route]` for those actions (inheritance only carries over the base's existing routes).
+
+Legacy XML chain (still honored for BC, wins over the compiled override): register your module under `<{area}><routers><{routerCode}><args><modules><MyMod before|after="Mage_X"/>`. Migrate existing chains with `./maho legacy:migrate-routes` (it drops a `<modules>` chain once the overrides are clean subclasses). Use the inheritance approach for new code.
 
 ## Development Guidelines
 
@@ -100,29 +159,37 @@ All Zend Framework and Varien components have been completely removed. **NEVER**
 - CSS: use modern features, no IE/legacy browser support
 - JS AJAX: always use `mahoFetch()` instead of native `fetch()`
 - New tools/libraries: always use latest available version
-- Update PHP file headers with current year for the Maho copyright line
-- New PHP files: only Maho copyright with current year:
+- File headers use the SPDX format (see issue #939). Dual-licensed: source code (PHP, JS, CSS) under `OSL-3.0`; templates, config, and assets (PHTML, XML, HTML) under `AFL-3.0`.
+- New PHP files: a single `SPDX-FileCopyrightText` line with the current year and Maho as holder. Add a short class description on the first line ending with a period (it becomes the phpDocumentor summary); omit it if the class name is self-explanatory rather than writing filler:
 ```php
 /**
- * Maho
+ * Short class description ending with a period.
  *
- * @package    Mage_Module
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Module
  */
 ```
+- The SPDX block is tight (no blank lines inside); `@package` follows it with no blank line above. The phpDocumentor CI workflow strips ` * SPDX-` lines before generating docs, leaving the canonical summary/blank/tags docblock.
+- Non-PHP new files: XML/HTML use an `<!-- ... -->` comment block, JS uses `//` line comments, CSS uses a `/* ... */` block comment (not `//`), each with `SPDX-FileCopyrightText:` and `SPDX-License-Identifier:` lines.
+- Existing files: preserve inherited Magento/OpenMage copyright lines verbatim; don't add yourself (git history is the attribution log). Update the Maho year range only on files you're already modifying. Translate an existing `@license` URL to its SPDX identifier (`osl-3.0` → `OSL-3.0`, `afl-3.0` → `AFL-3.0`) rather than reassigning by extension.
+- When a file has multiple `SPDX-FileCopyrightText` holders, order them newest-maintainer-first: Maho, then OpenMage, then Magento, then any other third-party authors (ordered by copyright year, newest first). Not every holder appears in every file; just keep the priority among those present.
+- To migrate a file's header (or a whole directory) from the legacy `@copyright`/`@license` format, use the `spdx-headers` skill.
 - Before committing, ensure translatable strings (`$this->__()` or `Mage::helper()->__()`) are in `app/locale/en_US/`
 
 ### Adding New Features
 - New modules: `app/code/core/Maho/` namespace, declared in `app/etc/modules/`
-- Follow existing module patterns; use `declare(strict_types=1)` and PHP 8.3+ features
+- Follow existing module patterns; use `declare(strict_types=1)` (placed *after* the file-level docblock, not before) and PHP 8.3+ features
 - Use `#[\Override]` attribute for overridden methods
-- When overriding admin routes in Maho modules, use `before="Mage_Adminhtml"` pattern
+- To override an existing controller, subclass it (see "Overriding controllers" above) — no XML needed
 
 ### Modifying Existing Features
-- Do not increment module version in `config.xml`
 - Feel free to modify core files directly
 - Avoid creating a new module unless asked for it
+
+### Database Schema Changes
+- **Never modify historical install or upgrade scripts.** They are immutable snapshots of the schema at a given version. To change the schema, bump the module version in `etc/config.xml` and add a new `upgrade-X.Y.Z-A.B.C.php` (or `maho-X.Y.Z.php`) script. Fresh installs run install + every upgrade in sequence, so the new script repairs both fresh and existing installs.
+- This rule applies even to "obvious cleanups" (e.g. adding an explicit `default` to a column declared without one) — the fix belongs in a new upgrade, not in the install file.
 
 ## Modernizations
 
@@ -159,16 +226,50 @@ Mage::helper('core')->isValidDate($value);
 ```
 
 ### Date Handling (Native PHP DateTime)
-- **Database storage**: Always UTC in `'Y-m-d H:i:s'` format
-- **Display**: `storeDate()` converts UTC → HTML5 format
-- **Processing**: `utcDate()` converts HTML5 → UTC for database
+
+**Mental model:**
+- DB columns always store UTC as `'Y-m-d H:i:s'`. Never store store-local strings — they're ambiguous across stores.
+- Convert **on the way in** (`storeToUtc` user input → UTC for DB) and **on the way out** (`utcToStore` DB value → store TZ for display/computation).
+- Separate concerns by destination: `formatDateForDb()` is the single entry point for DB-bound strings (including `'now'` for current time). `nowUtc()` / `todayUtc()` are for non-DB UTC strings (logs, CSV exports, API payloads). The output happens to match, but the call-site intent is different — keep them separate.
+- Method names encode the timezone — `nowUtc()` returns UTC, `utcToStore()` returns store-local. You should be able to tell which TZ a value is in by reading the call site alone.
+
+**API:**
 
 ```php
-$html = Mage::app()->getLocale()->storeDate(null, $dbDate, false, 'html5');
-$utc = Mage::app()->getLocale()->utcDate(null, $inputDate, false, 'html5');
-Mage_Core_Model_Locale::now();    // 'Y-m-d H:i:s'
-Mage_Core_Model_Locale::today();  // 'Y-m-d'
+$locale = Mage::app()->getLocale();
+
+// DB-bound strings — use formatDateForDb() for anything headed to a DB column
+$locale->formatDateForDb('now');                               // 'Y-m-d H:i:s' (UTC) — current time for DB
+$locale->formatDateForDb('now', withTime: false);              // 'Y-m-d' (UTC) — current date for DB
+$locale->formatDateForDb($date);                               // normalize arbitrary input to 'Y-m-d H:i:s'
+$locale->formatDateForDb($date, withTime: false);              // normalize arbitrary input to 'Y-m-d'
+
+// Non-DB UTC strings — logs, CSV exports, API payloads, etc.
+$locale->nowUtc();                                             // 'Y-m-d H:i:s' (UTC)
+$locale->todayUtc();                                           // 'Y-m-d' (UTC)
+
+// "Now" in store timezone — for computation/display. Use utcToStore() with no args.
+$locale->utcToStore();                                         // DateTimeImmutable in store TZ
+$locale->utcToStore()->format('Y-m-d');                        // today in store TZ
+
+// Convert a known date between timezones — always returns DateTimeImmutable
+$dt = $locale->utcToStore($store, $utcInput);                  // DateTimeImmutable in store TZ
+$dt = $locale->storeToUtc($store, $storeInput);                // DateTimeImmutable in UTC
+
+// Caller formats the result explicitly — no magic strings
+$dt->format(Mage_Core_Model_Locale::DATETIME_FORMAT);          // 'Y-m-d H:i:s'
+$dt->format(Mage_Core_Model_Locale::DATE_FORMAT);              // 'Y-m-d'
+$dt->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT);    // 'Y-m-d\TH:i'
 ```
+
+**Common pitfalls:**
+- Don't use `nowUtc()` for DB inserts/updates — use `formatDateForDb('now')`. Same output, but the call site announces its DB-binding intent, and keeps `formatDateForDb` as the single choke point for DB-bound date formatting.
+- Don't pass `nowUtc()` to a store-local field — it's UTC, not store time. If you need store-local now, use `$locale->utcToStore()` and format from the DateTimeImmutable.
+- `utcToStore()` / `storeToUtc()` return `DateTimeImmutable` — mutators like `->setTime()` and `->modify()` return a new instance, so either chain directly (`utcToStore()->setTime(0,0,0)->format(...)`) or reassign (`$d = $d->modify('-1 day')`).
+- Don't rely on PHP's default timezone — Maho forces it to UTC at bootstrap, but pass DateTime objects with explicit TZ (or just strings/ints) rather than bare `new DateTime('...')` when precision matters.
+- For locale-aware display formatting (e.g. "April 16, 2026" in en_US, "16 avril 2026" in fr_FR), use `Mage::helper('core')->formatDate()`, not `DateTimeImmutable::format()`.
+
+**Why there's no `nowInStoreTimezone()` / `nowStore()`:** deliberate. A store-local *string* has no TZ tag, so storing one in the DB breaks the "DB is always UTC" invariant and produces different instants in multi-store setups. For computation or display you want a `DateTimeImmutable` anyway — `utcToStore()` with no args returns exactly that. If you catch yourself wanting a store-local now-as-string, step back: you probably want either `formatDateForDb('now')` (for the DB), `nowUtc()` (for logs/CSV/API), or `utcToStore()->format(...)` (for display).
 
 ### Filtering & Locale
 ```php
@@ -212,7 +313,59 @@ it('can process customer orders', function () {
 - Validate/sanitize user input at the model layer
 - Doctrine DBAL parameterized queries are automatic
 
+### Rate limiting & honeypot (shared `core` helper)
+
+Throttle public endpoints and trap bots with the shared `Mage_Core_Helper_Data` factories, do
+not roll a per-feature limiter. They hand back a `\Maho\Security\RateLimiter` (sliding window of
+`$maxAttempts` hits per `$windowSeconds`). **Core owns request identity**: callers never read the
+client IP or session id themselves, they name a scope and core resolves it. A non-positive
+`$maxAttempts` disables a limiter (no call-site `if ($limit <= 0)` guard needed).
+
+```php
+use Maho\Security\RateLimitScope;
+
+// Scope by request client (core resolves the identity). Default scope is Client = IP, falling
+// back to session id when the IP is unknown. Other scopes: RateLimitScope::Ip, ::Session.
+$limiter = Mage::helper('core')->rateLimiter('myfeature', 5, 3600);   // namespace, max, window
+if (!$limiter->attempt()) {            // check-and-record; false = blocked
+    // blocked, surface your own message (AJAX/API stay silent)
+}
+
+// Scope by a value you already hold (email, store id, order ref), not request identity.
+if (!Mage::helper('core')->rateLimiterBy('myfeature_email', $email, 1, 86400)->attempt()) {
+    // blocked
+}
+
+// Check up front, record only on failure (see Mage_Sales_Helper_Guest). ipRateLimiter() is the
+// store-config-governed IP limiter (system/rate_limit/*); null when disabled or IP unknown.
+$limiter = Mage::helper('core')->ipRateLimiter();
+if ($limiter?->tooManyAttempts()) { /* blocked: present "Too Soon" */ }
+// ...later, on a failed attempt only:
+$limiter?->hit();
+```
+
+`attempt()` is check-and-record; `tooManyAttempts()` is a pure read; `hit()` records explicitly.
+`remaining()` and `clear()` round out the object. Counters are cache-backed (tag
+`\Maho\Security\RateLimiter::CACHE_TAG`), so a full cache flush resets every window. Keep
+must-persist security counters (e.g. forgot-password) on durable storage instead.
+
+```php
+// Honeypot: render a visually-hidden trap field, then check it server-side. The field name is
+// install-specific. The on/off toggle is the caller's concern: gate both the render and the
+// check behind your module's own default-on `*/honeypot_enabled` flag.
+echo Mage::helper('core')->getHoneypotFieldHtml();               // in the template (ready-to-echo markup)
+if (Mage::getStoreConfigFlag('mymodule/abuse/honeypot_enabled')
+    && Mage::helper('core')->isHoneypotTriggered($request->getPost())) {
+    // silently drop (works for $request->getPost() and decoded API bodies alike)
+}
+```
+
 ## Git Commit Rules
 - **NEVER** include "Co-Authored-By: Claude" or any AI attribution in commits
 - **NEVER** mention Claude, AI, or assistant in commit messages
 - Keep commits professional and focused only on code changes
+
+## Pull Request Titles
+- Write a plain, descriptive title with **no** conventional-commit prefix (`feat(...)`, `fix(...)`, etc.)
+- Phrase it in the **past tense** describing what was done (e.g. "Added schema.org structured data for products and blog posts")
+- Spell out what the change delivers rather than using a vague summary

@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_CustomerSegmentation
  */
+
+declare(strict_types=1);
 
 class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Core_Model_Resource_Db_Abstract
 {
@@ -91,7 +88,7 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
                 ['subscriber_status'],
             )
             ->where('p.status = ?', Maho_CustomerSegmentation_Model_SequenceProgress::STATUS_SCHEDULED)
-            ->where('p.scheduled_at <= ?', Mage::getSingleton('core/date')->gmtDate())
+            ->where('p.scheduled_at <= ?', Mage::app()->getLocale()->formatDateForDb('now'))
             ->where('s.is_active = ?', 1)
             ->where('seg.auto_email_active = ?', 1)
             ->where('sub.subscriber_status = ?', Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED)
@@ -244,7 +241,7 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
 
         try {
             $data = [];
-            $now = Mage::getSingleton('core/date')->gmtDate();
+            $now = Mage::app()->getLocale()->formatDateForDb('now');
 
             foreach ($sequences as $sequence) {
                 $scheduledAt = $now;

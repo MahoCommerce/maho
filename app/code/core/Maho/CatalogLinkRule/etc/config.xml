@@ -1,18 +1,12 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @category   Maho
- * @package    Maho_CatalogLinkRule
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Maho_CatalogLinkRule>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
         </Maho_CatalogLinkRule>
     </modules>
 
@@ -31,15 +25,6 @@
                 </entities>
             </cataloglinkrule_resource>
         </models>
-
-        <resources>
-            <cataloglinkrule_setup>
-                <setup>
-                    <module>Maho_CatalogLinkRule</module>
-                    <class>Mage_Core_Model_Resource_Setup</class>
-                </setup>
-            </cataloglinkrule_setup>
-        </resources>
 
         <helpers>
             <cataloglinkrule>
@@ -73,36 +58,13 @@
         </translate>
     </adminhtml>
 
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <Maho_CatalogLinkRule before="Mage_Adminhtml">Maho_CatalogLinkRule_Adminhtml</Maho_CatalogLinkRule>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
-
     <default>
         <catalog>
             <linkrule>
                 <schedule>0 3 * * *</schedule>
+                <merge_mode>replace</merge_mode>
             </linkrule>
         </catalog>
     </default>
 
-    <crontab>
-        <jobs>
-            <cataloglinkrule_apply_all>
-                <schedule>
-                    <config_path>catalog/linkrule/schedule</config_path>
-                </schedule>
-                <run>
-                    <model>cataloglinkrule/processor::processRules</model>
-                </run>
-            </cataloglinkrule_apply_all>
-        </jobs>
-    </crontab>
 </config>

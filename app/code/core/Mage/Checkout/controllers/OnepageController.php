@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Checkout
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Checkout
  */
 
 class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
@@ -42,12 +40,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         // Disable flat for product collection
         Mage::helper('catalog/product_flat')->disableFlatCollection(true);
 
-        $checkoutSessionQuote = Mage::getSingleton('checkout/session')->getQuote();
-        if ($checkoutSessionQuote->getIsMultiShipping()) {
-            $checkoutSessionQuote->setIsMultiShipping(false);
-            $checkoutSessionQuote->removeAllAddresses();
-        }
-
         if (!$this->_canShowForUnregisteredUsers()) {
             $this->norouteAction();
             $this->setFlag('', self::FLAG_NO_DISPATCH, true);
@@ -80,7 +72,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     {
         if (!$this->getOnepage()->getQuote()->hasItems()
             || $this->getOnepage()->getQuote()->getHasError()
-            || $this->getOnepage()->getQuote()->getIsMultiShipping()
         ) {
             $this->_ajaxRedirectResponse();
             return true;
@@ -139,7 +130,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         $layout->generateXml();
         $layout->generateBlocks();
         $output = $layout->getOutput();
-        Mage::getSingleton('core/translate_inline')->processResponseBody($output);
         return $output;
     }
 
@@ -166,6 +156,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Checkout page
      */
+    #[Maho\Config\Route('/checkout/onepage', name: 'checkout.onepage.index', methods: ['GET'])]
     public function indexAction(): void
     {
         if (!Mage::helper('checkout')->canOnepageCheckout()) {
@@ -226,6 +217,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
      *
      * @return string|null
      */
+    #[Maho\Config\Route('/checkout/onepage/progress', name: 'checkout.onepage.progress', methods: ['GET'])]
     public function progressAction()
     {
         // previous step should never be null. We always start with billing and go forward
@@ -249,6 +241,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Shipping method action
      */
+    #[Maho\Config\Route('/checkout/onepage/shippingMethod', name: 'checkout.onepage.shippingMethod', methods: ['POST'])]
     public function shippingMethodAction(): void
     {
         if ($this->_expireAjax()) {
@@ -261,6 +254,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Review page action
      */
+    #[Maho\Config\Route('/checkout/onepage/review', name: 'checkout.onepage.review', methods: ['POST'])]
     public function reviewAction(): void
     {
         if ($this->_expireAjax()) {
@@ -273,6 +267,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Order success action
      */
+    #[Maho\Config\Route('/checkout/onepage/success', name: 'checkout.onepage.success', methods: ['GET'])]
     public function successAction(): void
     {
         $session = $this->getOnepage()->getCheckout();
@@ -299,6 +294,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Failure action
      */
+    #[Maho\Config\Route('/checkout/onepage/failure', name: 'checkout.onepage.failure', methods: ['GET'])]
     public function failureAction(): void
     {
         $lastQuoteId = $this->getOnepage()->getCheckout()->getLastQuoteId();
@@ -316,6 +312,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Get additional info action
      */
+    #[Maho\Config\Route('/checkout/onepage/getAdditional', name: 'checkout.onepage.getAdditional', methods: ['POST'])]
     public function getAdditionalAction(): void
     {
         $this->getResponse()->setBody($this->_getAdditionalHtml());
@@ -324,6 +321,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Address JSON
      */
+    #[Maho\Config\Route('/checkout/onepage/getAddress', name: 'checkout.onepage.getAddress', methods: ['POST'])]
     public function getAddressAction(): void
     {
         if ($this->_expireAjax()) {
@@ -344,6 +342,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Save checkout method
      */
+    #[Maho\Config\Route('/checkout/onepage/saveMethod', name: 'checkout.onepage.saveMethod', methods: ['POST'])]
     public function saveMethodAction(): void
     {
         if ($this->_expireAjax()) {
@@ -360,6 +359,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Save checkout billing address
      */
+    #[Maho\Config\Route('/checkout/onepage/saveBilling', name: 'checkout.onepage.saveBilling', methods: ['POST'])]
     public function saveBillingAction(): void
     {
         if ($this->_expireAjax()) {
@@ -414,6 +414,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
      * This action saves billing address fields to the quote without requiring
      * all fields to be valid. Used for shipping rate estimation in one-step checkout.
      */
+    #[Maho\Config\Route('/checkout/onepage/estimateBilling', name: 'checkout.onepage.estimateBilling', methods: ['POST'])]
     public function estimateBillingAction(): void
     {
         if ($this->_expireAjax()) {
@@ -429,25 +430,38 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         }
 
         $data = $this->getRequest()->getPost('billing', []);
+        $customerAddressId = $this->getRequest()->getPost('billing_address_id', false);
         $quote = $this->getOnepage()->getQuote();
 
-        // Save to billing address
+        // Address-book lookup is parent_id-scoped, so a foreign id never resolves.
+        // When present, the saved address wins over the posted form: the hidden
+        // new-address form is pre-filled with the customer's *default* address
+        // and addData() would otherwise clobber the chosen one.
+        $customerAddress = null;
+        if ($customerAddressId && $quote->getCustomerId()) {
+            $customerAddress = $quote->getCustomer()->getAddressItemById($customerAddressId);
+        }
+
         $billingAddress = $quote->getBillingAddress();
-        $billingAddress->addData($data);
+        if ($customerAddress) {
+            $billingAddress->importCustomerAddress($customerAddress)->setSaveInAddressBook(0);
+        } else {
+            $billingAddress->addData($data);
+        }
         $billingAddress->implodeStreetAddress();
 
-        // If using billing for shipping, also set shipping address
+        // `billing[use_for_shipping]` lives outside the hidden form and is always posted.
         $useForShipping = $data['use_for_shipping'] ?? 1;
         if ($useForShipping && !$quote->isVirtual()) {
             $shippingAddress = $quote->getShippingAddress();
-
-            // Remove fields that should not be copied to shipping address
-            // address_id is the quote address entity ID - copying it would overwrite the shipping address identity
-            $shippingData = $data;
-            unset($shippingData['address_id']);
-
+            if ($customerAddress) {
+                $shippingAddress->importCustomerAddress($customerAddress)->setSaveInAddressBook(0);
+            } else {
+                $shippingData = $data;
+                unset($shippingData['address_id']);
+                $shippingAddress->addData($shippingData);
+            }
             $shippingAddress->setSameAsBilling(1)
-                ->addData($shippingData)
                 ->implodeStreetAddress()
                 ->setCollectShippingRates(true);
         }
@@ -470,6 +484,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Shipping address save action
      */
+    #[Maho\Config\Route('/checkout/onepage/saveShipping', name: 'checkout.onepage.saveShipping', methods: ['POST'])]
     public function saveShippingAction(): void
     {
         if ($this->_expireAjax()) {
@@ -499,6 +514,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Shipping method save action
      */
+    #[Maho\Config\Route('/checkout/onepage/saveShippingMethod', name: 'checkout.onepage.saveShippingMethod', methods: ['POST'])]
     public function saveShippingMethodAction(): void
     {
         if ($this->_expireAjax()) {
@@ -539,6 +555,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
      *
      * Sets either redirect or a JSON response
      */
+    #[Maho\Config\Route('/checkout/onepage/savePayment', name: 'checkout.onepage.savePayment', methods: ['POST'])]
     public function savePaymentAction(): void
     {
         if ($this->_expireAjax()) {
@@ -625,6 +642,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     /**
      * Create order action
      */
+    #[Maho\Config\Route('/checkout/onepage/saveOrder', name: 'checkout.onepage.saveOrder', methods: ['POST'])]
     public function saveOrderAction(): void
     {
         if (!$this->_validateFormKey()) {

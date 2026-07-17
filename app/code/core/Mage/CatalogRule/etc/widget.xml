@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: OSL-3.0
+-->
+<widgets>
+    <onsale type="catalogrule/product_widget_onsale" translate="name description" module="catalogrule">
+        <name>Catalog On Sale Products</name>
+        <description>List of Products with an active Catalog Price Rule discount</description>
+        <parameters>
+            <rule_id translate="label description">
+                <visible>1</visible>
+                <label>Catalog Price Rule</label>
+                <description>Restrict to a single rule (e.g. "Offer of the month"). Leave empty for all active rules.</description>
+                <type>select</type>
+                <source_model>catalogrule/source_rule</source_model>
+            </rule_id>
+            <order translate="label">
+                <required>1</required>
+                <visible>1</visible>
+                <label>Order Products By</label>
+                <type>select</type>
+                <value>newest</value>
+                <values>
+                    <newest translate="label">
+                        <value>newest</value>
+                        <label>Newest</label>
+                    </newest>
+                    <bestselling translate="label">
+                        <value>bestselling</value>
+                        <label>Best Selling</label>
+                    </bestselling>
+                    <biggest_discount translate="label">
+                        <value>biggest_discount</value>
+                        <label>Biggest Discount</label>
+                    </biggest_discount>
+                    <random translate="label">
+                        <value>random</value>
+                        <label>Random</label>
+                    </random>
+                </values>
+            </order>
+            <only_in_stock translate="label">
+                <visible>1</visible>
+                <label>Only In-Stock Products</label>
+                <type>boolean</type>
+                <value>1</value>
+            </only_in_stock>
+            <show_pager translate="label">
+                <visible>1</visible>
+                <label>Display Page Control</label>
+                <type>boolean</type>
+            </show_pager>
+            <products_per_page translate="label">
+                <required>1</required>
+                <visible>1</visible>
+                <value>5</value>
+                <label>Number of Products per Page</label>
+                <type>text</type>
+                <depends><show_pager><value>1</value></show_pager></depends>
+            </products_per_page>
+            <products_count translate="label">
+                <required>1</required>
+                <visible>1</visible>
+                <value>5</value>
+                <label>Number of Products to Display</label>
+                <type>text</type>
+            </products_count>
+            <template>
+                <required>1</required>
+                <visible>1</visible>
+                <label>Template</label>
+                <type>select</type>
+                <value>catalogrule/widget/onsale/content/onsale_grid.phtml</value>
+                <values>
+                    <default translate="label">
+                        <value>catalogrule/widget/onsale/content/onsale_grid.phtml</value>
+                        <label>On Sale Products Grid Template</label>
+                    </default>
+                    <list translate="label">
+                        <value>catalogrule/widget/onsale/content/onsale_list.phtml</value>
+                        <label>On Sale Products List Template</label>
+                    </list>
+                </values>
+            </template>
+            <cache_lifetime translate="label description">
+                <label>Cache Lifetime (Seconds)</label>
+                <description>86400 by default, if not set. Rule prices change with the daily catalog rule reindex.</description>
+                <visible>1</visible>
+                <type>text</type>
+            </cache_lifetime>
+        </parameters>
+    </onsale>
+</widgets>

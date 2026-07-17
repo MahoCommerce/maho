@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Oauth
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Oauth
  */
 
 class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Controller_Action
@@ -59,6 +57,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     /**
      * Index action.
      */
+    #[Maho\Config\Route('/admin/oauth_authorize/index')]
     public function indexAction(): void
     {
         $this->_initForm();
@@ -70,6 +69,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     /**
      * Index action with a simple design
      */
+    #[Maho\Config\Route('/admin/oauth_authorize/simple')]
     public function simpleAction(): void
     {
         $this->_initForm(true);
@@ -243,6 +243,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     /**
      * Confirm token authorization action
      */
+    #[Maho\Config\Route('/admin/oauth_authorize/confirm')]
     public function confirmAction(): void
     {
         $this->_initConfirmPage();
@@ -251,6 +252,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     /**
      * Confirm token authorization simple page
      */
+    #[Maho\Config\Route('/admin/oauth_authorize/confirmSimple')]
     public function confirmSimpleAction(): void
     {
         $this->_initConfirmPage();
@@ -259,6 +261,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     /**
      * Reject token authorization action
      */
+    #[Maho\Config\Route('/admin/oauth_authorize/reject')]
     public function rejectAction(): void
     {
         $this->_initRejectPage();
@@ -267,6 +270,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     /**
      * Reject token authorization simple page
      */
+    #[Maho\Config\Route('/admin/oauth_authorize/rejectSimple')]
     public function rejectSimpleAction(): void
     {
         $this->_initRejectPage();

@@ -1,18 +1,13 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Payment
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2022 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_Payment>
-            <version>1.6.0.1</version>
+            <version>2.0.0</version>
         </Mage_Payment>
     </modules>
     <global>
@@ -30,13 +25,6 @@
                 </entities>
             </payment_resource>
         </models>
-        <resources>
-            <payment_setup>
-                <setup>
-                    <module>Mage_Payment</module>
-                </setup>
-            </payment_setup>
-        </resources>
         <blocks>
             <payment>
                 <class>Mage_Payment_Block</class>
@@ -91,40 +79,6 @@
                 <offline>Offline Payment Methods</offline>
             </groups>
         </payment>
-        <events>
-            <sales_order_save_before>
-                <observers>
-                    <payment_sales_order_save_before>
-                        <class>payment/observer</class>
-                        <method>salesOrderBeforeSave</method>
-                    </payment_sales_order_save_before>
-                </observers>
-            </sales_order_save_before>
-            <sales_order_payment_save_before>
-                <observers>
-                    <payment_before_save>
-                        <class>payment/observer</class>
-                        <method>beforeOrderPaymentSave</method>
-                    </payment_before_save>
-                </observers>
-            </sales_order_payment_save_before>
-            <sales_order_status_unassign_before>
-                <observers>
-                    <payment_order_status_unassign_before>
-                        <class>payment/observer</class>
-                        <method>beforeSalesOrderStatusUnassign</method>
-                    </payment_order_status_unassign_before>
-                </observers>
-            </sales_order_status_unassign_before>
-            <encryption_key_regenerated>
-                <observers>
-                    <payment_encryption_key_regenerated>
-                        <class>payment/observer</class>
-                        <method>encryptionKeyRegenerated</method>
-                    </payment_encryption_key_regenerated>
-                </observers>
-            </encryption_key_regenerated>
-        </events>
     </global>
     <frontend>
         <translate>
@@ -136,16 +90,6 @@
                 </Mage_Payment>
             </modules>
         </translate>
-        <events>
-            <catalog_product_type_prepare_full_options>
-                <observers>
-                    <payment_recurring_profile_prepare_options>
-                        <class>payment/observer</class>
-                        <method>prepareProductRecurringProfileOptions</method>
-                    </payment_recurring_profile_prepare_options>
-                </observers>
-            </catalog_product_type_prepare_full_options>
-        </events>
         <layout>
             <updates>
                 <payment module="Mage_Payment">
@@ -172,17 +116,6 @@
             </updates>
         </layout>
     </adminhtml>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <payment before="Mage_Adminhtml">Mage_Payment_Adminhtml</payment>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
     <default>
         <payment>
             <checkmo>

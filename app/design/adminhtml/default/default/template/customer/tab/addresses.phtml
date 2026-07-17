@@ -1,23 +1,21 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
-/** @var Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses $this */
+/**
+ * @var Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses $this
+ * @var Mage_Customer_Model_Address[] $addressCollection
+ */
 ?>
 <!-- Addresses list -->
 <table cellspacing="0" class="form-edit">
 <tr>
 <td class="address-list">
-    <div class="entry-edit-head">
-        <h4><?= Mage::helper('customer')->__('Customer Addresses') ?></h4>
-    </div>
     <div class="sub-btn-set"><?= $this->getAddNewButtonHtml() ?></div>
     <ul id="address_list">
     <?php $_iterator = 0; ?>
@@ -34,11 +32,11 @@
             </address>
             <div class="address-type">
                 <span class="address-type-line">
-                    <input type="radio" <?php if ($this->isReadonly()):?> disabled="disabled"<?php endif ?> value="<?= $_address->getId() ?>" id="address_item_billing<?= $_address->getId() ?>" name="account[default_billing]" title="<?= $this->quoteEscape(Mage::helper('customer')->__('Set as Default Billing Address')) ?>"<?php if ($_address->getId() == $customer->getDefaultBilling()): ?> checked="checked"<?php endif ?>/>
+                    <input type="radio" <?php if ($this->isReadonly()):?> disabled="disabled"<?php endif ?> value="<?= $_address->getId() ?>" id="address_item_billing<?= $_address->getId() ?>" name="account[default_billing]" title="<?= $this->quoteEscape(Mage::helper('customer')->__('Set as Default Billing Address')) ?>"<?php if ($_address->getId() == $customer->getDefaultBilling()): ?> checked="checked"<?php endif ?>>
                     &nbsp;<label for="address_item_billing<?= $_address->getId() ?>"><?= Mage::helper('customer')->__('Default Billing Address') ?></label>
                 </span>
                 <span class="address-type-line">
-                    <input type="radio"  <?php if ($this->isReadonly()):?> disabled="disabled"<?php endif ?> value="<?= $_address->getId() ?>" id="address_item_shipping<?= $_address->getId() ?>" name="account[default_shipping]" title="<?= $this->quoteEscape(Mage::helper('customer')->__('Set as Default Shipping Address')) ?>"<?php if ($_address->getId() == $customer->getDefaultShipping()): ?> checked="checked"<?php endif ?>/>
+                    <input type="radio"  <?php if ($this->isReadonly()):?> disabled="disabled"<?php endif ?> value="<?= $_address->getId() ?>" id="address_item_shipping<?= $_address->getId() ?>" name="account[default_shipping]" title="<?= $this->quoteEscape(Mage::helper('customer')->__('Set as Default Shipping Address')) ?>"<?php if ($_address->getId() == $customer->getDefaultShipping()): ?> checked="checked"<?php endif ?>>
                     &nbsp;<label for="address_item_shipping<?= $_address->getId() ?>"><?= Mage::helper('customer')->__('Default Shipping Address') ?></label>
                 </span>
             </div>
@@ -59,11 +57,11 @@
         <address><?= Mage::helper('customer')->__('New Customer Address') ?></address>
         <div class="address-type">
             <span class="address-type-line">
-                <input  <?php if ($this->isReadonly()):?> disabled="disabled"<?php endif ?> type="radio" value="<?= $_templatePrefix ?>" id="address_item_billing<?= $_templatePrefix ?>" name="account[default_billing]" title="<?= $this->quoteEscape(Mage::helper('customer')->__('Set as Default Billing Address')) ?>"/>
+                <input  <?php if ($this->isReadonly()):?> disabled="disabled"<?php endif ?> type="radio" value="<?= $_templatePrefix ?>" id="address_item_billing<?= $_templatePrefix ?>" name="account[default_billing]" title="<?= $this->quoteEscape(Mage::helper('customer')->__('Set as Default Billing Address')) ?>">
                 &nbsp;<label for="address_item_billing<?= $_templatePrefix ?>"><?= Mage::helper('customer')->__('Default Billing Address') ?></label>
             </span>
             <span class="address-type-line">
-                <input  <?php if ($this->isReadonly()):?> disabled="disabled"<?php endif ?> type="radio" value="<?= $_templatePrefix ?>" id="address_item_shipping<?= $_templatePrefix ?>" name="account[default_shipping]" title="<?= $this->quoteEscape(Mage::helper('customer')->__('Set as Default Shipping Address')) ?>"/>
+                <input  <?php if ($this->isReadonly()):?> disabled="disabled"<?php endif ?> type="radio" value="<?= $_templatePrefix ?>" id="address_item_shipping<?= $_templatePrefix ?>" name="account[default_shipping]" title="<?= $this->quoteEscape(Mage::helper('customer')->__('Set as Default Shipping Address')) ?>">
                 &nbsp;<label for="address_item_shipping<?= $_templatePrefix ?>"><?= Mage::helper('customer')->__('Default Shipping Address') ?></label>
             </span>
         </div>
@@ -90,7 +88,7 @@
                     ->addValuesToNameSuffixElement($_address->getSuffix());
                 ?>
             <?= $this->getForm()->getHtml() ?>
-            <input type="hidden" name="address[<?= $_address->getId() ?>][_deleted]" id="deleted_address_item_<?= $_address->getId() ?>" />
+            <input type="hidden" name="address[<?= $_address->getId() ?>][_deleted]" id="deleted_address_item_<?= $_address->getId() ?>">
             </div>
             <?php endforeach ?>
         <?php else: ?>
@@ -98,7 +96,7 @@
         <?php endif ?>
     </div>
 
-<script type="text/javascript">
+<script>
 let deleteButtonId = <?= $_iterator ?>;
 
 class addressesModel {
@@ -412,11 +410,11 @@ class addressesModel {
             const addressElement = container.addressItem.querySelector('address');
             if (addressElement) {
                 let html = this.evaluateTemplate(this.itemContentTemplate, data);
-                html = html.replace(/(<br\s*\/?\s*>){2,}/gi, '<br/>');
-                html = html.replace(/<br\s*\/?\s*>(\s*,){1,}\s*<br\s*\/?\s*>/gi, '<br/>');
-                html = html.replace(/<br\s*\/?\s*>(\s*,){1,}(.*)<br\s*\/?\s*>/gi, '<br/>$2<br/>');
-                html = html.replace(/<br\s*\/?\s*>(.*?)(,\s*){1,}<br\s*\/?\s*>/gi, '<br/>$1<br/>');
-                html = html.replace(/<br\s*\/?\s*>(.*?)(,\s*){2,}(.*?)<br\s*\/?\s*>/gi, '<br/>$1, $3<br/>');
+                html = html.replace(/(<br\s*\/?\s*>){2,}/gi, '<br>');
+                html = html.replace(/<br\s*\/?\s*>(\s*,){1,}\s*<br\s*\/?\s*>/gi, '<br>');
+                html = html.replace(/<br\s*\/?\s*>(\s*,){1,}(.*)<br\s*\/?\s*>/gi, '<br>$2<br>');
+                html = html.replace(/<br\s*\/?\s*>(.*?)(,\s*){1,}<br\s*\/?\s*>/gi, '<br>$1<br>');
+                html = html.replace(/<br\s*\/?\s*>(.*?)(,\s*){2,}(.*?)<br\s*\/?\s*>/gi, '<br>$1, $3<br>');
                 html = html.replace(/t:\s*<br\s*\/?\s*>/gi, '');
                 html = html.replace(/f:\s*<br\s*\/?\s*>/gi, '');
                 html = html.replace(/vat:\s*$/gi, '');
@@ -575,14 +573,14 @@ class addressesModel {
                 }
             }
             html += '</select>';
-            html += `<input type="hidden" name="${regionHtmlName}" id="${regionHtmlId}"/>`;
+            html += `<input type="hidden" name="${regionHtmlName}" id="${regionHtmlId}">`;
 
             reqLabel.forEach(item => item.style.display = '');
             newInputId = regionIdHtmlId;
         } else {
             // Create visible text input 'region' and hidden 'region_id'
-            html = `<input type="text" name="${regionHtmlName}" id="${regionHtmlId}" class="input-text" title="${this.regionElement.title}" />` +
-                   `<input type="hidden" name="${regionIdHtmlName}" id="${regionIdHtmlId}"/>`;
+            html = `<input type="text" name="${regionHtmlName}" id="${regionHtmlId}" class="input-text" title="${this.regionElement.title}">` +
+                   `<input type="hidden" name="${regionIdHtmlName}" id="${regionIdHtmlId}">`;
 
             reqLabel.forEach(item => item.style.display = 'none');
             newInputId = regionHtmlId;
@@ -649,6 +647,29 @@ class addressesModel {
 }
 
 const customerAddresses = new addressesModel();
+
+<?php if (Mage::helper('customer')->isVatValidationEnabled()): ?>
+// Initialize VAT validation for existing addresses
+function initVatField(vatFieldId, countryFieldId) {
+    const elm = document.getElementById(vatFieldId);
+    if (!elm) return;
+    elm.classList.add('validate-vat');
+    elm.dataset.validateVatUrl = '<?= $this->jsQuoteEscape($this->getUrl('adminhtml/customer_system_config_validatevat/validate')) ?>';
+    elm.dataset.validateVatCountry = countryFieldId;
+    Validation.initVatValidation(elm);
+}
+
+<?php foreach ($addressCollection as $_address): ?>
+initVatField('_item<?= $_address->getId() ?>vat_id', '_item<?= $_address->getId() ?>country_id');
+<?php endforeach ?>
+
+// Extend addNewAddress to initialize VAT validation for new addresses
+const originalAddNewAddress = customerAddresses.addNewAddress.bind(customerAddresses);
+customerAddresses.addNewAddress = function(event) {
+    originalAddNewAddress(event);
+    initVatField('_item' + this.itemCount + 'vat_id', '_item' + this.itemCount + 'country_id');
+};
+<?php endif ?>
 </script>
 </td>
 </tr>

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Bundle
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2026 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Bundle
  */
 
 class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abstract
@@ -527,7 +525,8 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
 
         $options = $buyRequest->getBundleOption();
         if (is_array($options)) {
-            $options = array_filter($options, '\intval');
+            // Keep only values that are non-zero when cast to int
+            $options = array_filter($options, fn(mixed $o) => (int) $o !== 0);
             $qtys = $buyRequest->getBundleOptionQty();
             foreach ($options as $_optionId => $_selections) {
                 if (empty($_selections)) {
@@ -578,7 +577,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
                             $moreSelections = false;
                         }
                         if ($selectedOption->getRequired()
-                            && (!$selectedOption->isMultiSelection() || ($selectedOption->isMultiSelection() && !$moreSelections))
+                            && (!$selectedOption->isMultiSelection() || !$moreSelections)
                         ) {
                             return Mage::helper('bundle')->__('Selected required options are not available.');
                         }
@@ -1000,8 +999,9 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
         $option     = $buyRequest->getBundleOption();
         $optionQty  = $buyRequest->getBundleOptionQty();
 
-        $option     = (is_array($option)) ? array_filter($option, '\intval') : [];
-        $optionQty  = (is_array($optionQty)) ? array_filter($optionQty, '\intval') : [];
+        // Keep only values that are non-zero when cast to int/float
+        $option     = (is_array($option)) ? array_filter($option, fn(mixed $o) => (int) $o !== 0) : [];
+        $optionQty  = (is_array($optionQty)) ? array_filter($optionQty, fn(mixed $o) => (float) $o !== 0.0) : [];
 
         return [
             'bundle_option'     => $option,

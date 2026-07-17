@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Directory
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Directory
  */
 
 /**
@@ -96,9 +94,9 @@ class Mage_Directory_Model_Country extends Mage_Core_Model_Abstract
 {{street2}}
 {{city}}, {{region}} {{postcode}}';
             } else {
-                $template = '{{firstname}} {{lastname}}<br/>
-{{street}}<br/>
-{{city}}, {{region}} {{postcode}}<br/>
+                $template = '{{firstname}} {{lastname}}<br>
+{{street}}<br>
+{{city}}, {{region}} {{postcode}}<br>
 T: {{telephone}}';
             }
         }
@@ -107,7 +105,7 @@ T: {{telephone}}';
         $addressText = $filter->setData($address->getData())->filter($template);
 
         if ($html) {
-            $addressText = preg_replace('#(<br\s*/?>\s*){2,}#im', '<br/>', $addressText);
+            $addressText = preg_replace('#(<br\s*/?>\s*){2,}#im', '<br>', $addressText);
         } else {
             $addressText = preg_replace('#(\n\s*){2,}#m', "\n", $addressText);
         }

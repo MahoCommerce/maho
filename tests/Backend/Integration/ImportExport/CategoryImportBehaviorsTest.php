@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Maho
- *
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 declare(strict_types=1);
@@ -15,15 +13,26 @@ uses(MahoBackendTestCase::class);
 
 beforeEach(function () {
     $this->importModel = Mage::getModel('importexport/import_entity_category');
+
+    // Snapshot the categories that already exist (sample data + anything a prior
+    // test left behind) so afterEach only removes what THIS test creates.
+    $this->preExistingCategoryIds = array_map('intval', Mage::getModel('catalog/category')->getCollection()->getAllIds());
 });
 
 afterEach(function () {
-    // Clean up test categories
+    // Clean up ONLY the categories this test created. Deleting every category
+    // with entity_id > 2 would also remove the sample-data categories and cascade
+    // into catalog_category_product, corrupting the shared test database for the
+    // API integration tests that run later in the same suite.
+    $preExisting = array_flip($this->preExistingCategoryIds ?? []);
     $collection = Mage::getModel('catalog/category')->getCollection()
         ->addAttributeToFilter('level', ['gt' => 0])
         ->addAttributeToFilter('entity_id', ['gt' => 2]);
 
     foreach ($collection as $category) {
+        if (isset($preExisting[(int) $category->getId()])) {
+            continue;
+        }
         try {
             $category->delete();
         } catch (Exception $e) {
@@ -493,10 +502,12 @@ describe('Behavior Comparison', function () {
 
         expect(findCategoryByUrlKeyBehavior('behavior-test-1')->getName())->toBe('Updated 1');
 
-        // Reset for REPLACE test - clean up manually
+        // Reset for REPLACE test - remove only the categories THIS test created.
+        // A blanket delete of every entity_id > 2 would wipe the sample-data
+        // categories (and cascade into catalog_category_product), corrupting the
+        // shared test database for the API integration tests that run later.
         $collection = Mage::getModel('catalog/category')->getCollection()
-            ->addAttributeToFilter('level', ['gt' => 0])
-            ->addAttributeToFilter('entity_id', ['gt' => 2]);
+            ->addAttributeToFilter('url_key', ['like' => 'behavior-test-%']);
 
         foreach ($collection as $category) {
             try {

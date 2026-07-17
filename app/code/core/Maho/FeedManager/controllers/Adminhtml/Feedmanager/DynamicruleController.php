@@ -1,19 +1,15 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Maho_FeedManager
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_FeedManager
  */
+
+declare(strict_types=1);
 
 class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_Adminhtml_Controller_Action
 {
-    use Maho_FeedManager_Controller_Adminhtml_JsonResponseTrait;
-
     public const ADMIN_RESOURCE = 'catalog/feedmanager/dynamicrules';
 
     #[\Override]
@@ -32,6 +28,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -42,11 +39,20 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/grid')]
+    public function gridAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/edit')]
     public function editAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -83,6 +89,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/save')]
     public function saveAction(): void
     {
         $data = $this->getRequest()->getPost();
@@ -231,6 +238,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
     /**
      * Get initial conditions HTML for a new case (AJAX)
      */
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/caseConditionsHtml')]
     public function caseConditionsHtmlAction(): void
     {
         $caseIndex = max(0, (int) $this->getRequest()->getParam('case_index', 0));
@@ -261,6 +269,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
     /**
      * New condition HTML for AJAX (standard Maho rules engine)
      */
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/newConditionHtml')]
     public function newConditionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -297,6 +306,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
         $this->getResponse()->setBody($html);
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/delete')]
     public function deleteAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -328,6 +338,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/massStatus')]
     public function massStatusAction(): void
     {
         $ruleIds = $this->getRequest()->getParam('rule_ids');
@@ -357,6 +368,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/massDelete')]
     public function massDeleteAction(): void
     {
         $ruleIds = $this->getRequest()->getParam('rule_ids');
@@ -405,6 +417,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
     /**
      * Get available product attributes for AJAX request
      */
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/getAttributes')]
     public function getAttributesAction(): void
     {
         $attributes = [];
@@ -436,6 +449,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
 
         $attributes = array_merge($computed, $attributes);
 
-        $this->_sendJsonResponse($attributes);
+        $this->getResponse()->setBodyJson($attributes);
     }
 }

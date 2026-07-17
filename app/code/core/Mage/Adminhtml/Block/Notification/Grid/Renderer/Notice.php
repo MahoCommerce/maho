@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Block_Notification_Grid_Renderer_Notice extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
@@ -21,6 +19,6 @@ class Mage_Adminhtml_Block_Notification_Grid_Renderer_Notice extends Mage_Adminh
     public function render(\Maho\DataObject $row)
     {
         return '<span class="grid-row-title">' . $this->escapeHtml($row->getTitle()) . '</span>'
-            . ($row->getDescription() ? '<br />' . $this->escapeHtml($row->getDescription()) : '');
+            . ($row->getDescription() ? '<br>' . $this->escapeHtml($row->getDescription()) : '');
     }
 }

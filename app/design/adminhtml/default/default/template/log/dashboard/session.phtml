@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Log_Block_Dashboard_Session $this */
@@ -34,7 +32,7 @@ $metrics = $this->getMetrics();
 
 <style>
 .dashboard-session-metrics {
-    padding: 10px;
+    padding: 4px 15px 15px;
 }
 .dashboard-session-metrics .metrics-grid {
     display: grid;
@@ -44,19 +42,19 @@ $metrics = $this->getMetrics();
 .dashboard-session-metrics .metric-item {
     text-align: center;
     padding: 12px 8px;
-    background: #f9f9f9;
+    background: var(--maho-surface-sunken);
     border-radius: 4px;
 }
 .dashboard-session-metrics .metric-value {
     font-size: 18px;
     font-weight: bold;
-    color: #333;
+    color: var(--maho-ink);
     margin-bottom: 4px;
     white-space: nowrap;
 }
 .dashboard-session-metrics .metric-label {
     font-size: 10px;
-    color: #666;
+    color: var(--maho-ink-muted);
     text-transform: uppercase;
     letter-spacing: 0.3px;
 }

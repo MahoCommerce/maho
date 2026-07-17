@@ -1,12 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Blog
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Blog
  */
 
 class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
@@ -71,12 +68,16 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             $this->_saveStoreRelations($object);
         }
 
+        if ($object->hasData('categories')) {
+            $this->_saveCategoryRelations($object);
+        }
+
         return parent::_afterSave($object);
     }
 
     protected function _saveStoreRelations(\Maho\DataObject $post): void
     {
-        $oldStores = $this->lookupStoreIds($post->getId());
+        $oldStores = $this->lookupStoreIds((int) $post->getId());
         $newStores = (array) $post->getStores();
 
         $table = $this->_storeTable;
@@ -166,19 +167,35 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         $isActive = $coreHelper->filterInt($object->getData('is_active') ?? 0) ? 1 : 0;
         $object->setData('is_active', $isActive);
 
-        // Validate publish_date and set to today if empty/invalid
+        // Validate publish_date and set to today (in store TZ — matches admin's view) if empty/invalid
         if (!$object->hasData('publish_date') || empty($object->getData('publish_date')) || !$coreHelper->isValidDate($object->getData('publish_date'))) {
-            $locale = Mage::app()->getLocale();
-            $today = $locale->utcDate(null, null, true, Mage_Core_Model_Locale::DATE_FORMAT);
-            $object->setData('publish_date', $today);
+            $object->setData('publish_date', Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT));
         }
 
-        // Filter HTML content
+        // Sanitize HTML content on save so a stored value is never dangerous. The malicious-code
+        // filter (HTMLPurifier) HTML-parses the content, which would mangle a template directive
+        // whose nested quotes are invalid HTML attribute syntax (e.g. {{media url="..."}} inside
+        // an img src). So mask real directives ({{keyword ...}}) before filtering and restore them
+        // after; anything else wrapped in braces (e.g. {{<script>...}}) is left for the filter to
+        // strip. A directive's own parameters are preserved as authored and resolved on output;
+        // constraining what content directives may do is a separate, platform-wide concern.
         if ($object->hasData('content')) {
-            $content = $object->getData('content');
+            $content = (string) $object->getData('content');
+
+            $directives = [];
+            $content = (string) preg_replace_callback('/\{\{[a-z]{1,10}.*?\}\}/is', function (array $match) use (&$directives): string {
+                $token = 'MAHODIRECTIVE' . count($directives) . 'X';
+                $directives[$token] = $match[0];
+                return $token;
+            }, $content);
+
             $filter = Mage::getModel('core/input_filter_maliciousCode');
-            $filteredContent = $filter->linkFilter($filter->filter($content));
-            $object->setData('content', $filteredContent);
+            $content = $filter->linkFilter($filter->filter($content));
+
+            if ($directives !== []) {
+                $content = strtr($content, $directives);
+            }
+            $object->setData('content', $content);
         }
 
         // Auto-generate URL key from title if empty
@@ -207,12 +224,12 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     #[\Override]
     public function save(\Maho\DataObject $object)
     {
-        $locale = Mage::app()->getLocale();
+        $now = Mage::app()->getLocale()->formatDateForDb('now');
 
         if (!$object->getId()) {
-            $object->setCreatedAt($locale->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+            $object->setCreatedAt($now);
         }
-        $object->setUpdatedAt($locale->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+        $object->setUpdatedAt($now);
 
         // First do the EAV save (creates entity and gets ID)
         parent::save($object);
@@ -250,10 +267,53 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     protected function _afterLoad(\Maho\DataObject $object): self
     {
         if ($object->getId()) {
-            $stores = $this->lookupStoreIds($object->getId());
+            $stores = $this->lookupStoreIds((int) $object->getId());
             $object->setData('stores', $stores);
+
+            $categoryIds = $this->lookupCategoryIds($object->getId());
+            $object->setData('category_ids', $categoryIds);
         }
 
         return parent::_afterLoad($object);
+    }
+
+    public function lookupCategoryIds(int $postId): array
+    {
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getTable('blog/post_category'), 'category_id')
+            ->where('post_id = ?', (int) $postId);
+
+        return $adapter->fetchCol($select);
+    }
+
+    protected function _saveCategoryRelations(\Maho\DataObject $post): void
+    {
+        $oldCategoryIds = $this->lookupCategoryIds($post->getId());
+        $newCategoryIds = (array) $post->getData('categories');
+
+        $table = $this->getTable('blog/post_category');
+        $adapter = $this->_getWriteAdapter();
+
+        $delete = array_diff($oldCategoryIds, $newCategoryIds);
+        if (!empty($delete)) {
+            $adapter->delete($table, [
+                'post_id = ?' => (int) $post->getId(),
+                'category_id IN (?)' => $delete,
+            ]);
+        }
+
+        $insert = array_diff($newCategoryIds, $oldCategoryIds);
+        if (!empty($insert)) {
+            $data = [];
+            foreach ($insert as $categoryId) {
+                $data[] = [
+                    'post_id' => (int) $post->getId(),
+                    'category_id' => (int) $categoryId,
+                    'position' => 0,
+                ];
+            }
+            $adapter->insertMultiple($table, $data);
+        }
     }
 }

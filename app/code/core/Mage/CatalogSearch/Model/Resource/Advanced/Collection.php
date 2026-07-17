@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_CatalogSearch
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_CatalogSearch
  */
 
 class Mage_CatalogSearch_Model_Resource_Advanced_Collection extends Mage_Catalog_Model_Resource_Product_Collection
@@ -70,10 +68,9 @@ class Mage_CatalogSearch_Model_Resource_Advanced_Collection extends Mage_Catalog
                                     Mage::throwException($invalidDateMessage);
                                 }
                                 if (!is_numeric($conditionValue['from'])) {
-                                    $conditionValue['from'] = Mage::getSingleton('core/date')
-                                        ->gmtDate(null, $conditionValue['from']);
+                                    $conditionValue['from'] = Mage::app()->getLocale()->storeToUtc(null, $conditionValue['from'])->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                                     if (!$conditionValue['from']) {
-                                        $conditionValue['from'] = Mage::getSingleton('core/date')->gmtDate();
+                                        $conditionValue['from'] = Mage::app()->getLocale()->formatDateForDb('now');
                                     }
                                 }
                                 $conditionData[] = ['gteq' => $conditionValue['from']];
@@ -83,10 +80,9 @@ class Mage_CatalogSearch_Model_Resource_Advanced_Collection extends Mage_Catalog
                                     Mage::throwException($invalidDateMessage);
                                 }
                                 if (!is_numeric($conditionValue['to'])) {
-                                    $conditionValue['to'] = Mage::getSingleton('core/date')
-                                        ->gmtDate(null, $conditionValue['to']);
+                                    $conditionValue['to'] = Mage::app()->getLocale()->storeToUtc(null, $conditionValue['to'])->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                                     if (!$conditionValue['to']) {
-                                        $conditionValue['to'] = Mage::getSingleton('core/date')->gmtDate();
+                                        $conditionValue['to'] = Mage::app()->getLocale()->formatDateForDb('now');
                                     }
                                 }
                                 $conditionData[] = ['lteq' => $conditionValue['to']];

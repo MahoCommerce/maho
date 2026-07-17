@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Tag
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Tag
  */
 
 /**
@@ -191,6 +189,8 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_controller_product_save_visibility_changed', area: 'adminhtml')]
+    #[Maho\Config\Observer('catalog_controller_product_delete', area: 'adminhtml')]
     public function productEventAggregate($observer)
     {
         $this->_getProductEventTagsCollection($observer)->walk('aggregate');
@@ -203,6 +203,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_product_delete_before', area: 'adminhtml')]
     public function productDeleteEventAction($observer)
     {
         $this->_getResource()->decrementProducts($this->_getProductEventTagsCollection($observer)->getAllIds());
@@ -312,7 +313,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
      */
     public function isAvailableInStore($storeId = null)
     {
-        $storeId = (is_null($storeId)) ? Mage::app()->getStore()->getId() : $storeId;
+        $storeId ??= Mage::app()->getStore()->getId();
         return in_array($storeId, $this->getVisibleInStoreIds());
     }
 
@@ -344,7 +345,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
             ->setProductId($productId)
             ->setCustomerId($customerId)
             ->setActive(Mage_Tag_Model_Tag_Relation::STATUS_ACTIVE)
-            ->setCreatedAt($relationModel->getResource()->formatDate(time()));
+            ->setCreatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
 
         $result = '';
         $relationModelSaveNeed = false;

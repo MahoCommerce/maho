@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Wishlist
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Wishlist
  */
 
 /**
@@ -33,6 +31,11 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     {
         parent::preDispatch();
 
+        if (!Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')) {
+            $this->norouteAction();
+            $this->setFlag('', self::FLAG_NO_DISPATCH, true);
+            return $this;
+        }
         if (!$this->_skipAuthentication && !Mage::getSingleton('customer/session')->authenticate($this)) {
             $this->setFlag('', 'no-dispatch', true);
             if (!Mage::getSingleton('customer/session')->getBeforeWishlistUrl()) {
@@ -110,6 +113,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
      *
      * @return Mage_Core_Controller_Varien_Action|void
      */
+    #[Maho\Config\Route('/wishlist', name: 'wishlist.index.index', methods: ['GET'])]
     public function indexAction()
     {
         if (!$this->_getWishlist()) {
@@ -148,6 +152,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
      *
      * @return Mage_Core_Controller_Varien_Action|void
      */
+    #[Maho\Config\Route('/wishlist/index/add', name: 'wishlist.index.add', methods: ['POST'])]
     public function addAction()
     {
         if (!$this->_validateFormKey()) {
@@ -240,6 +245,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     /**
      * Action to reconfigure wishlist item
      */
+    #[Maho\Config\Route('/wishlist/index/configure/{id}', name: 'wishlist.index.configure', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function configureAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -286,6 +292,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     /**
      * Action to accept new configuration for a wishlist item
      */
+    #[Maho\Config\Route('/wishlist/index/updateItemOptions', name: 'wishlist.index.updateItemOptions', methods: ['POST'])]
     public function updateItemOptionsAction(): void
     {
         $session = Mage::getSingleton('customer/session');
@@ -342,6 +349,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
      *
      * @return Mage_Core_Controller_Varien_Action|void
      */
+    #[Maho\Config\Route('/wishlist/index/update', name: 'wishlist.index.update', methods: ['POST'])]
     public function updateAction()
     {
         if (!$this->_validateFormKey()) {
@@ -431,6 +439,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
      *
      *  @return Mage_Core_Controller_Varien_Action|void
      */
+    #[Maho\Config\Route('/wishlist/index/remove', name: 'wishlist.index.remove', methods: ['POST'])]
     public function removeAction()
     {
         if (!$this->_validateFormKey()) {
@@ -471,6 +480,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
      * If Product has required options - item removed from wishlist and redirect
      * to product view page with message about needed defined required options
      */
+    #[Maho\Config\Route('/wishlist/index/cart', name: 'wishlist.index.cart', methods: ['POST'])]
     public function cartAction()
     {
         if (!$this->_validateFormKey()) {
@@ -558,6 +568,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
      *
      * @return Mage_Core_Controller_Varien_Action|void
      */
+    #[Maho\Config\Route('/wishlist/index/fromcart', name: 'wishlist.index.fromcart', methods: ['POST'])]
     public function fromcartAction()
     {
         $wishlist = $this->_getWishlist();
@@ -634,6 +645,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     /**
      * Prepare wishlist for share
      */
+    #[Maho\Config\Route('/wishlist/index/share', name: 'wishlist.index.share', methods: ['GET'])]
     public function shareAction(): void
     {
         $this->_getWishlist();
@@ -648,6 +660,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
      *
      * @return Mage_Core_Controller_Varien_Action|void
      */
+    #[Maho\Config\Route('/wishlist/index/send', name: 'wishlist.index.send', methods: ['POST'])]
     public function sendAction()
     {
         if (!$this->_validateFormKey()) {
@@ -683,10 +696,6 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             $this->_redirect('*/*/share');
             return;
         }
-
-        $translate = Mage::getSingleton('core/translate');
-        /** @var Mage_Core_Model_Translate $translate */
-        $translate->setTranslateInline(false);
 
         try {
             $customer = Mage::getSingleton('customer/session')->getCustomer();
@@ -726,16 +735,12 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             $wishlist->setShared(1);
             $wishlist->save();
 
-            $translate->setTranslateInline(true);
-
             Mage::dispatchEvent('wishlist_share', ['wishlist' => $wishlist]);
             Mage::getSingleton('customer/session')->addSuccess(
                 $this->__('Your Wishlist has been shared.'),
             );
             $this->_redirect('*/*', ['wishlist_id' => $wishlist->getId()]);
         } catch (Exception $e) {
-            $translate->setTranslateInline(true);
-
             Mage::getSingleton('wishlist/session')->addError($e->getMessage());
             Mage::getSingleton('wishlist/session')->setSharingForm($this->getRequest()->getPost());
             $this->_redirect('*/*/share');
@@ -745,6 +750,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     /**
      * Custom options download action
      */
+    #[Maho\Config\Route('/wishlist/index/downloadCustomOption', name: 'wishlist.index.downloadCustomOption', methods: ['GET'])]
     public function downloadCustomOptionAction(): void
     {
         $option = Mage::getModel('wishlist/item_option')->load($this->getRequest()->getParam('id'));
@@ -786,7 +792,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             $filePath  = Mage::getBaseDir() . $info['quote_path'];
             $secretKey = $this->getRequest()->getParam('key');
 
-            if ($secretKey == $info['secret_key']) {
+            if (isset($info['secret_key']) && hash_equals($info['secret_key'], (string) $secretKey)) {
                 $this->_prepareDownloadResponse($info['title'], [
                     'value' => $filePath,
                     'type'  => 'filename',

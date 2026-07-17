@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 
 /** @var Mage_Sales_Block_Widget_Guest_Form $this */
@@ -16,7 +14,7 @@
 </div>
 
 
-<form id="oar_widget_orders_and_returns_form" action="<?= $this->getActionUrl() ?>" method="post" class="search-form" name="guest_post">
+<form id="oar_widget_orders_and_returns_form" action="<?= $this->getActionUrl() ?>" method="post" class="search-form" name="guest_post" autocomplete="off">
     <div class="fieldset">
         <h2 class="legend"><?= Mage::helper('sales')->__('Order Information') ?></h2>
 
@@ -26,7 +24,7 @@
                    <label for="oar_order_id" class="required"><?= Mage::helper('sales')->__('Order ID') ?></label>
                </div>
                <div class="input-box">
-                   <input type="text" class="input-text required-entry" id="oar_order_id" name="oar_order_id" style="width:300px;"/>
+                   <input type="text" class="input-text required-entry" id="oar_order_id" name="oar_order_id" style="width:300px;">
                </div>
            </li>
            <li class="wide">
@@ -39,7 +37,7 @@
                    <label for="oar_billing_lastname" class="required"><?= Mage::helper('sales')->__('Billing Last Name') ?></label>
                </div>
                <div class="input-box">
-                   <input type="text" class="input-text required-entry" id="oar_billing_lastname" name="oar_billing_lastname"  style="width:300px;"/>
+                   <input type="text" class="input-text required-entry" id="oar_billing_lastname" name="oar_billing_lastname"  style="width:300px;">
                </div>
            </li>
            <li>
@@ -58,7 +56,7 @@
                    <label for="oar_email" class="required"><?= Mage::helper('sales')->__('Email Address') ?></label>
                </div>
                <div class="input-box">
-                   <input type="text" class="input-text validate-email required-entry" id="oar_email" name="oar_email"  style="width:300px;"/>
+                   <input type="email" autocomplete="email" class="input-text validate-email required-entry" id="oar_email" name="oar_email"  style="width:300px;">
                </div>
            </li>
            <li id="oar-zip" style="display:none;">
@@ -66,7 +64,7 @@
                    <label for="oar_zip" class="required"><?= Mage::helper('sales')->__('Billing ZIP Code') ?></label>
                </div>
                <div class="input-box">
-                   <input type="text" class="input-text required-entry" id="oar_zip" name="oar_zip" style="width:300px;"/>
+                   <input type="text" class="input-text required-entry" id="oar_zip" name="oar_zip" style="width:300px;">
                </div>
            </li>
        </ul>
@@ -77,7 +75,7 @@
     </div>
 </form>
 
-<script type="text/javascript">
+<script>
     if (document.getElementById('quick_search_type_id').value === 'zip') {
         document.getElementById('oar-zip').style.display = 'block';
         document.getElementById('oar-email').style.display = 'none';

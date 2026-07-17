@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_Action
@@ -18,6 +16,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
      */
     public const ADMIN_RESOURCE = 'system/myaccount';
 
+    #[Maho\Config\Route('/admin/system_account/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))->_title($this->__('My Account'));
@@ -31,6 +30,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
     /**
      * Saving edited user information
      */
+    #[Maho\Config\Route('/admin/system_account/save')]
     public function saveAction(): void
     {
         $userId = Mage::getSingleton('admin/session')->getUser()->getId();
@@ -89,7 +89,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
             $user->setTwofaEnabled((bool) $this->getRequest()->getPost('twofa_enabled'));
             $twofaCode = $this->getRequest()->getPost('twofa_verification_code', '');
             if ($user->getTwofaEnabled() && $twofaCode) {
-                if (!Mage::helper('admin/auth')->verifyTwofaCode($user->getTwofaSecret(), $twofaCode)) {
+                if (!Mage::helper('core/security')->verifyTotpCode($user->getTwofaSecret(), $twofaCode)) {
                     Mage::throwException(Mage::helper('adminhtml')->__('Invalid 2FA verification code'));
                 }
             }

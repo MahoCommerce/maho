@@ -1,0 +1,11 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Revocation
+ */
+
+/** @var Maho_Revocation_Block_Order_Link $this */
+?>
+<span class="separator">|</span>
+<a href="<?= $this->getRevocationUrl() ?>" class="link-revocation"><?= Mage::helper('revocation')->__('Revoke this contract') ?></a>

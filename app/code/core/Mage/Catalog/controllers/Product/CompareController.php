@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_Action
@@ -37,6 +35,7 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
         return $this;
     }
 
+    #[Maho\Config\Route('/catalog/product_compare', name: 'catalog.product.compare.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $items = $this->getRequest()->getParam('items');
@@ -61,6 +60,7 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
     /**
      * Add item to compare list
      */
+    #[Maho\Config\Route('/catalog/product_compare/add', name: 'catalog.product.compare.add', methods: ['POST'])]
     public function addAction(): void
     {
         if (!$this->_validateFormKey()) {
@@ -93,6 +93,7 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
     /**
      * Remove item from compare list
      */
+    #[Maho\Config\Route('/catalog/product_compare/remove', name: 'catalog.product.compare.remove', methods: ['POST'])]
     public function removeAction(): void
     {
         $productId = (int) $this->getRequest()->getParam('product');
@@ -135,6 +136,7 @@ class Mage_Catalog_Product_CompareController extends Mage_Core_Controller_Front_
     /**
      * Remove all items from comparison list
      */
+    #[Maho\Config\Route('/catalog/product_compare/clear', name: 'catalog.product.compare.clear', methods: ['POST'])]
     public function clearAction(): void
     {
         $items = Mage::getResourceModel('catalog/product_compare_item_collection');

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Cron
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Cron
  */
 
 /**
@@ -90,17 +88,17 @@ class Mage_Cron_Model_Schedule extends Mage_Core_Model_Abstract
             $time = null;
         }
 
-        $d = getdate(Mage::getSingleton('core/date')->timestamp($time));
+        $dt = Mage::app()->getLocale()->utcToStore(null, $time);
 
-        $match = $this->matchCronExpression($e[0], $d['minutes'])
-            && $this->matchCronExpression($e[1], $d['hours'])
-            && $this->matchCronExpression($e[2], $d['mday'])
-            && $this->matchCronExpression($e[3], $d['mon'])
-            && $this->matchCronExpression($e[4], $d['wday']);
+        $match = $this->matchCronExpression($e[0], (int) $dt->format('i'))
+            && $this->matchCronExpression($e[1], (int) $dt->format('G'))
+            && $this->matchCronExpression($e[2], (int) $dt->format('j'))
+            && $this->matchCronExpression($e[3], (int) $dt->format('n'))
+            && $this->matchCronExpression($e[4], (int) $dt->format('w'));
 
         if ($match) {
-            $this->setCreatedAt(Mage::getSingleton('core/date')->gmtDate());
-            $this->setScheduledAt(Mage::getSingleton('core/date')->gmtDate('Y-m-d H:i:00', $time));
+            $this->setCreatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
+            $this->setScheduledAt(gmdate('Y-m-d H:i:00', $time));
         }
         return $match;
     }
@@ -120,12 +118,7 @@ class Mage_Cron_Model_Schedule extends Mage_Core_Model_Abstract
 
         // handle multiple options
         if (str_contains($expr, ',')) {
-            foreach (explode(',', $expr) as $e) {
-                if ($this->matchCronExpression($e, $num)) {
-                    return true;
-                }
-            }
-            return false;
+            return array_any(explode(',', $expr), fn($e) => $this->matchCronExpression($e, $num));
         }
 
         // handle modulus

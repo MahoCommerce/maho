@@ -1,0 +1,17 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Paypal
+ */
+
+/** @var Maho_Paypal_Block_Paylater_Message $this */
+$containerId = $this->getMessageHtmlId();
+?>
+<div id="<?= $this->escapeHtml($containerId) ?>"
+    class="paypal-paylater-message"
+    data-sdk-url="<?= $this->escapeUrl($this->getJsSdkUrl()) ?>"
+    data-client-token-url="<?= $this->escapeUrl($this->getClientTokenUrl()) ?>"
+    data-amount="<?= $this->escapeHtml($this->getAmount()) ?>"
+    data-currency="<?= $this->escapeHtml($this->getCurrencyCode()) ?>"
+    data-placement="<?= $this->escapeHtml($this->getPlacement()) ?>"></div>

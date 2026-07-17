@@ -1,15 +1,13 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2022 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 ?>
-<script type="text/javascript">
+<script>
 function saveAndContinueEdit(){
     disableElements('save');
     var activeTab = product_attribute_tabsJsTabs.activeTab.id;
@@ -35,7 +33,7 @@ function toggleApplyVisibility(select) {
     const selectElement = typeof select === 'string' ? document.getElementById(select) : select;
     if (!selectElement) return;
 
-    const nextSelect = selectElement.nextElementSibling;
+    let nextSelect = selectElement.nextElementSibling;
     while (nextSelect && nextSelect.tagName !== 'SELECT') {
         nextSelect = nextSelect.nextElementSibling;
     }

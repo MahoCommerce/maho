@@ -1,15 +1,14 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Blog
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Blog
  */
 
 class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abstract
 {
+    #[Maho\Config\Observer('controller_front_init_routers')]
     public function initControllerRouters(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Core_Controller_Varien_Front $front */
@@ -37,18 +36,57 @@ class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abs
                 Mage_Core_Model_Url_Rewrite::REWRITE_REQUEST_PATH_ALIAS,
                 $identifier,
             );
-            return true;
+            $dispatcher = new \Maho\Routing\ControllerDispatcher();
+            return $dispatcher->dispatchForward($request, Mage::app()->getFrontController()->getResponse());
         }
 
-        // Check if this is a blog post URL (prefix/post-url-key)
+        // Check if this is a blog URL (prefix/...)
         $pattern = '#^' . preg_quote($urlPrefix, '#') . '/(.+?)/?$#';
         if (!preg_match($pattern, $identifier, $matches)) {
             return false;
         }
 
-        $urlKey = $matches[1];
+        $pathPart = $matches[1];
+        $storeId = Mage::app()->getStore()->getId();
+
+        $catPrefix = $helper->getCategoryUrlPrefix();
+
+        // Redirect bare /category-prefix to blog index
+        if ($pathPart === $catPrefix) {
+            Mage::app()->getResponse()
+                ->setRedirect(Mage::getUrl($urlPrefix), 301)
+                ->sendResponse();
+            return true;
+        }
+
+        // Check for category URL (prefix/cat-prefix/{path}) — before post matching
+        if ($helper->areCategoriesEnabled()) {
+            $categoryPattern = '#^' . preg_quote($catPrefix, '#') . '/(.+?)$#';
+            if (preg_match($categoryPattern, $pathPart, $catMatches)) {
+                $categoryPath = $catMatches[1];
+                $segments = explode('/', $categoryPath);
+                /** @var Maho_Blog_Model_Resource_Category $resource */
+                $resource = Mage::getResourceSingleton('blog/category');
+                $categoryId = $resource->getCategoryIdByFullPath($segments, $storeId);
+                if ($categoryId) {
+                    $request->setModuleName('blog')
+                        ->setControllerName('index')
+                        ->setActionName('category')
+                        ->setParam('category_id', $categoryId);
+                    $request->setAlias(
+                        Mage_Core_Model_Url_Rewrite::REWRITE_REQUEST_PATH_ALIAS,
+                        $identifier,
+                    );
+                    $dispatcher = new \Maho\Routing\ControllerDispatcher();
+                    return $dispatcher->dispatchForward($request, Mage::app()->getFrontController()->getResponse());
+                }
+            }
+        }
+
+        // Check for post URL (prefix/{url-key})
+        $urlKey = $pathPart;
         $post = Mage::getModel('blog/post');
-        $postId = $post->getPostIdByUrlKey($urlKey, Mage::app()->getStore()->getId());
+        $postId = $post->getPostIdByUrlKey($urlKey, $storeId);
         if (!$postId) {
             return false;
         }
@@ -62,6 +100,7 @@ class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abs
             $identifier,
         );
 
-        return true;
+        $dispatcher = new \Maho\Routing\ControllerDispatcher();
+        return $dispatcher->dispatchForward($request, Mage::app()->getFrontController()->getResponse());
     }
 }

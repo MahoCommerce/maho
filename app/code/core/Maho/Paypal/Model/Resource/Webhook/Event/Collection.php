@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Paypal
+ */
+
+declare(strict_types=1);
+
+class Maho_Paypal_Model_Resource_Webhook_Event_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
+{
+    #[\Override]
+    protected function _construct(): void
+    {
+        $this->_init('paypal/webhook_event');
+    }
+}

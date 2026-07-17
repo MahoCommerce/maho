@@ -1,12 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Blog
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Blog
  */
 
 class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
@@ -58,6 +55,12 @@ class Maho_Blog_Model_Post_Api extends Mage_Api_Model_Resource_Abstract
 
     public function create(array $postData): int
     {
+        foreach (['title', 'content'] as $required) {
+            if (empty($postData[$required])) {
+                $this->_fault('data_invalid', ucfirst($required) . ' is required.');
+            }
+        }
+
         try {
             $post = Mage::getModel('blog/post')
                 ->setData($postData)

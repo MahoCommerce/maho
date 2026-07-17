@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 class Mage_Catalog_Model_Layer_Filter_Price_Algorithm
@@ -518,7 +516,7 @@ class Mage_Catalog_Model_Layer_Filter_Price_Algorithm
         $result = [];
         $lastCount = 0;
         $intervalFirstPrice = $this->_minPrice;
-        $lastSeparator = is_null($this->_lowerLimit) ? 0 : $this->_lowerLimit;
+        $lastSeparator = $this->_lowerLimit ?? 0;
 
         for ($i = 1; $i < $this->getIntervalsNumber(); ++$i) {
             $separator = $this->_findPriceSeparator($i);
@@ -581,7 +579,7 @@ class Mage_Catalog_Model_Layer_Filter_Price_Algorithm
             $isEqualPrice = ($intervalFirstPrice == $this->_maxPrice) ? $intervalFirstPrice : false;
             $result[$this->getIntervalsNumber()] = [
                 'from'  => $isEqualPrice ?: $lastSeparator,
-                'to'    => $isEqualPrice ?: (is_null($this->_upperLimit) ? '' : $this->_upperLimit),
+                'to'    => $isEqualPrice ?: ($this->_upperLimit ?? ''),
                 'count' => $this->_count - $lastCount,
             ];
         }

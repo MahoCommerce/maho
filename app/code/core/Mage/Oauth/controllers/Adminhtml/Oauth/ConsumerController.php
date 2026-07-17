@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Oauth
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Oauth
  */
 
 class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Controller_Action
@@ -47,17 +45,19 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
     /**
      * Render grid page
      */
+    #[Maho\Config\Route('/admin/oauth_consumer/index')]
     public function indexAction(): void
     {
         $this
             ->loadLayout()
-            ->_setActiveMenu('system/api/oauth_consumer')
+            ->_setActiveMenu('system/api/rest_legacy/oauth_consumer')
             ->renderLayout();
     }
 
     /**
      * Render grid AJAX request
      */
+    #[Maho\Config\Route('/admin/oauth_consumer/grid')]
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -67,6 +67,7 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
     /**
      * Create page action
      */
+    #[Maho\Config\Route('/admin/oauth_consumer/new')]
     public function newAction(): void
     {
         /** @var Mage_Oauth_Model_Consumer $model */
@@ -88,13 +89,14 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
 
         $this
             ->loadLayout()
-            ->_setActiveMenu('system/api/oauth_consumer')
+            ->_setActiveMenu('system/api/rest_legacy/oauth_consumer')
             ->renderLayout();
     }
 
     /**
      * Edit page action
      */
+    #[Maho\Config\Route('/admin/oauth_consumer/edit')]
     public function editAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -120,13 +122,14 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
 
         $this
             ->loadLayout()
-            ->_setActiveMenu('system/api/oauth_consumer')
+            ->_setActiveMenu('system/api/rest_legacy/oauth_consumer')
             ->renderLayout();
     }
 
     /**
      * Render edit page
      */
+    #[Maho\Config\Route('/admin/oauth_consumer/save')]
     public function saveAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -197,6 +200,20 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
 
         try {
             $model->addData($data);
+
+            $apiRoleId = $this->getRequest()->getPost('api_role_id');
+            $model->setData('api_role_id', $apiRoleId ?: null);
+
+            $storeIds = $this->getRequest()->getPost('store_ids', []);
+            if (!empty($storeIds)) {
+                $model->setStoreIds(Mage::helper('core')->jsonEncode($storeIds));
+            } else {
+                $model->setStoreIds('all');
+            }
+
+            $expiresAt = $this->getRequest()->getPost('expires_at');
+            $model->setExpiresAt($expiresAt ?: null);
+
             $model->save();
             $this->_getSession()->addSuccess($this->__('The consumer has been saved.'));
             $this->_setFormData(null);
@@ -263,6 +280,7 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
     /**
      * Delete consumer action
      */
+    #[Maho\Config\Route('/admin/oauth_consumer/delete')]
     public function deleteAction(): void
     {
         $consumerId = (int) $this->getRequest()->getParam('id');

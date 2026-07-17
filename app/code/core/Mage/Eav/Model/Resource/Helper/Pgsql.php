@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Eav
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Eav
  */
 
 class Mage_Eav_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Resource_Helper_Pgsql
@@ -22,9 +20,9 @@ class Mage_Eav_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Resource_Help
         Maho\Db\Ddl\Table::TYPE_BIGINT        => 'bigint',
         Maho\Db\Ddl\Table::TYPE_FLOAT         => 'real',
         Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'numeric',
-        Maho\Db\Ddl\Table::TYPE_NUMERIC       => 'numeric',
         Maho\Db\Ddl\Table::TYPE_DATE          => 'date',
-        Maho\Db\Ddl\Table::TYPE_TIMESTAMP     => 'timestamp',
+        // TYPE_TIMESTAMP is a value-equal alias for TYPE_DATETIME — both fall here.
+        // PgSQL's `timestamp` is the semantic equivalent of MySQL's DATETIME.
         Maho\Db\Ddl\Table::TYPE_DATETIME      => 'timestamp',
         Maho\Db\Ddl\Table::TYPE_TEXT          => 'text',
         Maho\Db\Ddl\Table::TYPE_BLOB          => 'bytea',
@@ -62,10 +60,14 @@ class Mage_Eav_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Resource_Help
             'float'    => Maho\Db\Ddl\Table::TYPE_FLOAT,
             'decimal'  => Maho\Db\Ddl\Table::TYPE_DECIMAL,
             'boolean'  => Maho\Db\Ddl\Table::TYPE_BOOLEAN,
+            // PgSQL has no native tinyint; this entry exists only for callers that
+            // explicitly pass TYPE_TINYINT through the EAV path. The physical column
+            // is created as smallint (see adapter map).
+            'tinyint'  => Maho\Db\Ddl\Table::TYPE_TINYINT,
             'datetime' => Maho\Db\Ddl\Table::TYPE_DATETIME,
             'datetimetz' => Maho\Db\Ddl\Table::TYPE_DATETIME,
             'date'     => Maho\Db\Ddl\Table::TYPE_DATE,
-            'time'     => Maho\Db\Ddl\Table::TYPE_TIMESTAMP,
+            'time'     => Maho\Db\Ddl\Table::TYPE_TIME,
             'blob'     => Maho\Db\Ddl\Table::TYPE_BLOB,
             'binary'   => Maho\Db\Ddl\Table::TYPE_VARBINARY,
         ];
@@ -106,10 +108,10 @@ class Mage_Eav_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Resource_Help
                 $columnType = 'boolean';
                 break;
             case 'timestamp without time zone':
-            case 'timestamp with time zone':
-            case 'timestamptz':
-            case 'timestamp':
                 $columnType = 'timestamp';
+                break;
+            case 'time without time zone':
+                $columnType = 'time';
                 break;
             case 'numeric':
                 // Already in correct form

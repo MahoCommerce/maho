@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: OSL-3.0
+-->
+<config>
+    <modules>
+        <Maho_Paypal>
+            <version>6.0.1</version>
+        </Maho_Paypal>
+    </modules>
+
+    <global>
+        <models>
+            <paypal>
+                <class>Maho_Paypal_Model</class>
+                <resourceModel>paypal_resource</resourceModel>
+            </paypal>
+            <paypal_resource>
+                <class>Maho_Paypal_Model_Resource</class>
+                <entities>
+                    <webhook_event>
+                        <table>paypal_webhook_event</table>
+                    </webhook_event>
+                    <vault_token>
+                        <table>paypal_vault_token</table>
+                    </vault_token>
+                </entities>
+            </paypal_resource>
+        </models>
+
+        <resources>
+            <paypal_setup>
+                <setup>
+                    <module>Maho_Paypal</module>
+                </setup>
+            </paypal_setup>
+        </resources>
+
+        <blocks>
+            <paypal>
+                <class>Maho_Paypal_Block</class>
+            </paypal>
+        </blocks>
+
+        <helpers>
+            <paypal>
+                <class>Maho_Paypal_Helper</class>
+            </paypal>
+        </helpers>
+    </global>
+
+    <frontend>
+        <secure_url>
+            <paypal_checkout>/paypal/checkout</paypal_checkout>
+            <paypal_webhook>/paypal/webhook</paypal_webhook>
+            <paypal_vault>/paypal/vault</paypal_vault>
+        </secure_url>
+        <translate>
+            <modules>
+                <Maho_Paypal>
+                    <files>
+                        <default>Maho_Paypal.csv</default>
+                    </files>
+                </Maho_Paypal>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <paypal>
+                    <file>paypal.xml</file>
+                </paypal>
+            </updates>
+        </layout>
+    </frontend>
+
+    <adminhtml>
+        <translate>
+            <modules>
+                <Maho_Paypal>
+                    <files>
+                        <default>Maho_Paypal.csv</default>
+                    </files>
+                </Maho_Paypal>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <paypal>
+                    <file>paypal.xml</file>
+                </paypal>
+            </updates>
+        </layout>
+    </adminhtml>
+
+    <default>
+        <paypal>
+            <credentials>
+                <sandbox>1</sandbox>
+                <client_id backend_model="adminhtml/system_config_backend_encrypted"/>
+                <client_secret backend_model="adminhtml/system_config_backend_encrypted"/>
+                <debug>0</debug>
+                <webhook_id/>
+            </credentials>
+            <general>
+                <paylater_enabled>0</paylater_enabled>
+                <paylater_product>1</paylater_product>
+                <paylater_cart>1</paylater_cart>
+            </general>
+        </paypal>
+        <payment>
+            <paypal_standard_checkout>
+                <active>0</active>
+                <model>paypal/method_standardCheckout</model>
+                <title>PayPal</title>
+                <payment_action>authorize</payment_action>
+                <visible_on_cart>1</visible_on_cart>
+                <visible_on_product>1</visible_on_product>
+                <line_items_enabled>1</line_items_enabled>
+                <group>paypal</group>
+                <sort_order>10</sort_order>
+            </paypal_standard_checkout>
+            <paypal_advanced_checkout>
+                <active>0</active>
+                <model>paypal/method_advancedCheckout</model>
+                <title>Credit or Debit Card</title>
+                <payment_action>authorize</payment_action>
+                <cctypes>VI,MC,AE,DI</cctypes>
+                <group>paypal</group>
+                <sort_order>20</sort_order>
+            </paypal_advanced_checkout>
+            <paypal_vault>
+                <active>0</active>
+                <model>paypal/method_vault</model>
+                <title>Saved Payment Method</title>
+                <payment_action>authorize</payment_action>
+                <group>paypal</group>
+                <sort_order>5</sort_order>
+            </paypal_vault>
+        </payment>
+    </default>
+</config>

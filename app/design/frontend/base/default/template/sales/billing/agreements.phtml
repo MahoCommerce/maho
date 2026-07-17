@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 ?>
 <?php /** @var Mage_Sales_Block_Billing_Agreements $this */ ?>
@@ -21,12 +19,12 @@
     <?php if (count($billingAgreements) > 0): ?>
         <?= $this->getChildHtml('pager') ?>
         <table id="billing-agreements" class="data-table linearize-table">
-            <col />
-            <col width="1" />
-            <col />
-            <col />
-            <col />
-            <col width="1" />
+            <col>
+            <col width="1">
+            <col>
+            <col>
+            <col>
+            <col width="1">
             <thead>
             <tr>
                 <th class="reference-id"><span class="nobr"><?= $this->__('Reference ID') ?></span></th>

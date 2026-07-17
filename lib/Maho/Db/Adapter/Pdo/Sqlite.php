@@ -1,14 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    MahoLib
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
+
+declare(strict_types=1);
 
 namespace Maho\Db\Adapter\Pdo;
 
@@ -40,16 +37,17 @@ class Sqlite extends AbstractPdoAdapter
      */
     protected array $_ddlColumnTypes = [
         \Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'INTEGER',
+        \Maho\Db\Ddl\Table::TYPE_TINYINT       => 'INTEGER',
         \Maho\Db\Ddl\Table::TYPE_SMALLINT      => 'INTEGER',
         \Maho\Db\Ddl\Table::TYPE_INTEGER       => 'INTEGER',
         \Maho\Db\Ddl\Table::TYPE_BIGINT        => 'INTEGER',
         \Maho\Db\Ddl\Table::TYPE_FLOAT         => 'REAL',
         \Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'NUMERIC',
-        \Maho\Db\Ddl\Table::TYPE_NUMERIC       => 'NUMERIC',
         \Maho\Db\Ddl\Table::TYPE_DATE          => 'TEXT',
-        \Maho\Db\Ddl\Table::TYPE_TIMESTAMP     => 'TEXT',
+        \Maho\Db\Ddl\Table::TYPE_TIME          => 'TEXT',
         \Maho\Db\Ddl\Table::TYPE_DATETIME      => 'TEXT',
         \Maho\Db\Ddl\Table::TYPE_TEXT          => 'TEXT',
+        // SQLite has no varchar type — both VARCHAR and TEXT store as TEXT.
         \Maho\Db\Ddl\Table::TYPE_VARCHAR       => 'TEXT',
         \Maho\Db\Ddl\Table::TYPE_BLOB          => 'BLOB',
         \Maho\Db\Ddl\Table::TYPE_VARBINARY     => 'BLOB',
@@ -112,6 +110,12 @@ class Sqlite extends AbstractPdoAdapter
 
         // Store temp tables in memory
         $this->_connection->executeStatement('PRAGMA temp_store = MEMORY');
+
+        // Ensure the advisory locks table exists up front, while the fresh connection
+        // is guaranteed to be outside any transaction. SQLite forbids DDL inside a
+        // transaction, so creating it here means getLock() never has to issue DDL
+        // mid-transaction (e.g. a config-section load during a config save).
+        $this->_ensureLocksTableExists();
 
         // Register custom REGEXP function for SQLite (required for REGEXP queries)
         $this->_registerCustomFunctions();
@@ -1127,13 +1131,13 @@ class Sqlite extends AbstractPdoAdapter
      * Acquire a named lock using a locks table
      *
      * SQLite doesn't have advisory locks, so we implement using a table.
-     * The locks table is created on first use.
+     * The locks table is created at connection init (see _initConnection), so no
+     * DDL is issued here — acquiring a lock is safe inside an open transaction.
      */
     #[\Override]
     public function getLock(string $lockName, int $timeout = 0): bool
     {
         $this->_connect();
-        $this->_ensureLocksTableExists();
 
         $lockKey = md5($lockName);
         $expireTime = time() + 3600; // Locks expire after 1 hour
@@ -1494,12 +1498,7 @@ class Sqlite extends AbstractPdoAdapter
     public function tableColumnExists(string $tableName, string $columnName, ?string $schemaName = null): bool
     {
         $describe = $this->describeTable($tableName, $schemaName);
-        foreach ($describe as $column) {
-            if (strcasecmp($column['COLUMN_NAME'], $columnName) === 0) {
-                return true;
-            }
-        }
-        return false;
+        return array_any($describe, fn($column) => strcasecmp($column['COLUMN_NAME'], $columnName) === 0);
     }
 
     /**
@@ -1637,32 +1636,11 @@ class Sqlite extends AbstractPdoAdapter
         // Save existing indexes BEFORE modification
         $indexesBefore = $this->_saveIndexesBeforeModification($table);
 
-        // Modify column WITHOUT touching indexes
+        // Modify column WITHOUT touching indexes — closure shared with MySQL/PgSQL via
+        // AbstractPdoAdapter so the surgical contract stays consistent across adapters.
         $newTable = $table->edit()->modifyColumn(
             \Doctrine\DBAL\Schema\Name\UnqualifiedName::unquoted($columnName),
-            function (\Doctrine\DBAL\Schema\ColumnEditor $editor) use ($definition): void {
-                if (array_key_exists('NULLABLE', $definition)) {
-                    $editor->setNotNull(!$definition['NULLABLE']);
-                }
-                if (array_key_exists('DEFAULT', $definition)) {
-                    $editor->setDefaultValue($definition['DEFAULT']);
-                }
-                if (isset($definition['LENGTH'])) {
-                    $editor->setLength((int) $definition['LENGTH']);
-                }
-                if (isset($definition['PRECISION'])) {
-                    $editor->setPrecision((int) $definition['PRECISION']);
-                }
-                if (isset($definition['SCALE'])) {
-                    $editor->setScale((int) $definition['SCALE']);
-                }
-                if (isset($definition['UNSIGNED'])) {
-                    $editor->setUnsigned((bool) $definition['UNSIGNED']);
-                }
-                if (isset($definition['COMMENT'])) {
-                    $editor->setComment($definition['COMMENT']);
-                }
-            },
+            $this->_buildColumnEditorClosure($definition),
         )
             ->create();
 
@@ -2197,7 +2175,6 @@ class Sqlite extends AbstractPdoAdapter
         // Column size/precision handling (SQLite is flexible, but we honor requests)
         switch ($ddlType) {
             case \Maho\Db\Ddl\Table::TYPE_DECIMAL:
-            case \Maho\Db\Ddl\Table::TYPE_NUMERIC:
                 $precision = 10;
                 $scale = 0;
                 $match = [];
@@ -2241,11 +2218,17 @@ class Sqlite extends AbstractPdoAdapter
             $cDefault = str_replace("'", '', $cDefault);
         }
 
-        // Handle timestamp defaults
-        if ($ddlType == \Maho\Db\Ddl\Table::TYPE_TIMESTAMP) {
+        // Branch covers both TYPE_DATETIME and TYPE_TIMESTAMP (value-equal aliases).
+        if ($ddlType == \Maho\Db\Ddl\Table::TYPE_DATETIME) {
             if ($cDefault === null) {
                 $cDefault = new \Maho\Db\Expr('NULL');
-            } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT || $cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE) {
+            } elseif ($cDefault == \Maho\Db\Ddl\Table::TIMESTAMP_INIT) {
+                $cDefault = new \Maho\Db\Expr('CURRENT_TIMESTAMP');
+            } elseif ($cDefault == 'TIMESTAMP_INIT_UPDATE') {
+                @trigger_error(
+                    'TIMESTAMP_INIT_UPDATE is deprecated because it is MySQL-only (SQLite has no equivalent on-update syntax); use TIMESTAMP_INIT plus an explicit _beforeSave() that sets updated_at for cross-engine parity.',
+                    E_USER_DEPRECATED,
+                );
                 $cDefault = new \Maho\Db\Expr('CURRENT_TIMESTAMP');
             } elseif ($cNullable && !$cDefault) {
                 $cDefault = new \Maho\Db\Expr('NULL');
@@ -2314,14 +2297,7 @@ class Sqlite extends AbstractPdoAdapter
 
         // Add composite PRIMARY KEY if no identity column and multiple primary columns
         if (!$hasIdentity && !empty($primary) && count($primary) > 0) {
-            // Check if we didn't already add it inline
-            $hasInlinePrimary = false;
-            foreach ($definition as $def) {
-                if (str_contains($def, 'PRIMARY KEY')) {
-                    $hasInlinePrimary = true;
-                    break;
-                }
-            }
+            $hasInlinePrimary = array_any($definition, fn($def) => str_contains($def, 'PRIMARY KEY'));
             if (!$hasInlinePrimary) {
                 asort($primary, SORT_NUMERIC);
                 $primaryCols = array_map([$this, 'quoteIdentifier'], array_keys($primary));

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Newsletter
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Newsletter
  */
 
 class Mage_Newsletter_ManageController extends Mage_Core_Controller_Front_Action
@@ -21,12 +19,18 @@ class Mage_Newsletter_ManageController extends Mage_Core_Controller_Front_Action
     public function preDispatch()
     {
         parent::preDispatch();
+        if (!Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')) {
+            $this->norouteAction();
+            $this->setFlag('', self::FLAG_NO_DISPATCH, true);
+            return $this;
+        }
         if (!Mage::getSingleton('customer/session')->authenticate($this)) {
             $this->setFlag('', 'no-dispatch', true);
         }
         return $this;
     }
 
+    #[Maho\Config\Route('/newsletter/manage', name: 'newsletter.manage.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->loadLayout();
@@ -40,6 +44,7 @@ class Mage_Newsletter_ManageController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/newsletter/manage/save', name: 'newsletter.manage.save', methods: ['POST'])]
     public function saveAction()
     {
         if (!$this->_validateFormKey()) {

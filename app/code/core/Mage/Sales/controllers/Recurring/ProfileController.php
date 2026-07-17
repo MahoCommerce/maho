@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
  */
 
 class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_Action
@@ -30,6 +28,11 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
         if (!$this->getRequest()->isDispatched()) {
             return;
         }
+        if (!Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')) {
+            $this->norouteAction();
+            $this->setFlag('', self::FLAG_NO_DISPATCH, true);
+            return $this;
+        }
         $this->_session = Mage::getSingleton('customer/session');
         if (!$this->_session->authenticate($this)) {
             $this->setFlag('', 'no-dispatch', true);
@@ -41,6 +44,7 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     /**
      * Profiles listing
      */
+    #[Maho\Config\Route('/sales/recurring_profile', name: 'sales.recurring_profile.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->_title($this->__('Recurring Profiles'));
@@ -52,6 +56,7 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     /**
      * Profile main view
      */
+    #[Maho\Config\Route('/sales/recurring_profile/view/{profile}', name: 'sales.recurring_profile.view', methods: ['GET'], requirements: ['profile' => '\d+'])]
     public function viewAction(): void
     {
         $this->_viewAction();
@@ -60,6 +65,7 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     /**
      * Profile related orders view
      */
+    #[Maho\Config\Route('/sales/recurring_profile/orders/{profile}', name: 'sales.recurring_profile.orders', methods: ['GET'], requirements: ['profile' => '\d+'])]
     public function ordersAction(): void
     {
         $this->_viewAction();
@@ -68,6 +74,7 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     /**
      * Attempt to set profile state
      */
+    #[Maho\Config\Route('/sales/recurring_profile/updateState', name: 'sales.recurring_profile.updateState', methods: ['POST'])]
     public function updateStateAction(): void
     {
         $profile = null;
@@ -102,6 +109,7 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     /**
      * Fetch an update with profile
      */
+    #[Maho\Config\Route('/sales/recurring_profile/updateProfile', name: 'sales.recurring_profile.updateProfile', methods: ['POST'])]
     public function updateProfileAction(): void
     {
         $profile = null;

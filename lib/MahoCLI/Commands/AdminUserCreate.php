@@ -1,11 +1,8 @@
 <?php
 
 /**
- * Maho
- *
- * @package    MahoCLI
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 declare(strict_types=1);
@@ -31,10 +28,13 @@ class AdminUserCreate extends BaseMahoCommand
     {
         $this->initMaho();
 
-        $role = Mage::getModel('admin/roles')
-            ->load('Administrators', 'role_name');
+        $role = Mage::getModel('admin/roles')->getCollection()
+            ->addFieldToFilter('role_type', 'G')
+            ->addFieldToFilter('tree_level', 1)
+            ->setOrder('role_id', 'ASC')
+            ->getFirstItem();
         if (!$role->getId()) {
-            $output->writeln('<error>Role "Administrators" not found</error>');
+            $output->writeln('<error>No admin role found</error>');
             return Command::FAILURE;
         }
 
@@ -61,7 +61,7 @@ class AdminUserCreate extends BaseMahoCommand
         $email = $questionHelper->ask($input, $output, $question);
         $email = trim($email);
         if (!strlen($email)) {
-            $output->writeln('<error>Username cannot be empty</error>');
+            $output->writeln('<error>Email cannot be empty</error>');
             return Command::INVALID;
         }
 

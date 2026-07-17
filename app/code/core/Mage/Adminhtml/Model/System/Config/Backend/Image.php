@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Model_System_Config_Backend_Image extends Mage_Adminhtml_Model_System_Config_Backend_File
@@ -42,10 +40,12 @@ class Mage_Adminhtml_Model_System_Config_Backend_Image extends Mage_Adminhtml_Mo
 
         $uploader->addValidateCallback(Mage_Core_Model_File_Validator_Image::NAME, $validator, 'validate');
 
-        // Add SVG validator if SVG is allowed
+        // Add SVG validator only if SVG is allowed and the uploaded file is actually an SVG
         if (in_array('svg', $allowedExtensions)) {
-            $svgValidator = Mage::getModel('core/file_validator_svg');
-            $uploader->addValidateCallback(Mage_Core_Model_File_Validator_Svg::NAME, $svgValidator, 'validate');
+            if (strtolower(pathinfo($originalFileName, PATHINFO_EXTENSION)) === 'svg') {
+                $svgValidator = Mage::getModel('core/file_validator_svg');
+                $uploader->addValidateCallback(Mage_Core_Model_File_Validator_Svg::NAME, $svgValidator, 'validate');
+            }
         }
     }
 }

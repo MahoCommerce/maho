@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_SalesRule
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_SalesRule
  */
 
 class Mage_SalesRule_Model_Observer
@@ -19,6 +17,7 @@ class Mage_SalesRule_Model_Observer
      * @return $this
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    #[Maho\Config\Observer('sales_order_place_after')]
     public function sales_order_afterPlace($observer)
     {
         /** @var Mage_Sales_Model_Order $order */
@@ -84,6 +83,7 @@ class Mage_SalesRule_Model_Observer
      * @param \Maho\Event\Observer $observer
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    #[Maho\Config\Observer('sales_order_payment_cancel')]
     public function sales_order_paymentCancel($observer)
     {
         $event = $observer->getEvent();
@@ -129,10 +129,11 @@ class Mage_SalesRule_Model_Observer
      * @param Mage_Cron_Model_Schedule $schedule
      * @return $this
      */
+    #[Maho\Config\CronJob('aggregate_sales_report_coupons_data', configPath: 'reports/crontab/coupons_expr')]
     public function aggregateSalesReportCouponsData($schedule)
     {
         Mage::app()->getLocale()->emulate(0);
-        $date = Mage::app()->getLocale()->dateImmutable()->modify('-25 hours');
+        $date = Mage::app()->getLocale()->utcToStore()->modify('-25 hours');
         Mage::getResourceModel('salesrule/report_rule')->aggregate($date);
         Mage::app()->getLocale()->revert();
         return $this;
@@ -199,6 +200,7 @@ class Mage_SalesRule_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_entity_attribute_save_after', area: 'adminhtml')]
     public function catalogAttributeSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
@@ -216,6 +218,7 @@ class Mage_SalesRule_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_entity_attribute_delete_after', area: 'adminhtml')]
     public function catalogAttributeDeleteAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
@@ -232,6 +235,7 @@ class Mage_SalesRule_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('sales_quote_config_get_product_attributes')]
     public function addProductAttributes(\Maho\Event\Observer $observer)
     {
         /** @var \Maho\DataObject $attributesTransfer */
@@ -256,6 +260,7 @@ class Mage_SalesRule_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
+    #[Maho\Config\Observer('sales_convert_quote_to_order')]
     public function addSalesRuleNameToOrder($observer)
     {
         /** @var Mage_Sales_Model_Order $order */

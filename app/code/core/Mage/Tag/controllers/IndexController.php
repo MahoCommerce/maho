@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Tag
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Tag
  */
 
 class Mage_Tag_IndexController extends Mage_Core_Controller_Front_Action
@@ -15,6 +13,7 @@ class Mage_Tag_IndexController extends Mage_Core_Controller_Front_Action
     /**
      * Saving tag and relation between tag, customer, product and store
      */
+    #[Maho\Config\Route('/tag/index/save', name: 'tag.index.save')]
     public function saveAction(): void
     {
         $helper = Mage::helper('tag');

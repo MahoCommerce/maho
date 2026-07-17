@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Checkout
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Checkout
  */
 
 class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
@@ -94,8 +92,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Predispatch: remove isMultiShipping option from quote
-     *
      * @return $this
      */
     #[\Override]
@@ -104,17 +100,13 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         parent::preDispatch();
         Mage::helper('catalog/product_flat')->disableFlatCollection(true);
 
-        $cart = $this->_getCart();
-        if ($cart->getQuote()->getIsMultiShipping()) {
-            $cart->getQuote()->setIsMultiShipping(false);
-        }
-
         return $this;
     }
 
     /**
      * Shopping cart display action
      */
+    #[Maho\Config\Route('/checkout/cart', name: 'checkout.cart.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $cart = $this->_getCart();
@@ -177,6 +169,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
      *
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Route('/checkout/cart/add', name: 'checkout.cart.add', methods: ['POST'])]
     public function addAction(): void
     {
         $isAjax = (bool) $this->getRequest()->getParam('isAjax');
@@ -243,7 +236,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $this->getResponse()->setBodyJson([
                     'success' => true,
                     'message' => $message,
-                    'qty' => $this->_getCart()->getSummaryQty(),
+                    'qty' => $this->_getCart()->getSummaryQty() ?? 0,
                     'content' => $this->getLayout()->getBlock('minicart_content')->toHtml(),
                 ]);
                 return;
@@ -299,6 +292,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Add products in group to shopping cart action
      */
+    #[Maho\Config\Route('/checkout/cart/addgroup', name: 'checkout.cart.addgroup', methods: ['POST'])]
     public function addgroupAction(): void
     {
         $orderItemIds = $this->getRequest()->getParam('order_items', []);
@@ -338,6 +332,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Action to reconfigure cart item
      */
+    #[Maho\Config\Route('/checkout/cart/configure', name: 'checkout.cart.configure', methods: ['GET'])]
     public function configureAction(): void
     {
         // Extract item and product to configure
@@ -372,6 +367,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Update product configuration for a cart item
      */
+    #[Maho\Config\Route('/checkout/cart/updateItemOptions', name: 'checkout.cart.updateItemOptions', methods: ['POST'])]
     public function updateItemOptionsAction(): void
     {
         $isAjax = (bool) $this->getRequest()->getParam('isAjax');
@@ -434,7 +430,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $this->getResponse()->setBodyJson([
                     'success' => true,
                     'message' => $message,
-                    'qty' => $this->_getCart()->getSummaryQty(),
+                    'qty' => $this->_getCart()->getSummaryQty() ?? 0,
                     'content' => $this->getLayout()->getBlock('minicart_content')->toHtml(),
                 ]);
                 return;
@@ -490,6 +486,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Update shopping cart data action
      */
+    #[Maho\Config\Route('/checkout/cart/updatePost', name: 'checkout.cart.updatePost', methods: ['POST'])]
     public function updatePostAction(): void
     {
         if (!$this->_validateFormKey()) {
@@ -556,6 +553,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Delete shoping cart item action
      */
+    #[Maho\Config\Route('/checkout/cart/delete', name: 'checkout.cart.delete', methods: ['POST'])]
     public function deleteAction(): void
     {
         if ($this->_validateFormKey()) {
@@ -579,6 +577,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Initialize shipping information
      */
+    #[Maho\Config\Route('/checkout/cart/estimatePost', name: 'checkout.cart.estimatePost', methods: ['POST'])]
     public function estimatePostAction(): void
     {
         $country    = (string) $this->getRequest()->getParam('country_id');
@@ -639,6 +638,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Estimate update action
      */
+    #[Maho\Config\Route('/checkout/cart/estimateUpdatePost', name: 'checkout.cart.estimateUpdatePost', methods: ['POST'])]
     public function estimateUpdatePostAction(): void
     {
         $code = (string) $this->getRequest()->getParam('estimate_method');
@@ -664,6 +664,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Initialize coupon - also handles gift cards when coupon code fails
      */
+    #[Maho\Config\Route('/checkout/cart/couponPost', name: 'checkout.cart.couponPost', methods: ['POST'])]
     public function couponPostAction(): void
     {
         $isAjax = (bool) $this->getRequest()->getParam('isAjax');
@@ -968,10 +969,15 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Minicart delete action
      */
+    #[Maho\Config\Route('/checkout/cart/ajaxDelete', name: 'checkout.cart.ajaxDelete', methods: ['POST'])]
     public function ajaxDeleteAction(): void
     {
         if (!$this->_validateFormKey()) {
-            Mage::throwException('Invalid form key');
+            $this->getResponse()->setBodyJson([
+                'success' => 0,
+                'error' => $this->__('Invalid form key. Please refresh the page.'),
+            ]);
+            return;
         }
         $id = (int) $this->getRequest()->getParam('id');
         $result = [];
@@ -999,10 +1005,15 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Minicart ajax update qty action
      */
+    #[Maho\Config\Route('/checkout/cart/ajaxUpdate', name: 'checkout.cart.ajaxUpdate', methods: ['POST'])]
     public function ajaxUpdateAction(): void
     {
         if (!$this->_validateFormKey()) {
-            Mage::throwException('Invalid form key');
+            $this->getResponse()->setBodyJson([
+                'success' => 0,
+                'error' => $this->__('Invalid form key. Please refresh the page.'),
+            ]);
+            return;
         }
         $id = (int) $this->getRequest()->getParam('id');
         $qty = $this->getRequest()->getParam('qty');
@@ -1043,6 +1054,22 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         }
 
         $this->getResponse()->setBodyJson($result);
+    }
+
+    /**
+     * Return current minicart content, used to refresh stale data (e.g. after a bfcache restore)
+     */
+    #[Maho\Config\Route('/checkout/cart/ajaxContent', name: 'checkout.cart.ajaxContent', methods: ['GET'])]
+    public function ajaxContentAction(): void
+    {
+        $this->loadLayout();
+        $this->getResponse()
+            ->setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate', true)
+            ->setBodyJson([
+                'success' => 1,
+                'qty' => $this->_getCart()->getSummaryQty() ?? 0,
+                'content' => $this->getLayout()->getBlock('minicart_content')->toHtml(),
+            ]);
     }
 
     /**

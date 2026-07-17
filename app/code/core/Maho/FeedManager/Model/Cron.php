@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Maho_FeedManager
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_FeedManager
  */
+
+declare(strict_types=1);
 
 /**
  * Feed Manager Cron Model
@@ -34,6 +32,7 @@ class Maho_FeedManager_Model_Cron
      *
      * Called by cron every hour (configurable in config.xml)
      */
+    #[Maho\Config\CronJob('feedmanager_generate_scheduled', schedule: '0 * * * *')]
     public function generateScheduledFeeds(): void
     {
         if (!Mage::helper('feedmanager')->isEnabled()) {
@@ -90,7 +89,7 @@ class Maho_FeedManager_Model_Cron
 
         foreach ($hungLogs as $log) {
             $log->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED)
-                ->setCompletedAt(Mage_Core_Model_Locale::now())
+                ->setCompletedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->addError('Feed generation timed out (exceeded ' . self::HUNG_FEED_TIMEOUT_MINUTES . ' minutes)')
                 ->save();
 
@@ -131,7 +130,7 @@ class Maho_FeedManager_Model_Cron
 
         if ($startedAt < $hungThreshold) {
             $runningLog->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED)
-                ->setCompletedAt(Mage_Core_Model_Locale::now())
+                ->setCompletedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->addError('Manually reset - feed was stuck')
                 ->save();
             return true;
@@ -235,7 +234,7 @@ class Maho_FeedManager_Model_Cron
 
             $success = $uploader->upload($filePath, $remoteName);
 
-            $destination->setLastUploadAt(Mage_Core_Model_Locale::now())
+            $destination->setLastUploadAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->setLastUploadStatus($success ? 'success' : 'failed')
                 ->save();
 
@@ -269,6 +268,7 @@ class Maho_FeedManager_Model_Cron
      *
      * Called by cron daily at 3:30 AM (configurable in config.xml)
      */
+    #[Maho\Config\CronJob('feedmanager_cleanup_logs', schedule: '30 3 * * *')]
     public function cleanupOldLogs(): void
     {
         $retentionDays = (int) Mage::getStoreConfig('feedmanager/general/log_retention_days');

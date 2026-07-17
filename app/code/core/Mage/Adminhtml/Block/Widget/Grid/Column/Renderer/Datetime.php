@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Datetime extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
@@ -44,15 +42,15 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Datetime extends Mage_Adm
                 $useTimezone = $this->getColumn()->getUseTimezone() ?? true;
                 $locale = $this->getColumn()->getLocale() ?? null;
 
-                $dateObj = Mage::app()->getLocale()
-                    ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT, $locale, $useTimezone);
+                $dateObj = $useTimezone
+                    ? Mage::app()->getLocale()->utcToStore(null, $data)
+                    : new DateTime($data);
 
                 return $this->_getFormatter($locale)->format($dateObj);
             } catch (Exception $e) {
                 // Fallback to simple format
                 try {
-                    $dateObj = Mage::app()->getLocale()
-                        ->date($data, Mage_Core_Model_Locale::DATETIME_FORMAT);
+                    $dateObj = Mage::app()->getLocale()->utcToStore(null, $data);
                     return $dateObj->format('M j, Y, g:i:s A');
                 } catch (Exception $e2) {
                     return $data;

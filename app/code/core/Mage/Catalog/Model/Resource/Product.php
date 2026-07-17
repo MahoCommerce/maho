@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Abstract
@@ -469,7 +467,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
             $select->where('t_v_default.entity_id IN (?)', $product);
         }
 
-        $adapter->query($adapter->insertFromSelect($select, $indexTable));
+        $adapter->query($adapter->insertFromSelect($select, $indexTable, [], \Maho\Db\Adapter\AdapterInterface::INSERT_ON_DUPLICATE));
 
         return $this;
     }
@@ -621,7 +619,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
         if (!empty($columns) && is_string($columns)) {
             $columns = [$columns];
         }
-        if (empty($columns) || !is_array($columns)) {
+        if (empty($columns)) {
             $columns = $this->_getDefaultAttributes();
         }
 

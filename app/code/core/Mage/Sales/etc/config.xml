@@ -1,18 +1,13 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2016-2023 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2016-2023 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_Sales>
-            <version>1.6.0.11</version>
+            <version>2.0.1</version>
         </Mage_Sales>
     </modules>
     <global>
@@ -65,9 +60,6 @@
                 <telephone>
                     <to_order>*</to_order>
                 </telephone>
-                <fax>
-                    <to_order>*</to_order>
-                </fax>
                 <region_id>
                     <to_order>*</to_order>
                 </region_id>
@@ -112,9 +104,6 @@
                 <telephone>
                     <to_order>*</to_order>
                 </telephone>
-                <fax>
-                    <to_order>*</to_order>
-                </fax>
                 <region_id>
                     <to_order>*</to_order>
                 </region_id>
@@ -344,10 +333,6 @@
                     <to_order_address>*</to_order_address>
                     <to_customer_address>*</to_customer_address>
                 </telephone>
-                <fax>
-                    <to_order_address>*</to_order_address>
-                    <to_customer_address>*</to_customer_address>
-                </fax>
                 <email>
                     <to_order_address>*</to_order_address>
                     <to_customer_address>*</to_customer_address>
@@ -686,9 +671,6 @@
                 <telephone>
                     <to_quote_address>*</to_quote_address>
                 </telephone>
-                <fax>
-                    <to_quote_address>*</to_quote_address>
-                </fax>
             </sales_convert_order_address>
             <sales_convert_order_payment>
                 <method>
@@ -888,9 +870,6 @@
                 <telephone>
                     <to_quote_address>*</to_quote_address>
                 </telephone>
-                <fax>
-                    <to_quote_address>*</to_quote_address>
-                </fax>
             </customer_address>
         </fieldsets>
         <models>
@@ -898,32 +877,7 @@
                 <class>Mage_Sales_Model</class>
                 <resourceModel>sales_resource</resourceModel>
             </sales>
-            <sales_entity>
-                <class>Mage_Sales_Model_Entity</class>
-                <entities>
-                    <quote>
-                        <table>sales_quote</table>
-                    </quote>
-                    <quote_address>
-                        <table>sales_quote_address</table>
-                    </quote_address>
-                    <quote_item>
-                        <table>sales_quote_item</table>
-                    </quote_item>
-                    <quote_entity>
-                        <table>sales_quote_entity</table>
-                    </quote_entity>
-                    <quote_temp>
-                        <table>sales_quote_temp</table>
-                    </quote_temp>
-                    <order>
-                        <table>sales_order</table>
-                    </order>
-                    <order_entity>
-                        <table>sales_order_entity</table>
-                    </order_entity>
-                </entities>
-            </sales_entity>
+
             <sales_resource>
                 <class>Mage_Sales_Model_Resource</class>
                 <entities>
@@ -1479,30 +1433,11 @@
                 </reference>
             </sales_pdf_creditmemo>
         </layout>
-        <events>
-            <sales_order_place_after>
-                <observers>
-                    <sales_vat_request_params_order_comment>
-                        <class>sales/observer</class>
-                        <method>addVatRequestParamsOrderComment</method>
-                    </sales_vat_request_params_order_comment>
-                </observers>
-            </sales_order_place_after>
-        </events>
     </global>
     <frontend>
         <secure_url>
             <sales>/sales/</sales>
         </secure_url>
-        <routers>
-            <sales>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Sales</module>
-                    <frontName>sales</frontName>
-                </args>
-            </sales>
-        </routers>
         <translate>
             <modules>
                 <Mage_Sales>
@@ -1525,32 +1460,6 @@
                 </sales_recurring_profile>
             </updates>
         </layout>
-        <events>
-            <sales_quote_address_collect_totals_before>
-                <observers>
-                    <sales_customer_validate_vat_number>
-                        <class>sales/observer</class>
-                        <method>changeQuoteCustomerGroupId</method>
-                    </sales_customer_validate_vat_number>
-                </observers>
-            </sales_quote_address_collect_totals_before>
-            <sales_quote_address_collect_totals_after>
-                <observers>
-                    <sales_customer_validate_vat_number>
-                        <class>sales/observer</class>
-                        <method>restoreQuoteCustomerGroupId</method>
-                    </sales_customer_validate_vat_number>
-                </observers>
-            </sales_quote_address_collect_totals_after>
-            <sales_quote_collect_totals_after>
-                <observers>
-                    <catalog_msrp>
-                        <class>sales/observer</class>
-                        <method>setQuoteCanApplyMsrp</method>
-                    </catalog_msrp>
-                </observers>
-            </sales_quote_collect_totals_after>
-        </events>
     </frontend>
     <adminhtml>
         <translate>
@@ -1569,67 +1478,13 @@
                 </sales>
             </updates>
         </layout>
-        <events>
-            <catalog_product_delete_before>
-                <observers>
-                    <sales_quote_observer>
-                        <class>sales/observer</class>
-                        <method>substractQtyFromQuotes</method>
-                    </sales_quote_observer>
-                </observers>
-            </catalog_product_delete_before>
-            <catalogrule_after_apply>
-                <observers>
-                    <sales_quote_observer>
-                        <class>sales/observer</class>
-                        <method>markQuotesRecollectOnCatalogRules</method>
-                    </sales_quote_observer>
-                </observers>
-            </catalogrule_after_apply>
-            <catalog_product_save_after>
-                <observers>
-                    <sales_quote>
-                        <class>sales/observer</class>
-                        <method>catalogProductSaveAfter</method>
-                    </sales_quote>
-                </observers>
-            </catalog_product_save_after>
-            <catalog_product_status_update>
-                <observers>
-                    <sales_quote>
-                        <class>sales/observer</class>
-                        <method>catalogProductStatusUpdate</method>
-                    </sales_quote>
-                </observers>
-            </catalog_product_status_update>
-            <catalog_product_edit_form_render_recurring>
-                <observers>
-                    <payment>
-                        <class>sales/observer</class>
-                        <method>prepareProductEditFormRecurringProfile</method>
-                    </payment>
-                </observers>
-            </catalog_product_edit_form_render_recurring>
-            <payment_method_is_active>
-                <observers>
-                    <sales_billing_agreement>
-                        <class>sales/observer</class>
-                        <method>restrictAdminBillingAgreementUsage</method>
-                    </sales_billing_agreement>
-                </observers>
-            </payment_method_is_active>
-
-            <customer_save_after>
-                <observers>
-                    <customer>
-                        <class>sales/observer</class>
-                        <method>customerSaveAfter</method>
-                    </customer>
-                </observers>
-            </customer_save_after>
-        </events>
     </adminhtml>
     <default>
+        <system>
+            <rate_limit>
+                <guest_order_lookup>30</guest_order_lookup>
+            </rate_limit>
+        </system>
         <sales>
             <totals_sort>
                 <discount>20</discount>
@@ -1663,6 +1518,7 @@
                 <guest_template>sales_email_invoice_guest_template</guest_template>
                 <identity>sales</identity>
                 <copy_method>bcc</copy_method>
+                <attach_pdf>0</attach_pdf>
             </invoice>
             <invoice_comment>
                 <enabled>1</enabled>
@@ -1677,6 +1533,7 @@
                 <guest_template>sales_email_shipment_guest_template</guest_template>
                 <identity>sales</identity>
                 <copy_method>bcc</copy_method>
+                <attach_pdf>0</attach_pdf>
             </shipment>
             <shipment_comment>
                 <enabled>1</enabled>
@@ -1691,6 +1548,7 @@
                 <guest_template>sales_email_creditmemo_guest_template</guest_template>
                 <identity>sales</identity>
                 <copy_method>bcc</copy_method>
+                <attach_pdf>0</attach_pdf>
             </creditmemo>
             <creditmemo_comment>
                 <enabled>1</enabled>
@@ -1713,56 +1571,4 @@
             </crontab>
         </reports>
     </default>
-    <crontab>
-        <jobs>
-            <sales_clean_quotes>
-                <schedule>
-                    <cron_expr>0 0 * * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>sales/observer::cleanExpiredQuotes</model>
-                </run>
-            </sales_clean_quotes>
-            <aggregate_sales_report_order_data>
-                <schedule>
-                    <config_path>reports/crontab/sales_expr</config_path>
-                </schedule>
-                <run>
-                    <model>sales/observer::aggregateSalesReportOrderData</model>
-                </run>
-            </aggregate_sales_report_order_data>
-            <aggregate_sales_report_shipment_data>
-                <schedule>
-                    <config_path>reports/crontab/shipping_expr</config_path>
-                </schedule>
-                <run>
-                    <model>sales/observer::aggregateSalesReportShipmentData</model>
-                </run>
-            </aggregate_sales_report_shipment_data>
-            <aggregate_sales_report_invoiced_data>
-                <schedule>
-                    <config_path>reports/crontab/invoiced_expr</config_path>
-                </schedule>
-                <run>
-                    <model>sales/observer::aggregateSalesReportInvoicedData</model>
-                </run>
-            </aggregate_sales_report_invoiced_data>
-            <aggregate_sales_report_refunded_data>
-                <schedule>
-                    <config_path>reports/crontab/refunded_expr</config_path>
-                </schedule>
-                <run>
-                    <model>sales/observer::aggregateSalesReportRefundedData</model>
-                </run>
-            </aggregate_sales_report_refunded_data>
-            <aggregate_sales_report_bestsellers_data>
-                <schedule>
-                    <config_path>reports/crontab/bestsellers_expr</config_path>
-                </schedule>
-                <run>
-                    <model>sales/observer::aggregateSalesReportBestsellersData</model>
-                </run>
-            </aggregate_sales_report_bestsellers_data>
-        </jobs>
-    </crontab>
 </config>

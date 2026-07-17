@@ -1,13 +1,7 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @category   Maho
- * @package    Maho_ContentVersion
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
@@ -35,56 +29,12 @@
                 <class>Maho_ContentVersion_Helper</class>
             </contentversion>
         </helpers>
-        <resources>
-            <contentversion_setup>
-                <setup>
-                    <module>Maho_ContentVersion</module>
-                </setup>
-            </contentversion_setup>
-        </resources>
-        <events>
-            <cms_page_save_before>
-                <observers>
-                    <contentversion_snapshot>
-                        <class>contentversion/observer</class>
-                        <method>beforeCmsPageSave</method>
-                    </contentversion_snapshot>
-                </observers>
-            </cms_page_save_before>
-            <cms_block_save_before>
-                <observers>
-                    <contentversion_snapshot>
-                        <class>contentversion/observer</class>
-                        <method>beforeCmsBlockSave</method>
-                    </contentversion_snapshot>
-                </observers>
-            </cms_block_save_before>
-            <blog_post_save_before>
-                <observers>
-                    <contentversion_snapshot>
-                        <class>contentversion/observer</class>
-                        <method>beforeBlogPostSave</method>
-                    </contentversion_snapshot>
-                </observers>
-            </blog_post_save_before>
-        </events>
         <blocks>
             <contentversion>
                 <class>Maho_ContentVersion_Block</class>
             </contentversion>
         </blocks>
     </global>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <Maho_ContentVersion before="Mage_Adminhtml">Maho_ContentVersion_Adminhtml</Maho_ContentVersion>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
     <adminhtml>
         <layout>
             <updates>

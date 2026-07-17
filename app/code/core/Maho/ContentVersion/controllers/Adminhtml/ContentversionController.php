@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_ContentVersion
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_ContentVersion
  */
+
+declare(strict_types=1);
 
 class Maho_ContentVersion_Adminhtml_ContentversionController extends Mage_Adminhtml_Controller_Action
 {
@@ -22,6 +19,7 @@ class Maho_ContentVersion_Adminhtml_ContentversionController extends Mage_Adminh
         return parent::preDispatch();
     }
 
+    #[Maho\Config\Route('/admin/contentversion/restore')]
     public function restoreAction(): void
     {
         $versionId = (int) $this->getRequest()->getParam('version_id');
@@ -45,6 +43,7 @@ class Maho_ContentVersion_Adminhtml_ContentversionController extends Mage_Adminh
         }
     }
 
+    #[Maho\Config\Route('/admin/contentversion/preview')]
     public function previewAction(): void
     {
         $versionId = (int) $this->getRequest()->getParam('version_id');

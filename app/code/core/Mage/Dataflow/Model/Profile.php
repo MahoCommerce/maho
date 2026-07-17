@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Dataflow
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Dataflow
  */
 
 /**
@@ -85,8 +83,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
     {
         parent::_beforeSave();
         $actionsXML = $this->getData('actions_xml');
-        // @phpstan-ignore-next-line because of https://github.com/phpstan/phpstan/issues/10570
-        if ($actionsXML !== null && strlen($actionsXML) < 0 &&
+        if ($actionsXML !== null && (string) $actionsXML !== '' &&
             @simplexml_load_string('<data>' . $actionsXML . '</data>', null, LIBXML_NOERROR) === false
         ) {
             Mage::throwException(Mage::helper('dataflow')->__('Actions XML is not valid.'));
@@ -234,7 +231,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
                     }
                 }
                 //BOM deleting for UTF files
-                if (isset($path, $newFilename) && $newFilename) {
+                if (isset($path, $newFilename)) {
                     $contents = file_get_contents($path . $newFilename);
                     if (ord($contents[0]) == 0xEF && ord($contents[1]) == 0xBB && ord($contents[2]) == 0xBF) {
                         $contents = substr($contents, 3);

@@ -1,14 +1,19 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Maho_Captcha
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Captcha
  */
 
-use AltchaOrg\Altcha;
+use AltchaOrg\Altcha\Algorithm\Pbkdf2;
+use AltchaOrg\Altcha\Altcha;
+use AltchaOrg\Altcha\Challenge;
+use AltchaOrg\Altcha\ChallengeParameters;
+use AltchaOrg\Altcha\CreateChallengeOptions;
+use AltchaOrg\Altcha\Payload;
+use AltchaOrg\Altcha\Solution;
+use AltchaOrg\Altcha\VerifySolutionOptions;
 
 class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 {
@@ -19,7 +24,7 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 
     protected $_moduleName = 'Maho_Captcha';
 
-    /** @var array <string, bool> */
+    /** @var array<string, bool> */
     protected static array $_payloadVerificationCache = [];
 
     public function isEnabled(): bool
@@ -58,26 +63,23 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
     public function getWidgetAttributes(): \Maho\DataObject
     {
         return new \Maho\DataObject([
-            'challengeurl' => $this->getChallengeUrl(),
-            'name' => 'maho_captcha',
+            'challenge' => $this->getChallengeUrl(),
             'id' => 'maho_captcha',
             'auto' => 'onload',
-            'hidelogo' => '',
-            'hidefooter' => '',
-            'refetchonexpire' => '',
+            'hideLogo' => '',
+            'hideFooter' => '',
         ]);
     }
 
-    public function createChallenge(?array $options = null): Altcha\Challenge
+    public function createChallenge(): Challenge
     {
-        $options = new Altcha\ChallengeOptions(
-            Altcha\Hasher\Algorithm::SHA512,
-            Altcha\ChallengeOptions::DEFAULT_MAX_NUMBER,
-            (new DateTime())->modify('+' . self::CHALLENGE_EXPIRATION . ' seconds'),
-            $options ?? [],
-            32,
+        $algorithm = new Pbkdf2();
+        $options = new CreateChallengeOptions(
+            algorithm: $algorithm,
+            cost: 5000,
+            expiresAt: (new DateTimeImmutable())->modify('+' . self::CHALLENGE_EXPIRATION . ' seconds'),
         );
-        $altcha = new Altcha\Altcha($this->getHmacKey());
+        $altcha = new Altcha(hmacSignatureSecret: $this->getHmacKey());
         return $altcha->createChallenge($options);
     }
 
@@ -99,8 +101,28 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         try {
-            $altcha = new Altcha\Altcha($this->getHmacKey());
-            $isValid = $altcha->verifySolution($payload, true);
+            $algorithm = new Pbkdf2();
+            $altcha = new Altcha(hmacSignatureSecret: $this->getHmacKey());
+            $decoded = json_decode(base64_decode($payload), true);
+            $challengeData = $decoded['challenge'] ?? [];
+            $solutionData = $decoded['solution'] ?? [];
+
+            $payloadObj = new Payload(
+                challenge: new Challenge(
+                    parameters: ChallengeParameters::fromArray($challengeData['parameters'] ?? []),
+                    signature: $challengeData['signature'] ?? null,
+                ),
+                solution: new Solution(
+                    counter: (int) ($solutionData['counter'] ?? 0),
+                    derivedKey: $solutionData['derivedKey'] ?? '',
+                ),
+            );
+
+            $result = $altcha->verifySolution(new VerifySolutionOptions(
+                payload: $payloadObj,
+                algorithm: $algorithm,
+            ));
+            $isValid = $result->verified;
             Mage::app()->getCache()->save('1', $cacheKey, [self::CACHE_TAG], self::CHALLENGE_EXPIRATION);
         } catch (Exception $e) {
             $isValid = false;

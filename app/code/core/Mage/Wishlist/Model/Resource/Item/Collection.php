@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Wishlist
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2026 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Wishlist
  */
 
 /**
@@ -171,7 +169,7 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
             ->addTaxPercents();
 
         if ($this->_productVisible) {
-            Mage::getSingleton('catalog/product_visibility')->addVisibleInSiteFilterToCollection($productCollection);
+            $productCollection->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInSiteIds());
         }
         if ($this->_productSalable) {
             $productCollection = Mage::helper('adminhtml/sales')->applySalableProductTypesFilter($productCollection);
@@ -376,20 +374,12 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
 
         $filter = [];
 
-        $now = Mage::getSingleton('core/date')->date();
-        $gmtOffset = (int) Mage::getSingleton('core/date')->getGmtOffset();
         if (isset($constraints['from'])) {
-            $lastDay = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_FORMAT, $now) ?: new DateTime($now);
-            $lastDay->modify('-' . $gmtOffset . ' seconds')
-                ->modify('-' . ($constraints['from'] - 1) . ' days');
-            $filter['to'] = $lastDay;
+            $filter['to'] = new DateTime('-' . ($constraints['from'] - 1) . ' days');
         }
 
         if (isset($constraints['to'])) {
-            $firstDay = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_FORMAT, $now) ?: new DateTime($now);
-            $firstDay->modify('-' . $gmtOffset . ' seconds')
-                ->modify('-' . $constraints['to'] . ' days');
-            $filter['from'] = $firstDay;
+            $filter['from'] = new DateTime('-' . $constraints['to'] . ' days');
         }
 
         if ($filter) {

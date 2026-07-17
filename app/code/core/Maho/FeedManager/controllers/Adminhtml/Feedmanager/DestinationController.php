@@ -1,19 +1,15 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Maho_FeedManager
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_FeedManager
  */
+
+declare(strict_types=1);
 
 class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_Adminhtml_Controller_Action
 {
-    use Maho_FeedManager_Controller_Adminhtml_JsonResponseTrait;
-
     public const ADMIN_RESOURCE = 'catalog/feedmanager/destinations';
 
     #[\Override]
@@ -32,6 +28,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_destination/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -42,11 +39,20 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_destination/grid')]
+    public function gridAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
+    #[Maho\Config\Route('/admin/feedmanager_destination/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_destination/edit')]
     public function editAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -81,6 +87,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_destination/save')]
     public function saveAction(): void
     {
         $data = $this->getRequest()->getPost();
@@ -223,6 +230,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
         return $config;
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_destination/delete')]
     public function deleteAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -258,12 +266,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_destination/test')]
     public function testAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
 
         if (!$id) {
-            $this->_sendJsonResponse(['error' => true, 'message' => 'Destination ID required']);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => 'Destination ID required']);
             return;
         }
 
@@ -271,7 +280,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
             $destination = Mage::getModel('feedmanager/destination')->load($id);
 
             if (!$destination->getId()) {
-                $this->_sendJsonResponse(['error' => true, 'message' => 'Destination not found']);
+                $this->getResponse()->setBodyJson(['error' => true, 'message' => 'Destination not found']);
                 return;
             }
 
@@ -279,22 +288,23 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
             $result = $uploader->testConnection();
 
             if ($result['success']) {
-                $this->_sendJsonResponse([
+                $this->getResponse()->setBodyJson([
                     'success' => true,
                     'message' => 'Connection successful',
                 ]);
             } else {
-                $this->_sendJsonResponse([
+                $this->getResponse()->setBodyJson([
                     'error' => true,
                     'message' => $result['message'] ?? 'Connection failed',
                 ]);
             }
 
         } catch (Exception $e) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $e->getMessage()]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
         }
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_destination/massStatus')]
     public function massStatusAction(): void
     {
         $destinationIds = $this->getRequest()->getParam('destination_ids');
@@ -324,6 +334,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/feedmanager_destination/massDelete')]
     public function massDeleteAction(): void
     {
         $destinationIds = $this->getRequest()->getParam('destination_ids');

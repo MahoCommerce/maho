@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Giftcard
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Giftcard
  */
+
+declare(strict_types=1);
 
 class Maho_Giftcard_Model_Cron
 {
@@ -17,6 +14,7 @@ class Maho_Giftcard_Model_Cron
      * Process scheduled gift card emails
      * Runs every 5 minutes
      */
+    #[Maho\Config\CronJob('giftcard_process_scheduled_emails', schedule: '*/5 * * * *')]
     public function processScheduledEmails(): void
     {
         try {
@@ -46,11 +44,12 @@ class Maho_Giftcard_Model_Cron
      * Mark expired gift cards
      * Runs daily at 1 AM
      */
+    #[Maho\Config\CronJob('giftcard_mark_expired', schedule: '0 1 * * *')]
     public function markExpiredGiftcards(): void
     {
         try {
             // Get current time in UTC (expires_at is stored in UTC)
-            $currentTimeUtc = Mage::app()->getLocale()->utcDate(null, null, true);
+            $currentTimeUtc = Mage::app()->getLocale()->storeToUtc();
 
             // Get active gift cards that have expired
             $collection = Mage::getResourceModel('giftcard/giftcard_collection')
@@ -74,7 +73,7 @@ class Maho_Giftcard_Model_Cron
                         'balance_before' => (float) $giftcard->getBalance(),
                         'balance_after' => (float) $giftcard->getBalance(),
                         'comment' => 'Automatically expired by cron',
-                        'created_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                        'created_at' => Mage::app()->getLocale()->formatDateForDb('now'),
                     ]);
                     $history->save();
 

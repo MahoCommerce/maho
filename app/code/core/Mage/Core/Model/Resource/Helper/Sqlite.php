@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 class Mage_Core_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource_Helper_Abstract
@@ -244,7 +242,7 @@ class Mage_Core_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource_He
                         $preparedColumns[strtoupper($col)] = [$correlationName, $col, null];
                     }
                 } else {
-                    $columnKey = is_null($alias) ? $column : $alias;
+                    $columnKey = $alias ?? $column;
                     $preparedColumns[strtoupper($columnKey)] = [$correlationName, $column, $alias];
                 }
             }

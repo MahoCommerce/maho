@@ -1,10 +1,5 @@
-/**
- * Maho
- *
- * @package     Mage_Adminhtml
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+// SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+// SPDX-License-Identifier: AFL-3.0
 
 /**
  * Class to control the "Manage Categories" page
@@ -53,9 +48,13 @@ class CategoryEditForm {
         this.initVarienForm();
         this.initProductsGrid();
 
+        const showId = localStorage.getItem('category_tree_show_id') === '1';
+        const showCount = localStorage.getItem('category_tree_show_count') !== '0';
+
         this.tree = new MahoTree(this.config.treeDiv, {
             showRootNode: true,
             treatAllNodesAsFolders: true,
+            metaOverrides: { id: showId, count: showCount },
             selectable: {
                 mode: 'radio',
                 showInputs: false,
@@ -76,6 +75,26 @@ class CategoryEditForm {
                     setMessagesDiv(Translator.translate('Error loading children: %s', error), 'error');
                 }
             }
+        });
+
+        this.initLabelOptions();
+    }
+
+    initLabelOptions() {
+        const showIdEl = document.getElementById('tree-show-id');
+        const showCountEl = document.getElementById('tree-show-count');
+        if (!showIdEl || !showCountEl) {
+            return;
+        }
+        showIdEl.checked = localStorage.getItem('category_tree_show_id') === '1';
+        showCountEl.checked = localStorage.getItem('category_tree_show_count') !== '0';
+        showIdEl.addEventListener('change', () => {
+            localStorage.setItem('category_tree_show_id', showIdEl.checked ? '1' : '0');
+            this.tree.setMetaVisible('id', showIdEl.checked);
+        });
+        showCountEl.addEventListener('change', () => {
+            localStorage.setItem('category_tree_show_count', showCountEl.checked ? '1' : '0');
+            this.tree.setMetaVisible('count', showCountEl.checked);
         });
     }
 
@@ -136,7 +155,8 @@ class CategoryEditForm {
         }
 
         gridObj.checkboxCheckCallback = (gridObj, element, checked) => {
-            const positionEl = event.target.closest('tr')?.querySelector('input[name=position]');
+            if (!element.value || !/^\d+$/.test(element.value)) return;
+            const positionEl = element.closest('tr')?.querySelector('input[name=position]');
             if (positionEl) {
                 positionEl.disabled = !checked;
             }
@@ -304,6 +324,7 @@ class CategoryEditForm {
             window[this.config.tabsJsObjectName]?.moveTabContentInDest();
             this.initVarienForm();
             this.initProductsGrid();
+            varienWindowOnload();
 
             history.replaceState(null, '', setQueryParams(url, { isAjax: null }));
 

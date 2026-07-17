@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Adminhtml_Block_Sales_Order_Create_Totals $this */
@@ -21,18 +19,18 @@
 <div class="order-totals-bottom">
     <p>
         <label for="notify_customer" class="normal"><?= Mage::helper('sales')->__('Append Comments') ?></label>
-        <input type="checkbox" id="notify_customer" name="order[comment][customer_note_notify]" value="1" <?php if($this->getNoteNotify()): ?>checked="true"<?php endif ?>/>
+        <input type="checkbox" id="notify_customer" name="order[comment][customer_note_notify]" value="1" <?php if($this->getNoteNotify()): ?>checked="true"<?php endif ?>>
     </p>
     <?php if ($this->canSendNewOrderConfirmationEmail()): ?>
     <p>
         <label for="send_confirmation" class="normal"><?= Mage::helper('sales')->__('Email Order Confirmation') ?></label>
-        <input type="checkbox" id="send_confirmation" name="order[send_confirmation]" value="1" checked="checked"/>
+        <input type="checkbox" id="send_confirmation" name="order[send_confirmation]" value="1" checked="checked">
     </p>
     <?php endif ?>
     <p><?= $this->getButtonHtml(Mage::helper('sales')->__('Submit Order'),'order.submit()','save') ?></p>
 </div>
 
-<script type="text/javascript">
+<script>
 (function() {
     const sendEmailCheckbox = document.getElementById('send_confirmation');
     if (sendEmailCheckbox) {

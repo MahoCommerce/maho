@@ -1,18 +1,13 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Api2
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_Api2>
-            <version>1.0.0.0</version>
+            <version>2.0.0</version>
         </Mage_Api2>
     </modules>
     <global>
@@ -66,24 +61,6 @@
                 </setup>
             </api2_setup>
         </resources>
-        <events>
-            <admin_user_save_after>
-                <observers>
-                    <api2>
-                        <class>api2/observer</class>
-                        <method>saveAdminToRoleRelation</method>
-                    </api2>
-                </observers>
-            </admin_user_save_after>
-            <api_user_authenticated>
-                <observers>
-                    <api2_upgrade_key>
-                        <class>api2/observer</class>
-                        <method>upgradeApiKey</method>
-                    </api2_upgrade_key>
-                </observers>
-            </api_user_authenticated>
-        </events>
         <api2>
             <auth_adapters>
                 <oauth module="api2" translate="label">
@@ -171,17 +148,6 @@
             </response>
         </api2>
     </global>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <api2 before="Mage_Adminhtml">Mage_Api2_Adminhtml</api2>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
     <adminhtml>
         <layout>
             <updates>
@@ -190,15 +156,5 @@
                 </api2>
             </updates>
         </layout>
-        <events>
-            <catalog_entity_attribute_save_after>
-                <observers>
-                    <api2>
-                        <class>api2/observer</class>
-                        <method>catalogAttributeSaveAfter</method>
-                    </api2>
-                </observers>
-            </catalog_entity_attribute_save_after>
-        </events>
     </adminhtml>
 </config>

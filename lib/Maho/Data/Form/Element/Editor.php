@@ -1,13 +1,10 @@
 <?php
 
 /**
- * Maho
- *
- * @package    MahoLib
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 namespace Maho\Data\Form\Element;
@@ -69,7 +66,7 @@ class Editor extends Textarea
 
         }
         // Display only buttons to additional features
-        if ($this->getConfig('widget_window_url') || $this->getConfig('plugins') || $this->getConfig('add_images')) {
+        if ($this->getConfig('widget_window_url') || $this->getConfig('plugins') || $this->getConfig('add_images') || $this->getConfig('validate_html_url')) {
             $html = $this->_getButtonsHtml() . parent::getElementHtml();
             $html = $this->_wrapIntoContainer($html);
             return $html;
@@ -166,6 +163,15 @@ class Editor extends Textarea
                 }
                 $buttonsHtml .= $this->_getButtonHtml($buttonOptions);
             }
+        }
+
+        if ($this->getConfig('validate_html_url')) {
+            $url = $this->getConfig('validate_html_url');
+            $buttonsHtml .= $this->_getButtonHtml([
+                'title'     => $this->translate('Validate HTML'),
+                'onclick'   => "validateHtmlContent('{$this->getHtmlId()}', '$url');",
+                'class'     => 'validate-html plugin' . ($visible ? '' : ' no-display'),
+            ]);
         }
 
         return $buttonsHtml;

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Reports
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Reports
  */
 
 abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Model_Resource_Db_Abstract
@@ -52,7 +50,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
 
         $time = time();
         // touch last_update
-        $this->_getFlag()->setLastUpdate($this->formatDate($time));
+        $this->_getFlag()->setLastUpdate(Mage::app()->getLocale()->formatDateForDb($time));
 
         $this->_getFlag()->save();
 
@@ -317,11 +315,11 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
     protected function _checkDates(&$from, &$to)
     {
         if ($from !== null) {
-            $from = $this->formatDate($from);
+            $from = Mage::app()->getLocale()->formatDateForDb($from);
         }
 
         if ($to !== null) {
-            $to = $this->formatDate($to);
+            $to = Mage::app()->getLocale()->formatDateForDb($to);
         }
 
         return $this;
@@ -351,7 +349,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
         }
 
         $periods = $this->_getTZOffsetTransitions(
-            Mage::app()->getLocale()->storeDate($store)->format('T'),
+            Mage::app()->getLocale()->utcToStore($store)->format('T'),
             $from,
             $to,
         );
@@ -391,7 +389,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
         $tzTransitions = [];
         try {
             if (!empty($from)) {
-                if ($from instanceof DateTime) {
+                if ($from instanceof DateTimeInterface) {
                     $from = $from->getTimestamp();
                 } else {
                     $fromOriginal = $from;
@@ -400,7 +398,7 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
                 }
             }
 
-            if ($to instanceof DateTime) {
+            if ($to instanceof DateTimeInterface) {
                 $nextPeriod = $this->_getWriteAdapter()->formatDate($to->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
                 $to = $to->getTimestamp();
             } elseif (!empty($to)) {
@@ -485,14 +483,14 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
      */
     protected function _getStoreTimezoneUtcOffset($store = null)
     {
-        return Mage::app()->getLocale()->storeDate($store)->format('P');
+        return Mage::app()->getLocale()->utcToStore($store)->format('P');
     }
 
     /**
      * Retrieve date in UTC timezone
      *
      * @param string|null $date
-     * @return DateTime|null
+     * @return DateTimeImmutable|null
      */
     protected function _dateToUtc($date)
     {
@@ -500,6 +498,6 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
             return null;
         }
 
-        return Mage::app()->getLocale()->utcDate(0, $date, true);
+        return Mage::app()->getLocale()->storeToUtc(0, $date);
     }
 }

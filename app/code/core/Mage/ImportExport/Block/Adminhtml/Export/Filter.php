@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_ImportExport
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_ImportExport
  */
 
 /**
@@ -85,7 +83,7 @@ class Mage_ImportExport_Block_Adminhtml_Export_Filter extends Mage_Adminhtml_Blo
             $html .= ' value="' . $this->_helper->escapeHtml($value) . '"';
         }
 
-        return $html . ' />';
+        return $html . '>';
     }
 
     /**
@@ -140,10 +138,10 @@ class Mage_ImportExport_Block_Adminhtml_Export_Filter extends Mage_Adminhtml_Blo
 
         return '<strong>' . Mage::helper('importexport')->__('From') . ':</strong>&nbsp;'
              . '<input type="text" name="' . $name . '[]" class="input-text input-text-range"'
-             . ' value="' . $fromValue . '"/>&nbsp;'
+             . ' value="' . $fromValue . '">&nbsp;'
              . '<strong>' . Mage::helper('importexport')->__('To')
              . ':</strong>&nbsp;<input type="text" name="' . $name
-             . '[]" class="input-text input-text-range" value="' . $toValue . '" />';
+             . '[]" class="input-text input-text-range" value="' . $toValue . '">';
     }
 
     /**

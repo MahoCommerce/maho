@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_Action
@@ -27,6 +25,7 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/catalog_search/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))->_title($this->__('Search Terms'));
@@ -37,11 +36,13 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
             ->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/catalog_search/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
+    #[Maho\Config\Route('/admin/catalog_search/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('Catalog'))->_title($this->__('Search Terms'));
@@ -84,6 +85,7 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
     /**
      * Save search query
      */
+    #[Maho\Config\Route('/admin/catalog_search/save')]
     public function saveAction(): void
     {
         $hasError   = false;
@@ -138,6 +140,7 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
         }
     }
 
+    #[Maho\Config\Route('/admin/catalog_search/delete')]
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -158,6 +161,7 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/catalog_search/massDelete')]
     public function massDeleteAction(): void
     {
         $searchIds = $this->getRequest()->getParam('search');

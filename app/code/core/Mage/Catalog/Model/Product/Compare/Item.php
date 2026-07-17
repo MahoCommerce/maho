@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 /**
@@ -161,6 +159,7 @@ class Mage_Catalog_Model_Product_Compare_Item extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[Maho\Config\Observer('customer_login', area: 'frontend')]
     public function bindCustomerLogin()
     {
         $this->_getResource()->updateCustomerFromVisitor($this);
@@ -174,6 +173,7 @@ class Mage_Catalog_Model_Product_Compare_Item extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[Maho\Config\Observer('customer_logout', area: 'frontend')]
     public function bindCustomerLogout(?\Maho\Event\Observer $observer = null)
     {
         $this->_getResource()->purgeVisitorByCustomer($this);

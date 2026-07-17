@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Customer
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Customer
  */
 
 class Mage_Customer_Model_Observer
@@ -70,10 +68,57 @@ class Mage_Customer_Model_Observer
     }
 
     /**
+     * Force customers to enroll in 2FA before using their account when it is mandatory.
+     */
+    #[Maho\Config\Observer('controller_action_predispatch', area: 'frontend')]
+    public function enforceMandatoryTwofa(\Maho\Event\Observer $observer): void
+    {
+        if (!Mage::getStoreConfigFlag('customer/password/allow_2fa')
+            || !Mage::getStoreConfigFlag('customer/password/require_2fa')
+        ) {
+            return;
+        }
+
+        /** @var Mage_Customer_Model_Session $session */
+        $session = Mage::getSingleton('customer/session');
+        if (!$session->isLoggedIn() || $session->getCustomer()->getTwofaEnabled()) {
+            return;
+        }
+
+        /** @var Mage_Core_Controller_Front_Action $action */
+        $action = $observer->getControllerAction();
+        $request = $action->getRequest();
+
+        // Only gate the sensitive surfaces (account management and checkout); browsing the
+        // catalog, CMS pages, etc. carries no risk and blocking it just punishes the customer.
+        $gatedRoutes = ['customer', 'checkout'];
+        if (!in_array(strtolower((string) $request->getRouteName()), $gatedRoutes, true)) {
+            return;
+        }
+
+        // Within the gated routes, still allow the enrollment page itself, its POST handler and logging out
+        $current = strtolower($request->getRouteName() . '/' . $request->getControllerName() . '/' . $request->getActionName());
+        $allowed = [
+            'customer/account/twofa',
+            'customer/account/twofapost',
+            'customer/account/logout',
+            'customer/account/logoutsuccess',
+        ];
+        if (in_array($current, $allowed, true)) {
+            return;
+        }
+
+        $session->addNotice(Mage::helper('customer')->__('Two-factor authentication is required. Please set it up to continue.'));
+        $action->setFlag('', Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH, true);
+        $action->getResponse()->setRedirect(Mage::getUrl('customer/account/twofa'));
+    }
+
+    /**
      * Before load layout event handler
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('controller_action_layout_load_before', area: 'frontend')]
     public function beforeLoadLayout($observer)
     {
         $loggedIn = Mage::getSingleton('customer/session')->isLoggedIn();
@@ -87,6 +132,7 @@ class Mage_Customer_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('customer_address_save_before')]
     public function beforeAddressSave($observer)
     {
         if (Mage::registry(self::VIV_CURRENTLY_SAVED_ADDRESS)) {
@@ -116,6 +162,7 @@ class Mage_Customer_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('customer_address_save_after')]
     public function afterAddressSave($observer)
     {
         /** @var Mage_Customer_Model_Address $customerAddress */
@@ -186,6 +233,7 @@ class Mage_Customer_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('sales_model_service_quote_submit_after', area: 'frontend')]
     public function quoteSubmitAfter($observer)
     {
         /** @var Mage_Customer_Model_Customer $customer */
@@ -208,11 +256,12 @@ class Mage_Customer_Model_Observer
     /**
      * Clear customer flow password table
      */
+    #[Maho\Config\CronJob('customer_flowpassword', schedule: '0 0 1 * *')]
     public function deleteCustomerFlowPassword()
     {
         $resource   = Mage::getSingleton('core/resource');
         $connection = $resource->getConnection('write');
-        $condition  = ['requested_date < ?' => Mage::getModel('core/date')->date(null, '-1 day')];
+        $condition  = ['requested_date < ?' => Mage::app()->getLocale()->formatDateForDb('-1 day')];
         $connection->delete($resource->getTableName('customer_flowpassword'), $condition);
     }
 
@@ -221,6 +270,7 @@ class Mage_Customer_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('customer_customer_authenticated')]
     public function actionUpgradeCustomerPassword($observer)
     {
         $password = $observer->getEvent()->getPassword();
@@ -233,13 +283,7 @@ class Mage_Customer_Model_Observer
             Mage_Core_Model_Encryption::HASH_VERSION_SHA512,
             Mage_Core_Model_Encryption::HASH_VERSION_LATEST,
         ];
-        $currentVersionHash = null;
-        foreach ($hashVersionArray as $hashVersion) {
-            if ($encryptor->validateHashByVersion($password, $model->getPasswordHash(), $hashVersion)) {
-                $currentVersionHash = $hashVersion;
-                break;
-            }
-        }
+        $currentVersionHash = array_find($hashVersionArray, fn($hashVersion) => $encryptor->validateHashByVersion($password, $model->getPasswordHash(), $hashVersion));
         if (Mage_Core_Model_Encryption::HASH_VERSION_SHA256 !== $currentVersionHash) {
             $model->changePassword($password, false);
         }
@@ -248,6 +292,7 @@ class Mage_Customer_Model_Observer
     /**
      * Set the customer's or guest's session time based on config
      */
+    #[Maho\Config\Observer('session_before_renew_cookie')]
     public function setCookieLifetime(\Maho\Event\Observer $observer)
     {
         if ($observer->getSessionName() === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {

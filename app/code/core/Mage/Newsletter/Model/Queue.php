@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Newsletter
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Newsletter
  */
 
 /**
@@ -118,9 +116,8 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
             $this->setQueueStartAt(null);
         } else {
             $locale = Mage::app()->getLocale();
-            $format = $locale->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM);
-            $time = $locale->date($startAt, $format)->getTimestamp();
-            $this->setQueueStartAt(Mage::getModel('core/date')->gmtDate(null, $time));
+            $utcDate = $locale->storeToUtc(null, $startAt);
+            $this->setQueueStartAt($utcDate->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
         }
         return $this;
     }
@@ -166,7 +163,7 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
             $name = $item->getSubscriberFullName();
 
             $sender->emulateDesign($item->getStoreId());
-            $successSend = $sender->send($email, $name, ['subscriber' => $item]);
+            $successSend = $sender->send($email, $name, ['subscriber' => $item, 'is_newsletter' => true]);
             $sender->revertDesign();
 
             if ($successSend) {
@@ -195,7 +192,7 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
      */
     protected function _finishQueue()
     {
-        $this->setQueueFinishAt(Mage::getSingleton('core/date')->gmtDate());
+        $this->setQueueFinishAt(Mage::app()->getLocale()->formatDateForDb('now'));
         $this->setQueueStatus(self::STATUS_SENT);
         $this->save();
 

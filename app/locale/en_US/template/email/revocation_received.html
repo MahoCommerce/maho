@@ -1,0 +1,46 @@
+<!--@subject Receipt confirmation of your revocation (order {{var order_reference}}) @-->
+<!--@vars
+{"var customer_name":"Customer Name",
+"var customer_email":"Customer Email",
+"var order_reference":"Order Reference",
+"var request_id":"Request Reference Number",
+"var received_store":"Received At (Store Timezone)",
+"var received_utc":"Received At (UTC)",
+"var reason":"Reason (optional)",
+"var store.getFrontendName()":"Store Name"}
+@-->
+
+<!--@styles
+.revocation-receipt-box { border: 1px solid #dddddd; padding: 20px; margin: 20px 0; background-color: #f9f9f9; }
+@-->
+
+{{template config_path="design/email/header"}}
+{{inlinecss file="email-inline.css"}}
+
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+    <tr>
+        <td class="action-content">
+            <h1>Confirmation of receipt of your revocation</h1>
+            <p>Dear {{var customer_name}},</p>
+            <p>we hereby confirm that your revocation declaration has been <strong>received</strong>.</p>
+
+            <div class="revocation-receipt-box">
+                <p><strong>Reference number:</strong> #{{var request_id}}</p>
+                <p><strong>Received at:</strong> {{var received_store}}<br>
+                {{var received_utc}}</p>
+                <p><strong>Name:</strong> {{var customer_name}}<br>
+                <strong>Email:</strong> {{var customer_email}}<br>
+                <strong>Order reference:</strong> {{var order_reference}}</p>
+                {{depend reason}}
+                <p><strong>Reason given (voluntary):</strong><br>{{var reason}}</p>
+                {{/depend}}
+            </div>
+
+            <p>This message confirms only the receipt of your declaration. The validity of the revocation will be assessed and we will inform you separately about the further processing.</p>
+
+            <p>Please keep the reference number for any follow-up communication.</p>
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer"}}

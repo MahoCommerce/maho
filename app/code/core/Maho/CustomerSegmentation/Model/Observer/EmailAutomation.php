@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_CustomerSegmentation
  */
+
+declare(strict_types=1);
 
 /**
  * Email Automation Observer
@@ -28,6 +25,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
      * Handle segment refresh completion
      * Triggered after segment customer membership is updated
      */
+    #[Maho\Config\Observer('customer_segment_refresh_after')]
     public function onSegmentRefreshAfter(\Maho\Event\Observer $observer): void
     {
         /** @var Maho_CustomerSegmentation_Model_Segment $segment */
@@ -188,6 +186,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
      * Handle newsletter subscription changes
      * Stop email sequences when customer unsubscribes
      */
+    #[Maho\Config\Observer('newsletter_subscriber_save_after')]
     public function onNewsletterSubscriberSaveAfter(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Newsletter_Model_Subscriber $subscriber */
@@ -229,6 +228,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
      * Handle customer deletion
      * Clean up sequence progress when customer is deleted
      */
+    #[Maho\Config\Observer('customer_delete_after')]
     public function onCustomerDeleteAfter(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Customer_Model_Customer $customer */
@@ -266,6 +266,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
      * Process ready email sequences (called by cron)
      * This processes scheduled emails that are ready to send
      */
+    #[Maho\Config\Observer('customer_segmentation_process_scheduled_emails')]
     public function processScheduledEmails(\Maho\Event\Observer $observer): void
     {
         $startTime = microtime(true);
@@ -377,7 +378,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
 
                 // Convert DateTime to string if needed
                 $expirationDate = null;
-                if ($expirationDateRaw instanceof DateTime) {
+                if ($expirationDateRaw instanceof DateTimeInterface) {
                     $expirationDate = $expirationDateRaw->format('Y-m-d H:i:s');
                 } elseif (is_string($expirationDateRaw) && !empty($expirationDateRaw)) {
                     $expirationDate = $expirationDateRaw;
@@ -405,7 +406,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
               ->setNewsletterSenderName($template->getTemplateSenderName())
               ->setNewsletterSenderEmail($template->getTemplateSenderEmail())
               ->setQueueStatus(Mage_Newsletter_Model_Queue::STATUS_SENDING)
-              ->setQueueStartAt(Mage::getSingleton('core/date')->gmtDate())
+              ->setQueueStartAt(Mage::app()->getLocale()->formatDateForDb('now'))
               ->setAutomationSource('customer_segmentation')
               ->setAutomationSourceId($sequenceData['segment_id'])
               ->save();

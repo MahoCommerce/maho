@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Review
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Review
  */
 
 class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_Model_Resource_Product_Collection
@@ -362,13 +360,13 @@ class Mage_Review_Model_Resource_Review_Product_Collection extends Mage_Catalog_
                 $this->setStoreFilter($condition);
                 break;
             case 'type':
-                if ($condition == 1) {
+                if ((int) $condition === 1) {
                     $conditionParts = [
                         $this->_getConditionSql('rdt.customer_id', ['is' => new Maho\Db\Expr('NULL')]),
                         $this->_getConditionSql('rdt.store_id', ['eq' => Mage_Core_Model_App::ADMIN_STORE_ID]),
                     ];
                     $conditionSql = implode(' AND ', $conditionParts);
-                } elseif ($condition == 2) {
+                } elseif ((int) $condition === 2) {
                     $conditionSql = $this->_getConditionSql('rdt.customer_id', ['gt' => 0]);
                 } else {
                     $conditionParts = [

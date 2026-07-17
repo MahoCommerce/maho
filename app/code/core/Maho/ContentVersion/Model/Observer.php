@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_ContentVersion
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_ContentVersion
  */
+
+declare(strict_types=1);
 
 class Maho_ContentVersion_Model_Observer
 {
@@ -19,16 +16,19 @@ class Maho_ContentVersion_Model_Observer
      */
     public const REGISTRY_EDITOR = 'contentversion_editor';
 
+    #[Maho\Config\Observer('cms_page_save_before')]
     public function beforeCmsPageSave(Maho\Event\Observer $observer): void
     {
         $this->createVersionFromEvent($observer, 'cms_page');
     }
 
+    #[Maho\Config\Observer('cms_block_save_before')]
     public function beforeCmsBlockSave(Maho\Event\Observer $observer): void
     {
         $this->createVersionFromEvent($observer, 'cms_block');
     }
 
+    #[Maho\Config\Observer('blog_post_save_before')]
     public function beforeBlogPostSave(Maho\Event\Observer $observer): void
     {
         $this->createVersionFromEvent($observer, 'blog_post');

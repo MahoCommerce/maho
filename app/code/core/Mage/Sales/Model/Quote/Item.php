@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
  */
 
 /**
@@ -81,9 +79,6 @@
  * @method $this setIsQtyDecimal(int $value)
  * @method $this setIsRecurring(int $value)
  * @method int getItemId()
- *
- * @method int getMultishippingQty()
- * @method $this setMultishippingQty(int $value)
  *
  * @method string getName()
  * @method $this setName(string $value)
@@ -639,10 +634,8 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
             $option = Mage::getModel('sales/quote_item_option')->setData($option->getData())
                 ->setProduct($option->getProduct())
                 ->setItem($this);
-        } elseif ($option instanceof Mage_Sales_Model_Quote_Item_Option) {
-            $option->setItem($this);
         } else {
-            Mage::throwException(Mage::helper('sales')->__('Invalid item option format.'));
+            $option->setItem($this);
         }
 
         if ($exOption = $this->getOptionByCode($option->getCode())) {

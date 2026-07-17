@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 
 /** @var Mage_Catalog_Block_Product_List $this */
@@ -40,7 +38,7 @@
                 <img id="product-collection-image-<?= $_product->getId() ?>" width="<?= $_imgSize ?>" height="<?= $_imgSize ?>"
                      src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize) ?>"
                      srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize * 2) ?> 2x"
-                     alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" />
+                     alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>">
             </a>
             <?php // Product description ?>
             <div class="product-shop">
@@ -91,7 +89,7 @@
                                 <li>
                                     <a href="#" data-url="<?= $_wishlistUrl ?>" data-params="<?= $_params ?>"
                                        class="link-wishlist" title="<?= $this->__('Add to Wishlist') ?>"
-                                       onclick="customFormSubmit('<?= $_wishlistUrl ?>', '<?= $_params ?>', 'post')">
+                                       onclick="customFormSubmit('<?= $_wishlistUrl ?>', '<?= $_params ?>', 'post'); return false;">
                                         <?= $this->getIconSvg('heart') ?>
                                         <?= $this->__('Add to Wishlist') ?>
                                     </a>
@@ -100,7 +98,7 @@
                             <?php if ($_compareUrl = $this->getAddToCompareUrlCustom($_product, false)) : ?>
                                 <li>
                                     <a href="#" title="<?= $this->__('Add to Compare') ?>"
-                                       onclick="customFormSubmit('<?= $_compareUrl ?>', '<?= $_params ?>', 'post')">
+                                       onclick="customFormSubmit('<?= $_compareUrl ?>', '<?= $_params ?>', 'post'); return false;">
                                         <?= $this->getIconSvg('scale') ?>
                                         <?= $this->__('Add to Compare') ?>
                                     </a>
@@ -133,7 +131,7 @@
                         <img id="product-collection-image-<?= $_product->getId() ?>" width="<?= $_imgSize ?>" height="<?= $_imgSize ?>"
                              src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize) ?>"
                              srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize * 2) ?> 2x"
-                             alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" />
+                             alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>">
                     </a>
                     <ul>
                         <?php if ($this->helper('wishlist')->isAllow()) : ?>
@@ -141,7 +139,7 @@
                             <li>
                                 <a href="#" data-url="<?= $_wishlistUrl ?>" data-params="<?= $_params ?>"
                                    class="link-wishlist" title="<?= $this->__('Add to Wishlist') ?>"
-                                   onclick="customFormSubmit('<?= $_wishlistUrl ?>', '<?= $_params ?>', 'post')">
+                                   onclick="customFormSubmit('<?= $_wishlistUrl ?>', '<?= $_params ?>', 'post'); return false;">
                                     <?= $this->getIconSvg('heart') ?>
                                     <?= $this->__('Add to Wishlist') ?>
                                 </a>
@@ -150,7 +148,7 @@
                         <?php if ($_compareUrl = $this->getAddToCompareUrlCustom($_product, false)) : ?>
                             <li>
                                 <a href="#" title="<?= $this->__('Add to Compare') ?>"
-                                   onclick="customFormSubmit('<?= $_compareUrl ?>', '<?= $_params ?>', 'post')">
+                                   onclick="customFormSubmit('<?= $_compareUrl ?>', '<?= $_params ?>', 'post'); return false;">
                                     <?= $this->getIconSvg('scale') ?>
                                     <?= $this->__('Add to Compare') ?>
                                 </a>

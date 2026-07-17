@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Block_Customer_Sales_Order_Address_Form_Renderer_Vat extends Mage_Adminhtml_Block_Widget_Form_Renderer_Fieldset_Element
@@ -26,6 +24,34 @@ class Mage_Adminhtml_Block_Customer_Sales_Order_Address_Form_Renderer_Vat extend
     protected function _construct()
     {
         $this->setTemplate('customer/sales/order/create/address/form/renderer/vat.phtml');
+    }
+
+    /**
+     * Get VAT field HTML ID
+     */
+    public function getVatFieldId(): string
+    {
+        return $this->_element->getHtmlId();
+    }
+
+    /**
+     * Get country field HTML ID
+     */
+    public function getCountryFieldId(): string
+    {
+        /** @var \Maho\Data\Form $form */
+        $form = $this->_element->getForm();
+        $element = $form->getElement('country_id');
+        return $element ? $element->getHtmlId() : 'country_id';
+    }
+
+    /**
+     * Get AJAX validation URL for real-time validation
+     */
+    public function getAjaxValidateUrl(): string
+    {
+        return Mage::getSingleton('adminhtml/url')
+            ->getUrl('*/customer_system_config_validatevat/validate');
     }
 
     /**
@@ -64,7 +90,7 @@ class Mage_Adminhtml_Block_Customer_Sales_Order_Address_Form_Renderer_Vat extend
             ]);
 
             $optionsVarName = $this->getJsVariablePrefix() . 'VatParameters';
-            $beforeHtml = '<script type="text/javascript">var ' . $optionsVarName . ' = ' . $vatValidateOptions
+            $beforeHtml = '<script>var ' . $optionsVarName . ' = ' . $vatValidateOptions
                 . ';</script>';
 
             /** @var Mage_Adminhtml_Block_Widget_Button $block */

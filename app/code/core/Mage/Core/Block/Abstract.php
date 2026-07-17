@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2026 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 /**
@@ -223,7 +221,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      */
     protected function _getFactory()
     {
-        return is_null($this->_factory) ? Mage::getSingleton('core/factory') : $this->_factory;
+        return $this->_factory ?? Mage::getSingleton('core/factory');
     }
 
     /**
@@ -233,7 +231,7 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      */
     protected function _getApp()
     {
-        return is_null($this->_app) ? Mage::app() : $this->_app;
+        return $this->_app ?? Mage::app();
     }
 
     /**
@@ -915,19 +913,9 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
             }
             $html = $this->_loadCache();
             if ($html === false) {
-                $translate = Mage::getSingleton('core/translate');
-                /** @var Mage_Core_Model_Translate $translate */
-                if ($this->hasData('translate_inline')) {
-                    $translate->setTranslateInline($this->getData('translate_inline'));
-                }
-
                 $this->_beforeToHtml();
                 $html = $this->_toHtml();
                 $this->_saveCache($html);
-
-                if ($this->hasData('translate_inline')) {
-                    $translate->setTranslateInline(true);
-                }
             }
             $html = $this->_afterToHtml($html);
 
@@ -1115,32 +1103,32 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
     /**
      * Retrieve formatting date
      *
-     * @param string|int|DateTime|null $date
+     * @param string|int|DateTimeInterface|null $date
      * @param string $format
-     * @param bool $showTime
+     * @param bool $withTime
      * @return string
      */
-    public function formatDate($date = null, $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT, $showTime = false)
+    public function formatDate($date = null, $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT, $withTime = false)
     {
         /** @var Mage_Core_Helper_Data $helper */
         $helper = $this->helper('core');
-        return $helper->formatDate($date, $format, $showTime);
+        return $helper->formatDate($date, $format, $withTime);
     }
 
     /**
      * Retrieve formatting timezone date
      *
-     * @param string|int|DateTime|null $date
+     * @param string|int|DateTimeInterface|null $date
      */
     public function formatTimezoneDate(
         $date = null,
         string $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT,
-        bool $showTime = false,
+        bool $withTime = false,
         bool $useTimezone = true,
     ): string {
         /** @var Mage_Core_Helper_Data $helper */
         $helper = $this->helper('core');
-        return $helper->formatTimezoneDate($date, $format, $showTime, $useTimezone);
+        return $helper->formatTimezoneDate($date, $format, $withTime, $useTimezone);
     }
 
     /**
@@ -1241,9 +1229,9 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
     /**
      * Escape html entities
      *
-     * @param string|string[] $data
-     * @param array|null $allowedTags
-     * @return null|string|string[]
+     * @param null|string|string[] $data
+     * @param null|string[] $allowedTags
+     * @return ($data is array ? array<?string> : ?string)
      */
     public function escapeHtml($data, $allowedTags = null)
     {
@@ -1334,9 +1322,9 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      *
      * @see Mage_Core_Helper_Data::jsonEncode()
      */
-    public function jsonEncode($valueToEncode, bool $cycleCheck = false, array $options = []): string
+    public function jsonEncode($valueToEncode): string
     {
-        return Mage::helper('core')->jsonEncode($valueToEncode, $cycleCheck, $options);
+        return Mage::helper('core')->jsonEncode($valueToEncode);
     }
 
     /**
@@ -1534,6 +1522,11 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
                 $session->getSessionIdQueryParam() . '=' . $session->getEncryptedSessionId(),
                 $cacheData,
             );
+            $cacheData = str_replace(
+                $this->_getFormKeyPlaceholder($cacheKey),
+                $session->getFormKey(),
+                $cacheData,
+            );
         }
         return $cacheData;
     }
@@ -1549,12 +1542,22 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
         if (is_null($this->getCacheLifetime()) || !$this->_getApp()->useCache(self::CACHE_GROUP)) {
             return false;
         }
+        // Don't cache block HTML that contains deferred image resize URLs —
+        // once the images are generated the next request will cache with direct URLs.
+        if (Mage::helper('catalog/image')->hasDeferredImages) {
+            return false;
+        }
         $cacheKey = $this->getCacheKey();
         /** @var Mage_Core_Model_Session $session */
         $session = Mage::getSingleton('core/session');
         $data = str_replace(
             $session->getSessionIdQueryParam() . '=' . $session->getEncryptedSessionId(),
             $this->_getSidPlaceholder($cacheKey),
+            $data,
+        );
+        $data = str_replace(
+            $session->getFormKey(),
+            $this->_getFormKeyPlaceholder($cacheKey),
             $data,
         );
 
@@ -1596,6 +1599,18 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
         }
 
         return '<!--SID=' . $cacheKey . '-->';
+    }
+
+    /**
+     * Get form key placeholder for cache
+     */
+    protected function _getFormKeyPlaceholder(?string $cacheKey = null): string
+    {
+        if (is_null($cacheKey)) {
+            $cacheKey = $this->getCacheKey();
+        }
+
+        return '<!--FORM_KEY=' . $cacheKey . '-->';
     }
 
     /**

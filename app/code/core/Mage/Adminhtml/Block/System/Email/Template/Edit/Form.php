@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
@@ -46,7 +44,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
                 'label' => Mage::helper('adminhtml')->__('Used Currently For'),
                 'container_id' => 'used_currently_for',
                 'after_element_html' =>
-                    '<script type="text/javascript">' .
+                    '<script>' .
                     ($this->getEmailTemplate()->getSystemConfigPathsWhereUsedCurrently()
                         ? '' : 'document.getElementById(\'' . 'used_currently_for' . '\').style.display = \'none\'; ') .
                     '</script>',
@@ -58,7 +56,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
                 'label' => Mage::helper('adminhtml')->__('Used as Default For'),
                 'container_id' => 'used_default_for',
                 'after_element_html' =>
-                    '<script type="text/javascript">' .
+                    '<script>' .
                     ((bool) $this->getEmailTemplate()->getOrigTemplateCode()
                         ? '' : 'document.getElementById(\'' . 'used_default_for' . '\').style.display = \'none\'; ') .
                     '</script>',

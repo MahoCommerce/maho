@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Paypal
+ */
+
+declare(strict_types=1);
+
+class Maho_Paypal_Block_Checkout_Standard_Form extends Mage_Payment_Block_Form
+{
+    protected ?Maho_Paypal_Model_Config $_paypalConfig = null;
+
+    #[\Override]
+    protected function _construct(): void
+    {
+        parent::_construct();
+        $this->setTemplate('maho/paypal/checkout/standard/form.phtml');
+    }
+
+    public function getConfig(): Maho_Paypal_Model_Config
+    {
+        if ($this->_paypalConfig === null) {
+            $this->_paypalConfig = Mage::getModel('paypal/config');
+        }
+        return $this->_paypalConfig;
+    }
+
+    public function getClientId(): string
+    {
+        return $this->getConfig()->getClientId();
+    }
+
+    public function getIntent(): string
+    {
+        return $this->getConfig()->getNewPaymentAction(Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT);
+    }
+
+    public function getCreateOrderUrl(): string
+    {
+        return Mage::getUrl('paypal/checkout/createOrder', ['_secure' => true]);
+    }
+
+    public function getApproveOrderUrl(): string
+    {
+        return Mage::getUrl('paypal/checkout/approveOrder', ['_secure' => true]);
+    }
+
+    public function getJsSdkUrl(): string
+    {
+        return $this->getConfig()->getJsSdkUrl();
+    }
+
+    public function getClientTokenUrl(): string
+    {
+        return $this->getConfig()->getClientTokenUrl();
+    }
+
+    public function getCurrencyCode(): string
+    {
+        return $this->getConfig()->getCurrencyCode();
+    }
+
+    public function isVaultAvailable(): bool
+    {
+        return $this->getConfig()->isVaultEnabled()
+            && (bool) Mage::getSingleton('customer/session')->getCustomerId();
+    }
+}

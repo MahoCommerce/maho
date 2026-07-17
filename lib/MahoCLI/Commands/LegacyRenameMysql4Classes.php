@@ -1,12 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    MahoCLI
- * @copyright  Copyright (c) 2023 The OpenMage Contributors (https://www.openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2023 The OpenMage Contributors <https://www.openmage.org>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 declare(strict_types=1);
@@ -19,7 +16,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'legacy:rename-mysql4-classes',
+    name: 'dev:legacy:rename-mysql4-classes',
     description: 'Search for old Mysql4 classes and replaces them with Resource classes',
 )]
 class LegacyRenameMysql4Classes extends BaseMahoCommand
@@ -272,8 +269,6 @@ class LegacyRenameMysql4Classes extends BaseMahoCommand
             'Mage_Newsletter_Model_Mysql4_Subscriber_Collection' => 'Mage_Newsletter_Model_Resource_Subscriber_Collection',
             'Mage_Newsletter_Model_Mysql4_Template' => 'Mage_Newsletter_Model_Resource_Template',
             'Mage_Newsletter_Model_Mysql4_Template_Collection' => 'Mage_Newsletter_Model_Resource_Template_Collection',
-            'Mage_Paygate_Model_Mysql4_Authorizenet_Debug' => 'Mage_Paygate_Model_Resource_Authorizenet_Debug',
-            'Mage_Paygate_Model_Mysql4_Authorizenet_Debug_Collection' => 'Mage_Paygate_Model_Resource_Authorizenet_Debug_Collection',
             'Mage_Paypal_Model_Mysql4_Cert' => 'Mage_Paypal_Model_Resource_Cert',
             'Mage_Paypal_Model_Mysql4_Report_Settlement' => 'Mage_Paypal_Model_Resource_Report_Settlement',
             'Mage_Paypal_Model_Mysql4_Report_Settlement_Row' => 'Mage_Paypal_Model_Resource_Report_Settlement_Row',
@@ -298,7 +293,6 @@ class LegacyRenameMysql4Classes extends BaseMahoCommand
             'Mage_Rating_Model_Mysql4_Rating_Option_Vote' => 'Mage_Rating_Model_Resource_Rating_Option_Vote',
             'Mage_Rating_Model_Mysql4_Rating_Option_Vote_Collection' => 'Mage_Rating_Model_Resource_Rating_Option_Vote_Collection',
             'Mage_Reports_Model_Mysql4_Accounts_Collection' => 'Mage_Reports_Model_Resource_Accounts_Collection',
-            'Mage_Reports_Model_Mysql4_Coupons_Collection' => 'Mage_Reports_Model_Resource_Coupons_Collection',
             'Mage_Reports_Model_Mysql4_Customer_Collection' => 'Mage_Reports_Model_Resource_Customer_Collection',
             'Mage_Reports_Model_Mysql4_Customer_Orders_Collection' => 'Mage_Reports_Model_Resource_Customer_Orders_Collection',
             'Mage_Reports_Model_Mysql4_Customer_Totals_Collection' => 'Mage_Reports_Model_Resource_Customer_Totals_Collection',
@@ -307,7 +301,6 @@ class LegacyRenameMysql4Classes extends BaseMahoCommand
             'Mage_Reports_Model_Mysql4_Event_Collection' => 'Mage_Reports_Model_Resource_Event_Collection',
             'Mage_Reports_Model_Mysql4_Event_Type' => 'Mage_Reports_Model_Resource_Event_Type',
             'Mage_Reports_Model_Mysql4_Event_Type_Collection' => 'Mage_Reports_Model_Resource_Event_Type_Collection',
-            'Mage_Reports_Model_Mysql4_Invoiced_Collection' => 'Mage_Reports_Model_Resource_Invoiced_Collection',
             'Mage_Reports_Model_Mysql4_Order_Collection' => 'Mage_Reports_Model_Resource_Order_Collection',
             'Mage_Reports_Model_Mysql4_Product_Collection' => 'Mage_Reports_Model_Resource_Product_Collection',
             'Mage_Reports_Model_Mysql4_Product_Downloads_Collection' => 'Mage_Reports_Model_Resource_Product_Downloads_Collection',
@@ -322,18 +315,15 @@ class LegacyRenameMysql4Classes extends BaseMahoCommand
             'Mage_Reports_Model_Mysql4_Product_Sold_Collection' => 'Mage_Reports_Model_Resource_Product_Sold_Collection',
             'Mage_Reports_Model_Mysql4_Product_Viewed_Collection' => 'Mage_Reports_Model_Resource_Product_Viewed_Collection',
             'Mage_Reports_Model_Mysql4_Quote_Collection' => 'Mage_Reports_Model_Resource_Quote_Collection',
-            'Mage_Reports_Model_Mysql4_Refunded_Collection' => 'Mage_Reports_Model_Resource_Refunded_Collection',
             'Mage_Reports_Model_Mysql4_Report_Abstract' => 'Mage_Reports_Model_Resource_Report_Abstract',
             'Mage_Reports_Model_Mysql4_Report_Collection' => 'Mage_Reports_Model_Resource_Report_Collection',
             'Mage_Reports_Model_Mysql4_Review_Collection' => 'Mage_Reports_Model_Resource_Review_Collection',
             'Mage_Reports_Model_Mysql4_Review_Customer_Collection' => 'Mage_Reports_Model_Resource_Review_Customer_Collection',
             'Mage_Reports_Model_Mysql4_Review_Product_Collection' => 'Mage_Reports_Model_Resource_Review_Product_Collection',
-            'Mage_Reports_Model_Mysql4_Shipping_Collection' => 'Mage_Reports_Model_Resource_Shipping_Collection',
             'Mage_Reports_Model_Mysql4_Shopcart_Product_Collection' => 'Mage_Reports_Model_Resource_Shopcart_Product_Collection',
             'Mage_Reports_Model_Mysql4_Tag_Collection' => 'Mage_Reports_Model_Resource_Tag_Collection',
             'Mage_Reports_Model_Mysql4_Tag_Customer_Collection' => 'Mage_Reports_Model_Resource_Tag_Customer_Collection',
             'Mage_Reports_Model_Mysql4_Tag_Product_Collection' => 'Mage_Reports_Model_Resource_Tag_Product_Collection',
-            'Mage_Reports_Model_Mysql4_Tax_Collection' => 'Mage_Reports_Model_Resource_Tax_Collection',
             'Mage_Reports_Model_Mysql4_Wishlist_Collection' => 'Mage_Reports_Model_Resource_Wishlist_Collection',
             'Mage_Reports_Model_Mysql4_Wishlist_Product_Collection' => 'Mage_Reports_Model_Resource_Wishlist_Product_Collection',
             'Mage_Review_Model_Mysql4_Review' => 'Mage_Review_Model_Resource_Review',

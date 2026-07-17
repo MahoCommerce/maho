@@ -1,11 +1,8 @@
 <?php
 
 /**
- * Maho
- *
- * @package    MahoCLI
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 declare(strict_types=1);
@@ -15,9 +12,9 @@ namespace MahoCLI\Commands;
 use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
     name: 'health-check',
@@ -25,6 +22,28 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class HealthCheck extends BaseMahoCommand
 {
+    public const LEGACY_CORE_FILES = [
+        'app/bootstrap.php',
+        'app/Mage.php',
+        'app/code/core',
+    ];
+
+    public const DEPRECATED_FOLDERS = [
+        'app/code/core/Zend',
+        'lib/Cm',
+        'lib/Credis',
+        'lib/mcryptcompat',
+        'lib/Pelago',
+        'lib/phpseclib',
+        'lib/Zend',
+        'skin',
+    ];
+
+    public const LEGACY_XML_SCAN_DIRS = [
+        'app/code/local',
+        'app/code/community',
+    ];
+
     private const DESIGN_PATH = 'app/design/frontend';
     private const SKIN_PATH = 'public/skin/frontend';
 
@@ -76,29 +95,299 @@ class HealthCheck extends BaseMahoCommand
         'Varien_Io_Sftp' => \Maho\Io\Sftp::class,
         'Varien_Object' => \Maho\DataObject::class,
         'Varien_Object_Cache' => \Maho\DataObject\Cache::class,
-        'Varien_Object_Mapper' => \Maho\DataObject\Mapper::class,
+        'Varien_Object_Mapper' => \Maho\DataObject\Mapper::class, // @phpstan-ignore classConstant.deprecatedClass
         'Varien_Simplexml_Config' => \Maho\Simplexml\Config::class,
         'Varien_Simplexml_Element' => \Maho\Simplexml\Element::class,
         'Varien_Exception' => \Maho\Exception::class,
         'Varien_Profiler' => \Maho\Profiler::class,
     ];
 
-    protected function checkComposer(OutputInterface $output): ?int
+    public static function isComposerAutoloaderOptimized(): bool
     {
-        $result = Command::SUCCESS;
+        foreach (spl_autoload_functions() as $autoloader) {
+            if (is_array($autoloader) && $autoloader[0] instanceof \Composer\Autoload\ClassLoader) {
+                return isset($autoloader[0]->getClassMap()['Mage_Core_Model_App']);
+            }
+        }
+        return false;
+    }
 
-        /** @var \Composer\Autoload\ClassLoader $composerClassLoader */
-        $composerClassLoader = require MAHO_ROOT_DIR . '/vendor/autoload.php';
+    /**
+     * @param array<string> $paths
+     * @return array<string>
+     */
+    public static function findExistingPaths(array $paths): array
+    {
+        $existing = [];
+        foreach ($paths as $path) {
+            if (file_exists(MAHO_ROOT_DIR . "/{$path}")) {
+                $existing[] = $path;
+            }
+        }
+        return $existing;
+    }
 
-        $classMap = $composerClassLoader->getClassMap();
-        if (isset($classMap['Mage_Core_Model_App'])) {
-            $result = Command::FAILURE;
-            $output->writeln('');
-            $output->writeln('<comment>Warning: Optimized autoloader detected.</comment>');
-            $output->writeln('Ignore if you are in a production environment, otherwise run: composer dump');
+    /**
+     * @return array<string>
+     */
+    public static function findOrphanedResourceIds(string $type): array
+    {
+        $rulesResource = Mage::getResourceModel("{$type}/rules");
+        if (!method_exists($rulesResource, 'getOrphanedResourcesCollection')) {
+            throw new \RuntimeException("Unable to load {$type}/rules resource model");
         }
 
-        return $result;
+        $collection = $rulesResource->getOrphanedResourcesCollection();
+        $orphanedIds = [];
+        foreach ($collection as $item) {
+            $orphanedIds[] = $item->getResourceId();
+        }
+        return $orphanedIds;
+    }
+
+    /**
+     * Scans user code (app/code/local and app/code/community) for legacy XML config
+     * declarations that have PHP-attribute equivalents introduced in v26.5.
+     *
+     * @return array{
+     *     routes: list<array{module: string, file: string, frontName: string, area: string}>,
+     *     observers: list<array{module: string, file: string, count: int}>,
+     *     cron: list<array{module: string, file: string, count: int}>
+     * }
+     */
+    public static function findLegacyXmlConfig(): array
+    {
+        $findings = ['routes' => [], 'observers' => [], 'cron' => []];
+
+        foreach (self::LEGACY_XML_SCAN_DIRS as $dir) {
+            $base = MAHO_ROOT_DIR . '/' . $dir;
+            if (!is_dir($base)) {
+                continue;
+            }
+
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($base, \RecursiveDirectoryIterator::SKIP_DOTS),
+            );
+
+            foreach ($iterator as $file) {
+                if ($file->getFilename() !== 'config.xml') {
+                    continue;
+                }
+
+                $relPath = str_replace(MAHO_ROOT_DIR . '/', '', $file->getPathname());
+                $parts = explode('/', $relPath);
+                // Expected layout: app/code/{pool}/{Vendor}/{Module}/etc/config.xml
+                if (count($parts) < 7 || $parts[5] !== 'etc') {
+                    continue;
+                }
+                $moduleName = $parts[3] . '_' . $parts[4];
+
+                libxml_use_internal_errors(true);
+                $xml = simplexml_load_file($file->getPathname());
+                libxml_clear_errors();
+                if ($xml === false) {
+                    continue;
+                }
+
+                // Legacy router declarations: <{area}><routers><X><use>{type}</use>
+                $areaUseMap = ['frontend' => 'standard', 'admin' => 'admin', 'install' => 'install'];
+                foreach ($areaUseMap as $area => $expectedUse) {
+                    if (!isset($xml->{$area}->routers)) {
+                        continue;
+                    }
+                    foreach ($xml->{$area}->routers->children() as $routerCode => $routerNode) {
+                        $use = (string) ($routerNode->use ?? '');
+                        if ($use !== $expectedUse) {
+                            continue;
+                        }
+                        $frontName = (string) ($routerNode->args->frontName ?? $routerCode);
+                        $findings['routes'][] = [
+                            'module' => $moduleName,
+                            'file' => $relPath,
+                            'frontName' => $frontName,
+                            'area' => $area,
+                        ];
+                    }
+                }
+
+                // Legacy observer declarations: <events> blocks under any scope
+                $observerCount = 0;
+                foreach (['global', 'frontend', 'adminhtml', 'crontab'] as $scope) {
+                    if (!isset($xml->{$scope}->events)) {
+                        continue;
+                    }
+                    foreach ($xml->{$scope}->events->children() as $eventNode) {
+                        if (isset($eventNode->observers)) {
+                            $observerCount += count($eventNode->observers->children());
+                        }
+                    }
+                }
+                if ($observerCount > 0) {
+                    $findings['observers'][] = [
+                        'module' => $moduleName,
+                        'file' => $relPath,
+                        'count' => $observerCount,
+                    ];
+                }
+
+                // Legacy cron declarations: <crontab><jobs><X><run>
+                $cronCount = 0;
+                if (isset($xml->crontab->jobs)) {
+                    foreach ($xml->crontab->jobs->children() as $jobNode) {
+                        if (isset($jobNode->run)) {
+                            $cronCount++;
+                        }
+                    }
+                }
+                if ($cronCount > 0) {
+                    $findings['cron'][] = [
+                        'module' => $moduleName,
+                        'file' => $relPath,
+                        'count' => $cronCount,
+                    ];
+                }
+            }
+        }
+
+        return $findings;
+    }
+
+    /**
+     * Detect a legacy `<admin><routers><adminhtml><args><frontName>` declaration
+     * in `app/etc/local.xml`. The constant `Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_ROUTER_FRONTNAME`
+     * now resolves to `admin/base_path`; an entry at the old path is silently ignored,
+     * leaving the admin reachable only at `/admin/...` regardless of the value declared here.
+     *
+     * @return ?array{file: string, frontName: string}
+     */
+    public static function findLegacyLocalXmlAdminPath(): ?array
+    {
+        $file = MAHO_ROOT_DIR . '/app/etc/local.xml';
+        if (!is_file($file)) {
+            return null;
+        }
+
+        libxml_use_internal_errors(true);
+        $xml = simplexml_load_file($file);
+        libxml_clear_errors();
+        if ($xml === false) {
+            return null;
+        }
+
+        $frontName = (string) ($xml->admin->routers->adminhtml->args->frontName ?? '');
+        if ($frontName === '') {
+            return null;
+        }
+
+        return ['file' => 'app/etc/local.xml', 'frontName' => $frontName];
+    }
+
+    /**
+     * @param list<array{module: string, file?: string, frontName?: string, area?: string, count?: int}> $findings
+     */
+    private static function formatLegacyXmlSummary(string $label, array $findings, string $attribute): string
+    {
+        $modules = array_values(array_unique(array_column($findings, 'module')));
+        return sprintf(
+            'Found legacy XML %s in %d module(s): %s. Migrate to %s attributes.',
+            $label,
+            count($modules),
+            implode(', ', $modules),
+            $attribute,
+        );
+    }
+
+    /**
+     * @return array<int, array{check: string, severity: string, details: string}>
+     */
+    public static function getCheckResults(): array
+    {
+        $checks = [];
+
+        $isOptimized = self::isComposerAutoloaderOptimized();
+        $checks[] = [
+            'check' => 'Composer Autoloader',
+            'severity' => $isOptimized ? 'warning' : 'ok',
+            'details' => $isOptimized ? 'Optimized autoloader detected. This is fine for production, but may cause issues during development. Run "composer dump" to fix.' : '',
+        ];
+
+        $legacyFiles = self::findExistingPaths(self::LEGACY_CORE_FILES);
+        $checks[] = [
+            'check' => 'Legacy Core Files',
+            'severity' => empty($legacyFiles) ? 'ok' : 'error',
+            'details' => empty($legacyFiles) ? '' : 'Found old Magento/OpenMage files: ' . implode(', ', $legacyFiles) . '. These should be removed.',
+        ];
+
+        $deprecatedFolders = self::findExistingPaths(self::DEPRECATED_FOLDERS);
+        $checks[] = [
+            'check' => 'Deprecated Folders',
+            'severity' => empty($deprecatedFolders) ? 'ok' : 'error',
+            'details' => empty($deprecatedFolders) ? '' : 'Found deprecated folders: ' . implode(', ', $deprecatedFolders) . '. Remove them to avoid unpredictable behavior.',
+        ];
+
+        foreach (['admin' => 'Admin', 'api' => 'API'] as $type => $label) {
+            try {
+                $orphanedIds = self::findOrphanedResourceIds($type);
+                $checks[] = [
+                    'check' => "{$label} Orphaned Role Resources",
+                    'severity' => empty($orphanedIds) ? 'ok' : 'warning',
+                    'details' => empty($orphanedIds) ? '' : 'Found ' . count($orphanedIds) . ' orphaned resource(s): ' . implode(', ', $orphanedIds),
+                ];
+            } catch (\Exception) {
+                $checks[] = [
+                    'check' => "{$label} Orphaned Role Resources",
+                    'severity' => 'error',
+                    'details' => 'Unable to check orphaned resources.',
+                ];
+            }
+        }
+
+        $legacyXml = self::findLegacyXmlConfig();
+
+        $checks[] = [
+            'check' => 'Legacy XML Routing',
+            'severity' => empty($legacyXml['routes']) ? 'ok' : 'warning',
+            'details' => empty($legacyXml['routes']) ? '' : self::formatLegacyXmlSummary(
+                'route declarations',
+                $legacyXml['routes'],
+                '#[Maho\\Config\\Route]',
+            ),
+        ];
+
+        $checks[] = [
+            'check' => 'Legacy XML Observers',
+            'severity' => empty($legacyXml['observers']) ? 'ok' : 'warning',
+            'details' => empty($legacyXml['observers']) ? '' : self::formatLegacyXmlSummary(
+                'observer declarations',
+                $legacyXml['observers'],
+                '#[Maho\\Config\\Observer]',
+            ),
+        ];
+
+        $checks[] = [
+            'check' => 'Legacy XML Cron Jobs',
+            'severity' => empty($legacyXml['cron']) ? 'ok' : 'warning',
+            'details' => empty($legacyXml['cron']) ? '' : self::formatLegacyXmlSummary(
+                'cron job declarations',
+                $legacyXml['cron'],
+                '#[Maho\\Config\\CronJob]',
+            ),
+        ];
+
+        $legacyAdminPath = self::findLegacyLocalXmlAdminPath();
+        $checks[] = [
+            'check' => 'Legacy Admin Frontname in local.xml',
+            'severity' => $legacyAdminPath === null ? 'ok' : 'warning',
+            'details' => $legacyAdminPath === null ? '' : sprintf(
+                'Found <admin><routers><adminhtml><args><frontName>%s</frontName> in %s. This node is ignored; '
+                . 'replace it with <admin><base_path>%s</base_path> (or run `./maho legacy:migrate-routes`).',
+                $legacyAdminPath['frontName'],
+                $legacyAdminPath['file'],
+                $legacyAdminPath['frontName'],
+            ),
+        ];
+
+        return $checks;
     }
 
     /**
@@ -428,26 +717,19 @@ class HealthCheck extends BaseMahoCommand
 
         // Check for use-include-path in composer.json
         $output->write('Checking composer.json... ');
-        if ($this->checkComposer($output) === Command::SUCCESS) {
-            $output->writeln('<info>OK</info>');
-        } else {
+        if (self::isComposerAutoloaderOptimized()) {
             $hasErrors = true;
             $output->writeln('');
+            $output->writeln('<comment>Warning: Optimized autoloader detected.</comment>');
+            $output->writeln('Ignore if you are in a production environment, otherwise run: composer dump');
+            $output->writeln('');
+        } else {
+            $output->writeln('<info>OK</info>');
         }
 
         // Check for M1 core files
         $output->write('Checking Magento/OpenMage core... ');
-        $folders = [
-            'app/bootstrap.php',
-            'app/Mage.php',
-            'app/code/core',
-        ];
-        $existingFolders = [];
-        foreach ($folders as $folder) {
-            if (file_exists(MAHO_ROOT_DIR . "/{$folder}")) {
-                $existingFolders[] = $folder;
-            }
-        }
+        $existingFolders = self::findExistingPaths(self::LEGACY_CORE_FILES);
 
         if (empty($existingFolders)) {
             $output->writeln('<info>OK</info>');
@@ -482,22 +764,7 @@ class HealthCheck extends BaseMahoCommand
 
         // Check for deprecated folders
         $output->write('Checking for deprecated folders... ');
-        $folders = [
-            'app/code/core/Zend',
-            'lib/Cm',
-            'lib/Credis',
-            'lib/mcryptcompat',
-            'lib/Pelago',
-            'lib/phpseclib',
-            'lib/Zend',
-            'skin',
-        ];
-        $existingFolders = [];
-        foreach ($folders as $folder) {
-            if (file_exists(MAHO_ROOT_DIR . "/{$folder}")) {
-                $existingFolders[] = $folder;
-            }
-        }
+        $existingFolders = self::findExistingPaths(self::DEPRECATED_FOLDERS);
         if (empty($existingFolders)) {
             $output->writeln('<info>OK</info>');
         } else {
@@ -558,10 +825,118 @@ class HealthCheck extends BaseMahoCommand
             $output->writeln('');
         }
 
+        // Check for legacy XML config (routes, observers, cron jobs)
+        $output->write('Checking for legacy XML config... ');
+        $legacyXml = self::findLegacyXmlConfig();
+        $totalLegacy = count($legacyXml['routes']) + count($legacyXml['observers']) + count($legacyXml['cron']);
+
+        if ($totalLegacy === 0) {
+            $output->writeln('<info>OK</info>');
+        } else {
+            $output->writeln('');
+            $output->writeln('<comment>Warning: Found legacy XML configuration in user modules:</comment>');
+            $output->writeln('These declarations still work via a back-compatibility shim, but should be migrated to PHP attributes.');
+            $output->writeln('');
+
+            if (!empty($legacyXml['routes'])) {
+                $output->writeln('<comment>Legacy XML routes (migrate to #[Maho\Config\Route]):</comment>');
+                foreach ($legacyXml['routes'] as $r) {
+                    $output->writeln(sprintf('  - %s (%s area, frontName: %s) in %s', $r['module'], $r['area'], $r['frontName'], $r['file']));
+                }
+                $output->writeln('');
+            }
+
+            if (!empty($legacyXml['observers'])) {
+                $output->writeln('<comment>Legacy XML observers (migrate to #[Maho\Config\Observer]):</comment>');
+                foreach ($legacyXml['observers'] as $o) {
+                    $output->writeln(sprintf('  - %s (%d observer(s)) in %s', $o['module'], $o['count'], $o['file']));
+                }
+                $output->writeln('');
+            }
+
+            if (!empty($legacyXml['cron'])) {
+                $output->writeln('<comment>Legacy XML cron jobs (migrate to #[Maho\Config\CronJob]):</comment>');
+                foreach ($legacyXml['cron'] as $c) {
+                    $output->writeln(sprintf('  - %s (%d job(s)) in %s', $c['module'], $c['count'], $c['file']));
+                }
+                $output->writeln('');
+            }
+
+            $output->writeln('See: https://mahocommerce.com/routing/');
+            $output->writeln('');
+        }
+
+        // Check for a legacy admin frontName declaration in app/etc/local.xml
+        $output->write('Checking app/etc/local.xml admin frontName... ');
+        $legacyAdminPath = self::findLegacyLocalXmlAdminPath();
+        if ($legacyAdminPath === null) {
+            $output->writeln('<info>OK</info>');
+        } else {
+            $output->writeln('');
+            $output->writeln(sprintf(
+                '<comment>Warning: Legacy admin frontName found in %s.</comment>',
+                $legacyAdminPath['file'],
+            ));
+            $output->writeln(sprintf(
+                '  <admin><routers><adminhtml><args><frontName>%s</frontName>... is no longer honored.',
+                $legacyAdminPath['frontName'],
+            ));
+            $output->writeln(sprintf(
+                '  Replace it with <admin><base_path>%s</base_path>, or run: ./maho legacy:migrate-routes',
+                $legacyAdminPath['frontName'],
+            ));
+            $output->writeln('');
+        }
+
+        // Check for orphaned role resources (requires database)
+        $this->initMaho();
+
+        $this->checkOrphanedResources($input, $output, Mage::getResourceModel('admin/rules'), 'admin');
+        $this->checkOrphanedResources($input, $output, Mage::getResourceModel('api/rules'), 'API');
+
         if ($hasErrors) {
             return Command::FAILURE;
         }
 
         return Command::SUCCESS;
+    }
+
+    private function checkOrphanedResources(
+        InputInterface $input,
+        OutputInterface $output,
+        \Mage_Admin_Model_Resource_Rules|\Mage_Api_Model_Resource_Rules $rulesResource,
+        string $label,
+    ): void {
+        $output->write("Checking for orphaned {$label} role resources... ");
+
+        $collection = $rulesResource->getOrphanedResourcesCollection();
+
+        $orphanedIds = [];
+        foreach ($collection as $item) {
+            $orphanedIds[] = $item->getResourceId();
+        }
+
+        if ($orphanedIds === []) {
+            $output->writeln('<info>OK</info>');
+            return;
+        }
+
+        $output->writeln('');
+        $output->writeln('<comment>Warning: Found ' . count($orphanedIds) . " orphaned {$label} role resource(s):</comment>");
+        foreach ($orphanedIds as $resource) {
+            $output->writeln('  - ' . $resource);
+        }
+
+        /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion(
+            "<question>Do you want to delete these orphaned {$label} role resources? [y/N]</question> ",
+            false,
+        );
+        if ($helper->ask($input, $output, $question)) {
+            $deleted = $rulesResource->deleteOrphanedResources($orphanedIds);
+            $output->writeln("<info>Deleted {$deleted} orphaned {$label} role resource rule(s).</info>");
+        }
+        $output->writeln('');
     }
 }

@@ -1,28 +1,16 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Cron
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2022 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_Cron>
-            <version>1.6.0.0</version>
+            <version>2.0.0</version>
         </Mage_Cron>
     </modules>
     <global>
-        <resources>
-            <cron_setup>
-                <setup>
-                    <module>Mage_Cron</module>
-                </setup>
-            </cron_setup>
-        </resources>
         <models>
             <cron>
                 <class>Mage_Cron_Model</class>
@@ -38,31 +26,11 @@
             </cron_resource>
         </models>
     </global>
-    <crontab>
-        <events>
-            <default>
-                <observers>
-                    <cron_observer>
-                        <class>cron/observer</class>
-                        <method>dispatch</method>
-                    </cron_observer>
-                </observers>
-            </default>
-            <always>
-                <observers>
-                    <cron_observer>
-                        <class>cron/observer</class>
-                        <method>dispatchAlways</method>
-                    </cron_observer>
-                </observers>
-            </always>
-        </events>
-    </crontab>
     <default>
         <system>
             <cron>
                 <schedule_generate_every>15</schedule_generate_every>
-                <schedule_ahead_for>20</schedule_ahead_for>
+                <schedule_ahead_for>60</schedule_ahead_for>
                 <schedule_lifetime>15</schedule_lifetime>
                 <history_cleanup_every>10</history_cleanup_every>
                 <history_success_lifetime>60</history_success_lifetime>
@@ -70,17 +38,6 @@
             </cron>
         </system>
     </default>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <cron before="Mage_Adminhtml">Mage_Cron_Adminhtml</cron>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
     <adminhtml>
         <translate>
             <modules>

@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Eav
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Eav
  */
 
 class Mage_Eav_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource_Helper_Sqlite
@@ -17,14 +15,15 @@ class Mage_Eav_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource_Hel
      */
     protected $_ddlColumnTypes = [
         Maho\Db\Ddl\Table::TYPE_BOOLEAN       => 'integer',
+        Maho\Db\Ddl\Table::TYPE_TINYINT       => 'integer',
         Maho\Db\Ddl\Table::TYPE_SMALLINT      => 'integer',
         Maho\Db\Ddl\Table::TYPE_INTEGER       => 'integer',
         Maho\Db\Ddl\Table::TYPE_BIGINT        => 'integer',
         Maho\Db\Ddl\Table::TYPE_FLOAT         => 'real',
         Maho\Db\Ddl\Table::TYPE_DECIMAL       => 'real',
-        Maho\Db\Ddl\Table::TYPE_NUMERIC       => 'real',
         Maho\Db\Ddl\Table::TYPE_DATE          => 'text',
-        Maho\Db\Ddl\Table::TYPE_TIMESTAMP     => 'text',
+        Maho\Db\Ddl\Table::TYPE_TIME          => 'text',
+        // TYPE_TIMESTAMP is a value-equal alias for TYPE_DATETIME — both fall here.
         Maho\Db\Ddl\Table::TYPE_DATETIME      => 'text',
         Maho\Db\Ddl\Table::TYPE_TEXT          => 'text',
         Maho\Db\Ddl\Table::TYPE_BLOB          => 'blob',

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Model_Customer_Renderer_Region implements \Maho\Data\Form\Element\Renderer\RendererInterface
@@ -82,7 +80,7 @@ class Mage_Adminhtml_Model_Customer_Renderer_Region implements \Maho\Data\Form\E
             }
             $html .= '</select>' . "\n";
 
-            $html .= '<input type="hidden" name="' . $regionHtmlName . '" id="' . $regionHtmlId . '" value=""/>';
+            $html .= '<input type="hidden" name="' . $regionHtmlName . '" id="' . $regionHtmlId . '" value="">';
 
             $html .= '</td>';
             $element->setClass($elementClass);
@@ -96,8 +94,8 @@ class Mage_Adminhtml_Model_Customer_Renderer_Region implements \Maho\Data\Form\E
             $html .= '<td class="value">';
             $html .= '<input id="' . $regionHtmlId . '" name="' . $regionHtmlName
                 . '" value="' . $element->getEscapedValue() . '" '
-                . $element->serialize($htmlAttributes) . '/>' . "\n";
-            $html .= '<input type="hidden" name="' . $regionIdHtmlName . '" id="' . $regionIdHtmlId . '" value=""/>';
+                . $element->serialize($htmlAttributes) . '>' . "\n";
+            $html .= '<input type="hidden" name="' . $regionIdHtmlName . '" id="' . $regionIdHtmlId . '" value="">';
             $html .= '</td>' . "\n";
         }
         $html .= '</tr>' . "\n";

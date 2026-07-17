@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Tax
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Tax
  */
 
 class Mage_Tax_Model_Config
@@ -91,9 +89,7 @@ class Mage_Tax_Model_Config
     public const FPT_TAXED = 1;
     public const FPT_LOADED_DISPLAY_WITH_TAX = 2;
 
-    /**
-     * @deprecated
-     */
+    #[\Deprecated]
     public const CONFIG_XML_PATH_DISPLAY_TAX_COLUMN = 'tax/display/column_in_summary';
 
     /**
@@ -310,10 +306,10 @@ class Mage_Tax_Model_Config
     /**
      * Get shopping cart prices display type
      *
-     * @deprecated please use displayCartPrice or displaySalesZeroTax
      * @param   null|string|bool|int|Mage_Core_Model_Store $store
      * @return  bool
      */
+    #[\Deprecated(message: 'please use displayCartPrice or displaySalesZeroTax')]
     public function displayTaxColumn($store = null)
     {
         return (bool) $this->_getStoreConfig(self::CONFIG_XML_PATH_DISPLAY_TAX_COLUMN, $store);

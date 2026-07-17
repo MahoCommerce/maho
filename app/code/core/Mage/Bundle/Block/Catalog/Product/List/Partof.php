@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Bundle
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Bundle
  */
 
 class Mage_Bundle_Block_Catalog_Product_List_Partof extends Mage_Catalog_Block_Product_Abstract
@@ -30,16 +28,13 @@ class Mage_Bundle_Block_Catalog_Product_List_Partof extends Mage_Catalog_Block_P
                 'in' => Mage::getSingleton('catalog/product_status')->getSaleableStatusIds(),
             ])
             ->addPriceData()
+            ->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds())
             ->joinTable('bundle/option', 'parent_id=entity_id', ['option_id' => 'option_id'])
             ->joinTable('bundle/selection', 'option_id=option_id', ['product_id' => 'product_id'], '{{table}}.product_id=' . $this->getProduct()->getId());
 
-        $ids = Mage::getSingleton('checkout/cart')->getProductIds();
-
-        if (count($ids)) {
-            $collection->addIdFilter(Mage::getSingleton('checkout/cart')->getProductIds(), true);
+        if ($cartProductIds = Mage::getSingleton('checkout/cart')->getProductIds()) {
+            $collection->addIdFilter($cartProductIds, true);
         }
-
-        Mage::getSingleton('catalog/product_visibility')->addVisibleInCatalogFilterToCollection($collection);
         $collection->getSelect()->group('entity_id');
 
         $collection->load();

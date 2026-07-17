@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Maho_FeedManager
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_FeedManager
  */
+
+declare(strict_types=1);
 
 /**
  * CSV Builder block for feed mapping configuration
@@ -72,7 +70,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
         </div>
 
 
-        <script type="text/javascript">
+        <script>
         var CsvBuilder = {
             columns: ' . Mage::helper('core')->jsonEncode($columnsData) . ',
             sourceTypes: ' . Mage::helper('core')->jsonEncode($sourceTypes) . ',
@@ -251,11 +249,12 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
                 }
             },
 
-            loadPreset: function(platform) {
+            loadPreset: function(platform, options) {
                 if (!platform) return;
+                options = options || {};
 
-                // Confirm before overwriting existing mappings
-                if (this.columns && this.columns.length > 0) {
+                // Programmatic callers pass {force:true} to skip the confirm.
+                if (!options.force && this.columns && this.columns.length > 0) {
                     if (!confirm("Loading a preset will replace your current column mappings. Continue?")) {
                         document.getElementById("csv-preset-select").value = this.currentPlatform || "";
                         return;

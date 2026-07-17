@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_CatalogRule
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_CatalogRule
  */
 
 class Mage_CatalogRule_Model_Action_Index_Refresh
@@ -87,11 +85,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     {
         $this->_app->dispatchEvent('catalogrule_before_apply', ['resource' => $this->_resource]);
 
-        $coreDate = $this->_factory->getModel('core/date');
-        if (!$coreDate instanceof Mage_Core_Model_Date) {
-            throw new Mage_Core_Exception('Invalid core/date model');
-        }
-        $timestamp = $coreDate->gmtTimestamp();
+        $timestamp = time();
 
         foreach ($this->_app->getWebsites(false) as $website) {
             if ($website->getDefaultStore()) {
@@ -586,7 +580,7 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
 
     /**
      * Prepare data for group website relation
-     * @param string $timestamp
+     * @param int $timestamp
      */
     protected function _prepareGroupWebsite($timestamp)
     {

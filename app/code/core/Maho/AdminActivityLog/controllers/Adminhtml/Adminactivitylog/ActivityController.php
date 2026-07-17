@@ -1,16 +1,14 @@
 <?php
 
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_AdminActivityLog
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_AdminActivityLog
  */
 
 class Maho_AdminActivityLog_Adminhtml_Adminactivitylog_ActivityController extends Mage_Adminhtml_Controller_Action
 {
+    #[Maho\Config\Route('/admin/adminactivitylog_activity/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))->_title($this->__('Admin Activity Log'));
@@ -22,12 +20,14 @@ class Maho_AdminActivityLog_Adminhtml_Adminactivitylog_ActivityController extend
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/adminactivitylog_activity/grid')]
     public function gridAction(): void
     {
         $this->loadLayout(false);
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/adminactivitylog_activity/view')]
     public function viewAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -52,6 +52,7 @@ class Maho_AdminActivityLog_Adminhtml_Adminactivitylog_ActivityController extend
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/adminactivitylog_activity/exportCsv')]
     public function exportCsvAction(): void
     {
         $fileName = 'admin_activity_log.csv';
@@ -61,6 +62,7 @@ class Maho_AdminActivityLog_Adminhtml_Adminactivitylog_ActivityController extend
         $this->_prepareDownloadResponse($fileName, $content);
     }
 
+    #[Maho\Config\Route('/admin/adminactivitylog_activity/exportXml')]
     public function exportXmlAction(): void
     {
         $fileName = 'admin_activity_log.xml';

@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 class Mage_Catalog_Model_Resource_Category_Dynamic_Rule extends Mage_Core_Model_Resource_Db_Abstract
@@ -74,7 +72,7 @@ class Mage_Catalog_Model_Resource_Category_Dynamic_Rule extends Mage_Core_Model_
     #[\Override]
     public function save(Mage_Core_Model_Abstract $rule)
     {
-        $now = Mage::getSingleton('core/date')->gmtDate();
+        $now = Mage::app()->getLocale()->formatDateForDb('now');
         $rule->setUpdatedAt($now);
         if (!$rule->getCreatedAt()) {
             $rule->setCreatedAt($now);

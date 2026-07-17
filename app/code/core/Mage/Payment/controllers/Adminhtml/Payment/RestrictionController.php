@@ -1,16 +1,15 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Payment
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Payment
  */
 
 /**
  * Payment restrictions admin controller
  */
+
 class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtml_Controller_Action
 {
     protected function _initAction(): self
@@ -28,6 +27,7 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
         return $this;
     }
 
+    #[Maho\Config\Route('/admin/payment_restriction/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -37,6 +37,14 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
             ->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/payment_restriction/grid')]
+    public function gridAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
+    #[Maho\Config\Route('/admin/payment_restriction/new')]
     public function newAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -55,6 +63,7 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
             ->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/payment_restriction/edit')]
     public function editAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -97,6 +106,7 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
             ->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/payment_restriction/save')]
     public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -176,6 +186,7 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/payment_restriction/delete')]
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -200,6 +211,7 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/payment_restriction/massDelete')]
     public function massDeleteAction(): void
     {
         $restrictionIds = $this->getRequest()->getParam('restriction');
@@ -223,6 +235,7 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
         $this->_redirect('*/*/index');
     }
 
+    #[Maho\Config\Route('/admin/payment_restriction/massStatus')]
     public function massStatusAction(): void
     {
         $restrictionIds = $this->getRequest()->getParam('restriction');
@@ -248,12 +261,12 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
         $this->_redirect('*/*/index');
     }
 
+    #[Maho\Config\Route('/admin/payment_restriction/newConditionHtml')]
     public function newConditionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
         $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
         $type = $typeArr[0];
-
 
         // Create the rule and ensure it has a form
         $rule = Mage::getModel('payment/restriction_rule');

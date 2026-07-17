@@ -1,12 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_CatalogLinkRule
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_CatalogLinkRule
  */
 
 declare(strict_types=1);
@@ -15,20 +12,30 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
 {
     public const ADMIN_RESOURCE = 'catalog/linkrules';
 
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/index')]
     public function indexAction(): void
     {
         $this->loadLayout()
-            ->_setActiveMenu('cataloglinkrule/rules')
+            ->_setActiveMenu('catalog/linkrules')
             ->_title(Mage::helper('cataloglinkrule')->__('Catalog'))
             ->_title(Mage::helper('cataloglinkrule')->__('Product Relationship Rules'))
             ->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/grid')]
+    public function gridAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/edit')]
     public function editAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -45,17 +52,21 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
             }
         }
 
+        $model->getConditions()->setJsFormObject('rule_conditions_fieldset');
+        $model->getActions()->setJsFormObject('rule_actions_fieldset');
+
         // Register the current rule for use in blocks
         Mage::register('current_linkrule', $model);
 
         $this->loadLayout()
-            ->_setActiveMenu('cataloglinkrule/rules')
+            ->_setActiveMenu('catalog/linkrules')
             ->_title(Mage::helper('cataloglinkrule')->__('Catalog'))
             ->_title(Mage::helper('cataloglinkrule')->__('Product Relationship Rules'))
             ->_title($id ? $model->getName() : Mage::helper('cataloglinkrule')->__('New Rule'))
             ->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/save')]
     public function saveAction(): void
     {
         if ($this->getRequest()->getPost()) {
@@ -108,6 +119,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/delete')]
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -126,6 +138,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
         $this->_redirect('*/*/');
     }
 
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/massDelete')]
     public function massDeleteAction(): void
     {
         $ruleIds = $this->getRequest()->getParam('rule_ids');
@@ -150,6 +163,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
         $this->_redirect('*/*/index');
     }
 
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/massStatus')]
     public function massStatusAction(): void
     {
         $ruleIds = $this->getRequest()->getParam('rule_ids');
@@ -176,11 +190,13 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
         $this->_redirect('*/*/index');
     }
 
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/newConditionHtml')]
     public function newConditionHtmlAction(): void
     {
         $this->_renderRuleHtml('conditions');
     }
 
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/newActionHtml')]
     public function newActionHtmlAction(): void
     {
         $this->_renderRuleHtml('actions');

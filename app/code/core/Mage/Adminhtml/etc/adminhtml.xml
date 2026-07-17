@@ -1,14 +1,9 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <menu>
@@ -25,6 +20,18 @@
                 <tools translate="title">
                     <title>Tools</title>
                     <sort_order>20</sort_order>
+                    <children>
+                        <email_log translate="title" module="core">
+                            <title>Email Log</title>
+                            <action>adminhtml/system_email_log</action>
+                            <sort_order>20</sort_order>
+                        </email_log>
+                        <healthcheck translate="title">
+                            <title>Health Check</title>
+                            <action>adminhtml/system_tools_healthcheck</action>
+                            <sort_order>30</sort_order>
+                        </healthcheck>
+                    </children>
                 </tools>
                 <design translate="title">
                     <title>Design</title>
@@ -213,6 +220,14 @@
                             <tools translate="title">
                                 <title>Tools</title>
                                 <sort_order>60</sort_order>
+                                <children>
+                                    <email_log translate="title" module="core">
+                                        <title>Email Log</title>
+                                    </email_log>
+                                    <healthcheck translate="title">
+                                        <title>Health Check</title>
+                                    </healthcheck>
+                                </children>
                             </tools>
                             <convert translate="title">
                                 <title>Import/Export</title>

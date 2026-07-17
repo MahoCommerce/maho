@@ -1,0 +1,48 @@
+<!--@subject New revocation request #{{var request_id}} (order reference {{var order_reference}}) @-->
+<!--@vars
+{"var customer_name":"Customer Name",
+"var customer_email":"Customer Email",
+"var order_reference":"Order Reference as Typed",
+"var order_increment_id":"Matched Order Increment ID",
+"var request_id":"Request Reference Number",
+"var received_store":"Received At (Store Timezone)",
+"var received_utc":"Received At (UTC)",
+"var reason":"Reason (optional)",
+"var verified_label":"Verified Flag",
+"var suppressed":"Customer Email Suppressed Flag",
+"var store.getFrontendName()":"Store Name"}
+@-->
+
+{{template config_path="design/email/header"}}
+{{inlinecss file="email-inline.css"}}
+
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+    <tr>
+        <td class="action-content">
+            <h1>New revocation request received</h1>
+            <p>A consumer has exercised the revocation button on {{var store.getFrontendName()}}.</p>
+
+            <p><strong>Reference number:</strong> #{{var request_id}}<br>
+            <strong>Received at:</strong> {{var received_store}}<br>
+            {{var received_utc}}</p>
+
+            <p><strong>Name:</strong> {{var customer_name}}<br>
+            <strong>Email:</strong> {{var customer_email}}<br>
+            <strong>Order reference (as typed):</strong> {{var order_reference}}<br>
+            {{depend order_increment_id}}<strong>Matched order:</strong> #{{var order_increment_id}}<br>{{/depend}}
+            <strong>Verified (authenticated session):</strong> {{var verified_label}}</p>
+
+            {{depend reason}}
+            <p><strong>Reason given (voluntary):</strong><br>{{var reason}}</p>
+            {{/depend}}
+
+            {{depend suppressed}}
+            <p><strong>Note:</strong> the customer receipt email was suppressed by the per-recipient rate limit and has not been delivered. Review the request in the admin panel and resend it after triage.</p>
+            {{/depend}}
+
+            <p>You can review and process this request in the admin panel under <strong>Sales &gt; Revocation Requests</strong>.</p>
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer"}}

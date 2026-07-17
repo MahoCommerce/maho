@@ -1,12 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Reports
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Reports
  */
 
 /**
@@ -37,7 +36,7 @@ class Mage_Reports_Model_Report extends Mage_Core_Model_Abstract
     /**
      * @param string $from
      * @param string $to
-     * @return Mage_Reports_Model_Report
+     * @return Maho\Data\Collection
      */
     public function getReportFull($from, $to)
     {
@@ -50,7 +49,7 @@ class Mage_Reports_Model_Report extends Mage_Core_Model_Abstract
     /**
      * @param string $from
      * @param string $to
-     * @return Mage_Reports_Model_Report
+     * @return Maho\Data\Collection
      */
     public function getReport($from, $to)
     {

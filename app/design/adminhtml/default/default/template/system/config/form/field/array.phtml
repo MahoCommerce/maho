@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract $this */
@@ -44,7 +42,7 @@ $_colspan = $_colspan > 1 ? 'colspan="' . $_colspan . '"' : '';
 
         </tbody>
     </table>
-    <input type="hidden" name="<?= $this->getElement()->getName() ?>[__empty]" value="" />
+    <input type="hidden" name="<?= $this->getElement()->getName() ?>[__empty]" value="">
 </div>
 <div id="empty<?= $_htmlId ?>">
     <button style="" onclick="" class="scalable add" type="button" id="emptyAddBtn<?= $_htmlId ?>">
@@ -52,7 +50,7 @@ $_colspan = $_colspan > 1 ? 'colspan="' . $_colspan . '"' : '';
     </button>
 </div>
 
-<script type="text/javascript">
+<script>
 const arrayRow<?= $_htmlId ?> = {
     template: new Template(
         '<tr id="#{_id}">'

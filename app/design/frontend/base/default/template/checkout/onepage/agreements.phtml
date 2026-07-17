@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 
 /** @var Mage_Checkout_Block_Agreements $this */
@@ -26,7 +24,7 @@
             </div>
         <?php endif ?>
         <p class="agree">
-            <input type="checkbox" id="agreement-<?= $_a->getId()?>" name="agreement[<?= $_a->getId() ?>]" value="1" title="<?= $this->escapeHtml($_a->getCheckboxText()) ?>" class="checkbox" /><label for="agreement-<?= $_a->getId()?>"><?= $_a->getIsHtml() ? $_a->getCheckboxText() : $this->escapeHtml($_a->getCheckboxText()) ?></label>
+            <input type="checkbox" id="agreement-<?= $_a->getId()?>" name="agreement[<?= $_a->getId() ?>]" value="1" title="<?= $this->escapeHtml($_a->getCheckboxText()) ?>" class="checkbox"><label for="agreement-<?= $_a->getId()?>"><?= $_a->getIsHtml() ? $_a->getCheckboxText() : $this->escapeHtml($_a->getCheckboxText()) ?></label>
         </p>
     </li>
 <?php endforeach ?>

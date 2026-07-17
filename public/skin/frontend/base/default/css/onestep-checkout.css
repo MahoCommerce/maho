@@ -1,9 +1,7 @@
-/**
- * Maho
- *
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+/*
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+*/
 
 /* Override default checkout layout - make col-main full width and centered */
 .checkout-onepage-index:has(.onestep-checkout) {
@@ -112,6 +110,10 @@
 
 .onestep-section {
     overflow: hidden;
+}
+
+#onestep-review {
+    overflow: visible;
 }
 
 .onestep-section-header {
@@ -464,6 +466,7 @@
 
         &:first-child {
             inline-size: 100%;
+            white-space: normal;
         }
     }
 
@@ -474,6 +477,7 @@
         border-block-end: 1px solid var(--maho-color-border-light);
         overflow: hidden;
         text-overflow: ellipsis;
+        word-break: break-word;
 
         &:nth-child(2),
         &:nth-child(3),
@@ -503,6 +507,7 @@
         td {
             padding: 0.5rem;
             font-size: 0.875rem;
+            white-space: normal;
             border-block-end: none;
 
             &:last-child {

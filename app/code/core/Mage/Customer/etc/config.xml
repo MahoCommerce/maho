@@ -1,19 +1,14 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Customer
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+SPDX-FileCopyrightText: 2018-2024 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_Customer>
-            <version>1.6.2.0.7</version>
+            <version>2.0.2</version>
         </Mage_Customer>
     </modules>
     <admin>
@@ -174,10 +169,6 @@
                     <billing>1</billing>
                     <shipping>1</shipping>
                 </company>
-                <fax>
-                    <billing>1</billing>
-                    <shipping>1</shipping>
-                </fax>
             </customer_dataflow>
         </fieldsets>
     </admin>
@@ -418,47 +409,13 @@
                     <file>account_password_reset_confirmation.html</file>
                     <type>html</type>
                 </customer_password_link_email_template>
-                <customer_magic_link_email_template translate="label" module="customer">
+                <customer_login_magic_link_email_template translate="label" module="customer">
                     <label>Magic Link Login</label>
                     <file>account_magic_link.html</file>
                     <type>html</type>
-                </customer_magic_link_email_template>
+                </customer_login_magic_link_email_template>
             </email>
         </template>
-        <events>
-            <customer_address_save_before>
-                <observers>
-                    <customer_address_before_save_viv_observer>
-                        <class>customer/observer</class>
-                        <method>beforeAddressSave</method>
-                    </customer_address_before_save_viv_observer>
-                </observers>
-            </customer_address_save_before>
-            <customer_address_save_after>
-                <observers>
-                    <customer_addres_after_save_viv_observer>
-                        <class>customer/observer</class>
-                        <method>afterAddressSave</method>
-                    </customer_addres_after_save_viv_observer>
-                </observers>
-            </customer_address_save_after>
-            <customer_customer_authenticated>
-                <observers>
-                    <customer_upgrade_password>
-                        <class>customer/observer</class>
-                        <method>actionUpgradeCustomerPassword</method>
-                    </customer_upgrade_password>
-                </observers>
-            </customer_customer_authenticated>
-            <session_before_renew_cookie>
-                <observers>
-                    <customer_session_before_renew_cookie>
-                        <class>customer/observer</class>
-                        <method>setCookieLifetime</method>
-                    </customer_session_before_renew_cookie>
-                </observers>
-            </session_before_renew_cookie>
-        </events>
     </global>
     <adminhtml>
         <translate>
@@ -475,33 +432,6 @@
         <secure_url>
             <customer>/customer/</customer>
         </secure_url>
-        <events>
-            <controller_action_layout_load_before>
-                <observers>
-                    <customer_is_logged_in_observer>
-                        <class>customer/observer</class>
-                        <method>beforeLoadLayout</method>
-                    </customer_is_logged_in_observer>
-                </observers>
-            </controller_action_layout_load_before>
-            <sales_model_service_quote_submit_after>
-                <observers>
-                    <restore_customer_group_id>
-                        <class>customer/observer</class>
-                        <method>quoteSubmitAfter</method>
-                    </restore_customer_group_id>
-                </observers>
-            </sales_model_service_quote_submit_after>
-        </events>
-        <routers>
-            <customer>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Customer</module>
-                    <frontName>customer</frontName>
-                </args>
-            </customer>
-        </routers>
         <translate>
             <modules>
                 <Mage_Customer>
@@ -520,7 +450,17 @@
         </layout>
     </frontend>
     <default>
+        <system>
+            <rate_limit>
+                <customer_register>10</customer_register>
+                <forgot_password>3</forgot_password>
+                <reset_password>10</reset_password>
+            </rate_limit>
+        </system>
         <customer>
+            <account>
+                <enabled_in_frontend>1</enabled_in_frontend>
+            </account>
             <account_share>
                 <scope>1</scope>
             </account_share>
@@ -549,6 +489,8 @@
                 <reset_link_expiration_period>2</reset_link_expiration_period>
                 <require_admin_user_to_change_user_password>1</require_admin_user_to_change_user_password>
                 <min_password_length>7</min_password_length>
+                <allow_2fa>1</allow_2fa>
+                <require_2fa>0</require_2fa>
             </password>
             <password_link>
                 <email_identity>support</email_identity>
@@ -561,9 +503,14 @@
                 <magic_link_rate_limit_email>3</magic_link_rate_limit_email>
                 <magic_link_rate_limit_ip>10</magic_link_rate_limit_ip>
                 <magic_link_email_identity>general</magic_link_email_identity>
-                <magic_link_email_template>customer_magic_link_email_template</magic_link_email_template>
+                <magic_link_email_template>customer_login_magic_link_email_template</magic_link_email_template>
                 <magic_link_registration_mode>no_password</magic_link_registration_mode>
             </login>
+            <vat_validation>
+                <enabled>0</enabled>
+                <cache_lifetime>24</cache_lifetime>
+                <offline_fallback>1</offline_fallback>
+            </vat_validation>
             <address>
                 <street_lines>2</street_lines>
                 <prefix_show/>
@@ -588,7 +535,6 @@
 {{if city}}{{var city}},  {{/if}}{{if region}}{{var region}}, {{/if}}{{if postcode}}{{var postcode}}{{/if}}
 {{var country}}
 T: {{var telephone}}
-{{depend fax}}F: {{var fax}}{{/depend}}
 {{depend vat_id}}VAT: {{var vat_id}}{{/depend}}</text>
                 <oneline>{{depend prefix}}{{var prefix}} {{/depend}}{{var firstname}} {{depend middlename}}{{var middlename}} {{/depend}}{{var lastname}}{{depend suffix}} {{var suffix}}{{/depend}}, {{var street}}, {{var city}}, {{var region}} {{var postcode}}, {{var country}}</oneline>
                 <html><![CDATA[{{depend prefix}}{{var prefix}} {{/depend}}{{var firstname}} {{depend middlename}}{{var middlename}} {{/depend}}{{var lastname}}{{depend suffix}} {{var suffix}}{{/depend}}<br/>
@@ -600,7 +546,6 @@ T: {{var telephone}}
 {{if city}}{{var city}},  {{/if}}{{if region}}{{var region}}, {{/if}}{{if postcode}}{{var postcode}}{{/if}}<br/>
 {{var country}}<br/>
 {{depend telephone}}T: {{var telephone}}{{/depend}}
-{{depend fax}}<br/>F: {{var fax}}{{/depend}}
 {{depend vat_id}}<br/>VAT: {{var vat_id}}{{/depend}}]]></html>
                 <pdf><![CDATA[{{depend prefix}}{{var prefix}} {{/depend}}{{var firstname}} {{depend middlename}}{{var middlename}} {{/depend}}{{var lastname}}{{depend suffix}} {{var suffix}}{{/depend}}|
 {{depend company}}{{var company}}|{{/depend}}
@@ -613,9 +558,8 @@ T: {{var telephone}}
 {{if region}}{{var region}}, {{/if}}{{if postcode}}{{var postcode}}{{/if}}|
 {{var country}}|
 {{depend telephone}}T: {{var telephone}}{{/depend}}|
-{{depend fax}}<br/>F: {{var fax}}{{/depend}}|
 {{depend vat_id}}<br/>VAT: {{var vat_id}}{{/depend}}|]]></pdf>
-                <js_template><![CDATA[#{prefix} #{firstname} #{middlename} #{lastname} #{suffix}<br/>#{company}<br/>#{street0}<br/>#{street1}<br/>#{street2}<br/>#{street3}<br/>#{city}, #{region}, #{postcode}<br/>#{country_id}<br/>T: #{telephone}<br/>F: #{fax}<br/>VAT: #{vat_id}]]></js_template>
+                <js_template><![CDATA[#{prefix} #{firstname} #{middlename} #{lastname} #{suffix}<br/>#{company}<br/>#{street0}<br/>#{street1}<br/>#{street2}<br/>#{street3}<br/>#{city}, #{region}, #{postcode}<br/>#{country_id}<br/>T: #{telephone}<br/>VAT: #{vat_id}]]></js_template>
             </address_templates>
         </customer>
         <admin>
@@ -627,16 +571,4 @@ T: {{var telephone}}
             </security>
         </admin>
     </default>
-    <crontab>
-        <jobs>
-            <customer_flowpassword>
-                <schedule>
-                    <cron_expr>0 0 1 * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>customer/observer::deleteCustomerFlowPassword</model>
-                </run>
-            </customer_flowpassword>
-        </jobs>
-    </crontab>
 </config>

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_CatalogRule
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_CatalogRule
  */
 
 /**
@@ -184,7 +182,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
     public function getNow()
     {
         if (!$this->_now) {
-            return Mage_Core_Model_Locale::now();
+            return Mage::app()->getLocale()->nowUtc();
         }
         return $this->_now;
     }
@@ -357,11 +355,11 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
         } else {
             $customerGroupId = Mage::getSingleton('customer/session')->getCustomerGroupId();
         }
-        $dateTs     = Mage::app()->getLocale()->dateImmutable()->getTimestamp();
-        $cacheKey   = date(Mage_Core_Model_Locale::DATE_FORMAT, $dateTs) . "|$websiteId|$customerGroupId|$productId|$price";
+        $storeNow   = Mage::app()->getLocale()->utcToStore();
+        $cacheKey   = $storeNow->format(Mage_Core_Model_Locale::DATE_FORMAT) . "|$websiteId|$customerGroupId|$productId|$price";
 
         if (!array_key_exists($cacheKey, self::$_priceRulesData)) {
-            $rulesData = $this->_getResource()->getRulesFromProduct($dateTs, $websiteId, $customerGroupId, $productId);
+            $rulesData = $this->_getResource()->getRulesFromProduct($storeNow->getTimestamp(), $websiteId, $customerGroupId, $productId);
             if ($rulesData) {
                 foreach ($rulesData as $ruleData) {
                     if ($product->getParentId()) {

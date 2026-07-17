@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Action
@@ -18,6 +16,7 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
      */
     public const ADMIN_RESOURCE = 'dashboard';
 
+    #[Maho\Config\Route('/admin/dashboard/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Dashboard'));
@@ -31,6 +30,7 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets most viewed products list
      */
+    #[Maho\Config\Route('/admin/dashboard/productsViewed')]
     public function productsViewedAction(): void
     {
         $this->loadLayout();
@@ -40,6 +40,7 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets latest customers list
      */
+    #[Maho\Config\Route('/admin/dashboard/customersNewest')]
     public function customersNewestAction(): void
     {
         $this->loadLayout();
@@ -49,12 +50,14 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets the list of most active customers
      */
+    #[Maho\Config\Route('/admin/dashboard/customersMost')]
     public function customersMostAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();
     }
 
+    #[Maho\Config\Route('/admin/dashboard/ajaxBlock')]
     public function ajaxBlockAction(): void
     {
         $output   = '';
@@ -68,6 +71,7 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets devices & browsers breakdown
      */
+    #[Maho\Config\Route('/admin/dashboard/devices')]
     public function devicesAction(): void
     {
         $this->loadLayout();
@@ -77,6 +81,7 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets engagement metrics
      */
+    #[Maho\Config\Route('/admin/dashboard/engagement')]
     public function engagementAction(): void
     {
         $this->loadLayout();
@@ -86,6 +91,7 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets entry & exit pages
      */
+    #[Maho\Config\Route('/admin/dashboard/entryExit')]
     public function entryExitAction(): void
     {
         $this->loadLayout();
@@ -95,6 +101,7 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets language breakdown
      */
+    #[Maho\Config\Route('/admin/dashboard/languages')]
     public function languagesAction(): void
     {
         $this->loadLayout();
@@ -104,6 +111,7 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets top pages
      */
+    #[Maho\Config\Route('/admin/dashboard/topPages')]
     public function topPagesAction(): void
     {
         $this->loadLayout();
@@ -113,6 +121,7 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets traffic sources
      */
+    #[Maho\Config\Route('/admin/dashboard/trafficSources')]
     public function trafficSourcesAction(): void
     {
         $this->loadLayout();

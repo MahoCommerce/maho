@@ -1,18 +1,13 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_GiftMessage
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2021-2022 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_GiftMessage>
-            <version>1.6.0.0</version>
+            <version>2.0.0</version>
         </Mage_GiftMessage>
     </modules>
     <global>
@@ -76,53 +71,6 @@
                 </Mage_GiftMessage>
             </modules>
         </translate>
-        <events>
-            <sales_convert_quote_item_to_order_item>
-                <observers>
-                    <giftmessage>
-                        <type>model</type>
-                        <class>giftmessage/observer</class>
-                        <method>salesEventConvertQuoteItemToOrderItem</method>
-                    </giftmessage>
-                </observers>
-            </sales_convert_quote_item_to_order_item>
-            <sales_convert_quote_address_to_order>
-                <observers>
-                    <giftmessage>
-                        <type>model</type>
-                        <class>giftmessage/observer</class>
-                        <method>salesEventConvertQuoteAddressToOrder</method>
-                    </giftmessage>
-                </observers>
-            </sales_convert_quote_address_to_order>
-            <sales_convert_quote_to_order>
-                <observers>
-                    <giftmessage>
-                        <type>model</type>
-                        <class>giftmessage/observer</class>
-                        <method>salesEventConvertQuoteToOrder</method>
-                    </giftmessage>
-                </observers>
-            </sales_convert_quote_to_order>
-            <sales_convert_order_to_quote>
-                <observers>
-                    <giftmessage>
-                        <type>model</type>
-                        <class>giftmessage/observer</class>
-                        <method>salesEventOrderToQuote</method>
-                    </giftmessage>
-                </observers>
-            </sales_convert_order_to_quote>
-            <sales_convert_order_item_to_quote_item>
-                <observers>
-                    <giftmessage>
-                        <type>model</type>
-                        <class>giftmessage/observer</class>
-                        <method>salesEventOrderItemToQuoteItem</method>
-                    </giftmessage>
-                </observers>
-            </sales_convert_order_item_to_quote_item>
-        </events>
         <layout>
             <updates>
                 <giftmessage>
@@ -132,71 +80,6 @@
         </layout>
     </adminhtml>
     <frontend>
-        <events>
-            <sales_convert_quote_item_to_order_item>
-                <observers>
-                    <giftmessage>
-                        <type>model</type>
-                        <class>giftmessage/observer</class>
-                        <method>salesEventConvertQuoteItemToOrderItem</method>
-                    </giftmessage>
-                </observers>
-            </sales_convert_quote_item_to_order_item>
-            <sales_convert_quote_address_to_order>
-                <observers>
-                    <giftmessage>
-                        <type>model</type>
-                        <class>giftmessage/observer</class>
-                        <method>salesEventConvertQuoteAddressToOrder</method>
-                    </giftmessage>
-                </observers>
-            </sales_convert_quote_address_to_order>
-            <sales_convert_quote_to_order>
-                <observers>
-                    <giftmessage>
-                        <type>model</type>
-                        <class>giftmessage/observer</class>
-                        <method>salesEventConvertQuoteToOrder</method>
-                    </giftmessage>
-                </observers>
-            </sales_convert_quote_to_order>
-            <checkout_controller_onepage_save_shipping_method>
-                <observers>
-                    <giftmessage>
-                        <type>model</type>
-                        <class>giftmessage/observer</class>
-                        <method>checkoutEventCreateGiftMessage</method>
-                    </giftmessage>
-                </observers>
-            </checkout_controller_onepage_save_shipping_method>
-            <checkout_controller_multishipping_shipping_post>
-                <observers>
-                    <giftmessage>
-                        <type>model</type>
-                        <class>giftmessage/observer</class>
-                        <method>checkoutEventCreateGiftMessage</method>
-                    </giftmessage>
-                </observers>
-            </checkout_controller_multishipping_shipping_post>
-            <sales_convert_order_to_quote>
-                <observers>
-                    <giftmessage>
-                        <type>model</type>
-                        <class>giftmessage/observer</class>
-                        <method>salesEventOrderToQuote</method>
-                    </giftmessage>
-                </observers>
-            </sales_convert_order_to_quote>
-        </events>
-        <routers>
-            <giftmessage>
-                <use>standard</use>
-                <args>
-                    <module>Mage_GiftMessage</module>
-                    <frontName>giftmessage</frontName>
-                </args>
-            </giftmessage>
-        </routers>
         <translate>
             <modules>
                 <Mage_GiftMessage>

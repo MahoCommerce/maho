@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2026 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2026 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
  */
 
 /**
@@ -377,7 +375,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     {
         $customer = $this->getQuote()->getCustomer();
         return !$customer->getDefaultShippingAddress()
-            || $customer->getDefaultBillingAddress() && $customer->getDefaultShippingAddress()
+            || $customer->getDefaultBillingAddress()
                 && $customer->getDefaultBillingAddress()->getId() == $customer->getDefaultShippingAddress()->getId();
     }
 
@@ -530,50 +528,28 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
             $this->_nominalOnly = true; // Now $this->_filterNominal() will return positive values for nominal items
 
             $quoteItems = $this->getQuote()->getItemsCollection();
-            $addressItems = $this->getItemsCollection();
 
             $items = [];
             $nominalItems = [];
             $nonNominalItems = [];
-            if ($this->getQuote()->getIsMultiShipping() && $addressItems->count() > 0) {
-                foreach ($addressItems as $aItem) {
-                    if ($aItem->isDeleted()) {
+            /*
+            * For virtual quote we assign items only to billing address, otherwise - only to shipping address
+            */
+            $addressType = $this->getAddressType();
+            $canAddItems = $this->getQuote()->isVirtual()
+                ? ($addressType == self::TYPE_BILLING)
+                : ($addressType == self::TYPE_SHIPPING);
+
+            if ($canAddItems) {
+                foreach ($quoteItems as $qItem) {
+                    if ($qItem->isDeleted()) {
                         continue;
                     }
-
-                    if (!$aItem->getQuoteItemImported()) {
-                        $qItem = $this->getQuote()->getItemById($aItem->getQuoteItemId());
-                        if ($qItem) {
-                            $aItem->importQuoteItem($qItem);
-                        }
-                    }
-                    $items[] = $aItem;
-                    if ($this->_filterNominal($aItem)) {
-                        $nominalItems[] = $aItem;
+                    $items[] = $qItem;
+                    if ($this->_filterNominal($qItem)) {
+                        $nominalItems[] = $qItem;
                     } else {
-                        $nonNominalItems[] = $aItem;
-                    }
-                }
-            } else {
-                /*
-                * For virtual quote we assign items only to billing address, otherwise - only to shipping address
-                */
-                $addressType = $this->getAddressType();
-                $canAddItems = $this->getQuote()->isVirtual()
-                    ? ($addressType == self::TYPE_BILLING)
-                    : ($addressType == self::TYPE_SHIPPING);
-
-                if ($canAddItems) {
-                    foreach ($quoteItems as $qItem) {
-                        if ($qItem->isDeleted()) {
-                            continue;
-                        }
-                        $items[] = $qItem;
-                        if ($this->_filterNominal($qItem)) {
-                            $nominalItems[] = $qItem;
-                        } else {
-                            $nonNominalItems[] = $qItem;
-                        }
+                        $nonNominalItems[] = $qItem;
                     }
                 }
             }
@@ -1063,9 +1039,9 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     /**
      * Retrieve total models
      *
-     * @deprecated
      * @return array
      */
+    #[\Deprecated]
     public function getTotalModels()
     {
         return $this->getTotalCollector()->getRetrievers();

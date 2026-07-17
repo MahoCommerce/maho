@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Tax
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Tax
  */
 
 class Mage_Tax_Model_Observer
@@ -15,6 +13,7 @@ class Mage_Tax_Model_Observer
     /**
      * Put quote address tax information into order
      */
+    #[Maho\Config\Observer('sales_convert_quote_address_to_order')]
     public function salesEventConvertQuoteAddressToOrder(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote_Address $address */
@@ -35,6 +34,7 @@ class Mage_Tax_Model_Observer
     /**
      * Save order tax information
      */
+    #[Maho\Config\Observer('sales_order_save_after')]
     public function salesEventOrderAfterSave(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order $order */
@@ -147,6 +147,7 @@ class Mage_Tax_Model_Observer
      *
      * @return  Mage_Tax_Model_Observer
      */
+    #[Maho\Config\Observer('catalog_prepare_price_select')]
     public function prepareCatalogIndexPriceSelect(\Maho\Event\Observer $observer)
     {
         $table = $observer->getEvent()->getTable();
@@ -178,6 +179,7 @@ class Mage_Tax_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return  Mage_Tax_Model_Observer
      */
+    #[Maho\Config\Observer('catalog_product_collection_load_after')]
     public function addTaxPercentToProductCollection($observer)
     {
         $helper = Mage::helper('tax');
@@ -210,10 +212,11 @@ class Mage_Tax_Model_Observer
      * @param Mage_Cron_Model_Schedule $schedule
      * @return $this
      */
+    #[Maho\Config\CronJob('aggregate_sales_report_tax_data', configPath: 'reports/crontab/tax_expr')]
     public function aggregateSalesReportTaxData($schedule)
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->dateMutable();
+        $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('tax/report_tax')->aggregate($date);
         Mage::app()->getLocale()->revert();
@@ -225,6 +228,7 @@ class Mage_Tax_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('sales_quote_collect_totals_before')]
     public function quoteCollectTotalsBefore(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */

@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 
 /** @var Mage_Catalog_Block_Product_View_Options_Type_Text $this */
@@ -20,7 +18,7 @@ $optionId = $option->getId();
 <dd>
     <div class="input-box">
     <?php if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_FIELD): ?>
-        <input type="text" id="option_<?= $optionId ?>" class="input-text<?= $option->getIsRequired() ? ' required-entry' : '' ?> <?= $option->getMaxCharacters() ? ' validate-length maximum-length-' . $option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $option->getId() ?>]" value="<?= $this->escapeHtml($this->getDefaultValue()) ?>" onchange="opConfig.reloadPrice()" />
+        <input type="text" id="option_<?= $optionId ?>" class="input-text<?= $option->getIsRequired() ? ' required-entry' : '' ?> <?= $option->getMaxCharacters() ? ' validate-length maximum-length-' . $option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $option->getId() ?>]" value="<?= $this->escapeHtml($this->getDefaultValue()) ?>" onchange="opConfig.reloadPrice()">
     <?php elseif ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_AREA): ?>
         <textarea id="option_<?= $optionId ?>" class="<?= $option->getIsRequired() ? ' required-entry' : '' ?> <?= $option->getMaxCharacters() ? ' validate-length maximum-length-' . $option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $option->getId() ?>]" rows="5" cols="25" onchange="opConfig.reloadPrice()"><?= $this->escapeHtml($this->getDefaultValue()) ?></textarea>
     <?php endif ?>

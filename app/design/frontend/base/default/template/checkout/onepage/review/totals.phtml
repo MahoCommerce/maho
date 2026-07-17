@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 
 /**
@@ -19,13 +17,13 @@
     <?php $_colspan = $this->helper('tax')->displayCartBothPrices() ? 5 : 3; ?>
     <?= $this->renderTotals(null, $_colspan) ?>
     <?= $this->renderTotals('footer', $_colspan) ?>
-    <?php if ($this->needDisplayBaseGrandtotal()):?>
+    <?php if ($this->needDisplayBaseGrandtotal()): ?>
     <tr>
-        <td class="a-right" colspan="<?= $_colspan ?>">
-            <small><?= $this->helper('sales')->__('Grand Total to be Charged') ?></small>
-        </td>
-        <td class="a-right">
-            <small><?= $this->displayBaseGrandtotal() ?></small>
+        <td colspan="<?= $_colspan + 1 ?>" style="font-weight: normal; text-align: center; color: var(--maho-color-text-secondary); padding-top: .5rem;">
+            <small>
+                <?= $this->helper('sales')->__('You\'ll be charged in the store currency: %s.', $this->displayBaseGrandtotal()) ?><br>
+                <?= $this->helper('sales')->__('Your bank may apply its own conversion rate.') ?>
+            </small>
         </td>
     </tr>
     <?php endif ?>

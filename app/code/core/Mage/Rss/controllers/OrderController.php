@@ -1,17 +1,16 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Rss
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Rss
  */
 
 class Mage_Rss_OrderController extends Mage_Rss_Controller_Abstract
 {
+    #[Maho\Config\Route('/rss/order/new', name: 'rss.order.new', methods: ['GET'])]
     public function newAction(): void
     {
         if ($this->checkFeedEnable('order/new')) {
@@ -24,6 +23,7 @@ class Mage_Rss_OrderController extends Mage_Rss_Controller_Abstract
      * @return $this|void
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[Maho\Config\Route('/rss/order/customer', name: 'rss.order.customer', methods: ['GET'])]
     public function customerAction()
     {
         if ($this->checkFeedEnable('order/customer')) {
@@ -39,6 +39,7 @@ class Mage_Rss_OrderController extends Mage_Rss_Controller_Abstract
     /**
      * Order status action
      */
+    #[Maho\Config\Route('/rss/order/status', name: 'rss.order.status', methods: ['GET'])]
     public function statusAction(): void
     {
         if ($this->isFeedEnable('order/status_notified')) {

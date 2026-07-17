@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 /**
@@ -176,12 +174,10 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
             $option = $this->getOption();
             if ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE) {
                 $format = Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM);
-                $result = Mage::app()->getLocale()->dateMutable($optionValue, DateTime::ATOM, null, false)
-                    ->format($format);
+                $result = (new DateTime($optionValue))->format($format);
             } elseif ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
                 $format = Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
-                $result = Mage::app()->getLocale()
-                    ->date($optionValue, Mage_Core_Model_Locale::DATETIME_FORMAT, null, false)->format($format);
+                $result = (new DateTime($optionValue))->format($format);
             } elseif ($this->getOption()->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME) {
                 $date = new DateTime($optionValue);
                 $result = $date->format('H:i');
@@ -263,8 +259,8 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      * Always returns true as we only use native inputs now
      *
      * @return bool
-     * @deprecated since 25.9.0
      */
+    #[\Deprecated(message: 'since 25.9.0')]
     public function useCalendar()
     {
         return true;
@@ -275,8 +271,8 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
      * Always returns true for 24h format as native inputs handle this
      *
      * @return bool
-     * @deprecated since 25.9.0
      */
+    #[\Deprecated(message: 'since 25.9.0')]
     public function is24hTimeFormat()
     {
         return true;

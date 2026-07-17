@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
  */
 
 class Mage_Sales_Model_Service_Quote
@@ -252,6 +250,16 @@ class Mage_Sales_Model_Service_Quote
     }
 
     /**
+     * Public entry point to validate the quote without submitting it.
+     * Lets callers (e.g. PayPal) verify the quote is placeable before
+     * taking an irreversible action such as capturing payment.
+     */
+    public function validate(): self
+    {
+        return $this->_validate();
+    }
+
+    /**
      * Validate quote data before converting to order
      *
      * @return $this
@@ -268,7 +276,7 @@ class Mage_Sales_Model_Service_Quote
             }
             $method = $address->getShippingMethod();
             $rate  = $address->getShippingRateByCode($method);
-            if (!$this->getQuote()->isVirtual() && (!$method || !$rate)) {
+            if (!$method || !$rate) {
                 Mage::throwException(Mage::helper('sales')->__('Please specify a shipping method.'));
             }
         }

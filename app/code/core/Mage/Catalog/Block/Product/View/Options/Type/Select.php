@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 /**
@@ -123,11 +121,11 @@ class Mage_Catalog_Block_Product_View_Options_Type_Select extends Mage_Catalog_B
                     . ($this->getSkipJsReloadPrice() ? '' : ' onclick="opConfig.reloadPrice()"')
                     . ' name="options[' . $option->getId() . ']' . $arraySign . '" id="options_' . $option->getId()
                     . '_' . $count . '" value="' . $htmlValue . '" ' . $checked . ' price="'
-                    . $helper::currencyByStore($value->getPrice(true), $store, false) . '" />'
+                    . $helper::currencyByStore($value->getPrice(true), $store, false) . '">'
                     . '<span class="label"><label for="options_' . $option->getId() . '_' . $count . '">'
                     . $this->escapeHtml($value->getTitle()) . ' ' . $priceStr . '</label></span>';
                 if ($option->getIsRequire()) {
-                    $selectHtml .= '<script type="text/javascript">' . 'document.getElementById(\'options_' . $option->getId() . '_'
+                    $selectHtml .= '<script>' . 'document.getElementById(\'options_' . $option->getId() . '_'
                     . $count . '\').advaiceContainer = \'options-' . $option->getId() . '-container\';'
                     . 'document.getElementById(\'options_' . $option->getId() . '_' . $count
                     . '\').callbackFunction = \'validateOptionsCallback\';' . '</script>';

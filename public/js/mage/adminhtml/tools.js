@@ -1,14 +1,26 @@
-/**
- * Maho
- *
- * @package     Mage_Adminhtml
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+// SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+// SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+// SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+// SPDX-License-Identifier: AFL-3.0
 function setLocation(url){
-    window.location.href = encodeURI(url);
+    window.location.href = addAdminFormKey(url);
+}
+
+// Append the admin form key to same-origin navigations so state-changing GET
+// actions guarded by _setForcedFormKeyActions() pass server-side CSRF validation.
+function addAdminFormKey(url){
+    if (typeof FORM_KEY === 'undefined' || !FORM_KEY) {
+        return encodeURI(url);
+    }
+    try {
+        const target = new URL(url, window.location.href);
+        if (target.origin === window.location.origin && !target.searchParams.has('form_key')) {
+            target.searchParams.set('form_key', FORM_KEY);
+        }
+        return target.href;
+    } catch (e) {
+        return encodeURI(url);
+    }
 }
 
 function confirmSetLocation(message, url){
@@ -616,5 +628,83 @@ function debounce(func, delay) {
 function xssFilter(str) {
     const sanitize = xssKillah();
     const safeNodes = sanitize(str);
-    return Array.from(safeNodes).map(n => n.outerHTML || n.textContent).join('');
+    // Filter out comment nodes to prevent their text from leaking as visible content
+    return Array.from(safeNodes).filter(n => n.nodeType !== Node.COMMENT_NODE).map(n => n.outerHTML || n.textContent).join('');
+}
+
+async function validateHtmlContent(textareaId, url) {
+    const textarea = document.getElementById(textareaId);
+    if (!textarea) {
+        return;
+    }
+
+    const html = textarea.value.trim();
+    if (!html) {
+        Dialog.info('<p>There is no HTML content to validate.</p>', { title: 'HTML Validation', width: 500 });
+        return;
+    }
+
+    try {
+        const result = await mahoFetch(url, {
+            method: 'POST',
+            body: new URLSearchParams({ html }),
+        });
+
+        const messages = result.messages ?? [];
+        const ignored = result.ignored ?? 0;
+        const ignoredNote = ignored > 0
+            ? `<p class="note-msg">${ignored} message${ignored > 1 ? 's' : ''} hidden by ignore list.</p>`
+            : '';
+
+        if (messages.length === 0) {
+            Dialog.info(`<p class="validate-ok">No errors or warnings found.</p>${ignoredNote}`, { title: 'HTML Validation', width: 500 });
+            return;
+        }
+
+        const errors = messages.filter(m => m.type === 'error');
+        const warnings = messages.filter(m => m.type !== 'error');
+        const summary = [];
+        if (errors.length) summary.push(`${errors.length} error${errors.length > 1 ? 's' : ''}`);
+        if (warnings.length) summary.push(`${warnings.length} warning${warnings.length > 1 ? 's' : ''}`);
+
+        const items = messages.map(msg => {
+            const isError = msg.type === 'error';
+            const label = isError ? 'Error' : 'Warning';
+            const line = msg.lastLine ? ` — line ${msg.lastLine}` : '';
+            let extractHtml = '';
+
+            if (msg.extract) {
+                if (msg.hiliteStart !== undefined && msg.hiliteLength) {
+                    const before = escapeHtml(msg.extract.substring(0, msg.hiliteStart));
+                    const hilite = escapeHtml(msg.extract.substring(msg.hiliteStart, msg.hiliteStart + msg.hiliteLength));
+                    const after = escapeHtml(msg.extract.substring(msg.hiliteStart + msg.hiliteLength));
+                    extractHtml = `<pre>${before}<mark>${hilite}</mark>${after}</pre>`;
+                } else {
+                    extractHtml = `<pre>${escapeHtml(msg.extract)}</pre>`;
+                }
+            }
+
+            return `<div class="${isError ? 'error-msg' : 'warning-msg'}">
+                <strong>${label}${line}:</strong> ${escapeHtml(msg.message ?? '')}
+                ${extractHtml}
+            </div>`;
+        }).join('');
+
+        const content = `
+            <style>
+                .dialog-content .error-msg,
+                .dialog-content .warning-msg { background-image: none !important; background-position: 0 !important; padding-left: 12px !important; }
+                .dialog-content .error-msg pre,
+                .dialog-content .warning-msg pre { margin: 6px 0 0; padding: 6px; background: #f5f5f5; border-radius: 3px; font-size: 12px; white-space: pre-wrap; overflow-x: auto; }
+                .dialog-content .error-msg mark { background: #fecaca; padding: 1px 2px; border-radius: 2px; }
+                .dialog-content .warning-msg mark { background: #fed7aa; padding: 1px 2px; border-radius: 2px; }
+            </style>
+            <p>${summary.join(' and ')} found:</p>
+            ${ignoredNote}
+            ${items}`;
+
+        Dialog.info(content, { title: 'HTML Validation', width: 600 });
+    } catch (e) {
+        Dialog.alert(`<p>${escapeHtml(e.message ?? 'Could not reach the HTML validator service.')}</p>`, { title: 'HTML Validation', width: 500 });
+    }
 }

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Controller_Action
@@ -15,6 +13,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Billing agreements
      */
+    #[Maho\Config\Route('/admin/sales_billing_agreement/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -28,6 +27,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Ajax action for billing agreements
      */
+    #[Maho\Config\Route('/admin/sales_billing_agreement/grid')]
     public function gridAction(): void
     {
         $this->loadLayout(false)
@@ -37,6 +37,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * View billing agreement action
      */
+    #[Maho\Config\Route('/admin/sales_billing_agreement/view')]
     public function viewAction(): void
     {
         $agreementModel = $this->_initBillingAgreement();
@@ -58,6 +59,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Related orders ajax action
      */
+    #[Maho\Config\Route('/admin/sales_billing_agreement/ordersGrid')]
     public function ordersGridAction(): void
     {
         $this->_initBillingAgreement();
@@ -68,6 +70,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Cutomer billing agreements ajax action
      */
+    #[Maho\Config\Route('/admin/sales_billing_agreement/customerGrid')]
     public function customerGridAction(): void
     {
         $this->_initCustomer();
@@ -78,6 +81,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Cancel billing agreement action
      */
+    #[Maho\Config\Route('/admin/sales_billing_agreement/cancel')]
     public function cancelAction()
     {
         $agreementModel = $this->_initBillingAgreement();
@@ -102,6 +106,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Delete billing agreement action
      */
+    #[Maho\Config\Route('/admin/sales_billing_agreement/delete')]
     public function deleteAction(): void
     {
         $agreementModel = $this->_initBillingAgreement();

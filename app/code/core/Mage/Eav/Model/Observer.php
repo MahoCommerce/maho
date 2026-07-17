@@ -1,12 +1,10 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Eav
- * @copyright  Copyright (c) 2019-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2022 The OpenMage Contributors <https://openmage.org>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Eav
  */
 
 class Mage_Eav_Model_Observer
@@ -16,6 +14,7 @@ class Mage_Eav_Model_Observer
      * @return void
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[Maho\Config\Observer('controller_action_predispatch')]
     public function onControllerActionPredispatch($event)
     {
         /** @var Mage_Core_Controller_Varien_Action $controllerAction */
@@ -27,6 +26,7 @@ class Mage_Eav_Model_Observer
         }
     }
 
+    #[Maho\Config\CronJob('eav_clean_orphaned_records', schedule: '0 0 * * *')]
     public function cleanOrphanedRecords()
     {
         $resource = Mage::getSingleton('core/resource');

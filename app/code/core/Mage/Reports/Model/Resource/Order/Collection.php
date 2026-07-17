@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Reports
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Reports
  */
 
 /**
@@ -274,7 +272,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
     protected function _getTZRangeExpressionForAttribute($range, $attribute, $tzFrom = '+00:00', $tzTo = null)
     {
         if ($tzTo == null) {
-            $tzTo = Mage::app()->getLocale()->storeDate()->format('P');
+            $tzTo = Mage::app()->getLocale()->utcToStore()->format('P');
         }
         $adapter = $this->getConnection();
         $expression = $this->_getRangeExpression($range);
@@ -295,7 +293,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      */
     public function getDateRange($range, $customStart, $customEnd, $returnObjects = false)
     {
-        $baseDate = Mage::app()->getLocale()->dateImmutable();
+        $baseDate = Mage::app()->getLocale()->utcToStore();
         $dateStart = DateTime::createFromImmutable($baseDate);
         $dateStart->setTime(0, 0, 0);
         $dateEnd = DateTime::createFromImmutable($baseDate);

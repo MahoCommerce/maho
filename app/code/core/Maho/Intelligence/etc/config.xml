@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Maho_Intelligence>
+            <version>1.0.0</version>
+        </Maho_Intelligence>
+    </modules>
+    <global>
+        <helpers>
+            <intelligence>
+                <class>Maho_Intelligence_Helper</class>
+            </intelligence>
+        </helpers>
+        <models>
+            <intelligence>
+                <class>Maho_Intelligence_Model</class>
+            </intelligence>
+        </models>
+    </global>
+</config>

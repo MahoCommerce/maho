@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Maho
- *
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 declare(strict_types=1);
@@ -175,7 +173,7 @@ describe('Log Model', function () {
         $feed->setFileFormat('xml');
         $feed->save();
 
-        $startedAt = Mage_Core_Model_Locale::now();
+        $startedAt = Mage::app()->getLocale()->nowUtc();
         $this->log->setFeedId((int) $feed->getId());
         $this->log->setStatus(Maho_FeedManager_Model_Log::STATUS_RUNNING);
         $this->log->setStartedAt($startedAt);

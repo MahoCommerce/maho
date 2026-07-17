@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_CurrencySymbol
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_CurrencySymbol
  */
 
 class Mage_CurrencySymbol_Adminhtml_System_CurrencysymbolController extends Mage_Adminhtml_Controller_Action
@@ -21,6 +19,7 @@ class Mage_CurrencySymbol_Adminhtml_System_CurrencysymbolController extends Mage
     /**
      * Show Currency Symbols Management dialog
      */
+    #[Maho\Config\Route('/admin/system_currencysymbol/index')]
     public function indexAction(): void
     {
         // set active menu and breadcrumbs
@@ -43,6 +42,7 @@ class Mage_CurrencySymbol_Adminhtml_System_CurrencysymbolController extends Mage
     /**
      * Save custom Currency symbol
      */
+    #[Maho\Config\Route('/admin/system_currencysymbol/save')]
     public function saveAction(): void
     {
         $symbolsDataArray = $this->getRequest()->getParam('custom_currency_symbol');
@@ -67,6 +67,7 @@ class Mage_CurrencySymbol_Adminhtml_System_CurrencysymbolController extends Mage
     /**
      * Resets custom Currency symbol for all store views, websites and default value
      */
+    #[Maho\Config\Route('/admin/system_currencysymbol/reset')]
     public function resetAction(): void
     {
         Mage::getModel('currencysymbol/system_currencysymbol')->resetValues();

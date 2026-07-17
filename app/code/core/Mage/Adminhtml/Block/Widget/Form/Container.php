@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Block_Widget_Form_Container extends Mage_Adminhtml_Block_Widget_Container
@@ -17,6 +15,10 @@ class Mage_Adminhtml_Block_Widget_Form_Container extends Mage_Adminhtml_Block_Wi
     protected $_formInitScripts = [];
     protected $_mode = 'edit';
     protected $_blockGroup = 'adminhtml';
+
+    protected ?string $_gridNavigationId = null;
+    protected string $_gridNavigationRoute = '*/*/view';
+    protected ?array $_gridNavigation = null;
 
     public function __construct()
     {
@@ -51,6 +53,56 @@ class Mage_Adminhtml_Block_Widget_Form_Container extends Mage_Adminhtml_Block_Wi
             'onclick'   => 'editForm.submit();',
             'class'     => 'save',
         ], 1);
+    }
+
+    public function getGridNavigation(): ?array
+    {
+        if ($this->_gridNavigation !== null) {
+            return $this->_gridNavigation ?: null;
+        }
+
+        $this->_gridNavigation = [];
+
+        $currentId = (int) $this->getRequest()->getParam($this->_objectId);
+        if (!$this->_gridNavigationId || !$currentId) {
+            return null;
+        }
+
+        $navData = Mage::getSingleton('adminhtml/session')->getData($this->_gridNavigationId . '_nav');
+        if (!$navData || empty($navData['sql'])) {
+            return null;
+        }
+
+        try {
+            $sql = "SELECT * FROM ({$navData['sql']}) AS _nav WHERE {$navData['id_field']} = ?";
+            $row = Mage::getSingleton('core/resource')->getConnection('core_read')
+                ->fetchRow($sql, [...$navData['bind'], $currentId]);
+            if (!$row) {
+                return null;
+            }
+
+            $prevId = $row['prev_id'] !== null ? (int) $row['prev_id'] : null;
+            $nextId = $row['next_id'] !== null ? (int) $row['next_id'] : null;
+
+            $this->_gridNavigation = [
+                'prev_id'  => $prevId,
+                'next_id'  => $nextId,
+                'prev_url' => $prevId !== null ? $this->getNavigationUrl($prevId) : null,
+                'next_url' => $nextId !== null ? $this->getNavigationUrl($nextId) : null,
+                'position' => (int) $row['position'],
+                'total'    => (int) $row['total'],
+            ];
+
+            return $this->_gridNavigation;
+        } catch (\Exception $e) {
+            Mage::log('Grid navigation error: ' . $e->getMessage(), Mage::LOG_WARNING);
+            return null;
+        }
+    }
+
+    protected function getNavigationUrl(int $entityId): string
+    {
+        return $this->getUrl($this->_gridNavigationRoute, [$this->_objectId => $entityId]);
     }
 
     #[\Override]
@@ -92,10 +144,10 @@ class Mage_Adminhtml_Block_Widget_Form_Container extends Mage_Adminhtml_Block_Wi
     /**
      * Get form save URL
      *
-     * @deprecated
      * @see getFormActionUrl()
      * @return string
      */
+    #[\Deprecated]
     public function getSaveUrl()
     {
         return $this->getFormActionUrl();
@@ -119,7 +171,7 @@ class Mage_Adminhtml_Block_Widget_Form_Container extends Mage_Adminhtml_Block_Wi
      */
     public function getFormHtml()
     {
-        $this->getChild('form')->setData('action', $this->getSaveUrl());
+        $this->getChild('form')->setData('action', $this->getFormActionUrl());
         return $this->getChildHtml('form');
     }
 
@@ -129,7 +181,7 @@ class Mage_Adminhtml_Block_Widget_Form_Container extends Mage_Adminhtml_Block_Wi
     public function getFormInitScripts()
     {
         if (!empty($this->_formInitScripts) && is_array($this->_formInitScripts)) {
-            return '<script type="text/javascript">' . implode("\n", $this->_formInitScripts) . '</script>';
+            return '<script>' . implode("\n", $this->_formInitScripts) . '</script>';
         }
         return '';
     }
@@ -140,7 +192,7 @@ class Mage_Adminhtml_Block_Widget_Form_Container extends Mage_Adminhtml_Block_Wi
     public function getFormScripts()
     {
         if (!empty($this->_formScripts) && is_array($this->_formScripts)) {
-            return '<script type="text/javascript">' . implode("\n", $this->_formScripts) . '</script>';
+            return '<script>' . implode("\n", $this->_formScripts) . '</script>';
         }
         return '';
     }

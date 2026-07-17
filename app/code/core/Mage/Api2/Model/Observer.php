@@ -1,20 +1,22 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Api2
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Api2
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api2_Model_Observer
 {
     /**
      * Save relation of admin user to API2 role
      */
+    #[Maho\Config\Observer('admin_user_save_after')]
     public function saveAdminToRoleRelation(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Admin_Model_User $user Object */
@@ -38,6 +40,7 @@ class Mage_Api2_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_entity_attribute_save_after', area: 'adminhtml')]
     public function catalogAttributeSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
@@ -65,6 +68,7 @@ class Mage_Api2_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('api_user_authenticated', id: 'api2_upgrade_key')]
     public function upgradeApiKey($observer)
     {
         $apiKey = $observer->getEvent()->getApiKey();

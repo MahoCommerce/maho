@@ -1,12 +1,10 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Dataflow
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Dataflow
  */
 
 abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Dataflow_Model_Convert_Container_Interface
@@ -183,7 +181,7 @@ abstract class Mage_Dataflow_Model_Convert_Container_Abstract implements Mage_Da
     public function addException($error, $level = null)
     {
         $e = new Mage_Dataflow_Model_Convert_Exception($error);
-        $e->setLevel(is_null($level) ? Mage_Dataflow_Model_Convert_Exception::NOTICE : $level);
+        $e->setLevel($level ?? Mage_Dataflow_Model_Convert_Exception::NOTICE);
         $e->setContainer($this);
         $e->setPosition($this->getPosition());
 

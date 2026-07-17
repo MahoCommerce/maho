@@ -1,12 +1,10 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Checkout
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2020-2026 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Checkout
  */
 
 class Mage_Checkout_Block_Cart_Crosssell extends Mage_Catalog_Block_Product_Abstract
@@ -35,6 +33,7 @@ class Mage_Checkout_Block_Cart_Crosssell extends Mage_Catalog_Block_Product_Abst
                     $collection = $this->_getCollection()
                         ->addProductFilter($lastAdded)
                         ->addExcludeProductFilter($ninProductIds)
+                        ->setGroupBy()
                         ->setPositionOrder()
                         ->load();
 
@@ -154,7 +153,8 @@ class Mage_Checkout_Block_Cart_Crosssell extends Mage_Catalog_Block_Product_Abst
             ->setPageSize($this->_maxItemCount);
         $this->_addProductAttributesAndPrices($collection);
 
-        Mage::getSingleton('catalog/product_visibility')->addVisibleInCatalogFilterToCollection($collection);
+        $collection->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds());
+        // Always filter out-of-stock regardless of setting, since cart crosssell items are meant for immediate purchase
         Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($collection);
 
         return $collection;

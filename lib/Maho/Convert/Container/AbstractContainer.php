@@ -1,13 +1,10 @@
 <?php
 
 /**
- * Maho
- *
- * @package    MahoLib
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 namespace Maho\Convert\Container;
@@ -136,7 +133,7 @@ abstract class AbstractContainer implements ContainerInterface
     public function addException(string $error, string|int|null $level = null): Exception
     {
         $e = new Exception($error);
-        $e->setLevel(is_null($level) ? Exception::NOTICE : $level);
+        $e->setLevel($level ?? Exception::NOTICE);
         $e->setContainer($this);
         $e->setPosition($this->getPosition());
 

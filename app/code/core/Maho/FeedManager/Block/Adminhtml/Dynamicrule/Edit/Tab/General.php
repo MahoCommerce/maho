@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Maho_FeedManager
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_FeedManager
  */
+
+declare(strict_types=1);
 
 class Maho_FeedManager_Block_Adminhtml_Dynamicrule_Edit_Tab_General extends Mage_Adminhtml_Block_Widget_Form
 {
@@ -75,7 +73,7 @@ class Maho_FeedManager_Block_Adminhtml_Dynamicrule_Edit_Tab_General extends Mage
             $fieldset->addField('is_system_note', 'note', [
                 'label' => $this->__('Type'),
                 'text' => '<span class="fm-status-system">' . $this->__('System Rule') . '</span>' .
-                          '<br/><small>' . $this->__('System rules can be modified but not deleted.') . '</small>',
+                          '<br><small>' . $this->__('System rules can be modified but not deleted.') . '</small>',
             ]);
         }
 

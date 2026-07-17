@@ -1,18 +1,13 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Install
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_Install>
-            <version>0.7.0</version>
+            <version>2.0.0</version>
         </Mage_Install>
     </modules>
     <global>
@@ -32,14 +27,6 @@
         </blocks>
     </global>
     <default>
-        <web>
-            <routers>
-                <install>
-                    <area>frontend</area>
-                    <class>Mage_Install_Controller_Router_Install</class>
-                </install>
-            </routers>
-        </web>
         <validators>
             <custom_layout>
                 <disallowed_block>
@@ -48,31 +35,10 @@
             </custom_layout>
         </validators>
     </default>
-    <stores>
-        <default>
-            <web>
-                <routers>
-                    <install>
-                        <area>frontend</area>
-                        <class>Mage_Install_Controller_Router_Install</class>
-                    </install>
-                </routers>
-            </web>
-        </default>
-    </stores>
     <frontend>
         <secure_url>
             <install>/install/wizard/checkSecureHost</install>
         </secure_url>
-        <routers>
-            <install>
-                <use>install</use>
-                <args>
-                    <module>Mage_Install</module>
-                    <frontName>install</frontName>
-                </args>
-            </install>
-        </routers>
     </frontend>
     <install>
         <databases>
@@ -102,32 +68,6 @@
                 </main>
             </updates>
         </layout>
-        <events>
-            <controller_action_predispatch>
-                <observers>
-                    <checkConnection>
-                        <class>core/resource</class>
-                        <method>checkDbConnection</method>
-                    </checkConnection>
-                </observers>
-            </controller_action_predispatch>
-            <mage_run_exception>
-                <observers>
-                    <install_failure>
-                        <class>install/observer</class>
-                        <method>installFailure</method>
-                    </install_failure>
-                </observers>
-            </mage_run_exception>
-            <core_locale_set_locale>
-                <observers>
-                    <bind_locale>
-                        <class>install/observer</class>
-                        <method>bindLocale</method>
-                    </bind_locale>
-                </observers>
-            </core_locale_set_locale>
-        </events>
         <translate>
             <modules>
                 <Mage_Install>

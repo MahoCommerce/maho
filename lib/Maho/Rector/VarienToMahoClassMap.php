@@ -1,11 +1,8 @@
 <?php
 
 /**
- * Maho
- *
- * @package    MahoLib
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 declare(strict_types=1);
@@ -138,7 +135,7 @@ final class VarienToMahoClassMap
             // Object/DataObject namespace
             'Varien_Object' => \Maho\DataObject::class,
             'Varien_Object_Cache' => \Maho\DataObject\Cache::class,
-            'Varien_Object_Mapper' => \Maho\DataObject\Mapper::class,
+            'Varien_Object_Mapper' => \Maho\DataObject\Mapper::class, // @phpstan-ignore classConstant.deprecatedClass
 
             // Simplexml namespace
             'Varien_Simplexml_Config' => \Maho\Simplexml\Config::class,

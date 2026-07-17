@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Oauth
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Oauth
  */
 
 /**
@@ -56,9 +54,7 @@ class Mage_Oauth_Model_Consumer extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _beforeSave()
     {
-        if (!$this->getId()) {
-            $this->setUpdatedAt(time());
-        }
+        $this->setUpdatedAt(Mage::app()->getLocale()->formatDateForDb('now'));
         $this->setCallbackUrl(trim($this->getCallbackUrl()));
         $this->setRejectedCallbackUrl(trim($this->getRejectedCallbackUrl()));
         $this->validate();
@@ -91,4 +87,5 @@ class Mage_Oauth_Model_Consumer extends Mage_Core_Model_Abstract
         }
         return true;
     }
+
 }
