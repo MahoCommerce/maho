@@ -18,12 +18,13 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Heading extends Mage_Adminht
     #[\Override]
     public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
-        $originalData = $element->getOriginalData();
-        $package = $originalData['mandatory_package'] ?? '';
-        if ($package && !\Composer\InstalledVersions::isInstalled($package)) {
-            $warning = "⚠️ Install <code>$package</code>";
-            $label = $element->getLabel();
-            $element->setLabel(($label ? "$label<br>" : '') . $warning);
+        $package = (string) ($element->getOriginalData()['mandatory_package'] ?? '');
+        if ($package) {
+            $warning = trim(Mage::helper('core')->packageInstallWarning($package));
+            if ($warning !== '') {
+                $label = $element->getLabel();
+                $element->setLabel(($label ? "$label<br>" : '') . $warning);
+            }
         }
 
         return sprintf(
