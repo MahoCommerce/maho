@@ -860,8 +860,19 @@ final class Mage
                 self::$_tracer = $initialized;
                 return self::$_tracer;
             }
-            // Don't cache false here — initialize() may fail because the store
-            // config isn't loaded yet. Allow retry on subsequent calls.
+
+            // initialize() declined. If the store config is readable, that decision
+            // is final for this request (disabled, no endpoint, SDK missing) — cache
+            // it so hot paths (every DB query, block render) don't re-run the init
+            // and re-log its warnings. If the store config isn't loaded yet
+            // (early bootstrap), leave the cache empty and retry on a later call.
+            try {
+                if (self::getStoreConfig('dev/opentelemetry/enabled') !== null) {
+                    self::$_tracer = false;
+                }
+            } catch (\Throwable $e) {
+                // Store config not ready yet — retry later
+            }
             return null;
         } catch (\Throwable $e) {
             // Use error_log() because Mage::log() may not be available during early bootstrap

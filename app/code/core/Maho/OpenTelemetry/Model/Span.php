@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * OpenTelemetry span that wraps the SDK span or provides no-op behavior when the SDK is not available.
+ *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Maho_OpenTelemetry
@@ -12,11 +14,6 @@ use OpenTelemetry\API\Trace\SpanInterface;
 use OpenTelemetry\API\Trace\StatusCode;
 use OpenTelemetry\Context\ScopeInterface;
 
-/**
- * OpenTelemetry Span Implementation
- *
- * Wraps the OpenTelemetry SDK span or provides no-op behavior when SDK is not available.
- */
 class Maho_OpenTelemetry_Model_Span extends Mage_Core_Model_Abstract
 {
     /**
@@ -56,7 +53,7 @@ class Maho_OpenTelemetry_Model_Span extends Mage_Core_Model_Abstract
             $this->_scope = $span->activate();
         } catch (\Throwable $e) {
             // Activation failure should not break the application
-            error_log('OpenTelemetry: Failed to activate span: ' . $e->getMessage());
+            Mage::log('Failed to activate span: ' . $e->getMessage(), Mage::LOG_ERROR);
         }
 
         return $this;
@@ -185,7 +182,7 @@ class Maho_OpenTelemetry_Model_Span extends Mage_Core_Model_Abstract
             try {
                 $this->_scope->detach();
             } catch (\Throwable $e) {
-                error_log('OpenTelemetry: Failed to detach span scope: ' . $e->getMessage());
+                Mage::log('Failed to detach span scope: ' . $e->getMessage(), Mage::LOG_ERROR);
             }
             $this->_scope = null;
         }
@@ -218,8 +215,9 @@ class Maho_OpenTelemetry_Model_Span extends Mage_Core_Model_Abstract
         if ($this->_sdkSpan) {
             try {
                 return $this->_sdkSpan->getContext()->getTraceId();
-            } catch (\Throwable $e) {
-                Mage::log('Failed to get trace ID: ' . $e->getMessage(), Mage::LOG_ERROR);
+            } catch (\Throwable) {
+                // Silent: called from the TraceContext log processor on every record —
+                // Mage::log() here would re-enter the processor and recurse unboundedly
             }
         }
         return '';
@@ -233,8 +231,9 @@ class Maho_OpenTelemetry_Model_Span extends Mage_Core_Model_Abstract
         if ($this->_sdkSpan) {
             try {
                 return $this->_sdkSpan->getContext()->getSpanId();
-            } catch (\Throwable $e) {
-                Mage::log('Failed to get span ID: ' . $e->getMessage(), Mage::LOG_ERROR);
+            } catch (\Throwable) {
+                // Silent: called from the TraceContext log processor on every record —
+                // Mage::log() here would re-enter the processor and recurse unboundedly
             }
         }
         return '';
@@ -248,8 +247,9 @@ class Maho_OpenTelemetry_Model_Span extends Mage_Core_Model_Abstract
         if ($this->_sdkSpan) {
             try {
                 return $this->_sdkSpan->isRecording();
-            } catch (\Throwable $e) {
-                Mage::log('Failed to check if span is recording: ' . $e->getMessage(), Mage::LOG_ERROR);
+            } catch (\Throwable) {
+                // Silent: called from the TraceContext log processor on every record —
+                // Mage::log() here would re-enter the processor and recurse unboundedly
             }
         }
         return false;

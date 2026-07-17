@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * HTTP client decorator that wraps Symfony HttpClient to create spans for outgoing requests and inject W3C Trace Context headers for distributed tracing.
+ *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Maho_OpenTelemetry
@@ -12,12 +14,6 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Symfony\Contracts\HttpClient\ResponseStreamInterface;
 
-/**
- * HTTP Client decorator that adds OpenTelemetry tracing
- *
- * Wraps Symfony HttpClient to automatically create spans for HTTP requests
- * and inject W3C Trace Context headers for distributed tracing.
- */
 class Maho_OpenTelemetry_Model_Http_TracedClient extends Mage_Core_Model_Abstract implements HttpClientInterface
 {
     /**

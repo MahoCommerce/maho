@@ -18,8 +18,11 @@ class Profiler
     private static bool $_memory_get_usage = false;
 
     /**
-     * Stack of active OpenTelemetry spans indexed by timer name
-     * @var array<string, \Maho_OpenTelemetry_Model_Span>
+     * Stacks of active OpenTelemetry spans indexed by timer name.
+     * Each name holds a LIFO stack so re-entrant timers with the same name
+     * (e.g. two anonymous blocks both keyed 'BLOCK:...') end their own span
+     * instead of orphaning the outer one.
+     * @var array<string, list<\Maho_OpenTelemetry_Model_Span>>
      */
     private static array $_spans = [];
 
@@ -37,6 +40,9 @@ class Profiler
         'BLOCK:',
         'cron.job',
         'email.send',
+        'image.process',
+        'index.reindex',
+        'payment.',
     ];
 
     public static function enable(): void
@@ -93,7 +99,7 @@ class Profiler
         if ($tracer) {
             foreach (self::$_spanPrefixes as $prefix) {
                 if (str_starts_with($timerName, $prefix)) {
-                    self::$_spans[$timerName] = $tracer->startSpan($timerName, $attributes);
+                    self::$_spans[$timerName][] = $tracer->startSpan($timerName, $attributes);
                     break;
                 }
             }
@@ -125,14 +131,17 @@ class Profiler
     {
         self::pause($timerName);
 
-        // End corresponding OTel span if one was created
-        if (isset(self::$_spans[$timerName])) {
+        // End the most recent OTel span for this timer name, if one was created
+        if (!empty(self::$_spans[$timerName])) {
+            $span = array_pop(self::$_spans[$timerName]);
+            if (self::$_spans[$timerName] === []) {
+                unset(self::$_spans[$timerName]);
+            }
             try {
-                self::$_spans[$timerName]->end();
+                $span->end();
             } catch (\Throwable $e) {
                 // Don't let span errors affect profiler
             }
-            unset(self::$_spans[$timerName]);
         }
     }
 

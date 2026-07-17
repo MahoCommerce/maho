@@ -410,9 +410,6 @@ class Mage_Core_Model_App
                 }
             }
 
-            // End root span
-            $rootSpan?->end();
-
             // Finish the request — no output allowed beyond this point
             if (in_array(php_sapi_name(), ['fpm-fcgi', 'frankenphp'], true) && function_exists('fastcgi_finish_request')) {
                 fastcgi_finish_request();
@@ -433,15 +430,10 @@ class Mage_Core_Model_App
             $rootSpan?->setStatus('error', $e->getMessage());
             throw $e;
         } finally {
-            // End span and flush telemetry after response is sent to client
+            // End span and flush telemetry after the response is sent to the client.
+            // On the error path do NOT finish the request here: the exception still has
+            // to propagate to Mage::run()'s handler, which renders the error page.
             $rootSpan?->end();
-
-            // On the error path, ensure response is sent before flushing telemetry
-            if (!headers_sent()) {
-                if (in_array(php_sapi_name(), ['fpm-fcgi', 'frankenphp'], true) && function_exists('fastcgi_finish_request')) {
-                    fastcgi_finish_request();
-                }
-            }
 
             Mage::getTracer()?->flush();
         }

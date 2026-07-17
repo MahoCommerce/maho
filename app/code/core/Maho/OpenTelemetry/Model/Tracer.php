@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * OpenTelemetry tracer that integrates the OpenTelemetry SDK to send traces to OTLP endpoints.
+ *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Maho_OpenTelemetry
@@ -22,11 +24,6 @@ use OpenTelemetry\Contrib\Otlp\OtlpHttpTransportFactory;
 use OpenTelemetry\SDK\Trace\Sampler\AlwaysOnSampler;
 use OpenTelemetry\SDK\Trace\Sampler\TraceIdRatioBasedSampler;
 
-/**
- * OpenTelemetry Tracer Implementation
- *
- * Integrates the OpenTelemetry SDK to send traces to OTLP endpoints
- */
 class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
 {
     /**

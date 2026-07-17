@@ -1,9 +1,10 @@
 <?php
 
 /**
+ * HTTP client factory that creates Symfony HTTP clients with automatic OpenTelemetry tracing when enabled, falling back to the standard client otherwise.
+ *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
- * @package Maho_Http
  */
 
 declare(strict_types=1);
@@ -14,12 +15,6 @@ use Symfony\Component\HttpClient\HttpClient as SymfonyHttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
- * HTTP Client factory with automatic OpenTelemetry instrumentation
- *
- * Creates Symfony HTTP clients with optional tracing when OpenTelemetry
- * module is enabled. Falls back to standard Symfony client when telemetry
- * is disabled or not installed.
- *
  * Usage:
  * ```php
  * $client = \Maho\Http\Client::create(['timeout' => 30]);

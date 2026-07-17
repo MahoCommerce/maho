@@ -8,9 +8,6 @@
 
 declare(strict_types=1);
 
-/**
- * OpenTelemetry helper
- */
 class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
 {
     /**

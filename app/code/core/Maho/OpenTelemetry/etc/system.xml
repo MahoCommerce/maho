@@ -83,7 +83,7 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment><![CDATA[Additional HTTP headers in format <code>Key: Value</code> (one per line). Example:<br/><code>X-Custom-Header: value</code><br/><code>X-Another-Header: another-value</code>]]></comment>
+                            <comment><![CDATA[Additional HTTP headers in format <code>Key: Value</code> (one per line). Example:<br/><code>X-Custom-Header: value</code><br/><code>X-Another-Header: another-value</code><br/>Stored in plaintext: do not put credentials here, use the Authorization Header field for secrets.]]></comment>
                             <depends>
                                 <enabled>1</enabled>
                             </depends>
