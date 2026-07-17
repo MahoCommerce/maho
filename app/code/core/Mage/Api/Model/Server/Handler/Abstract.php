@@ -8,6 +8,9 @@
  * @package Mage_Api
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 abstract class Mage_Api_Model_Server_Handler_Abstract
 {
     protected $_resourceSuffix = null;

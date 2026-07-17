@@ -11,11 +11,25 @@ use Tests\MahoBackendTestCase;
 
 uses(MahoBackendTestCase::class);
 
+beforeEach(function () {
+    // Snapshot the categories that already exist (sample data + anything a prior
+    // test left behind) so afterEach only removes what THIS test creates.
+    $this->preExistingCategoryIds = array_map('intval', Mage::getModel('catalog/category')->getCollection()->getAllIds());
+});
+
 afterEach(function () {
+    // Clean up ONLY the categories this test created. Deleting every category
+    // with entity_id > 2 would also remove the sample-data categories and cascade
+    // into catalog_category_product, corrupting the shared test database for the
+    // API integration tests that run later in the same suite.
+    $preExisting = array_flip($this->preExistingCategoryIds ?? []);
     $collection = Mage::getModel('catalog/category')->getCollection()
         ->addAttributeToFilter('entity_id', ['gt' => 2]);
 
     foreach ($collection as $category) {
+        if (isset($preExisting[(int) $category->getId()])) {
+            continue;
+        }
         try {
             $category->delete();
         } catch (Exception $e) {

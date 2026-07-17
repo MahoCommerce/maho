@@ -3088,8 +3088,8 @@ class Pgsql extends AbstractPdoAdapter
         $conditionKeyMap = [
             'eq'            => '{{fieldName}} = ?',
             'neq'           => '{{fieldName}} != ?',
-            'like'          => '{{fieldName}} LIKE ?',
-            'nlike'         => '{{fieldName}} NOT LIKE ?',
+            'like'          => '{{fieldName}} ILIKE ?',
+            'nlike'         => '{{fieldName}} NOT ILIKE ?',
             'in'            => '{{fieldName}} IN(?)',
             'nin'           => '{{fieldName}} NOT IN(?)',
             'is'            => '{{fieldName}} IS ?',

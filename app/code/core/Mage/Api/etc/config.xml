@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
 SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
 SPDX-License-Identifier: AFL-3.0
@@ -85,6 +86,12 @@ SPDX-License-Identifier: AFL-3.0
         </translate>
     </adminhtml>
     <default>
+        <system>
+            <rate_limit>
+                <auth_token_ip>20</auth_token_ip>
+                <customer_login>5</customer_login>
+            </rate_limit>
+        </system>
         <api>
             <config>
                 <charset>UTF-8</charset>

@@ -50,7 +50,7 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
     {
         $this
             ->loadLayout()
-            ->_setActiveMenu('system/api/oauth_consumer')
+            ->_setActiveMenu('system/api/rest_legacy/oauth_consumer')
             ->renderLayout();
     }
 
@@ -89,7 +89,7 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
 
         $this
             ->loadLayout()
-            ->_setActiveMenu('system/api/oauth_consumer')
+            ->_setActiveMenu('system/api/rest_legacy/oauth_consumer')
             ->renderLayout();
     }
 
@@ -122,7 +122,7 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
 
         $this
             ->loadLayout()
-            ->_setActiveMenu('system/api/oauth_consumer')
+            ->_setActiveMenu('system/api/rest_legacy/oauth_consumer')
             ->renderLayout();
     }
 
@@ -200,6 +200,20 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
 
         try {
             $model->addData($data);
+
+            $apiRoleId = $this->getRequest()->getPost('api_role_id');
+            $model->setData('api_role_id', $apiRoleId ?: null);
+
+            $storeIds = $this->getRequest()->getPost('store_ids', []);
+            if (!empty($storeIds)) {
+                $model->setStoreIds(Mage::helper('core')->jsonEncode($storeIds));
+            } else {
+                $model->setStoreIds('all');
+            }
+
+            $expiresAt = $this->getRequest()->getPost('expires_at');
+            $model->setExpiresAt($expiresAt ?: null);
+
             $model->save();
             $this->_getSession()->addSuccess($this->__('The consumer has been saved.'));
             $this->_setFormData(null);

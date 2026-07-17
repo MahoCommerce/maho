@@ -87,8 +87,10 @@ class JsonRpcResponse
             throw new \InvalidArgumentException('Invalid JSON-RPC version');
         }
 
-        // Validate ID matches
-        if (isset($this->data['id']) && $this->data['id'] !== $this->expectedId) {
+        // Validate ID matches. A JSON-RPC id may be a number or a string, and
+        // the server may echo it back as a different scalar type (Laminas returns
+        // "1" for a request id of 1), so compare by value, not by strict type.
+        if (isset($this->data['id']) && (string) $this->data['id'] !== (string) $this->expectedId) {
             throw new \InvalidArgumentException(
                 sprintf('Response ID mismatch: expected %s, got %s', $this->expectedId, $this->data['id']),
             );

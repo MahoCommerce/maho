@@ -15,13 +15,17 @@ use Symfony\Component\Process\Process;
  * Boots `./maho serve` for browser tests.
  *
  * The app is installed with base_url http://<host>:<port>/ and served on that exact
- * host:port (no runtime base_url rewrite), so every suite shares one configuration. The host
- * comes from MAHO_BROWSER_HOST: CI sets it to the runner's real IP (detected before
- * install), so the browser hits a routable address and sidesteps every loopback caveat
- * (Playwright's Chromium ignores /etc/hosts and is unreliable with bare 127.0.0.1 on CI).
- * Locally it defaults to `localhost`, served on 127.0.0.1 which localhost maps to. The
- * server binds the same host it's addressed by; the port must match base_url or
+ * host:port. The host comes from MAHO_BROWSER_HOST: CI sets it to the runner's real IP
+ * (detected before install), so the browser hits a routable address and sidesteps every
+ * loopback caveat (Playwright's Chromium ignores /etc/hosts and is unreliable with bare
+ * 127.0.0.1 on CI). Locally it defaults to `localhost`, served on 127.0.0.1 which localhost
+ * maps to. The server binds the same host it's addressed by; the port must match base_url or
  * redirect_to_base bounces the browser to an unserved origin.
+ *
+ * The Api suite runs before this one and repoints the store base_url at its own HTTP server
+ * (so the JWT issuer matches the tokens it signs), so we can't assume base_url still holds
+ * the install value. Repoint it back to this server's URL on start, before serving, so
+ * redirect_to_base keeps the browser on the origin we actually serve.
  */
 final class MahoServer
 {
@@ -41,6 +45,11 @@ final class MahoServer
         $bindHost = $envHost !== '' ? $envHost : '127.0.0.1';
         $port ??= (int) (getenv('MAHO_BROWSER_PORT') ?: 8901);
         self::$baseUrl = "http://{$addressHost}:{$port}";
+
+        // Repoint base_url at the URL we're about to serve (a prior suite may have moved it),
+        // then flush so the serve workers boot with fresh config. Otherwise redirect_to_base
+        // bounces every navigation to whatever origin base_url currently names.
+        self::syncBaseUrl(self::$baseUrl . '/');
 
         // The PHP built-in server is single-threaded; a browser's parallel asset
         // requests would serialize and stall. Spawn workers so requests run concurrently.
@@ -66,6 +75,15 @@ final class MahoServer
     {
         self::$process?->stop(3);
         self::$process = null;
+    }
+
+    private static function syncBaseUrl(string $url): void
+    {
+        foreach (['web/unsecure/base_url', 'web/secure/base_url'] as $path) {
+            (new Process(['./maho', 'config:set', $path, $url, '--scope', 'default', '--scope-id', '0', '--silent']))
+                ->mustRun();
+        }
+        (new Process(['./maho', 'cache:flush']))->mustRun();
     }
 
     private static function waitUntilReady(string $host, int $port, int $timeoutSeconds = 30): void

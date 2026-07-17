@@ -521,8 +521,12 @@ class Mage_Eav_Model_Config
         $entityType = $this->getEntityType($entityType);
         $attributes = [];
         $storeId = $this->_storeId();
+        // Ensure the per-store attribute index is loaded (getAttribute() does the same). Without
+        // this, a caller in a context that has not yet initialized the store — e.g. an API request
+        // whose first EAV access is getAttributes() — hits array_keys(null) below.
+        $this->_initializeStore($storeId);
         // need to access attributes to ensure they are hydrated and initialized
-        foreach (array_keys($this->_entityTypeAttributes[$storeId][$entityType->getId()]) as $attributeId) {
+        foreach (array_keys($this->_entityTypeAttributes[$storeId][$entityType->getId()] ?? []) as $attributeId) {
             $attributes[] = $this->getAttribute($entityType, $attributeId, $storeId);
         }
 

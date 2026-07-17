@@ -33,6 +33,36 @@ SPDX-License-Identifier: AFL-3.0
                         </enabled>
                     </fields>
                 </contacts>
+                <api translate="label comment">
+                    <label>API Submissions</label>
+                    <comment>Settings for contact-form submissions made via the REST/GraphQL API (used by headless storefronts).</comment>
+                    <sort_order>20</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label comment">
+                            <label>Enable Contact API</label>
+                            <comment>Allow headless frontends to submit contact forms via the API.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+                        <honeypot_enabled translate="label comment">
+                            <label>Enable Honeypot Field</label>
+                            <comment>Adds a hidden field that bots fill in, zero dependency, works everywhere.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </honeypot_enabled>
+                    </fields>
+                </api>
                 <abuse translate="label comment">
                     <label>Abuse Protection</label>
                     <comment><![CDATA[Invisible background measures (honeypot, rate limits) that blunt spam and email-bombing without inconveniencing real customers. Do not set the limits so low that legitimate visitors are blocked.]]></comment>
@@ -135,5 +165,22 @@ SPDX-License-Identifier: AFL-3.0
                 </auto_reply>
             </groups>
         </contacts>
+        <system>
+            <groups>
+                <rate_limit>
+                    <fields>
+                        <contact translate="label comment" module="contacts">
+                            <label>Contact form (web + API)</label>
+                            <comment>Per email address. Default 3 per hour. 0 to disable.</comment>
+                            <sort_order>110</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </contact>
+                    </fields>
+                </rate_limit>
+            </groups>
+        </system>
     </sections>
 </config>
