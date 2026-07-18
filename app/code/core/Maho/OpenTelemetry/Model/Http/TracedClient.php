@@ -58,11 +58,28 @@ class Maho_OpenTelemetry_Model_Http_TracedClient extends Mage_Core_Model_Abstrac
             throw new \RuntimeException('TracedHttpClient not properly initialized');
         }
 
-        $span = $this->_tracer->startSpan('http.client.request', [
-            'http.method' => $method,
-            'http.url' => strtok($url, '?') ?: $url,
+        // Span name per HTTP client semconv is the bare method. url.full is recomposed
+        // without query string, fragment or userinfo so tokens/secrets in query params
+        // or embedded credentials (https://user:pass@host) never reach a span
+        $urlParts = parse_url($url);
+        if (!empty($urlParts['host'])) {
+            $urlFull = ($urlParts['scheme'] ?? 'http') . '://' . $urlParts['host']
+                . (isset($urlParts['port']) ? ':' . $urlParts['port'] : '')
+                . ($urlParts['path'] ?? '/');
+        } else {
+            $urlFull = strtok($url, '?') ?: $url;
+        }
+        $attributes = [
             'http.request.method' => $method,
-        ]);
+            'url.full' => $urlFull,
+        ];
+        if (!empty($urlParts['host'])) {
+            $attributes['server.address'] = $urlParts['host'];
+        }
+        if (!empty($urlParts['port'])) {
+            $attributes['server.port'] = $urlParts['port'];
+        }
+        $span = $this->_tracer->startSpan($method, $attributes, 'client');
 
         try {
             // Inject W3C Trace Context headers for distributed tracing
@@ -78,14 +95,13 @@ class Maho_OpenTelemetry_Model_Http_TracedClient extends Mage_Core_Model_Abstrac
 
             // Add response data
             $statusCode = $response->getStatusCode();
-            $span->setAttributes([
-                'http.status_code' => $statusCode,
-            ]);
+            $span->setAttribute('http.response.status_code', $statusCode);
             $span->setStatus($statusCode >= 500 ? 'error' : 'ok');
 
             return $response;
         } catch (\Throwable $e) {
             $span->recordException($e);
+            $span->setAttribute('error.type', $e::class);
             $span->setStatus('error', $e::class);
             throw $e;
         } finally {

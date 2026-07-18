@@ -1783,18 +1783,20 @@ abstract class AbstractPdoAdapter implements AdapterInterface
      */
     protected function _startQuerySpan(string $sql, array $bind): ?\Maho_OpenTelemetry_Model_Span
     {
-        $span = \Mage::startSpan('db.query', [
-            'db.system' => $this->_getDbSystem(),
-            'db.name' => $this->_config['dbname'] ?? '',
-            'db.statement' => $sql,
-            'db.operation' => $this->_getOperationType($sql),
-        ]);
+        $operation = $this->_getOperationType($sql);
+        $table = $this->_getTargetTable($sql);
 
-        if ($span) {
-            $table = $this->_getTargetTable($sql);
-            if ($table) {
-                $span->setAttribute('db.sql.table', $table);
-            }
+        // Span name per DB semconv: "{db.operation.name} {db.collection.name}" — low
+        // cardinality, so backends can group by statement shape
+        $span = \Mage::startSpan($table !== '' ? $operation . ' ' . $table : $operation, [
+            'db.system.name' => $this->_getDbSystem(),
+            'db.namespace' => $this->_config['dbname'] ?? '',
+            'db.query.text' => $sql,
+            'db.operation.name' => $operation,
+        ], 'client');
+
+        if ($span && $table !== '') {
+            $span->setAttribute('db.collection.name', $table);
         }
 
         return $span;

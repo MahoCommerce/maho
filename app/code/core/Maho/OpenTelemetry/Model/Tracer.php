@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 use OpenTelemetry\API\Trace\TracerInterface;
 use OpenTelemetry\API\Trace\SpanInterface;
+use OpenTelemetry\API\Trace\SpanKind;
 use OpenTelemetry\API\Common\Time\Clock;
 use OpenTelemetry\SDK\Trace\TracerProvider;
 use OpenTelemetry\SDK\Trace\TracerProviderInterface;
@@ -35,6 +36,11 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
      * Is tracer enabled and initialized
      */
     private bool $_enabled = false;
+
+    /**
+     * Whether BLOCK: profiler timers should create spans
+     */
+    private bool $_traceBlocks = true;
 
     /**
      * OpenTelemetry TracerProvider
@@ -66,6 +72,16 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
 
         // Check if enabled
         if (!$helper->isEnabled()) {
+            return false;
+        }
+
+        // Excluded paths: the tracer initializes lazily on the first span attempt,
+        // which can happen during bootstrap (DB queries) before dispatch — so the
+        // exclusion must be decided here, not at dispatch time. Mage::getTracer()
+        // caches the false result for the request once store config is readable,
+        // and Mage::reset() clears it between requests. CLI has no REQUEST_URI.
+        $requestPath = strtok($_SERVER['REQUEST_URI'] ?? '', '?') ?: '';
+        if ($requestPath !== '' && $helper->isPathExcluded($requestPath)) {
             return false;
         }
 
@@ -101,8 +117,16 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
 
             $exporter = new SpanExporter($transport);
 
-            // Batch processor: queue spans in memory, export all at once on forceFlush()
-            $spanProcessor = new BatchSpanProcessor($exporter, Clock::getDefault());
+            // Batch processor: queue spans in memory, export all at once on forceFlush().
+            // Queue/batch sizing honors the standard OTEL_BSP_* environment variables.
+            $spanProcessor = new BatchSpanProcessor(
+                $exporter,
+                Clock::getDefault(),
+                (int) ($helper->getEnv('OTEL_BSP_MAX_QUEUE_SIZE') ?: BatchSpanProcessor::DEFAULT_MAX_QUEUE_SIZE),
+                (int) ($helper->getEnv('OTEL_BSP_SCHEDULE_DELAY') ?: BatchSpanProcessor::DEFAULT_SCHEDULE_DELAY),
+                (int) ($helper->getEnv('OTEL_BSP_EXPORT_TIMEOUT') ?: BatchSpanProcessor::DEFAULT_EXPORT_TIMEOUT),
+                (int) ($helper->getEnv('OTEL_BSP_MAX_EXPORT_BATCH_SIZE') ?: BatchSpanProcessor::DEFAULT_MAX_EXPORT_BATCH_SIZE),
+            );
 
             // Create sampler based on sampling rate
             $samplingRate = $helper->getSamplingRate();
@@ -124,6 +148,7 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
             );
 
             $this->_enabled = true;
+            $this->_traceBlocks = $helper->isBlockTracingEnabled();
 
             Mage::log('OpenTelemetry tracer initialized successfully', Mage::LOG_INFO);
 
@@ -137,8 +162,10 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
 
     /**
      * Start a root span (top-level span for a trace)
+     *
+     * @param string|null $kind Span kind: 'server', 'client', 'producer', 'consumer' or null for internal
      */
-    public function startRootSpan(string $name, array $attributes = []): Maho_OpenTelemetry_Model_Span
+    public function startRootSpan(string $name, array $attributes = [], ?string $kind = 'server'): Maho_OpenTelemetry_Model_Span
     {
         if (!$this->_enabled || !$this->_tracer) {
             return $this->_createNullSpan();
@@ -147,6 +174,7 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
         try {
             // Start a new root span (no parent)
             $spanBuilder = $this->_tracer->spanBuilder($name);
+            $spanBuilder->setSpanKind($this->_mapSpanKind($kind));
 
             // Add attributes
             foreach ($attributes as $key => $value) {
@@ -168,8 +196,10 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
 
     /**
      * Start a child span (nested under current active span)
+     *
+     * @param string|null $kind Span kind: 'server', 'client', 'producer', 'consumer' or null for internal
      */
-    public function startSpan(string $name, array $attributes = []): Maho_OpenTelemetry_Model_Span
+    public function startSpan(string $name, array $attributes = [], ?string $kind = null): Maho_OpenTelemetry_Model_Span
     {
         if (!$this->_enabled || !$this->_tracer) {
             return $this->_createNullSpan();
@@ -177,6 +207,7 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
 
         try {
             $spanBuilder = $this->_tracer->spanBuilder($name);
+            $spanBuilder->setSpanKind($this->_mapSpanKind($kind));
 
             // Parent span is automatically set from current context by OpenTelemetry SDK
 
@@ -211,6 +242,36 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Get the root span of the current trace (bottom of the stack)
+     */
+    public function getRootSpan(): ?Maho_OpenTelemetry_Model_Span
+    {
+        return $this->_spanStack[0] ?? null;
+    }
+
+    /**
+     * Whether BLOCK: profiler timers should create spans (checked by \Maho\Profiler)
+     */
+    public function isBlockTracingEnabled(): bool
+    {
+        return $this->_traceBlocks;
+    }
+
+    /**
+     * Map a span kind string to the SDK SpanKind constant
+     */
+    private function _mapSpanKind(?string $kind): int
+    {
+        return match ($kind) {
+            'server' => SpanKind::KIND_SERVER,
+            'client' => SpanKind::KIND_CLIENT,
+            'producer' => SpanKind::KIND_PRODUCER,
+            'consumer' => SpanKind::KIND_CONSUMER,
+            default => SpanKind::KIND_INTERNAL,
+        };
+    }
+
+    /**
      * Record an exception in the active span
      */
     public function recordException(\Throwable $e): void
@@ -242,7 +303,7 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
         try {
             $context = $activeSpan->getSdkSpan()->getContext();
             if ($context->isValid()) {
-                return [
+                $headers = [
                     'traceparent' => sprintf(
                         '00-%s-%s-%02x',
                         $context->getTraceId(),
@@ -250,6 +311,20 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
                         $context->getTraceFlags(),
                     ),
                 ];
+
+                // W3C Baggage: propagate store context to downstream services
+                try {
+                    $store = Mage::app()->getStore();
+                    $headers['baggage'] = sprintf(
+                        'maho.store=%s,maho.currency=%s',
+                        rawurlencode((string) $store->getCode()),
+                        rawurlencode((string) $store->getCurrentCurrencyCode()),
+                    );
+                } catch (\Throwable $e) {
+                    // Store not initialized — propagate trace context only
+                }
+
+                return $headers;
             }
         } catch (\Throwable $e) {
             Mage::log('Failed to generate trace headers: ' . $e->getMessage(), Mage::LOG_ERROR);

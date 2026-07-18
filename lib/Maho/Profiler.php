@@ -99,6 +99,11 @@ class Profiler
         if ($tracer) {
             foreach (self::$_spanPrefixes as $prefix) {
                 if (str_starts_with($timerName, $prefix)) {
+                    // Block rendering is the highest-volume span source and can be
+                    // switched off independently to keep traces small
+                    if ($prefix === 'BLOCK:' && !$tracer->isBlockTracingEnabled()) {
+                        break;
+                    }
                     self::$_spans[$timerName][] = $tracer->startSpan($timerName, $attributes);
                     break;
                 }

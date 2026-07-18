@@ -109,6 +109,23 @@ class Maho_OpenTelemetry_Model_Span extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Update the span name (e.g. once the route is resolved after dispatch)
+     *
+     * @return $this
+     */
+    public function updateName(string $name): self
+    {
+        if ($this->_sdkSpan) {
+            try {
+                $this->_sdkSpan->updateName($name);
+            } catch (\Throwable $e) {
+                Mage::log('Failed to update span name: ' . $e->getMessage(), Mage::LOG_ERROR);
+            }
+        }
+        return $this;
+    }
+
+    /**
      * Record an exception event on the span
      *
      * @return $this

@@ -31,7 +31,8 @@ SPDX-License-Identifier: AFL-3.0
                 <service_name>maho-store</service_name>
                 <endpoint></endpoint>
                 <sampling_rate>0.1</sampling_rate><!-- 10% default sampling -->
-                <export_logs>0</export_logs><!-- Opt-in for log export -->
+                <trace_blocks>1</trace_blocks>
+                <excluded_paths></excluded_paths>
                 <!-- backend_model attribute makes Mage::getStoreConfig() decrypt the stored value at runtime -->
                 <auth_header backend_model="adminhtml/system_config_backend_encrypted"/>
             </opentelemetry>

@@ -888,12 +888,13 @@ final class Mage
      *
      * Shorthand for Mage::getTracer()?->startSpan($name, $attributes)
      *
-     * @param string $name Span name (e.g., 'db.query', 'http.client.request')
+     * @param string $name Span name (e.g., 'SELECT catalog_product', 'GET')
      * @param array $attributes Initial span attributes
+     * @param string|null $kind Span kind: 'server', 'client', 'producer', 'consumer' or null for internal
      */
-    public static function startSpan(string $name, array $attributes = []): ?Maho_OpenTelemetry_Model_Span
+    public static function startSpan(string $name, array $attributes = [], ?string $kind = null): ?Maho_OpenTelemetry_Model_Span
     {
-        return self::getTracer()?->startSpan($name, $attributes);
+        return self::getTracer()?->startSpan($name, $attributes, $kind);
     }
 
     /**

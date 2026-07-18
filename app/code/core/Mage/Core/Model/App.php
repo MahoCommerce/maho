@@ -340,14 +340,21 @@ class Mage_Core_Model_App
             Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
         }
 
-        // OpenTelemetry: start root span for request
+        // OpenTelemetry: start root span for request. Excluded paths are handled
+        // inside Tracer::initialize(), which declines for them, so getTracer()
+        // returns null here and no spans are created for the whole request.
         $requestUri = $_SERVER['REQUEST_URI'] ?? '';
-        $rootSpan = Mage::getTracer()?->startRootSpan('http.request', [
-            'http.method' => $_SERVER['REQUEST_METHOD'] ?? 'CLI',
-            'http.target' => strtok($requestUri, '?') ?: $requestUri,
-            'http.scheme' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http',
-            'http.host' => $_SERVER['HTTP_HOST'] ?? '',
-            'server.address' => $_SERVER['SERVER_NAME'] ?? '',
+        $requestPath = strtok($requestUri, '?') ?: $requestUri;
+        $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'CLI';
+        $tracer = Mage::getTracer();
+        $host = $_SERVER['HTTP_HOST'] ?? ($_SERVER['SERVER_NAME'] ?? '');
+        // Strip the port, preserving bracketed IPv6 literals ("[::1]:8080" → "[::1]")
+        $serverAddress = preg_replace('/:\d+$/', '', $host) ?? $host;
+        $rootSpan = $tracer?->startRootSpan($requestMethod, [
+            'http.request.method' => $requestMethod,
+            'url.path' => $requestPath,
+            'url.scheme' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http',
+            'server.address' => $serverAddress,
         ]);
 
         // Add store context to root span
@@ -369,15 +376,18 @@ class Mage_Core_Model_App
             // Add response attributes to root span
             if ($rootSpan) {
                 $statusCode = http_response_code() ?: 200;
-                $rootSpan->setAttribute('http.status_code', $statusCode);
+                $rootSpan->setAttribute('http.response.status_code', $statusCode);
                 $rootSpan->setStatus($statusCode >= 500 ? 'error' : 'ok');
 
-                // Route context
+                // Route context; rename the span to "{method} {route}" per HTTP semconv
+                // so trace lists group by route instead of showing one generic name
                 $request = $this->getRequest();
                 if ($request) {
-                    $rootSpan->setAttribute('http.route', $request->getModuleName()
+                    $route = $request->getModuleName()
                         . '/' . $request->getControllerName()
-                        . '/' . $request->getActionName());
+                        . '/' . $request->getActionName();
+                    $rootSpan->setAttribute('http.route', $route);
+                    $rootSpan->updateName($requestMethod . ' ' . $route);
 
                     // Detect area: admin, api, or frontend
                     $area = 'frontend';

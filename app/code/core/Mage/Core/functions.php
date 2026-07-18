@@ -109,8 +109,8 @@ function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
                     E_USER_NOTICE => 'user_notice', E_RECOVERABLE_ERROR => 'recoverable_error',
                     E_DEPRECATED => 'deprecated', default => "unknown_$errno",
                 },
-                'code.filepath' => $errfile,
-                'code.lineno' => $errline,
+                'code.file.path' => $errfile,
+                'code.line.number' => $errline,
             ];
             if (in_array($errno, [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR], true)) {
                 $spanEventAttributes['error.message'] = $errstr;
