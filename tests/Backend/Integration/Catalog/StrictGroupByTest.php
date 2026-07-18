@@ -3,11 +3,9 @@
 declare(strict_types=1);
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 use Maho\Db\Adapter\Pdo\Mysql;
@@ -185,8 +183,9 @@ it('counts super-product usage in isUsedBySuperProducts and honors the attribute
         expect((int) $attributeResource->isUsedBySuperProducts($attribute, $fixture['attribute_set_id']))->toBe(2);
 
         // ...and a non-matching set yields no row -> falsy, the boolean contract
-        // deleteEntity() and _beforeDelete() rely on.
-        expect($attributeResource->isUsedBySuperProducts($attribute, 999999))->toBeFalsy();
+        // deleteEntity() and _beforeDelete() rely on. 32767 stays inside the
+        // smallint range of attribute_set_id on PostgreSQL.
+        expect($attributeResource->isUsedBySuperProducts($attribute, 32767))->toBeFalsy();
     } finally {
         $adapter->delete($superTable, ['attribute_id = ?' => $attributeId]);
     }

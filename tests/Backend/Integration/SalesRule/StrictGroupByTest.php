@@ -144,6 +144,19 @@ function salesRuleLoadReportCollection(string $collectionModel, string $period):
 }
 
 /**
+ * Keep only the rows created by this file's fixtures. The sample-data install
+ * can leave unrelated aggregated rows inside the same store/date range, so
+ * absolute row counts must be scoped to the fixture coupon codes.
+ */
+function salesRuleFixtureRows(array $rows): array
+{
+    return array_values(array_filter(
+        $rows,
+        fn(array $row) => in_array($row['coupon_code'] ?? null, ['MAHO-SGB-A', 'MAHO-SGB-B'], true),
+    ));
+}
+
+/**
  * Find a grouped result row by coupon code and period prefix.
  */
 function salesRuleFindRow(array $rows, string $couponCode, string $periodPrefix): ?array
@@ -170,11 +183,15 @@ it('loads the daily coupon report collection without strict GROUP BY errors and 
         expect(strtoupper($collection->getSelect()->assemble()))->toContain('MAX(RULE_NAME)');
 
         // Executes under strict GROUP BY (throws -> test fails).
-        $rows = salesRuleRunInStrictMode($collection->getSelect());
+        $rows = salesRuleFixtureRows(salesRuleRunInStrictMode($collection->getSelect()));
 
-        // 3 groups: (2026-01-15, A), (2026-01-15, B), (2026-02-10, A).
+        // 3 fixture groups: (2026-01-15, A), (2026-01-15, B), (2026-02-10, A).
         expect($rows)->toHaveCount(3);
-        expect($collection->getItems())->toHaveCount(3);
+        $fixtureItems = array_filter(
+            $collection->getItems(),
+            fn($item) => in_array($item->getData('coupon_code'), ['MAHO-SGB-A', 'MAHO-SGB-B'], true),
+        );
+        expect($fixtureItems)->toHaveCount(3);
 
         // The two 2026-01-15 / MAHO-SGB-A source rows collapsed into one group
         // with summed measures and the (constant-per-coupon) rule name intact.
@@ -203,9 +220,9 @@ it('loads the monthly and yearly coupon report collections without strict GROUP 
     salesRuleInsertAggregateFixture('salesrule/coupon_aggregated');
 
     try {
-        // Month: groups (2026-01, A), (2026-01, B), (2026-02, A).
+        // Month: fixture groups (2026-01, A), (2026-01, B), (2026-02, A).
         $monthCollection = salesRuleLoadReportCollection('salesrule/report_collection', 'month');
-        $monthRows = salesRuleRunInStrictMode($monthCollection->getSelect());
+        $monthRows = salesRuleFixtureRows(salesRuleRunInStrictMode($monthCollection->getSelect()));
         expect($monthRows)->toHaveCount(3);
 
         $monthRowA = salesRuleFindRow($monthRows, 'MAHO-SGB-A', '2026-01');
@@ -213,9 +230,9 @@ it('loads the monthly and yearly coupon report collections without strict GROUP 
         expect((int) $monthRowA['coupon_uses'])->toBe(5);
         expect($monthRowA['rule_name'])->toBe('Maho Strict Rule A');
 
-        // Year: groups (2026, A) and (2026, B); all three A rows collapse.
+        // Year: fixture groups (2026, A) and (2026, B); all three A rows collapse.
         $yearCollection = salesRuleLoadReportCollection('salesrule/report_collection', 'year');
-        $yearRows = salesRuleRunInStrictMode($yearCollection->getSelect());
+        $yearRows = salesRuleFixtureRows(salesRuleRunInStrictMode($yearCollection->getSelect()));
         expect($yearRows)->toHaveCount(2);
 
         $yearRowA = salesRuleFindRow($yearRows, 'MAHO-SGB-A', '2026');
@@ -273,7 +290,7 @@ it('loads the updated-at coupon report collection without strict GROUP BY errors
         expect($collection)->toBeInstanceOf(Mage_SalesRule_Model_Resource_Report_Updatedat_Collection::class);
         expect(strtoupper($collection->getSelect()->assemble()))->toContain('MAX(RULE_NAME)');
 
-        $rows = salesRuleRunInStrictMode($collection->getSelect());
+        $rows = salesRuleFixtureRows(salesRuleRunInStrictMode($collection->getSelect()));
         expect($rows)->toHaveCount(3);
 
         $rowA = salesRuleFindRow($rows, 'MAHO-SGB-A', '2026-01-15');
@@ -311,9 +328,10 @@ it('loads the coupon report collection in subtotals mode without strict GROUP BY
 
         $rows = salesRuleRunInStrictMode($collection->getSelect());
 
-        // 2 period groups: 2026-01-15 (uses 2+3+1) and 2026-02-10 (uses 4).
-        expect($rows)->toHaveCount(2);
-
+        // Subtotal rows carry no coupon_code, so assertions are scoped to the
+        // two fixture periods instead of counting all rows: 2026-01-15
+        // (uses 2+3+1) and 2026-02-10 (uses 4). Sample data may contribute
+        // rows for other periods in the same range.
         $usesByPeriod = [];
         foreach ($rows as $row) {
             $usesByPeriod[(string) $row['period']] = (int) $row['coupon_uses'];

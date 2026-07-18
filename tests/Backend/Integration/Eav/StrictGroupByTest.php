@@ -3,11 +3,9 @@
 declare(strict_types=1);
 
 /**
- * Maho
- *
- * @package    Mage_Eav
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Eav
  */
 
 uses(Tests\MahoBackendTestCase::class);
@@ -178,19 +176,34 @@ it('filters by an array of attribute set ids via subquery without strict GROUP B
     // belongs to the default set into it. Under the old JOIN + GROUP BY shape
     // an attribute in both sets produced two joined rows; the IN-subquery must
     // return it exactly once.
+    // Resolve the new ids by their unique names rather than lastInsertId(),
+    // which is unreliable for these sequence-backed tables on PostgreSQL.
+    $setName = 'Maho Strict GROUP BY Set ' . uniqid();
     $adapter->insert($resource->getTableName('eav/attribute_set'), [
         'entity_type_id'     => $entityTypeId,
-        'attribute_set_name' => 'Maho Strict GROUP BY Set ' . uniqid(),
+        'attribute_set_name' => $setName,
         'sort_order'         => 999,
     ]);
-    $newSetId = (int) $adapter->lastInsertId($resource->getTableName('eav/attribute_set'));
+    $newSetId = (int) $adapter->fetchOne(
+        $adapter->select()
+            ->from($resource->getTableName('eav/attribute_set'), ['attribute_set_id'])
+            ->where('attribute_set_name = ?', $setName),
+    );
+    expect($newSetId)->toBeGreaterThan(0);
 
+    $groupName = 'Maho Strict Group ' . uniqid();
     $adapter->insert($resource->getTableName('eav/attribute_group'), [
         'attribute_set_id'     => $newSetId,
-        'attribute_group_name' => 'General',
+        'attribute_group_name' => $groupName,
         'sort_order'           => 1,
     ]);
-    $newGroupId = (int) $adapter->lastInsertId($resource->getTableName('eav/attribute_group'));
+    $newGroupId = (int) $adapter->fetchOne(
+        $adapter->select()
+            ->from($resource->getTableName('eav/attribute_group'), ['attribute_group_id'])
+            ->where('attribute_set_id = ?', $newSetId)
+            ->where('attribute_group_name = ?', $groupName),
+    );
+    expect($newGroupId)->toBeGreaterThan(0);
 
     $linkedAttributeId = (int) $adapter->fetchOne(
         $adapter->select()
