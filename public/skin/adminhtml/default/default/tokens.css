@@ -1,0 +1,108 @@
+/*
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+*/
+
+:root {
+    color-scheme: light dark;
+
+    --maho-font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+    /* Pure neutral graphite; chartreuse is the only color in the chrome */
+    --maho-ink: light-dark(#1c1c1c, #ececec);
+    --maho-ink-soft: light-dark(#404040, #c6c6c6);
+    --maho-ink-muted: light-dark(#666, #959595);
+    --maho-ink-faint: light-dark(#9e9e9e, #6d6d6d);
+
+    --maho-chartreuse: #d7df22;
+    --maho-chartreuse-deep: light-dark(#647004, #c5cd31);
+    --maho-night: light-dark(#121212, #0c0c0c);
+    --maho-night-raised: light-dark(#242424, #1e1e1e);
+    --maho-night-soft: light-dark(#2e2e2e, #d4d4d4);
+    --maho-link: light-dark(#647004, #c5cd31);
+
+    --maho-surface-page: light-dark(#f2f2f2, #161616);
+    --maho-surface: light-dark(#fff, #1d1d1d);
+    --maho-surface-raised: light-dark(#fff, #242424);
+    --maho-surface-sunken: light-dark(#f1f1f1, #111);
+    --maho-surface-overlay: light-dark(#fff, #292929);
+
+    --maho-border-strong: light-dark(rgba(0, 0, 0, .32), rgba(255, 255, 255, .26));
+    --maho-border: light-dark(rgba(0, 0, 0, .19), rgba(255, 255, 255, .15));
+    --maho-border-soft: light-dark(rgba(0, 0, 0, .12), rgba(255, 255, 255, .1));
+    --maho-hairline: light-dark(rgba(0, 0, 0, .07), rgba(255, 255, 255, .06));
+
+    --maho-control-bg: light-dark(#fff, #111);
+    --maho-control-border: light-dark(rgba(0, 0, 0, .26), rgba(255, 255, 255, .22));
+    --maho-control-ink: light-dark(#1c1c1c, #ececec);
+    --maho-control-placeholder: light-dark(#9e9e9e, #6d6d6d);
+    --maho-accent: light-dark(#647004, #c5cd31);
+    --maho-accent-strong: light-dark(#4c5405, #d7df22);
+    --maho-focus-ring: light-dark(#8a920f, #d7df22);
+
+    --maho-success: light-dark(#2e7d43, #7fc98f);
+    --maho-success-bg: light-dark(#e9f4e6, #1d2b1f);
+    --maho-success-border: light-dark(#b5d4ab, #3a5440);
+    --maho-warning: light-dark(#946300, #e3b341);
+    --maho-warning-bg: light-dark(#fbf4dc, #2c2616);
+    --maho-warning-border: light-dark(#e3d49a, #5c4a1e);
+    --maho-error: light-dark(#c8401e, #f08565);
+    --maho-error-strong: light-dark(#a23218, #f4a088);
+    --maho-error-bg: light-dark(#faece6, #2e1b15);
+    --maho-error-border: light-dark(#e2a18c, #6b3525);
+    --maho-info: light-dark(#2e6e8e, #7fb7d4);
+    --maho-info-bg: light-dark(#edf4f7, #16242c);
+    --maho-info-border: light-dark(#b9d2de, #2e4d5e);
+
+    --maho-zebra: light-dark(#f8f8f8, #252525);
+    --maho-row-hover: light-dark(rgba(215, 223, 34, .14), rgba(215, 223, 34, .07));
+    --maho-row-selected: light-dark(rgba(215, 223, 34, .24), rgba(215, 223, 34, .13));
+
+    --maho-btn-bg: light-dark(#1c1c1c, #d7df22);
+    --maho-btn-bg-hover: light-dark(#d7df22, #e3ea56);
+    --maho-btn-ink: light-dark(#fff, #121212);
+    --maho-btn-ink-hover: #121212;
+    --maho-btn2-bg: light-dark(#fff, #242424);
+    --maho-btn2-bg-hover: light-dark(#f1f1f1, #303030);
+    --maho-btn2-border: light-dark(rgba(0, 0, 0, .28), rgba(255, 255, 255, .24));
+    --maho-btn2-ink: light-dark(#1c1c1c, #ececec);
+
+    --maho-space-1: 0.125rem;   /* 2px */
+    --maho-space-2: 0.3125rem;  /* 5px */
+    --maho-space-3: 0.625rem;   /* 10px */
+    --maho-space-4: 0.9375rem;  /* 15px */
+    --maho-space-5: 1.25rem;    /* 20px */
+    --maho-space-6: 1.5625rem;  /* 25px */
+    --maho-space-7: 1.875rem;   /* 30px */
+    --maho-space-8: 2.5rem;     /* 40px */
+    --maho-space-9: 3.125rem;   /* 50px */
+
+    --maho-radius-sm: 4px;
+    --maho-radius-md: 6px;
+    --maho-radius-lg: 10px;
+    --maho-radius-pill: 999px;
+
+    --maho-text-xs: 0.6875rem;  /* 11px */
+    --maho-text-sm: 0.75rem;    /* 12px */
+    --maho-text-md: 0.8125rem;  /* 13px */
+    --maho-text-lg: 0.875rem;   /* 14px */
+    --maho-text-xl: 1rem;       /* 16px */
+    --maho-text-2xl: 1.125rem;  /* 18px */
+    --maho-text-3xl: 1.25rem;   /* 20px */
+    --maho-text-4xl: 1.375rem;  /* 22px */
+
+    --maho-shadow-float: 0 8px 24px light-dark(rgba(0, 0, 0, .12), rgba(0, 0, 0, .5)), 0 1px 3px light-dark(rgba(0, 0, 0, .07), rgba(0, 0, 0, .4));
+
+    --maho-duration-fast: .15s;
+    --maho-duration-slow: .3s;
+    --maho-ease: ease;
+}
+
+/* Manual override from the header scheme selector; default follows the OS */
+:root[data-scheme="light"] {
+    color-scheme: light;
+}
+
+:root[data-scheme="dark"] {
+    color-scheme: dark;
+}

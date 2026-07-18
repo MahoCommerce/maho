@@ -1,15 +1,16 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Api2
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Api2
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -38,10 +39,10 @@ class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Contro
     {
         $this
             ->_title($this->__('System'))
-            ->_title($this->__('Web Services'))
+            ->_title($this->__('API'))
             ->_title($this->__('REST Attributes'))
             ->loadLayout()
-            ->_setActiveMenu('system/api/rest_attributes')
+            ->_setActiveMenu('system/api/rest_legacy/rest_attributes')
             ->_addBreadcrumb($this->__('Web services'), $this->__('Web services'))
             ->_addBreadcrumb($this->__('REST Attributes'), $this->__('REST Attributes'))
             ->_addBreadcrumb($this->__('Attributes'), $this->__('Attributes'))
@@ -55,7 +56,7 @@ class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Contro
     public function editAction(): void
     {
         $this->loadLayout()
-            ->_setActiveMenu('system/api/rest_attributes');
+            ->_setActiveMenu('system/api/rest_legacy/rest_attributes');
 
         $type = $this->getRequest()->getParam('type');
 
@@ -67,7 +68,7 @@ class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Contro
         }
 
         $this->_title($this->__('System'))
-            ->_title($this->__('Web Services'))
+            ->_title($this->__('API'))
             ->_title($this->__('REST ACL Attributes'));
 
         $title = $this->__('Edit %s ACL attribute rules', $userTypes[$type]);

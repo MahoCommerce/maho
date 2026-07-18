@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 /**
@@ -454,6 +452,34 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
         $this->load($origObject, $object->getData($this->getEntityIdField()));
 
         return $origObject;
+    }
+
+    /**
+     * Validate attribute values, excusing store-scope attributes set to use the default value.
+     *
+     * In catalog a `false` value is the "use default scope value" sentinel, and it is the only value
+     * treated as empty (see _isAttributeValueEmpty), so it is the only value a required attribute is
+     * ever flagged for. In a non-default store the default scope is assumed to hold a valid value
+     * (not verified here), so such an attribute is not a missing required value.
+     *
+     * @param Mage_Catalog_Model_Abstract $object
+     * @return array|true
+     */
+    #[\Override]
+    public function validate($object)
+    {
+        $result = parent::validate($object);
+        if ($result === true || (int) $object->getStoreId() === Mage_Core_Model_App::ADMIN_STORE_ID) {
+            return $result;
+        }
+
+        foreach (array_keys($result) as $code) {
+            if ($object->getData($code) === false) {
+                unset($result[$code]);
+            }
+        }
+
+        return $result === [] ? true : $result;
     }
 
     /**

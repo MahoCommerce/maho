@@ -1,14 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    MahoLib
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
+
+declare(strict_types=1);
 
 namespace Maho\Db\Adapter\Pdo;
 
@@ -113,6 +110,12 @@ class Sqlite extends AbstractPdoAdapter
 
         // Store temp tables in memory
         $this->_connection->executeStatement('PRAGMA temp_store = MEMORY');
+
+        // Ensure the advisory locks table exists up front, while the fresh connection
+        // is guaranteed to be outside any transaction. SQLite forbids DDL inside a
+        // transaction, so creating it here means getLock() never has to issue DDL
+        // mid-transaction (e.g. a config-section load during a config save).
+        $this->_ensureLocksTableExists();
 
         // Register custom REGEXP function for SQLite (required for REGEXP queries)
         $this->_registerCustomFunctions();
@@ -1119,13 +1122,13 @@ class Sqlite extends AbstractPdoAdapter
      * Acquire a named lock using a locks table
      *
      * SQLite doesn't have advisory locks, so we implement using a table.
-     * The locks table is created on first use.
+     * The locks table is created at connection init (see _initConnection), so no
+     * DDL is issued here — acquiring a lock is safe inside an open transaction.
      */
     #[\Override]
     public function getLock(string $lockName, int $timeout = 0): bool
     {
         $this->_connect();
-        $this->_ensureLocksTableExists();
 
         $lockKey = md5($lockName);
         $expireTime = time() + 3600; // Locks expire after 1 hour
@@ -1486,12 +1489,7 @@ class Sqlite extends AbstractPdoAdapter
     public function tableColumnExists(string $tableName, string $columnName, ?string $schemaName = null): bool
     {
         $describe = $this->describeTable($tableName, $schemaName);
-        foreach ($describe as $column) {
-            if (strcasecmp($column['COLUMN_NAME'], $columnName) === 0) {
-                return true;
-            }
-        }
-        return false;
+        return array_any($describe, fn($column) => strcasecmp($column['COLUMN_NAME'], $columnName) === 0);
     }
 
     /**
@@ -2290,14 +2288,7 @@ class Sqlite extends AbstractPdoAdapter
 
         // Add composite PRIMARY KEY if no identity column and multiple primary columns
         if (!$hasIdentity && !empty($primary) && count($primary) > 0) {
-            // Check if we didn't already add it inline
-            $hasInlinePrimary = false;
-            foreach ($definition as $def) {
-                if (str_contains($def, 'PRIMARY KEY')) {
-                    $hasInlinePrimary = true;
-                    break;
-                }
-            }
+            $hasInlinePrimary = array_any($definition, fn($def) => str_contains($def, 'PRIMARY KEY'));
             if (!$hasInlinePrimary) {
                 asort($primary, SORT_NUMERIC);
                 $primaryCols = array_map([$this, 'quoteIdentifier'], array_keys($primary));

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Customer
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Customer
  */
 
 class Mage_Customer_Model_Observer
@@ -67,6 +65,52 @@ class Mage_Customer_Model_Observer
             return $this->_isDefaultShipping($address);
         }
         return $this->_isDefaultBilling($address);
+    }
+
+    /**
+     * Force customers to enroll in 2FA before using their account when it is mandatory.
+     */
+    #[Maho\Config\Observer('controller_action_predispatch', area: 'frontend')]
+    public function enforceMandatoryTwofa(\Maho\Event\Observer $observer): void
+    {
+        if (!Mage::getStoreConfigFlag('customer/password/allow_2fa')
+            || !Mage::getStoreConfigFlag('customer/password/require_2fa')
+        ) {
+            return;
+        }
+
+        /** @var Mage_Customer_Model_Session $session */
+        $session = Mage::getSingleton('customer/session');
+        if (!$session->isLoggedIn() || $session->getCustomer()->getTwofaEnabled()) {
+            return;
+        }
+
+        /** @var Mage_Core_Controller_Front_Action $action */
+        $action = $observer->getControllerAction();
+        $request = $action->getRequest();
+
+        // Only gate the sensitive surfaces (account management and checkout); browsing the
+        // catalog, CMS pages, etc. carries no risk and blocking it just punishes the customer.
+        $gatedRoutes = ['customer', 'checkout'];
+        if (!in_array(strtolower((string) $request->getRouteName()), $gatedRoutes, true)) {
+            return;
+        }
+
+        // Within the gated routes, still allow the enrollment page itself, its POST handler and logging out
+        $current = strtolower($request->getRouteName() . '/' . $request->getControllerName() . '/' . $request->getActionName());
+        $allowed = [
+            'customer/account/twofa',
+            'customer/account/twofapost',
+            'customer/account/logout',
+            'customer/account/logoutsuccess',
+        ];
+        if (in_array($current, $allowed, true)) {
+            return;
+        }
+
+        $session->addNotice(Mage::helper('customer')->__('Two-factor authentication is required. Please set it up to continue.'));
+        $action->setFlag('', Mage_Core_Controller_Varien_Action::FLAG_NO_DISPATCH, true);
+        $action->getResponse()->setRedirect(Mage::getUrl('customer/account/twofa'));
     }
 
     /**
@@ -239,13 +283,7 @@ class Mage_Customer_Model_Observer
             Mage_Core_Model_Encryption::HASH_VERSION_SHA512,
             Mage_Core_Model_Encryption::HASH_VERSION_LATEST,
         ];
-        $currentVersionHash = null;
-        foreach ($hashVersionArray as $hashVersion) {
-            if ($encryptor->validateHashByVersion($password, $model->getPasswordHash(), $hashVersion)) {
-                $currentVersionHash = $hashVersion;
-                break;
-            }
-        }
+        $currentVersionHash = array_find($hashVersionArray, fn($hashVersion) => $encryptor->validateHashByVersion($password, $model->getPasswordHash(), $hashVersion));
         if (Mage_Core_Model_Encryption::HASH_VERSION_SHA256 !== $currentVersionHash) {
             $model->changePassword($password, false);
         }

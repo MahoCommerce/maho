@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Checkout
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Checkout
  */
 
 class Mage_Checkout_Model_Type_Onepage
@@ -152,6 +150,13 @@ class Mage_Checkout_Model_Type_Onepage
         $customer = $customerSession->getCustomer();
         if ($customer) {
             $this->getQuote()->assignCustomer($customer);
+
+            // Single saved address used for both: default the shipping radio to
+            // "same as billing". Render-scoped flag, the quote is not re-saved here.
+            $defaultBilling = $customer->getDefaultBilling();
+            if ($defaultBilling && $defaultBilling == $customer->getDefaultShipping()) {
+                $this->getQuote()->getShippingAddress()->setSameAsBilling(1);
+            }
         }
         return $this;
     }

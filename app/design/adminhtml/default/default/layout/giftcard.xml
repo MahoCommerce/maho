@@ -1,13 +1,7 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Giftcard
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- */
+SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: OSL-3.0
 -->
 <layout>
     <!-- Gift Card Grid Page -->
@@ -24,13 +18,10 @@
         </reference>
     </adminhtml_giftcard_history_index>
 
-    <!-- Gift Card Product Edit Page - Add tab and field toggle script -->
+    <!-- Gift Card Product Edit Page - Add tab -->
     <adminhtml_catalog_product_giftcard>
         <reference name="product_tabs">
             <action method="addTabAfter"><name>giftcard</name><block>giftcard/adminhtml_catalog_product_edit_tab_giftcard</block><after>group_9</after></action>
-        </reference>
-        <reference name="content">
-            <block type="core/template" name="giftcard.type.toggle" template="maho/giftcard/catalog/product/type-toggle.phtml" />
         </reference>
     </adminhtml_catalog_product_giftcard>
 

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_CatalogRule
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_CatalogRule
  */
 
 class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstract
@@ -642,6 +640,31 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
             ->where('website_id = ?', $websiteId)
             ->where('customer_group_id = ?', $customerGroupId)
             ->where('product_id IN(?)', $productIds);
+        return $adapter->fetchPairs($select);
+    }
+
+    /**
+     * Retrieve all products with an active catalog rule price for a date, website and customer group.
+     * Collect data with product Id => rule_price pairs.
+     *
+     * @param int|string|DateTimeInterface $date
+     * @param int $websiteId
+     * @param int $customerGroupId
+     * @param array|null $productIds optional product id whitelist
+     *
+     * @return array<int, float>
+     */
+    public function getActiveRuleProductPrices($date, $websiteId, $customerGroupId, ?array $productIds = null)
+    {
+        $adapter = $this->_getReadAdapter();
+        $select  = $adapter->select()
+            ->from($this->getTable('catalogrule/rule_product_price'), ['product_id', 'rule_price'])
+            ->where('rule_date = ?', Mage::app()->getLocale()->formatDateForDb($date, withTime: false))
+            ->where('website_id = ?', $websiteId)
+            ->where('customer_group_id = ?', $customerGroupId);
+        if ($productIds !== null) {
+            $select->where('product_id IN (?)', $productIds);
+        }
         return $adapter->fetchPairs($select);
     }
 

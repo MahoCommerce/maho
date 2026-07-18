@@ -9,9 +9,12 @@ Maho is an open-source ecommerce platform forked from OpenMage, designed for med
 ## Essential Commands
 
 ```bash
-vendor/bin/php-cs-fixer fix        # Fix code style (lint)
-vendor/bin/phpstan analyze         # Run static analysis (level 6)
-vendor/bin/rector -c .rector.php
+composer lint                      # Run all linters (cs-fixer, rector, phpstan)
+composer lint:cs-fixer             # Code style only (dry-run)
+composer lint:rector               # Rector only (dry-run)
+composer lint:phpstan              # PHPStan only (level 6)
+vendor/bin/php-cs-fixer fix        # Apply code style fixes (writes changes)
+vendor/bin/rector -c .rector.php   # Apply rector fixes (writes changes)
 ./maho cache:flush                 # Flush all caches
 composer test                        # Run all tests (Install → Backend → Frontend)
 composer test -- --testsuite=Frontend # Run frontend tests only
@@ -131,9 +134,17 @@ public function viewAction() { ... }
 - Back-compat: modules still declaring `<frontend><routers>` in `config.xml` keep working via a legacy-XML match path that runs **before** the Symfony matcher, preserving M1's "first declared wins" precedence. A single `LOG_NOTICE` is emitted once per process listing legacy frontNames, encouraging migration.
 
 #### Overriding controllers
-- **Admin**: register your module under `<admin><routers><adminhtml><args><modules><MyMod before|after="Mage_Adminhtml"/>` in `config.xml`. The runtime walks this chain at dispatch time, so admin controllers (subclasses of `Mage_Adminhtml_Controller_Action` / `Maho\Controller\AdminAction`) override core controllers without redeclaring routes.
-- **Frontend**: same pattern via `<frontend><routers><{routerCode}><args><modules><MyMod before|after="Mage_Customer"/>` (the router code must equal the frontName you're overriding, or supply `<args><frontName>` explicitly). Subclasses of the core controller win over the base when present; M1 chain semantics are preserved.
-- **Install**: no chain support; override by redeclaring `#[Route]` attributes on a custom controller.
+Preferred (no XML): **subclass the controller you want to override.** The compiler detects, at `composer dump-autoload`, any controller that extends a route-owning controller and declares no `#[Route]` of its own, and points the route at the subclass. This works in every area (frontend, admin, install).
+
+```php
+// Just works — no XML, no attribute. Run `composer dump-autoload` after adding it.
+class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /* override actions */ }
+```
+
+- **Precedence is structural.** When several modules override the same controller they should form a single inheritance chain (B extends A extends Core); the most-derived class wins, deterministically and regardless of module load order. Two *sibling* subclasses extending the same base independently are a conflict: the compiler logs an error and falls back to module load order (local/community over core) — resolve it by having one override extend the other.
+- A subclass that adds **new** actions needs its own `#[Route]` for those actions (inheritance only carries over the base's existing routes).
+
+Legacy XML chain (still honored for BC, wins over the compiled override): register your module under `<{area}><routers><{routerCode}><args><modules><MyMod before|after="Mage_X"/>`. Migrate existing chains with `./maho legacy:migrate-routes` (it drops a `<modules>` chain once the overrides are clean subclasses). Use the inheritance approach for new code.
 
 ## Development Guidelines
 
@@ -148,24 +159,29 @@ All Zend Framework and Varien components have been completely removed. **NEVER**
 - CSS: use modern features, no IE/legacy browser support
 - JS AJAX: always use `mahoFetch()` instead of native `fetch()`
 - New tools/libraries: always use latest available version
-- Update PHP file headers with current year for the Maho copyright line
-- New PHP files: only Maho copyright with current year:
+- File headers use the SPDX format (see issue #939). Dual-licensed: source code (PHP, JS, CSS) under `OSL-3.0`; templates, config, and assets (PHTML, XML, HTML) under `AFL-3.0`.
+- New PHP files: a single `SPDX-FileCopyrightText` line with the current year and Maho as holder. Add a short class description on the first line ending with a period (it becomes the phpDocumentor summary); omit it if the class name is self-explanatory rather than writing filler:
 ```php
 /**
- * Maho
+ * Short class description ending with a period.
  *
- * @package    Mage_Module
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Module
  */
 ```
+- The SPDX block is tight (no blank lines inside); `@package` follows it with no blank line above. The phpDocumentor CI workflow strips ` * SPDX-` lines before generating docs, leaving the canonical summary/blank/tags docblock.
+- Non-PHP new files: XML/HTML use an `<!-- ... -->` comment block, JS uses `//` line comments, CSS uses a `/* ... */` block comment (not `//`), each with `SPDX-FileCopyrightText:` and `SPDX-License-Identifier:` lines.
+- Existing files: preserve inherited Magento/OpenMage copyright lines verbatim; don't add yourself (git history is the attribution log). Update the Maho year range only on files you're already modifying. Translate an existing `@license` URL to its SPDX identifier (`osl-3.0` → `OSL-3.0`, `afl-3.0` → `AFL-3.0`) rather than reassigning by extension.
+- When a file has multiple `SPDX-FileCopyrightText` holders, order them newest-maintainer-first: Maho, then OpenMage, then Magento, then any other third-party authors (ordered by copyright year, newest first). Not every holder appears in every file; just keep the priority among those present.
+- To migrate a file's header (or a whole directory) from the legacy `@copyright`/`@license` format, use the `spdx-headers` skill.
 - Before committing, ensure translatable strings (`$this->__()` or `Mage::helper()->__()`) are in `app/locale/en_US/`
 
 ### Adding New Features
 - New modules: `app/code/core/Maho/` namespace, declared in `app/etc/modules/`
-- Follow existing module patterns; use `declare(strict_types=1)` and PHP 8.3+ features
+- Follow existing module patterns; use `declare(strict_types=1)` (placed *after* the file-level docblock, not before) and PHP 8.3+ features
 - Use `#[\Override]` attribute for overridden methods
-- When overriding admin routes in Maho modules, use `before="Mage_Adminhtml"` pattern
+- To override an existing controller, subclass it (see "Overriding controllers" above) — no XML needed
 
 ### Modifying Existing Features
 - Feel free to modify core files directly
@@ -297,7 +313,59 @@ it('can process customer orders', function () {
 - Validate/sanitize user input at the model layer
 - Doctrine DBAL parameterized queries are automatic
 
+### Rate limiting & honeypot (shared `core` helper)
+
+Throttle public endpoints and trap bots with the shared `Mage_Core_Helper_Data` factories, do
+not roll a per-feature limiter. They hand back a `\Maho\Security\RateLimiter` (sliding window of
+`$maxAttempts` hits per `$windowSeconds`). **Core owns request identity**: callers never read the
+client IP or session id themselves, they name a scope and core resolves it. A non-positive
+`$maxAttempts` disables a limiter (no call-site `if ($limit <= 0)` guard needed).
+
+```php
+use Maho\Security\RateLimitScope;
+
+// Scope by request client (core resolves the identity). Default scope is Client = IP, falling
+// back to session id when the IP is unknown. Other scopes: RateLimitScope::Ip, ::Session.
+$limiter = Mage::helper('core')->rateLimiter('myfeature', 5, 3600);   // namespace, max, window
+if (!$limiter->attempt()) {            // check-and-record; false = blocked
+    // blocked, surface your own message (AJAX/API stay silent)
+}
+
+// Scope by a value you already hold (email, store id, order ref), not request identity.
+if (!Mage::helper('core')->rateLimiterBy('myfeature_email', $email, 1, 86400)->attempt()) {
+    // blocked
+}
+
+// Check up front, record only on failure (see Mage_Sales_Helper_Guest). ipRateLimiter() is the
+// store-config-governed IP limiter (system/rate_limit/*); null when disabled or IP unknown.
+$limiter = Mage::helper('core')->ipRateLimiter();
+if ($limiter?->tooManyAttempts()) { /* blocked: present "Too Soon" */ }
+// ...later, on a failed attempt only:
+$limiter?->hit();
+```
+
+`attempt()` is check-and-record; `tooManyAttempts()` is a pure read; `hit()` records explicitly.
+`remaining()` and `clear()` round out the object. Counters are cache-backed (tag
+`\Maho\Security\RateLimiter::CACHE_TAG`), so a full cache flush resets every window. Keep
+must-persist security counters (e.g. forgot-password) on durable storage instead.
+
+```php
+// Honeypot: render a visually-hidden trap field, then check it server-side. The field name is
+// install-specific. The on/off toggle is the caller's concern: gate both the render and the
+// check behind your module's own default-on `*/honeypot_enabled` flag.
+echo Mage::helper('core')->getHoneypotFieldHtml();               // in the template (ready-to-echo markup)
+if (Mage::getStoreConfigFlag('mymodule/abuse/honeypot_enabled')
+    && Mage::helper('core')->isHoneypotTriggered($request->getPost())) {
+    // silently drop (works for $request->getPost() and decoded API bodies alike)
+}
+```
+
 ## Git Commit Rules
 - **NEVER** include "Co-Authored-By: Claude" or any AI attribution in commits
 - **NEVER** mention Claude, AI, or assistant in commit messages
 - Keep commits professional and focused only on code changes
+
+## Pull Request Titles
+- Write a plain, descriptive title with **no** conventional-commit prefix (`feat(...)`, `fix(...)`, etc.)
+- Phrase it in the **past tense** describing what was done (e.g. "Added schema.org structured data for products and blog posts")
+- Spell out what the change delivers rather than using a vague summary

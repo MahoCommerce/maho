@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 class Mage_Core_Model_Translate
@@ -65,22 +63,6 @@ class Mage_Core_Model_Translate
     protected $_dataScope;
 
     /**
-     * Configuration flag to enable inline translations
-     *
-     * @var bool
-     */
-    protected $_translateInline;
-
-    /**
-     * Configuration flag to local enable inline translations
-     *
-     * @var bool
-     */
-    protected $_canUseInline = true;
-
-    public function __construct() {}
-
-    /**
      * Initialization translation data
      *
      * @param string $area
@@ -90,9 +72,6 @@ class Mage_Core_Model_Translate
     public function init($area, $forceReload = false)
     {
         $this->setConfig([self::CONFIG_KEY_AREA => $area]);
-
-        $this->_translateInline = Mage::getSingleton('core/translate_inline')
-            ->isAllowed($area === Mage_Core_Model_App_Area::AREA_ADMINHTML ? 'admin' : null);
 
         if (!$forceReload) {
             if ($this->_canUseCache()) {
@@ -363,7 +342,6 @@ class Mage_Core_Model_Translate
         }
         if ($text instanceof Mage_Core_Model_Translate_Expr) {
             $code = $text->getCode(self::SCOPE_SEPARATOR);
-            $module = $text->getModule();
             $text = $text->getText();
             $translated = $this->_getTranslatedString($text, $code);
         } else {
@@ -397,35 +375,7 @@ class Mage_Core_Model_Translate
             $result = $translated;
         }
 
-        if ($this->_translateInline && $this->getTranslateInline()) {
-            if (!str_contains($result, '{{{') || !str_contains($result, '}}}') || !str_contains($result, '}}{{')) {
-                $result = '{{{' . $result . '}}{{' . $translated . '}}{{' . $text . '}}{{' . $module . '}}}';
-            }
-        }
-
         return $result;
-    }
-
-    /**
-     * Set Translate inline mode
-     *
-     * @param bool $flag
-     * @return $this
-     */
-    public function setTranslateInline($flag = null)
-    {
-        $this->_canUseInline = (bool) $flag;
-        return $this;
-    }
-
-    /**
-     * Retrieve active translate mode
-     *
-     * @return bool
-     */
-    public function getTranslateInline()
-    {
-        return $this->_canUseInline;
     }
 
     /**

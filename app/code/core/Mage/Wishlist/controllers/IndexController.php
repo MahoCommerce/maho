@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Wishlist
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Wishlist
  */
 
 /**
@@ -699,10 +697,6 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             return;
         }
 
-        $translate = Mage::getSingleton('core/translate');
-        /** @var Mage_Core_Model_Translate $translate */
-        $translate->setTranslateInline(false);
-
         try {
             $customer = Mage::getSingleton('customer/session')->getCustomer();
 
@@ -741,16 +735,12 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             $wishlist->setShared(1);
             $wishlist->save();
 
-            $translate->setTranslateInline(true);
-
             Mage::dispatchEvent('wishlist_share', ['wishlist' => $wishlist]);
             Mage::getSingleton('customer/session')->addSuccess(
                 $this->__('Your Wishlist has been shared.'),
             );
             $this->_redirect('*/*', ['wishlist_id' => $wishlist->getId()]);
         } catch (Exception $e) {
-            $translate->setTranslateInline(true);
-
             Mage::getSingleton('wishlist/session')->addError($e->getMessage());
             Mage::getSingleton('wishlist/session')->setSharingForm($this->getRequest()->getPost());
             $this->_redirect('*/*/share');

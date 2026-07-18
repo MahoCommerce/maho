@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 class Mage_Catalog_Model_Product_Type_Price
@@ -382,8 +380,10 @@ class Mage_Catalog_Model_Product_Type_Price
 
         if ($rulePrice === false) {
             $storeDateTime = Mage::app()->getLocale()->utcToStore($sId, 'now');
-            $rulePrice = Mage::getResourceModel('catalogrule/rule')
-                ->getRulePrice($storeDateTime, $wId, $gId, $productId);
+            if (Mage::helper('core')->isModuleEnabled('Mage_CatalogRule')) {
+                $rulePrice = Mage::getResourceModel('catalogrule/rule')
+                    ->getRulePrice($storeDateTime, $wId, $gId, $productId);
+            }
         }
 
         if ($rulePrice !== null && $rulePrice !== false) {

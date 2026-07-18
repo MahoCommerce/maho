@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
  */
 
 class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_Resource_Report_Abstract
@@ -74,7 +72,7 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
                 // convert dates from UTC to current admin timezone
                 'period'                         => $periodExpr,
                 'store_id'                       => 'o.store_id',
-                'order_status'                   => 'o.status',
+                'order_status'                   => $adapter->getIfNullSql('o.status', "''"),
                 'orders_count'                   => new Maho\Db\Expr('COUNT(o.entity_id)'),
                 'total_qty_ordered'              => new Maho\Db\Expr('SUM(oi.total_qty_ordered)'),
                 'total_qty_invoiced'             => new Maho\Db\Expr('SUM(oi.total_qty_invoiced)'),

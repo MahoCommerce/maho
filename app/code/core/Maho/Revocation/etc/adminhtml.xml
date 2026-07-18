@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: OSL-3.0
+-->
+<config>
+    <menu>
+        <sales>
+            <children>
+                <revocation translate="title" module="revocation">
+                    <title>Revocation Requests</title>
+                    <action>adminhtml/sales_revocation/index</action>
+                    <sort_order>52</sort_order>
+                </revocation>
+            </children>
+        </sales>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <sales>
+                        <children>
+                            <revocation translate="title" module="revocation">
+                                <title>Revocation Requests</title>
+                                <sort_order>250</sort_order>
+                                <children>
+                                    <view translate="title">
+                                        <title>View Requests</title>
+                                        <sort_order>10</sort_order>
+                                    </view>
+                                    <process translate="title">
+                                        <title>Process Requests</title>
+                                        <sort_order>20</sort_order>
+                                    </process>
+                                </children>
+                            </revocation>
+                        </children>
+                    </sales>
+                    <system>
+                        <children>
+                            <config>
+                                <children>
+                                    <revocation translate="title" module="revocation">
+                                        <title>Revocation Button</title>
+                                    </revocation>
+                                </children>
+                            </config>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

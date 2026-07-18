@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Maho_Paypal
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Paypal
  */
 
 declare(strict_types=1);
@@ -126,14 +124,16 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
      */
     protected function _acquireLock(string $paypalOrderId): bool
     {
-        $lock = Mage_Index_Model_Lock::getInstance();
-        return $lock->setLock('paypal_order_' . $paypalOrderId, file: true, block: false);
+        /** @var Maho_Paypal_Helper_Data $helper */
+        $helper = Mage::helper('paypal');
+        return $helper->acquireOrderLock($paypalOrderId);
     }
 
     protected function _releaseLock(string $paypalOrderId): void
     {
-        $lock = Mage_Index_Model_Lock::getInstance();
-        $lock->releaseLock('paypal_order_' . $paypalOrderId, file: true);
+        /** @var Maho_Paypal_Helper_Data $helper */
+        $helper = Mage::helper('paypal');
+        $helper->releaseOrderLock($paypalOrderId);
     }
 
     protected function _placeOrderFromPaypalResult(

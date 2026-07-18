@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Maho_Paypal
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Paypal
  */
 
 declare(strict_types=1);
@@ -258,7 +256,7 @@ class Maho_Paypal_Model_Api_Client
             $message = $errorData['message'] ?? $errorBody;
             if (!empty($errorData['details'])) {
                 $details = array_map(fn(array $d) => $d['description'] ?? $d['issue'] ?? '', $errorData['details']);
-                $message .= ' — ' . implode('; ', array_filter($details));
+                $message .= ': ' . implode('; ', array_filter($details));
             }
             $this->_log('Webhook registration failed', ['url' => $url, 'status' => $statusCode, 'response' => $errorData]);
             throw new \RuntimeException($message);
@@ -271,22 +269,18 @@ class Maho_Paypal_Model_Api_Client
     {
         $certUrl = $headers['PAYPAL-CERT-URL'] ?? '';
         if (!preg_match('#^https://api(-m)?\.(?:sandbox\.)?paypal\.com/#', $certUrl)) {
+            $this->_log('Webhook verification rejected', ['reason' => 'cert_url', 'cert_url' => $certUrl]);
             return false;
         }
 
-        $verifyBody = [
-            'auth_algo' => $headers['PAYPAL-AUTH-ALGO'] ?? '',
-            'cert_url' => $certUrl,
-            'transmission_id' => $headers['PAYPAL-TRANSMISSION-ID'] ?? '',
-            'transmission_sig' => $headers['PAYPAL-TRANSMISSION-SIG'] ?? '',
-            'transmission_time' => $headers['PAYPAL-TRANSMISSION-TIME'] ?? '',
-            'webhook_id' => $webhookId,
-            'webhook_event' => Mage::helper('core')->jsonDecode($body),
-        ];
+        if (!json_validate($body)) {
+            $this->_log('Webhook verification rejected', ['reason' => 'malformed_body']);
+            return false;
+        }
 
         $client = $this->_createHttpClient();
         $response = $client->request('POST', $this->_getApiUrl('/v1/notifications/verify-webhook-signature'), [
-            'json' => $verifyBody,
+            'body' => self::buildVerificationRequest($headers, $webhookId, $body),
             'headers' => $this->_getAuthHeaders(),
         ]);
 
@@ -297,7 +291,37 @@ class Maho_Paypal_Model_Api_Client
         }
 
         $result = Mage::helper('core')->jsonDecode($response->getContent(false));
-        return ($result['verification_status'] ?? '') === 'SUCCESS';
+        $verdict = $result['verification_status'] ?? '';
+        if ($verdict !== 'SUCCESS') {
+            $this->_log('Webhook signature verification failed', [
+                'reason' => 'verdict',
+                'verification_status' => $verdict,
+                'transmission_id' => $headers['PAYPAL-TRANSMISSION-ID'] ?? '',
+            ]);
+        }
+
+        return $verdict === 'SUCCESS';
+    }
+
+    /**
+     * The transmission signature covers the exact bytes PayPal delivered, so the event
+     * must be spliced into the request verbatim — a decode/encode round-trip changes
+     * JSON semantics (PHP folds {} into []), which fails verification for any payload
+     * containing an empty object, e.g. every CHECKOUT.ORDER.APPROVED event.
+     */
+    public static function buildVerificationRequest(array $headers, string $webhookId, string $rawBody): string
+    {
+        return sprintf(
+            '{"auth_algo":%s,"cert_url":%s,"transmission_id":%s,"transmission_sig":%s,'
+            . '"transmission_time":%s,"webhook_id":%s,"webhook_event":%s}',
+            json_encode($headers['PAYPAL-AUTH-ALGO'] ?? ''),
+            json_encode($headers['PAYPAL-CERT-URL'] ?? ''),
+            json_encode($headers['PAYPAL-TRANSMISSION-ID'] ?? ''),
+            json_encode($headers['PAYPAL-TRANSMISSION-SIG'] ?? ''),
+            json_encode($headers['PAYPAL-TRANSMISSION-TIME'] ?? ''),
+            json_encode($webhookId),
+            $rawBody,
+        );
     }
 
     /**
@@ -337,7 +361,10 @@ class Maho_Paypal_Model_Api_Client
         }
 
         if (is_object($response) && method_exists($response, 'getBody')) {
-            return Mage::helper('core')->jsonDecode((string) $response->getBody());
+            // Empty body (HTTP 204) decodes to "", not an array.
+            $body = (string) $response->getBody();
+            $decoded = $body === '' ? [] : Mage::helper('core')->jsonDecode($body);
+            return is_array($decoded) ? $decoded : [];
         }
 
         return [];

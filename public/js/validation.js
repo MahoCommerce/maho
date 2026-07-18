@@ -1,8 +1,6 @@
-/*
- * @copyright  Copyright (c) 2007 Andrew Tetlaw
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/license/mit.php
- */
+// SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+// SPDX-FileCopyrightText: 2007 Andrew Tetlaw
+// SPDX-License-Identifier: MIT
 
 class Validator {
     constructor(className, error, test, options = {}) {
@@ -487,9 +485,6 @@ Validation.addAllThese([
     }],
     ['validate-phoneLax', 'Please enter a valid phone number. For example (123) 456-7890 or 123-456-7890.', v => {
         return Validation.get('IsEmpty').test(v) || /^((\d[-. ]?)?((\(\d{3}\))|\d{3}))?[-. ]?\d{3}[-. ]?\d{4}$/.test(v);
-    }],
-    ['validate-fax', 'Please enter a valid fax number. For example (123) 456-7890 or 123-456-7890.', v => {
-        return Validation.get('IsEmpty').test(v) || /^(\()?\d{3}(\))?(-|\s)?\d{3}(-|\s)\d{4}$/.test(v);
     }],
     ['validate-date', 'Please enter a valid date.', v => {
         const test = new Date(v);

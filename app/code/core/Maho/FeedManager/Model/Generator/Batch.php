@@ -1,25 +1,23 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Maho_FeedManager
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_FeedManager
  */
+
+declare(strict_types=1);
 
 /**
  * Batch Generator - Handles AJAX batch-by-batch feed generation
  *
  * This class manages stateful batch processing across multiple HTTP requests.
  * State is persisted to a JSON file between requests. Uses the shared output
- * engine from ProductProcessorTrait for all format handling.
+ * engine from ProductWriterTrait for all format handling.
  */
 class Maho_FeedManager_Model_Generator_Batch
 {
-    use Maho_FeedManager_Model_Generator_ProductProcessorTrait;
+    use Maho_FeedManager_Model_Generator_ProductWriterTrait;
 
     public const STATUS_INITIALIZING = 'initializing';
     public const STATUS_PROCESSING = 'processing';
@@ -111,7 +109,17 @@ class Maho_FeedManager_Model_Generator_Batch
     /**
      * Process a single batch of products
      *
-     * @return array{status: string, progress: int, total: int, batches_processed: int, batches_total: int, message: string}
+     * @return array{
+     *     status: string,
+     *     progress: int,
+     *     total: int,
+     *     batches_processed: int,
+     *     batches_total: int,
+     *     message: string,
+     *     processed?: int,
+     *     batch_products?: int,
+     *     errors?: list<string>,
+     * }
      */
     public function processBatch(string $jobId): array
     {
@@ -146,10 +154,10 @@ class Maho_FeedManager_Model_Generator_Batch
             if ($this->_state['status'] === self::STATUS_COMPLETED) {
                 return [
                     'status' => self::STATUS_COMPLETED,
-                    'progress' => $this->_state['product_count'],
-                    'total' => $this->_state['total_products'],
-                    'batches_processed' => $this->_state['batches_processed'],
-                    'batches_total' => $this->_state['batches_total'],
+                    'progress' => (int) $this->_state['product_count'],
+                    'total' => (int) $this->_state['total_products'],
+                    'batches_processed' => (int) $this->_state['batches_processed'],
+                    'batches_total' => (int) $this->_state['batches_total'],
                     'message' => 'Generation already completed',
                 ];
             }
@@ -201,11 +209,11 @@ class Maho_FeedManager_Model_Generator_Batch
 
             return [
                 'status' => $isComplete ? self::STATUS_FINALIZING : self::STATUS_PROCESSING,
-                'progress' => $this->_state['product_count'],
-                'total' => $this->_state['total_products'],
-                'processed' => $this->_state['processed_count'],
-                'batches_processed' => $this->_state['batches_processed'],
-                'batches_total' => $this->_state['batches_total'],
+                'progress' => (int) $this->_state['product_count'],
+                'total' => (int) $this->_state['total_products'],
+                'processed' => (int) $this->_state['processed_count'],
+                'batches_processed' => (int) $this->_state['batches_processed'],
+                'batches_total' => (int) $this->_state['batches_total'],
                 'batch_products' => $processedInBatch,
                 'message' => $isComplete
                     ? 'Ready to finalize'
@@ -221,7 +229,26 @@ class Maho_FeedManager_Model_Generator_Batch
     /**
      * Finalize the generation (validation, compression, cleanup)
      *
-     * @return array{status: string, file_url: string, product_count: int, file_size: int, message: string}
+     * Failure paths (lock-failed, invalid-job) return the basic file shape with empty values.
+     * Failure via _failWithError() returns the processBatch failure shape with progress/total counters.
+     *
+     * @return array{
+     *     status: string,
+     *     message: string,
+     *     file_url?: string,
+     *     product_count?: int,
+     *     file_size?: int,
+     *     total_products?: int,
+     *     file_size_formatted?: string,
+     *     errors?: list<string>,
+     *     has_destination?: bool,
+     *     upload_status?: string,
+     *     upload_message?: string,
+     *     progress?: int,
+     *     total?: int,
+     *     batches_processed?: int,
+     *     batches_total?: int,
+     * }
      */
     public function finalize(string $jobId): array
     {
@@ -287,13 +314,13 @@ class Maho_FeedManager_Model_Generator_Batch
 
             return [
                 'status' => self::STATUS_COMPLETED,
-                'file_url' => Mage::helper('feedmanager')->getFeedUrl($this->_feed),
-                'product_count' => $this->_state['product_count'],
-                'total_products' => $this->_state['total_products'],
-                'file_size' => $fileSize,
-                'file_size_formatted' => Mage::helper('feedmanager')->formatFileSize($fileSize),
+                'file_url' => (string) Mage::helper('feedmanager')->getFeedUrl($this->_feed),
+                'product_count' => (int) $this->_state['product_count'],
+                'total_products' => (int) $this->_state['total_products'],
+                'file_size' => (int) $fileSize,
+                'file_size_formatted' => (string) Mage::helper('feedmanager')->formatFileSize($fileSize),
                 'message' => "Feed generated successfully with {$this->_state['product_count']} products",
-                'errors' => $this->_errors,
+                'errors' => array_values(array_map('strval', $this->_errors)),
                 'has_destination' => (bool) $this->_feed->getDestinationId(),
                 'upload_status' => $uploadResult['status'],
                 'upload_message' => $uploadResult['message'],
@@ -499,6 +526,16 @@ class Maho_FeedManager_Model_Generator_Batch
 
     /**
      * Fail with error message
+     *
+     * @return array{
+     *     status: string,
+     *     progress: int,
+     *     total: int,
+     *     batches_processed: int,
+     *     batches_total: int,
+     *     message: string,
+     *     errors: list<string>,
+     * }
      */
     protected function _failWithError(string $message): array
     {
@@ -521,12 +558,12 @@ class Maho_FeedManager_Model_Generator_Batch
 
         return [
             'status' => self::STATUS_FAILED,
-            'progress' => $this->_state['product_count'] ?? 0,
-            'total' => $this->_state['total_products'] ?? 0,
-            'batches_processed' => $this->_state['batches_processed'] ?? 0,
-            'batches_total' => $this->_state['batches_total'] ?? 0,
+            'progress' => (int) ($this->_state['product_count'] ?? 0),
+            'total' => (int) ($this->_state['total_products'] ?? 0),
+            'batches_processed' => (int) ($this->_state['batches_processed'] ?? 0),
+            'batches_total' => (int) ($this->_state['batches_total'] ?? 0),
             'message' => $message,
-            'errors' => $this->_state['errors'],
+            'errors' => array_values(array_map('strval', $this->_state['errors'])),
         ];
     }
 

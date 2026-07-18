@@ -1,12 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_CatalogLinkRule
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_CatalogLinkRule
  */
 
 declare(strict_types=1);
@@ -14,7 +11,6 @@ declare(strict_types=1);
 /**
  * Catalog Link Rule Model
  *
- * @category   Maho
  * @package    Maho_CatalogLinkRule
  *
  * @property Maho_CatalogLinkRule_Model_Rule_Source_Combine $_conditions
@@ -38,6 +34,36 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
         }
         $this->setUpdatedAt($now);
         return $this;
+    }
+
+    #[\Override]
+    protected function _afterSave()
+    {
+        // A deactivated rule should no longer contribute links: drop the ones it generated so
+        // they don't linger (the processor only refreshes active rules). Manual links untouched.
+        if (!$this->getIsActive()) {
+            $this->deleteGeneratedLinks();
+        }
+        return parent::_afterSave();
+    }
+
+    #[\Override]
+    protected function _afterDelete()
+    {
+        $this->deleteGeneratedLinks();
+        return parent::_afterDelete();
+    }
+
+    /**
+     * Remove the catalog links this rule generated (rule_id tag); manual links are untouched.
+     */
+    protected function deleteGeneratedLinks(): void
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $resource->getConnection('core_write')->delete(
+            $resource->getTableName('catalog/product_link'),
+            ['rule_id = ?' => (int) $this->getId()],
+        );
     }
 
     public function hasConditionsSerialized(): bool

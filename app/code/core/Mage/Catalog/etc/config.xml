@@ -1,19 +1,14 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+SPDX-FileCopyrightText: 2017-2025 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_Catalog>
-            <version>1.6.0.0.19.1.7</version>
+            <version>2.0.0</version>
         </Mage_Catalog>
     </modules>
     <admin>
@@ -441,13 +436,13 @@
             <product>
                 <type>
                     <simple translate="label" module="catalog">
-                        <label>Simple Product</label>
+                        <label>Simple</label>
                         <model>catalog/product_type_simple</model>
                         <composite>0</composite>
                         <index_priority>10</index_priority>
                     </simple>
                     <grouped translate="label" module="catalog">
-                        <label>Grouped Product</label>
+                        <label>Grouped</label>
                         <model>catalog/product_type_grouped</model>
                         <price_model>catalog/product_type_grouped_price</price_model>
                         <composite>1</composite>
@@ -459,7 +454,7 @@
                         <price_indexer>catalog/product_indexer_price_grouped</price_indexer>
                     </grouped>
                     <configurable translate="label" module="catalog">
-                        <label>Configurable Product</label>
+                        <label>Configurable</label>
                         <model>catalog/product_type_configurable</model>
                         <price_model>catalog/product_type_configurable_price</price_model>
                         <composite>1</composite>
@@ -471,7 +466,7 @@
                         <price_indexer>catalog/product_indexer_price_configurable</price_indexer>
                     </configurable>
                     <virtual translate="label" module="catalog">
-                        <label>Virtual Product</label>
+                        <label>Virtual</label>
                         <model>catalog/product_type_virtual</model>
                         <composite>0</composite>
                         <index_priority>20</index_priority>
@@ -724,8 +719,11 @@
                 <product_use_categories>1</product_use_categories>
                 <save_rewrites_history>1</save_rewrites_history>
                 <title_separator>-</title_separator>
-                <category_canonical_tag>0</category_canonical_tag>
+                <category_canonical_tag>1</category_canonical_tag>
                 <product_canonical_tag>0</product_canonical_tag>
+                <layered_navigation_noindex_filtered>1</layered_navigation_noindex_filtered>
+                <layered_navigation_noindex_paginated>1</layered_navigation_noindex_paginated>
+                <layered_navigation_nofollow_filter_links>1</layered_navigation_nofollow_filter_links>
             </seo>
             <custom_options>
                 <date_fields_order>m,d,y</date_fields_order>

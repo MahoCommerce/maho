@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Log_Block_Dashboard_TopPages $this */
@@ -33,7 +31,7 @@ $pages = $this->getTopPages();
     </table>
 </div>
 <?php else: ?>
-<p class="a-center" style="padding: 20px; color: #999;">
+<p class="a-center" style="padding: 20px; color: var(--maho-ink-faint);">
     <?= $this->__('No page view data available') ?>
 </p>
 <?php endif ?>

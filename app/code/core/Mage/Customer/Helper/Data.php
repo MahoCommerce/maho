@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Customer
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Customer
  */
 
 class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
@@ -27,9 +25,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public const XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD = 'customer/login/redirect_dashboard';
 
-    /**
-     * @deprecated Since 26.1.0. Use XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD instead
-     */
+    #[\Deprecated(message: 'Since 26.1.0. Use XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD instead')]
     public const XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD = self::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD;
 
     /**

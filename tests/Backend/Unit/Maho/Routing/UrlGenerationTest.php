@@ -1,13 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
+
+declare(strict_types=1);
 
 use Mage_Adminhtml_Helper_Data as AdminhtmlHelper;
 use Maho\Routing\RouteCollectionBuilder;
@@ -101,6 +99,12 @@ describe('Mage::getUrl() home and fallback', function () {
         // No #[Route] attribute matches frontName 'paypaluk' (real route uses 'payflow'),
         // so Mage::getUrl('paypaluk/...') must fall through to legacy path construction.
         expect(urlPath('paypaluk/express/start'))->toBe('/paypaluk/express/start/');
+    });
+
+    it('does not collapse the CMS no-route URL to its legacy aliases', function () {
+        // norouteAction declares the canonical /cms/index/noroute last, so getUrl()
+        // resolves to it rather than the /cms or /cms/index inbound traps.
+        expect(urlPath('cms/index/noroute'))->toBe('/cms/index/noroute/');
     });
 
     it('resolves the module whose route frontName differs from module key (PaypalUk → payflow)', function () {

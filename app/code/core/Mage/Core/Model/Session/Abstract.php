@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 use Symfony\Component\HttpFoundation\Request;
@@ -342,12 +340,12 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
      */
     public function getSessionId()
     {
-        return $this->getSymfonySession()->getId();
+        return $this->getSymfonySession()?->getId() ?? false;
     }
 
     public function getSessionName(): string
     {
-        return $this->getSymfonySession()->getName();
+        return $this->getSymfonySession()?->getName() ?? '';
     }
 
     public function setSessionName(string $name): self
@@ -873,12 +871,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
             && $sessionData[self::VALIDATOR_HTTP_USER_AGENT_KEY] != $validatorData[self::VALIDATOR_HTTP_USER_AGENT_KEY]
         ) {
             $userAgentValidated = $this->getValidateHttpUserAgentSkip();
-            foreach ($userAgentValidated as $agent) {
-                if (preg_match('/' . $agent . '/iu', $validatorData[self::VALIDATOR_HTTP_USER_AGENT_KEY])) {
-                    return true;
-                }
-            }
-            return false;
+            return array_any($userAgentValidated, fn($agent) => preg_match('/' . $agent . '/iu', $validatorData[self::VALIDATOR_HTTP_USER_AGENT_KEY]));
         }
 
         $session = $this->getSymfonySession();

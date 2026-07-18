@@ -1,12 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Giftcard
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Giftcard
  */
 
 class Maho_Giftcard_Block_Sales_Order_Invoice_Totals extends Mage_Sales_Block_Order_Invoice_Totals

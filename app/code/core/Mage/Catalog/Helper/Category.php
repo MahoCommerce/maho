@@ -1,12 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
@@ -14,6 +13,10 @@ class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
     public const XML_PATH_CATEGORY_URL_SUFFIX          = 'catalog/seo/category_url_suffix';
     public const XML_PATH_USE_CATEGORY_CANONICAL_TAG   = 'catalog/seo/category_canonical_tag';
     public const XML_PATH_CATEGORY_ROOT_ID             = 'catalog/category/root_id';
+    public const XML_PATH_LN_NOINDEX_FILTERED          = 'catalog/seo/layered_navigation_noindex_filtered';
+    public const XML_PATH_LN_NOINDEX_PAGINATED         = 'catalog/seo/layered_navigation_noindex_paginated';
+    public const XML_PATH_LN_NOFOLLOW_FILTER_LINKS     = 'catalog/seo/layered_navigation_nofollow_filter_links';
+    public const REGISTRY_LN_LANDING_PAGE              = 'layered_navigation_landing_page';
 
     protected $_moduleName = 'Mage_Catalog';
 
@@ -162,5 +165,46 @@ class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
     public function canUseCanonicalTag($store = null)
     {
         return Mage::getStoreConfigFlag(self::XML_PATH_USE_CATEGORY_CANONICAL_TAG, $store);
+    }
+
+    /**
+     * Check if filtered layered-navigation pages should be marked NOINDEX,FOLLOW
+     *
+     * @param null|string|bool|int|Mage_Core_Model_Store $store
+     */
+    public function canUseNoindexForFilteredPages($store = null): bool
+    {
+        return Mage::getStoreConfigFlag(self::XML_PATH_LN_NOINDEX_FILTERED, $store);
+    }
+
+    /**
+     * Check if paginated category pages (p > 1) should be marked NOINDEX,FOLLOW
+     *
+     * @param null|string|bool|int|Mage_Core_Model_Store $store
+     */
+    public function canUseNoindexForPaginatedPages($store = null): bool
+    {
+        return Mage::getStoreConfigFlag(self::XML_PATH_LN_NOINDEX_PAGINATED, $store);
+    }
+
+    /**
+     * Check if layered-navigation filter links should carry rel="nofollow"
+     *
+     * @param null|string|bool|int|Mage_Core_Model_Store $store
+     */
+    public function canUseNofollowForFilterLinks($store = null): bool
+    {
+        return Mage::getStoreConfigFlag(self::XML_PATH_LN_NOFOLLOW_FILTER_LINKS, $store);
+    }
+
+    /**
+     * Whether the current request is being served as an indexable facet landing
+     * page. A future facet-landing-page feature (see discussion #971) registers
+     * REGISTRY_LN_LANDING_PAGE to opt the view out of the layered-navigation
+     * crawl controls (NOINDEX, canonical-to-base, nofollow filter links).
+     */
+    public function isLayeredNavigationLandingPage(): bool
+    {
+        return (bool) Mage::registry(self::REGISTRY_LN_LANDING_PAGE);
     }
 }

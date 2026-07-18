@@ -1,17 +1,12 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Maho_Paypal
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- */
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: OSL-3.0
 -->
 <config>
     <modules>
         <Maho_Paypal>
-            <version>6.0.0</version>
+            <version>6.0.1</version>
         </Maho_Paypal>
     </modules>
 

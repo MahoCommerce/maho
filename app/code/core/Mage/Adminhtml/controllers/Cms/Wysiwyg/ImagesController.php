@@ -1,16 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
+
+declare(strict_types=1);
 
 class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Controller_Action
 {
@@ -433,8 +431,8 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
      * Save current path in session
      *
      * @return $this
-     * @deprecated since 25.7.0 current path is no longer stored in session
      */
+    #[\Deprecated(message: 'since 25.7.0 current path is no longer stored in session')]
     protected function _saveSessionCurrentPath()
     {
         return $this;

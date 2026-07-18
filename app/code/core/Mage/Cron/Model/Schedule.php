@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Cron
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Cron
  */
 
 /**
@@ -120,12 +118,7 @@ class Mage_Cron_Model_Schedule extends Mage_Core_Model_Abstract
 
         // handle multiple options
         if (str_contains($expr, ',')) {
-            foreach (explode(',', $expr) as $e) {
-                if ($this->matchCronExpression($e, $num)) {
-                    return true;
-                }
-            }
-            return false;
+            return array_any(explode(',', $expr), fn($e) => $this->matchCronExpression($e, $num));
         }
 
         // handle modulus

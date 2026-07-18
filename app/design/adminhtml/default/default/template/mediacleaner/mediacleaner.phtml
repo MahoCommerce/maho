@@ -1,0 +1,24 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package Maho_MediaCleaner
+ */
+
+/** @var Maho_MediaCleaner_Block_Adminhtml_Mediacleaner $this */
+?>
+<div class="content-header">
+    <?= $this->getHeaderHtml() ?>
+    <p class="content-buttons form-buttons"><?php
+        foreach ($this->getDropdowns() as $dropdown):
+            ?><span class="btn-dropdown"><button type="button" class="scalable"><?= $this->escapeHtml($dropdown['label']) ?> &#9662;</button><span class="btn-dropdown-menu"><?php
+                foreach ($dropdown['items'] as $item):
+                    ?><a href="<?= $this->escapeUrl($item['url']) ?>"><?= $this->escapeHtml($item['label']) ?></a><?php
+                endforeach;
+            ?></span></span><?php
+        endforeach;
+        ?><?= $this->getButtonsHtml() ?></p>
+</div>
+<div>
+    <?= $this->getGridHtml() ?>
+</div>

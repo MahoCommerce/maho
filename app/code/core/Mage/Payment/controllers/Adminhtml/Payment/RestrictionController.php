@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Payment
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Payment
  */
 
 /**
@@ -37,6 +35,13 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
 
         $this->_initAction()
             ->renderLayout();
+    }
+
+    #[Maho\Config\Route('/admin/payment_restriction/grid')]
+    public function gridAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
     }
 
     #[Maho\Config\Route('/admin/payment_restriction/new')]

@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Maho_FeedManager
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_FeedManager
  */
+
+declare(strict_types=1);
 
 class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Condition_Product_Abstract
 {
@@ -176,6 +174,65 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
         $this->setAttributeOption($attributes);
 
         return $this;
+    }
+
+    /**
+     * Add is_empty / is_not_empty operators for matching null / missing / blank EAV values.
+     */
+    #[\Override]
+    public function getDefaultOperatorOptions()
+    {
+        if ($this->_defaultOperatorOptions === null) {
+            $this->_defaultOperatorOptions = parent::getDefaultOperatorOptions();
+            $this->_defaultOperatorOptions['is_empty'] = static::$translate
+                ? Mage::helper('rule')->__('is empty')
+                : 'is empty';
+            $this->_defaultOperatorOptions['is_not_empty'] = static::$translate
+                ? Mage::helper('rule')->__('is not empty')
+                : 'is not empty';
+        }
+        return $this->_defaultOperatorOptions;
+    }
+
+    /**
+     * Expose is_empty / is_not_empty on every input type — parent map otherwise hides them on select/boolean.
+     */
+    #[\Override]
+    public function loadOperatorOptions()
+    {
+        parent::loadOperatorOptions();
+        $map = $this->getOperatorByInputType();
+        if (is_array($map)) {
+            foreach ($map as $type => $operators) {
+                if (!in_array('is_empty', $operators, true)) {
+                    $map[$type][] = 'is_empty';
+                    $map[$type][] = 'is_not_empty';
+                }
+            }
+            $this->setOperatorByInputType($map);
+        }
+        return $this;
+    }
+
+    /**
+     * Treat null, empty string, and empty array as "empty". Numeric 0 is
+     * NOT considered empty because for many attributes (price, qty, sort
+     * order) zero is a legitimate value the merchant may want to match
+     * with `equals 0` rather than `is empty`.
+     */
+    #[\Override]
+    public function validateAttribute($validatedValue)
+    {
+        $operator = $this->getOperatorForValidate();
+
+        if ($operator === 'is_empty' || $operator === 'is_not_empty') {
+            $isEmpty = $validatedValue === null
+                || $validatedValue === ''
+                || (is_array($validatedValue) && count($validatedValue) === 0);
+            return $operator === 'is_empty' ? $isEmpty : !$isEmpty;
+        }
+
+        return parent::validateAttribute($validatedValue);
     }
 
     /**

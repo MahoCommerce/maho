@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
  */
 
 /**
@@ -32,20 +30,12 @@ class Mage_Sales_Model_Quote_Address_Total_Msrp extends Mage_Sales_Model_Quote_A
         if (!count($items)) {
             return $this;
         }
-
-        $canApplyMsrp = false;
-        foreach ($items as $item) {
-            if (!$item->getParentItemId()
-                && Mage::helper('catalog')->canApplyMsrp(
-                    $item->getProductId(),
-                    Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type::TYPE_BEFORE_ORDER_CONFIRM,
-                    true,
-                )
-            ) {
-                $canApplyMsrp = true;
-                break;
-            }
-        }
+        $canApplyMsrp = array_any($items, fn($item) => !$item->getParentItemId()
+            && Mage::helper('catalog')->canApplyMsrp(
+                $item->getProductId(),
+                Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type::TYPE_BEFORE_ORDER_CONFIRM,
+                true,
+            ));
 
         $address->setCanApplyMsrp($canApplyMsrp);
 

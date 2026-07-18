@@ -1,16 +1,18 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_CatalogRule
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_CatalogRule
  */
 
-class Mage_CatalogRule_Model_Rule_Condition_Combine extends Mage_Rule_Model_Condition_Combine
+declare(strict_types=1);
+
+// Implementation lives in Mage_Catalog; this subclass re-skins it with the 'catalogrule/...'
+// factory prefix and catalogrule translations, preserving back-compat for saved price rules.
+class Mage_CatalogRule_Model_Rule_Condition_Combine extends Mage_Catalog_Model_Rule_Condition_Combine
 {
     public function __construct()
     {
@@ -18,35 +20,15 @@ class Mage_CatalogRule_Model_Rule_Condition_Combine extends Mage_Rule_Model_Cond
         $this->setType('catalogrule/rule_condition_combine');
     }
 
-    /**
-     * @return array
-     */
     #[\Override]
-    public function getNewChildSelectOptions()
+    protected function _getConditionPrefix(): string
     {
-        $productCondition = Mage::getModel('catalogrule/rule_condition_product');
-        $productAttributes = $productCondition->loadAttributeOptions()->getAttributeOption();
-        $attributes = [];
-        foreach ($productAttributes as $code => $label) {
-            $attributes[] = ['value' => 'catalogrule/rule_condition_product|' . $code, 'label' => $label];
-        }
-        $conditions = parent::getNewChildSelectOptions();
-        $conditions = array_merge_recursive($conditions, [
-            ['value' => 'catalogrule/rule_condition_combine', 'label' => Mage::helper('catalogrule')->__('Conditions Combination')],
-            ['label' => Mage::helper('catalogrule')->__('Product Attribute'), 'value' => $attributes],
-        ]);
-        return $conditions;
+        return 'catalogrule/rule_condition';
     }
 
-    /**
-     * @param Mage_Catalog_Model_Resource_Product_Collection $productCollection
-     * @return $this
-     */
-    public function collectValidatedAttributes($productCollection)
+    #[\Override]
+    protected function _getConditionHelper(): string
     {
-        foreach ($this->getConditions() as $condition) {
-            $condition->collectValidatedAttributes($productCollection);
-        }
-        return $this;
+        return 'catalogrule';
     }
 }

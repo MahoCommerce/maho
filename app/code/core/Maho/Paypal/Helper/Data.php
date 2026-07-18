@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Maho_Paypal
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Paypal
  */
 
 declare(strict_types=1);
@@ -13,6 +11,20 @@ declare(strict_types=1);
 class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
 {
     protected $_moduleName = 'Maho_Paypal';
+
+    /**
+     * Per-order lock preventing the webhook and the JS controller from
+     * placing the same order concurrently.
+     */
+    public function acquireOrderLock(string $paypalOrderId, bool $blocking = false): bool
+    {
+        return Mage::getSingleton('core/lock')->acquire('paypal_order_' . $paypalOrderId, $blocking);
+    }
+
+    public function releaseOrderLock(string $paypalOrderId): void
+    {
+        Mage::getSingleton('core/lock')->release('paypal_order_' . $paypalOrderId);
+    }
 
     public function importPaypalAddress(array $paypalResult, Mage_Sales_Model_Quote $quote): void
     {
@@ -189,6 +201,36 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
                 }
             }
         }
+    }
+
+    /**
+     * Prepare and validate the quote before any payment is captured.
+     *
+     * Imports the PayPal address (assigning a shipping method) when needed,
+     * recollects totals, then runs the same validation order placement will
+     * run. Throws here, before the irreversible capture, when the quote is not
+     * placeable (e.g. missing shipping method), so no money moves for an order
+     * that cannot be created.
+     */
+    public function prepareQuoteForPaypalOrder(
+        Mage_Sales_Model_Quote $quote,
+        array $paypalResult,
+        string $methodCode,
+    ): void {
+        $quote->getPayment()->setMethod($methodCode);
+
+        if (!$quote->getBillingAddress()->getFirstname()) {
+            $this->importPaypalAddress($paypalResult, $quote);
+        }
+
+        // Ensure correct checkout method for sessionless contexts (webhooks)
+        if ($quote->getCustomerId() && !$quote->getData('checkout_method')) {
+            $quote->setData('checkout_method', Mage_Checkout_Model_Type_Onepage::METHOD_CUSTOMER);
+        }
+
+        $quote->collectTotals();
+
+        Mage::getModel('sales/service_quote', $quote)->validate();
     }
 
     public function saveVaultToken(array $paypalResult, Mage_Sales_Model_Quote $quote): void

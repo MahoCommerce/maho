@@ -1,18 +1,13 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Contacts
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2022-2025 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_Contacts>
-            <version>1.6.0.0</version>
+            <version>2.0.0</version>
         </Mage_Contacts>
     </modules>
     <frontend>
@@ -34,13 +29,6 @@
         </layout>
     </frontend>
     <global>
-        <resources>
-            <contacts_setup>
-                <setup>
-                    <module>Mage_Contacts</module>
-                </setup>
-            </contacts_setup>
-        </resources>
         <template>
             <email>
                 <contacts_email_email_template translate="label" module="contacts">
@@ -68,10 +56,24 @@
         </translate>
     </adminhtml>
     <default>
+        <system>
+            <rate_limit>
+                <contact>3</contact>
+            </rate_limit>
+        </system>
         <contacts>
             <contacts>
                 <enabled>1</enabled>
             </contacts>
+            <api>
+                <enabled>1</enabled>
+                <honeypot_enabled>1</honeypot_enabled>
+            </api>
+            <abuse>
+                <honeypot_enabled>1</honeypot_enabled>
+                <ip_rate_limit_per_hour>10</ip_rate_limit_per_hour>
+                <recipient_rate_limit_per_hour>3</recipient_rate_limit_per_hour>
+            </abuse>
             <email>
                 <recipient_email><![CDATA[hello@example.com]]></recipient_email>
                 <sender_email_identity>custom2</sender_email_identity>

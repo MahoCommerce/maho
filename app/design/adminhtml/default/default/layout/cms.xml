@@ -1,14 +1,9 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+SPDX-FileCopyrightText: 2022 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 
 <layout>
@@ -17,6 +12,10 @@
             <block type="adminhtml/cms_page" name="cms_page"></block>
         </reference>
     </adminhtml_cms_page_index>
+
+    <adminhtml_cms_page_grid>
+        <block type="adminhtml/cms_page_grid" name="root" output="toHtml" />
+    </adminhtml_cms_page_grid>
 
     <adminhtml_cms_page_new>
         <update handle="adminhtml_cms_page_edit" />
@@ -46,6 +45,10 @@
             <block type="adminhtml/cms_block" name="cms_block"></block>
         </reference>
     </adminhtml_cms_block_index>
+
+    <adminhtml_cms_block_grid>
+        <block type="adminhtml/cms_block_grid" name="root" output="toHtml" />
+    </adminhtml_cms_block_grid>
 
     <adminhtml_cms_block_new>
         <update handle="adminhtml_cms_block_edit" />

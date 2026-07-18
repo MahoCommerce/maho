@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Cms
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Cms
  */
 
 class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
@@ -18,17 +16,12 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
      * @param string $coreRoute
      */
     #[Maho\Config\Route('/', name: 'cms.home', methods: ['GET'])]
-    #[Maho\Config\Route('/cms', name: 'cms.index', methods: ['GET'])]
     public function indexAction($coreRoute = null)
     {
         $pageId = Mage::getStoreConfig(Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE);
         if (!Mage::helper('cms/page')->renderPage($this, $pageId)) {
             return $this->_forward('defaultIndex');
         }
-
-        $this->getResponse()
-            ->setHeader('Pragma', 'public', true)
-            ->setHeader('Cache-Control', 'private max-age=60', true);
     }
 
     /**
@@ -50,6 +43,9 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
      * @param string $coreRoute
      */
     #[\Override]
+    #[Maho\Config\Route('/cms', name: 'cms.index')]
+    #[Maho\Config\Route('/cms/index', name: 'cms.index_index')]
+    #[Maho\Config\Route('/cms/index/noroute', name: 'cms.noroute')]
     public function norouteAction($coreRoute = null): void
     {
         $this->getResponse()->setHeader('HTTP/1.1', '404 Not Found');

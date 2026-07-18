@@ -1,10 +1,5 @@
-/**
- * Maho
- *
- * @package    Maho_Paypal
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- */
+// SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+// SPDX-License-Identifier: OSL-3.0
 
 class MahoPaypalSdk {
     static _instance = null;
@@ -38,7 +33,7 @@ class MahoPaypalSdk {
     static async _doInit(sdkUrl, clientTokenUrl) {
         await this._loadScript(sdkUrl);
 
-        const response = await mahoFetch(clientTokenUrl, { method: 'GET', loaderArea: false });
+        const response = await mahoFetch(clientTokenUrl, { method: 'POST', loaderArea: false });
         if (!response.success) {
             throw new Error(response.message || 'Failed to get client token');
         }

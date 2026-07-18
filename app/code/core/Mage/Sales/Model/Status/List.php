@@ -1,15 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
  */
+
+declare(strict_types=1);
 /**
  * Service model for managing statuses information. Statuses are just records with code, message and any
  * additional data. The model helps to keep track and manipulate statuses, that different modules want to set

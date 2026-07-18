@@ -1,14 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Maho
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
+
+declare(strict_types=1);
 
 namespace Maho\Routing;
 
@@ -146,13 +143,20 @@ class RouteCollectionBuilder
 
     /**
      * Translate a URL frontName to its reverse-lookup key (sentinel for admin/install, identity otherwise).
+     *
+     * The admin comparison is exact-case (M1 semantics): a mis-cased admin frontName must not
+     * normalize to the sentinel, so /Admin/... misses every compiled lookup and falls through
+     * to the noroute handler on all dispatch paths — rather than half-dispatching with a
+     * mis-cased route name that breaks adminhtml_* layout handles and predispatch observers.
+     * Frontend frontNames stay case-insensitive: DB-persisted URL rewrites may carry
+     * mixed-case targets.
      */
     public static function normalizeFrontName(string $frontName): string
     {
-        $lower = strtolower($frontName);
-        if ($lower === strtolower(self::getAdminFrontName())) {
+        if ($frontName === self::getAdminFrontName()) {
             return self::ADMIN_SENTINEL;
         }
+        $lower = strtolower($frontName);
         if ($lower === 'install') {
             return self::INSTALL_SENTINEL;
         }

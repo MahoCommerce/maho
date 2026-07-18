@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Giftcard
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Giftcard
  */
+
+declare(strict_types=1);
 
 class Maho_Giftcard_Model_Pdf_Giftcard extends Mage_Sales_Model_Order_Pdf_Abstract
 {
@@ -52,8 +49,6 @@ class Maho_Giftcard_Model_Pdf_Giftcard extends Mage_Sales_Model_Order_Pdf_Abstra
         // Convert to array if collection
         $giftcards = $documents instanceof Maho\Data\Collection ? $documents->getItems() : $documents;
 
-        $this->_beforeGetPdf();
-
         try {
             // Create PDF block and set gift cards
             $block = Mage::app()->getLayout()->createBlock('giftcard/pdf_giftcard');
@@ -64,8 +59,6 @@ class Maho_Giftcard_Model_Pdf_Giftcard extends Mage_Sales_Model_Order_Pdf_Abstra
 
             // Generate PDF using DomPdf
             $pdfContent = $this->generatePdf($html, 'giftcard.pdf');
-
-            $this->_afterGetPdf();
 
             return $pdfContent;
 

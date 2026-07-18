@@ -1,12 +1,7 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Maho_FeedManager
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- */
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: OSL-3.0
 -->
 <config>
     <sections>
@@ -29,8 +24,7 @@
                     <fields>
                         <enabled translate="label comment">
                             <label>Enable Module</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

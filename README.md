@@ -71,6 +71,34 @@ Full details on web server configuration, database setup, and deployment options
 - [DeepWiki](https://deepwiki.com/MahoCommerce/maho) - AI-powered code exploration
 - [Contributing Guide](CONTRIBUTING.md) - development setup, code style, testing, and PR guidelines
 
+## GenAI transparency
+
+Maho is built by a small team competing in a heavyweight championship, something that
+traditionally would have needed entire engineering departments behind it. Generative AI is
+a big part of what makes this realistic, and what allows us to deliver ambitious features
+along with refactoring, modernization, testing, and documentation, on a small budget and
+with volunteer effort. We don't hide this and we don't apologize for it. It is an added
+value of the project, the superpower of our developers and maintainers. Even with AI in the
+loop, a huge amount of human work still goes into Maho every day: defining specs, designing
+features, reviewing code, steering the roadmap, addressing issues, managing the community,
+and keeping the lights on. AI amplifies that effort, it doesn't replace it.
+
+AI tools are used alongside human work for writing and refactoring code, expanding the test
+suite, drafting documentation and translations, and helping triage pull requests, often
+highlighting spots the human eye would have missed. Our primary tool is
+[Claude Code](https://claude.com/claude-code) with Anthropic's Claude family of models,
+plus [DeepWiki](https://deepwiki.com/MahoCommerce/maho) for code exploration;
+we use them under terms that allow producing output under Maho's OSL-3.0 license.
+
+We built a big set of automated guardrails (PHPStan, PHP CS Fixer, Rector, and more) and an
+expanding set of tests to keep AI in check (and to help it produce better results), before
+our maintainers review and validate every part of every PR with no exception, to always
+deliver the highest quality in the industry. We never merge purely AI-generated changes.
+
+If you're a contributor, AI use in your PRs is welcome. We don't require an explicit disclosure,
+but you are expected to understand and stand behind the code you submit, just as you would
+with any other contribution.
+
 ## About the name
 
 "Maho" ([pronounced "mah-hoh"](https://www.ingles.com/pronunciacion/majo)) is the name of the

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 /**
@@ -365,7 +363,6 @@ abstract class Mage_Core_Controller_Varien_Action
         $this->getLayout()->setDirectOutput(false);
 
         $output = $this->getLayout()->getOutput();
-        Mage::getSingleton('core/translate_inline')->processResponseBody($output);
         $this->getResponse()->appendBody($output);
         \Maho\Profiler::stop("$profilerKey::layout_render");
 

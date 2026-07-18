@@ -1,12 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    MahoLib
- * @copyright  Copyright (c) 2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 namespace Maho\Data\Form\Element;

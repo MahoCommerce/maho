@@ -1,12 +1,10 @@
 #!/usr/bin/env php
 <?php
+
 /**
- * Maho
- *
- * @category   Maho
- * @package    MahoCLI
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package MahoCLI
  */
 
 define('MAHO_ROOT_DIR', __DIR__);
@@ -91,14 +89,27 @@ $application->addCommand(new \MahoCLI\Commands\TranslationsMissing());
 $application->addCommand(new \MahoCLI\Commands\TranslationsUnused());
 
 $application->addCommand(new \MahoCLI\Commands\CreateCommand());
+$application->addCommand(new \MahoCLI\Commands\CreateApiResource());
+$application->addCommand(new \MahoCLI\Commands\ListApiResources());
 
 $application->addCommand(new \MahoCLI\Commands\DevModuleList());
+$application->addCommand(new \MahoCLI\Commands\DevLspStart());
+$application->addCommand(new \MahoCLI\Commands\DevMcpStart());
+$application->addCommand(new \MahoCLI\Commands\PaypalWebhookSimulate());
 
 $application->addCommand(new \MahoCLI\Commands\FrontendLayoutDebug());
 $application->addCommand(new \MahoCLI\Commands\FrontendThemeCreate());
 
+$application->addCommand(new \MahoCLI\Commands\FeedList());
+$application->addCommand(new \MahoCLI\Commands\FeedGenerate());
+$application->addCommand(new \MahoCLI\Commands\FeedGenerateAll());
+$application->addCommand(new \MahoCLI\Commands\FeedValidate());
+
 $discoverer = new CommandDiscoverer();
-$commands = $discoverer->discover(__DIR__ . '/vendor/*/*') + $discoverer->discover(__DIR__);
+$commands = array_merge(
+    $discoverer->discover(__DIR__ . '/vendor/*/*'),
+    $discoverer->discover(__DIR__),
+);
 foreach ($commands as $command) {
     $application->addCommand($command);
 }

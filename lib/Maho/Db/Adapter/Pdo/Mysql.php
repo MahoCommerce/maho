@@ -1,16 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    MahoLib
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
+
+declare(strict_types=1);
 
 namespace Maho\Db\Adapter\Pdo;
 
@@ -224,7 +221,9 @@ class Mysql extends AbstractPdoAdapter
             $params['driverOptions'] = $driverOptions;
         }
 
-        $this->_connection = \Doctrine\DBAL\DriverManager::getConnection($params);
+        $configuration = new \Doctrine\DBAL\Configuration();
+        $configuration->setMiddlewares([new \Maho\Db\Driver\MariaDbPlatformMiddleware()]);
+        $this->_connection = \Doctrine\DBAL\DriverManager::getConnection($params, $configuration);
         $this->_debugStat(self::DEBUG_CONNECT, '');
 
         $this->_initConnection();
@@ -689,12 +688,7 @@ class Mysql extends AbstractPdoAdapter
     public function tableColumnExists(string $tableName, string $columnName, ?string $schemaName = null): bool
     {
         $describe = $this->describeTable($tableName, $schemaName);
-        foreach ($describe as $column) {
-            if ($column['COLUMN_NAME'] == $columnName) {
-                return true;
-            }
-        }
-        return false;
+        return array_any($describe, fn($column) => $column['COLUMN_NAME'] == $columnName);
     }
 
     /**
@@ -4055,16 +4049,6 @@ class Mysql extends AbstractPdoAdapter
     public function decodeVarbinary(mixed $value): mixed
     {
         return $value;
-    }
-
-    /**
-     * Returns date that fits into TYPE_DATETIME range and is suggested to act as default 'zero' value
-     * for a column for current RDBMS.
-     */
-    #[\Override]
-    public function getSuggestedZeroDate(): string
-    {
-        return '0000-00-00 00:00:00';
     }
 
     /**

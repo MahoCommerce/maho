@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 /**
@@ -50,6 +48,8 @@ class Mage_Core_Model_Email_Template_Mailer extends \Maho\DataObject
             $emailInfo = array_pop($this->_emailInfos);
             // Handle "Bcc" recipients of the current email
             $emailTemplate->addBcc($emailInfo->getBccEmails());
+            // Set (reset) the current email's attachments so they don't leak to the next recipient
+            $emailTemplate->setAttachments($emailInfo->getAttachments());
             // Set required design parameters and delegate email sending to Mage_Core_Model_Email_Template
             $emailTemplate
                 ->setDesignConfig(['area' => Mage_Core_Model_App_Area::AREA_FRONTEND, 'store' => $this->getStoreId()])

@@ -1,13 +1,7 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @category   Maho
- * @package    Maho_SpeculationRules
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <sections>
@@ -24,8 +18,7 @@
                     <fields>
                         <enabled translate="label comment">
                             <label>Enable Speculation Rules</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

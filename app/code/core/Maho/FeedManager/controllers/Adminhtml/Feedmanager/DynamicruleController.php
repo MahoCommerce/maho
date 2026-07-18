@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Maho_FeedManager
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_FeedManager
  */
+
+declare(strict_types=1);
 
 class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_Adminhtml_Controller_Action
 {
@@ -38,6 +36,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
             ->_title($this->__('Dynamic Rules'));
 
         $this->_initAction();
+        $this->renderLayout();
+    }
+
+    #[Maho\Config\Route('/admin/feedmanager_dynamicrule/grid')]
+    public function gridAction(): void
+    {
+        $this->loadLayout();
         $this->renderLayout();
     }
 

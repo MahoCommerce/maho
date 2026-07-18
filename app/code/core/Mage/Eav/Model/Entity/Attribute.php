@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Eav
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Eav
  */
 
 /**
@@ -34,7 +32,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      */
     protected $_eventPrefix                         = 'eav_entity_attribute';
 
-    public const ATTRIBUTE_CODE_MAX_LENGTH                 = 30;
+    public const ATTRIBUTE_CODE_MAX_LENGTH                 = 64;
 
     /**
      * Parameter name in event
@@ -92,9 +90,9 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
      * Retrieve default attribute source model
      *
      * @return string
-     * @deprecated since 26.1 use getDefaultSourceModel() instead
      */
     #[\Override]
+    #[\Deprecated(message: 'since 26.1 use getDefaultSourceModel() instead')]
     protected function _getDefaultSourceModel()
     {
         return $this->getDefaultSourceModel();

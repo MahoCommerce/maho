@@ -1,18 +1,21 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Api
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Api
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_V2_SoapController extends Mage_Api_Controller_Action
 {
-    #[Maho\Config\Route('/api/v2_soap', name: 'api.v2_soap')]
+    // No #[Route] here: /api/v2_soap is owned by Maho_ApiPlatform_IndexController,
+    // which gates the protocol behind apiplatform/protocols/v2_soap and dispatches
+    // to this controller only when enabled. A route here would shadow the gate.
     public function indexAction(): void
     {
         if (Mage::helper('api/data')->isComplianceWSI()) {

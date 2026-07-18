@@ -1,0 +1,30 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/** @var Mage_CatalogRule_Block_Product_Widget_OnSale $this */
+?>
+<?php if (($_products = $this->getProductCollection()) && $_products->getSize()): ?>
+<div class="widget widget-onsale">
+    <div class="block block-list">
+        <div class="block-title">
+            <strong><span><?= $this->__('On Sale') ?></span></strong>
+        </div>
+        <div class="block-content">
+            <?= $this->getPagerHtml() ?>
+            <?php $suffix = $this->getNameInLayout(); ?>
+            <ol class="mini-products-images-list" id="widget-onsale-<?= $suffix ?>">
+            <?php foreach ($_products->getItems() as $_product): ?>
+                <li class="item">
+                    <?php $_imgSize = 310; ?>
+                    <a class="product-image" href="<?= $_product->getProductUrl() ?>" title="<?= $this->stripTags($_product->getName(), null, true) ?>"><img src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize) ?>" srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize*2) ?> 2x" alt="<?= $this->stripTags($_product->getName(), null, true) ?>"></a>
+                </li>
+            <?php endforeach ?>
+            </ol>
+        </div>
+    </div>
+</div>
+<?php endif ?>

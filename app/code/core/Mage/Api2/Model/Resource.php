@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Api2
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Api2
  */
 
 /**
@@ -23,6 +21,8 @@
  * @method void _multiUpdate() _multiUpdate(array $filteredData) update of a collection
  * @method void _delete() deletion of an entity
  * @method void _multidelete() _multidelete(array $requestData) deletion of a collection
+ *
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
 abstract class Mage_Api2_Model_Resource
 {
@@ -745,11 +745,6 @@ abstract class Mage_Api2_Model_Resource
             $this->_critical(self::RESOURCE_COLLECTION_FILTERING_ERROR);
         }
 
-        if (method_exists($collection, 'addAttributeToFilter')) {
-            $methodName = 'addAttributeToFilter';
-        } else {
-            $methodName = 'addFieldToFilter';
-        }
         $allowedAttributes = $this->getFilter()->getAllowedAttributes(self::OPERATION_ATTRIBUTE_READ);
 
         foreach ($filter as $filterEntry) {
@@ -764,7 +759,12 @@ abstract class Mage_Api2_Model_Resource
             unset($filterEntry['attribute']);
 
             try {
-                $collection->$methodName($attributeCode, $filterEntry);
+                // EAV collections filter by attribute; flat collections by field
+                if (method_exists($collection, 'addAttributeToFilter')) {
+                    $collection->addAttributeToFilter($attributeCode, $filterEntry);
+                } else {
+                    $collection->addFieldToFilter($attributeCode, $filterEntry);
+                }
             } catch (Exception $e) {
                 $this->_critical(self::RESOURCE_COLLECTION_FILTERING_ERROR);
             }

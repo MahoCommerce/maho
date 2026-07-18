@@ -1,14 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Maho
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
+
+declare(strict_types=1);
 
 namespace Maho\Routing;
 
@@ -72,9 +69,27 @@ class ControllerDispatcher
             return false;
         }
 
-        // Set routeName for event dispatching (controller_action_predispatch_<routeName>)
+        // M1 BC: the standard router recorded the resolving module's class prefix (e.g.
+        // 'Mage_Adminhtml' or 'Buddy_LogViewer_Adminhtml') via setControllerModule(), and
+        // third-party code dispatched through this path may read it back. Set only after all
+        // checks pass, like M1's standard router — a dispatch that bails must not leak a
+        // module onto a request that falls through to another handler. Every resolution
+        // branch assembles or stores the class as <modulePrefix>_<UcWordsController>Controller,
+        // so the prefix is recovered by stripping the suffix (case-insensitively — PHP class
+        // names are case-insensitive, so the URL casing may differ from the declared one).
+        $suffix = '_' . uc_words($controllerName) . 'Controller';
+        if (strcasecmp(substr($controllerClass, -strlen($suffix)), $suffix) === 0) {
+            $request->setControllerModule(substr($controllerClass, 0, -strlen($suffix)));
+        }
+
+        // Set routeName for event dispatching (controller_action_predispatch_<routeName>).
+        // Map frontName to routeName so the admin frontName resolves to 'adminhtml', matching
+        // what setAdminRequestNames() does for Symfony-matched routes. Without this, legacy
+        // admin URLs (no #[Route] attribute, dispatched via the fallback path) end up with
+        // routeName='admin', which breaks getFullActionName() (yields 'admin_*' instead of
+        // 'adminhtml_*'), causing layout handles and predispatch observers to miss.
         if (!$request->getRouteName()) {
-            $request->setRouteName($moduleName);
+            $request->setRouteName(RouteCollectionBuilder::getRouteByFrontName($moduleName) ?? $moduleName);
         }
         $request->setDispatched(true);
         $controllerInstance->dispatch($actionName);
@@ -161,7 +176,10 @@ class ControllerDispatcher
         }
 
         // 4. Admin module chain — third-party admin extensions without `#[Route]`.
-        if (strtolower($frontName) === strtolower(RouteCollectionBuilder::getAdminFrontName())) {
+        //    Exact-case comparison (M1 semantics), matching normalizeFrontName() in the
+        //    compiled lookup above: a mis-cased admin frontName resolves nothing on any
+        //    dispatch path and falls through to the noroute handler.
+        if ($frontName === RouteCollectionBuilder::getAdminFrontName()) {
             foreach ($this->buildAdminModuleChain() as $chainModule) {
                 $className = $chainModule . '_' . uc_words($controllerName) . 'Controller';
                 if (class_exists($className)) {
@@ -193,13 +211,25 @@ class ControllerDispatcher
             return false;
         }
 
-        // Admin area: verify the matched frontName matches the runtime admin frontName.
-        // Without this, a request like /notadmin/... would match admin routes with any
-        // segment for `{_adminFrontName}` and dispatch as admin — rejecting at this point
-        // simply falls through to the noroute handler.
+        // Honor the runtime module-enabled state. The compiled matcher only refreshes
+        // on `composer dump-autoload`, so a route can survive in the table after its
+        // module was disabled in app/etc/modules/*.xml. Without this guard the request
+        // would dispatch a controller whose module config never loaded (fatal error);
+        // returning false here lets the router fall through to the no-route handler.
+        // $module is the canonical declaration name (e.g. Maho_Blog), stored verbatim
+        // in maho_attributes.php as `module` and exposed here as `_maho_module`.
+        if ($module !== '' && !Mage::helper('core')->isModuleEnabled($module)) {
+            return false;
+        }
+
+        // Admin area: verify the matched frontName matches the runtime admin frontName
+        // exactly, including case (M1 semantics — /Admin/... 404s rather than dispatching
+        // with a mis-cased route name). Without this, a request like /notadmin/... would
+        // match admin routes with any segment for `{_adminFrontName}` and dispatch as
+        // admin — rejecting at this point simply falls through to the noroute handler.
         if ($area === 'adminhtml') {
             $matchedAdminFrontName = $params['_adminFrontName'] ?? '';
-            if (strtolower($matchedAdminFrontName) !== strtolower(RouteCollectionBuilder::getAdminFrontName())) {
+            if ($matchedAdminFrontName !== RouteCollectionBuilder::getAdminFrontName()) {
                 return false;
             }
         }
@@ -243,9 +273,18 @@ class ControllerDispatcher
     }
 
     /**
-     * Walk the area's module override chain. Both admin and frontend honor
-     * <args><modules> declarations from third-party config.xml — admin via
-     * `admin/routers/adminhtml`, frontend via `frontend/routers/<frontName>`.
+     * Resolve the controller class for a Symfony-matched route, honoring overrides.
+     *
+     * Precedence:
+     *  1. XML `<args><modules>` chain (M1 BC) — admin via `admin/routers/adminhtml`,
+     *     frontend via `frontend/routers/<frontName>`. A config.xml override wins.
+     *  2. Compiled `controllerLookup` — resolves attribute/inheritance-based overrides
+     *     (a subclass of a route-owning controller automatically supersedes it) and, when
+     *     no override exists, the route-owning base controller itself.
+     *
+     * Returning null lets the caller fall back to the route's `_maho_controller` default.
+     * For admin/install the incoming frontName is already the sentinel; normalizeFrontName()
+     * inside the lookup is idempotent on sentinels, so it keys correctly either way.
      */
     protected function resolveAttributeControllerClass(
         string $controllerName,
@@ -258,21 +297,30 @@ class ControllerDispatcher
 
         if ($area === 'adminhtml') {
             foreach ($this->buildAdminModuleChain() as $realModule) {
+                // The chain is seeded with the Mage_Adminhtml base; skip it so the base
+                // (and any inheritance-based override of it) is resolved via the compiled
+                // lookup below, mirroring the override-only frontend chain. Only XML
+                // `<args><modules>` overrides win here.
+                if ($realModule === 'Mage_Adminhtml') {
+                    continue;
+                }
                 $className = $realModule . '_' . uc_words($controllerName) . 'Controller';
                 if (class_exists($className)) {
                     return $className;
                 }
             }
-            return null;
-        }
-
-        if ($area === 'frontend') {
+        } elseif ($area === 'frontend') {
             foreach ($this->buildFrontendModuleChain($frontName) as $chainModule) {
                 $className = $chainModule . '_' . uc_words($controllerName) . 'Controller';
                 if (class_exists($className)) {
                     return $className;
                 }
             }
+        }
+
+        $className = RouteCollectionBuilder::lookupCompiledControllerClass($frontName, $controllerName);
+        if ($className !== null && class_exists($className)) {
+            return $className;
         }
 
         return null;

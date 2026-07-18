@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
  */
 
 /**
@@ -26,6 +24,34 @@ abstract class Mage_Sales_Model_Abstract extends Mage_Core_Model_Abstract
      * @return int|string|Mage_Core_Model_Store
      */
     abstract public function getStore();
+
+    /**
+     * Descriptor for attaching this document as a PDF to an email, or null when the
+     * document has no printable PDF form. Overridden by invoice/shipment/creditmemo.
+     *
+     * @return array{source_model: string, entity_model: string, filename_prefix: string}|null
+     */
+    protected function _getPdfAttachmentInfo(): ?array
+    {
+        return null;
+    }
+
+    /**
+     * Attach a PDF copy of this document to the given email info, if it has a PDF form
+     */
+    protected function _addPdfAttachment(Mage_Core_Model_Email_Info $emailInfo): void
+    {
+        $info = $this->_getPdfAttachmentInfo();
+        if ($info === null) {
+            return;
+        }
+        $emailInfo->addPdfAttachment(
+            $info['source_model'],
+            $info['entity_model'],
+            (int) $this->getId(),
+            $info['filename_prefix'] . '-' . $this->getIncrementId() . '.pdf',
+        );
+    }
 
     /**
      * Processing object after save data

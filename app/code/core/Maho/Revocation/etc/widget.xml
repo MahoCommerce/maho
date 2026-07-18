@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: OSL-3.0
+-->
+<widgets>
+    <revocation_button type="revocation/widget_button" translate="name description" module="revocation">
+        <name>Revocation Button</name>
+        <description>Link to the contract revocation form (EU Directive 2023/2673). Place it in your footer or anywhere it must stay visible during the withdrawal period.</description>
+        <parameters>
+            <label translate="label description">
+                <visible>1</visible>
+                <label>Custom Label</label>
+                <description>Leave empty to use the label configured under Sales &gt; Revocation Button.</description>
+                <type>text</type>
+                <sort_order>10</sort_order>
+            </label>
+        </parameters>
+    </revocation_button>
+</widgets>

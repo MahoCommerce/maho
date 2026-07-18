@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
  */
 /** @var Mage_Checkout_Block_Onepage_Billing $this */
 ?>
@@ -108,12 +106,6 @@
                         <label for="billing:telephone" class="required"><?= $this->__('Telephone') ?></label>
                         <div class="input-box">
                             <input type="tel" name="billing[telephone]" value="<?= $this->escapeHtml($this->getAddress()->getTelephone()) ?>" title="<?= $this->quoteEscape($this->__('Telephone')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('telephone') ?>" id="billing:telephone">
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label for="billing:fax"><?= $this->__('Fax') ?></label>
-                        <div class="input-box">
-                            <input type="tel" name="billing[fax]" value="<?= $this->escapeHtml($this->getAddress()->getFax()) ?>" title="<?= $this->quoteEscape($this->__('Fax')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('fax') ?>" id="billing:fax">
                         </div>
                     </div>
                 </li>

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
  */
 
 class Mage_Sales_Model_Resource_Report_Invoiced extends Mage_Sales_Model_Resource_Report_Abstract
@@ -85,7 +83,7 @@ class Mage_Sales_Model_Resource_Report_Invoiced extends Mage_Sales_Model_Resourc
                 // convert dates from UTC to current admin timezone
                 'period'                => $periodExpr,
                 'store_id'              => 'order_table.store_id',
-                'order_status'          => 'order_table.status',
+                'order_status'          => $adapter->getIfNullSql('order_table.status', "''"),
                 'orders_count'          => new Maho\Db\Expr('COUNT(order_table.entity_id)'),
                 'orders_invoiced'       => new Maho\Db\Expr('COUNT(order_table.entity_id)'),
                 'invoiced'              => new Maho\Db\Expr('SUM(order_table.base_total_invoiced'
@@ -204,7 +202,7 @@ class Mage_Sales_Model_Resource_Report_Invoiced extends Mage_Sales_Model_Resourc
         $columns = [
             'period'                => $periodExpr,
             'store_id'              => 'store_id',
-            'order_status'          => 'status',
+            'order_status'          => $adapter->getIfNullSql('status', "''"),
             'orders_count'          => new Maho\Db\Expr('COUNT(base_total_invoiced)'),
             'orders_invoiced'       => new Maho\Db\Expr(
                 sprintf(

@@ -1,10 +1,8 @@
 <?php
 
 /**
- * Maho
- *
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 declare(strict_types=1);
@@ -49,5 +47,9 @@ it('provides JS SDK URL for correct environment', function () {
 
 it('reports no credentials when not configured', function () {
     $config = Mage::getModel('paypal/config');
+    // The test harness may inject sandbox credentials globally at install time; clear them
+    // in-memory so this verifies the genuine "not configured" path.
+    Mage::app()->getStore()->setConfig('paypal/credentials/client_id', '');
+    Mage::app()->getStore()->setConfig('paypal/credentials/client_secret', '');
     expect($config->hasCredentials())->toBeFalse();
 });

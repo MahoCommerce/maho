@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Action
@@ -19,12 +17,24 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     public const ADMIN_RESOURCE = 'cms';
 
     /**
+     * Replace template directives with a non-empty placeholder before HTML validation.
+     *
+     * A directive used inside an attribute (e.g. src="{{media url="..."}}") would otherwise
+     * collapse to src="" once stripped, triggering a bogus "Must be non-empty" validator error.
+     * Match against the canonical directive pattern so exactly the constructs the template filter
+     * renders are blanked out, and the resulting placeholder (#) stays syntactically valid.
+     */
+    public static function blankDirectivesForValidation(string $html): string
+    {
+        return (string) preg_replace(\Maho\Filter\Template::CONSTRUCTION_PATTERN, '#', $html);
+    }
+
+    /**
      * Validate HTML fragment via the W3C Nu validator
      */
     public function validateHtmlAction(): void
     {
-        $html = $this->getRequest()->getPost('html', '');
-        $html = preg_replace('/\{\{[^{}]*\}\}/', '', $html);
+        $html = self::blankDirectivesForValidation($this->getRequest()->getPost('html', ''));
 
         $prefix = "<!DOCTYPE html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><title>v</title></head>\n<body>\n";
         $suffix = "\n</body>\n</html>";
@@ -62,13 +72,7 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
                     continue;
                 }
                 $text = (string) ($msg['message'] ?? '');
-                $skip = false;
-                foreach ($ignoreList as $needle) {
-                    if (str_contains($text, $needle)) {
-                        $skip = true;
-                        break;
-                    }
-                }
+                $skip = array_any($ignoreList, fn($needle) => str_contains($text, $needle));
                 if ($skip) {
                     $ignoredCount++;
                     continue;

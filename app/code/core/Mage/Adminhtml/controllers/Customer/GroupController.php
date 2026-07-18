@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_Action
@@ -53,6 +51,13 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
         $this->_setActiveMenu('customer/group');
         $this->_addBreadcrumb(Mage::helper('customer')->__('Customers'), Mage::helper('customer')->__('Customers'));
         $this->_addBreadcrumb(Mage::helper('customer')->__('Customer Groups'), Mage::helper('customer')->__('Customer Groups'));
+        $this->renderLayout();
+    }
+
+    #[Maho\Config\Route('/admin/customer_group/grid')]
+    public function gridAction(): void
+    {
+        $this->loadLayout();
         $this->renderLayout();
     }
 

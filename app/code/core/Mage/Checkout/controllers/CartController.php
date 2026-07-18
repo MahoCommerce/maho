@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Checkout
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Checkout
  */
 
 class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
@@ -238,7 +236,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $this->getResponse()->setBodyJson([
                     'success' => true,
                     'message' => $message,
-                    'qty' => $this->_getCart()->getSummaryQty(),
+                    'qty' => $this->_getCart()->getSummaryQty() ?? 0,
                     'content' => $this->getLayout()->getBlock('minicart_content')->toHtml(),
                 ]);
                 return;
@@ -432,7 +430,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $this->getResponse()->setBodyJson([
                     'success' => true,
                     'message' => $message,
-                    'qty' => $this->_getCart()->getSummaryQty(),
+                    'qty' => $this->_getCart()->getSummaryQty() ?? 0,
                     'content' => $this->getLayout()->getBlock('minicart_content')->toHtml(),
                 ]);
                 return;
@@ -1056,6 +1054,22 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         }
 
         $this->getResponse()->setBodyJson($result);
+    }
+
+    /**
+     * Return current minicart content, used to refresh stale data (e.g. after a bfcache restore)
+     */
+    #[Maho\Config\Route('/checkout/cart/ajaxContent', name: 'checkout.cart.ajaxContent', methods: ['GET'])]
+    public function ajaxContentAction(): void
+    {
+        $this->loadLayout();
+        $this->getResponse()
+            ->setHeader('Cache-Control', 'private, no-store, no-cache, must-revalidate', true)
+            ->setBodyJson([
+                'success' => 1,
+                'qty' => $this->_getCart()->getSummaryQty() ?? 0,
+                'content' => $this->getLayout()->getBlock('minicart_content')->toHtml(),
+            ]);
     }
 
     /**

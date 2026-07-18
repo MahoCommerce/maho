@@ -1,15 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Mage_Rating
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Rating
  */
+
+declare(strict_types=1);
 
 /**
  * @method Mage_Rating_Model_Resource_Rating_Option_Vote_Collection getResourceCollection()

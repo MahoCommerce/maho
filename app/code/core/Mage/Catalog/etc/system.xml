@@ -1,14 +1,9 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+SPDX-FileCopyrightText: 2018-2025 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <tabs>
@@ -324,6 +319,33 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </product_canonical_tag>
+                        <layered_navigation_noindex_filtered translate="label comment">
+                            <label>Add NOINDEX,FOLLOW to Filtered Layered Navigation Pages</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>9</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>Prevents indexing of pages with active filters to avoid duplicate content.</comment>
+                        </layered_navigation_noindex_filtered>
+                        <layered_navigation_noindex_paginated translate="label comment">
+                            <label>Add NOINDEX,FOLLOW to Paginated Category Pages</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>Prevents indexing of pages after the first page (p &gt; 1).</comment>
+                        </layered_navigation_noindex_paginated>
+                        <layered_navigation_nofollow_filter_links translate="label comment">
+                            <label>Add rel="nofollow" to Layered Navigation Filter Links</label>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>11</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>Signals crawlers not to prioritize filter combination URLs.</comment>
+                        </layered_navigation_nofollow_filter_links>
                     </fields>
                 </seo>
 

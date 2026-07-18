@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Maho_Paypal
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Paypal
  */
 
 declare(strict_types=1);
@@ -196,7 +194,7 @@ class Maho_Paypal_Model_Api_OrderBuilder
     }
 
     /**
-     * @return array<array{name: string, quantity: string, unit_amount: array{currency_code: string, value: string}}>
+     * @return list<array{name: string, quantity: string, sku: string, unit_amount: array{currency_code: string, value: string}, category: 'DIGITAL_GOODS'|'PHYSICAL_GOODS'}>
      */
     protected function _buildLineItems(Mage_Sales_Model_Quote $quote, string $currency): array
     {

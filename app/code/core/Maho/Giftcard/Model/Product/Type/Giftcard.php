@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Giftcard
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Giftcard
  */
+
+declare(strict_types=1);
 
 /**
  * Gift Card Product Type Model
@@ -126,7 +123,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
 
             // Validate custom amount against min/max if type allows custom
             $giftcardType = $productInstance->getGiftcardType();
-            if ($giftcardType === 'custom' || $giftcardType === 'combined') {
+            if ($giftcardType === 'range' || $giftcardType === 'combined') {
                 $minAmount = $productInstance->getGiftcardMinAmount();
                 $maxAmount = $productInstance->getGiftcardMaxAmount();
 
@@ -164,15 +161,7 @@ class Maho_Giftcard_Model_Product_Type_Giftcard extends Mage_Catalog_Model_Produ
                 if ($allowedAmounts) {
                     $amounts = array_map('trim', explode(',', $allowedAmounts));
                     $amounts = array_map('floatval', $amounts);
-
-                    // Use float comparison with small epsilon for precision issues
-                    $isValid = false;
-                    foreach ($amounts as $allowedAmount) {
-                        if (abs($amount - $allowedAmount) < 0.01) {
-                            $isValid = true;
-                            break;
-                        }
-                    }
+                    $isValid = array_any($amounts, fn($allowedAmount) => abs($amount - $allowedAmount) < 0.01);
 
                     if (!$isValid) {
                         return Mage::helper('giftcard')->__('Please select a valid gift card amount');

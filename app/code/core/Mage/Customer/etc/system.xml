@@ -1,14 +1,9 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Customer
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+SPDX-FileCopyrightText: 2017-2024 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <tabs>
@@ -36,8 +31,7 @@
                     <fields>
                         <enabled_in_frontend translate="label comment">
                             <label>Enable Customer Accounts in Frontend</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <backend_model>customer/config_account_enabled</backend_model>
                             <sort_order>1</sort_order>
                             <show_in_default>1</show_in_default>
@@ -335,6 +329,25 @@
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </min_password_length>
+                        <allow_2fa translate="label comment">
+                            <label>Allow Two-Factor Authentication</label>
+                            <comment>Let customers enable TOTP-based two-factor authentication on their account.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </allow_2fa>
+                        <require_2fa translate="label comment">
+                            <label>Require Two-Factor Authentication</label>
+                            <comment>Force all customers to set up two-factor authentication before they can use their account.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><allow_2fa>1</allow_2fa></depends>
+                        </require_2fa>
                     </fields>
                 </password>
                 <password_link translate="label">
@@ -710,5 +723,40 @@
                 </security>
             </groups>
         </admin>
+        <system>
+            <groups>
+                <rate_limit>
+                    <fields>
+                        <customer_register translate="label comment" module="customer">
+                            <label>Customer registration</label>
+                            <comment>Per IP address. Default 10 per hour. 0 to disable.</comment>
+                            <sort_order>140</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </customer_register>
+                        <forgot_password translate="label comment" module="customer">
+                            <label>Forgot password</label>
+                            <comment>Per email address. Default 3 per hour. 0 to disable.</comment>
+                            <sort_order>150</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </forgot_password>
+                        <reset_password translate="label comment" module="customer">
+                            <label>Reset password</label>
+                            <comment>Per IP address (token brute-force guard). Default 10 per hour. 0 to disable.</comment>
+                            <sort_order>160</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>validate-digits validate-zero-or-greater</validate>
+                        </reset_password>
+                    </fields>
+                </rate_limit>
+            </groups>
+        </system>
     </sections>
 </config>

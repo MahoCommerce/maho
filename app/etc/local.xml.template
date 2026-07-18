@@ -1,14 +1,9 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package     Mage_Core
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+SPDX-FileCopyrightText: 2022 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <global>
@@ -35,6 +30,22 @@
             </default_setup>
         </resources>
         <session_save>{{session_save}}</session_save>
+        <!--
+            Named locks (cron dispatch, reindexing, order placement, ...). Default backend is "file".
+            - file: kernel flock in var/locks. Released instantly when the holding process exits or
+              crashes. The right choice for single-server setups; use it unless multiple servers must
+              share locks.
+            - db: the database server's advisory locks (MySQL GET_LOCK, PostgreSQL advisory locks),
+              for multi-frontend setups sharing one database server. Do NOT use it on Galera-style
+              clusters (no advisory lock support) or on SQLite (only emulated via an expiring lock
+              table). Note: advisory locks belong to the DB session, so if the connection drops during
+              a long run (e.g. MySQL wait_timeout) the server releases the lock while PHP keeps running.
+        -->
+        <!--
+        <lock>
+            <backend>db</backend>
+        </lock>
+        -->
     </global>
     <admin>
         <base_path>{{admin_frontname}}</base_path>

@@ -1,12 +1,9 @@
-/**
- * Maho
- *
- * @package     base_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+/*
+SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+SPDX-FileCopyrightText: 2021-2023 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
+*/
 
 :root {
   /* Primary Colors */
@@ -3140,10 +3137,17 @@ body {
   position: relative;
   grid-auto-flow: row;
   justify-items: center;
+  align-self: start;
+  text-align: center;
+  width: min-content;
   padding: 0;
   gap: 0.1rem;
   border: none;
   color: var(--maho-color-text-primary)
+}
+
+.page-header-container .header-minicart {
+  align-self: start;
 }
 
 .skip-cart .count {

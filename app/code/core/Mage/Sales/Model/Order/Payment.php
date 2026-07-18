@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
  */
 
 /**
@@ -209,6 +207,11 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
     protected $_order;
 
     /**
+     * Invoice currently being captured, exposed to gateway methods during capture()
+     */
+    protected ?Mage_Sales_Model_Order_Invoice $_invoice = null;
+
+    /**
      * Billing agreement instance that may be created during payment processing
      *
      * @var Mage_Sales_Model_Billing_Agreement
@@ -270,6 +273,17 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
     public function getOrder()
     {
         return $this->_order;
+    }
+
+    public function setInvoice(?Mage_Sales_Model_Order_Invoice $invoice): self
+    {
+        $this->_invoice = $invoice;
+        return $this;
+    }
+
+    public function getInvoice(): ?Mage_Sales_Model_Order_Invoice
+    {
+        return $this->_invoice;
     }
 
     /**
@@ -438,6 +452,9 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         }
         $amountToCapture = $this->_formatAmount($invoice->getBaseGrandTotal());
         $order = $this->getOrder();
+
+        // expose the invoice being captured to the gateway method (getInvoice())
+        $this->setInvoice($invoice);
 
         // prepare parent transaction and its amount
         $paidWorkaround = 0;

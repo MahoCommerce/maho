@@ -1,15 +1,16 @@
 <?php
 
+/**
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Api
+ */
+
 declare(strict_types=1);
 
 /**
- * Maho
- *
- * @package    Mage_Api
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
-
 interface Mage_Api_Model_Acl_Assert_Interface
 {
     /**

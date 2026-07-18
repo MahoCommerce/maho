@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 use Symfony\Component\Mailer\Mailer;
@@ -83,6 +81,9 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     protected $_bccEmails = [];
     protected ?string $_replyToEmail = null;
     protected ?string $_returnPathEmail = null;
+
+    /** @var Mage_Core_Model_Email_Attachment[] */
+    protected array $_attachments = [];
 
     protected static $_defaultTemplates;
 
@@ -402,6 +403,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
                 'from_name'         => $this->getSenderName(),
                 'reply_to'          => $this->_replyToEmail,
                 'return_to'         => $this->_returnPathEmail,
+                'attachments'       => array_map(fn($a) => $a->toArray(), $this->_attachments),
             ])
                 ->addRecipients($emails, $names, Mage_Core_Model_Email_Queue::EMAIL_TYPE_TO)
                 ->addRecipients($this->_bccEmails, [], Mage_Core_Model_Email_Queue::EMAIL_TYPE_BCC);
@@ -440,6 +442,11 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             if ($this->getTemplateId()) {
                 $email->getHeaders()->addTextHeader('X-Maho-Template', (string) $this->getTemplateId());
             }
+
+            Mage_Core_Model_Email_Attachment::applyDescriptors(
+                $email,
+                array_map(fn($a) => $a->toArray(), $this->_attachments),
+            );
 
             $transport = Mage::helper('core')->getMailTransport();
             if (!$transport) {
@@ -564,6 +571,26 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             $this->_bccEmails[] = $bcc;
         }
         return $this;
+    }
+
+    /**
+     * Set the attachments to add to the email
+     *
+     * @param Mage_Core_Model_Email_Attachment[] $attachments
+     * @return $this
+     */
+    public function setAttachments(array $attachments)
+    {
+        $this->_attachments = $attachments;
+        return $this;
+    }
+
+    /**
+     * @return Mage_Core_Model_Email_Attachment[]
+     */
+    public function getAttachments()
+    {
+        return $this->_attachments;
     }
 
     /**

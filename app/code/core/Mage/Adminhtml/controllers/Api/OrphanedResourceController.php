@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
+
+declare(strict_types=1);
 
 class Mage_Adminhtml_Api_OrphanedResourceController extends Mage_Adminhtml_Controller_Action
 {
@@ -26,7 +24,7 @@ class Mage_Adminhtml_Api_OrphanedResourceController extends Mage_Adminhtml_Contr
         $this->loadLayout()
             ->_setActiveMenu('system/api/orphaned_resources')
             ->_addBreadcrumb($this->__('System'), $this->__('System'))
-            ->_addBreadcrumb($this->__('Web Services'), $this->__('Web Services'))
+            ->_addBreadcrumb($this->__('API'), $this->__('API'))
             ->_addBreadcrumb($this->__('Orphaned Resources'), $this->__('Orphaned API Role Resources'));
         return $this;
     }
@@ -38,7 +36,7 @@ class Mage_Adminhtml_Api_OrphanedResourceController extends Mage_Adminhtml_Contr
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
-            ->_title($this->__('Web Services'))
+            ->_title($this->__('API'))
             ->_title($this->__('Orphaned API Role Resources'));
 
         /** @var Mage_Adminhtml_Block_Api_OrphanedResource $block */

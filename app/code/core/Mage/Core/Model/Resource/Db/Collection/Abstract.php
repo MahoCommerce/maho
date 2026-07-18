@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Data\Collection\Db
@@ -689,13 +687,13 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
     /**
      * Format Date to internal database date format
      *
-     * @deprecated since 26.5 Use Mage::app()->getLocale()->formatDateForDb() or now() instead
      * @see Mage_Core_Model_Locale::formatDateForDb()
      *
      * @param int|string|DateTime|bool $date
      * @param bool $withTime
      * @return string|null
      */
+    #[\Deprecated(message: 'since 26.5 Use Mage::app()->getLocale()->formatDateForDb() or now() instead')]
     public function formatDate($date, $withTime = true)
     {
         if ($date === true) {

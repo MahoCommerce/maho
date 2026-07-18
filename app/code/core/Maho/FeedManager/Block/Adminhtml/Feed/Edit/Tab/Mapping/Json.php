@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Maho_FeedManager
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_FeedManager
  */
+
+declare(strict_types=1);
 
 /**
  * JSON Builder block for feed mapping configuration
@@ -367,15 +365,16 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                 TransformerModal.open();
             },
 
-            loadPreset: function(platform) {
+            loadPreset: function(platform, options) {
                 if (!platform) return;
+                options = options || {};
 
-                // Confirm before overwriting existing structure
+                // Programmatic callers pass {force:true} to skip the confirm.
                 var hasContent = this.structure && (
                     (Array.isArray(this.structure) && this.structure.length > 0) ||
                     (typeof this.structure === "object" && Object.keys(this.structure).length > 0)
                 );
-                if (hasContent) {
+                if (!options.force && hasContent) {
                     if (!confirm("Loading a preset will replace your current JSON structure. Continue?")) {
                         document.getElementById("json-preset-select").value = this.currentPlatform || "";
                         return;

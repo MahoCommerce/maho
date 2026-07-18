@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Blog
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Blog
  */
 
 class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abstract

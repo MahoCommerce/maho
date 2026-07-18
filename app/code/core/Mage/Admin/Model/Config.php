@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Admin
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Admin
  */
 
 class Mage_Admin_Model_Config extends \Maho\Simplexml\Config
@@ -138,6 +136,9 @@ class Mage_Admin_Model_Config extends \Maho\Simplexml\Config
     {
         $moduleName = 'adminhtml';
         $menuNode = $this->getAdminhtmlConfig()->getNode('menu/' . str_replace('/', '/children/', trim($path, '/')));
+        if ($menuNode === false) {
+            return '';
+        }
         if ($menuNode->getAttribute('module')) {
             $moduleName = (string) $menuNode->getAttribute('module');
         }

@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @var Mage_Adminhtml_Block_Sales_Order_Create_Shipping_Method_Form $this */
@@ -64,9 +62,9 @@
                 <?php endif ?>
             </strong>
             <br>
-            <a href="#" onclick="document.getElementById('order-shipping-method-info').style.display = 'none';document.getElementById('order-shipping-method-choose').style.display = 'block';return false">
+            <button type="button" class="scalable" onclick="document.getElementById('order-shipping-method-info').style.display = 'none';document.getElementById('order-shipping-method-choose').style.display = 'block';return false">
                 <?= Mage::helper('sales')->__('Click to change shipping method') ?>
-            </a>
+            </button>
         </div>
     <?php else: ?>
         <script>document.getElementById('order-shipping-method-choose').style.display = 'block';</script>
@@ -75,9 +73,9 @@
     <strong><?= Mage::helper('sales')->__('Sorry, no quotes are available for this order at this time.') ?></strong>
 <?php else: ?>
     <div id="order-shipping-method-summary">
-        <a href="#" onclick="order.loadShippingRates();return false">
+        <button type="button" class="scalable" onclick="order.loadShippingRates();return false">
             <?= Mage::helper('sales')->__('Get shipping methods and rates') ?>
-        </a>
+        </button>
         <input type="hidden" name="order[has_shipping]" value="" class="required-entry">
     </div>
 <?php endif ?>

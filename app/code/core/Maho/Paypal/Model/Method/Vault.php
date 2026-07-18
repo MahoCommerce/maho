@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Maho_Paypal
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Paypal
  */
 
 declare(strict_types=1);
@@ -21,6 +19,10 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
     #[\Override]
     public function isAvailable($quote = null): bool
     {
+        if (!parent::isAvailable($quote)) {
+            return false;
+        }
+
         $customerId = $quote?->getCustomerId()
             ?: Mage::getSingleton('customer/session')->getCustomerId();
 
@@ -30,13 +32,10 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
 
         /** @var Maho_Paypal_Model_Resource_Vault_Token_Collection $tokens */
         $tokens = Mage::getResourceModel('paypal/vault_token_collection');
-        $tokens->addCustomerFilter((int) $customerId)->addActiveFilter();
-
-        if ($tokens->getSize() === 0) {
-            return false;
-        }
-
-        return parent::isAvailable($quote);
+        return $tokens
+            ->addCustomerFilter((int) $customerId)
+            ->addActiveFilter()
+            ->getSize() > 0;
     }
 
     #[\Override]

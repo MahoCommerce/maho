@@ -1,22 +1,21 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+SPDX-FileCopyrightText: 2017-2025 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_Core>
-            <version>1.6.0.10</version>
+            <version>2.0.0</version>
         </Mage_Core>
     </modules>
     <global>
+        <!-- Named lock backend: "file" or "db" (see local.xml.template) -->
+        <lock>
+            <backend>file</backend>
+        </lock>
         <models>
             <core>
                 <class>Mage_Core_Model</class>
@@ -226,13 +225,6 @@
             <debug>
                 <profiler>0</profiler>
             </debug>
-            <translate_inline>
-                <active>0</active>
-                <active_admin>0</active_admin>
-                <invalid_caches>
-                    <block_html/>
-                </invalid_caches>
-            </translate_inline>
             <log>
                 <active>0</active>
                 <min_level>100</min_level>

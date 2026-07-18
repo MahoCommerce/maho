@@ -2,6 +2,14 @@
 .paypal-button-container paypal-button { display: block; width: 100%; }
 body.paypal-standard-active .btn-checkout { display: none !important; }
 
+/* Multistep: payment-step hint shown instead of the smart button */
+.paypal-multistep-hint { margin: 0; color: #555; font-size: 13px; }
+
+/* Multistep review step: smart button + disabled native Place Order until approval */
+.paypal-review-checkout .paypal-review-hint { margin: 0 0 10px; color: #555; font-size: 13px; }
+.paypal-review-checkout .paypal-button-container { margin-bottom: 10px; }
+#checkout-review-submit .btn-checkout[disabled] { opacity: 0.5; cursor: not-allowed; }
+
 .paypal-card-field { height: 3rem; margin-bottom: 10px; }
 .paypal-card-row { display: flex; gap: 10px; }
 .paypal-card-row .paypal-card-field { flex: 1; }

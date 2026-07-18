@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Maho_Intelligence
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Intelligence
  */
 
 declare(strict_types=1);
@@ -80,7 +78,7 @@ class Maho_Intelligence_Model_Mcp_Server
 
         $this->addTool(
             'list_events',
-            'List all events and their observers. Optionally filter by event name pattern (substring match).',
+            'List all events and their observers (both XML-declared and #[Maho\\Config\\Observer] attribute-based). Each observer carries a "source" field ("xml" or "attribute"). Optionally filter by event name pattern (substring match).',
             [
                 'type' => 'object',
                 'properties' => [
@@ -136,7 +134,7 @@ class Maho_Intelligence_Model_Mcp_Server
 
         $this->addTool(
             'list_cron_jobs',
-            'List all cron job definitions with their model::method callbacks and schedules.',
+            'List all cron job definitions (both XML-declared and #[Maho\\Config\\CronJob] attribute-based) with their model::method callbacks and schedules. Each job carries a "source" field ("xml" or "attribute").',
             ['type' => 'object', 'properties' => new \stdClass()],
             fn(array $args) => $registry->get('cron', 'getAllJobs'),
         );
@@ -164,7 +162,7 @@ class Maho_Intelligence_Model_Mcp_Server
 
         $this->addTool(
             'list_routes',
-            'List all frontend and admin route definitions with frontNames, modules, and controller overrides.',
+            'List routing definitions in two sections: "xml_routers" (router-level frontName→module mappings with controller-override chains, used by legacy XML / custom projects), and "attribute_routes" (per-URL Symfony routes defined via #[Maho\\Config\\Route] attributes).',
             ['type' => 'object', 'properties' => new \stdClass()],
             fn(array $args) => $registry->get('router', 'getAllRoutes'),
         );

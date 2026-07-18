@@ -1,12 +1,7 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Maho_Paypal
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- */
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: OSL-3.0
 -->
 <layout>
     <default>
@@ -38,6 +33,12 @@
             </action>
         </reference>
     </checkout_onepage_index>
+
+    <checkout_onepage_review>
+        <reference name="root">
+            <block type="paypal/checkout_standard_review" name="checkout.onepage.review.paypal_standard" as="paypal_standard" template="maho/paypal/checkout/standard/review.phtml"/>
+        </reference>
+    </checkout_onepage_review>
 
     <checkout_cart_index>
         <reference name="head">

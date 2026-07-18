@@ -1,12 +1,7 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Maho_FeedManager
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- */
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: OSL-3.0
 -->
 <layout>
     <!-- FeedManager Default: Load CSS on all FeedManager pages -->
@@ -125,4 +120,17 @@
             </block>
         </reference>
     </adminhtml_feedmanager_dynamicrule_edit>
+
+    <!-- AJAX grid reload handles -->
+    <adminhtml_feedmanager_feed_grid>
+        <block type="feedmanager/adminhtml_feed_grid" name="root" output="toHtml" />
+    </adminhtml_feedmanager_feed_grid>
+
+    <adminhtml_feedmanager_destination_grid>
+        <block type="feedmanager/adminhtml_destination_grid" name="root" output="toHtml" />
+    </adminhtml_feedmanager_destination_grid>
+
+    <adminhtml_feedmanager_dynamicrule_grid>
+        <block type="feedmanager/adminhtml_dynamicrule_grid" name="root" output="toHtml" />
+    </adminhtml_feedmanager_dynamicrule_grid>
 </layout>

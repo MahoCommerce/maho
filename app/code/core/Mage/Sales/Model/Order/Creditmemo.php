@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
  */
 
 /**
@@ -147,6 +145,7 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
     public const XML_PATH_EMAIL_COPY_TO                = 'sales_email/creditmemo/copy_to';
     public const XML_PATH_EMAIL_COPY_METHOD            = 'sales_email/creditmemo/copy_method';
     public const XML_PATH_EMAIL_ENABLED                = 'sales_email/creditmemo/enabled';
+    public const XML_PATH_EMAIL_ATTACH_PDF             = 'sales_email/creditmemo/attach_pdf';
 
     public const XML_PATH_UPDATE_EMAIL_TEMPLATE        = 'sales_email/creditmemo_comment/template';
     public const XML_PATH_UPDATE_EMAIL_GUEST_TEMPLATE  = 'sales_email/creditmemo_comment/guest_template';
@@ -788,6 +787,8 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
             $customerName = $order->getCustomerName();
         }
 
+        $attachPdf = Mage::getStoreConfigFlag(self::XML_PATH_EMAIL_ATTACH_PDF, $storeId);
+
         $mailer = Mage::getModel('core/email_template_mailer');
         if ($notifyCustomer) {
             $emailInfo = Mage::getModel('core/email_info');
@@ -798,6 +799,9 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
                     $emailInfo->addBcc($email);
                 }
             }
+            if ($attachPdf) {
+                $this->_addPdfAttachment($emailInfo);
+            }
             $mailer->addEmailInfo($emailInfo);
         }
 
@@ -806,6 +810,9 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
             foreach ($copyTo as $email) {
                 $emailInfo = Mage::getModel('core/email_info');
                 $emailInfo->addTo($email);
+                if ($attachPdf) {
+                    $this->_addPdfAttachment($emailInfo);
+                }
                 $mailer->addEmailInfo($emailInfo);
             }
         }
@@ -829,6 +836,16 @@ class Mage_Sales_Model_Order_Creditmemo extends Mage_Sales_Model_Abstract
         }
 
         return $this;
+    }
+
+    #[\Override]
+    protected function _getPdfAttachmentInfo(): ?array
+    {
+        return [
+            'source_model'    => 'sales/order_pdf_creditmemo',
+            'entity_model'    => 'sales/order_creditmemo',
+            'filename_prefix' => 'creditmemo',
+        ];
     }
 
     /**

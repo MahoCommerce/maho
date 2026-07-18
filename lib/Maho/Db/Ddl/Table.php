@@ -1,16 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    MahoLib
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
+
+declare(strict_types=1);
 
 namespace Maho\Db\Ddl;
 
@@ -72,14 +69,15 @@ class Table
 
     /**
      * Default values for timestamp columns: fill with current timestamp on insert, on update, or both.
-     *
-     * @deprecated TIMESTAMP_INIT_UPDATE is unsafe for cross-engine use: PgSQL and SQLite
-     * silently downgrade it to plain CURRENT_TIMESTAMP (no on-update auto-bump), and the
-     * surgical modifyColumn path drops the ON UPDATE clause across all adapters because
-     * Doctrine DBAL's column model has no on-update concept. Use TIMESTAMP_INIT plus an
-     * explicit _beforeSave() that calls setUpdatedAt(Mage::app()->getLocale()->formatDateForDb('now'))
-     * for cross-engine parity.
      */
+    #[\Deprecated(message: <<<'TXT'
+    TIMESTAMP_INIT_UPDATE is unsafe for cross-engine use: PgSQL and SQLite
+     silently downgrade it to plain CURRENT_TIMESTAMP (no on-update auto-bump), and the
+     surgical modifyColumn path drops the ON UPDATE clause across all adapters because
+     Doctrine DBAL's column model has no on-update concept. Use TIMESTAMP_INIT plus an
+     explicit _beforeSave() that calls setUpdatedAt(Mage::app()->getLocale()->formatDateForDb('now'))
+     for cross-engine parity.
+    TXT)]
     public const TIMESTAMP_INIT_UPDATE = 'TIMESTAMP_INIT_UPDATE';
     public const TIMESTAMP_INIT        = 'TIMESTAMP_INIT';
     /**

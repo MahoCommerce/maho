@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Giftcard
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Giftcard
  */
+
+declare(strict_types=1);
 
 /**
  * Gift Card Price Indexer Resource Model
@@ -241,7 +238,7 @@ class Maho_Giftcard_Model_Resource_Indexer_Price extends Mage_Catalog_Model_Reso
 
             // Check custom amount range
             $giftcardType = $product->getData('giftcard_type');
-            if ($giftcardType === 'custom' || $giftcardType === 'combined') {
+            if ($giftcardType === 'range' || $giftcardType === 'combined') {
                 $customMin = (float) $product->getData('giftcard_min_amount');
                 $customMax = (float) $product->getData('giftcard_max_amount');
 

@@ -1,17 +1,15 @@
 <?php
 
 /**
- * Maho
- *
- * @package    MahoCLI
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 declare(strict_types=1);
 
 namespace MahoCLI\Commands;
 
+use Maho;
 use Mage;
 use Mage_Cron_Model_Observer;
 use Mage_Cron_Model_Schedule;
@@ -27,13 +25,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class CronRun extends BaseMahoCommand
 {
-    protected bool $isShellAvailable;
-
     #[\Override]
     protected function configure(): void
     {
         $this->addArgument('mode', InputArgument::REQUIRED, '"default" or "always"');
-        $this->setShellAvailable();
     }
 
     #[\Override]
@@ -46,7 +41,15 @@ class CronRun extends BaseMahoCommand
         $mode = $modeOrJobCode;
         $availableModes = ['default', 'always'];
         if (in_array($mode, $availableModes)) {
-            if ($this->isProcessRunning("maho cron:run $mode")) {
+            try {
+                // Held until this process exits
+                $acquired = Mage::getSingleton('core/lock')->acquire("cron.{$mode}");
+            } catch (\Throwable $e) {
+                // Lock could not be created: abort instead of running unguarded
+                $output->writeln("<error>{$e->getMessage()}</error>");
+                return Command::FAILURE;
+            }
+            if (!$acquired) {
                 $output->writeln("<error>{$mode} is already running</error>");
                 return Command::INVALID;
             }
@@ -64,17 +67,12 @@ class CronRun extends BaseMahoCommand
             $output->writeln("<comment>{$jobCode} is disabled in admin. Running anyway via CLI.</comment>");
         }
 
-        $jobConfig = $this->getJobConfig($jobCode);
-        if (!$jobConfig) {
+        $runModel = $this->getJobRunModel($jobCode);
+        if ($runModel === null) {
             $output->writeln("<error>Unknown mode/job: {$modeOrJobCode}</error>");
             return Command::FAILURE;
         }
-        $runConfig = $jobConfig['run'];
-        if (!$runConfig['model']) {
-            $output->writeln("<error>Invalid model definition for {$jobCode}</error>");
-            return Command::FAILURE;
-        }
-        if (!preg_match(Mage_Cron_Model_Observer::REGEX_RUN_MODEL, (string) $runConfig['model'], $run)) {
+        if (!preg_match(Mage_Cron_Model_Observer::REGEX_RUN_MODEL, $runModel, $run)) {
             $output->writeln('<error>Invalid model/method definition, expecting "model/class::method"</error>');
             return Command::FAILURE;
         }
@@ -133,41 +131,31 @@ class CronRun extends BaseMahoCommand
         return Command::SUCCESS;
     }
 
-    protected function getJobConfig(string $jobCode): array|false
+    /**
+     * Resolve the "model/class::method" run definition for a job_code.
+     *
+     * Looks up attribute-registered (compiled) cron jobs first, then falls back to
+     * legacy XML-declared jobs under crontab/jobs and default/crontab/jobs.
+     */
+    protected function getJobRunModel(string $jobCode): ?string
     {
-        $jobConfig = Mage::getConfig()->getNode("crontab/jobs/{$jobCode}")->asArray();
-        if ($jobConfig) {
-            return $jobConfig;
+        $compiledJobs = Maho::getCompiledAttributes()['crontab'] ?? [];
+        if (isset($compiledJobs[$jobCode])) {
+            $jobDef = $compiledJobs[$jobCode];
+            if (!empty($jobDef['module']) && !Mage::helper('core')->isModuleEnabled($jobDef['module'])) {
+                return null;
+            }
+            return $jobDef['alias'] . '::' . $jobDef['method'];
         }
 
-        $jobConfig = Mage::getConfig()->getNode("default/crontab/jobs/{$jobCode}")->asArray();
-        if ($jobConfig) {
-            return $jobConfig;
+        foreach (['crontab/jobs', 'default/crontab/jobs'] as $path) {
+            $node = Mage::getConfig()->getNode("{$path}/{$jobCode}");
+            if ($node && $node->run && (string) $node->run->model !== '') {
+                return (string) $node->run->model;
+            }
         }
 
-        return false;
+        return null;
     }
 
-    protected function setShellAvailable(): void
-    {
-        $disabledFuncs = array_map('trim', preg_split("/,|\s+/", strtolower(ini_get('disable_functions'))));
-        $isWinOS = !str_contains(strtolower(PHP_OS), 'darwin') && str_contains(strtolower(PHP_OS), 'win');
-        $isShellDisabled = in_array('shell_exec', $disabledFuncs) || $isWinOS
-            || !shell_exec('which expr 2>/dev/null')
-            || !shell_exec('which ps 2>/dev/null')
-            || !shell_exec('which sed 2>/dev/null');
-
-        $this->isShellAvailable = !$isShellDisabled;
-    }
-
-    protected function isProcessRunning(string $command): bool
-    {
-        if (!$this->isShellAvailable) {
-            return false;
-        }
-
-        $output = [];
-        exec("ps auxwww | grep \"$command\" | grep -v grep | grep -v cron.php", $output);
-        return count($output) > 1;
-    }
 }

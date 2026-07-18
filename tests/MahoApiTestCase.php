@@ -1,13 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
+
+declare(strict_types=1);
 
 namespace Tests;
 
@@ -23,6 +21,32 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // The legacy Mage_Api endpoints are opt-in (disabled by default). Enable
+        // the ones these tests exercise once per run; the flags persist in
+        // core_config_data. Done here rather than relying on the Api/V2 suite,
+        // which enables them too but runs alphabetically after Api/JsonRpc.
+        static $legacyProtocolsEnabled = false;
+        if (!$legacyProtocolsEnabled) {
+            $config = \Mage::getModel('core/config');
+            $config->saveConfig('apiplatform/protocols/legacy_rest', '1', 'default', 0);
+            $config->saveConfig('apiplatform/protocols/jsonrpc', '1', 'default', 0);
+            \Mage::app()->getCache()->cleanType('config');
+            $legacyProtocolsEnabled = true;
+        }
+
+        // Skip if no API server configured (CI environments)
+        if (empty($_ENV['API_BASE_URL'])) {
+            try {
+                $store = \Mage::app()->getStore();
+                $baseUrl = $store->getBaseUrl(\Mage_Core_Model_Store::URL_TYPE_WEB);
+                if (!$baseUrl || !filter_var($baseUrl, FILTER_VALIDATE_URL)) {
+                    $this->markTestSkipped('API server not configured');
+                }
+            } catch (\Throwable $e) {
+                $this->markTestSkipped('API server not available: ' . $e->getMessage());
+            }
+        }
 
         $this->apiConfig = $this->getApiConfig();
         $this->apiClient = new JsonRpcClient($this->apiConfig['base_url']);
@@ -74,8 +98,8 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
 
         try {
             // Method 1: Try to get from current store configuration
-            $store = Mage::app()->getStore();
-            $baseUrl = $store->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB);
+            $store = \Mage::app()->getStore();
+            $baseUrl = $store->getBaseUrl(\Mage_Core_Model_Store::URL_TYPE_WEB);
 
             // If we got a valid URL, use it
             if ($baseUrl && filter_var($baseUrl, FILTER_VALIDATE_URL)) {
@@ -84,8 +108,8 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
             }
 
             // Method 2: Try to get from configuration directly
-            $unsecureBaseUrl = Mage::getStoreConfig('web/unsecure/base_url');
-            $secureBaseUrl = Mage::getStoreConfig('web/secure/base_url');
+            $unsecureBaseUrl = \Mage::getStoreConfig('web/unsecure/base_url');
+            $secureBaseUrl = \Mage::getStoreConfig('web/secure/base_url');
 
             // Prefer HTTPS if available, otherwise HTTP
             $configuredUrl = $secureBaseUrl ?: $unsecureBaseUrl;
@@ -105,9 +129,9 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
                 return $scheme . '://' . $host . $baseDir . '/api.php';
             }
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // Log error but don't fail the test setup
-            error_log('Failed to detect API base URL: ' . $e->getMessage());
+            \Mage::log('Failed to detect API base URL: ' . $e->getMessage(), \Mage::LOG_WARNING);
         }
 
         // Final fallback
@@ -220,10 +244,11 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
     protected function skipIfApiNotAvailable(): void
     {
         try {
-            $response = $this->apiClient->call('resources');
-            if (!$response->isSuccess()) {
-                $this->markTestSkipped('API is not available or not responding at: ' . $this->apiConfig['base_url']);
-            }
+            // Any well-formed JSON-RPC reply proves the endpoint is reachable -
+            // even an auth error like "Session expired" (resources requires a
+            // session). Only a transport failure or a non-JSON-RPC body (which
+            // makes the response object throw) means the API is truly unavailable.
+            $this->apiClient->call('resources');
         } catch (\Exception $e) {
             $this->markTestSkipped('API is not available at: ' . $this->apiConfig['base_url'] . ' - ' . $e->getMessage());
         }
@@ -246,77 +271,66 @@ abstract class MahoApiTestCase extends \Tests\MahoBackendTestCase
         $username = $this->apiConfig['username'];
         $password = $this->apiConfig['password'];
 
-        // Check if user already exists
-        $existingUser = Mage::getModel('api/user')->loadByUsername($username);
-
-        if ($existingUser->getId()) {
-            // User exists, just ensure correct permissions
-            $this->ensureBlogApiPermissions($existingUser);
-            return;
-        }
-
-        // Create new API user with minimal blog permissions
-        $user = Mage::getModel('api/user');
-        $user->setData([
-            'username' => $username,
-            'firstname' => 'Blog',
-            'lastname' => 'API User',
-            'email' => 'blog-api-test@example.com',
-            'password' => $password,
-            'is_active' => 1,
-        ]);
-        $user->save();
-
-        // Create minimal role with only blog API permissions
-        $role = Mage::getModel('api/role');
-        $role->setData([
-            'role_name' => 'Blog API Test Role',
-            'role_type' => 'U',
-            'user_id' => $user->getId(),
-        ]);
-        $role->save();
-
-        // Set blog-specific API permissions
-        $this->setBlogApiPermissions($role);
-    }
-
-    /**
-     * Ensure existing user has correct blog API permissions
-     */
-    private function ensureBlogApiPermissions($user): void
-    {
-        $roles = Mage::getModel('api/role')->getCollection()
-            ->addFieldToFilter('user_id', $user->getId())
-            ->addFieldToFilter('role_type', 'U');
-
-        foreach ($roles as $role) {
-            $this->setBlogApiPermissions($role);
-        }
-    }
-
-    /**
-     * Set minimal blog API permissions for a role
-     */
-    private function setBlogApiPermissions($role): void
-    {
-        // Delete existing permissions for this role
-        Mage::getModel('api/rules')->getCollection()
-            ->addFieldToFilter('role_id', $role->getId())
-            ->walk('delete');
-
-        // Add only blog API permissions
-        $blogPermissions = [
-            'system/api/blog_post', // Blog API resource
-        ];
-
-        foreach ($blogPermissions as $permission) {
-            $rule = Mage::getModel('api/rules');
-            $rule->setData([
-                'role_id' => $role->getId(),
-                'resource_id' => $permission,
-                'privileges' => null, // Grant all privileges for this resource
+        // Create the API user if missing. The credential is the api_key (hashed
+        // by Mage_Api_Model_User::_beforeSave), not the admin-style password.
+        $user = \Mage::getModel('api/user')->loadByUsername($username);
+        if (!$user->getId()) {
+            $user = \Mage::getModel('api/user');
+            $user->setData([
+                'username' => $username,
+                'firstname' => 'Blog',
+                'lastname' => 'API User',
+                'email' => 'blog-api-test@example.com',
+                'api_key' => $password,
+                'api_key_confirmation' => $password,
+                'is_active' => 1,
             ]);
-            $rule->save();
+            $user->save();
+        }
+
+        $this->ensureBlogApiRole($user);
+    }
+
+    /**
+     * Give the API user a group role granting the blog_post resources.
+     *
+     * Mirrors the admin Api/RoleController flow: a group ('G') role holds the
+     * ACL rules, the user is attached to it via a 'U' assignment row, and
+     * Mage_Api_Model_Session::login() requires that assignment (parent_id > 0)
+     * before it will authorise any call.
+     */
+    private function ensureBlogApiRole($user): void
+    {
+        $roleName = 'Blog API Test Role';
+
+        $group = \Mage::getModel('api/role')->getCollection()
+            ->addFieldToFilter('role_type', \Mage_Api_Model_Acl::ROLE_TYPE_GROUP)
+            ->addFieldToFilter('role_name', $roleName)
+            ->getFirstItem();
+
+        if (!$group->getId()) {
+            $group = \Mage::getModel('api/role')
+                ->setName($roleName)
+                ->setPid(0)
+                ->setRoleType(\Mage_Api_Model_Acl::ROLE_TYPE_GROUP)
+                ->save();
+        }
+
+        // Allow the blog_post resource tree (deny everything else). The method
+        // ACLs are blog/post/{list,info,create,update,delete}.
+        \Mage::getModel('api/rules')
+            ->setRoleId($group->getId())
+            ->setResources([
+                'blog', 'blog/post',
+                'blog/post/list', 'blog/post/info',
+                'blog/post/create', 'blog/post/update', 'blog/post/delete',
+            ])
+            ->saveRel();
+
+        // Attach the user to the group role (idempotent).
+        $user->setRoleId($group->getId())->setUserId($user->getId());
+        if ($user->roleUserExists() !== true) {
+            $user->add();
         }
     }
 }

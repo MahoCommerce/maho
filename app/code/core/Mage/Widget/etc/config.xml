@@ -1,18 +1,13 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Widget
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <modules>
         <Mage_Widget>
-            <version>1.6.0.1</version>
+            <version>2.0.0</version>
         </Mage_Widget>
     </modules>
     <global>
@@ -39,13 +34,6 @@
                 </entities>
             </widget_resource>
         </models>
-        <resources>
-            <widget_setup>
-                <setup>
-                    <module>Mage_Widget</module>
-                </setup>
-            </widget_setup>
-        </resources>
         <blocks>
             <widget>
                 <class>Mage_Widget_Block</class>

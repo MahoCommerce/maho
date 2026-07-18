@@ -1,15 +1,94 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Reports
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2022 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <widgets>
+    <bestsellers type="reports/product_widget_bestsellers" translate="name description" module="reports">
+        <name>Bestsellers</name>
+        <description>List of best selling products for a given period</description>
+        <parameters>
+            <period translate="label">
+                <required>1</required>
+                <visible>1</visible>
+                <label>Period</label>
+                <type>select</type>
+                <value>all_time</value>
+                <values>
+                    <all_time translate="label">
+                        <value>all_time</value>
+                        <label>All Time</label>
+                    </all_time>
+                    <year translate="label">
+                        <value>year</value>
+                        <label>This Year</label>
+                    </year>
+                    <month translate="label">
+                        <value>month</value>
+                        <label>This Month</label>
+                    </month>
+                    <last_30_days translate="label">
+                        <value>last_30_days</value>
+                        <label>Last 30 Days</label>
+                    </last_30_days>
+                    <last_7_days translate="label">
+                        <value>last_7_days</value>
+                        <label>Last 7 Days</label>
+                    </last_7_days>
+                </values>
+            </period>
+            <only_in_stock translate="label">
+                <visible>1</visible>
+                <label>Only In-Stock Products</label>
+                <type>boolean</type>
+                <value>1</value>
+            </only_in_stock>
+            <show_pager translate="label">
+                <visible>1</visible>
+                <label>Display Page Control</label>
+                <type>boolean</type>
+            </show_pager>
+            <products_per_page translate="label">
+                <required>1</required>
+                <visible>1</visible>
+                <value>5</value>
+                <label>Number of Products per Page</label>
+                <type>text</type>
+                <depends><show_pager><value>1</value></show_pager></depends>
+            </products_per_page>
+            <products_count translate="label">
+                <required>1</required>
+                <visible>1</visible>
+                <value>5</value>
+                <label>Number of Products to Display</label>
+                <type>text</type>
+            </products_count>
+            <template>
+                <required>1</required>
+                <visible>1</visible>
+                <label>Template</label>
+                <type>select</type>
+                <value>reports/widget/bestsellers/content/bestsellers_grid.phtml</value>
+                <values>
+                    <default translate="label">
+                        <value>reports/widget/bestsellers/content/bestsellers_grid.phtml</value>
+                        <label>Bestsellers Grid Template</label>
+                    </default>
+                    <list translate="label">
+                        <value>reports/widget/bestsellers/content/bestsellers_list.phtml</value>
+                        <label>Bestsellers List Template</label>
+                    </list>
+                </values>
+            </template>
+            <cache_lifetime translate="label description">
+                <label>Cache Lifetime (Seconds)</label>
+                <description>86400 by default, if not set. To refresh instantly, Clear the Blocks HTML Output Cache.</description>
+                <visible>1</visible>
+                <type>text</type>
+            </cache_lifetime>
+        </parameters>
+    </bestsellers>
     <recently_viewed type="reports/product_widget_viewed" translate="name description" module="reports">
         <name>Recently Viewed Products</name>
         <description>List of Products Recently Viewed by Visitor</description>

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Log
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Log
  */
 
 /**
@@ -214,10 +212,12 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('controller_action_predispatch', area: 'frontend')]
+    #[Maho\Config\Observer('controller_action_predispatch', area: 'frontend', type: 'singleton')]
     public function initByRequest($observer)
     {
-        if ($this->_skipRequestLogging || $this->isModuleIgnored($observer)) {
+        if ($this->_skipRequestLogging || $this->isModuleIgnored($observer)
+            || $this->_session->getSessionId() === false
+        ) {
             return $this;
         }
 
@@ -259,10 +259,12 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('controller_action_postdispatch', area: 'frontend')]
+    #[Maho\Config\Observer('controller_action_postdispatch', area: 'frontend', type: 'singleton')]
     public function saveByRequest($observer)
     {
-        if ($this->_skipRequestLogging || $this->isModuleIgnored($observer)) {
+        if ($this->_skipRequestLogging || $this->isModuleIgnored($observer)
+            || $this->_session->getSessionId() === false
+        ) {
             return $this;
         }
 
@@ -285,7 +287,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('customer_login', area: 'frontend')]
+    #[Maho\Config\Observer('customer_login', area: 'frontend', type: 'singleton')]
     public function bindCustomerLogin($observer)
     {
         /** @var Mage_Customer_Model_Customer $customer */
@@ -313,7 +315,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('customer_logout', area: 'frontend')]
+    #[Maho\Config\Observer('customer_logout', area: 'frontend', type: 'singleton')]
     public function bindCustomerLogout($observer)
     {
         if ($this->getCustomerId() && $customer = $observer->getEvent()->getCustomer()) {
@@ -326,7 +328,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
-    #[Maho\Config\Observer('sales_quote_save_after', area: 'frontend')]
+    #[Maho\Config\Observer('sales_quote_save_after', area: 'frontend', type: 'singleton')]
     public function bindQuoteCreate($observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */
@@ -344,7 +346,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
-    #[Maho\Config\Observer('checkout_quote_destroy', area: 'frontend')]
+    #[Maho\Config\Observer('checkout_quote_destroy', area: 'frontend', type: 'singleton')]
     public function bindQuoteDestroy($observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */

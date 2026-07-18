@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Tax
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Tax
  */
 
 /** @var Mage_Tax_Model_Resource_Setup $this */
@@ -91,3 +89,33 @@ $data = [
     ],
 ];
 $installer->getConnection()->insertMultiple($installer->getTable('tax/tax_calculation'), $data);
+
+/**
+ * Register tax_class_id attribute on the catalog product entity.
+ * Moved here from the legacy schema install script; the table structure
+ * lives in sql/schema.php now and attribute registration is data work.
+ */
+$catalogInstaller = Mage::getResourceModel('catalog/setup', 'catalog_setup');
+$catalogInstaller->addAttribute(Mage_Catalog_Model_Product::ENTITY, 'tax_class_id', [
+    'group'                      => 'Prices',
+    'type'                       => 'int',
+    'backend'                    => '',
+    'frontend'                   => '',
+    'label'                      => 'Tax Class',
+    'input'                      => 'select',
+    'class'                      => '',
+    'source'                     => 'tax/class_source_product',
+    'global'                     => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_WEBSITE,
+    'visible'                    => true,
+    'required'                   => true,
+    'user_defined'               => false,
+    'default'                    => '',
+    'searchable'                 => true,
+    'filterable'                 => false,
+    'comparable'                 => false,
+    'visible_on_front'           => false,
+    'visible_in_advanced_search' => true,
+    'used_in_product_listing'    => true,
+    'unique'                     => false,
+    'apply_to'                   => 'simple,configurable,virtual,downloadable,bundle',
+]);

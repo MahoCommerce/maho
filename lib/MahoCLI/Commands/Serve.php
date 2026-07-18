@@ -1,11 +1,8 @@
 <?php
 
 /**
- * Maho
- *
- * @package    MahoCLI
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 declare(strict_types=1);
@@ -17,6 +14,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -29,16 +27,17 @@ class Serve extends BaseMahoCommand
     protected function configure(): void
     {
         $this->addArgument('port', InputArgument::OPTIONAL, 'Default is 8000', 8000);
+        $this->addOption('host', null, InputOption::VALUE_REQUIRED, 'Host/interface to bind', '127.0.0.1');
     }
 
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $host = '127.0.0.1';
+        $host = (string) $input->getOption('host');
         $port = $input->getArgument('port');
         $docroot = MAHO_PUBLIC_DIR;
 
-        passthru("php -S {$host}:{$port} -t {$docroot}");
+        passthru('php -S ' . escapeshellarg("{$host}:{$port}") . ' -t ' . escapeshellarg($docroot));
 
         return Command::SUCCESS;
     }

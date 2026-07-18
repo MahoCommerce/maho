@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
@@ -543,7 +541,14 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
             return Mage::helper('core')->jsonDecode($str);
         }
 
-        return unserialize($str, ['allowed_classes' => false]);
+        // Tolerate never-serialized input (e.g. plain custom-option values): pass it through
+        // unchanged instead of warning. serialize(false) is the one input that legitimately
+        // unserializes to false, so it must not be treated as a decode failure.
+        $result = @unserialize($str, ['allowed_classes' => false]);
+        if ($result === false && $str !== 'b:0;') {
+            return $str;
+        }
+        return $result;
     }
 
     /**

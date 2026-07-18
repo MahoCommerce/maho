@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2017-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 class Mage_Catalog_CategoryController extends Mage_Core_Controller_Front_Action
@@ -108,10 +106,6 @@ class Mage_Catalog_CategoryController extends Mage_Core_Controller_Front_Action
             $this->_initLayoutMessages('catalog/session');
             $this->_initLayoutMessages('checkout/session');
             $this->renderLayout();
-
-            $this->getResponse()
-                ->setHeader('Pragma', 'public', true)
-                ->setHeader('Cache-Control', 'private max-age=60', true);
         } elseif (!$this->getResponse()->isRedirect()) {
             $this->_forward('noRoute');
         }

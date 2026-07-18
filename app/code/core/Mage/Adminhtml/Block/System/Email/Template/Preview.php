@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Block_System_Email_Template_Preview extends Mage_Adminhtml_Block_Widget
@@ -38,14 +36,6 @@ class Mage_Adminhtml_Block_System_Email_Template_Preview extends Mage_Adminhtml_
             $template->setTemplateStyles($this->getRequest()->getParam('styles'));
         }
 
-        $template->setTemplateStyles(
-            $this->maliciousCodeFilter($template->getTemplateStyles()),
-        );
-
-        $template->setTemplateText(
-            $this->maliciousCodeFilter($template->getTemplateText()),
-        );
-
         \Maho\Profiler::start('email_template_proccessing');
         $vars = [];
 
@@ -53,6 +43,11 @@ class Mage_Adminhtml_Block_System_Email_Template_Preview extends Mage_Adminhtml_
 
         if ($template->isPlain()) {
             $templateProcessed = '<pre>' . htmlspecialchars($templateProcessed) . '</pre>';
+        } else {
+            // Sanitize the resolved output (directives are now real URLs/values).
+            // Sanitizing before directive resolution would mangle {{...}}
+            // directives and leave their content unsanitized.
+            $templateProcessed = $this->maliciousCodeFilter($templateProcessed);
         }
 
         \Maho\Profiler::stop('email_template_proccessing');

@@ -1,15 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @category   Mage
- * @package    Mage_Core
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
+
+declare(strict_types=1);
 
 use MatthiasMullie\Minify\CSS as CSSMinifier;
 use MatthiasMullie\Minify\JS as JSMinifier;
@@ -152,14 +149,11 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
         try {
             $this->ensureCacheDirectory($type);
 
-            $lockFile = $cachedFile . '.lock';
-            $lockHandle = fopen($lockFile, 'c');
+            $lockName = 'minify_' . md5($absolutePath);
+            $lock = Mage::getSingleton('core/lock');
 
-            if (!$lockHandle || !flock($lockHandle, LOCK_EX | LOCK_NB)) {
+            if (!$lock->acquire($lockName)) {
                 // If we can't get a lock, return original file (another process is minifying)
-                if ($lockHandle) {
-                    fclose($lockHandle);
-                }
                 return $filePath;
             }
 
@@ -177,9 +171,7 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
                 }
                 return $cachedUrl;
             } finally {
-                flock($lockHandle, LOCK_UN);
-                fclose($lockHandle);
-                @unlink($lockFile);
+                $lock->release($lockName);
             }
 
         } catch (Exception $e) {

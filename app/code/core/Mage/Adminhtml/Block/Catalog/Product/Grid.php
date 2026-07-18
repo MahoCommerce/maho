@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 use Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract as MassAction;
@@ -228,10 +226,19 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
             'visibility',
             [
                 'header' => Mage::helper('catalog')->__('Visibility'),
-                'width' => '150px',
+                'width' => '60px',
+                'align' => 'center',
                 'index' => 'visibility',
                 'type'  => 'options',
                 'options' => Mage::getModel('catalog/product_visibility')->getOptionArray(),
+                'renderer' => 'adminhtml/widget_grid_column_renderer_iconoptions',
+                'filter' => 'adminhtml/widget_grid_column_filter_iconoptions',
+                'icons' => [
+                    Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE => 'eye-off',
+                    Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_CATALOG  => 'layout-grid',
+                    Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_SEARCH   => 'search',
+                    Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH        => ['layout-grid', 'search'],
+                ],
             ],
         );
 
@@ -239,10 +246,17 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
             'status',
             [
                 'header' => Mage::helper('catalog')->__('Status'),
-                'width' => '70px',
+                'width' => '60px',
+                'align' => 'center',
                 'index' => 'status',
                 'type'  => 'options',
                 'options' => Mage::getSingleton('catalog/product_status')->getOptionArray(),
+                'renderer' => 'adminhtml/widget_grid_column_renderer_iconoptions',
+                'filter' => 'adminhtml/widget_grid_column_filter_iconoptions',
+                'icons' => [
+                    Mage_Catalog_Model_Product_Status::STATUS_ENABLED  => ['icon' => 'circle', 'variant' => 'filled', 'class' => 'grid-icon-value--on'],
+                    Mage_Catalog_Model_Product_Status::STATUS_DISABLED => ['icon' => 'circle', 'variant' => 'filled', 'class' => 'grid-icon-value--off'],
+                ],
             ],
         );
 

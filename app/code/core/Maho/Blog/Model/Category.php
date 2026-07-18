@@ -1,15 +1,14 @@
 <?php
 
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Blog
+ */
+
 declare(strict_types=1);
 
 /**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Blog
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- *
  * @method string getName()
  * @method string getUrlKey()
  * @method int getParentId()
@@ -18,7 +17,6 @@ declare(strict_types=1);
  * @method int getPosition()
  * @method int getIsActive()
  */
-
 class Maho_Blog_Model_Category extends Mage_Core_Model_Abstract
 {
     public const ENTITY = 'blog_category';

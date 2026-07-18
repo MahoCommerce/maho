@@ -1,14 +1,9 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+SPDX-FileCopyrightText: 2022 The OpenMage Contributors <https://openmage.org>
+SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <jstranslator>
     <global module="core">
@@ -54,9 +49,6 @@
         <validate-phone-lax translate="message">
             <message>Please enter a valid phone number. For example (123) 456-7890 or 123-456-7890.</message>
         </validate-phone-lax>
-        <validate-fax translate="message">
-            <message>Please enter a valid fax number. For example (123) 456-7890 or 123-456-7890.</message>
-        </validate-fax>
         <validate-date translate="message">
             <message>Please enter a valid date.</message>
         </validate-date>

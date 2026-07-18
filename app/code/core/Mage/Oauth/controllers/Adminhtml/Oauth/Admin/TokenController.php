@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Oauth
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Oauth
  */
 
 /**
@@ -41,7 +39,7 @@ class Mage_Oauth_Adminhtml_Oauth_Admin_TokenController extends Mage_Adminhtml_Co
     {
         $this
             ->loadLayout()
-            ->_setActiveMenu('system/api/oauth_admin_token')
+            ->_setActiveMenu('system/api/rest_legacy/oauth_admin_token')
             ->renderLayout();
     }
 

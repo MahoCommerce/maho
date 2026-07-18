@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 class Mage_Core_Model_Input_Filter_MaliciousCode
@@ -96,7 +94,15 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
 
         $libXmlErrorsState = libxml_use_internal_errors(true);
         $dom = $this->_initDOMDocument();
-        if (!$dom->loadHTML($html)) {
+        // DOMDocument::loadHTML() defaults to ISO-8859-1 when no encoding hint
+        // is present, which mangles UTF-8 multi-byte sequences during the
+        // saveHTML() round-trip (e.g. "ö" becomes "&Atilde;&para;"). Prepend a
+        // <?xml encoding> processing instruction so libxml parses as UTF-8.
+        // TODO: when the minimum PHP version reaches 8.4, replace this whole
+        // DOMDocument + XML-PI workaround with \DOM\HTMLDocument::createFromString(),
+        // which parses UTF-8 natively (and drop the <?xml ...> strip from the
+        // wrapper regex below).
+        if (!$dom->loadHTML('<?xml encoding="UTF-8">' . $html)) {
             Mage::throwException(Mage::helper('core')->__('HTML filtration has failed.'));
         }
 
@@ -118,7 +124,10 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
         }
 
         if ($removeWrapper) {
-            $html = preg_replace('/<(?:!DOCTYPE|\/?(?:html|body))[^>]*>\s*/i', '', $html);
+            // Strip the wrapper tags libxml adds, plus the XML PI we injected
+            // above (libxml may emit it with or without a trailing question
+            // mark depending on version; [^>]* matches both forms).
+            $html = preg_replace('/<(?:!DOCTYPE|\?xml\b|\/?(?:html|body))[^>]*>\s*/i', '', $html);
         }
 
         libxml_use_internal_errors($libXmlErrorsState);

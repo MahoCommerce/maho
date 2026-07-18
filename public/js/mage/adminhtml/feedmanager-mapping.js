@@ -1,10 +1,7 @@
-/**
- * Maho FeedManager - Mapping Tab JavaScript
- *
- * @package    Maho_FeedManager
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- */
+// Maho FeedManager - Mapping Tab JavaScript
+//
+// SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+// SPDX-License-Identifier: OSL-3.0
 
 /**
  * Field editor state
@@ -329,7 +326,18 @@ const TransformerModal = {
                 for (let j = 0; j < optPairs.length; j++) {
                     const kv = optPairs[j].split('=');
                     if (kv.length === 2) {
-                        options[kv[0].trim()] = kv[1].trim();
+                        const key = kv[0].trim();
+                        const raw = kv[1];
+                        // Direction-aware trim — keep the inside edge for prepend_append.
+                        let value;
+                        if (code === 'prepend_append' && key === 'prepend') {
+                            value = raw.replace(/^\s+/, '');
+                        } else if (code === 'prepend_append' && key === 'append') {
+                            value = raw.replace(/\s+$/, '');
+                        } else {
+                            value = raw.trim();
+                        }
+                        options[key] = value;
                     }
                 }
             }

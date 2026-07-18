@@ -1,10 +1,5 @@
-/**
- * Maho
- *
- * @package     Mage_Adminhtml
- * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+// SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+// SPDX-License-Identifier: AFL-3.0
 
 import * as TiptapModules from './extensions.js';
 import { html_beautify } from 'https://esm.sh/js-beautify@1.15.4/js/lib/beautify-html.js';
@@ -301,7 +296,10 @@ class tiptapWysiwygSetup {
                     shouldShow: ({ editor, view, state, oldState }) => {
                         const isInTable = editor.isActive('table');
                         const isInCell = editor.isActive('tableCell') || editor.isActive('tableHeader');
-                        const shouldShow = isInTable && isInCell;
+                        // Require focus: TipTap only positions the menu while the editor is focused,
+                        // so without this the menu shows unpositioned (top-left) whenever the initial
+                        // selection happens to land in a table cell (e.g. a doc ending with a table).
+                        const shouldShow = editor.isFocused && isInTable && isInCell;
                         tableBubbleMenu.style.display = shouldShow ? 'flex' : 'none';
                         return shouldShow;
                     },
@@ -509,6 +507,7 @@ class tiptapWysiwygSetup {
 
         bubbleMenu.id = `${this.id}_table_bubble_menu`;
         bubbleMenu.className = 'tiptap-bubble-menu';
+        bubbleMenu.style.display = 'none';
         return bubbleMenu;
     }
 

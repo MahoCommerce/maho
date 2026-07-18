@@ -1,12 +1,10 @@
 <?php
 /**
- * Maho
- *
- * @package     default_default
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2021-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
  */
 
 /** @see Mage_Adminhtml_Block_Sales_Order_Create_Billing_Address $this */
@@ -53,7 +51,7 @@ if ($this->getIsShipping()):
         <br>
         <?php if ($this->getIsShipping()): ?>
             <input type="checkbox" id="order-shipping_as_billing" name="shipping_as_billing" value="1" onclick="order.setShippingAsBilling(this.checked)" <?php if ($this->getIsAsBilling()): ?>checked<?php endif ?>>
-            <label for="order-shipping_as_billing" class="no-float"><?= Mage::helper('sales')->__('Same As Billing Address') ?></label>
+            <label for="order-shipping_as_billing" class="inline"><?= Mage::helper('sales')->__('Same As Billing Address') ?></label>
         <?php else: ?>
             &nbsp;
         <?php endif ?>

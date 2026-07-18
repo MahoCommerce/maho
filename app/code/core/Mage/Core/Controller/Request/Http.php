@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Core
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Core
  */
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
@@ -376,9 +374,13 @@ class Mage_Core_Controller_Request_Http
     public function getPost(string|null $key = null, mixed $default = null): mixed
     {
         if ($key === null) {
-            return $_POST;
+            return $this->symfonyRequest->request->all();
         }
-        return $_POST[$key] ?? $default;
+        if ($this->symfonyRequest->request->has($key)) {
+            // Use all() to support array values
+            return $this->symfonyRequest->request->all()[$key];
+        }
+        return $default;
     }
 
     public function getCookie(string|null $key = null, mixed $default = null): mixed

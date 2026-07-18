@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Sales
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2018-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Sales
  */
 
 abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
@@ -234,27 +232,4 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
         return $a['sort_order'] <=> $b['sort_order'];
     }
 
-    /**
-     * Before get PDF
-     *
-     * @return void
-     */
-    protected function _beforeGetPdf()
-    {
-        $translate = Mage::getSingleton('core/translate');
-        /** @var Mage_Core_Model_Translate $translate */
-        $translate->setTranslateInline(false);
-    }
-
-    /**
-     * After get PDF
-     *
-     * @return void
-     */
-    protected function _afterGetPdf()
-    {
-        $translate = Mage::getSingleton('core/translate');
-        /** @var Mage_Core_Model_Translate $translate */
-        $translate->setTranslateInline(true);
-    }
 }

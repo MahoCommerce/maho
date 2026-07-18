@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Maho_FeedManager
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_FeedManager
  */
+
+declare(strict_types=1);
 
 /**
  * Attribute Mapper
@@ -41,6 +39,7 @@ class Maho_FeedManager_Model_Mapper
         'max_price',
         'tier_price',
         'group_price',
+        'sale_price',
         'msrp',
         'cost',
     ];
@@ -57,6 +56,9 @@ class Maho_FeedManager_Model_Mapper
 
     /** @var array<int, array|null> Cache of parent product data by parent ID */
     protected array $_parentDataCache = [];
+
+    /** @var array<int, array<int|string>> Cache of parent product ID => its category IDs */
+    protected array $_parentCategoryIdsCache = [];
 
     /** @var array<int, array{name: string, path: string}> Static cache of category data (id => [name, path]) */
     protected static array $_categoryCache = [];
@@ -263,6 +265,10 @@ class Maho_FeedManager_Model_Mapper
         $additionalImages = $this->_getAdditionalImages($product);
         $data['additional_images'] = $additionalImages;
         $data['additional_images_csv'] = implode(',', $additionalImages);
+        // image_1..image_10 are advertised as source options in AbstractBuilder.
+        for ($i = 1; $i <= 10; $i++) {
+            $data['image_' . $i] = $additionalImages[$i - 1] ?? null;
+        }
 
         // Categories
         $data['category_ids'] = $product->getCategoryIds();
@@ -398,9 +404,22 @@ class Maho_FeedManager_Model_Mapper
             $data['special_to_date'],
         );
         $data['url'] = $this->_getProductSeoUrl($parent);
+        // Computed category keys, mirroring the child row assembly - without
+        // these, parent_category_path never exists and use_parent=if_empty on
+        // category-derived fields silently yields nothing for variant children.
+        $data['category_ids'] = $parent->getCategoryIds();
+        $data['category_names'] = $this->_getCategoryNames($parent);
+        $data['category_path'] = $this->_getCategoryPath($parent);
         $data['image'] = $this->_getImageUrl($parent, 'image');
         $data['small_image'] = $this->_getImageUrl($parent, 'small_image');
         $data['thumbnail'] = $this->_getImageUrl($parent, 'thumbnail');
+
+        $additionalImages = $this->_getAdditionalImages($parent);
+        $data['additional_images'] = $additionalImages;
+        $data['additional_images_csv'] = implode(',', $additionalImages);
+        for ($i = 1; $i <= 10; $i++) {
+            $data['image_' . $i] = $additionalImages[$i - 1] ?? null;
+        }
 
         // Add common custom attributes
         foreach ($parent->getAttributes() as $attribute) {
@@ -436,11 +455,72 @@ class Maho_FeedManager_Model_Mapper
         return match ($sourceType) {
             self::SOURCE_TYPE_ATTRIBUTE => self::getValueWithParentMode($sourceValue, $rawData, $useParentMode),
             self::SOURCE_TYPE_STATIC => $sourceValue,
-            self::SOURCE_TYPE_RULE => $this->_evaluateRule($sourceValue, $rawData, $product),
+            self::SOURCE_TYPE_RULE => $this->_evaluateRuleWithParentMode($sourceValue, $rawData, $product, $useParentMode),
             self::SOURCE_TYPE_COMBINED => $this->_evaluateCombined($sourceValue, $rawData),
-            self::SOURCE_TYPE_TAXONOMY => $this->_getTaxonomyForProduct($sourceValue, $product),
+            self::SOURCE_TYPE_TAXONOMY => $this->_getTaxonomyForProduct($sourceValue, $product, $useParentMode),
             default => null,
         };
+    }
+
+    /**
+     * Evaluate a dynamic rule-based source with parent-mode support.
+     *
+     * Rules evaluate against a product MODEL. For variant children that inherit
+     * pricing (etc.) from their parent, "if_empty" re-evaluates the rule against
+     * the loaded parent model when the child evaluation produced nothing;
+     * "always" evaluates the parent first. Without this, rule sources silently
+     * ignored use_parent while attribute sources honoured it.
+     */
+    protected function _evaluateRuleWithParentMode(string $ruleCode, array $rawData, Mage_Catalog_Model_Product $product, string $useParentMode): mixed
+    {
+        if ($useParentMode === 'always') {
+            $parent = $this->_getParentProductModel($product);
+            if ($parent !== null) {
+                // Strict parent semantics: when a parent exists its result IS
+                // the answer, even when empty. Configurable storefront pricing
+                // ignores child specials entirely, so falling back to the
+                // child here would advertise sales the customer never gets.
+                return $this->_evaluateRule($ruleCode, $rawData, $parent);
+            }
+            return $this->_evaluateRule($ruleCode, $rawData, $product);
+        }
+
+        $value = $this->_evaluateRule($ruleCode, $rawData, $product);
+        if ($useParentMode === 'if_empty' && ($value === null || $value === '')) {
+            $parent = $this->_getParentProductModel($product);
+            if ($parent !== null) {
+                return $this->_evaluateRule($ruleCode, $rawData, $parent);
+            }
+        }
+        return $value;
+    }
+
+    /** @var array<int, Mage_Catalog_Model_Product|null> Parent product models keyed by parent ID */
+    protected array $_parentModelCache = [];
+
+    /**
+     * Load (and cache) the configurable parent model for a child product.
+     * Rule conditions validate against a product MODEL, so parent fallback
+     * for rule sources needs the parent model, not the parent_* raw keys.
+     */
+    protected function _getParentProductModel(Mage_Catalog_Model_Product $product): ?Mage_Catalog_Model_Product
+    {
+        $childId = (int) $product->getId();
+        if (array_key_exists($childId, $this->_childParentMap)) {
+            $parentId = $this->_childParentMap[$childId];
+        } else {
+            $parentIds = Mage::getModel('catalog/product_type_configurable')->getParentIdsByChild($childId);
+            $parentId = empty($parentIds) ? null : (int) $parentIds[0];
+            $this->_childParentMap[$childId] = $parentId;
+        }
+        if ($parentId === null) {
+            return null;
+        }
+        if (!array_key_exists($parentId, $this->_parentModelCache)) {
+            $parent = Mage::getModel('catalog/product')->setStoreId($this->_storeId)->load($parentId);
+            $this->_parentModelCache[$parentId] = $parent->getId() ? $parent : null;
+        }
+        return $this->_parentModelCache[$parentId];
     }
 
     /**
@@ -545,12 +625,19 @@ class Maho_FeedManager_Model_Mapper
     {
         $images = [];
 
+        // Force-load the media_gallery backend (collections don't trigger it).
+        if ($product->getData('media_gallery') === null) {
+            $attr = $product->getResource()->getAttribute('media_gallery');
+            if ($attr) {
+                $attr->getBackend()->afterLoad($product);
+            }
+        }
+
         try {
             $gallery = $product->getMediaGalleryImages();
             if ($gallery && $gallery->getSize() > 0) {
                 foreach ($gallery as $image) {
                     $url = $image->getUrl();
-                    // Ensure we have a string URL
                     if (is_string($url) && !empty($url)) {
                         $images[] = $url;
                     }
@@ -571,6 +658,12 @@ class Maho_FeedManager_Model_Mapper
                     }
                 }
             }
+        }
+
+        // additional_image_link must not duplicate the main image_link URL.
+        $mainImageUrl = $this->_getImageUrl($product, 'image');
+        if ($mainImageUrl) {
+            $images = array_values(array_filter($images, fn($u) => $u !== $mainImageUrl));
         }
 
         return $images;
@@ -747,8 +840,11 @@ class Maho_FeedManager_Model_Mapper
      * @param Mage_Catalog_Model_Product $product Product to get taxonomy for
      * @return string|null Taxonomy path or null if no mapping found
      */
-    protected function _getTaxonomyForProduct(string $platform, Mage_Catalog_Model_Product $product): ?string
-    {
+    protected function _getTaxonomyForProduct(
+        string $platform,
+        Mage_Catalog_Model_Product $product,
+        string $useParentMode = '',
+    ): ?string {
         if (empty($platform)) {
             return null;
         }
@@ -798,12 +894,27 @@ class Maho_FeedManager_Model_Mapper
             return null;
         }
 
-        $categoryIds = $product->getCategoryIds();
+        if ($useParentMode === 'always') {
+            return $this->_findTaxonomyForParentCategories($mappings, $product);
+        }
 
-        // Find deepest mapped category (no model loading - depths are pre-cached)
+        $bestMatch = $this->_findBestTaxonomyMatch($mappings, $product->getCategoryIds());
+
+        if ($bestMatch === null && $useParentMode === 'if_empty') {
+            $bestMatch = $this->_findTaxonomyForParentCategories($mappings, $product);
+        }
+
+        return $bestMatch;
+    }
+
+    /**
+     * @param array<int, array{path:string, depth:int}> $mappings
+     * @param array<int|string> $categoryIds
+     */
+    protected function _findBestTaxonomyMatch(array $mappings, array $categoryIds): ?string
+    {
         $bestMatch = null;
         $bestDepth = 0;
-
         foreach ($categoryIds as $categoryId) {
             if (isset($mappings[$categoryId])) {
                 $mapping = $mappings[$categoryId];
@@ -813,8 +924,30 @@ class Maho_FeedManager_Model_Mapper
                 }
             }
         }
-
         return $bestMatch;
+    }
+
+    /**
+     * @param array<int, array{path:string, depth:int}> $mappings
+     */
+    protected function _findTaxonomyForParentCategories(array $mappings, Mage_Catalog_Model_Product $child): ?string
+    {
+        $parentId = $this->_getParentId($child);
+        if ($parentId === null) {
+            return null;
+        }
+
+        if (!isset($this->_parentCategoryIdsCache[$parentId])) {
+            $resource = Mage::getSingleton('core/resource');
+            $adapter = $resource->getConnection('core_read');
+            $this->_parentCategoryIdsCache[$parentId] = $adapter->fetchCol(
+                $adapter->select()
+                    ->from($resource->getTableName('catalog/category_product'), 'category_id')
+                    ->where('product_id = ?', $parentId),
+            );
+        }
+
+        return $this->_findBestTaxonomyMatch($mappings, $this->_parentCategoryIdsCache[$parentId]);
     }
 
     /**
@@ -1044,7 +1177,7 @@ class Maho_FeedManager_Model_Mapper
                 'source_value' => $column['source_value'] ?? '',
                 'transformers' => $transformers,
                 'conditions' => [],
-                'use_parent' => !empty($column['use_parent']),
+                'use_parent' => (string) ($column['use_parent'] ?? ''),
             ];
         }
 

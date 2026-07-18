@@ -34,3 +34,13 @@ parameters:
 
     ignoreErrors:
         - identifier: missingType.iterableValue
+
+        # DBAL deprecated the whole KeywordList feature (DBAL 5 will quote every
+        # identifier unconditionally), but until then subclassing it is the only
+        # way to quote words newer MariaDB releases reserve (e.g. TO_DATE in 12.3).
+        - identifier: class.extendsDeprecatedClass
+          path: lib/Maho/Db/Driver/MariaDbPlatformMiddleware.php
+        - identifier: method.deprecatedClass
+          path: lib/Maho/Db/Driver/MariaDbPlatformMiddleware.php
+        - identifier: instanceof.deprecatedClass
+          path: lib/Maho/Db/Driver/MariaDbPlatformMiddleware.php

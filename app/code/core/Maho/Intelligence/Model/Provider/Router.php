@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Maho_Intelligence
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Intelligence
  */
 
 declare(strict_types=1);
@@ -13,9 +11,24 @@ declare(strict_types=1);
 class Maho_Intelligence_Model_Provider_Router
 {
     /**
-     * Get all route definitions across frontend and admin areas
+     * Get all routing definitions.
+     *
+     * Returns two sections: XML routers are router-level frontName→module
+     * mappings (with optional controller-override chains); attribute routes
+     * are per-URL Symfony routes compiled from #[Maho\Config\Route]
+     * attributes into vendor/composer/maho_attributes.php.
+     *
+     * @return array{xml_routers: array, attribute_routes: array}
      */
     public function getAllRoutes(): array
+    {
+        return [
+            'xml_routers' => $this->getXmlRouters(),
+            'attribute_routes' => $this->getAttributeRoutes(),
+        ];
+    }
+
+    private function getXmlRouters(): array
     {
         $config = Mage::getConfig();
         $result = [];
@@ -58,7 +71,32 @@ class Maho_Intelligence_Model_Provider_Router
             }
         }
 
-        ksort($result);
+        ksort($result, SORT_NATURAL | SORT_FLAG_CASE);
+        return $result;
+    }
+
+    private function getAttributeRoutes(): array
+    {
+        $routes = Maho::getCompiledAttributes()['routes'] ?? [];
+        $result = [];
+
+        foreach ($routes as $routeName => $route) {
+            $result[$routeName] = [
+                'name' => $routeName,
+                'area' => $route['area'] ?? null,
+                'path' => $route['path'] ?? '',
+                'methods' => $route['methods'] ?? [],
+                'class' => $route['class'] ?? '',
+                'action' => $route['action'] ?? '',
+                'module' => $route['module'] ?? null,
+                'controller_name' => $route['controllerName'] ?? null,
+                'path_variables' => $route['pathVariables'] ?? [],
+                'defaults' => $route['defaults'] ?? [],
+                'requirements' => $route['requirements'] ?? [],
+            ];
+        }
+
+        ksort($result, SORT_NATURAL | SORT_FLAG_CASE);
         return $result;
     }
 }

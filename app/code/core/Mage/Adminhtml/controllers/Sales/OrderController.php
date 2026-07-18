@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2016-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2016-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Action
@@ -331,11 +329,6 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     {
         $this->_initOrder();
         $html = $this->getLayout()->createBlock('adminhtml/sales_order_view_tab_history')->toHtml();
-        /** @var Mage_Core_Model_Translate_Inline $translate */
-        $translate = Mage::getModel('core/translate_inline');
-        if ($translate->isAllowed()) {
-            $translate->processResponseBody($html);
-        }
         $this->getResponse()->setBody($html);
     }
 
@@ -820,7 +813,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     #[\Override]
     public function preDispatch()
     {
-        $this->_setForcedFormKeyActions(['cancel', 'massCancel', 'guestOrderEmailChange']);
+        $this->_setForcedFormKeyActions(['cancel', 'massCancel', 'hold', 'unhold', 'guestOrderEmailChange']);
         return parent::preDispatch();
     }
 }

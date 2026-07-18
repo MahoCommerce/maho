@@ -1,11 +1,9 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Maho_Paypal
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Paypal
  */
 
 declare(strict_types=1);
@@ -129,6 +127,15 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                 shippingCallbackUrl: $shippingCallbackUrl,
             );
 
+            // Vault payments capture synchronously inside createOrder (there is no
+            // popup/approve round-trip), so validate the quote here, before the money
+            // moves, just as the standard flow validates before its capture.
+            if ($vaultPaypalTokenId) {
+                $quote->getPayment()->setMethod($methodCode);
+                $quote->collectTotals();
+                Mage::getModel('sales/service_quote', $quote)->validate();
+            }
+
             /** @var Maho_Paypal_Model_Api_Client $client */
             $client = Mage::getModel('paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
             $paypalOrder = $client->createOrder(['body' => $orderRequest]);
@@ -147,6 +154,11 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             $quote->getPayment()->setAdditionalInformation('paypal_order_id', $paypalOrderId);
             $quote->getPayment()->setData('paypal_order_id', $paypalOrderId);
             $quote->getPayment()->save();
+
+            // Persist the quote so the reserved order id (used as the PayPal invoice_id and
+            // checked in approveOrder) survives the reload there. buildFromQuote reserves it
+            // in memory only; without this the invoice_id check rejects the order.
+            $quote->save();
 
             $result['success'] = true;
             $result['paypal_order_id'] = $paypalOrderId;
@@ -225,9 +237,9 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             );
 
             // Acquire lock to prevent concurrent order placement with webhook handlers
-            $lock = Mage_Index_Model_Lock::getInstance();
-            $lockName = 'paypal_order_' . $paypalOrderId;
-            if (!$lock->setLock($lockName, file: true, block: true)) {
+            /** @var Maho_Paypal_Helper_Data $paypalHelper */
+            $paypalHelper = Mage::helper('paypal');
+            if (!$paypalHelper->acquireOrderLock($paypalOrderId, blocking: true)) {
                 Mage::throwException(Mage::helper('paypal')->__('Could not acquire order lock.'));
             }
 
@@ -276,8 +288,11 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                     /** @var Maho_Paypal_Model_Api_Client $client */
                     $client = Mage::getModel('paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
 
-                    // Fetch current order status (include payment details in case it's already completed)
-                    $paypalResult = $client->getOrder($paypalOrderId, 'purchase_units.payments');
+                    // Fetch the full order representation. A sparse `fields` filter (e.g.
+                    // purchase_units.payments) strips invoice_id/amount that the security
+                    // assertion below needs; the full GET still includes payments for an
+                    // already-completed order.
+                    $paypalResult = $client->getOrder($paypalOrderId);
 
                     // SECURITY: refuse to act on a PayPal order that wasn't created for this
                     // quote, or whose total/currency was tampered with. Without this check an
@@ -285,6 +300,10 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                     // different cart and place an order paid by someone else's capture.
                     $this->_assertPaypalOrderMatchesQuote($paypalResult, $quote);
                     $this->_assertPaypalOrderNotAlreadyUsed($paypalOrderId);
+
+                    // Prepare and validate the quote BEFORE capturing. A missing or
+                    // invalid shipping method must fail here, not after the money moves.
+                    $paypalHelper->prepareQuoteForPaypalOrder($quote, $paypalResult, $methodCode);
 
                     $status = $paypalResult['status'] ?? '';
 
@@ -309,7 +328,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                     $result['redirect_url'] = Mage::getUrl('checkout/onepage/success', ['_secure' => true]);
                 }
             } finally {
-                $lock->releaseLock($lockName, file: true);
+                $paypalHelper->releaseOrderLock($paypalOrderId);
             }
         } catch (\Throwable $e) {
             $result['message'] = $e->getMessage();

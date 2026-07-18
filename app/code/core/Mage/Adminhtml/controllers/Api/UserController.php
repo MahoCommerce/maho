@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
@@ -33,8 +31,8 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
     protected function _initAction()
     {
         $this->loadLayout()
-            ->_setActiveMenu('system/api/users')
-            ->_addBreadcrumb($this->__('Web Services'), $this->__('Web Services'))
+            ->_setActiveMenu('system/api/soap/users')
+            ->_addBreadcrumb($this->__('API'), $this->__('API'))
             ->_addBreadcrumb($this->__('Permissions'), $this->__('Permissions'))
             ->_addBreadcrumb($this->__('Users'), $this->__('Users'))
         ;
@@ -45,7 +43,7 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
-             ->_title($this->__('Web Services'))
+             ->_title($this->__('API'))
              ->_title($this->__('Users'));
 
         $this->_initAction()
@@ -63,7 +61,7 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
     public function editAction(): void
     {
         $this->_title($this->__('System'))
-             ->_title($this->__('Web Services'))
+             ->_title($this->__('API'))
              ->_title($this->__('Users'));
 
         $id = $this->getRequest()->getParam('user_id');

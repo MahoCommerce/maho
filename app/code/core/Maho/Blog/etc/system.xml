@@ -1,13 +1,7 @@
 <?xml version="1.0"?>
 <!--
-/**
- * Maho
- *
- * @category   Maho
- * @package    Maho_Blog
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
- */
+SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
 -->
 <config>
     <sections>
@@ -30,8 +24,7 @@
                     <fields>
                         <enable_categories translate="label">
                             <label>Enable Categories</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>5</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -47,8 +40,7 @@
                         </category_url_prefix>
                         <show_in_navigation translate="label">
                             <label>Show in Navigation</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -82,8 +74,7 @@
                     <fields>
                         <enable_autosuggest translate="label">
                             <label>Enable Blog Search in Autosuggest</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_type>boolean</frontend_type>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>

@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2026 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2019-2026 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Adminhtml
  */
 
 use Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract as MassAction;
@@ -83,6 +81,14 @@ class Mage_Adminhtml_Block_Sales_Shipment_Grid extends Mage_Adminhtml_Block_Widg
             'header' => Mage::helper('sales')->__('Ship to Name'),
             'index' => 'shipping_name',
             'filter_index' => 'main_table.shipping_name',
+        ]);
+
+        $this->addColumn('shipment_status', [
+            'header'       => Mage::helper('sales')->__('Status'),
+            'index'        => 'shipment_status',
+            'filter_index' => 'main_table.shipment_status',
+            'type'         => 'options',
+            'options'      => Mage_Sales_Model_Order_Shipment::getStatuses(),
         ]);
 
         $this->addColumn('total_qty', [

@@ -1,13 +1,10 @@
 <?php
 
 /**
- * Maho
- *
- * @package    MahoLib
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2020-2023 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
  */
 
 namespace Maho\Data;
@@ -117,32 +114,23 @@ class Form extends AbstractForm
 
     /**
      * Check existing element
-     *
-     * @param   string $elementId
-     * @return  bool
      */
-    protected function _elementIdExists($elementId)
+    protected function _elementIdExists(?string $elementId): bool
     {
-        return isset($this->_elementsIndex[$elementId]);
+        return isset($this->_elementsIndex[(string) $elementId]);
     }
 
-    /**
-     * @param Form\Element\AbstractElement $element
-     * @return $this
-     */
-    public function addElementToCollection($element)
+    public function addElementToCollection(Form\Element\AbstractElement $element): self
     {
-        $this->_elementsIndex[$element->getId()] = $element;
+        $this->_elementsIndex[(string) $element->getId()] = $element;
         $this->_allElements->add($element);
         return $this;
     }
 
     /**
-     * @param string $elementId
-     * @return bool
      * @throws \Exception
      */
-    public function checkElementId($elementId)
+    public function checkElementId(?string $elementId): bool
     {
         if ($this->_elementIdExists($elementId)) {
             throw new \Exception('Element with id "' . $elementId . '" already exists');
@@ -158,16 +146,9 @@ class Form extends AbstractForm
         return $this;
     }
 
-    /**
-     * @param string $elementId
-     * @return Form\Element\AbstractElement|null
-     */
-    public function getElement($elementId)
+    public function getElement(?string $elementId): ?Form\Element\AbstractElement
     {
-        if ($this->_elementIdExists($elementId)) {
-            return $this->_elementsIndex[$elementId];
-        }
-        return null;
+        return $this->_elementsIndex[(string) $elementId] ?? null;
     }
 
     /**
@@ -242,15 +223,12 @@ class Form extends AbstractForm
     }
 
     /**
-     * @param string $elementId
-     * @return $this|AbstractForm
+     * @return $this
      */
     #[\Override]
-    public function removeField($elementId)
+    public function removeField(?string $elementId): self
     {
-        if ($this->_elementIdExists($elementId)) {
-            unset($this->_elementsIndex[$elementId]);
-        }
+        unset($this->_elementsIndex[(string) $elementId]);
         return $this;
     }
 

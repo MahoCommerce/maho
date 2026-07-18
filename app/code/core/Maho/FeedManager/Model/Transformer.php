@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
- * Maho
- *
- * @package    Maho_FeedManager
- * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_FeedManager
  */
+
+declare(strict_types=1);
 
 /**
  * Transformer Factory/Registry
@@ -31,10 +29,12 @@ class Maho_FeedManager_Model_Transformer
         'map_values' => Maho_FeedManager_Model_Transformer_MapValues::class,
         'format_price' => Maho_FeedManager_Model_Transformer_FormatPrice::class,
         'format_date' => Maho_FeedManager_Model_Transformer_FormatDate::class,
+        'relative_date_range' => Maho_FeedManager_Model_Transformer_RelativeDateRange::class,
         'url_encode' => Maho_FeedManager_Model_Transformer_UrlEncode::class,
         'combine_fields' => Maho_FeedManager_Model_Transformer_CombineFields::class, // Internal only - used by Mapper
         'conditional' => Maho_FeedManager_Model_Transformer_Conditional::class,
         'round' => Maho_FeedManager_Model_Transformer_Round::class,
+        'currency_convert' => Maho_FeedManager_Model_Transformer_CurrencyConvert::class,
         'uppercase' => Maho_FeedManager_Model_Transformer_Uppercase::class,
         'lowercase' => Maho_FeedManager_Model_Transformer_Lowercase::class,
         'capitalise' => Maho_FeedManager_Model_Transformer_Capitalise::class,
@@ -62,8 +62,8 @@ class Maho_FeedManager_Model_Transformer
     protected static array $_categories = [
         'text_formatting' => ['uppercase', 'lowercase', 'capitalise', 'strip_tags', 'truncate', 'replace'],
         'values_defaults' => ['default_value', 'map_values', 'conditional'],
-        'numbers_prices' => ['format_price', 'round'],
-        'dates_urls' => ['format_date', 'url_encode'],
+        'numbers_prices' => ['format_price', 'round', 'currency_convert'],
+        'dates_urls' => ['format_date', 'relative_date_range', 'url_encode'],
         'advanced' => ['prepend_append'],
     ];
 
@@ -289,7 +289,8 @@ class Maho_FeedManager_Model_Transformer
                 foreach ($optPairs as $pair) {
                     $kv = explode('=', $pair, 2);
                     if (count($kv) === 2) {
-                        $options[trim($kv[0])] = trim($kv[1]);
+                        $key = trim($kv[0]);
+                        $options[$key] = self::_trimOptionValue($code, $key, $kv[1]);
                     }
                 }
             }
@@ -301,6 +302,21 @@ class Maho_FeedManager_Model_Transformer
         }
 
         return $chain;
+    }
+
+    /**
+     * Direction-aware trim — preserves the inside edge for prepend_append.prepend/append
+     * (where whitespace is the gap between affix and value); full trim everywhere else.
+     */
+    protected static function _trimOptionValue(string $code, string $key, string $raw): string
+    {
+        if ($code === 'prepend_append' && $key === 'prepend') {
+            return ltrim($raw);
+        }
+        if ($code === 'prepend_append' && $key === 'append') {
+            return rtrim($raw);
+        }
+        return trim($raw);
     }
 
     /**

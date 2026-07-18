@@ -1,13 +1,11 @@
 <?php
 
 /**
- * Maho
- *
- * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+ * SPDX-FileCopyrightText: 2022-2025 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Catalog
  */
 
 class Mage_Catalog_ProductController extends Mage_Core_Controller_Front_Action
@@ -46,9 +44,6 @@ class Mage_Catalog_ProductController extends Mage_Core_Controller_Front_Action
         // Render page
         try {
             $viewHelper->prepareAndRender($productId, $this, $params);
-            $this->getResponse()
-                ->setHeader('Pragma', 'public', true)
-                ->setHeader('Cache-Control', 'private max-age=60', true);
         } catch (Exception $e) {
             if ($e->getCode() == $viewHelper->ERR_NO_PRODUCT_LOADED) {
                 if (isset($_GET['store'])  && !$this->getResponse()->isRedirect()) {

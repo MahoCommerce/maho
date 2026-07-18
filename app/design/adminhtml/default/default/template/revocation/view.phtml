@@ -1,0 +1,165 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Maho_Revocation
+ */
+
+/** @var Maho_Revocation_Block_Adminhtml_Request_View $this */
+$helper = Mage::helper('revocation');
+$request = $this->getRevocationRequest();
+if (!$request) {
+    return;
+}
+$order = $request->getOrder();
+?>
+<div class="content-header">
+    <h3 class="icon-head head-sales-order"><?= $this->escapeHtml($this->getHeaderText()) ?></h3>
+    <p class="content-buttons form-buttons"><?= $this->getButtonsHtml() ?></p>
+</div>
+
+<?php if ($request->getSuppressedAt()): ?>
+<ul class="messages">
+    <li class="warning-msg">
+        <ul>
+            <li>
+                <?= $helper->__('The customer receipt email was suppressed (%s) at %s and has not been delivered. Use "Resend Receipt Email" to deliver it after triage.', $this->escapeHtml((string) $request->getSuppressedReason()), $this->formatDateTime($request->getSuppressedAt())) ?>
+            </li>
+        </ul>
+    </li>
+</ul>
+<?php endif ?>
+
+<div class="entry-edit">
+    <div class="entry-edit-head">
+        <h4 class="icon-head"><?= $helper->__('Declaration (read-only legal record)') ?></h4>
+    </div>
+    <div class="fieldset">
+        <table class="form-list" cellspacing="0">
+            <tr>
+                <td class="label"><?= $helper->__('Reference number') ?></td>
+                <td class="value"><strong>#<?= (int) $request->getId() ?></strong></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $helper->__('Received at (UTC)') ?></td>
+                <td class="value"><?= $this->escapeHtml($request->getReceivedAt()) ?></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $helper->__('Customer Name') ?></td>
+                <td class="value"><?= $this->escapeHtml($request->getCustomerName()) ?></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $helper->__('Email') ?></td>
+                <td class="value"><?= $this->escapeHtml($request->getEmail()) ?></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $helper->__('Order Reference') ?></td>
+                <td class="value"><?= $this->escapeHtml($request->getOrderReference()) ?></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $helper->__('Reason') ?></td>
+                <td class="value"><?= $request->getReason() ? nl2br($this->escapeHtml($request->getReason())) : '' ?></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $helper->__('Verified') ?></td>
+                <td class="value"><?= $request->getVerified() ? $helper->__('Yes (submitted from an authenticated customer session)') : $helper->__('No (self-asserted via the public form)') ?></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $helper->__('IP Address') ?></td>
+                <td class="value"><?= $this->escapeHtml((string) $request->getIp()) ?></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $helper->__('User Agent') ?></td>
+                <td class="value"><?= $this->escapeHtml((string) $request->getUserAgent()) ?></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $helper->__('Locale') ?></td>
+                <td class="value"><?= $this->escapeHtml((string) $request->getLocale()) ?></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="entry-edit">
+    <div class="entry-edit-head">
+        <h4 class="icon-head"><?= $helper->__('Matched Order') ?></h4>
+    </div>
+    <div class="fieldset">
+        <?php if ($order): ?>
+            <p>
+                <?= $helper->__('Order') ?>
+                <a href="<?= $this->getOrderViewUrl($order) ?>"><strong>#<?= $this->escapeHtml($order->getIncrementId()) ?></strong></a>
+                (<?= $this->escapeHtml($order->getStatusLabel()) ?>)
+            </p>
+            <p class="note"><?= $helper->__('Accepting or rejecting only records the decision and adds a note to this order. The order status, state, and any refund are left unchanged.') ?></p>
+            <?php if ($request->getProcessedStatus() === Maho_Revocation_Model_Request::PROCESSED_STATUS_ACCEPTED && $order->canCreditmemo()): ?>
+            <ul class="messages">
+                <li class="notice-msg">
+                    <ul>
+                        <li><?= $helper->__('This revocation was accepted. To refund the customer, %s for order %s.', '<a href="' . $this->escapeHtml($this->getCreditmemoUrl($order)) . '">' . $helper->__('create a credit memo') . '</a>', '#' . $this->escapeHtml($order->getIncrementId())) ?></li>
+                    </ul>
+                </li>
+            </ul>
+            <?php endif ?>
+        <?php else: ?>
+            <p><?= $helper->__('No order could be matched to this request. The customer typed "%s".', $this->escapeHtml($request->getOrderReference())) ?></p>
+            <?php if ($this->getRevocationRequest() && Mage::getSingleton('admin/session')->isAllowed('sales/revocation/process')): ?>
+            <form action="<?= $this->getLinkOrderUrl() ?>" method="post">
+                <?= $this->getBlockHtml('formkey') ?>
+                <label for="order_increment_id"><?= $helper->__('Link to order (increment ID):') ?></label>
+                <input type="text" class="input-text" id="order_increment_id" name="order_increment_id" value="<?= $this->escapeHtml($request->getOrderReference()) ?>">
+                <button type="submit" class="scalable"><span><span><span><?= $helper->__('Link Order') ?></span></span></span></button>
+            </form>
+            <?php endif ?>
+        <?php endif ?>
+    </div>
+</div>
+
+<div class="entry-edit">
+    <div class="entry-edit-head">
+        <h4 class="icon-head"><?= $helper->__('Processing') ?></h4>
+    </div>
+    <div class="fieldset">
+        <form action="<?= $this->getSaveUrl() ?>" method="post" id="revocation-note-form">
+            <?= $this->getBlockHtml('formkey') ?>
+            <table class="form-list" cellspacing="0">
+                <tr>
+                    <td class="label"><?= $helper->__('Processed Status') ?></td>
+                    <td class="value"><?= $this->getProcessedStatusLabel() ?: '<em>' . $helper->__('(not processed yet)') . '</em>' ?></td>
+                </tr>
+                <tr>
+                    <td class="label"><?= $helper->__('Processed At') ?></td>
+                    <td class="value"><?= $this->formatDateTime($request->getProcessedAt()) ?></td>
+                </tr>
+                <tr>
+                    <td class="label"><label for="admin_note"><?= $helper->__('Internal Note') ?></label></td>
+                    <td class="value">
+                        <textarea name="admin_note" id="admin_note" class="input-text" rows="5" style="width:600px;"><?= $this->escapeHtml((string) $request->getAdminNote()) ?></textarea>
+                    </td>
+                </tr>
+            </table>
+            <div class="form-buttons">
+                <button type="submit" class="scalable save"><span><span><span><?= $helper->__('Save Note') ?></span></span></span></button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<form action="<?= $this->getProcessUrl() ?>" method="post" id="revocation-process-form">
+    <?= $this->getBlockHtml('formkey') ?>
+    <input type="hidden" name="decision" value="" id="revocation-process-decision">
+</form>
+<script>
+    const revocationProcess = {
+        submit(decision) {
+            const messages = {
+                accept: '<?= $this->jsQuoteEscape($helper->__('Accept this revocation? This records the decision and adds a note to the matched order. No order status or refund changes automatically.')) ?>',
+                reject: '<?= $this->jsQuoteEscape($helper->__('Reject this revocation? This records the decision and adds a note to the matched order. No order status changes automatically.')) ?>'
+            };
+            if (confirm(messages[decision])) {
+                document.getElementById('revocation-process-decision').value = decision;
+                document.getElementById('revocation-process-form').submit();
+            }
+        }
+    };
+</script>

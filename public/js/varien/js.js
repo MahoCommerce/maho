@@ -1,12 +1,7 @@
-/**
- * Maho
- *
- * @package     js
- * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright   Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
- * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
- */
+// SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
+// SPDX-FileCopyrightText: 2020-2023 The OpenMage Contributors <https://openmage.org>
+// SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
+// SPDX-License-Identifier: AFL-3.0
 
 /**
  * Custom error with translated message
@@ -176,6 +171,9 @@ function generateRandomString(length) {
  * @param {Object} params - key value pairs to add, update, or remove
  */
 function setRouteParams(url, params = {}) {
+    if (!url) {
+        return url;
+    }
     url = new URL(url);
 
     const noTrailingSlash = !url.pathname.endsWith('/');
@@ -205,6 +203,9 @@ function setRouteParams(url, params = {}) {
  * @param {Object} params - key value pairs to add, update, or remove
  */
 function setQueryParams(url, params = {}) {
+    if (!url) {
+        return url;
+    }
     url = new URL(url);
     for (const [ key, val ] of Object.entries(params)) {
         if (val === null || val === false) {
