@@ -176,8 +176,8 @@ it('filters by an array of attribute set ids via subquery without strict GROUP B
     // belongs to the default set into it. Under the old JOIN + GROUP BY shape
     // an attribute in both sets produced two joined rows; the IN-subquery must
     // return it exactly once.
-    // Resolve the new ids by their unique names rather than lastInsertId(),
-    // which is unreliable for these sequence-backed tables on PostgreSQL.
+    // Resolve the new ids by their unique names so the fixture does not depend
+    // on engine-specific lastInsertId() semantics.
     $setName = 'Maho Strict GROUP BY Set ' . uniqid();
     $adapter->insert($resource->getTableName('eav/attribute_set'), [
         'entity_type_id'     => $entityTypeId,
