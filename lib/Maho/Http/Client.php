@@ -32,18 +32,16 @@ class Client
     {
         $client = SymfonyHttpClient::create($options);
 
-        // Wrap with tracing decorator if tracer exists
+        // Wrap with tracing decorator if tracer exists. Instantiated directly:
+        // the camel-cased class name is not addressable through a lowercase
+        // getModel() alias on case-sensitive filesystems, and it's a plain
+        // class, not a rewritable Mage model.
         $tracer = \Mage::getTracer();
-        if ($tracer && $tracer->isEnabled()) {
-            // Check if TracedHttpClient class exists (from OpenTelemetry module)
-            if (class_exists('Maho_OpenTelemetry_Model_Http_TracedClient')) {
-                $tracedClient = \Mage::getModel('opentelemetry/http_tracedclient');
-                if ($tracedClient) {
-                    $tracedClient->setClient($client);
-                    $tracedClient->setTracer($tracer);
-                    return $tracedClient;
-                }
-            }
+        if ($tracer && $tracer->isEnabled() && class_exists(\Maho_OpenTelemetry_Model_Http_TracedClient::class)) {
+            $tracedClient = new \Maho_OpenTelemetry_Model_Http_TracedClient();
+            $tracedClient->setClient($client);
+            $tracedClient->setTracer($tracer);
+            return $tracedClient;
         }
 
         // Return standard client if tracing not available
