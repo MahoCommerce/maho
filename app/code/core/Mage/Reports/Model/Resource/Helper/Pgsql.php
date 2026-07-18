@@ -38,9 +38,11 @@ class Mage_Reports_Model_Resource_Helper_Pgsql extends Mage_Core_Model_Resource_
     {
         $adapter = $this->_getWriteAdapter();
 
+        // DATE_TRUNC keeps the expression date-typed; the aggregation table's
+        // period column is a date, so a TO_CHAR (text) expression would fail.
         $periodCol = match ($type) {
-            'year' => "TO_CHAR(t.period, 'YYYY-01-01')",
-            'month' => "TO_CHAR(t.period, 'YYYY-MM-01')",
+            'year' => "DATE_TRUNC('year', t.period)::date",
+            'month' => "DATE_TRUNC('month', t.period)::date",
             default => 't.period',
         };
 
