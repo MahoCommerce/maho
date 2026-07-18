@@ -125,7 +125,7 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
                 ['queue_id', 'total' => new Maho\Db\Expr('COUNT(queue_link_id)')],
             )
             ->group('queue_id')
-            ->having($this->_getConditionSql('total', $condition));
+            ->having($this->_getConditionSql('COUNT(queue_link_id)', $condition));
 
         if ($field == 'subscribers_sent') {
             $select->where('letter_sent_at IS NOT NULL');

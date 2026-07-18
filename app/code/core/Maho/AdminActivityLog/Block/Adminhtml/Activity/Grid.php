@@ -22,12 +22,24 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid extends Mage_Adminhtml
     {
         $collection = Mage::getResourceModel('adminactivitylog/activity_collection');
 
-        // Group by action_group_id to show only one entry per group
-        $collection->getSelect()
-            ->group(new Maho\Db\Expr('COALESCE(main_table.action_group_id, main_table.activity_id)'))
-            ->columns([
+        // Show only one entry per action group: join a derived aggregate that picks the
+        // latest activity of each group as the representative row. Grouping happens only
+        // inside the subquery, so the outer main_table.* select stays valid under strict
+        // GROUP BY (ONLY_FULL_GROUP_BY / PostgreSQL). The CASE expression keeps each row
+        // without an action_group_id in its own group, avoiding a string/integer COALESCE.
+        $subSelect = $collection->getConnection()->select()
+            ->from($collection->getMainTable(), [
+                'representative_id' => new Maho\Db\Expr('MAX(activity_id)'),
                 'activity_count' => new Maho\Db\Expr('COUNT(*)'),
-            ]);
+            ])
+            ->group('action_group_id')
+            ->group(new Maho\Db\Expr('CASE WHEN action_group_id IS NULL THEN activity_id END'));
+
+        $collection->getSelect()->join(
+            ['grp' => $subSelect],
+            'main_table.activity_id = grp.representative_id',
+            ['activity_count'],
+        );
 
         $this->setCollection($collection);
         return parent::_prepareCollection();

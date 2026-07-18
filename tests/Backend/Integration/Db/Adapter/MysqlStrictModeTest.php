@@ -35,6 +35,15 @@ function fetchSqlMode(Mysql $adapter): string
 }
 
 /**
+ * Helper: whether the live server is MariaDB. MariaDB is exempt from the developer-mode
+ * ONLY_FULL_GROUP_BY toggle because it lacks functional-dependency detection (MDEV-11588).
+ */
+function isMariaDbServer(Mysql $adapter): bool
+{
+    return str_contains(strtolower((string) $adapter->fetchOne('SELECT VERSION()')), 'mariadb');
+}
+
+/**
  * Skip this test file if the live DB is not MySQL.
  */
 beforeEach(function () {
@@ -47,8 +56,20 @@ beforeEach(function () {
 it('sets SQL_MODE to ONLY_FULL_GROUP_BY on MySQL connection init when developer mode is on', function () {
     Mage::setIsDeveloperMode(true);
     $adapter = createFreshMysqlAdapter();
+    if (isMariaDbServer($adapter)) {
+        $this->markTestSkipped('Genuine-MySQL-only test: MariaDB is exempt from strict mode.');
+    }
     $sqlMode = fetchSqlMode($adapter);
     expect($sqlMode)->toContain('ONLY_FULL_GROUP_BY');
+});
+
+it('keeps SQL_MODE empty on MariaDB even when developer mode is on', function () {
+    Mage::setIsDeveloperMode(true);
+    $adapter = createFreshMysqlAdapter();
+    if (!isMariaDbServer($adapter)) {
+        $this->markTestSkipped('MariaDB-only test.');
+    }
+    expect(fetchSqlMode($adapter))->toBe('');
 });
 
 it('sets SQL_MODE to an empty string on MySQL connection init when developer mode is off', function () {
@@ -62,6 +83,9 @@ it('sets SQL_MODE to an empty string on MySQL connection init when developer mod
 it('raises an SQL error on a GROUP BY query missing aggregates when developer mode is on', function () {
     Mage::setIsDeveloperMode(true);
     $adapter = createFreshMysqlAdapter();
+    if (isMariaDbServer($adapter)) {
+        $this->markTestSkipped('Genuine-MySQL-only test: MariaDB is exempt from strict mode.');
+    }
     // core_config_data has scope_id and path columns; selecting path without grouping or aggregating it
     // violates ONLY_FULL_GROUP_BY
     expect(fn() => $adapter->fetchAll(
@@ -90,6 +114,9 @@ it('keeps the SET time_zone statement working alongside the SQL_MODE toggle', fu
 it('preserves ONLY_FULL_GROUP_BY across startSetup and endSetup when developer mode is on', function () {
     Mage::setIsDeveloperMode(true);
     $adapter = createFreshMysqlAdapter();
+    if (isMariaDbServer($adapter)) {
+        $this->markTestSkipped('Genuine-MySQL-only test: MariaDB is exempt from strict mode.');
+    }
     $adapter->startSetup();
     $adapter->endSetup();
     $sqlMode = fetchSqlMode($adapter);
@@ -108,6 +135,9 @@ it('preserves the empty SQL_MODE across startSetup and endSetup when developer m
 it('preserves the live SQL_MODE in insertForce so the bulk-import path still works in dev mode', function () {
     Mage::setIsDeveloperMode(true);
     $adapter = createFreshMysqlAdapter();
+    if (isMariaDbServer($adapter)) {
+        $this->markTestSkipped('Genuine-MySQL-only test: MariaDB is exempt from strict mode.');
+    }
 
     // SQL_MODE before
     $modeBefore = fetchSqlMode($adapter);

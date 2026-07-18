@@ -28,14 +28,17 @@ class Mage_Bundle_Block_Catalog_Product_List_Partof extends Mage_Catalog_Block_P
                 'in' => Mage::getSingleton('catalog/product_status')->getSaleableStatusIds(),
             ])
             ->addPriceData()
-            ->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds())
-            ->joinTable('bundle/option', 'parent_id=entity_id', ['option_id' => 'option_id'])
-            ->joinTable('bundle/selection', 'option_id=option_id', ['product_id' => 'product_id'], '{{table}}.product_id=' . $this->getProduct()->getId());
+            ->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds());
+
+        $bundleSelect = $collection->getConnection()->select()
+            ->from(['bo' => $collection->getTable('bundle/option')], 'bo.parent_id')
+            ->join(['bs' => $collection->getTable('bundle/selection')], 'bs.option_id = bo.option_id', [])
+            ->where('bs.product_id = ?', (int) $this->getProduct()->getId());
+        $collection->getSelect()->where('e.entity_id IN (?)', new Maho\Db\Expr((string) $bundleSelect));
 
         if ($cartProductIds = Mage::getSingleton('checkout/cart')->getProductIds()) {
             $collection->addIdFilter($cartProductIds, true);
         }
-        $collection->getSelect()->group('entity_id');
 
         $collection->load();
         $this->_itemCollection = $collection;

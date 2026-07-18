@@ -30,13 +30,25 @@ class Mage_Customer_Model_Resource_Customer_Collection extends Mage_Eav_Model_En
      */
     public function groupByEmail()
     {
-        $this->getSelect()
+        // Join a grouped derived table instead of grouping the main select, so that
+        // e.* and EAV attribute loading stay valid under strict GROUP BY. The
+        // MIN(entity_id) row is the deterministic representative for each email.
+        $subSelect = $this->getConnection()->select()
             ->from(
-                ['email' => $this->getEntity()->getEntityTable()],
-                ['email_count' => new Maho\Db\Expr('COUNT(email.entity_id)')],
+                $this->getEntity()->getEntityTable(),
+                [
+                    'email',
+                    'entity_id' => new Maho\Db\Expr('MIN(entity_id)'),
+                    'email_count' => new Maho\Db\Expr('COUNT(*)'),
+                ],
             )
-            ->where('email.entity_id = e.entity_id')
-            ->group('email.email');
+            ->group('email');
+
+        $this->getSelect()->joinInner(
+            ['email' => $subSelect],
+            'email.entity_id = e.entity_id',
+            ['email_count'],
+        );
 
         return $this;
     }

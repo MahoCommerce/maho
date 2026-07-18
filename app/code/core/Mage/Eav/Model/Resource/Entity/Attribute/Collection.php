@@ -108,14 +108,12 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Collection extends Mage_Core_Mode
     {
         if (is_array($setId)) {
             if (!empty($setId)) {
-                $this->join(
-                    'entity_attribute',
-                    'entity_attribute.attribute_id = main_table.attribute_id',
-                    'attribute_id',
-                );
-                $this->addFieldToFilter('entity_attribute.attribute_set_id', ['in' => $setId]);
-                $this->addAttributeGrouping();
-                $this->_useAnalyticFunction = true;
+                // Use a subquery instead of JOIN+GROUP BY to avoid ONLY_FULL_GROUP_BY violations
+                $adapter = $this->getConnection();
+                $subquery = $adapter->select()
+                    ->from($this->getTable('eav/entity_attribute'), ['attribute_id'])
+                    ->where($adapter->prepareSqlCondition('attribute_set_id', ['in' => $setId]));
+                $this->getSelect()->where('main_table.attribute_id IN (?)', new \Maho\Db\Expr('(' . $subquery . ')'));
             }
         } elseif ($setId) {
             $this->join(
@@ -229,6 +227,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Collection extends Mage_Core_Mode
      *
      * @return $this
      */
+    #[\Deprecated(message: 'grouping by a joined alias is not strict-GROUP-BY safe; filter with a subquery instead')]
     public function addAttributeGrouping()
     {
         $this->getSelect()->group('entity_attribute.attribute_id');
@@ -263,22 +262,16 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Collection extends Mage_Core_Mode
     public function addHasOptionsFilter()
     {
         $adapter = $this->getConnection();
+        // Use a subquery instead of JOIN+GROUP BY to avoid ONLY_FULL_GROUP_BY violations
+        $subquery = $adapter->select()
+            ->from($this->getTable('eav/attribute_option'), ['attribute_id']);
         $orWhere = implode(' OR ', [
-            $adapter->quoteInto('(main_table.frontend_input = ? AND ao.option_id > 0)', 'select'),
+            $adapter->quoteInto('(main_table.frontend_input = ? AND main_table.attribute_id IN (' . $subquery . '))', 'select'),
             $adapter->quoteInto('(main_table.frontend_input <> ?)', 'select'),
             '(main_table.is_user_defined = 0)',
         ]);
 
-        $this->getSelect()
-            ->joinLeft(
-                ['ao' => $this->getTable('eav/attribute_option')],
-                'ao.attribute_id = main_table.attribute_id',
-                'option_id',
-            )
-            ->group('main_table.attribute_id')
-            ->where($orWhere);
-
-        $this->_useAnalyticFunction = true;
+        $this->getSelect()->where($orWhere);
 
         return $this;
     }

@@ -136,7 +136,13 @@ class Mage_Tag_Model_Resource_Tag_Collection extends Mage_Core_Model_Resource_Db
                         'customers' => 'MAX(' . $tableAlias . '.customers)',
                         'products' => 'MAX(' . $tableAlias . '.products)',
                     ],
-                );
+                )
+                ->group('main_table.tag_id');
+
+            /*
+             * Allow analytic function usage
+             */
+            $this->_useAnalyticFunction = true;
 
             $this->addFilterToMap('store_id', $tableAlias . '.store_id');
             $this->addFilterToMap('popularity', $tableAlias . '.popularity');
@@ -218,6 +224,50 @@ class Mage_Tag_Model_Resource_Tag_Collection extends Mage_Core_Model_Resource_Db
             parent::addFieldToFilter($field, $condition);
         }
         return $this;
+    }
+
+    /**
+     * Add select order
+     *
+     * @param string $field
+     * @param string $direction
+     * @return $this
+     */
+    #[\Override]
+    public function setOrder($field, $direction = self::SORT_ORDER_DESC)
+    {
+        return parent::setOrder($this->_getSummaryOrderExpression($field), $direction);
+    }
+
+    /**
+     * Add select order
+     *
+     * @param string $field
+     * @param string $direction
+     * @return $this
+     */
+    #[\Override]
+    public function addOrder($field, $direction = self::SORT_ORDER_DESC)
+    {
+        return parent::addOrder($this->_getSummaryOrderExpression($field), $direction);
+    }
+
+    /**
+     * Ordering by summary columns must use the aggregate expression because
+     * addSummary() groups the select by main_table.tag_id
+     *
+     * @param string $field
+     * @return string
+     */
+    protected function _getSummaryOrderExpression($field)
+    {
+        if ($this->getFlag('summary')
+            && is_string($field)
+            && in_array($field, ['store_id', 'popularity', 'customers', 'products'])
+        ) {
+            return 'MAX(summary.' . $field . ')';
+        }
+        return $field;
     }
 
     /**
@@ -356,9 +406,11 @@ class Mage_Tag_Model_Resource_Tag_Collection extends Mage_Core_Model_Resource_Db
     public function joinRel()
     {
         $this->setFlag('relation', true);
+        // Join without selecting columns to avoid GROUP BY issues
         $this->getSelect()->joinLeft(
             ['relation' => $this->getTable('tag/relation')],
             'main_table.tag_id=relation.tag_id',
+            [],
         );
         return $this;
     }

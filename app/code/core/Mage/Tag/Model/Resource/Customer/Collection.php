@@ -103,8 +103,11 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
      */
     public function addDescOrder()
     {
+        // Order by the output alias (not tr.tag_relation_id) so the ORDER BY stays
+        // valid under strict GROUP BY when stacked with addGroupByTag(), which
+        // rewrites the column into an aggregate expression with the same alias
         $this->getSelect()
-            ->order('tr.tag_relation_id desc');
+            ->order('tag_relation_id desc');
         return $this;
     }
 
@@ -115,8 +118,13 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
      */
     public function addGroupByTag()
     {
+        // Grouping by the tag and customer primary keys legalizes t.* and e.* under
+        // strict GROUP BY (ONLY_FULL_GROUP_BY / PostgreSQL); the tag relation columns
+        // are not functionally dependent on them and must be aggregated
+        $this->_aggregateRelationColumns();
         $this->getSelect()
-            ->group('tr.tag_id');
+            ->group(['tr.tag_id', 't.tag_id', 'e.entity_id']);
+        $this->setFlag('group_tag', true);
 
         /*
          * Allow analytic functions usage
@@ -134,10 +142,52 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
      */
     public function addGroupByCustomer()
     {
+        // Grouping by the customer primary key legalizes e.* under strict GROUP BY;
+        // the tag relation and tag table columns must be aggregated
+        $this->_aggregateRelationColumns(true);
         $this->getSelect()
-            ->group('tr.customer_id');
+            ->group(['tr.customer_id', 'e.entity_id']);
 
         $this->_allowDisableGrouping = false;
+        return $this;
+    }
+
+    /**
+     * Replaces the tag relation columns (and optionally the tag table columns) in
+     * the select with aggregate expressions keeping the same aliases, so grouped
+     * queries stay valid under strict GROUP BY (ONLY_FULL_GROUP_BY / PostgreSQL)
+     *
+     * @param bool $aggregateTagColumns whether to expand t.* into aggregated columns
+     * @return $this
+     */
+    protected function _aggregateRelationColumns($aggregateTagColumns = false)
+    {
+        $aggregates = [
+            'tag_relation_id' => 'MAX(tr.tag_relation_id)',
+            'product_id'      => 'MAX(tr.product_id)',
+            'active'          => 'MAX(tr.active)',
+            'added_in'        => 'MIN(tr.store_id)',
+        ];
+
+        $columns = [];
+        foreach ($this->getSelect()->getPart(Maho\Db\Select::COLUMNS) as $columnEntry) {
+            [$correlationName, $column, $alias] = $columnEntry;
+            if ($correlationName == 'tr' && is_string($column)) {
+                $alias = $alias ?: $column;
+                if (isset($aggregates[$alias])) {
+                    $columns[] = ['', new Maho\Db\Expr($aggregates[$alias]), $alias];
+                    continue;
+                }
+            } elseif ($aggregateTagColumns && $correlationName == 't' && $column === '*') {
+                $tagColumns = $this->getConnection()->describeTable($this->getTable('tag/tag'));
+                foreach (array_keys($tagColumns) as $tagColumn) {
+                    $columns[] = ['', new Maho\Db\Expr('MAX(t.' . $tagColumn . ')'), $tagColumn];
+                }
+                continue;
+            }
+            $columns[] = $columnEntry;
+        }
+        $this->getSelect()->setPart(Maho\Db\Select::COLUMNS, $columns);
         return $this;
     }
 
@@ -196,6 +246,22 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
     #[\Override]
     public function getSelectCountSql()
     {
+        if ($this->getFlag('group_tag')) {
+            // The select is grouped by (tag, customer): COUNT(DISTINCT tr.tag_id)
+            // would undercount when several customers share a tag, and multi-column
+            // COUNT(DISTINCT) is not portable to PostgreSQL, so count the grouped
+            // rows through a derived table
+            $groupSelect = clone $this->getSelect();
+            $groupSelect->reset(Maho\Db\Select::ORDER);
+            $groupSelect->reset(Maho\Db\Select::LIMIT_COUNT);
+            $groupSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
+            $groupSelect->reset(Maho\Db\Select::COLUMNS);
+            $groupSelect->columns(new Maho\Db\Expr('1'));
+
+            return $this->getConnection()->select()
+                ->from(['counted' => $groupSelect], new Maho\Db\Expr('COUNT(*)'));
+        }
+
         $countSelect = parent::getSelectCountSql();
 
         if ($this->_allowDisableGrouping) {

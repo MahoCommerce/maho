@@ -129,9 +129,24 @@ class Mysql extends AbstractPdoAdapter
     protected function _initConnection(): void
     {
         /** @link http://bugs.mysql.com/bug.php?id=18551 */
-        $sqlMode = \Mage::getIsDeveloperMode() ? 'ONLY_FULL_GROUP_BY' : '';
+        $sqlMode = '';
+        if (\Mage::getIsDeveloperMode() && !$this->isMariaDb()) {
+            // Surface non-strict GROUP BY queries during development (issue #688).
+            // MariaDB is exempt: its ONLY_FULL_GROUP_BY lacks the functional-dependency
+            // detection of MySQL/PostgreSQL (MDEV-11588), so it would reject
+            // SQL-standard queries like SELECT t.* ... GROUP BY t.pk.
+            $sqlMode = 'ONLY_FULL_GROUP_BY';
+        }
         $this->_connection->executeStatement("SET SQL_MODE='{$sqlMode}'");
         $this->_connection->executeStatement("SET time_zone = '+00:00'");
+    }
+
+    /**
+     * Whether the connected server is MariaDB rather than genuine MySQL
+     */
+    protected function isMariaDb(): bool
+    {
+        return $this->_connection->getDatabasePlatform() instanceof \Doctrine\DBAL\Platforms\MariaDBPlatform;
     }
 
     /**
