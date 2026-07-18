@@ -33,6 +33,10 @@ SPDX-License-Identifier: AFL-3.0
                 <sampling_rate>0.1</sampling_rate><!-- 10% default sampling -->
                 <trace_blocks>1</trace_blocks>
                 <excluded_paths></excluded_paths>
+                <trust_incoming_traces>0</trust_incoming_traces>
+                <server_timing>0</server_timing>
+                <export_logs>0</export_logs>
+                <export_metrics>0</export_metrics>
                 <!-- backend_model attribute makes Mage::getStoreConfig() decrypt the stored value at runtime -->
                 <auth_header backend_model="adminhtml/system_config_backend_encrypted"/>
             </opentelemetry>

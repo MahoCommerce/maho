@@ -157,6 +157,117 @@ class Maho_OpenTelemetry_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Whether to trust incoming W3C traceparent/tracestate headers and continue
+     * the caller's trace instead of starting a new one. Default off: honoring
+     * attacker-supplied trace ids can pollute sampling decisions, so this should
+     * only be enabled behind a trusted proxy/gateway.
+     */
+    public function isTrustIncomingTracesEnabled(): bool
+    {
+        try {
+            return Mage::getStoreConfigFlag('dev/opentelemetry/trust_incoming_traces');
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Whether to emit a Server-Timing response header carrying the traceparent,
+     * so browser RUM tooling can correlate page loads with backend traces
+     */
+    public function isServerTimingEnabled(): bool
+    {
+        try {
+            return Mage::getStoreConfigFlag('dev/opentelemetry/server_timing');
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Whether log records should also be exported to the OTLP endpoint
+     * (OTEL_LOGS_EXPORTER=otlp|none overrides the admin flag)
+     */
+    public function isLogExportEnabled(): bool
+    {
+        $env = strtolower($this->getEnv('OTEL_LOGS_EXPORTER'));
+        if ($env === 'otlp') {
+            return true;
+        }
+        if ($env === 'none') {
+            return false;
+        }
+        try {
+            return Mage::getStoreConfigFlag('dev/opentelemetry/export_logs');
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Whether metrics should be exported to the OTLP endpoint
+     * (OTEL_METRICS_EXPORTER=otlp|none overrides the admin flag)
+     */
+    public function isMetricsExportEnabled(): bool
+    {
+        $env = strtolower($this->getEnv('OTEL_METRICS_EXPORTER'));
+        if ($env === 'otlp') {
+            return true;
+        }
+        if ($env === 'none') {
+            return false;
+        }
+        try {
+            return Mage::getStoreConfigFlag('dev/opentelemetry/export_metrics');
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Get OTLP logs endpoint URL, derived from the traces endpoint unless the
+     * standard signal-specific env vars say otherwise
+     */
+    public function getLogsEndpoint(): string
+    {
+        return $this->_getSignalEndpoint('OTEL_EXPORTER_OTLP_LOGS_ENDPOINT', 'logs');
+    }
+
+    /**
+     * Get OTLP metrics endpoint URL, derived from the traces endpoint unless the
+     * standard signal-specific env vars say otherwise
+     */
+    public function getMetricsEndpoint(): string
+    {
+        return $this->_getSignalEndpoint('OTEL_EXPORTER_OTLP_METRICS_ENDPOINT', 'metrics');
+    }
+
+    /**
+     * Resolve a per-signal OTLP endpoint: signal env var verbatim, base env var
+     * with the signal path appended, or the traces endpoint with its signal
+     * segment swapped
+     */
+    private function _getSignalEndpoint(string $envVar, string $signal): string
+    {
+        $env = $this->getEnv($envVar);
+        if ($env !== '') {
+            return $env;
+        }
+        $env = $this->getEnv('OTEL_EXPORTER_OTLP_ENDPOINT');
+        if ($env !== '') {
+            return rtrim($env, '/') . '/v1/' . $signal;
+        }
+        $traces = $this->getEndpoint();
+        if ($traces === '') {
+            return '';
+        }
+        if (str_contains($traces, '/v1/traces')) {
+            return str_replace('/v1/traces', '/v1/' . $signal, $traces);
+        }
+        return rtrim($traces, '/') . '/v1/' . $signal;
+    }
+
+    /**
      * Whether BLOCK: profiler timers should create spans (they are the highest
      * volume span source; disable to reduce trace size on complex pages)
      */

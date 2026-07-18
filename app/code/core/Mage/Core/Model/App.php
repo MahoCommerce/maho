@@ -368,8 +368,23 @@ class Mage_Core_Model_App
             } catch (\Throwable $e) {
                 // Store may not be fully initialized yet
             }
+
+            // Expose the trace id to browser RUM tooling (e.g. Grafana Faro) via
+            // the Server-Timing header, so frontend page timings can be correlated
+            // with this backend trace
+            try {
+                if (Mage::helper('opentelemetry')->isServerTimingEnabled()) {
+                    $traceparent = $tracer?->getTracePropagationHeaders()['traceparent'] ?? '';
+                    if ($traceparent !== '' && !headers_sent()) {
+                        header('Server-Timing: traceparent;desc="' . $traceparent . '"');
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Telemetry must never break the response
+            }
         }
 
+        $dispatchError = false;
         try {
             $this->getFrontController()->dispatch();
 
@@ -436,6 +451,7 @@ class Mage_Core_Model_App
                 Mage::logException($e);
             }
         } catch (Throwable $e) {
+            $dispatchError = true;
             $rootSpan?->recordException($e);
             $rootSpan?->setStatus('error', $e->getMessage());
             throw $e;
@@ -444,6 +460,19 @@ class Mage_Core_Model_App
             // On the error path do NOT finish the request here: the exception still has
             // to propagate to Mage::run()'s handler, which renders the error page.
             $rootSpan?->end();
+
+            // http.server.request.duration histogram (no-op unless metric export
+            // is enabled); recorded before flush() so it ships with this request
+            Mage::getTracer()?->recordRequestDuration(
+                microtime(true) - (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true)),
+                [
+                    'http.request.method' => $requestMethod,
+                    // On an uncaught dispatch exception no response was sent yet
+                    // (the error page is rendered later in Mage::run), so 500 is
+                    // the closest truthful status class here
+                    'http.response.status_code' => $dispatchError ? 500 : (http_response_code() ?: 200),
+                ],
+            );
 
             Mage::getTracer()?->flush();
         }

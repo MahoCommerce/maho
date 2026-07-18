@@ -14,7 +14,7 @@ use OpenTelemetry\API\Trace\SpanInterface;
 use OpenTelemetry\API\Trace\StatusCode;
 use OpenTelemetry\Context\ScopeInterface;
 
-class Maho_OpenTelemetry_Model_Span extends Mage_Core_Model_Abstract
+class Maho_OpenTelemetry_Model_Span
 {
     /**
      * The underlying OpenTelemetry SDK span

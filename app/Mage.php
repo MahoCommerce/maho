@@ -142,6 +142,13 @@ final class Mage
         self::$_isInstalled     = null;
         self::$_tracer          = null;
         self::$_tracerInitializing = false;
+        // Cached loggers hold references to the old tracer (trace-context
+        // processor and OTLP handler) — drop them so they are rebuilt
+        try {
+            Mage_Core_Model_Logger::flushLoggerCache();
+        } catch (\Throwable $e) {
+            // Logger may not be available this early in bootstrap
+        }
         // do not reset $headersSentThrowsException
     }
 
@@ -858,6 +865,13 @@ final class Mage
             $initialized = $tracer->initialize();
             if ($initialized) {
                 self::$_tracer = $initialized;
+                // Loggers created before/during tracer init lack the trace-context
+                // processor and OTLP log handler — drop them so they are rebuilt
+                try {
+                    Mage_Core_Model_Logger::flushLoggerCache();
+                } catch (\Throwable $e) {
+                    // Never let logging wiring break tracer availability
+                }
                 return self::$_tracer;
             }
 

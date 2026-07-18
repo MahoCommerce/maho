@@ -103,6 +103,19 @@ class Mage_Core_Model_Logger
         Mage::logException($e);
     }
 
+    /**
+     * Drop all cached Monolog loggers so they are rebuilt on next use.
+     *
+     * Called by Mage::getTracer() right after the tracer initializes: loggers
+     * created during bootstrap (including by the tracer's own init logging)
+     * predate the tracer and lack the trace-context processor and the OTLP
+     * log handler — rebuilding them picks both up.
+     */
+    public static function flushLoggerCache(): void
+    {
+        self::$_loggers = [];
+    }
+
     protected function createLogger(string $file, Level|int $minLogLevel, bool $forceLog): void
     {
         $logDir = Mage::getBaseDir('var') . DS . 'log';
@@ -129,6 +142,16 @@ class Mage_Core_Model_Logger
             try {
                 // TraceContext processor adds trace_id and span_id to all log records
                 $logger->pushProcessor(new Maho_OpenTelemetry_Handler_TraceContext($tracer));
+
+                // Export log records to the OTLP endpoint when enabled, via the
+                // official Monolog bridge (open-telemetry/opentelemetry-logger-monolog)
+                $loggerProvider = $tracer->getLoggerProvider();
+                if ($loggerProvider && class_exists(\OpenTelemetry\Contrib\Logs\Monolog\Handler::class)) {
+                    $otlpHandler = new \OpenTelemetry\Contrib\Logs\Monolog\Handler($loggerProvider, $configLevel);
+                    if ($otlpHandler instanceof \Monolog\Handler\HandlerInterface) {
+                        $logger->pushHandler($otlpHandler);
+                    }
+                }
             } catch (\Throwable $e) {
                 // Silently fail - telemetry should never break logging
                 // Use error_log() to avoid re-entrant createLogger() → stack overflow

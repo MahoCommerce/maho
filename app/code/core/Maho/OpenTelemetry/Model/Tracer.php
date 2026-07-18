@@ -10,22 +10,34 @@
 
 declare(strict_types=1);
 
+use OpenTelemetry\API\Metrics\CounterInterface;
+use OpenTelemetry\API\Metrics\HistogramInterface;
 use OpenTelemetry\API\Trace\TracerInterface;
 use OpenTelemetry\API\Trace\SpanInterface;
 use OpenTelemetry\API\Trace\SpanKind;
+use OpenTelemetry\API\Trace\Propagation\TraceContextPropagator;
 use OpenTelemetry\API\Common\Time\Clock;
+use OpenTelemetry\Context\ContextInterface;
+use OpenTelemetry\SDK\Logs\LoggerProvider;
+use OpenTelemetry\SDK\Logs\Processor\BatchLogRecordProcessor;
+use OpenTelemetry\SDK\Metrics\MeterProvider;
+use OpenTelemetry\SDK\Metrics\MetricReader\ExportingReader;
+use OpenTelemetry\SDK\Metrics\Data\Temporality;
 use OpenTelemetry\SDK\Trace\TracerProvider;
 use OpenTelemetry\SDK\Trace\TracerProviderInterface;
 use OpenTelemetry\SDK\Trace\SpanProcessor\BatchSpanProcessor;
 use OpenTelemetry\SDK\Resource\ResourceInfo;
 use OpenTelemetry\SDK\Resource\ResourceInfoFactory;
 use OpenTelemetry\SDK\Common\Attribute\Attributes;
+use OpenTelemetry\Contrib\Otlp\LogsExporter;
+use OpenTelemetry\Contrib\Otlp\MetricExporter;
 use OpenTelemetry\Contrib\Otlp\SpanExporter;
 use OpenTelemetry\Contrib\Otlp\OtlpHttpTransportFactory;
 use OpenTelemetry\SDK\Trace\Sampler\AlwaysOnSampler;
+use OpenTelemetry\SDK\Trace\Sampler\ParentBased;
 use OpenTelemetry\SDK\Trace\Sampler\TraceIdRatioBasedSampler;
 
-class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
+class Maho_OpenTelemetry_Model_Tracer
 {
     /**
      * Active span stack
@@ -51,6 +63,27 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
      * OpenTelemetry Tracer instance
      */
     private ?TracerInterface $_tracer = null;
+
+    /**
+     * OpenTelemetry LoggerProvider for OTLP log export (null unless enabled)
+     */
+    private ?LoggerProvider $_loggerProvider = null;
+
+    /**
+     * OpenTelemetry MeterProvider for OTLP metric export (null unless enabled)
+     */
+    private ?MeterProvider $_meterProvider = null;
+
+    /**
+     * Histogram for http.server.request.duration (lazily created)
+     */
+    private ?HistogramInterface $_requestDurationHistogram = null;
+
+    /**
+     * Counters by metric name (lazily created)
+     * @var array<string, CounterInterface>
+     */
+    private array $_counters = [];
 
     /**
      * Initialize tracer
@@ -92,9 +125,10 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
             return false;
         }
 
-        // Check if SDK is available
+        // Check if SDK is available (nyholm/psr7 provides the PSR-17 factories
+        // the OTLP HTTP transport discovers at runtime)
         if (!class_exists(TracerProvider::class)) {
-            Mage::log('OpenTelemetry SDK not installed. Run: composer require open-telemetry/sdk open-telemetry/exporter-otlp', Mage::LOG_WARNING);
+            Mage::log('OpenTelemetry SDK not installed. Run: composer require open-telemetry/sdk open-telemetry/exporter-otlp nyholm/psr7', Mage::LOG_WARNING);
             return false;
         }
 
@@ -108,11 +142,14 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
                 'telemetry.sdk.version' => \Composer\InstalledVersions::getVersion('open-telemetry/sdk') ?? 'unknown',
             ])));
 
-            // Create OTLP exporter
+            // Create OTLP exporter. maxRetries 1 (SDK default is 3): exports are
+            // request-scoped, so retrying a struggling collector only holds the
+            // PHP worker longer without improving delivery odds.
             $transport = (new OtlpHttpTransportFactory())->create(
                 $endpoint,
                 'application/x-protobuf',
                 $helper->getHeaders(),
+                maxRetries: 1,
             );
 
             $exporter = new SpanExporter($transport);
@@ -128,11 +165,13 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
                 (int) ($helper->getEnv('OTEL_BSP_MAX_EXPORT_BATCH_SIZE') ?: BatchSpanProcessor::DEFAULT_MAX_EXPORT_BATCH_SIZE),
             );
 
-            // Create sampler based on sampling rate
+            // Create sampler based on sampling rate. ParentBased wrapping means a
+            // trusted remote parent's sampling decision is respected (the spec's
+            // parentbased_traceidratio default); local root spans still sample by ratio.
             $samplingRate = $helper->getSamplingRate();
-            $sampler = $samplingRate >= 1.0
+            $sampler = new ParentBased($samplingRate >= 1.0
                 ? new AlwaysOnSampler()
-                : new TraceIdRatioBasedSampler($samplingRate);
+                : new TraceIdRatioBasedSampler($samplingRate));
 
             // Create tracer provider
             $this->_tracerProvider = TracerProvider::builder()
@@ -146,6 +185,36 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
                 'maho',
                 Mage::getVersion(),
             );
+
+            // Optional OTLP log export: Mage_Core_Model_Logger bridges Monolog to
+            // this provider via the official contrib handler when available
+            if ($helper->isLogExportEnabled() && class_exists(LoggerProvider::class)) {
+                $logsTransport = (new OtlpHttpTransportFactory())->create(
+                    $helper->getLogsEndpoint(),
+                    'application/x-protobuf',
+                    $helper->getHeaders(),
+                    maxRetries: 1,
+                );
+                $this->_loggerProvider = LoggerProvider::builder()
+                    ->addLogRecordProcessor(new BatchLogRecordProcessor(new LogsExporter($logsTransport), Clock::getDefault()))
+                    ->setResource($resource)
+                    ->build();
+            }
+
+            // Optional OTLP metric export. Delta temporality: PHP processes are
+            // short-lived, so deltas are aggregated on the receiving side.
+            if ($helper->isMetricsExportEnabled() && class_exists(MeterProvider::class)) {
+                $metricsTransport = (new OtlpHttpTransportFactory())->create(
+                    $helper->getMetricsEndpoint(),
+                    'application/x-protobuf',
+                    $helper->getHeaders(),
+                    maxRetries: 1,
+                );
+                $this->_meterProvider = MeterProvider::builder()
+                    ->setResource($resource)
+                    ->addReader(new ExportingReader(new MetricExporter($metricsTransport, Temporality::DELTA)))
+                    ->build();
+            }
 
             $this->_enabled = true;
             $this->_traceBlocks = $helper->isBlockTracingEnabled();
@@ -172,9 +241,15 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
         }
 
         try {
-            // Start a new root span (no parent)
             $spanBuilder = $this->_tracer->spanBuilder($name);
             $spanBuilder->setSpanKind($this->_mapSpanKind($kind));
+
+            // Continue the caller's trace when incoming W3C context is trusted;
+            // otherwise this starts a brand new trace
+            $remoteContext = $this->_extractRemoteContext();
+            if ($remoteContext) {
+                $spanBuilder->setParent($remoteContext);
+            }
 
             // Add attributes
             foreach ($attributes as $key => $value) {
@@ -255,6 +330,73 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
     public function isBlockTracingEnabled(): bool
     {
         return $this->_traceBlocks;
+    }
+
+    /**
+     * Get the LoggerProvider for OTLP log export (null unless log export is enabled)
+     */
+    public function getLoggerProvider(): ?LoggerProvider
+    {
+        return $this->_loggerProvider;
+    }
+
+    /**
+     * Record the http.server.request.duration histogram (no-op unless metric
+     * export is enabled)
+     */
+    public function recordRequestDuration(float $seconds, array $attributes = []): void
+    {
+        if (!$this->_meterProvider) {
+            return;
+        }
+        try {
+            $this->_requestDurationHistogram ??= $this->_meterProvider
+                ->getMeter('maho')
+                ->createHistogram('http.server.request.duration', 's', 'Duration of HTTP server requests');
+            $this->_requestDurationHistogram->record($seconds, $attributes);
+        } catch (\Throwable $e) {
+            Mage::log('Failed to record request duration metric: ' . $e->getMessage(), Mage::LOG_ERROR);
+        }
+    }
+
+    /**
+     * Increment a counter metric (no-op unless metric export is enabled)
+     */
+    public function addCounter(string $name, int|float $amount = 1, array $attributes = [], string $unit = '{count}'): void
+    {
+        if (!$this->_meterProvider) {
+            return;
+        }
+        try {
+            $this->_counters[$name] ??= $this->_meterProvider
+                ->getMeter('maho')
+                ->createCounter($name, $unit);
+            $this->_counters[$name]->add($amount, $attributes);
+        } catch (\Throwable $e) {
+            Mage::log('Failed to record counter metric: ' . $e->getMessage(), Mage::LOG_ERROR);
+        }
+    }
+
+    /**
+     * Extract a trusted remote W3C trace context from the incoming request
+     */
+    private function _extractRemoteContext(): ?ContextInterface
+    {
+        try {
+            if (empty($_SERVER['HTTP_TRACEPARENT'])
+                || !Mage::helper('opentelemetry')->isTrustIncomingTracesEnabled()
+            ) {
+                return null;
+            }
+            $carrier = ['traceparent' => (string) $_SERVER['HTTP_TRACEPARENT']];
+            if (!empty($_SERVER['HTTP_TRACESTATE'])) {
+                $carrier['tracestate'] = (string) $_SERVER['HTTP_TRACESTATE'];
+            }
+            return TraceContextPropagator::getInstance()->extract($carrier);
+        } catch (\Throwable $e) {
+            // Malformed incoming context — start a fresh trace instead
+            return null;
+        }
     }
 
     /**
@@ -360,6 +502,8 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
             $prevReporting = error_reporting(error_reporting() & ~E_DEPRECATED);
             try {
                 $this->_tracerProvider->forceFlush();
+                $this->_loggerProvider?->forceFlush();
+                $this->_meterProvider?->forceFlush();
             } finally {
                 error_reporting($prevReporting);
             }
@@ -411,21 +555,21 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Shutdown tracer provider (called on destruct)
+     * Shutdown telemetry providers (called on destruct)
      */
     public function __destruct()
     {
-        if ($this->_tracerProvider) {
+        try {
+            $prevReporting = error_reporting(error_reporting() & ~E_DEPRECATED);
             try {
-                $prevReporting = error_reporting(error_reporting() & ~E_DEPRECATED);
-                try {
-                    $this->_tracerProvider->shutdown();
-                } finally {
-                    error_reporting($prevReporting);
-                }
-            } catch (\Throwable $e) {
-                // Ignore errors during shutdown
+                $this->_tracerProvider?->shutdown();
+                $this->_loggerProvider?->shutdown();
+                $this->_meterProvider?->shutdown();
+            } finally {
+                error_reporting($prevReporting);
             }
+        } catch (\Throwable $e) {
+            // Ignore errors during shutdown
         }
     }
 }

@@ -14,7 +14,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Symfony\Contracts\HttpClient\ResponseStreamInterface;
 
-class Maho_OpenTelemetry_Model_Http_TracedClient extends Mage_Core_Model_Abstract implements HttpClientInterface
+class Maho_OpenTelemetry_Model_Http_TracedClient implements HttpClientInterface
 {
     /**
      * Wrapped HTTP client

@@ -19,8 +19,8 @@ class Maho_OpenTelemetry_Model_Observer
     #[\Maho\Config\Observer('sales_order_place_after')]
     public function addOrderPlacedEvent(\Maho\Event\Observer $observer): void
     {
-        $span = Mage::getTracer()?->getActiveSpan();
-        if (!$span) {
+        $tracer = Mage::getTracer();
+        if (!$tracer?->isEnabled()) {
             return;
         }
         try {
@@ -28,13 +28,20 @@ class Maho_OpenTelemetry_Model_Observer
             if (!$order instanceof Mage_Sales_Model_Order) {
                 return;
             }
-            $span->addEvent('maho.order.placed', [
+            $tracer->getActiveSpan()?->addEvent('maho.order.placed', [
                 'maho.order.increment_id' => (string) $order->getIncrementId(),
                 'maho.order.grand_total' => (float) $order->getGrandTotal(),
                 'maho.order.currency' => (string) $order->getOrderCurrencyCode(),
                 'maho.order.items_count' => (int) $order->getTotalItemCount(),
                 'maho.payment.method' => (string) ($order->getPayment()?->getMethod() ?? ''),
             ]);
+            $tracer->addCounter('maho.orders', 1, [
+                'maho.order.currency' => (string) $order->getOrderCurrencyCode(),
+                'maho.payment.method' => (string) ($order->getPayment()?->getMethod() ?? ''),
+            ], '{order}');
+            $tracer->addCounter('maho.order.revenue', (float) $order->getGrandTotal(), [
+                'maho.order.currency' => (string) $order->getOrderCurrencyCode(),
+            ], '{currency_unit}');
         } catch (\Throwable $e) {
             // Telemetry must never affect order placement
         }
@@ -46,8 +53,8 @@ class Maho_OpenTelemetry_Model_Observer
     #[\Maho\Config\Observer('checkout_cart_product_add_after')]
     public function addCartAddEvent(\Maho\Event\Observer $observer): void
     {
-        $span = Mage::getTracer()?->getActiveSpan();
-        if (!$span) {
+        $tracer = Mage::getTracer();
+        if (!$tracer?->isEnabled()) {
             return;
         }
         try {
@@ -55,10 +62,11 @@ class Maho_OpenTelemetry_Model_Observer
             if (!$product instanceof Mage_Catalog_Model_Product) {
                 return;
             }
-            $span->addEvent('maho.cart.add', [
+            $tracer->getActiveSpan()?->addEvent('maho.cart.add', [
                 'maho.product.id' => (int) $product->getId(),
                 'maho.product.sku' => (string) $product->getSku(),
             ]);
+            $tracer->addCounter('maho.cart.additions', 1, [], '{addition}');
         } catch (\Throwable $e) {
             // Telemetry must never affect the cart
         }
