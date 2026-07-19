@@ -21,10 +21,37 @@ describe('Meta Pixel Advanced Matching', function () {
             expect($result)->toBe(['em' => hash('sha256', 'john.doe@example.com')]);
         });
 
-        it('keeps only digits in phone numbers and strips leading zeros', function () {
+        it('keeps only digits in phone numbers entered in international format', function () {
             $result = $this->block->buildAdvancedMatchingData(['ph' => '+44 (0) 7911 123-456']);
 
             expect($result)->toBe(['ph' => hash('sha256', '4407911123456')]);
+        });
+
+        it('prepends the billing country calling code to national phone numbers', function () {
+            expect($this->block->buildAdvancedMatchingData(['ph' => '(555) 123-4567', 'country' => 'US'])['ph'])
+                ->toBe(hash('sha256', '15551234567'));
+            expect($this->block->buildAdvancedMatchingData(['ph' => '07911 123456', 'country' => 'GB'])['ph'])
+                ->toBe(hash('sha256', '447911123456'));
+        });
+
+        it('keeps the Italian trunk zero when prepending the country code', function () {
+            expect($this->block->buildAdvancedMatchingData(['ph' => '06 1234567', 'country' => 'IT'])['ph'])
+                ->toBe(hash('sha256', '39061234567'));
+        });
+
+        it('treats a 00 dial-out prefix as international format', function () {
+            expect($this->block->buildAdvancedMatchingData(['ph' => '0044 7911 123456', 'country' => 'GB'])['ph'])
+                ->toBe(hash('sha256', '447911123456'));
+        });
+
+        it('sends phone digits as entered when the country is unknown', function () {
+            expect($this->block->buildAdvancedMatchingData(['ph' => '555-123-4567']))
+                ->toBe(['ph' => hash('sha256', '5551234567')]);
+        });
+
+        it('does not double the country code when it was already entered', function () {
+            expect($this->block->buildAdvancedMatchingData(['ph' => '1 555 123 4567', 'country' => 'US'])['ph'])
+                ->toBe(hash('sha256', '15551234567'));
         });
 
         it('strips punctuation and whitespace from names and cities', function () {
@@ -72,6 +99,11 @@ describe('Meta Pixel Advanced Matching', function () {
 
         it('omits invalid birthdates', function () {
             expect($this->block->buildAdvancedMatchingData(['db' => 'not a date']))->toBe([]);
+        });
+
+        it('omits legacy zero-date birthdates', function () {
+            expect($this->block->buildAdvancedMatchingData(['db' => '0000-00-00']))->toBe([]);
+            expect($this->block->buildAdvancedMatchingData(['db' => '0000-00-00 00:00:00']))->toBe([]);
         });
 
         it('hashes the external id as provided', function () {

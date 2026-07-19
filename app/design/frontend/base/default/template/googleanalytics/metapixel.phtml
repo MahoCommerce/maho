@@ -20,7 +20,7 @@ $_helper = $this->helper('googleanalytics');
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
         <?php $_amData = $this->getAdvancedMatchingData(); ?>
-        fbq('init', '<?= $_helper->getMetaPixelId() ?>'<?= $_amData ? ', ' . json_encode($_amData, JSON_THROW_ON_ERROR) : '' ?>);
+        fbq('init', '<?= $_helper->getMetaPixelId() ?>'<?= $_amData ? ', ' . Mage::helper('core')->jsonEncode($_amData) : '' ?>);
         fbq('track', 'PageView');
     </script>
     <script>

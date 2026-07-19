@@ -275,7 +275,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                     'ge' => $this->_getGenderCode((int) $order->getCustomerGender()),
                     'ph' => $address ? (string) $address->getTelephone() : '',
                     'ct' => $address ? (string) $address->getCity() : '',
-                    'st' => $address ? (string) $address->getRegionCode() : '',
+                    'st' => $this->_getRegionForMatching($address ?: null),
                     'zp' => $address ? (string) $address->getPostcode() : '',
                     'country' => $address ? (string) $address->getCountryId() : '',
                     'external_id' => (string) $order->getCustomerId(),
@@ -297,7 +297,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
             'ge' => $this->_getGenderCode((int) $customer->getGender()),
             'ph' => $address ? (string) $address->getTelephone() : '',
             'ct' => $address ? (string) $address->getCity() : '',
-            'st' => $address ? (string) $address->getRegionCode() : '',
+            'st' => $this->_getRegionForMatching($address),
             'zp' => $address ? (string) $address->getPostcode() : '',
             'country' => $address ? (string) $address->getCountryId() : '',
             'external_id' => (string) $customer->getId(),
@@ -306,6 +306,9 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
 
     /**
      * Map the customer gender attribute option id to Meta's 'm'/'f' codes.
+     *
+     * Matches against the admin (default) option labels so store-level
+     * translations of the gender options don't break the mapping.
      */
     protected function _getGenderCode(int $optionId): string
     {
@@ -313,18 +316,44 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
             return '';
         }
         try {
-            $label = Mage::getResourceModel('customer/customer')
+            $source = Mage::getResourceModel('customer/customer')
                 ->getAttribute('gender')
-                ->getSource()
-                ->getOptionText($optionId);
+                ->getSource();
+            // Admin (default) labels when available, so store-level translations
+            // of the option labels don't break the mapping
+            $options = $source instanceof Mage_Eav_Model_Entity_Attribute_Source_Table
+                ? $source->getAllOptions(false, true)
+                : $source->getAllOptions();
         } catch (Throwable $e) {
             return '';
         }
-        return match (mb_strtolower((string) $label)) {
-            'male' => 'm',
-            'female' => 'f',
-            default => '',
-        };
+        foreach ($options as $option) {
+            if ((int) ($option['value'] ?? 0) === $optionId) {
+                return match (mb_strtolower(trim((string) ($option['label'] ?? '')))) {
+                    'male', 'm' => 'm',
+                    'female', 'f' => 'f',
+                    default => '',
+                };
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Region value for Meta's `st` parameter: the 2-letter region code where one
+     * exists (e.g. US/CA); otherwise the full region name, which Meta matches
+     * better than internal 3+ letter directory codes.
+     */
+    protected function _getRegionForMatching(?Mage_Customer_Model_Address_Abstract $address): string
+    {
+        if (!$address) {
+            return '';
+        }
+        $code = (string) $address->getRegionCode();
+        if (preg_match('/^[A-Za-z]{2}$/', $code)) {
+            return $code;
+        }
+        return (string) $address->getRegion();
     }
 
     /**
@@ -345,8 +374,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
             }
             $normalized[$key] = match ($key) {
                 'em' => mb_strtolower($value),
-                // Digits only, no leading zeros; the country code is kept as entered
-                'ph' => ltrim((string) preg_replace('/\D+/', '', $value), '0'),
+                'ph' => $this->_normalizePhone($value, trim((string) ($raw['country'] ?? ''))),
                 'fn', 'ln', 'ct', 'st' => (string) preg_replace('/[^\p{L}\p{N}]+/u', '', mb_strtolower($value)),
                 'zp' => str_replace(' ', '', mb_strtolower(explode('-', $value)[0])),
                 'country' => mb_strtolower(substr($value, 0, 2)),
@@ -367,8 +395,94 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
     protected function _normalizeDob(string $dob): string
     {
         $timestamp = strtotime($dob);
-        return $timestamp === false ? '' : date('Ymd', $timestamp);
+        if ($timestamp === false) {
+            return '';
+        }
+        $date = date('Ymd', $timestamp);
+        // Reject non-real dates: strtotime() rolls the legacy '0000-00-00'
+        // sentinel back to year -1 instead of failing, yielding '-00011130'
+        return preg_match('/^\d{8}$/', $date) ? $date : '';
     }
+
+    /**
+     * Normalize a phone number to digits with a country calling code, per the
+     * Meta spec ("include the country code, even if all of your data is from
+     * the same country").
+     *
+     * Numbers entered in international format ('+' or '00' prefix) are kept as
+     * entered; national-format numbers get their trunk '0' dropped (kept for
+     * Italy, where it is part of the number) and the billing country's calling
+     * code prepended. Unknown country: digits are sent as entered (best effort).
+     */
+    protected function _normalizePhone(string $phone, string $countryId): string
+    {
+        $digits = (string) preg_replace('/\D+/', '', $phone);
+        if ($digits === '') {
+            return '';
+        }
+        if (str_starts_with(trim($phone), '+')) {
+            return $digits;
+        }
+        if (str_starts_with($digits, '00')) {
+            return substr($digits, 2);
+        }
+        $callingCode = self::COUNTRY_CALLING_CODES[strtoupper($countryId)] ?? '';
+        if ($callingCode === '') {
+            return $digits;
+        }
+        if (strtoupper($countryId) !== 'IT') {
+            $digits = ltrim($digits, '0');
+            if ($digits === '') {
+                return '';
+            }
+        }
+        // Long enough to already include the country code it starts with
+        if (str_starts_with($digits, $callingCode) && strlen($digits) >= strlen($callingCode) + 9) {
+            return $digits;
+        }
+        return $callingCode . $digits;
+    }
+
+    /**
+     * ITU-T E.164 country calling codes by ISO 3166-1 alpha-2 country.
+     */
+    private const COUNTRY_CALLING_CODES = [
+        'AD' => '376', 'AE' => '971', 'AF' => '93', 'AG' => '1', 'AI' => '1', 'AL' => '355', 'AM' => '374',
+        'AO' => '244', 'AR' => '54', 'AS' => '1', 'AT' => '43', 'AU' => '61', 'AW' => '297', 'AX' => '358',
+        'AZ' => '994', 'BA' => '387', 'BB' => '1', 'BD' => '880', 'BE' => '32', 'BF' => '226', 'BG' => '359',
+        'BH' => '973', 'BI' => '257', 'BJ' => '229', 'BL' => '590', 'BM' => '1', 'BN' => '673', 'BO' => '591',
+        'BQ' => '599', 'BR' => '55', 'BS' => '1', 'BT' => '975', 'BW' => '267', 'BY' => '375', 'BZ' => '501',
+        'CA' => '1', 'CC' => '61', 'CD' => '243', 'CF' => '236', 'CG' => '242', 'CH' => '41', 'CI' => '225',
+        'CK' => '682', 'CL' => '56', 'CM' => '237', 'CN' => '86', 'CO' => '57', 'CR' => '506', 'CU' => '53',
+        'CV' => '238', 'CW' => '599', 'CX' => '61', 'CY' => '357', 'CZ' => '420', 'DE' => '49', 'DJ' => '253',
+        'DK' => '45', 'DM' => '1', 'DO' => '1', 'DZ' => '213', 'EC' => '593', 'EE' => '372', 'EG' => '20',
+        'EH' => '212', 'ER' => '291', 'ES' => '34', 'ET' => '251', 'FI' => '358', 'FJ' => '679', 'FK' => '500',
+        'FM' => '691', 'FO' => '298', 'FR' => '33', 'GA' => '241', 'GB' => '44', 'GD' => '1', 'GE' => '995',
+        'GF' => '594', 'GG' => '44', 'GH' => '233', 'GI' => '350', 'GL' => '299', 'GM' => '220', 'GN' => '224',
+        'GP' => '590', 'GQ' => '240', 'GR' => '30', 'GT' => '502', 'GU' => '1', 'GW' => '245', 'GY' => '592',
+        'HK' => '852', 'HN' => '504', 'HR' => '385', 'HT' => '509', 'HU' => '36', 'ID' => '62', 'IE' => '353',
+        'IL' => '972', 'IM' => '44', 'IN' => '91', 'IO' => '246', 'IQ' => '964', 'IR' => '98', 'IS' => '354',
+        'IT' => '39', 'JE' => '44', 'JM' => '1', 'JO' => '962', 'JP' => '81', 'KE' => '254', 'KG' => '996',
+        'KH' => '855', 'KI' => '686', 'KM' => '269', 'KN' => '1', 'KP' => '850', 'KR' => '82', 'KW' => '965',
+        'KY' => '1', 'KZ' => '7', 'LA' => '856', 'LB' => '961', 'LC' => '1', 'LI' => '423', 'LK' => '94',
+        'LR' => '231', 'LS' => '266', 'LT' => '370', 'LU' => '352', 'LV' => '371', 'LY' => '218', 'MA' => '212',
+        'MC' => '377', 'MD' => '373', 'ME' => '382', 'MF' => '590', 'MG' => '261', 'MH' => '692', 'MK' => '389',
+        'ML' => '223', 'MM' => '95', 'MN' => '976', 'MO' => '853', 'MP' => '1', 'MQ' => '596', 'MR' => '222',
+        'MS' => '1', 'MT' => '356', 'MU' => '230', 'MV' => '960', 'MW' => '265', 'MX' => '52', 'MY' => '60',
+        'MZ' => '258', 'NA' => '264', 'NC' => '687', 'NE' => '227', 'NF' => '672', 'NG' => '234', 'NI' => '505',
+        'NL' => '31', 'NO' => '47', 'NP' => '977', 'NR' => '674', 'NU' => '683', 'NZ' => '64', 'OM' => '968',
+        'PA' => '507', 'PE' => '51', 'PF' => '689', 'PG' => '675', 'PH' => '63', 'PK' => '92', 'PL' => '48',
+        'PM' => '508', 'PR' => '1', 'PS' => '970', 'PT' => '351', 'PW' => '680', 'PY' => '595', 'QA' => '974',
+        'RE' => '262', 'RO' => '40', 'RS' => '381', 'RU' => '7', 'RW' => '250', 'SA' => '966', 'SB' => '677',
+        'SC' => '248', 'SD' => '249', 'SE' => '46', 'SG' => '65', 'SH' => '290', 'SI' => '386', 'SJ' => '47',
+        'SK' => '421', 'SL' => '232', 'SM' => '378', 'SN' => '221', 'SO' => '252', 'SR' => '597', 'SS' => '211',
+        'ST' => '239', 'SV' => '503', 'SX' => '1', 'SY' => '963', 'SZ' => '268', 'TC' => '1', 'TD' => '235',
+        'TG' => '228', 'TH' => '66', 'TJ' => '992', 'TK' => '690', 'TL' => '670', 'TM' => '993', 'TN' => '216',
+        'TO' => '676', 'TR' => '90', 'TT' => '1', 'TV' => '688', 'TW' => '886', 'TZ' => '255', 'UA' => '380',
+        'UG' => '256', 'US' => '1', 'UY' => '598', 'UZ' => '998', 'VA' => '379', 'VC' => '1', 'VE' => '58',
+        'VG' => '1', 'VI' => '1', 'VN' => '84', 'VU' => '678', 'WF' => '681', 'WS' => '685', 'XK' => '383',
+        'YE' => '967', 'YT' => '262', 'ZA' => '27', 'ZM' => '260', 'ZW' => '263',
+    ];
 
     #[\Override]
     protected function _toHtml(): string
