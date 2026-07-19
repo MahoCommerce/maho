@@ -20,9 +20,14 @@ class Mage_GoogleAnalytics_Model_Observer
         if (empty($orderIds) || !is_array($orderIds)) {
             return;
         }
-        $block = Mage::app()->getFrontController()->getAction()->getLayout()->getBlock('google_analytics');
+        $layout = Mage::app()->getFrontController()->getAction()->getLayout();
+        $block = $layout->getBlock('google_analytics');
         if ($block) {
             $block->setOrderIds($orderIds);
+        }
+        $metaPixelBlock = $layout->getBlock('meta_pixel');
+        if ($metaPixelBlock) {
+            $metaPixelBlock->setOrderIds($orderIds);
         }
     }
 
