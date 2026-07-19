@@ -42,6 +42,11 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
         return Mage::getStoreConfig('google/meta_pixel/account');
     }
 
+    public function isMetaPixelAdvancedMatchingEnabled(): bool
+    {
+        return Mage::getStoreConfigFlag('google/meta_pixel/advanced_matching');
+    }
+
     /**
      * Whether GTM is ready to use
      *

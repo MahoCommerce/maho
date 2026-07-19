@@ -1,0 +1,118 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ */
+
+declare(strict_types=1);
+
+uses(Tests\MahoFrontendTestCase::class);
+
+describe('Meta Pixel Advanced Matching', function () {
+    beforeEach(function () {
+        $this->block = new Mage_GoogleAnalytics_Block_Metapixel();
+    });
+
+    describe('buildAdvancedMatchingData', function () {
+        it('normalizes and hashes email addresses', function () {
+            $result = $this->block->buildAdvancedMatchingData(['em' => ' John.Doe@Example.COM ']);
+
+            expect($result)->toBe(['em' => hash('sha256', 'john.doe@example.com')]);
+        });
+
+        it('keeps only digits in phone numbers and strips leading zeros', function () {
+            $result = $this->block->buildAdvancedMatchingData(['ph' => '+44 (0) 7911 123-456']);
+
+            expect($result)->toBe(['ph' => hash('sha256', '4407911123456')]);
+        });
+
+        it('strips punctuation and whitespace from names and cities', function () {
+            $result = $this->block->buildAdvancedMatchingData([
+                'fn' => "O'Brien",
+                'ct' => 'New York',
+            ]);
+
+            expect($result)->toBe([
+                'fn' => hash('sha256', 'obrien'),
+                'ct' => hash('sha256', 'newyork'),
+            ]);
+        });
+
+        it('preserves non-latin characters in names', function () {
+            $result = $this->block->buildAdvancedMatchingData(['ln' => 'Müller']);
+
+            expect($result)->toBe(['ln' => hash('sha256', 'müller')]);
+        });
+
+        it('keeps only the first segment of zip codes', function () {
+            $result = $this->block->buildAdvancedMatchingData(['zp' => '90210-1234']);
+
+            expect($result)->toBe(['zp' => hash('sha256', '90210')]);
+        });
+
+        it('lowercases the two-letter country code', function () {
+            $result = $this->block->buildAdvancedMatchingData(['country' => 'GB']);
+
+            expect($result)->toBe(['country' => hash('sha256', 'gb')]);
+        });
+
+        it('accepts only m or f as gender', function () {
+            expect($this->block->buildAdvancedMatchingData(['ge' => 'm']))
+                ->toBe(['ge' => hash('sha256', 'm')]);
+            expect($this->block->buildAdvancedMatchingData(['ge' => 'x']))->toBe([]);
+        });
+
+        it('formats birthdates as YYYYMMDD', function () {
+            expect($this->block->buildAdvancedMatchingData(['db' => '1985-04-12']))
+                ->toBe(['db' => hash('sha256', '19850412')]);
+            expect($this->block->buildAdvancedMatchingData(['db' => '1985-04-12 00:00:00']))
+                ->toBe(['db' => hash('sha256', '19850412')]);
+        });
+
+        it('omits invalid birthdates', function () {
+            expect($this->block->buildAdvancedMatchingData(['db' => 'not a date']))->toBe([]);
+        });
+
+        it('hashes the external id as provided', function () {
+            $result = $this->block->buildAdvancedMatchingData(['external_id' => '42']);
+
+            expect($result)->toBe(['external_id' => hash('sha256', '42')]);
+        });
+
+        it('omits empty and whitespace-only values', function () {
+            $result = $this->block->buildAdvancedMatchingData([
+                'em' => '',
+                'fn' => '   ',
+                'ln' => 'Doe',
+            ]);
+
+            expect($result)->toBe(['ln' => hash('sha256', 'doe')]);
+        });
+
+        it('returns an empty array for empty input', function () {
+            expect($this->block->buildAdvancedMatchingData([]))->toBe([]);
+        });
+
+        it('outputs only 64-character lowercase hex values', function () {
+            $result = $this->block->buildAdvancedMatchingData([
+                'em' => 'john@example.com',
+                'ph' => '+1 555 123 4567',
+                'fn' => 'John',
+                'ln' => 'Doe',
+                'ge' => 'm',
+                'db' => '1985-04-12',
+                'ct' => 'Springfield',
+                'st' => 'IL',
+                'zp' => '62701',
+                'country' => 'US',
+                'external_id' => '42',
+            ]);
+
+            expect($result)->toHaveCount(11);
+            foreach ($result as $value) {
+                expect($value)->toMatch('/^[0-9a-f]{64}$/');
+            }
+        });
+    });
+});

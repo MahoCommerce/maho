@@ -226,6 +226,150 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
         return implode("\n", $eventStrings);
     }
 
+    /**
+     * Advanced Matching parameters for fbq('init'), SHA-256 hashed per Meta spec.
+     *
+     * Listeners of the dispatched event receive already-hashed values and must
+     * keep any value they add SHA-256 hashed as well.
+     *
+     * @return array<string, string> param => hashed value, empty when disabled or no data
+     */
+    public function getAdvancedMatchingData(): array
+    {
+        if (!Mage::helper('googleanalytics')->isMetaPixelAdvancedMatchingEnabled()) {
+            return [];
+        }
+
+        $data = $this->buildAdvancedMatchingData($this->_collectRawCustomerData());
+
+        $transport = new \Maho\DataObject();
+        $transport->setData($data);
+        Mage::dispatchEvent('googleanalytics_metapixel_advanced_matching_data', [
+            'transport' => $transport,
+            'block' => $this,
+        ]);
+        return $transport->getData();
+    }
+
+    /**
+     * Raw customer values keyed by Meta parameter name, preferring the just-placed
+     * order (success page, covers guest checkout) over the logged-in customer.
+     *
+     * @return array<string, string>
+     */
+    protected function _collectRawCustomerData(): array
+    {
+        $orderIds = $this->getOrderIds();
+        if (!empty($orderIds) && is_array($orderIds)) {
+            /** @var Mage_Sales_Model_Order $order */
+            $order = Mage::getResourceModel('sales/order_collection')
+                ->addFieldToFilter('entity_id', ['in' => $orderIds])
+                ->getFirstItem();
+            if ($order->getId()) {
+                $address = $order->getBillingAddress();
+                return array_filter([
+                    'em' => (string) $order->getCustomerEmail(),
+                    'fn' => (string) $order->getCustomerFirstname(),
+                    'ln' => (string) $order->getCustomerLastname(),
+                    'db' => (string) $order->getCustomerDob(),
+                    'ge' => $this->_getGenderCode((int) $order->getCustomerGender()),
+                    'ph' => $address ? (string) $address->getTelephone() : '',
+                    'ct' => $address ? (string) $address->getCity() : '',
+                    'st' => $address ? (string) $address->getRegionCode() : '',
+                    'zp' => $address ? (string) $address->getPostcode() : '',
+                    'country' => $address ? (string) $address->getCountryId() : '',
+                    'external_id' => (string) $order->getCustomerId(),
+                ]);
+            }
+        }
+
+        $session = Mage::getSingleton('customer/session');
+        if (!$session->isLoggedIn()) {
+            return [];
+        }
+        $customer = $session->getCustomer();
+        $address = $customer->getDefaultBillingAddress() ?: null;
+        return array_filter([
+            'em' => (string) $customer->getEmail(),
+            'fn' => (string) $customer->getFirstname(),
+            'ln' => (string) $customer->getLastname(),
+            'db' => (string) $customer->getDob(),
+            'ge' => $this->_getGenderCode((int) $customer->getGender()),
+            'ph' => $address ? (string) $address->getTelephone() : '',
+            'ct' => $address ? (string) $address->getCity() : '',
+            'st' => $address ? (string) $address->getRegionCode() : '',
+            'zp' => $address ? (string) $address->getPostcode() : '',
+            'country' => $address ? (string) $address->getCountryId() : '',
+            'external_id' => (string) $customer->getId(),
+        ]);
+    }
+
+    /**
+     * Map the customer gender attribute option id to Meta's 'm'/'f' codes.
+     */
+    protected function _getGenderCode(int $optionId): string
+    {
+        if (!$optionId) {
+            return '';
+        }
+        try {
+            $label = Mage::getResourceModel('customer/customer')
+                ->getAttribute('gender')
+                ->getSource()
+                ->getOptionText($optionId);
+        } catch (Throwable $e) {
+            return '';
+        }
+        return match (mb_strtolower((string) $label)) {
+            'male' => 'm',
+            'female' => 'f',
+            default => '',
+        };
+    }
+
+    /**
+     * Normalize raw values per the Meta Advanced Matching spec and SHA-256 hash
+     * them. Pure function of its input: empty or invalid values are omitted.
+     *
+     * @see https://developers.facebook.com/docs/meta-pixel/advanced/advanced-matching
+     * @param array<string, string> $raw
+     * @return array<string, string>
+     */
+    public function buildAdvancedMatchingData(array $raw): array
+    {
+        $normalized = [];
+        foreach ($raw as $key => $value) {
+            $value = trim((string) $value);
+            if ($value === '') {
+                continue;
+            }
+            $normalized[$key] = match ($key) {
+                'em' => mb_strtolower($value),
+                // Digits only, no leading zeros; the country code is kept as entered
+                'ph' => ltrim((string) preg_replace('/\D+/', '', $value), '0'),
+                'fn', 'ln', 'ct', 'st' => (string) preg_replace('/[^\p{L}\p{N}]+/u', '', mb_strtolower($value)),
+                'zp' => str_replace(' ', '', mb_strtolower(explode('-', $value)[0])),
+                'country' => mb_strtolower(substr($value, 0, 2)),
+                'ge' => in_array($value, ['m', 'f'], true) ? $value : '',
+                'db' => $this->_normalizeDob($value),
+                default => $value,
+            };
+            if ($normalized[$key] === '') {
+                unset($normalized[$key]);
+            }
+        }
+        return array_map(static fn(string $v): string => hash('sha256', $v), $normalized);
+    }
+
+    /**
+     * Meta expects birthdates as YYYYMMDD; dob is stored as 'Y-m-d' or 'Y-m-d H:i:s'.
+     */
+    protected function _normalizeDob(string $dob): string
+    {
+        $timestamp = strtotime($dob);
+        return $timestamp === false ? '' : date('Ymd', $timestamp);
+    }
+
     #[\Override]
     protected function _toHtml(): string
     {

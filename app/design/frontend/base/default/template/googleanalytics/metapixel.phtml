@@ -19,7 +19,8 @@ $_helper = $this->helper('googleanalytics');
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '<?= $_helper->getMetaPixelId() ?>');
+        <?php $_amData = $this->getAdvancedMatchingData(); ?>
+        fbq('init', '<?= $_helper->getMetaPixelId() ?>'<?= $_amData ? ', ' . json_encode($_amData, JSON_THROW_ON_ERROR) : '' ?>);
         fbq('track', 'PageView');
     </script>
     <script>
