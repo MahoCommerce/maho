@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Reports
  */
+
+declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -190,6 +190,69 @@ it('loads the Reports Order Collection in date-range and customer-group modes wi
     $customerGroupCollection->addOrdersCount();
     $customerGroupCollection->joinCustomerName();
     expect(fn() => $customerGroupCollection->getSize())->not->toThrow(\Throwable::class);
+});
+
+// ---------------------------------------------------------------------------
+// Requirement 4b: joinCustomerName() BEFORE groupByCustomer() — the call order
+// used by the real Customer Orders/Totals report collections — must keep the
+// customer name column populated (groupByCustomer() may not wipe it)
+// ---------------------------------------------------------------------------
+it('keeps the customer name populated when joinCustomerName() runs before groupByCustomer()', function () {
+    $resource = Mage::getSingleton('core/resource');
+    $adapter = $resource->getConnection('core_write');
+
+    // Minimal fixture: one customer row + one order row referencing it.
+    $customerTable = $resource->getTableName('customer/entity');
+    $entityTypeId = (int) Mage::getSingleton('eav/config')->getEntityType('customer')->getEntityTypeId();
+    $token = uniqid();
+    $adapter->insert($customerTable, [
+        'entity_type_id' => $entityTypeId,
+        'attribute_set_id' => 0,
+        'website_id' => null,
+        'email' => "maho-test-name-{$token}@example.com",
+        'group_id' => 1,
+        'store_id' => 0,
+        'created_at' => '2024-01-01 00:00:00',
+        'updated_at' => '2024-01-01 00:00:00',
+        'is_active' => 1,
+    ]);
+    $customerId = (int) $adapter->lastInsertId($customerTable);
+
+    $orderTable = $resource->getTableName('sales/order');
+    $adapter->insert($orderTable, [
+        'state' => 'new',
+        'status' => 'pending',
+        'store_id' => null,
+        'customer_id' => $customerId,
+        'customer_email' => "maho-test-name-{$token}@example.com",
+        'customer_firstname' => 'StrictFirst',
+        'customer_middlename' => '',
+        'customer_lastname' => 'GroupByLast',
+        'created_at' => '2024-01-02 00:00:00',
+        'updated_at' => '2024-01-02 00:00:00',
+    ]);
+    $orderId = (int) $adapter->lastInsertId($orderTable);
+
+    try {
+        // Same call order as Mage_Reports_Model_Resource_Customer_Orders/Totals_Collection
+        $collection = Mage::getResourceModel('reports/order_collection');
+        $collection->setMainTable('sales/order');
+        $collection->joinCustomerName()
+            ->groupByCustomer()
+            ->addOrdersCount();
+        $collection->getSelect()->where('main_table.customer_id = ?', $customerId);
+        $collection->load();
+
+        $items = array_values($collection->getItems());
+        expect(count($items))->toBe(1);
+        expect((int) $items[0]->getOrdersCount())->toBe(1);
+        // The name column must survive groupByCustomer() and be populated.
+        expect((string) $items[0]->getName())->toContain('StrictFirst');
+        expect((string) $items[0]->getName())->toContain('GroupByLast');
+    } finally {
+        $adapter->delete($orderTable, ['entity_id = ?' => $orderId]);
+        $adapter->delete($customerTable, ['entity_id = ?' => $customerId]);
+    }
 });
 
 // ---------------------------------------------------------------------------

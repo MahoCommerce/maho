@@ -1,11 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
+ * @package Mage_Tag
  */
+
+declare(strict_types=1);
 
 use Maho\Db\Adapter\Pdo\Mysql;
 use Maho\Db\Adapter\Pdo\Pgsql;
@@ -614,6 +615,11 @@ it('collapses tag customer rows to one per customer with addGroupByCustomer', fu
             ->addGroupByCustomer();
 
         tagRunInStrictMode($collection->getSelect());
+        // group_customer flag: portable derived-table COUNT(*) over the grouped
+        // select (multi-column COUNT(DISTINCT) would break on PostgreSQL)
+        tagRunInStrictMode($collection->getSelectCountSql());
+
+        expect((int) $collection->getSize())->toBe(1);
 
         $collection->load();
         $items = array_values($collection->getItems());

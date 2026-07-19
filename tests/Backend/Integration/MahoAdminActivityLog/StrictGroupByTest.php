@@ -146,16 +146,17 @@ it('executes the activity grid select and its pager count without strict GROUP B
         $collection = adminActivityLogGridCollection();
         $strictAdapter = adminActivityLogStrictAdapter();
 
+        // Pager count query used by getSize(). Fetching it first also renders the
+        // collection filters, which applies the deferred action-group dedup join.
+        $count = (int) $strictAdapter->fetchOne($collection->getSelectCountSql()->assemble());
+        expect($count)->toBeGreaterThanOrEqual(3);
+
         // Main grid select: SELECT main_table.*, grp.activity_count with the
         // derived-aggregate join. Throws on a GROUP BY violation (1055 / 42803),
         // which fails the test automatically.
         $rows = $strictAdapter->fetchAll($collection->getSelect()->assemble());
         expect($rows)->not->toBeEmpty();
         expect($rows[0])->toHaveKeys(['activity_id', 'username', 'created_at', 'activity_count']);
-
-        // Pager count query used by getSize().
-        $count = (int) $strictAdapter->fetchOne($collection->getSelectCountSql()->assemble());
-        expect($count)->toBeGreaterThanOrEqual(3);
     } finally {
         adminActivityLogCleanFixture($fixture);
     }
@@ -220,6 +221,36 @@ it('reports one pager row per action group via getSize()', function () {
 
         // 5 activities → 3 groups (1 grouped + 2 standalone).
         expect($collection->getSize())->toBe(3);
+    } finally {
+        adminActivityLogCleanFixture($fixture);
+    }
+});
+
+// ---------------------------------------------------------------------------
+// Requirement 4: grid filters interact correctly with the dedup — filtering by
+// an activity_id that is NOT its group's representative must still return that
+// row (the dedup is computed within the filtered set, not over the whole table)
+// ---------------------------------------------------------------------------
+
+it('returns a non-representative activity when the grid is filtered by its id', function () {
+    $fixture = adminActivityLogInsertFixture();
+
+    try {
+        // The oldest activity of the group: never the MAX(activity_id) representative.
+        $nonRepresentativeId = min($fixture['grouped_ids']);
+        expect($nonRepresentativeId)->not->toBe(max($fixture['grouped_ids']));
+
+        $collection = adminActivityLogGridCollection();
+        $collection->addFieldToFilter('main_table.activity_id', $nonRepresentativeId);
+        $collection->load();
+
+        $items = $collection->getItems();
+        expect(count($items))->toBe(1);
+
+        $item = array_values($items)[0];
+        expect((int) $item->getActivityId())->toBe($nonRepresentativeId);
+        // Within the filtered set the group contains a single activity.
+        expect((int) $item->getActivityCount())->toBe(1);
     } finally {
         adminActivityLogCleanFixture($fixture);
     }

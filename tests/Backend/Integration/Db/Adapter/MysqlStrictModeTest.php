@@ -1,11 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
+ * @package Tests
  */
+
+declare(strict_types=1);
 
 use Maho\Db\Adapter\Pdo\Mysql;
 

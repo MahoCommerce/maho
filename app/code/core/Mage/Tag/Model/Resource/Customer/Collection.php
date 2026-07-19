@@ -147,6 +147,7 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
         $this->_aggregateRelationColumns(true);
         $this->getSelect()
             ->group(['tr.customer_id', 'e.entity_id']);
+        $this->setFlag('group_customer', true);
 
         $this->_allowDisableGrouping = false;
         return $this;
@@ -246,11 +247,12 @@ class Mage_Tag_Model_Resource_Customer_Collection extends Mage_Customer_Model_Re
     #[\Override]
     public function getSelectCountSql()
     {
-        if ($this->getFlag('group_tag')) {
-            // The select is grouped by (tag, customer): COUNT(DISTINCT tr.tag_id)
-            // would undercount when several customers share a tag, and multi-column
-            // COUNT(DISTINCT) is not portable to PostgreSQL, so count the grouped
-            // rows through a derived table
+        if ($this->getFlag('group_tag') || $this->getFlag('group_customer')) {
+            // The select is grouped by a multi-column key ((tag, customer) or
+            // (customer, entity)): a single-column COUNT(DISTINCT) would undercount,
+            // and multi-column COUNT(DISTINCT) is not portable to PostgreSQL, so
+            // count the grouped rows through a derived table
+            $this->_renderFilters();
             $groupSelect = clone $this->getSelect();
             $groupSelect->reset(Maho\Db\Select::ORDER);
             $groupSelect->reset(Maho\Db\Select::LIMIT_COUNT);

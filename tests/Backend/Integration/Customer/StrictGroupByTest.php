@@ -1,12 +1,12 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Customer
  */
+
+declare(strict_types=1);
 
 use Maho\Db\Adapter\Pdo\Mysql;
 use Maho\Db\Adapter\Pdo\Sqlite;
@@ -18,10 +18,12 @@ uses(Tests\MahoBackendTestCase::class);
  * Mage_Customer_Model_Resource_Customer_Collection::groupByEmail().
  *
  * The fix moved the GROUP BY into a grouped derived table (email,
- * MIN(entity_id) AS entity_id, COUNT(*) AS email_count) joined inner on
- * e.entity_id, keeping the main select ungrouped so e.*, EAV attribute
- * loading, and getSelectCountSql()/getSize() stay legal under
- * ONLY_FULL_GROUP_BY (MySQL) and native strict grouping (PostgreSQL).
+ * MIN(entity_id) AS entity_id, COUNT(DISTINCT e.entity_id) AS email_count)
+ * joined inner on e.entity_id, keeping the main select ungrouped so e.*, EAV
+ * attribute loading, and getSelectCountSql()/getSize() stay legal under
+ * ONLY_FULL_GROUP_BY (MySQL) and native strict grouping (PostgreSQL). The
+ * derived table is built at load/count time from the filtered select, so the
+ * representative row and email_count are scoped to the collection's filters.
  *
  * Strict-mode enforcement note: MahoBackendTestCase::setUp() opens the DB
  * connection before beforeEach() runs, so on MySQL the assembled SQL is
@@ -132,17 +134,18 @@ it('executes groupByEmail main and count selects without strict GROUP BY errors'
 
     try {
         $collection = customerGroupByEmailCollection([$duplicateEmail, $uniqueEmail]);
+        $strictAdapter = customerStrictAdapter();
+
+        // The count path must be legal: the main select is ungrouped, so
+        // getSelectCountSql() needs no grouped-select wrapping. Fetching it first
+        // also renders the filters, which applies the deferred dedup join.
+        $count = (int) $strictAdapter->fetchOne($collection->getSelectCountSql()->assemble());
+        expect($count)->toBe(2);
 
         // Execute through a strict-mode adapter: any ONLY_FULL_GROUP_BY /
         // 42803 violation throws and fails the test automatically.
-        $strictAdapter = customerStrictAdapter();
         $rows = $strictAdapter->fetchAll($collection->getSelect()->assemble());
         expect($rows)->toHaveCount(2);
-
-        // The count path must also be legal: the main select is ungrouped,
-        // so getSelectCountSql() needs no grouped-select wrapping.
-        $count = (int) $strictAdapter->fetchOne($collection->getSelectCountSql()->assemble());
-        expect($count)->toBe(2);
     } finally {
         customerGroupByEmailCleanFixture($ids);
     }
@@ -209,6 +212,30 @@ it('counts distinct emails via getSize() consistently with the loaded rows', fun
 // Requirement 4: groupByEmail() composes with EAV attribute selection and
 // addNameToSelect() (main select stays ungrouped, so extra columns are legal)
 // ---------------------------------------------------------------------------
+
+it('scopes the email dedup to the filtered set, not the whole customer table', function () {
+    [$duplicateEmail, $uniqueEmail, $ids] = customerGroupByEmailFixture();
+
+    try {
+        // Exclude the global MIN(entity_id) representative of the duplicate-email
+        // group. The dedup must be computed within the filtered set: the group
+        // survives through its remaining row instead of silently disappearing.
+        $excludedId = min($ids[0], $ids[1]);
+        $survivorId = max($ids[0], $ids[1]);
+
+        $collection = customerGroupByEmailCollection([$duplicateEmail]);
+        $collection->addAttributeToFilter('entity_id', ['gt' => $excludedId]);
+        $collection->load();
+
+        $items = array_values($collection->getItems());
+        expect(count($items))->toBe(1);
+        expect((int) $items[0]->getId())->toBe($survivorId);
+        // email_count counts only rows matching the collection filters.
+        expect((int) $items[0]->getEmailCount())->toBe(1);
+    } finally {
+        customerGroupByEmailCleanFixture($ids);
+    }
+});
 
 it('composes groupByEmail with addNameToSelect and EAV attribute loading', function () {
     [$duplicateEmail, $uniqueEmail, $ids] = customerGroupByEmailFixture();
