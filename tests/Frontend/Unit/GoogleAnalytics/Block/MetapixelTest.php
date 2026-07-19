@@ -72,10 +72,22 @@ describe('Meta Pixel Advanced Matching', function () {
             expect($result)->toBe(['ln' => hash('sha256', 'müller')]);
         });
 
-        it('keeps only the first segment of zip codes', function () {
-            $result = $this->block->buildAdvancedMatchingData(['zp' => '90210-1234']);
+        it('truncates US ZIP+4 codes to the 5-digit base', function () {
+            $result = $this->block->buildAdvancedMatchingData(['zp' => '90210-1234', 'country' => 'US']);
 
-            expect($result)->toBe(['zp' => hash('sha256', '90210')]);
+            expect($result['zp'])->toBe(hash('sha256', '90210'));
+        });
+
+        it('keeps all digits of hyphenated non-US postal codes, dropping the separator', function () {
+            $result = $this->block->buildAdvancedMatchingData(['zp' => '123-4567', 'country' => 'JP']);
+
+            expect($result['zp'])->toBe(hash('sha256', '1234567'));
+        });
+
+        it('removes spaces from postal codes and lowercases them', function () {
+            $result = $this->block->buildAdvancedMatchingData(['zp' => 'SW1A 1AA', 'country' => 'GB']);
+
+            expect($result['zp'])->toBe(hash('sha256', 'sw1a1aa'));
         });
 
         it('lowercases the two-letter country code', function () {

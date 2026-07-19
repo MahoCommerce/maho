@@ -40,7 +40,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
         if ($addedProducts) {
             foreach ($addedProducts as $_addedProduct) {
                 $eventData = [];
-                $eventData['value'] = $helper->formatPrice($_addedProduct['price'] * $_addedProduct['qty']);
+                $eventData['value'] = (float) $helper->formatPrice($_addedProduct['price'] * $_addedProduct['qty']);
                 $eventData['currency'] = Mage::app()->getStore()->getCurrentCurrencyCode();
                 $eventData['content_name'] = $_addedProduct['name'];
                 $eventData['content_type'] = 'product';
@@ -48,7 +48,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                     [
                         'id' => $_addedProduct['sku'],
                         'quantity' => (int) $_addedProduct['qty'],
-                        'item_price' => $helper->formatPrice($_addedProduct['price']),
+                        'item_price' => (float) $helper->formatPrice($_addedProduct['price']),
                     ],
                 ];
                 $result[] = ['AddToCart', $eventData];
@@ -62,7 +62,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
             $productViewed = Mage::registry('current_product');
             if ($productViewed) {
                 $eventData = [];
-                $eventData['value'] = $helper->formatPrice($productViewed->getFinalPrice());
+                $eventData['value'] = (float) $helper->formatPrice($productViewed->getFinalPrice());
                 $eventData['currency'] = Mage::app()->getStore()->getCurrentCurrencyCode();
                 $eventData['content_name'] = $productViewed->getName();
                 $eventData['content_ids'] = [$productViewed->getSku()];
@@ -71,7 +71,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                     [
                         'id' => $productViewed->getSku(),
                         'quantity' => 1,
-                        'item_price' => $helper->formatPrice($productViewed->getFinalPrice()),
+                        'item_price' => (float) $helper->formatPrice($productViewed->getFinalPrice()),
                     ],
                 ];
                 $category = Mage::registry('current_category');
@@ -108,7 +108,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
 
                     foreach ($productCollection as $productViewed) {
                         $productId = $productViewed->getSku();
-                        $productPrice = $helper->formatPrice($productViewed->getFinalPrice());
+                        $productPrice = (float) $helper->formatPrice($productViewed->getFinalPrice());
                         $contentIds[] = $productId;
                         $contents[] = [
                             'id' => $productId,
@@ -119,7 +119,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                     }
 
                     $eventData = [];
-                    $eventData['value'] = $helper->formatPrice($totalValue); // Sum of displayed product prices
+                    $eventData['value'] = (float) $helper->formatPrice($totalValue); // Sum of displayed product prices
                     $eventData['currency'] = Mage::app()->getStore()->getCurrentCurrencyCode();
                     ;
                     $eventData['content_name'] = $category->getName();
@@ -154,14 +154,14 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                         $contents[] = [
                             'id' => $productId,
                             'quantity' => (int) $item->getQty(),
-                            'item_price' => $helper->formatPrice($item->getBasePrice()),
+                            'item_price' => (float) $helper->formatPrice($item->getBasePrice()),
                         ];
                         $totalValue += $item->getBaseRowTotal();
                         $numItems += (int) $item->getQty();
                     }
 
                     $eventData = [];
-                    $eventData['value'] = $helper->formatPrice($totalValue);
+                    $eventData['value'] = (float) $helper->formatPrice($totalValue);
                     $eventData['currency'] = Mage::app()->getStore()->getCurrentCurrencyCode();
                     $eventData['content_ids'] = $contentIds;
                     $eventData['content_type'] = 'product';
@@ -174,7 +174,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
 
         // This event signifies when one or more items is purchased by a user.
         // @see https://developers.facebook.com/docs/meta-pixel/reference#standard-events
-        $orderIds = $this->getOrderIds(); // Assuming this method retrieves order IDs from the success page
+        $orderIds = $this->getOrderIds();
         if (!empty($orderIds) && is_array($orderIds)) {
             $collection = Mage::getResourceModel('sales/order_collection')
                 ->addFieldToFilter('entity_id', ['in' => $orderIds]);
@@ -193,14 +193,14 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                     $contents[] = [
                         'id' => $productId,
                         'quantity' => (int) $item->getQtyOrdered(),
-                        'item_price' => $helper->formatPrice($item->getBasePrice()),
+                        'item_price' => (float) $helper->formatPrice($item->getBasePrice()),
                     ];
                     $numItems += (int) $item->getQtyOrdered();
                 }
 
                 if (!empty($contents)) {
                     $eventData = [];
-                    $eventData['value'] = $helper->formatPrice($order->getBaseGrandTotal());
+                    $eventData['value'] = (float) $helper->formatPrice($order->getBaseGrandTotal());
                     $eventData['currency'] = $order->getBaseCurrencyCode();
                     $eventData['content_ids'] = $contentIds;
                     $eventData['content_type'] = 'product';
@@ -219,7 +219,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
 
         $eventStrings = [];
         foreach ($result as $metaEvent) {
-            $eventDataJson = json_encode($metaEvent[1], JSON_THROW_ON_ERROR | JSON_NUMERIC_CHECK);
+            $eventDataJson = Mage::helper('core')->jsonEncode($metaEvent[1]);
             $eventDataJsonEscaped = str_replace("'", "\\'", $eventDataJson);
             $eventStrings[] = "fbq('track', '{$metaEvent[0]}', {$eventDataJsonEscaped});";
         }
@@ -376,7 +376,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                 'em' => mb_strtolower($value),
                 'ph' => $this->_normalizePhone($value, trim((string) ($raw['country'] ?? ''))),
                 'fn', 'ln', 'ct', 'st' => (string) preg_replace('/[^\p{L}\p{N}]+/u', '', mb_strtolower($value)),
-                'zp' => str_replace(' ', '', mb_strtolower(explode('-', $value)[0])),
+                'zp' => $this->_normalizeZip($value, trim((string) ($raw['country'] ?? ''))),
                 'country' => mb_strtolower(substr($value, 0, 2)),
                 'ge' => in_array($value, ['m', 'f'], true) ? $value : '',
                 'db' => $this->_normalizeDob($value),
@@ -387,6 +387,22 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
             }
         }
         return array_map(static fn(string $v): string => hash('sha256', $v), $normalized);
+    }
+
+    /**
+     * Normalize a postal code per the Meta spec: lowercase, with spaces and
+     * dashes stripped for every country. US ZIP codes are additionally
+     * truncated to the 5-digit base (dropping the +4 extension); elsewhere all
+     * digits are kept, since a hyphen there separates parts of one complete
+     * code (e.g. JP 123-4567 → 1234567) rather than an optional suffix.
+     */
+    protected function _normalizeZip(string $zip, string $countryId): string
+    {
+        $zip = str_replace([' ', '-'], '', mb_strtolower($zip));
+        if (strtoupper($countryId) === 'US') {
+            return substr($zip, 0, 5);
+        }
+        return $zip;
     }
 
     /**
