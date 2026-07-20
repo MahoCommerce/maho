@@ -43,6 +43,8 @@ describe('Mapper default mappings', function () {
     });
 
     test('db mappings are not overridden by platform defaults', function () {
+        $this->feed->setName('Mapper Test Feed');
+        $this->feed->setFilename('mapper-test-feed');
         $this->feed->save();
         Mage::getModel('feedmanager/attributeMapping')
             ->setFeedId((int) $this->feed->getId())
