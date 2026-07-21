@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2019-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2019-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Core
@@ -85,8 +85,11 @@ class Mage_Core_Model_Resource_Url_Rewrite_Collection extends Mage_Core_Model_Re
      */
     public function filterAllByCategory()
     {
+        $idPathExpr = $this->getConnection()->getConcatSql(["'category/'", 'category_id']);
         $this->getSelect()
-            ->where('id_path LIKE ?', 'category/%');
+            ->where('id_path LIKE ?', 'category/%')
+            ->where('category_id IS NOT NULL')
+            ->where("id_path = {$idPathExpr}");
         return $this;
     }
 }
