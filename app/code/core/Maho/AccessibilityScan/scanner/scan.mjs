@@ -167,9 +167,14 @@ try {
     });
 
     await page.goto(config.url, {
-        waitUntil: 'networkidle',
+        waitUntil: 'load',
         timeout: config.timeout ?? 30000,
     });
+
+    // Best-effort settle for lazy-loaded content. Pages with persistent
+    // connections (chat widgets, analytics beacons, websockets) never reach
+    // network idle, so cap the wait and continue instead of failing the scan.
+    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
 
     if (!isAllowedNavigation(new URL(page.url()))) {
         throw new Error(`Navigation escaped the target host: ${page.url()}`);

@@ -46,7 +46,7 @@ $logoUrl = $this->getLogoUrl();
 
 <div class="report-header">
     <?php if ($logoUrl): ?>
-        <img src="<?= $logoUrl ?>" alt="">
+        <img src="<?= $this->escapeHtml($logoUrl) ?>" alt="">
     <?php endif; ?>
     <h1><?= $helper->__('Accessibility Scan Report') ?></h1>
     <div class="subtitle"><?= $this->escapeHtml($scan->getUrl()) ?></div>

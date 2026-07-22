@@ -49,6 +49,9 @@ class Maho_AccessibilityScan_Model_Runner
             $scan->setStatus(Maho_AccessibilityScan_Model_Scan::STATUS_COMPLETE);
         } catch (Throwable $e) {
             Mage::logException($e);
+            // No page rows reference the screenshots of a failed scan, so
+            // retention cleanup would never delete them — remove them now
+            $this->cleanupScreenshots($scan);
             $scan->setStatus(Maho_AccessibilityScan_Model_Scan::STATUS_FAILED)
                 ->setErrorMessage($e->getMessage());
         }
@@ -259,6 +262,17 @@ class Maho_AccessibilityScan_Model_Runner
             ->setViolationsSerious($counts[Maho_AccessibilityScan_Model_Violation::IMPACT_SERIOUS])
             ->setViolationsModerate($counts[Maho_AccessibilityScan_Model_Violation::IMPACT_MODERATE])
             ->setViolationsMinor($counts[Maho_AccessibilityScan_Model_Violation::IMPACT_MINOR]);
+    }
+
+    /**
+     * Delete every screenshot the scanner wrote for the given scan
+     */
+    protected function cleanupScreenshots(Maho_AccessibilityScan_Model_Scan $scan): void
+    {
+        $pattern = $this->helper->getScreenshotDir() . DS . 'scan-' . (int) $scan->getId() . '-*.png';
+        foreach (glob($pattern) ?: [] as $file) {
+            @unlink($file);
+        }
     }
 
     /**

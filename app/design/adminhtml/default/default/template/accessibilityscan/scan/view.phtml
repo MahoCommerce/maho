@@ -81,7 +81,8 @@ $page = $this->getPage();
                            class="a11yscan-marker <?= $this->escapeHtml($marker['impact']) ?>"
                            href="#violation-<?= $marker['id'] ?>"
                            style="left:<?= sprintf('%.3F', $marker['left']) ?>%;top:<?= sprintf('%.3F', $marker['top']) ?>%;width:<?= sprintf('%.3F', $marker['width']) ?>%;height:<?= sprintf('%.3F', $marker['height']) ?>%"
-                           title="#<?= $marker['number'] ?> <?= $this->escapeHtml($marker['title']) ?>"><span><?= $marker['number'] ?></span></a>
+                           title="#<?= $marker['number'] ?> <?= $this->escapeHtml($marker['title']) ?>"
+                           aria-label="<?= $this->quoteEscape($helper->__('Violation #%s: %s', $marker['number'], $marker['title'])) ?>"><span aria-hidden="true"><?= $marker['number'] ?></span></a>
                     <?php endforeach; ?>
                 </div>
             </div>

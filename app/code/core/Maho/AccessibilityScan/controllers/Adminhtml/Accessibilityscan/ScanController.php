@@ -15,7 +15,7 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
     #[\Override]
     public function preDispatch()
     {
-        $this->_setForcedFormKeyActions(['start', 'delete']);
+        $this->_setForcedFormKeyActions(['start', 'run', 'delete']);
         return parent::preDispatch();
     }
 
@@ -66,7 +66,10 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
     }
 
     /**
-     * Start a scan (AJAX). Runs synchronously and returns the result URL.
+     * Create a pending scan (AJAX) and return the URLs to run and poll it.
+     * Creation and execution are separate requests: a scan can outlive a
+     * proxy timeout on the run request, with the status poller as the
+     * source of truth for the outcome.
      */
     #[Maho\Config\Route('/admin/accessibilityscan_scan/start', methods: ['POST'])]
     public function startAction(): void
@@ -90,9 +93,6 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
             return;
         }
 
-        // First run downloads Playwright + Chromium and can take several minutes
-        @set_time_limit(0);
-
         try {
             $helper = Mage::helper('accessibilityscan');
             $scan = Mage::getModel('accessibilityscan/scan');
@@ -103,24 +103,76 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
                 ->setStatus(Maho_AccessibilityScan_Model_Scan::STATUS_PENDING)
                 ->save();
 
-            Mage::getModel('accessibilityscan/runner')->run($scan);
-
-            if ($scan->isFailed()) {
-                $this->getResponse()->setBodyJson([
-                    'error' => true,
-                    'message' => $this->__('Scan failed: %s', $scan->getData('error_message')),
-                ]);
-                return;
-            }
-
             $this->getResponse()->setBodyJson([
                 'success' => true,
                 'scan_id' => (int) $scan->getId(),
-                'redirect' => $this->getUrl('*/*/view', ['id' => $scan->getId()]),
+                'run_url' => $this->getUrl('*/*/run', ['id' => $scan->getId()]),
+                'status_url' => $this->getUrl('*/*/status', ['id' => $scan->getId()]),
             ]);
         } catch (Throwable $e) {
             Mage::logException($e);
             $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Execute a pending scan (AJAX). A fronting proxy may time out long
+     * runs (the first one downloads Playwright + Chromium), so the scan
+     * keeps running after the client gives up and this response is only
+     * advisory: the dashboard polls statusAction for the outcome.
+     */
+    #[Maho\Config\Route('/admin/accessibilityscan_scan/run', methods: ['POST'])]
+    public function runAction(): void
+    {
+        $scan = Mage::getModel('accessibilityscan/scan')->load((int) $this->getRequest()->getParam('id'));
+        if (!$scan->getId() || !$scan->isPending()) {
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Scan not found')]);
+            return;
+        }
+
+        ignore_user_abort(true);
+        @set_time_limit(0);
+
+        try {
+            Mage::getModel('accessibilityscan/runner')->run($scan);
+            $this->sendScanStatus($scan);
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Report a scan's current status (AJAX), polled while a scan runs
+     */
+    #[Maho\Config\Route('/admin/accessibilityscan_scan/status')]
+    public function statusAction(): void
+    {
+        $scan = Mage::getModel('accessibilityscan/scan')->load((int) $this->getRequest()->getParam('id'));
+        if (!$scan->getId()) {
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Scan not found')]);
+            return;
+        }
+        $this->sendScanStatus($scan);
+    }
+
+    protected function sendScanStatus(Maho_AccessibilityScan_Model_Scan $scan): void
+    {
+        if ($scan->isFailed()) {
+            $this->getResponse()->setBodyJson([
+                'error' => true,
+                'message' => $this->__('Scan failed: %s', $scan->getData('error_message')),
+            ]);
+        } elseif ($scan->isComplete()) {
+            $this->getResponse()->setBodyJson([
+                'success' => true,
+                'redirect' => $this->getUrl('*/*/view', ['id' => $scan->getId()]),
+            ]);
+        } else {
+            $this->getResponse()->setBodyJson([
+                'success' => true,
+                'status' => (string) $scan->getStatus(),
+            ]);
         }
     }
 

@@ -128,15 +128,19 @@ class Maho_AccessibilityScan_Block_Adminhtml_Scan_View extends Mage_Adminhtml_Bl
                 if ($rect === null) {
                     continue;
                 }
+                // Clamp the box to the canvas: an element measured near the
+                // right/bottom edge must not overflow past the screenshot
+                $left = max(0.0, min(100.0, $rect['x'] / $pageWidth * 100));
+                $top = max(0.0, min(100.0, $rect['y'] / $pageHeight * 100));
                 $markers[] = [
                     'id' => (int) $violation->getId(),
                     'number' => $this->getViolationNumber($violation),
                     'impact' => $impact,
                     'title' => (string) $violation->getAxeRuleId(),
-                    'left' => max(0.0, min(100.0, $rect['x'] / $pageWidth * 100)),
-                    'top' => max(0.0, min(100.0, $rect['y'] / $pageHeight * 100)),
-                    'width' => min(100.0, $rect['width'] / $pageWidth * 100),
-                    'height' => min(100.0, $rect['height'] / $pageHeight * 100),
+                    'left' => $left,
+                    'top' => $top,
+                    'width' => max(0.0, min(100.0 - $left, $rect['width'] / $pageWidth * 100)),
+                    'height' => max(0.0, min(100.0 - $top, $rect['height'] / $pageHeight * 100)),
                 ];
             }
         }

@@ -148,6 +148,11 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
         return (int) $this->getData('incomplete_count');
     }
 
+    public function isPending(): bool
+    {
+        return $this->getStatus() === self::STATUS_PENDING;
+    }
+
     public function isComplete(): bool
     {
         return $this->getStatus() === self::STATUS_COMPLETE;

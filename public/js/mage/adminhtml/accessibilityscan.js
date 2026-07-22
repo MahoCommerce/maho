@@ -14,14 +14,25 @@ async function accessibilityScanStart(form) {
     }
 
     try {
-        const result = await mahoFetch(form.action, {
+        const started = await mahoFetch(form.action, {
             method: 'POST',
             body: new FormData(form),
         });
-        if (result?.redirect) {
-            setLocation(result.redirect);
-            return;
-        }
+
+        // Kick off the scan. A fronting proxy may time this request out even
+        // though the scan keeps running server-side, so its outcome is only
+        // advisory: the status poller below decides success or failure.
+        const runBody = new FormData();
+        runBody.append('form_key', FORM_KEY);
+        mahoFetch(started.run_url, { method: 'POST', body: runBody }).catch(() => {});
+
+        let result;
+        do {
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+            result = await mahoFetch(started.status_url);
+        } while (!result?.redirect);
+        setLocation(result.redirect);
+        return;
     } catch (error) {
         if (status) {
             status.textContent = error.message;
@@ -44,7 +55,10 @@ function accessibilityScanShowMarker(violationId) {
     // Force a reflow so re-clicking the same violation restarts the pulse
     void marker.offsetWidth;
     marker.classList.add('flash');
-    marker.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    marker.scrollIntoView({
+        block: 'center',
+        behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    });
 }
 
 function accessibilityScanDelete(url, message) {
