@@ -11,10 +11,22 @@
 
 $helper = Mage::helper('accessibilityscan');
 $latestScan = $this->getLatestScan();
+$requirementIssues = $helper->getRequirementIssues();
 ?>
 <div class="content-header">
     <h3 class="icon-head"><?= $helper->__('Accessibility Scan') ?></h3>
 </div>
+
+<?php if ($requirementIssues): ?>
+    <div class="a11yscan-warning">
+        <strong><?= $helper->__('The scanner cannot run on this server yet:') ?></strong>
+        <ul>
+            <?php foreach ($requirementIssues as $issue): ?>
+                <li><?= $this->escapeHtml($issue) ?></li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+<?php endif; ?>
 
 <div class="a11yscan-top">
 <div class="a11yscan-cards">
@@ -51,10 +63,14 @@ $latestScan = $this->getLatestScan();
                     </option>
                 <?php endforeach; ?>
             </select>
-            <button type="submit" class="scalable add"><span><?= $helper->__('Start Scan') ?></span></button>
+            <button type="submit" class="scalable add"<?= $requirementIssues ? ' disabled' : '' ?>><span><?= $helper->__('Start Scan') ?></span></button>
         </div>
         <p id="a11yscan-status" class="a11yscan-status" role="status"
-           data-running-message="<?= $this->quoteEscape($helper->__('Scanning... the first run downloads Playwright and Chromium and can take a few minutes.')) ?>"></p>
+           data-running-message="<?= $this->quoteEscape($helper->__('Scanning... the first run downloads Playwright and Chromium and can take a few minutes.')) ?>"><?php
+            if (!$requirementIssues && !$helper->isPlaywrightInstalled()) {
+                echo $this->escapeHtml($helper->__('The first scan will automatically download Playwright and Chromium (roughly 300 MB) into the var directory.'));
+            }
+        ?></p>
     </form>
 </div>
 </div>

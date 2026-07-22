@@ -40,6 +40,13 @@ class Maho_AccessibilityScan_Model_Runner
             ->save();
 
         try {
+            // Fail fast with an actionable message instead of a raw
+            // "unable to start process" from deep inside the install
+            $issues = $this->helper->getRequirementIssues();
+            if ($issues !== []) {
+                Mage::throwException(implode(' ', $issues));
+            }
+
             $this->installPlaywright($reinstallPlaywright);
             $results = [];
             foreach ($this->helper->getViewports() as $device => $viewport) {
@@ -324,19 +331,11 @@ class Maho_AccessibilityScan_Model_Runner
 
         $env = getenv();
         $env['PLAYWRIGHT_BROWSERS_PATH'] = $this->helper->getBrowsersDir();
-        // Web-server PHP often runs with a minimal PATH; append the usual
-        // node/npm install locations so the default binary names resolve
-        $env['PATH'] = implode(':', array_unique(array_filter([
-            ...explode(':', $env['PATH'] ?? ''),
-            '/usr/local/bin',
-            '/opt/homebrew/bin',
-            '/usr/bin',
-            '/bin',
-        ])));
+        $env['PATH'] = $this->helper->getBinarySearchPath();
 
         // proc_open() resolves a bare binary name against the parent process
         // PATH, not the child $env, so resolve it ourselves
-        $command[0] = $this->resolveBinary($command[0], $env['PATH']);
+        $command[0] = $this->helper->resolveBinaryPath($command[0]) ?? $command[0];
 
         $process = proc_open($command, $descriptors, $pipes, $cwd, $env);
         if (!is_resource($process)) {
@@ -399,22 +398,5 @@ class Maho_AccessibilityScan_Model_Runner
         }
 
         return $stdout;
-    }
-
-    /**
-     * Resolve a bare binary name to an absolute path using the given PATH
-     */
-    protected function resolveBinary(string $binary, string $path): string
-    {
-        if (str_contains($binary, '/')) {
-            return $binary;
-        }
-        foreach (explode(':', $path) as $dir) {
-            $candidate = $dir . '/' . $binary;
-            if ($dir !== '' && is_executable($candidate)) {
-                return $candidate;
-            }
-        }
-        return $binary;
     }
 }

@@ -150,6 +150,9 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
         return ['width' => $defaultWidth, 'height' => $defaultHeight, 'mobile' => $mobile];
     }
 
+    /** Minimum Node.js major version required by Playwright */
+    public const MIN_NODE_MAJOR = 20;
+
     public function getNodePath(): string
     {
         return trim((string) Mage::getStoreConfig('accessibilityscan/advanced/node_path')) ?: 'node';
@@ -158,6 +161,108 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
     public function getNpmPath(): string
     {
         return trim((string) Mage::getStoreConfig('accessibilityscan/advanced/npm_path')) ?: 'npm';
+    }
+
+    /**
+     * PATH used to resolve the node/npm binaries: the process PATH plus the
+     * usual install locations, which web-server PHP often lacks
+     */
+    public function getBinarySearchPath(): string
+    {
+        return implode(':', array_unique(array_filter([
+            ...explode(':', (string) getenv('PATH')),
+            '/usr/local/bin',
+            '/opt/homebrew/bin',
+            '/usr/bin',
+            '/bin',
+        ])));
+    }
+
+    /**
+     * Resolve a binary name or path to an absolute executable file, or null
+     * when it cannot be found
+     */
+    public function resolveBinaryPath(string $binary): ?string
+    {
+        if (str_contains($binary, '/')) {
+            return is_file($binary) && is_executable($binary) ? $binary : null;
+        }
+        foreach (explode(':', $this->getBinarySearchPath()) as $dir) {
+            $candidate = $dir . '/' . $binary;
+            if ($dir !== '' && is_file($candidate) && is_executable($candidate)) {
+                return $candidate;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Installed Node.js version (e.g. "22.11.0"), or null when node is
+     * missing or does not report a parsable version
+     */
+    public function getNodeVersion(): ?string
+    {
+        $node = $this->resolveBinaryPath($this->getNodePath());
+        if ($node === null) {
+            return null;
+        }
+
+        $process = proc_open([$node, '--version'], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+        if (!is_resource($process)) {
+            return null;
+        }
+        $output = (string) stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_close($process);
+
+        return preg_match('/v?(\d+\.\d+\.\d+)/', $output, $m) ? $m[1] : null;
+    }
+
+    /**
+     * Whether the Playwright package and browser have already been installed
+     * by a previous scan
+     */
+    public function isPlaywrightInstalled(): bool
+    {
+        return is_file($this->getPlaywrightDir() . DS . 'node_modules' . DS . '.package-lock.json');
+    }
+
+    /**
+     * Human-readable problems that will prevent the scanner from running,
+     * empty when all requirements are met
+     *
+     * @return list<string>
+     */
+    public function getRequirementIssues(): array
+    {
+        $issues = [];
+
+        if ($this->resolveBinaryPath($this->getNodePath()) === null) {
+            $issues[] = $this->__(
+                'Node.js was not found (looking for "%s"). Install Node.js %s or newer, or set its full path in System > Configuration > Accessibility Scan.',
+                $this->getNodePath(),
+                self::MIN_NODE_MAJOR,
+            );
+        } else {
+            $version = $this->getNodeVersion();
+            if ($version !== null && version_compare($version, self::MIN_NODE_MAJOR . '.0.0', '<')) {
+                $issues[] = $this->__(
+                    'Node.js %s is installed, but the scanner requires version %s or newer.',
+                    $version,
+                    self::MIN_NODE_MAJOR,
+                );
+            }
+        }
+
+        if ($this->resolveBinaryPath($this->getNpmPath()) === null) {
+            $issues[] = $this->__(
+                'npm was not found (looking for "%s"). Install it together with Node.js, or set its full path in System > Configuration > Accessibility Scan.',
+                $this->getNpmPath(),
+            );
+        }
+
+        return $issues;
     }
 
     /**
