@@ -8,24 +8,6 @@
 
 declare(strict_types=1);
 
-/**
- * @method int getScanId()
- * @method $this setScanId(int $value)
- * @method string getViewport()
- * @method $this setViewport(string $value)
- * @method string getUrl()
- * @method $this setUrl(string $value)
- * @method ?string getPageTitle()
- * @method $this setPageTitle(?string $value)
- * @method string getStatus()
- * @method $this setStatus(string $value)
- * @method ?string getScreenshotPath()
- * @method $this setScreenshotPath(?string $value)
- * @method $this setPageWidth(?int $value)
- * @method $this setPageHeight(?int $value)
- * @method $this setViolationCount(int $value)
- * @method $this setScannedAt(string $value)
- */
 class Maho_AccessibilityScan_Model_Page extends Mage_Core_Model_Abstract
 {
     #[\Override]
@@ -34,9 +16,109 @@ class Maho_AccessibilityScan_Model_Page extends Mage_Core_Model_Abstract
         $this->_init('accessibilityscan/page');
     }
 
+    public function getScanId(): int
+    {
+        return (int) $this->getData('scan_id');
+    }
+
+    public function setScanId(int $value): self
+    {
+        return $this->setData('scan_id', $value);
+    }
+
+    public function getViewport(): string
+    {
+        return (string) $this->getData('viewport');
+    }
+
+    public function setViewport(string $value): self
+    {
+        return $this->setData('viewport', $value);
+    }
+
+    public function getUrl(): string
+    {
+        return (string) $this->getData('url');
+    }
+
+    public function setUrl(string $value): self
+    {
+        return $this->setData('url', $value);
+    }
+
+    public function getPageTitle(): ?string
+    {
+        $value = $this->getData('page_title');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setPageTitle(?string $value): self
+    {
+        return $this->setData('page_title', $value);
+    }
+
+    public function getStatus(): string
+    {
+        return (string) $this->getData('status');
+    }
+
+    public function setStatus(string $value): self
+    {
+        return $this->setData('status', $value);
+    }
+
+    public function getScreenshotPath(): ?string
+    {
+        $value = $this->getData('screenshot_path');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setScreenshotPath(?string $value): self
+    {
+        return $this->setData('screenshot_path', $value);
+    }
+
+    public function getPageWidth(): ?int
+    {
+        $value = $this->getData('page_width');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPageWidth(?int $value): self
+    {
+        return $this->setData('page_width', $value);
+    }
+
+    public function getPageHeight(): ?int
+    {
+        $value = $this->getData('page_height');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setPageHeight(?int $value): self
+    {
+        return $this->setData('page_height', $value);
+    }
+
     public function getViolationCount(): int
     {
         return (int) $this->getData('violation_count');
+    }
+
+    public function setViolationCount(int $value): self
+    {
+        return $this->setData('violation_count', $value);
+    }
+
+    public function getScannedAt(): ?string
+    {
+        $value = $this->getData('scanned_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setScannedAt(string $value): self
+    {
+        return $this->setData('scanned_at', $value);
     }
 
     /**

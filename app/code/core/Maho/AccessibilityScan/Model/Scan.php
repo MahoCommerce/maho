@@ -8,28 +8,6 @@
 
 declare(strict_types=1);
 
-/**
- * @method int getStoreId()
- * @method $this setStoreId(int $value)
- * @method string getStatus()
- * @method $this setStatus(string $value)
- * @method string getWcagLevel()
- * @method $this setWcagLevel(string $value)
- * @method string getUrl()
- * @method $this setUrl(string $value)
- * @method string getTriggeredBy()
- * @method $this setTriggeredBy(string $value)
- * @method $this setTotalViolations(int $value)
- * @method $this setViolationsCritical(int $value)
- * @method $this setViolationsSerious(int $value)
- * @method $this setViolationsModerate(int $value)
- * @method $this setViolationsMinor(int $value)
- * @method $this setIncompleteCount(int $value)
- * @method $this setErrorMessage(?string $value)
- * @method $this setStartedAt(string $value)
- * @method $this setCompletedAt(string $value)
- * @method $this setCreatedAt(string $value)
- */
 class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
 {
     public const STATUS_PENDING  = 'pending';
@@ -51,6 +29,150 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
     protected function _construct(): void
     {
         $this->_init('accessibilityscan/scan');
+    }
+
+    public function getStoreId(): int
+    {
+        return (int) $this->getData('store_id');
+    }
+
+    public function setStoreId(int $value): self
+    {
+        return $this->setData('store_id', $value);
+    }
+
+    public function getStatus(): string
+    {
+        return (string) $this->getData('status');
+    }
+
+    public function setStatus(string $value): self
+    {
+        return $this->setData('status', $value);
+    }
+
+    public function getWcagLevel(): string
+    {
+        return (string) $this->getData('wcag_level');
+    }
+
+    public function setWcagLevel(string $value): self
+    {
+        return $this->setData('wcag_level', $value);
+    }
+
+    public function getUrl(): string
+    {
+        return (string) $this->getData('url');
+    }
+
+    public function setUrl(string $value): self
+    {
+        return $this->setData('url', $value);
+    }
+
+    public function getTriggeredBy(): string
+    {
+        return (string) $this->getData('triggered_by');
+    }
+
+    public function setTriggeredBy(string $value): self
+    {
+        return $this->setData('triggered_by', $value);
+    }
+
+    public function setTotalViolations(int $value): self
+    {
+        return $this->setData('total_violations', $value);
+    }
+
+    public function getViolationsCritical(): int
+    {
+        return (int) $this->getData('violations_critical');
+    }
+
+    public function setViolationsCritical(int $value): self
+    {
+        return $this->setData('violations_critical', $value);
+    }
+
+    public function getViolationsSerious(): int
+    {
+        return (int) $this->getData('violations_serious');
+    }
+
+    public function setViolationsSerious(int $value): self
+    {
+        return $this->setData('violations_serious', $value);
+    }
+
+    public function getViolationsModerate(): int
+    {
+        return (int) $this->getData('violations_moderate');
+    }
+
+    public function setViolationsModerate(int $value): self
+    {
+        return $this->setData('violations_moderate', $value);
+    }
+
+    public function getViolationsMinor(): int
+    {
+        return (int) $this->getData('violations_minor');
+    }
+
+    public function setViolationsMinor(int $value): self
+    {
+        return $this->setData('violations_minor', $value);
+    }
+
+    public function setIncompleteCount(int $value): self
+    {
+        return $this->setData('incomplete_count', $value);
+    }
+
+    public function getErrorMessage(): ?string
+    {
+        $value = $this->getData('error_message');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setErrorMessage(?string $value): self
+    {
+        return $this->setData('error_message', $value);
+    }
+
+    public function getStartedAt(): ?string
+    {
+        $value = $this->getData('started_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setStartedAt(string $value): self
+    {
+        return $this->setData('started_at', $value);
+    }
+
+    public function getCompletedAt(): ?string
+    {
+        $value = $this->getData('completed_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCompletedAt(string $value): self
+    {
+        return $this->setData('completed_at', $value);
+    }
+
+    public function getCreatedAt(): ?string
+    {
+        $value = $this->getData('created_at');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCreatedAt(string $value): self
+    {
+        return $this->setData('created_at', $value);
     }
 
     public function getPageCollection(): Maho_AccessibilityScan_Model_Resource_Page_Collection
@@ -91,10 +213,10 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
     public function getViolationCounts(): array
     {
         return [
-            Maho_AccessibilityScan_Model_Violation::IMPACT_CRITICAL => (int) $this->getData('violations_critical'),
-            Maho_AccessibilityScan_Model_Violation::IMPACT_SERIOUS  => (int) $this->getData('violations_serious'),
-            Maho_AccessibilityScan_Model_Violation::IMPACT_MODERATE => (int) $this->getData('violations_moderate'),
-            Maho_AccessibilityScan_Model_Violation::IMPACT_MINOR    => (int) $this->getData('violations_minor'),
+            Maho_AccessibilityScan_Model_Violation::IMPACT_CRITICAL => $this->getViolationsCritical(),
+            Maho_AccessibilityScan_Model_Violation::IMPACT_SERIOUS  => $this->getViolationsSerious(),
+            Maho_AccessibilityScan_Model_Violation::IMPACT_MODERATE => $this->getViolationsModerate(),
+            Maho_AccessibilityScan_Model_Violation::IMPACT_MINOR    => $this->getViolationsMinor(),
         ];
     }
 

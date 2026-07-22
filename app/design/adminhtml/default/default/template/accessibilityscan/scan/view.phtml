@@ -34,7 +34,7 @@ $page = $this->getPage();
 <?php if ($scan->isFailed()): ?>
     <div class="error-msg">
         <strong><?= $helper->__('Scan failed') ?></strong>
-        <p><?= $this->escapeHtml((string) $scan->getData('error_message')) ?></p>
+        <p><?= $this->escapeHtml((string) $scan->getErrorMessage()) ?></p>
     </div>
 <?php endif; ?>
 
@@ -57,10 +57,10 @@ $page = $this->getPage();
         <td><strong><?= $helper->__('Status') ?></strong></td>
         <td><span class="a11yscan-badge status-<?= $this->escapeHtml($scan->getStatus()) ?>"><?= $this->escapeHtml($scan->getStatus()) ?></span></td>
     </tr>
-    <?php if ($scan->getData('completed_at')): ?>
+    <?php if ($scan->getCompletedAt()): ?>
         <tr>
             <td><strong><?= $helper->__('Completed') ?></strong></td>
-            <td><?= $this->escapeHtml(Mage::helper('core')->formatDate($scan->getData('completed_at'), 'medium', true)) ?></td>
+            <td><?= $this->escapeHtml(Mage::helper('core')->formatDate($scan->getCompletedAt(), 'medium', true)) ?></td>
         </tr>
     <?php endif; ?>
 </table>

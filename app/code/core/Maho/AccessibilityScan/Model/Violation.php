@@ -8,32 +8,6 @@
 
 declare(strict_types=1);
 
-/**
- * @method int getScanId()
- * @method $this setScanId(int $value)
- * @method string getAxeRuleId()
- * @method $this setAxeRuleId(string $value)
- * @method ?string getImpact()
- * @method $this setImpact(?string $value)
- * @method ?string getWcagLevel()
- * @method $this setWcagLevel(?string $value)
- * @method ?string getWcagCriteria()
- * @method $this setWcagCriteria(?string $value)
- * @method ?string getDescription()
- * @method $this setDescription(?string $value)
- * @method ?string getHelpUrl()
- * @method $this setHelpUrl(?string $value)
- * @method ?string getHtmlSnippet()
- * @method $this setHtmlSnippet(?string $value)
- * @method ?string getCssSelector()
- * @method $this setCssSelector(?string $value)
- * @method ?string getFailureSummary()
- * @method $this setFailureSummary(?string $value)
- * @method ?string getTemplateFile()
- * @method $this setTemplateFile(?string $value)
- * @method ?int getTemplateLine()
- * @method $this setTemplateLine(?int $value)
- */
 class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
 {
     public const IMPACT_CRITICAL = 'critical';
@@ -53,6 +27,136 @@ class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
     protected function _construct(): void
     {
         $this->_init('accessibilityscan/violation');
+    }
+
+    public function getScanId(): int
+    {
+        return (int) $this->getData('scan_id');
+    }
+
+    public function setScanId(int $value): self
+    {
+        return $this->setData('scan_id', $value);
+    }
+
+    public function getAxeRuleId(): string
+    {
+        return (string) $this->getData('axe_rule_id');
+    }
+
+    public function setAxeRuleId(string $value): self
+    {
+        return $this->setData('axe_rule_id', $value);
+    }
+
+    public function getImpact(): ?string
+    {
+        $value = $this->getData('impact');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setImpact(?string $value): self
+    {
+        return $this->setData('impact', $value);
+    }
+
+    public function getWcagLevel(): ?string
+    {
+        $value = $this->getData('wcag_level');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setWcagLevel(?string $value): self
+    {
+        return $this->setData('wcag_level', $value);
+    }
+
+    public function getWcagCriteria(): ?string
+    {
+        $value = $this->getData('wcag_criteria');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setWcagCriteria(?string $value): self
+    {
+        return $this->setData('wcag_criteria', $value);
+    }
+
+    public function getDescription(): ?string
+    {
+        $value = $this->getData('description');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setDescription(?string $value): self
+    {
+        return $this->setData('description', $value);
+    }
+
+    public function getHelpUrl(): ?string
+    {
+        $value = $this->getData('help_url');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setHelpUrl(?string $value): self
+    {
+        return $this->setData('help_url', $value);
+    }
+
+    public function getHtmlSnippet(): ?string
+    {
+        $value = $this->getData('html_snippet');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setHtmlSnippet(?string $value): self
+    {
+        return $this->setData('html_snippet', $value);
+    }
+
+    public function getCssSelector(): ?string
+    {
+        $value = $this->getData('css_selector');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setCssSelector(?string $value): self
+    {
+        return $this->setData('css_selector', $value);
+    }
+
+    public function getFailureSummary(): ?string
+    {
+        $value = $this->getData('failure_summary');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setFailureSummary(?string $value): self
+    {
+        return $this->setData('failure_summary', $value);
+    }
+
+    public function getTemplateFile(): ?string
+    {
+        $value = $this->getData('template_file');
+        return $value === null ? null : (string) $value;
+    }
+
+    public function setTemplateFile(?string $value): self
+    {
+        return $this->setData('template_file', $value);
+    }
+
+    public function getTemplateLine(): ?int
+    {
+        $value = $this->getData('template_line');
+        return $value === null ? null : (int) $value;
+    }
+
+    public function setTemplateLine(?int $value): self
+    {
+        return $this->setData('template_line', $value);
     }
 
     /**

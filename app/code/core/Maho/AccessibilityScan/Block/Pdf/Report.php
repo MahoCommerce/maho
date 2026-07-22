@@ -88,8 +88,8 @@ class Maho_AccessibilityScan_Block_Pdf_Report extends Mage_Core_Block_Pdf
      */
     protected function annotateScreenshot(Maho_AccessibilityScan_Model_Page $page, string $png): string
     {
-        $pageWidth = (int) $page->getData('page_width');
-        $pageHeight = (int) $page->getData('page_height');
+        $pageWidth = (int) $page->getPageWidth();
+        $pageHeight = (int) $page->getPageHeight();
         if ($pageWidth < 1 || $pageHeight < 1) {
             return $png;
         }
@@ -165,8 +165,8 @@ class Maho_AccessibilityScan_Block_Pdf_Report extends Mage_Core_Block_Pdf
      */
     public function getScreenshotStyle(Maho_AccessibilityScan_Model_Page $page): string
     {
-        $width = (int) $page->getData('page_width');
-        $height = (int) $page->getData('page_height');
+        $width = (int) $page->getPageWidth();
+        $height = (int) $page->getPageHeight();
         if ($width < 1 || $height < 1) {
             return 'max-width: 100%';
         }

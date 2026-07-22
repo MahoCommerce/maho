@@ -112,8 +112,8 @@ class Maho_AccessibilityScan_Block_Adminhtml_Scan_View extends Mage_Adminhtml_Bl
      */
     public function getScreenshotMarkers(Maho_AccessibilityScan_Model_Page $page): array
     {
-        $pageWidth = (int) $page->getData('page_width');
-        $pageHeight = (int) $page->getData('page_height');
+        $pageWidth = (int) $page->getPageWidth();
+        $pageHeight = (int) $page->getPageHeight();
         if ($pageWidth < 1 || $pageHeight < 1) {
             return [];
         }

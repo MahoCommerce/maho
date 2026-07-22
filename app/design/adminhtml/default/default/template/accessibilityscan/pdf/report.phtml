@@ -65,10 +65,10 @@ $logoUrl = $this->getLogoUrl();
         <td><strong><?= $helper->__('Status') ?></strong></td>
         <td><?= $this->escapeHtml($scan->getStatus()) ?></td>
     </tr>
-    <?php if ($scan->getData('completed_at')): ?>
+    <?php if ($scan->getCompletedAt()): ?>
         <tr>
             <td><strong><?= $helper->__('Completed') ?></strong></td>
-            <td><?= $this->escapeHtml(Mage::helper('core')->formatDate($scan->getData('completed_at'), 'medium', true)) ?></td>
+            <td><?= $this->escapeHtml(Mage::helper('core')->formatDate($scan->getCompletedAt(), 'medium', true)) ?></td>
         </tr>
     <?php endif; ?>
 </table>

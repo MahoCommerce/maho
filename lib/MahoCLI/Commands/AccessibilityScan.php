@@ -82,10 +82,10 @@ class AccessibilityScan extends BaseMahoCommand
                 $output->writeln((string) json_encode([
                     'scan_id' => (int) $scan->getId(),
                     'status' => $scan->getStatus(),
-                    'error' => $scan->getData('error_message'),
+                    'error' => $scan->getErrorMessage(),
                 ], JSON_PRETTY_PRINT));
             } else {
-                $output->writeln('<error>Scan failed: ' . $scan->getData('error_message') . '</error>');
+                $output->writeln('<error>Scan failed: ' . $scan->getErrorMessage() . '</error>');
             }
             return 2;
         }
