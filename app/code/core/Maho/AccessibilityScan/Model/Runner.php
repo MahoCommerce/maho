@@ -331,11 +331,12 @@ class Maho_AccessibilityScan_Model_Runner
 
         $env = getenv();
         $env['PLAYWRIGHT_BROWSERS_PATH'] = $this->helper->getBrowsersDir();
-        // Child PATH for node's own subprocess spawns (npm re-invokes node):
-        // append the same Homebrew dir Mage::findExecutable() searches
+        // npm re-invokes node, so the resolved node binary's directory must
+        // be on the child PATH even when the web-server PATH lacks it
+        $nodePath = $this->helper->resolveBinaryPath($this->helper->getNodePath());
         $env['PATH'] = implode(':', array_unique(array_filter([
             ...explode(':', (string) ($env['PATH'] ?? '')),
-            '/opt/homebrew/bin',
+            $nodePath !== null ? dirname($nodePath) : '',
         ])));
 
         // proc_open() resolves a bare binary name against the parent process
