@@ -164,13 +164,6 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Directories to search beyond PATH. Kept minimal per the #1068
-     * convention: PATH already covers the standard bin dirs even under
-     * PHP-FPM; only the Homebrew dir is genuinely missing there.
-     */
-    protected const EXTRA_BIN_DIRS = ['/opt/homebrew/bin'];
-
-    /**
      * PATH for the scanner child processes, so node's own subprocess
      * spawns resolve the same binaries the runner found
      */
@@ -178,21 +171,20 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
     {
         return implode(':', array_unique(array_filter([
             ...explode(':', (string) getenv('PATH')),
-            ...self::EXTRA_BIN_DIRS,
+            ...Maho::EXTRA_BIN_DIRS,
         ])));
     }
 
     /**
      * Resolve a binary name or path to an absolute executable file, or null
-     * when it cannot be found. Bare names go through ExecutableFinder, the
-     * same mechanism core uses for the php/composer/db-client binaries.
+     * when it cannot be found
      */
     public function resolveBinaryPath(string $binary): ?string
     {
         if (str_contains($binary, '/') || str_contains($binary, DIRECTORY_SEPARATOR)) {
             return is_file($binary) && is_executable($binary) ? $binary : null;
         }
-        return (new \Symfony\Component\Process\ExecutableFinder())->find($binary, null, self::EXTRA_BIN_DIRS);
+        return Maho::findExecutable($binary);
     }
 
     /**

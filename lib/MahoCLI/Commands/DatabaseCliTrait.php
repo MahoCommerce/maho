@@ -9,8 +9,6 @@ declare(strict_types=1);
 
 namespace MahoCLI\Commands;
 
-use Symfony\Component\Process\ExecutableFinder;
-
 trait DatabaseCliTrait
 {
     private function getEngine(mixed $connConfig): string
@@ -66,11 +64,8 @@ trait DatabaseCliTrait
      */
     private function resolveClientBinary(string $engine): ?string
     {
-        // ExecutableFinder is cross-platform (resolves "mysql.exe" on Windows), spawns no shell,
-        // and is not defeated by disable_functions — unlike a shell_exec('command -v ...') probe.
-        $finder = new ExecutableFinder();
         foreach ($this->clientBinaryCandidatesForEngine($engine) as $candidate) {
-            if ($finder->find($candidate) !== null) {
+            if (\Maho::findExecutable($candidate) !== null) {
                 return $candidate;
             }
         }
