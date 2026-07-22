@@ -19,17 +19,17 @@ $latestScan = $this->getLatestScan();
 <div class="a11yscan-top">
 <div class="a11yscan-cards">
     <div class="a11yscan-card">
-        <span class="a11yscan-card-label"><?= $helper->__('Total Scans') ?></span>
+        <h4 class="a11yscan-card-label"><?= $helper->__('Total Scans') ?></h4>
         <span class="a11yscan-card-value"><?= (int) $this->getTotalScans() ?></span>
     </div>
     <?php if ($latestScan): ?>
         <div class="a11yscan-card">
-            <span class="a11yscan-card-label"><?= $helper->__('Violations (Latest Scan)') ?></span>
+            <h4 class="a11yscan-card-label"><?= $helper->__('Violations (Latest Scan)') ?></h4>
             <span class="a11yscan-card-value"><?= $latestScan->getTotalViolations() ?></span>
         </div>
         <?php foreach ($latestScan->getViolationCounts() as $impact => $count): ?>
             <div class="a11yscan-card">
-                <span class="a11yscan-card-label"><span class="a11yscan-badge <?= $this->escapeHtml($impact) ?>"><?= $this->escapeHtml($impact) ?></span></span>
+                <h4 class="a11yscan-card-label"><span class="a11yscan-badge <?= $this->escapeHtml($impact) ?>"><?= $this->escapeHtml($impact) ?></span></h4>
                 <span class="a11yscan-card-value"><?= (int) $count ?></span>
             </div>
         <?php endforeach; ?>
