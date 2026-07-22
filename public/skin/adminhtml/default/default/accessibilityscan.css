@@ -325,15 +325,6 @@ SPDX-License-Identifier: OSL-3.0
     margin-bottom: 20px;
 }
 
-/* Same look as the content-header page title (h4 element keeps the
-   heading hierarchy intact) */
-.a11yscan-recent > h4 {
-    margin: 24px 0 10px;
-    color: var(--maho-link);
-    font-size: var(--maho-text-xl);
-    line-height: 1.2em;
-}
-
 .a11yscan-recent table {
     width: 100%;
 }
