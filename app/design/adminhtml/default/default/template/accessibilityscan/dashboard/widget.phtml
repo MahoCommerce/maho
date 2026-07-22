@@ -1,0 +1,66 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
+ */
+
+/** @var Maho_AccessibilityScan_Block_Adminhtml_Dashboard_Widget $this */
+?>
+<div class="entry-edit">
+    <div class="entry-edit-head"><h4><?= $this->__('Accessibility Violations') ?></h4></div>
+    <fieldset class="np">
+        <div class="a11yscan-widget-stats">
+            <?php foreach ($this->getScheduledUrlScans() as $row): ?>
+                <?php $scan = $row['scan']; ?>
+                <?php $tag = $scan ? 'a' : 'div'; ?>
+                <<?= $tag ?> class="stat-col"<?= $scan ? ' href="' . $this->escapeUrl($this->getScanUrl($scan)) . '"' : '' ?> title="<?= $this->escapeHtml($row['url']) ?>">
+                    <?php if ($scan === null || !($scan->isComplete() || $scan->isFailed())): ?>
+                        <div class="stat-value">&mdash;</div>
+                    <?php elseif ($scan->isFailed()): ?>
+                        <div class="stat-value stat-failed" title="<?= $this->quoteEscape($this->__('Scan failed')) ?>">&#10007;</div>
+                    <?php else: ?>
+                        <div class="stat-value"><?= $scan->getTotalViolations() ?></div>
+                    <?php endif ?>
+                    <div class="stat-label"><?= $this->escapeHtml($this->getDisplayPath($row['url'])) ?></div>
+                </<?= $tag ?>>
+            <?php endforeach ?>
+        </div>
+    </fieldset>
+</div>
+
+<style>
+.a11yscan-widget-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 4px 15px 15px;
+}
+.a11yscan-widget-stats .stat-col {
+    flex: 1;
+    min-width: 90px;
+    text-align: center;
+    padding: 10px 5px;
+    background: var(--maho-surface-sunken);
+    border-radius: 4px;
+    text-decoration: none;
+}
+.a11yscan-widget-stats .stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--maho-ink);
+    margin-bottom: 2px;
+    line-height: 1;
+}
+.a11yscan-widget-stats .stat-value.stat-failed {
+    color: var(--maho-error);
+}
+.a11yscan-widget-stats .stat-label {
+    color: var(--maho-ink-muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    overflow-wrap: anywhere;
+}
+</style>

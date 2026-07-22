@@ -4,6 +4,12 @@ SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 SPDX-License-Identifier: AFL-3.0
 -->
 <layout>
+    <adminhtml_dashboard_index>
+        <reference name="dashboard.widgets.left">
+            <block type="accessibilityscan/adminhtml_dashboard_widget" name="accessibilityscan.dashboard.widget" template="accessibilityscan/dashboard/widget.phtml"/>
+        </reference>
+    </adminhtml_dashboard_index>
+
     <accessibilityscan_default>
         <reference name="head">
             <action method="addCss"><name>accessibilityscan.css</name></action>

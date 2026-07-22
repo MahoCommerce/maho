@@ -2,6 +2,7 @@
 "%s violation(s)","%s violation(s)"
 "Accessibility Scan Report","Accessibility Scan Report"
 "Accessibility Scan","Accessibility Scan"
+"Accessibility Violations","Accessibility Violations"
 "Advanced","Advanced"
 "Are you sure you want to delete this scan?","Are you sure you want to delete this scan?"
 "axe-core could not automatically evaluate %s check(s) (for example, color contrast over an image). Review them manually.","axe-core could not automatically evaluate %s check(s) (for example, color contrast over an image). Review them manually."

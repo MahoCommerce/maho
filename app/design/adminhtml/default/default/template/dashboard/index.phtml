@@ -127,6 +127,7 @@ mahoOnReady(() => loadChartJs().then(() => initDashboardCharts(document)));
                 <div class="entry-edit-head"><h4><?= $this->__('Top 5 Search Terms') ?></h4></div>
                 <fieldset class="np"><?= $this->getChildHtml('topSearches') ?></fieldset>
             </div>
+            <?= $this->getChildHtml('widgets_left') ?>
         </div>
         <div class="dashboard-col-right">
             <div class="entry-edit dashboard-diagrams-box">
@@ -142,6 +143,7 @@ mahoOnReady(() => loadChartJs().then(() => initDashboardCharts(document)));
                 <?= $this->getChildHtml('grids') ?>
                 <div id="grid_tab_content"></div>
             </div>
+            <?= $this->getChildHtml('widgets_right') ?>
         </div>
     </div>
 </div>
