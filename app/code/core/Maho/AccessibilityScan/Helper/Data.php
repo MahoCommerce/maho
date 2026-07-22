@@ -164,19 +164,21 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Usual install locations that web-server PHP's minimal PATH often lacks
+     * Directories to search beyond PATH. Kept minimal per the #1068
+     * convention: PATH already covers the standard bin dirs even under
+     * PHP-FPM; only the Homebrew dir is genuinely missing there.
      */
-    protected const COMMON_BIN_DIRS = ['/usr/local/bin', '/opt/homebrew/bin', '/usr/bin', '/bin'];
+    protected const EXTRA_BIN_DIRS = ['/opt/homebrew/bin'];
 
     /**
-     * PATH for the scanner child processes: the process PATH plus the common
-     * install locations, so node's own subprocess spawns keep resolving
+     * PATH for the scanner child processes, so node's own subprocess
+     * spawns resolve the same binaries the runner found
      */
     public function getBinarySearchPath(): string
     {
         return implode(':', array_unique(array_filter([
             ...explode(':', (string) getenv('PATH')),
-            ...self::COMMON_BIN_DIRS,
+            ...self::EXTRA_BIN_DIRS,
         ])));
     }
 
@@ -190,7 +192,7 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
         if (str_contains($binary, '/') || str_contains($binary, DIRECTORY_SEPARATOR)) {
             return is_file($binary) && is_executable($binary) ? $binary : null;
         }
-        return (new \Symfony\Component\Process\ExecutableFinder())->find($binary, null, self::COMMON_BIN_DIRS);
+        return (new \Symfony\Component\Process\ExecutableFinder())->find($binary, null, self::EXTRA_BIN_DIRS);
     }
 
     /**
