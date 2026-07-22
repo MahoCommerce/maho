@@ -133,7 +133,7 @@ $page = $this->getPage();
                         <span class="a11yscan-chip"><?= $this->escapeHtml($this->getViewportLabel($this->getPageViewport($violation))) ?></span>
                         <?php if ($this->hasMarker($violation)): ?>
                             <a class="a11yscan-show-marker" href="#a11yscan-marker-<?= (int) $violation->getId() ?>"
-                               onclick="accessibilityScanShowMarker(<?= (int) $violation->getId() ?>); return false;"><?= $helper->__('Show on screenshot') ?></a>
+                               onclick="accessibilityScanShowMarker(<?= (int) $violation->getId() ?>); return false;"><?= $this->escapeHtml($this->getShowMarkerLabel($violation)) ?></a>
                         <?php endif; ?>
                     </div>
                     <p class="a11yscan-violation-desc">
@@ -156,7 +156,7 @@ $page = $this->getPage();
                                     <?php if ($this->hasMarker($violation)): ?>
                                         <a class="a11yscan-selector-link" href="#a11yscan-marker-<?= (int) $violation->getId() ?>"
                                            onclick="accessibilityScanShowMarker(<?= (int) $violation->getId() ?>); return false;"
-                                           title="<?= $this->quoteEscape($helper->__('Show on screenshot')) ?>"><code><?= $this->escapeHtml($violation->getCssSelector()) ?></code></a>
+                                           title="<?= $this->quoteEscape($this->getShowMarkerLabel($violation)) ?>"><code><?= $this->escapeHtml($violation->getCssSelector()) ?></code></a>
                                     <?php else: ?>
                                         <code><?= $this->escapeHtml($violation->getCssSelector()) ?></code>
                                     <?php endif; ?>

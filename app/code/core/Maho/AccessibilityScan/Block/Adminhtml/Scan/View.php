@@ -71,6 +71,18 @@ class Maho_AccessibilityScan_Block_Adminhtml_Scan_View extends Mage_Adminhtml_Bl
     }
 
     /**
+     * Label for the marker link, naming the viewport whose screenshot
+     * the violation was measured on
+     */
+    public function getShowMarkerLabel(Maho_AccessibilityScan_Model_Violation $violation): string
+    {
+        $helper = Mage::helper('accessibilityscan');
+        return $this->getPageViewport($violation) === Maho_AccessibilityScan_Helper_Data::VIEWPORT_MOBILE
+            ? $helper->__('Show on mobile screenshot')
+            : $helper->__('Show on desktop screenshot');
+    }
+
+    /**
      * Whether a violation can be highlighted on its page's screenshot
      */
     public function hasMarker(Maho_AccessibilityScan_Model_Violation $violation): bool
