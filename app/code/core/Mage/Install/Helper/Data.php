@@ -35,7 +35,7 @@ class Mage_Install_Helper_Data extends Mage_Core_Helper_Abstract
 
         // Prefer PHP's own bindir over $PATH: in a web (fpm/apache) context PHP_BINARY points
         // at php-fpm, so we look up the "php" CLI sibling rather than reusing the SAPI binary.
-        self::$phpBinary = Maho::findExecutable('php', [PHP_BINDIR, dirname(PHP_BINDIR) . '/bin']);
+        self::$phpBinary = Mage::findExecutable('php', [PHP_BINDIR, dirname(PHP_BINDIR) . '/bin']);
 
         return self::$phpBinary;
     }
@@ -58,7 +58,7 @@ class Mage_Install_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         // Search $PATH and common locations for the composer binary
-        self::$composerBinary = Maho::findExecutable('composer', [PHP_BINDIR, dirname(PHP_BINDIR) . '/bin']);
+        self::$composerBinary = Mage::findExecutable('composer', [PHP_BINDIR, dirname(PHP_BINDIR) . '/bin']);
 
         return self::$composerBinary;
     }

@@ -171,7 +171,7 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
     {
         return implode(':', array_unique(array_filter([
             ...explode(':', (string) getenv('PATH')),
-            ...Maho::EXTRA_BIN_DIRS,
+            ...Mage::EXTRA_BIN_DIRS,
         ])));
     }
 
@@ -184,7 +184,7 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
         if (str_contains($binary, '/') || str_contains($binary, DIRECTORY_SEPARATOR)) {
             return is_file($binary) && is_executable($binary) ? $binary : null;
         }
-        return Maho::findExecutable($binary);
+        return Mage::findExecutable($binary);
     }
 
     /**

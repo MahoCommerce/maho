@@ -65,7 +65,7 @@ trait DatabaseCliTrait
     private function resolveClientBinary(string $engine): ?string
     {
         foreach ($this->clientBinaryCandidatesForEngine($engine) as $candidate) {
-            if (\Maho::findExecutable($candidate) !== null) {
+            if (\Mage::findExecutable($candidate) !== null) {
                 return $candidate;
             }
         }
