@@ -164,19 +164,6 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * PATH for the scanner child processes, so node's own subprocess
-     * spawns resolve the same binaries the runner found. Appends the same
-     * Homebrew dir Mage::findExecutable() searches beyond PATH.
-     */
-    public function getBinarySearchPath(): string
-    {
-        return implode(':', array_unique(array_filter([
-            ...explode(':', (string) getenv('PATH')),
-            '/opt/homebrew/bin',
-        ])));
-    }
-
-    /**
      * Resolve a binary name or path to an absolute executable file, or null
      * when it cannot be found
      */
