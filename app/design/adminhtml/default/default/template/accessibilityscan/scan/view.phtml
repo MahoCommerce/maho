@@ -137,7 +137,9 @@ $page = $this->getPage();
                         <?php foreach ($markerViewports as $index => $viewport): ?>
                             <a class="a11yscan-show-marker<?= $index > 0 ? ' a11yscan-show-marker-extra' : '' ?>"
                                href="#a11yscan-marker-<?= (int) $violation->getId() ?>-<?= $this->escapeHtml($viewport) ?>"
-                               onclick="accessibilityScanShowMarker('a11yscan-marker-<?= (int) $violation->getId() ?>-<?= $this->escapeHtml($viewport) ?>'); return false;"><?= $this->escapeHtml($this->getShowMarkerLabel($viewport)) ?></a>
+                               onclick="accessibilityScanShowMarker('a11yscan-marker-<?= (int) $violation->getId() ?>-<?= $this->escapeHtml($viewport) ?>'); return false;"
+                               title="<?= $this->quoteEscape($this->getShowMarkerLabel($viewport)) ?>"
+                               aria-label="<?= $this->quoteEscape($this->getShowMarkerLabel($viewport)) ?>"><?= $this->getIconSvg($viewport === Maho_AccessibilityScan_Helper_Data::VIEWPORT_MOBILE ? 'device-mobile' : 'device-desktop') ?></a>
                         <?php endforeach; ?>
                     </div>
                     <p class="a11yscan-violation-desc">

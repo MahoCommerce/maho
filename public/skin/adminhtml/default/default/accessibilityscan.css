@@ -258,8 +258,17 @@ SPDX-License-Identifier: OSL-3.0
 
 .a11yscan-show-marker {
     margin-left: auto;
-    font-size: 12px;
-    white-space: nowrap;
+    display: inline-flex;
+    color: inherit;
+}
+
+.a11yscan-show-marker svg {
+    width: 18px;
+    height: 18px;
+}
+
+.a11yscan-show-marker:hover {
+    color: var(--maho-link);
 }
 
 /* Only the first marker link takes the auto margin that right-aligns the pair */
