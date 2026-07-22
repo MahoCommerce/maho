@@ -184,6 +184,33 @@ class Maho_AccessibilityScan_Block_Adminhtml_Scan_View extends Mage_Adminhtml_Bl
         return $sections;
     }
 
+    /**
+     * Source line of the violation's template, read from disk at display
+     * time, so it shows the code that produced the rendered HTML (e.g. the
+     * translation call behind a literal string). Null when the template or
+     * line is unknown; the line may drift if the template changed since
+     * the scan.
+     */
+    public function getTemplateSourceLine(Maho_AccessibilityScan_Model_Violation $violation): ?string
+    {
+        $file = (string) $violation->getTemplateFile();
+        $line = (int) $violation->getTemplateLine();
+        if ($file === '' || $line < 1 || str_contains($file, '..') || !str_ends_with($file, '.phtml')) {
+            return null;
+        }
+
+        $path = Mage::getBaseDir() . '/' . $file;
+        if (!is_file($path)) {
+            return null;
+        }
+        $lines = file($path);
+        if ($lines === false || !isset($lines[$line - 1])) {
+            return null;
+        }
+        $source = trim($lines[$line - 1]);
+        return $source !== '' ? $source : null;
+    }
+
     public function getImpactLabel(string $impact): string
     {
         $helper = Mage::helper('accessibilityscan');

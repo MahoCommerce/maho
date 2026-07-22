@@ -176,6 +176,12 @@ $page = $this->getPage();
                             <pre><?= $this->escapeHtml($violation->getHtmlSnippet()) ?></pre>
                         </div>
                     <?php endif; ?>
+                    <?php if ($templateSource = $this->getTemplateSourceLine($violation)): ?>
+                        <div class="a11yscan-violation-block">
+                            <span class="a11yscan-label"><?= $helper->__('Template Source') ?></span>
+                            <pre><?= $this->escapeHtml($templateSource) ?></pre>
+                        </div>
+                    <?php endif; ?>
                     <?php foreach ($this->getFailureSections($violation) as $section): ?>
                         <div class="a11yscan-violation-block">
                             <span class="a11yscan-label"><?= $this->escapeHtml($section['title']) ?></span>
