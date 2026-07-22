@@ -164,36 +164,33 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * PATH used to resolve the node/npm binaries: the process PATH plus the
-     * usual install locations, which web-server PHP often lacks
+     * Usual install locations that web-server PHP's minimal PATH often lacks
+     */
+    protected const COMMON_BIN_DIRS = ['/usr/local/bin', '/opt/homebrew/bin', '/usr/bin', '/bin'];
+
+    /**
+     * PATH for the scanner child processes: the process PATH plus the common
+     * install locations, so node's own subprocess spawns keep resolving
      */
     public function getBinarySearchPath(): string
     {
         return implode(':', array_unique(array_filter([
             ...explode(':', (string) getenv('PATH')),
-            '/usr/local/bin',
-            '/opt/homebrew/bin',
-            '/usr/bin',
-            '/bin',
+            ...self::COMMON_BIN_DIRS,
         ])));
     }
 
     /**
      * Resolve a binary name or path to an absolute executable file, or null
-     * when it cannot be found
+     * when it cannot be found. Bare names go through ExecutableFinder, the
+     * same mechanism core uses for the php/composer/db-client binaries.
      */
     public function resolveBinaryPath(string $binary): ?string
     {
-        if (str_contains($binary, '/')) {
+        if (str_contains($binary, '/') || str_contains($binary, DIRECTORY_SEPARATOR)) {
             return is_file($binary) && is_executable($binary) ? $binary : null;
         }
-        foreach (explode(':', $this->getBinarySearchPath()) as $dir) {
-            $candidate = $dir . '/' . $binary;
-            if ($dir !== '' && is_file($candidate) && is_executable($candidate)) {
-                return $candidate;
-            }
-        }
-        return null;
+        return (new \Symfony\Component\Process\ExecutableFinder())->find($binary, null, self::COMMON_BIN_DIRS);
     }
 
     /**
