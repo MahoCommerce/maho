@@ -26,6 +26,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 class AccessibilityScan extends BaseMahoCommand
 {
     #[\Override]
+    public function isEnabled(): bool
+    {
+        return $this->isModuleActive('Maho_AccessibilityScan');
+    }
+
+    #[\Override]
     protected function configure(): void
     {
         $this

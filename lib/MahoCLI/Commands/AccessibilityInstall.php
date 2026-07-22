@@ -23,6 +23,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 class AccessibilityInstall extends BaseMahoCommand
 {
     #[\Override]
+    public function isEnabled(): bool
+    {
+        return $this->isModuleActive('Maho_AccessibilityScan');
+    }
+
+    #[\Override]
     protected function configure(): void
     {
         $this->addOption('force', null, InputOption::VALUE_NONE, 'Reinstall even when already installed');
