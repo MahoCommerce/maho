@@ -44,6 +44,9 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
     /** @var array<string, list<Maho_AccessibilityScan_Model_Violation>>|null */
     protected ?array $violationsGroupedByImpact = null;
 
+    /** @var list<Maho_AccessibilityScan_Model_Page>|null */
+    protected ?array $pages = null;
+
     #[\Override]
     protected function _construct(): void
     {
@@ -58,18 +61,20 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
 
     public function getFirstPage(): ?Maho_AccessibilityScan_Model_Page
     {
-        $page = $this->getPageCollection()->getFirstItem();
-        return $page instanceof Maho_AccessibilityScan_Model_Page && $page->getId() ? $page : null;
+        return $this->getPages()[0] ?? null;
     }
 
     /**
-     * Pages of this scan in insert order (one per scanned viewport)
+     * Pages of this scan in insert order (one per scanned viewport).
+     * Cached for the lifetime of the model instance: the scan view renders
+     * per-violation marker links, which would otherwise re-query the pages
+     * once per violation.
      *
      * @return list<Maho_AccessibilityScan_Model_Page>
      */
     public function getPages(): array
     {
-        return array_values($this->getPageCollection()->getItems());
+        return $this->pages ??= array_values($this->getPageCollection()->getItems());
     }
 
     public function getViolationCollection(): Maho_AccessibilityScan_Model_Resource_Violation_Collection
@@ -174,7 +179,7 @@ class Maho_AccessibilityScan_Model_Scan extends Mage_Core_Model_Abstract
 
         $screenshotDir = Mage::helper('accessibilityscan')->getScreenshotDir();
         foreach ($screenshots as $path) {
-            if (is_string($path) && $path !== '' && str_starts_with($path, $screenshotDir)) {
+            if (is_string($path) && $path !== '' && str_starts_with($path, $screenshotDir . DS)) {
                 @unlink($path);
             }
         }
