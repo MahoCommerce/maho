@@ -97,7 +97,10 @@ SPDX-License-Identifier: AFL-3.0
                 <block type="adminhtml/store_switcher" name="store_switcher" as="store_switcher" template="store/switcher.phtml">
                     <action method="setUseConfirm"><params>0</params></action>
                 </block>
-                <!-- Extension points: modules append widget blocks via layout updates -->
+                <!-- Extension points: modules append widget blocks via layout updates.
+                     "stats" renders among the stat boxes before the Last 5 Orders table,
+                     "left"/"right" at the bottom of the respective column -->
+                <block type="core/text_list" name="dashboard.widgets.stats" as="widgets_stats"/>
                 <block type="core/text_list" name="dashboard.widgets.left" as="widgets_left"/>
                 <block type="core/text_list" name="dashboard.widgets.right" as="widgets_right"/>
             </block>

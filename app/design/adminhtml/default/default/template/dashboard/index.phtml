@@ -115,6 +115,7 @@ mahoOnReady(() => loadChartJs().then(() => initDashboardCharts(document)));
             </div>
             <?php endif ?>
             <?= $this->getChildHtml('sales') ?>
+            <?= $this->getChildHtml('widgets_stats') ?>
             <div class="entry-edit">
                 <div class="entry-edit-head"><h4><?= $this->__('Last 5 Orders') ?></h4></div>
                 <fieldset class="np"><?= $this->getChildHtml('lastOrders') ?></fieldset>

@@ -5,7 +5,7 @@ SPDX-License-Identifier: AFL-3.0
 -->
 <layout>
     <adminhtml_dashboard_index>
-        <reference name="dashboard.widgets.left">
+        <reference name="dashboard.widgets.stats">
             <block type="accessibilityscan/adminhtml_dashboard_widget" name="accessibilityscan.dashboard.widget" template="accessibilityscan/dashboard/widget.phtml"/>
         </reference>
     </adminhtml_dashboard_index>
