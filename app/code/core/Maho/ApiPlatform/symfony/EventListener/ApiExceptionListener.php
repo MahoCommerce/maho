@@ -19,6 +19,8 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
+use Symfony\Component\Serializer\Exception\NotEncodableValueException;
+use Symfony\Component\Serializer\Exception\UnexpectedValueException as SerializerUnexpectedValueException;
 
 /**
  * API Exception Listener.
@@ -191,6 +193,35 @@ class ApiExceptionListener implements EventSubscriberInterface
 
             $headers = $statusCode === 401 ? ['WWW-Authenticate' => 'Bearer'] : [];
             return new JsonResponse($data, $statusCode, $headers);
+        }
+
+        // Request bodies the Symfony Serializer rejects while deserializing into
+        // an input DTO (API Platform's DeserializeProvider) are client errors.
+        // NotEncodableValueException = unparseable JSON; the other subclasses
+        // (NotNormalizableValueException, PartialDenormalizationException, the
+        // base class itself) = parseable JSON that doesn't fit the DTO shape.
+        // Their messages are serializer-generated and client-actionable ("The
+        // type of the "email" attribute must be ..."), safe to pass through.
+        // Processor::parseRequestBody() already maps its own JSON errors to 400;
+        // this mirrors that for the DTO path, which otherwise surfaced as 500.
+        if ($exception instanceof SerializerUnexpectedValueException) {
+            $statusCode = 400;
+            $data = [
+                'error' => 'bad_request',
+                'message' => $exception instanceof NotEncodableValueException
+                    ? 'Invalid JSON in request body'
+                    : ($exception->getMessage() ?: 'Invalid request body'),
+                'code' => $statusCode,
+            ];
+
+            if ($this->showDebug()) {
+                $data['debug'] = [
+                    'class' => $exception::class,
+                    'trace' => $exception->getTraceAsString(),
+                ];
+            }
+
+            return new JsonResponse($data, $statusCode);
         }
 
         // Mage_Core_Exception is the canonical user-facing validation/business
