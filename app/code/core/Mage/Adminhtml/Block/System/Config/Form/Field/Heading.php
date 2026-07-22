@@ -18,6 +18,15 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Heading extends Mage_Adminht
     #[\Override]
     public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
+        $package = (string) ($element->getOriginalData()['mandatory_package'] ?? '');
+        if ($package) {
+            $warning = trim(Mage::helper('core')->packageInstallWarning($package));
+            if ($warning !== '') {
+                $label = $element->getLabel();
+                $element->setLabel(($label ? "$label<br>" : '') . $warning);
+            }
+        }
+
         return sprintf(
             '<tr class="system-fieldset-sub-head" id="row_%s"><td colspan="5"><h4 id="%s">%s</h4></td></tr>',
             $element->getHtmlId(),

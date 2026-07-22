@@ -9,9 +9,9 @@
 /**
  * System-config field renderer that appends a "⚠️ Install <package>"
  * hint to the field's comment when its declared <mandatory_package> isn't
- * installed. Sibling to the heading-row variant
- * (Mage_Adminhtml_Block_System_Config_Form_Field_Heading_Packagecheck) for
- * cases where the warning belongs inline with a regular field.
+ * installed. Groups and heading rows get this natively from the base
+ * Fieldset and Heading renderers; use this class for cases where the
+ * warning belongs inline with a regular field.
  */
 class Mage_Adminhtml_Block_System_Config_Form_Field_Packagecheck extends Mage_Adminhtml_Block_System_Config_Form_Field
 {

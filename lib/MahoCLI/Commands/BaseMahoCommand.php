@@ -18,6 +18,18 @@ abstract class BaseMahoCommand extends Command
     {
         Mage::register('isSecureArea', true, true);
         Mage::app('admin');
+
+        // OpenTelemetry: each CLI command is its own trace. Only the command name is
+        // recorded — arguments can contain secrets (e.g. admin-user:changepassword).
+        // flush() at shutdown ends the root span and any children left open.
+        $tracer = Mage::getTracer();
+        if ($tracer?->isEnabled()) {
+            $tracer->startRootSpan('maho ' . (string) $this->getName(), [
+                'maho.area' => 'cli',
+                'process.title' => 'maho',
+            ], null);
+            register_shutdown_function(static fn() => Mage::getTracer()?->flush());
+        }
     }
 
     public function humanReadableSize(int $bytes): string

@@ -421,7 +421,14 @@ class Mage_Cron_Model_Observer
                 ->setExecutedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->save();
 
-            call_user_func_array($callback, [$schedule]);
+            \Maho\Profiler::start('cron.job.execute', [
+                'cron.job_code' => $schedule->getJobCode(),
+            ]);
+            try {
+                call_user_func_array($callback, [$schedule]);
+            } finally {
+                \Maho\Profiler::stop('cron.job.execute');
+            }
 
             $schedule
                 ->setStatus(Mage_Cron_Model_Schedule::STATUS_SUCCESS)

@@ -17,6 +17,34 @@ class Profiler
     private static bool $_enabled = false;
     private static bool $_memory_get_usage = false;
 
+    /**
+     * Stacks of active OpenTelemetry spans indexed by timer name.
+     * Each name holds a LIFO stack so re-entrant timers with the same name
+     * (e.g. two anonymous blocks both keyed 'BLOCK:...') end their own span
+     * instead of orphaning the outer one.
+     * @var array<string, list<\Maho_OpenTelemetry_Model_Span>>
+     */
+    private static array $_spans = [];
+
+    /**
+     * Profiler timer prefixes that should create OpenTelemetry spans.
+     * Only meaningful high-level operations are included to avoid noise.
+     */
+    private static array $_spanPrefixes = [
+        'mage::app::init',
+        'mage::app::dispatch',
+        'mage::dispatch',
+        'mage::app::init_front_controller',
+        'dispatch.controller.action',
+        'OBSERVER:',
+        'BLOCK:',
+        'cron.job',
+        'email.send',
+        'image.process',
+        'index.reindex',
+        'payment.',
+    ];
+
     public static function enable(): void
     {
         self::$_enabled = true;
@@ -56,9 +84,31 @@ class Profiler
         self::$_timers[$timerName]['count']++;
     }
 
-    public static function start(string $timerName): void
+    /**
+     * Start profiling timer and create OpenTelemetry span
+     *
+     * @param string $timerName The name for the profiler timer (will be used as span name)
+     * @param array $attributes Optional OpenTelemetry span attributes
+     */
+    public static function start(string $timerName, array $attributes = []): void
     {
         self::resume($timerName);
+
+        // Create OTel span for meaningful profiler timers
+        $tracer = \Mage::getTracer();
+        if ($tracer) {
+            foreach (self::$_spanPrefixes as $prefix) {
+                if (str_starts_with($timerName, $prefix)) {
+                    // Block rendering is the highest-volume span source and can be
+                    // switched off independently to keep traces small
+                    if ($prefix === 'BLOCK:' && !$tracer->isBlockTracingEnabled()) {
+                        break;
+                    }
+                    self::$_spans[$timerName][] = $tracer->startSpan($timerName, $attributes);
+                    break;
+                }
+            }
+        }
     }
 
     public static function pause(string $timerName): void
@@ -85,6 +135,19 @@ class Profiler
     public static function stop(string $timerName): void
     {
         self::pause($timerName);
+
+        // End the most recent OTel span for this timer name, if one was created
+        if (!empty(self::$_spans[$timerName])) {
+            $span = array_pop(self::$_spans[$timerName]);
+            if (self::$_spans[$timerName] === []) {
+                unset(self::$_spans[$timerName]);
+            }
+            try {
+                $span->end();
+            } catch (\Throwable $e) {
+                // Don't let span errors affect profiler
+            }
+        }
     }
 
     public static function fetch(string $timerName, string $key = 'sum'): false|array|int|float

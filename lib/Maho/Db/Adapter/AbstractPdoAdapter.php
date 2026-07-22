@@ -1773,4 +1773,67 @@ abstract class AbstractPdoAdapter implements AdapterInterface
      * as the syntax varies between databases
      */
     abstract public function changeTableComment(string $tableName, string $comment, ?string $schemaName = null): mixed;
+
+    /**
+     * Start an OpenTelemetry span for a database query
+     *
+     * Call after _prepareQuery() so $sql is a string and $bind is normalized.
+     * The SQL is sent with ? placeholders only — bind values are never included
+     * to avoid leaking sensitive data (passwords, tokens, encrypted CC numbers).
+     */
+    protected function _startQuerySpan(string $sql, array $bind): ?\Maho_OpenTelemetry_Model_Span
+    {
+        $operation = $this->_getOperationType($sql);
+        $table = $this->_getTargetTable($sql);
+
+        // Span name per DB semconv: "{db.operation.name} {db.collection.name}" — low
+        // cardinality, so backends can group by statement shape
+        $span = \Mage::startSpan($table !== '' ? $operation . ' ' . $table : $operation, [
+            'db.system.name' => $this->_getDbSystem(),
+            'db.namespace' => $this->_config['dbname'] ?? '',
+            'db.query.text' => $sql,
+            'db.operation.name' => $operation,
+        ], 'client');
+
+        if ($span && $table !== '') {
+            $span->setAttribute('db.collection.name', $table);
+        }
+
+        return $span;
+    }
+
+    /**
+     * Get the OTel db.system identifier for this adapter
+     */
+    protected function _getDbSystem(): string
+    {
+        return 'other_sql';
+    }
+
+    /**
+     * Get SQL operation type (SELECT, INSERT, UPDATE, DELETE, etc.)
+     */
+    protected function _getOperationType(string $sql): string
+    {
+        $sql = trim($sql);
+        $firstSpace = strpos($sql, ' ');
+        return $firstSpace !== false ? strtoupper(substr($sql, 0, $firstSpace)) : 'UNKNOWN';
+    }
+
+    /**
+     * Extract the primary target table from a SQL query
+     */
+    protected function _getTargetTable(string $sql): string
+    {
+        if (preg_match('/\bFROM\s+[`"]?(\w+)[`"]?/i', $sql, $m)) {
+            return $m[1];
+        }
+        if (preg_match('/\bINTO\s+[`"]?(\w+)[`"]?/i', $sql, $m)) {
+            return $m[1];
+        }
+        if (preg_match('/\bUPDATE\s+[`"]?(\w+)[`"]?/i', $sql, $m)) {
+            return $m[1];
+        }
+        return '';
+    }
 }

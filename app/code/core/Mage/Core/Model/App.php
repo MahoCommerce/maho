@@ -340,22 +340,141 @@ class Mage_Core_Model_App
             Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
         }
 
-        $this->getFrontController()->dispatch();
+        // OpenTelemetry: start root span for request. Excluded paths are handled
+        // inside Tracer::initialize(), which declines for them, so getTracer()
+        // returns null here and no spans are created for the whole request.
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+        $requestPath = strtok($requestUri, '?') ?: $requestUri;
+        $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'CLI';
+        $tracer = Mage::getTracer();
+        $host = $_SERVER['HTTP_HOST'] ?? ($_SERVER['SERVER_NAME'] ?? '');
+        // Strip the port, preserving bracketed IPv6 literals ("[::1]:8080" → "[::1]")
+        $serverAddress = preg_replace('/:\d+$/', '', $host) ?? $host;
+        $rootSpan = $tracer?->startRootSpan($requestMethod, [
+            'http.request.method' => $requestMethod,
+            'url.path' => $requestPath,
+            'url.scheme' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http',
+            'server.address' => $serverAddress,
+        ]);
 
-        // Finish the request explicitly, no output allowed beyond this point
-        if (in_array(php_sapi_name(), ['fpm-fcgi', 'frankenphp'], true) && function_exists('fastcgi_finish_request')) {
-            fastcgi_finish_request();
-        } else {
-            flush();
-        }
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
+        // Add store context to root span
+        if ($rootSpan) {
+            try {
+                $rootSpan->setAttributes([
+                    'maho.store_id' => $this->getStore()->getId(),
+                    'maho.store_code' => $this->getStore()->getCode(),
+                    'maho.website_id' => $this->getWebsite()->getId(),
+                ]);
+            } catch (\Throwable $e) {
+                // Store may not be fully initialized yet
+            }
+
+            // Expose the trace id to browser RUM tooling (e.g. Grafana Faro) via
+            // the Server-Timing header, so frontend page timings can be correlated
+            // with this backend trace
+            try {
+                if (Mage::helper('opentelemetry')->isServerTimingEnabled()) {
+                    $traceparent = $tracer?->getTracePropagationHeaders()['traceparent'] ?? '';
+                    if ($traceparent !== '' && !headers_sent()) {
+                        header('Server-Timing: traceparent;desc="' . $traceparent . '"');
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Telemetry must never break the response
+            }
         }
 
+        $dispatchError = false;
         try {
-            Mage::dispatchEvent('core_app_run_after', ['app' => $this]);
+            $this->getFrontController()->dispatch();
+
+            // Add response attributes to root span
+            if ($rootSpan) {
+                $statusCode = http_response_code() ?: 200;
+                $rootSpan->setAttribute('http.response.status_code', $statusCode);
+                $rootSpan->setStatus($statusCode >= 500 ? 'error' : 'ok');
+
+                // Route context; rename the span to "{method} {route}" per HTTP semconv
+                // so trace lists group by route instead of showing one generic name
+                $request = $this->getRequest();
+                if ($request) {
+                    $route = $request->getModuleName()
+                        . '/' . $request->getControllerName()
+                        . '/' . $request->getActionName();
+                    $rootSpan->setAttribute('http.route', $route);
+                    $rootSpan->updateName($requestMethod . ' ' . $route);
+
+                    // Detect area: admin, api, or frontend
+                    $area = 'frontend';
+                    try {
+                        if ($this->getStore()->isAdmin()) {
+                            $area = 'admin';
+                        }
+                    } catch (\Throwable $e) {
+                        // Store may not be initialized
+                    }
+                    if (str_starts_with($request->getModuleName() ?? '', 'api')
+                        || str_starts_with($requestUri, '/api/')
+                    ) {
+                        $area = 'api';
+                    }
+                    $rootSpan->setAttribute('maho.area', $area);
+                }
+
+                // Admin user context (session may not be initialized on frontend)
+                try {
+                    $adminSession = Mage::getSingleton('admin/session');
+                    if ($adminSession->isLoggedIn()) {
+                        $user = $adminSession->getUser();
+                        if ($user) {
+                            $rootSpan->setAttribute('enduser.id', (string) $user->getUserId());
+                        }
+                    }
+                } catch (\Throwable) {
+                    // Admin session not available — skip
+                }
+            }
+
+            // Finish the request — no output allowed beyond this point
+            if (in_array(php_sapi_name(), ['fpm-fcgi', 'frankenphp', 'litespeed'], true) && function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request();
+            } else {
+                flush();
+            }
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+
+            try {
+                Mage::dispatchEvent('core_app_run_after', ['app' => $this]);
+            } catch (Throwable $e) {
+                Mage::logException($e);
+            }
         } catch (Throwable $e) {
-            Mage::logException($e);
+            $dispatchError = true;
+            $rootSpan?->recordException($e);
+            $rootSpan?->setStatus('error', $e->getMessage());
+            throw $e;
+        } finally {
+            // End span and flush telemetry after the response is sent to the client.
+            // On the error path do NOT finish the request here: the exception still has
+            // to propagate to Mage::run()'s handler, which renders the error page.
+            $rootSpan?->end();
+
+            // http.server.request.duration histogram (no-op unless metric export
+            // is enabled); recorded before flush() so it ships with this request
+            Mage::getTracer()?->recordRequestDuration(
+                microtime(true) - (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true)),
+                [
+                    'http.request.method' => $requestMethod,
+                    // On an uncaught dispatch exception no response was sent yet
+                    // (the error page is rendered later in Mage::run), so 500 is
+                    // the closest truthful status class here
+                    'http.response.status_code' => $dispatchError ? 500 : (http_response_code() ?: 200),
+                ],
+            );
+
+            Mage::getTracer()?->flush();
         }
 
         return $this;
