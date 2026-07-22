@@ -32,7 +32,7 @@ $page = $this->getPage();
 </div>
 
 <?php if ($scan->isFailed()): ?>
-    <div class="a11yscan-error">
+    <div class="error-msg">
         <strong><?= $helper->__('Scan failed') ?></strong>
         <p><?= $this->escapeHtml((string) $scan->getData('error_message')) ?></p>
     </div>

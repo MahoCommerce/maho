@@ -21,7 +21,7 @@ if (!$requirementIssues && !$helper->isPlaywrightInstalled()) {
 </div>
 
 <?php if ($requirementIssues): ?>
-    <div class="a11yscan-warning">
+    <div class="notice-msg a11yscan-warning">
         <strong><?= $helper->__('The scanner cannot run on this server yet:') ?></strong>
         <ul>
             <?php foreach ($requirementIssues as $issue): ?>
