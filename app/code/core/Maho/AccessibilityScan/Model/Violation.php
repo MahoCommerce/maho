@@ -97,7 +97,7 @@ class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
         }
         try {
             $rects = Mage::helper('core')->jsonDecode($raw);
-        } catch (Mage_Core_Exception_Json) {
+        } catch (JsonException) {
             return null;
         }
         $rect = is_array($rects) ? ($rects[$viewport] ?? null) : null;
