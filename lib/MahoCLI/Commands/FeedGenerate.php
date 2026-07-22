@@ -24,6 +24,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 class FeedGenerate extends BaseMahoCommand
 {
     #[\Override]
+    public function isEnabled(): bool
+    {
+        return $this->isModuleActive('Maho_FeedManager');
+    }
+
+    #[\Override]
     protected function configure(): void
     {
         $this->addArgument('feed_id', InputArgument::REQUIRED, 'The ID of the feed to generate');
