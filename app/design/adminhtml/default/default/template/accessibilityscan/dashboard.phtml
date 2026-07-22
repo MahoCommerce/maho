@@ -17,6 +17,25 @@ $latestScan = $this->getLatestScan();
 </div>
 
 <div class="a11yscan-top">
+<div class="a11yscan-cards">
+    <div class="a11yscan-card">
+        <span class="a11yscan-card-label"><?= $helper->__('Total Scans') ?></span>
+        <span class="a11yscan-card-value"><?= (int) $this->getTotalScans() ?></span>
+    </div>
+    <?php if ($latestScan): ?>
+        <div class="a11yscan-card">
+            <span class="a11yscan-card-label"><?= $helper->__('Violations (Latest Scan)') ?></span>
+            <span class="a11yscan-card-value"><?= $latestScan->getTotalViolations() ?></span>
+        </div>
+        <?php foreach ($latestScan->getViolationCounts() as $impact => $count): ?>
+            <div class="a11yscan-card">
+                <span class="a11yscan-card-label"><span class="a11yscan-badge <?= $this->escapeHtml($impact) ?>"><?= $this->escapeHtml($impact) ?></span></span>
+                <span class="a11yscan-card-value"><?= (int) $count ?></span>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+</div>
+
 <div class="a11yscan-form">
     <h4><?= $helper->__('Run a New Scan') ?></h4>
     <form id="a11yscan-form" action="<?= $this->escapeUrl($this->getStartUrl()) ?>" onsubmit="accessibilityScanStart(this); return false;">
@@ -37,25 +56,6 @@ $latestScan = $this->getLatestScan();
         <p id="a11yscan-status" class="a11yscan-status" role="status"
            data-running-message="<?= $this->quoteEscape($helper->__('Scanning... the first run downloads Playwright and Chromium and can take a few minutes.')) ?>"></p>
     </form>
-</div>
-
-<div class="a11yscan-cards">
-    <div class="a11yscan-card">
-        <span class="a11yscan-card-value"><?= (int) $this->getTotalScans() ?></span>
-        <span class="a11yscan-card-label"><?= $helper->__('Total Scans') ?></span>
-    </div>
-    <?php if ($latestScan): ?>
-        <div class="a11yscan-card">
-            <span class="a11yscan-card-value"><?= $latestScan->getTotalViolations() ?></span>
-            <span class="a11yscan-card-label"><?= $helper->__('Violations (Latest Scan)') ?></span>
-        </div>
-        <?php foreach ($latestScan->getViolationCounts() as $impact => $count): ?>
-            <div class="a11yscan-card">
-                <span class="a11yscan-card-value"><?= (int) $count ?></span>
-                <span class="a11yscan-card-label"><span class="a11yscan-badge <?= $this->escapeHtml($impact) ?>"><?= $this->escapeHtml($impact) ?></span></span>
-            </div>
-        <?php endforeach; ?>
-    <?php endif; ?>
 </div>
 </div>
 
