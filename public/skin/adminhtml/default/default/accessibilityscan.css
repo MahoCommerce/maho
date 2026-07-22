@@ -325,6 +325,14 @@ SPDX-License-Identifier: OSL-3.0
     margin-bottom: 20px;
 }
 
+/* Same panel treatment as the scan form and stats cards */
+.a11yscan-recent {
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 16px;
+}
+
 .a11yscan-recent table {
     width: 100%;
 }
