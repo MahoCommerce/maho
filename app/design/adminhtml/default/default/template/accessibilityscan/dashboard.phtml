@@ -14,11 +14,6 @@ $latestScan = $this->getLatestScan();
 ?>
 <div class="content-header">
     <h3 class="icon-head"><?= $helper->__('Accessibility Scan') ?></h3>
-    <p class="content-buttons form-buttons">
-        <button type="button" class="scalable" onclick="setLocation('<?= $this->escapeUrl($this->getScanHistoryUrl()) ?>')">
-            <span><?= $helper->__('Scan History') ?></span>
-        </button>
-    </p>
 </div>
 
 <div class="a11yscan-form">
@@ -63,6 +58,6 @@ $latestScan = $this->getLatestScan();
 </div>
 
 <div class="a11yscan-recent entry-edit">
-    <div class="entry-edit-head"><h4 class="icon-head"><?= $helper->__('Recent Scans') ?></h4></div>
+    <div class="entry-edit-head"><h4 class="icon-head"><?= $helper->__('Scan History') ?></h4></div>
     <?= $this->getChildHtml('grid') ?>
 </div>

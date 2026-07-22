@@ -27,20 +27,6 @@ SPDX-License-Identifier: AFL-3.0
         <block type="accessibilityscan/adminhtml_dashboard_grid" name="root" output="toHtml"/>
     </adminhtml_accessibilityscan_dashboard_grid>
 
-    <adminhtml_accessibilityscan_scan_index>
-        <update handle="accessibilityscan_default"/>
-        <reference name="head">
-            <action method="setTitle" translate="title"><title>Scan History</title></action>
-        </reference>
-        <reference name="content">
-            <block type="accessibilityscan/adminhtml_scan" name="accessibilityscan_scan"/>
-        </reference>
-    </adminhtml_accessibilityscan_scan_index>
-
-    <adminhtml_accessibilityscan_scan_grid>
-        <block type="accessibilityscan/adminhtml_scan_grid" name="root" output="toHtml"/>
-    </adminhtml_accessibilityscan_scan_grid>
-
     <adminhtml_accessibilityscan_scan_view>
         <update handle="accessibilityscan_default"/>
         <reference name="head">

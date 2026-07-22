@@ -198,7 +198,7 @@ class Maho_AccessibilityScan_Block_Adminhtml_Scan_View extends Mage_Adminhtml_Bl
 
     public function getBackUrl(): string
     {
-        return $this->getUrl('*/*/index');
+        return $this->getUrl('*/accessibilityscan_dashboard/');
     }
 
     public function getDeleteUrl(): string

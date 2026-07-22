@@ -7,22 +7,15 @@ SPDX-License-Identifier: AFL-3.0
     <menu>
         <system>
             <children>
-                <accessibilityscan translate="title" module="accessibilityscan">
-                    <title>Accessibility Scan</title>
-                    <sort_order>110</sort_order>
+                <tools>
                     <children>
-                        <dashboard translate="title" module="accessibilityscan">
-                            <title>Dashboard</title>
+                        <accessibilityscan translate="title" module="accessibilityscan">
+                            <title>Accessibility Scan</title>
                             <action>adminhtml/accessibilityscan_dashboard</action>
-                            <sort_order>10</sort_order>
-                        </dashboard>
-                        <scans translate="title" module="accessibilityscan">
-                            <title>Scan History</title>
-                            <action>adminhtml/accessibilityscan_scan</action>
-                            <sort_order>20</sort_order>
-                        </scans>
+                            <sort_order>40</sort_order>
+                        </accessibilityscan>
                     </children>
-                </accessibilityscan>
+                </tools>
             </children>
         </system>
     </menu>
@@ -32,18 +25,14 @@ SPDX-License-Identifier: AFL-3.0
                 <children>
                     <system>
                         <children>
-                            <accessibilityscan translate="title" module="accessibilityscan">
-                                <title>Accessibility Scan</title>
-                                <sort_order>110</sort_order>
+                            <tools>
                                 <children>
-                                    <dashboard translate="title" module="accessibilityscan">
-                                        <title>Dashboard</title>
-                                    </dashboard>
-                                    <scans translate="title" module="accessibilityscan">
-                                        <title>Scan History</title>
-                                    </scans>
+                                    <accessibilityscan translate="title" module="accessibilityscan">
+                                        <title>Accessibility Scan</title>
+                                        <sort_order>40</sort_order>
+                                    </accessibilityscan>
                                 </children>
-                            </accessibilityscan>
+                            </tools>
                             <config>
                                 <children>
                                     <accessibilityscan translate="title" module="accessibilityscan">

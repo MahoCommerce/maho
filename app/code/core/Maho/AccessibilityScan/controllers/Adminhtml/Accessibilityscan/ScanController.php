@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/accessibilityscan/scans';
+    public const ADMIN_RESOURCE = 'system/tools/accessibilityscan';
 
     #[\Override]
     public function preDispatch()
@@ -19,35 +19,13 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
         return parent::preDispatch();
     }
 
-    #[Maho\Config\Route('/admin/accessibilityscan_scan/index')]
-    public function indexAction(): void
-    {
-        $this->_title($this->__('System'))
-            ->_title($this->__('Accessibility Scan'))
-            ->_title($this->__('Scan History'));
-
-        $this->loadLayout();
-        $this->_setActiveMenu('system/accessibilityscan/scans');
-        $this->_addBreadcrumb($this->__('Accessibility Scan'), $this->__('Accessibility Scan'));
-        $this->_addBreadcrumb($this->__('Scan History'), $this->__('Scan History'));
-
-        $this->renderLayout();
-    }
-
-    #[Maho\Config\Route('/admin/accessibilityscan_scan/grid')]
-    public function gridAction(): void
-    {
-        $this->loadLayout(false);
-        $this->renderLayout();
-    }
-
     #[Maho\Config\Route('/admin/accessibilityscan_scan/view')]
     public function viewAction(): void
     {
         $scan = Mage::getModel('accessibilityscan/scan')->load((int) $this->getRequest()->getParam('id'));
         if (!$scan->getId()) {
             Mage::getSingleton('adminhtml/session')->addError($this->__('Scan not found'));
-            $this->_redirect('*/*/');
+            $this->_redirect('*/accessibilityscan_dashboard/');
             return;
         }
 
@@ -58,7 +36,7 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
             ->_title($this->__('Scan #%s', $scan->getId()));
 
         $this->loadLayout();
-        $this->_setActiveMenu('system/accessibilityscan/scans');
+        $this->_setActiveMenu('system/tools/accessibilityscan');
         $this->_addBreadcrumb($this->__('Accessibility Scan'), $this->__('Accessibility Scan'));
         $this->_addBreadcrumb($this->__('Scan Results'), $this->__('Scan Results'));
 
@@ -182,7 +160,7 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
         $scan = Mage::getModel('accessibilityscan/scan')->load((int) $this->getRequest()->getParam('id'));
         if (!$scan->getId()) {
             Mage::getSingleton('adminhtml/session')->addError($this->__('Scan not found'));
-            $this->_redirect('*/*/');
+            $this->_redirect('*/accessibilityscan_dashboard/');
             return;
         }
 
@@ -194,7 +172,7 @@ class Maho_AccessibilityScan_Adminhtml_Accessibilityscan_ScanController extends 
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
         }
 
-        $this->_redirect('*/*/');
+        $this->_redirect('*/accessibilityscan_dashboard/');
     }
 
     /**

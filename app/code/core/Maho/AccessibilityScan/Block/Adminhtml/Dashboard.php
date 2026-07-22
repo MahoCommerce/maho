@@ -48,9 +48,4 @@ class Maho_AccessibilityScan_Block_Adminhtml_Dashboard extends Mage_Adminhtml_Bl
     {
         return $this->getUrl('*/accessibilityscan_scan/start');
     }
-
-    public function getScanHistoryUrl(): string
-    {
-        return $this->getUrl('*/accessibilityscan_scan/index');
-    }
 }
