@@ -85,10 +85,10 @@ describe('AccessibilityScan helper', function () {
     });
 
     it('resolves binaries to absolute executable paths', function () {
-        expect($this->helper->resolveBinaryPath('/bin/sh'))->toBe('/bin/sh');
-        expect($this->helper->resolveBinaryPath('sh'))->toEndWith('/sh');
-        expect($this->helper->resolveBinaryPath('definitely-not-a-real-binary-xyz'))->toBeNull();
-        expect($this->helper->resolveBinaryPath('/path/to/nowhere/node'))->toBeNull();
+        expect(Mage::findExecutable('/bin/sh'))->toBe('/bin/sh');
+        expect(Mage::findExecutable('sh'))->toEndWith('/sh');
+        expect(Mage::findExecutable('definitely-not-a-real-binary-xyz'))->toBeNull();
+        expect(Mage::findExecutable('/path/to/nowhere/node'))->toBeNull();
     });
 
     it('reports requirement issues when the configured binaries do not exist', function () {

@@ -47,7 +47,16 @@ class Maho_AccessibilityScan_Model_Runner
                 Mage::throwException(implode(' ', $issues));
             }
 
-            $this->installPlaywright($reinstallPlaywright);
+            // Installing the runtime (npm install + Chromium download) is a
+            // CLI-only operation; a web request must never trigger it
+            if (PHP_SAPI === 'cli') {
+                $this->installPlaywright($reinstallPlaywright);
+            } elseif (!$this->helper->isPlaywrightInstalled()) {
+                Mage::throwException($this->helper->__('The scanner runtime is not installed yet. Run "./maho accessibility:install" from the command line to install it.'));
+            } else {
+                $this->syncScannerScript();
+            }
+
             $results = [];
             foreach ($this->helper->getViewports() as $device => $viewport) {
                 $results[$device] = $this->executeScanner($scan, $device, $viewport);
@@ -112,6 +121,25 @@ class Maho_AccessibilityScan_Model_Runner
                 $dir,
                 self::INSTALL_TIMEOUT,
             );
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
+    }
+
+    /**
+     * Keep the installed copy of scan.mjs current without touching the
+     * npm packages, for scans running where installation is not allowed
+     */
+    protected function syncScannerScript(): void
+    {
+        $dir = $this->helper->getPlaywrightDir();
+        $lock = fopen($dir . DS . '.install.lock', 'c');
+        if ($lock === false || !flock($lock, LOCK_EX)) {
+            Mage::throwException($this->helper->__('Unable to acquire the scanner install lock in %s', $dir));
+        }
+        try {
+            $this->copyScannerScript($dir);
         } finally {
             flock($lock, LOCK_UN);
             fclose($lock);
@@ -333,7 +361,7 @@ class Maho_AccessibilityScan_Model_Runner
         $env['PLAYWRIGHT_BROWSERS_PATH'] = $this->helper->getBrowsersDir();
         // npm re-invokes node, so the resolved node binary's directory must
         // be on the child PATH even when the web-server PATH lacks it
-        $nodePath = $this->helper->resolveBinaryPath($this->helper->getNodePath());
+        $nodePath = Mage::findExecutable($this->helper->getNodePath());
         $env['PATH'] = implode(':', array_unique(array_filter([
             ...explode(':', (string) ($env['PATH'] ?? '')),
             $nodePath !== null ? dirname($nodePath) : '',
@@ -341,7 +369,7 @@ class Maho_AccessibilityScan_Model_Runner
 
         // proc_open() resolves a bare binary name against the parent process
         // PATH, not the child $env, so resolve it ourselves
-        $command[0] = $this->helper->resolveBinaryPath($command[0]) ?? $command[0];
+        $command[0] = Mage::findExecutable($command[0]) ?? $command[0];
 
         $process = proc_open($command, $descriptors, $pipes, $cwd, $env);
         if (!is_resource($process)) {

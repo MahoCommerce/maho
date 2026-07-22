@@ -12,6 +12,9 @@
 $helper = Mage::helper('accessibilityscan');
 $latestScan = $this->getLatestScan();
 $requirementIssues = $helper->getRequirementIssues();
+if (!$requirementIssues && !$helper->isPlaywrightInstalled()) {
+    $requirementIssues[] = $helper->__('The scanner runtime is not installed yet. Run "./maho accessibility:install" from the command line to install it.');
+}
 ?>
 <div class="content-header">
     <h3 class="icon-head"><?= $helper->__('Accessibility Scan') ?></h3>
@@ -66,11 +69,7 @@ $requirementIssues = $helper->getRequirementIssues();
             <button type="submit" class="scalable add"<?= $requirementIssues ? ' disabled' : '' ?>><span><?= $helper->__('Start Scan') ?></span></button>
         </div>
         <p id="a11yscan-status" class="a11yscan-status" role="status"
-           data-running-message="<?= $this->quoteEscape($helper->__('Scanning... the first run downloads Playwright and Chromium and can take a few minutes.')) ?>"><?php
-            if (!$requirementIssues && !$helper->isPlaywrightInstalled()) {
-                echo $this->escapeHtml($helper->__('The first scan will automatically download Playwright and Chromium (roughly 300 MB) into the var directory.'));
-            }
-        ?></p>
+           data-running-message="<?= $this->quoteEscape($helper->__('Scanning... this can take a couple of minutes.')) ?>"></p>
     </form>
 </div>
 </div>

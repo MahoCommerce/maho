@@ -246,9 +246,10 @@ final class Mage
     }
 
     /**
-     * Find an executable by name, or null when it cannot be found.
-     * Cross-platform, spawns no shell, and is not defeated by
-     * disable_functions - use this instead of shell probes.
+     * Find an executable by bare name or explicit path, returning its
+     * absolute path or null when it cannot be found. Cross-platform,
+     * spawns no shell, and is not defeated by disable_functions - use
+     * this instead of shell probes.
      *
      * Beyond PATH, only the Homebrew dir is searched: PATH covers the
      * standard bin dirs even under PHP-FPM.
@@ -257,6 +258,9 @@ final class Mage
      */
     public static function findExecutable(string $name, array $extraDirs = []): ?string
     {
+        if (str_contains($name, '/') || str_contains($name, DIRECTORY_SEPARATOR)) {
+            return is_file($name) && is_executable($name) ? $name : null;
+        }
         return (new \Symfony\Component\Process\ExecutableFinder())
             ->find($name, null, [...$extraDirs, '/opt/homebrew/bin']);
     }

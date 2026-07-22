@@ -164,24 +164,12 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Resolve a binary name or path to an absolute executable file, or null
-     * when it cannot be found
-     */
-    public function resolveBinaryPath(string $binary): ?string
-    {
-        if (str_contains($binary, '/') || str_contains($binary, DIRECTORY_SEPARATOR)) {
-            return is_file($binary) && is_executable($binary) ? $binary : null;
-        }
-        return Mage::findExecutable($binary);
-    }
-
-    /**
      * Installed Node.js version (e.g. "22.11.0"), or null when node is
      * missing or does not report a parsable version
      */
     public function getNodeVersion(): ?string
     {
-        $node = $this->resolveBinaryPath($this->getNodePath());
+        $node = Mage::findExecutable($this->getNodePath());
         if ($node === null) {
             return null;
         }
@@ -217,7 +205,7 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $issues = [];
 
-        if ($this->resolveBinaryPath($this->getNodePath()) === null) {
+        if (Mage::findExecutable($this->getNodePath()) === null) {
             $issues[] = $this->__(
                 'Node.js was not found (looking for "%s"). Install Node.js %s or newer, or set its full path in System > Configuration > Accessibility Scan.',
                 $this->getNodePath(),
@@ -234,7 +222,7 @@ class Maho_AccessibilityScan_Helper_Data extends Mage_Core_Helper_Abstract
             }
         }
 
-        if ($this->resolveBinaryPath($this->getNpmPath()) === null) {
+        if (Mage::findExecutable($this->getNpmPath()) === null) {
             $issues[] = $this->__(
                 'npm was not found (looking for "%s"). Install it together with Node.js, or set its full path in System > Configuration > Accessibility Scan.',
                 $this->getNpmPath(),
