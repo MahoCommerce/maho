@@ -40,13 +40,6 @@ final class Mage
     public const LOG_WARN = self::LOG_WARNING;
 
     /**
-     * Directories to search for executables beyond PATH. Kept minimal:
-     * PATH covers the standard bin dirs even under PHP-FPM; only the
-     * Homebrew dir is genuinely missing there.
-     */
-    public const EXTRA_BIN_DIRS = ['/opt/homebrew/bin'];
-
-    /**
      * Registry collection
      *
      * @var array
@@ -257,12 +250,15 @@ final class Mage
      * Cross-platform, spawns no shell, and is not defeated by
      * disable_functions - use this instead of shell probes.
      *
+     * Beyond PATH, only the Homebrew dir is searched: PATH covers the
+     * standard bin dirs even under PHP-FPM.
+     *
      * @param list<string> $extraDirs additional directories to search
      */
     public static function findExecutable(string $name, array $extraDirs = []): ?string
     {
         return (new \Symfony\Component\Process\ExecutableFinder())
-            ->find($name, null, [...$extraDirs, ...self::EXTRA_BIN_DIRS]);
+            ->find($name, null, [...$extraDirs, '/opt/homebrew/bin']);
     }
 
     /**
