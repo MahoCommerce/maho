@@ -58,12 +58,14 @@ SPDX-License-Identifier: OSL-3.0
     line-height: 1.2;
 }
 
+/* Match the h4 heading of the neighboring scan-form block */
 .a11yscan-card .a11yscan-card-label {
     display: block;
-    color: #666;
-    font-size: 12px;
-    text-transform: uppercase;
-    margin-bottom: 2px;
+    color: var(--maho-ink-soft);
+    font-size: var(--maho-text-lg);
+    font-weight: bold;
+    line-height: 1.4em;
+    margin-bottom: .6em;
 }
 
 .a11yscan-form {
