@@ -16,6 +16,7 @@ $latestScan = $this->getLatestScan();
     <h3 class="icon-head"><?= $helper->__('Accessibility Scan') ?></h3>
 </div>
 
+<div class="a11yscan-top">
 <div class="a11yscan-form">
     <h4><?= $helper->__('Run a New Scan') ?></h4>
     <form id="a11yscan-form" action="<?= $this->escapeUrl($this->getStartUrl()) ?>" onsubmit="accessibilityScanStart(this); return false;">
@@ -55,6 +56,7 @@ $latestScan = $this->getLatestScan();
             </div>
         <?php endforeach; ?>
     <?php endif; ?>
+</div>
 </div>
 
 <div class="a11yscan-recent entry-edit">

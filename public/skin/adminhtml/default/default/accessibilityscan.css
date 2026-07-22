@@ -16,9 +16,28 @@ SPDX-License-Identifier: OSL-3.0
     border: 0;
 }
 
+/* Scan form and stat cards side by side, stacking on narrow screens */
+.a11yscan-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.a11yscan-top .a11yscan-form {
+    flex: 1 1 480px;
+    margin-bottom: 0;
+}
+
+.a11yscan-top .a11yscan-cards {
+    flex: 1 1 320px;
+    margin-bottom: 0;
+}
+
 .a11yscan-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 12px;
     margin-bottom: 20px;
 }
