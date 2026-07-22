@@ -262,6 +262,11 @@ SPDX-License-Identifier: OSL-3.0
     white-space: nowrap;
 }
 
+/* Only the first marker link takes the auto margin that right-aligns the pair */
+.a11yscan-show-marker-extra {
+    margin-left: 0;
+}
+
 .a11yscan-violation-desc {
     margin: 8px 0 0;
 }

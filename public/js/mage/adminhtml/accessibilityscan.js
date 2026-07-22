@@ -42,8 +42,8 @@ async function accessibilityScanStart(form) {
     button.disabled = false;
 }
 
-function accessibilityScanShowMarker(violationId) {
-    const marker = document.getElementById('a11yscan-marker-' + violationId);
+function accessibilityScanShowMarker(markerId) {
+    const marker = document.getElementById(markerId);
     const details = marker?.closest('details.a11yscan-screenshot');
     if (!details || !marker) {
         return;

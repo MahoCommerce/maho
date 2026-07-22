@@ -49,19 +49,6 @@ class Maho_AccessibilityScan_Block_Adminhtml_Scan_View extends Mage_Adminhtml_Bl
         return $this->getUrl('*/*/screenshot', ['id' => $this->getScan()->getId(), 'page_id' => $page->getId()]);
     }
 
-    /**
-     * Viewport (device) name of the page a violation was found on
-     */
-    public function getPageViewport(Maho_AccessibilityScan_Model_Violation $violation): string
-    {
-        foreach ($this->getPages() as $page) {
-            if ((int) $page->getId() === (int) $violation->getPageId()) {
-                return (string) $page->getViewport();
-            }
-        }
-        return Maho_AccessibilityScan_Helper_Data::VIEWPORT_DESKTOP;
-    }
-
     public function getViewportLabel(string $viewport): string
     {
         $helper = Mage::helper('accessibilityscan');
@@ -71,31 +58,32 @@ class Maho_AccessibilityScan_Block_Adminhtml_Scan_View extends Mage_Adminhtml_Bl
     }
 
     /**
-     * Label for the marker link, naming the viewport whose screenshot
-     * the violation was measured on
+     * Label for a marker link, naming the viewport whose screenshot it opens
      */
-    public function getShowMarkerLabel(Maho_AccessibilityScan_Model_Violation $violation): string
+    public function getShowMarkerLabel(string $viewport): string
     {
         $helper = Mage::helper('accessibilityscan');
-        return $this->getPageViewport($violation) === Maho_AccessibilityScan_Helper_Data::VIEWPORT_MOBILE
+        return $viewport === Maho_AccessibilityScan_Helper_Data::VIEWPORT_MOBILE
             ? $helper->__('Show on mobile screenshot')
             : $helper->__('Show on desktop screenshot');
     }
 
     /**
-     * Whether a violation can be highlighted on its page's screenshot
+     * Viewports whose screenshot can highlight the violation: a bounding box
+     * was measured there and the viewport's screenshot exists
+     *
+     * @return list<string>
      */
-    public function hasMarker(Maho_AccessibilityScan_Model_Violation $violation): bool
+    public function getMarkerViewports(Maho_AccessibilityScan_Model_Violation $violation): array
     {
-        if ($violation->getElementRect() === null) {
-            return false;
-        }
+        $viewports = [];
         foreach ($this->getPages() as $page) {
-            if ((int) $page->getId() === (int) $violation->getPageId()) {
-                return $page->getScreenshotFile() !== null;
+            $viewport = (string) $page->getViewport();
+            if ($violation->getElementRect($viewport) !== null && $page->getScreenshotFile() !== null) {
+                $viewports[] = $viewport;
             }
         }
-        return false;
+        return $viewports;
     }
 
     /**
@@ -117,10 +105,10 @@ class Maho_AccessibilityScan_Block_Adminhtml_Scan_View extends Mage_Adminhtml_Bl
     }
 
     /**
-     * Screenshot overlay markers for the given page's violations that carry
-     * element coordinates, as percentages of the captured page dimensions
+     * Screenshot overlay markers for the violations measured on the given
+     * page's viewport, as percentages of the captured page dimensions
      *
-     * @return list<array{id: int, number: int, impact: string, title: string, left: float, top: float, width: float, height: float}>
+     * @return list<array{id: int, viewport: string, number: int, impact: string, title: string, left: float, top: float, width: float, height: float}>
      */
     public function getScreenshotMarkers(Maho_AccessibilityScan_Model_Page $page): array
     {
@@ -130,13 +118,11 @@ class Maho_AccessibilityScan_Block_Adminhtml_Scan_View extends Mage_Adminhtml_Bl
             return [];
         }
 
+        $viewport = (string) $page->getViewport();
         $markers = [];
         foreach ($this->getViolationsByImpact() as $impact => $violations) {
             foreach ($violations as $violation) {
-                if ((int) $violation->getPageId() !== (int) $page->getId()) {
-                    continue;
-                }
-                $rect = $violation->getElementRect();
+                $rect = $violation->getElementRect($viewport);
                 if ($rect === null) {
                     continue;
                 }
@@ -146,6 +132,7 @@ class Maho_AccessibilityScan_Block_Adminhtml_Scan_View extends Mage_Adminhtml_Bl
                 $top = max(0.0, min(100.0, $rect['y'] / $pageHeight * 100));
                 $markers[] = [
                     'id' => (int) $violation->getId(),
+                    'viewport' => $viewport,
                     'number' => $this->getViolationNumber($violation),
                     'impact' => $impact,
                     'title' => (string) $violation->getAxeRuleId(),

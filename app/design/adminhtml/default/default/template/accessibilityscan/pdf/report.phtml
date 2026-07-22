@@ -126,7 +126,7 @@ $logoUrl = $this->getLogoUrl();
                 <?php if ($violation->getWcagCriteria()): ?>
                     (<?= $helper->__('WCAG %s', $violation->getWcagCriteria()) ?>)
                 <?php endif; ?>
-                - <?= $this->escapeHtml($this->getViewportLabel($this->getPageViewport($violation))) ?>
+                - <?= $this->escapeHtml($this->getViewportLabels($violation)) ?>
             </h3>
             <p><?= $this->escapeHtml((string) $violation->getDescription()) ?></p>
             <?php if ($violation->getTemplateFile()): ?>

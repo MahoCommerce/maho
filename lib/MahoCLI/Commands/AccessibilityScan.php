@@ -93,21 +93,16 @@ class AccessibilityScan extends BaseMahoCommand
             }
         }
 
-        $pageViewports = [];
-        foreach ($scan->getPages() as $page) {
-            $pageViewports[(int) $page->getId()] = (string) $page->getViewport();
-        }
-
         if ($format === 'json') {
             $this->outputJson($output, $scan, array_map(
                 fn(Maho_AccessibilityScan_Model_Violation $violation) => array_merge(
                     $violation->getData(),
-                    ['viewport' => $pageViewports[(int) $violation->getPageId()] ?? null],
+                    ['viewports' => $violation->getViewports()],
                 ),
                 $violations,
             ));
         } else {
-            $this->outputTable($output, $scan, $violations, $pageViewports);
+            $this->outputTable($output, $scan, $violations);
         }
 
         $threshold = $input->getOption('threshold');
@@ -144,20 +139,18 @@ class AccessibilityScan extends BaseMahoCommand
 
     /**
      * @param list<Maho_AccessibilityScan_Model_Violation> $violations
-     * @param array<int, string> $pageViewports
      */
     private function outputTable(
         OutputInterface $output,
         Maho_AccessibilityScan_Model_Scan $scan,
         array $violations,
-        array $pageViewports,
     ): void {
         $rows = [];
         foreach ($violations as $violation) {
             $rows[] = [
                 $violation->getAxeRuleId(),
                 $violation->getImpact(),
-                $pageViewports[(int) $violation->getPageId()] ?? '-',
+                implode(', ', $violation->getViewports()) ?: '-',
                 $violation->getWcagCriteria() ?: '-',
                 mb_substr((string) $violation->getCssSelector(), 0, 60),
                 $violation->getTemplateFile()
@@ -170,7 +163,7 @@ class AccessibilityScan extends BaseMahoCommand
             $output->writeln('<info>No automatically detectable violations found. Automated checks cover only part of WCAG, so manual testing is still recommended.</info>');
         } else {
             $table = new Table($output);
-            $table->setHeaders(['Rule', 'Impact', 'Viewport', 'WCAG', 'Selector', 'Template']);
+            $table->setHeaders(['Rule', 'Impact', 'Viewports', 'WCAG', 'Selector', 'Template']);
             $table->setRows($rows);
             $table->render();
         }

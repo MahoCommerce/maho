@@ -77,7 +77,7 @@ $page = $this->getPage();
                         <img src="<?= $this->escapeUrl($screenshotUrl) ?>" alt="<?= $this->quoteEscape($screenshotLabel) ?>">
                     </a>
                     <?php foreach ($this->getScreenshotMarkers($screenshotPage) as $marker): ?>
-                        <a id="a11yscan-marker-<?= $marker['id'] ?>"
+                        <a id="a11yscan-marker-<?= $marker['id'] ?>-<?= $this->escapeHtml($marker['viewport']) ?>"
                            class="a11yscan-marker <?= $this->escapeHtml($marker['impact']) ?>"
                            href="#violation-<?= $marker['id'] ?>"
                            style="left:<?= sprintf('%.3F', $marker['left']) ?>%;top:<?= sprintf('%.3F', $marker['top']) ?>%;width:<?= sprintf('%.3F', $marker['width']) ?>%;height:<?= sprintf('%.3F', $marker['height']) ?>%"
@@ -123,6 +123,7 @@ $page = $this->getPage();
                 <?= $helper->__('%s violation(s)', count($violations)) ?>
             </h4>
             <?php foreach ($violations as $violation): ?>
+                <?php $markerViewports = $this->getMarkerViewports($violation); ?>
                 <div class="a11yscan-violation <?= $this->escapeHtml($impact) ?>" id="violation-<?= (int) $violation->getId() ?>">
                     <div class="a11yscan-violation-head">
                         <span class="a11yscan-num">#<?= $this->getViolationNumber($violation) ?></span>
@@ -130,11 +131,14 @@ $page = $this->getPage();
                         <?php if ($violation->getWcagCriteria()): ?>
                             <span class="a11yscan-chip"><?= $helper->__('WCAG %s', $violation->getWcagCriteria()) ?></span>
                         <?php endif; ?>
-                        <span class="a11yscan-chip"><?= $this->escapeHtml($this->getViewportLabel($this->getPageViewport($violation))) ?></span>
-                        <?php if ($this->hasMarker($violation)): ?>
-                            <a class="a11yscan-show-marker" href="#a11yscan-marker-<?= (int) $violation->getId() ?>"
-                               onclick="accessibilityScanShowMarker(<?= (int) $violation->getId() ?>); return false;"><?= $this->escapeHtml($this->getShowMarkerLabel($violation)) ?></a>
-                        <?php endif; ?>
+                        <?php foreach ($violation->getViewports() as $viewport): ?>
+                            <span class="a11yscan-chip"><?= $this->escapeHtml($this->getViewportLabel($viewport)) ?></span>
+                        <?php endforeach; ?>
+                        <?php foreach ($markerViewports as $index => $viewport): ?>
+                            <a class="a11yscan-show-marker<?= $index > 0 ? ' a11yscan-show-marker-extra' : '' ?>"
+                               href="#a11yscan-marker-<?= (int) $violation->getId() ?>-<?= $this->escapeHtml($viewport) ?>"
+                               onclick="accessibilityScanShowMarker('a11yscan-marker-<?= (int) $violation->getId() ?>-<?= $this->escapeHtml($viewport) ?>'); return false;"><?= $this->escapeHtml($this->getShowMarkerLabel($viewport)) ?></a>
+                        <?php endforeach; ?>
                     </div>
                     <p class="a11yscan-violation-desc">
                         <?= $this->escapeHtml((string) $violation->getDescription()) ?>
@@ -153,10 +157,10 @@ $page = $this->getPage();
                             <?php if ($violation->getCssSelector()): ?>
                                 <div>
                                     <span class="a11yscan-label"><?= $helper->__('Selector') ?></span>
-                                    <?php if ($this->hasMarker($violation)): ?>
-                                        <a class="a11yscan-selector-link" href="#a11yscan-marker-<?= (int) $violation->getId() ?>"
-                                           onclick="accessibilityScanShowMarker(<?= (int) $violation->getId() ?>); return false;"
-                                           title="<?= $this->quoteEscape($this->getShowMarkerLabel($violation)) ?>"><code><?= $this->escapeHtml($violation->getCssSelector()) ?></code></a>
+                                    <?php if ($markerViewports !== []): ?>
+                                        <a class="a11yscan-selector-link" href="#a11yscan-marker-<?= (int) $violation->getId() ?>-<?= $this->escapeHtml($markerViewports[0]) ?>"
+                                           onclick="accessibilityScanShowMarker('a11yscan-marker-<?= (int) $violation->getId() ?>-<?= $this->escapeHtml($markerViewports[0]) ?>'); return false;"
+                                           title="<?= $this->quoteEscape($this->getShowMarkerLabel($markerViewports[0])) ?>"><code><?= $this->escapeHtml($violation->getCssSelector()) ?></code></a>
                                     <?php else: ?>
                                         <code><?= $this->escapeHtml($violation->getCssSelector()) ?></code>
                                     <?php endif; ?>

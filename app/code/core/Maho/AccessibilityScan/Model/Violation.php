@@ -9,8 +9,6 @@
 declare(strict_types=1);
 
 /**
- * @method int getPageId()
- * @method $this setPageId(int $value)
  * @method int getScanId()
  * @method $this setScanId(int $value)
  * @method string getAxeRuleId()
@@ -35,10 +33,6 @@ declare(strict_types=1);
  * @method $this setTemplateFile(?string $value)
  * @method ?int getTemplateLine()
  * @method $this setTemplateLine(?int $value)
- * @method $this setElementX(?int $value)
- * @method $this setElementY(?int $value)
- * @method $this setElementWidth(?int $value)
- * @method $this setElementHeight(?int $value)
  */
 class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
 {
@@ -62,23 +56,59 @@ class Maho_AccessibilityScan_Model_Violation extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Bounding box of the offending element in absolute page CSS pixels,
-     * or null when the scanner could not measure it
+     * Viewports (device names) this issue was found on
+     *
+     * @return list<string>
+     */
+    public function getViewports(): array
+    {
+        return array_values(array_filter(explode(',', (string) $this->getData('viewports'))));
+    }
+
+    /**
+     * @param list<string> $viewports
+     */
+    public function setViewports(array $viewports): self
+    {
+        return $this->setData('viewports', implode(',', $viewports));
+    }
+
+    /**
+     * Per-viewport bounding boxes, set by the runner when saving results
+     *
+     * @param array<string, array{x: int, y: int, width: int, height: int}> $rects
+     */
+    public function setElementRects(array $rects): self
+    {
+        return $this->setData('element_rects', $rects === [] ? null : Mage::helper('core')->jsonEncode($rects));
+    }
+
+    /**
+     * Bounding box of the offending element on the given viewport, in
+     * absolute page CSS pixels, or null when it could not be measured there
      *
      * @return ?array{x: int, y: int, width: int, height: int}
      */
-    public function getElementRect(): ?array
+    public function getElementRect(string $viewport): ?array
     {
-        if ($this->getData('element_x') === null || $this->getData('element_y') === null
-            || (int) $this->getData('element_width') < 1 || (int) $this->getData('element_height') < 1
-        ) {
+        $raw = (string) $this->getData('element_rects');
+        if ($raw === '') {
+            return null;
+        }
+        try {
+            $rects = Mage::helper('core')->jsonDecode($raw);
+        } catch (Mage_Core_Exception_Json) {
+            return null;
+        }
+        $rect = is_array($rects) ? ($rects[$viewport] ?? null) : null;
+        if (!is_array($rect) || (int) ($rect['width'] ?? 0) < 1 || (int) ($rect['height'] ?? 0) < 1) {
             return null;
         }
         return [
-            'x' => (int) $this->getData('element_x'),
-            'y' => (int) $this->getData('element_y'),
-            'width' => (int) $this->getData('element_width'),
-            'height' => (int) $this->getData('element_height'),
+            'x' => (int) ($rect['x'] ?? 0),
+            'y' => (int) ($rect['y'] ?? 0),
+            'width' => (int) $rect['width'],
+            'height' => (int) $rect['height'],
         ];
     }
 }

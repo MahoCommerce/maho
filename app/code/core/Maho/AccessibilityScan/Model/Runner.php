@@ -212,8 +212,13 @@ class Maho_AccessibilityScan_Model_Runner
     }
 
     /**
-     * Persist one page row per scanned viewport with its violations, and
-     * update the scan counters with the totals across all viewports
+     * Persist one page row per scanned viewport and one violation row per
+     * distinct issue (axe rule + selector), merged across viewports: the same
+     * template defect usually renders on both, and counting it twice would
+     * inflate the totals. Descriptive fields come from the first viewport
+     * that reported the issue; the bounding boxes are kept per viewport.
+     * The scan counters therefore count distinct issues, while each page row
+     * keeps its own per-viewport occurrence count.
      *
      * @param array<string, array<string, mixed>> $results scanner results keyed by device name
      */
@@ -222,13 +227,16 @@ class Maho_AccessibilityScan_Model_Runner
         $locale = Mage::app()->getLocale();
 
         $counts = array_fill_keys(Maho_AccessibilityScan_Model_Violation::IMPACT_LEVELS, 0);
-        $total = 0;
         $incomplete = 0;
+        $pages = [];
+        $pageTotals = [];
+        $merged = [];
 
         foreach ($results as $device => $result) {
+            $device = (string) $device;
             $page = Mage::getModel('accessibilityscan/page');
             $page->setScanId((int) $scan->getId())
-                ->setViewport((string) $device)
+                ->setViewport($device)
                 ->setUrl((string) ($result['url'] ?? $scan->getUrl()))
                 ->setPageTitle(isset($result['title']) ? mb_substr((string) $result['title'], 0, 255) : null)
                 ->setStatus('complete')
@@ -237,9 +245,15 @@ class Maho_AccessibilityScan_Model_Runner
                 ->setPageHeight(isset($result['pageHeight']) ? (int) $result['pageHeight'] : null)
                 ->setScannedAt($locale->formatDateForDb('now'))
                 ->save();
+            $pages[$device] = $page;
+            $pageTotals[$device] = 0;
+
+            // Axe cannot decide these automatically (e.g. contrast over an
+            // image); the sets largely overlap between viewports, so take
+            // the largest instead of summing
+            $incomplete = max($incomplete, (int) ($result['incompleteCount'] ?? 0));
 
             $mapper = new Maho_AccessibilityScan_Model_TemplateMapper((string) ($result['rawHtml'] ?? ''));
-            $pageTotal = 0;
 
             $violations = $result['violations'] ?? [];
             foreach (is_array($violations) ? $violations : [] as $violation) {
@@ -251,47 +265,71 @@ class Maho_AccessibilityScan_Model_Runner
                 if (!in_array($impact, Maho_AccessibilityScan_Model_Violation::IMPACT_LEVELS, true)) {
                     $impact = Maho_AccessibilityScan_Model_Violation::IMPACT_MINOR;
                 }
+                $ruleId = mb_substr((string) ($violation['ruleId'] ?? ''), 0, 64);
 
                 $nodes = $violation['nodes'] ?? [];
                 foreach (is_array($nodes) ? $nodes : [] as $node) {
                     if (!is_array($node)) {
                         continue;
                     }
+                    $selector = isset($node['cssSelector']) ? (string) $node['cssSelector'] : '';
+                    $box = is_array($node['boundingBox'] ?? null) ? $node['boundingBox'] : null;
+                    $rect = $box !== null ? [
+                        'x' => (int) ($box['x'] ?? 0),
+                        'y' => (int) ($box['y'] ?? 0),
+                        'width' => (int) ($box['width'] ?? 0),
+                        'height' => (int) ($box['height'] ?? 0),
+                    ] : null;
+                    $pageTotals[$device]++;
+
+                    $key = $ruleId . '|' . $selector;
+                    if (isset($merged[$key])) {
+                        $merged[$key]['viewports'][$device] = true;
+                        if ($rect !== null) {
+                            $merged[$key]['rects'][$device] = $rect;
+                        }
+                        continue;
+                    }
+
                     $snippet = isset($node['html']) ? (string) $node['html'] : null;
                     [$templateFile, $templateLine] = $mapper->mapSnippet($snippet);
-                    $box = is_array($node['boundingBox'] ?? null) ? $node['boundingBox'] : null;
-
-                    Mage::getModel('accessibilityscan/violation')
-                        ->setPageId((int) $page->getId())
-                        ->setScanId((int) $scan->getId())
-                        ->setAxeRuleId(mb_substr((string) ($violation['ruleId'] ?? ''), 0, 64))
-                        ->setImpact($impact)
-                        ->setWcagLevel($this->wcagLevelFromTags($wcagTags))
-                        ->setWcagCriteria($this->wcagCriteriaFromTags($wcagTags))
-                        ->setDescription(isset($violation['description']) ? (string) $violation['description'] : null)
-                        ->setHelpUrl(isset($violation['helpUrl']) ? mb_substr((string) $violation['helpUrl'], 0, 512) : null)
-                        ->setHtmlSnippet($snippet)
-                        ->setCssSelector(isset($node['cssSelector']) ? (string) $node['cssSelector'] : null)
-                        ->setFailureSummary(isset($node['failureSummary']) ? (string) $node['failureSummary'] : null)
-                        ->setTemplateFile($templateFile)
-                        ->setTemplateLine($templateLine)
-                        ->setElementX($box !== null ? (int) ($box['x'] ?? 0) : null)
-                        ->setElementY($box !== null ? (int) ($box['y'] ?? 0) : null)
-                        ->setElementWidth($box !== null ? (int) ($box['width'] ?? 0) : null)
-                        ->setElementHeight($box !== null ? (int) ($box['height'] ?? 0) : null)
-                        ->save();
-
-                    $counts[$impact]++;
-                    $total++;
-                    $pageTotal++;
+                    $merged[$key] = [
+                        'impact' => $impact,
+                        'viewports' => [$device => true],
+                        'rects' => $rect !== null ? [$device => $rect] : [],
+                        'data' => [
+                            'axe_rule_id' => $ruleId,
+                            'wcag_level' => $this->wcagLevelFromTags($wcagTags),
+                            'wcag_criteria' => $this->wcagCriteriaFromTags($wcagTags),
+                            'description' => isset($violation['description']) ? (string) $violation['description'] : null,
+                            'help_url' => isset($violation['helpUrl']) ? mb_substr((string) $violation['helpUrl'], 0, 512) : null,
+                            'html_snippet' => $snippet,
+                            'css_selector' => $selector !== '' ? $selector : null,
+                            'failure_summary' => isset($node['failureSummary']) ? (string) $node['failureSummary'] : null,
+                            'template_file' => $templateFile,
+                            'template_line' => $templateLine,
+                        ],
+                    ];
                 }
             }
-
-            $page->setViolationCount($pageTotal)->save();
-            $incomplete += max((int) ($result['incompleteCount'] ?? 0), 0);
         }
 
-        $scan->setTotalViolations($total)
+        foreach ($merged as $issue) {
+            Mage::getModel('accessibilityscan/violation')
+                ->addData($issue['data'])
+                ->setScanId((int) $scan->getId())
+                ->setImpact($issue['impact'])
+                ->setViewports(array_keys($issue['viewports']))
+                ->setElementRects($issue['rects'])
+                ->save();
+            $counts[$issue['impact']]++;
+        }
+
+        foreach ($pages as $device => $page) {
+            $page->setViolationCount($pageTotals[$device])->save();
+        }
+
+        $scan->setTotalViolations(count($merged))
             ->setIncompleteCount($incomplete)
             ->setViolationsCritical($counts[Maho_AccessibilityScan_Model_Violation::IMPACT_CRITICAL])
             ->setViolationsSerious($counts[Maho_AccessibilityScan_Model_Violation::IMPACT_SERIOUS])

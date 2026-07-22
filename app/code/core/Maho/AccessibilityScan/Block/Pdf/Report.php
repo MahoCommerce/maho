@@ -104,10 +104,7 @@ class Maho_AccessibilityScan_Block_Pdf_Report extends Mage_Core_Block_Pdf
 
             foreach ($this->getViolationsByImpact() as $impact => $violations) {
                 foreach ($violations as $violation) {
-                    if ((int) $violation->getPageId() !== (int) $page->getId()) {
-                        continue;
-                    }
-                    $rect = $violation->getElementRect();
+                    $rect = $violation->getElementRect((string) $page->getViewport());
                     if ($rect === null) {
                         continue;
                     }
@@ -178,16 +175,11 @@ class Maho_AccessibilityScan_Block_Pdf_Report extends Mage_Core_Block_Pdf
     }
 
     /**
-     * Viewport (device) name of the page a violation was found on
+     * Comma-separated translated labels of the viewports an issue was found on
      */
-    public function getPageViewport(Maho_AccessibilityScan_Model_Violation $violation): string
+    public function getViewportLabels(Maho_AccessibilityScan_Model_Violation $violation): string
     {
-        foreach ($this->getPages() as $page) {
-            if ((int) $page->getId() === (int) $violation->getPageId()) {
-                return (string) $page->getViewport();
-            }
-        }
-        return Maho_AccessibilityScan_Helper_Data::VIEWPORT_DESKTOP;
+        return implode(', ', array_map($this->getViewportLabel(...), $violation->getViewports()));
     }
 
     public function getViewportLabel(string $viewport): string

@@ -62,9 +62,11 @@ return function (Schema $schema): void {
     );
     $page->setComment('Accessibility Scan Page Table');
 
+    // One row per distinct issue (axe rule + selector), deduplicated across
+    // viewports: the viewports column lists where it occurred, element_rects
+    // holds the per-viewport bounding boxes as JSON
     $violation = $schema->createTable('accessibilityscan_violation');
     $violation->addColumn('violation_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
-    $violation->addColumn('page_id', Types::INTEGER, ['unsigned' => true]);
     $violation->addColumn('scan_id', Types::INTEGER, ['unsigned' => true]);
     $violation->addColumn('axe_rule_id', Types::STRING, ['length' => 64]);
     $violation->addColumn('impact', Types::STRING, ['length' => 16, 'notnull' => false]);
@@ -77,10 +79,8 @@ return function (Schema $schema): void {
     $violation->addColumn('failure_summary', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $violation->addColumn('template_file', Types::STRING, ['length' => 255, 'notnull' => false]);
     $violation->addColumn('template_line', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
-    $violation->addColumn('element_x', Types::INTEGER, ['notnull' => false]);
-    $violation->addColumn('element_y', Types::INTEGER, ['notnull' => false]);
-    $violation->addColumn('element_width', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
-    $violation->addColumn('element_height', Types::INTEGER, ['unsigned' => true, 'notnull' => false]);
+    $violation->addColumn('viewports', Types::STRING, ['length' => 64, 'default' => '']);
+    $violation->addColumn('element_rects', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $violation->addColumn('ai_suggestion', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $violation->addColumn('ai_diff', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $violation->addPrimaryKeyConstraint(
@@ -88,12 +88,6 @@ return function (Schema $schema): void {
     );
     $violation->addIndex(['axe_rule_id']);
     $violation->addIndex(['impact']);
-    $violation->addForeignKeyConstraint(
-        'accessibilityscan_page',
-        ['page_id'],
-        ['page_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
     $violation->addForeignKeyConstraint(
         'accessibilityscan_scan',
         ['scan_id'],
