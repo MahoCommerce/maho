@@ -325,6 +325,18 @@ SPDX-License-Identifier: OSL-3.0
     margin-bottom: 20px;
 }
 
+/* Region label on the page canvas: quieter than the in-panel h4 headings,
+   echoing the grid's own uppercase column-header voice, and spaced to bind
+   with the grid below rather than the row above */
+.a11yscan-recent > h4 {
+    margin: 24px 0 8px;
+    color: var(--maho-ink-muted);
+    font-size: var(--maho-text-sm);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
 .a11yscan-recent table {
     width: 100%;
 }
