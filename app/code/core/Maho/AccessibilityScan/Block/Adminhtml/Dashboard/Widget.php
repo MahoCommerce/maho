@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 class Maho_AccessibilityScan_Block_Adminhtml_Dashboard_Widget extends Mage_Adminhtml_Block_Template
 {
-    /** @var list<array{url: string, scan: ?Maho_AccessibilityScan_Model_Scan}>|null */
-    protected ?array $rows = null;
+    /** @var array{0: array<string, int>|null}|null */
+    protected ?array $totals = null;
 
     /**
      * Render only when scheduled scans are on, URLs are configured
@@ -32,40 +32,31 @@ class Maho_AccessibilityScan_Block_Adminhtml_Dashboard_Widget extends Mage_Admin
     }
 
     /**
-     * One row per configured URL with its most recent scan regardless of how
-     * it was triggered (a manual scan is still the latest data for the URL);
-     * the scan is null when the URL has not been scanned yet
+     * Violation counts by impact level summed across the most recent
+     * completed scheduled scan of each configured URL, or null when no
+     * scheduled scan has completed yet
      *
-     * @return list<array{url: string, scan: ?Maho_AccessibilityScan_Model_Scan}>
+     * @return array<string, int>|null
      */
-    public function getScheduledUrlScans(): array
+    public function getViolationTotals(): ?array
     {
-        if ($this->rows === null) {
-            $this->rows = [];
+        if ($this->totals === null) {
+            $sums = null;
             foreach (Mage::helper('accessibilityscan')->getScheduledScanUrls() as $url) {
                 $scan = Mage::getResourceModel('accessibilityscan/scan_collection')
+                    ->addFieldToFilter('triggered_by', Maho_AccessibilityScan_Model_Scan::TRIGGER_SCHEDULE)
                     ->addFieldToFilter('url', $url)
                     ->setOrder('created_at', 'DESC')
                     ->setPageSize(1)
                     ->getFirstItem();
-                $this->rows[] = [
-                    'url' => $url,
-                    'scan' => $scan instanceof Maho_AccessibilityScan_Model_Scan && $scan->getId() ? $scan : null,
-                ];
+                if ($scan instanceof Maho_AccessibilityScan_Model_Scan && $scan->getId() && $scan->isComplete()) {
+                    foreach ($scan->getViolationCounts() as $impact => $count) {
+                        $sums[$impact] = ($sums[$impact] ?? 0) + $count;
+                    }
+                }
             }
+            $this->totals = [$sums];
         }
-        return $this->rows;
-    }
-
-    public function getDisplayPath(string $url): string
-    {
-        $path = (string) (parse_url($url, PHP_URL_PATH) ?: '/');
-        $query = (string) parse_url($url, PHP_URL_QUERY);
-        return $path . ($query !== '' ? '?' . $query : '');
-    }
-
-    public function getScanUrl(Maho_AccessibilityScan_Model_Scan $scan): string
-    {
-        return $this->getUrl('*/accessibilityscan_scan/view', ['id' => $scan->getId()]);
+        return $this->totals[0];
     }
 }
