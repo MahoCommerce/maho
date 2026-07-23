@@ -58,6 +58,20 @@ describe('legacy single-variable conditions', function () {
         expect($filter->filter("{{if order.status_label == 'Processing'}}Y{{else}}N{{/if}}"))->toBe('Y');
     });
 
+    it('resolves property paths through computed getters returning objects', function () {
+        // getData('billing_address') is empty; only the real getter can resolve the path,
+        // and its DataObject result must be re-wrapped for the .company access to work
+        $order = new class () extends DataObject {
+            public function getBillingAddress(): DataObject
+            {
+                return new DataObject(['company' => 'ACME']);
+            }
+        };
+        $filter = (new Template())->setVariables(['order' => $order]);
+        expect($filter->filter('{{if order.billing_address.company}}Y{{else}}N{{/if}}'))->toBe('Y');
+        expect($filter->filter("{{if order.billing_address.company == 'ACME'}}Y{{else}}N{{/if}}"))->toBe('Y');
+    });
+
     it('treats absent variables as empty without failing', function () {
         $filter = (new Template())->setVariables(['foo' => 'bar']);
         expect($filter->filter('{{if comment}}A{{else}}B{{/if}}'))->toBe('B');
@@ -155,5 +169,25 @@ describe('expression object wrapper', function () {
 
         expect($wrapped->getConfig('general/locale/code'))->toBe('general/locale/code');
         expect($wrapped->getConfig((string) $encryptedPaths[0]))->toBeNull();
+    });
+
+    it('applies the encrypted-path guard to getConfig calls made inside template expressions', function () {
+        $encryptedPaths = Mage::getSingleton('adminhtml/config')->getEncryptedNodeEntriesPaths();
+        if (count($encryptedPaths) === 0) {
+            $this->markTestSkipped('No encrypted configuration paths available in this environment');
+        }
+
+        $store = new class () extends DataObject {
+            public function getConfig(?string $path = null): ?string
+            {
+                return $path === null ? null : 'secret-value';
+            }
+        };
+        $filter = (new Template())->setVariables(['store' => $store]);
+
+        // Plain path reaches getConfig and returns a value; encrypted path is called with null
+        expect($filter->filter("{{if store.getConfig('general/locale/code') == 'secret-value'}}Y{{else}}N{{/if}}"))->toBe('Y');
+        $encrypted = (string) $encryptedPaths[0];
+        expect($filter->filter("{{if store.getConfig('{$encrypted}') == 'secret-value'}}Y{{else}}N{{/if}}"))->toBe('N');
     });
 });
