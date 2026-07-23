@@ -828,6 +828,16 @@ final class Mage
      */
     public static function printException(Throwable $e, string $extra = '', int $httpResponseCode = 503): never
     {
+        if (PHP_SAPI === 'cli') {
+            // STDOUT may be an active output buffer whose content exit() would silently
+            // discard (e.g. under Pest/PHPUnit), so report on STDERR and exit non-zero.
+            $message = (empty($extra) ? '' : $extra . "\n\n")
+                . $e->getMessage() . "\n\n"
+                . $e->getTraceAsString() . "\n";
+            file_put_contents('php://stderr', $message);
+            exit(1);
+        }
+
         if (self::$_isDeveloperMode) {
             print '<pre>';
 
@@ -855,6 +865,11 @@ final class Mage
             Maho::errorReport($reportData, $httpResponseCode);
         }
 
+        // Deliver any buffered output before terminating, so the error page
+        // cannot be discarded by an open output buffer.
+        while (ob_get_level() > 0) {
+            ob_end_flush();
+        }
         die();
     }
 
