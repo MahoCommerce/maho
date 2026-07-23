@@ -14,6 +14,7 @@ use Maho\Filter\Template\Tokenizer\Parameter;
 use Maho\Filter\Template\Tokenizer\Variable;
 use Maho\DataObject;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
+use Symfony\Component\ExpressionLanguage\Node\Node;
 
 class Template
 {
@@ -27,6 +28,11 @@ class Template
      */
     public const CONSTRUCTION_DEPEND_PATTERN = '/{{depend\s*(.*?)}}(.*?){{\\/depend\s*}}/si';
     public const CONSTRUCTION_IF_PATTERN = '/{{if\s*(.*?)}}(.*?)({{else}}(.*?))?{{\\/if\s*}}/si';
+
+    /**
+     * Expression operators refused in {{if}} / {{depend}} conditions, see assertNoDeniedOperator()
+     */
+    private const DENIED_OPERATORS = ['matches', '..'];
 
     private static ?ExpressionLanguage $_expressionLanguage = null;
 
@@ -270,7 +276,10 @@ class Template
         }
 
         try {
-            return (bool) self::getExpressionLanguage()->evaluate($expression, $values);
+            $language = self::getExpressionLanguage();
+            $parsed = $language->parse($expression, array_keys($values));
+            self::assertNoDeniedOperator($parsed->getNodes());
+            return (bool) $language->evaluate($parsed, $values);
         } catch (\Throwable $e) {
             \Mage::log(
                 sprintf('Invalid condition "%s" in template directive: %s', $expression, $e->getMessage()),
@@ -280,16 +289,38 @@ class Template
         }
     }
 
+    /**
+     * Reject the two operators a condition never legitimately needs but which let a template
+     * author stall the process: "matches" runs an arbitrary regex against arbitrary input
+     * (catastrophic backtracking) and ".." builds a range array of arbitrary size.
+     *
+     * @throws \RuntimeException
+     */
+    private static function assertNoDeniedOperator(Node $node): void
+    {
+        $operator = $node->attributes['operator'] ?? null;
+        if (in_array($operator, self::DENIED_OPERATORS, true)) {
+            throw new \RuntimeException(sprintf('operator "%s" is not allowed in a condition', $operator));
+        }
+        foreach ($node->nodes as $child) {
+            if ($child instanceof Node) {
+                self::assertNoDeniedOperator($child);
+            }
+        }
+    }
+
     protected static function getExpressionLanguage(): ExpressionLanguage
     {
         if (self::$_expressionLanguage === null) {
             $language = new ExpressionLanguage();
             // Templates must not read arbitrary PHP/class constants
-            $language->register(
-                'constant',
-                static fn(): string => 'null',
-                static fn(): mixed => null,
-            );
+            foreach (['constant', 'enum'] as $function) {
+                $language->register(
+                    $function,
+                    static fn(): string => 'null',
+                    static fn(): mixed => null,
+                );
+            }
             self::$_expressionLanguage = $language;
         }
         return self::$_expressionLanguage;
