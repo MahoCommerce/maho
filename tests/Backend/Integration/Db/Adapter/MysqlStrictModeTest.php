@@ -14,7 +14,7 @@ uses(Tests\MahoBackendTestCase::class);
 
 /**
  * Helper: create a fresh MySQL adapter instance using the same connection params from local.xml.
- * Bypasses the singleton cache so _initConnection() re-runs with the current developer mode setting.
+ * Bypasses the singleton cache so _initConnection() re-runs.
  */
 function createFreshMysqlAdapter(): Mysql
 {
@@ -34,8 +34,9 @@ function fetchSqlMode(Mysql $adapter): string
 }
 
 /**
- * Helper: whether the live server is MariaDB. MariaDB is exempt from the developer-mode
- * ONLY_FULL_GROUP_BY toggle because it lacks functional-dependency detection (MDEV-11588).
+ * Helper: whether the live server is MariaDB. MariaDB is exempt from ONLY_FULL_GROUP_BY
+ * because it lacks functional-dependency detection (MDEV-11588), but it still gets the
+ * rest of the strict baseline.
  */
 function isMariaDbServer(Mysql $adapter): bool
 {
@@ -52,97 +53,94 @@ beforeEach(function () {
     }
 });
 
-it('sets SQL_MODE to ONLY_FULL_GROUP_BY on MySQL connection init when developer mode is on', function () {
-    Mage::setIsDeveloperMode(true);
+it('pins the strict baseline SQL_MODE on connection init', function () {
     $adapter = createFreshMysqlAdapter();
-    if (isMariaDbServer($adapter)) {
-        $this->markTestSkipped('Genuine-MySQL-only test: MariaDB is exempt from strict mode.');
-    }
     $sqlMode = fetchSqlMode($adapter);
-    expect($sqlMode)->toContain('ONLY_FULL_GROUP_BY');
+    expect($sqlMode)->toContain('STRICT_TRANS_TABLES');
+    expect($sqlMode)->toContain('NO_ZERO_DATE');
+    expect($sqlMode)->toContain('NO_ZERO_IN_DATE');
+    expect($sqlMode)->toContain('ERROR_FOR_DIVISION_BY_ZERO');
+    expect($sqlMode)->toContain('NO_ENGINE_SUBSTITUTION');
 });
 
-it('keeps SQL_MODE empty on MariaDB even when developer mode is on', function () {
-    Mage::setIsDeveloperMode(true);
+it('includes ONLY_FULL_GROUP_BY in the baseline on genuine MySQL', function () {
+    $adapter = createFreshMysqlAdapter();
+    if (isMariaDbServer($adapter)) {
+        $this->markTestSkipped('Genuine-MySQL-only test: MariaDB is exempt from ONLY_FULL_GROUP_BY.');
+    }
+    expect(fetchSqlMode($adapter))->toContain('ONLY_FULL_GROUP_BY');
+});
+
+it('exempts MariaDB from ONLY_FULL_GROUP_BY but keeps the rest of the strict baseline', function () {
     $adapter = createFreshMysqlAdapter();
     if (!isMariaDbServer($adapter)) {
         $this->markTestSkipped('MariaDB-only test.');
     }
-    expect(fetchSqlMode($adapter))->toBe('');
-});
-
-it('sets SQL_MODE to an empty string on MySQL connection init when developer mode is off', function () {
-    Mage::setIsDeveloperMode(false);
-    $adapter = createFreshMysqlAdapter();
     $sqlMode = fetchSqlMode($adapter);
     expect($sqlMode)->not->toContain('ONLY_FULL_GROUP_BY');
-    expect($sqlMode)->toBe('');
+    expect($sqlMode)->toContain('STRICT_TRANS_TABLES');
 });
 
-it('raises an SQL error on a GROUP BY query missing aggregates when developer mode is on', function () {
-    Mage::setIsDeveloperMode(true);
+it('pins the same SQL_MODE baseline regardless of developer mode', function () {
+    $modes = [];
+    foreach ([true, false] as $devMode) {
+        Mage::setIsDeveloperMode($devMode);
+        $adapter = createFreshMysqlAdapter();
+        $modes[] = fetchSqlMode($adapter);
+    }
+    expect($modes[0])->toBe($modes[1]);
+});
+
+it('raises an SQL error on a GROUP BY query missing aggregates even with developer mode off', function () {
+    Mage::setIsDeveloperMode(false);
     $adapter = createFreshMysqlAdapter();
     if (isMariaDbServer($adapter)) {
-        $this->markTestSkipped('Genuine-MySQL-only test: MariaDB is exempt from strict mode.');
+        $this->markTestSkipped('Genuine-MySQL-only test: MariaDB is exempt from ONLY_FULL_GROUP_BY.');
     }
-    // core_config_data has scope_id and path columns; selecting path without grouping or aggregating it
-    // violates ONLY_FULL_GROUP_BY
+    // core_config_data has scope and path columns; selecting path without grouping or
+    // aggregating it violates ONLY_FULL_GROUP_BY
     expect(fn() => $adapter->fetchAll(
         'SELECT scope, path FROM core_config_data GROUP BY scope',
     ))->toThrow(\Exception::class);
 });
 
-it('does not raise an SQL error on the same non-strict GROUP BY query when developer mode is off', function () {
-    Mage::setIsDeveloperMode(false);
+it('rejects writes that would be silently truncated under the legacy relaxed mode', function () {
     $adapter = createFreshMysqlAdapter();
-    $results = $adapter->fetchAll(
-        'SELECT scope, path FROM core_config_data GROUP BY scope',
-    );
-    expect($results)->toBeArray();
+    $tempTable = 'test_strict_' . uniqid();
+    $table = $adapter->newTable($tempTable)
+        ->addColumn('id', \Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
+            'identity' => true,
+            'nullable' => false,
+            'primary' => true,
+        ], 'ID')
+        ->addColumn('val', \Maho\Db\Ddl\Table::TYPE_VARCHAR, 5, [], 'Val');
+    $adapter->createTable($table);
+
+    expect(fn() => $adapter->insert($tempTable, ['val' => 'longer than five']))
+        ->toThrow(\Exception::class);
+
+    $adapter->dropTable($tempTable);
 });
 
-it('keeps the SET time_zone statement working alongside the SQL_MODE toggle', function () {
-    foreach ([true, false] as $devMode) {
-        Mage::setIsDeveloperMode($devMode);
-        $adapter = createFreshMysqlAdapter();
-        $tz = $adapter->fetchOne('SELECT @@time_zone');
-        expect($tz)->toBe('+00:00');
-    }
+it('keeps the SET time_zone statement working alongside the SQL_MODE baseline', function () {
+    $adapter = createFreshMysqlAdapter();
+    $tz = $adapter->fetchOne('SELECT @@time_zone');
+    expect($tz)->toBe('+00:00');
 });
 
-it('preserves ONLY_FULL_GROUP_BY across startSetup and endSetup when developer mode is on', function () {
-    Mage::setIsDeveloperMode(true);
+it('preserves the strict baseline across startSetup and endSetup', function () {
     $adapter = createFreshMysqlAdapter();
-    if (isMariaDbServer($adapter)) {
-        $this->markTestSkipped('Genuine-MySQL-only test: MariaDB is exempt from strict mode.');
-    }
-    $adapter->startSetup();
-    $adapter->endSetup();
-    $sqlMode = fetchSqlMode($adapter);
-    expect($sqlMode)->toContain('ONLY_FULL_GROUP_BY');
-});
-
-it('preserves the empty SQL_MODE across startSetup and endSetup when developer mode is off', function () {
-    Mage::setIsDeveloperMode(false);
-    $adapter = createFreshMysqlAdapter();
-    $adapter->startSetup();
-    $adapter->endSetup();
-    $sqlMode = fetchSqlMode($adapter);
-    expect($sqlMode)->toBe('');
-});
-
-it('preserves the live SQL_MODE in insertForce so the bulk-import path still works in dev mode', function () {
-    Mage::setIsDeveloperMode(true);
-    $adapter = createFreshMysqlAdapter();
-    if (isMariaDbServer($adapter)) {
-        $this->markTestSkipped('Genuine-MySQL-only test: MariaDB is exempt from strict mode.');
-    }
-
-    // SQL_MODE before
     $modeBefore = fetchSqlMode($adapter);
-    expect($modeBefore)->toContain('ONLY_FULL_GROUP_BY');
+    $adapter->startSetup();
+    $adapter->endSetup();
+    expect(fetchSqlMode($adapter))->toBe($modeBefore);
+});
 
-    // Create a temp table and call insertForce
+it('preserves the live SQL_MODE in insertForce so the bulk-import path still works', function () {
+    $adapter = createFreshMysqlAdapter();
+    $modeBefore = fetchSqlMode($adapter);
+    expect($modeBefore)->toContain('STRICT_TRANS_TABLES');
+
     $tempTable = 'test_insertforce_' . uniqid();
     $table = $adapter->newTable($tempTable)
         ->addColumn('id', \Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
@@ -150,13 +148,13 @@ it('preserves the live SQL_MODE in insertForce so the bulk-import path still wor
             'nullable' => false,
             'primary' => true,
         ], 'ID')
-        ->addColumn('val', \Maho\Db\Ddl\Table::TYPE_VARCHAR, 50, [], 'Val')
-        ->setOption('type', 'TEMPORARY');
+        ->addColumn('val', \Maho\Db\Ddl\Table::TYPE_VARCHAR, 50, [], 'Val');
     $adapter->createTable($table);
 
     $adapter->insertForce($tempTable, ['id' => 0, 'val' => 'test']);
 
-    // SQL_MODE should be restored to ONLY_FULL_GROUP_BY after insertForce
-    $modeAfter = fetchSqlMode($adapter);
-    expect($modeAfter)->toContain('ONLY_FULL_GROUP_BY');
+    // SQL_MODE should be restored to the strict baseline after insertForce
+    expect(fetchSqlMode($adapter))->toBe($modeBefore);
+
+    $adapter->dropTable($tempTable);
 });

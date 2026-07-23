@@ -27,8 +27,7 @@ beforeEach(function () {
         ], 'ID')
         ->addColumn('name', \Maho\Db\Ddl\Table::TYPE_TEXT, 100, [], 'Name')
         ->addColumn('value', \Maho\Db\Ddl\Table::TYPE_INTEGER, null, [], 'Value')
-        ->addColumn('status', \Maho\Db\Ddl\Table::TYPE_SMALLINT, null, ['default' => 1], 'Status')
-        ->setOption('type', 'TEMPORARY');
+        ->addColumn('status', \Maho\Db\Ddl\Table::TYPE_SMALLINT, null, ['default' => 1], 'Status');
     $this->adapter->createTable($sourceTable);
 
     $targetTable = $this->adapter->newTable($this->tempTableTarget)
@@ -44,14 +43,18 @@ beforeEach(function () {
             $this->adapter->getIndexName($this->tempTableTarget, ['name'], AdapterInterface::INDEX_TYPE_UNIQUE),
             ['name'],
             ['type' => AdapterInterface::INDEX_TYPE_UNIQUE],
-        )
-        ->setOption('type', 'TEMPORARY');
+        );
     $this->adapter->createTable($targetTable);
 
     // Insert test data
     $this->adapter->insert($this->tempTableSource, ['name' => 'test1', 'value' => 100]);
     $this->adapter->insert($this->tempTableSource, ['name' => 'test2', 'value' => 200]);
     $this->adapter->insert($this->tempTableSource, ['name' => 'test3', 'value' => 300]);
+});
+
+afterEach(function () {
+    $this->adapter->dropTable($this->tempTableSource);
+    $this->adapter->dropTable($this->tempTableTarget);
 });
 
 describe('insertFromSelect', function () {
