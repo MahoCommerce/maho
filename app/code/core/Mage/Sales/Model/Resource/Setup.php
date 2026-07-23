@@ -136,8 +136,6 @@ class Mage_Sales_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
         $length = null;
         switch ($data['type']) {
             case 'timestamp':
-                $type = Maho\Db\Ddl\Table::TYPE_TIMESTAMP;
-                break;
             case 'datetime':
                 $type = Maho\Db\Ddl\Table::TYPE_DATETIME;
                 break;

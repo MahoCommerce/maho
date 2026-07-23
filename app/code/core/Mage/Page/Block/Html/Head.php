@@ -37,7 +37,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
      */
     public function addCss($name, $params = '', $referenceName = '*', $before = null)
     {
-        $this->addItem('skin_css', $name, $params, null, null, $referenceName, $before);
+        $this->addItem('skin_css', $name, $params, null, $referenceName, $before);
         return $this;
     }
 
@@ -52,7 +52,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
      */
     public function addJs($name, $params = '', $referenceName = '*', $before = null)
     {
-        $this->addItem('js', $name, $params, null, null, $referenceName, $before);
+        $this->addItem('js', $name, $params, null, $referenceName, $before);
         return $this;
     }
 
@@ -82,20 +82,16 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
      * @param string $type
      * @param string $name
      * @param string $params
-     * @param string $if
      * @param string $cond
      * @param string $referenceName name of the item to insert the element before. If name is not found, insert at the end, * has special meaning (before all / before all)
      * @param string|bool $before If true insert before the $referenceName instead of after
      * @return $this
      */
-    public function addItem($type, $name, $params = null, $if = null, $cond = null, $referenceName = '*', $before = false)
+    public function addItem($type, $name, $params = null, $cond = null, $referenceName = '*', $before = false)
     {
         // allow skipping of parameters in the layout XML files via empty-string
         if ($params === '') {
             $params = null;
-        }
-        if ($if === '') {
-            $if = null;
         }
         if ($cond === '') {
             $cond = null;
@@ -113,7 +109,6 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
             'type' => $type,
             'name' => $name,
             'params' => $params,
-            'if' => $if,
             'cond' => $cond,
             'should_minify' => $shouldMinify, // Flag for deferred minification
         ];
@@ -150,55 +145,43 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
     public function getCssJsHtml()
     {
         // separate items by types
-        $lines  = [];
+        $items  = [];
         foreach ($this->_data['items'] as $item) {
             if (!is_null($item['cond']) && !$this->getData($item['cond']) || !isset($item['name'])) {
                 continue;
             }
-            $if     = empty($item['if']) ? '' : $item['if'];
             $params = empty($item['params']) ? '' : $item['params'];
             switch ($item['type']) {
                 case 'js':        // js/*.js
                 case 'skin_js':   // skin/*/*.js
                 case 'js_css':    // js/*.css
                 case 'skin_css':  // skin/*/*.css
-                    $lines[$if][$item['type']][$params][$item['name']] = $item;
+                    $items[$item['type']][$params][$item['name']] = $item;
                     break;
                 default:
-                    $this->_separateOtherHtmlHeadElements($lines, $if, $item['type'], $params, $item['name'], $item);
+                    $this->_separateOtherHtmlHeadElements($items, $item['type'], $params, $item['name'], $item);
                     break;
             }
         }
 
         // prepare HTML
-        $html   = '';
-        foreach ($lines as $if => $items) {
-            if (empty($items)) {
-                continue;
-            }
-            if (!empty($if)) {
-                // @deprecated
-                continue;
-            }
+        // static and skin css
+        $html = $this->_prepareStaticAndSkinElements(
+            '<link rel="stylesheet" href="%s"%s >' . PHP_EOL,
+            empty($items['js_css']) ? [] : $items['js_css'],
+            empty($items['skin_css']) ? [] : $items['skin_css'],
+        );
 
-            // static and skin css
-            $html .= $this->_prepareStaticAndSkinElements(
-                '<link rel="stylesheet" href="%s"%s >' . PHP_EOL,
-                empty($items['js_css']) ? [] : $items['js_css'],
-                empty($items['skin_css']) ? [] : $items['skin_css'],
-            );
+        // static and skin javascripts
+        $html .= $this->_prepareStaticAndSkinElements(
+            '<script src="%s"%s></script>' . PHP_EOL,
+            empty($items['js']) ? [] : $items['js'],
+            empty($items['skin_js']) ? [] : $items['skin_js'],
+        );
 
-            // static and skin javascripts
-            $html .= $this->_prepareStaticAndSkinElements(
-                '<script src="%s"%s></script>' . PHP_EOL,
-                empty($items['js']) ? [] : $items['js'],
-                empty($items['skin_js']) ? [] : $items['skin_js'],
-            );
-
-            // other stuff
-            if (!empty($items['other'])) {
-                $html .= $this->_prepareOtherHtmlHeadElements($items['other']) . PHP_EOL;
-            }
+        // other stuff
+        if (!empty($items['other'])) {
+            $html .= $this->_prepareOtherHtmlHeadElements($items['other']) . PHP_EOL;
         }
         return $html;
     }
@@ -280,26 +263,25 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
      *
      * @see self::getCssJsHtml()
      * @param array $lines
-     * @param string $itemIf
      * @param string $itemType
      * @param string $itemParams
      * @param string $itemName
      * @param array $itemThe
      */
-    protected function _separateOtherHtmlHeadElements(&$lines, $itemIf, $itemType, $itemParams, $itemName, $itemThe)
+    protected function _separateOtherHtmlHeadElements(&$lines, $itemType, $itemParams, $itemName, $itemThe)
     {
         $params = $itemParams ? ' ' . $itemParams : '';
         $href   = $itemName;
         switch ($itemType) {
             case 'rss':
-                $lines[$itemIf]['other'][] = sprintf(
+                $lines['other'][] = sprintf(
                     '<link href="%s"%s rel="alternate" type="application/rss+xml">',
                     $href,
                     $params,
                 );
                 break;
             case 'link_rel':
-                $lines[$itemIf]['other'][] = sprintf('<link%s href="%s">', $params, $href);
+                $lines['other'][] = sprintf('<link%s href="%s">', $params, $href);
                 break;
         }
     }
