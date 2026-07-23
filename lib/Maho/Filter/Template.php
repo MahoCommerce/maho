@@ -9,9 +9,11 @@
 
 namespace Maho\Filter;
 
+use Maho\Filter\Template\ExpressionObjectWrapper;
 use Maho\Filter\Template\Tokenizer\Parameter;
 use Maho\Filter\Template\Tokenizer\Variable;
 use Maho\DataObject;
+use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 class Template
 {
@@ -25,6 +27,8 @@ class Template
      */
     public const CONSTRUCTION_DEPEND_PATTERN = '/{{depend\s*(.*?)}}(.*?){{\\/depend\s*}}/si';
     public const CONSTRUCTION_IF_PATTERN = '/{{if\s*(.*?)}}(.*?)({{else}}(.*?))?{{\\/if\s*}}/si';
+
+    private static ?ExpressionLanguage $_expressionLanguage = null;
 
     /**
      * Assigned template variables
@@ -215,7 +219,7 @@ class Template
             return $construction[0];
         }
 
-        if ($this->_getVariable($construction[1], '') == '') {
+        if (!$this->evaluateCondition($construction[1])) {
             return '';
         }
         return $construction[2];
@@ -227,13 +231,68 @@ class Template
             return $construction[0];
         }
 
-        if ($this->_getVariable($construction[1], '') == '') {
+        if (!$this->evaluateCondition($construction[1])) {
             if (isset($construction[3]) && isset($construction[4])) {
                 return $construction[4];
             }
             return '';
         }
         return $construction[2];
+    }
+
+    /**
+     * Evaluate an {{if}} / {{depend}} condition as a Symfony ExpressionLanguage expression
+     * against the template variables, e.g. {{if order.grand_total > 100 && customer.group_id == 2}}.
+     *
+     * The legacy single-variable syntax ("order.increment_id", "customer.getName()") is a
+     * subset of the expression syntax and keeps working: identifiers the template does not
+     * define evaluate as null, and the result uses standard PHP truthiness. A condition that
+     * fails to parse or evaluate logs a warning and yields false, so a broken template
+     * degrades instead of aborting.
+     */
+    protected function evaluateCondition(string $condition): bool
+    {
+        $expression = trim($condition);
+        if ($expression === '') {
+            return false;
+        }
+
+        $values = [];
+        foreach ($this->_templateVars as $name => $value) {
+            $values[$name] = ExpressionObjectWrapper::wrap($value);
+        }
+        // Default every identifier-shaped token to null so absent optional variables
+        // ({{depend comment}}) evaluate silently as empty instead of failing the parse.
+        // Extra names never change how operators or literals are parsed.
+        preg_match_all('/\b[a-z_][a-z0-9_]*\b/i', $expression, $matches);
+        foreach ($matches[0] as $name) {
+            $values[$name] ??= null;
+        }
+
+        try {
+            return (bool) self::getExpressionLanguage()->evaluate($expression, $values);
+        } catch (\Throwable $e) {
+            \Mage::log(
+                sprintf('Invalid condition "%s" in template directive: %s', $expression, $e->getMessage()),
+                \Mage::LOG_WARNING,
+            );
+            return false;
+        }
+    }
+
+    protected static function getExpressionLanguage(): ExpressionLanguage
+    {
+        if (self::$_expressionLanguage === null) {
+            $language = new ExpressionLanguage();
+            // Templates must not read arbitrary PHP/class constants
+            $language->register(
+                'constant',
+                static fn(): string => 'null',
+                static fn(): mixed => null,
+            );
+            self::$_expressionLanguage = $language;
+        }
+        return self::$_expressionLanguage;
     }
 
     /**
