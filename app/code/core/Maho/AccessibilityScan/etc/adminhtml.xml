@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <menu>
+        <system>
+            <children>
+                <tools>
+                    <children>
+                        <accessibilityscan translate="title" module="accessibilityscan">
+                            <title>Accessibility Scan</title>
+                            <action>adminhtml/accessibilityscan_dashboard</action>
+                            <sort_order>40</sort_order>
+                        </accessibilityscan>
+                    </children>
+                </tools>
+            </children>
+        </system>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <system>
+                        <children>
+                            <tools>
+                                <children>
+                                    <accessibilityscan translate="title" module="accessibilityscan">
+                                        <title>Accessibility Scan</title>
+                                        <sort_order>40</sort_order>
+                                    </accessibilityscan>
+                                </children>
+                            </tools>
+                            <config>
+                                <children>
+                                    <accessibilityscan translate="title" module="accessibilityscan">
+                                        <title>Accessibility Scan</title>
+                                    </accessibilityscan>
+                                </children>
+                            </config>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

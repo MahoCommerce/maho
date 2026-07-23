@@ -25,7 +25,7 @@ describe('Refund Flow - Single Gift Card', function () {
 
         // Create order that used the gift card
         $this->order = Mage::getModel('sales/order');
-        $this->order->setIncrementId('REFUND-TEST-' . time() . '-' . mt_rand(1000, 9999));
+        $this->order->setIncrementId('REFUND-TEST-' . uniqid('', true));
         $this->order->setStoreId(1);
         $this->order->setStore(Mage::app()->getStore(1));
         $this->order->setBaseCurrencyCode('USD');
@@ -184,7 +184,7 @@ describe('Refund Flow - Multiple Gift Cards', function () {
 
         // Create order that used both gift cards ($30 + $70 = $100)
         $this->order = Mage::getModel('sales/order');
-        $this->order->setIncrementId('REFUND-MULTI-' . time() . '-' . mt_rand(1000, 9999));
+        $this->order->setIncrementId('REFUND-MULTI-' . uniqid('', true));
         $this->order->setStoreId(1);
         $this->order->setStore(Mage::app()->getStore(1));
         $this->order->setBaseCurrencyCode('USD');
@@ -320,7 +320,7 @@ describe('Refund Flow - Multiple Credit Memos', function () {
         $this->giftcard->save();
 
         $this->order = Mage::getModel('sales/order');
-        $this->order->setIncrementId('REFUND-MULTI-CM-' . time() . '-' . mt_rand(1000, 9999));
+        $this->order->setIncrementId('REFUND-MULTI-CM-' . uniqid('', true));
         $this->order->setStoreId(1);
         $this->order->setStore(Mage::app()->getStore(1));
         $this->order->setBaseCurrencyCode('USD');
@@ -462,7 +462,7 @@ describe('Refund Flow - Edge Cases', function () {
         $giftcard->save();
 
         $order = Mage::getModel('sales/order');
-        $order->setIncrementId('REFUND-ZERO-' . time() . '-' . mt_rand(1000, 9999));
+        $order->setIncrementId('REFUND-ZERO-' . uniqid('', true));
         $order->setStoreId(1);
         $order->setStore(Mage::app()->getStore(1));
         $order->setBaseGiftcardAmount(50.00);
@@ -492,7 +492,7 @@ describe('Refund Flow - Edge Cases', function () {
 
     test('handles missing gift card codes gracefully', function () {
         $order = Mage::getModel('sales/order');
-        $order->setIncrementId('REFUND-NOCODES-' . time() . '-' . mt_rand(1000, 9999));
+        $order->setIncrementId('REFUND-NOCODES-' . uniqid('', true));
         $order->setStoreId(1);
         $order->setStore(Mage::app()->getStore(1));
         $order->setBaseGiftcardAmount(50.00);
@@ -529,7 +529,7 @@ describe('Refund Flow - Edge Cases', function () {
         $code = $giftcard->getCode();
 
         $order = Mage::getModel('sales/order');
-        $order->setIncrementId('REFUND-DELETED-' . time() . '-' . mt_rand(1000, 9999));
+        $order->setIncrementId('REFUND-DELETED-' . uniqid('', true));
         $order->setStoreId(1);
         $order->setStore(Mage::app()->getStore(1));
         $order->setBaseGiftcardAmount(50.00);
@@ -568,7 +568,7 @@ describe('Refund Flow - Edge Cases', function () {
         $giftcard->save();
 
         $order = Mage::getModel('sales/order');
-        $order->setIncrementId('REFUND-PARTIAL-USE-' . time() . '-' . mt_rand(1000, 9999));
+        $order->setIncrementId('REFUND-PARTIAL-USE-' . uniqid('', true));
         $order->setStoreId(1);
         $order->setStore(Mage::app()->getStore(1));
         $order->setBaseGiftcardAmount(60.00); // Only $60 was applied
@@ -612,7 +612,7 @@ describe('Refund Flow - Order Fully Paid by Gift Card', function () {
 
         // Order fully paid by gift card (grand_total = 0)
         $this->order = Mage::getModel('sales/order');
-        $this->order->setIncrementId('REFUND-FULLGC-' . time() . '-' . mt_rand(1000, 9999));
+        $this->order->setIncrementId('REFUND-FULLGC-' . uniqid('', true));
         $this->order->setStoreId(1);
         $this->order->setStore(Mage::app()->getStore(1));
         $this->order->setBaseCurrencyCode('USD');
@@ -699,7 +699,7 @@ describe('Refund Flow - Expired Card Expiration Extension', function () {
         $giftcard->save();
 
         $order = Mage::getModel('sales/order');
-        $order->setIncrementId('REFUND-EXPIRED-' . time() . '-' . mt_rand(1000, 9999));
+        $order->setIncrementId('REFUND-EXPIRED-' . uniqid('', true));
         $order->setStoreId(1);
         $order->setStore(Mage::app()->getStore(1));
         $order->setBaseGiftcardAmount(100.00);
@@ -752,7 +752,7 @@ describe('Refund Flow - Expired Card Expiration Extension', function () {
         $giftcard->save();
 
         $order = Mage::getModel('sales/order');
-        $order->setIncrementId('REFUND-PASTEXP-' . time() . '-' . mt_rand(1000, 9999));
+        $order->setIncrementId('REFUND-PASTEXP-' . uniqid('', true));
         $order->setStoreId(1);
         $order->setStore(Mage::app()->getStore(1));
         $order->setBaseGiftcardAmount(80.00);
@@ -802,7 +802,7 @@ describe('Refund Flow - Expired Card Expiration Extension', function () {
         $giftcard->save();
 
         $order = Mage::getModel('sales/order');
-        $order->setIncrementId('REFUND-SOON-' . time() . '-' . mt_rand(1000, 9999));
+        $order->setIncrementId('REFUND-SOON-' . uniqid('', true));
         $order->setStoreId(1);
         $order->setStore(Mage::app()->getStore(1));
         $order->setBaseGiftcardAmount(100.00);
@@ -854,7 +854,7 @@ describe('Refund Flow - Expired Card Expiration Extension', function () {
         $originalExpiresAt = $giftcard->getExpiresAt();
 
         $order = Mage::getModel('sales/order');
-        $order->setIncrementId('REFUND-FUTURE-' . time() . '-' . mt_rand(1000, 9999));
+        $order->setIncrementId('REFUND-FUTURE-' . uniqid('', true));
         $order->setStoreId(1);
         $order->setStore(Mage::app()->getStore(1));
         $order->setBaseGiftcardAmount(100.00);
@@ -897,7 +897,7 @@ describe('Refund Flow - Expired Card Expiration Extension', function () {
         $giftcard->save();
 
         $order = Mage::getModel('sales/order');
-        $order->setIncrementId('REFUND-HISTORY-' . time() . '-' . mt_rand(1000, 9999));
+        $order->setIncrementId('REFUND-HISTORY-' . uniqid('', true));
         $order->setStoreId(1);
         $order->setStore(Mage::app()->getStore(1));
         $order->setBaseGiftcardAmount(50.00);
@@ -940,7 +940,7 @@ describe('Refund Flow - Expired Card Expiration Extension', function () {
         $giftcard->save();
 
         $order = Mage::getModel('sales/order');
-        $order->setIncrementId('REFUND-NOEXP-' . time() . '-' . mt_rand(1000, 9999));
+        $order->setIncrementId('REFUND-NOEXP-' . uniqid('', true));
         $order->setStoreId(1);
         $order->setStore(Mage::app()->getStore(1));
         $order->setBaseGiftcardAmount(75.00);
