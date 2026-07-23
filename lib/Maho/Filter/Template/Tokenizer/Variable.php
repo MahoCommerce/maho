@@ -11,6 +11,11 @@ declare(strict_types=1);
 
 namespace Maho\Filter\Template\Tokenizer;
 
+/**
+ * Tokenizes a {{var}} object path into a variable/property/method stack.
+ *
+ * @deprecated since 26.9 Use Symfony\Component\ExpressionLanguage\ExpressionLanguage instead, as Maho\Filter\Template now does to resolve {{var}} and {{if}}/{{depend}}.
+ */
 class Variable extends AbstractTokenizer
 {
     /**

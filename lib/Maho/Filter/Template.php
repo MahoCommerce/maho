@@ -11,8 +11,6 @@ namespace Maho\Filter;
 
 use Maho\Filter\Template\ExpressionObjectWrapper;
 use Maho\Filter\Template\Tokenizer\Parameter;
-use Maho\Filter\Template\Tokenizer\Variable;
-use Maho\DataObject;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\ExpressionLanguage\Node\Node;
 
@@ -263,18 +261,7 @@ class Template
             return false;
         }
 
-        $values = [];
-        foreach ($this->_templateVars as $name => $value) {
-            $values[$name] = ExpressionObjectWrapper::wrap($value);
-        }
-        // Default every identifier-shaped token to null so absent optional variables
-        // ({{depend comment}}) evaluate silently as empty instead of failing the parse.
-        // Extra names never change how operators or literals are parsed.
-        preg_match_all('/\b[a-z_][a-z0-9_]*\b/i', $expression, $matches);
-        foreach ($matches[0] as $name) {
-            $values[$name] ??= null;
-        }
-
+        $values = $this->_expressionValues($expression);
         try {
             $language = self::getExpressionLanguage();
             $parsed = $language->parse($expression, array_keys($values));
@@ -287,6 +274,28 @@ class Template
             );
             return false;
         }
+    }
+
+    /**
+     * Build the variable map an expression is evaluated against: every template variable
+     * wrapped so property/method access is gated, plus every identifier-shaped token in the
+     * expression defaulted to null so an absent variable ({{depend comment}}, {{var comment}})
+     * evaluates silently as empty instead of failing the parse. Extra names never change how
+     * operators or literals are parsed. Shared by {{if}}/{{depend}} and {{var}}.
+     *
+     * @return array<string, mixed>
+     */
+    private function _expressionValues(string $expression): array
+    {
+        $values = [];
+        foreach ($this->_templateVars as $name => $value) {
+            $values[$name] = ExpressionObjectWrapper::wrap($value);
+        }
+        preg_match_all('/\b[a-z_][a-z0-9_]*\b/i', $expression, $matches);
+        foreach ($matches[0] as $name) {
+            $values[$name] ??= null;
+        }
+        return $values;
     }
 
     /**
@@ -346,67 +355,38 @@ class Template
     }
 
     /**
-     * Return variable value for var construction
+     * Resolve a {{var}} object path to its value through the same sandboxed ExpressionLanguage
+     * engine as {{if}}/{{depend}}: property reads and read-only accessors work (including
+     * arg-bearing ones such as getAttributeText('color') and format('html')), while
+     * state-changing methods, secret fields and whole-object dumps are refused by the wrapper.
+     * Returns $default when the path is empty, resolves to nothing, or fails to parse/evaluate.
      *
-     * @param string $value raw parameters
+     * @param string $value raw variable expression
      * @param string|null $default default value
-     * @return string
+     * @return mixed
      */
     protected function _getVariable($value, $default = '{no_value_defined}')
     {
         \Maho\Profiler::start('email_template_proccessing_variables');
-        $tokenizer = new Variable();
-        $tokenizer->setString($value);
-        $stackVars = $tokenizer->tokenize();
-        $result = $default;
-        $last = 0;
-        /** @var \Mage_Adminhtml_Model_Email_PathValidator $emailPathValidator */
-        $emailPathValidator = $this->getEmailPathValidator();
-        for ($i = 0; $i < count($stackVars); $i++) {
-            if ($i == 0 && isset($this->_templateVars[$stackVars[$i]['name']])) {
-                // Getting of template value
-                $stackVars[$i]['variable'] = & $this->_templateVars[$stackVars[$i]['name']];
-            } elseif (isset($stackVars[$i - 1]['variable']) && $stackVars[$i - 1]['variable'] instanceof DataObject) {
-                // If object calling methods or getting properties
-                if ($stackVars[$i]['type'] == 'property') {
-                    $caller = 'get' . uc_words($stackVars[$i]['name'], '');
-                    $stackVars[$i]['variable'] = method_exists($stackVars[$i - 1]['variable'], $caller)
-                        ? $stackVars[$i - 1]['variable']->$caller()
-                        : $stackVars[$i - 1]['variable']->getData($stackVars[$i]['name']);
-                } elseif ($stackVars[$i]['type'] == 'method') {
-                    // Calling of object method
-                    if (method_exists($stackVars[$i - 1]['variable'], $stackVars[$i]['name'])
-                        || str_starts_with($stackVars[$i]['name'], 'get')
-                    ) {
-                        $isEncrypted = false;
-                        if ($stackVars[$i]['name'] == 'getConfig') {
-                            $isEncrypted = $emailPathValidator->isValid($stackVars[$i]['args']);
-                        }
-                        $stackVars[$i]['variable'] = call_user_func_array(
-                            [$stackVars[$i - 1]['variable'], $stackVars[$i]['name']],
-                            $isEncrypted ? [null] : $stackVars[$i]['args'],
-                        );
-                    }
-                }
-                $last = $i;
-            }
+        $expression = trim($value);
+        if ($expression === '') {
+            \Maho\Profiler::stop('email_template_proccessing_variables');
+            return $default;
         }
-
-        if (isset($stackVars[$last]['variable'])) {
-            // If value for construction exists set it
-            $result = $stackVars[$last]['variable'];
+        try {
+            $values = $this->_expressionValues($expression);
+            $language = self::getExpressionLanguage();
+            $parsed = $language->parse($expression, array_keys($values));
+            self::assertNoDeniedOperator($parsed->getNodes());
+            $result = ExpressionObjectWrapper::unwrap($language->evaluate($parsed, $values)) ?? $default;
+        } catch (\Throwable $e) {
+            \Mage::log(
+                sprintf('Invalid variable "%s" in template directive: %s', $expression, $e->getMessage()),
+                \Mage::LOG_WARNING,
+            );
+            $result = $default;
         }
         \Maho\Profiler::stop('email_template_proccessing_variables');
         return $result;
-    }
-
-    /**
-     * Retrieve model object
-     *
-     * @return \Mage_Adminhtml_Model_Email_PathValidator
-     */
-    protected function getEmailPathValidator()
-    {
-        return \Mage::getModel('adminhtml/email_pathValidator');
     }
 }

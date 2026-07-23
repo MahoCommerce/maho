@@ -24,9 +24,11 @@ use Maho\DataObject;
 class ExpressionObjectWrapper implements \Stringable
 {
     /**
-     * Method name prefixes considered read-only and therefore callable from a condition.
+     * Method name prefixes considered read-only and therefore callable from a template.
+     * Shared with the legacy {{var}} resolver (Template::_isReadOnlyMethodCall) so both the
+     * condition sandbox and the {{var}} gate draw the read-only surface from one place.
      */
-    private const READ_ONLY_PREFIXES = ['get', 'has', 'is', 'can', 'to', 'count', 'format'];
+    public const READ_ONLY_PREFIXES = ['get', 'has', 'is', 'can', 'to', 'count', 'format'];
 
     /**
      * Methods refused even though they match a read-only prefix. getConfigData() reads
@@ -36,13 +38,13 @@ class ExpressionObjectWrapper implements \Stringable
      * calls an arbitrary getter, so it side-steps the name-based getConfig encrypted-path
      * guard in __call() (the same getter stays reachable directly — getConfig()/getFoo()/foo
      * — where the guard still applies); getDataSetDefault() writes to the object despite its
-     * getter-shaped name.
+     * getter-shaped name; getDataByPath() walks an ungated a/b/c path into nested _data, so it
+     * is closed whole rather than filtered by key.
      *
      * This list is deliberately small: it holds only method-level denials that a field-name
      * rule cannot express. Secret *fields* (password, card data, tokens, ...) are refused by
-     * SENSITIVE_FIELD_FRAGMENTS instead, and the no-argument rule in isAllowedCall() already
-     * refuses getDataByPath() (it walks an ungated a/b/c path into nested _data) and
-     * isDeleted($flag)-style getter-shaped mutators, without listing each by name.
+     * SENSITIVE_FIELD_FRAGMENTS instead, and isAllowedCall() refuses an argument to an
+     * is/can predicate so isDeleted($flag)-style getter-shaped mutators cannot toggle state.
      */
     private const DENIED_METHODS = [
         'getconfigdata',
@@ -52,6 +54,7 @@ class ExpressionObjectWrapper implements \Stringable
         'tostring',
         'getdatausingmethod',
         'getdatasetdefault',
+        'getdatabypath',
     ];
 
     /**
@@ -94,6 +97,23 @@ class ExpressionObjectWrapper implements \Stringable
         }
         if (is_array($value)) {
             return array_map(self::wrap(...), $value);
+        }
+        return $value;
+    }
+
+    /**
+     * Reverse wrap(): unwrap a value returned from an expression back to the raw object it
+     * guards, so {{var}} can format a DateTimeInterface or string-cast a scalar. The guard only
+     * governs how a value is *reached* during evaluation; the resolved value itself is returned
+     * plain.
+     */
+    public static function unwrap(mixed $value): mixed
+    {
+        if ($value instanceof self) {
+            return $value->object;
+        }
+        if (is_array($value)) {
+            return array_map(self::unwrap(...), $value);
         }
         return $value;
     }
@@ -164,39 +184,43 @@ class ExpressionObjectWrapper implements \Stringable
         if (!self::isReadOnlyMethod($method)) {
             return false;
         }
-        $isKeyedAccessor = in_array(strtolower($method), self::KEYED_DATA_ACCESSORS, true);
-        // A read-only getter is called with no arguments. The only calls that legitimately
-        // carry one are the keyed data accessors (the key to read) and getConfig (the config
-        // path, still neutralized on encrypted paths by __call). Refusing every other
-        // argument-bearing call closes a whole class of escapes structurally rather than
-        // name by name: a getter-shaped method that mutates when handed an argument
-        // (isDeleted($flag)) or resolves an ungated nested path (getDataByPath('payment/cc_number'),
-        // the un-gated twin of the keyed getData()) can never be reached.
-        if ($args !== [] && !$isKeyedAccessor && strcasecmp($method, 'getConfig') !== 0) {
+        // A named getter resolves to a field; refuse it when that field is a secret, so a
+        // subclass getter returning a stored credential (Customer::getPassword(), reached
+        // directly or as the getter __get() derives for a property) cannot become an oracle.
+        if (self::isSensitiveField(self::fieldFromMethod($method))) {
             return false;
         }
-        if (!$isKeyedAccessor) {
-            // A named getter resolves to a field; refuse it when that field is a secret, so a
-            // subclass getter returning a stored credential (Customer::getPassword()) cannot
-            // become an exfil oracle. Reached both directly (getPassword()) and via the getter
-            // __get() derives for a property (.password -> getPassword).
-            $field = self::fieldFromMethod($method);
-            // A method that is exactly a bare prefix ("get") resolves to no field and, through
-            // DataObject::__call, dumps the whole _data array (getData('') semantics), so it is
-            // refused like the keyed accessors refuse a missing key.
-            return $field !== '' && !self::isSensitiveField($field);
+        // A bare "get" resolves to getData('') and dumps the whole _data array. (format()/
+        // count() also strip to an empty field but read, not dump, so they stay allowed.)
+        if (strcasecmp($method, 'get') === 0) {
+            return false;
         }
-        // getData('password') has to be refused exactly like getPassword(): the key names
-        // what is being read, so it is the key that has to clear both the secret-field gate
-        // and the read-only gate. Called without a key these accessors return the entire
-        // internal _data array, which would hand out every field at once, so a missing or
-        // non-string key is refused outright. A key carrying a "/" is refused too: getData()
-        // forwards it to the same ungated getDataByPath() traversal, so only the top-level key
-        // would clear the gate while the nested segment ("address/cc_number") is read unchecked.
-        $key = $args[0] ?? null;
-        return is_string($key) && $key !== '' && !str_contains($key, '/')
-            && !self::isSensitiveField($key)
-            && self::isReadOnlyMethod('get' . uc_words($key, ''));
+        // A keyed data accessor needs a non-empty string key; without one it returns the whole
+        // internal _data array, handing out every field at once.
+        if (in_array(strtolower($method), self::KEYED_DATA_ACCESSORS, true)
+            && (!is_string($args[0] ?? null) || $args[0] === '')
+        ) {
+            return false;
+        }
+        if ($args === []) {
+            return true;
+        }
+        // An argument to an is/can predicate is not a read but a state toggle (isDeleted($flag)).
+        if (preg_match('/^(?i:is|can)([^a-z]|$)/', $method)) {
+            return false;
+        }
+        // getConfig carries a config path (which contains "/"); its encrypted paths are
+        // neutralized separately in __call().
+        if (strcasecmp($method, 'getConfig') === 0) {
+            return true;
+        }
+        // Otherwise arguments are allowed — getData('sku'), getAttributeText('color'),
+        // format('html') — but a string argument must not smuggle a secret field name or a
+        // nested "/" path (getDataByPath('payment/cc_number')) past the field-name gate.
+        return !array_any(
+            $args,
+            fn($arg) => is_string($arg) && (str_contains($arg, '/') || self::isSensitiveField($arg)),
+        );
     }
 
     private static function isReadOnlyMethod(string $method): bool
