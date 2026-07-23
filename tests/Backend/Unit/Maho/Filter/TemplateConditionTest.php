@@ -48,7 +48,7 @@ describe('legacy single-variable conditions', function () {
     });
 
     it('prefers a real getter method over raw data access for property paths', function () {
-        $order = new class () extends DataObject {
+        $order = new class extends DataObject {
             public function getStatusLabel(): string
             {
                 return 'Processing';
@@ -61,7 +61,7 @@ describe('legacy single-variable conditions', function () {
     it('resolves property paths through computed getters returning objects', function () {
         // getData('billing_address') is empty; only the real getter can resolve the path,
         // and its DataObject result must be re-wrapped for the .company access to work
-        $order = new class () extends DataObject {
+        $order = new class extends DataObject {
             public function getBillingAddress(): DataObject
             {
                 return new DataObject(['company' => 'ACME']);
@@ -159,7 +159,7 @@ describe('expression object wrapper', function () {
             $this->markTestSkipped('No encrypted configuration paths available in this environment');
         }
 
-        $object = new class () extends DataObject {
+        $object = new class extends DataObject {
             public function getConfig(?string $path = null): ?string
             {
                 return $path;
@@ -177,7 +177,7 @@ describe('expression object wrapper', function () {
             $this->markTestSkipped('No encrypted configuration paths available in this environment');
         }
 
-        $store = new class () extends DataObject {
+        $store = new class extends DataObject {
             public function getConfig(?string $path = null): ?string
             {
                 return $path === null ? null : 'secret-value';
