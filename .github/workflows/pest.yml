@@ -17,6 +17,9 @@ jobs:
     name: Test Suite (${{ matrix.name }})
     runs-on: ubuntu-latest
 
+    env:
+      MAGE_IS_DEVELOPER_MODE: 1
+
     strategy:
       fail-fast: false
       matrix:

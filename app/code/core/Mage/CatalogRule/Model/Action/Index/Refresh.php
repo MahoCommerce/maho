@@ -517,8 +517,8 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
                     'product_id'            => 'product_id',
                     'rule_price'            => 'MIN(rule_price)',
                     'website_id'            => new Maho\Db\Expr($website->getId()),
-                    'latest_start_date'     => 'latest_start_date',
-                    'earliest_end_date'     => 'earliest_end_date',
+                    'latest_start_date'     => 'MAX(latest_start_date)',
+                    'earliest_end_date'     => 'MIN(earliest_end_date)',
                 ],
             )
             ->where(new Maho\Db\Expr($this->_connection->getUnixTimestamp('dates.rule_date') . ' >= from_time'))

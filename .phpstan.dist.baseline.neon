@@ -12298,12 +12298,6 @@ parameters:
 			path: app/code/core/Mage/ConfigurableSwatches/Model/Resource/Catalog/Product/Type/Configurable/Product/Collection.php
 
 		-
-			rawMessage: Variable $query might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/code/core/Mage/ConfigurableSwatches/Model/Resource/Catalog/Product/Type/Configurable/Product/Collection.php
-
-		-
 			rawMessage: 'Parameter #1 $array of function array_unshift expects array, null given.'
 			identifier: argument.type
 			count: 1

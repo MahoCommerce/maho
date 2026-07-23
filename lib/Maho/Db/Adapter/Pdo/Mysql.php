@@ -129,8 +129,24 @@ class Mysql extends AbstractPdoAdapter
     protected function _initConnection(): void
     {
         /** @link http://bugs.mysql.com/bug.php?id=18551 */
-        $this->_connection->executeStatement("SET SQL_MODE=''");
+        $sqlMode = '';
+        if (\Mage::getIsDeveloperMode() && !$this->isMariaDb()) {
+            // Surface non-strict GROUP BY queries during development (issue #688).
+            // MariaDB is exempt: its ONLY_FULL_GROUP_BY lacks the functional-dependency
+            // detection of MySQL/PostgreSQL (MDEV-11588), so it would reject
+            // SQL-standard queries like SELECT t.* ... GROUP BY t.pk.
+            $sqlMode = 'ONLY_FULL_GROUP_BY';
+        }
+        $this->_connection->executeStatement("SET SQL_MODE='{$sqlMode}'");
         $this->_connection->executeStatement("SET time_zone = '+00:00'");
+    }
+
+    /**
+     * Whether the connected server is MariaDB rather than genuine MySQL
+     */
+    protected function isMariaDb(): bool
+    {
+        return $this->_connection->getDatabasePlatform() instanceof \Doctrine\DBAL\Platforms\MariaDBPlatform;
     }
 
     /**
@@ -223,8 +239,7 @@ class Mysql extends AbstractPdoAdapter
         $this->_connection = \Doctrine\DBAL\DriverManager::getConnection($params);
         $this->_debugStat(self::DEBUG_CONNECT, '');
 
-        /** @link http://bugs.mysql.com/bug.php?id=18551 */
-        $this->_connection->executeStatement("SET SQL_MODE=''");
+        $this->_initConnection();
 
         $this->_connectionFlagsSet = true;
     }
@@ -2787,7 +2802,6 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     public function startSetup(): self
     {
-        $this->raw_query("SET SQL_MODE=''");
         $this->raw_query('SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0');
         $this->raw_query("SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
 

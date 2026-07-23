@@ -65,18 +65,26 @@ class Mage_Sales_Model_Api2_Order extends Mage_Api2_Model_Resource
         $taxInfoFields = [];
 
         if ($this->_isTaxNameAllowed()) {
-            $taxInfoFields['tax_name'] = 'order_tax.title';
+            $taxInfoFields['tax_name'] = 'title';
         }
         if ($this->_isTaxRateAllowed()) {
-            $taxInfoFields['tax_rate'] = 'order_tax.percent';
+            $taxInfoFields['tax_rate'] = 'percent';
         }
         if ($taxInfoFields) {
-            $collection->getSelect()->joinLeft(
-                ['order_tax' => $collection->getTable('sales/order_tax')],
-                'main_table.entity_id = order_tax.order_id',
-                $taxInfoFields,
-            );
-            $collection->getSelect()->group('main_table.entity_id');
+            // Use correlated subqueries instead of JOIN+GROUP BY to avoid ONLY_FULL_GROUP_BY
+            // violations. Both subqueries order by tax_id, so tax_name and tax_rate are
+            // deterministically taken from the same (first) tax record of the order.
+            $adapter = $collection->getConnection();
+            $columns = [];
+            foreach ($taxInfoFields as $alias => $field) {
+                $subSelect = $adapter->select()
+                    ->from(['order_tax' => $collection->getTable('sales/order_tax')], [$field])
+                    ->where('order_tax.order_id = main_table.entity_id')
+                    ->order('order_tax.tax_id')
+                    ->limit(1);
+                $columns[$alias] = new Maho\Db\Expr('(' . $subSelect . ')');
+            }
+            $collection->getSelect()->columns($columns);
         }
         return $this;
     }

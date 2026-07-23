@@ -141,7 +141,11 @@ class Mage_Reports_Model_Resource_Tag_Product_Collection extends Mage_Tag_Model_
             ->join(
                 ['t' => $this->getTable('tag/tag')],
                 't.tag_id = relation.tag_id',
-                ['tag_id',  'status', 'tag_name' => 'name'],
+                [
+                    'tag_id' => new Maho\Db\Expr('MIN(t.tag_id)'),
+                    'status' => new Maho\Db\Expr('MIN(t.status)'),
+                    'tag_name' => new Maho\Db\Expr('MIN(t.name)'),
+                ],
             );
 
         return $this;

@@ -70,7 +70,7 @@ class Mage_SalesRule_Model_Resource_Report_Collection extends Mage_Sales_Model_R
             $this->_selectedColumns = [
                 'period'                  => $this->_periodFormat,
                 'coupon_code',
-                'rule_name',
+                'rule_name'               => 'MAX(rule_name)',
                 'coupon_uses'             => 'SUM(coupon_uses)',
                 'subtotal_amount'         => 'SUM(subtotal_amount)',
                 'discount_amount'         => 'SUM(discount_amount)',
