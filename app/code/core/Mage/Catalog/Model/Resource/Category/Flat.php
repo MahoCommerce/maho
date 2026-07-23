@@ -558,7 +558,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
             $this->_columns = array_merge($this->_getStaticColumns(), $this->_getEavColumns());
             foreach ($this->_columns as $fieldName => $fieldProp) {
                 $default = $fieldProp['default'];
-                if ($fieldProp['type'][0] == Maho\Db\Ddl\Table::TYPE_TIMESTAMP
+                if ($fieldProp['type'][0] == Maho\Db\Ddl\Table::TYPE_DATETIME
                     && $default === 'CURRENT_TIMESTAMP'
                 ) {
                     $default = Maho\Db\Ddl\Table::TIMESTAMP_INIT;
@@ -672,11 +672,8 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
                     $options = $column['LENGTH'];
                     $isUnsigned = null;
                     break;
-                case Maho\Db\Ddl\Table::TYPE_TIMESTAMP:
-                    $options = null;
-                    $isUnsigned = null;
-                    break;
                 case Maho\Db\Ddl\Table::TYPE_DATETIME:
+                    $options = null;
                     $isUnsigned = null;
                     break;
             }

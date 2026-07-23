@@ -1,0 +1,146 @@
+<?xml version="1.0"?>
+<!--
+SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+SPDX-License-Identifier: AFL-3.0
+-->
+<config>
+    <sections>
+        <accessibilityscan translate="label" module="accessibilityscan">
+            <label>Accessibility Scan</label>
+            <tab>advanced</tab>
+            <frontend_type>text</frontend_type>
+            <sort_order>10</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>0</show_in_website>
+            <show_in_store>0</show_in_store>
+            <groups>
+                <general translate="label">
+                    <label>General Settings</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>10</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <wcag_level translate="label comment">
+                            <label>Default WCAG Level</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>accessibilityscan/source_wcagLevel</source_model>
+                            <comment>Conformance level used when starting a scan without an explicit level.</comment>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </wcag_level>
+                        <timeout translate="label comment">
+                            <label>Scan Timeout</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits validate-greater-than-zero</validate>
+                            <comment>Maximum time in seconds to wait for a single page scan.</comment>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </timeout>
+                        <viewport_desktop translate="label comment">
+                            <label>Desktop Viewport</label>
+                            <frontend_type>text</frontend_type>
+                            <comment>Width x height in CSS pixels. Every scan runs one pass per viewport. Default: 1280x1024</comment>
+                            <sort_order>22</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </viewport_desktop>
+                        <viewport_mobile translate="label comment">
+                            <label>Mobile Viewport</label>
+                            <frontend_type>text</frontend_type>
+                            <comment>Width x height in CSS pixels, scanned with mobile emulation. Default: 390x844</comment>
+                            <sort_order>24</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </viewport_mobile>
+                        <cleanup_days translate="label comment">
+                            <label>Delete Scans After</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits</validate>
+                            <comment>Scans older than this many days are deleted automatically. 0 keeps everything.</comment>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </cleanup_days>
+                    </fields>
+                </general>
+                <scheduled translate="label">
+                    <label>Scheduled Scans</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>15</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <enabled translate="label comment">
+                            <label>Enabled</label>
+                            <frontend_type>boolean</frontend_type>
+                            <comment>Periodically scan the URLs below via cron, using the default WCAG level.</comment>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </enabled>
+                        <urls translate="label comment">
+                            <label>URLs to Scan</label>
+                            <frontend_type>textarea</frontend_type>
+                            <backend_model>accessibilityscan/system_config_backend_scheduledUrls</backend_model>
+                            <comment>One URL per line. Every URL must belong to one of the configured store base URLs.</comment>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </urls>
+                        <schedule translate="label comment">
+                            <label>Cron Schedule</label>
+                            <frontend_type>text</frontend_type>
+                            <comment><![CDATA[Cron expression. Default: <strong>0 3 * * *</strong> (daily at 3am).]]></comment>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><enabled>1</enabled></depends>
+                        </schedule>
+                    </fields>
+                </scheduled>
+                <advanced translate="label">
+                    <label>Advanced</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>20</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <node_path translate="label comment">
+                            <label>Node.js Binary Path</label>
+                            <frontend_type>text</frontend_type>
+                            <comment>Path to the node executable. Default: node</comment>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </node_path>
+                        <npm_path translate="label comment">
+                            <label>npm Binary Path</label>
+                            <frontend_type>text</frontend_type>
+                            <comment>Path to the npm executable. Default: npm</comment>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </npm_path>
+                    </fields>
+                </advanced>
+            </groups>
+        </accessibilityscan>
+    </sections>
+</config>

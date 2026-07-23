@@ -59,6 +59,11 @@ function apiPost(string $path, array $data, ?string $token = null, array $extraH
     return ApiV2Helper::post($path, $data, $token, $extraHeaders);
 }
 
+function apiPostRaw(string $path, string $body, ?string $token = null, array $extraHeaders = []): array
+{
+    return ApiV2Helper::postRaw($path, $body, $token, $extraHeaders);
+}
+
 function apiPut(string $path, array $data, ?string $token = null, array $extraHeaders = []): array
 {
     return ApiV2Helper::put($path, $data, $token, $extraHeaders);

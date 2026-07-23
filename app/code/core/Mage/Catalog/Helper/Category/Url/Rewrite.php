@@ -2,7 +2,7 @@
 
 /**
  * SPDX-FileCopyrightText: 2024-2026 Maho <https://mahocommerce.com>
- * SPDX-FileCopyrightText: 2017-2024 The OpenMage Contributors <https://openmage.org>
+ * SPDX-FileCopyrightText: 2017-2026 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
  * @package Mage_Catalog
@@ -43,6 +43,7 @@ class Mage_Catalog_Helper_Category_Url_Rewrite extends Mage_Core_Helper_Abstract
     #[\Override]
     public function joinTableToEavCollection(Mage_Eav_Model_Entity_Collection_Abstract $collection, $storeId)
     {
+        $idPathExpr = $this->_connection->getConcatSql(["'category/'", 'e.entity_id']);
         $collection->joinTable(
             'core/url_rewrite',
             'category_id=entity_id',
@@ -50,7 +51,7 @@ class Mage_Catalog_Helper_Category_Url_Rewrite extends Mage_Core_Helper_Abstract
             '{{table}}.is_system=1 AND ' .
                 "{{table}}.store_id='{$storeId}' AND " .
                 '{{table}}.category_id IS NOT NULL AND ' .
-                "{{table}}.id_path LIKE 'category/%'",
+                "{{table}}.id_path = {$idPathExpr}",
             'left',
         );
         return $this;
@@ -65,12 +66,13 @@ class Mage_Catalog_Helper_Category_Url_Rewrite extends Mage_Core_Helper_Abstract
     #[\Override]
     public function joinTableToCollection(Mage_Catalog_Model_Resource_Category_Flat_Collection $collection, $storeId)
     {
+        $idPathExpr = $collection->getConnection()->getConcatSql(["'category/'", 'main_table.entity_id']);
         $collection->getSelect()->joinLeft(
             ['url_rewrite' => $collection->getTable('core/url_rewrite')],
             'url_rewrite.category_id = main_table.entity_id AND url_rewrite.is_system = 1 ' .
                 ' AND ' . $collection->getConnection()->quoteInto('url_rewrite.store_id = ?', $storeId) .
                 ' AND url_rewrite.category_id IS NOT NULL' .
-                ' AND ' . $collection->getConnection()->quoteInto('url_rewrite.id_path LIKE ?', 'category/%'),
+                " AND url_rewrite.id_path = {$idPathExpr}",
             ['request_path'],
         );
         return $this;
@@ -85,6 +87,7 @@ class Mage_Catalog_Helper_Category_Url_Rewrite extends Mage_Core_Helper_Abstract
     #[\Override]
     public function joinTableToSelect(\Maho\Db\Select $select, $storeId)
     {
+        $idPathExpr = $this->_connection->getConcatSql(["'category/'", 'main_table.entity_id']);
         $select->joinLeft(
             ['url_rewrite' => $this->_resource->getTableName('core/url_rewrite')],
             'url_rewrite.category_id=main_table.entity_id AND url_rewrite.is_system=1 AND ' .
@@ -93,7 +96,7 @@ class Mage_Catalog_Helper_Category_Url_Rewrite extends Mage_Core_Helper_Abstract
                     (int) $storeId,
                 ) .
                 'url_rewrite.category_id IS NOT NULL AND ' .
-                $this->_connection->prepareSqlCondition('url_rewrite.id_path', ['like' => 'category/%']),
+                "url_rewrite.id_path = {$idPathExpr}",
             ['request_path' => 'url_rewrite.request_path'],
         );
         return $this;

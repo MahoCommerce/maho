@@ -1,0 +1,55 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package default_default
+ */
+
+/**
+ * @var Maho_AccessibilityScan_Block_Adminhtml_Dashboard_Widget $this
+ */
+
+$totals = $this->getViolationTotals();
+?>
+<div class="entry-edit">
+    <div class="entry-edit-head"><h4><?= $this->__('Accessibility Violations') ?></h4></div>
+    <fieldset class="np">
+        <div class="a11yscan-widget-stats">
+            <?php foreach (Maho_AccessibilityScan_Model_Violation::IMPACT_LEVELS as $impact): ?>
+                <div class="stat-col">
+                    <div class="stat-value"><?= $totals === null ? '&mdash;' : (int) ($totals[$impact] ?? 0) ?></div>
+                    <div class="stat-label"><?= $this->__(ucfirst($impact)) ?></div>
+                </div>
+            <?php endforeach ?>
+        </div>
+    </fieldset>
+</div>
+
+<style>
+.a11yscan-widget-stats {
+    display: flex;
+    gap: 10px;
+    padding: 4px 15px 15px;
+}
+.a11yscan-widget-stats .stat-col {
+    flex: 1;
+    text-align: center;
+    padding: 10px 5px;
+    background: var(--maho-surface-sunken);
+    border-radius: 4px;
+}
+.a11yscan-widget-stats .stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--maho-ink);
+    margin-bottom: 2px;
+    line-height: 1;
+}
+.a11yscan-widget-stats .stat-label {
+    color: var(--maho-ink-muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+</style>

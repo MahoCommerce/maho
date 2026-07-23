@@ -24,6 +24,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 class FeedGenerateAll extends BaseMahoCommand
 {
     #[\Override]
+    public function isEnabled(): bool
+    {
+        return $this->isModuleActive('Maho_FeedManager');
+    }
+
+    #[\Override]
     protected function configure(): void
     {
         $this->addOption('include-disabled', null, InputOption::VALUE_NONE, 'Also generate disabled feeds');
