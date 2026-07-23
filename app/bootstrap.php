@@ -139,9 +139,6 @@ defined('DS') || define('DS', DIRECTORY_SEPARATOR);
 defined('PS') || define('PS', PATH_SEPARATOR);
 defined('BP') || define('BP', Maho::getBasePath());
 
-/** @deprecated */
-defined('MAGENTO_ROOT') || define('MAGENTO_ROOT', BP);
-
 if (!empty($_SERVER['MAGE_IS_DEVELOPER_MODE']) || !empty($_ENV['MAGE_IS_DEVELOPER_MODE'])) {
     Mage::setIsDeveloperMode(true);
 
