@@ -29,6 +29,23 @@ class LegacyFixZeroDates extends BaseMahoCommand
     protected function configure(): void
     {
         $this->addOption('force', null, InputOption::VALUE_NONE, 'Apply the fixes instead of only reporting them');
+        $this->setHelp(<<<'HELP'
+            Scans every date/datetime/timestamp column for legacy '0000-00-00' values and
+            zero-date column DEFAULTs, typically left behind by stores migrated from
+            Magento/OpenMage. Strict SQL_MODE (NO_ZERO_DATE) rejects rewriting such rows
+            and inserting via such defaults.
+
+            What it changes, per finding:
+            - nullable column with zero-date rows: sets those rows to NULL
+              (in Magento 1 semantics a zero date always meant "no value")
+            - nullable column with a zero-date DEFAULT: changes it to DEFAULT NULL
+              (metadata-only, instant even on huge tables)
+            - NOT NULL columns: never touched; listed for a per-column decision
+              (make the column nullable, or backfill a meaningful real date)
+
+            Without --force nothing is written: the command prints exactly what it
+            would change, with per-column row counts. Re-run with --force to apply.
+            HELP);
     }
 
     #[\Override]
