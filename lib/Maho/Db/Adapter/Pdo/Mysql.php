@@ -128,23 +128,13 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     protected function _initConnection(): void
     {
-        // Pin an explicit strict baseline per connection, so behavior is
-        // deterministic regardless of server or provider global defaults
-        // (issue #688). The set is intentionally the MySQL 8+ factory default,
-        // the most battle-tested combination there is. Flags beyond it were
-        // considered and excluded on purpose:
-        // - STRICT_ALL_TABLES: an error midway through a multi-row write on a
-        //   non-transactional table leaves partial data with no rollback,
-        //   which is why MySQL keeps it out of its defaults too
-        // - ANSI_QUOTES/PIPES_AS_CONCAT/REAL_AS_FLOAT change SQL parsing and
-        //   would break MySQL-idiom queries (double-quoted string literals)
-        // - NO_BACKSLASH_ESCAPES would desync server escaping from what PDO
-        //   quoting produces
-        // - NO_AUTO_VALUE_ON_ZERO is needed only for explicit id=0 inserts and
-        //   is applied scoped to setup scripts by startSetup()
-        // NO_ZERO_DATE, NO_ZERO_IN_DATE and ERROR_FOR_DIVISION_BY_ZERO are
-        // deprecated as standalone flags (slated to fold into strict mode);
-        // trim them here when a MySQL release drops them.
+        // Pin a strict baseline per connection, so behavior is deterministic
+        // regardless of server or provider global defaults (issue #688). The
+        // set is intentionally exactly the MySQL 8+ factory default: stricter
+        // or different flags were considered and deliberately excluded, see
+        // PR #1123 before changing this list. The three zero-date/division
+        // flags are deprecated as standalone flags; trim them here when a
+        // MySQL release drops them.
         if (isset($this->_config['sql_mode'])) {
             // Escape hatch: a <sql_mode> node on the connection in local.xml
             // overrides the baseline verbatim (an empty value restores the
