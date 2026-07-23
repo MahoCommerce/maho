@@ -919,34 +919,10 @@ class HealthCheck extends BaseMahoCommand
             return;
         }
 
-        $dbName = (string) $adapter->fetchOne('SELECT DATABASE()');
+        $badDefaults = \MahoCLI\Helper\ZeroDateScanner::findZeroDateDefaults($adapter);
+        $badValues = \MahoCLI\Helper\ZeroDateScanner::findZeroDateValues($adapter);
 
-        $badDefaults = $adapter->fetchAll(
-            'SELECT TABLE_NAME, COLUMN_NAME FROM information_schema.COLUMNS'
-            . ' WHERE TABLE_SCHEMA = ? AND COLUMN_DEFAULT LIKE ?',
-            [$dbName, '0000-00-00%'],
-        );
-
-        $dateColumns = $adapter->fetchAll(
-            'SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM information_schema.COLUMNS'
-            . " WHERE TABLE_SCHEMA = ? AND DATA_TYPE IN ('date', 'datetime', 'timestamp')",
-            [$dbName],
-        );
-        $columnsWithZeroDates = [];
-        foreach ($dateColumns as $column) {
-            $zero = $column['DATA_TYPE'] === 'date' ? '0000-00-00' : '0000-00-00 00:00:00';
-            $found = $adapter->fetchOne(sprintf(
-                'SELECT 1 FROM %s WHERE %s = %s LIMIT 1',
-                $adapter->quoteIdentifier($column['TABLE_NAME']),
-                $adapter->quoteIdentifier($column['COLUMN_NAME']),
-                $adapter->quote($zero),
-            ));
-            if ($found) {
-                $columnsWithZeroDates[] = $column['TABLE_NAME'] . '.' . $column['COLUMN_NAME'];
-            }
-        }
-
-        if (empty($badDefaults) && empty($columnsWithZeroDates)) {
+        if (empty($badDefaults) && empty($badValues)) {
             $output->writeln('<info>OK</info>');
             return;
         }
@@ -955,17 +931,17 @@ class HealthCheck extends BaseMahoCommand
         $output->writeln('<comment>Warning: Found legacy zero dates, which strict SQL_MODE (NO_ZERO_DATE) rejects:</comment>');
         if (!empty($badDefaults)) {
             $output->writeln('Columns with a zero-date DEFAULT (INSERTs omitting the column will fail):');
-            foreach ($badDefaults as $column) {
-                $output->writeln('- ' . $column['TABLE_NAME'] . '.' . $column['COLUMN_NAME']);
+            foreach ($badDefaults as $finding) {
+                $output->writeln('- ' . $finding['table'] . '.' . $finding['column']);
             }
         }
-        if (!empty($columnsWithZeroDates)) {
+        if (!empty($badValues)) {
             $output->writeln('Columns containing zero-date values (UPDATEs rewriting those rows will fail):');
-            foreach ($columnsWithZeroDates as $column) {
-                $output->writeln('- ' . $column);
+            foreach ($badValues as $finding) {
+                $output->writeln(sprintf('- %s.%s (%d row(s))', $finding['table'], $finding['column'], $finding['rows']));
             }
         }
-        $output->writeln('Update the values to NULL (or a real date) and change the column defaults.');
+        $output->writeln('Run: ./maho legacy:fix-zero-dates');
         $output->writeln('To temporarily restore the old behavior, set <sql_mode></sql_mode> on the');
         $output->writeln('connection in app/etc/local.xml while you clean up.');
         $output->writeln('');
