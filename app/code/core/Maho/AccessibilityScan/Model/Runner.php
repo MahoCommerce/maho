@@ -400,8 +400,8 @@ class Maho_AccessibilityScan_Model_Runner
         // npm re-invokes node, so the resolved node binary's directory must
         // be on the child PATH even when the web-server PATH lacks it
         $nodePath = Mage::findExecutable($this->helper->getNodePath());
-        $env['PATH'] = implode(':', array_unique(array_filter([
-            ...explode(':', (string) ($env['PATH'] ?? '')),
+        $env['PATH'] = implode(PATH_SEPARATOR, array_unique(array_filter([
+            ...explode(PATH_SEPARATOR, (string) ($env['PATH'] ?? '')),
             $nodePath !== null ? dirname($nodePath) : '',
         ])));
 

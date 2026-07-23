@@ -139,6 +139,21 @@ try {
         return privateHostCache.get(bare);
     };
 
+    // Same-host subresources are pinned to the target's own port(s): the
+    // target host may itself be a private address (validated upstream), so
+    // without a port check page content could reach other services bound to
+    // that private IP (Redis, Elasticsearch, internal admin panels) on
+    // arbitrary ports.
+    const isAllowedSubresource = async (url) => {
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+            return false;
+        }
+        if (url.hostname === targetUrl.hostname) {
+            return allowedPorts.has(url.port || defaultPort(url.protocol));
+        }
+        return !(await isPrivateHost(url.hostname));
+    };
+
     await page.route('**/*', async (route) => {
         const request = route.request();
         let url;
@@ -148,20 +163,27 @@ try {
             return route.abort('blockedbyclient');
         }
         if (request.isNavigationRequest()) {
+            // Main-frame redirect hops are re-checked after page.goto() below
             return isAllowedNavigation(url) ? route.continue() : route.abort('blockedbyclient');
         }
-        // Same-host subresources are pinned to the target's own port(s): the
-        // target host may itself be a private address (validated upstream), so
-        // without a port check page content could reach other services bound to
-        // that private IP (Redis, Elasticsearch, internal admin panels) on
-        // arbitrary ports.
-        if (url.hostname === targetUrl.hostname) {
-            return allowedPorts.has(url.port || defaultPort(url.protocol))
-                ? route.continue()
-                : route.abort('blockedbyclient');
-        }
-        if (!(await isPrivateHost(url.hostname))) {
-            return route.continue();
+        // page.route() is not re-invoked for server redirect hops, so a public
+        // host could 302 a subresource straight into the private network:
+        // follow redirects manually, vetting every hop against the same policy
+        try {
+            for (let hop = 0; hop < 5; hop++) {
+                if (!(await isAllowedSubresource(url))) {
+                    break;
+                }
+                const response = await route.fetch({ url: url.toString(), maxRedirects: 0 });
+                const location = response.headers()['location'];
+                if (response.status() >= 300 && response.status() < 400 && location) {
+                    url = new URL(location, url);
+                    continue;
+                }
+                return await route.fulfill({ response });
+            }
+        } catch {
+            // route.fetch() rejects e.g. on cross-protocol redirects or network errors
         }
         return route.abort('blockedbyclient');
     });
@@ -178,6 +200,30 @@ try {
 
     if (!isAllowedNavigation(new URL(page.url()))) {
         throw new Error(`Navigation escaped the target host: ${page.url()}`);
+    }
+
+    // The route handler vets only the first request of a redirect chain, so a
+    // same-host iframe URL could still 302 into the private network, and
+    // axe-core reads every frame's content into the results: drop any frame
+    // whose final http(s) URL escaped the target host (about:, data: and
+    // blob: frames carry page-authored content and stay)
+    for (const frame of page.frames()) {
+        if (frame === page.mainFrame()) {
+            continue;
+        }
+        let frameUrl;
+        try {
+            frameUrl = new URL(frame.url());
+        } catch {
+            continue;
+        }
+        if ((frameUrl.protocol === 'http:' || frameUrl.protocol === 'https:') && !isAllowedNavigation(frameUrl)) {
+            try {
+                await (await frame.frameElement()).evaluate((el) => el.remove());
+            } catch {
+                // frame already detached
+            }
+        }
     }
 
     const title = await page.title();
