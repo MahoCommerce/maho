@@ -128,16 +128,23 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     protected function _initConnection(): void
     {
-        /** @link http://bugs.mysql.com/bug.php?id=18551 */
-        $sqlMode = '';
-        if (\Mage::getIsDeveloperMode() && !$this->isMariaDb()) {
-            // Surface non-strict GROUP BY queries during development (issue #688).
-            // MariaDB is exempt: its ONLY_FULL_GROUP_BY lacks the functional-dependency
-            // detection of MySQL/PostgreSQL (MDEV-11588), so it would reject
-            // SQL-standard queries like SELECT t.* ... GROUP BY t.pk.
-            $sqlMode = 'ONLY_FULL_GROUP_BY';
+        // PROTOTYPE (issue #688 step 3): pin an explicit modern strict baseline (the
+        // MySQL 8+ default mode set) instead of the legacy SQL_MODE='' override, so
+        // behavior is deterministic regardless of server/provider global defaults.
+        $modes = [
+            'STRICT_TRANS_TABLES',
+            'NO_ZERO_IN_DATE',
+            'NO_ZERO_DATE',
+            'ERROR_FOR_DIVISION_BY_ZERO',
+            'NO_ENGINE_SUBSTITUTION',
+        ];
+        if (!$this->isMariaDb()) {
+            // MariaDB is exempt from ONLY_FULL_GROUP_BY: its implementation lacks the
+            // functional-dependency detection of MySQL/PostgreSQL (MDEV-11588), so it
+            // would reject SQL-standard queries like SELECT t.* ... GROUP BY t.pk.
+            array_unshift($modes, 'ONLY_FULL_GROUP_BY');
         }
-        $this->_connection->executeStatement("SET SQL_MODE='{$sqlMode}'");
+        $this->_connection->executeStatement("SET SQL_MODE='" . implode(',', $modes) . "'");
         $this->_connection->executeStatement("SET time_zone = '+00:00'");
     }
 
