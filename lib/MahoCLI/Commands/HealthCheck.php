@@ -894,11 +894,81 @@ class HealthCheck extends BaseMahoCommand
         $this->checkOrphanedResources($input, $output, Mage::getResourceModel('admin/rules'), 'admin');
         $this->checkOrphanedResources($input, $output, Mage::getResourceModel('api/rules'), 'API');
 
+        $this->checkZeroDates($output);
+
         if ($hasErrors) {
             return Command::FAILURE;
         }
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Detect legacy zero dates that are incompatible with the strict SQL_MODE
+     * baseline (NO_ZERO_DATE): stored '0000-00-00' values make any later UPDATE
+     * of those rows fail, and zero-date column defaults make INSERTs omitting
+     * the column fail. Typically found on stores migrated from Magento/OpenMage.
+     */
+    private function checkZeroDates(OutputInterface $output): void
+    {
+        $output->write('Checking for legacy zero dates... ');
+
+        $adapter = \Mage::getSingleton('core/resource')->getConnection('core_read');
+        if (!($adapter instanceof \Maho\Db\Adapter\Pdo\Mysql)) {
+            $output->writeln('<info>OK (MySQL/MariaDB only check)</info>');
+            return;
+        }
+
+        $dbName = (string) $adapter->fetchOne('SELECT DATABASE()');
+
+        $badDefaults = $adapter->fetchAll(
+            'SELECT TABLE_NAME, COLUMN_NAME FROM information_schema.COLUMNS'
+            . ' WHERE TABLE_SCHEMA = ? AND COLUMN_DEFAULT LIKE ?',
+            [$dbName, '0000-00-00%'],
+        );
+
+        $dateColumns = $adapter->fetchAll(
+            'SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM information_schema.COLUMNS'
+            . " WHERE TABLE_SCHEMA = ? AND DATA_TYPE IN ('date', 'datetime', 'timestamp')",
+            [$dbName],
+        );
+        $columnsWithZeroDates = [];
+        foreach ($dateColumns as $column) {
+            $zero = $column['DATA_TYPE'] === 'date' ? '0000-00-00' : '0000-00-00 00:00:00';
+            $found = $adapter->fetchOne(sprintf(
+                'SELECT 1 FROM %s WHERE %s = %s LIMIT 1',
+                $adapter->quoteIdentifier($column['TABLE_NAME']),
+                $adapter->quoteIdentifier($column['COLUMN_NAME']),
+                $adapter->quote($zero),
+            ));
+            if ($found) {
+                $columnsWithZeroDates[] = $column['TABLE_NAME'] . '.' . $column['COLUMN_NAME'];
+            }
+        }
+
+        if (empty($badDefaults) && empty($columnsWithZeroDates)) {
+            $output->writeln('<info>OK</info>');
+            return;
+        }
+
+        $output->writeln('');
+        $output->writeln('<comment>Warning: Found legacy zero dates, which strict SQL_MODE (NO_ZERO_DATE) rejects:</comment>');
+        if (!empty($badDefaults)) {
+            $output->writeln('Columns with a zero-date DEFAULT (INSERTs omitting the column will fail):');
+            foreach ($badDefaults as $column) {
+                $output->writeln('- ' . $column['TABLE_NAME'] . '.' . $column['COLUMN_NAME']);
+            }
+        }
+        if (!empty($columnsWithZeroDates)) {
+            $output->writeln('Columns containing zero-date values (UPDATEs rewriting those rows will fail):');
+            foreach ($columnsWithZeroDates as $column) {
+                $output->writeln('- ' . $column);
+            }
+        }
+        $output->writeln('Update the values to NULL (or a real date) and change the column defaults.');
+        $output->writeln('To temporarily restore the old behavior, set <sql_mode></sql_mode> on the');
+        $output->writeln('connection in app/etc/local.xml while you clean up.');
+        $output->writeln('');
     }
 
     private function checkOrphanedResources(

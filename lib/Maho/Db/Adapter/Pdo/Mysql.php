@@ -128,23 +128,31 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     protected function _initConnection(): void
     {
-        // PROTOTYPE (issue #688 step 3): pin an explicit modern strict baseline (the
-        // MySQL 8+ default mode set) instead of the legacy SQL_MODE='' override, so
-        // behavior is deterministic regardless of server/provider global defaults.
-        $modes = [
-            'STRICT_TRANS_TABLES',
-            'NO_ZERO_IN_DATE',
-            'NO_ZERO_DATE',
-            'ERROR_FOR_DIVISION_BY_ZERO',
-            'NO_ENGINE_SUBSTITUTION',
-        ];
-        if (!$this->isMariaDb()) {
-            // MariaDB is exempt from ONLY_FULL_GROUP_BY: its implementation lacks the
-            // functional-dependency detection of MySQL/PostgreSQL (MDEV-11588), so it
-            // would reject SQL-standard queries like SELECT t.* ... GROUP BY t.pk.
-            array_unshift($modes, 'ONLY_FULL_GROUP_BY');
+        // Pin an explicit modern strict baseline (the MySQL 8+ default mode set)
+        // per connection, so behavior is deterministic regardless of server or
+        // provider global defaults (issue #688).
+        if (isset($this->_config['sql_mode'])) {
+            // Escape hatch: a <sql_mode> node on the connection in local.xml
+            // overrides the baseline verbatim (an empty value restores the
+            // legacy fully-relaxed behavior).
+            $sqlMode = (string) $this->_config['sql_mode'];
+        } else {
+            $modes = [
+                'STRICT_TRANS_TABLES',
+                'NO_ZERO_IN_DATE',
+                'NO_ZERO_DATE',
+                'ERROR_FOR_DIVISION_BY_ZERO',
+                'NO_ENGINE_SUBSTITUTION',
+            ];
+            if (!$this->isMariaDb()) {
+                // MariaDB is exempt from ONLY_FULL_GROUP_BY: its implementation lacks the
+                // functional-dependency detection of MySQL/PostgreSQL (MDEV-11588), so it
+                // would reject SQL-standard queries like SELECT t.* ... GROUP BY t.pk.
+                array_unshift($modes, 'ONLY_FULL_GROUP_BY');
+            }
+            $sqlMode = implode(',', $modes);
         }
-        $this->_connection->executeStatement("SET SQL_MODE='" . implode(',', $modes) . "'");
+        $this->_connection->executeStatement('SET SQL_MODE=' . $this->_connection->quote($sqlMode));
         $this->_connection->executeStatement("SET time_zone = '+00:00'");
     }
 

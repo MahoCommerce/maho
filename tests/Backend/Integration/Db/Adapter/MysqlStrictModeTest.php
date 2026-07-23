@@ -81,6 +81,18 @@ it('exempts MariaDB from ONLY_FULL_GROUP_BY but keeps the rest of the strict bas
     expect($sqlMode)->toContain('STRICT_TRANS_TABLES');
 });
 
+it('honors the sql_mode escape hatch from the connection config', function () {
+    $resource = Mage::getSingleton('core/resource');
+    $config = $resource->getConnection('core_write')->getConfig();
+    $config['sql_mode'] = '';
+    $adapter = new Mysql($config);
+    expect(fetchSqlMode($adapter))->toBe('');
+
+    $config['sql_mode'] = 'STRICT_TRANS_TABLES';
+    $adapter = new Mysql($config);
+    expect(fetchSqlMode($adapter))->toBe('STRICT_TRANS_TABLES');
+});
+
 it('pins the same SQL_MODE baseline regardless of developer mode', function () {
     $modes = [];
     foreach ([true, false] as $devMode) {
