@@ -122,7 +122,7 @@ final class VarienToMahoClassMap
             'Varien_Filter_Template_Simple' => \Maho\Filter\Template\Simple::class,
             'Varien_Filter_Template_Tokenizer_Abstract' => \Maho\Filter\Template\Tokenizer\AbstractTokenizer::class,
             'Varien_Filter_Template_Tokenizer_Parameter' => \Maho\Filter\Template\Tokenizer\Parameter::class,
-            'Varien_Filter_Template_Tokenizer_Variable' => \Maho\Filter\Template\Tokenizer\Variable::class,
+            'Varien_Filter_Template_Tokenizer_Variable' => \Maho\Filter\Template\Tokenizer\Variable::class, // @phpstan-ignore classConstant.deprecatedClass
 
             // Io namespace
             'Varien_Io_Abstract' => \Maho\Io::class,

@@ -9,10 +9,11 @@
 
 namespace Maho\Filter;
 
-use Maho\Filter\Template\ExpressionObjectWrapper;
+use Maho\Filter\Template\ExpressionSandbox;
 use Maho\Filter\Template\Tokenizer\Parameter;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\ExpressionLanguage\Node\Node;
+use Symfony\Component\ExpressionLanguage\ParsedExpression;
 
 class Template
 {
@@ -28,9 +29,22 @@ class Template
     public const CONSTRUCTION_IF_PATTERN = '/{{if\s*(.*?)}}(.*?)({{else}}(.*?))?{{\\/if\s*}}/si';
 
     /**
-     * Expression operators refused in {{if}} / {{depend}} conditions, see assertNoDeniedOperator()
+     * Expression operators refused in {{if}} / {{depend}} conditions, see _assertNoDeniedOperator()
      */
     private const DENIED_OPERATORS = ['matches', '..'];
+
+    /**
+     * Maximum byte length of an {{if}} / {{depend}} / {{var}} expression.
+     *
+     * Symfony's expression parser is recursive-descent — it recurses once per operator — so a
+     * deeply nested expression ({{if not not not ... x}}, {{if ((((...))))}}) overflows the native
+     * C stack and takes the whole worker down with a SIGSEGV *during parse*, before any node-level
+     * guard can run. A signal is not an exception, so filter()'s try/catch cannot absorb it: an
+     * admin with only template-edit rights would crash transactional-mail rendering with one saved
+     * template. A real condition or variable path is a few dozen bytes; capping the raw string
+     * bounds nesting far below the crash depth while leaving every legitimate expression untouched.
+     */
+    private const MAX_EXPRESSION_LENGTH = 2000;
 
     private static ?ExpressionLanguage $_expressionLanguage = null;
 
@@ -40,6 +54,17 @@ class Template
      * @var array
      */
     protected $_templateVars = [];
+
+    /**
+     * _templateVars run through ExpressionSandbox::wrap(), memoized for the life of the
+     * assignment. Wrapping an object is cheap (it only captures it), but wrapping an array is an
+     * eager filtered deep copy — the only way to gate a native subscript — so redoing it for
+     * every directive makes a template's cost the product of its directive count and its largest
+     * array variable. setVariables() is the only thing that can change what needs wrapping.
+     *
+     * @var array<string, mixed>|null
+     */
+    private ?array $_wrappedTemplateVars = null;
 
     /**
      * Template processor
@@ -63,6 +88,7 @@ class Template
         foreach ($variables as $name => $value) {
             $this->_templateVars[$name] = $value;
         }
+        $this->_wrappedTemplateVars = null;
         return $this;
     }
 
@@ -166,11 +192,31 @@ class Template
             return $construction[0];
         }
 
-        $replacedValue = $this->_getVariable($construction[2], '');
-        if ($replacedValue instanceof \DateTimeInterface) {
-            $replacedValue = $replacedValue->format('Y-m-d H:i:s');
+        return $this->_stringifyVariable($this->_getVariable($construction[2], ''));
+    }
+
+    /**
+     * Render a resolved {{var}} value as the string that replaces the directive.
+     *
+     * A path can legitimately resolve to a model — {{var order.billing_address}} hands back the
+     * address object — and casting one that defines no __toString() raises a native \Error, which
+     * is not an \Exception and so escapes filter()'s handler and aborts the whole render. An
+     * object with no string form has no template representation, so it degrades to the empty
+     * default like every other unresolvable path.
+     *
+     * An array degrades the same way: a getter returning one ({{var product.multiselect_attr}})
+     * would otherwise cast to the literal text "Array" in the rendered mail and raise an
+     * "Array to string conversion" warning while doing it.
+     */
+    protected function _stringifyVariable(mixed $value): string
+    {
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format('Y-m-d H:i:s');
         }
-        return (string) $replacedValue;
+        if (is_array($value) || (is_object($value) && !$value instanceof \Stringable)) {
+            return '';
+        }
+        return (string) $value;
     }
 
     public function includeDirective($construction)
@@ -223,7 +269,7 @@ class Template
             return $construction[0];
         }
 
-        if (!$this->evaluateCondition($construction[1])) {
+        if (!$this->_evaluateCondition($construction[1])) {
             return '';
         }
         return $construction[2];
@@ -235,7 +281,7 @@ class Template
             return $construction[0];
         }
 
-        if (!$this->evaluateCondition($construction[1])) {
+        if (!$this->_evaluateCondition($construction[1])) {
             if (isset($construction[3]) && isset($construction[4])) {
                 return $construction[4];
             }
@@ -251,10 +297,16 @@ class Template
      * The legacy single-variable syntax ("order.increment_id", "customer.getName()") is a
      * subset of the expression syntax and keeps working: identifiers the template does not
      * define evaluate as null, and the result uses standard PHP truthiness. A condition that
-     * fails to parse or evaluate logs a warning and yields false, so a broken template
-     * degrades instead of aborting.
+     * fails to parse or evaluate logs and yields false, so a broken template degrades instead
+     * of aborting.
+     *
+     * Truthiness is the one deliberate behaviour change: the legacy directive tested
+     * _getVariable(...) != '', which under PHP 8 makes 0, '0' and 0.0 *truthy*, so
+     * {{if order.getItemsCount()}} rendered its true branch for an empty order. Casting to bool
+     * makes those falsy, which is what a template author writing {{if x}} means; the cost is
+     * that a field whose value is literally "0" (a house number, say) now takes the else branch.
      */
-    protected function evaluateCondition(string $condition): bool
+    protected function _evaluateCondition(string $condition): bool
     {
         $expression = trim($condition);
         if ($expression === '') {
@@ -263,17 +315,30 @@ class Template
 
         $values = $this->_expressionValues($expression);
         try {
-            $language = self::getExpressionLanguage();
-            $parsed = $language->parse($expression, array_keys($values));
-            self::assertNoDeniedOperator($parsed->getNodes());
-            return (bool) $language->evaluate($parsed, $values);
+            $parsed = self::_parseExpression($expression, array_keys($values));
+            return (bool) self::_getExpressionLanguage()->evaluate($parsed, $values);
         } catch (\Throwable $e) {
-            \Mage::log(
-                sprintf('Invalid condition "%s" in template directive: %s', $expression, $e->getMessage()),
-                \Mage::LOG_WARNING,
-            );
+            self::_logExpressionFailure(sprintf('Invalid condition "%s" in template directive', $expression), $e);
             return false;
         }
+    }
+
+    /**
+     * Log an expression that could not be resolved, at a level matching how alarming it is.
+     *
+     * A hop past a value that is legitimately absent — {{if order.shipping_address.company}} on a
+     * virtual order — makes Symfony throw a plain \RuntimeException ("Unable to get property ... of
+     * non-object"), because a template author never writes its ?. null-safe syntax. The legacy
+     * tokenizer resolved that to the default silently, so logging it as a warning on every render
+     * would flood system.log for templates that are working as intended: it is recorded at debug
+     * level instead. Everything else — a syntax error, a denied operator, an exception escaping a
+     * getter (which is a \RuntimeException *subclass*, never the base class Symfony throws) — still
+     * warns.
+     */
+    private static function _logExpressionFailure(string $message, \Throwable $e): void
+    {
+        $level = $e::class === \RuntimeException::class ? \Mage::LOG_DEBUG : \Mage::LOG_WARNING;
+        \Mage::log(sprintf('%s: %s', $message, $e->getMessage()), $level);
     }
 
     /**
@@ -287,10 +352,13 @@ class Template
      */
     private function _expressionValues(string $expression): array
     {
-        $values = [];
-        foreach ($this->_templateVars as $name => $value) {
-            $values[$name] = ExpressionObjectWrapper::wrap($value);
+        if ($this->_wrappedTemplateVars === null) {
+            $this->_wrappedTemplateVars = [];
+            foreach ($this->_templateVars as $name => $value) {
+                $this->_wrappedTemplateVars[$name] = ExpressionSandbox::wrap($value);
+            }
         }
+        $values = $this->_wrappedTemplateVars;
         preg_match_all('/\b[a-z_][a-z0-9_]*\b/i', $expression, $matches);
         foreach ($matches[0] as $name) {
             $values[$name] ??= null;
@@ -299,26 +367,50 @@ class Template
     }
 
     /**
+     * Parse an expression under the guards {{if}}/{{depend}} and {{var}} share: refuse an
+     * over-long expression before the recursive parser can run into it (see MAX_EXPRESSION_LENGTH)
+     * and refuse a denied operator once parsed. Both refusals throw from the \LogicException
+     * family, so the callers' \Throwable catch routes them through _logExpressionFailure() as an
+     * authoring error, the same as Symfony's own SyntaxError.
+     *
+     * @param string[] $names identifiers the expression is allowed to reference
+     * @throws \LengthException|\LogicException|\Symfony\Component\ExpressionLanguage\SyntaxError
+     */
+    private static function _parseExpression(string $expression, array $names): ParsedExpression
+    {
+        if (strlen($expression) > self::MAX_EXPRESSION_LENGTH) {
+            throw new \LengthException(sprintf('expression exceeds %d bytes', self::MAX_EXPRESSION_LENGTH));
+        }
+        $parsed = self::_getExpressionLanguage()->parse($expression, $names);
+        self::_assertNoDeniedOperator($parsed->getNodes());
+        return $parsed;
+    }
+
+    /**
      * Reject the two operators a condition never legitimately needs but which let a template
      * author stall the process: "matches" runs an arbitrary regex against arbitrary input
      * (catastrophic backtracking) and ".." builds a range array of arbitrary size.
      *
-     * @throws \RuntimeException
+     * Refusing an operator is a template-authoring error like Symfony's own SyntaxError, so it
+     * throws from the \LogicException family: _logExpressionFailure() reserves the quiet debug
+     * level for the base \RuntimeException Symfony throws when a hop resolves to null.
+     *
+     * @throws \LogicException
      */
-    private static function assertNoDeniedOperator(Node $node): void
+    private static function _assertNoDeniedOperator(Node $node): void
     {
         $operator = $node->attributes['operator'] ?? null;
         if (in_array($operator, self::DENIED_OPERATORS, true)) {
-            throw new \RuntimeException(sprintf('operator "%s" is not allowed in a condition', $operator));
+            throw new \LogicException(sprintf('operator "%s" is not allowed in a condition', $operator));
         }
         foreach ($node->nodes as $child) {
             if ($child instanceof Node) {
-                self::assertNoDeniedOperator($child);
+                self::_assertNoDeniedOperator($child);
             }
         }
     }
 
-    protected static function getExpressionLanguage(): ExpressionLanguage
+    protected static function _getExpressionLanguage(): ExpressionLanguage
     {
         if (self::$_expressionLanguage === null) {
             $language = new ExpressionLanguage();
@@ -375,15 +467,10 @@ class Template
         }
         try {
             $values = $this->_expressionValues($expression);
-            $language = self::getExpressionLanguage();
-            $parsed = $language->parse($expression, array_keys($values));
-            self::assertNoDeniedOperator($parsed->getNodes());
-            $result = ExpressionObjectWrapper::unwrap($language->evaluate($parsed, $values)) ?? $default;
+            $parsed = self::_parseExpression($expression, array_keys($values));
+            $result = ExpressionSandbox::unwrap(self::_getExpressionLanguage()->evaluate($parsed, $values)) ?? $default;
         } catch (\Throwable $e) {
-            \Mage::log(
-                sprintf('Invalid variable "%s" in template directive: %s', $expression, $e->getMessage()),
-                \Mage::LOG_WARNING,
-            );
+            self::_logExpressionFailure(sprintf('Invalid variable "%s" in template directive', $expression), $e);
             $result = $default;
         }
         \Maho\Profiler::stop('email_template_proccessing_variables');

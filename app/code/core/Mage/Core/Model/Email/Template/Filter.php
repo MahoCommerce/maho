@@ -348,9 +348,9 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
         $parts = explode('|', $construction[2], 2);
         if (count($parts) === 2) {
             [$variableName, $modifiersString] = $parts;
-            return $this->_amplifyModifiers($this->_getVariable($variableName, ''), $modifiersString);
+            return $this->_amplifyModifiers($this->_stringifyVariable($this->_getVariable($variableName, '')), $modifiersString);
         }
-        return $this->_getVariable($construction[2], '');
+        return $this->_stringifyVariable($this->_getVariable($construction[2], ''));
     }
 
     /**
@@ -532,24 +532,70 @@ class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
     }
 
     /**
-     * Return variable value for var construction
+     * Resolve a {{var}} path under the same save/delete guard as {{if}}/{{depend}}, see
+     * _evaluateCondition() below for what registering varProcessing buys.
      *
-     * @param string $value raw parameters
+     * @param string $value raw variable expression
      * @param string $default default value
-     * @return string
-     * @throws Mage_Core_Exception
+     * @return mixed
      */
     #[\Override]
     protected function _getVariable($value, $default = '{no_value_defined}')
     {
-        Mage::register('varProcessing', true);
+        $owns = self::_beginVarProcessing();
         try {
-            $result = parent::_getVariable($value, $default);
-        } catch (Exception $e) {
-            $result = '';
-            Mage::logException($e);
+            return parent::_getVariable($value, $default);
+        } finally {
+            self::_endVarProcessing($owns);
         }
-        Mage::unregister('varProcessing');
-        return $result;
+    }
+
+    /**
+     * Evaluate an {{if}} / {{depend}} condition under the same save/delete guard as {{var}}.
+     *
+     * Mage_Core_Model_Observer::secureVarProcessing() refuses any model save or delete while the
+     * varProcessing flag is registered, which is the last-resort net behind the wrapper's
+     * read-only method gate: a getter that looks like a read but persists on the way out is
+     * stopped there. Conditions used to inherit that net for free, because ifDirective() resolved
+     * its operand through _getVariable(); they now evaluate through the expression engine
+     * instead, so the flag has to be set here too, or the same accessor would be guarded in
+     * {{var}} and unguarded in {{depend}}.
+     */
+    #[\Override]
+    protected function _evaluateCondition(string $condition): bool
+    {
+        $owns = self::_beginVarProcessing();
+        try {
+            return parent::_evaluateCondition($condition);
+        } finally {
+            self::_endVarProcessing($owns);
+        }
+    }
+
+    /**
+     * Raise the varProcessing flag, returning whether this call is the one that owns it.
+     *
+     * Mage::register() throws when the key is already taken, so a nested render — a getter
+     * reached from a directive that itself filters a template — would abort the inner render
+     * outright, and abort it *before* entering the try block, leaving the flag to be dropped by
+     * whichever frame unwinds first. Re-entering is legitimate and must simply join the guard
+     * already in force: only the outermost frame registers, and only it unregisters, so the
+     * save/delete net stays up for the whole nest instead of being torn down early by an inner
+     * frame finishing first.
+     */
+    protected static function _beginVarProcessing(): bool
+    {
+        if (Mage::registry('varProcessing') !== null) {
+            return false;
+        }
+        Mage::register('varProcessing', true);
+        return true;
+    }
+
+    protected static function _endVarProcessing(bool $owns): void
+    {
+        if ($owns) {
+            Mage::unregister('varProcessing');
+        }
     }
 }

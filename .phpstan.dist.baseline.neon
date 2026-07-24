@@ -24379,24 +24379,6 @@ parameters:
 			path: lib/Maho/Filter/Template/Tokenizer/Variable.php
 
 		-
-			rawMessage: '''
-				Access to constant on deprecated class Maho\Filter\Template\Tokenizer\Variable:
-				since 26.9 Use Symfony\Component\ExpressionLanguage\ExpressionLanguage instead, as Maho\Filter\Template now does to resolve {{var}} and {{if}}/{{depend}}.
-			'''
-			identifier: classConstant.deprecatedClass
-			count: 1
-			path: app/bootstrap.php
-
-		-
-			rawMessage: '''
-				Access to constant on deprecated class Maho\Filter\Template\Tokenizer\Variable:
-				since 26.9 Use Symfony\Component\ExpressionLanguage\ExpressionLanguage instead, as Maho\Filter\Template now does to resolve {{var}} and {{if}}/{{depend}}.
-			'''
-			identifier: classConstant.deprecatedClass
-			count: 1
-			path: lib/Maho/Rector/VarienToMahoClassMap.php
-
-		-
 			rawMessage: 'Method Maho\Io\File::dirname() has no return type specified.'
 			identifier: missingType.return
 			count: 1
