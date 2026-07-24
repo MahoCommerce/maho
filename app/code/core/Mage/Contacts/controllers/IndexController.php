@@ -97,6 +97,15 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
                     Mage::throwException($this->__('Unable to submit your request. Please try again later'));
                 }
 
+                // Throttle by submitter email, same key as the API endpoint so a
+                // bot rotating between web form and API still hits a unified limit.
+                $contactLimit = (int) Mage::getStoreConfig('system/rate_limit/contact');
+                $email = strtolower(trim($post['email']));
+                $storeId = (int) Mage::app()->getStore()->getId();
+                if (!Mage::helper('core')->rateLimiterBy('contact', "{$storeId}:{$email}", $contactLimit, 3600)->attempt()) {
+                    Mage::throwException($this->__('Too Soon: You are trying to perform this operation too frequently. Please wait a few seconds and try again.'));
+                }
+
                 // send email
                 $mailTemplate = Mage::getModel('core/email_template');
                 /** @var Mage_Core_Model_Email_Template $mailTemplate */

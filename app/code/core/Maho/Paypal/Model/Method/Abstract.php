@@ -111,15 +111,30 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
         $paypalOrderId = $payment->getAdditionalInformation('paypal_order_id');
 
         if ($authId) {
+            $order = $payment->getOrder();
             $body = [];
-            if ($amount != $payment->getOrder()->getBaseGrandTotal()) {
+            if ($amount != $order->getBaseGrandTotal()) {
+                // final_capture releases the still-authorized remainder and closes the
+                // authorization, so it may only be sent when no further capture will run:
+                // nothing left to invoice AND no other pending invoice awaiting capture.
+                // canInvoice() alone is not enough — items are registered when an invoice
+                // is created, not captured, so "Not Capture" invoices consume the
+                // remaining-to-invoice quantities while their captures are still to come.
+                $isFinalCapture = !$order->canInvoice() && !$this->_hasOtherPendingInvoices($payment);
                 $body = [
                     'amount' => [
                         'value' => number_format((float) $amount, 2, '.', ''),
-                        'currency_code' => $payment->getOrder()->getBaseCurrencyCode(),
+                        'currency_code' => $order->getBaseCurrencyCode(),
                     ],
-                    'final_capture' => true,
+                    'final_capture' => $isFinalCapture,
                 ];
+                if ($isFinalCapture) {
+                    // keep the local authorization transaction in step with the gateway:
+                    // on a reduced final capture _isCaptureFinal() sees amount < grand
+                    // total and would leave the parent transaction open while PayPal
+                    // has already released the authorization
+                    $payment->setShouldCloseParentTransaction(true);
+                }
             }
             $result = $this->_getApiClient()->captureAuthorization($authId, $body);
             $captureId = $result['id'] ?? null;
@@ -199,6 +214,25 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
         return $this->void($payment);
     }
 
+    /**
+     * Whether another still-open invoice awaits its own capture against the same
+     * authorization. The invoice currently being captured is itself open at this
+     * point, so it is excluded; a freshly created invoice has no id yet and is not
+     * in the collection at all.
+     */
+    protected function _hasOtherPendingInvoices(Mage_Sales_Model_Order_Payment $payment): bool
+    {
+        $currentInvoiceId = $payment->getInvoice()?->getId();
+        foreach ($payment->getOrder()->getInvoiceCollection() as $invoice) {
+            if ($invoice->getState() == Mage_Sales_Model_Order_Invoice::STATE_OPEN
+                && (!$currentInvoiceId || $invoice->getId() != $currentInvoiceId)
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected function _createCaptureInvoice(Mage_Sales_Model_Order_Payment $payment, string $captureId): void
     {
         $order = $payment->getOrder();
@@ -258,6 +292,12 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
             $this->_config = Mage::getModel('paypal/config');
         }
         return $this->_config;
+    }
+
+    public function setApiClient(Maho_Paypal_Model_Api_Client $client): self
+    {
+        $this->_apiClient = $client;
+        return $this;
     }
 
     protected function _getApiClient(): Maho_Paypal_Model_Api_Client

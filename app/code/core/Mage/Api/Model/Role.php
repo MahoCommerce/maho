@@ -27,8 +27,9 @@ declare(strict_types=1);
  * @method $this setRoleName(string $value)
  * @method $this setCreated(string $value)
  * @method $this setModified(string $value)
+ *
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
-
 class Mage_Api_Model_Role extends Mage_Core_Model_Abstract
 {
     /**

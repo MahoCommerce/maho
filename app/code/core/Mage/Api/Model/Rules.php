@@ -23,6 +23,8 @@
  * @method $this setRoleType(string $value)
  * @method string getPermission()
  * @method $this setPermission(string $value)
+ *
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
  */
 class Mage_Api_Model_Rules extends Mage_Core_Model_Abstract
 {

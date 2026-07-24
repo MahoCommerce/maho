@@ -8,6 +8,9 @@
  * @package Mage_Api
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_Model_Wsdl_Config_Base extends \Maho\Simplexml\Config
 {
     protected $_handler = '';

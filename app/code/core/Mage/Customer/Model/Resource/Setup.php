@@ -427,15 +427,6 @@ class Mage_Customer_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
                         'validate_rules'     => 'a:2:{s:15:"max_text_length";i:255;s:15:"min_text_length";i:1;}',
                         'position'           => 120,
                     ],
-                    'fax'                => [
-                        'type'               => 'varchar',
-                        'label'              => 'Fax',
-                        'input'              => 'text',
-                        'required'           => false,
-                        'sort_order'         => 130,
-                        'validate_rules'     => 'a:2:{s:15:"max_text_length";i:255;s:15:"min_text_length";i:1;}',
-                        'position'           => 130,
-                    ],
                 ],
             ],
         ];

@@ -410,7 +410,6 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
         $entityTable = Mage::getSingleton('core/resource')->getTableName('catalog_category_entity');
         $newCategoryAttributes = [];
         $isPostgres = $this->_connection instanceof \Maho\Db\Adapter\Pdo\Pgsql;
-        $isSqlite = $this->_connection instanceof \Maho\Db\Adapter\Pdo\Sqlite;
 
         foreach ($entityRows as &$row) {
             // Extract temporary data before database insert
@@ -429,13 +428,11 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                         "SELECT nextval(pg_get_serial_sequence('{$entityTable}', 'entity_id'))",
                     );
                     $row['entity_id'] = $entityId;
-                } elseif ($isSqlite) {
-                    // SQLite: use placeholder path since we can't get next ID before insert
-                    // but SQLite strictly enforces NOT NULL. Will update after insert.
-                    $row['path'] = '0';
-                    $needsPathUpdate = true;
                 } else {
-                    // MySQL: let auto_increment handle it, will update path after
+                    // MySQL/SQLite: the auto-increment id is unknown before insert and
+                    // path is NOT NULL under strict mode, so insert a placeholder path
+                    // and update it after lastInsertId is available.
+                    $row['path'] = '0';
                     $needsPathUpdate = true;
                 }
             }

@@ -184,7 +184,9 @@ class Mage_Tag_Model_Resource_Product_Collection extends Mage_Catalog_Model_Reso
      */
     public function setDescOrder($dir = 'DESC')
     {
-        $this->setOrder('relation.tag_relation_id', $dir);
+        // Aggregate keeps the ORDER BY legal under strict GROUP BY (collection groups
+        // by e.entity_id); MAX() orders products by their most recent tag relation
+        $this->setOrder('MAX(relation.tag_relation_id)', $dir);
         return $this;
     }
 
@@ -219,7 +221,7 @@ class Mage_Tag_Model_Resource_Product_Collection extends Mage_Catalog_Model_Reso
             ->joinLeft(
                 ['prelation' => $innerSelect],
                 $condition,
-                ['popularity' => 'prelation.popularity'],
+                ['popularity' => new Maho\Db\Expr('MAX(prelation.popularity)')],
             );
 
         $this->_tagIdFilter = $tagId;
@@ -316,20 +318,22 @@ class Mage_Tag_Model_Resource_Product_Collection extends Mage_Catalog_Model_Reso
 
         $this->getSelect()
             ->join(['relation' => $tagRelationTable], 'relation.product_id = e.entity_id', [
-                'product_id'    => 'product_id',
-                'item_store_id' => 'store_id',
+                'product_id'    => new Maho\Db\Expr('MIN(relation.product_id)'),
+                'item_store_id' => new Maho\Db\Expr('MIN(relation.store_id)'),
             ])
             ->join(
                 ['t' => $tagTable],
                 't.tag_id = relation.tag_id',
                 [
-                    'tag_id',
-                    'tag_status' => 'status',
-                    'tag_name'   => 'name',
-                    'store_id'   => $this->getConnection()->getCheckSql(
-                        't.first_store_id = 0',
-                        'relation.store_id',
-                        't.first_store_id',
+                    'tag_id'     => new Maho\Db\Expr('MIN(t.tag_id)'),
+                    'tag_status' => new Maho\Db\Expr('MIN(t.status)'),
+                    'tag_name'   => new Maho\Db\Expr('MIN(t.name)'),
+                    'store_id'   => new Maho\Db\Expr(
+                        'MIN(' . $this->getConnection()->getCheckSql(
+                            't.first_store_id = 0',
+                            'relation.store_id',
+                            't.first_store_id',
+                        ) . ')',
                     ),
                 ],
             );

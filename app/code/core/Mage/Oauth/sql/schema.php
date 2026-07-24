@@ -25,6 +25,10 @@ return function (Schema $schema): void {
     $consumer->addColumn('secret', Types::STRING, ['length' => 32]);
     $consumer->addColumn('callback_url', Types::STRING, ['length' => 255, 'notnull' => false]);
     $consumer->addColumn('rejected_callback_url', Types::STRING, ['length' => 255]);
+    $consumer->addColumn('store_ids', Types::TEXT, ['length' => 65535, 'notnull' => false, 'comment' => 'Allowed store IDs (JSON array or "all")']);
+    $consumer->addColumn('last_used_at', Types::DATETIME_MUTABLE, ['notnull' => false, 'comment' => 'Last API usage timestamp']);
+    $consumer->addColumn('expires_at', Types::DATETIME_MUTABLE, ['notnull' => false, 'comment' => 'Token expiration date']);
+    $consumer->addColumn('api_role_id', Types::INTEGER, ['unsigned' => true, 'notnull' => false, 'comment' => 'API Role ID for permission management']);
     $consumer->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('entity_id')->create(),
     );
@@ -32,6 +36,13 @@ return function (Schema $schema): void {
     $consumer->addUniqueIndex(['secret']);
     $consumer->addIndex(['created_at']);
     $consumer->addIndex(['updated_at']);
+    $consumer->addIndex(['api_role_id']);
+    $consumer->addForeignKeyConstraint(
+        'api_role',
+        ['api_role_id'],
+        ['role_id'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'SET NULL'],
+    );
     $consumer->setComment('OAuth Consumers');
 
     $token = $schema->createTable('oauth_token');

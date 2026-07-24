@@ -54,16 +54,25 @@ SPDX-License-Identifier: AFL-3.0
             <children>
                 <api>
                     <children>
-                        <rest_roles translate="title" module="api2">
-                            <title>REST - Roles</title>
-                            <sort_order>30</sort_order>
-                            <action>adminhtml/api2_role</action>
-                        </rest_roles>
-                        <rest_attributes translate="title" module="api2">
-                            <title>REST - Attributes</title>
-                            <sort_order>40</sort_order>
-                            <action>adminhtml/api2_attribute</action>
-                        </rest_attributes>
+                        <rest_legacy translate="title" module="adminhtml">
+                            <title>REST (legacy)</title>
+                            <resource>system/api</resource>
+                            <sort_order>20</sort_order>
+                            <children>
+                                <rest_roles translate="title" module="api2">
+                                    <title>Roles</title>
+                                    <resource>system/api/rest_roles</resource>
+                                    <sort_order>30</sort_order>
+                                    <action>adminhtml/api2_role</action>
+                                </rest_roles>
+                                <rest_attributes translate="title" module="api2">
+                                    <title>Attributes</title>
+                                    <resource>system/api/rest_attributes</resource>
+                                    <sort_order>40</sort_order>
+                                    <action>adminhtml/api2_attribute</action>
+                                </rest_attributes>
+                            </children>
+                        </rest_legacy>
                     </children>
                 </api>
             </children>

@@ -197,10 +197,16 @@ class Mage_Reports_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             )
             ->where('quote_items.product_id = e.entity_id');
 
+        // PostgreSQL cannot reference the select-list alias "carts" in HAVING, and the condition
+        // involves no aggregates, so filter with EXISTS in WHERE instead
+        $existsSelect = clone $countSelect;
+        $existsSelect->reset(Maho\Db\Select::COLUMNS)
+            ->columns(new Maho\Db\Expr('1'));
+
         $this->getSelect()
             ->columns(['carts' => "({$countSelect})"])
-            ->group("e.{$this->getProductEntityId()}")
-            ->having('carts > ?', 0);
+            ->group('e.entity_id')
+            ->where("EXISTS ({$existsSelect})");
 
         return $this;
     }
@@ -276,7 +282,7 @@ class Mage_Reports_Model_Resource_Product_Collection extends Mage_Catalog_Model_
                 ['order_items' => $this->getTable('sales/order_item')],
                 [
                     'ordered_qty' => 'SUM(order_items.qty_ordered)',
-                    'order_items_name' => 'order_items.name',
+                    'order_items_name' => new Maho\Db\Expr('MIN(order_items.name)'),
                 ],
             )
             ->joinInner(
@@ -289,14 +295,14 @@ class Mage_Reports_Model_Resource_Product_Collection extends Mage_Catalog_Model_
                 implode(' AND ', $productJoinCondition),
                 [
                     'entity_id' => 'order_items.product_id',
-                    'entity_type_id' => 'e.entity_type_id',
-                    'attribute_set_id' => 'e.attribute_set_id',
-                    'type_id' => 'e.type_id',
-                    'sku' => 'e.sku',
-                    'has_options' => 'e.has_options',
-                    'required_options' => 'e.required_options',
-                    'created_at' => 'e.created_at',
-                    'updated_at' => 'e.updated_at',
+                    'entity_type_id' => new Maho\Db\Expr('MAX(e.entity_type_id)'),
+                    'attribute_set_id' => new Maho\Db\Expr('MAX(e.attribute_set_id)'),
+                    'type_id' => new Maho\Db\Expr('MAX(e.type_id)'),
+                    'sku' => new Maho\Db\Expr('MAX(e.sku)'),
+                    'has_options' => new Maho\Db\Expr('MAX(e.has_options)'),
+                    'required_options' => new Maho\Db\Expr('MAX(e.required_options)'),
+                    'created_at' => new Maho\Db\Expr('MAX(e.created_at)'),
+                    'updated_at' => new Maho\Db\Expr('MAX(e.updated_at)'),
                 ],
             )
             ->where('parent_item_id IS NULL')

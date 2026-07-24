@@ -60,6 +60,17 @@ class Mage_Reports_Model_Resource_Event_Collection extends Mage_Core_Model_Resou
     {
         $stores = $this->getResource()->getCurrentStoreIds($this->_storeIds);
         $select = $this->getSelect();
+
+        // Reset to only the columns needed; grouping by object_id deduplicates per
+        // product/entity.  MAX(event_id) picks the most-recent event per object.
+        // Without this reset, the default main_table.* would contain non-aggregated
+        // columns (event_id, store_id, …) which violates ONLY_FULL_GROUP_BY.
+        $select->reset(Maho\Db\Select::COLUMNS)
+            ->columns([
+                'object_id' => 'main_table.object_id',
+                'event_id'  => new Maho\Db\Expr('MAX(main_table.event_id)'),
+            ]);
+
         $select->where('event_type_id = ?', $typeId)
             ->where('subject_id = ?', $subjectId)
             ->where('subtype = ?', $subtype)

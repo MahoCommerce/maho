@@ -113,6 +113,44 @@ class SampleDataImporter
     private array $oldAttributeGroups = [];
 
     /**
+     * Parsed attribute sets from SQL: old_set_id => ['entity_type_id' => int, 'attribute_set_name' => string, 'sort_order' => int]
+     */
+    private array $oldAttributeSets = [];
+
+    /**
+     * Remap: old_attribute_set_id => current DB attribute_set_id
+     *
+     * The dump carries attribute set ids from the installation it was generated
+     * on, but the target install has already created its own sets (module setup
+     * scripts run before sample data import), so ids overlap arbitrarily.
+     * Importing the dump rows verbatim corrupts the target: MySQL's REPLACE
+     * deletes the pre-existing conflicting sets, while the PostgreSQL path
+     * skips the dump rows — and the later group/entity-attribute merges then
+     * reference set ids that don't exist (FK enforcement is disabled during
+     * import). Sets are therefore matched by (entity_type, name) and remapped,
+     * exactly like attributes, options, and groups.
+     */
+    private array $attributeSetRemap = [];
+
+    /**
+     * Dump set ids skipped because their entity type doesn't exist in the DB
+     */
+    private array $skippedAttributeSets = [];
+
+    /**
+     * Remap: dump entity_type_id => current DB entity_type_id (matched by code)
+     */
+    private array $entityTypeRemap = [];
+
+    /**
+     * Tables whose rows carry an attribute_set_id that must be remapped in-SQL
+     */
+    private const TABLES_WITH_ATTRIBUTE_SET_ID = [
+        'catalog_product_entity',
+        'catalog_category_entity',
+    ];
+
+    /**
      * User-defined attributes that need to be created
      */
     private array $attributesToCreate = [];
@@ -244,19 +282,26 @@ class SampleDataImporter
         // Step 4: Parse eav_attribute_group from SQL (for group ID remapping)
         $this->parseEavAttributeGroupFromSql($sql);
 
-        // Step 5: Load current attribute mapping from installed DB
+        // Step 5: Parse entity types and attribute sets from SQL, then merge
+        // the sets into the DB (match by entity type + name, create missing)
+        // so the set ID remap exists before the SQL is rewritten
+        $this->parseEavEntityTypeFromSql($sql);
+        $this->parseEavAttributeSetFromSql($sql);
+        $this->mergeAttributeSets();
+
+        // Step 6: Load current attribute mapping from installed DB
         $this->loadCurrentAttributes();
 
-        // Step 6: Build attribute remap and identify attributes to create
+        // Step 7: Build attribute remap and identify attributes to create
         $this->buildAttributeRemap();
 
-        // Step 7: Create missing user-defined attributes
+        // Step 8: Create missing user-defined attributes
         $this->createMissingAttributes();
 
-        // Step 8: Build option remap (after attributes are created)
+        // Step 9: Build option remap (after attributes are created)
         $this->buildOptionRemap($sql);
 
-        // Step 9: Remap the SQL (this will skip eav_entity_attribute)
+        // Step 10: Remap the SQL (this will skip eav_entity_attribute)
         // Note: Attribute group remapping happens later in mergeEntityAttributes()
         // after the SQL has created the new attribute sets and groups
         $remappedSql = $this->remapSql($sql);
@@ -288,8 +333,11 @@ class SampleDataImporter
         $addedCount = 0;
 
         foreach ($this->sampleEntityAttributes as $entry) {
-            $entityTypeId = $entry['entity_type_id'];
-            $attributeSetId = $entry['attribute_set_id'];
+            if (isset($this->skippedAttributeSets[$entry['attribute_set_id']])) {
+                continue;
+            }
+            $entityTypeId = $this->entityTypeRemap[$entry['entity_type_id']] ?? $entry['entity_type_id'];
+            $attributeSetId = $this->attributeSetRemap[$entry['attribute_set_id']] ?? $entry['attribute_set_id'];
             $oldAttributeGroupId = $entry['attribute_group_id'];
             $oldAttributeId = $entry['attribute_id'];
             $sortOrder = $entry['sort_order'];
@@ -402,7 +450,11 @@ class SampleDataImporter
         $remappedCount = 0;
 
         foreach ($this->oldAttributeGroups as $oldGroupId => $groupInfo) {
-            $setId = $groupInfo['attribute_set_id'];
+            $oldSetId = $groupInfo['attribute_set_id'];
+            if (isset($this->skippedAttributeSets[$oldSetId])) {
+                continue;
+            }
+            $setId = $this->attributeSetRemap[$oldSetId] ?? $oldSetId;
             $groupName = $groupInfo['attribute_group_name'];
             $sortOrder = $groupInfo['sort_order'] ?? 0;
             $defaultId = $groupInfo['default_id'] ?? 0;
@@ -478,6 +530,144 @@ class SampleDataImporter
         }
 
         $this->log('Parsed ' . count($this->sampleEntityAttributes) . ' attribute set assignments from sample data', 'info');
+    }
+
+    /**
+     * Parse eav_entity_type entries from sample data SQL and build the entity
+     * type remap (dump id => DB id, matched by entity_type_code)
+     */
+    private function parseEavEntityTypeFromSql(string $sql): void
+    {
+        $pattern = '/REPLACE\s+INTO\s+`eav_entity_type`\s*\(([^)]+)\)\s*VALUES\s*(.*?)(?=;\s*(?:\/\*|LOCK|UNLOCK|$))/si';
+
+        if (!preg_match($pattern, $sql, $matches)) {
+            return;
+        }
+
+        $sqlColumns = array_map(fn($c) => trim($c, ' `'), explode(',', $matches[1]));
+        $typeIdPos = array_search('entity_type_id', $sqlColumns);
+        $typeCodePos = array_search('entity_type_code', $sqlColumns);
+
+        if ($typeIdPos === false || $typeCodePos === false) {
+            return;
+        }
+
+        preg_match_all('/\(([^)]+)\)/s', $matches[2], $rowMatches);
+
+        foreach ($rowMatches[1] as $rowContent) {
+            $values = $this->parseValueRow($rowContent);
+            $dumpTypeId = (int) trim($values[$typeIdPos] ?? '0');
+            $typeCode = $this->cleanSqlValue($values[$typeCodePos] ?? '');
+
+            if ($dumpTypeId === 0 || $typeCode === null) {
+                continue;
+            }
+
+            $dbTypeId = $this->getEntityTypeId($typeCode);
+            if ($dbTypeId !== null) {
+                $this->entityTypeRemap[$dumpTypeId] = $dbTypeId;
+            } else {
+                $this->log("Entity type '{$typeCode}' from sample data does not exist in this installation", 'warning');
+            }
+        }
+    }
+
+    /**
+     * Parse eav_attribute_set entries from sample data SQL
+     */
+    private function parseEavAttributeSetFromSql(string $sql): void
+    {
+        $pattern = '/REPLACE\s+INTO\s+`eav_attribute_set`\s*\(([^)]+)\)\s*VALUES\s*(.*?)(?=;\s*(?:\/\*|LOCK|UNLOCK|$))/si';
+
+        if (!preg_match($pattern, $sql, $matches)) {
+            return;
+        }
+
+        $sqlColumns = array_map(fn($c) => trim($c, ' `'), explode(',', $matches[1]));
+        $setIdPos = array_search('attribute_set_id', $sqlColumns);
+        $typeIdPos = array_search('entity_type_id', $sqlColumns);
+        $setNamePos = array_search('attribute_set_name', $sqlColumns);
+        $sortOrderPos = array_search('sort_order', $sqlColumns);
+
+        if ($setIdPos === false || $typeIdPos === false || $setNamePos === false) {
+            return;
+        }
+
+        preg_match_all('/\(([^)]+)\)/s', $matches[2], $rowMatches);
+
+        foreach ($rowMatches[1] as $rowContent) {
+            $values = $this->parseValueRow($rowContent);
+            $setId = (int) trim($values[$setIdPos] ?? '0');
+            $typeId = (int) trim($values[$typeIdPos] ?? '0');
+            $setName = $this->cleanSqlValue($values[$setNamePos] ?? '');
+
+            if ($setId === 0 || $typeId === 0 || $setName === null) {
+                continue;
+            }
+
+            $this->oldAttributeSets[$setId] = [
+                'entity_type_id' => $typeId,
+                'attribute_set_name' => $setName,
+                'sort_order' => $sortOrderPos !== false ? (int) trim($values[$sortOrderPos] ?? '0') : 0,
+            ];
+        }
+
+        $this->log('Parsed ' . count($this->oldAttributeSets) . ' attribute sets from sample data', 'info');
+    }
+
+    /**
+     * Merge sample data's attribute sets into the database and build the set
+     * ID remap. Sets are matched against existing ones by (entity type, name);
+     * missing ones are created through the engine's identity mechanism so no
+     * explicit dump id ever reaches the target database.
+     */
+    private function mergeAttributeSets(): void
+    {
+        if (empty($this->oldAttributeSets)) {
+            return;
+        }
+
+        $stmt = $this->pdo->query('SELECT attribute_set_id, entity_type_id, attribute_set_name FROM eav_attribute_set');
+        $currentSets = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $key = $row['entity_type_id'] . ':' . strtolower(trim($row['attribute_set_name']));
+            $currentSets[$key] = (int) $row['attribute_set_id'];
+        }
+
+        $insertStmt = $this->pdo->prepare('
+            INSERT INTO eav_attribute_set (entity_type_id, attribute_set_name, sort_order)
+            VALUES (?, ?, ?)
+        ');
+
+        $addedCount = 0;
+        $matchedCount = 0;
+
+        foreach ($this->oldAttributeSets as $oldSetId => $info) {
+            $dbTypeId = $this->entityTypeRemap[$info['entity_type_id']] ?? null;
+            if ($dbTypeId === null) {
+                $this->skippedAttributeSets[$oldSetId] = true;
+                $this->log(
+                    "Skipping attribute set '{$info['attribute_set_name']}' (unknown entity type {$info['entity_type_id']})",
+                    'warning',
+                );
+                continue;
+            }
+
+            $key = $dbTypeId . ':' . strtolower(trim($info['attribute_set_name']));
+
+            if (isset($currentSets[$key])) {
+                $this->attributeSetRemap[$oldSetId] = $currentSets[$key];
+                $matchedCount++;
+            } else {
+                $insertStmt->execute([$dbTypeId, $info['attribute_set_name'], $info['sort_order']]);
+                $newSetId = (int) $this->pdo->lastInsertId();
+                $this->attributeSetRemap[$oldSetId] = $newSetId;
+                $currentSets[$key] = $newSetId;
+                $addedCount++;
+            }
+        }
+
+        $this->log("Merged attribute sets: {$matchedCount} matched, {$addedCount} created", 'info');
     }
 
     /**
@@ -892,6 +1082,21 @@ class SampleDataImporter
         // and break attribute group assignments (e.g., is_dynamic would end up in wrong group)
         $sql = $this->removeTableBlock($sql, 'eav_attribute_group');
 
+        // Skip eav_attribute_set - sets were merged in mergeAttributeSets();
+        // importing the dump's explicit set ids would clobber (MySQL REPLACE)
+        // or silently skip (PostgreSQL) the sets module setups already created
+        $sql = $this->removeTableBlock($sql, 'eav_attribute_set');
+
+        // Skip eav_entity_type - entity types are owned by module setup
+        // scripts; the dump's rows carry stale ids/config from the machine the
+        // dump was generated on (types are matched by code via entityTypeRemap)
+        $sql = $this->removeTableBlock($sql, 'eav_entity_type');
+
+        // Remap attribute_set_id in entity tables to the merged set ids
+        foreach (self::TABLES_WITH_ATTRIBUTE_SET_ID as $table) {
+            $sql = $this->remapAttributeSetIdInTable($sql, $table);
+        }
+
         // Remap attribute_id in EAV value tables
         foreach (self::TABLES_WITH_ATTRIBUTE_ID as $table) {
             $sql = $this->remapAttributeIdInTable($sql, $table);
@@ -945,6 +1150,34 @@ class SampleDataImporter
 
             // Remap each row
             $valuesBlock = $this->remapColumnInValues($valuesBlock, $attrIdPos, $this->attributeRemap);
+
+            return "REPLACE INTO `{$table}` ({$columns}) VALUES {$valuesBlock}";
+        }, $sql);
+    }
+
+    /**
+     * Remap attribute_set_id values in a specific table's INSERT statements
+     */
+    private function remapAttributeSetIdInTable(string $sql, string $table): string
+    {
+        if (empty($this->attributeSetRemap)) {
+            return $sql;
+        }
+
+        $pattern = '/REPLACE\s+INTO\s+`' . preg_quote($table, '/') . '`\s*\(([^)]+)\)\s*VALUES\s*(.*?)(?=;[\s]*(?:LOCK|UNLOCK|$))/si';
+
+        return preg_replace_callback($pattern, function ($matches) use ($table) {
+            $columns = $matches[1];
+            $valuesBlock = $matches[2];
+
+            $columnList = array_map('trim', explode(',', str_replace('`', '', $columns)));
+            $setIdPos = array_search('attribute_set_id', $columnList);
+
+            if ($setIdPos === false) {
+                return $matches[0];
+            }
+
+            $valuesBlock = $this->remapColumnInValues($valuesBlock, $setIdPos, $this->attributeSetRemap);
 
             return "REPLACE INTO `{$table}` ({$columns}) VALUES {$valuesBlock}";
         }, $sql);
@@ -1205,6 +1438,14 @@ class SampleDataImporter
     public function getAttributeRemap(): array
     {
         return $this->attributeRemap;
+    }
+
+    /**
+     * Get the attribute set remap for debugging/logging
+     */
+    public function getAttributeSetRemap(): array
+    {
+        return $this->attributeSetRemap;
     }
 
     /**

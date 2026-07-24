@@ -136,8 +136,6 @@ class Mage_Sales_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
         $length = null;
         switch ($data['type']) {
             case 'timestamp':
-                $type = Maho\Db\Ddl\Table::TYPE_TIMESTAMP;
-                break;
             case 'datetime':
                 $type = Maho\Db\Ddl\Table::TYPE_DATETIME;
                 break;
@@ -288,7 +286,6 @@ class Mage_Sales_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
                     'postcode'                  => ['type' => 'static'],
                     'country_id'                => ['type' => 'static'],
                     'telephone'                 => ['type' => 'static'],
-                    'fax'                       => ['type' => 'static'],
 
                     'same_as_billing'           => ['type' => 'static'],
                     'free_shipping'             => ['type' => 'static'],
@@ -543,7 +540,6 @@ class Mage_Sales_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
                     'postcode'              => [],
                     'country_id'            => ['type' => 'varchar'],
                     'telephone'             => [],
-                    'fax'                   => [],
 
                 ],
             ],

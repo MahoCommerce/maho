@@ -23,6 +23,9 @@ $application = new class ('Maho', Mage::getVersion()) extends Application {
     }
 };
 
+$application->addCommand(new \MahoCLI\Commands\AccessibilityInstall());
+$application->addCommand(new \MahoCLI\Commands\AccessibilityScan());
+
 $application->addCommand(new \MahoCLI\Commands\AdminUserList());
 $application->addCommand(new \MahoCLI\Commands\AdminUserCreate());
 $application->addCommand(new \MahoCLI\Commands\AdminUserChangepassword());
@@ -71,6 +74,7 @@ $application->addCommand(new \MahoCLI\Commands\LegacyRenameMysql4Classes());
 $application->addCommand(new \MahoCLI\Commands\LegacyMigrateObservers());
 $application->addCommand(new \MahoCLI\Commands\LegacyMigrateCron());
 $application->addCommand(new \MahoCLI\Commands\LegacyMigrateRoutes());
+$application->addCommand(new \MahoCLI\Commands\LegacyFixZeroDates());
 
 $application->addCommand(new \MahoCLI\Commands\Serve());
 $application->addCommand(new \MahoCLI\Commands\Shell());
@@ -89,12 +93,22 @@ $application->addCommand(new \MahoCLI\Commands\TranslationsMissing());
 $application->addCommand(new \MahoCLI\Commands\TranslationsUnused());
 
 $application->addCommand(new \MahoCLI\Commands\CreateCommand());
+$application->addCommand(new \MahoCLI\Commands\CreateApiResource());
+$application->addCommand(new \MahoCLI\Commands\ListApiResources());
 
 $application->addCommand(new \MahoCLI\Commands\DevModuleList());
+$application->addCommand(new \MahoCLI\Commands\DevLspStart());
+$application->addCommand(new \MahoCLI\Commands\DevMcpStart());
+$application->addCommand(new \MahoCLI\Commands\PaypalWebhookSimulate());
 
 $application->addCommand(new \MahoCLI\Commands\FrontendLayoutDebug());
 $application->addCommand(new \MahoCLI\Commands\FrontendThemeBuild());
 $application->addCommand(new \MahoCLI\Commands\FrontendThemeCreate());
+
+$application->addCommand(new \MahoCLI\Commands\FeedList());
+$application->addCommand(new \MahoCLI\Commands\FeedGenerate());
+$application->addCommand(new \MahoCLI\Commands\FeedGenerateAll());
+$application->addCommand(new \MahoCLI\Commands\FeedValidate());
 
 $discoverer = new CommandDiscoverer();
 $commands = array_merge(

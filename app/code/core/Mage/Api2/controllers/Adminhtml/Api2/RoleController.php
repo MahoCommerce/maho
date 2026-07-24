@@ -8,8 +8,13 @@
  * @package Mage_Api2
  */
 
+/**
+ * @deprecated since 26.7 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_Action
 {
+    public const ADMIN_RESOURCE = 'system/api/rest_roles';
+
     /**
      * Controller pre-dispatch method
      *
@@ -30,10 +35,10 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     {
         $this
             ->_title($this->__('System'))
-            ->_title($this->__('Web Services'))
+            ->_title($this->__('API'))
             ->_title($this->__('REST Roles'))
             ->loadLayout()
-            ->_setActiveMenu('system/api/rest_roles')
+            ->_setActiveMenu('system/api/rest_legacy/rest_roles')
             ->_addBreadcrumb($this->__('Web services'), $this->__('Web services'))
             ->_addBreadcrumb($this->__('REST Roles'), $this->__('REST Roles'))
             ->_addBreadcrumb($this->__('Roles'), $this->__('Roles'))
@@ -74,10 +79,10 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     {
         $this
             ->_title($this->__('System'))
-            ->_title($this->__('Web Services'))
+            ->_title($this->__('API'))
             ->_title($this->__('Rest Roles'))
             ->loadLayout()
-            ->_setActiveMenu('system/api/rest_roles')
+            ->_setActiveMenu('system/api/rest_legacy/rest_roles')
             ->_addBreadcrumb($this->__('Web services'), $this->__('Web services'))
             ->_addBreadcrumb($this->__('REST Roles'), $this->__('REST Roles'))
             ->_addBreadcrumb($this->__('Roles'), $this->__('Roles'))
@@ -104,9 +109,9 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
 
         $this
             ->loadLayout()
-            ->_setActiveMenu('system/api/rest_roles')
+            ->_setActiveMenu('system/api/rest_legacy/rest_roles')
             ->_title($this->__('System'))
-            ->_title($this->__('Web Services'))
+            ->_title($this->__('API'))
             ->_title($this->__('Rest Roles'));
 
         $breadCrumb = $this->__('Edit Role');
@@ -276,14 +281,6 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
         }
 
         $this->_redirect('*/*/');
-    }
-
-    #[\Override]
-    protected function _isAllowed()
-    {
-        /** @var Mage_Admin_Model_Session $session */
-        $session = Mage::getSingleton('admin/session');
-        return $session->isAllowed('system/api/rest_roles');
     }
 
     /**

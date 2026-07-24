@@ -108,6 +108,12 @@ SPDX-License-Identifier: AFL-3.0
         </secure_url>
     </frontend>
     <default>
+        <system>
+            <rate_limit>
+                <newsletter_subscribe>3</newsletter_subscribe>
+                <newsletter_unsubscribe>30</newsletter_unsubscribe>
+            </rate_limit>
+        </system>
         <newsletter>
             <subscription>
                 <allow_guest_subscribe>1</allow_guest_subscribe>

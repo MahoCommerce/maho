@@ -228,17 +228,12 @@ class Mage_Review_Model_Resource_Review_Collection extends Mage_Core_Model_Resou
      */
     public function addReviewsTotalCount()
     {
-        $this->_select->joinLeft(
-            ['r' => $this->_reviewTable],
-            'main_table.entity_pk_value = r.entity_pk_value',
-            ['total_reviews' => new Maho\Db\Expr('COUNT(r.review_id)')],
-        )
-        ->group('main_table.review_id');
-
-        /*
-         * Allow analytic functions usage
-         */
-        $this->_useAnalyticFunction = true;
+        $reviewTable = $this->_reviewTable;
+        $this->_select->columns([
+            'total_reviews' => new Maho\Db\Expr(
+                "(SELECT COUNT(*) FROM {$reviewTable} r2 WHERE r2.entity_pk_value = main_table.entity_pk_value)",
+            ),
+        ]);
 
         return $this;
     }

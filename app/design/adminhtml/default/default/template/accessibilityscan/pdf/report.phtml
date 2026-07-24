@@ -1,0 +1,151 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package Maho_AccessibilityScan
+ */
+
+/**
+ * @var Maho_AccessibilityScan_Block_Pdf_Report $this
+ */
+
+$helper = Mage::helper('accessibilityscan');
+$scan = $this->getScan();
+$counts = $scan->getViolationCounts();
+$logoUrl = $this->getLogoUrl();
+?>
+<style>
+    body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #222; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    h2 { font-size: 15px; margin: 24px 0 8px; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+    h3 { font-size: 12px; margin: 0 0 4px; }
+    .report-header { margin-bottom: 20px; }
+    .report-header img { max-height: 40px; margin-bottom: 8px; }
+    .subtitle { color: #666; }
+    table.meta { border-collapse: collapse; margin: 12px 0 20px; }
+    table.meta td { padding: 3px 18px 3px 0; vertical-align: top; }
+    table.summary { border-collapse: collapse; width: 100%; margin-bottom: 8px; }
+    table.summary th, table.summary td { border: 1px solid #ccc; padding: 6px 10px; text-align: center; }
+    table.summary th { background: #f0f0f0; }
+    .badge { display: inline-block; padding: 1px 6px; border-radius: 8px; color: #fff; font-size: 9px; text-transform: uppercase; }
+    .badge.critical { background: #d40707; }
+    .badge.serious { background: #e07c00; }
+    .badge.moderate { background: #b8a000; }
+    .badge.minor { background: #777; }
+    .violation { border: 1px solid #ccc; border-left: 4px solid #777; padding: 8px 12px; margin-bottom: 8px; page-break-inside: avoid; }
+    .violation.critical { border-left-color: #d40707; }
+    .violation.serious { border-left-color: #e07c00; }
+    .violation.moderate { border-left-color: #b8a000; }
+    .violation pre { background: #f6f6f6; border: 1px solid #ddd; padding: 6px; font-size: 9px; white-space: pre-wrap; word-break: break-all; }
+    .violation .label { font-weight: bold; margin: 6px 0 2px; }
+    .help-url { color: #666; font-size: 9px; word-break: break-all; }
+    img.screenshot { max-width: 100%; border: 1px solid #ccc; }
+    .screenshot-page, .violations-start { page-break-before: always; }
+    .coverage-note { margin-top: 24px; padding-top: 8px; border-top: 1px solid #ccc; color: #666; font-size: 9px; }
+</style>
+
+<div class="report-header">
+    <?php if ($logoUrl): ?>
+        <img src="<?= $this->escapeHtml($logoUrl) ?>" alt="">
+    <?php endif; ?>
+    <h1><?= $helper->__('Accessibility Scan Report') ?></h1>
+    <div class="subtitle"><?= $this->escapeHtml($scan->getUrl()) ?></div>
+</div>
+
+<table class="meta">
+    <tr>
+        <td><strong><?= $helper->__('Scan ID') ?></strong></td>
+        <td>#<?= (int) $scan->getId() ?></td>
+    </tr>
+    <tr>
+        <td><strong><?= $helper->__('WCAG Level') ?></strong></td>
+        <td><?= $this->escapeHtml($scan->getWcagLevel()) ?></td>
+    </tr>
+    <tr>
+        <td><strong><?= $helper->__('Status') ?></strong></td>
+        <td><?= $this->escapeHtml($scan->getStatus()) ?></td>
+    </tr>
+    <?php if ($scan->getCompletedAt()): ?>
+        <tr>
+            <td><strong><?= $helper->__('Completed') ?></strong></td>
+            <td><?= $this->escapeHtml(Mage::helper('core')->formatDate($scan->getCompletedAt(), 'medium', true)) ?></td>
+        </tr>
+    <?php endif; ?>
+</table>
+
+<h2><?= $helper->__('Summary') ?></h2>
+<table class="summary">
+    <tr>
+        <th><?= $helper->__('Total') ?></th>
+        <th><?= $helper->__('Critical') ?></th>
+        <th><?= $helper->__('Serious') ?></th>
+        <th><?= $helper->__('Moderate') ?></th>
+        <th><?= $helper->__('Minor') ?></th>
+        <th><?= $helper->__('Needs Review') ?></th>
+    </tr>
+    <tr>
+        <td><?= $scan->getTotalViolations() ?></td>
+        <td><?= $counts['critical'] ?></td>
+        <td><?= $counts['serious'] ?></td>
+        <td><?= $counts['moderate'] ?></td>
+        <td><?= $counts['minor'] ?></td>
+        <td><?= $scan->getIncompleteCount() ?></td>
+    </tr>
+</table>
+
+<?php if (!$scan->getTotalViolations()): ?>
+    <p><?= $helper->__('No automatically detectable violations were found. Automated checks cover only part of WCAG, so manual testing with a keyboard and a screen reader is still recommended.') ?></p>
+<?php endif; ?>
+
+<?php if ($scan->getIncompleteCount()): ?>
+    <p><?= $helper->__('axe-core could not automatically evaluate %s check(s) (for example, color contrast over an image). Review them manually.', $scan->getIncompleteCount()) ?></p>
+<?php endif; ?>
+
+<?php $hasScreenshots = false; ?>
+<?php foreach ($this->getPages() as $page): ?>
+    <?php if ($screenshot = $this->getScreenshotDataUri($page)): ?>
+        <?php $hasScreenshots = true; ?>
+        <div class="screenshot-page">
+            <h2><?= $helper->__('%s Screenshot', $this->getViewportLabel($page->getViewport())) ?></h2>
+            <img class="screenshot" style="<?= $this->getScreenshotStyle($page) ?>" src="<?= $screenshot ?>" alt="">
+        </div>
+    <?php endif; ?>
+<?php endforeach; ?>
+
+<?php if ($hasScreenshots && $scan->getTotalViolations()): ?><div class="violations-start"></div><?php endif; ?>
+<?php foreach ($this->getViolationsByImpact() as $impact => $violations): ?>
+    <h2>
+        <span class="badge <?= $this->escapeHtml($impact) ?>"><?= $this->escapeHtml($impact) ?></span>
+        <?= $helper->__('%s violation(s)', count($violations)) ?>
+    </h2>
+    <?php foreach ($violations as $violation): ?>
+        <div class="violation <?= $this->escapeHtml($impact) ?>">
+            <h3>
+                #<?= $this->getViolationNumber($violation) ?>
+                <?= $this->escapeHtml($violation->getAxeRuleId()) ?>
+                <?php if ($violation->getWcagCriteria()): ?>
+                    (<?= $helper->__('WCAG %s', $violation->getWcagCriteria()) ?>)
+                <?php endif; ?>
+                - <?= $this->escapeHtml($this->getViewportLabels($violation)) ?>
+            </h3>
+            <p><?= $this->escapeHtml((string) $violation->getDescription()) ?></p>
+            <?php if ($violation->getTemplateFile()): ?>
+                <div class="label"><?= $helper->__('Template') ?></div>
+                <div><?= $this->escapeHtml($violation->getTemplateFile()) ?><?= $violation->getTemplateLine() ? ':' . (int) $violation->getTemplateLine() : '' ?></div>
+            <?php endif; ?>
+            <?php if ($violation->getCssSelector()): ?>
+                <div class="label"><?= $helper->__('Selector') ?></div>
+                <div><?= $this->escapeHtml($violation->getCssSelector()) ?></div>
+            <?php endif; ?>
+            <?php if ($violation->getHtmlSnippet()): ?>
+                <div class="label"><?= $helper->__('HTML') ?></div>
+                <pre><?= $this->escapeHtml($violation->getHtmlSnippet()) ?></pre>
+            <?php endif; ?>
+            <?php if ($violation->getHelpUrl()): ?>
+                <div class="help-url"><?= $this->escapeHtml($violation->getHelpUrl()) ?></div>
+            <?php endif; ?>
+        </div>
+    <?php endforeach; ?>
+<?php endforeach; ?>
+
+<p class="coverage-note"><?= $helper->__('This report was generated with automated checks (axe-core), which detect only a subset of WCAG success criteria. A report with no violations does not guarantee conformance; manual testing with a keyboard and a screen reader is still required.') ?></p>

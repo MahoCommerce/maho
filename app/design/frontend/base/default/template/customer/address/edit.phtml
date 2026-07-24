@@ -43,12 +43,6 @@
                         <input type="tel" name="telephone" value="<?= $this->escapeHtml($this->getAddress()->getTelephone()) ?>" title="<?= $this->quoteEscape($this->__('Telephone')) ?>" class="input-text  <?= $this->helper('customer/address')->getAttributeValidationClass('telephone') ?>" id="telephone">
                     </div>
                 </div>
-                <div class="field">
-                    <label for="fax"><?= $this->__('Fax') ?></label>
-                    <div class="input-box">
-                        <input type="tel" name="fax" id="fax" title="<?= $this->quoteEscape($this->__('Fax')) ?>" value="<?= $this->escapeHtml($this->getAddress()->getFax()) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('fax') ?>">
-                    </div>
-                </div>
             </li>
         </ul>
     </div>

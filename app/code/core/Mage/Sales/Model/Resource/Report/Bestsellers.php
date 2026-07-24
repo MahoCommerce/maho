@@ -77,7 +77,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
                 'period'                 => $periodExpr,
                 'store_id'               => 'source_table.store_id',
                 'product_id'             => 'order_item.product_id',
-                'product_type_id'        => 'product.type_id',
+                'product_type_id'        => new Maho\Db\Expr('MIN(product.type_id)'),
                 'product_name'           => new Maho\Db\Expr(
                     sprintf(
                         'MIN(%s)',
@@ -240,7 +240,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
             'period'            => 'period',
             'store_id'          => new Maho\Db\Expr((string) Mage_Core_Model_App::ADMIN_STORE_ID),
             'product_id'        => 'product_id',
-            'product_type_id'   => 'product_type_id',
+            'product_type_id'   => new Maho\Db\Expr('MIN(product_type_id)'),
             'product_name'      => new Maho\Db\Expr('MIN(product_name)'),
             'product_price'     => new Maho\Db\Expr(
                 sprintf(

@@ -112,14 +112,6 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @return string
-     */
-    public function getReviewUrl()
-    {
-        return Mage::getUrl('review/product/view', ['id' => $this->getReviewId()]);
-    }
-
-    /**
      * @return array|bool
      */
     public function validate()
