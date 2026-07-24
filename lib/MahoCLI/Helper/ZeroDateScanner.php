@@ -24,10 +24,15 @@ class ZeroDateScanner
      */
     public static function findZeroDateDefaults(Mysql $adapter): array
     {
+        // Restrict to date/datetime/timestamp columns: a non-date column whose text
+        // default merely starts with '0000-00-00' is not a zero-date default and must
+        // not be "fixed". MariaDB quotes literal defaults in information_schema (e.g.
+        // '0000-00-00'), MySQL returns them bare (0000-00-00), so match both forms.
         $rows = $adapter->fetchAll(
             'SELECT TABLE_NAME, COLUMN_NAME, IS_NULLABLE FROM information_schema.COLUMNS'
-            . ' WHERE TABLE_SCHEMA = ? AND COLUMN_DEFAULT LIKE ?',
-            [self::databaseName($adapter), '0000-00-00%'],
+            . " WHERE TABLE_SCHEMA = ? AND DATA_TYPE IN ('date', 'datetime', 'timestamp')"
+            . ' AND (COLUMN_DEFAULT LIKE ? OR COLUMN_DEFAULT LIKE ?)',
+            [self::databaseName($adapter), '0000-00-00%', "'0000-00-00%"],
         );
 
         $findings = [];

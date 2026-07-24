@@ -105,6 +105,7 @@ class LegacyFixZeroDates extends BaseMahoCommand
                     $adapter->quoteIdentifier($finding['table']),
                     $adapter->quoteIdentifier($finding['column']),
                 ));
+                $adapter->resetDdlCache($finding['table']);
                 $output->writeln("Changed DEFAULT to NULL on $target");
             } else {
                 $output->writeln("Would change DEFAULT to NULL on $target");
