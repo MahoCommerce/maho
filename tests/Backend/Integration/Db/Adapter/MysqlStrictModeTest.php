@@ -148,6 +148,19 @@ it('preserves the strict baseline across startSetup and endSetup', function () {
     expect(fetchSqlMode($adapter))->toBe($modeBefore);
 });
 
+it('keeps the strict baseline active during setup, only adding NO_AUTO_VALUE_ON_ZERO', function () {
+    $adapter = createFreshMysqlAdapter();
+    $adapter->startSetup();
+    // Setup scripts must run under the same strict mode as production, so a bad
+    // write in an install/upgrade script is caught instead of silently truncated.
+    $modeDuring = fetchSqlMode($adapter);
+    $adapter->endSetup();
+
+    expect($modeDuring)->toContain('STRICT_TRANS_TABLES');
+    expect($modeDuring)->toContain('NO_ZERO_DATE');
+    expect($modeDuring)->toContain('NO_AUTO_VALUE_ON_ZERO');
+});
+
 it('preserves the live SQL_MODE in insertForce so the bulk-import path still works', function () {
     $adapter = createFreshMysqlAdapter();
     $modeBefore = fetchSqlMode($adapter);

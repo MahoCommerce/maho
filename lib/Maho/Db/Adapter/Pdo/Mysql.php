@@ -1878,7 +1878,10 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     public function insertForce(string $table, array $bind): int
     {
-        $this->raw_query("SET @OLD_INSERT_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
+        // Add NO_AUTO_VALUE_ON_ZERO (so an explicit 0 is stored in an identity column
+        // instead of triggering auto_increment) on top of the strict baseline, rather
+        // than replacing it — the insert itself stays validated by the pinned mode.
+        $this->raw_query("SET @OLD_INSERT_SQL_MODE=@@SQL_MODE, SQL_MODE=CONCAT(@@SQL_MODE, ',NO_AUTO_VALUE_ON_ZERO')");
         $result = $this->insert($table, $bind);
         $this->raw_query("SET SQL_MODE=IFNULL(@OLD_INSERT_SQL_MODE,'')");
 
@@ -2822,7 +2825,10 @@ class Mysql extends AbstractPdoAdapter
     public function startSetup(): self
     {
         $this->raw_query('SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0');
-        $this->raw_query("SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
+        // Add NO_AUTO_VALUE_ON_ZERO (data scripts may insert explicit ids, including 0)
+        // on top of the strict baseline instead of replacing it, so install/upgrade
+        // scripts run under the same strict mode as production, not a relaxed one.
+        $this->raw_query("SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE=CONCAT(@@SQL_MODE, ',NO_AUTO_VALUE_ON_ZERO')");
 
         return $this;
     }
