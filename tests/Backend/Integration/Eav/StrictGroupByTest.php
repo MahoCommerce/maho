@@ -297,30 +297,20 @@ it('loads the catalog product attribute collection with stacked filters (advance
     expect($collection->getSize())->toBe(count($collection->getItems()));
 });
 
-it('reports strict GROUP BY as required when developer mode is on', function () {
-    Mage::setIsDeveloperMode(true);
-    $helper = Mage::getResourceHelper('eav');
-    $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+it('reports strict GROUP BY as required independently of developer mode', function () {
+    foreach ([true, false] as $devMode) {
+        Mage::setIsDeveloperMode($devMode);
+        $helper = Mage::getResourceHelper('eav');
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
 
-    if ($adapter instanceof \Maho\Db\Adapter\Pdo\Sqlite) {
-        // SQLite never enforces strict GROUP BY, regardless of developer mode.
-        expect($helper->requiresStrictGroupBy())->toBeFalse();
-    } else {
-        // MySQL (ONLY_FULL_GROUP_BY in developer mode) and PostgreSQL (always).
-        expect($helper->requiresStrictGroupBy())->toBeTrue();
-    }
-});
-
-it('reports strict GROUP BY as not required when developer mode is off', function () {
-    Mage::setIsDeveloperMode(false);
-    $helper = Mage::getResourceHelper('eav');
-    $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
-
-    if ($adapter instanceof \Maho\Db\Adapter\Pdo\Pgsql) {
-        // PostgreSQL enforces strict GROUP BY natively, independent of dev mode.
-        expect($helper->requiresStrictGroupBy())->toBeTrue();
-    } else {
-        // MySQL only enables ONLY_FULL_GROUP_BY in developer mode; SQLite never.
-        expect($helper->requiresStrictGroupBy())->toBeFalse();
+        if ($adapter instanceof \Maho\Db\Adapter\Pdo\Sqlite) {
+            // SQLite never enforces strict GROUP BY.
+            expect($helper->requiresStrictGroupBy())->toBeFalse();
+        } else {
+            // MySQL pins ONLY_FULL_GROUP_BY in its connection baseline and
+            // PostgreSQL enforces strict grouping natively - both regardless
+            // of developer mode, so the compliant query shape is the only shape.
+            expect($helper->requiresStrictGroupBy())->toBeTrue();
+        }
     }
 });

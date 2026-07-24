@@ -103,14 +103,15 @@ class Mage_Eav_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_Help
     /**
      * Check if database requires strict GROUP BY (all SELECT columns in GROUP BY)
      *
-     * Returns true when Maho is in developer mode, since the MySQL adapter
-     * sets SQL_MODE='ONLY_FULL_GROUP_BY' in that case.
+     * Always true: the MySQL adapter pins ONLY_FULL_GROUP_BY in its baseline
+     * SQL_MODE (issue #688 step 3), so the compliant query shape must not
+     * depend on developer mode.
      *
      * @return bool
      */
     public function requiresStrictGroupBy()
     {
-        return Mage::getIsDeveloperMode();
+        return true;
     }
 
     /**

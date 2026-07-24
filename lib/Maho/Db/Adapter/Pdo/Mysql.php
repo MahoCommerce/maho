@@ -128,16 +128,44 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     protected function _initConnection(): void
     {
-        /** @link http://bugs.mysql.com/bug.php?id=18551 */
-        $sqlMode = '';
-        if (\Mage::getIsDeveloperMode() && !$this->isMariaDb()) {
-            // Surface non-strict GROUP BY queries during development (issue #688).
-            // MariaDB is exempt: its ONLY_FULL_GROUP_BY lacks the functional-dependency
-            // detection of MySQL/PostgreSQL (MDEV-11588), so it would reject
-            // SQL-standard queries like SELECT t.* ... GROUP BY t.pk.
-            $sqlMode = 'ONLY_FULL_GROUP_BY';
+        // Pin a strict baseline per connection, so behavior is deterministic
+        // regardless of server or provider global defaults (issue #688). The
+        // validation flags are exactly the MySQL 8+ factory default; stricter
+        // or different flags were considered and deliberately excluded, see
+        // PR #1123 before changing this list. The three zero-date/division
+        // flags are deprecated as standalone flags; trim them here when a
+        // MySQL release drops them.
+        //
+        // NO_AUTO_VALUE_ON_ZERO is the one addition on top of the factory
+        // default: it makes an explicit 0 bound to an AUTO_INCREMENT column
+        // store 0 (instead of triggering next-value generation), matching how
+        // PostgreSQL and SQLite already behave, so insert semantics are
+        // identical across all three engines. New-row inserts omit the PK (or
+        // bind NULL) and still auto-generate as usual. Because it is now always
+        // on, startSetup()/insertForce() no longer need to toggle SQL_MODE.
+        if (isset($this->_config['sql_mode'])) {
+            // Escape hatch: a <sql_mode> node on the connection in local.xml
+            // overrides the baseline verbatim (an empty value restores the
+            // legacy fully-relaxed behavior).
+            $sqlMode = (string) $this->_config['sql_mode'];
+        } else {
+            $modes = [
+                'STRICT_TRANS_TABLES',
+                'NO_ZERO_IN_DATE',
+                'NO_ZERO_DATE',
+                'ERROR_FOR_DIVISION_BY_ZERO',
+                'NO_ENGINE_SUBSTITUTION',
+                'NO_AUTO_VALUE_ON_ZERO',
+            ];
+            if (!$this->isMariaDb()) {
+                // MariaDB is exempt from ONLY_FULL_GROUP_BY: its implementation lacks the
+                // functional-dependency detection of MySQL/PostgreSQL (MDEV-11588), so it
+                // would reject SQL-standard queries like SELECT t.* ... GROUP BY t.pk.
+                array_unshift($modes, 'ONLY_FULL_GROUP_BY');
+            }
+            $sqlMode = implode(',', $modes);
         }
-        $this->_connection->executeStatement("SET SQL_MODE='{$sqlMode}'");
+        $this->_connection->executeStatement('SET SQL_MODE=' . $this->_connection->quote($sqlMode));
         $this->_connection->executeStatement("SET time_zone = '+00:00'");
     }
 
@@ -1853,17 +1881,19 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
-     * Inserts a table row with specified data
-     * Special for Zero values to identity column
+     * Inserts a table row with specified data, storing an explicit 0 verbatim in
+     * an identity column.
+     *
+     * NO_AUTO_VALUE_ON_ZERO is now pinned permanently in the connection baseline
+     * (see _initConnection()), so a plain insert() already stores an explicit 0
+     * without triggering auto_increment — identical to the PostgreSQL and SQLite
+     * adapters. Kept as a thin wrapper for backward compatibility and to document
+     * intent at call sites.
      */
     #[\Override]
     public function insertForce(string $table, array $bind): int
     {
-        $this->raw_query("SET @OLD_INSERT_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
-        $result = $this->insert($table, $bind);
-        $this->raw_query("SET SQL_MODE=IFNULL(@OLD_INSERT_SQL_MODE,'')");
-
-        return $result;
+        return $this->insert($table, $bind);
     }
 
     /**
@@ -2802,8 +2832,11 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     public function startSetup(): self
     {
+        // SQL_MODE is left untouched: the connection baseline already pins the strict
+        // flags plus NO_AUTO_VALUE_ON_ZERO (data scripts may insert explicit ids,
+        // including 0), so install/upgrade scripts run under the same mode as
+        // production and get fully validated.
         $this->raw_query('SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0');
-        $this->raw_query("SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO'");
 
         return $this;
     }
@@ -2814,7 +2847,6 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     public function endSetup(): self
     {
-        $this->raw_query("SET SQL_MODE=IFNULL(@OLD_SQL_MODE,'')");
         $this->raw_query('SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS=0, 0, 1)');
 
         return $this;
