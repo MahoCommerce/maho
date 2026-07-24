@@ -61,6 +61,9 @@ it('pins the strict baseline SQL_MODE on connection init', function () {
     expect($sqlMode)->toContain('NO_ZERO_IN_DATE');
     expect($sqlMode)->toContain('ERROR_FOR_DIVISION_BY_ZERO');
     expect($sqlMode)->toContain('NO_ENGINE_SUBSTITUTION');
+    // Added on top of the MySQL factory default so an explicit 0 is stored in an
+    // identity column (matching PostgreSQL/SQLite) instead of triggering auto_increment.
+    expect($sqlMode)->toContain('NO_AUTO_VALUE_ON_ZERO');
 });
 
 it('includes ONLY_FULL_GROUP_BY in the baseline on genuine MySQL', function () {
@@ -148,25 +151,26 @@ it('preserves the strict baseline across startSetup and endSetup', function () {
     expect(fetchSqlMode($adapter))->toBe($modeBefore);
 });
 
-it('keeps the strict baseline active during setup, only adding NO_AUTO_VALUE_ON_ZERO', function () {
+it('keeps the strict baseline active during setup without touching SQL_MODE', function () {
     $adapter = createFreshMysqlAdapter();
+    $modeBefore = fetchSqlMode($adapter);
     $adapter->startSetup();
     // Setup scripts must run under the same strict mode as production, so a bad
     // write in an install/upgrade script is caught instead of silently truncated.
+    // The baseline already carries NO_AUTO_VALUE_ON_ZERO, so setup leaves SQL_MODE alone.
     $modeDuring = fetchSqlMode($adapter);
     $adapter->endSetup();
 
+    expect($modeDuring)->toBe($modeBefore);
     expect($modeDuring)->toContain('STRICT_TRANS_TABLES');
     expect($modeDuring)->toContain('NO_ZERO_DATE');
     expect($modeDuring)->toContain('NO_AUTO_VALUE_ON_ZERO');
 });
 
-it('preserves the live SQL_MODE in insertForce so the bulk-import path still works', function () {
+it('stores an explicit 0 in an identity column via both insert and insertForce', function () {
     $adapter = createFreshMysqlAdapter();
-    $modeBefore = fetchSqlMode($adapter);
-    expect($modeBefore)->toContain('STRICT_TRANS_TABLES');
 
-    $tempTable = 'test_insertforce_' . uniqid();
+    $tempTable = 'test_zero_identity_' . uniqid();
     $table = $adapter->newTable($tempTable)
         ->addColumn('id', \Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
             'identity' => true,
@@ -176,10 +180,23 @@ it('preserves the live SQL_MODE in insertForce so the bulk-import path still wor
         ->addColumn('val', \Maho\Db\Ddl\Table::TYPE_VARCHAR, 50, [], 'Val');
     $adapter->createTable($table);
 
-    $adapter->insertForce($tempTable, ['id' => 0, 'val' => 'test']);
+    try {
+        // Permanent NO_AUTO_VALUE_ON_ZERO: an explicit 0 is stored verbatim rather
+        // than triggering auto_increment, identical to the PostgreSQL/SQLite adapters.
+        $adapter->insert($tempTable, ['id' => 0, 'val' => 'via-insert']);
+        expect((int) $adapter->fetchOne("SELECT id FROM {$tempTable} WHERE val = 'via-insert'"))->toBe(0);
 
-    // SQL_MODE should be restored to the strict baseline after insertForce
-    expect(fetchSqlMode($adapter))->toBe($modeBefore);
+        // insertForce is now a thin wrapper over insert and behaves identically.
+        $adapter->insertForce($tempTable, ['id' => 5, 'val' => 'via-force']);
+        expect((int) $adapter->fetchOne("SELECT id FROM {$tempTable} WHERE val = 'via-force'"))->toBe(5);
 
-    $adapter->dropTable($tempTable);
+        // A new row still auto-generates when the PK is omitted.
+        $adapter->insert($tempTable, ['val' => 'auto']);
+        expect((int) $adapter->fetchOne("SELECT id FROM {$tempTable} WHERE val = 'auto'"))->toBeGreaterThan(0);
+
+        // The baseline is unchanged by the inserts.
+        expect(fetchSqlMode($adapter))->toContain('NO_AUTO_VALUE_ON_ZERO');
+    } finally {
+        $adapter->dropTable($tempTable);
+    }
 });

@@ -130,11 +130,19 @@ class Mysql extends AbstractPdoAdapter
     {
         // Pin a strict baseline per connection, so behavior is deterministic
         // regardless of server or provider global defaults (issue #688). The
-        // set is intentionally exactly the MySQL 8+ factory default: stricter
+        // validation flags are exactly the MySQL 8+ factory default; stricter
         // or different flags were considered and deliberately excluded, see
         // PR #1123 before changing this list. The three zero-date/division
         // flags are deprecated as standalone flags; trim them here when a
         // MySQL release drops them.
+        //
+        // NO_AUTO_VALUE_ON_ZERO is the one addition on top of the factory
+        // default: it makes an explicit 0 bound to an AUTO_INCREMENT column
+        // store 0 (instead of triggering next-value generation), matching how
+        // PostgreSQL and SQLite already behave, so insert semantics are
+        // identical across all three engines. New-row inserts omit the PK (or
+        // bind NULL) and still auto-generate as usual. Because it is now always
+        // on, startSetup()/insertForce() no longer need to toggle SQL_MODE.
         if (isset($this->_config['sql_mode'])) {
             // Escape hatch: a <sql_mode> node on the connection in local.xml
             // overrides the baseline verbatim (an empty value restores the
@@ -147,6 +155,7 @@ class Mysql extends AbstractPdoAdapter
                 'NO_ZERO_DATE',
                 'ERROR_FOR_DIVISION_BY_ZERO',
                 'NO_ENGINE_SUBSTITUTION',
+                'NO_AUTO_VALUE_ON_ZERO',
             ];
             if (!$this->isMariaDb()) {
                 // MariaDB is exempt from ONLY_FULL_GROUP_BY: its implementation lacks the
@@ -1872,20 +1881,19 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
-     * Inserts a table row with specified data
-     * Special for Zero values to identity column
+     * Inserts a table row with specified data, storing an explicit 0 verbatim in
+     * an identity column.
+     *
+     * NO_AUTO_VALUE_ON_ZERO is now pinned permanently in the connection baseline
+     * (see _initConnection()), so a plain insert() already stores an explicit 0
+     * without triggering auto_increment — identical to the PostgreSQL and SQLite
+     * adapters. Kept as a thin wrapper for backward compatibility and to document
+     * intent at call sites.
      */
     #[\Override]
     public function insertForce(string $table, array $bind): int
     {
-        // Add NO_AUTO_VALUE_ON_ZERO (so an explicit 0 is stored in an identity column
-        // instead of triggering auto_increment) on top of the strict baseline, rather
-        // than replacing it — the insert itself stays validated by the pinned mode.
-        $this->raw_query("SET @OLD_INSERT_SQL_MODE=@@SQL_MODE, SQL_MODE=CONCAT(@@SQL_MODE, ',NO_AUTO_VALUE_ON_ZERO')");
-        $result = $this->insert($table, $bind);
-        $this->raw_query("SET SQL_MODE=IFNULL(@OLD_INSERT_SQL_MODE,'')");
-
-        return $result;
+        return $this->insert($table, $bind);
     }
 
     /**
@@ -2824,11 +2832,11 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     public function startSetup(): self
     {
+        // SQL_MODE is left untouched: the connection baseline already pins the strict
+        // flags plus NO_AUTO_VALUE_ON_ZERO (data scripts may insert explicit ids,
+        // including 0), so install/upgrade scripts run under the same mode as
+        // production and get fully validated.
         $this->raw_query('SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0');
-        // Add NO_AUTO_VALUE_ON_ZERO (data scripts may insert explicit ids, including 0)
-        // on top of the strict baseline instead of replacing it, so install/upgrade
-        // scripts run under the same strict mode as production, not a relaxed one.
-        $this->raw_query("SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE=CONCAT(@@SQL_MODE, ',NO_AUTO_VALUE_ON_ZERO')");
 
         return $this;
     }
@@ -2839,7 +2847,6 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     public function endSetup(): self
     {
-        $this->raw_query("SET SQL_MODE=IFNULL(@OLD_SQL_MODE,'')");
         $this->raw_query('SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS=0, 0, 1)');
 
         return $this;
