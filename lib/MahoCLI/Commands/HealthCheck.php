@@ -13,6 +13,7 @@ use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
@@ -711,6 +712,17 @@ class HealthCheck extends BaseMahoCommand
     }
 
     #[\Override]
+    protected function configure(): void
+    {
+        $this->addOption(
+            'check-zero-dates',
+            null,
+            InputOption::VALUE_NONE,
+            'Also scan every date column for stored zero-date values (full table scans, slow on large stores)',
+        );
+    }
+
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $hasErrors = false;
@@ -894,7 +906,7 @@ class HealthCheck extends BaseMahoCommand
         $this->checkOrphanedResources($input, $output, Mage::getResourceModel('admin/rules'), 'admin');
         $this->checkOrphanedResources($input, $output, Mage::getResourceModel('api/rules'), 'API');
 
-        $this->checkZeroDates($output);
+        $this->checkZeroDates($output, (bool) $input->getOption('check-zero-dates'));
 
         if ($hasErrors) {
             return Command::FAILURE;
@@ -908,8 +920,12 @@ class HealthCheck extends BaseMahoCommand
      * baseline (NO_ZERO_DATE): stored '0000-00-00' values make any later UPDATE
      * of those rows fail, and zero-date column defaults make INSERTs omitting
      * the column fail. Typically found on stores migrated from Magento/OpenMage.
+     *
+     * The DEFAULT check is a single indexed information_schema query and always
+     * runs. The stored-value scan is a full table scan per date column (slow on
+     * large stores), so it runs only when explicitly requested via $scanValues.
      */
-    private function checkZeroDates(OutputInterface $output): void
+    private function checkZeroDates(OutputInterface $output, bool $scanValues): void
     {
         $output->write('Checking for legacy zero dates... ');
 
@@ -920,10 +936,13 @@ class HealthCheck extends BaseMahoCommand
         }
 
         $badDefaults = \MahoCLI\Helper\ZeroDateScanner::findZeroDateDefaults($adapter);
-        $badValues = \MahoCLI\Helper\ZeroDateScanner::findZeroDateValues($adapter);
+        $badValues = $scanValues ? \MahoCLI\Helper\ZeroDateScanner::findZeroDateValues($adapter) : [];
 
         if (empty($badDefaults) && empty($badValues)) {
             $output->writeln('<info>OK</info>');
+            if (!$scanValues) {
+                $output->writeln('(DEFAULTs only; add --check-zero-dates to also scan stored values, slow on large stores)');
+            }
             return;
         }
 
