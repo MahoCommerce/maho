@@ -217,6 +217,27 @@ class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
     }
 
     /**
+     * Whether this block renders the document skeleton (doctype/html or the
+     * head, including blocks rendered inside the head): template hints must
+     * never wrap those, as stray divs there derail the HTML parser
+     */
+    private function isDocumentSkeletonBlock(): bool
+    {
+        if ($this instanceof Mage_Page_Block_Html || $this instanceof Mage_Page_Block_Html_Head) {
+            return true;
+        }
+        $block = $this->getParentBlock();
+        $i = 0;
+        while ($i++ < 20 && $block instanceof Mage_Core_Block_Abstract) {
+            if ($block instanceof Mage_Page_Block_Html_Head) {
+                return true;
+            }
+            $block = $block->getParentBlock();
+        }
+        return false;
+    }
+
+    /**
      * Retrieve block view from file (template)
      *
      * @param   string $fileName
@@ -232,6 +253,13 @@ class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
         $do = $this->getDirectOutput();
 
         $hints = Mage::app()->getStore()->isAdmin() ? $this->getShowTemplateHintsAdmin() : $this->getShowTemplateHints();
+
+        // Never wrap the document skeleton: a <div> before <html> or inside
+        // <head> makes the HTML parser eject the whole head into the body,
+        // breaking stylesheets, the viewport meta and the rendered layout
+        if ($hints && $this->isDocumentSkeletonBlock()) {
+            $hints = false;
+        }
 
         if (!$do) {
             ob_start();

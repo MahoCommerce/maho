@@ -294,6 +294,18 @@ class ApiV2Helper
     }
 
     /**
+     * HTTP POST with a raw, unencoded body — for sending deliberately malformed
+     * JSON or other non-array payloads that post() would json_encode.
+     *
+     * @param array<string, string> $extraHeaders
+     * @return array{status: int, json: array, raw: string, headers: array}
+     */
+    public static function postRaw(string $path, string $body, ?string $token = null, array $extraHeaders = []): array
+    {
+        return self::request('POST', $path, $body, $token, $extraHeaders);
+    }
+
+    /**
      * HTTP PUT request
      *
      * @param array<string, string> $extraHeaders
@@ -809,7 +821,7 @@ class ApiV2Helper
      * @param array<string, string> $extraHeaders
      * @return array{status: int, json: array, raw: string, headers: array}
      */
-    private static function request(string $method, string $path, ?array $data = null, ?string $token = null, array $extraHeaders = []): array
+    private static function request(string $method, string $path, array|string|null $data = null, ?string $token = null, array $extraHeaders = []): array
     {
         $url = self::getBaseUrl() . $path;
 
@@ -843,7 +855,7 @@ class ApiV2Helper
         ];
 
         if ($data !== null) {
-            $options['http']['content'] = json_encode($data);
+            $options['http']['content'] = is_array($data) ? json_encode($data) : $data;
         }
 
         $requestUrl = $url;

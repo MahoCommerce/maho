@@ -24,6 +24,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 class PaypalWebhookSimulate extends BaseMahoCommand
 {
     #[\Override]
+    public function isEnabled(): bool
+    {
+        return $this->isModuleActive('Maho_Paypal');
+    }
+
+    #[\Override]
     protected function configure(): void
     {
         $this

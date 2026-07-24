@@ -80,6 +80,12 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
         $adapter = $this->getConnection();
         $cols    = $this->_getSelectedColumns();
         $cols['qty_ordered'] = 'SUM(qty_ordered)';
+        if (!$this->isTotals() && ($this->_period == 'year' || $this->_period == 'month')) {
+            // wrap the bare period expression in MAX() as this select groups by product_id only;
+            // each boundary select spans a single year/month, so MAX() returns the one shared label
+            $format = $this->_period == 'year' ? '%Y' : '%Y-%m';
+            $cols['period'] = new Maho\Db\Expr('MAX(' . $adapter->getDateFormatSql('period', $format) . ')');
+        }
         $sel     = $adapter->select()
             ->from($this->getResource()->getMainTable(), $cols)
             ->where('period >= ?', $from)

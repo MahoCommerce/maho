@@ -951,19 +951,18 @@ describe('DDL Operations - Table Management', function () {
     it('creates temporary table', function () {
         $table = $this->adapter->newTable($this->testTableName)
             ->addColumn('id', Table::TYPE_INTEGER, null, ['nullable' => false, 'primary' => true])
-            ->addColumn('data', Table::TYPE_TEXT, 255, [])
-            ->setOption('type', 'TEMPORARY');
+            ->addColumn('data', Table::TYPE_TEXT, 255, []);
 
-        $this->adapter->createTable($table);
+        $this->adapter->createTemporaryTable($table);
 
-        // Temporary tables exist for the current connection
-        expect($this->adapter->isTableExists($this->testTableName))->toBeTrue();
-
-        // Can insert data
+        // Temporary tables are connection-local and invisible to SHOW TABLES /
+        // information_schema, so assert through actual reads and writes instead.
         $this->adapter->insert($this->testTableName, ['id' => 1, 'data' => 'test']);
 
         $result = $this->adapter->fetchOne("SELECT data FROM {$this->testTableName} WHERE id = 1");
         expect($result)->toBe('test');
+
+        $this->adapter->dropTemporaryTable($this->testTableName);
     });
 });
 

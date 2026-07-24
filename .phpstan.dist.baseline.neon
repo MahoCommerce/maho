@@ -12298,12 +12298,6 @@ parameters:
 			path: app/code/core/Mage/ConfigurableSwatches/Model/Resource/Catalog/Product/Type/Configurable/Product/Collection.php
 
 		-
-			rawMessage: Variable $query might not be defined.
-			identifier: variable.undefined
-			count: 1
-			path: app/code/core/Mage/ConfigurableSwatches/Model/Resource/Catalog/Product/Type/Configurable/Product/Collection.php
-
-		-
 			rawMessage: 'Parameter #1 $array of function array_unshift expects array, null given.'
 			identifier: argument.type
 			count: 1
@@ -17963,24 +17957,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Review/Block/Product/View/List.php
-
-		-
-			rawMessage: 'Method Mage_Review_Block_View::getTotalReviews() should return string but returns int.'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Review/Block/View.php
-
-		-
-			rawMessage: 'Method Mage_Review_Block_View::setTotalReviewsCache() invoked with 1 parameter, 3 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Review/Block/View.php
-
-		-
-			rawMessage: 'Parameter #1 $entityPkValue of method Mage_Review_Block_View::setTotalReviewsCache() expects int, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Review/Block/View.php
 
 		-
 			rawMessage: 'Method Mage_Review_Model_Resource_Review::_construct() has no return type specified.'

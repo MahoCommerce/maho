@@ -1001,17 +1001,9 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
         }
 
         $this->printLogQuery($printQuery, $logQuery);
-        $query = '';
 
-        try {
-            /*
-             * Prepare select query
-             */
-            $query = $this->_prepareSelect($this->getSelect());
-            $rows = $this->_fetchAll($query);
-        } catch (Exception $e) {
-            Mage::printException($e, $query);
-        }
+        $query = $this->_prepareSelect($this->getSelect());
+        $rows = $this->_fetchAll($query);
 
         foreach ($rows as $v) {
             $object = $this->getNewEmptyItem()
@@ -1074,17 +1066,13 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Coll
         $selectGroups = $helper->getLoadAttributesSelectGroups($selects);
         foreach ($selectGroups as $selects) {
             if (!empty($selects)) {
-                try {
-                    if (is_array($selects)) {
-                        $select = implode(' UNION ALL ', $selects);
-                    } else {
-                        $select = $selects;
-                    }
-
-                    $values = $this->getConnection()->fetchAll($select);
-                } catch (Exception $e) {
-                    Mage::printException($e, $select);
+                if (is_array($selects)) {
+                    $select = implode(' UNION ALL ', $selects);
+                } else {
+                    $select = $selects;
                 }
+
+                $values = $this->getConnection()->fetchAll($select);
 
                 foreach ($values as $value) {
                     $this->_setItemAttributeValue($value);

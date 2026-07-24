@@ -30,15 +30,50 @@ class Mage_Customer_Model_Resource_Customer_Collection extends Mage_Eav_Model_En
      */
     public function groupByEmail()
     {
-        $this->getSelect()
-            ->from(
-                ['email' => $this->getEntity()->getEntityTable()],
-                ['email_count' => new Maho\Db\Expr('COUNT(email.entity_id)')],
-            )
-            ->where('email.entity_id = e.entity_id')
-            ->group('email.email');
+        // The dedup subquery is built in _renderFiltersBefore() (i.e. at load/count
+        // time), so it sees every filter applied to the collection: the per-email
+        // representative and email_count are computed within the filtered set, not
+        // over the whole customer_entity table.
+        $this->setFlag('group_by_email', true);
 
         return $this;
+    }
+
+    /**
+     * Apply the deferred groupByEmail() dedup once all filters are on the select.
+     *
+     * Joins a grouped derived table instead of grouping the main select, so that
+     * e.* and EAV attribute loading stay valid under strict GROUP BY. The derived
+     * table is a filtered clone of the main select grouped by email, so the
+     * MIN(entity_id) representative row always satisfies the collection's filters
+     * and email_count only counts rows matching them.
+     */
+    #[\Override]
+    protected function _renderFiltersBefore(): void
+    {
+        if (!$this->getFlag('group_by_email') || $this->getFlag('group_by_email_applied')) {
+            return;
+        }
+        $this->setFlag('group_by_email_applied', true);
+
+        $subSelect = clone $this->getSelect();
+        $subSelect->reset(Maho\Db\Select::COLUMNS)
+            ->reset(Maho\Db\Select::ORDER)
+            ->reset(Maho\Db\Select::GROUP)
+            ->reset(Maho\Db\Select::LIMIT_COUNT)
+            ->reset(Maho\Db\Select::LIMIT_OFFSET)
+            ->columns([
+                'entity_id' => new Maho\Db\Expr('MIN(e.entity_id)'),
+                // DISTINCT keeps the count exact even when a filter join fans out rows
+                'email_count' => new Maho\Db\Expr('COUNT(DISTINCT e.entity_id)'),
+            ])
+            ->group('e.email');
+
+        $this->getSelect()->joinInner(
+            ['email' => $subSelect],
+            'email.entity_id = e.entity_id',
+            ['email_count'],
+        );
     }
 
     /**

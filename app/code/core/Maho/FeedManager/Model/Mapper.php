@@ -123,11 +123,16 @@ class Maho_FeedManager_Model_Mapper
             $defaults = $this->_platform->getDefaultMappings();
             foreach ($defaults as $feedAttr => $config) {
                 if (!isset($this->_mappings[$feedAttr])) {
+                    $transformers = $config['transformers'] ?? [];
+                    if (is_string($transformers)) {
+                        $transformers = Maho_FeedManager_Model_Transformer::parseChainString($transformers);
+                    }
                     $this->_mappings[$feedAttr] = [
                         'source_type' => $config['source_type'],
                         'source_value' => $config['source_value'],
-                        'transformers' => [],
+                        'transformers' => $transformers,
                         'conditions' => [],
+                        'use_parent' => (string) ($config['use_parent'] ?? ''),
                     ];
                 }
             }

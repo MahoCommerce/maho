@@ -1,4 +1,5 @@
 "Account Number","Account Number"
+"Advanced Matching","Advanced Matching"
 "Container ID","Container ID"
 "Enable","Enable"
 "Enable GA4 Debug Real Time view for Development IP.","Enable GA4 Debug Real Time view for Development IP."
@@ -9,5 +10,6 @@
 "Google API","Google API"
 "Google Tag Manager","Google Tag Manager"
 "Meta Pixel ID","Meta Pixel ID"
+"Send hashed customer data (email, phone, name, etc.) with the pixel to improve event matching. Values are SHA-256 hashed server side.","Send hashed customer data (email, phone, name, etc.) with the pixel to improve event matching. Values are SHA-256 hashed server side."
 "Type","Type"
 "User ID tracking","User ID tracking"
