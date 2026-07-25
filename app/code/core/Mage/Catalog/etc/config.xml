@@ -698,7 +698,7 @@ SPDX-License-Identifier: AFL-3.0
                 <default_sort_by>position</default_sort_by>
                 <parse_url_directives>1</parse_url_directives>
                 <enable_addtocart_in_product_listings>1</enable_addtocart_in_product_listings>
-                <category_image_fallback>1</category_image_fallback>
+                <category_image_fallback>0</category_image_fallback>
             </frontend>
             <sitemap>
                 <tree_mode>0</tree_mode>

@@ -607,33 +607,14 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     }
 
     /**
-     * Resolve the store the lookup runs in.
-     *
-     * Anchor traversal lives purely in catalog_category_product_index, which is per store view;
-     * the default scope joins catalog_category_product instead and so only ever sees directly
-     * assigned products. Borrowing one of the category's own store views keeps an anchor category
-     * answering the same way however it was loaded, which matters for the API.
-     */
-    protected function _getFallbackStoreId(): int
-    {
-        $storeId = (int) $this->getStoreId();
-        if ($storeId !== self::DEFAULT_STORE_ID) {
-            return $storeId;
-        }
-
-        $storeIds = array_filter(array_map('intval', $this->getStoreIds()));
-        if ($storeIds !== []) {
-            return min($storeIds);
-        }
-
-        return (int) Mage::app()->getDefaultStoreView()?->getId();
-    }
-
-    /**
      * Look up the image of the first visible, enabled product of this category.
      */
     protected function _loadFallbackImage(): ?string
     {
+        // The lookup runs in whatever scope the category was loaded in. Anchor traversal lives only
+        // in catalog_category_product_index, which is per store view, so a category loaded in the
+        // default scope joins catalog_category_product and sees just its direct assignments.
+        //
         // addCategoryFilter() reads is_anchor off the category and treats it as absent-means-false,
         // so a collection that does not select the attribute would confine an anchor category to
         // its directly assigned products. Callers that load categories leanly select it explicitly.
@@ -641,7 +622,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
         // Plain attribute filters rather than setVisibility(), which would force the indexed
         // category join and so come up empty for a category loaded in the default store scope
         $collection = Mage::getResourceModel('catalog/product_collection')
-            ->setStoreId($this->_getFallbackStoreId())
+            ->setStoreId((int) $this->getStoreId())
             ->addCategoryFilter($this)
             ->addAttributeToSelect(self::IMAGE_FALLBACK_ATTRIBUTE)
             ->addAttributeToFilter(self::IMAGE_FALLBACK_ATTRIBUTE, ['nin' => ['', 'no_selection']])

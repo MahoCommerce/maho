@@ -166,21 +166,22 @@ it('prefers a product assigned directly to an anchor category over one inherited
     expect($anchor->getFallbackImage())->toBe('/c/i/cif-anchor-direct.jpg');
 });
 
-it('answers the same for an anchor category loaded in the default scope as in a store view', function () {
+it('resolves an anchor category in the scope it was loaded in', function () {
     $childProduct = cifCreateProduct('cif-anchor-scope-' . uniqid(), '/c/i/cif-anchor-scope.jpg');
 
     $anchor = cifCreateCategory('CIF Anchor Scope', [], null, '1/2', true);
     cifCreateCategory('CIF Anchor Scope Child', [$childProduct => 0], null, '1/2/' . $anchor->getId());
 
-    // Default scope joins catalog_category_product, which holds no inherited rows at all, so the
-    // lookup has to borrow a store view or the API would report no image here
+    // Anchor traversal exists only in catalog_category_product_index, which is per store view. The
+    // default scope joins catalog_category_product, which holds no inherited rows, so an anchor
+    // holding nothing directly reports no image there rather than guessing at a store to borrow.
     $inDefaultScope = Mage::getModel('catalog/category')
         ->setStoreId(Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID)
         ->load($anchor->getId());
     $inStoreView = Mage::getModel('catalog/category')->load($anchor->getId());
 
-    expect($inDefaultScope->getFallbackImage())->toBe('/c/i/cif-anchor-scope.jpg')
-        ->and($inDefaultScope->getFallbackImage())->toBe($inStoreView->getFallbackImage());
+    expect($inStoreView->getFallbackImage())->toBe('/c/i/cif-anchor-scope.jpg')
+        ->and($inDefaultScope->getFallbackImage())->toBeNull();
 });
 
 /**
@@ -226,6 +227,14 @@ it('returns nothing when the category holds no usable product', function () {
     expect($category->getFallbackImage())->toBeNull()
         ->and($category->getImageUrl())->toBe('')
         ->and($category->getImagePath())->toBe('');
+});
+
+it('ships switched off so an upgrade does not change how existing categories render', function () {
+    // beforeEach() turns the flag on for the other cases, so assert against the shipped default
+    // node rather than the runtime store config
+    $default = Mage::getConfig()->getNode('default/' . Mage_Catalog_Model_Category::XML_PATH_IMAGE_FALLBACK);
+
+    expect((string) $default)->toBe('0');
 });
 
 it('does nothing when the fallback is switched off', function () {
