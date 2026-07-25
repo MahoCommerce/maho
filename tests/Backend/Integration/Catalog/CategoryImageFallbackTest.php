@@ -183,6 +183,32 @@ it('answers the same for an anchor category loaded in the default scope as in a 
         ->and($inDefaultScope->getFallbackImage())->toBe($inStoreView->getFallbackImage());
 });
 
+/**
+ * The REST and GraphQL providers load categories through a fixed attribute list rather than a full
+ * load. addCategoryFilter() reads is_anchor as absent-means-false, so dropping it from one of those
+ * lists would quietly confine an anchor category to its directly assigned products and lose the
+ * derived image. Each list is exercised against a real anchor to keep that from regressing.
+ */
+dataset('lean category attribute lists', [
+    'REST provider' => [['name', 'url_key', 'url_path', 'image', 'is_active', 'is_anchor', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page', 'page_layout']],
+    'GraphQL provider' => [['name', 'is_active', 'is_anchor', 'position', 'level', 'children_count', 'image']],
+]);
+
+it('reaches into child categories for an anchor loaded through an API attribute list', function (array $attributes) {
+    $childProduct = cifCreateProduct('cif-anchor-lean-' . uniqid(), '/c/i/cif-anchor-lean.jpg');
+
+    $anchor = cifCreateCategory('CIF Anchor Lean', [], null, '1/2', true);
+    cifCreateCategory('CIF Anchor Lean Child', [$childProduct => 0], null, '1/2/' . $anchor->getId());
+
+    $lean = Mage::getResourceModel('catalog/category_collection')
+        ->addAttributeToSelect($attributes)
+        ->addFieldToFilter('entity_id', $anchor->getId())
+        ->getFirstItem();
+
+    expect($lean->hasData('is_anchor'))->toBeTrue()
+        ->and($lean->getFallbackImage())->toBe('/c/i/cif-anchor-lean.jpg');
+})->with('lean category attribute lists');
+
 it('ignores child category products when the category is not an anchor', function () {
     $childProduct = cifCreateProduct('cif-noanchor-' . uniqid(), '/c/i/cif-noanchor.jpg');
 

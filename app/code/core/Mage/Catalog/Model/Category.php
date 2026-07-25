@@ -578,7 +578,8 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     }
 
     /**
-     * Memoize the lookup so a page rendering many image-less categories costs one query, not one each.
+     * Cache the lookup so a page rendering many image-less categories only pays for the query once
+     * per category, on the first render rather than on every one.
      *
      * Tagged with both catalog entities: saving any product or category drops the entries, which is
      * what keeps the derived image current without ever persisting it onto the category.
@@ -633,6 +634,10 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
      */
     protected function _loadFallbackImage(): ?string
     {
+        // addCategoryFilter() reads is_anchor off the category and treats it as absent-means-false,
+        // so a collection that does not select the attribute would confine an anchor category to
+        // its directly assigned products. Callers that load categories leanly select it explicitly.
+        //
         // Plain attribute filters rather than setVisibility(), which would force the indexed
         // category join and so come up empty for a category loaded in the default store scope
         $collection = Mage::getResourceModel('catalog/product_collection')
