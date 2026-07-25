@@ -118,7 +118,10 @@ abstract class Mage_ProductAlert_Block_Email_Abstract extends Mage_Core_Block_Te
     {
         $shortDescription = $product->getShortDescription();
         if ($shortDescription) {
-            $shortDescription = Mage::getSingleton('core/input_filter_maliciousCode')->filter($shortDescription);
+            // short_description is WYSIWYG-enabled, so it may hold template directives; filtering
+            // it as plain HTML would mangle them into broken markup in the alert email.
+            $shortDescription = Mage::getSingleton('core/input_filter_maliciousCode')
+                ->filterPreservingDirectives($shortDescription);
         }
         return $shortDescription;
     }

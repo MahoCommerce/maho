@@ -289,7 +289,48 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
     protected function _beforeSave()
     {
         $this->unlockAttributes();
+        $this->_sanitizeWysiwygAttributes();
         return parent::_beforeSave();
+    }
+
+    /**
+     * Sanitize the rich-text attributes of this entity (product description, category description,
+     * any custom WYSIWYG-enabled attribute) so a stored value is never dangerous.
+     *
+     * WYSIWYG-enabled attributes are exactly the ones Mage_Catalog_Helper_Output renders through
+     * the template processor, so they are the ones that may hold template directives — hence
+     * filterPreservingDirectives(), which sanitizes without mangling them. No link filtering:
+     * a description links to other pages of the same catalog.
+     *
+     * Bulk import writes attribute values straight to the DB rather than through the model, so it
+     * is unaffected; admin, API and programmatic saves all pass through here.
+     */
+    protected function _sanitizeWysiwygAttributes(): void
+    {
+        $resource = $this->getResource();
+        if (!$resource instanceof Mage_Eav_Model_Entity_Abstract) {
+            return;
+        }
+        $entityType = $resource->getEntityType();
+
+        /** @var Mage_Eav_Model_Config $config */
+        $config = Mage::getSingleton('eav/config');
+        // Membership test first: getAttribute() hydrates a model for every code it is handed,
+        // including the non-attribute keys an entity carries around (stores, category_ids, …).
+        $attributeCodes = array_flip($config->getEntityAttributeCodes($entityType));
+
+        $filter = Mage::getSingleton('core/input_filter_maliciousCode');
+
+        foreach ($this->getData() as $code => $value) {
+            if (!is_string($value) || $value === '' || !isset($attributeCodes[$code])) {
+                continue;
+            }
+            $attribute = $config->getAttribute($entityType, $code);
+            if (!$attribute || !$attribute->getIsWysiwygEnabled()) {
+                continue;
+            }
+            $this->setData($code, $filter->filterPreservingDirectives($value));
+        }
     }
 
     /**

@@ -41,6 +41,14 @@ class Mage_Cms_Model_Resource_Block extends Mage_Core_Model_Resource_Db_Abstract
             Mage::throwException(Mage::helper('cms')->__('A block identifier with the same properties already exists in the selected store.'));
         }
 
+        // Sanitize the block content on save so a stored value is never dangerous, keeping the
+        // template directives it contains intact. No link filtering: block content is ordinary
+        // site navigation, which must not be forced into a new tab.
+        if ($object->hasData('content')) {
+            $object->setData('content', Mage::getSingleton('core/input_filter_maliciousCode')
+                ->filterPreservingDirectives($object->getData('content')));
+        }
+
         if (!$object->getId()) {
             $object->setCreationTime(Mage::app()->getLocale()->formatDateForDb('now'));
         }

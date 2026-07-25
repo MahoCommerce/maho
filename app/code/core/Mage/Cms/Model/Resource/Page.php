@@ -98,6 +98,14 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
             }
         }
 
+        // Sanitize the page content on save so a stored value is never dangerous, keeping the
+        // template directives it contains intact. No link filtering: page content is ordinary
+        // site navigation, which must not be forced into a new tab.
+        if ($object->hasData('content')) {
+            $object->setData('content', Mage::getSingleton('core/input_filter_maliciousCode')
+                ->filterPreservingDirectives($object->getData('content')));
+        }
+
         if (!$this->getIsUniquePageToStores($object)) {
             Mage::throwException(Mage::helper('cms')->__('A page URL key for specified store already exists.'));
         }

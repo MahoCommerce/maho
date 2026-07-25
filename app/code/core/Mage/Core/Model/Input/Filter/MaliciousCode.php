@@ -11,6 +11,18 @@
 class Mage_Core_Model_Input_Filter_MaliciousCode
 {
     /**
+     * Matches a template directive ({{media url="..."}}, {{widget ...}}, {{store ...}}, …) so it
+     * can be masked while the malicious-code filter runs — see filterPreservingDirectives().
+     *
+     * Deliberately stricter than \Maho\Filter\Template::CONSTRUCTION_PATTERN: the body may not
+     * contain <, > or braces. That is the security boundary of the masking technique. Whatever
+     * this pattern matches is restored verbatim and never sanitized, and \Maho\Filter\Template
+     * leaves an unknown directive in the output untouched — so a permissive body (`.*?`) would
+     * let `{{a<script>alert(1)</script>}}` survive both the filter and the renderer.
+     */
+    public const DIRECTIVE_PATTERN = '/\{\{[a-z]{1,10}[^<>{}]*\}\}/is';
+
+    /**
      * Regular expressions for cutting malicious code
      */
     protected array $_expressions = [
@@ -51,6 +63,50 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
         } while ($count !== 0);
 
         return Mage::helper('core/purifier')->purify($value);
+    }
+
+    /**
+     * Sanitize admin-authored rich content without mangling the template directives it contains.
+     *
+     * The malicious-code filter HTML-parses its input, and a directive is not valid HTML — the
+     * nested quotes of {{media url="..."}} inside an img src break attribute parsing, leaving a
+     * %7B%7B… URL behind. So real directives are masked before filtering and restored after;
+     * anything else wrapped in braces (e.g. {{<script>…}}) is left for the filter to strip.
+     *
+     * Use this on every save path that persists rich content, so the stored value is clean and
+     * render only has to resolve the preserved directives. Never run filter() directly over
+     * content whose directives are still unresolved.
+     *
+     * Note this sanitizes client-side HTML only. A directive's own parameters are preserved as
+     * authored and resolved on output; constraining what content directives may do is a separate,
+     * platform-wide concern.
+     *
+     * @param string|null $content
+     * @param bool $applyLinkFilter also run linkFilter(), forcing target="_blank" on every link —
+     *                              appropriate for article-style content, not for content whose
+     *                              links are internal navigation
+     * @return string
+     * @throws Mage_Core_Exception
+     */
+    public function filterPreservingDirectives($content, $applyLinkFilter = false)
+    {
+        $directives = [];
+        $masked = (string) preg_replace_callback(
+            self::DIRECTIVE_PATTERN,
+            function (array $match) use (&$directives): string {
+                $token = 'MAHODIRECTIVE' . count($directives) . 'X';
+                $directives[$token] = $match[0];
+                return $token;
+            },
+            (string) $content,
+        );
+
+        $result = (string) $this->filter($masked);
+        if ($applyLinkFilter) {
+            $result = $this->linkFilter($result);
+        }
+
+        return $directives === [] ? $result : strtr($result, $directives);
     }
 
     /**
