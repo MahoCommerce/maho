@@ -10,42 +10,14 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 /*
- * Source guard for a silent, recurring admin-form bug.
- *
- * Maho\Data\Form::setValues() clears every element the data array doesn't
- * mention, so a field declared as
- *
- *     $fieldset->addField('website_ids', 'hidden', ['value' => $websiteId]);
- *
- * loses that value the moment the block runs its usual
- * `$form->setValues($model->getData())` and the model has no 'website_ids' key -
- * which is exactly the case for a *new* record. The value never reaches the
- * browser, so it never comes back on POST. For a hidden field or a checkbox
- * nothing on screen hints at it: the admin sees a form that refuses to save
- * (customer segments in single-store mode rejected every new segment with
- * "select at least one website", with no field to fix) or a control that
- * silently does nothing (the API user "Regenerate Credentials" checkbox posted
- * an empty string, so `!empty($data[...])` was never true).
- *
- * The fix at each call site is to seed the same key on the model - `$model->
- * setWebsiteIds($websiteId)` next to the addField() - so setValues() restores
- * it instead of wiping it. That is what the core adminhtml blocks do
- * (Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Main, ..._Promo_Quote_Edit_Tab_Main).
- *
- * The scan is deliberately narrow, to stay actionable rather than chatty:
- *   - only 'hidden' and 'checkbox' fields, where a lost value is invisible and
- *     the admin has no way to re-enter it;
- *   - only values that can't come back from the data itself (a literal empty
- *     value is a no-op; a value read off the very object whose getData() feeds
- *     setValues() comes back on its own);
- *   - anything already seeded, re-set after setValues(), or listed below.
+ * Flags hidden/checkbox fields whose declared value a later setValues() would clear.
+ * The fix is to seed the same key on the model, as Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Main does.
  */
 
 /**
  * Blocks that legitimately declare a value the scan can't prove safe.
  *
- * Keyed by "<path relative to app/code>:<element id>". Add an entry only with a
- * reason that says where the value comes back from at runtime.
+ * Keyed by "<path relative to app/code>:<element id>", valued with the reason it's safe.
  *
  * @return array<string, string>
  */

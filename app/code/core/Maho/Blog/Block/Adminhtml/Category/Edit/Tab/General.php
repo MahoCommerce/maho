@@ -62,18 +62,19 @@ class Maho_Blog_Block_Adminhtml_Category_Edit_Tab_General extends Mage_Adminhtml
             $renderer = $this->getStoreSwitcherRenderer();
             $field->setRenderer($renderer);
         } else {
-            $storeId = Mage::app()->getStore(true)->getId();
-            $fieldset->addField('stores', 'hidden', [
-                'name' => 'stores[]',
-                'value' => $storeId,
-            ]);
-            // Seed the element's own key: setValues() below clears whatever the
-            // data has nothing to say about, and an array value (what a loaded
-            // category carries) renders as an empty hidden input either way. Keep
-            // the store the category is already assigned to, so editing doesn't
-            // narrow one saved against store 0 ("All Store Views") to the current.
-            $savedStores = $model->getStores();
-            $model->setData('stores', $savedStores !== [] ? reset($savedStores) : $storeId);
+            // One hidden input per assigned store, each seeding the key setValues() would clear
+            $savedStores = array_values((array) $model->getStores());
+            if ($savedStores === []) {
+                $savedStores = [Mage::app()->getStore(true)->getId()];
+            }
+            foreach ($savedStores as $index => $storeId) {
+                $elementId = 'stores_' . $index;
+                $fieldset->addField($elementId, 'hidden', [
+                    'name' => 'stores[]',
+                    'value' => $storeId,
+                ]);
+                $model->setData($elementId, $storeId);
+            }
         }
 
         $fieldset->addField('is_active', 'select', [

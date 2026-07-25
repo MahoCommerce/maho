@@ -69,18 +69,19 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Tab_Content extends Mage_Adminhtml_Blo
             $renderer = $this->getStoreSwitcherRenderer();
             $field->setRenderer($renderer);
         } else {
-            $storeId = Mage::app()->getStore(true)->getId();
-            $fieldset->addField('stores', 'hidden', [
-                'name' => 'stores[]',
-                'value' => $storeId,
-            ]);
-            // Seed the element's own key: setValues() below clears whatever the
-            // data has nothing to say about, and an array value (what a loaded
-            // post carries) renders as an empty hidden input either way. Keep the
-            // store the post is already assigned to, so editing doesn't narrow a
-            // post saved against store 0 ("All Store Views") to the current one.
-            $savedStores = $model->getStores();
-            $model->setData('stores', $savedStores !== [] ? reset($savedStores) : $storeId);
+            // One hidden input per assigned store, each seeding the key setValues() would clear
+            $savedStores = array_values((array) $model->getStores());
+            if ($savedStores === []) {
+                $savedStores = [Mage::app()->getStore(true)->getId()];
+            }
+            foreach ($savedStores as $index => $storeId) {
+                $elementId = 'stores_' . $index;
+                $fieldset->addField($elementId, 'hidden', [
+                    'name' => 'stores[]',
+                    'value' => $storeId,
+                ]);
+                $model->setData($elementId, $storeId);
+            }
         }
 
         $fieldset->addField('is_active', 'select', [

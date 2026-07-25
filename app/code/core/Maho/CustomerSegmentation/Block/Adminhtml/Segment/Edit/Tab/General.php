@@ -72,12 +72,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_General extends
                 'name'  => 'website_ids',
                 'value' => $websiteId,
             ]);
-            // setValues() below nulls any element missing from the model's data,
-            // and a loaded segment carries website_ids as an array (which renders
-            // as an empty hidden input), so normalise to the scalar the column
-            // stores. Only fall back to the current website when the segment has
-            // no scope of its own: single-store mode means one store view, not
-            // necessarily one website.
+            // Seed the key setValues() would otherwise clear, keeping the segment's own scope
             $savedWebsiteIds = $model?->getData('website_ids');
             $savedWebsiteIds = is_array($savedWebsiteIds) ? implode(',', $savedWebsiteIds) : (string) $savedWebsiteIds;
             $model?->setWebsiteIds($savedWebsiteIds !== '' ? $savedWebsiteIds : $websiteId);
