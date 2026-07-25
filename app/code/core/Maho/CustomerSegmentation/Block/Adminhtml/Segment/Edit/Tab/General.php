@@ -67,10 +67,13 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_General extends
                 'values'   => Mage::getSingleton('adminhtml/system_config_source_website')->toOptionArray(),
             ]);
         } else {
+            $websiteId = (string) Mage::app()->getStore(true)->getWebsiteId();
             $fieldset->addField('website_ids', 'hidden', [
                 'name'  => 'website_ids',
-                'value' => Mage::app()->getStore(true)->getWebsiteId(),
+                'value' => $websiteId,
             ]);
+            // setValues() below nulls any element missing from the model's data
+            $model?->setWebsiteIds($websiteId);
         }
 
         $customerGroups = Mage::getResourceModel('customer/group_collection')->toOptionArray();
