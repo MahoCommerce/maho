@@ -56,15 +56,16 @@
     </div>
     <div class="box">
         <div class="hor-scroll">
-            <table class="dynamic-grid" cellspacing="0"  cellpadding="0">
-                <tr id="attribute-options-table">
+            <table class="dynamic-grid" cellspacing="0"  cellpadding="0" id="attribute-options-table">
+                <thead>
+                    <tr>
+                        <th class="option-sort-cell"></th>
                     <?php if ($this->isConfigurableSwatchesEnabled()): ?>
                         <th><?= $this->escapeHtml($this->__('Swatch')) ?></th>
                     <?php endif ?>
                     <?php foreach ($this->getStores() as $_store): ?>
                         <th><?= $this->escapeHtml($_store->getName()) ?></th>
                     <?php endforeach ?>
-                        <th><?= $this->__('Position') ?></th>
                         <th class="nobr a-center"><?= $this->escapeHtml($this->__('Is Default')) ?></th>
                         <th>
                             <?php if (!$this->getReadOnly()):?>
@@ -72,26 +73,8 @@
                             <?php endif ?>
                         </th>
                     </tr>
-                    <tr class="no-display template" id="row-template">
-                        <?php if ($this->isConfigurableSwatchesEnabled()): ?>
-                        <td style="position:relative">
-                            <input type="hidden" disabled class="swatch-value" name="option[swatch][{{id}}]" value="{{swatch}}">
-                            <input type="color" class="input-color-html5 validate-hex-color-hash {{swatch_class}}" value="{{swatch}}">
-                            <span class="swatch-delete" data-msg-delete="<?= $this->escapeHtml($this->__('Are you sure to delete this fallback color?')) ?>"><?= $this->getIconSvg('x') ?></span>
-                        </td>
-                        <?php endif ?>
-                        <?php foreach ($this->getStores() as $_store): ?>
-                        <td><input name="option[value][{{id}}][<?= $_store->getId() ?>]" value="{{store<?= $_store->getId() ?>}}" class="input-text<?php if($_store->getId()==0): ?> required-option<?php endif ?>" type="text" <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>></td>
-                        <?php endforeach ?>
-                        <td class="a-center"><input class="input-text" type="text" name="option[order][{{id}}]" value="{{sort_order}}" <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>></td>
-                        <td><input class="input-radio" type="radio" name="default[]" value="{{id}}" <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>></td>
-                        <td class="a-left">
-                            <input type="hidden" class="delete-flag" name="option[delete][{{id}}]" value="">
-                            <?php if (!$this->getReadOnly()):?>
-                                <?= $this->getDeleteButtonHtml() ?>
-                            <?php endif ?>
-                        </td>
-                    </tr>
+                </thead>
+                <tbody id="attribute-options-container"></tbody>
             </table>
         </div>
         <input type="hidden" id="option-count-check" value="">
@@ -104,6 +87,12 @@ var optionDefaultInputType = 'radio';
 // IE removes quotes from element.innerHTML whenever it thinks they're not needed, which breaks html.
 var templateText =
         '<tr class="option-row" title="ID: {{id}}">'+
+            '<td class="option-sort-cell">'+
+                <?php if (!$this->getReadOnly()):?>
+                    '<span class="option-sort-handle" title="<?= $this->jsQuoteEscape($this->__('Drag to reorder')) ?>"><?= $this->getIconSvg('grip-vertical') ?><\/span>'+
+                <?php endif ?>
+                '<input type="hidden" class="option-order" name="option[order][{{id}}]" value="{{sort_order}}" <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>>'+
+            '<\/td>'+
         <?php if ($this->isConfigurableSwatchesEnabled()): ?>
             '<td style="position:relative">'+
                 '<input type="hidden" disabled class="swatch-value" name="option[swatch][{{id}}]" value="{{swatch}}">'+
@@ -114,7 +103,6 @@ var templateText =
 <?php foreach ($this->getStores() as $_store): ?>
             '<td><input name="option[value][{{id}}][<?= $_store->getId() ?>]" value="{{store<?= $_store->getId() ?>}}" class="input-text<?php if($_store->getId()==0): ?> required-option<?php endif ?>" type="text" <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>><\/td>'+
 <?php endforeach ?>
-            '<td><input class="input-text" type="text" name="option[order][{{id}}]" value="{{sort_order}}" <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>><\/td>'+
             '<td class="a-center"><input class="input-radio" type="{{intype}}" name="default[]" value="{{id}}" {{checked}} <?php if ($this->getReadOnly()):?> disabled="disabled"<?php endif ?>><\/td>'+
             '<td class="a-left" id="delete_button_container_{{id}}">'+
                 '<input type="hidden" class="delete-flag" name="option[delete][{{id}}]" value="">'+
@@ -125,7 +113,7 @@ var templateText =
         '<\/tr>';
 
 var attributeOption = {
-    table : document.getElementById('attribute-options-table'),
+    container : document.getElementById('attribute-options-container'),
     templateText : templateText,
     itemCount : 0,
     totalItems : 0,
@@ -144,7 +132,7 @@ var attributeOption = {
             data.swatch_class = 'swatch-disabled';
         }
         let newHTML = this.template.evaluate(data);
-        this.table.insertAdjacentHTML('afterend', newHTML);
+        this.container.insertAdjacentHTML('beforeend', newHTML);
         if (isNewOption && !this.isReadOnly) {
             this.enableNewOptionDeleteButton(data.id);
         }
@@ -166,6 +154,7 @@ var attributeOption = {
             element.classList.add('no-display', 'template');
             this.totalItems--;
             this.updateItemsCountField();
+            this.updatePositions();
         }
     },
     swatch : function(event){
@@ -200,6 +189,30 @@ var attributeOption = {
                 elementSwatchOption.classList.add('swatch-disabled');
             }
         }
+    },
+    updatePositions: function() {
+        let position = 0;
+        this.container.querySelectorAll('tr.option-row').forEach(function(row) {
+            if (row.classList.contains('no-display')) {
+                return;
+            }
+            let orderInput = row.querySelector('.option-order');
+            if (orderInput) {
+                orderInput.value = position++;
+            }
+        });
+    },
+    initSortable: function() {
+        if (this.isReadOnly || typeof Sortable === 'undefined') {
+            return;
+        }
+        new Sortable(this.container, {
+            handle: '.option-sort-handle',
+            draggable: 'tr.option-row',
+            filter: '.no-display',
+            animation: 150,
+            onUpdate: this.updatePositions.bind(this),
+        });
     },
     updateItemsCountField: function() {
         let optionCountCheck = document.getElementById('option-count-check');
@@ -239,14 +252,14 @@ var attributeOption = {
         });
     }
 }
-let rowTemplate = document.getElementById('row-template');
-if (rowTemplate) {
-    rowTemplate.remove();
-}
 attributeOption.bindRemoveButtons();
+attributeOption.initSortable();
 let addNewOptionButton = document.getElementById('add_new_option_button');
 if (addNewOptionButton) {
-    addNewOptionButton.addEventListener('click', attributeOption.add.bind(attributeOption));
+    addNewOptionButton.addEventListener('click', function() {
+        attributeOption.add({});
+        attributeOption.updatePositions();
+    });
 }
 Validation.addAllThese([
     ['required-option', '<?= $this->jsQuoteEscape($this->__('Failed')) ?>', function(v) {
@@ -259,5 +272,6 @@ Validation.addAllThese([
 <?php foreach ($this->getOptionValues() as $_value): ?>
     attributeOption.add(<?= $_value->toJson() ?>);
 <?php endforeach ?>
+attributeOption.updatePositions();
 //]]>
 </script>

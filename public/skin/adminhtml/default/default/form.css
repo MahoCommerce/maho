@@ -206,6 +206,23 @@ select[multiple], select[size] {
   padding: var(--maho-space-3) var(--maho-space-3) var(--maho-space-4);
   font-size: var(--maho-text-2xl); }
 
+#attribute-options-table th.option-sort-cell, #attribute-options-table td.option-sort-cell {
+  width: 20px;
+  padding-right: var(--maho-space-1); }
+#attribute-options-table .option-sort-handle {
+  display: block;
+  width: 16px;
+  height: 16px;
+  color: var(--maho-ink-muted);
+  cursor: grab; }
+  #attribute-options-table .option-sort-handle svg {
+    width: 16px;
+    height: 16px; }
+  #attribute-options-table .option-sort-handle:active {
+    cursor: grabbing; }
+#attribute-options-table tr.sortable-ghost {
+  opacity: .4; }
+
 td:has(input.swatch-option) {
   display: flex;
   gap: var(--maho-space-1); }
