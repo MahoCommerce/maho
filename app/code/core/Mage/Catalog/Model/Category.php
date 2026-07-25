@@ -88,6 +88,16 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     public const CACHE_TAG             = 'catalog_category';
 
     /**
+     * Store config flag enabling the product-derived category image fallback
+     */
+    public const XML_PATH_IMAGE_FALLBACK = 'catalog/frontend/category_image_fallback';
+
+    /**
+     * Product attribute the fallback category image is taken from
+     */
+    public const IMAGE_FALLBACK_ATTRIBUTE = 'image';
+
+    /**
      * Prefix of model events names
      *
      * @var string
@@ -517,12 +527,17 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     /**
      * Retrieve image URL
      *
+     * Falls back to a product image when the category has none of its own.
+     *
      * @return string
      */
     public function getImageUrl()
     {
         if ($image = $this->getImage()) {
             return Mage::getBaseUrl('media') . 'catalog/category/' . $image;
+        }
+        if ($image = $this->getFallbackImage()) {
+            return (string) Mage::getSingleton('catalog/product_media_config')->getMediaUrl($image);
         }
         return '';
     }
@@ -535,7 +550,81 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
         if ($image = $this->getImage()) {
             return Mage::getBaseDir('media') . '/catalog/category/' . $image;
         }
+        if ($image = $this->getFallbackImage()) {
+            return (string) Mage::getSingleton('catalog/product_media_config')->getMediaPath($image);
+        }
         return '';
+    }
+
+    /**
+     * Retrieve the product image file standing in for a category that has no image of its own.
+     *
+     * The first product of the category by position wins, lowest entity id breaking ties.
+     * Resolved at runtime and never persisted, so it follows the catalog as it changes.
+     */
+    public function getFallbackImage(): ?string
+    {
+        if ($this->hasData('fallback_image')) {
+            return $this->getData('fallback_image');
+        }
+
+        $image = null;
+        if ($this->getId() && Mage::getStoreConfigFlag(self::XML_PATH_IMAGE_FALLBACK, $this->getStoreId())) {
+            $image = $this->_cachedFallbackImage();
+        }
+        $this->setData('fallback_image', $image);
+
+        return $image;
+    }
+
+    /**
+     * Memoize the lookup so a page rendering many image-less categories costs one query, not one each.
+     *
+     * Tagged with both catalog entities: saving any product or category drops the entries, which is
+     * what keeps the derived image current without ever persisting it onto the category.
+     */
+    protected function _cachedFallbackImage(): ?string
+    {
+        $cacheId = 'catalog_category_fallback_image_' . $this->getId() . '_' . (int) $this->getStoreId();
+
+        if (!Mage::app()->useCache('collections')) {
+            return $this->_loadFallbackImage();
+        }
+
+        $cached = Mage::app()->loadCache($cacheId);
+        if ($cached !== false) {
+            return $cached === '' ? null : $cached;
+        }
+
+        $image = $this->_loadFallbackImage();
+        Mage::app()->saveCache((string) $image, $cacheId, [
+            self::CACHE_TAG,
+            Mage_Catalog_Model_Product::CACHE_TAG,
+        ]);
+
+        return $image;
+    }
+
+    /**
+     * Look up the image of the first visible, enabled product of this category.
+     */
+    protected function _loadFallbackImage(): ?string
+    {
+        // Plain attribute filters rather than setVisibility(), which would force the indexed
+        // category join and so come up empty for a category loaded in the default store scope
+        $collection = $this->getProductCollection()
+            ->addAttributeToSelect(self::IMAGE_FALLBACK_ATTRIBUTE)
+            ->addAttributeToFilter(self::IMAGE_FALLBACK_ATTRIBUTE, ['nin' => ['', 'no_selection']])
+            ->addAttributeToFilter('status', ['in' => Mage::getSingleton('catalog/product_status')->getVisibleStatusIds()])
+            ->addAttributeToFilter('visibility', ['in' => Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds()]);
+
+        // cat_index_position is exposed by both the indexed and the zero-store category joins
+        $collection->getSelect()->order(['cat_index_position ASC', 'e.entity_id ASC']);
+        $collection->setPageSize(1)->setCurPage(1);
+
+        $image = $collection->getFirstItem()->getData(self::IMAGE_FALLBACK_ATTRIBUTE);
+
+        return $image ?: null;
     }
 
     /**

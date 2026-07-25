@@ -215,9 +215,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $dto->updatedAt = $category->getUpdatedAt();
 
         // Get image URL
-        if ($category->getImage()) {
-            $dto->image = $category->getImageUrl();
-        }
+        $dto->image = $category->getImageUrl() ?: null;
 
         // Get product count
         $dto->productCount = (int) $category->getProductCount();
