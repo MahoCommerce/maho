@@ -39,13 +39,18 @@ function cifCreateProduct(string $sku, ?string $image): int
 /**
  * @param array<int, int> $productPositions productId => position
  */
-function cifCreateCategory(string $name, array $productPositions, ?string $image = null): Mage_Catalog_Model_Category
-{
+function cifCreateCategory(
+    string $name,
+    array $productPositions,
+    ?string $image = null,
+    string $parentPath = '1/2',
+    bool $isAnchor = false,
+): Mage_Catalog_Model_Category {
     $category = Mage::getModel('catalog/category');
     $category->setName($name);
-    $category->setPath('1/2');
+    $category->setPath($parentPath);
     $category->setIsActive(1);
-    $category->setIsAnchor(0);
+    $category->setIsAnchor($isAnchor ? 1 : 0);
     $category->setDisplayMode(Mage_Catalog_Model_Category::DM_PRODUCT);
     $category->setAttributeSetId($category->getDefaultAttributeSetId());
     if ($image !== null) {
@@ -133,6 +138,43 @@ it('skips products that are disabled, not visible in catalog, or have no image',
     ]);
 
     expect($category->getFallbackImage())->toBe('/c/i/cif-good.jpg');
+});
+
+it('reaches into child categories for an anchor category holding no products of its own', function () {
+    $childProduct = cifCreateProduct('cif-anchor-child-' . uniqid(), '/c/i/cif-anchor-child.jpg');
+
+    $anchor = cifCreateCategory('CIF Anchor', [], null, '1/2', true);
+    cifCreateCategory('CIF Anchor Child', [$childProduct => 0], null, '1/2/' . $anchor->getId());
+
+    // Reload: the indexer only writes the anchor's descendant rows once the child exists
+    $anchor = Mage::getModel('catalog/category')->load($anchor->getId());
+
+    expect($anchor->getFallbackImage())->toBe('/c/i/cif-anchor-child.jpg');
+});
+
+it('prefers a product assigned directly to an anchor category over one inherited from a child', function () {
+    $childProduct = cifCreateProduct('cif-anchor-inh-' . uniqid(), '/c/i/cif-anchor-inherited.jpg');
+    $directProduct = cifCreateProduct('cif-anchor-dir-' . uniqid(), '/c/i/cif-anchor-direct.jpg');
+
+    // The indexer offsets inherited positions by (child position + 1) * (level + 1) * 10000,
+    // so a directly assigned product sorts first whatever its own position
+    $anchor = cifCreateCategory('CIF Anchor Direct', [$directProduct => 99], null, '1/2', true);
+    cifCreateCategory('CIF Anchor Direct Child', [$childProduct => 0], null, '1/2/' . $anchor->getId());
+
+    $anchor = Mage::getModel('catalog/category')->load($anchor->getId());
+
+    expect($anchor->getFallbackImage())->toBe('/c/i/cif-anchor-direct.jpg');
+});
+
+it('ignores child category products when the category is not an anchor', function () {
+    $childProduct = cifCreateProduct('cif-noanchor-' . uniqid(), '/c/i/cif-noanchor.jpg');
+
+    $parent = cifCreateCategory('CIF No Anchor', [], null, '1/2', false);
+    cifCreateCategory('CIF No Anchor Child', [$childProduct => 0], null, '1/2/' . $parent->getId());
+
+    $parent = Mage::getModel('catalog/category')->load($parent->getId());
+
+    expect($parent->getFallbackImage())->toBeNull();
 });
 
 it('returns nothing when the category holds no usable product', function () {
