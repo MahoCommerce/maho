@@ -181,6 +181,9 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Edit_Tab_Main extends Ma
         // shows a "stored hashed" note instead of the value.
         $data = $model->getData();
         unset($data['api_key']);
+        // The checkbox is not a column of the user, so setValues() would clear
+        // its declared value and the box would post an empty string when ticked.
+        $data['regenerate_client_credentials'] = 1;
         $form->setValues($data);
         $this->setForm($form);
 

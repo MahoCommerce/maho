@@ -62,11 +62,15 @@ class Maho_Blog_Block_Adminhtml_Category_Edit_Tab_General extends Mage_Adminhtml
             $renderer = $this->getStoreSwitcherRenderer();
             $field->setRenderer($renderer);
         } else {
+            $storeId = Mage::app()->getStore(true)->getId();
             $fieldset->addField('stores', 'hidden', [
                 'name' => 'stores[]',
-                'value' => Mage::app()->getStore(true)->getId(),
+                'value' => $storeId,
             ]);
-            $model->setStoreId(Mage::app()->getStore(true)->getId());
+            // Seed the element's own key: setValues() below clears whatever the
+            // data has nothing to say about, and an array value (what a loaded
+            // category carries) renders as an empty hidden input either way.
+            $model->setData('stores', $storeId);
         }
 
         $fieldset->addField('is_active', 'select', [

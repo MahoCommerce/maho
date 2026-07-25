@@ -69,11 +69,15 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Tab_Content extends Mage_Adminhtml_Blo
             $renderer = $this->getStoreSwitcherRenderer();
             $field->setRenderer($renderer);
         } else {
+            $storeId = Mage::app()->getStore(true)->getId();
             $fieldset->addField('stores', 'hidden', [
                 'name' => 'stores[]',
-                'value' => Mage::app()->getStore(true)->getId(),
+                'value' => $storeId,
             ]);
-            $model->setStoreId(Mage::app()->getStore(true)->getId());
+            // Seed the element's own key: setValues() below clears whatever the
+            // data has nothing to say about, and an array value (what a loaded
+            // post carries) renders as an empty hidden input either way.
+            $model->setData('stores', $storeId);
         }
 
         $fieldset->addField('is_active', 'select', [
