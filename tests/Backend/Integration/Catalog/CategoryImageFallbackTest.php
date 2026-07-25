@@ -166,6 +166,23 @@ it('prefers a product assigned directly to an anchor category over one inherited
     expect($anchor->getFallbackImage())->toBe('/c/i/cif-anchor-direct.jpg');
 });
 
+it('answers the same for an anchor category loaded in the default scope as in a store view', function () {
+    $childProduct = cifCreateProduct('cif-anchor-scope-' . uniqid(), '/c/i/cif-anchor-scope.jpg');
+
+    $anchor = cifCreateCategory('CIF Anchor Scope', [], null, '1/2', true);
+    cifCreateCategory('CIF Anchor Scope Child', [$childProduct => 0], null, '1/2/' . $anchor->getId());
+
+    // Default scope joins catalog_category_product, which holds no inherited rows at all, so the
+    // lookup has to borrow a store view or the API would report no image here
+    $inDefaultScope = Mage::getModel('catalog/category')
+        ->setStoreId(Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID)
+        ->load($anchor->getId());
+    $inStoreView = Mage::getModel('catalog/category')->load($anchor->getId());
+
+    expect($inDefaultScope->getFallbackImage())->toBe('/c/i/cif-anchor-scope.jpg')
+        ->and($inDefaultScope->getFallbackImage())->toBe($inStoreView->getFallbackImage());
+});
+
 it('ignores child category products when the category is not an anchor', function () {
     $childProduct = cifCreateProduct('cif-noanchor-' . uniqid(), '/c/i/cif-noanchor.jpg');
 
