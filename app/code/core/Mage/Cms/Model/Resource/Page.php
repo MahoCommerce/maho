@@ -98,12 +98,17 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
             }
         }
 
-        // Sanitize the page content on save so a stored value is never dangerous, keeping the
-        // template directives it contains intact. No link filtering: page content is ordinary
-        // site navigation, which must not be forced into a new tab.
+        // Sanitize the markup authored in this field on save, keeping the template directives it
+        // contains intact. This is not a complete boundary: what a directive resolves to at render
+        // is not sanitized, so a crafted parameter still reaches the page. No link filtering:
+        // page content is ordinary site navigation, which must not be forced into a new tab.
         if ($object->hasData('content')) {
             $object->setData('content', Mage::getSingleton('core/input_filter_maliciousCode')
-                ->filterPreservingDirectives($object->getData('content')));
+                ->filterPreservingDirectives(
+                    $object->getData('content'),
+                    false,
+                    Mage::helper('cms')->getPageTemplateProcessor(),
+                ));
         }
 
         if (!$this->getIsUniquePageToStores($object)) {

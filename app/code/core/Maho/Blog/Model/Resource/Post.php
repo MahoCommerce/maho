@@ -172,12 +172,19 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             $object->setData('publish_date', Mage::app()->getLocale()->utcToStore()->format(Mage_Core_Model_Locale::DATE_FORMAT));
         }
 
-        // Sanitize HTML content on save so a stored value is never dangerous, keeping the template
-        // directives it contains intact. Links get target="_blank" — blog content is article-style,
-        // so an outbound link should not navigate the reader away from the post.
+        // Sanitize the markup authored in this field on save, keeping the template directives it
+        // contains intact. This is not a complete boundary: what a directive resolves to at render
+        // is not sanitized, so a crafted parameter still reaches the page. Links get
+        // target="_blank" — blog content is article-style, so an outbound link should not
+        // navigate the reader away from the post.
         if ($object->hasData('content')) {
             $object->setData('content', Mage::getSingleton('core/input_filter_maliciousCode')
-                ->filterPreservingDirectives($object->getData('content'), true));
+                ->filterPreservingDirectives(
+                    $object->getData('content'),
+                    true,
+                    // Matches Maho_Blog_Model_Post::getFilteredContent(), which renders it.
+                    Mage::helper('cms')->getPageTemplateProcessor(),
+                ));
         }
 
         // Auto-generate URL key from title if empty

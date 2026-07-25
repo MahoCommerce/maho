@@ -86,6 +86,62 @@ describe('product description sanitization', function () {
     });
 });
 
+describe('catalog description sanitization when directive parsing is disabled', function () {
+    afterEach(function () {
+        foreach (Mage::app()->getStores() as $store) {
+            $store->setConfig(Mage_Catalog_Helper_Data::CONFIG_PARSE_URL_DIRECTIVES, 1);
+        }
+    });
+
+    it('stores the directive intact rather than mangling it', function () {
+        // Regression: saving used to run the plain filter whenever any store view had directive
+        // parsing off, which rewrote a WYSIWYG-inserted {{media url="..."}} into a broken
+        // %7B%7B… URL — permanently, for every store, over a per-store performance setting.
+        // The storefront strips what it cannot resolve, so the stored value stays authoritative.
+        foreach (Mage::app()->getStores() as $store) {
+            $store->setConfig(Mage_Catalog_Helper_Data::CONFIG_PARSE_URL_DIRECTIVES, 0);
+        }
+
+        $product = Mage::getModel('catalog/product');
+        $product->setStoreId(Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID)
+            ->setSku('directive-parsing-off-' . uniqid())
+            ->setName('Directive Parsing Off')
+            ->setPrice(10.00)
+            ->setStatus(Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ->setVisibility(Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH)
+            ->setTypeId(Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+            ->setAttributeSetId(4)
+            ->setWebsiteIds([1])
+            ->setDescription('<img src="{{media url="wysiwyg/photo.jpg"}}" alt="Product photo">')
+            ->save();
+
+        $loaded = Mage::getModel('catalog/product')
+            ->setStoreId(Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID)
+            ->load($product->getId());
+
+        expect($loaded->getDescription())->toContain('{{media url="wysiwyg/photo.jpg"}}')
+            ->and($loaded->getDescription())->not->toContain('%7B%7B');
+
+        $product->delete();
+    });
+
+    it('does not let an unresolvable directive reach the page', function () {
+        // The storefront, not the save, is where a directive that will not resolve is neutralized.
+        foreach (Mage::app()->getStores() as $store) {
+            $store->setConfig(Mage_Catalog_Helper_Data::CONFIG_PARSE_URL_DIRECTIVES, 0);
+        }
+
+        $stored = Mage::getSingleton('core/input_filter_maliciousCode')->filterPreservingDirectives(
+            '<img src="{{media url="a.jpg" onerror="alert(document.cookie)"}}">',
+            false,
+            Mage::helper('catalog')->getPageTemplateProcessor(),
+        );
+
+        expect(Mage_Core_Model_Input_Filter_MaliciousCode::stripDirectives($stored))
+            ->not->toContain('onerror');
+    });
+});
+
 describe('category description sanitization', function () {
     it('preserves directives and strips malicious markup on save', function () {
         $category = Mage::getModel('catalog/category');

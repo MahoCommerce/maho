@@ -11,16 +11,89 @@
 class Mage_Core_Model_Input_Filter_MaliciousCode
 {
     /**
+     * Directives that may be masked, subject to the renderer actually implementing them.
+     *
+     * var, depend and if are deliberately absent even though every renderer implements them:
+     * \Maho\Filter\Template returns the construction verbatim when no template variables are
+     * assigned (which is exactly the CMS/catalog case), so masking them would put their quotes in
+     * front of the browser unfiltered.
+     */
+    public const DIRECTIVE_KEYWORDS = [
+        'media', 'skin', 'store', 'widget', 'config', 'block',
+        'layout', 'template', 'protocol', 'htmlescape', 'customvar', 'inlinecss', 'include',
+    ];
+
+    /**
+     * Matches any template construction, used to strip directives that will not be resolved.
+     * Mirrors \Maho\Filter\Template::CONSTRUCTION_PATTERN.
+     */
+    public const ANY_DIRECTIVE_PATTERN = '/\{\{[a-z]{0,10}.*?\}\}/si';
+
+    /**
+     * A single directive parameter: name="value", name='value' or an unquoted token.
+     *
+     * The value may contain NO quote character of either kind, nor <, > or braces. Forbidding only
+     * the delimiting quote is not enough: a directive is interpolated into HTML by whoever placed
+     * it, and a value delimited with ' that smuggles a " closes an enclosing double-quoted
+     * attribute — `{{media url='x" onerror="alert(1)//'}}` inside src="…" resolves to a URL
+     * followed by a live event handler. No real directive parameter needs to contain a quote.
+     */
+    private const DIRECTIVE_PARAM = '(?:\s+[a-z0-9_:.\/-]+\s*=\s*(?:"[^"\'<>{}]*"|\'[^"\'<>{}]*\'|[^\s"\'<>{}]+))';
+
+    /**
      * Matches a template directive ({{media url="..."}}, {{widget ...}}, {{store ...}}, …) so it
      * can be masked while the malicious-code filter runs — see filterPreservingDirectives().
      *
-     * Deliberately stricter than \Maho\Filter\Template::CONSTRUCTION_PATTERN: the body may not
-     * contain <, > or braces. That is the security boundary of the masking technique. Whatever
-     * this pattern matches is restored verbatim and never sanitized, and \Maho\Filter\Template
-     * leaves an unknown directive in the output untouched — so a permissive body (`.*?`) would
-     * let `{{a<script>alert(1)</script>}}` survive both the filter and the renderer.
+     * Whatever this pattern matches is restored verbatim and never sanitized, so it is the security
+     * boundary of the masking technique and is deliberately far stricter than
+     * \Maho\Filter\Template::CONSTRUCTION_PATTERN. Two rules make it safe, and both are load-bearing:
+     *
+     * 1. The keyword must be one $renderer actually resolves. \Maho\Filter\Template leaves a
+     *    directive it has no handler for untouched in the output, so masking one hands the payload
+     *    straight to the browser. This is renderer-specific, not global: the catalog filter
+     *    implements only 5 of the 13 keywords below, so masking {{config}} in a product
+     *    description would emit it verbatim on the storefront.
+     * 2. The body must be well-formed `name="value"` parameters. A directive legitimately contains
+     *    quotes, so a body such as `" onerror="alert(1)` would otherwise close the enclosing HTML
+     *    attribute and graft a live event handler onto the tag — without ever using < or >.
+     *
+     * Neither rule is sufficient alone: `onerror="alert(1)"` is itself a well-formed parameter, so
+     * it satisfies (2) and is caught only by (1) declining to mask an unresolvable keyword.
+     *
+     * @param \Maho\Filter\Template $renderer the processor that will render this content
      */
-    public const DIRECTIVE_PATTERN = '/\{\{[a-z]{1,10}[^<>{}]*\}\}/is';
+    public static function getDirectivePattern($renderer): string
+    {
+        $keywords = array_filter(
+            self::DIRECTIVE_KEYWORDS,
+            static fn(string $keyword): bool => is_callable([$renderer, $keyword . 'Directive']),
+        );
+
+        if ($keywords === []) {
+            // Match nothing rather than compiling an empty alternation, which would match ''.
+            return '/(?!)/';
+        }
+
+        return '/\{\{(?:' . implode('|', $keywords) . ')' . self::DIRECTIVE_PARAM . '*\s*\}\}/i';
+    }
+
+    /**
+     * Neutralize template constructions that a render path is not going to resolve.
+     *
+     * Leaving an unresolved directive in the markup is not merely cosmetic: its quotes close the
+     * enclosing HTML attribute, and whatever follows becomes a live attribute on the tag. That
+     * danger comes entirely from the quotes, so only quote-bearing constructions are removed —
+     * `{{name}}` and friends are inert and survive as the literal text the author typed, which
+     * matters for content that legitimately shows template syntax (docs, tutorials, code samples).
+     */
+    public static function stripDirectives(?string $content): string
+    {
+        return (string) preg_replace_callback(
+            self::ANY_DIRECTIVE_PATTERN,
+            static fn(array $match): string => strpbrk($match[0], '"\'') === false ? $match[0] : '',
+            (string) $content,
+        );
+    }
 
     /**
      * Regular expressions for cutting malicious code
@@ -77,6 +150,16 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
      * render only has to resolve the preserved directives. Never run filter() directly over
      * content whose directives are still unresolved.
      *
+     * Only a directive $renderer can resolve is masked (see getDirectivePattern()); anything else
+     * in braces stays in the filter's hands. The masked text is restored without sanitization, so
+     * the invariant that keeps this safe is that a masked directive always resolves at render time
+     * and never reaches the browser as written.
+     *
+     * Pass the processor this content will actually be rendered with. Omitting it preserves
+     * nothing: a caller with no renderer has no render path that resolves directives, and masking
+     * on the assumption that something downstream will resolve them is how content ends up
+     * shipping a live event handler.
+     *
      * Note this sanitizes client-side HTML only. A directive's own parameters are preserved as
      * authored and resolved on output; constraining what content directives may do is a separate,
      * platform-wide concern.
@@ -85,21 +168,25 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
      * @param bool $applyLinkFilter also run linkFilter(), forcing target="_blank" on every link —
      *                              appropriate for article-style content, not for content whose
      *                              links are internal navigation
+     * @param \Maho\Filter\Template|null $renderer the processor that will render this content
      * @return string
      * @throws Mage_Core_Exception
      */
-    public function filterPreservingDirectives($content, $applyLinkFilter = false)
+    public function filterPreservingDirectives($content, $applyLinkFilter = false, $renderer = null)
     {
         $directives = [];
-        $masked = (string) preg_replace_callback(
-            self::DIRECTIVE_PATTERN,
-            function (array $match) use (&$directives): string {
-                $token = 'MAHODIRECTIVE' . count($directives) . 'X';
-                $directives[$token] = $match[0];
-                return $token;
-            },
-            (string) $content,
-        );
+        $masked = (string) $content;
+        if ($renderer !== null) {
+            $masked = (string) preg_replace_callback(
+                self::getDirectivePattern($renderer),
+                function (array $match) use (&$directives): string {
+                    $token = 'MAHODIRECTIVE' . count($directives) . 'X';
+                    $directives[$token] = $match[0];
+                    return $token;
+                },
+                $masked,
+            );
+        }
 
         $result = (string) $this->filter($masked);
         if ($applyLinkFilter) {

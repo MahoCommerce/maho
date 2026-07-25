@@ -123,6 +123,11 @@ class Mage_Catalog_Helper_Output extends Mage_Core_Helper_Abstract
         if ($attribute->getIsHtmlAllowedOnFront() && $attribute->getIsWysiwygEnabled()) {
             if (Mage::helper('catalog')->isUrlDirectivesParsingAllowed()) {
                 $attributeHtml = $this->_getTemplateProcessor()->filter($attributeHtml);
+            } else {
+                // Directive syntax is not valid HTML. Emitting an unresolved directive would let
+                // its quotes close the enclosing attribute, turning whatever follows into a live
+                // one — so when this store will not resolve them, remove them instead.
+                $attributeHtml = Mage_Core_Model_Input_Filter_MaliciousCode::stripDirectives($attributeHtml);
             }
         }
 
@@ -155,6 +160,11 @@ class Mage_Catalog_Helper_Output extends Mage_Core_Helper_Abstract
         if ($attribute->getIsHtmlAllowedOnFront() && $attribute->getIsWysiwygEnabled()) {
             if (Mage::helper('catalog')->isUrlDirectivesParsingAllowed()) {
                 $attributeHtml = $this->_getTemplateProcessor()->filter($attributeHtml);
+            } else {
+                // Directive syntax is not valid HTML. Emitting an unresolved directive would let
+                // its quotes close the enclosing attribute, turning whatever follows into a live
+                // one — so when this store will not resolve them, remove them instead.
+                $attributeHtml = Mage_Core_Model_Input_Filter_MaliciousCode::stripDirectives($attributeHtml);
             }
         }
         $attributeHtml = $this->process('categoryAttribute', $attributeHtml, [
