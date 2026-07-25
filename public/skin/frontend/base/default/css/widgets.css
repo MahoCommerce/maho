@@ -74,4 +74,9 @@ SPDX-License-Identifier: AFL-3.0
 
 .sidebar .widget-cms-link { display:block; margin:0 0 15px; padding:0 10px; }
 .sidebar .widget-cms-link a { background:url(../images/widgets/i_widget-link.gif) 100% 4px no-repeat; padding:0 15px 0 0; }
+
+/* Widget: YouTube Video. The aspect-ratio is set inline by the widget so the box reserves the
+   right height before the iframe loads, which keeps the embed from shifting the layout. */
+.widget-youtube { width:100%; margin:0 0 15px; }
+.widget-youtube iframe { width:100%; height:100%; border:0; display:block; }
 /* ======================================================================================= */
