@@ -76,8 +76,11 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Tab_Content extends Mage_Adminhtml_Blo
             ]);
             // Seed the element's own key: setValues() below clears whatever the
             // data has nothing to say about, and an array value (what a loaded
-            // post carries) renders as an empty hidden input either way.
-            $model->setData('stores', $storeId);
+            // post carries) renders as an empty hidden input either way. Keep the
+            // store the post is already assigned to, so editing doesn't narrow a
+            // post saved against store 0 ("All Store Views") to the current one.
+            $savedStores = $model->getStores();
+            $model->setData('stores', $savedStores !== [] ? reset($savedStores) : $storeId);
         }
 
         $fieldset->addField('is_active', 'select', [
