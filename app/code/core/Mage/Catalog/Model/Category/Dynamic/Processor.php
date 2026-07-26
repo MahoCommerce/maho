@@ -51,44 +51,44 @@ class Mage_Catalog_Model_Category_Dynamic_Processor
 
     /**
      * Get matching product IDs based on rules
+     *
+     * Each rule resolves its own matches (see the rule's parent resolution setting) before the rules
+     * are intersected, so only products wanted by every rule end up in the category.
      */
     protected function getMatchingProductIds(array $rules, Mage_Catalog_Model_Category $category): array
     {
-        if (empty($rules)) {
-            return [];
-        }
-
-        $allProductIds = [];
+        $allProductIds = null;
 
         foreach ($rules as $rule) {
-            $ruleProductIds = $rule->getMatchingProductIds();
+            $ruleProductIds = $rule->getResolvedProductIds();
 
-            // Intersection: only products that match all rules
-            if (empty($allProductIds)) {
-                $allProductIds = $ruleProductIds;
-            } else {
-                $allProductIds = array_intersect($allProductIds, $ruleProductIds);
-            }
+            // Intersection: only products that match all rules. A rule matching nothing empties the
+            // category, so start from null rather than treating [] as "not collected yet".
+            $allProductIds = $allProductIds === null
+                ? $ruleProductIds
+                : array_intersect($allProductIds, $ruleProductIds);
         }
 
-        return array_unique($allProductIds);
+        return array_values(array_unique($allProductIds ?? []));
     }
 
     protected function updateCategoryProducts(Mage_Catalog_Model_Category $category, array $productIds): self
     {
-        // Get current category products
-        $currentProductIds = $category->getResource()->getProductsPosition($category);
-        $currentProductIds = is_array($currentProductIds) ? array_keys($currentProductIds) : [];
+        // Get current category products, positions included: manual ordering set in Category > Products
+        // must survive a reindex, otherwise the default Position sort silently becomes arbitrary
+        $currentPositions = $category->getResource()->getProductsPosition($category);
+        $currentPositions = is_array($currentPositions) ? $currentPositions : [];
+        $currentProductIds = array_keys($currentPositions);
 
         // Calculate changes
         $toAdd = array_diff($productIds, $currentProductIds);
         $toRemove = array_diff($currentProductIds, $productIds);
 
         if (!empty($toAdd) || !empty($toRemove)) {
-            // Prepare new product positions (all with position 0 for dynamic assignment)
+            // Carry the existing positions forward; only products entering the category default to 0
             $newPositions = [];
             foreach ($productIds as $productId) {
-                $newPositions[$productId] = 0;
+                $newPositions[$productId] = $currentPositions[$productId] ?? 0;
             }
 
             // Save new product associations
@@ -97,51 +97,6 @@ class Mage_Catalog_Model_Category_Dynamic_Processor
 
             // Clear category cache
             Mage::app()->cleanCache([Mage_Catalog_Model_Category::CACHE_TAG . '_' . $category->getId()]);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Process dynamic categories for specific product
-     */
-    public function processProductUpdate(Mage_Catalog_Model_Product $product): self
-    {
-        /** @var Mage_Catalog_Model_Resource_Category_Collection $categoryCollection */
-        $categoryCollection = Mage::getModel('catalog/category')->getCollection()
-            ->addAttributeToSelect(['entity_id', 'name', 'is_dynamic'])
-            ->addAttributeToFilter('is_dynamic', 1);
-
-        foreach ($categoryCollection as $category) {
-            $rules = $this->getRulesForCategory($category->getId());
-
-            foreach ($rules as $rule) {
-                // Set products filter to only this product for efficiency
-                $rule->setProductsFilter([$product->getId()]);
-
-                $matchingIds = $rule->getMatchingProductIds();
-                $isMatching = in_array($product->getId(), $matchingIds);
-
-                // Get current category products
-                $currentProductIds = $category->getResource()->getProductsPosition($category);
-                $currentProductIds = is_array($currentProductIds) ? array_keys($currentProductIds) : [];
-                $isCurrentlyInCategory = in_array($product->getId(), $currentProductIds);
-
-                // Update if status changed
-                if ($isMatching && !$isCurrentlyInCategory) {
-                    // Add product to category
-                    $positions = $category->getResource()->getProductsPosition($category) ?: [];
-                    $positions[$product->getId()] = 0;
-                    $category->setPostedProducts($positions);
-                    $category->save();
-                } elseif (!$isMatching && $isCurrentlyInCategory) {
-                    // Remove product from category (only if it was dynamically added)
-                    $positions = $category->getResource()->getProductsPosition($category) ?: [];
-                    unset($positions[$product->getId()]);
-                    $category->setPostedProducts($positions);
-                    $category->save();
-                }
-            }
         }
 
         return $this;
