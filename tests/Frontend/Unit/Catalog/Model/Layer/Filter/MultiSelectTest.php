@@ -24,7 +24,7 @@ uses(Tests\MahoFrontendTestCase::class);
  */
 function multiSelectFilterStub(bool $multiple, array $appliedValues): Maho\DataObject
 {
-    return new class($multiple, $appliedValues) extends Maho\DataObject {
+    return new class ($multiple, $appliedValues) extends Maho\DataObject {
         public function __construct(private bool $multiple, private array $appliedValues)
         {
             parent::__construct();
