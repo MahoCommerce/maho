@@ -21,7 +21,7 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Edit_Filter_Action extends Mag
         ];
         $value = $this->getValue();
 
-        $html  = '<select name="' . ($this->getColumn()->getName() ?: $this->getColumn()->getId()) . '" ' . $this->getColumn()->getValidateClass() . '>';
+        $html  = '<select name="' . ($this->getColumn()->getName() ?: $this->getColumn()->getId()) . '" ' . $this->getColumn()->getValidateClass() . $this->_getUnboundFormAttribute() . '>';
         foreach ($values as $k => $v) {
             $html .= '<option value="' . $k . '"' . ($value == $k ? ' selected="selected"' : '') . '>' . $v . '</option>';
         }

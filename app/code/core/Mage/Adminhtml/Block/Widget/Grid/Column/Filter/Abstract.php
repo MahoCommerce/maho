@@ -64,6 +64,14 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Abstract extends Mage_Admin
     }
 
     /**
+     * Keeps this filter out of any form it is rendered inside, see Grid::UNBOUND_FORM_ID
+     */
+    protected function _getUnboundFormAttribute(): string
+    {
+        return ' form="' . Mage_Adminhtml_Block_Widget_Grid::UNBOUND_FORM_ID . '"';
+    }
+
+    /**
      * Retrieve escaped value
      *
      * @param mixed $index
