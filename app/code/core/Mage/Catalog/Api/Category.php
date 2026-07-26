@@ -178,9 +178,7 @@ class Category extends CrudResource
     public static function afterLoad(self $dto, object $model): void
     {
         // Image URL
-        if ($model->getImage()) {
-            $dto->image = $model->getImageUrl();
-        }
+        $dto->image = $model->getImageUrl() ?: null;
 
         // Product count
         $dto->productCount = (int) $model->getProductCount();

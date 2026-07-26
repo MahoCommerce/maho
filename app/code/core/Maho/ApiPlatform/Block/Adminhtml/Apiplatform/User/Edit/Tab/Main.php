@@ -181,6 +181,8 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Edit_Tab_Main extends Ma
         // shows a "stored hashed" note instead of the value.
         $data = $model->getData();
         unset($data['api_key']);
+        // Not a column of the user, so seed the value setValues() would clear
+        $data['regenerate_client_credentials'] = 1;
         $form->setValues($data);
         $this->setForm($form);
 

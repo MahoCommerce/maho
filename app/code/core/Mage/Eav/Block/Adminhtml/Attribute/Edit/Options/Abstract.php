@@ -104,7 +104,7 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract extends 
             $values = [];
             $optionCollection = Mage::getResourceModel('eav/entity_attribute_option_collection')
                 ->setAttributeFilter($this->getAttributeObject()->getId())
-                ->setPositionOrder('desc', true)
+                ->setPositionOrder('asc', true)
                 ->load();
 
             $helper = Mage::helper('core');

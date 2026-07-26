@@ -287,6 +287,9 @@ Layout handle for configurable products
     </adminhtml_catalog_product_action_attribute_edit>
 
     <adminhtml_catalog_product_attribute_edit>
+        <reference name="head">
+            <action method="addJs"><name>sortable.min.js</name></action>
+        </reference>
         <reference name="left">
             <block type="adminhtml/catalog_product_attribute_edit_tabs" name="attribute_edit_tabs"></block>
         </reference>

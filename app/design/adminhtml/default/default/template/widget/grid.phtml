@@ -37,7 +37,7 @@ $numColumns = count($this->getColumns());
                 <span class="pager-arrow disabled" aria-label="<?= $this->quoteEscape($this->__('Go to Previous page')) ?>"><?= $this->getIconSvg('circle-arrow-left') ?></span>
             <?php endif ?>
 
-            <input type="text" name="<?= $this->getVarNamePage() ?>" value="<?= $_curPage ?>" class="input-text page" onkeypress="<?= $this->getJsObjectName() ?>.inputPage(event, '<?= $_lastPage ?>')">
+            <input type="text" name="<?= $this->getVarNamePage() ?>" value="<?= $_curPage ?>" class="input-text page" form="<?= Mage_Adminhtml_Block_Widget_Grid::UNBOUND_FORM_ID ?>" onkeypress="<?= $this->getJsObjectName() ?>.inputPage(event, '<?= $_lastPage ?>')">
 
             <?php if($_curPage < $_lastPage): ?>
                 <a href="#" title="<?= $this->quoteEscape($this->__('Next page')) ?>" aria-label="<?= $this->quoteEscape($this->__('Go to Next page')) ?>" class="pager-arrow" onclick="<?= $this->getJsObjectName() ?>.setPage('<?= ($_curPage+1) ?>');return false;"><?= $this->getIconSvg('circle-arrow-right') ?></a>
@@ -47,7 +47,7 @@ $numColumns = count($this->getColumns());
 
             <?= $this->__('of %s', $this->getCollection()->getLastPageNumber()) ?>
             <span class="separator">|</span>
-            <select name="<?= $this->getVarNameLimit() ?>" aria-label="<?= $this->quoteEscape($this->__('Items per page')) ?>" onchange="<?= $this->getJsObjectName() ?>.loadByElement(this)">
+            <select name="<?= $this->getVarNameLimit() ?>" aria-label="<?= $this->quoteEscape($this->__('Items per page')) ?>" form="<?= Mage_Adminhtml_Block_Widget_Grid::UNBOUND_FORM_ID ?>" onchange="<?= $this->getJsObjectName() ?>.loadByElement(this)">
                 <?php foreach ($this->getLimitOptions() as $pageSize): ?>
                     <option value="<?= $pageSize ?>"<?php if($this->getCollection()->getPageSize() == $pageSize): ?> selected="selected"<?php endif ?>><?= $pageSize ?></option>
                 <?php endforeach ?>
@@ -65,7 +65,7 @@ $numColumns = count($this->getColumns());
     <?php if($this->getExportTypes()): ?>
         <td class="export a-right">
             <?= $this->__('Export to:') ?>
-            <select name="<?= $this->getId() ?>_export" id="<?= $this->getId() ?>_export" style="width:8em;">
+            <select name="<?= $this->getId() ?>_export" id="<?= $this->getId() ?>_export" style="width:8em;" form="<?= Mage_Adminhtml_Block_Widget_Grid::UNBOUND_FORM_ID ?>">
             <?php foreach ($this->getExportTypes() as $_type): ?>
                 <option value="<?= $_type->getUrl() ?>"><?= $_type->getLabel() ?></option>
             <?php endforeach ?>

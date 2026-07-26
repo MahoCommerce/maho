@@ -141,7 +141,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
 
         $collection = \Mage::getModel('catalog/category')
             ->getCollection()
-            ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page', 'page_layout'])
+            ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'is_anchor', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page', 'page_layout'])
             ->addAttributeToFilter('is_active', 1)
             ->setOrder('position', 'ASC');
 
@@ -215,9 +215,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $dto->updatedAt = $category->getUpdatedAt();
 
         // Get image URL
-        if ($category->getImage()) {
-            $dto->image = $category->getImageUrl();
-        }
+        $dto->image = $category->getImageUrl() ?: null;
 
         // Get product count
         $dto->productCount = (int) $category->getProductCount();
@@ -232,7 +230,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         if ($includeChildren && !empty($dto->childrenIds)) {
             $childCollection = \Mage::getModel('catalog/category')
                 ->getCollection()
-                ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page', 'page_layout'])
+                ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'is_anchor', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page', 'page_layout'])
                 ->addAttributeToFilter('entity_id', ['in' => $dto->childrenIds])
                 ->addAttributeToFilter('is_active', 1)
                 ->setOrder('position', 'ASC');

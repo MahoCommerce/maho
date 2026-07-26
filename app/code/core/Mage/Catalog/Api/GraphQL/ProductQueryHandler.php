@@ -207,7 +207,7 @@ class ProductQueryHandler
 
         $escapedParentId = addcslashes((string) $parentId, '%_');
         $collection = \Mage::getModel('catalog/category')->getCollection()
-            ->addAttributeToSelect(['name', 'is_active', 'position', 'level', 'children_count', 'image'])
+            ->addAttributeToSelect(['name', 'is_active', 'is_anchor', 'position', 'level', 'children_count', 'image'])
             ->addFieldToFilter('path', ['like' => "%/{$escapedParentId}/%"])
             ->addFieldToFilter('level', ['lteq' => $absoluteMaxLevel])
             ->setOrder('position', 'ASC');

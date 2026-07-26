@@ -15,6 +15,14 @@
 class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
 {
     /**
+     * Never render a form with this id: grid controls point at it precisely so that they have no
+     * form owner. Grids often sit inside an edit form, where their column-named filters (name,
+     * is_active, page...) collide with its fields and overwrite them on save. Orphaning them is
+     * safe because grids serialise their own filters and pager.
+     */
+    public const UNBOUND_FORM_ID = 'maho-grid-unbound';
+
+    /**
      * Columns array
      *
      * [

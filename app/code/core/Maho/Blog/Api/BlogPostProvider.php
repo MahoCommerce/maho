@@ -79,7 +79,7 @@ final class BlogPostProvider extends CrudProvider
         $collection->addFieldToFilter('publish_date', [
             'or' => [
                 ['null' => true],
-                ['lteq' => \Mage::app()->getLocale()->formatDateForDb('now')],
+                ['lteq' => $this->publishedCutoff()],
             ],
         ]);
     }
@@ -111,7 +111,7 @@ final class BlogPostProvider extends CrudProvider
      * A future-scheduled post must not be reachable by direct id or urlKey, so
      * the single-item paths apply the same publish_date cutoff as the collection
      * (applyCollectionFilters): a null publish_date is always live, otherwise it
-     * must be at or before "now". Uses the same UTC cutoff the collection does.
+     * must be at or before the cutoff.
      */
     private function isPublished(object $post): bool
     {
@@ -120,6 +120,18 @@ final class BlogPostProvider extends CrudProvider
             return true;
         }
 
-        return $publishDate <= \Mage::app()->getLocale()->formatDateForDb('now');
+        return $publishDate <= $this->publishedCutoff();
+    }
+
+    /**
+     * publish_date is a store-local date (Maho_Blog_Model_Resource_Post::_beforeSave
+     * defaults it to today in the store's timezone), so compare it against today in
+     * that same timezone — as the frontend blocks and the sitemap observer do. A UTC
+     * cutoff would hide a post published today from every store ahead of UTC until
+     * UTC caught up.
+     */
+    private function publishedCutoff(): string
+    {
+        return \Mage::app()->getLocale()->utcToStore()->format(\Mage_Core_Model_Locale::DATE_FORMAT);
     }
 }

@@ -120,9 +120,19 @@ class Mage_Catalog_Helper_Output extends Mage_Core_Helper_Abstract
                 }
             }
         }
-        if ($attribute->getIsHtmlAllowedOnFront() && $attribute->getIsWysiwygEnabled()) {
-            if (Mage::helper('catalog')->isUrlDirectivesParsingAllowed()) {
+        // Gated on WYSIWYG alone, unlike the escaping above: a WYSIWYG-enabled attribute is saved
+        // with its directives preserved (Mage_Catalog_Model_Abstract::_sanitizeWysiwygAttributes),
+        // so every attribute that can hold one has to either resolve it or remove it here. Keying
+        // this off is_html_allowed_on_front as well would leave the two flags' mismatched
+        // combination falling through all three branches, emitting the directive verbatim.
+        if ($attribute->getIsWysiwygEnabled()) {
+            if ($attribute->getIsHtmlAllowedOnFront() && Mage::helper('catalog')->isUrlDirectivesParsingAllowed()) {
                 $attributeHtml = $this->_getTemplateProcessor()->filter($attributeHtml);
+            } else {
+                // Directive syntax is not valid HTML. Emitting an unresolved directive would let
+                // its quotes close the enclosing attribute, turning whatever follows into a live
+                // one — so when this store will not resolve them, remove them instead.
+                $attributeHtml = Mage_Core_Model_Input_Filter_MaliciousCode::stripDirectives($attributeHtml);
             }
         }
 
@@ -152,9 +162,15 @@ class Mage_Catalog_Helper_Output extends Mage_Core_Helper_Abstract
         ) {
             $attributeHtml = $this->escapeHtml($attributeHtml);
         }
-        if ($attribute->getIsHtmlAllowedOnFront() && $attribute->getIsWysiwygEnabled()) {
-            if (Mage::helper('catalog')->isUrlDirectivesParsingAllowed()) {
+        // Gated on WYSIWYG alone — see productAttribute() above.
+        if ($attribute->getIsWysiwygEnabled()) {
+            if ($attribute->getIsHtmlAllowedOnFront() && Mage::helper('catalog')->isUrlDirectivesParsingAllowed()) {
                 $attributeHtml = $this->_getTemplateProcessor()->filter($attributeHtml);
+            } else {
+                // Directive syntax is not valid HTML. Emitting an unresolved directive would let
+                // its quotes close the enclosing attribute, turning whatever follows into a live
+                // one — so when this store will not resolve them, remove them instead.
+                $attributeHtml = Mage_Core_Model_Input_Filter_MaliciousCode::stripDirectives($attributeHtml);
             }
         }
         $attributeHtml = $this->process('categoryAttribute', $attributeHtml, [
