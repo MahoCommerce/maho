@@ -43,9 +43,11 @@ describe('CatalogLinkRule target-scan caching', function () {
 
     test('a source-match nested in a sub-combine is still detected', function () {
         $rule = Mage::getModel('cataloglinkrule/rule');
+        // Attach the sub-combine before adding its child: addCondition() propagates the parent
+        // combine's prefix down, so building top-down keeps every level's getConditions() in sync.
         $nested = Mage::getModel('cataloglinkrule/rule_target_combine');
-        $nested->addCondition(Mage::getModel('cataloglinkrule/rule_target_sourceMatch'));
         $rule->getTargetConditions()->addCondition($nested);
+        $nested->addCondition(Mage::getModel('cataloglinkrule/rule_target_sourceMatch'));
 
         expect($rule->targetConditionsUseSourceProduct())->toBeTrue();
     });
