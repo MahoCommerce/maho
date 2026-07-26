@@ -133,12 +133,51 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
     }
 
     /**
+     * Target product IDs matched by this rule, cached when the target conditions do not depend on
+     * the source product (see targetConditionsUseSourceProduct()).
+     *
+     * @var int[]|null
+     */
+    protected ?array $_targetProductIds = null;
+
+    protected ?bool $_targetConditionsUseSourceProduct = null;
+
+    /**
+     * Whether the target conditions reference the source product, i.e. whether the matched target
+     * set can differ from one source product to the next.
+     */
+    public function targetConditionsUseSourceProduct(): bool
+    {
+        if ($this->_targetConditionsUseSourceProduct === null) {
+            $this->_targetConditionsUseSourceProduct = $this->_hasSourceMatchCondition($this->getTargetConditions());
+        }
+
+        return $this->_targetConditionsUseSourceProduct;
+    }
+
+    protected function _hasSourceMatchCondition(Mage_Rule_Model_Condition_Abstract $condition): bool
+    {
+        if ($condition instanceof Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch) {
+            return true;
+        }
+
+        if ($condition instanceof Mage_Rule_Model_Condition_Combine) {
+            foreach ($condition->getConditions() as $child) {
+                if ($this->_hasSourceMatchCondition($child)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Get matching source product IDs
      */
     public function getMatchingSourceProductIds(): array
     {
         $productCollection = Mage::getResourceModel('catalog/product_collection')
-            ->addAttributeToSelect('*')
             ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
 
         /** @var Maho_CatalogLinkRule_Model_Rule_Source_Combine $sourceConditions */
@@ -159,6 +198,31 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
      * Get matching target product IDs with sorting for a specific source product
      */
     public function getMatchingTargetProductIds(?Mage_Catalog_Model_Product $sourceProduct = null): array
+    {
+        // When no target condition looks at the source product, the matched set is identical for
+        // every source product: scan the catalog once and reuse it. Only the order may differ, so
+        // random sorting still shuffles a fresh copy per source product below.
+        if (!$this->targetConditionsUseSourceProduct()) {
+            if ($this->_targetProductIds === null) {
+                $this->_targetProductIds = $this->_collectMatchingTargetProductIds();
+            }
+            $productIds = $this->_targetProductIds;
+            if (!in_array($this->getSortOrder(), ['price_desc', 'name_asc', 'name_desc', 'newest', 'oldest', 'price_asc'], true)) {
+                shuffle($productIds);
+            }
+            return $productIds;
+        }
+
+        return $this->_collectMatchingTargetProductIds($sourceProduct);
+    }
+
+    /**
+     * Scan the enabled catalog and return the target product IDs matched by this rule, in the
+     * configured sort order.
+     *
+     * @return int[]
+     */
+    protected function _collectMatchingTargetProductIds(?Mage_Catalog_Model_Product $sourceProduct = null): array
     {
         $productCollection = Mage::getResourceModel('catalog/product_collection')
             ->addAttributeToSelect(['name', 'price', 'created_at'])
