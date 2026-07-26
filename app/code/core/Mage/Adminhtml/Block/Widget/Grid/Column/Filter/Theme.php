@@ -25,7 +25,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Theme extends Mage_Adminhtm
                 'label' => '',
             ]);
         }
-        return sprintf('<select name="%s" id="%s" class="no-changes">', $this->_getHtmlName(), $this->_getHtmlId())
+        return sprintf('<select name="%s" id="%s" class="no-changes"%s>', $this->_getHtmlName(), $this->_getHtmlId(), $this->_getUnboundFormAttribute())
             . $this->_drawOptions($options)
             . '</select>';
     }

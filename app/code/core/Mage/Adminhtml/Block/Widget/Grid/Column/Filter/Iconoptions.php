@@ -23,7 +23,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Iconoptions extends Mage_Ad
 
         $value = $this->getValue();
 
-        $html = '<select name="' . $this->_getHtmlName() . '" id="' . $this->_getHtmlId() . '" class="no-changes grid-icon-filter">';
+        $html = '<select name="' . $this->_getHtmlName() . '" id="' . $this->_getHtmlId() . '" class="no-changes grid-icon-filter"' . $this->_getUnboundFormAttribute() . '>';
         $html .= '<button type="button"><selectedcontent></selectedcontent></button>';
         foreach ($this->_getOptions() as $option) {
             if (is_array($option['value'])) {

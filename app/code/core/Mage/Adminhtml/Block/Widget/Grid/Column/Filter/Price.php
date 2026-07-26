@@ -24,12 +24,12 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
             . '<span class="label" aria-hidden="true" title="' . $this->quoteEscape($fromLabel) . '">&ge;</span>'
             . '<input type="number" name="' . $this->_getHtmlName() . '[from]" id="' . $this->_getHtmlId() . '_from"'
                 . ' aria-label="' . $this->quoteEscape($fromLabel) . '" title="' . $this->quoteEscape($fromLabel) . '"'
-                . ' value="' . $this->getEscapedValue('from') . '" class="input-text no-changes"></div>';
+                . ' value="' . $this->getEscapedValue('from') . '" class="input-text no-changes"' . $this->_getUnboundFormAttribute() . '></div>';
         $html .= '<div class="range-line">'
             . '<span class="label" aria-hidden="true" title="' . $this->quoteEscape($toLabel) . '">&le;</span>'
             . '<input type="number" name="' . $this->_getHtmlName() . '[to]" id="' . $this->_getHtmlId() . '_to"'
                 . ' aria-label="' . $this->quoteEscape($toLabel) . '" title="' . $this->quoteEscape($toLabel) . '"'
-                . ' value="' . $this->getEscapedValue('to') . '" class="input-text no-changes"></div>';
+                . ' value="' . $this->getEscapedValue('to') . '" class="input-text no-changes"' . $this->_getUnboundFormAttribute() . '></div>';
         if ($this->getDisplayCurrencySelect()) {
             $currencyLabel = Mage::helper('adminhtml')->__('Currency');
             $html .= '<div class="range-line">'
@@ -76,7 +76,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
         $label = $label ?: Mage::helper('adminhtml')->__('Currency');
         $html  = '';
         $html .= '<select name="' . $this->_getHtmlName() . '[currency]" id="' . $this->_getHtmlId() . '_currency"'
-            . ' aria-label="' . $this->quoteEscape($label) . '" title="' . $this->quoteEscape($label) . '">';
+            . ' aria-label="' . $this->quoteEscape($label) . '" title="' . $this->quoteEscape($label) . '"' . $this->_getUnboundFormAttribute() . '>';
         foreach ($this->_getCurrencyList() as $currency) {
             $html .= '<option value="' . $currency . '" ' . ($currency == $value ? 'selected="selected"' : '') . '>'
                 . $currency . '</option>';
