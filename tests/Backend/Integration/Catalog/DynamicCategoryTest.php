@@ -413,6 +413,50 @@ it('falls back to no replacement when the posted setting is not a known option',
         ->toBe(Mage_Catalog_Model_Category_Dynamic_Rule::PARENT_RESOLUTION_NONE);
 });
 
+/**
+ * The admin form splits the rule across two POST keys: the conditions tree renders against the
+ * rule's own form so it posts at the top level as rule[conditions], while plain fieldset fields go
+ * through the category form's "general" name suffix and land in general[rule]. saveAction() has to
+ * merge both — reading only one key silently drops half the rule.
+ */
+it('merges both posted rule keys when saving through the category controller', function () {
+    $category = dynCategory();
+    $sku = 'dyn-post-' . uniqid();
+
+    $request = new Mage_Core_Controller_Request_Http();
+    $request->setParam('id', (int) $category->getId());
+    $request->setPost([
+        'general' => [
+            'name' => $category->getName(),
+            'is_active' => 1,
+            'rule' => [
+                'parent_resolution' => Mage_Catalog_Model_Category_Dynamic_Rule::PARENT_RESOLUTION_KEEP_ORPHANS,
+            ],
+        ],
+        'rule' => [
+            'conditions' => [
+                1 => ['type' => 'catalog/category_dynamic_rule_condition_combine', 'aggregator' => 'all', 'value' => 1],
+                '1--1' => dynSkuCondition('==', $sku),
+            ],
+        ],
+        'use_config' => ['available_sort_by', 'default_sort_by'],
+    ]);
+
+    $controller = new Mage_Adminhtml_Catalog_CategoryController(
+        $request,
+        new Mage_Core_Controller_Response_Http(),
+    );
+    $controller->saveAction();
+
+    $rule = Mage::getResourceModel('catalog/category_dynamic_rule_collection')
+        ->addCategoryFilter((int) $category->getId())
+        ->getFirstItem();
+
+    expect($rule->getParentResolution())
+        ->toBe(Mage_Catalog_Model_Category_Dynamic_Rule::PARENT_RESOLUTION_KEEP_ORPHANS)
+        ->and($rule->getConditionsSerialized())->toContain($sku);
+});
+
 // ---------------------------------------------------------------------------
 // Multi-rule intersection
 // ---------------------------------------------------------------------------

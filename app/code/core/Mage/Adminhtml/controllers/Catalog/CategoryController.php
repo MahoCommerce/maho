@@ -260,11 +260,16 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
                 $category->setPostedProducts($products);
             }
 
-            // Store dynamic category rule data for the observer to handle
-            if (isset($data['rule']) && is_array($data['rule'])) {
-                $category->setDynamicRuleData($data['rule']);
-            } elseif (isset($data['general']['rule']) && is_array($data['general']['rule'])) {
-                $category->setDynamicRuleData($data['general']['rule']);
+            // Store dynamic category rule data for the observer to handle. The rule fields are split
+            // across two POST keys: the conditions tree renders against the rule's own form, so it
+            // posts at the top level as rule[conditions], while plain fieldset fields go through the
+            // category form's "general" name suffix and land in general[rule]. Merge both.
+            $ruleData = array_replace(
+                is_array($data['general']['rule'] ?? null) ? $data['general']['rule'] : [],
+                is_array($data['rule'] ?? null) ? $data['rule'] : [],
+            );
+            if ($ruleData !== []) {
+                $category->setDynamicRuleData($ruleData);
             }
 
             Mage::dispatchEvent('catalog_category_prepare_save', [
@@ -489,6 +494,8 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
 
     /**
      * Generate condition HTML for dynamic category rules
+     *
+     * @throws Mage_Core_Exception
      */
     #[Maho\Config\Route('/admin/catalog_category/newConditionHtml')]
     public function newConditionHtmlAction(): void
@@ -496,6 +503,15 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         $id = $this->getRequest()->getParam('id');
         $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
         $type = $typeArr[0];
+
+        // Both params end up unescaped inside the generated form element id/name attributes,
+        // so they must be restricted to the safe alias charset before they reach the model.
+        if (!$this->_validateRequestParams([$id, $type])) {
+            if ($this->getRequest()->getQuery('id')) {
+                $this->getRequest()->setQuery('id', '');
+            }
+            Mage::throwException(Mage::helper('adminhtml')->__('An error occurred while adding condition.'));
+        }
 
         $model = Mage::getModel($type)
             ->setId($id)
