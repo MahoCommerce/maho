@@ -27,6 +27,8 @@ describe('Mage_Cms_Block_Widget_Youtube::getVideoId', function () {
         'https://youtu.be/dQw4w9WgXcQ',
         'https://www.youtube.com/embed/dQw4w9WgXcQ',
         'https://www.youtube.com/shorts/dQw4w9WgXcQ',
+        'https://www.youtube.com/live/dQw4w9WgXcQ',
+        'https://www.youtube.com/v/dQw4w9WgXcQ',
         'https://m.youtube.com/watch?v=dQw4w9WgXcQ',
         'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ',
         'youtu.be/dQw4w9WgXcQ',
@@ -45,6 +47,13 @@ describe('Mage_Cms_Block_Widget_Youtube::getVideoId', function () {
         'https://notyoutube.com/watch?v=dQw4w9WgXcQ',
         '../../etc/passwd',
         'https://www.youtube.com/watch?v=<script>',
+        // A real YouTube URL that is not a video: the last path segment is id-shaped, so taking it
+        // would embed https://www.youtube-nocookie.com/embed/playlist rather than render nothing.
+        'https://www.youtube.com/playlist?list=PLdQw4w9WgXcQdQw4w9WgXcQ',
+        'https://www.youtube.com/results?search_query=dQw4w9WgXcQ',
+        'https://www.youtube.com/c/SomeChannel',
+        'https://www.youtube.com/channel/dQw4w9WgXcQ',
+        'https://youtu.be/embed/dQw4w9WgXcQ',
         '',
         '   ',
     ]);

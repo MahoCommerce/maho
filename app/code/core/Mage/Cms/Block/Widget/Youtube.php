@@ -29,6 +29,13 @@ class Mage_Cms_Block_Widget_Youtube extends Mage_Core_Block_Template implements 
     /** Hosts a video id may be extracted from, compared with any leading "www." removed. */
     public const VIDEO_HOSTS = ['youtube.com', 'youtu.be', 'youtube-nocookie.com', 'm.youtube.com'];
 
+    /**
+     * Path segments that introduce a video id on a youtube.com host. Only these carry one: a
+     * /playlist, /results or /c/SomeChannel URL ends in an id-shaped segment too, and accepting it
+     * would turn a merchant pasting the wrong link into a broken embed instead of nothing at all.
+     */
+    public const VIDEO_PATH_PREFIXES = ['embed', 'shorts', 'live', 'v'];
+
     #[\Override]
     protected function _construct(): void
     {
@@ -63,7 +70,8 @@ class Mage_Cms_Block_Widget_Youtube extends Mage_Core_Block_Template implements 
 
         // Insisting on a real YouTube host keeps arbitrary junk ("../../etc/passwd") from
         // producing an id-shaped fragment that would render as a broken embed.
-        if (!in_array(strtolower(preg_replace('/^www\./', '', $parts['host'])), self::VIDEO_HOSTS, true)) {
+        $host = strtolower((string) preg_replace('/^www\./', '', $parts['host']));
+        if (!in_array($host, self::VIDEO_HOSTS, true)) {
             return '';
         }
 
@@ -74,14 +82,18 @@ class Mage_Cms_Block_Widget_Youtube extends Mage_Core_Block_Template implements 
             }
         }
 
-        if (isset($parts['path'])) {
-            $segment = basename(rtrim($parts['path'], '/'));
-            if (preg_match(self::VIDEO_ID_PATTERN, $segment)) {
-                return $segment;
-            }
+        // youtu.be share links put the id straight in the path; every other host prefixes it with
+        // the kind of player being linked, and a path shaped like neither holds no video id.
+        $segments = array_values(array_filter(explode('/', (string) ($parts['path'] ?? '')), static fn(string $segment): bool => $segment !== ''));
+        if ($host === 'youtu.be') {
+            $segment = count($segments) === 1 ? $segments[0] : '';
+        } else {
+            $segment = count($segments) === 2 && in_array(strtolower($segments[0]), self::VIDEO_PATH_PREFIXES, true)
+                ? $segments[1]
+                : '';
         }
 
-        return '';
+        return $segment !== '' && preg_match(self::VIDEO_ID_PATTERN, $segment) ? $segment : '';
     }
 
     public function getEmbedUrl(): string
