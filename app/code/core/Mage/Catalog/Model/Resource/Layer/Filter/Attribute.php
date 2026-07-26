@@ -20,7 +20,8 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Attribute extends Mage_Core_Model
      * Apply attribute filter to product collection
      *
      * @param Mage_Catalog_Model_Layer_Filter_Attribute $filter
-     * @param int $value
+     * @param int|array $value single option id, or a list of option ids for a
+     *                         multi-select filter (matched with IN(), i.e. OR)
      * @return $this
      */
     public function applyFilterToCollection($filter, $value)
@@ -29,11 +30,14 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Attribute extends Mage_Core_Model
         $attribute  = $filter->getAttributeModel();
         $connection = $this->_getReadAdapter();
         $tableAlias = $attribute->getAttributeCode() . '_idx';
+        $valueCondition = is_array($value)
+            ? $connection->quoteInto("{$tableAlias}.value IN (?)", $value)
+            : $connection->quoteInto("{$tableAlias}.value = ?", $value);
         $conditions = [
             "{$tableAlias}.entity_id = e.entity_id",
             $connection->quoteInto("{$tableAlias}.attribute_id = ?", $attribute->getAttributeId()),
             $connection->quoteInto("{$tableAlias}.store_id = ?", $collection->getStoreId()),
-            $connection->quoteInto("{$tableAlias}.value = ?", $value),
+            $valueCondition,
         ];
 
         $collection->getSelect()->join(
@@ -64,6 +68,19 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Attribute extends Mage_Core_Model
         $connection = $this->_getReadAdapter();
         $attribute  = $filter->getAttributeModel();
         $tableAlias = sprintf('%s_idx', $attribute->getAttributeCode());
+
+        // For a multi-select filter this facet's own values are already joined
+        // into the collection (OR within the facet). Drop that join before
+        // counting so every option is counted against the *other* active facets
+        // only, keeping the whole facet visible instead of collapsing to the
+        // selected values. For any other facet the alias is absent and this is a
+        // no-op, so cross-facet AND filtering is preserved.
+        $fromPart = (array) $select->getPart(Maho\Db\Select::FROM);
+        if (isset($fromPart[$tableAlias])) {
+            unset($fromPart[$tableAlias]);
+            $select->setPart(Maho\Db\Select::FROM, $fromPart);
+        }
+
         $conditions = [
             "{$tableAlias}.entity_id = e.entity_id",
             $connection->quoteInto("{$tableAlias}.attribute_id = ?", $attribute->getAttributeId()),

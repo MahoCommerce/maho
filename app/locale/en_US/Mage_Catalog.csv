@@ -51,6 +51,8 @@
 "ALL GROUPS","ALL GROUPS"
 "Allow All Products per Page","Allow All Products per Page"
 "Allow Dynamic Media URLs in Products and Categories","Allow Dynamic Media URLs in Products and Categories"
+"Allow Multiple Selections in Layered Navigation","Allow Multiple Selections in Layered Navigation"
+"Lets shoppers combine several values of this filter (Nike or Adidas). Enable only where the Layered Navigation SEO controls stay on (filtered pages NOINDEX,FOLLOW and filter links rel=""nofollow""), as multi-select greatly multiplies crawlable filter URLs.","Lets shoppers combine several values of this filter (Nike or Adidas). Enable only where the Layered Navigation SEO controls stay on (filtered pages NOINDEX,FOLLOW and filter links rel=""nofollow""), as multi-select greatly multiplies crawlable filter URLs."
 "Allowed File Extensions","Allowed File Extensions"
 "Allowed file extensions to upload","Allowed file extensions to upload"
 "Allow HTML Tags on Frontend","Allow HTML Tags on Frontend"

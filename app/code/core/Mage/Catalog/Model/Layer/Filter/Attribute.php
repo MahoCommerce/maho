@@ -20,6 +20,13 @@ class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer
     protected $_resource;
 
     /**
+     * Option values currently applied for a multi-select attribute filter
+     *
+     * @var array
+     */
+    protected $_appliedValues = [];
+
+    /**
      * Construct attribute filter
      */
     public function __construct()
@@ -62,6 +69,11 @@ class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer
     public function apply(Mage_Core_Controller_Request_Http $request, $filterBlock)
     {
         $filter = $request->getParam($this->_requestVar);
+
+        if ($this->isMultipleSelect()) {
+            return $this->_applyMultiple($filter);
+        }
+
         if (is_array($filter)) {
             return $this;
         }
@@ -76,6 +88,77 @@ class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer
             $this->_items = [];
         }
         return $this;
+    }
+
+    /**
+     * Apply a multi-select attribute filter (OR within the facet).
+     *
+     * Every valid value is applied to the product collection with a single
+     * IN() condition and gets its own removable state item. Unlike the
+     * single-select path the facet is left renderable, so the remaining
+     * option values stay available to be OR-ed into the current selection.
+     */
+    protected function _applyMultiple(array|string|null $filter): static
+    {
+        $applied = [];
+        foreach ($this->_parseRequestValues($filter) as $value) {
+            $text = $this->_getOptionText($value);
+            if (is_string($text) && strlen($text)) {
+                $applied[$value] = $text;
+            }
+        }
+
+        if (empty($applied)) {
+            return $this;
+        }
+
+        $this->_appliedValues = array_keys($applied);
+        $this->_getResource()->applyFilterToCollection($this, $this->_appliedValues);
+        foreach ($applied as $value => $text) {
+            $this->getLayer()->getState()->addFilter($this->_createItem($text, $value));
+        }
+
+        return $this;
+    }
+
+    /**
+     * Normalize the request value of a multi-select filter to a list of values.
+     *
+     * Accepts both the repeated-parameter form (?code[]=a&code[]=b, parsed by
+     * PHP into an array) and the comma-separated form (?code=a,b). Values are
+     * trimmed, empties dropped and duplicates removed.
+     */
+    protected function _parseRequestValues(array|string|null $filter): array
+    {
+        if (is_array($filter)) {
+            $values = $filter;
+        } elseif (is_string($filter) && strlen($filter)) {
+            $values = explode(',', $filter);
+        } else {
+            return [];
+        }
+
+        $values = array_filter(array_map('trim', $values), fn($value): bool => $value !== '');
+
+        return array_values(array_unique($values));
+    }
+
+    /**
+     * Whether this attribute allows selecting several values at once.
+     */
+    #[\Override]
+    public function isMultipleSelect(): bool
+    {
+        return (bool) $this->getAttributeModel()->getIsFilterableMultiple();
+    }
+
+    /**
+     * Option values currently applied for this multi-select filter.
+     */
+    #[\Override]
+    public function getAppliedValues(): array
+    {
+        return $this->_appliedValues;
     }
 
     /**
@@ -106,9 +189,15 @@ class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer
         if ($data === null) {
             $options = $attribute->getFrontend()->getSelectOptions();
             $optionsCount = $this->_getResource()->getCount($this);
+            // Values already selected are shown as removable state chips, so drop
+            // them from the option list; the rest stay available to be OR-ed in.
+            $appliedValues = array_map('strval', $this->getAppliedValues());
             $data = [];
             foreach ($options as $option) {
                 if (is_array($option['value'])) {
+                    continue;
+                }
+                if (in_array((string) $option['value'], $appliedValues, true)) {
                     continue;
                 }
                 if (Mage::helper('core/string')->strlen($option['value'])) {
