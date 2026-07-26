@@ -42,7 +42,6 @@
         "cbschuld/browser.php": "^2.0",
         "doctrine/dbal": "^4.4",
         "dompdf/dompdf": "^3.1",
-        "ezyang/htmlpurifier": "^4.17",
         "intervention/image": "^4.0",
         "laminas/laminas-permissions-acl": "^2.17",
         "lbuchs/webauthn": "^2.2",
@@ -72,7 +71,8 @@
         "symfony/framework-bundle": "^7.4",
         "symfony/security-bundle": "^7.4",
         "webonyx/graphql-php": "^15.31",
-        "lcobucci/jwt": "^5.6"
+        "lcobucci/jwt": "^5.6",
+        "symfony/html-sanitizer": "^7.4"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "^99.99",

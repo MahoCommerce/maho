@@ -47,7 +47,7 @@ class Mage_Cms_Block_Widget_Youtube extends Mage_Core_Block_Template implements 
      * The video id, extracted from whatever the merchant pasted: a watch URL, a share link, an
      * embed URL, a Shorts URL, or the bare id.
      *
-     * Returns '' when nothing valid can be extracted. Callers must treat '' as "render nothing" —
+     * Returns '' when nothing valid can be extracted. Callers must treat '' as "render nothing":
      * this is the only validation between merchant input and an iframe src, so it is a strict
      * allowlist rather than an escape.
      */
@@ -123,7 +123,7 @@ class Mage_Cms_Block_Widget_Youtube extends Mage_Core_Block_Template implements 
 
     /**
      * CSS aspect-ratio value for the responsive wrapper. The YouTube player is always 16:9 except
-     * for Shorts, which are 9:16 — anything else (4:3 archive footage, square uploads) is
+     * for Shorts, which are 9:16. Anything else (4:3 archive footage, square uploads) is
      * letterboxed by the player inside one of those two, so offering more would only misreserve
      * space. Restricted to the two so a stored value can never reach the style attribute unchecked.
      */
