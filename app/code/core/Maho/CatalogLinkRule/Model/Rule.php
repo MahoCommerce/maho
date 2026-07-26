@@ -195,6 +195,29 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
     }
 
     /**
+     * Deterministic target sort orders, mapped to the [attribute, direction] applied to the
+     * collection. Any sort order not listed here (including 'random' and the empty default) is
+     * shuffled in PHP instead — see isRandomSort(). Single source of truth for both call sites.
+     */
+    protected const SORT_ORDERS = [
+        'price_desc' => ['price', 'DESC'],
+        'name_asc' => ['name', 'ASC'],
+        'name_desc' => ['name', 'DESC'],
+        'newest' => ['created_at', 'DESC'],
+        'oldest' => ['created_at', 'ASC'],
+        'price_asc' => ['price', 'ASC'],
+    ];
+
+    /**
+     * Whether the configured sort order is random (shuffled in PHP) rather than a deterministic
+     * SQL ordering. Kept as a single check so the cached and freshly-scanned paths never disagree.
+     */
+    protected function isRandomSort(): bool
+    {
+        return !isset(self::SORT_ORDERS[(string) $this->getSortOrder()]);
+    }
+
+    /**
      * Get matching target product IDs with sorting for a specific source product
      */
     public function getMatchingTargetProductIds(?Mage_Catalog_Model_Product $sourceProduct = null): array
@@ -207,7 +230,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
                 $this->_targetProductIds = $this->_collectMatchingTargetProductIds();
             }
             $productIds = $this->_targetProductIds;
-            if (!in_array($this->getSortOrder(), ['price_desc', 'name_asc', 'name_desc', 'newest', 'oldest', 'price_asc'], true)) {
+            if ($this->isRandomSort()) {
                 shuffle($productIds);
             }
             return $productIds;
@@ -237,37 +260,11 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
             $this->setSourceProduct($sourceProduct);
         }
 
-        // Apply sorting
-        switch ($this->getSortOrder()) {
-            case 'price_desc':
-                $productCollection->addAttributeToSort('price', 'DESC');
-                break;
-            case 'name_asc':
-                $productCollection->addAttributeToSort('name', 'ASC');
-                break;
-            case 'name_desc':
-                $productCollection->addAttributeToSort('name', 'DESC');
-                break;
-            case 'newest':
-                $productCollection->addAttributeToSort('created_at', 'DESC');
-                break;
-            case 'oldest':
-                $productCollection->addAttributeToSort('created_at', 'ASC');
-                break;
-            case 'price_asc':
-                $productCollection->addAttributeToSort('price', 'ASC');
-                break;
-            case 'random':
-            default:
-                // Default: random order (for better performance on large catalogs, shuffle in PHP)
-                $productIds = [];
-                foreach ($productCollection as $product) {
-                    if ($targetConditions->validate($product)) {
-                        $productIds[] = (int) $product->getId();
-                    }
-                }
-                shuffle($productIds);
-                return $productIds;
+        // Apply the configured deterministic sort; random/unknown orders stay unsorted here and are
+        // shuffled in PHP below (cheaper than a SQL random ordering on large catalogs).
+        if (isset(self::SORT_ORDERS[(string) $this->getSortOrder()])) {
+            [$attribute, $direction] = self::SORT_ORDERS[(string) $this->getSortOrder()];
+            $productCollection->addAttributeToSort($attribute, $direction);
         }
 
         $productIds = [];
@@ -275,6 +272,10 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
             if ($targetConditions->validate($product)) {
                 $productIds[] = (int) $product->getId();
             }
+        }
+
+        if ($this->isRandomSort()) {
+            shuffle($productIds);
         }
 
         return $productIds;
