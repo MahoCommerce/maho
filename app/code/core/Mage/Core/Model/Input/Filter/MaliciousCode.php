@@ -37,8 +37,26 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
      * it, and a value delimited with ' that smuggles a " closes an enclosing double-quoted
      * attribute — `{{media url='x" onerror="alert(1)//'}}` inside src="…" resolves to a URL
      * followed by a live event handler. No real directive parameter needs to contain a quote.
+     *
+     * The name may not be an event handler. A well-formed parameter is still a well-formed HTML
+     * attribute, so `{{media url="a" onerror="alert(1)"}}` satisfies every other rule here and
+     * names a keyword the renderer resolves — yet emitted verbatim inside alt="…" the HTML parser
+     * ends the attribute at the directive's first quote and reads `onerror` as the next attribute
+     * of the tag. Resolving the directive discards the extra parameter, so this only bites on a
+     * render path that emits rather than resolves; excluding the name keeps the preserved text
+     * inert either way. Only `on` + letters is rejected, which is the exact shape the browser
+     * treats as a handler — a widget parameter such as `on_sale` is untouched.
+     *
+     * The exclusion deliberately stops there and is not extended to href/src/formaction/etc, even
+     * though those are grafted onto the tag by the same trick. Rejecting `on` + letters is free —
+     * no directive parameter is ever named `onclick` — whereas `href` and `src` are plausible
+     * widget parameter names, so excluding them would stop masking a legitimate directive and
+     * mangle it on save. What keeps those inert is the invariant above: a masked directive is
+     * always resolved at render (every handler reads its own named parameters and drops the rest)
+     * or removed by stripDirectives(). Preserve that invariant on new render paths rather than
+     * growing this list.
      */
-    private const DIRECTIVE_PARAM = '(?:\s+[a-z0-9_:.\/-]+\s*=\s*(?:"[^"\'<>{}]*"|\'[^"\'<>{}]*\'|[^\s"\'<>{}]+))';
+    private const DIRECTIVE_PARAM = '(?:\s+(?!on[a-z]+\s*=)[a-z0-9_:.\/-]+\s*=\s*(?:"[^"\'<>{}]*"|\'[^"\'<>{}]*\'|[^\s"\'<>{}]+))';
 
     /**
      * Matches a template directive ({{media url="..."}}, {{widget ...}}, {{store ...}}, …) so it
@@ -53,12 +71,16 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
      *    straight to the browser. This is renderer-specific, not global: the catalog filter
      *    implements only 5 of the 13 keywords below, so masking {{config}} in a product
      *    description would emit it verbatim on the storefront.
-     * 2. The body must be well-formed `name="value"` parameters. A directive legitimately contains
-     *    quotes, so a body such as `" onerror="alert(1)` would otherwise close the enclosing HTML
-     *    attribute and graft a live event handler onto the tag — without ever using < or >.
+     * 2. The body must be well-formed `name="value"` parameters, and no parameter may be named like
+     *    an event handler. A directive legitimately contains quotes, so a body such as
+     *    `" onerror="alert(1)` would otherwise close the enclosing HTML attribute and graft a live
+     *    event handler onto the tag — without ever using < or >. Requiring well-formed parameters
+     *    is not enough on its own, because `onerror="alert(1)"` is itself one: rule (1) vets the
+     *    keyword, not the parameters after it, so `{{media url="a" onerror="alert(1)"}}` clears both
+     *    halves unless the name is excluded too. See DIRECTIVE_PARAM.
      *
-     * Neither rule is sufficient alone: `onerror="alert(1)"` is itself a well-formed parameter, so
-     * it satisfies (2) and is caught only by (1) declining to mask an unresolvable keyword.
+     * Neither rule is sufficient alone: (2) alone would mask an unresolvable keyword whose body
+     * happens to parse, and (1) alone would mask a resolvable keyword carrying a handler.
      *
      * @param \Maho\Filter\Template $renderer the processor that will render this content
      */

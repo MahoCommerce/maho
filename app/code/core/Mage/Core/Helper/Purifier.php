@@ -52,6 +52,16 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
 
     protected ?HtmlSanitizerInterface $sanitizer;
 
+    /**
+     * How many per-data-attribute-set sanitizers to keep.
+     *
+     * The cache key comes from the content being sanitized, so a loop over entities with varied
+     * markup would otherwise add an entry per distinct set and hold every one for the rest of the
+     * request. The cap keeps the common case (one shape of content, reused) free while bounding
+     * a mass save; building a sanitizer is cheap enough that a miss only costs the config.
+     */
+    public const SANITIZER_CACHE_SIZE = 32;
+
     /** @var array<string, HtmlSanitizerInterface> */
     protected array $sanitizerCache = [];
 
@@ -126,6 +136,9 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
             $config = self::buildConfig();
             foreach ($dataAttributes as $attribute) {
                 $config = $config->allowAttribute($attribute, '*');
+            }
+            if (count($this->sanitizerCache) >= self::SANITIZER_CACHE_SIZE) {
+                array_shift($this->sanitizerCache);
             }
             $this->sanitizerCache[$key] = new HtmlSanitizer($config);
         }

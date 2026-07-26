@@ -70,7 +70,9 @@ class Mage_Cms_Block_Widget_Youtube extends Mage_Core_Block_Template implements 
 
         // Insisting on a real YouTube host keeps arbitrary junk ("../../etc/passwd") from
         // producing an id-shaped fragment that would render as a broken embed.
-        $host = strtolower((string) preg_replace('/^www\./', '', $parts['host']));
+        // Lowercase before stripping the prefix, or a pasted "WWW.youtube.com" keeps it and fails
+        // the host check — a valid URL rendering nothing.
+        $host = (string) preg_replace('/^www\./', '', strtolower((string) $parts['host']));
         if (!in_array($host, self::VIDEO_HOSTS, true)) {
             return '';
         }

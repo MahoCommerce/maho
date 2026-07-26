@@ -378,7 +378,7 @@ Mage::getSingleton('core/input_filter_maliciousCode')->filter($template->getProc
 ```
 
 The masking pattern is a security boundary: whatever it matches is restored **unsanitized**. Don't
-loosen it. Two rules, neither sufficient alone:
+loosen it. Three rules, none sufficient alone:
 
 - **Only mask what the renderer resolves — and only if it runs at all.** A directive with no
   handler is emitted verbatim, so masking one hands the payload to the browser. This is
@@ -388,6 +388,11 @@ loosen it. Two rules, neither sufficient alone:
   `stripDirectives()` rather than emit them (see `Mage_Catalog_Helper_Output`).
 - **The body must be well-formed `name="value"` params.** Excluding `<`/`>` isn't enough: an
   attribute is closed by a quote, so `" onerror="alert(1)` breaks out without an angle bracket.
+- **No param may be named like an event handler** (`on` + letters). A well-formed param is itself a
+  well-formed HTML attribute, so `{{media url="a" onerror="alert(1)"}}` satisfies both rules above —
+  the keyword resolves, the body parses — yet emitted verbatim inside `alt="…"` the parser ends the
+  attribute at the directive's first quote and reads `onerror` as the next attribute of the tag.
+  Only `on` + letters is rejected, so a widget param such as `on_sale` still masks.
 
 `var`/`depend`/`if` are never masked — they render verbatim when no template vars are assigned.
 

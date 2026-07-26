@@ -184,6 +184,35 @@ describe('Mage_Core_Model_Input_Filter_MaliciousCode::filterPreservingDirectives
         }
     });
 
+    it('does not mask a resolvable directive that carries an event handler parameter', function () {
+        // Regression: rule (1) vets the keyword and rule (2) required well-formed parameters, but
+        // onerror="alert(1)" is itself a well-formed parameter — so {{media url="a" onerror="…"}}
+        // cleared both and was restored unsanitized. The CMS renderer resolves {{media}} and drops
+        // the extra parameter, but any path that emits instead of resolving handed the browser a
+        // live handler: the parser ends alt="…" at the directive's first quote and reads onerror as
+        // the next attribute of the tag.
+        foreach (Mage_Core_Model_Input_Filter_MaliciousCode::DIRECTIVE_KEYWORDS as $keyword) {
+            $result = $this->filter->filterPreservingDirectives(
+                '<img src="x" alt="{{' . $keyword . ' url="a.jpg" onerror="alert(document.cookie)"}}">',
+                false,
+                $this->renderer,
+            );
+
+            expect($result)->not->toContain('onerror');
+        }
+    });
+
+    it('still masks a parameter merely starting with the letters on', function () {
+        // Only `on` + letters is a handler; a widget parameter such as on_sale must keep working.
+        $result = $this->filter->filterPreservingDirectives(
+            '{{widget type="cms/widget_page_link" on_sale="1"}}',
+            false,
+            $this->renderer,
+        );
+
+        expect($result)->toContain('{{widget type="cms/widget_page_link" on_sale="1"}}');
+    });
+
     it('still preserves the directives the catalog renderer does resolve', function () {
         $renderer = Mage::helper('catalog')->getPageTemplateProcessor();
         $result = $this->filter->filterPreservingDirectives(
