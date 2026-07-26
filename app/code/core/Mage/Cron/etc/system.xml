@@ -40,6 +40,15 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <validate>required-entry validate-digits validate-zero-or-greater</validate>
                         </schedule_lifetime>
+                        <max_running_time translate="label">
+                            <label>Mark as Error if Still Running After</label>
+                            <sort_order>35</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
+                            <comment>Stale jobs whose worker died (OOM, timeout, SIGKILL) are flipped from "running" to "error" after this many minutes. Set to 0 to disable.</comment>
+                        </max_running_time>
                         <history_cleanup_every translate="label">
                             <label>History Cleanup Every</label>
                             <sort_order>40</sort_order>

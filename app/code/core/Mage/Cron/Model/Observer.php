@@ -19,6 +19,7 @@ class Mage_Cron_Model_Observer
     public const XML_PATH_SCHEDULE_GENERATE_EVERY  = 'system/cron/schedule_generate_every';
     public const XML_PATH_SCHEDULE_AHEAD_FOR       = 'system/cron/schedule_ahead_for';
     public const XML_PATH_SCHEDULE_LIFETIME        = 'system/cron/schedule_lifetime';
+    public const XML_PATH_MAX_RUNNING_TIME         = 'system/cron/max_running_time';
     public const XML_PATH_HISTORY_CLEANUP_EVERY    = 'system/cron/history_cleanup_every';
     public const XML_PATH_HISTORY_SUCCESS          = 'system/cron/history_success_lifetime';
     public const XML_PATH_HISTORY_FAILURE          = 'system/cron/history_failure_lifetime';
@@ -105,7 +106,7 @@ class Mage_Cron_Model_Observer
                     }
                 }
                 $this->_processJob($schedule, $jobConfig);
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
                     ->setMessages($e->__toString())
                     ->save();
@@ -113,6 +114,7 @@ class Mage_Cron_Model_Observer
         }
 
         $this->generate();
+        $this->reapStuckJobs();
         $this->cleanup();
     }
 
@@ -153,7 +155,7 @@ class Mage_Cron_Model_Observer
             if ($schedule !== false) {
                 try {
                     $this->_processCompiledJob($schedule, $jobDef, true);
-                } catch (Exception $e) {
+                } catch (\Throwable $e) {
                     $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
                         ->setMessages($e->__toString())
                         ->save();
@@ -314,6 +316,74 @@ class Mage_Cron_Model_Observer
     }
 
     /**
+     * Reconcile schedules stuck in "running" whose worker died without recording an outcome.
+     *
+     * A job killed by the OOM killer, SIGKILL, a container eviction or a fatal that outran the
+     * shutdown handler leaves its row at status = running forever: invisible to cleanup(), never
+     * pruned, and misreported in the admin grid as still working. Flip any such row older than
+     * system/cron/max_running_time to error so it is surfaced as a failure and becomes eligible
+     * for history_failure_lifetime pruning. A non-positive threshold disables the reaper.
+     *
+     * @return $this
+     */
+    public function reapStuckJobs()
+    {
+        $maxRunningTime = (int) Mage::getStoreConfig(self::XML_PATH_MAX_RUNNING_TIME);
+        if ($maxRunningTime <= 0) {
+            return $this;
+        }
+
+        $threshold = time() - $maxRunningTime * 60;
+
+        $stuck = Mage::getModel('cron/schedule')->getCollection()
+            ->addFieldToFilter('status', Mage_Cron_Model_Schedule::STATUS_RUNNING)
+            ->load();
+
+        foreach ($stuck->getIterator() as $schedule) {
+            $referenceTime = $schedule->getExecutedAt() ?: $schedule->getScheduledAt() ?: $schedule->getCreatedAt();
+            if (!$referenceTime || strtotime($referenceTime) >= $threshold) {
+                continue;
+            }
+            $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
+                ->setMessages(Mage::helper('cron')->__('Job did not complete: the process died or exceeded the maximum running time (%s minutes).', $maxRunningTime))
+                ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'))
+                ->save();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Register a shutdown function that records fatal errors (memory_limit exhaustion,
+     * max_execution_time, E_ERROR, E_PARSE, ...) which no try/catch can intercept.
+     *
+     * If the process dies fatally while this schedule is still marked running, PHP still runs
+     * registered shutdown functions, so we can turn the death into an actionable error row
+     * carrying the real message instead of a row that lies about still running.
+     */
+    protected function _registerJobShutdownHandler(Mage_Cron_Model_Schedule $schedule): void
+    {
+        $fatalMask = E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR;
+        register_shutdown_function(function () use ($schedule, $fatalMask): void {
+            $error = error_get_last();
+            if ($error === null || ($error['type'] & $fatalMask) === 0) {
+                return;
+            }
+            if ($schedule->getStatus() !== Mage_Cron_Model_Schedule::STATUS_RUNNING) {
+                return;
+            }
+            try {
+                $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
+                    ->setMessages("{$error['message']} in {$error['file']}:{$error['line']}")
+                    ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'))
+                    ->save();
+            } catch (\Throwable) {
+                // Nothing more can be done while the process is already tearing down.
+            }
+        });
+    }
+
+    /**
      * Processing cron task which is marked as always
      *
      * @param string $jobCode
@@ -421,12 +491,16 @@ class Mage_Cron_Model_Observer
                 ->setExecutedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->save();
 
+            // Record fatal errors (OOM, max_execution_time, E_ERROR) that no try/catch can reach,
+            // but which still allow PHP to run shutdown functions.
+            $this->_registerJobShutdownHandler($schedule);
+
             call_user_func_array($callback, [$schedule]);
 
             $schedule
                 ->setStatus(Mage_Cron_Model_Schedule::STATUS_SUCCESS)
                 ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $schedule->setStatus($errorStatus)
                 ->setMessages($e->__toString());
         }

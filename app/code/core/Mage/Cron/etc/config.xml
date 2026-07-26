@@ -32,6 +32,7 @@ SPDX-License-Identifier: AFL-3.0
                 <schedule_generate_every>15</schedule_generate_every>
                 <schedule_ahead_for>60</schedule_ahead_for>
                 <schedule_lifetime>15</schedule_lifetime>
+                <max_running_time>60</max_running_time>
                 <history_cleanup_every>10</history_cleanup_every>
                 <history_success_lifetime>60</history_success_lifetime>
                 <history_failure_lifetime>600</history_failure_lifetime>
