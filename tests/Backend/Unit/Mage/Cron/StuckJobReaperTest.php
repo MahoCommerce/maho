@@ -32,6 +32,7 @@ function makeRunningSchedule(string $executedAt): Mage_Cron_Model_Schedule
 }
 
 afterEach(function () {
+    Mage::app()->getStore()->setConfig(Mage_Cron_Model_Observer::XML_PATH_MAX_RUNNING_TIME, '60');
     Mage::getModel('cron/schedule')->getCollection()
         ->addFieldToFilter('job_code', 'unit_test_stuck_job')
         ->walk('delete');
@@ -70,6 +71,5 @@ it('does nothing when the reaper is disabled', function () {
 
     $reloaded = Mage::getModel('cron/schedule')->load($schedule->getId());
     expect($reloaded->getStatus())->toBe(Mage_Cron_Model_Schedule::STATUS_RUNNING);
-
-    $store->setConfig(Mage_Cron_Model_Observer::XML_PATH_MAX_RUNNING_TIME, '60');
+    // Config is restored in afterEach so a failed assertion above cannot leak it.
 });

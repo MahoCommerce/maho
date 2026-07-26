@@ -62,7 +62,7 @@
 "Schedule","Schedule"
 "Schedule Ahead for","Schedule Ahead for"
 "Schedule not found.","Schedule not found."
-"Stale jobs whose worker died (OOM, timeout, SIGKILL) are flipped from ""running"" to ""error"" after this many minutes. Set to 0 to disable.","Stale jobs whose worker died (OOM, timeout, SIGKILL) are flipped from ""running"" to ""error"" after this many minutes. Set to 0 to disable."
+"Stale jobs whose worker died (OOM, timeout, SIGKILL) are flipped from ""running"" to ""error"" after this many minutes. Keep this above the runtime of your slowest job, as any job still running past this threshold is marked as an error. Set to 0 to disable.","Stale jobs whose worker died (OOM, timeout, SIGKILL) are flipped from ""running"" to ""error"" after this many minutes. Keep this above the runtime of your slowest job, as any job still running past this threshold is marked as an error. Set to 0 to disable."
 "Success","Success"
 "Success History Lifetime","Success History Lifetime"
 "Too late for the schedule.","Too late for the schedule."
