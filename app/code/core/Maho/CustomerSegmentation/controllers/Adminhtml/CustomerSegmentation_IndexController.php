@@ -76,7 +76,9 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
 
         $data = Mage::getSingleton('adminhtml/session')->getFormData(true);
         if (!empty($data)) {
-            $segment->setData($data);
+            // loadPost() (not setData()) so the submitted conditions tree is rebuilt instead of
+            // being left as a raw array, which would render the Conditions tab as if it were empty
+            $segment->loadPost($data);
         }
 
         Mage::register('current_customer_segment', $segment);
@@ -94,7 +96,11 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     #[Maho\Config\Route('/admin/customersegmentation_index/save')]
     public function saveAction(): void
     {
-        if ($data = $this->getRequest()->getPost()) {
+        if ($post = $this->getRequest()->getPost()) {
+            // The segment's own fields live under the "segment" key: the tabs are rendered inside
+            // the edit form, so unprefixed names would be overwritten by the filter and pager
+            // inputs of the grids loaded into the Customers and E-mails on Enter/Exit tabs.
+            $data = $post['segment'] ?? [];
             $segment = Mage::getModel('customersegmentation/segment');
             $segmentId = $this->getRequest()->getParam('id');
 
@@ -111,10 +117,9 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
 
             try {
                 // Process conditions
-                if (isset($data['rule']['conditions'])) {
-                    $data['conditions'] = $data['rule']['conditions'];
+                if (isset($post['rule']['conditions'])) {
+                    $data['conditions'] = $post['rule']['conditions'];
                 }
-                unset($data['rule']);
 
                 $segment->loadPost($data);
                 $segment->save();
