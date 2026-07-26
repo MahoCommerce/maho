@@ -13,6 +13,8 @@
  * @method $this setCategoryId(int $value)
  * @method string getConditionsSerialized()
  * @method $this setConditionsSerialized(string $value)
+ * @method string|null getParentResolution()
+ * @method $this setParentResolution(string $value)
  * @method int getIsActive()
  * @method $this setIsActive(int $value)
  * @method string getCreatedAt()
@@ -23,9 +25,30 @@
 
 class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 {
+    /** Matched products go into the category as they are. */
+    public const PARENT_RESOLUTION_NONE = 'none';
+
+    /** Matched products are swapped for their parents; matched products without a parent stay. */
+    public const PARENT_RESOLUTION_KEEP_ORPHANS = 'keep_orphans';
+
+    /** Matched products are swapped for their parents; matched simples without a parent are dropped. */
+    public const PARENT_RESOLUTION_DISCARD_ORPHANS = 'discard_orphans';
+
     protected ?array $_productIds = null;
     protected int|array|null $_productsFilter = null;
     protected ?Mage_Catalog_Model_Category $_category = null;
+
+    /**
+     * Options for the "When products match" rule setting.
+     */
+    public static function getParentResolutionOptions(): array
+    {
+        return [
+            self::PARENT_RESOLUTION_NONE => Mage::helper('catalog')->__('Do not replace'),
+            self::PARENT_RESOLUTION_KEEP_ORPHANS => Mage::helper('catalog')->__('Replace with parent products, keep products that have no parent'),
+            self::PARENT_RESOLUTION_DISCARD_ORPHANS => Mage::helper('catalog')->__('Replace with parent products, discard products that have no parent'),
+        ];
+    }
 
     #[\Override]
     protected function _construct(): void
@@ -67,7 +90,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     #[\Override]
     public function getConditionsInstance(): Mage_Catalog_Model_Rule_Condition_Combine
     {
-        return Mage::getModel('catalog/rule_condition_combine');
+        return Mage::getModel('catalog/category_dynamic_rule_condition_combine');
     }
 
     #[\Override]
@@ -79,6 +102,12 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     #[\Override]
     protected function _beforeSave(): self
     {
+        // loadPost() writes every posted key straight onto the model, so the column is normalised here
+        // rather than at the call site: whichever path set it, only a known option reaches the table
+        if (!array_key_exists((string) $this->getParentResolution(), self::getParentResolutionOptions())) {
+            $this->setParentResolution(self::PARENT_RESOLUTION_NONE);
+        }
+
         // Encode conditions as JSON
         if ($this->getConditions()) {
             try {
@@ -192,6 +221,52 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
         }
 
         return $this->_productIds;
+    }
+
+    /**
+     * Product IDs this rule wants in the category: the matched products, after parent resolution.
+     */
+    public function getResolvedProductIds(): array
+    {
+        return $this->resolveParents($this->getMatchingProductIds());
+    }
+
+    /**
+     * Map matched products onto the products that should actually be assigned.
+     *
+     * A matched product with parents contributes every one of its parents (a simple can belong to more
+     * than one configurable). A matched product with no parent is kept when the rule keeps orphans, and
+     * also when it is composite itself: a configurable that matched the rule directly is parentless by
+     * nature and is never what "discard orphans" is aimed at.
+     */
+    public function resolveParents(array $productIds): array
+    {
+        $mode = $this->getParentResolution() ?: self::PARENT_RESOLUTION_NONE;
+        if ($mode === self::PARENT_RESOLUTION_NONE || empty($productIds)) {
+            return $productIds;
+        }
+
+        /** @var Mage_Catalog_Model_Resource_Category_Dynamic_Rule $resource */
+        $resource = $this->getResource();
+        $parentsByChild = $resource->getParentIdsByChildIds($productIds);
+
+        $orphans = array_values(array_diff($productIds, array_keys($parentsByChild)));
+        $keepOrphans = $mode !== self::PARENT_RESOLUTION_DISCARD_ORPHANS;
+        $composites = $keepOrphans || empty($orphans) ? [] : $resource->getCompositeProductIds($orphans);
+
+        // Keys dedupe two matched children that share a parent
+        $resolved = [];
+        foreach ($productIds as $productId) {
+            if (isset($parentsByChild[$productId])) {
+                foreach ($parentsByChild[$productId] as $parentId) {
+                    $resolved[$parentId] = true;
+                }
+            } elseif ($keepOrphans || in_array($productId, $composites)) {
+                $resolved[$productId] = true;
+            }
+        }
+
+        return array_keys($resolved);
     }
 
     public function callbackValidateProduct(array $args): void
