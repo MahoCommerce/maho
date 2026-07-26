@@ -23,19 +23,19 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_General extends
 
         if ($model && $model->getId()) {
             $fieldset->addField('segment_id', 'hidden', [
-                'name' => 'segment_id',
+                'name' => 'segment[segment_id]',
             ]);
         }
 
         $fieldset->addField('name', 'text', [
-            'name'     => 'name',
+            'name'     => 'segment[name]',
             'label'    => Mage::helper('customersegmentation')->__('Segment Name'),
             'title'    => Mage::helper('customersegmentation')->__('Segment Name'),
             'required' => true,
         ]);
 
         $fieldset->addField('description', 'textarea', [
-            'name'  => 'description',
+            'name'  => 'segment[description]',
             'label' => Mage::helper('customersegmentation')->__('Description'),
             'title' => Mage::helper('customersegmentation')->__('Description'),
         ]);
@@ -43,7 +43,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_General extends
         $fieldset->addField('is_active', 'select', [
             'label'  => Mage::helper('customersegmentation')->__('Status'),
             'title'  => Mage::helper('customersegmentation')->__('Status'),
-            'name'   => 'is_active',
+            'name'   => 'segment[is_active]',
             'values' => [
                 ['value' => 1, 'label' => Mage::helper('customersegmentation')->__('Active')],
                 ['value' => 0, 'label' => Mage::helper('customersegmentation')->__('Inactive')],
@@ -53,14 +53,14 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_General extends
         $fieldset->addField('refresh_mode', 'select', [
             'label'  => Mage::helper('customersegmentation')->__('Refresh Mode'),
             'title'  => Mage::helper('customersegmentation')->__('Refresh Mode'),
-            'name'   => 'refresh_mode',
+            'name'   => 'segment[refresh_mode]',
             'values' => Mage::getModel('customersegmentation/segment')->getRefreshModeOptions(),
             'note'   => Mage::helper('customersegmentation')->__('Automatic: Refreshed daily via cron. Manual: Must be refreshed manually.'),
         ]);
 
         if (!Mage::app()->isSingleStoreMode()) {
             $fieldset->addField('website_ids', 'multiselect', [
-                'name'     => 'website_ids',
+                'name'     => 'segment[website_ids]',
                 'label'    => Mage::helper('customersegmentation')->__('Assign to Website'),
                 'title'    => Mage::helper('customersegmentation')->__('Assign to Website'),
                 'required' => true,
@@ -69,7 +69,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_General extends
         } else {
             $websiteId = (string) Mage::app()->getStore(true)->getWebsiteId();
             $fieldset->addField('website_ids', 'hidden', [
-                'name'  => 'website_ids',
+                'name'  => 'segment[website_ids]',
                 'value' => $websiteId,
             ]);
             // Seed the key setValues() would otherwise clear, keeping the segment's own scope
@@ -82,7 +82,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_General extends
         array_unshift($customerGroups, ['value' => '', 'label' => Mage::helper('customersegmentation')->__('-- Please Select --')]);
 
         $fieldset->addField('customer_group_ids', 'multiselect', [
-            'name'   => 'customer_group_ids',
+            'name'   => 'segment[customer_group_ids]',
             'label'  => Mage::helper('customersegmentation')->__('Customer Groups'),
             'title'  => Mage::helper('customersegmentation')->__('Customer Groups'),
             'values' => $customerGroups,
