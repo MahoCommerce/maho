@@ -88,7 +88,9 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
     {
         $keywords = array_filter(
             self::DIRECTIVE_KEYWORDS,
-            static fn(string $keyword): bool => is_callable([$renderer, $keyword . 'Directive']),
+            // method_exists, not is_callable: a renderer with a magic __call would satisfy
+            // is_callable for every keyword and silently widen the mask to all 13.
+            static fn(string $keyword): bool => method_exists($renderer, $keyword . 'Directive'),
         );
 
         if ($keywords === []) {
@@ -199,10 +201,13 @@ class Mage_Core_Model_Input_Filter_MaliciousCode
         $directives = [];
         $masked = (string) $content;
         if ($renderer !== null) {
+            // The nonce keeps author text that happens to spell a token from being rewritten
+            // into a directive at restore time.
+            $prefix = 'MAHODIRECTIVE' . bin2hex(random_bytes(8)) . 'X';
             $masked = (string) preg_replace_callback(
                 self::getDirectivePattern($renderer),
-                function (array $match) use (&$directives): string {
-                    $token = 'MAHODIRECTIVE' . count($directives) . 'X';
+                function (array $match) use (&$directives, $prefix): string {
+                    $token = $prefix . count($directives) . 'X';
                     $directives[$token] = $match[0];
                     return $token;
                 },

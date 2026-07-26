@@ -34,9 +34,9 @@ class Mage_Core_Helper_Purifier extends Mage_Core_Helper_Abstract
      *
      * The sanitizer defaults to 20000 characters and silently truncates past it, which would cut
      * the tail off an ordinary CMS page on save. Symfony warns that disabling the cap entirely
-     * invites a DoS, so rather than -1 this tracks the `content` column in Mage/Cms/sql/schema.php:
-     * a MEDIUMTEXT bounded at 2 MiB. Nothing that fits in the column can be truncated by the
-     * sanitizer, and anything larger was never going to be stored anyway.
+     * invites a DoS, so rather than -1 this matches the declared length of the `content` column in
+     * Mage/Cms/sql/schema.php: 2 MiB, which the DBAL maps to MEDIUMTEXT. Input past the cap is
+     * still truncated silently, but nothing within the column's declared size can be.
      */
     public const MAX_INPUT_LENGTH = 2_097_152;
 
