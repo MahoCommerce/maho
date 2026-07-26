@@ -1,0 +1,18 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package base_default
+ */
+
+/** @var Mage_Cms_Block_Widget_Youtube $this */
+?>
+<div class="widget widget-youtube" style="aspect-ratio: <?= $this->escapeHtml($this->getAspectRatio()) ?>">
+    <iframe
+        src="<?= $this->escapeHtml($this->getEmbedUrl()) ?>"
+        title="<?= $this->escapeHtml($this->getVideoTitle()) ?>"
+        loading="lazy"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+        allowfullscreen></iframe>
+</div>

@@ -289,7 +289,63 @@ abstract class Mage_Catalog_Model_Abstract extends Mage_Core_Model_Abstract
     protected function _beforeSave()
     {
         $this->unlockAttributes();
+        $this->_sanitizeWysiwygAttributes();
         return parent::_beforeSave();
+    }
+
+    /**
+     * Sanitize the rich-text attributes of this entity (product description, category description,
+     * any custom WYSIWYG-enabled attribute).
+     *
+     * This covers the markup authored in the field. It is not a complete boundary: what a directive
+     * resolves to at render is not sanitized, so a crafted parameter — or a value pulled in by
+     * {{customvar}} or {{config}} — still reaches the page unescaped.
+     *
+     * WYSIWYG-enabled attributes are exactly the ones Mage_Catalog_Helper_Output renders through
+     * the template processor, so they are the ones that may hold template directives — hence
+     * filterPreservingDirectives(), which sanitizes without mangling them. No link filtering:
+     * a description links to other pages of the same catalog.
+     *
+     * Bulk import writes attribute values straight to the DB rather than through the model, so it
+     * is unaffected; admin, API and programmatic saves all pass through here.
+     */
+    protected function _sanitizeWysiwygAttributes(): void
+    {
+        $resource = $this->getResource();
+        if (!$resource instanceof Mage_Eav_Model_Entity_Abstract) {
+            return;
+        }
+        $entityType = $resource->getEntityType();
+
+        /** @var Mage_Eav_Model_Config $config */
+        $config = Mage::getSingleton('eav/config');
+        // Membership test first: getAttribute() hydrates a model for every code it is handed,
+        // including the non-attribute keys an entity carries around (stores, category_ids, …).
+        $attributeCodes = array_flip($config->getEntityAttributeCodes($entityType));
+
+        $filter = Mage::getSingleton('core/input_filter_maliciousCode');
+        // The processor Mage_Catalog_Helper_Output renders these attributes with. It resolves far
+        // fewer directives than the CMS one, and masking a directive it cannot resolve would emit
+        // it verbatim on the storefront — so the mask has to be derived from this exact instance.
+        //
+        // The stored value keeps its directives even for a store view with parse_url_directives
+        // off. Deciding that here would be both wrong and destructive: the flag is per store view
+        // and can be changed long after the save, and running the plain filter over a directive
+        // mangles it into a broken %7B%7B… URL — permanently, for every store, over a setting that
+        // is only about one. Safety belongs at the point of use, so Mage_Catalog_Helper_Output
+        // strips unresolved directives when the rendering store will not resolve them.
+        $renderer = Mage::helper('catalog')->getPageTemplateProcessor();
+
+        foreach ($this->getData() as $code => $value) {
+            if (!is_string($value) || $value === '' || !isset($attributeCodes[$code])) {
+                continue;
+            }
+            $attribute = $config->getAttribute($entityType, $code);
+            if (!$attribute || !$attribute->getIsWysiwygEnabled()) {
+                continue;
+            }
+            $this->setData($code, $filter->filterPreservingDirectives($value, false, $renderer));
+        }
     }
 
     /**

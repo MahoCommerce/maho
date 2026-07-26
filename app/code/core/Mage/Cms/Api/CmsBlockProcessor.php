@@ -31,9 +31,8 @@ final class CmsBlockProcessor extends CrudProcessor
             }
         }
 
-        $content = $model->getData('content');
-        if ($content !== null) {
-            $model->setData('content', \Mage::getSingleton('core/input_filter_maliciousCode')->filter($content));
-        }
+        // Content sanitization lives in Mage_Cms_Model_Resource_Block::_beforeSave(), so it covers
+        // every save path. Filtering here as well would run over unresolved template directives
+        // and mangle them ({{media url="..."}} becomes a broken %7B%7B… URL).
     }
 }

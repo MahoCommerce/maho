@@ -118,7 +118,13 @@ abstract class Mage_ProductAlert_Block_Email_Abstract extends Mage_Core_Block_Te
     {
         $shortDescription = $product->getShortDescription();
         if ($shortDescription) {
-            $shortDescription = Mage::getSingleton('core/input_filter_maliciousCode')->filter($shortDescription);
+            // No directive-safe filtering here: the alert templates echo this value straight out,
+            // and it reaches the transactional email as the already-rendered {{var alertGrid}},
+            // which \Maho\Filter\Template does not rescan. Nothing would ever resolve a preserved
+            // directive, so it would reach the inbox verbatim and its quotes would break out of
+            // the enclosing attribute. Strip the directives, then filter as plain HTML.
+            $filter = Mage::getSingleton('core/input_filter_maliciousCode');
+            $shortDescription = $filter->filter($filter::stripDirectives($shortDescription));
         }
         return $shortDescription;
     }

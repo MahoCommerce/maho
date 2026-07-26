@@ -360,6 +360,42 @@ if (Mage::getStoreConfigFlag('mymodule/abuse/honeypot_enabled')
 }
 ```
 
+### Sanitizing rich content (template directives)
+
+**Never call `filter()` on content whose `{{...}}` directives are still unresolved** — a directive
+isn't valid HTML, so the filter mangles it into a broken `%7B%7B…` URL.
+
+```php
+// Persisted content → sanitize on save, in the resource model's _beforeSave().
+// 2nd arg forces links to a new tab: true for article-style content (blog), off for CMS/catalog.
+// 3rd arg is REQUIRED in practice: the processor that will actually render this content.
+$object->setData('content', Mage::getSingleton('core/input_filter_maliciousCode')
+    ->filterPreservingDirectives($object->getData('content'), false,
+        Mage::helper('cms')->getPageTemplateProcessor()));
+
+// Non-persisted preview → resolve first, then filter the resolved markup.
+Mage::getSingleton('core/input_filter_maliciousCode')->filter($template->getProcessedTemplate());
+```
+
+The masking pattern is a security boundary: whatever it matches is restored **unsanitized**. Don't
+loosen it. Three rules, none sufficient alone:
+
+- **Only mask what the renderer resolves — and only if it runs at all.** A directive with no
+  handler is emitted verbatim, so masking one hands the payload to the browser. This is
+  per-renderer, not global (the catalog filter resolves 5 keywords, the CMS one 13), so always pass
+  the real processor. No renderer means no preservation: if you can't name the processor that will
+  resolve these directives, there isn't one. A render path that *can't* resolve them must call
+  `stripDirectives()` rather than emit them (see `Mage_Catalog_Helper_Output`).
+- **The body must be well-formed `name="value"` params.** Excluding `<`/`>` isn't enough: an
+  attribute is closed by a quote, so `" onerror="alert(1)` breaks out without an angle bracket.
+- **No param may be named like an event handler** (`on` + letters). A well-formed param is itself a
+  well-formed HTML attribute, so `{{media url="a" onerror="alert(1)"}}` satisfies both rules above —
+  the keyword resolves, the body parses — yet emitted verbatim inside `alt="…"` the parser ends the
+  attribute at the directive's first quote and reads `onerror` as the next attribute of the tag.
+  Only `on` + letters is rejected, so a widget param such as `on_sale` still masks.
+
+`var`/`depend`/`if` are never masked — they render verbatim when no template vars are assigned.
+
 ## Git Commit Rules
 - **NEVER** include "Co-Authored-By: Claude" or any AI attribution in commits
 - **NEVER** mention Claude, AI, or assistant in commit messages
