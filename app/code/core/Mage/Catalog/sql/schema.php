@@ -876,6 +876,7 @@ return function (Schema $schema): void {
     $categoryDynamicRule->addColumn('rule_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $categoryDynamicRule->addColumn('category_id', Types::INTEGER, ['unsigned' => true]);
     $categoryDynamicRule->addColumn('conditions_serialized', Types::TEXT, ['length' => 2097152, 'notnull' => false]);
+    $categoryDynamicRule->addColumn('parent_resolution', Types::STRING, ['length' => 20, 'default' => 'none']);
     $categoryDynamicRule->addColumn('is_active', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
     $categoryDynamicRule->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     $categoryDynamicRule->addColumn('updated_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);

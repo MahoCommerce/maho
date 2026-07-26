@@ -142,6 +142,41 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
 
         // If this is the Dynamic Category attribute group, add the dynamic rules form
         if ($group->getAttributeGroupName() == 'Dynamic Category') {
+            $rule = $this->getDynamicRule();
+
+            // Rule-level behaviour, not a condition: this maps the matched set onto another set rather
+            // than answering "does this product belong?" for one product at a time
+            $fieldset->addField('parent_resolution', 'select', [
+                'name' => 'rule[parent_resolution]',
+                'label' => Mage::helper('catalog')->__('When Products Match'),
+                'title' => Mage::helper('catalog')->__('When Products Match'),
+                'required' => false,
+                'options' => Mage_Catalog_Model_Category_Dynamic_Rule::getParentResolutionOptions(),
+                'value' => $rule->getParentResolution() ?: Mage_Catalog_Model_Category_Dynamic_Rule::PARENT_RESOLUTION_NONE,
+                'note' => Mage::helper('catalog')->__('Rules often match data that only exists on the simple product (stock qty, size, special price) when the product you want in the category is the configurable.'),
+            ]);
+
+            if ($this->getCategory() && $this->getCategory()->getId()) {
+                // Runs the rules synchronously in this request, evaluating every product in the catalog,
+                // so confirm before starting rather than letting a large catalog look like a hung page
+                $refreshUrl = $this->getUrl('*/*/processDynamic', [
+                    'id' => $this->getCategory()->getId(),
+                    'store' => $this->getRequest()->getParam('store'),
+                    'form_key' => Mage::getSingleton('core/session')->getFormKey(),
+                ]);
+                $fieldset->addField('dynamic_refresh_button', 'note', [
+                    'text' => $this->getLayout()->createBlock('adminhtml/widget_button')
+                        ->setData([
+                            'label' => Mage::helper('catalog')->__('Refresh Products Now'),
+                            'onclick' => Mage::helper('core/js')->getConfirmSetLocationJs(
+                                $refreshUrl,
+                                Mage::helper('catalog')->__('This evaluates the rules against every product in the catalog and can take a while on a large one. Continue?'),
+                            ),
+                        ])->toHtml(),
+                    'note' => Mage::helper('catalog')->__('Recalculates this category\'s products immediately, without waiting for the next reindex. Save your changes first. On a large catalog this can take a while.'),
+                ]);
+            }
+
             // Add dynamic rules fieldset
             $rulesFieldset = $form->addFieldset('dynamic_rules_fieldset', [
                 'legend' => Mage::helper('catalog')->__('Dynamic Category Rules'),
@@ -152,9 +187,6 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
                 ->setTemplate('promo/fieldset.phtml')
                 ->setNewChildUrl($this->getUrl('*/*/newConditionHtml/form/dynamic_conditions_fieldset'));
             $rulesFieldset->setRenderer($renderer);
-
-            // Get or create the dynamic rule for this category
-            $rule = $this->getDynamicRule();
 
             $conditionsField = $rulesFieldset->addField('conditions', 'text', [
                 'name' => 'rule[conditions]',
