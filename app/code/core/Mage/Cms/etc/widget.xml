@@ -54,6 +54,52 @@ SPDX-License-Identifier: AFL-3.0
             </template>
         </parameters>
     </cms_page_link>
+    <cms_youtube type="cms/widget_youtube" translate="name description" module="cms">
+        <name>YouTube Video</name>
+        <description>Embed a YouTube video using the privacy-friendly youtube-nocookie host. Rendered when the page is displayed, so the embed is not affected by content sanitization.</description>
+        <parameters>
+            <video translate="label description">
+                <visible>1</visible>
+                <required>1</required>
+                <label>Video URL or ID</label>
+                <description>Paste the video URL (watch, share, embed or Shorts) or just the video ID.</description>
+                <type>text</type>
+                <sort_order>10</sort_order>
+            </video>
+            <title translate="label description">
+                <visible>1</visible>
+                <label>Title</label>
+                <description>Describes the video to screen readers. Defaults to a generic label.</description>
+                <type>text</type>
+                <sort_order>20</sort_order>
+            </title>
+            <aspect_ratio translate="label description">
+                <visible>1</visible>
+                <label>Format</label>
+                <description>Reserves the correct height before the video loads, so the page does not jump.</description>
+                <type>select</type>
+                <value>16 / 9</value>
+                <values>
+                    <widescreen translate="label">
+                        <value>16 / 9</value>
+                        <label>Standard video (16:9)</label>
+                    </widescreen>
+                    <vertical translate="label">
+                        <value>9 / 16</value>
+                        <label>Short (9:16)</label>
+                    </vertical>
+                </values>
+                <sort_order>30</sort_order>
+            </aspect_ratio>
+            <start translate="label description">
+                <visible>1</visible>
+                <label>Start At (seconds)</label>
+                <description>Leave empty to start from the beginning.</description>
+                <type>text</type>
+                <sort_order>40</sort_order>
+            </start>
+        </parameters>
+    </cms_youtube>
     <cms_static_block type="cms/widget_block" translate="name description" module="cms">
         <name>CMS Static Block</name>
         <description>Contents of a Static Block</description>

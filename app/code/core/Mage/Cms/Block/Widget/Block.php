@@ -60,13 +60,10 @@ class Mage_Cms_Block_Widget_Block extends Mage_Core_Block_Template implements Ma
             if ($block->getIsActive()) {
                 $helper = Mage::helper('cms');
                 $processor = $helper->getBlockTemplateProcessor();
-                if ($this->isRequestFromAdminArea()) {
-                    $this->setText($processor->filter(
-                        Mage::getSingleton('core/input_filter_maliciousCode')->filter($block->getContent()),
-                    ));
-                } else {
-                    $this->setText($processor->filter($block->getContent()));
-                }
+                // The stored content is already sanitized (Mage_Cms_Model_Resource_Block::_beforeSave),
+                // so there is nothing to filter here. The admin area used to run the malicious-code
+                // filter over the raw content, which mangled any directive it contained.
+                $this->setText($processor->filter($block->getContent()));
                 $this->addModelTags($block);
             }
         }
@@ -89,15 +86,5 @@ class Mage_Cms_Block_Widget_Block extends Mage_Core_Block_Template implements Ma
             $result[] = $blockId;
         }
         return $result;
-    }
-
-    /**
-     * Check is request goes from admin area
-     *
-     * @return bool
-     */
-    public function isRequestFromAdminArea()
-    {
-        return $this->getRequest()->getRouteName() === Mage_Core_Model_App_Area::AREA_ADMINHTML;
     }
 }

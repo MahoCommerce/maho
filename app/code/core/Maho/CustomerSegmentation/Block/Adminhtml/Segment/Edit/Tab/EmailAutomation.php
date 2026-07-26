@@ -24,7 +24,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailAutomation
         $fieldset->addField('auto_email_active', 'select', [
             'label'  => Mage::helper('customersegmentation')->__('Enable Email Automation'),
             'title'  => Mage::helper('customersegmentation')->__('Enable Email Automation'),
-            'name'   => 'auto_email_active',
+            'name'   => 'segment[auto_email_active]',
             'values' => [
                 ['value' => 0, 'label' => Mage::helper('customersegmentation')->__('No')],
                 ['value' => 1, 'label' => Mage::helper('customersegmentation')->__('Yes')],
@@ -35,7 +35,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailAutomation
         $fieldset->addField('allow_overlapping_sequences', 'select', [
             'label'  => Mage::helper('customersegmentation')->__('Allow Overlapping Sequences'),
             'title'  => Mage::helper('customersegmentation')->__('Allow Overlapping Sequences'),
-            'name'   => 'allow_overlapping_sequences',
+            'name'   => 'segment[allow_overlapping_sequences]',
             'values' => [
                 ['value' => 0, 'label' => Mage::helper('customersegmentation')->__('No')],
                 ['value' => 1, 'label' => Mage::helper('customersegmentation')->__('Yes')],

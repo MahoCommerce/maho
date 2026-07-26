@@ -69,11 +69,19 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Tab_Content extends Mage_Adminhtml_Blo
             $renderer = $this->getStoreSwitcherRenderer();
             $field->setRenderer($renderer);
         } else {
-            $fieldset->addField('stores', 'hidden', [
-                'name' => 'stores[]',
-                'value' => Mage::app()->getStore(true)->getId(),
-            ]);
-            $model->setStoreId(Mage::app()->getStore(true)->getId());
+            // One hidden input per assigned store, each seeding the key setValues() would clear
+            $savedStores = array_values((array) $model->getStores());
+            if ($savedStores === []) {
+                $savedStores = [Mage::app()->getStore(true)->getId()];
+            }
+            foreach ($savedStores as $index => $storeId) {
+                $elementId = 'stores_' . $index;
+                $fieldset->addField($elementId, 'hidden', [
+                    'name' => 'stores[]',
+                    'value' => $storeId,
+                ]);
+                $model->setData($elementId, $storeId);
+            }
         }
 
         $fieldset->addField('is_active', 'select', [
