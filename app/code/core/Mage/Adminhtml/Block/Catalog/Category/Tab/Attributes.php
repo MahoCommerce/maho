@@ -157,17 +157,23 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
             ]);
 
             if ($this->getCategory() && $this->getCategory()->getId()) {
+                // Runs the rules synchronously in this request, evaluating every product in the catalog,
+                // so confirm before starting rather than letting a large catalog look like a hung page
+                $refreshUrl = $this->getUrl('*/*/processDynamic', [
+                    'id' => $this->getCategory()->getId(),
+                    'store' => $this->getRequest()->getParam('store'),
+                    'form_key' => Mage::getSingleton('core/session')->getFormKey(),
+                ]);
                 $fieldset->addField('dynamic_refresh_button', 'note', [
                     'text' => $this->getLayout()->createBlock('adminhtml/widget_button')
                         ->setData([
                             'label' => Mage::helper('catalog')->__('Refresh Products Now'),
-                            'onclick' => "setLocation('" . $this->getUrl('*/*/processDynamic', [
-                                'id' => $this->getCategory()->getId(),
-                                'store' => $this->getRequest()->getParam('store'),
-                                'form_key' => Mage::getSingleton('core/session')->getFormKey(),
-                            ]) . "')",
+                            'onclick' => Mage::helper('core/js')->getConfirmSetLocationJs(
+                                $refreshUrl,
+                                Mage::helper('catalog')->__('This evaluates the rules against every product in the catalog and can take a while on a large one. Continue?'),
+                            ),
                         ])->toHtml(),
-                    'note' => Mage::helper('catalog')->__('Recalculates this category\'s products immediately, without waiting for the next reindex. Save your changes first.'),
+                    'note' => Mage::helper('catalog')->__('Recalculates this category\'s products immediately, without waiting for the next reindex. Save your changes first. On a large catalog this can take a while.'),
                 ]);
             }
 
