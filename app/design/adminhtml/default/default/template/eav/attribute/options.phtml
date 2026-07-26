@@ -64,7 +64,18 @@
                         <th><?= $this->escapeHtml($this->__('Swatch')) ?></th>
                     <?php endif ?>
                     <?php foreach ($this->getStores() as $_store): ?>
+                    <?php if ($this->getReadOnly()): ?>
                         <th><?= $this->escapeHtml($_store->getName()) ?></th>
+                    <?php else: ?>
+                        <th class="option-sort-column">
+                            <button type="button" class="option-sort-button" title="<?= $this->escapeHtml($this->__('Sort options alphabetically by this column')) ?>">
+                                <?= $this->escapeHtml($_store->getName()) ?>
+                                <span class="option-sort-icon option-sort-icon-none"><?= $this->getIconSvg('arrows-sort') ?></span>
+                                <span class="option-sort-icon option-sort-icon-asc"><?= $this->getIconSvg('sort-a-z') ?></span>
+                                <span class="option-sort-icon option-sort-icon-desc"><?= $this->getIconSvg('sort-z-a') ?></span>
+                            </button>
+                        </th>
+                    <?php endif ?>
                     <?php endforeach ?>
                         <th class="nobr a-center"><?= $this->escapeHtml($this->__('Is Default')) ?></th>
                         <th>
@@ -202,6 +213,40 @@ var attributeOption = {
             }
         });
     },
+    sortByColumn: function(cellIndex, direction) {
+        let collator = new Intl.Collator('<?= $this->jsQuoteEscape(str_replace('_', '-', Mage::app()->getLocale()->getLocaleCode())) ?>', {numeric: true, sensitivity: 'base'});
+        let sign = direction === 'desc' ? -1 : 1;
+        let value = function(row) {
+            let input = row.cells[cellIndex] ? row.cells[cellIndex].querySelector('input') : null;
+            return input ? input.value : '';
+        };
+        let rows = Array.from(this.container.querySelectorAll('tr.option-row'));
+        rows.sort(function(a, b) {
+            return sign * collator.compare(value(a), value(b));
+        });
+        rows.forEach(function(row) {
+            this.container.appendChild(row);
+        }, this);
+        this.updatePositions();
+    },
+    clearSortIndicators: function() {
+        document.querySelectorAll('#attribute-options-table th.option-sort-column').forEach(function(heading) {
+            delete heading.dataset.sortDirection;
+        });
+    },
+    initColumnSort: function() {
+        let headings = document.querySelectorAll('#attribute-options-table th.option-sort-column');
+        headings.forEach(function(heading) {
+            heading.querySelector('.option-sort-button').addEventListener('click', function() {
+                let direction = heading.dataset.sortDirection === 'asc' ? 'desc' : 'asc';
+                headings.forEach(function(other) {
+                    delete other.dataset.sortDirection;
+                });
+                heading.dataset.sortDirection = direction;
+                attributeOption.sortByColumn(heading.cellIndex, direction);
+            });
+        });
+    },
     initSortable: function() {
         if (this.isReadOnly || typeof Sortable === 'undefined') {
             return;
@@ -211,7 +256,11 @@ var attributeOption = {
             draggable: 'tr.option-row',
             filter: '.no-display',
             animation: 150,
-            onUpdate: this.updatePositions.bind(this),
+            onUpdate: function() {
+                // the manual order no longer matches whatever column was last sorted on
+                this.clearSortIndicators();
+                this.updatePositions();
+            }.bind(this),
         });
     },
     updateItemsCountField: function() {
@@ -254,10 +303,12 @@ var attributeOption = {
 }
 attributeOption.bindRemoveButtons();
 attributeOption.initSortable();
+attributeOption.initColumnSort();
 let addNewOptionButton = document.getElementById('add_new_option_button');
 if (addNewOptionButton) {
     addNewOptionButton.addEventListener('click', function() {
         attributeOption.add({});
+        attributeOption.clearSortIndicators();
         attributeOption.updatePositions();
     });
 }

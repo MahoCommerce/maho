@@ -223,6 +223,40 @@ select[multiple], select[size] {
 #attribute-options-table tr.sortable-ghost {
   opacity: .4; }
 
+#attribute-options-table thead th {
+  white-space: nowrap; }
+
+#attribute-options-table th.option-sort-column {
+  padding: 0; }
+  #attribute-options-table .option-sort-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--maho-space-1);
+    background: none;
+    border: 0;
+    border-radius: 0;
+    padding: var(--maho-space-1) var(--maho-space-2);
+    color: inherit;
+    font: inherit;
+    line-height: inherit;
+    cursor: pointer; }
+  #attribute-options-table .option-sort-button:hover {
+    background: none;
+    color: var(--maho-accent); }
+  #attribute-options-table .option-sort-icon {
+    display: none;
+    color: var(--maho-ink-muted); }
+  #attribute-options-table .option-sort-icon svg {
+    width: 14px;
+    height: 14px;
+    display: block; }
+  #attribute-options-table .option-sort-column:not([data-sort-direction]) .option-sort-icon-none,
+  #attribute-options-table .option-sort-column[data-sort-direction="asc"] .option-sort-icon-asc,
+  #attribute-options-table .option-sort-column[data-sort-direction="desc"] .option-sort-icon-desc {
+    display: block; }
+  #attribute-options-table .option-sort-column[data-sort-direction] .option-sort-icon {
+    color: var(--maho-accent); }
+
 td:has(input.swatch-option) {
   display: flex;
   gap: var(--maho-space-1); }

@@ -919,6 +919,7 @@
 "SOAP / XML-RPC (legacy)","SOAP / XML-RPC (legacy)"
 "Some items in this order have different invoice and shipment types. You can create shipment only after the invoice is created.","Some items in this order have different invoice and shipment types. You can create shipment only after the invoice is created."
 "Some of the ordered items do not exist in the catalog anymore and will be removed if you try to edit the order.","Some of the ordered items do not exist in the catalog anymore and will be removed if you try to edit the order."
+"Sort options alphabetically by this column","Sort options alphabetically by this column"
 "Special Price:","Special Price:"
 "Specific Countries","Specific Countries"
 "Specified","Specified"
