@@ -200,7 +200,9 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
         }
     }
 
-    #[Maho\Config\Route('/admin/apiplatform_role/delete', methods: ['POST'])]
+    // Reached through the grid/form delete link, so it has to answer GET like
+    // every other admin delete action; CSRF is covered by the forced form key.
+    #[Maho\Config\Route('/admin/apiplatform_role/delete')]
     public function deleteAction(): void
     {
         $id = (int) $this->getRequest()->getParam('role_id');

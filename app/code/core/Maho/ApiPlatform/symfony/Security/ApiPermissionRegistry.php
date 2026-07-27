@@ -27,7 +27,9 @@ namespace Maho\ApiPlatform\Security;
  * `composer dump-autoload` from `#[Maho\Config\ApiResource]` attributes
  * (subclass of API Platform's `ApiResource`) on resource DTO classes.
  *
- * Run `composer dump-autoload` after adding/modifying an attribute.
+ * Run `composer dump-autoload` after adding/modifying an attribute. If that file
+ * is missing or empty when the registry is first read, it is rebuilt in-process
+ * once so the admin role editor never silently renders an empty permission tree.
  */
 class ApiPermissionRegistry
 {
@@ -48,9 +50,16 @@ class ApiPermissionRegistry
     private static ?array $compiled = null;
 
     /**
-     * Lazy-load the compiled permissions file. Returns an empty registry and logs
-     * a warning if the file is missing; the role editor then simply shows no
-     * grantable permissions, which is the safe failure mode.
+     * Guard so a still-broken install pays for at most one class-map scan per
+     * process instead of one per request.
+     */
+    private static bool $compileAttempted = false;
+
+    /**
+     * Lazy-load the compiled permissions file, rebuilding it in-process when it
+     * is missing or empty. Returns an empty registry and logs a warning when the
+     * rebuild is impossible too; the role editor then shows no grantable
+     * permissions, which is the safe failure mode.
      *
      * @return array{
      *     resources: array<string, array{label: string, section: string, operations: array<string, string>}>,
@@ -64,19 +73,54 @@ class ApiPermissionRegistry
             return self::$compiled;
         }
 
-        $path = (defined('BP') ? BP : dirname(__DIR__, 7)) . self::COMPILED_FILE;
+        $basePath = defined('BP') ? BP : dirname(__DIR__, 7);
+        $path = $basePath . self::COMPILED_FILE;
+        $data = self::read($path);
 
-        if (!is_file($path)) {
+        // The composer plugin skips the API permission compile whenever it cannot
+        // autoload the API Platform classes, which leaves an install with no file
+        // at all (or a stale one compiled before the API modules were scannable).
+        // Rebuilding here keeps the role editor usable instead of rendering three
+        // blank sections with no explanation.
+        if (($data === null || $data['resources'] === []) && self::recompile($basePath)) {
+            $data = self::read($path) ?? $data;
+        }
+
+        if ($data === null) {
             \Mage::log(
-                'ApiPermissionRegistry: ' . $path . ' is missing, run `composer dump-autoload`. '
-                . 'Falling back to empty registry; the role editor will show no grantable permissions.',
+                'ApiPermissionRegistry: ' . $path . ' is missing and could not be compiled, run '
+                . '`composer dump-autoload`. Falling back to empty registry; the role editor will '
+                . 'show no grantable permissions.',
                 \Mage::LOG_WARNING,
             );
-            return self::$compiled = [
+            $data = [
                 'resources' => [],
                 'publicRead' => [],
                 'customerScoped' => [],
             ];
+        }
+
+        return self::$compiled = $data;
+    }
+
+    /**
+     * Read the compiled file, or `null` when it is absent or unusable.
+     *
+     * @return array{
+     *     resources: array<string, array{label: string, section: string, operations: array<string, string>}>,
+     *     publicRead: list<string>,
+     *     customerScoped: array<string, string>,
+     * }|null
+     */
+    private static function read(string $path): ?array
+    {
+        if (!is_file($path)) {
+            return null;
+        }
+
+        $data = include $path;
+        if (!is_array($data)) {
+            return null;
         }
 
         /** @var array{
@@ -84,8 +128,49 @@ class ApiPermissionRegistry
          *     publicRead: list<string>,
          *     customerScoped: array<string, string>,
          * } $data */
-        $data = require $path;
-        return self::$compiled = $data;
+        $data += ['resources' => [], 'publicRead' => [], 'customerScoped' => []];
+        return $data;
+    }
+
+    /**
+     * Recompile the permission map through the composer plugin's runtime entry
+     * point, the same one the admin cache page uses. Returns whether the file
+     * is worth re-reading.
+     */
+    private static function recompile(string $basePath): bool
+    {
+        if (self::$compileAttempted) {
+            return false;
+        }
+        self::$compileAttempted = true;
+
+        // Mirrors the plugin's own guard: the parent class is checked first so
+        // that resolving Maho\Config\ApiResource cannot fatal on an install that
+        // has replaced api-platform/core out.
+        if (!class_exists(\ApiPlatform\Metadata\ApiResource::class)
+            || !class_exists(\Maho\Config\ApiResource::class)
+            || !class_exists(\Maho\ComposerPlugin\ApiPermissionCompiler::class)
+        ) {
+            return false;
+        }
+
+        try {
+            \Maho\ComposerPlugin\ApiPermissionCompiler::compileRuntime($basePath . '/vendor/composer');
+        } catch (\Throwable $e) {
+            // A read-only vendor/ is a legitimate deployment, so this stays a
+            // warning and the caller falls back to the empty registry.
+            \Mage::log(
+                'ApiPermissionRegistry: rebuilding the permission map failed, run '
+                . '`composer dump-autoload`. ' . $e->getMessage(),
+                \Mage::LOG_WARNING,
+            );
+            return false;
+        }
+
+        if (function_exists('opcache_invalidate')) {
+            @opcache_invalidate($basePath . self::COMPILED_FILE, true);
+        }
+        return true;
     }
 
     /**

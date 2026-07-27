@@ -63,6 +63,7 @@
 "New API Key","New API Key"
 "New API User","New API User"
 "New Role","New Role"
+"No grantable permissions could be loaded. Run ""composer dump-autoload"" in the Maho root, then reload this page.","No grantable permissions could be loaded. Run ""composer dump-autoload"" in the Maho root, then reload this page."
 "No permissions needed, these are read-only public endpoints.","No permissions needed, these are read-only public endpoints."
 "OAuth2 Client Credentials","OAuth2 Client Credentials"
 "OAuth2 client_id and client_secret will be generated when you save this user.","OAuth2 client_id and client_secret will be generated when you save this user."
