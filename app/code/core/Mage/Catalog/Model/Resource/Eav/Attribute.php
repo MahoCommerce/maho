@@ -283,6 +283,14 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     }
 
     /**
+     * Whether this attribute allows selecting several values at once in layered navigation.
+     */
+    public function getIsFilterableMultiple(): int
+    {
+        return (int) $this->_getData('is_filterable_multiple');
+    }
+
+    /**
      * Get default attribute source model
      */
     #[\Override]

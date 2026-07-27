@@ -57,6 +57,26 @@ abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends \Maho\DataObject
     }
 
     /**
+     * Whether this filter accepts several simultaneous values (OR within the facet).
+     *
+     * Single-value by default; multi-select attribute filters override this.
+     */
+    public function isMultipleSelect(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Values currently applied for a multi-select filter, in the order selected.
+     *
+     * Empty for single-value filters.
+     */
+    public function getAppliedValues(): array
+    {
+        return [];
+    }
+
+    /**
      * Retrieve filter value for Clear All Items filter state
      *
      * @return mixed
