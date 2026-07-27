@@ -31,11 +31,19 @@ final class MahoServer
 {
     private static ?Process $process = null;
     private static string $baseUrl = '';
+    private static bool $stopRegistered = false;
 
     public static function start(?int $port = null): string
     {
         if (self::$process && self::$process->isRunning()) {
             return self::$baseUrl;
+        }
+
+        // One server for the whole run: every test file starts it, and it lives until the
+        // process ends rather than being torn down and rebuilt between files.
+        if (!self::$stopRegistered) {
+            register_shutdown_function(self::stop(...));
+            self::$stopRegistered = true;
         }
 
         // Address host (what the browser navigates to) vs bind host (what the server binds).

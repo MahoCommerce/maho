@@ -8,16 +8,11 @@
 declare(strict_types=1);
 
 use Tests\Browser\MahoServer;
-use Tests\MahoFrontendTestCase;
+use Tests\MahoBrowserTestCase;
 
-uses(MahoFrontendTestCase::class)->group('browser');
-
-afterAll(fn() => MahoServer::stop());
+uses(MahoBrowserTestCase::class)->group('browser');
 
 beforeEach(function () {
-    if (!browserTestsReady()) {
-        test()->markTestSkipped('Playwright is not installed');
-    }
     // Enable a second display currency so the storefront currency switcher renders.
     $config = Mage::getModel('core/config');
     $config->saveConfig('currency/options/base', 'USD');
@@ -26,7 +21,6 @@ beforeEach(function () {
     Mage::getModel('directory/currency')->saveRates(['USD' => ['USD' => 1.0, 'EUR' => 0.9]]);
     Mage::app()->getStore()->resetConfig();
     Mage::app()->cleanCache();
-    MahoServer::start();
 });
 
 /** A salable, priced, visible simple product page URL. */
@@ -49,13 +43,16 @@ it('switches the storefront display currency and reflects it on the new page', f
     // switcher's selected option carries the switch URL of the current currency, so
     // its value is the reliable signal of which currency is active (the visible $/€
     // symbols and both option values are in the DOM regardless of what's selected).
-    $page = visit(MahoServer::baseUrl() . $productUrl)
-        ->assertPresent('#select-currency');
+    $page = visit(MahoServer::baseUrl() . $productUrl);
+    waitForPageLoad($page, '#select-currency')->assertPresent('#select-currency');
     expect($page->page()->locator('#select-currency')->inputValue())->toContain('currency=USD');
 
     // Switch to EUR through the real <select>. Its onchange navigates to the switch
     // URL (already a fully-encoded URL), which 302s back to this page with EUR active.
+    // The sleep covers the navigation starting, which waitForPageLoad can't: the switcher is
+    // on the page being left too, so no element gate tells the two apart here.
     $page->select('#select-currency', '€')->wait(2);
+    waitForPageLoad($page, '#select-currency');
 
     // The redirect completed cleanly (regression: a double-encoded uenc back-URL used to
     // put a newline in the Location header, triggering PHP's "Header may not contain
