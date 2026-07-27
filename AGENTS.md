@@ -191,6 +191,12 @@ All Zend Framework and Varien components have been deleted:
 
 - Use `declare(strict_types=1)` (placed *after* the file-level docblock), PHP 8.3+ features,
   and the `#[\Override]` attribute on overridden methods
+- Type everything that can be typed: parameter, return, and property types (including `void`,
+  `never`, nullable, union, and intersection types). Reserve docblock `@param`/`@return` for what
+  the type system can't express (array shapes, generics, `@throws`); don't restate a native type
+- Comments only when they earn their place: explain a non-obvious *why*, a workaround, or a
+  subtle invariant. Keep them to a line or two. Never narrate what the code already says, and
+  don't leave section banners, changelog notes, or commentary about the edit itself
 - CSS: modern features, no IE/legacy browser support
 - JS AJAX: always use `mahoFetch()` instead of native `fetch()`
 - New tools/libraries: always use the latest available version
