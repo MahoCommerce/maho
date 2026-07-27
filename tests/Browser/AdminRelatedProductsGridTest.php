@@ -8,9 +8,9 @@
 declare(strict_types=1);
 
 use Tests\Browser\MahoServer;
-use Tests\MahoBackendTestCase;
+use Tests\MahoBrowserTestCase;
 
-uses(MahoBackendTestCase::class)->group('browser');
+uses(MahoBrowserTestCase::class)->group('browser');
 
 /**
  * Regression for serialized grids losing their selection on an ajax reload.
@@ -26,8 +26,6 @@ uses(MahoBackendTestCase::class)->group('browser');
  * repo has no js test harness.
  */
 
-afterAll(fn() => MahoServer::stop());
-
 const RELATED_GRID_SKU_PREFIX = 'pest-related-grid-';
 const RELATED_GRID_ADMIN_USERNAME = 'pest_related_grid';
 const RELATED_GRID_ADMIN_PASSWORD = 'PestRelatedGrid2026!';
@@ -35,10 +33,6 @@ const RELATED_GRID_ALPHA = 'Pest Related Alpha';
 const RELATED_GRID_BETA = 'Pest Related Beta';
 
 beforeEach(function () {
-    if (!browserTestsReady()) {
-        test()->markTestSkipped('Playwright is not installed');
-    }
-
     deleteRelatedGridFixtures();
 
     // Admin urls carry a secret key derived from the session's form key, which this process
@@ -48,8 +42,6 @@ beforeEach(function () {
         '0',
     );
     Mage::app()->cleanCache();
-
-    MahoServer::start();
 });
 
 afterEach(function () {
@@ -106,8 +98,15 @@ function deleteRelatedGridFixtures(): void
     /** @var Mage_Catalog_Model_Resource_Product_Collection $products */
     $products = Mage::getResourceModel('catalog/product_collection');
     $products->addAttributeToFilter('sku', ['like' => RELATED_GRID_SKU_PREFIX . '%']);
-    foreach ($products as $product) {
-        $product->delete();
+
+    // Product deletion is admin-guarded, hence isSecureArea.
+    Mage::register('isSecureArea', true);
+    try {
+        foreach ($products as $product) {
+            $product->delete();
+        }
+    } finally {
+        Mage::unregister('isSecureArea');
     }
 
     $user = Mage::getModel('admin/user')->loadByUsername(RELATED_GRID_ADMIN_USERNAME);

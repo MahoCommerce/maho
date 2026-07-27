@@ -8,9 +8,9 @@
 declare(strict_types=1);
 
 use Tests\Browser\MahoServer;
-use Tests\MahoFrontendTestCase;
+use Tests\MahoBrowserTestCase;
 
-uses(MahoFrontendTestCase::class)->group('browser');
+uses(MahoBrowserTestCase::class)->group('browser');
 
 /**
  * Regression for the failed-login redirect bug.
@@ -29,17 +29,11 @@ uses(MahoFrontendTestCase::class)->group('browser');
  * cart/session cookie persists across requests.
  */
 
-afterAll(fn() => MahoServer::stop());
-
 beforeEach(function () {
-    if (!browserTestsReady()) {
-        test()->markTestSkipped('Playwright is not installed');
-    }
     // Drop any guest-checkout override (e.g. left behind by an aborted run on a reused DB).
     Mage::getModel('core/config')->deleteConfig(Mage_Checkout_Helper_Data::XML_PATH_GUEST_CHECKOUT);
     Mage::app()->getStore()->resetConfig();
     Mage::app()->cleanCache();
-    MahoServer::start();
 });
 
 afterEach(fn() => deleteLoginRedirectCustomer());

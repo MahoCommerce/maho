@@ -8,16 +8,11 @@
 declare(strict_types=1);
 
 use Tests\Browser\MahoServer;
-use Tests\MahoFrontendTestCase;
+use Tests\MahoBrowserTestCase;
 
-uses(MahoFrontendTestCase::class)->group('browser');
-
-afterAll(fn() => MahoServer::stop());
+uses(MahoBrowserTestCase::class)->group('browser');
 
 beforeEach(function () {
-    if (!browserTestsReady()) {
-        test()->markTestSkipped('Playwright is not installed');
-    }
     // Enable a second display currency so the storefront currency switcher renders.
     $config = Mage::getModel('core/config');
     $config->saveConfig('currency/options/base', 'USD');
@@ -26,7 +21,6 @@ beforeEach(function () {
     Mage::getModel('directory/currency')->saveRates(['USD' => ['USD' => 1.0, 'EUR' => 0.9]]);
     Mage::app()->getStore()->resetConfig();
     Mage::app()->cleanCache();
-    MahoServer::start();
 });
 
 /** A salable, priced, visible simple product page URL. */
