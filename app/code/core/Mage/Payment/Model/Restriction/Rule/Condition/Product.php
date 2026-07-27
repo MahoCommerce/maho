@@ -38,7 +38,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product extends Mage_Rule_Mo
      */
     public function getRule()
     {
-        return $this->_rule ?? null;
+        return $this->_rule;
     }
 
     /**
