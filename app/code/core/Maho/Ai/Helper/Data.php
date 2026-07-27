@@ -130,7 +130,7 @@ class Maho_Ai_Helper_Data extends Mage_Core_Helper_Abstract
         // path in invoke(). Without this the async queue would be a bypass
         // around the same guard that protects synchronous calls.
         foreach ($data['messages'] ?? [] as $msg) {
-            if (($msg['role'] ?? null) === 'user') {
+            if (($msg['role'] ?? '') === 'user') {
                 $validation = $this->getInputValidator()->validate((string) ($msg['content'] ?? ''));
                 if (!$validation['safe']) {
                     throw new Mage_Core_Exception('AI request rejected: ' . $validation['reason']);
