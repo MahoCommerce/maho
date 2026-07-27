@@ -98,13 +98,16 @@ function createLoginRedirectCustomer(): void
 /** Seed beforeAuthUrl = checkout/onepage via a guest checkout visit, then open the login form. */
 function gotoLoginFormWithCheckoutPending(): object
 {
-    return visit(MahoServer::baseUrl() . loginRedirectProductUrl())
+    $page = visit(MahoServer::baseUrl() . loginRedirectProductUrl())
         ->click('Add to Cart')
         ->waitForText('Cart Subtotal')
-        ->navigate(MahoServer::baseUrl() . '/checkout/onepage')
-        ->assertPathContains('checkout/onepage')
-        ->navigate(MahoServer::baseUrl() . '/customer/account/login')
-        ->assertPresent('#email');
+        ->navigate(MahoServer::baseUrl() . '/checkout/onepage');
+
+    // Neither assertion retries, so each has to run against the page it talks about.
+    waitForPageLoad($page, '#onestep-checkout')->assertPathContains('checkout/onepage')
+        ->navigate(MahoServer::baseUrl() . '/customer/account/login');
+
+    return waitForPageLoad($page, '#email')->assertPresent('#email');
 }
 
 it('keeps a failed login on the login form instead of bouncing to checkout', function () {

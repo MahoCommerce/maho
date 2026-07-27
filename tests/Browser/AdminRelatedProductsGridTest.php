@@ -159,12 +159,14 @@ function visitRelatedProductsTab(int $parentId): object
         ->fill('#login', RELATED_GRID_ADMIN_PASSWORD)
         ->click('#step1 input[type="submit"]');
 
-    // The page assertions below don't retry, so gate on element reads, which do wait: the
-    // admin menu only exists once logged in, the grid table only once the tab's ajax landed.
-    $page->text('.nav-bar');
-    $page->navigate(MahoServer::baseUrl() . '/admin/catalog_product/edit/id/' . $parentId)
-        ->click('#product_info_tabs_related');
-    $page->text('#related_product_grid_table');
+    waitForPageLoad($page, '.nav-bar:visible');
+    $page->navigate(MahoServer::baseUrl() . '/admin/catalog_product/edit/id/' . $parentId);
+    waitForPageLoad($page, '#product_info_tabs_related');
+
+    // An inactive tab keeps its content attached, so `:visible` is what distinguishes the
+    // tab having opened from the grid merely existing in the page.
+    $page->click('#product_info_tabs_related');
+    $page->text('#related_product_grid_table:visible');
 
     return $page->assertSee(RELATED_GRID_ALPHA)
         ->assertSee(RELATED_GRID_BETA);
@@ -177,7 +179,7 @@ function sortRelatedGridBy(object $page, string $columnId): object
 
     // Only the reloaded header carries the "sorted" class, and reading it waits for it,
     // so this returns on the new markup whether or not it still lists anything.
-    $page->text('#related_product_grid_table th[data-column-id="' . $columnId . '"].sorted');
+    $page->text('#related_product_grid_table th[data-column-id="' . $columnId . '"].sorted:visible');
 
     return $page;
 }
