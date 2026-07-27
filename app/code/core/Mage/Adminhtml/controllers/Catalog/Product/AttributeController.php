@@ -263,6 +263,9 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
             if (!isset($data['is_filterable'])) {
                 $data['is_filterable'] = 0;
             }
+            if (!isset($data['is_filterable_multiple'])) {
+                $data['is_filterable_multiple'] = 0;
+            }
             if (!isset($data['is_filterable_in_search'])) {
                 $data['is_filterable_in_search'] = 0;
             }

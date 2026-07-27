@@ -61,6 +61,14 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Edit_Tab_Front extends Mage
             ],
         ]);
 
+        $fieldset->addField('is_filterable_multiple', 'select', [
+            'name' => 'is_filterable_multiple',
+            'label' => Mage::helper('catalog')->__('Allow Multiple Selections in Layered Navigation'),
+            'title' => Mage::helper('catalog')->__('Allow Multiple Selections in Layered Navigation'),
+            'note' => Mage::helper('catalog')->__('Lets shoppers combine several values of this filter (Nike or Adidas). Enable only where the Layered Navigation SEO controls stay on (filtered pages NOINDEX,FOLLOW and filter links rel="nofollow"), as multi-select greatly multiplies crawlable filter URLs.'),
+            'values' => $yesno,
+        ]);
+
         $fieldset->addField('is_visible_on_front', 'select', [
             'name' => 'is_visible_on_front',
             'label' => Mage::helper('catalog')->__('Visible on Catalog Pages on Front-end'),
