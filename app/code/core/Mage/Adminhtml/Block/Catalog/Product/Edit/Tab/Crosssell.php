@@ -182,7 +182,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Crosssell extends Mage_Admin
             'validate_class'            => 'validate-number',
             'index'                     => 'position',
             'editable'                  => !$this->isReadonly(),
-            'edit_only'                 => !$this->_getProduct()->getId(),
             'filter_condition_callback' => [$this, '_addLinkModelFilterCallback'],
         ]);
 

@@ -301,7 +301,10 @@ big {
 
 .grid {
     border-bottom: 0;
-    padding-bottom: .5em
+    padding-bottom: .5em;
+    /* Total footprint of the >=/<= label in a range filter. Editable cells inset
+       their input by the same amount so it lines up with the filter above it. */
+    --maho-grid-range-label: 1.25rem
 }
 
 .grid table {
@@ -340,8 +343,17 @@ big {
 }
 
 .grid td.editable input.input-text {
-    width: 50px!important;
-    margin-left: var(--maho-space-2)!important
+    width: calc(100% - var(--maho-grid-range-label))!important;
+    min-width: 0;
+    margin: 0!important
+}
+
+.grid td.a-right.editable input.input-text {
+    text-align: right
+}
+
+.grid td.a-center.editable input.input-text {
+    text-align: center
 }
 
 .grid td input.input-text {
@@ -694,6 +706,9 @@ table.actions td {
 .grid tr.filter th {
     padding-top: var(--maho-space-2);
     padding-bottom: var(--maho-space-2);
+    /* match the headings row and the body cells, which both use space-3 */
+    padding-left: var(--maho-space-3);
+    padding-right: var(--maho-space-3);
     border: 0;
     border-bottom: 1px solid var(--maho-border-soft);
     white-space: normal
@@ -5045,7 +5060,7 @@ small {
 .grid tr.filter .range .label {
     flex: 0 0 auto;
     font-weight: 400;
-    width: 0.625rem;
+    width: calc(var(--maho-grid-range-label) - var(--maho-space-2) * 2);
     padding: 0 var(--maho-space-2);
     font-size: var(--maho-text-lg);
     color: var(--maho-ink-muted);
