@@ -71,6 +71,15 @@ $customerResources = $this->getCustomerResources();
         gap: 15px;
         margin-bottom: 10px;
     }
+    .api-permissions-missing {
+        margin: 0 0 10px;
+        padding: 8px 12px;
+        background: #fdecea;
+        border: 1px solid #f5c6c3;
+        border-radius: 3px;
+        color: #b71c1c;
+        font-size: 12px;
+    }
 </style>
 
 <!-- Section 1: Public Storefront (informational) -->
@@ -121,6 +130,11 @@ $customerResources = $this->getCustomerResources();
         <p style="margin:0 0 8px; font-size:12px; color:#555;">
             <?= $this->__('These permissions control what API users (service accounts) can do. Grant only the operations each integration needs.') ?>
         </p>
+        <?php if (!$this->hasServicePermissions()): ?>
+            <p class="api-permissions-missing">
+                <?= $this->__('No grantable permissions could be loaded. Run "composer dump-autoload" in the Maho root, then reload this page.') ?>
+            </p>
+        <?php endif; ?>
         <input type="hidden" name="permissions_tree" id="role_permissions" value="" />
         <div class="api-service-controls">
             <label for="permissions_all"><?= $this->__('Resource Access') ?></label>
