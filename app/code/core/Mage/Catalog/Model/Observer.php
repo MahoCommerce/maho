@@ -292,6 +292,7 @@ class Mage_Catalog_Model_Observer
                 'is_searchable',
                 'is_visible_in_advanced_search',
                 'is_filterable',
+                'is_filterable_multiple',
                 'is_filterable_in_search',
                 'is_comparable',
                 'is_used_for_promo_rules',

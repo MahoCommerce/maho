@@ -51,7 +51,7 @@ class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer
     /**
      * Get option text from frontend model by option id
      *
-     * @param   int $optionId
+     * @param   int|string $optionId
      * @return  string|bool
      */
     protected function _getOptionText($optionId)
@@ -102,6 +102,10 @@ class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer
     {
         $applied = [];
         foreach ($this->_parseRequestValues($filter) as $value) {
+            $value = $this->_getCanonicalOptionValue($value);
+            if ($value === null) {
+                continue;
+            }
             $text = $this->_getOptionText($value);
             if (is_string($text) && strlen($text)) {
                 $applied[$value] = $text;
@@ -138,9 +142,34 @@ class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer
             return [];
         }
 
-        $values = array_filter(array_map('trim', $values), fn($value): bool => $value !== '');
+        // Request params can nest (?code[][]=1), so drop non-scalars before trimming.
+        $values = array_map('trim', array_map('strval', array_filter($values, 'is_scalar')));
 
-        return array_values(array_unique($values));
+        return array_values(array_unique(array_filter($values, fn(string $value): bool => $value !== '')));
+    }
+
+    /**
+     * Resolve a requested value to the option value it denotes.
+     *
+     * Matching is strict, so only the exact values this filter puts in its own
+     * URLs are accepted. Other spellings of the same id ('04', '4.0') would each
+     * survive as a distinct applied value, duplicating state chips and leaving
+     * the option unmatchable against the applied ones.
+     *
+     * @return string|null canonical option value, or null when unknown
+     */
+    protected function _getCanonicalOptionValue(string $value): ?string
+    {
+        foreach ($this->getAttributeModel()->getFrontend()->getSelectOptions() as $option) {
+            if (!isset($option['value']) || is_array($option['value'])) {
+                continue;
+            }
+            if ((string) $option['value'] === $value) {
+                return (string) $option['value'];
+            }
+        }
+
+        return null;
     }
 
     /**

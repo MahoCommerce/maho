@@ -30,14 +30,34 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Attribute extends Mage_Core_Model
         $attribute  = $filter->getAttributeModel();
         $connection = $this->_getReadAdapter();
         $tableAlias = $attribute->getAttributeCode() . '_idx';
-        $valueCondition = is_array($value)
-            ? $connection->quoteInto("{$tableAlias}.value IN (?)", $value)
-            : $connection->quoteInto("{$tableAlias}.value = ?", $value);
+
+        if (is_array($value)) {
+            // The index holds one row per value, and a product can own several
+            // (multiselect attributes, configurables inheriting their children's
+            // values), so a plain IN() join would return it once per match. Join a
+            // de-duplicated subselect to keep one row per product, under the same
+            // alias getCount() drops below.
+            $subSelect = $connection->select()
+                ->distinct(true)
+                ->from($this->getMainTable(), ['entity_id'])
+                ->where('attribute_id = ?', $attribute->getAttributeId())
+                ->where('store_id = ?', $collection->getStoreId())
+                ->where('value IN (?)', $value);
+
+            $collection->getSelect()->join(
+                [$tableAlias => new Maho\Db\Expr('(' . $subSelect . ')')],
+                "{$tableAlias}.entity_id = e.entity_id",
+                [],
+            );
+
+            return $this;
+        }
+
         $conditions = [
             "{$tableAlias}.entity_id = e.entity_id",
             $connection->quoteInto("{$tableAlias}.attribute_id = ?", $attribute->getAttributeId()),
             $connection->quoteInto("{$tableAlias}.store_id = ?", $collection->getStoreId()),
-            $valueCondition,
+            $connection->quoteInto("{$tableAlias}.value = ?", $value),
         ];
 
         $collection->getSelect()->join(

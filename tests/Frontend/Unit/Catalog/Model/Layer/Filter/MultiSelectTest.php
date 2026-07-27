@@ -54,6 +54,40 @@ function invokeProtected(object $object, string $method): mixed
     return $ref->invoke($object);
 }
 
+/**
+ * Attribute double exposing a fixed option list through the frontend model,
+ * which is all _getCanonicalOptionValue() reads.
+ */
+function multiSelectAttributeStub(array $optionValues): Maho\DataObject
+{
+    $frontend = new class ($optionValues) extends Maho\DataObject {
+        public function __construct(private array $optionValues)
+        {
+            parent::__construct();
+        }
+
+        public function getSelectOptions(): array
+        {
+            return array_map(
+                fn($value): array => ['value' => $value, 'label' => 'Option ' . $value],
+                $this->optionValues,
+            );
+        }
+    };
+
+    return new class ($frontend) extends Maho\DataObject {
+        public function __construct(private Maho\DataObject $frontend)
+        {
+            parent::__construct();
+        }
+
+        public function getFrontend(): Maho\DataObject
+        {
+            return $this->frontend;
+        }
+    };
+}
+
 describe('request value parsing', function () {
     beforeEach(function () {
         $this->filter = Mage::getModel('catalog/layer_filter_attribute');
@@ -76,6 +110,35 @@ describe('request value parsing', function () {
     test('empty and null request values yield no filter values', function () {
         expect($this->parse->invoke($this->filter, ''))->toBe([]);
         expect($this->parse->invoke($this->filter, null))->toBe([]);
+    });
+
+    test('nested array params are dropped instead of raising a TypeError', function () {
+        // ?code[][]=1 reaches the filter as [['1']] and used to reach trim().
+        expect($this->parse->invoke($this->filter, [['1']]))->toBe([]);
+        expect($this->parse->invoke($this->filter, ['12', ['1'], '15']))->toBe(['12', '15']);
+    });
+});
+
+describe('applied value canonicalisation', function () {
+    beforeEach(function () {
+        $this->filter = Mage::getModel('catalog/layer_filter_attribute')
+            ->setAttributeModel(multiSelectAttributeStub([4, 7]));
+        $this->canonicalise = new ReflectionMethod($this->filter, '_getCanonicalOptionValue');
+        $this->canonicalise->setAccessible(true);
+    });
+
+    test('an exact option value resolves to itself', function () {
+        expect($this->canonicalise->invoke($this->filter, '4'))->toBe('4');
+    });
+
+    test('alternative spellings of an option id are rejected', function () {
+        foreach (['04', '4.0', '4e0', ' 4'] as $value) {
+            expect($this->canonicalise->invoke($this->filter, $value))->toBeNull();
+        }
+    });
+
+    test('unknown values are rejected', function () {
+        expect($this->canonicalise->invoke($this->filter, '999'))->toBeNull();
     });
 });
 
