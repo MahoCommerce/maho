@@ -16,6 +16,9 @@ jobs:
   pest-db:
     name: Test Suite (${{ matrix.name }})
     runs-on: ubuntu-latest
+    # The Playwright websocket read has no timeout, so a wedged browser otherwise hangs the
+    # job until GitHub's 6h limit. A healthy run takes ~15 minutes.
+    timeout-minutes: 45
 
     env:
       MAGE_IS_DEVELOPER_MODE: 1
@@ -214,6 +217,7 @@ jobs:
   pest-sqlite:
     name: Test Suite (sqlite)
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
       - name: Setup PHP

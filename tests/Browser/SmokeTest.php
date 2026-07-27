@@ -8,19 +8,13 @@
 declare(strict_types=1);
 
 use Tests\Browser\MahoServer;
+use Tests\MahoBrowserTestCase;
 
-uses()->group('browser');
-
-afterAll(fn() => MahoServer::stop());
-
-beforeEach(function () {
-    if (!browserTestsReady()) {
-        test()->markTestSkipped('Playwright is not installed');
-    }
-    MahoServer::start();
-});
+uses(MahoBrowserTestCase::class)->group('browser');
 
 it('renders the storefront homepage in a real browser', function () {
-    visit(MahoServer::baseUrl() . '/')
-        ->assertNoSmoke();
+    $page = visit(MahoServer::baseUrl() . '/');
+
+    // assertNoSmoke reads once, so on a half-built page it passes as readily as it fails.
+    waitForPageLoad($page, 'body:visible')->assertNoSmoke();
 });
