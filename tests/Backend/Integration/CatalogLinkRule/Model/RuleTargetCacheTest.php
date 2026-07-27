@@ -41,6 +41,17 @@ describe('CatalogLinkRule target-scan caching', function () {
         expect($rule->targetConditionsUseSourceProduct())->toBeTrue();
     });
 
+    test('a target product condition using a "matches source" operator is source-dependent', function () {
+        foreach (Maho_CatalogLinkRule_Model_Rule_Target_Product::SOURCE_MATCH_OPERATORS as $operator) {
+            $rule = Mage::getModel('cataloglinkrule/rule');
+            $condition = Mage::getModel('cataloglinkrule/rule_target_product');
+            $condition->setAttribute('attribute_set_id')->setOperator($operator);
+            $rule->getTargetConditions()->addCondition($condition);
+
+            expect($rule->targetConditionsUseSourceProduct())->toBeTrue();
+        }
+    });
+
     test('a source-match nested in a sub-combine is still detected', function () {
         $rule = Mage::getModel('cataloglinkrule/rule');
         // Attach the sub-combine before adding its child: addCondition() propagates the parent
@@ -73,6 +84,31 @@ describe('CatalogLinkRule target-scan caching', function () {
 
         expect($rule->getMatchingTargetProductIds())->toBe([11, 22, 33]);
         expect($rule->getMatchingTargetProductIds())->toBe([11, 22, 33]);
+        expect($rule->collectCalls)->toBe(1);
+    });
+
+    test('changing the sort order rescans instead of reusing a differently-ordered cache', function () {
+        $rule = new Maho_CatalogLinkRule_Test_CountingRule();
+        $rule->collectResult = [11, 22, 33];
+        $rule->setSortOrder('price_asc');
+        $rule->getMatchingTargetProductIds();
+
+        $rule->setSortOrder('name_desc');
+        $rule->getMatchingTargetProductIds();
+
+        expect($rule->collectCalls)->toBe(2);
+    });
+
+    test('an unchanged rule scans only once across many source products', function () {
+        $rule = new Maho_CatalogLinkRule_Test_CountingRule();
+        $rule->collectResult = [11, 22, 33];
+        $rule->getTargetConditions()->addCondition(Mage::getModel('cataloglinkrule/rule_target_product'));
+
+        for ($i = 0; $i < 50; $i++) {
+            expect($rule->getMatchingTargetProductIds())->toBe([11, 22, 33]);
+        }
+
+        // The whole point of the change: one scan, not one per source product.
         expect($rule->collectCalls)->toBe(1);
     });
 

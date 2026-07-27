@@ -18,6 +18,26 @@ declare(strict_types=1);
  */
 class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
 {
+    /**
+     * Target product IDs matched by this rule, cached when the target conditions do not depend on
+     * the source product (see targetConditionsUseSourceProduct()).
+     *
+     * Scoped to one instance whose target conditions don't change: the processor loads each rule
+     * fresh per run and only reads it, so there is deliberately no invalidation hook. Code that
+     * edits the conditions of a rule it has already scanned must use a fresh instance.
+     *
+     * @var int[]|null
+     */
+    protected ?array $_targetProductIds = null;
+
+    /**
+     * Sort order the cached scan above was collected under, so a later sort order change can't be
+     * served from a differently-ordered cache.
+     */
+    protected ?string $_targetProductIdsSortOrder = null;
+
+    protected ?bool $_targetConditionsUseSourceProduct = null;
+
     #[\Override]
     protected function _construct(): void
     {
@@ -133,24 +153,12 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
     }
 
     /**
-     * Target product IDs matched by this rule, cached when the target conditions do not depend on
-     * the source product (see targetConditionsUseSourceProduct()).
-     *
-     * @var int[]|null
-     */
-    protected ?array $_targetProductIds = null;
-
-    protected ?bool $_targetConditionsUseSourceProduct = null;
-
-    /**
      * Whether the target conditions reference the source product, i.e. whether the matched target
      * set can differ from one source product to the next.
      */
     public function targetConditionsUseSourceProduct(): bool
     {
-        if ($this->_targetConditionsUseSourceProduct === null) {
-            $this->_targetConditionsUseSourceProduct = $this->_hasSourceMatchCondition($this->getTargetConditions());
-        }
+        $this->_targetConditionsUseSourceProduct ??= $this->_hasSourceMatchCondition($this->getTargetConditions());
 
         return $this->_targetConditionsUseSourceProduct;
     }
@@ -158,6 +166,14 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
     protected function _hasSourceMatchCondition(Mage_Rule_Model_Condition_Abstract $condition): bool
     {
         if ($condition instanceof Maho_CatalogLinkRule_Model_Rule_Target_SourceMatch) {
+            return true;
+        }
+
+        // A plain target-attribute condition is source-dependent too when it uses one of the
+        // "matches source" operators, which compare the target against the source product.
+        if ($condition instanceof Maho_CatalogLinkRule_Model_Rule_Target_Product
+            && $condition->isSourceMatchOperator()
+        ) {
             return true;
         }
 
@@ -197,7 +213,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
     /**
      * Deterministic target sort orders, mapped to the [attribute, direction] applied to the
      * collection. Any sort order not listed here (including 'random' and the empty default) is
-     * shuffled in PHP instead — see isRandomSort(). Single source of truth for both call sites.
+     * shuffled in PHP instead — see _isRandomSort(). Single source of truth for both call sites.
      */
     protected const SORT_ORDERS = [
         'price_desc' => ['price', 'DESC'],
@@ -212,7 +228,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
      * Whether the configured sort order is random (shuffled in PHP) rather than a deterministic
      * SQL ordering. Kept as a single check so the cached and freshly-scanned paths never disagree.
      */
-    protected function isRandomSort(): bool
+    protected function _isRandomSort(): bool
     {
         return !isset(self::SORT_ORDERS[(string) $this->getSortOrder()]);
     }
@@ -226,11 +242,14 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
         // every source product: scan the catalog once and reuse it. Only the order may differ, so
         // random sorting still shuffles a fresh copy per source product below.
         if (!$this->targetConditionsUseSourceProduct()) {
-            if ($this->_targetProductIds === null) {
+            // The cache holds the IDs *in* the sort order they were collected under, so a changed
+            // sort order has to rescan rather than reuse a differently-ordered array.
+            if ($this->_targetProductIds === null || $this->_targetProductIdsSortOrder !== (string) $this->getSortOrder()) {
                 $this->_targetProductIds = $this->_collectMatchingTargetProductIds();
+                $this->_targetProductIdsSortOrder = (string) $this->getSortOrder();
             }
             $productIds = $this->_targetProductIds;
-            if ($this->isRandomSort()) {
+            if ($this->_isRandomSort()) {
                 shuffle($productIds);
             }
             return $productIds;
@@ -274,7 +293,7 @@ class Maho_CatalogLinkRule_Model_Rule extends Mage_Rule_Model_Abstract
             }
         }
 
-        if ($this->isRandomSort()) {
+        if ($this->_isRandomSort()) {
             shuffle($productIds);
         }
 
