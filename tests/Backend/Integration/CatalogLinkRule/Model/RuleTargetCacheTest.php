@@ -105,7 +105,9 @@ describe('CatalogLinkRule target-scan caching', function () {
         $rule->getTargetConditions()->addCondition(Mage::getModel('cataloglinkrule/rule_target_product'));
 
         for ($i = 0; $i < 50; $i++) {
-            expect($rule->getMatchingTargetProductIds())->toBe([11, 22, 33]);
+            // No sort order is configured, so the default random sort shuffles a fresh copy per
+            // call; only the matched set is stable, not its order.
+            expect($rule->getMatchingTargetProductIds())->toEqualCanonicalizing([11, 22, 33]);
         }
 
         // The whole point of the change: one scan, not one per source product.
