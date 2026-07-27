@@ -883,10 +883,23 @@ class serializerController {
         this.grid.rowClickCallback = this.rowClick.bind(this);
         this.grid.initRowCallback = this.rowInit.bind(this);
         this.grid.checkboxCheckCallback = this.registerData.bind(this);
+        this.updateReloadParam();
 
         if (this.grid.rows) {
             this.grid.rows.forEach(row => this.eachRow(row));
         }
+    }
+
+    // The grid reloads over ajax on sort/filter/paginate and the controller rebuilds the
+    // "in list" filter from this param, so the current selection must travel with the request.
+    updateReloadParam() {
+        if (!this.reloadParamName) {
+            return;
+        }
+        if (!this.grid.reloadParams) {
+            this.grid.reloadParams = {};
+        }
+        this.grid.reloadParams[this.reloadParamName + '[]'] = this.getDataForReloadParam();
     }
 
     setOldCallback(callbackName, callback) {
@@ -924,6 +937,7 @@ class serializerController {
         }
 
         this.hiddenDataHolder.value = this.serializeObject();
+        this.updateReloadParam();
         this.getOldCallback('checkbox_check')(grid, element, checked);
     }
 
