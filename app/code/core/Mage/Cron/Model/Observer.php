@@ -323,10 +323,8 @@ class Mage_Cron_Model_Observer
      * pruned, and misreported in the admin grid as still working. Flip any such row older than
      * system/cron/max_running_time to error so it is surfaced as a failure and becomes eligible
      * for history_failure_lifetime pruning. A non-positive threshold disables the reaper.
-     *
-     * @return $this
      */
-    public function reapStuckJobs()
+    public function reapStuckJobs(): self
     {
         $maxRunningTime = (int) Mage::getStoreConfig(self::XML_PATH_MAX_RUNNING_TIME);
         if ($maxRunningTime <= 0) {
@@ -335,13 +333,15 @@ class Mage_Cron_Model_Observer
 
         $threshold = time() - $maxRunningTime * 60;
 
+        /** @var Mage_Cron_Model_Resource_Schedule_Collection $stuck */
         $stuck = Mage::getModel('cron/schedule')->getCollection()
             ->addFieldToFilter('status', Mage_Cron_Model_Schedule::STATUS_RUNNING)
             ->load();
 
+        /** @var Mage_Cron_Model_Schedule $schedule */
         foreach ($stuck->getIterator() as $schedule) {
-            $referenceTime = $schedule->getExecutedAt() ?: $schedule->getScheduledAt() ?: $schedule->getCreatedAt();
-            if (!$referenceTime || strtotime($referenceTime) >= $threshold) {
+            $referenceTime = (string) ($schedule->getExecutedAt() ?: $schedule->getScheduledAt() ?: $schedule->getCreatedAt());
+            if ($referenceTime === '' || strtotime($referenceTime) >= $threshold) {
                 continue;
             }
             $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
@@ -363,24 +363,39 @@ class Mage_Cron_Model_Observer
      */
     protected function _registerJobShutdownHandler(Mage_Cron_Model_Schedule $schedule): void
     {
-        $fatalMask = E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR;
-        register_shutdown_function(function () use ($schedule, $fatalMask): void {
-            $error = error_get_last();
-            if ($error === null || ($error['type'] & $fatalMask) === 0) {
-                return;
-            }
-            if ($schedule->getStatus() !== Mage_Cron_Model_Schedule::STATUS_RUNNING) {
-                return;
-            }
-            try {
-                $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
-                    ->setMessages("{$error['message']} in {$error['file']}:{$error['line']}")
-                    ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'))
-                    ->save();
-            } catch (\Throwable) {
-                // Nothing more can be done while the process is already tearing down.
-            }
+        register_shutdown_function(function () use ($schedule): void {
+            $this->_recordFatalError($schedule, error_get_last());
         });
+    }
+
+    /**
+     * Turn a fatal $error (as returned by error_get_last()) into an error row for $schedule.
+     *
+     * No-op unless the last error is fatal and the schedule is still marked running: a
+     * non-fatal last error means the process is shutting down normally, and a schedule that
+     * already carries an outcome was handled by the regular catch/success paths. Handlers stay
+     * registered for the whole process, so every job dispatched in this tick gets one; the
+     * running check is what keeps the already-finished ones from claiming another job's death.
+     *
+     * @param array{type: int, message: string, file: string, line: int}|null $error
+     */
+    protected function _recordFatalError(Mage_Cron_Model_Schedule $schedule, ?array $error): void
+    {
+        $fatalMask = E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR;
+        if ($error === null || ($error['type'] & $fatalMask) === 0) {
+            return;
+        }
+        if ($schedule->getStatus() !== Mage_Cron_Model_Schedule::STATUS_RUNNING) {
+            return;
+        }
+        try {
+            $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
+                ->setMessages("{$error['message']} in {$error['file']}:{$error['line']}")
+                ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'))
+                ->save();
+        } catch (\Throwable) {
+            // Nothing more can be done while the process is already tearing down.
+        }
     }
 
     /**

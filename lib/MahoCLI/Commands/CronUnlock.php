@@ -38,6 +38,7 @@ class CronUnlock extends BaseMahoCommand
         $this->initMaho();
 
         $jobCode = $input->getArgument('job_code');
+        $jobCode = is_string($jobCode) ? trim($jobCode) : '';
         $unlockAll = (bool) $input->getOption('all');
 
         $threshold = null;
@@ -49,24 +50,26 @@ class CronUnlock extends BaseMahoCommand
             $threshold = time() - $maxRunningTime * 60;
         }
 
+        /** @var \Mage_Cron_Model_Resource_Schedule_Collection $collection */
         $collection = Mage::getModel('cron/schedule')->getCollection()
             ->addFieldToFilter('status', Mage_Cron_Model_Schedule::STATUS_RUNNING);
-        if (is_string($jobCode) && $jobCode !== '') {
+        if ($jobCode !== '') {
             $collection->addFieldToFilter('job_code', $jobCode);
         }
         $collection->load();
 
         $count = 0;
+        /** @var Mage_Cron_Model_Schedule $schedule */
         foreach ($collection->getIterator() as $schedule) {
             if ($threshold !== null) {
-                $referenceTime = $schedule->getExecutedAt() ?: $schedule->getScheduledAt() ?: $schedule->getCreatedAt();
-                if (!$referenceTime || strtotime($referenceTime) >= $threshold) {
+                $referenceTime = (string) ($schedule->getExecutedAt() ?: $schedule->getScheduledAt() ?: $schedule->getCreatedAt());
+                if ($referenceTime === '' || strtotime($referenceTime) >= $threshold) {
                     continue;
                 }
             }
 
             $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
-                ->setMessages('Manually reset via cron:unlock: job never completed')
+                ->setMessages(Mage::helper('cron')->__('Manually reset via cron:unlock: job never completed.'))
                 ->setFinishedAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->save();
 

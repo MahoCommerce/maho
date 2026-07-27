@@ -40,6 +40,7 @@
 "Job did not complete: the process died or exceeded the maximum running time (%s minutes).","Job did not complete: the process died or exceeded the maximum running time (%s minutes)."
 "Last Run","Last Run"
 "Last Status","Last Status"
+"Manually reset via cron:unlock: job never completed.","Manually reset via cron:unlock: job never completed."
 "Mark as Error if Still Running After","Mark as Error if Still Running After"
 "minute %s","minute %s"
 "Missed","Missed"
