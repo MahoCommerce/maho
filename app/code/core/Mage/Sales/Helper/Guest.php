@@ -149,7 +149,7 @@ class Mage_Sales_Helper_Guest extends Mage_Core_Helper_Data
     {
         if (!is_null($cookie)) {
             $cookieData = explode(':', base64_decode($cookie));
-            $protectCode = $cookieData[0] ?? null;
+            $protectCode = $cookieData[0];
             $incrementId = $cookieData[1] ?? null;
 
             if (!empty($protectCode) && !empty($incrementId)) {
