@@ -148,6 +148,16 @@ big {
     font-size: var(--maho-text-xl)
 }
 
+/* Same artwork as images/loading.svg, inlined so it renders on themes that don't ship the file */
+.maho-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: url('data:image/svg+xml,%3Csvg width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%223%22/%3E%3Cg%3E%3Ccircle cx=%224%22 cy=%2212%22 r=%223%22/%3E%3Ccircle cx=%2220%22 cy=%2212%22 r=%223%22/%3E%3CanimateTransform attributeName=%22transform%22 type=%22rotate%22 calcMode=%22spline%22 dur=%221s%22 keySplines=%22.36,.6,.31,1;.36,.6,.31,1%22 values=%220 12 12;180 12 12;360 12 12%22 repeatCount=%22indefinite%22/%3E%3C/g%3E%3C/svg%3E') no-repeat center;
+    background-size: contain;
+    vertical-align: middle
+}
+
 #loading-process {
     position: absolute;
     top: 45%;

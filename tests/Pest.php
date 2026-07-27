@@ -310,3 +310,26 @@ function browserTestsReady(): bool
 {
     return is_file(dirname(__DIR__) . '/node_modules/.bin/playwright');
 }
+
+/**
+ * Block until the browser has finished loading the page $selector belongs to.
+ *
+ * The plugin's own waits are no-ops (waitForEvent/waitForFunction never iterate the generator
+ * Client::execute() returns) and navigate() can return on the previous navigation's load event.
+ * $selector has to belong to the awaited page and not the one being left, since about:blank and
+ * the previous page both report readyState 'complete'; a bare tag name reads as link text.
+ */
+function waitForPageLoad(object $page, string $selector): object
+{
+    $page->text($selector);
+
+    $deadline = microtime(true) + 5;
+    while ($page->script('document.readyState') !== 'complete') {
+        if (microtime(true) >= $deadline) {
+            throw new RuntimeException("The page holding [{$selector}] did not finish loading within 5s");
+        }
+        usleep(50_000);
+    }
+
+    return $page;
+}

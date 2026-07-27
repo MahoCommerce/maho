@@ -160,7 +160,6 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
             .cron-run-job-name { font-family: monospace; font-size: 13px; color: #555; margin-bottom: 16px; word-break: break-all; }
             .cron-run-timer { font-size: 36px; font-weight: 600; font-variant-numeric: tabular-nums; color: #333; margin: 8px 0; }
             .cron-run-label { font-size: 13px; color: #888; display: inline-flex; align-items: center; gap: 6px; }
-            .cron-run-spinner { width: 20px; height: 20px; }
             .cron-run-result { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; margin-top: 4px; }
             .cron-run-result svg { width: 20px; height: 20px; }
             .cron-run-result.success { color: #5b8a3c; }
@@ -187,7 +186,6 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
         }
 
         async function cronRunJob(jobCode) {
-            const loadingSvg = SKIN_URL + 'images/loading.svg';
             const startTime = Date.now();
             cronCurrentJob = jobCode;
 
@@ -195,7 +193,7 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
                 '<div class="cron-run-body">'
                 + '<div class="cron-run-job-name">' + cronEscapeHtml(jobCode) + '</div>'
                 + '<div class="cron-run-timer" id="cronTimer">0s</div>'
-                + '<div class="cron-run-label"><img class="cron-run-spinner" src="' + loadingSvg + '" alt="">{$runningLabel}</div>'
+                + '<div class="cron-run-label"><span class="maho-spinner"></span>{$runningLabel}</div>'
                 + '</div>',
                 {
                     title: '{$runNowTitle}',
@@ -312,10 +310,8 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
         }
 
         async function cronShowHistory(jobCode) {
-            const loadingSvg = SKIN_URL + 'images/loading.svg';
-
             Dialog.info(
-                '<div style="text-align:center; padding:30px"><img src="' + loadingSvg + '" style="width:24px; height:24px"></div>',
+                '<div style="text-align:center; padding:30px"><span class="maho-spinner" style="width:24px; height:24px"></span></div>',
                 {
                     title: '{$historyTitle}: ' + jobCode,
                     className: 'cron-history-dialog',
