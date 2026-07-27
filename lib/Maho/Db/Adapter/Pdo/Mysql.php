@@ -36,6 +36,17 @@ class Mysql extends AbstractPdoAdapter
     protected string $_debugFile = 'pdo_mysql.log';
 
     /**
+     * Nesting depth of startSetup()/endSetup(): only the outermost pair saves
+     * and restores SQL_MODE.
+     */
+    protected int $_setupNesting = 0;
+
+    /**
+     * SQL_MODE saved by the outermost startSetup(), null outside setup.
+     */
+    protected ?string $_setupSqlMode = null;
+
+    /**
      * MySQL column - Table DDL type pairs
      */
     protected array $_ddlColumnTypes = [
@@ -142,7 +153,8 @@ class Mysql extends AbstractPdoAdapter
         // PostgreSQL and SQLite already behave, so insert semantics are
         // identical across all three engines. New-row inserts omit the PK (or
         // bind NULL) and still auto-generate as usual. Because it is now always
-        // on, startSetup()/insertForce() no longer need to toggle SQL_MODE.
+        // on, insertForce() no longer needs to toggle SQL_MODE; startSetup()
+        // still lifts the two zero-date flags, and only those, see there.
         if (isset($this->_config['sql_mode'])) {
             // Escape hatch: a <sql_mode> node on the connection in local.xml
             // overrides the baseline verbatim (an empty value restores the
@@ -2832,10 +2844,22 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     public function startSetup(): self
     {
-        // SQL_MODE is left untouched: the connection baseline already pins the strict
-        // flags plus NO_AUTO_VALUE_ON_ZERO (data scripts may insert explicit ids,
-        // including 0), so install/upgrade scripts run under the same mode as
-        // production and get fully validated.
+        // Setup lifts the two zero-date flags, and only those: a legacy
+        // '0000-00-00 00:00:00' DEFAULT or stored value makes MySQL reject *any*
+        // ALTER on that table (error 1067/1292), including a DROP INDEX naming
+        // other columns and the very ALTER that would remove the offending
+        // default, which leaves a store migrated from Magento/OpenMage with no way
+        // to upgrade. What survives the migration is reported by health-check and
+        // cleaned up by ./maho legacy:fix-zero-dates.
+        if ($this->_setupNesting++ === 0) {
+            $this->_setupSqlMode = (string) $this->fetchOne('SELECT @@SESSION.sql_mode');
+            $relaxed = array_diff(
+                explode(',', $this->_setupSqlMode),
+                ['NO_ZERO_DATE', 'NO_ZERO_IN_DATE'],
+            );
+            $this->raw_query('SET SESSION SQL_MODE=' . $this->quote(implode(',', $relaxed)));
+        }
+
         $this->raw_query('SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0');
 
         return $this;
@@ -2848,6 +2872,13 @@ class Mysql extends AbstractPdoAdapter
     public function endSetup(): self
     {
         $this->raw_query('SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS=0, 0, 1)');
+
+        // Guard: a script calling endSetup() without a matching startSetup()
+        // must not restore a mode that was never saved.
+        if ($this->_setupNesting > 0 && --$this->_setupNesting === 0) {
+            $this->raw_query('SET SESSION SQL_MODE=' . $this->quote((string) $this->_setupSqlMode));
+            $this->_setupSqlMode = null;
+        }
 
         return $this;
     }

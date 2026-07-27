@@ -151,20 +151,20 @@ it('preserves the strict baseline across startSetup and endSetup', function () {
     expect(fetchSqlMode($adapter))->toBe($modeBefore);
 });
 
-it('keeps the strict baseline active during setup without touching SQL_MODE', function () {
+it('keeps the strict baseline active during setup apart from the zero-date flags', function () {
     $adapter = createFreshMysqlAdapter();
-    $modeBefore = fetchSqlMode($adapter);
     $adapter->startSetup();
     // Setup scripts must run under the same strict mode as production, so a bad
     // write in an install/upgrade script is caught instead of silently truncated.
-    // The baseline already carries NO_AUTO_VALUE_ON_ZERO, so setup leaves SQL_MODE alone.
+    // Only the two zero-date flags are lifted, so a legacy '0000-00-00' default
+    // inherited from Magento/OpenMage cannot block the ALTER that would remove it.
     $modeDuring = fetchSqlMode($adapter);
     $adapter->endSetup();
 
-    expect($modeDuring)->toBe($modeBefore);
     expect($modeDuring)->toContain('STRICT_TRANS_TABLES');
-    expect($modeDuring)->toContain('NO_ZERO_DATE');
     expect($modeDuring)->toContain('NO_AUTO_VALUE_ON_ZERO');
+    expect($modeDuring)->not->toContain('NO_ZERO_DATE');
+    expect($modeDuring)->not->toContain('NO_ZERO_IN_DATE');
 });
 
 it('stores an explicit 0 in an identity column via both insert and insertForce', function () {
