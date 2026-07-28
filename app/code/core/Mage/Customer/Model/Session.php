@@ -356,9 +356,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
         }
 
         // A redirect is always followed with a GET, so the current URL is only a usable
-        // post-login target when the interrupted request was itself a GET: replaying a
-        // POST-only action (wishlist/index/add, customer/address/formPost, ...) with a GET
-        // answers 405 Method Not Allowed.
+        // post-login target on a GET: a POST-only action replayed as GET answers 405.
         $this->setBeforeAuthUrl($action->getRequest()->isGet()
             ? Mage::getUrl('*/*/*', ['_current' => true])
             : Mage::helper('customer')->getPostAuthUrl());

@@ -18,7 +18,7 @@ uses(Tests\MahoFrontendTestCase::class);
  * URL stored as the post-login target. Routes are method-restricted, and a redirect is
  * always followed with a GET, so storing the URL of a POST-only action (wishlist/index/add,
  * review/product/post, customer/address/formPost, ...) answered 405 Method Not Allowed
- * right after a successful login — the customer was logged in but stared at an error page.
+ * right after a successful login: the customer was logged in but stared at an error page.
  */
 
 beforeEach(function () {
