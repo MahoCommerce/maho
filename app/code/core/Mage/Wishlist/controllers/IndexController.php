@@ -42,6 +42,11 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                 Mage::getSingleton('customer/session')->setBeforeWishlistUrl($this->_getRefererUrl());
             }
             Mage::getSingleton('customer/session')->setBeforeWishlistRequest($this->getRequest()->getParams());
+
+            // The mutating wishlist actions are POST-only, so they would 405.
+            if (!$this->getRequest()->isGet()) {
+                Mage::getSingleton('customer/session')->setBeforeAuthUrl(Mage::getUrl('wishlist'));
+            }
         }
         if (!Mage::getStoreConfigFlag('wishlist/general/active')) {
             $this->norouteAction();

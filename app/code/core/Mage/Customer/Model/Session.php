@@ -355,7 +355,10 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
             return true;
         }
 
-        $this->setBeforeAuthUrl(Mage::getUrl('*/*/*', ['_current' => true]));
+        $this->setBeforeAuthUrl($action->getRequest()->isGet()
+            ? Mage::getUrl('*/*/*', ['_current' => true])
+            : Mage::helper('customer')->getDefaultBeforeAuthUrl());
+
         if (isset($loginUrl)) {
             $action->getResponse()->setRedirect($loginUrl);
         } else {
