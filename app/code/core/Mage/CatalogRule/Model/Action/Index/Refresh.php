@@ -388,14 +388,12 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
      * one produced, until a rule with action_stop breaks the chain. That is a running calculation
      * over ordered rows, which used to be done with MySQL user variables (SET @price := ...) and
      * so only ever worked on MySQL. It is done here instead, once per row, in the same order.
-     *
-     * @param int $time
      */
-    protected function _fillIndexData(Mage_Core_Model_Website $website, $time)
+    protected function _fillIndexData(Mage_Core_Model_Website $website, int $time): void
     {
         $table = $this->_resource->getTable('catalogrule/rule_product_price');
         $websiteId = (int) $website->getId();
-        $dates = $this->_getRuleDates((int) $time);
+        $dates = $this->_getRuleDates($time);
 
         $statement = $this->_connection->query(
             $this->_connection->select()
@@ -458,9 +456,11 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
      */
     protected function _getRuleDates(int $time): array
     {
+        $locale = $this->_app->getLocale();
+
         $dates = [];
         foreach ([$time - 86400, $time, $time + 86400] as $timestamp) {
-            $dates[gmdate('Y-m-d', $timestamp)] = $timestamp;
+            $dates[$locale->formatDateForDb($timestamp, withTime: false)] = $timestamp;
         }
         return $dates;
     }
@@ -559,14 +559,10 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
                 $this->_resource->getTable('catalogrule/rule_product'),
                 ['rule_id', 'customer_group_id', 'website_id'],
             )
-            ->where(new Maho\Db\Expr("{$timestamp} >= from_time"))
-            ->where(
-                $this->_connection->getCheckSql(
-                    new Maho\Db\Expr('to_time = 0'),
-                    new Maho\Db\Expr('1'),
-                    new Maho\Db\Expr("{$timestamp} <= to_time"),
-                ),
-            );
+            ->where(new Maho\Db\Expr(((int) $timestamp) . ' >= from_time'))
+            // A CASE returning either 1 or a comparison mixes integer and boolean, which PostgreSQL
+            // rejects outright; the open-ended window is a plain disjunction anyway.
+            ->where(new Maho\Db\Expr('to_time = 0 OR ' . ((int) $timestamp) . ' <= to_time'));
         $query = $select->insertFromSelect($this->_resource->getTable('catalogrule/rule_group_website'));
         $this->_connection->query($query);
     }

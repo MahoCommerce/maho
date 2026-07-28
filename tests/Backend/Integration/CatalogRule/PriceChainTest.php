@@ -108,7 +108,9 @@ afterEach(function () {
         $write->delete(chainTable('catalogrule/rule_product'), ['rule_id IN (?)' => $ruleIds]);
         $write->delete(chainTable('catalogrule/rule'), ['rule_id IN (?)' => $ruleIds]);
     }
-    $write->delete(chainTable('catalogrule/rule_product_price'), []);
+    // Scoped to the product under test: the indexer rebuilds the whole website index, so wiping the
+    // table outright would drop the rows it legitimately wrote for every other product.
+    $write->delete(chainTable('catalogrule/rule_product_price'), ['product_id = ?' => (int) chainProduct()->getId()]);
 });
 
 it('applies each rule to the price the previous one produced', function () {
