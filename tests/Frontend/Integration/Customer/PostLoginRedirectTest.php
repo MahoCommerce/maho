@@ -8,6 +8,8 @@
 declare(strict_types=1);
 
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 uses(Tests\MahoFrontendTestCase::class);
 
@@ -18,10 +20,15 @@ uses(Tests\MahoFrontendTestCase::class);
  * review/product/post, customer/address/formPost, ...) answered 405 Method Not Allowed
  * right after a successful login — the customer was logged in but stared at an error page.
  */
-function makeRequest(string $uri, string $method = 'GET'): Mage_Core_Controller_Request_Http
-{
-    return new Mage_Core_Controller_Request_Http(SymfonyRequest::create($uri, $method));
-}
+
+// The session models would otherwise try to name a PHP session another suite already
+// started in this process. Mage::reset() in tearDown drops this again per test.
+beforeEach(function () {
+    Mage::unregister(Mage_Core_Model_Session_Abstract::REGISTRY_KEY);
+    $session = new Session(new MockArraySessionStorage());
+    $session->start();
+    Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, $session);
+});
 
 it('reports a GET-only route as routable', function () {
     expect(Mage::helper('core/url')->isGetRoutable(Mage::getUrl('wishlist')))->toBeTrue();
@@ -64,7 +71,9 @@ it('sends a guest bounced off a wishlist POST to the wishlist page after login',
     $session->logout();
     $session->unsBeforeAuthUrl();
 
-    $request = makeRequest('/wishlist/index/add?product=1', 'POST');
+    $request = new Mage_Core_Controller_Request_Http(
+        SymfonyRequest::create('/wishlist/index/add?product=1', 'POST'),
+    );
     $request->setRouteName('wishlist')
         ->setControllerName('index')
         ->setActionName('add')
