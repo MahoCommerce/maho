@@ -296,7 +296,11 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
         if (!$referer && !Mage::getStoreConfigFlag(self::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD)
             && !Mage::getSingleton('customer/session')->getNoReferer()
         ) {
-            $referer = Mage::getUrl('*/*/*', ['_current' => true, '_use_rewrite' => true]);
+            // _loginPostRedirect() replays this param as the post-login target, so it has to be
+            // a URL a redirect can reach: the current one is only that on a GET request.
+            $referer = $this->_getRequest()->isGet()
+                ? Mage::getUrl('*/*/*', ['_current' => true, '_use_rewrite' => true])
+                : $this->getPostAuthUrl();
             $referer = Mage::helper('core')->urlEncode($referer);
         }
 
@@ -305,6 +309,28 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         return $params;
+    }
+
+    /**
+     * Where to send the customer after login when the interrupted request cannot be replayed.
+     *
+     * A redirect is always followed with a GET, so the URL of a POST-only action (say
+     * wishlist/index/add) is not a usable target: it answers 405 Method Not Allowed. The page
+     * that held the form is, and it is what the customer expects to come back to.
+     */
+    public function getPostAuthUrl(): string
+    {
+        if (Mage::getStoreConfigFlag(self::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD)) {
+            return $this->getDashboardUrl();
+        }
+
+        $referer = (string) $this->_getRequest()->getServer('HTTP_REFERER');
+
+        if ($referer !== '' && Mage::helper('core/url')->isInternalUrl($referer)) {
+            return $referer;
+        }
+
+        return $this->getAccountUrl();
     }
 
     /**

@@ -67,56 +67,17 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Check whether a URL can be reached with a GET request.
-     *
-     * A redirect is always followed with a GET, so a URL whose route is restricted to other
-     * verbs is not a usable redirect target: it answers 405 Method Not Allowed.
-     *
-     * Only known non-GET routes are rejected. External URLs, and paths that match no
-     * attributed route (URL rewrites, CMS pages, legacy path dispatch), are reported as
-     * routable — this is a guard against a specific mistake, not a general URL validator.
+     * Check whether a URL points at this store, i.e. is safe to redirect to.
      */
-    public function isGetRoutable(string $url): bool
+    public function isInternalUrl(string $url): bool
     {
-        $path = parse_url($url, PHP_URL_PATH);
-        if (!is_string($path) || $path === '') {
-            return true;
-        }
-
-        $request = Mage::app()->getRequest();
-
-        $baseUrl = $request->getBaseUrl();
-        if ($baseUrl !== '' && str_starts_with($path, $baseUrl)) {
-            $path = substr($path, strlen($baseUrl));
-        }
-
-        // Mirror the store-code stripping the request does when building its path info,
-        // otherwise /fr/wishlist/index/add matches nothing and is waved through.
-        if (Mage::isInstalled() && Mage::getStoreConfigFlag(Mage_Core_Model_Store::XML_PATH_STORE_IN_URL)) {
-            $storeCode = explode('/', ltrim($path, '/'), 2)[0];
-            if ($storeCode !== '' && array_key_exists($storeCode, Mage::app()->getStores(true, true))) {
-                $path = substr(ltrim($path, '/'), strlen($storeCode));
-            }
-        }
-
-        $path = '/' . ltrim($path, '/');
-        if (strlen($path) > 1) {
-            $path = rtrim($path, '/');
-        }
-
-        $context = new \Symfony\Component\Routing\RequestContext();
-        $context->fromRequest($request->getSymfonyRequest());
-        $context->setMethod('GET');
-
-        try {
-            \Maho\Routing\RouteCollectionBuilder::createMatcher($context)->match($path);
-        } catch (\Symfony\Component\Routing\Exception\MethodNotAllowedException) {
+        if (!str_contains($url, 'http')) {
             return false;
-        } catch (\Symfony\Component\Routing\Exception\ExceptionInterface) {
-            return true;
         }
 
-        return true;
+        // Url must start from base secure or base unsecure url
+        return str_starts_with($url, Mage::app()->getStore()->getBaseUrl())
+            || str_starts_with($url, Mage::app()->getStore()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK, true));
     }
 
     /**

@@ -43,9 +43,9 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             }
             Mage::getSingleton('customer/session')->setBeforeWishlistRequest($this->getRequest()->getParams());
 
-            // Every wishlist action that mutates the list is POST-only, and authenticate()
-            // stored the current URL as the post-login target. Send the customer to the
-            // wishlist itself instead, which reports the interrupted add (see indexAction).
+            // Every wishlist action that mutates the list is POST-only, so it cannot be the
+            // post-login target. The wishlist itself is the better landing page anyway: it
+            // reports the interrupted add (see indexAction).
             if (!$this->getRequest()->isGet()) {
                 Mage::getSingleton('customer/session')->setBeforeAuthUrl(Mage::getUrl('wishlist'));
             }
