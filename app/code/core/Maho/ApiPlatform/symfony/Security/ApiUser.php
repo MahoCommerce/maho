@@ -44,12 +44,14 @@ class ApiUser implements UserInterface
     /**
      * Erase sensitive credentials (no-op for JWT-based authentication).
      *
-     * security-core 7.x still declares eraseCredentials() on UserInterface
-     * (deprecated since 7.3, removed in 8.0), so #[\Override] is correct for
-     * the version this project targets. Drop the attribute if/when upgrading
-     * to security-core 8.0, where the interface no longer declares it.
+     * Declared by UserInterface on security-core 7.x (deprecated since 7.3),
+     * dropped from the interface in 8.0. Deliberately no #[\Override]: the
+     * attribute is a fatal error once the interface stops declaring it.
+     *
+     * #[\Deprecated] tells AuthenticatorManager this implementation is empty,
+     * which both silences the 7.3 deprecation and skips the call entirely.
      */
-    #[\Override]
+    #[\Deprecated]
     public function eraseCredentials(): void
     {
         // No credentials to erase for JWT-based authentication
