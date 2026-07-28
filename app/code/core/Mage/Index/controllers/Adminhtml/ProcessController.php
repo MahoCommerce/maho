@@ -8,6 +8,8 @@
  * @package Mage_Index
  */
 
+use Maho\Job\StepState;
+
 class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -15,6 +17,13 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
      * @see Mage_Adminhtml_Controller_Action::_isAllowed()
      */
     public const ADMIN_RESOURCE = 'system/index';
+
+    #[\Override]
+    public function preDispatch(): self
+    {
+        $this->_setForcedFormKeyActions(['reindexProcess', 'reindexAll', 'massReindex', 'massChangeMode']);
+        return parent::preDispatch();
+    }
 
     /**
      * Initialize process object by request
@@ -118,30 +127,15 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
     {
         /** @var Mage_Index_Model_Process $process */
         $process = $this->_initProcess();
-        if ($process) {
-            try {
-                \Maho\Profiler::start('__INDEX_PROCESS_REINDEX_ALL__');
-
-                $process->reindexEverything();
-                \Maho\Profiler::stop('__INDEX_PROCESS_REINDEX_ALL__');
-                $this->_getSession()->addSuccess(
-                    Mage::helper('index')->__('%s index was rebuilt.', $process->getIndexer()->getName()),
-                );
-            } catch (Mage_Core_Exception $e) {
-                $this->_getSession()->addError($e->getMessage());
-            } catch (Exception $e) {
-                $this->_getSession()->addException(
-                    $e,
-                    Mage::helper('index')->__('There was a problem with reindexing process.'),
-                );
-            }
-        } else {
-            $this->_getSession()->addError(
-                Mage::helper('index')->__('Cannot initialize the indexer process.'),
-            );
+        if (!$process) {
+            $this->getResponse()->setBodyJson([
+                'error' => true,
+                'message' => Mage::helper('index')->__('Cannot initialize the indexer process.'),
+            ]);
+            return;
         }
 
-        $this->_redirect('*/*/list');
+        $this->_startReindex([$process->getId()]);
     }
 
     /**
@@ -151,10 +145,13 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
     public function reindexEventsAction(): void {}
 
     /**
-     * Rebiuld all processes index
+     * Rebuild all processes index
      */
     #[Maho\Config\Route('/admin/process/reindexAll')]
-    public function reindexAllAction(): void {}
+    public function reindexAllAction(): void
+    {
+        $this->_startReindex(null);
+    }
 
     /**
      * Mass rebuild selected processes index
@@ -162,33 +159,115 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
     #[Maho\Config\Route('/admin/process/massReindex')]
     public function massReindexAction(): void
     {
-        /** @var Mage_Index_Model_Indexer $indexer */
-        $indexer    = Mage::getSingleton('index/indexer');
         $processIds = $this->getRequest()->getParam('process');
         if (empty($processIds) || !is_array($processIds)) {
-            $this->_getSession()->addError(Mage::helper('index')->__('Please select Indexes'));
-        } else {
-            try {
-                $counter = 0;
-                foreach ($processIds as $processId) {
-                    /** @var Mage_Index_Model_Process $process */
-                    $process = $indexer->getProcessById($processId);
-                    if ($process && $process->getIndexer()->isVisible()) {
-                        $process->reindexEverything();
-                        $counter++;
-                    }
-                }
-                $this->_getSession()->addSuccess(
-                    Mage::helper('index')->__('Total of %d index(es) have reindexed data.', $counter),
-                );
-            } catch (Mage_Core_Exception $e) {
-                $this->_getSession()->addError($e->getMessage());
-            } catch (Exception $e) {
-                $this->_getSession()->addException($e, Mage::helper('index')->__('Cannot initialize the indexer process.'));
-            }
+            $this->getResponse()->setBodyJson([
+                'error' => true,
+                'message' => Mage::helper('index')->__('Please select Indexes'),
+            ]);
+            return;
         }
 
-        $this->_redirect('*/*/list');
+        $this->_startReindex($processIds);
+    }
+
+    /**
+     * Report the state of a backgrounded reindex run
+     */
+    #[Maho\Config\Route('/admin/process/reindexStatus')]
+    public function reindexStatusAction(): void
+    {
+        try {
+            /** @var Mage_Index_Model_Progress $progress */
+            $progress = Mage::getModel('index/progress');
+            $record = $progress->setToken((string) $this->getRequest()->getParam('token'))->read();
+        } catch (Mage_Core_Exception $e) {
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $e->getMessage()]);
+            return;
+        }
+
+        if (!$record) {
+            $this->getResponse()->setBodyJson([
+                'error' => true,
+                'message' => Mage::helper('index')->__('Unknown reindex run.'),
+            ]);
+            return;
+        }
+
+        $this->getResponse()->setBodyJson($this->_detectInterruptedRun($record));
+    }
+
+    /**
+     * Kick off a reindex that outlives the request.
+     *
+     * The client gets the run token straight away and polls reindexStatus for the rest; a null
+     * $processIds means every visible index.
+     */
+    protected function _startReindex(?array $processIds): void
+    {
+        /** @var Mage_Index_Model_Runner $runner */
+        $runner = Mage::getModel('index/runner');
+        $queue = $runner->buildQueue($processIds);
+
+        if (!$queue) {
+            $this->getResponse()->setBodyJson([
+                'error' => true,
+                'message' => Mage::helper('index')->__('Cannot initialize the indexer process.'),
+            ]);
+            return;
+        }
+
+        Mage_Index_Model_Progress::cleanupStale();
+
+        /** @var Mage_Index_Model_Progress $progress */
+        $progress = Mage::getModel('index/progress');
+        $progress->init($runner->getSteps($queue));
+
+        $this->getResponse()->sendJsonAndDetach($progress->toArray());
+
+        try {
+            $runner->run($queue, $progress);
+        } catch (Throwable $e) {
+            Mage::logException($e);
+        } finally {
+            // Prevent the framework from sending a second response
+            exit;
+        }
+    }
+
+    /**
+     * A worker killed mid-reindex never writes to its record again. Left alone the client would
+     * poll a "running" run forever, so report it as interrupted once nothing holds an index lock.
+     */
+    protected function _detectInterruptedRun(array $record): array
+    {
+        if (!empty($record['finished'])
+            || time() - (int) ($record['updated_at'] ?? 0) < Mage_Index_Model_Progress::STALE_AFTER
+        ) {
+            return $record;
+        }
+
+        /** @var Mage_Index_Model_Indexer $indexer */
+        $indexer = Mage::getSingleton('index/indexer');
+
+        foreach ($record['steps'] ?? [] as &$step) {
+            if ($step['state'] === StepState::Running->value) {
+                $process = $indexer->getProcessByCode($step['code']);
+                if ($process && $process->isLocked()) {
+                    // Still working, it just has nothing to report mid-index
+                    return $record;
+                }
+                $step['state'] = StepState::Error->value;
+                $step['message'] = Mage::helper('index')->__('The reindex process was interrupted.');
+            } elseif ($step['state'] === StepState::Queued->value) {
+                $step['state'] = StepState::Skipped->value;
+                $step['message'] = Mage::helper('index')->__('Not started.');
+            }
+        }
+        unset($step);
+
+        $record['finished'] = true;
+        return $record;
     }
 
     /**
@@ -222,6 +301,7 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
             }
         }
 
-        $this->_redirect('*/*/list');
+        // The grid posts mass-actions over ajax, so the messages are picked up on the reload
+        $this->getResponse()->setBodyJson(['success' => true]);
     }
 }

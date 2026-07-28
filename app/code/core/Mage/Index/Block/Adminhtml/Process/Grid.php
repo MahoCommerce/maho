@@ -86,7 +86,6 @@ class Mage_Index_Block_Adminhtml_Process_Grid extends Mage_Adminhtml_Block_Widge
     #[\Override]
     protected function _prepareColumns()
     {
-        $baseUrl = $this->getUrl();
         $this->addColumn('indexer_code', [
             'header'    => Mage::helper('index')->__('Index'),
             'width'     => '180',
@@ -149,8 +148,8 @@ class Mage_Index_Block_Adminhtml_Process_Grid extends Mage_Adminhtml_Block_Widge
                 'actions'   => [
                     [
                         'caption'   => Mage::helper('index')->__('Reindex Data'),
-                        'url'       => ['base' => '*/*/reindexProcess'],
-                        'field'     => 'process',
+                        'url'       => '#',
+                        'onclick'   => 'indexReindexProcess($process_id); return false;',
                     ],
                 ],
                 'is_system' => true,
@@ -255,11 +254,15 @@ class Mage_Index_Block_Adminhtml_Process_Grid extends Mage_Adminhtml_Block_Widge
         $this->setMassactionIdField('process_id');
         $this->getMassactionBlock()->setFormFieldName('process');
 
+        // Reindexing answers with a run token instead of redirecting, so the dialog can take over
+        $this->getMassactionBlock()->setUseAjax(true);
+
         $modeOptions = Mage::getModel('index/process')->getModesOptions();
 
         $this->getMassactionBlock()->addItem(MassAction::CHANGE_MODE, [
             'label'         => Mage::helper('index')->__('Change Index Mode'),
             'url'           => $this->getUrl('*/*/massChangeMode'),
+            'complete'      => 'indexMassChangeModeComplete',
             'additional'    => [
                 'mode'      => [
                     'name'      => 'index_mode',
@@ -274,6 +277,7 @@ class Mage_Index_Block_Adminhtml_Process_Grid extends Mage_Adminhtml_Block_Widge
         $this->getMassactionBlock()->addItem(MassAction::REINDEX, [
             'label'    => Mage::helper('index')->__('Reindex Data'),
             'url'      => $this->getUrl('*/*/massReindex'),
+            'complete' => 'indexReindexMassComplete',
             'selected' => true,
         ]);
 

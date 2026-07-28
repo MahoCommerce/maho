@@ -343,14 +343,7 @@ class Mage_Core_Model_App
         $this->getFrontController()->dispatch();
 
         // Finish the request explicitly, no output allowed beyond this point
-        if (in_array(php_sapi_name(), ['fpm-fcgi', 'frankenphp'], true) && function_exists('fastcgi_finish_request')) {
-            fastcgi_finish_request();
-        } else {
-            flush();
-        }
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
-        }
+        Mage_Core_Controller_Response_Http::finishRequest();
 
         try {
             Mage::dispatchEvent('core_app_run_after', ['app' => $this]);

@@ -737,6 +737,50 @@ class Mage_Core_Controller_Response_Http implements \Stringable
         return $this;
     }
 
+    /**
+     * Hand the response back to the client and release the session lock.
+     *
+     * No output is allowed beyond this point. Whatever the script does next runs with the
+     * connection already closed, so concurrent requests from the same session no longer block.
+     */
+    public static function finishRequest(): void
+    {
+        if (in_array(php_sapi_name(), ['fpm-fcgi', 'frankenphp'], true) && function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        } else {
+            flush();
+        }
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+    }
+
+    /**
+     * Send a JSON payload, close the connection, and keep executing in the background.
+     *
+     * Lets an action hand the client a handle (a token, an id) for a job that takes far longer than
+     * any request timeout allows. The caller must not emit anything afterwards and should exit()
+     * once its work is done, so the framework doesn't send a second body.
+     */
+    public function sendJsonAndDetach(mixed $data): void
+    {
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        $json = Mage::helper('core')->jsonEncode($data);
+        header('Content-Type: application/json');
+        header('Content-Length: ' . strlen($json));
+        header('Connection: close');
+        echo $json;
+
+        self::finishRequest();
+
+        ignore_user_abort(true);
+        set_time_limit(0);
+    }
+
     protected function getJavaScriptDeferMode(): int
     {
         return (int) Mage::getStoreConfig('dev/js/defer_mode');

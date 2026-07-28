@@ -14,6 +14,7 @@ SPDX-License-Identifier: AFL-3.0
     <adminhtml_process_edit>
         <reference name="content">
             <block type="index/adminhtml_process_edit" name="process_edit"></block>
+            <block type="index/adminhtml_process_dialog" name="process_dialog"/>
         </reference>
         <reference name="left">
             <block type="index/adminhtml_process_edit_tabs" name="index_edit_tabs">
@@ -25,6 +26,7 @@ SPDX-License-Identifier: AFL-3.0
     <adminhtml_process_list>
         <reference name="content">
             <block type="index/adminhtml_process" name="process" />
+            <block type="index/adminhtml_process_dialog" name="process_dialog"/>
         </reference>
     </adminhtml_process_list>
 </layout>

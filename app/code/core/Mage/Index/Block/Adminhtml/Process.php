@@ -16,5 +16,10 @@ class Mage_Index_Block_Adminhtml_Process extends Mage_Adminhtml_Block_Widget_Gri
         $this->_headerText = Mage::helper('index')->__('Index Management');
         parent::__construct();
         $this->_removeButton('add');
+        $this->_addButton('reindex_all', [
+            'label'   => Mage::helper('index')->__('Reindex All'),
+            'onclick' => 'indexReindexAll()',
+            'class'   => 'task',
+        ]);
     }
 }
