@@ -10,6 +10,8 @@
 
 class Mage_CatalogRule_Model_Action_Index_Refresh
 {
+    protected const INDEX_INSERT_BATCH = 1000;
+
     /**
      * Connection instance
      *
@@ -369,170 +371,6 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     }
 
     /**
-     * Prepare price column
-     *
-     * @return Maho\Db\Expr
-     */
-    protected function _calculatePrice()
-    {
-        $toPercent = $this->_connection->quote('to_percent');
-        $byPercent = $this->_connection->quote('by_percent');
-        $toFixed   = $this->_connection->quote('to_fixed');
-        $byFixed   = $this->_connection->quote('by_fixed');
-        $nA        = $this->_connection->quote('N/A');
-
-        return $this->_connection->getCaseSql(
-            '',
-            [
-                $this->_connection->getIfNullSql(
-                    new Maho\Db\Expr('@group_id'),
-                    $nA,
-                ) . ' != cppt.grouped_id' =>
-                '@price := ' . $this->_connection->getCaseSql(
-                    $this->_connection->quoteIdentifier('cppt.action_operator'),
-                    [
-                        $toPercent => new Maho\Db\Expr('cppt.price * cppt.action_amount/100'),
-                        $byPercent => new Maho\Db\Expr('cppt.price * (1 - cppt.action_amount/100)'),
-                        $toFixed   => $this->_connection->getCheckSql(
-                            new Maho\Db\Expr('cppt.action_amount < cppt.price'),
-                            new Maho\Db\Expr('cppt.action_amount'),
-                            new Maho\Db\Expr('cppt.price'),
-                        ),
-                        $byFixed   => $this->_connection->getCheckSql(
-                            new Maho\Db\Expr('0 > cppt.price - cppt.action_amount'),
-                            new Maho\Db\Expr('0'),
-                            new Maho\Db\Expr('cppt.price - cppt.action_amount'),
-                        ),
-                    ],
-                ),
-                $this->_connection->getIfNullSql(
-                    new Maho\Db\Expr('@group_id'),
-                    $nA,
-                ) . ' = cppt.grouped_id AND '
-                . $this->_connection->getIfNullSql(
-                    new Maho\Db\Expr('@action_stop'),
-                    new Maho\Db\Expr('0'),
-                ) . ' = 0' => '@price := ' . $this->_connection->getCaseSql(
-                    $this->_connection->quoteIdentifier('cppt.action_operator'),
-                    [
-                        $toPercent => new Maho\Db\Expr('@price * cppt.action_amount/100'),
-                        $byPercent => new Maho\Db\Expr('@price * (1 - cppt.action_amount/100)'),
-                        $toFixed   => $this->_connection->getCheckSql(
-                            new Maho\Db\Expr('cppt.action_amount < @price'),
-                            new Maho\Db\Expr('cppt.action_amount'),
-                            new Maho\Db\Expr('@price'),
-                        ),
-                        $byFixed   => $this->_connection->getCheckSql(
-                            new Maho\Db\Expr('0 > @price - cppt.action_amount'),
-                            new Maho\Db\Expr('0'),
-                            new Maho\Db\Expr('@price - cppt.action_amount'),
-                        ),
-                    ],
-                ),
-            ],
-            '@price',
-        );
-    }
-
-    /**
-     * Prepare index select
-     *
-     * @param int|Maho\Db\Expr $time
-     * @return Maho\Db\Select
-     */
-    protected function _prepareIndexSelect(Mage_Core_Model_Website $website, $time)
-    {
-        $nA = $this->_connection->quote('N/A');
-        $this->_connection->query('SET @price := 0');
-        $this->_connection->query('SET @group_id := NULL');
-        $this->_connection->query('SET @action_stop := NULL');
-
-        $indexSelect = $this->_connection->select()
-            ->from(['cppt' => $this->_getTemporaryTable()], [])
-            ->order(['cppt.grouped_id', 'cppt.sort_order', 'cppt.rule_product_id'])
-            ->columns(
-                [
-                    'customer_group_id' => 'cppt.customer_group_id',
-                    'product_id'        => 'cppt.product_id',
-                    'rule_price'        => $this->_calculatePrice(),
-                    'latest_start_date' => 'cppt.from_date',
-                    'earliest_end_date' => 'cppt.to_date',
-                    new Maho\Db\Expr(
-                        $this->_connection->getCaseSql(
-                            '',
-                            [
-                                $this->_connection->getIfNullSql(
-                                    new Maho\Db\Expr('@group_id'),
-                                    $nA,
-                                ) . ' != cppt.grouped_id' => new Maho\Db\Expr('@action_stop := cppt.action_stop'),
-                                $this->_connection->getIfNullSql(
-                                    new Maho\Db\Expr('@group_id'),
-                                    $nA,
-                                ) . ' = cppt.grouped_id' => '@action_stop := '
-                                    . $this->_connection->getIfNullSql(
-                                        new Maho\Db\Expr('@action_stop'),
-                                        new Maho\Db\Expr('0'),
-                                    ) . ' + cppt.action_stop',
-                            ],
-                        ),
-                    ),
-                    new Maho\Db\Expr('@group_id := cppt.grouped_id'),
-                    'from_time'         => 'cppt.from_time',
-                    'to_time'           => 'cppt.to_time',
-                ],
-            );
-
-        return $this->_connection->select()
-            ->from($indexSelect, [])
-            ->joinInner(
-                [
-                    'dates' => $this->_connection->select()->union(
-                        [
-                            new Maho\Db\Expr(
-                                'SELECT ' . $this->_connection->getDateAddSql(
-                                    $this->_connection->fromUnixtime($time),
-                                    -1,
-                                    Maho\Db\Adapter\AdapterInterface::INTERVAL_DAY,
-                                ) . ' AS rule_date',
-                            ),
-                            new Maho\Db\Expr('SELECT ' . $this->_connection->fromUnixtime($time) . ' AS rule_date'),
-                            new Maho\Db\Expr(
-                                'SELECT ' . $this->_connection->getDateAddSql(
-                                    $this->_connection->fromUnixtime($time),
-                                    1,
-                                    Maho\Db\Adapter\AdapterInterface::INTERVAL_DAY,
-                                ) . ' AS rule_date',
-                            ),
-                        ],
-                    ),
-                ],
-                '1=1',
-                [],
-            )
-            ->columns(
-                [
-                    'rule_product_price_id' => new Maho\Db\Expr('NULL'),
-                    'rule_date'             => 'dates.rule_date',
-                    'customer_group_id'     => 'customer_group_id',
-                    'product_id'            => 'product_id',
-                    'rule_price'            => 'MIN(rule_price)',
-                    'website_id'            => new Maho\Db\Expr($website->getId()),
-                    'latest_start_date'     => 'MAX(latest_start_date)',
-                    'earliest_end_date'     => 'MIN(earliest_end_date)',
-                ],
-            )
-            ->where(new Maho\Db\Expr($this->_connection->getUnixTimestamp('dates.rule_date') . ' >= from_time'))
-            ->where(
-                $this->_connection->getCheckSql(
-                    new Maho\Db\Expr('to_time = 0'),
-                    new Maho\Db\Expr('1'),
-                    new Maho\Db\Expr($this->_connection->getUnixTimestamp('dates.rule_date') . ' <= to_time'),
-                ),
-            )
-            ->group(['customer_group_id', 'product_id', 'dates.rule_date', 'website_id']);
-    }
-
-    /**
      * Remove old index data
      */
     protected function _removeOldIndexData(Mage_Core_Model_Website $website)
@@ -546,18 +384,148 @@ class Mage_CatalogRule_Model_Action_Index_Refresh
     /**
      * Fill Index Data
      *
+     * Rules chain: within one product/customer group, each rule applies to the price the previous
+     * one produced, until a rule with action_stop breaks the chain. That is a running calculation
+     * over ordered rows, which used to be done with MySQL user variables (SET @price := ...) and
+     * so only ever worked on MySQL. It is done here instead, once per row, in the same order.
+     *
      * @param int $time
      */
     protected function _fillIndexData(Mage_Core_Model_Website $website, $time)
     {
-        $this->_connection->query(
-            $this->_connection->insertFromSelect(
-                $this->_prepareIndexSelect($website, $time),
-                $this->_resource->getTable('catalogrule/rule_product_price'),
-                [],
-                Maho\Db\Adapter\AdapterInterface::INSERT_IGNORE,
-            ),
+        $table = $this->_resource->getTable('catalogrule/rule_product_price');
+        $websiteId = (int) $website->getId();
+        $dates = $this->_getRuleDates((int) $time);
+
+        $statement = $this->_connection->query(
+            $this->_connection->select()
+                ->from(['cppt' => $this->_getTemporaryTable()])
+                ->order(['cppt.grouped_id', 'cppt.sort_order', 'cppt.rule_product_id']),
         );
+
+        $groupedId = null;
+        $price = 0.0;
+        $actionStop = 0;
+        $group = [];
+        $pending = [];
+
+        $this->_connection->beginTransaction();
+        try {
+            while ($row = $statement->fetch()) {
+                if ((string) $row['grouped_id'] !== $groupedId) {
+                    $pending = array_merge($pending, array_values($group));
+                    $group = [];
+                    $groupedId = (string) $row['grouped_id'];
+                    $price = $this->_applyRuleAction((float) $row['price'], $row);
+                    $actionStop = (int) $row['action_stop'];
+                } else {
+                    if ($actionStop === 0) {
+                        $price = $this->_applyRuleAction($price, $row);
+                    }
+                    $actionStop += (int) $row['action_stop'];
+                }
+
+                foreach ($dates as $date => $timestamp) {
+                    if ($this->_isRuleActiveAt($row, $timestamp)) {
+                        $this->_collectRulePrice($group, $date, $row, $price, $websiteId);
+                    }
+                }
+
+                if (count($pending) >= self::INDEX_INSERT_BATCH) {
+                    $this->_connection->insertMultiple($table, $pending);
+                    $pending = [];
+                }
+            }
+
+            $pending = array_merge($pending, array_values($group));
+            if ($pending) {
+                $this->_connection->insertMultiple($table, $pending);
+            }
+
+            $this->_connection->commit();
+        } catch (Throwable $e) {
+            $this->_connection->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Yesterday, today and tomorrow relative to the reindex time, as 'Y-m-d' => timestamp.
+     *
+     * Three days are indexed so a store stays correct across the timezone spread of its websites.
+     *
+     * @return array<string, int>
+     */
+    protected function _getRuleDates(int $time): array
+    {
+        $dates = [];
+        foreach ([$time - 86400, $time, $time + 86400] as $timestamp) {
+            $dates[gmdate('Y-m-d', $timestamp)] = $timestamp;
+        }
+        return $dates;
+    }
+
+    /**
+     * @param array<string, mixed> $row
+     */
+    protected function _isRuleActiveAt(array $row, int $timestamp): bool
+    {
+        $toTime = (int) $row['to_time'];
+        return $timestamp >= (int) $row['from_time'] && ($toTime === 0 || $timestamp <= $toTime);
+    }
+
+    /**
+     * Apply one rule action to the price the chain has reached so far.
+     *
+     * @param array<string, mixed> $row
+     */
+    protected function _applyRuleAction(float $price, array $row): float
+    {
+        $amount = (float) $row['action_amount'];
+
+        return match ($row['action_operator']) {
+            'to_percent' => $price * $amount / 100,
+            'by_percent' => $price * (1 - $amount / 100),
+            'to_fixed'   => min($amount, $price),
+            'by_fixed'   => max(0.0, $price - $amount),
+            default      => $price,
+        };
+    }
+
+    /**
+     * Keep the cheapest price per date, with the widest start and narrowest end the rules allow.
+     *
+     * @param array<string, array<string, mixed>> $group
+     * @param array<string, mixed> $row
+     */
+    protected function _collectRulePrice(array &$group, string $date, array $row, float $price, int $websiteId): void
+    {
+        if (!isset($group[$date])) {
+            $group[$date] = [
+                'rule_date'         => $date,
+                'customer_group_id' => (int) $row['customer_group_id'],
+                'product_id'        => (int) $row['product_id'],
+                'rule_price'        => $price,
+                'website_id'        => $websiteId,
+                'latest_start_date' => $row['from_date'] ?: null,
+                'earliest_end_date' => $row['to_date'] ?: null,
+            ];
+            return;
+        }
+
+        $bucket = &$group[$date];
+        $bucket['rule_price'] = min($bucket['rule_price'], $price);
+
+        if ($row['from_date']
+            && ($bucket['latest_start_date'] === null || $row['from_date'] > $bucket['latest_start_date'])
+        ) {
+            $bucket['latest_start_date'] = $row['from_date'];
+        }
+        if ($row['to_date']
+            && ($bucket['earliest_end_date'] === null || $row['to_date'] < $bucket['earliest_end_date'])
+        ) {
+            $bucket['earliest_end_date'] = $row['to_date'];
+        }
     }
 
     /**
