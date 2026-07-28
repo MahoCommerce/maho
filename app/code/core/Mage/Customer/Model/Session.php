@@ -381,6 +381,14 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
             ->removeRequestParam($url, Mage::getSingleton('core/session')->getSessionIdQueryParam());
         // Add correct session ID to URL if needed
         $url = Mage::getModel('core/url')->getRebuiltUrl($url);
+
+        // Auth URLs are replayed with a redirect, i.e. a GET. Keeping the URL of a route that
+        // only accepts other verbs (say the POST-only wishlist/index/add a guest was bounced
+        // away from) would answer 405 Method Not Allowed right after a successful login.
+        if (!Mage::helper('core/url')->isGetRoutable($url)) {
+            return $this;
+        }
+
         return $this->setData($key, $url);
     }
 
