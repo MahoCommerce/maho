@@ -706,6 +706,11 @@ class varienGridMassaction {
             })
             .catch(error => {
                 console.error('Mass action error:', error);
+                // Hand the failure to the listener too, otherwise an {error: true} reply looks
+                // exactly like nothing happening
+                this.onMassactionComplete({
+                    responseText: JSON.stringify({ error: true, message: error.message })
+                });
             });
         } else if(item.url) {
             this.form.action = item.url;

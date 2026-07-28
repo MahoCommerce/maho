@@ -248,33 +248,8 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         // Clear any previous progress
         $installer->clearProgress();
 
-        // Clear all output buffers
-        while (ob_get_level() > 0) {
-            ob_end_clean();
-        }
-
-        // Send response immediately with Connection: close header
-        $json = Mage::helper('core')->jsonEncode(['success' => true]);
-        header('Content-Type: application/json');
-        header('Content-Length: ' . strlen($json));
-        header('Connection: close');
-        echo $json;
-
-        // Flush output to client
-        if (function_exists('fastcgi_finish_request')) {
-            fastcgi_finish_request();
-        } else {
-            flush();
-        }
-
-        // Continue processing in background
-        ignore_user_abort(true);
-        set_time_limit(0);
-
-        // Close session to allow progress polling requests to proceed
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
-        }
+        // Send the response immediately, then keep installing in the background
+        $this->getResponse()->sendJsonAndDetach(['success' => true]);
 
         // Now run the installation
         // Errors are written to progress file by install() method
