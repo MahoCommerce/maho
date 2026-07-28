@@ -44,13 +44,13 @@ class ApiUser implements UserInterface
     /**
      * Erase sensitive credentials (no-op for JWT-based authentication).
      *
-     * Declared by UserInterface on security-core 7.x (deprecated since 7.3),
-     * dropped from the interface in 8.0. Deliberately no #[\Override]: the
-     * attribute is a fatal error once the interface stops declaring it.
+     * #[\Deprecated] tells AuthenticatorManager this implementation is empty, so it
+     * skips the call instead of emitting the 7.3 deprecation on every authentication.
      *
-     * #[\Deprecated] tells AuthenticatorManager this implementation is empty,
-     * which both silences the 7.3 deprecation and skips the call entirely.
+     * UserInterface stops declaring the method in security-core 8.0, where #[\Override]
+     * becomes a fatal error; the conflict block in composer.json keeps us below that.
      */
+    #[\Override]
     #[\Deprecated]
     public function eraseCredentials(): void
     {
