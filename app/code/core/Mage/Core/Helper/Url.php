@@ -67,6 +67,20 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Check whether a URL points at this store, i.e. is safe to redirect to.
+     */
+    public function isInternalUrl(string $url): bool
+    {
+        if (!str_contains($url, 'http')) {
+            return false;
+        }
+
+        // Url must start from base secure or base unsecure url
+        return str_starts_with($url, Mage::app()->getStore()->getBaseUrl())
+            || str_starts_with($url, Mage::app()->getStore()->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_LINK, true));
+    }
+
+    /**
      * Formatting string
      *
      * @param string $string
