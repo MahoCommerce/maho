@@ -14,11 +14,8 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 uses(Tests\MahoFrontendTestCase::class);
 
 /**
- * A guest who is bounced to the login page from a login-protected action has that action's
- * URL stored as the post-login target. Routes are method-restricted, and a redirect is
- * always followed with a GET, so storing the URL of a POST-only action (wishlist/index/add,
- * review/product/post, customer/address/formPost, ...) answered 405 Method Not Allowed
- * right after a successful login: the customer was logged in but stared at an error page.
+ * A guest bounced to the login page had the interrupted action's URL stored as the post-login
+ * target. For a POST-only action the redirect back answered 405 Method Not Allowed.
  */
 
 beforeEach(function () {

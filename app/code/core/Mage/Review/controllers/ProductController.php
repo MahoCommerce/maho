@@ -27,9 +27,7 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
         if (!$allowGuest && $action == 'post' && $this->getRequest()->isPost()) {
             if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
                 $this->setFlag('', self::FLAG_NO_DISPATCH, true);
-                // Not the current URL: review/product/post is POST-only, so replaying it with
-                // the post-login GET answers 405. The referring product page re-renders the
-                // form data preserved just below.
+                // Not the current URL: review/product/post is POST-only, so it would 405.
                 Mage::getSingleton('customer/session')->setBeforeAuthUrl($this->_getRefererUrl());
                 Mage::getSingleton('review/session')->setFormData($this->getRequest()->getPost())
                     ->setRedirectUrl($this->_getRefererUrl());

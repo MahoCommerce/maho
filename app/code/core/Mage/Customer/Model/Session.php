@@ -355,11 +355,9 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
             return true;
         }
 
-        // A redirect is always followed with a GET, so the current URL is only a usable
-        // post-login target on a GET: a POST-only action replayed as GET answers 405.
         $this->setBeforeAuthUrl($action->getRequest()->isGet()
             ? Mage::getUrl('*/*/*', ['_current' => true])
-            : Mage::helper('customer')->getPostAuthUrl());
+            : Mage::helper('customer')->getDefaultBeforeAuthUrl());
 
         if (isset($loginUrl)) {
             $action->getResponse()->setRedirect($loginUrl);
