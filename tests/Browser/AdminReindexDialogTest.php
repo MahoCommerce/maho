@@ -8,9 +8,9 @@
 declare(strict_types=1);
 
 use Tests\Browser\MahoServer;
-use Tests\MahoFrontendTestCase;
+use Tests\MahoBrowserTestCase;
 
-uses(MahoFrontendTestCase::class)->group('browser');
+uses(MahoBrowserTestCase::class)->group('browser');
 
 /**
  * Secret keys in admin urls are turned off for the run so the test can address
@@ -23,23 +23,17 @@ const REINDEX_ADMIN_PASSWORD = 'Password123!';
 const REINDEX_SECRET_KEY_PATH = 'admin/security/use_form_key';
 
 afterAll(function () {
-    // Drop the override rather than pin a value; the test never ran if Playwright is missing
+    // Drop the override rather than pin a value
     Mage::getModel('core/config')->deleteConfig(REINDEX_SECRET_KEY_PATH);
     Mage::app()->getStore()->resetConfig();
     Mage::app()->cleanCache();
-    MahoServer::stop();
 });
 
 beforeEach(function () {
-    if (!browserTestsReady()) {
-        test()->markTestSkipped('Playwright is not installed');
-    }
-
     Mage::getModel('core/config')->saveConfig(REINDEX_SECRET_KEY_PATH, 0);
     Mage::app()->cleanCache();
 
     createReindexAdmin();
-    MahoServer::start();
 });
 
 afterEach(fn() => deleteReindexAdmin());
@@ -77,12 +71,15 @@ function createReindexAdmin(): void
 
 function loginToIndexManagement(): object
 {
-    return visit(MahoServer::baseUrl() . '/admin')
+    $page = visit(MahoServer::baseUrl() . '/admin')
         ->fill('#username', REINDEX_ADMIN_USER)
         ->fill('#login', REINDEX_ADMIN_PASSWORD)
-        ->press('Login')
-        ->navigate(MahoServer::baseUrl() . '/admin/process/list')
-        ->waitForText('Index Management');
+        ->click('#step1 input[type="submit"]');
+
+    waitForPageLoad($page, '.nav-bar:visible');
+    $page->navigate(MahoServer::baseUrl() . '/admin/process/list');
+
+    return waitForPageLoad($page, '#indexer_processes_grid_table:visible');
 }
 
 it('reports a single index through the progress dialog', function () {
