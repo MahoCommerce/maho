@@ -315,17 +315,14 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getDefaultBeforeAuthUrl(): string
     {
-        if (Mage::getStoreConfigFlag(self::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD)) {
-            return $this->getDashboardUrl();
+        if (!Mage::getStoreConfigFlag(self::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD)) {
+            $referer = (string) $this->_getRequest()->getServer('HTTP_REFERER');
+            if ($referer !== '' && Mage::helper('core/url')->isInternalUrl($referer)) {
+                return $referer;
+            }
         }
 
-        $referer = (string) $this->_getRequest()->getServer('HTTP_REFERER');
-
-        if ($referer !== '' && Mage::helper('core/url')->isInternalUrl($referer)) {
-            return $referer;
-        }
-
-        return $this->getAccountUrl();
+        return $this->getDashboardUrl();
     }
 
     /**

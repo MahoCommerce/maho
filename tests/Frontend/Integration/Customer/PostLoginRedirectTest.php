@@ -175,3 +175,22 @@ it('sends a guest bounced off a review POST back to the product page', function 
         ->not->toContain('review/product/post')
         ->toBe($_SERVER['HTTP_REFERER']);
 });
+
+it('does not let the login block capture a POST-only endpoint as the post-login target', function () {
+    $request = new Mage_Core_Controller_Request_Http(
+        SymfonyRequest::create('/customer/account/prelogin/?isAjax=true', 'POST'),
+    );
+    $request->setRouteName('customer')
+        ->setControllerName('account')
+        ->setActionName('prelogin')
+        ->setDispatched(true);
+    Mage::app()->setRequest($request);
+
+    $block = new Mage_Customer_Block_Form_Login();
+    $block->setLayout(Mage::app()->getLayout());
+    $block->canShowLogin();
+
+    expect(Mage::getSingleton('customer/session')->getBeforeAuthUrl())
+        ->not->toContain('prelogin')
+        ->toBe($_SERVER['HTTP_REFERER']);
+});
