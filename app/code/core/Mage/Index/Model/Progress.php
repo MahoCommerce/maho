@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Per-run progress record for a backgrounded reindex.
+ * Per-run progress record for a backgrounded reindex, written to a file because reindexing flushes
+ * cache tags and would wipe its own progress.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -12,22 +13,18 @@ declare(strict_types=1);
 
 use Maho\Job\StepState;
 
-/**
- * The reindex runs with its connection already closed, so it reports here and the polling endpoint
- * reads it back. A file rather than the cache: reindexing flushes cache tags and would wipe its
- * own progress.
- */
 class Mage_Index_Model_Progress
 {
     public const VAR_SUBDIR = 'index_progress';
 
     /**
-     * A record untouched for this long, with nothing holding an index lock, belongs to a worker
+     * A record untouched for this long, with nothing holding the runner's lock, belongs to a worker
      * that was killed and will never write again.
      */
     public const STALE_AFTER = 300;
 
-    protected const TOKEN_PATTERN = '/^[a-f0-9]{32}$/';
+    // \z rather than $, which would let a trailing newline into a file path
+    protected const TOKEN_PATTERN = '/\A[a-f0-9]{32}\z/';
 
     protected ?string $token = null;
 
@@ -157,17 +154,14 @@ class Mage_Index_Model_Progress
             return [];
         }
 
-        $data = json_decode((string) file_get_contents($file), true);
-        return is_array($data) ? $data : [];
-    }
-
-    public function clear(): self
-    {
-        $file = $this->getFilePath();
-        if (file_exists($file)) {
-            unlink($file);
+        try {
+            $data = Mage::helper('core')->jsonDecode((string) file_get_contents($file));
+        } catch (JsonException) {
+            // A record we cannot parse is reported as unknown rather than failing the poll
+            return [];
         }
-        return $this;
+
+        return is_array($data) ? $data : [];
     }
 
     /**
@@ -183,7 +177,8 @@ class Mage_Index_Model_Progress
 
         $cutoff = time() - $olderThanSeconds;
         $removed = 0;
-        foreach (glob($dir . DS . '*.json') ?: [] as $file) {
+        // The .tmp glob catches half-written records left behind by a worker killed inside write()
+        foreach (array_merge(glob($dir . DS . '*.json') ?: [], glob($dir . DS . '*.tmp') ?: []) as $file) {
             $mtime = @filemtime($file);
             if ($mtime !== false && $mtime < $cutoff && @unlink($file)) {
                 $removed++;
@@ -215,9 +210,14 @@ class Mage_Index_Model_Progress
 
         $tmp = $file . '.' . getmypid() . '.tmp';
         if (file_put_contents($tmp, Mage::helper('core')->jsonEncode($this->toArray())) === false) {
+            // Silence here would surface as a run the poller eventually calls interrupted
+            Mage::log('Could not write reindex progress to ' . $tmp, Mage::LOG_ERROR, forceLog: true);
             return $this;
         }
-        rename($tmp, $file);
+
+        if (!rename($tmp, $file)) {
+            Mage::log('Could not publish reindex progress to ' . $file, Mage::LOG_ERROR, forceLog: true);
+        }
 
         return $this;
     }

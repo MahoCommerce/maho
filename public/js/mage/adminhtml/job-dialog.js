@@ -20,11 +20,16 @@ class MahoJobDialog {
         this.startParams = config.startParams ?? {};
         this.width = config.width ?? 460;
         this.reloadOnClose = config.reloadOnClose ?? true;
+        // A job whose own reporting can go stale server-side needs no client-side deadline, and a
+        // wrong one would call a legitimately slow run failed
+        this.maxDurationMs = config.maxDurationMs ?? null;
         this.labels = {
             close: 'Close',
             done: 'Done',
             failed: 'Failed',
+            incomplete: 'Did not complete',
             requestFailed: 'Request failed',
+            timedOut: 'Timed out',
             ...config.labels,
         };
 
@@ -88,8 +93,14 @@ class MahoJobDialog {
     }
 
     async follow(result) {
-        if (result.error) {
+        if (result?.error) {
             this.showResult('error', result.message);
+            return;
+        }
+        if (!result?.token) {
+            // Anything but the expected payload (a fatal, an HTML error page) would otherwise be
+            // polled as if it were a run, hiding the real failure behind an invalid-token message
+            this.showResult('error', this.labels.requestFailed);
             return;
         }
 
@@ -108,6 +119,11 @@ class MahoJobDialog {
             await new Promise((resolve) => setTimeout(resolve, wait));
 
             if (!this.isOpen()) {
+                return;
+            }
+
+            if (this.maxDurationMs !== null && Date.now() - this.startedAt > this.maxDurationMs) {
+                this.showResult('error', this.labels.timedOut);
                 return;
             }
 
@@ -135,8 +151,15 @@ class MahoJobDialog {
         this.render();
 
         if (data.finished) {
-            const failed = this.steps.some((step) => step.state === 'error');
-            this.showResult(failed ? 'error' : 'success', failed ? this.labels.failed : this.labels.done);
+            // Anything that did not reach success (interrupted, skipped, never started) must not be
+            // reported as a completed job
+            if (this.steps.some((step) => step.state === 'error')) {
+                this.showResult('error', this.labels.failed);
+            } else if (this.steps.some((step) => step.state !== 'success')) {
+                this.showResult('incomplete', this.labels.incomplete);
+            } else {
+                this.showResult('success', this.labels.done);
+            }
         }
     }
 
@@ -160,13 +183,13 @@ class MahoJobDialog {
             ? MahoJobDialog.formatElapsed(step.duration * 1000)
             : '';
 
-        return `<li class="maho-job-step" data-state="${MahoJobDialog.escapeHtml(step.state)}">`
+        return `<li class="maho-job-step" data-state="${escapeHtml(step.state, true)}">`
             + '<div class="maho-job-step-row">'
             + icon
-            + `<span class="maho-job-step-name">${MahoJobDialog.escapeHtml(step.name)}</span>`
-            + `<span class="maho-job-step-meta">${MahoJobDialog.escapeHtml(meta)}</span>`
+            + `<span class="maho-job-step-name">${escapeHtml(step.name ?? '')}</span>`
+            + `<span class="maho-job-step-meta">${escapeHtml(meta)}</span>`
             + '</div>'
-            + (step.message ? `<pre class="maho-job-step-message">${MahoJobDialog.escapeHtml(step.message)}</pre>` : '')
+            + (step.message ? `<pre class="maho-job-step-message">${escapeHtml(step.message)}</pre>` : '')
             + '</li>';
     }
 
@@ -181,18 +204,12 @@ class MahoJobDialog {
         content.querySelector('.maho-job-result')?.remove();
         content.insertAdjacentHTML(
             'beforeend',
-            `<div class="maho-job-result" data-state="${state}">${MahoJobDialog.escapeHtml(message)}</div>`,
+            `<div class="maho-job-result" data-state="${state}">${escapeHtml(message ?? '')}</div>`,
         );
     }
 
     isOpen() {
         return this.dialog?.isConnected === true;
-    }
-
-    static escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str ?? '';
-        return div.innerHTML;
     }
 
     static formatElapsed(ms) {

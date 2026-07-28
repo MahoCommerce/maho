@@ -115,9 +115,22 @@ it('records a failing index and keeps going', function () {
     $states = array_column($record['steps'], 'state');
 
     expect($states)->toBe([StepState::Success->value, StepState::Error->value, StepState::Success->value])
-        ->and($record['steps'][1]['message'])->toBe('boom')
+        ->and($record['steps'][1]['message'])->not->toContain('boom')
         ->and($record['finished'])->toBeTrue()
         ->and($gamma->ran)->toBeTrue();
+});
+
+it('shows a user-facing message but hides the detail of anything else', function () {
+    $userFacing = fakeProcess('alpha', new Mage_Core_Exception('Rebuild the URL rewrites first'));
+    $internal = fakeProcess('beta', new RuntimeException('SQLSTATE[42S02]: catalog_product_entity'));
+
+    $progress = runnerProgress(['alpha', 'beta']);
+    Mage::getModel('index/runner')->run([$userFacing, $internal], $progress);
+
+    $steps = $progress->toArray()['steps'];
+
+    expect($steps[0]['message'])->toBe('Rebuild the URL rewrites first')
+        ->and($steps[1]['message'])->not->toContain('SQLSTATE');
 });
 
 it('skips an index that is already running', function () {
@@ -128,5 +141,7 @@ it('skips an index that is already running', function () {
     Mage::getModel('index/runner')->run([$locked], $progress);
 
     expect($progress->toArray()['steps'][0]['state'])->toBe(StepState::Skipped->value)
-        ->and($locked->ran)->toBeFalse();
+        ->and($locked->ran)->toBeFalse()
+        // Otherwise a dependent step further down the queue would rebuild it unreported
+        ->and($locked->getData('runed_reindexall'))->toBeTrue();
 });

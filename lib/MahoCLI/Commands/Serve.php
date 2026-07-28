@@ -37,6 +37,12 @@ class Serve extends BaseMahoCommand
         $port = $input->getArgument('port');
         $docroot = MAHO_PUBLIC_DIR;
 
+        // Single-threaded by default, which stalls anything that polls while a request is still
+        // running (the admin reindex and cron dialogs, parallel asset loads)
+        if (getenv('PHP_CLI_SERVER_WORKERS') === false) {
+            putenv('PHP_CLI_SERVER_WORKERS=8');
+        }
+
         passthru('php -S ' . escapeshellarg("{$host}:{$port}") . ' -t ' . escapeshellarg($docroot));
 
         return Command::SUCCESS;

@@ -148,6 +148,10 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
         $missedLabel = $this->jsQuoteEscape(Mage::helper('cron')->__('Missed'));
         $noHistoryLabel = $this->jsQuoteEscape(Mage::helper('cron')->__('No execution history found.'));
 
+        $notRunLabel = $this->jsQuoteEscape(Mage::helper('cron')->__('Not run'));
+        $requestFailedLabel = $this->jsQuoteEscape(Mage::helper('cron')->__('Request failed'));
+        $timedOutLabel = $this->jsQuoteEscape(Mage::helper('cron')->__('Timed out'));
+
         $runNowTitle = $this->jsQuoteEscape(Mage::helper('cron')->__('Run Cron Job'));
         $historyTitle = $this->jsQuoteEscape(Mage::helper('cron')->__('Execution History'));
 
@@ -168,10 +172,16 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
                 statusUrl: '{$statusUrl}',
                 startParams: { job_code: jobCode },
                 width: 380,
+                // A job killed mid-run leaves its schedule 'running' for good, so the dialog needs
+                // its own deadline to stop waiting on a status that will never change
+                maxDurationMs: 30 * 60 * 1000,
                 labels: {
                     close: '{$closeLabel}',
                     done: '{$successLabel}',
                     failed: '{$errorLabel}',
+                    incomplete: '{$notRunLabel}',
+                    requestFailed: '{$requestFailedLabel}',
+                    timedOut: '{$timedOutLabel}',
                 },
             }).run();
         }
@@ -217,11 +227,11 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
                     html += '<tr>'
                         + '<td>' + r.schedule_id + '</td>'
                         + '<td>' + cronStatusBadge(r.status) + '</td>'
-                        + '<td>' + MahoJobDialog.escapeHtml(r.scheduled_at || '') + '</td>'
-                        + '<td>' + MahoJobDialog.escapeHtml(r.executed_at || '') + '</td>'
-                        + '<td>' + MahoJobDialog.escapeHtml(r.finished_at || '') + '</td>'
-                        + '<td>' + MahoJobDialog.escapeHtml(r.duration || '') + '</td>'
-                        + '<td class="messages-cell" title="' + (r.messages || '').replace(/"/g, '&quot;') + '">' + MahoJobDialog.escapeHtml(r.messages || '') + '</td>'
+                        + '<td>' + escapeHtml(r.scheduled_at || '', true) + '</td>'
+                        + '<td>' + escapeHtml(r.executed_at || '', true) + '</td>'
+                        + '<td>' + escapeHtml(r.finished_at || '', true) + '</td>'
+                        + '<td>' + escapeHtml(r.duration || '', true) + '</td>'
+                        + '<td class="messages-cell" title="' + escapeHtml(r.messages || '', true) + '">' + escapeHtml(r.messages || '', true) + '</td>'
                         + '</tr>';
                 }
 

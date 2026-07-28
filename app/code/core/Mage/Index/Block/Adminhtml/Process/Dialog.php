@@ -13,7 +13,7 @@ declare(strict_types=1);
 class Mage_Index_Block_Adminhtml_Process_Dialog extends Mage_Adminhtml_Block_Template
 {
     #[\Override]
-    protected function _toHtml()
+    protected function _toHtml(): string
     {
         $reindexUrl = $this->getUrl('adminhtml/process/reindexProcess');
         $reindexAllUrl = $this->getUrl('adminhtml/process/reindexAll');
@@ -23,6 +23,8 @@ class Mage_Index_Block_Adminhtml_Process_Dialog extends Mage_Adminhtml_Block_Tem
         $closeLabel = $this->jsQuoteEscape(Mage::helper('index')->__('Close'));
         $doneLabel = $this->jsQuoteEscape(Mage::helper('index')->__('Reindex complete'));
         $failedLabel = $this->jsQuoteEscape(Mage::helper('index')->__('Reindex finished with errors'));
+        $incompleteLabel = $this->jsQuoteEscape(Mage::helper('index')->__('Reindex did not complete'));
+        $requestFailedLabel = $this->jsQuoteEscape(Mage::helper('index')->__('Request failed'));
 
         return <<<SCRIPT
         <script>
@@ -37,6 +39,8 @@ class Mage_Index_Block_Adminhtml_Process_Dialog extends Mage_Adminhtml_Block_Tem
                     close: '{$closeLabel}',
                     done: '{$doneLabel}',
                     failed: '{$failedLabel}',
+                    incomplete: '{$incompleteLabel}',
+                    requestFailed: '{$requestFailedLabel}',
                 },
             });
         }

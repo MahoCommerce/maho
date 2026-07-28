@@ -745,7 +745,7 @@ class Mage_Core_Controller_Response_Http implements \Stringable
      */
     public static function finishRequest(): void
     {
-        if (in_array(php_sapi_name(), ['fpm-fcgi', 'frankenphp'], true) && function_exists('fastcgi_finish_request')) {
+        if (in_array(php_sapi_name(), ['fpm-fcgi', 'frankenphp', 'litespeed'], true) && function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();
         } else {
             flush();
@@ -760,8 +760,8 @@ class Mage_Core_Controller_Response_Http implements \Stringable
      * Send a JSON payload, close the connection, and keep executing in the background.
      *
      * Lets an action hand the client a handle (a token, an id) for a job that takes far longer than
-     * any request timeout allows. The caller must not emit anything afterwards and should exit()
-     * once its work is done, so the framework doesn't send a second body.
+     * any request timeout allows. The caller must not emit anything afterwards; exit() once the
+     * work is done unless the rest of App::run() still has to happen.
      */
     public function sendJsonAndDetach(mixed $data): void
     {
@@ -770,9 +770,14 @@ class Mage_Core_Controller_Response_Http implements \Stringable
         }
 
         $json = Mage::helper('core')->jsonEncode($data);
-        header('Content-Type: application/json');
-        header('Content-Length: ' . strlen($json));
-        header('Connection: close');
+
+        // Through the response object rather than header(), so the headers every action queues
+        // (the admin no-store set, the domain policy security headers) still go out
+        $this->setHeader('Content-type', 'application/json', true)
+            ->setHeader('Content-Length', (string) strlen($json), true)
+            ->setHeader('Connection', 'close', true)
+            ->sendHeaders();
+
         echo $json;
 
         self::finishRequest();

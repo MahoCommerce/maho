@@ -82,6 +82,7 @@ it('rejects a token that is not one we generated', function (string $token) {
     'not-hex-at-all',
     '',
     'ABCDEF0123456789abcdef0123456789',
+    "abcdef0123456789abcdef0123456789\n",
 ])->throws(Mage_Core_Exception::class);
 
 it('removes only stale records', function () {

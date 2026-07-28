@@ -43,18 +43,6 @@ class Mage_Index_Block_Adminhtml_Process_Edit extends Mage_Adminhtml_Block_Widge
     }
 
     /**
-     * Get process reindex action url
-     *
-     * @return string
-     */
-    public function getRunUrl()
-    {
-        return $this->getUrl('adminhtml/process/reindexProcess', [
-            'process' => Mage::registry('current_index_process')->getId(),
-        ]);
-    }
-
-    /**
      * Retrieve text for header element depending on loaded page
      *
      * @return string

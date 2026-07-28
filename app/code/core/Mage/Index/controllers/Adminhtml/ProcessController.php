@@ -237,7 +237,8 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
 
     /**
      * A worker killed mid-reindex never writes to its record again. Left alone the client would
-     * poll a "running" run forever, so report it as interrupted once nothing holds an index lock.
+     * poll a "running" run forever, so report it as interrupted once nothing holds the runner's
+     * lock for the step, which only a live worker can be holding.
      */
     protected function _detectInterruptedRun(array $record): array
     {
@@ -247,13 +248,13 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
             return $record;
         }
 
-        /** @var Mage_Index_Model_Indexer $indexer */
-        $indexer = Mage::getSingleton('index/indexer');
+        /** @var Mage_Core_Model_Lock $lock */
+        $lock = Mage::getSingleton('core/lock');
 
-        foreach ($record['steps'] ?? [] as &$step) {
+        $steps = $record['steps'] ?? [];
+        foreach ($steps as &$step) {
             if ($step['state'] === StepState::Running->value) {
-                $process = $indexer->getProcessByCode($step['code']);
-                if ($process && $process->isLocked()) {
+                if ($lock->isHeld(Mage_Index_Model_Runner::lockName((string) $record['token'], $step['code']))) {
                     // Still working, it just has nothing to report mid-index
                     return $record;
                 }
@@ -266,6 +267,7 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
         }
         unset($step);
 
+        $record['steps'] = $steps;
         $record['finished'] = true;
         return $record;
     }

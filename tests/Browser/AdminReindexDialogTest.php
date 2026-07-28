@@ -13,9 +13,6 @@ use Tests\MahoFrontendTestCase;
 uses(MahoFrontendTestCase::class)->group('browser');
 
 /**
- * Reindexing from Index Management used to run inside the admin request and time out with no
- * feedback. It now answers with a run token and reports each index through the shared job dialog.
- *
  * Secret keys in admin urls are turned off for the run so the test can address
  * adminhtml/process/list directly; that also puts the reindex endpoints on the forced form key
  * path, which is the protection this screen relies on in that configuration.
@@ -23,10 +20,12 @@ uses(MahoFrontendTestCase::class)->group('browser');
 
 const REINDEX_ADMIN_USER = 'reindex-dialog-admin';
 const REINDEX_ADMIN_PASSWORD = 'Password123!';
-const SECRET_KEY_PATH = 'admin/security/use_form_key';
+const REINDEX_SECRET_KEY_PATH = 'admin/security/use_form_key';
 
 afterAll(function () {
-    Mage::getModel('core/config')->saveConfig(SECRET_KEY_PATH, 1);
+    // Drop the override rather than pin a value; the test never ran if Playwright is missing
+    Mage::getModel('core/config')->deleteConfig(REINDEX_SECRET_KEY_PATH);
+    Mage::app()->getStore()->resetConfig();
     Mage::app()->cleanCache();
     MahoServer::stop();
 });
@@ -36,7 +35,7 @@ beforeEach(function () {
         test()->markTestSkipped('Playwright is not installed');
     }
 
-    Mage::getModel('core/config')->saveConfig(SECRET_KEY_PATH, 0);
+    Mage::getModel('core/config')->saveConfig(REINDEX_SECRET_KEY_PATH, 0);
     Mage::app()->cleanCache();
 
     createReindexAdmin();
@@ -87,11 +86,16 @@ function loginToIndexManagement(): object
 }
 
 it('reports a single index through the progress dialog', function () {
-    $page = loginToIndexManagement()
-        ->click('Reindex Data')
-        ->waitForText('Reindex complete', 300);
+    // By selector, not by text: the mass-action select carries an option with the same caption,
+    // and every grid row carries the same link, so the first one has to be named explicitly
+    $page = loginToIndexManagement()->click('a[onclick^="indexReindexProcess"] >> nth=0');
 
-    expect($page->url())->toContain('process/list');
+    // waitForText() is a one-shot read, and the dialog only reports a result after the first poll
+    $result = $page->page()->locator('.maho-job-result');
+    $result->waitFor(['state' => 'visible', 'timeout' => 300_000]);
+
+    expect(trim((string) $result->textContent()))->toBe('Reindex complete')
+        ->and($page->url())->toContain('process/list');
 })->skip(
     fn() => count(Mage::getModel('index/runner')->buildQueue()) === 0,
     'no visible indexes to reindex',
