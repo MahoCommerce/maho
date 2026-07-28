@@ -1,5 +1,4 @@
 "%s Index process is working now. Please try run this process later.","%s Index process is working now. Please try run this process later."
-"%s index was rebuilt.","%s index was rebuilt."
 "'%s' Index Process Information","'%s' Index Process Information"
 "Action","Action"
 "Already running, skipped.","Already running, skipped."
@@ -51,7 +50,6 @@
 "There was a problem with reindexing process.","There was a problem with reindexing process."
 "There was a problem with saving process.","There was a problem with saving process."
 "Total of %d index(es) have changed index mode.","Total of %d index(es) have changed index mode."
-"Total of %d index(es) have reindexed data.","Total of %d index(es) have reindexed data."
 "Unable to create directory var/%s.","Unable to create directory var/%s."
 "Unknown reindex run.","Unknown reindex run."
 "Updated At","Updated At"
