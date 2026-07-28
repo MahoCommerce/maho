@@ -22,13 +22,6 @@ const REINDEX_ADMIN_USER = 'reindex-dialog-admin';
 const REINDEX_ADMIN_PASSWORD = 'Password123!';
 const REINDEX_SECRET_KEY_PATH = 'admin/security/use_form_key';
 
-afterAll(function () {
-    // Drop the override rather than pin a value
-    Mage::getModel('core/config')->deleteConfig(REINDEX_SECRET_KEY_PATH);
-    Mage::app()->getStore()->resetConfig();
-    Mage::app()->cleanCache();
-});
-
 beforeEach(function () {
     Mage::getModel('core/config')->saveConfig(REINDEX_SECRET_KEY_PATH, 0);
     Mage::app()->cleanCache();
@@ -36,7 +29,16 @@ beforeEach(function () {
     createReindexAdmin();
 });
 
-afterEach(fn() => deleteReindexAdmin());
+// Per test rather than once at the end: afterAll runs after the base tearDown has called
+// Mage::reset(), so there is no app left to clean up through
+afterEach(function () {
+    deleteReindexAdmin();
+
+    // Drop the override rather than pin a value
+    Mage::getModel('core/config')->deleteConfig(REINDEX_SECRET_KEY_PATH);
+    Mage::app()->getStore()->resetConfig();
+    Mage::app()->cleanCache();
+});
 
 function deleteReindexAdmin(): void
 {
