@@ -86,7 +86,18 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
 
         $storeIds = array_keys(Mage::app()->getStores());
         if (is_null($productIds) && $this->_canStageRebuild()) {
-            return $this->_rebuildViaShadowTable($storeIds);
+            // The shadow table has one fixed name, so a second rebuild would drop the
+            // first one's staging table mid-build. Losers fall back to the in place
+            // path, which tolerates concurrency as it always has.
+            $lock = Mage::getSingleton('core/lock');
+            $lockName = $this->getMainTable() . '_rebuild';
+            if ($lock->acquire($lockName)) {
+                try {
+                    return $this->_rebuildViaShadowTable($storeIds);
+                } finally {
+                    $lock->release($lockName);
+                }
+            }
         }
 
         // In place, so a transaction is what keeps a failure halfway from leaving

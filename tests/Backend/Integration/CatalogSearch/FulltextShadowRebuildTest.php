@@ -58,6 +58,24 @@ it('stages the rebuild rather than emptying the live index', function () {
     expect($canStage->invoke($resource))->toBeTrue();
 });
 
+it('rebuilds in place while another rebuild holds the shadow table', function () {
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $resource = Mage::getResourceModel('catalogsearch/fulltext');
+    $table = $resource->getMainTable();
+
+    $lock = Mage::getSingleton('core/lock');
+    expect($lock->acquire($table . '_rebuild'))->toBeTrue();
+
+    try {
+        $resource->rebuildIndex();
+        // Staging was declined, so no shadow table was ever created.
+        expect($adapter->isTableExists($table . '_shadow'))->toBeFalse();
+        expect($adapter->fetchOne("SELECT COUNT(*) FROM {$adapter->quoteIdentifier($table)}"))->toBeGreaterThan(0);
+    } finally {
+        $lock->release($table . '_rebuild');
+    }
+});
+
 it('writes to the live table when no rebuild is staged', function () {
     $engine = Mage::helper('catalogsearch')->getEngine();
 
