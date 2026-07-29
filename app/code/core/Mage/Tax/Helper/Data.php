@@ -392,10 +392,10 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $this->_app->getLocale()->emulate($store);
         $priceFormat = $this->_app->getLocale()->getJsPriceFormat();
-        $this->_app->getLocale()->revert();
         if ($store) {
             $priceFormat['pattern'] = $this->_app->getStore($store)->getCurrentCurrency()->getOutputFormat();
         }
+        $this->_app->getLocale()->revert();
         return Mage::helper('core')->jsonEncode($priceFormat);
     }
 
