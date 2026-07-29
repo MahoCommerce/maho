@@ -98,6 +98,36 @@ describe('MCP tool catalogue', function (): void {
         expect($properties)->toContain('page', 'itemsPerPage', 'search', 'sku', 'categoryId');
     });
 
+    it('covers resources declared with the plain API Platform attribute', function (): void {
+        // Product sub-resources gate on the parent's products/write rather than owning a
+        // permission, so they use ApiPlatform's attribute instead of Maho's. That says
+        // nothing about whether an agent should reach them.
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+
+        expect(array_keys($tools))->toContain(
+            'catalog_products_tier_prices_list',
+            'catalog_products_links_related_list',
+            'catalog_products_media_list',
+            'core_store_config_get',
+        );
+    });
+
+    it('omits operations that opt out and resources that declare no tools', function (): void {
+        $token = adminToken();
+        $names = array_keys(mcpTools($token, mcpSession($token)));
+
+        // AuthToken and ContactForm declare `mcp: []`; the custom-option download opts
+        // out per-operation because it returns a raw file. Nothing derives a tool from
+        // API Platform's injected NotExposed operation either.
+        foreach ($names as $name) {
+            expect($name)->not->toStartWith('api_auth_');
+            expect($name)->not->toContain('contact');
+            expect($name)->not->toContain('custom_option_file');
+        }
+        expect($names)->not->toContain('catalog_stocks_get');
+    });
+
     it('hides tools the caller cannot call', function (): void {
         $anonymous = mcpTools(null, mcpSession());
 
@@ -150,6 +180,18 @@ describe('MCP tool dispatch', function (): void {
 
         expect($payload['totalItems'] ?? null)->toBe(1);
         expect($payload['member'][0]['sku'] ?? null)->toBe($sku);
+    });
+
+    it('gives the operation its own URI so path parameters resolve', function (): void {
+        // ProductLinkProvider reads which of related/cross-sell/up-sell was meant off
+        // the request path, since a plain path parameter never reaches uriVariables.
+        // Under MCP every request is a POST to /api/mcp, so the tool call is dispatched
+        // against a request carrying the operation's URI instead.
+        $token = adminToken();
+        $session = mcpSession($token);
+        $response = mcpTool('catalog_products_links_related_list', ['productId' => 1], $token, $session);
+
+        expect($response['json']['error']['message'] ?? '')->not->toContain('Invalid link type');
     });
 
     it('refuses an unauthenticated call to a non-public tool', function (): void {

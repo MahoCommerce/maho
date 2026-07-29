@@ -12,9 +12,12 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\State;
 
+use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
+use Maho\ApiPlatform\Mcp\OperationRequestFactory;
 use Maho\ApiPlatform\Mcp\SourceOperationResolver;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * The write half of {@see McpDispatchProvider}'s operation swap.
@@ -33,11 +36,26 @@ final class McpWriteProcessor implements ProcessorInterface
     public function __construct(
         private readonly ProcessorInterface $decorated,
         private readonly SourceOperationResolver $operationResolver,
+        private readonly OperationRequestFactory $requestFactory,
     ) {}
 
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
     {
-        return $this->decorated->process($data, $this->operationResolver->resolve($operation), $uriVariables, $context);
+        $operation = $this->operationResolver->resolve($operation);
+
+        // The write stage gets its own context from the MCP handler, so the substituted
+        // request the read stage used never reaches it. Rebuild it here.
+        $request = $context['request'] ?? null;
+        if ($operation instanceof HttpOperation && $request instanceof Request) {
+            $context['request'] = $this->requestFactory->create(
+                $operation,
+                $uriVariables,
+                $context['mcp_data'] ?? [],
+                $request,
+            );
+        }
+
+        return $this->decorated->process($data, $operation, $uriVariables, $context);
     }
 }

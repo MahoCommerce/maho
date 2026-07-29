@@ -12,12 +12,15 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Metadata;
 
+use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\ErrorResource;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\McpTool;
 use ApiPlatform\Metadata\McpToolCollection;
+use ApiPlatform\Metadata\NotExposed;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use ApiPlatform\Metadata\Resource\ResourceMetadataCollection;
@@ -32,7 +35,10 @@ use Maho\Config\ApiResource as MahoApiResource;
  * Priority 150 puts it outside every metadata factory but the cache, so operations
  * arrive resolved and the tool copies `security` (and the rest) verbatim.
  *
- * Skipped when the author declared `mcp:` themselves or set `mahoMcp: false`.
+ * Opting out, in order of granularity: `mahoMcp: false` on a Maho-attributed
+ * resource, `mcp: []` on any resource, or `extraProperties: ['maho_mcp' => false]`
+ * on a single operation. The last one is for operations MCP can't represent, such
+ * as one returning a raw file download.
  */
 final class McpToolResourceMetadataCollectionFactory implements ResourceMetadataCollectionFactoryInterface
 {
@@ -41,6 +47,9 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
      * which builds the advertised input schema but only receives the operation.
      */
     public const LIST_ARGUMENTS = 'maho_mcp_list_arguments';
+
+    /** Per-operation opt-out, set as `extraProperties: ['maho_mcp' => false]`. */
+    public const OPERATION_OPT_OUT = 'maho_mcp';
 
     /** `Put` and `Patch` share `update`; the de-duplication below keeps the first. */
     private const VERB_SUFFIX = [
@@ -62,7 +71,14 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
         $collection = $this->decorated->create($resourceClass);
 
         foreach ($collection as $index => $resource) {
-            if (!$resource instanceof MahoApiResource || $resource->mahoMcp === false) {
+            // Plain `ApiPlatform\Metadata\ApiResource` counts too. Maho's subclass marks a
+            // resource as a grantable permission subject, which product sub-resources
+            // deliberately aren't (they gate on the parent's `products/write`), and that
+            // says nothing about whether an agent should be able to call them.
+            if ($resource instanceof ErrorResource) {
+                continue;
+            }
+            if ($resource instanceof MahoApiResource && $resource->mahoMcp === false) {
                 continue;
             }
             if ($resource->getMcp() !== null) {
@@ -81,14 +97,19 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
     /**
      * @return array<string, McpTool>
      */
-    private function deriveTools(string $resourceClass, MahoApiResource $resource): array
+    private function deriveTools(string $resourceClass, ApiResource $resource): array
     {
         $prefix = $this->toolNamePrefix($resourceClass, $resource);
         $listArguments = $this->listArguments($resource);
 
         $tools = [];
         foreach ($resource->getOperations() ?? [] as $sourceName => $operation) {
-            if (!$operation instanceof HttpOperation) {
+            // NotExposed is injected by API Platform for resources with no item GET so
+            // an IRI can still be generated. It routes nowhere, so it isn't a tool.
+            if (!$operation instanceof HttpOperation || $operation instanceof NotExposed) {
+                continue;
+            }
+            if (($operation->getExtraProperties()[self::OPERATION_OPT_OUT] ?? null) === false) {
                 continue;
             }
 
@@ -122,9 +143,9 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
      * Mirrors `ApiPermissionCompiler::deriveSectionFromNamespace()` so a tool name and
      * the permission section an operator grants in the admin agree.
      */
-    private function toolNamePrefix(string $resourceClass, MahoApiResource $resource): string
+    private function toolNamePrefix(string $resourceClass, ApiResource $resource): string
     {
-        $section = $resource->mahoSection;
+        $section = $resource instanceof MahoApiResource ? $resource->mahoSection : null;
         if ($section === null) {
             $parts = explode('\\', $resourceClass);
             array_pop($parts);
@@ -184,7 +205,7 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
      *
      * @return array<string, mixed>
      */
-    private function listArguments(MahoApiResource $resource): array
+    private function listArguments(ApiResource $resource): array
     {
         $collections = 0;
         foreach ($resource->getOperations() ?? [] as $operation) {
@@ -255,7 +276,7 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
         string $sourceName,
         string $suffix,
         HttpOperation $operation,
-        MahoApiResource $resource,
+        ApiResource $resource,
         array $listArguments,
     ): McpTool {
         $class = $operation instanceof CollectionOperationInterface ? McpToolCollection::class : McpTool::class;
@@ -312,7 +333,7 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
      * end up advertising identical text and a model can't tell them apart. Fall back
      * to a generated sentence in that case.
      */
-    private function description(HttpOperation $operation, MahoApiResource $resource): string
+    private function description(HttpOperation $operation, ApiResource $resource): string
     {
         $description = $operation->getDescription();
 
