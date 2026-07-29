@@ -194,9 +194,10 @@ All Zend Framework and Varien components have been deleted:
 - Type everything that can be typed: parameter, return, and property types (including `void`,
   `never`, nullable, union, and intersection types). Reserve docblock `@param`/`@return` for what
   the type system can't express (array shapes, generics, `@throws`); don't restate a native type
-- Comments only when they earn their place: explain a non-obvious *why*, a workaround, or a
-  subtle invariant. Keep them to a line or two. Never narrate what the code already says, and
-  don't leave section banners, changelog notes, or commentary about the edit itself
+- Default to **no comments**. Add one only when the code can't carry the information itself: a
+  non-obvious *why*, a workaround, a subtle invariant. Keep it to one line where possible. Never
+  narrate what the code already says, and don't leave section banners, changelog notes, or
+  commentary about the edit itself
 - **Never use em dashes** (`—`) in anything you write, rephrase, or use a comma, colon, or parentheses
 - CSS: modern features, no IE/legacy browser support
 - JS AJAX: always use `mahoFetch()` instead of native `fetch()`
@@ -462,3 +463,12 @@ loosen it. Three rules, none sufficient alone:
 - Past tense, describing what was done (e.g. "Added schema.org structured data for products
   and blog posts")
 - Spell out what the change delivers rather than using a vague summary
+
+## Be Brief
+
+Applies to issue and PR bodies, review comments, replies on GitHub, and answers in chat.
+
+- Say what changed and why, then stop. A few sentences or bullets beat a structured report
+- No test-plan checklists, no "Summary/Changes/Impact" headings, no restating the diff
+- Skip preamble, recap, and self-congratulation; don't pad with caveats already understood
+- Answer the question that was asked, not the adjacent ones
