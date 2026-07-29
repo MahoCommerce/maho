@@ -136,7 +136,7 @@ use Mage\Customer\Api\Address;
             requirements: ['incrementId' => '[a-zA-Z0-9_-]+'],
             extraProperties: ['no_iri' => true],
             security: 'true',
-            description: 'Read an order using the per-order one-time access token (X-Order-Token header)',
+            description: 'Read an order by increment ID, authorised by the one-time guest access token issued at checkout. The token travels in the X-Order-Token request header, not in the payload.',
         ),
     ],
     graphQlOperations: [
