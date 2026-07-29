@@ -122,6 +122,12 @@ class Kernel extends BaseKernel
             new \Symfony\Bundle\SecurityBundle\SecurityBundle(),
             new \ApiPlatform\Symfony\Bundle\ApiPlatformBundle(),
             new \Nelmio\CorsBundle\NelmioCorsBundle(),
+            // API Platform's Mcp namespace only loads when this bundle is present:
+            // its DI config wires `mcp.registry` and tags `mcp.loader` /
+            // `mcp.request_handler`, all of which McpBundle owns. Registering it
+            // unconditionally keeps /api/mcp routed; the protocol toggle (404 in
+            // ProtocolToggleListener) is what actually gates access.
+            new \Symfony\AI\McpBundle\McpBundle(),
         ];
 
         // symfony/twig-bundle is a `suggest`-only dependency. Inlining the
@@ -243,6 +249,30 @@ class Kernel extends BaseKernel
             // to fatal at container compile time on any composer-starter install.
             'patch_formats' => [
                 'json' => ['application/merge-patch+json'],
+            ],
+            // Tools are derived from resource metadata by
+            // McpToolResourceMetadataCollectionFactory, not declared by hand.
+            'mcp' => ['enabled' => true],
+        ]);
+
+        $container->extension('mcp', [
+            'app' => 'maho',
+            'version' => \Mage::getVersion(),
+            'description' => 'Maho Commerce store data and operations',
+            'instructions' => $this->mcpInstructions(),
+            'client_transports' => ['http' => true],
+            // Defaults to ['src'], resolved against getProjectDir() (the symfony/
+            // dir, which has no src/). Nothing to scan either way: Maho declares no
+            // #[AsMcpTool] handlers, every tool comes from ApiResource metadata.
+            'discovery' => ['scan_dirs' => []],
+            'http' => [
+                // Must sit under /api: the `api` firewall pattern is `^/api`, so
+                // this path inherits OAuth2Authenticator and bearer-token auth with
+                // no extra security config, and public/.htaccess already routes
+                // ^api(/.*)?$ to rest.php.
+                'path' => '/api/mcp',
+                'allowed_hosts' => $this->mcpAllowedHosts(),
+                'session' => ['store' => 'cache'],
             ],
         ]);
 
@@ -379,11 +409,102 @@ class Kernel extends BaseKernel
         // after the security firewall (priority 8). It must NOT be re-tagged
         // here: a second registration at a pre-firewall priority would see an
         // empty token and 401 every authenticated request.
+
+        // ---- MCP ------------------------------------------------------------
+        // Mirror every HTTP operation as an MCP tool. Priority 150 puts this
+        // outside every metadata factory but the cache, so operations arrive fully
+        // resolved (names, URI templates, formats, inherited defaults).
+        $services->set(Metadata\McpToolResourceMetadataCollectionFactory::class)
+            ->decorate('api_platform.metadata.resource.metadata_collection_factory', null, 150)
+            ->arg('$decorated', new Reference(Metadata\McpToolResourceMetadataCollectionFactory::class . '.inner'));
+
+        // Outermost decorator of the main state provider (priority 50, below
+        // ContentNegotiationProvider's 100) so the gates and the operation swap
+        // happen before the read, the deserialization and the security expression.
+        // autoconfigure is off on purpose: the class implements ProviderInterface,
+        // and letting it be tagged api_platform.state_provider would put it in the
+        // state-provider locator it decorates, i.e. a circular reference.
+        $services->set(State\McpDispatchProvider::class)
+            ->autoconfigure(false)
+            ->decorate('api_platform.state_provider.main', null, 50)
+            ->arg('$decorated', new Reference(State\McpDispatchProvider::class . '.inner'))
+            ->arg('$serializer', new Reference('api_platform.serializer'))
+            ->arg('$serializerContextBuilder', new Reference('api_platform.serializer.context_builder'));
+
+        $services->set(State\McpWriteProcessor::class)
+            ->autoconfigure(false)
+            ->decorate('api_platform.mcp.state_processor.write')
+            ->arg('$decorated', new Reference(State\McpWriteProcessor::class . '.inner'));
+
+        $services->set(Mcp\ToolSchemaFactory::class)
+            ->decorate('api_platform.mcp.json_schema.schema_factory')
+            ->arg('$decorated', new Reference(Mcp\ToolSchemaFactory::class . '.inner'));
+
+        $services->set(Mcp\PermissionFilteredListHandler::class)
+            ->decorate('api_platform.mcp.list_handler')
+            ->arg('$decorated', new Reference(Mcp\PermissionFilteredListHandler::class . '.inner'))
+            ->arg('$operationMetadataFactory', new Reference('api_platform.mcp.metadata.operation.mcp_factory'))
+            ->arg('$resourceAccessChecker', new Reference('api_platform.security.resource_access_checker'));
+    }
+
+    /**
+     * Orientation text the model reads before touching any tool. Kept short and
+     * concrete on purpose: it does more work than any individual tool description.
+     */
+    private function mcpInstructions(): string
+    {
+        $store = \Mage::app()->getDefaultStoreView();
+        $name = (string) \Mage::getStoreConfig('general/store_information/name') ?: (string) $store?->getFrontendName();
+        $currency = (string) $store?->getDefaultCurrencyCode();
+
+        return implode("\n", array_filter([
+            'Maho Commerce store data and operations: catalog, inventory, pricing, orders and customers.',
+            $name === '' ? null : sprintf('Store: %s.', $name),
+            $currency === '' ? null : sprintf('Prices and totals are in %s unless a tool says otherwise.', $currency),
+            'IDs are Maho entity IDs, not SKUs or increment IDs; look an entity up by its identifying field before writing to it.',
+            'Multi-store installs select a store view by its store code, never by name.',
+            'List tools are paginated and return one page at a time; ask for the next page rather than assuming the first is complete.',
+            'Tools mirror the REST API one-to-one, so a call is refused exactly when the same REST request would be.',
+        ]));
+    }
+
+    /**
+     * Hosts the MCP endpoint answers to.
+     *
+     * The SDK's DNS-rebinding protection defaults to localhost only, which rejects
+     * every remote call, so the store's own hosts have to be listed explicitly.
+     * Resolved at container-compile time, like the CORS allowlist above: clear
+     * var/cache/api_platform after changing a base URL.
+     *
+     * Returns null rather than an empty list when no host can be derived: an
+     * empty allowlist rejects every request including localhost, which would
+     * make a misconfigured base URL look like a broken MCP implementation.
+     *
+     * @return list<string>|null
+     */
+    private function mcpAllowedHosts(): ?array
+    {
+        $hosts = [];
+        foreach (\Mage::app()->getStores(true) as $store) {
+            foreach ([\Mage_Core_Model_Store::URL_TYPE_WEB, \Mage_Core_Model_Store::URL_TYPE_LINK] as $urlType) {
+                foreach ([true, false] as $secure) {
+                    $host = parse_url($store->getBaseUrl($urlType, $secure), PHP_URL_HOST);
+                    if (is_string($host) && $host !== '') {
+                        $hosts[$host] = true;
+                    }
+                }
+            }
+        }
+
+        return $hosts === [] ? null : array_keys($hosts);
     }
 
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $routes->import('.', 'api_platform')->prefix('/api');
+        // McpBundle's RouteLoader emits the endpoint at the configured absolute
+        // path (/api/mcp), so no prefix here.
+        $routes->import('.', 'mcp');
         $routes->import($this->getProjectDir() . '/Controller/', 'attribute');
     }
 

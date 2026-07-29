@@ -11,11 +11,11 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\EventListener;
 
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
+use Maho\ApiPlatform\Security\OperationAccessChecker;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
  * Pre-provider authentication enforcement for API Platform operations.
@@ -37,7 +37,7 @@ class DefaultDenyListener
 {
     public function __construct(
         private readonly ResourceMetadataCollectionFactoryInterface $resourceMetadataFactory,
-        private readonly TokenStorageInterface $tokenStorage,
+        private readonly OperationAccessChecker $accessChecker,
     ) {}
 
     public function __invoke(RequestEvent $event): void
@@ -57,24 +57,20 @@ class DefaultDenyListener
         // carrying an invalid/expired/forged Bearer token leaves the token empty
         // here and is correctly denied below — it can no longer bypass this gate
         // merely by including a junk Authorization header.
-        $token = $this->tokenStorage->getToken();
-        if ($token !== null && $token->getUser() !== null) {
+        if ($this->accessChecker->isAuthenticated()) {
             return;
         }
 
-        // Look up the operation's security attribute
+        // Look up the operation's security attribute. If we can't resolve the
+        // operation, it isn't public and the request is denied by default.
         try {
-            $resourceMetadata = $this->resourceMetadataFactory->create($resourceClass);
-            $operation = $resourceMetadata->getOperation($operationName);
-            $security = $operation->getSecurity();
+            $operation = $this->resourceMetadataFactory->create($resourceClass)->getOperation($operationName);
         } catch (\Throwable) {
-            // If we can't resolve the operation, deny by default
-            $security = null;
+            $operation = null;
         }
 
         // Public operations, no auth needed
-        // API Platform may wrap the value in quotes, so strip them before comparing
-        if ($security !== null && trim($security, '" ') === 'true') {
+        if (OperationAccessChecker::isPublic($operation)) {
             return;
         }
 

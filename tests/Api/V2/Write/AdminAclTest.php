@@ -8,8 +8,6 @@
 
 declare(strict_types=1);
 
-use Tests\Helpers\ApiV2Helper;
-
 /**
  * Admin ACL gating tests.
  *
@@ -29,68 +27,6 @@ use Tests\Helpers\ApiV2Helper;
 afterAll(function (): void {
     cleanupTestData();
 });
-
-/**
- * Create an admin role granting only the listed ACL paths, plus an admin
- * user assigned to that role. Returns a JWT for the user.
- *
- * @param list<string> $allowedAclPaths e.g. ['catalog/products', 'sales']
- */
-function adminTokenWithAcl(array $allowedAclPaths, string $username): string
-{
-    ApiV2Helper::ensureMahoBootstrapped();
-
-    // The JWT secret is auto-generated on the kernel's first HTTP boot.
-    // Trigger it with a public no-auth request before issuing tokens,
-    // mirrors what apiGet/apiPost do implicitly in other tests, but those
-    // tests issue tokens after their first HTTP call.
-    static $kernelBooted = false;
-    if (!$kernelBooted) {
-        apiGet('/api/rest/v2/store-config');
-        Mage::app()->getCache()->cleanType('config');
-        Mage::app()->reinitStores();
-        $kernelBooted = true;
-    }
-
-    /** @var Mage_Admin_Model_Role $role */
-    $role = Mage::getModel('admin/role');
-    $role->setData([
-        'role_name' => $username . '_role',
-        'role_type' => Mage_Admin_Model_Acl::ROLE_TYPE_GROUP,
-        'parent_id' => 0,
-    ])->save();
-    trackCreated('admin_role', (int) $role->getId());
-
-    Mage::getModel('admin/rules')
-        ->setRoleId($role->getId())
-        ->setResources($allowedAclPaths)
-        ->saveRel();
-
-    /** @var Mage_Admin_Model_User $user */
-    $user = Mage::getModel('admin/user');
-    $user->setData([
-        'username' => $username,
-        'firstname' => 'Pest',
-        'lastname' => 'Acl',
-        'email' => $username . '@example.test',
-        'password' => 'pest-acl-password-1234',
-        'is_active' => 1,
-    ])->save();
-    trackCreated('admin_user', (int) $user->getId());
-
-    Mage::getModel('admin/user')
-        ->setRoleId($role->getId())
-        ->setUserId($user->getId())
-        ->add();
-
-    return ApiV2Helper::generateToken([
-        'sub' => 'admin_' . $user->getId(),
-        'admin_id' => (int) $user->getId(),
-        'email' => $user->getEmail(),
-        'type' => 'admin',
-        'roles' => ['ROLE_ADMIN'],
-    ]);
-}
 
 describe('Admin ACL, REST', function (): void {
 

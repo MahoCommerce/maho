@@ -63,6 +63,7 @@ class ProtocolToggleListener
         return match (true) {
             str_starts_with($path, '/api/admin/graphql') => Helper::PROTOCOL_ADMIN_GRAPHQL,
             str_starts_with($path, '/api/graphql') => Helper::PROTOCOL_GRAPHQL,
+            str_starts_with($path, '/api/mcp') => Helper::PROTOCOL_MCP,
             // /api/docs is the OpenAPI / Swagger UI for the REST API, gating it
             // under REST v2 keeps the two in lockstep (no point documenting
             // endpoints that 404).

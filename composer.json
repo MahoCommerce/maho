@@ -72,7 +72,11 @@
         "symfony/security-bundle": "^7.4",
         "webonyx/graphql-php": "^15.31",
         "lcobucci/jwt": "^5.6",
-        "symfony/html-sanitizer": "^7.4"
+        "symfony/html-sanitizer": "^7.4",
+        "symfony/mcp-bundle": "^0.11",
+        "mcp/sdk": "^0.6",
+        "symfony/object-mapper": "^7.4",
+        "nyholm/psr7": "^1.8"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "^99.99",
