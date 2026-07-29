@@ -6892,16 +6892,16 @@
         },
         {
             "name": "webonyx/graphql-php",
-            "version": "v15.37.0",
+            "version": "v15.37.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webonyx/graphql-php.git",
-                "reference": "1ef0e90a44330949d10aff2c06fa39d1c154f0c5"
+                "reference": "8c620457202b5c8d81582338238f769790ef718a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webonyx/graphql-php/zipball/1ef0e90a44330949d10aff2c06fa39d1c154f0c5",
-                "reference": "1ef0e90a44330949d10aff2c06fa39d1c154f0c5",
+                "url": "https://api.github.com/repos/webonyx/graphql-php/zipball/8c620457202b5c8d81582338238f769790ef718a",
+                "reference": "8c620457202b5c8d81582338238f769790ef718a",
                 "shasum": ""
             },
             "require": {
@@ -6956,7 +6956,7 @@
             ],
             "support": {
                 "issues": "https://github.com/webonyx/graphql-php/issues",
-                "source": "https://github.com/webonyx/graphql-php/tree/v15.37.0"
+                "source": "https://github.com/webonyx/graphql-php/tree/v15.37.1"
             },
             "funding": [
                 {
@@ -6968,7 +6968,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2026-07-28T12:30:28+00:00"
+            "time": "2026-07-29T07:35:47+00:00"
         },
         {
             "name": "willdurand/negotiation",
