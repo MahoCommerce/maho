@@ -260,13 +260,15 @@ class Mage_Directory_Model_Currency extends Mage_Core_Model_Abstract
      */
     public function getOutputFormat()
     {
-        $formatter = Mage::app()->getLocale()->currency($this->getCode());
-        $pattern = $formatter->getPattern();
+        return Mage::app()->getLocale()->getCurrencyOutputFormat($this->getCode());
+    }
 
-        // Convert ICU number pattern to simple %s placeholder
-        // Replace sequences of number format characters (#, 0, comma, period) with %s
-        // This preserves currency symbols and other formatting elements
-        return preg_replace('/[#0,\.]+/', '%s', $pattern);
+    /**
+     * Returns the localized symbol for this currency, falling back to its code
+     */
+    public function getCurrencySymbol(): string
+    {
+        return Mage::app()->getLocale()->getCurrencySymbol($this->getCode());
     }
 
     /**
