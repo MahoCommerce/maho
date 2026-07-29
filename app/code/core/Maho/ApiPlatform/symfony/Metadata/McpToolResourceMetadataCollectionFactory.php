@@ -97,7 +97,7 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
                 continue;
             }
 
-            $tools[$name] = $this->buildTool($name, $sourceName, $operation);
+            $tools[$name] = $this->buildTool($name, $sourceName, $suffix, $operation, $resource);
         }
 
         return $tools;
@@ -154,14 +154,19 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
         return trim($value, '_');
     }
 
-    private function buildTool(string $name, string $sourceName, HttpOperation $operation): McpTool
-    {
+    private function buildTool(
+        string $name,
+        string $sourceName,
+        string $suffix,
+        HttpOperation $operation,
+        MahoApiResource $resource,
+    ): McpTool {
         $class = $operation instanceof CollectionOperationInterface ? McpToolCollection::class : McpTool::class;
 
         return new $class(
             name: $name,
-            title: $operation->getShortName(),
-            description: $operation->getDescription() ?? $this->fallbackDescription($operation),
+            title: sprintf('%s %s', ucfirst($suffix), $operation->getShortName() ?? 'record'),
+            description: $this->description($operation, $resource),
             annotations: $this->annotations($operation),
             method: $operation->getMethod(),
             uriTemplate: $operation->getUriTemplate(),
@@ -203,17 +208,34 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
         ];
     }
 
-    private function fallbackDescription(HttpOperation $operation): string
+    /**
+     * An operation with no `description:` inherits the resource's, which describes
+     * the resource ("CMS Block resource") rather than the action, so a get and a list
+     * end up advertising identical text and a model can't tell them apart. Fall back
+     * to a generated sentence in that case.
+     */
+    private function description(HttpOperation $operation, MahoApiResource $resource): string
     {
-        $shortName = $operation->getShortName() ?? 'resource';
+        $description = $operation->getDescription();
+
+        if ($description === null || $description === $resource->getDescription()) {
+            return $this->generatedDescription($operation);
+        }
+
+        return $description;
+    }
+
+    private function generatedDescription(HttpOperation $operation): string
+    {
+        $shortName = $operation->getShortName() ?? 'record';
         $method = strtoupper($operation->getMethod());
 
         return match (true) {
-            $operation instanceof CollectionOperationInterface => sprintf('List %s records.', $shortName),
-            $method === 'GET', $method === 'HEAD' => sprintf('Fetch a single %s.', $shortName),
+            $operation instanceof CollectionOperationInterface => sprintf('List %s records, one page at a time.', $shortName),
+            $method === 'GET', $method === 'HEAD' => sprintf('Fetch one %s by its identifier.', $shortName),
             $method === 'POST' => sprintf('Create a %s.', $shortName),
-            $method === 'DELETE' => sprintf('Delete a %s.', $shortName),
-            default => sprintf('Update a %s.', $shortName),
+            $method === 'DELETE' => sprintf('Delete one %s by its identifier.', $shortName),
+            default => sprintf('Update one %s by its identifier.', $shortName),
         };
     }
 }
