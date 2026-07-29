@@ -22,10 +22,10 @@ uses(Tests\MahoBackendTestCase::class);
 /** Helper with a settable owner, standing in for two different visitors. */
 class CaptchaPayloadOwnerHelper extends Maho_Captcha_Helper_Data
 {
-    public string $owner = 'session:first';
+    public ?string $owner = 'session:first';
 
     #[\Override]
-    protected function getPayloadOwner(): string
+    protected function getPayloadOwner(): ?string
     {
         return $this->owner;
     }
@@ -73,6 +73,28 @@ it('rejects a solved payload posted by anyone else', function () {
 
     forgetCaptchaRequestCache();
     $this->helper->owner = 'session:second';
+    expect($this->helper->verify($payload))->toBeFalse();
+});
+
+it('keeps a payload single-use when no session owns it', function () {
+    $this->helper->owner = null;
+    $payload = solvedCaptchaPayload($this->helper);
+
+    expect($this->helper->verify($payload))->toBeTrue();
+
+    forgetCaptchaRequestCache();
+    expect($this->helper->verify($payload))->toBeFalse();
+});
+
+it('stops accepting a payload once its reuse budget is spent', function () {
+    $payload = solvedCaptchaPayload($this->helper);
+
+    for ($use = 0; $use < Maho_Captcha_Helper_Data::MAX_PAYLOAD_USES; $use++) {
+        forgetCaptchaRequestCache();
+        expect($this->helper->verify($payload))->toBeTrue();
+    }
+
+    forgetCaptchaRequestCache();
     expect($this->helper->verify($payload))->toBeFalse();
 });
 

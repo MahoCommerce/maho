@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
-// Keeps every protected form armed with a currently valid payload, so forms can be posted
-// however and as often as their own module likes without knowing this module exists.
+// Keeps every protected form armed with a valid payload, so a form can be posted however and as
+// often as its own module likes without knowing this one exists.
 const MahoCaptcha = {
     loadingImageUrl: null,
     verifyingText: 'Verifying...',
@@ -12,7 +12,7 @@ const MahoCaptcha = {
     scriptsPromise: null,
     verificationPromise: null,
     resolveVerification: null,
-    lastRearmAt: 0,
+    idleRearms: 0,
     loaderEl: null,
     loaderTimeoutId: null,
 
@@ -22,16 +22,24 @@ const MahoCaptcha = {
         this.loadingImageUrl = config.loadingImageUrl ?? '';
         this.verifyingText = config.verifyingText ?? 'Verifying...';
 
-        if (document.readyState === 'loadingImageUrl') {
+        if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', this.initForms.bind(this));
         } else {
             this.initForms();
         }
 
+        this.altchaWidget.addEventListener('statechange', this.onStateChange.bind(this));
         this.altchaWidget.addEventListener('load', () => {
-            const state = this.altchaWidget.getState();
-            this.onStateChange({detail: {state}});
-            this.altchaWidget.addEventListener('statechange', this.onStateChange.bind(this));
+            this.onStateChange({ detail: { state: this.altchaWidget.getState() } });
+            // Never let the widget's own auto mode do this: two solves in flight abort each other.
+            this.startVerification();
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && this.altchaState === 'expired') {
+                this.idleRearms = 0;
+                this.startVerification();
+            }
         });
     },
 
@@ -102,7 +110,8 @@ const MahoCaptcha = {
         if (this.altchaState === 'verified') {
             return;
         }
-        const buttonEl = event.target;
+        // Not target: a click landing on markup inside the button replays into nothing.
+        const buttonEl = event.currentTarget;
 
         event.preventDefault();
         event.stopPropagation();
@@ -113,6 +122,7 @@ const MahoCaptcha = {
     },
 
     async verifyWithLoader() {
+        this.idleRearms = 0;
         this.showLoader();
         try {
             await this.loadAltchaScripts();
@@ -147,11 +157,12 @@ const MahoCaptcha = {
     },
 
     startVerification() {
-        if (this.altchaState === 'verifying') {
+        // Nothing to drive before the widget has loaded: its load handler starts the first one.
+        if (this.altchaState === null || this.altchaState === 'verifying') {
             return;
         }
         // The widget only solves a new challenge from the unverified state.
-        if (this.altchaState !== null && this.altchaState !== 'unverified') {
+        if (this.altchaState !== 'unverified') {
             this.altchaWidget.reset();
         }
         this.altchaWidget.verify();
@@ -168,17 +179,15 @@ const MahoCaptcha = {
         }
 
         if (state === 'verified') {
-            // Replicate maho_captcha input into all forms
-            if (typeof payload === 'string') {
-                for (const formEl of this.getForms()) {
-                    this.setHiddenInputValue(formEl, payload);
-                }
+            // The load event carries no payload of its own, so fall back to the widget's input.
+            const value = typeof payload === 'string' ? payload : this.getWidgetPayload();
+            for (const formEl of this.getForms()) {
+                this.setHiddenInputValue(formEl, value);
             }
-            this.settleVerification(typeof payload === 'string');
+            this.settleVerification(value !== '');
         } else if (state === 'expired') {
-            // Re-arm rather than leave forms holding a payload the server will reject: an AJAX
-            // post fires no submit event for us to intercept.
-            this.clearHiddenInputs();
+            // Re-arm: an AJAX post fires no submit event for us to intercept. The spent payload
+            // stays in the forms meanwhile, since removing it only breaks a post landing now.
             if (this.canRearm()) {
                 this.startVerification();
             } else {
@@ -186,19 +195,17 @@ const MahoCaptcha = {
             }
         } else if (state === 'error') {
             // No re-arm: retrying a failing challenge endpoint would spin.
-            this.clearHiddenInputs();
             this.settleVerification(false);
         }
     },
 
-    // Stops a challenge that arrives already expired (clock skew) from re-arming in a loop.
+    getWidgetPayload() {
+        return this.altchaWidget.querySelector('input[name="altcha"]')?.value ?? '';
+    },
+
+    // A challenge lives a minute: without a budget an idle tab would solve one forever.
     canRearm() {
-        const now = performance.now();
-        if (now - this.lastRearmAt < 5000) {
-            return false;
-        }
-        this.lastRearmAt = now;
-        return true;
+        return !document.hidden && this.idleRearms++ < 5;
     },
 
     setHiddenInputValue(formEl, payload) {
@@ -210,12 +217,6 @@ const MahoCaptcha = {
             formEl.appendChild(hiddenInput);
         }
         hiddenInput.value = payload;
-    },
-
-    clearHiddenInputs() {
-        for (const formEl of this.getForms()) {
-            formEl.querySelector('input[name="maho_captcha"]')?.remove();
-        }
     },
 
     showLoader() {
