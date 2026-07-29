@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
-// Keeps every protected form armed with a valid payload, so a form can be posted however and as
-// often as its own module likes without knowing this one exists.
 const MahoCaptcha = {
     loadingImageUrl: null,
     verifyingText: 'Verifying...',
@@ -12,7 +10,7 @@ const MahoCaptcha = {
     scriptsPromise: null,
     verificationPromise: null,
     resolveVerification: null,
-    idleRearms: 0,
+    lastRearmAt: 0,
     loaderEl: null,
     loaderTimeoutId: null,
 
@@ -36,8 +34,8 @@ const MahoCaptcha = {
         });
 
         document.addEventListener('visibilitychange', () => {
-            if (!document.hidden && this.altchaState === 'expired') {
-                this.idleRearms = 0;
+            if (!document.hidden && (this.altchaState === 'expired' || this.altchaState === 'error')) {
+                this.lastRearmAt = 0;
                 this.startVerification();
             }
         });
@@ -49,7 +47,7 @@ const MahoCaptcha = {
 
     initForms() {
         for (const formEl of this.getForms()) {
-            formEl.addEventListener('focusin', this.loadAltchaScripts.bind(this), { capture: true, once: true });
+            formEl.addEventListener('focusin', () => this.loadAltchaScripts().catch(() => {}), { capture: true, once: true });
             formEl.addEventListener('submit', this.onFormSubmit.bind(this), true);
             for (const buttonEl of formEl.querySelectorAll('button[type=submit]')) {
                 buttonEl.addEventListener('click', this.onFormButtonClick.bind(this), true);
@@ -57,9 +55,14 @@ const MahoCaptcha = {
         }
     },
 
-    // Memoized: several forms (and a submit) can race to load the script.
+    // Several forms (and a submit) can race to load the script. A failure is not memoized, so a
+    // later submit retries instead of finding the form permanently dead.
     loadAltchaScripts() {
-        return this.scriptsPromise ??= this.fetchAltchaScripts();
+        this.scriptsPromise ??= this.fetchAltchaScripts().catch((error) => {
+            this.scriptsPromise = null;
+            throw error;
+        });
+        return this.scriptsPromise;
     },
 
     async fetchAltchaScripts() {
@@ -122,7 +125,6 @@ const MahoCaptcha = {
     },
 
     async verifyWithLoader() {
-        this.idleRearms = 0;
         this.showLoader();
         try {
             await this.loadAltchaScripts();
@@ -186,8 +188,7 @@ const MahoCaptcha = {
             }
             this.settleVerification(value !== '');
         } else if (state === 'expired') {
-            // Re-arm: an AJAX post fires no submit event for us to intercept. The spent payload
-            // stays in the forms meanwhile, since removing it only breaks a post landing now.
+            // Re-arm: an AJAX post fires no submit event for us to intercept.
             if (this.canRearm()) {
                 this.startVerification();
             } else {
@@ -203,9 +204,15 @@ const MahoCaptcha = {
         return this.altchaWidget.querySelector('input[name="altcha"]')?.value ?? '';
     },
 
-    // A challenge lives a minute: without a budget an idle tab would solve one forever.
+    // Re-arming every expiry is the point; the throttle only stops a challenge that arrives
+    // already expired, from a client clock ahead of the server, from looping.
     canRearm() {
-        return !document.hidden && this.idleRearms++ < 5;
+        const now = performance.now();
+        if (document.hidden || now - this.lastRearmAt < 5000) {
+            return false;
+        }
+        this.lastRearmAt = now;
+        return true;
     },
 
     setHiddenInputValue(formEl, payload) {

@@ -45,6 +45,17 @@ function restoreCaptchaCheckoutConfig(): void
     Mage::app()->cleanCache();
 }
 
+/**
+ * Altcha solves the challenge with crypto.subtle, which browsers expose only on a trustworthy
+ * origin. CI serves the app from the runner's IP over plain HTTP, where it is undefined and the
+ * widget goes straight to its error state, so there is nothing to exercise there.
+ */
+function captchaCheckoutOriginIsTrustworthy(): bool
+{
+    $host = getenv('MAHO_BROWSER_HOST') ?: 'localhost';
+    return in_array($host, ['localhost', '127.0.0.1', '::1'], true);
+}
+
 /** A salable, priced, visible simple product page URL, with stock guaranteed for the run. */
 function captchaCheckoutProductUrl(): string
 {
@@ -122,4 +133,7 @@ it('saves the billing step twice instead of replaying the spent captcha payload'
     fillCaptchaCheckoutBilling($page, 'Second');
     $page->click('#billing-buttons-container button');
     expect(waitForCaptchaCheckoutBilling('Second'))->toBeTrue();
-});
+})->skip(
+    fn() => !captchaCheckoutOriginIsTrustworthy(),
+    'Altcha needs crypto.subtle, which this insecure origin does not expose',
+);

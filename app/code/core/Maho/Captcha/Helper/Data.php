@@ -98,7 +98,7 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         // One page legitimately posts the same form more than once (the checkout re-saves the
-        // billing step), so a solved payload is reusable, bounded by owner, uses and expiry.
+        // billing step), so a solved payload is reusable rather than spent on first use.
         $cacheKey = sha1($payload);
         $owner = $this->getPayloadOwner();
         $cached = Mage::app()->getCache()->load($cacheKey);
@@ -169,8 +169,7 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * The session that solved a payload, or null when there is none (API callers), which keeps
-     * the payload single-use: the only other identity is the address, and behind a proxy that is
-     * one shared bucket for every client.
+     * the payload single-use.
      */
     protected function getPayloadOwner(): ?string
     {
