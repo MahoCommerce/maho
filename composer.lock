@@ -1776,16 +1776,16 @@
         },
         {
             "name": "mahocommerce/icons",
-            "version": "3.45.0",
+            "version": "3.46.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/icons.git",
-                "reference": "ca3750ff257ef58d517ed1f2e551b824f1341e4d"
+                "reference": "03d66c2bb087413947a0bfba6c87b4c1b7538f78"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/icons/zipball/ca3750ff257ef58d517ed1f2e551b824f1341e4d",
-                "reference": "ca3750ff257ef58d517ed1f2e551b824f1341e4d",
+                "url": "https://api.github.com/repos/MahoCommerce/icons/zipball/03d66c2bb087413947a0bfba6c87b4c1b7538f78",
+                "reference": "03d66c2bb087413947a0bfba6c87b4c1b7538f78",
                 "shasum": ""
             },
             "type": "library",
@@ -1796,9 +1796,23 @@
             "description": "A huge package of optimized SVG icons",
             "support": {
                 "issues": "https://github.com/MahoCommerce/icons/issues",
-                "source": "https://github.com/MahoCommerce/icons/tree/3.45.0"
+                "source": "https://github.com/MahoCommerce/icons/tree/3.46.0"
             },
-            "time": "2026-07-26T13:00:27+00:00"
+            "funding": [
+                {
+                    "url": "https://www.buymeacoffee.com/fballiano",
+                    "type": "buy_me_a_coffee"
+                },
+                {
+                    "url": "https://paypal.me/fabrizioballiano",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fballiano",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-07-29T03:11:38+00:00"
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
@@ -5159,16 +5173,16 @@
         },
         {
             "name": "symfony/polyfill-php85",
-            "version": "v1.38.1",
+            "version": "v1.41.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php85.git",
-                "reference": "ba2ba04f3352cfa2dcbbcb90aee13ed967f505b1"
+                "reference": "255fab485aaa1006ed411040c42aecd7b5302d7a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php85/zipball/ba2ba04f3352cfa2dcbbcb90aee13ed967f505b1",
-                "reference": "ba2ba04f3352cfa2dcbbcb90aee13ed967f505b1",
+                "url": "https://api.github.com/repos/symfony/polyfill-php85/zipball/255fab485aaa1006ed411040c42aecd7b5302d7a",
+                "reference": "255fab485aaa1006ed411040c42aecd7b5302d7a",
                 "shasum": ""
             },
             "require": {
@@ -5215,7 +5229,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-php85/tree/v1.38.1"
+                "source": "https://github.com/symfony/polyfill-php85/tree/v1.41.0"
             },
             "funding": [
                 {
@@ -5235,7 +5249,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-05-26T02:25:22+00:00"
+            "time": "2026-07-01T12:47:55+00:00"
         },
         {
             "name": "symfony/process",
@@ -6878,16 +6892,16 @@
         },
         {
             "name": "webonyx/graphql-php",
-            "version": "v15.35.0",
+            "version": "v15.37.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webonyx/graphql-php.git",
-                "reference": "b67de08a46d42a5f606e455851882c27d3a3aba8"
+                "reference": "1ef0e90a44330949d10aff2c06fa39d1c154f0c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webonyx/graphql-php/zipball/b67de08a46d42a5f606e455851882c27d3a3aba8",
-                "reference": "b67de08a46d42a5f606e455851882c27d3a3aba8",
+                "url": "https://api.github.com/repos/webonyx/graphql-php/zipball/1ef0e90a44330949d10aff2c06fa39d1c154f0c5",
+                "reference": "1ef0e90a44330949d10aff2c06fa39d1c154f0c5",
                 "shasum": ""
             },
             "require": {
@@ -6900,12 +6914,12 @@
                 "amphp/http-server": "^2.1 || ^3",
                 "dms/phpunit-arraysubset-asserts": "dev-master",
                 "ergebnis/composer-normalize": "^2.28",
-                "friendsofphp/php-cs-fixer": "3.95.15",
+                "friendsofphp/php-cs-fixer": "3.95.17",
                 "mll-lab/php-cs-fixer-config": "5.13.0",
                 "nyholm/psr7": "^1.5",
                 "phpbench/phpbench": "^1.2",
                 "phpstan/extension-installer": "^1.1",
-                "phpstan/phpstan": "2.2.5",
+                "phpstan/phpstan": "2.2.6",
                 "phpstan/phpstan-phpunit": "2.0.18",
                 "phpstan/phpstan-strict-rules": "2.0.12",
                 "phpunit/phpunit": "^9.5 || ^10.5.21 || ^11",
@@ -6942,7 +6956,7 @@
             ],
             "support": {
                 "issues": "https://github.com/webonyx/graphql-php/issues",
-                "source": "https://github.com/webonyx/graphql-php/tree/v15.35.0"
+                "source": "https://github.com/webonyx/graphql-php/tree/v15.37.0"
             },
             "funding": [
                 {
@@ -6954,7 +6968,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2026-07-23T06:59:54+00:00"
+            "time": "2026-07-28T12:30:28+00:00"
         },
         {
             "name": "willdurand/negotiation",
@@ -9870,16 +9884,16 @@
         },
         {
             "name": "laminas/laminas-validator",
-            "version": "3.17.0",
+            "version": "3.18.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laminas/laminas-validator.git",
-                "reference": "b475163508bd3ba0c98c7642c485f1a5d65e9fd9"
+                "reference": "cb039378fcfb5217785371ff169198e8f97c582b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laminas/laminas-validator/zipball/b475163508bd3ba0c98c7642c485f1a5d65e9fd9",
-                "reference": "b475163508bd3ba0c98c7642c485f1a5d65e9fd9",
+                "url": "https://api.github.com/repos/laminas/laminas-validator/zipball/cb039378fcfb5217785371ff169198e8f97c582b",
+                "reference": "cb039378fcfb5217785371ff169198e8f97c582b",
                 "shasum": ""
             },
             "require": {
@@ -9940,11 +9954,11 @@
             },
             "funding": [
                 {
-                    "url": "https://funding.communitybridge.org/projects/laminas-project",
-                    "type": "community_bridge"
+                    "url": "https://crowdfunding.linuxfoundation.org/initiatives/laminas-project",
+                    "type": "custom"
                 }
             ],
-            "time": "2026-06-02T12:34:22+00:00"
+            "time": "2026-07-27T10:20:54+00:00"
         },
         {
             "name": "laminas/laminas-xml",
@@ -11404,16 +11418,16 @@
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
-            "version": "2.0.4",
+            "version": "2.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan-deprecation-rules.git",
-                "reference": "6b5571001a7f04fa0422254c30a0017ec2f2cacc"
+                "reference": "67bedd65c24bc72840afc45aed48b1059dd44bec"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan-deprecation-rules/zipball/6b5571001a7f04fa0422254c30a0017ec2f2cacc",
-                "reference": "6b5571001a7f04fa0422254c30a0017ec2f2cacc",
+                "url": "https://api.github.com/repos/phpstan/phpstan-deprecation-rules/zipball/67bedd65c24bc72840afc45aed48b1059dd44bec",
+                "reference": "67bedd65c24bc72840afc45aed48b1059dd44bec",
                 "shasum": ""
             },
             "require": {
@@ -11423,7 +11437,8 @@
             "require-dev": {
                 "php-parallel-lint/php-parallel-lint": "^1.2",
                 "phpstan/phpstan-phpunit": "^2.0",
-                "phpunit/phpunit": "^9.6"
+                "phpunit/phpunit": "^9.6",
+                "shipmonk/name-collision-detector": "^2.1"
             },
             "type": "phpstan-extension",
             "extra": {
@@ -11448,9 +11463,9 @@
             ],
             "support": {
                 "issues": "https://github.com/phpstan/phpstan-deprecation-rules/issues",
-                "source": "https://github.com/phpstan/phpstan-deprecation-rules/tree/2.0.4"
+                "source": "https://github.com/phpstan/phpstan-deprecation-rules/tree/2.0.5"
             },
-            "time": "2026-02-09T13:21:14+00:00"
+            "time": "2026-07-22T06:50:43+00:00"
         },
         {
             "name": "phpstan/phpstan-strict-rules",
