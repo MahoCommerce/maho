@@ -103,6 +103,7 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
         $listArguments = $this->listArguments($resource);
 
         $tools = [];
+        $canonical = $this->canonicalCollectionName($resource);
         foreach ($resource->getOperations() ?? [] as $sourceName => $operation) {
             // NotExposed is injected by API Platform for resources with no item GET so
             // an IRI can still be generated. It routes nowhere, so it isn't a tool.
@@ -126,13 +127,15 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
                 continue;
             }
 
+            $arguments = $sourceName === $canonical ? $listArguments : [];
+
             $tools[$name] = $this->buildTool(
                 $name,
                 $sourceName,
                 $suffix,
                 $operation,
                 $resource,
-                $operation instanceof CollectionOperationInterface ? $listArguments : [],
+                $arguments,
             );
         }
 
@@ -199,24 +202,15 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
      * declare them, in the same key namespace (see `ProductProvider::getCollection()`,
      * which merges the two), and GraphQL clients keep it honest.
      *
-     * Only used when the resource has exactly one collection operation. With more than
-     * one there is no way to tell which the args belong to, and advertising a filter a
-     * sub-collection silently ignores is worse than advertising nothing.
+     * There is one canonical collection query per resource, so its args go to the one
+     * collection operation on the resource's own base path. Scoped variants
+     * (`/customers/me/orders` beside `/orders`) read a different set in the provider,
+     * and advertising a filter one ignores is worse than advertising nothing.
      *
      * @return array<string, mixed>
      */
     private function listArguments(ApiResource $resource): array
     {
-        $collections = 0;
-        foreach ($resource->getOperations() ?? [] as $operation) {
-            if ($operation instanceof CollectionOperationInterface) {
-                ++$collections;
-            }
-        }
-        if ($collections !== 1) {
-            return [];
-        }
-
         foreach ($resource->getGraphQlOperations() ?? [] as $operation) {
             if (!$operation instanceof QueryCollection || $operation->getName() !== 'collection_query') {
                 continue;
@@ -228,6 +222,31 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
         }
 
         return [];
+    }
+
+    /**
+     * Which collection operation {@see listArguments()} belongs to: the shallowest URI,
+     * i.e. the resource's own base path rather than a scoped variant nested under it.
+     * Declaration order can't stand in for this, since a resource is free to declare
+     * `/customers/me/…` first.
+     */
+    private function canonicalCollectionName(ApiResource $resource): ?string
+    {
+        $canonical = null;
+        $depth = PHP_INT_MAX;
+        foreach ($resource->getOperations() ?? [] as $sourceName => $operation) {
+            if (!$operation instanceof HttpOperation || !$operation instanceof CollectionOperationInterface) {
+                continue;
+            }
+            $path = preg_replace('#\{[^}]*\}#', '', (string) $operation->getUriTemplate()) ?? '';
+            $segments = count(array_filter(explode('/', $path), static fn(string $s): bool => $s !== ''));
+            if ($segments < $depth) {
+                $canonical = (string) $sourceName;
+                $depth = $segments;
+            }
+        }
+
+        return $canonical;
     }
 
     /**

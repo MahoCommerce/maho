@@ -70,6 +70,9 @@ use Maho\ApiPlatform\CrudResource;
             // a plain GraphQL list rather than a paginated cursor connection.
             paginationEnabled: false,
             security: "is_granted('ROLE_ADMIN') or is_granted('customer-groups/read')",
+            extraArgs: [
+                'search' => ['type' => 'String', 'description' => 'Partial match on the group code'],
+            ],
         ),
     ],
 )]

@@ -149,6 +149,13 @@ use Mage\Customer\Api\Address;
             name: 'collection_query',
             description: 'Get orders',
             security: "is_granted('ROLE_ADMIN') or is_granted('orders/read')",
+            extraArgs: [
+                'status' => ['type' => 'String', 'description' => 'Filter by order status (pending, processing, complete, …)'],
+                'since' => ['type' => 'String', 'description' => 'Only orders updated at or after this UTC datetime (Y-m-d or Y-m-d H:i:s)'],
+                'email' => ['type' => 'String', 'description' => 'Exact customer-email match'],
+                'emailLike' => ['type' => 'String', 'description' => 'Partial customer-email match'],
+                'incrementId' => ['type' => 'String', 'description' => 'Exact increment-ID lookup (returns 0 or 1 order)'],
+            ],
         ),
         new Query(
             // Named 'guest' → field `guestOrder` (not `guestOrderOrder`).

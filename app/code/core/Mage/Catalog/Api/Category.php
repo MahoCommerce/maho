@@ -78,6 +78,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
                 'parentId' => ['type' => 'Int', 'description' => 'Filter by parent category ID'],
                 'includeInMenu' => ['type' => 'Boolean', 'description' => 'Only include categories in menu'],
                 'urlKey' => ['type' => 'String', 'description' => 'Exact URL-key lookup (returns 0 or 1 category)'],
+                'search' => ['type' => 'String', 'description' => 'Partial match on the category name or URL key'],
             ],
         ),
     ],

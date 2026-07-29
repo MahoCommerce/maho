@@ -57,7 +57,10 @@ use Maho\ApiPlatform\CrudResource;
             name: 'collection_query',
             description: 'Get CMS pages',
             security: 'true',
-            extraArgs: ['identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup (returns 0 or 1 page)']],
+            extraArgs: [
+                'identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup (returns 0 or 1 page)'],
+                'search' => ['type' => 'String', 'description' => 'Partial match on the page title or identifier, minimum 3 characters'],
+            ],
         ),
     ],
 )]

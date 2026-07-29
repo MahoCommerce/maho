@@ -59,6 +59,7 @@ use Maho\ApiPlatform\CrudResource;
             security: 'true',
             extraArgs: [
                 'identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup (returns 0 or 1 block)'],
+                'search' => ['type' => 'String', 'description' => 'Partial match on the block title or identifier'],
             ],
         ),
     ],

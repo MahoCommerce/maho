@@ -98,6 +98,23 @@ describe('MCP tool catalogue', function (): void {
         expect($properties)->toContain('page', 'itemsPerPage', 'search', 'sku', 'categoryId');
     });
 
+    it('gives the declared filters to the canonical collection, not a scoped variant', function (): void {
+        // Order exposes /orders and /customers/me/orders, and declares one collection
+        // query. The scoped variant takes a different branch in the provider and reads a
+        // different filter set, so advertising these on it would be a lie. Declaration
+        // order can't pick the right one either: RevocationRequest declares its
+        // /customers/me collection first.
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+
+        expect(array_keys($tools['sales_orders_list']['inputSchema']['properties'] ?? []))
+            ->toContain('status', 'since', 'incrementId', 'email', 'emailLike');
+        expect(array_keys($tools['sales_customers_me_orders_list']['inputSchema']['properties'] ?? []))
+            ->toEqualCanonicalizing(['page', 'itemsPerPage']);
+        expect(array_keys($tools['sales_revocation_requests_list']['inputSchema']['properties'] ?? []))
+            ->toContain('processedStatus');
+    });
+
     it('advertises the path parameter a scoped collection needs', function (): void {
         // Collections advertise pagination plus declared filters. For a sub-resource
         // that isn't enough: with no productId in the schema an agent has no way to say
@@ -218,6 +235,30 @@ describe('MCP tool dispatch', function (): void {
 
         expect($payload['totalItems'] ?? null)->toBe(1);
         expect($payload['member'][0]['sku'] ?? null)->toBe($sku);
+    });
+
+    it('narrows a list by a declared filter other than pagination', function (): void {
+        $token = adminToken();
+        $session = mcpSession($token);
+        $all = json_decode(mcpTool('content_cms_pages_list', [], $token, $session)['json']['result']['content'][0]['text'] ?? '{}', true);
+        $total = $all['totalItems'] ?? 0;
+
+        $needle = null;
+        foreach ($all['member'] ?? [] as $page) {
+            // The provider requires three characters before it applies the filter.
+            if (strlen((string) ($page['identifier'] ?? '')) >= 3) {
+                $needle = $page['identifier'];
+                break;
+            }
+        }
+        if ($total < 2 || $needle === null) {
+            $this->markTestSkipped('Needs at least two CMS pages, one with a 3+ character identifier');
+        }
+
+        $filtered = json_decode(mcpTool('content_cms_pages_list', ['search' => $needle], $token, $session)['json']['result']['content'][0]['text'] ?? '{}', true);
+
+        expect($filtered['totalItems'] ?? 0)->toBeGreaterThan(0);
+        expect($filtered['totalItems'] ?? 0)->toBeLessThan($total);
     });
 
     it('gives the operation its own URI so path parameters resolve', function (): void {

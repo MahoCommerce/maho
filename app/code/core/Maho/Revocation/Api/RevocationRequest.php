@@ -71,6 +71,12 @@ use Maho\Config\ApiResource;
             name: 'collection_query',
             description: 'List revocation requests (admin only)',
             security: "is_granted('ROLE_ADMIN') or is_granted('revocation-requests/read')",
+            extraArgs: [
+                'email' => ['type' => 'String', 'description' => 'Exact email match'],
+                'orderId' => ['type' => 'Int', 'description' => 'Filter by order ID'],
+                'processedStatus' => ['type' => 'String', 'description' => 'Filter by processing status'],
+                'storeId' => ['type' => 'Int', 'description' => 'Filter by store ID'],
+            ],
         ),
         new QueryCollection(
             // Named 'my' (not 'myRevocationRequests') so ApiPlatform's appended

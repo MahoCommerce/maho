@@ -67,6 +67,9 @@ use Maho\ApiPlatform\CrudResource;
             name: 'collection_query',
             description: 'Get tax rules',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-rules/read')",
+            extraArgs: [
+                'search' => ['type' => 'String', 'description' => 'Partial match on the rule code'],
+            ],
         ),
     ],
 )]
