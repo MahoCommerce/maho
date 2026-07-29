@@ -14,6 +14,7 @@ use AltchaOrg\Altcha\CreateChallengeOptions;
 use AltchaOrg\Altcha\Payload;
 use AltchaOrg\Altcha\Solution;
 use AltchaOrg\Altcha\VerifySolutionOptions;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 {
@@ -94,10 +95,14 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
             return self::$_payloadVerificationCache[$payload];
         }
 
-        // If challenge is already in cache, it was already solved, validation fails for replay attack protection
+        // A solved payload stays usable until its challenge expires, but only for the visitor
+        // who solved it: one page legitimately posts the same form more than once (the checkout
+        // re-saves the billing step). A payload from someone else's page is still a replay.
         $cacheKey = sha1($payload);
-        if (Mage::app()->getCache()->test($cacheKey)) {
-            return false;
+        $owner = $this->getPayloadOwner();
+        $cachedOwner = Mage::app()->getCache()->load($cacheKey);
+        if ($cachedOwner !== false) {
+            return self::$_payloadVerificationCache[$payload] = hash_equals((string) $cachedOwner, $owner);
         }
 
         try {
@@ -123,7 +128,9 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
                 algorithm: $algorithm,
             ));
             $isValid = $result->verified;
-            Mage::app()->getCache()->save('1', $cacheKey, [self::CACHE_TAG], self::CHALLENGE_EXPIRATION);
+            if ($isValid) {
+                Mage::app()->getCache()->save($owner, $cacheKey, [self::CACHE_TAG], self::CHALLENGE_EXPIRATION);
+            }
         } catch (Exception $e) {
             $isValid = false;
             Mage::logException($e);
@@ -131,5 +138,20 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 
         self::$_payloadVerificationCache[$payload] = $isValid;
         return $isValid;
+    }
+
+    /**
+     * Who a solved payload belongs to. Session first, so visitors behind one NAT can't reuse
+     * each other's payload; the address is a fallback for sessionless callers such as the API.
+     */
+    protected function getPayloadOwner(): string
+    {
+        // Read from the registry instead of Mage::getSingleton('core/session') so no session is
+        // started here: it holds null (untyped, hence the instanceof) until something starts one.
+        $session = Mage::registry(Mage_Core_Model_Session_Abstract::REGISTRY_KEY);
+        if ($session instanceof SessionInterface && $session->getId() !== '') {
+            return 'session:' . sha1($session->getId());
+        }
+        return 'ip:' . sha1((string) Mage::helper('core/http')->getRemoteAddr());
     }
 }
