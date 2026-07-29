@@ -98,6 +98,31 @@ describe('MCP tool catalogue', function (): void {
         expect($properties)->toContain('page', 'itemsPerPage', 'search', 'sku', 'categoryId');
     });
 
+    it('advertises every input schema as a JSON object on the wire', function (): void {
+        // The spec types `inputSchema.properties` as an object, and a strict client
+        // rejects the whole listing when one tool gets it wrong. An empty PHP array
+        // encodes to `[]`, so tools taking no arguments (/store-config, /customers/me)
+        // are the ones that break. Asserting on the encoded form is the point here:
+        // decoding into PHP arrays hides exactly the difference that matters.
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+
+        foreach ($tools as $name => $tool) {
+            $schema = $tool['inputSchema'] ?? null;
+            expect($schema)->toBeArray("tool {$name} has no input schema");
+            expect($schema['type'] ?? null)->toBe('object', "tool {$name} input schema is not an object");
+
+            $encoded = json_encode($schema, JSON_THROW_ON_ERROR);
+            expect($encoded)->not->toContain('"properties":[', "tool {$name} encodes properties as an array");
+            foreach (['properties', 'required'] as $key) {
+                if (!array_key_exists($key, $schema)) {
+                    continue;
+                }
+                expect($schema[$key])->not->toBe([], "tool {$name} declares an empty {$key}");
+            }
+        }
+    });
+
     it('covers resources declared with the plain API Platform attribute', function (): void {
         // Product sub-resources gate on the parent's products/write rather than owning a
         // permission, so they use ApiPlatform's attribute instead of Maho's. That says

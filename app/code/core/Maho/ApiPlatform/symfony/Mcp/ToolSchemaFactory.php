@@ -71,7 +71,14 @@ final class ToolSchemaFactory implements SchemaFactoryInterface
 
         // The body wins on collision: an `id` the resource exposes already carries its
         // own description and type.
-        $body['properties'] = ($body['properties'] ?? []) + $uriVariables;
+        $properties = ($body['properties'] ?? []) + $uriVariables;
+        if ($properties === []) {
+            unset($body['properties']);
+
+            return $body;
+        }
+
+        $body['properties'] = $properties;
 
         return $body;
     }
@@ -126,7 +133,11 @@ final class ToolSchemaFactory implements SchemaFactoryInterface
         unset($schema['$schema']);
 
         $schema['type'] = 'object';
-        $schema['properties'] = $properties;
+        // An empty PHP array encodes to `[]`, and the spec types `properties` as an
+        // object, so a tool taking no arguments has to omit the key entirely.
+        if ($properties !== []) {
+            $schema['properties'] = $properties;
+        }
         if ($required !== []) {
             $schema['required'] = $required;
         }
