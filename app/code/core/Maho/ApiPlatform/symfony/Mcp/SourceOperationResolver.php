@@ -85,7 +85,10 @@ final class SourceOperationResolver
             $operation = $operation->withDeserialize(false);
         }
         if ($operation->canWrite() === null) {
-            $operation = $operation->withWrite(true);
+            // Upstream forces this on because a hand-declared tool's processor *is* the
+            // tool body. A derived read must not reach the write stage: it would run the
+            // resource's processor over the provider's result.
+            $operation = $operation->withWrite(!in_array(strtoupper($operation->getMethod()), ['GET', 'HEAD'], true));
         }
         if ($operation->canSerialize() === null) {
             $operation = $operation->withSerialize(false);

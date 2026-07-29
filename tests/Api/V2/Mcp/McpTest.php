@@ -219,6 +219,45 @@ describe('MCP tool dispatch', function (): void {
         expect($response['json']['error']['message'] ?? '')->not->toContain('Invalid link type');
     });
 
+    it('keeps a read tool out of the write stage', function (): void {
+        // Twenty resources declare `processor:` at resource level, so their reads
+        // inherit one. Leaving API Platform's write stage enabled (what a hand-declared
+        // tool needs, since its processor is the tool body) runs that processor over the
+        // provider's result: CmsPage's 403s on cms-pages/write, and Order's replaces the
+        // collection with a single empty Order.
+        $token = adminToken();
+        $session = mcpSession($token);
+
+        foreach (['content_cms_pages_list', 'sales_orders_list'] as $name) {
+            $response = mcpTool($name, [], $token, $session);
+            expect($response['json']['error'] ?? null)->toBeNull("{$name} was refused");
+
+            $payload = json_decode($response['json']['result']['content'][0]['text'] ?? '{}', true);
+            expect($payload['@type'] ?? null)->toBe('Collection', "{$name} did not return a collection");
+        }
+    });
+
+    it('still runs the write stage for a write tool', function (): void {
+        $token = serviceToken();
+        $session = mcpSession($token);
+
+        $created = mcpTool('content_cms_blocks_create', [
+            'title' => 'MCP write stage',
+            'identifier' => 'mcp_write_stage_' . bin2hex(random_bytes(4)),
+            'content' => 'body',
+            'isActive' => true,
+            'stores' => [0],
+        ], $token, $session);
+
+        $payload = json_decode($created['json']['result']['content'][0]['text'] ?? '{}', true);
+        $id = $payload['id'] ?? null;
+        expect($id)->toBeInt();
+        trackCreated('cms_block', $id);
+
+        $deleted = mcpTool('content_cms_blocks_delete', ['id' => $id], $token, $session);
+        expect($deleted['json']['error'] ?? null)->toBeNull();
+    });
+
     it('refuses an unauthenticated call to a non-public tool', function (): void {
         $session = mcpSession();
         $response = mcpTool('catalog_products_delete', ['id' => 1], null, $session);
