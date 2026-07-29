@@ -98,6 +98,19 @@ describe('MCP tool catalogue', function (): void {
         expect($properties)->toContain('page', 'itemsPerPage', 'search', 'sku', 'categoryId');
     });
 
+    it('advertises the path parameter a scoped collection needs', function (): void {
+        // Collections advertise pagination plus declared filters. For a sub-resource
+        // that isn't enough: with no productId in the schema an agent has no way to say
+        // which product it means, and 17 list tools are uncallable.
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+        $schema = $tools['catalog_products_links_related_list']['inputSchema'] ?? [];
+
+        expect($schema['properties'] ?? [])->toHaveKey('productId');
+        expect($schema['required'] ?? [])->toContain('productId');
+        expect(array_keys($schema['properties'] ?? []))->toContain('page', 'itemsPerPage');
+    });
+
     it('advertises every input schema as a JSON object on the wire', function (): void {
         // The spec types `inputSchema.properties` as an object, and a strict client
         // rejects the whole listing when one tool gets it wrong. An empty PHP array

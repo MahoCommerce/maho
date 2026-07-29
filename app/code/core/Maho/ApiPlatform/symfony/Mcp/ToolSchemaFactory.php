@@ -50,11 +50,15 @@ final class ToolSchemaFactory implements SchemaFactoryInterface
             /** @var array{properties?: array<string, array<string, mixed>>, required?: list<string>} $arguments */
             $arguments = $operation->getExtraProperties()[McpToolResourceMetadataCollectionFactory::LIST_ARGUMENTS] ?? [];
 
+            // A sub-resource collection is scoped by its path (/products/{productId}/media),
+            // so its URI variables are arguments too: without them the tool is uncallable.
+            $uriVariables = $this->uriVariableProperties($operation);
+
             return $this->objectSchema(
                 // Declared filters win: they're hand-written per resource, whereas the
                 // pagination pair is boilerplate every list tool gets.
-                $this->paginationProperties() + ($arguments['properties'] ?? []),
-                $arguments['required'] ?? [],
+                $uriVariables + ($arguments['properties'] ?? []) + $this->paginationProperties(),
+                array_values(array_unique([...array_keys($uriVariables), ...($arguments['required'] ?? [])])),
             );
         }
 
