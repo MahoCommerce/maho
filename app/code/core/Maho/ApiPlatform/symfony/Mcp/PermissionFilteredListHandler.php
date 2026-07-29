@@ -27,16 +27,12 @@ use Mcp\Server\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- * Decorates `api_platform.mcp.list_handler` and drops from `tools/list` every
- * tool whose operation the current token is denied. Not a security boundary,
- * {@see \Maho\ApiPlatform\State\McpDispatchProvider} and the operation's own
- * `security:` expression are; this only stops an agent burning turns on tools it
- * will be refused.
+ * Drops from `tools/list` every tool the current token would be refused, so an agent
+ * doesn't burn turns discovering that. Not the security boundary,
+ * {@see \Maho\ApiPlatform\State\McpDispatchProvider} is.
  *
- * Filtering is deliberately optimistic. A tool stays in the list when the verdict
- * can't be reached without running the operation, in particular when the security
- * expression inspects `object` (customer-scoped resources compare the loaded
- * entity against the token), or when evaluating it throws.
+ * Optimistic on purpose: a tool stays listed when the verdict needs the entity
+ * loaded, e.g. a security expression inspecting `object`.
  *
  * @implements RequestHandlerInterface<ListToolsResult>
  */

@@ -122,11 +122,8 @@ class Kernel extends BaseKernel
             new \Symfony\Bundle\SecurityBundle\SecurityBundle(),
             new \ApiPlatform\Symfony\Bundle\ApiPlatformBundle(),
             new \Nelmio\CorsBundle\NelmioCorsBundle(),
-            // API Platform's Mcp namespace only loads when this bundle is present:
-            // its DI config wires `mcp.registry` and tags `mcp.loader` /
-            // `mcp.request_handler`, all of which McpBundle owns. Registering it
-            // unconditionally keeps /api/mcp routed; the protocol toggle (404 in
-            // ProtocolToggleListener) is what actually gates access.
+            // API Platform's Mcp namespace only loads when this bundle is present.
+            // Always registered; ProtocolToggleListener is what gates /api/mcp.
             new \Symfony\AI\McpBundle\McpBundle(),
         ];
 
@@ -250,8 +247,6 @@ class Kernel extends BaseKernel
             'patch_formats' => [
                 'json' => ['application/merge-patch+json'],
             ],
-            // Tools are derived from resource metadata by
-            // McpToolResourceMetadataCollectionFactory, not declared by hand.
             'mcp' => ['enabled' => true],
         ]);
 
@@ -261,15 +256,11 @@ class Kernel extends BaseKernel
             'description' => 'Maho Commerce store data and operations',
             'instructions' => $this->mcpInstructions(),
             'client_transports' => ['http' => true],
-            // Defaults to ['src'], resolved against getProjectDir() (the symfony/
-            // dir, which has no src/). Nothing to scan either way: Maho declares no
-            // #[AsMcpTool] handlers, every tool comes from ApiResource metadata.
+            // Defaults to ['src'] under getProjectDir(), which doesn't exist. Nothing
+            // to scan: every tool comes from ApiResource metadata, not #[AsMcpTool].
             'discovery' => ['scan_dirs' => []],
             'http' => [
-                // Must sit under /api: the `api` firewall pattern is `^/api`, so
-                // this path inherits OAuth2Authenticator and bearer-token auth with
-                // no extra security config, and public/.htaccess already routes
-                // ^api(/.*)?$ to rest.php.
+                // Under /api so the `^/api` firewall gives it bearer auth for free.
                 'path' => '/api/mcp',
                 'allowed_hosts' => $this->mcpAllowedHosts(),
                 'session' => ['store' => 'cache'],
@@ -411,19 +402,16 @@ class Kernel extends BaseKernel
         // empty token and 401 every authenticated request.
 
         // ---- MCP ------------------------------------------------------------
-        // Mirror every HTTP operation as an MCP tool. Priority 150 puts this
-        // outside every metadata factory but the cache, so operations arrive fully
-        // resolved (names, URI templates, formats, inherited defaults).
+        // Priority 150: outside every metadata factory but the cache, so operations
+        // arrive fully resolved.
         $services->set(Metadata\McpToolResourceMetadataCollectionFactory::class)
             ->decorate('api_platform.metadata.resource.metadata_collection_factory', null, 150)
             ->arg('$decorated', new Reference(Metadata\McpToolResourceMetadataCollectionFactory::class . '.inner'));
 
-        // Outermost decorator of the main state provider (priority 50, below
-        // ContentNegotiationProvider's 100) so the gates and the operation swap
-        // happen before the read, the deserialization and the security expression.
-        // autoconfigure is off on purpose: the class implements ProviderInterface,
-        // and letting it be tagged api_platform.state_provider would put it in the
-        // state-provider locator it decorates, i.e. a circular reference.
+        // Priority 50 (below ContentNegotiationProvider's 100) makes it outermost, so
+        // the gates and the operation swap precede the read and the security check.
+        // autoconfigure off: tagging a ProviderInterface api_platform.state_provider
+        // would put it in the locator it decorates, i.e. a circular reference.
         $services->set(State\McpDispatchProvider::class)
             ->autoconfigure(false)
             ->decorate('api_platform.state_provider.main', null, 50)
@@ -448,8 +436,8 @@ class Kernel extends BaseKernel
     }
 
     /**
-     * Orientation text the model reads before touching any tool. Kept short and
-     * concrete on purpose: it does more work than any individual tool description.
+     * Orientation text the model reads before touching any tool. Does more work than
+     * any individual tool description, so it stays short and concrete.
      */
     private function mcpInstructions(): string
     {
@@ -469,16 +457,11 @@ class Kernel extends BaseKernel
     }
 
     /**
-     * Hosts the MCP endpoint answers to.
-     *
-     * The SDK's DNS-rebinding protection defaults to localhost only, which rejects
-     * every remote call, so the store's own hosts have to be listed explicitly.
-     * Resolved at container-compile time, like the CORS allowlist above: clear
-     * var/cache/api_platform after changing a base URL.
-     *
-     * Returns null rather than an empty list when no host can be derived: an
-     * empty allowlist rejects every request including localhost, which would
-     * make a misconfigured base URL look like a broken MCP implementation.
+     * The SDK's DNS-rebinding protection defaults to localhost only, rejecting every
+     * remote call, so the store's hosts are listed explicitly. Baked in at compile
+     * time like the CORS allowlist: clear var/cache/api_platform after a base-URL
+     * change. Null, not [], when nothing can be derived, since an empty allowlist
+     * rejects even localhost.
      *
      * @return list<string>|null
      */
@@ -502,8 +485,7 @@ class Kernel extends BaseKernel
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $routes->import('.', 'api_platform')->prefix('/api');
-        // McpBundle's RouteLoader emits the endpoint at the configured absolute
-        // path (/api/mcp), so no prefix here.
+        // McpBundle emits the endpoint at the configured absolute path, so no prefix.
         $routes->import('.', 'mcp');
         $routes->import($this->getProjectDir() . '/Controller/', 'attribute');
     }

@@ -18,24 +18,16 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 
 /**
- * An `McpTool` is a presentation object: it advertises a name, a description and
- * a JSON schema. It is not the operation Maho's providers and processors expect.
- * They branch on the concrete metadata class (`$operation instanceof Post`,
- * `instanceof DeleteOperationInterface`) and on `$operation->getName()` to route
- * custom named operations, and an `McpTool` answers "no" and "catalog_products_get"
- * to all of that. Dispatching the tool itself would silently take the wrong branch
- * in roughly a dozen core processors.
+ * API Platform dispatches the `McpTool` itself, which works for a standalone tool
+ * with its own `input:` and `processor:`. Derived tools reuse REST processors, and
+ * those read the operation's identity: `instanceof Post` / `DeleteOperationInterface`
+ * to tell create from update, `getName()` to route named operations. So dispatch
+ * swaps the mirrored operation back in and the pipeline below is unchanged REST.
  *
- * So the tool carries the name of the operation it mirrors, and dispatch swaps it
- * back in. Everything below the swap is byte-for-byte the REST pipeline.
- *
- * The execution flags applied here mirror `ApiPlatform\Mcp\Server\Handler`, which
- * sets them on the tool before dispatch: MCP has its own transport, so content
- * negotiation and HTTP (de)serialization are off, while read and write are on.
- * The Handler's `ToolProvider` fallback is deliberately not mirrored, argument
- * mapping is {@see \Maho\ApiPlatform\State\McpDispatchProvider}'s job and it uses
- * the API Platform serializer rather than the object mapper, so a tool call
- * denormalizes under exactly the groups its REST counterpart would.
+ * The execution flags mirror `ApiPlatform\Mcp\Server\Handler`. Its `ToolProvider`
+ * fallback is not mirrored: argument mapping belongs to
+ * {@see \Maho\ApiPlatform\State\McpDispatchProvider}, which uses the serializer
+ * rather than the object mapper so groups match REST.
  */
 final class SourceOperationResolver
 {
@@ -46,8 +38,8 @@ final class SourceOperationResolver
     ) {}
 
     /**
-     * Returns the operation unchanged when it isn't a derived tool, so a
-     * hand-written `mcp: [new McpTool(...)]` keeps API Platform's own behaviour.
+     * A hand-declared tool has nothing to resolve and is returned unchanged, so it
+     * keeps API Platform's own dispatch.
      */
     public function resolve(Operation $operation): Operation
     {

@@ -21,14 +21,10 @@ use ApiPlatform\Metadata\McpTool;
 use ApiPlatform\Metadata\Operation;
 
 /**
- * `ApiPlatform\Mcp\Capability\Registry\Loader` builds a tool's input schema from
- * the resource class, which is right for a create or an update and wrong for
- * everything else: a `*_get` tool would advertise all sixty writable product
- * fields when it accepts one id, and a `*_list` tool would advertise an array,
- * which the MCP `Tool` constructor rejects outright ("inputSchema must be a JSON
- * Schema of type object").
- *
- * So the input schema is derived from what the tool actually consumes:
+ * Synthesises the schema a hand-declared tool would carry in `input:`. Derived tools
+ * have no DTO to point at, and the fallback (the resource class) is the response
+ * shape: it advertises sixty writable fields on a `*_get` tool that takes one id,
+ * and an array on a `*_list` tool, which the MCP `Tool` constructor rejects.
  *
  * - read/delete of a single item → its URI variables
  * - list → pagination
@@ -64,8 +60,8 @@ final class ToolSchemaFactory implements SchemaFactoryInterface
             return $this->objectSchema($uriVariables, array_keys($uriVariables));
         }
 
-        // The body wins on collision: an `id` the resource already exposes carries
-        // its own description and type, and restating it here would lose both.
+        // The body wins on collision: an `id` the resource exposes already carries its
+        // own description and type.
         $body['properties'] = ($body['properties'] ?? []) + $uriVariables;
 
         return $body;

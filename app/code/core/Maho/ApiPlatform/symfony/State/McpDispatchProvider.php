@@ -25,24 +25,16 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
 /**
- * Outermost decorator of `api_platform.state_provider.main`, so everything below
- * it, the read, the deserialization and the `security:` expression, runs against
- * the real operation and with the caller already vetted.
- *
- * Three jobs, all of them translations between MCP's one-POST-many-operations
- * shape and a pipeline built for one-request-one-operation:
+ * Outermost decorator of `api_platform.state_provider.main`, so the read, the
+ * deserialization and the `security:` expression all see a vetted caller and the
+ * real operation. Three translations from MCP's one-POST-many-operations shape:
  *
  * - **Gate the caller.** `AdminAclListener` and `DefaultDenyListener` key off the
  *   `_api_resource_class` request attribute, which `/api/mcp` never sets, so both
- *   skip every tool call. Without this an admin token would reach every tool
- *   regardless of its Maho role, and a resource declaring no `security:` would
- *   lose its default-deny.
+ *   skip every tool call.
  * - **Restore the operation.** See {@see SourceOperationResolver}.
- * - **Place the arguments.** REST carries them in the query string (filters and
- *   pagination) or the request body (the entity); MCP carries both in
- *   `params.arguments`. Route them to the same two places.
- *
- * Non-MCP traffic returns on the first line untouched.
+ * - **Place the arguments.** REST splits them between query string and body; MCP
+ *   sends both in `params.arguments`.
  *
  * @implements ProviderInterface<object>
  */
@@ -104,10 +96,9 @@ final class McpDispatchProvider implements ProviderInterface
     }
 
     /**
-     * Build the write payload the way `DeserializeProvider` would, minus the HTTP
-     * body: same serializer, same context builder, so groups, name conversion and
-     * `OBJECT_TO_POPULATE` behave exactly as they do over REST. `$data` is the
-     * entity the read stage loaded, present for PUT/PATCH and null for POST.
+     * What `DeserializeProvider` does, minus the HTTP body: same serializer and
+     * context builder, so groups and `OBJECT_TO_POPULATE` match REST. `$data` is the
+     * entity the read stage loaded, null for a create.
      *
      * @param array<string, mixed> $arguments
      */

@@ -17,13 +17,11 @@ use ApiPlatform\State\ProcessorInterface;
 use Maho\ApiPlatform\Mcp\SourceOperationResolver;
 
 /**
- * The write half of {@see McpDispatchProvider}'s operation swap. `Maho\ApiPlatform\Processor`
- * routes on `$operation instanceof DeleteOperationInterface` and `instanceof Post`,
- * so a processor handed the `McpTool` would treat every delete as an update.
+ * The write half of {@see McpDispatchProvider}'s operation swap.
  *
  * Decorates `api_platform.mcp.state_processor.write` rather than the MCP processor
- * that wraps it: `StructuredContentProcessor` needs to keep seeing the McpTool to
- * decide whether the result carries structured content.
+ * wrapping it: `StructuredContentProcessor` must keep seeing the McpTool to decide
+ * whether the result carries structured content.
  *
  * @implements ProcessorInterface<mixed, mixed>
  */

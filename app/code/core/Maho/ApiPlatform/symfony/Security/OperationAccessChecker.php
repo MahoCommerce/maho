@@ -17,17 +17,15 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
- * The two checks that API Platform's own `security:` expressions don't cover:
- * "is anybody authenticated at all" and "does this admin's Maho role grant the
- * resource's ADMIN_RESOURCE".
+ * The two checks `security:` expressions don't cover: whether anybody is
+ * authenticated, and whether an admin's Maho role grants the resource's
+ * ADMIN_RESOURCE.
  *
- * REST applies them at `kernel.request` (see `DefaultDenyListener` and
- * `AdminAclListener`), which works because one HTTP request maps to exactly one
- * operation. MCP does not: `tools/call` is a POST to `/api/mcp` carrying the
- * operation name in the JSON-RPC body, so the request attributes those listeners
- * key off (`_api_resource_class`) are never set and both silently skip. The same
- * rules therefore live here, applied at dispatch time by
- * `Maho\ApiPlatform\State\McpAclProvider`.
+ * REST applies them at `kernel.request` (`DefaultDenyListener`, `AdminAclListener`),
+ * which works because one request means one operation. MCP names the operation in
+ * the JSON-RPC body, so those listeners skip it and
+ * {@see \Maho\ApiPlatform\State\McpDispatchProvider} applies the same rules at
+ * dispatch time.
  */
 final class OperationAccessChecker
 {

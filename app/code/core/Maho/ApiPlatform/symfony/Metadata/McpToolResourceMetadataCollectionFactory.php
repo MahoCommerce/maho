@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\McpTool;
+use ApiPlatform\Metadata\McpToolCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use ApiPlatform\Metadata\Resource\ResourceMetadataCollection;
@@ -23,32 +24,18 @@ use Maho\ApiPlatform\Mcp\SourceOperationResolver;
 use Maho\Config\ApiResource as MahoApiResource;
 
 /**
- * `ApiPlatform\Mcp\Capability\Registry\Loader` only registers operations found in
- * `ApiResource(mcp: [...])`, so nothing is exposed to MCP by default. Rather than
- * asking every resource author to restate their operations a second time, this
- * factory derives the `mcp:` list from the operations they already declared. A
- * third-party module gets its tools for free the moment its resource is loaded.
+ * API Platform exposes nothing to MCP unless a resource declares `mcp: [...]`, so
+ * this derives that list from the operations already declared. Third-party resources
+ * are covered without their authors doing anything.
  *
- * Decorates the metadata chain at priority 150, i.e. everywhere inside the cache
- * layer has already run: operations arrive with names assigned, URI templates
- * expanded, formats resolved and resource-level defaults (provider, processor,
- * security, serializer groups) inherited. The tool copies that resolved state, so
- * `security` in particular carries over verbatim and `ApiUserVoter` gates a tool
- * call exactly as it gates the matching REST request.
+ * Priority 150 puts it outside every metadata factory but the cache, so operations
+ * arrive resolved and the tool copies `security` (and the rest) verbatim.
  *
- * The tool is metadata only; dispatch runs against the original operation, which
- * it names in `extraProperties` for {@see SourceOperationResolver}.
- *
- * Derivation is skipped when the author declared `mcp:` themselves, or opted out
- * with `mahoMcp: false`.
+ * Skipped when the author declared `mcp:` themselves or set `mahoMcp: false`.
  */
 final class McpToolResourceMetadataCollectionFactory implements ResourceMetadataCollectionFactoryInterface
 {
-    /**
-     * Tool-name suffix per HTTP verb. `Patch` and `Put` deliberately share
-     * `update`: a resource exposing both at the same URI wants one tool, and the
-     * de-duplication below keeps whichever comes first.
-     */
+    /** `Put` and `Patch` share `update`; the de-duplication below keeps the first. */
     private const VERB_SUFFIX = [
         'GET' => 'get',
         'HEAD' => 'get',
@@ -117,9 +104,8 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
     }
 
     /**
-     * `Mage\Catalog\Api\Product` → `catalog`, `Maho\Blog\Api\BlogPost` → `blog`.
-     * Mirrors `ApiPermissionCompiler::deriveSectionFromNamespace()` so a tool name
-     * and the permission section an operator grants in the admin agree.
+     * Mirrors `ApiPermissionCompiler::deriveSectionFromNamespace()` so a tool name and
+     * the permission section an operator grants in the admin agree.
      */
     private function toolNamePrefix(string $resourceClass, MahoApiResource $resource): string
     {
@@ -138,14 +124,9 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
     }
 
     /**
-     * `/products/{id}` + `get` → `catalog_products_get`,
-     * `/carts/{id}/items/{itemId}/gift-message` + `update` → `checkout_carts_items_gift_message_update`.
-     *
-     * Built from the URI's static segments rather than the resource name alone:
-     * resources such as Cart expose a dozen operations sharing one HTTP method, and
-     * a name derived from the method alone would collapse them into each other.
-     * Path variables are dropped, so an item URI and its collection differ only by
-     * the `get`/`list` suffix.
+     * `/carts/{id}/items/{itemId}/gift-message` + `update` →
+     * `checkout_carts_items_gift_message_update`. Built from the URI's static segments
+     * because resources like Cart expose a dozen operations sharing one HTTP method.
      */
     private function toolName(string $prefix, HttpOperation $operation, string $suffix): string
     {
@@ -163,11 +144,7 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
         return implode('_', [$prefix, ...$segments, $suffix]);
     }
 
-    /**
-     * MCP names are the protocol's wire identity: an agent's saved prompts and a
-     * client's tool allow-lists both key off them, so they must not drift. Anything
-     * that is not `[a-z0-9_]` is folded away here rather than passed through.
-     */
+    /** Tool names are wire identity, so anything outside `[a-z0-9_]` is folded away. */
     private function snake(string $value): string
     {
         $value = preg_replace('/(?<=[a-z0-9])(?=[A-Z])/', '_', $value) ?? $value;
@@ -179,7 +156,7 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
 
     private function buildTool(string $name, string $sourceName, HttpOperation $operation): McpTool
     {
-        $class = $operation instanceof CollectionOperationInterface ? McpCollectionTool::class : McpTool::class;
+        $class = $operation instanceof CollectionOperationInterface ? McpToolCollection::class : McpTool::class;
 
         return new $class(
             name: $name,
@@ -218,8 +195,8 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
 
         return [
             'readOnlyHint' => $method === 'GET' || $method === 'HEAD',
-            // Only DELETE removes data an agent cannot put back; POST/PUT are
-            // reported as additive so clients don't prompt on every write.
+            // Only a delete removes what an agent can't put back, so clients don't
+            // prompt on every write.
             'destructiveHint' => $operation instanceof Delete,
             'idempotentHint' => !$operation instanceof Post,
             'openWorldHint' => false,
