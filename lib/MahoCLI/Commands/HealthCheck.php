@@ -166,6 +166,19 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * Tables holding enough reclaimable free space to be worth a rebuild.
+     * Works on all three backends, each measuring its own form of bloat.
+     *
+     * @return list<array{table: string, total: int, reclaimable: int, ratio: float, detail: string}>
+     */
+    public static function findBloatedTables(): array
+    {
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+
+        return \MahoCLI\Helper\TableBloatScanner::scan($adapter, \Maho\Db\Schema\Collector::tablePrefix());
+    }
+
+    /**
      * Scans user code (app/code/local and app/code/community) for legacy XML config
      * declarations that have PHP-attribute equivalents introduced in v26.5.
      *
@@ -379,6 +392,28 @@ class HealthCheck extends BaseMahoCommand
                 'check' => 'Table Storage Engines',
                 'severity' => 'error',
                 'details' => 'Unable to check table storage engines.',
+            ];
+        }
+
+        try {
+            $bloated = self::findBloatedTables();
+            $checks[] = [
+                'check' => 'Table Optimization',
+                'severity' => empty($bloated) ? 'ok' : 'warning',
+                'details' => empty($bloated) ? '' : sprintf(
+                    '%d table(s) hold ~%s of reclaimable free space (%s). Bloat this size usually means rows were '
+                    . 'purged in bulk, or that a cleanup job (./maho log:clean) is not running. Run "./maho db:optimize" '
+                    . 'during a maintenance window to return the space to the filesystem.',
+                    count($bloated),
+                    Mage::helper('core')->formatFileSize((int) array_sum(array_column($bloated, 'reclaimable'))),
+                    implode(', ', array_column($bloated, 'table')),
+                ),
+            ];
+        } catch (\Exception) {
+            $checks[] = [
+                'check' => 'Table Optimization',
+                'severity' => 'error',
+                'details' => 'Unable to check table optimization.',
             ];
         }
 
@@ -947,6 +982,7 @@ class HealthCheck extends BaseMahoCommand
 
         $this->checkZeroDates($output, (bool) $input->getOption('check-zero-dates'));
         $this->checkTableEngines($output);
+        $this->checkTableBloat($output);
 
         if ($hasErrors) {
             return Command::FAILURE;
@@ -1046,6 +1082,51 @@ class HealthCheck extends BaseMahoCommand
             $output->writeln(sprintf('- %s (%s)', $table, $engine));
         }
         $output->writeln('Run: ./maho migrate');
+        $output->writeln('');
+    }
+
+    /**
+     * Detect tables whose on-disk footprint is mostly free space left behind by
+     * bulk deletes. All three backends are covered, each with its own measure:
+     * InnoDB's DATA_FREE, PostgreSQL's dead-tuple share, and SQLite's page
+     * freelist. Detection is metadata-only; the rebuild that reclaims the space
+     * is a maintenance-window operation, so it is never run from here.
+     */
+    private function checkTableBloat(OutputInterface $output): void
+    {
+        $output->write('Checking table optimization... ');
+
+        $adapter = \Mage::getSingleton('core/resource')->getConnection('core_read');
+        $tables = \MahoCLI\Helper\TableBloatScanner::scan($adapter, \Maho\Db\Schema\Collector::tablePrefix());
+
+        if ($tables === []) {
+            $output->writeln('<info>OK</info>');
+            $reason = \MahoCLI\Helper\TableBloatScanner::reclaimUnavailableReason($adapter);
+            if ($reason !== null) {
+                $output->writeln('(not measurable here: ' . $reason . ')');
+            }
+            return;
+        }
+
+        $output->writeln('');
+        $output->writeln(sprintf(
+            '<comment>Warning: %d table(s) hold reclaimable free space:</comment>',
+            count($tables),
+        ));
+        $helper = Mage::helper('core');
+        foreach ($tables as $table) {
+            $output->writeln(sprintf(
+                '- %s: %s of %s reclaimable (%d%%)%s',
+                $table['table'],
+                $helper->formatFileSize($table['reclaimable']),
+                $helper->formatFileSize($table['total']),
+                (int) round($table['ratio'] * 100),
+                $table['detail'] === '' ? '' : ', ' . $table['detail'],
+            ));
+        }
+        $output->writeln('Bloat this size usually means rows were purged in bulk, or that a cleanup job is not');
+        $output->writeln('running: check ./maho log:status and ./maho log:clean before rebuilding.');
+        $output->writeln('Run: ./maho db:optimize (during a maintenance window)');
         $output->writeln('');
     }
 
