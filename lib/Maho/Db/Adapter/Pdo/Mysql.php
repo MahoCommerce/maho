@@ -21,11 +21,6 @@ class Mysql extends AbstractPdoAdapter
     public const DDL_CACHE_TAG         = 'DB_PDO_MYSQL_DDL';
 
     /**
-     * MEMORY engine type for MySQL tables
-     */
-    public const ENGINE_MEMORY = 'MEMORY';
-
-    /**
      * Default class name for a DB statement.
      */
     protected string $_defaultStmtClass = \Maho\Db\Statement\Pdo\Mysql::class;
@@ -2387,9 +2382,20 @@ class Mysql extends AbstractPdoAdapter
         ];
         foreach ($tableProps as $key => $mask) {
             $v = $table->getOption($key);
-            if ($v !== null) {
-                $definition[] = sprintf($mask, $v);
+            if ($v === null) {
+                continue;
             }
+            // Coerced rather than refused, so a module carrying a 2012-era engine
+            // choice still installs. See Maho\Db\Schema\Collector for the why.
+            if ($key === 'type' && strcasecmp((string) $v, 'InnoDB') !== 0) {
+                \Mage::log(sprintf(
+                    'Table "%s" requests storage engine "%s"; forced to InnoDB.',
+                    $table->getName(),
+                    (string) $v,
+                ), \Mage::LOG_NOTICE);
+                $v = 'InnoDB';
+            }
+            $definition[] = sprintf($mask, $v);
         }
 
         return $definition;

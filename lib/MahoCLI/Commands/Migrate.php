@@ -62,7 +62,7 @@ class Migrate extends BaseMahoCommand
             if ($contributors === []) {
                 $output->writeln('✓ Applied declarative schema (no modules declare sql/schema.php)');
             } else {
-                $sql = Applier::plan($adapter->getConnection(), $target);
+                $sql = Applier::plan($adapter->getConnection(), $target, Collector::tablePrefix());
                 if ($sql === []) {
                     $output->writeln(sprintf(
                         '✓ Applied declarative schema (%d module(s), already up to date)',
@@ -138,7 +138,7 @@ class Migrate extends BaseMahoCommand
             $output->writeln('  No modules declare sql/schema.php');
         } else {
             try {
-                $sql = Applier::plan($adapter->getConnection(), $target);
+                $sql = Applier::plan($adapter->getConnection(), $target, Collector::tablePrefix());
             } catch (\Maho\Db\Schema\UnsupportedMigrationException $e) {
                 $output->writeln('  <error>' . $e->getMessage() . '</error>');
                 return Command::FAILURE;
