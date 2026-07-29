@@ -67,7 +67,11 @@ final class McpDispatchProvider implements ProviderInterface
         $arguments = $context['mcp_data'] ?? [];
 
         if ($operation instanceof CollectionOperationInterface && $arguments !== []) {
+            // Both keys: providers read collection filters from one, the other, or the
+            // merge of the two, depending on whether they were written with REST or
+            // GraphQL in mind. Nothing branches on which key is present.
             $context['filters'] = $arguments;
+            $context['args'] = $arguments;
         }
 
         $data = $this->decorated->provide($operation, $uriVariables, $context);

@@ -14,6 +14,7 @@ namespace Maho\ApiPlatform\Metadata;
 
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\McpTool;
 use ApiPlatform\Metadata\McpToolCollection;
@@ -35,6 +36,12 @@ use Maho\Config\ApiResource as MahoApiResource;
  */
 final class McpToolResourceMetadataCollectionFactory implements ResourceMetadataCollectionFactoryInterface
 {
+    /**
+     * Carries the derived filter schema to {@see \Maho\ApiPlatform\Mcp\ToolSchemaFactory},
+     * which builds the advertised input schema but only receives the operation.
+     */
+    public const LIST_ARGUMENTS = 'maho_mcp_list_arguments';
+
     /** `Put` and `Patch` share `update`; the de-duplication below keeps the first. */
     private const VERB_SUFFIX = [
         'GET' => 'get',
@@ -77,6 +84,7 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
     private function deriveTools(string $resourceClass, MahoApiResource $resource): array
     {
         $prefix = $this->toolNamePrefix($resourceClass, $resource);
+        $listArguments = $this->listArguments($resource);
 
         $tools = [];
         foreach ($resource->getOperations() ?? [] as $sourceName => $operation) {
@@ -97,7 +105,14 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
                 continue;
             }
 
-            $tools[$name] = $this->buildTool($name, $sourceName, $suffix, $operation, $resource);
+            $tools[$name] = $this->buildTool(
+                $name,
+                $sourceName,
+                $suffix,
+                $operation,
+                $resource,
+                $operation instanceof CollectionOperationInterface ? $listArguments : [],
+            );
         }
 
         return $tools;
@@ -154,12 +169,94 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
         return trim($value, '_');
     }
 
+    /**
+     * What a list tool accepts beyond pagination.
+     *
+     * Providers read collection filters from `$context['filters']` / `$context['args']`,
+     * which is ad-hoc PHP with nothing machine-readable behind it, so a derived tool has
+     * no way to advertise them. The resource's canonical GraphQL collection query does
+     * declare them, in the same key namespace (see `ProductProvider::getCollection()`,
+     * which merges the two), and GraphQL clients keep it honest.
+     *
+     * Only used when the resource has exactly one collection operation. With more than
+     * one there is no way to tell which the args belong to, and advertising a filter a
+     * sub-collection silently ignores is worse than advertising nothing.
+     *
+     * @return array<string, mixed>
+     */
+    private function listArguments(MahoApiResource $resource): array
+    {
+        $collections = 0;
+        foreach ($resource->getOperations() ?? [] as $operation) {
+            if ($operation instanceof CollectionOperationInterface) {
+                ++$collections;
+            }
+        }
+        if ($collections !== 1) {
+            return [];
+        }
+
+        foreach ($resource->getGraphQlOperations() ?? [] as $operation) {
+            if (!$operation instanceof QueryCollection || $operation->getName() !== 'collection_query') {
+                continue;
+            }
+
+            // Resources use either key: `args` replaces the generated cursor-pagination
+            // args, `extraArgs` sits alongside them. Both carry filters.
+            return $this->argumentSchema(($operation->getArgs() ?? []) + ($operation->getExtraArgs() ?? []));
+        }
+
+        return [];
+    }
+
+    /**
+     * GraphQL arg declarations to JSON Schema properties. A trailing `!` marks the arg
+     * non-null, which becomes a required property.
+     *
+     * @param array<string, mixed> $args
+     * @return array<string, mixed>
+     */
+    private function argumentSchema(array $args): array
+    {
+        $properties = [];
+        $required = [];
+
+        foreach ($args as $key => $definition) {
+            if (!is_string($key) || !is_array($definition)) {
+                continue;
+            }
+            $type = (string) ($definition['type'] ?? 'String');
+            if (str_ends_with($type, '!')) {
+                $required[] = $key;
+                $type = substr($type, 0, -1);
+            }
+
+            $property = ['type' => match ($type) {
+                'Int' => 'integer',
+                'Float' => 'number',
+                'Boolean' => 'boolean',
+                default => 'string',
+            }];
+            if (isset($definition['description']) && is_string($definition['description'])) {
+                $property['description'] = $definition['description'];
+            }
+            $properties[$key] = $property;
+        }
+
+        if ($properties === []) {
+            return [];
+        }
+
+        return ['properties' => $properties, 'required' => $required];
+    }
+
     private function buildTool(
         string $name,
         string $sourceName,
         string $suffix,
         HttpOperation $operation,
         MahoApiResource $resource,
+        array $listArguments,
     ): McpTool {
         $class = $operation instanceof CollectionOperationInterface ? McpToolCollection::class : McpTool::class;
 
@@ -185,9 +282,10 @@ final class McpToolResourceMetadataCollectionFactory implements ResourceMetadata
             provider: $operation->getProvider(),
             processor: $operation->getProcessor(),
             stateOptions: $operation->getStateOptions(),
-            extraProperties: $operation->getExtraProperties() + [
+            extraProperties: $operation->getExtraProperties() + array_filter([
                 SourceOperationResolver::SOURCE_OPERATION => $sourceName,
-            ],
+                self::LIST_ARGUMENTS => $listArguments,
+            ]),
         );
     }
 

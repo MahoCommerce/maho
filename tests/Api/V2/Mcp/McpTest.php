@@ -87,6 +87,17 @@ describe('MCP tool catalogue', function (): void {
         expect($schema['required'] ?? [])->toBe(['id']);
     });
 
+    it('advertises the filters a list resource declares', function (): void {
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+        $properties = array_keys($tools['catalog_products_list']['inputSchema']['properties'] ?? []);
+
+        // Pagination is boilerplate on every list tool; the rest is derived from the
+        // resource's canonical GraphQL collection query, the one machine-readable
+        // declaration of what its collection filters on.
+        expect($properties)->toContain('page', 'itemsPerPage', 'search', 'sku', 'categoryId');
+    });
+
     it('hides tools the caller cannot call', function (): void {
         $anonymous = mcpTools(null, mcpSession());
 
@@ -120,6 +131,25 @@ describe('MCP tool dispatch', function (): void {
 
         $payload = json_decode($response['json']['result']['content'][0]['text'] ?? '[]', true);
         expect($payload['member'] ?? [])->toHaveCount(2);
+    });
+
+    it('applies a declared filter to a list tool', function (): void {
+        $session = mcpSession();
+        $all = mcpTool('catalog_products_list', [], null, $session);
+        $total = json_decode($all['json']['result']['content'][0]['text'] ?? '[]', true)['totalItems'] ?? 0;
+
+        if ($total < 2) {
+            $this->markTestSkipped('Needs at least two products to prove filtering narrows the result');
+        }
+
+        // `sku` is read from $context['args'], not $context['filters'], so this also
+        // covers the tool arguments reaching both keys.
+        $sku = json_decode($all['json']['result']['content'][0]['text'] ?? '[]', true)['member'][0]['sku'];
+        $filtered = mcpTool('catalog_products_list', ['sku' => $sku], null, $session);
+        $payload = json_decode($filtered['json']['result']['content'][0]['text'] ?? '[]', true);
+
+        expect($payload['totalItems'] ?? null)->toBe(1);
+        expect($payload['member'][0]['sku'] ?? null)->toBe($sku);
     });
 
     it('refuses an unauthenticated call to a non-public tool', function (): void {

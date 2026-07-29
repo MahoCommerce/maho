@@ -19,6 +19,7 @@ use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\McpTool;
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Metadata\McpToolResourceMetadataCollectionFactory;
 
 /**
  * Synthesises the schema a hand-declared tool would carry in `input:`. Derived tools
@@ -27,7 +28,7 @@ use ApiPlatform\Metadata\Operation;
  * and an array on a `*_list` tool, which the MCP `Tool` constructor rejects.
  *
  * - read/delete of a single item → its URI variables
- * - list → pagination
+ * - list → pagination plus the filters the resource declares
  * - create/update → the resource body, with the URI variables merged in
  *
  * Output schemas are left to the decorated factory.
@@ -46,7 +47,15 @@ final class ToolSchemaFactory implements SchemaFactoryInterface
         }
 
         if ($operation instanceof CollectionOperationInterface) {
-            return $this->objectSchema($this->paginationProperties(), []);
+            /** @var array{properties?: array<string, array<string, mixed>>, required?: list<string>} $arguments */
+            $arguments = $operation->getExtraProperties()[McpToolResourceMetadataCollectionFactory::LIST_ARGUMENTS] ?? [];
+
+            return $this->objectSchema(
+                // Declared filters win: they're hand-written per resource, whereas the
+                // pagination pair is boilerplate every list tool gets.
+                $this->paginationProperties() + ($arguments['properties'] ?? []),
+                $arguments['required'] ?? [],
+            );
         }
 
         $uriVariables = $this->uriVariableProperties($operation);
