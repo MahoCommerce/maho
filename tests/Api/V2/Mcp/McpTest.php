@@ -232,6 +232,18 @@ describe('MCP tool dispatch', function (): void {
         expect($response['json']['error']['message'] ?? '')->not->toContain('Invalid link type');
     });
 
+    it('emits the same hypermedia links the REST response carries', function (): void {
+        // Serialization reads the request out of the context, and the MCP handler puts
+        // the JSON-RPC one there, so every IRI would otherwise read /api/mcp.
+        $token = adminToken();
+        $session = mcpSession($token);
+        $response = mcpTool('content_cms_pages_list', ['itemsPerPage' => 1], $token, $session);
+        $payload = json_decode($response['json']['result']['content'][0]['text'] ?? '{}', true);
+
+        expect($payload['@id'] ?? null)->toBe('/api/rest/v2/cms-pages');
+        expect($payload['view']['next'] ?? '')->toStartWith('/api/rest/v2/cms-pages?page=');
+    });
+
     it('keeps a read tool out of the write stage', function (): void {
         // Twenty resources declare `processor:` at resource level, so their reads
         // inherit one. Leaving API Platform's write stage enabled (what a hand-declared

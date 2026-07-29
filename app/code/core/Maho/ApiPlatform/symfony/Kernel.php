@@ -419,6 +419,11 @@ class Kernel extends BaseKernel
             ->arg('$serializer', new Reference('api_platform.serializer'))
             ->arg('$serializerContextBuilder', new Reference('api_platform.serializer.context_builder'));
 
+        $services->set(State\McpDispatchProcessor::class)
+            ->autoconfigure(false)
+            ->decorate('api_platform.mcp.state_processor')
+            ->arg('$decorated', new Reference(State\McpDispatchProcessor::class . '.inner'));
+
         $services->set(State\McpWriteProcessor::class)
             ->autoconfigure(false)
             ->decorate('api_platform.mcp.state_processor.write')

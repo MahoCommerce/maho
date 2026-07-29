@@ -16,8 +16,10 @@ use ApiPlatform\Metadata\Exception\InvalidArgumentException;
 use ApiPlatform\Metadata\Exception\OperationNotFoundException;
 use ApiPlatform\Metadata\Exception\RuntimeException;
 use ApiPlatform\Metadata\IriConverterInterface;
+use ApiPlatform\Metadata\McpTool;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\UrlGeneratorInterface;
+use Maho\ApiPlatform\Mcp\SourceOperationResolver;
 
 /**
  * Many Maho API responses are computed DTOs returned from action operations
@@ -33,10 +35,18 @@ use ApiPlatform\Metadata\UrlGeneratorInterface;
  * Clients read the JSON body, not the `@id`, so a missing self-IRI is harmless.
  * This decorator returns null (the interface already types the result as
  * ?string) instead of letting the failure abort the response.
+ *
+ * An MCP tool is a second case of an operation that can't generate an IRI: it has
+ * no route, and its name is the tool name. Rather than degrade to null, resolve it
+ * back to the operation it mirrors, so a tool result carries the same `@id` the
+ * equivalent REST response does.
  */
 final class TolerantIriConverter implements IriConverterInterface
 {
-    public function __construct(private readonly IriConverterInterface $inner) {}
+    public function __construct(
+        private readonly IriConverterInterface $inner,
+        private readonly SourceOperationResolver $operationResolver,
+    ) {}
 
     #[\Override]
     public function getResourceFromIri(string $iri, array $context = [], ?Operation $operation = null): object
@@ -47,6 +57,10 @@ final class TolerantIriConverter implements IriConverterInterface
     #[\Override]
     public function getIriFromResource(object|string $resource, int $referenceType = UrlGeneratorInterface::ABS_PATH, ?Operation $operation = null, array $context = []): ?string
     {
+        if ($operation instanceof McpTool) {
+            $operation = $this->operationResolver->resolve($operation);
+        }
+
         try {
             return $this->inner->getIriFromResource($resource, $referenceType, $operation, $context);
         } catch (InvalidArgumentException | RuntimeException | OperationNotFoundException) {
