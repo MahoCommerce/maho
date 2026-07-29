@@ -136,18 +136,13 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
 
         $timezoneLocal = new DateTimeZone(Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE));
 
-        /** @var array{0: DateTime, 1: DateTime} $dateRange */
         $dateRange = Mage::getResourceModel('reports/order_collection')
             ->getDateRange($this->getDataHelper()->getParam('period'), '', '', true);
         [$dateStart, $dateEnd] = $dateRange;
 
         // Convert to DateTimeImmutable to prevent mutation of original objects
-        $dateStart = $dateStart instanceof DateTimeImmutable
-            ? $dateStart->setTimezone($timezoneLocal)
-            : DateTimeImmutable::createFromMutable($dateStart)->setTimezone($timezoneLocal);
-        $dateEnd = $dateEnd instanceof DateTimeImmutable
-            ? $dateEnd->setTimezone($timezoneLocal)
-            : DateTimeImmutable::createFromMutable($dateEnd)->setTimezone($timezoneLocal);
+        $dateStart = DateTimeImmutable::createFromInterface($dateStart)->setTimezone($timezoneLocal);
+        $dateEnd = DateTimeImmutable::createFromInterface($dateEnd)->setTimezone($timezoneLocal);
 
         $d = '';
         $dates = [];
