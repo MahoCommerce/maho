@@ -137,6 +137,22 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Render a byte count in the largest unit that keeps it readable, e.g. "1.5 KB".
+     * Binary units (1 KB = 1024 B), since every caller measures storage or memory.
+     */
+    public function formatFileSize(int $bytes, int $precision = 2): string
+    {
+        if ($bytes <= 0) {
+            return '0 B';
+        }
+
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $unit = min((int) floor(log($bytes, 1024)), count($units) - 1);
+
+        return round($bytes / 1024 ** $unit, $unit === 0 ? 0 : $precision) . ' ' . $units[$unit];
+    }
+
+    /**
      * Format date for display using the store's locale and timezone.
      *
      * Produces locale-aware output (e.g. "April 16, 2026" in en_US, "16 avril 2026" in fr_FR).

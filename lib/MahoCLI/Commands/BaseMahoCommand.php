@@ -42,11 +42,6 @@ abstract class BaseMahoCommand extends Command
 
     public function humanReadableSize(int $bytes): string
     {
-        if ($bytes <= 0) {
-            return '0';
-        }
-
-        $i = (int) floor(log($bytes, 1024));
-        return round($bytes / 1024 ** $i, [0, 0, 2, 2, 3][$i]) . ['B', 'kB', 'MB', 'GB', 'TB'][$i];
+        return Mage::helper('core')->formatFileSize($bytes);
     }
 }
