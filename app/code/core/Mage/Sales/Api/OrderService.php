@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Mage\Sales\Api;
 
+use Maho\ApiPlatform\Trait\DateRangeFilterTrait;
 use Mage\Checkout\Api\CartService;
 
 /**
@@ -17,6 +18,8 @@ use Mage\Checkout\Api\CartService;
  */
 class OrderService
 {
+    use DateRangeFilterTrait;
+
     /**
      * Place order from quote
      *
@@ -224,35 +227,30 @@ class OrderService
     /**
      * Get all orders with billing address joined (no N+1 queries).
      *
-     * @param int $page Page number
-     * @param int $pageSize Page size
-     * @param string|null $status Filter by status
-     * @param string|null $email Filter by customer email (exact match, uses index)
-     * @param string|null $incrementId Filter by order increment ID (exact match)
-     * @param string|null $emailLike Filter by customer email (partial LIKE match, slower on large tables)
-     * @param string|null $since Filter by updated_at >= value (ISO datetime)
+     * @param array<string, mixed> $filters status, state, storeId, customerId, email,
+     *   emailLike, incrementId, createdFrom, createdTo, updatedSince (`since` is accepted
+     *   as the legacy name for the last)
      * @return array{orders: array, total: int}
      */
     public function getAllOrders(
         int $page = 1,
         int $pageSize = 20,
-        ?string $status = null,
         #[\SensitiveParameter]
-        ?string $email = null,
-        ?string $incrementId = null,
-        ?string $emailLike = null,
-        ?string $since = null,
+        array $filters = [],
     ): array {
-        $collection = $this->buildOrderCollection(null, $status, $since);
+        $customerId = ($filters['customerId'] ?? '') !== '' ? (int) $filters['customerId'] : null;
+        $collection = $this->buildOrderCollection($customerId, $filters);
 
+        $email = $filters['email'] ?? null;
+        $emailLike = $filters['emailLike'] ?? null;
         if ($email) {
             $collection->addFieldToFilter('customer_email', $email);
-        } elseif ($emailLike && mb_strlen($emailLike) >= 3) {
+        } elseif ($emailLike && mb_strlen((string) $emailLike) >= 3) {
             $collection->addFieldToFilter('customer_email', ['like' => '%' . $emailLike . '%']);
         }
 
-        if ($incrementId) {
-            $collection->addFieldToFilter('increment_id', $incrementId);
+        if (!empty($filters['incrementId'])) {
+            $collection->addFieldToFilter('increment_id', $filters['incrementId']);
         }
 
         return $this->paginateAndPreload($collection, $page, $pageSize);
@@ -275,7 +273,7 @@ class OrderService
         ?string $status = null,
         ?string $since = null,
     ): array {
-        $collection = $this->buildOrderCollection($customerId, $status, $since);
+        $collection = $this->buildOrderCollection($customerId, ['status' => $status, 'since' => $since]);
 
         return $this->paginateAndPreload($collection, $page, $pageSize);
     }
@@ -325,10 +323,12 @@ class OrderService
      * @param string|null $status Filter by order status
      * @param string|null $since Filter by updated_at >= value (ISO datetime)
      */
+    /**
+     * @param array<string, mixed> $filters
+     */
     private function buildOrderCollection(
         ?int $customerId = null,
-        ?string $status = null,
-        ?string $since = null,
+        array $filters = [],
     ): \Mage_Sales_Model_Resource_Order_Collection {
         $collection = \Mage::getModel('sales/order')->getCollection()
             ->setOrder('created_at', 'DESC');
@@ -337,17 +337,24 @@ class OrderService
             $collection->addFieldToFilter('customer_id', $customerId);
         }
 
-        if ($status) {
-            $collection->addFieldToFilter('status', $status);
+        if (!empty($filters['status'])) {
+            $collection->addFieldToFilter('status', $filters['status']);
         }
 
-        if ($since) {
-            // updated_at is stored in UTC; normalize the client-supplied value
-            // so a local-offset ISO string doesn't skew the filter boundary.
-            $collection->addFieldToFilter('updated_at', [
-                'gteq' => \Mage::app()->getLocale()->formatDateForDb($since),
-            ]);
+        // Status is the merchant-visible label and can be renamed per install; state is
+        // the fixed lifecycle stage behind it. Both are worth filtering on.
+        if (!empty($filters['state'])) {
+            $collection->addFieldToFilter('state', $filters['state']);
         }
+
+        if (($filters['storeId'] ?? '') !== '') {
+            $collection->addFieldToFilter('store_id', (int) $filters['storeId']);
+        }
+
+        // `since` predates the createdFrom/createdTo/updatedSince set and means the same
+        // as updatedSince; keep honouring it.
+        $filters['updatedSince'] ??= $filters['since'] ?? null;
+        $this->applyDateRangeFilters($collection, $filters);
 
         $resource = \Mage::getSingleton('core/resource');
         $collection->getSelect()->joinLeft(

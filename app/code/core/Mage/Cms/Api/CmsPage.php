@@ -58,6 +58,9 @@ use Maho\ApiPlatform\CrudResource;
             description: 'Get CMS pages',
             security: 'true',
             extraArgs: [
+                'createdFrom' => ['type' => 'String', 'description' => 'Created at or after this UTC date or datetime; a bare date means from 00:00:00'],
+                'createdTo' => ['type' => 'String', 'description' => 'Created at or before this UTC date or datetime; a bare date includes the whole day'],
+                'updatedSince' => ['type' => 'String', 'description' => 'Updated at or after this UTC date or datetime'],
                 'identifier' => ['type' => 'String', 'description' => 'Exact identifier lookup (returns 0 or 1 page)'],
                 'search' => ['type' => 'String', 'description' => 'Partial match on the page title or identifier, minimum 3 characters'],
             ],

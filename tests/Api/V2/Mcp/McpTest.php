@@ -98,6 +98,20 @@ describe('MCP tool catalogue', function (): void {
         expect($properties)->toContain('page', 'itemsPerPage', 'search', 'sku', 'categoryId');
     });
 
+    it('advertises date-range filters where the entity has timestamps', function (): void {
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+
+        foreach (['sales_orders_list', 'catalog_products_list', 'content_cms_pages_list', 'content_blog_posts_list'] as $name) {
+            expect(array_keys($tools[$name]['inputSchema']['properties'] ?? []))
+                ->toContain('createdFrom', 'createdTo', 'updatedSince', "{$name} is missing a date filter");
+        }
+
+        // Orders carry the rest of the set an agent needs to scope a question.
+        expect(array_keys($tools['sales_orders_list']['inputSchema']['properties'] ?? []))
+            ->toContain('state', 'storeId', 'customerId');
+    });
+
     it('gives the declared filters to the canonical collection, not a scoped variant', function (): void {
         // Order exposes /orders and /customers/me/orders, and declares one collection
         // query. The scoped variant takes a different branch in the provider and reads a
@@ -107,8 +121,11 @@ describe('MCP tool catalogue', function (): void {
         $token = adminToken();
         $tools = mcpTools($token, mcpSession($token));
 
+        // `since` is the pre-existing REST name for updatedSince. It still works, but
+        // only the canonical name is advertised: two names for one filter is a footgun
+        // in a schema an agent reads as the whole contract.
         expect(array_keys($tools['sales_orders_list']['inputSchema']['properties'] ?? []))
-            ->toContain('status', 'since', 'incrementId', 'email', 'emailLike');
+            ->toContain('status', 'updatedSince', 'incrementId', 'email', 'emailLike');
         expect(array_keys($tools['sales_customers_me_orders_list']['inputSchema']['properties'] ?? []))
             ->toEqualCanonicalizing(['page', 'itemsPerPage']);
         expect(array_keys($tools['sales_revocation_requests_list']['inputSchema']['properties'] ?? []))
@@ -235,6 +252,24 @@ describe('MCP tool dispatch', function (): void {
 
         expect($payload['totalItems'] ?? null)->toBe(1);
         expect($payload['member'][0]['sku'] ?? null)->toBe($sku);
+    });
+
+    it('treats a bare date upper bound as the whole day', function (): void {
+        // `createdTo=2026-07-29` compared against a bare 2026-07-29 would exclude
+        // everything created that day, which is the opposite of what a caller asking for
+        // "up to today" means, and the reason "today's orders" needs a range at all.
+        $token = adminToken();
+        $session = mcpSession($token);
+        $all = json_decode(mcpTool('content_cms_pages_list', ['itemsPerPage' => 1], $token, $session)['json']['result']['content'][0]['text'] ?? '{}', true);
+        $createdAt = $all['member'][0]['createdAt'] ?? null;
+        if ($createdAt === null) {
+            $this->markTestSkipped('Needs a CMS page with a creation timestamp');
+        }
+
+        $day = substr((string) $createdAt, 0, 10);
+        $sameDay = json_decode(mcpTool('content_cms_pages_list', ['createdFrom' => $day, 'createdTo' => $day], $token, $session)['json']['result']['content'][0]['text'] ?? '{}', true);
+
+        expect($sameDay['totalItems'] ?? 0)->toBeGreaterThan(0);
     });
 
     it('narrows a list by a declared filter other than pagination', function (): void {
