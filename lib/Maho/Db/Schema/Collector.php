@@ -58,6 +58,16 @@ final class Collector
         $schema = self::rebuildWithPrefix($schema);
         self::applyTableDefaults($schema);
 
+        foreach (self::enforceInnoDbEngine($schema) as $tableName => $declared) {
+            Mage::log(sprintf(
+                'Declarative schema: table "%s" declares storage engine "%s"; forced to InnoDB. '
+                . 'Non-InnoDB engines hold no foreign keys, and writing them inside a transaction '
+                . 'fails under MySQL 8.4+ (enforce_gtid_consistency=ON, SQLSTATE 1785).',
+                $tableName,
+                $declared,
+            ), Mage::LOG_NOTICE);
+        }
+
         // The implicit single-column indexes DBAL adds on FK local columns
         // (Table::_addForeignKeyConstraint) are kept. DBAL's Index::isFulfilledBy
         // demands exact column count, so even when a multi-col PK starts with
@@ -89,6 +99,36 @@ final class Collector
                 $table->addOption('collation', 'utf8_general_ci');
             }
         }
+    }
+
+    /**
+     * Force every declared table to InnoDB. Set unconditionally, not just when an
+     * author names something else: DBAL emits no ENGINE clause for a table that
+     * declares none, which silently inherits @@default_storage_engine. Inert on
+     * PostgreSQL and SQLite, like the charset/collation defaults above.
+     *
+     * @return array<string, string> table name => the engine it declared, when not InnoDB
+     */
+    private static function enforceInnoDbEngine(Schema $schema): array
+    {
+        $overridden = [];
+        foreach ($schema->getTables() as $table) {
+            $declared = $table->hasOption('engine') ? (string) $table->getOption('engine') : null;
+            if ($declared !== null && strcasecmp($declared, 'InnoDB') !== 0) {
+                $overridden[$table->getObjectName()->getUnqualifiedName()->getValue()] = $declared;
+            }
+            $table->addOption('engine', 'InnoDB');
+        }
+
+        return $overridden;
+    }
+
+    /**
+     * The configured table_prefix, or '' when the database is Maho's alone.
+     */
+    public static function tablePrefix(): string
+    {
+        return (string) Mage::getConfig()->getTablePrefix();
     }
 
     /**

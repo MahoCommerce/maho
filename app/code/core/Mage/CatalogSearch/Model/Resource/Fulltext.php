@@ -79,14 +79,96 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
      */
     public function rebuildIndex($storeId = null, $productIds = null)
     {
-        if (is_null($storeId)) {
-            $storeIds = array_keys(Mage::app()->getStores());
+        if (!is_null($storeId)) {
+            $this->_rebuildStoreIndex($storeId, $productIds);
+            return $this;
+        }
+
+        $storeIds = array_keys(Mage::app()->getStores());
+        if (is_null($productIds) && $this->_canStageRebuild()) {
+            return $this->_rebuildViaShadowTable($storeIds);
+        }
+
+        // In place, so a transaction is what keeps a failure halfway from leaving
+        // the index half-rewritten. The staged path needs none.
+        $this->beginTransaction();
+        try {
             foreach ($storeIds as $storeId) {
                 $this->_rebuildStoreIndex($storeId, $productIds);
             }
-        } else {
-            $this->_rebuildStoreIndex($storeId, $productIds);
+            $this->commit();
+        } catch (Exception $e) {
+            $this->rollBack();
+            throw $e;
         }
+
+        return $this;
+    }
+
+    /**
+     * Whether a whole-catalog rebuild can be staged in a shadow table.
+     *
+     * MySQL only: it is the backend that needs this (InnoDB reclaims a deleted
+     * row's FULLTEXT entries on OPTIMIZE TABLE and never otherwise), and only
+     * its CREATE TABLE ... LIKE reproduces index names verbatim, which keeps the
+     * swapped-in table matching the declarative schema.
+     *
+     * Declines inside an open transaction, which the swap's DDL would commit.
+     */
+    protected function _canStageRebuild(): bool
+    {
+        return $this->_getWriteAdapter() instanceof Maho\Db\Adapter\Pdo\Mysql
+            && $this->_getWriteAdapter()->getTransactionLevel() === 0
+            && $this->_engine instanceof Mage_CatalogSearch_Model_Resource_Fulltext_Engine
+            && $this->_engine->allowShadowRebuild();
+    }
+
+    /**
+     * Rebuild into an empty copy of the table, then swap it in with one atomic
+     * RENAME and drop the old. Shoppers search the live index throughout, and
+     * dropping the old table discards its accumulated FULLTEXT garbage wholesale
+     * rather than leaving OPTIMIZE TABLE for someone to remember.
+     *
+     * @param list<int|string> $storeIds
+     * @return $this
+     */
+    protected function _rebuildViaShadowTable(array $storeIds)
+    {
+        $adapter  = $this->_getWriteAdapter();
+        $liveName = $this->getMainTable();
+        $shadow   = $liveName . '_shadow';
+        $retired  = $liveName . '_retired';
+
+        // Left behind by a crash between the CREATE and the RENAME.
+        foreach ([$shadow, $retired] as $leftover) {
+            if ($adapter->isTableExists($leftover)) {
+                $adapter->dropTable($leftover);
+            }
+        }
+
+        $adapter->query(sprintf(
+            'CREATE TABLE %s LIKE %s',
+            $adapter->quoteIdentifier($shadow),
+            $adapter->quoteIdentifier($liveName),
+        ));
+
+        try {
+            $this->_engine->setIndexTable($shadow);
+            foreach ($storeIds as $storeId) {
+                $this->_rebuildStoreIndex($storeId);
+            }
+        } catch (Exception $e) {
+            $this->_engine->setIndexTable(null);
+            $adapter->dropTable($shadow);
+            throw $e;
+        }
+        $this->_engine->setIndexTable(null);
+
+        $adapter->renameTablesBatch([
+            ['oldName' => $liveName, 'newName' => $retired],
+            ['oldName' => $shadow,   'newName' => $liveName],
+        ]);
+        $adapter->dropTable($retired);
 
         return $this;
     }

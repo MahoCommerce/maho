@@ -147,6 +147,25 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * Tables still on a non-transactional engine, name => engine. Empty on
+     * PostgreSQL and SQLite, which have no storage-engine concept.
+     *
+     * @return array<string, string>
+     */
+    public static function findLegacyEngineTables(): array
+    {
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+        if (!($adapter instanceof \Maho\Db\Adapter\Pdo\Mysql)) {
+            return [];
+        }
+
+        return \Maho\Db\Schema\Applier::legacyEngineTables(
+            $adapter->getConnection(),
+            \Maho\Db\Schema\Collector::tablePrefix(),
+        );
+    }
+
+    /**
      * Scans user code (app/code/local and app/code/community) for legacy XML config
      * declarations that have PHP-attribute equivalents introduced in v26.5.
      *
@@ -341,6 +360,26 @@ class HealthCheck extends BaseMahoCommand
                     'details' => 'Unable to check orphaned resources.',
                 ];
             }
+        }
+
+        try {
+            $legacyEngines = self::findLegacyEngineTables();
+            $checks[] = [
+                'check' => 'Table Storage Engines',
+                'severity' => empty($legacyEngines) ? 'ok' : 'warning',
+                'details' => empty($legacyEngines) ? '' : sprintf(
+                    '%d table(s) are not InnoDB (%s). Writing them inside a transaction fails on MySQL 8.4+, '
+                    . 'where enforce_gtid_consistency defaults to ON. Run "./maho migrate" to convert them.',
+                    count($legacyEngines),
+                    implode(', ', array_keys($legacyEngines)),
+                ),
+            ];
+        } catch (\Exception) {
+            $checks[] = [
+                'check' => 'Table Storage Engines',
+                'severity' => 'error',
+                'details' => 'Unable to check table storage engines.',
+            ];
         }
 
         $legacyXml = self::findLegacyXmlConfig();
@@ -907,6 +946,7 @@ class HealthCheck extends BaseMahoCommand
         $this->checkOrphanedResources($input, $output, Mage::getResourceModel('api/rules'), 'API');
 
         $this->checkZeroDates($output, (bool) $input->getOption('check-zero-dates'));
+        $this->checkTableEngines($output);
 
         if ($hasErrors) {
             return Command::FAILURE;
@@ -963,6 +1003,49 @@ class HealthCheck extends BaseMahoCommand
         $output->writeln('Run: ./maho legacy:fix-zero-dates');
         $output->writeln('To temporarily restore the old behavior, set <sql_mode></sql_mode> on the');
         $output->writeln('connection in app/etc/local.xml while you clean up.');
+        $output->writeln('');
+    }
+
+    /**
+     * Detect tables still on a non-transactional storage engine, which the
+     * indexers and checkout write inside transactions: that fails with SQLSTATE
+     * 1785 on MySQL 8.4+, where enforce_gtid_consistency defaults to ON.
+     */
+    private function checkTableEngines(OutputInterface $output): void
+    {
+        $output->write('Checking table storage engines... ');
+
+        $adapter = \Mage::getSingleton('core/resource')->getConnection('core_read');
+        if (!($adapter instanceof \Maho\Db\Adapter\Pdo\Mysql)) {
+            $output->writeln('<info>OK (MySQL/MariaDB only check)</info>');
+            return;
+        }
+
+        $tables = self::findLegacyEngineTables();
+        if ($tables === []) {
+            $output->writeln('<info>OK</info>');
+            return;
+        }
+
+        // Warned about either way: a store on 8.0 today is a store on 8.4+ after
+        // one upgrade, and MariaDB (which has no such variable) still holds no
+        // foreign keys on MyISAM and still empties MEMORY on restart.
+        $enforced = false;
+        try {
+            $enforced = (string) $adapter->fetchOne('SELECT @@enforce_gtid_consistency') === 'ON';
+        } catch (\Exception) {
+        }
+
+        $output->writeln('');
+        $output->writeln(sprintf(
+            '<comment>Warning: %d table(s) are not InnoDB, so writing them inside a transaction %s:</comment>',
+            count($tables),
+            $enforced ? 'fails on this server (enforce_gtid_consistency=ON)' : 'is unsafe, and fails outright on MySQL 8.4+',
+        ));
+        foreach ($tables as $table => $engine) {
+            $output->writeln(sprintf('- %s (%s)', $table, $engine));
+        }
+        $output->writeln('Run: ./maho migrate');
         $output->writeln('');
     }
 

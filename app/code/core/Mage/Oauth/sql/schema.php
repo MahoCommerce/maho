@@ -90,5 +90,4 @@ return function (Schema $schema): void {
     $nonce->addColumn('nonce', Types::STRING, ['length' => 32]);
     $nonce->addColumn('timestamp', Types::INTEGER, ['unsigned' => true]);
     $nonce->addUniqueIndex(['nonce']);
-    $nonce->addOption('engine', 'MyISAM');
 };

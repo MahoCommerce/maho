@@ -72,7 +72,8 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('fulltext_id')->create(),
     );
     $fulltext->addUniqueIndex(['product_id', 'store_id']);
+    // InnoDB like every other table, no longer MyISAM: FULLTEXT is supported
+    // there since MySQL 5.6 / MariaDB 10.0.5.
     $fulltext->addIndex(['data_index'], null, ['fulltext']);
-    $fulltext->addOption('engine', 'MyISAM');
     $fulltext->setComment('Catalog search result table');
 };
