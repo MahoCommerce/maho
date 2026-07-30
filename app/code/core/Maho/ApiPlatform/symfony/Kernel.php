@@ -401,7 +401,6 @@ class Kernel extends BaseKernel
         // here: a second registration at a pre-firewall priority would see an
         // empty token and 401 every authenticated request.
 
-        // ---- MCP ------------------------------------------------------------
         // Priority 150: outside every metadata factory but the cache, so operations
         // arrive fully resolved.
         $services->set(Metadata\McpToolResourceMetadataCollectionFactory::class)
@@ -438,6 +437,10 @@ class Kernel extends BaseKernel
             ->arg('$decorated', new Reference(Mcp\PermissionFilteredListHandler::class . '.inner'))
             ->arg('$operationMetadataFactory', new Reference('api_platform.mcp.metadata.operation.mcp_factory'))
             ->arg('$resourceAccessChecker', new Reference('api_platform.security.resource_access_checker'));
+
+        // Tagged by its own #[AsEventListener]; registered here only for $debug.
+        $services->set(EventListener\McpErrorSanitizerListener::class)
+            ->arg('$debug', '%kernel.debug%');
     }
 
     /**
