@@ -102,10 +102,14 @@ describe('MCP tool catalogue', function (): void {
         $token = adminToken();
         $tools = mcpTools($token, mcpSession($token));
 
+        $missing = [];
         foreach (['sales_orders_list', 'catalog_products_list', 'content_cms_pages_list', 'content_blog_posts_list'] as $name) {
-            expect(array_keys($tools[$name]['inputSchema']['properties'] ?? []))
-                ->toContain('createdFrom', 'createdTo', 'updatedSince', "{$name} is missing a date filter");
+            $properties = array_keys($tools[$name]['inputSchema']['properties'] ?? []);
+            foreach (array_diff(['createdFrom', 'createdTo', 'updatedSince'], $properties) as $filter) {
+                $missing[] = "{$name}.{$filter}";
+            }
         }
+        expect($missing)->toBe([], 'list tools missing a date filter');
 
         // Orders carry the rest of the set an agent needs to scope a question.
         expect(array_keys($tools['sales_orders_list']['inputSchema']['properties'] ?? []))
@@ -160,7 +164,7 @@ describe('MCP tool catalogue', function (): void {
             expect($schema['type'] ?? null)->toBe('object', "tool {$name} input schema is not an object");
 
             $encoded = json_encode($schema, JSON_THROW_ON_ERROR);
-            expect($encoded)->not->toContain('"properties":[', "tool {$name} encodes properties as an array");
+            expect(str_contains($encoded, '"properties":['))->toBeFalse("tool {$name} encodes properties as an array");
             foreach (['properties', 'required'] as $key) {
                 if (!array_key_exists($key, $schema)) {
                     continue;
