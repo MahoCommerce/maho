@@ -56,8 +56,12 @@ jobs:
       # job status. Note that GITHUB_TOKEN carries no `workflows` scope, so a
       # PR touching `.github/workflows/**` always lands here and has to be
       # backported by hand.
+      #
+      # Match 'false' rather than "not 'true'": a merged PR carrying no backport
+      # label makes the action return before it sets any output, so an unset
+      # output means there was nothing to do, not that something went wrong.
       - name: Fail when a target could not be backported
-        if: steps.backport.outputs.was_successful != 'true'
+        if: steps.backport.outputs.was_successful == 'false'
         env:
           RESULT_BY_TARGET: ${{ steps.backport.outputs.was_successful_by_target }}
         run: |
