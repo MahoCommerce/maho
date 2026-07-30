@@ -20,6 +20,12 @@ use Tests\MahoBackendTestCase;
 
 uses(MahoBackendTestCase::class);
 
+beforeEach(function (): void {
+    if (!mcpPackagesInstalled()) {
+        $this->markTestSkipped('MCP packages not installed - run composer require symfony/mcp-bundle nyholm/psr7');
+    }
+});
+
 /*
  * The MCP server answers with Error::forInternalError($e->getMessage()) from its
  * own request loop, so ApiExceptionListener never sees the exception and a public

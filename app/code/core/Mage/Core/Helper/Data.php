@@ -1239,18 +1239,24 @@ XML;
      * isn't installed, or '' when it is. Used by system-config sources that
      * surface optional dependencies inline (SMTP transports, AI providers).
      *
+     * @param string $package one package, or a comma-separated list when a feature
+     *                        needs several. Only the missing ones are named.
      * @param string $separator string inserted before the warning - " " for
      *                          dropdown labels, "<br>" for heading rows.
      */
     public function packageInstallWarning(string $package, string $separator = ' '): string
     {
-        if (\Composer\InstalledVersions::isInstalled($package)) {
+        $missing = array_filter(
+            array_map('trim', explode(',', $package)),
+            static fn(string $name): bool => $name !== '' && !\Composer\InstalledVersions::isInstalled($name),
+        );
+        if ($missing === []) {
             return '';
         }
         // Result lands in raw admin <option> labels and config UI strings;
         // escape so a community provider supplying an arbitrary package
         // name can't inject HTML.
-        return $separator . '⚠️ Install ' . htmlspecialchars($package, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        return $separator . '⚠️ Install ' . htmlspecialchars(implode(' ', $missing), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 
     /**

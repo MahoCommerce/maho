@@ -122,9 +122,6 @@ class Kernel extends BaseKernel
             new \Symfony\Bundle\SecurityBundle\SecurityBundle(),
             new \ApiPlatform\Symfony\Bundle\ApiPlatformBundle(),
             new \Nelmio\CorsBundle\NelmioCorsBundle(),
-            // API Platform's Mcp namespace only loads when this bundle is present.
-            // Always registered; ProtocolToggleListener is what gates /api/mcp.
-            new \Symfony\AI\McpBundle\McpBundle(),
         ];
 
         // symfony/twig-bundle is a `suggest`-only dependency. Inlining the
@@ -132,6 +129,12 @@ class Kernel extends BaseKernel
         // PHPStan narrow the type and accept the `new` below.
         if (class_exists(\Symfony\Bundle\TwigBundle\TwigBundle::class)) {
             $bundles[] = new \Symfony\Bundle\TwigBundle\TwigBundle();
+        }
+
+        // API Platform's Mcp namespace only loads when this bundle is present.
+        // ProtocolToggleListener is what gates /api/mcp beyond that.
+        if ($this->isMcpAvailable()) {
+            $bundles[] = new \Symfony\AI\McpBundle\McpBundle();
         }
 
         return $bundles;
@@ -163,6 +166,7 @@ class Kernel extends BaseKernel
         // enabled without TwigBundle, so this flag must reflect availability.
         // symfony/twig-bundle is a `suggest`-only dependency; check directly.
         $twigAvailable = class_exists(\Symfony\Bundle\TwigBundle\TwigBundle::class);
+        $mcpAvailable = $this->isMcpAvailable();
 
         $docsFormats = [
             'jsonld' => ['application/ld+json'],
@@ -247,25 +251,28 @@ class Kernel extends BaseKernel
             'patch_formats' => [
                 'json' => ['application/merge-patch+json'],
             ],
-            'mcp' => ['enabled' => true],
+            'mcp' => ['enabled' => $mcpAvailable],
         ]);
 
-        $container->extension('mcp', [
-            'app' => 'maho',
-            'version' => \Mage::getVersion(),
-            'description' => 'Maho Commerce store data and operations',
-            'instructions' => $this->mcpInstructions(),
-            'client_transports' => ['http' => true],
-            // Defaults to ['src'] under getProjectDir(), which doesn't exist. Nothing
-            // to scan: every tool comes from ApiResource metadata, not #[AsMcpTool].
-            'discovery' => ['scan_dirs' => []],
-            'http' => [
-                // Under /api so the `^/api` firewall gives it bearer auth for free.
-                'path' => '/api/mcp',
-                'allowed_hosts' => $this->mcpAllowedHosts(),
-                'session' => ['store' => 'cache'],
-            ],
-        ]);
+        // The `mcp` extension only exists while McpBundle is registered.
+        if ($mcpAvailable) {
+            $container->extension('mcp', [
+                'app' => 'maho',
+                'version' => \Mage::getVersion(),
+                'description' => 'Maho Commerce store data and operations',
+                'instructions' => $this->mcpInstructions(),
+                'client_transports' => ['http' => true],
+                // Defaults to ['src'] under getProjectDir(), which doesn't exist. Nothing
+                // to scan: every tool comes from ApiResource metadata, not #[AsMcpTool].
+                'discovery' => ['scan_dirs' => []],
+                'http' => [
+                    // Under /api so the `^/api` firewall gives it bearer auth for free.
+                    'path' => '/api/mcp',
+                    'allowed_hosts' => $this->mcpAllowedHosts(),
+                    'session' => ['store' => 'cache'],
+                ],
+            ]);
+        }
 
         // allow_credentials is pinned to false in both blocks: combined with a
         // reflected origin (which NelmioCors does when `*` is present, even
@@ -367,8 +374,27 @@ class Kernel extends BaseKernel
             ->autoconfigure()
             ->private();
 
+        $excluded = ['%kernel.project_dir%/Kernel.php', '%kernel.project_dir%/config/'];
+        if (!$mcpAvailable) {
+            // The classes the MCP block below wires by hand: each type-hints an
+            // mcp/sdk class or takes a `$decorated` the skipped decoration supplies.
+            // Mcp/OperationRequestFactory and Mcp/SourceOperationResolver stay in,
+            // TolerantIriConverter needs the latter either way.
+            foreach ([
+                'Mcp/PermissionFilteredListHandler.php',
+                'Mcp/ToolSchemaFactory.php',
+                'State/McpDispatchProvider.php',
+                'State/McpDispatchProcessor.php',
+                'State/McpWriteProcessor.php',
+                'Metadata/McpToolResourceMetadataCollectionFactory.php',
+                'EventListener/McpErrorSanitizerListener.php',
+            ] as $file) {
+                $excluded[] = '%kernel.project_dir%/' . $file;
+            }
+        }
+
         $services->load('Maho\\ApiPlatform\\', '%kernel.project_dir%/')
-            ->exclude(['%kernel.project_dir%/Kernel.php', '%kernel.project_dir%/config/']);
+            ->exclude($excluded);
 
         $services->set(EventListener\ApiExceptionListener::class)
             ->arg('$debug', '%kernel.debug%')
@@ -400,6 +426,10 @@ class Kernel extends BaseKernel
         // after the security firewall (priority 8). It must NOT be re-tagged
         // here: a second registration at a pre-firewall priority would see an
         // empty token and 401 every authenticated request.
+
+        if (!$mcpAvailable) {
+            return;
+        }
 
         // Priority 150: outside every metadata factory but the cache, so operations
         // arrive fully resolved.
@@ -441,6 +471,25 @@ class Kernel extends BaseKernel
         // Tagged by its own #[AsEventListener]; registered here only for $debug.
         $services->set(EventListener\McpErrorSanitizerListener::class)
             ->arg('$debug', '%kernel.debug%');
+    }
+
+    /**
+     * MCP ships as `suggest`-only packages. The PSR-17 check is by virtual package
+     * because any implementation will do, and because php-http/discovery only fails
+     * on first use, not at compile time.
+     *
+     * symfony/object-mapper stays a hard require: api-platform gates its own MCP
+     * services on ContainerBuilder::willBeAvailable(), which reports a dev-only
+     * package as unavailable while symfony/framework-bundle is a prod require, so
+     * making it optional disables MCP even where it is installed.
+     *
+     * Result is baked into the compiled container: clear var/cache/api_platform
+     * after installing or removing any of them.
+     */
+    private function isMcpAvailable(): bool
+    {
+        return class_exists(\Symfony\AI\McpBundle\McpBundle::class)
+            && \Composer\InstalledVersions::isInstalled('psr/http-factory-implementation');
     }
 
     /**
@@ -493,8 +542,10 @@ class Kernel extends BaseKernel
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $routes->import('.', 'api_platform')->prefix('/api');
-        // McpBundle emits the endpoint at the configured absolute path, so no prefix.
-        $routes->import('.', 'mcp');
+        if ($this->isMcpAvailable()) {
+            // McpBundle emits the endpoint at the configured absolute path, so no prefix.
+            $routes->import('.', 'mcp');
+        }
         $routes->import($this->getProjectDir() . '/Controller/', 'attribute');
     }
 
