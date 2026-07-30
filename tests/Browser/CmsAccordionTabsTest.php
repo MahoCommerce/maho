@@ -17,7 +17,12 @@ const ACCORDION_CLOSED_BODY = 'Thirty days to change your mind';
 const TABS_FIRST_BODY = 'A description of the product';
 const TABS_SECOND_BODY = 'Weighs exactly one kilogram';
 
-/** A CMS page holding both a WYSIWYG accordion and a WYSIWYG tab group. */
+/**
+ * A CMS page holding both a WYSIWYG accordion and a WYSIWYG tab group.
+ *
+ * `open` marks the section the page loads on; the editor never writes it, so this is the
+ * shape of hand-written content.
+ */
 function createAccordionPage(): string
 {
     $identifier = 'accordion-tabs-' . uniqid();

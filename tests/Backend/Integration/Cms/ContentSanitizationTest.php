@@ -73,8 +73,8 @@ describe('CMS page content sanitization', function () {
 
     it('preserves accordion and tabs markup through save', function () {
         // The WYSIWYG accordion is plain <details> markup, and every part of it carries
-        // meaning on the storefront: `open` picks the visible panel, `name` keeps a tab
-        // group exclusive, and data-style decides accordion or tabs.
+        // meaning on the storefront: `name` keeps a tab group exclusive, data-style decides
+        // accordion or tabs, and `open` (hand-written only) picks the visible panel.
         $content = '<div data-type="maho-accordion" data-style="tabs">'
             . '<details name="maho-accordion-abc123" open><summary>Description</summary>'
             . '<div data-type="detailsContent"><p>First panel</p></div></details>'

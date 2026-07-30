@@ -96,14 +96,35 @@ export const MahoAccordion = Node.create({
                 // accordion items are independent, so the name is a property of the group
                 // rather than something an item can be left holding after a paste or a split
                 appendTransaction: (transactions, oldState, newState) => {
-                    if (!transactions.some((transaction) => transaction.docChanged)) {
+                    // Checking only the touched span keeps a keystroke off a walk of the whole doc
+                    let from = Infinity;
+                    let to = -Infinity;
+
+                    for (const transaction of transactions) {
+                        if (from <= to) {
+                            from = transaction.mapping.map(from, -1);
+                            to = transaction.mapping.map(to, 1);
+                        }
+                        transaction.mapping.maps.forEach((stepMap, index) => {
+                            const rest = transaction.mapping.slice(index + 1);
+                            stepMap.forEach((oldFrom, oldTo, newFrom, newTo) => {
+                                from = Math.min(from, rest.map(newFrom, -1));
+                                to = Math.max(to, rest.map(newTo, 1));
+                            });
+                        });
+                    }
+
+                    if (from > to) {
                         return null;
                     }
 
                     const { tr } = newState;
                     let changed = false;
 
-                    newState.doc.descendants((node, pos) => {
+                    const start = Math.max(from, 0);
+                    const end = Math.min(to, newState.doc.content.size);
+
+                    newState.doc.nodesBetween(start, end, (node, pos) => {
                         if (node.type !== newState.schema.nodes[this.name]) {
                             return;
                         }
@@ -175,15 +196,14 @@ export const MahoAccordion = Node.create({
     addCommands() {
         const translate = (editor, text) => editor.options.wysiwygSetup?.translate(text) ?? text;
 
+        // The menu only opens from a badge, so its accordion wins over wherever the cursor is
         const findAccordion = (editor, state) => {
-            const found = findParentNodeOfType(state.schema.nodes[this.name])(state.selection);
-            if (found) {
-                return found;
-            }
-            // Fall back to the accordion whose badge opened the bubble menu
             const pos = editor.storage[this.name].activePos;
             const node = typeof pos === 'number' ? state.doc.nodeAt(pos) : null;
-            return node?.type === state.schema.nodes[this.name] ? { node, pos } : null;
+            if (node?.type === state.schema.nodes[this.name]) {
+                return { node, pos };
+            }
+            return findParentNodeOfType(state.schema.nodes[this.name])(state.selection);
         };
 
         return {
@@ -245,6 +265,9 @@ export const MahoAccordion = Node.create({
                 if (dispatch) {
                     // The last item leaves an empty accordion behind, so drop the group with it
                     const target = accordion.node.childCount <= 1 ? accordion : item;
+                    if (target === accordion) {
+                        editor.storage[this.name].activePos = null;
+                    }
                     tr.delete(target.pos, target.pos + target.node.nodeSize);
                     dispatch(tr);
                 }
@@ -259,6 +282,7 @@ export const MahoAccordion = Node.create({
                 }
 
                 if (dispatch) {
+                    editor.storage[this.name].activePos = null;
                     tr.delete(accordion.pos, accordion.pos + accordion.node.nodeSize);
                     dispatch(tr);
                 }

@@ -321,9 +321,8 @@ class tiptapWysiwygSetup {
                 TiptapModules.MahoAccordion.configure({
                     bubbleMenu: accordionBubbleMenu,
                 }),
-                // Without persist the toggle only expands an item for editing: it never
-                // writes `open`, so opening every section to type in it does not publish
-                // the page with every section expanded
+                // Without persist, `open` is outside the schema: the toggle only expands an item
+                // for editing, so opening sections to type in them never publishes them expanded
                 TiptapModules.MahoDetails.configure({
                     persist: false,
                     renderToggleButton: ({ element, isOpen }) => {
