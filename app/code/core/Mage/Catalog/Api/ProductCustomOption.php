@@ -39,6 +39,9 @@ use ApiPlatform\Metadata\Put;
         new Get(
             uriTemplate: '/custom-option-file/{optionId}/{key}',
             name: 'download_option_file',
+            // Returns a raw file with Content-Disposition, which MCP's structured
+            // content can't represent, so it isn't derived as a tool.
+            extraProperties: ['maho_mcp' => false],
             security: 'true',
             description: 'Download a custom option file by option ID and secret key',
         ),

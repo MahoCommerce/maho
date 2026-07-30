@@ -67,6 +67,10 @@ use Maho\ApiPlatform\CrudResource;
             name: 'collection_query',
             description: 'Get tax rates',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-rates/read')",
+            extraArgs: [
+                'search' => ['type' => 'String', 'description' => 'Partial match on the rate code'],
+                'taxCountryId' => ['type' => 'String', 'description' => 'Exact two-letter country code'],
+            ],
         ),
     ],
 )]

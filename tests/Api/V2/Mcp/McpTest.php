@@ -1,0 +1,488 @@
+<?php
+
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: OSL-3.0
+ * @package Tests
+ */
+
+declare(strict_types=1);
+
+use Tests\Helpers\ApiV2Helper;
+
+/**
+ * MCP endpoint tests.
+ *
+ * The tool catalogue is derived from the same ApiResource metadata that drives
+ * REST, so these tests focus on what only MCP can get wrong: the handshake, the
+ * derived tool names, and the fact that dispatching a tool goes through the same
+ * authentication, admin ACL and per-operation permission gates a REST request
+ * would hit. Everything below that is the REST pipeline, covered elsewhere.
+ *
+ * @group write
+ */
+
+afterAll(function (): void {
+    cleanupTestData();
+});
+
+describe('MCP handshake', function (): void {
+
+    it('answers initialize with server info and instructions', function (): void {
+        $response = mcpCall([
+            'jsonrpc' => '2.0',
+            'id' => 1,
+            'method' => 'initialize',
+            'params' => [
+                'protocolVersion' => ApiV2Helper::MCP_PROTOCOL_VERSION,
+                'capabilities' => [],
+                'clientInfo' => ['name' => 'maho-pest', 'version' => '1.0'],
+            ],
+        ]);
+
+        expect($response['status'])->toBe(200);
+
+        $result = $response['json']['result'] ?? [];
+        expect($result['serverInfo']['name'] ?? null)->toBe('maho');
+        expect($result['serverInfo']['version'] ?? null)->toBe(Mage::getVersion());
+        expect($result['capabilities']['tools'] ?? null)->toBeArray();
+        expect($result['instructions'] ?? '')->toContain('Maho Commerce');
+    });
+
+    it('issues a session id later messages can reuse', function (): void {
+        expect(mcpSession())->toBeString();
+    });
+});
+
+describe('MCP tool catalogue', function (): void {
+
+    it('derives stable tool names from the resource surface', function (): void {
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+
+        expect(array_keys($tools))->toContain(
+            'catalog_products_list',
+            'catalog_products_get',
+            'catalog_categories_list',
+            'sales_orders_list',
+            'customers_customers_list',
+        );
+    });
+
+    it('marks read tools read-only and deletes destructive', function (): void {
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+
+        expect($tools['catalog_products_list']['annotations']['readOnlyHint'] ?? null)->toBeTrue();
+        expect($tools['catalog_products_delete']['annotations']['destructiveHint'] ?? null)->toBeTrue();
+    });
+
+    it('advertises only the identifier as input for an item read', function (): void {
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+        $schema = $tools['catalog_products_get']['inputSchema'] ?? [];
+
+        expect($schema['type'] ?? null)->toBe('object');
+        expect(array_keys($schema['properties'] ?? []))->toBe(['id']);
+        expect($schema['required'] ?? [])->toBe(['id']);
+    });
+
+    it('advertises the filters a list resource declares', function (): void {
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+        $properties = array_keys($tools['catalog_products_list']['inputSchema']['properties'] ?? []);
+
+        // Pagination is boilerplate on every list tool; the rest is derived from the
+        // resource's canonical GraphQL collection query, the one machine-readable
+        // declaration of what its collection filters on.
+        expect($properties)->toContain('page', 'itemsPerPage', 'search', 'sku', 'categoryId');
+    });
+
+    it('advertises date-range filters where the entity has timestamps', function (): void {
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+
+        $missing = [];
+        foreach (['sales_orders_list', 'catalog_products_list', 'content_cms_pages_list', 'content_blog_posts_list'] as $name) {
+            $properties = array_keys($tools[$name]['inputSchema']['properties'] ?? []);
+            foreach (array_diff(['createdFrom', 'createdTo', 'updatedSince'], $properties) as $filter) {
+                $missing[] = "{$name}.{$filter}";
+            }
+        }
+        expect($missing)->toBe([], 'list tools missing a date filter');
+
+        // Orders carry the rest of the set an agent needs to scope a question.
+        expect(array_keys($tools['sales_orders_list']['inputSchema']['properties'] ?? []))
+            ->toContain('state', 'storeId', 'customerId');
+    });
+
+    it('gives the declared filters to the canonical collection, not a scoped variant', function (): void {
+        // Order exposes /orders and /customers/me/orders, and declares one collection
+        // query. The scoped variant takes a different branch in the provider and reads a
+        // different filter set, so advertising these on it would be a lie. Declaration
+        // order can't pick the right one either: RevocationRequest declares its
+        // /customers/me collection first.
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+
+        // `since` is the pre-existing REST name for updatedSince. It still works, but
+        // only the canonical name is advertised: two names for one filter is a footgun
+        // in a schema an agent reads as the whole contract.
+        expect(array_keys($tools['sales_orders_list']['inputSchema']['properties'] ?? []))
+            ->toContain('status', 'updatedSince', 'incrementId', 'email', 'emailLike');
+        expect(array_keys($tools['sales_customers_me_orders_list']['inputSchema']['properties'] ?? []))
+            ->toEqualCanonicalizing(['page', 'itemsPerPage']);
+        expect(array_keys($tools['sales_revocation_requests_list']['inputSchema']['properties'] ?? []))
+            ->toContain('processedStatus');
+    });
+
+    it('advertises the path parameter a scoped collection needs', function (): void {
+        // Collections advertise pagination plus declared filters. For a sub-resource
+        // that isn't enough: with no productId in the schema an agent has no way to say
+        // which product it means, and 17 list tools are uncallable.
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+        $schema = $tools['catalog_products_links_related_list']['inputSchema'] ?? [];
+
+        expect($schema['properties'] ?? [])->toHaveKey('productId');
+        expect($schema['required'] ?? [])->toContain('productId');
+        expect(array_keys($schema['properties'] ?? []))->toContain('page', 'itemsPerPage');
+    });
+
+    it('advertises every input schema as a JSON object on the wire', function (): void {
+        // The spec types `inputSchema.properties` as an object, and a strict client
+        // rejects the whole listing when one tool gets it wrong. An empty PHP array
+        // encodes to `[]`, so tools taking no arguments (/store-config, /customers/me)
+        // are the ones that break. Asserting on the encoded form is the point here:
+        // decoding into PHP arrays hides exactly the difference that matters.
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+
+        foreach ($tools as $name => $tool) {
+            $schema = $tool['inputSchema'] ?? null;
+            expect($schema)->toBeArray("tool {$name} has no input schema");
+            expect($schema['type'] ?? null)->toBe('object', "tool {$name} input schema is not an object");
+
+            $encoded = json_encode($schema, JSON_THROW_ON_ERROR);
+            expect(str_contains($encoded, '"properties":['))->toBeFalse("tool {$name} encodes properties as an array");
+            foreach (['properties', 'required'] as $key) {
+                if (!array_key_exists($key, $schema)) {
+                    continue;
+                }
+                expect($schema[$key])->not->toBe([], "tool {$name} declares an empty {$key}");
+            }
+        }
+    });
+
+    it('covers resources declared with the plain API Platform attribute', function (): void {
+        // Product sub-resources gate on the parent's products/write rather than owning a
+        // permission, so they use ApiPlatform's attribute instead of Maho's. That says
+        // nothing about whether an agent should reach them.
+        $token = adminToken();
+        $tools = mcpTools($token, mcpSession($token));
+
+        expect(array_keys($tools))->toContain(
+            'catalog_products_tier_prices_list',
+            'catalog_products_links_related_list',
+            'catalog_products_media_list',
+            'core_store_config_get',
+        );
+    });
+
+    it('omits operations that opt out and resources that declare no tools', function (): void {
+        $token = adminToken();
+        $names = array_keys(mcpTools($token, mcpSession($token)));
+
+        // AuthToken and ContactForm declare `mcp: []`; the custom-option download opts
+        // out per-operation because it returns a raw file. Nothing derives a tool from
+        // API Platform's injected NotExposed operation either.
+        foreach ($names as $name) {
+            expect($name)->not->toStartWith('api_auth_');
+            expect($name)->not->toContain('contact');
+            expect($name)->not->toContain('custom_option_file');
+        }
+        expect($names)->not->toContain('catalog_stocks_get');
+    });
+
+    it('hides tools the caller cannot call', function (): void {
+        $anonymous = mcpTools(null, mcpSession());
+
+        // /products is public, so an unauthenticated caller keeps the read tools
+        // and loses everything that needs a grant.
+        expect(array_keys($anonymous))->toContain('catalog_products_list');
+        expect(array_keys($anonymous))->not->toContain('catalog_products_delete');
+        expect(array_keys($anonymous))->not->toContain('sales_orders_list');
+    });
+});
+
+describe('MCP tool dispatch', function (): void {
+
+    it('returns store data from a read tool', function (): void {
+        $session = mcpSession();
+        $response = mcpTool('catalog_products_list', [], null, $session);
+
+        expect($response['status'])->toBe(200);
+
+        $result = $response['json']['result'] ?? [];
+        expect($result['isError'] ?? false)->toBeFalse();
+
+        $payload = json_decode($result['content'][0]['text'] ?? '[]', true);
+        expect($payload['totalItems'] ?? null)->toBeInt();
+        expect($payload['member'] ?? null)->toBeArray();
+    });
+
+    it('passes list arguments through as pagination', function (): void {
+        $session = mcpSession();
+        $response = mcpTool('catalog_products_list', ['itemsPerPage' => 2], null, $session);
+
+        $payload = json_decode($response['json']['result']['content'][0]['text'] ?? '[]', true);
+        expect($payload['member'] ?? [])->toHaveCount(2);
+    });
+
+    it('applies a declared filter to a list tool', function (): void {
+        $session = mcpSession();
+        $all = mcpTool('catalog_products_list', [], null, $session);
+        $total = json_decode($all['json']['result']['content'][0]['text'] ?? '[]', true)['totalItems'] ?? 0;
+
+        if ($total < 2) {
+            $this->markTestSkipped('Needs at least two products to prove filtering narrows the result');
+        }
+
+        // `sku` is read from $context['args'], not $context['filters'], so this also
+        // covers the tool arguments reaching both keys.
+        $sku = json_decode($all['json']['result']['content'][0]['text'] ?? '[]', true)['member'][0]['sku'];
+        $filtered = mcpTool('catalog_products_list', ['sku' => $sku], null, $session);
+        $payload = json_decode($filtered['json']['result']['content'][0]['text'] ?? '[]', true);
+
+        expect($payload['totalItems'] ?? null)->toBe(1);
+        expect($payload['member'][0]['sku'] ?? null)->toBe($sku);
+    });
+
+    it('treats a bare date upper bound as the whole day', function (): void {
+        // `createdTo=2026-07-29` compared against a bare 2026-07-29 would exclude
+        // everything created that day, which is the opposite of what a caller asking for
+        // "up to today" means, and the reason "today's orders" needs a range at all.
+        $token = adminToken();
+        $session = mcpSession($token);
+        $all = json_decode(mcpTool('content_cms_pages_list', ['itemsPerPage' => 1], $token, $session)['json']['result']['content'][0]['text'] ?? '{}', true);
+        $createdAt = $all['member'][0]['createdAt'] ?? null;
+        if ($createdAt === null) {
+            $this->markTestSkipped('Needs a CMS page with a creation timestamp');
+        }
+
+        $day = substr((string) $createdAt, 0, 10);
+        $sameDay = json_decode(mcpTool('content_cms_pages_list', ['createdFrom' => $day, 'createdTo' => $day], $token, $session)['json']['result']['content'][0]['text'] ?? '{}', true);
+
+        expect($sameDay['totalItems'] ?? 0)->toBeGreaterThan(0);
+    });
+
+    it('narrows a list by a declared filter other than pagination', function (): void {
+        $token = adminToken();
+        $session = mcpSession($token);
+        $all = json_decode(mcpTool('content_cms_pages_list', [], $token, $session)['json']['result']['content'][0]['text'] ?? '{}', true);
+        $total = $all['totalItems'] ?? 0;
+
+        $needle = null;
+        foreach ($all['member'] ?? [] as $page) {
+            // The provider requires three characters before it applies the filter.
+            if (strlen((string) ($page['identifier'] ?? '')) >= 3) {
+                $needle = $page['identifier'];
+                break;
+            }
+        }
+        if ($total < 2 || $needle === null) {
+            $this->markTestSkipped('Needs at least two CMS pages, one with a 3+ character identifier');
+        }
+
+        $filtered = json_decode(mcpTool('content_cms_pages_list', ['search' => $needle], $token, $session)['json']['result']['content'][0]['text'] ?? '{}', true);
+
+        expect($filtered['totalItems'] ?? 0)->toBeGreaterThan(0);
+        expect($filtered['totalItems'] ?? 0)->toBeLessThan($total);
+    });
+
+    it('gives the operation its own URI so path parameters resolve', function (): void {
+        // ProductLinkProvider reads which of related/cross-sell/up-sell was meant off
+        // the request path, since a plain path parameter never reaches uriVariables.
+        // Under MCP every request is a POST to /api/mcp, so the tool call is dispatched
+        // against a request carrying the operation's URI instead.
+        $token = adminToken();
+        $session = mcpSession($token);
+        $response = mcpTool('catalog_products_links_related_list', ['productId' => 1], $token, $session);
+
+        expect($response['json']['error']['message'] ?? '')->not->toContain('Invalid link type');
+    });
+
+    it('emits the same hypermedia links the REST response carries', function (): void {
+        // Serialization reads the request out of the context, and the MCP handler puts
+        // the JSON-RPC one there, so every IRI would otherwise read /api/mcp.
+        $token = adminToken();
+        $session = mcpSession($token);
+        $response = mcpTool('content_cms_pages_list', ['itemsPerPage' => 1], $token, $session);
+        $payload = json_decode($response['json']['result']['content'][0]['text'] ?? '{}', true);
+
+        expect($payload['@id'] ?? null)->toBe('/api/rest/v2/cms-pages');
+        expect($payload['view']['next'] ?? '')->toStartWith('/api/rest/v2/cms-pages?page=');
+    });
+
+    it('keeps a read tool out of the write stage', function (): void {
+        // Twenty resources declare `processor:` at resource level, so their reads
+        // inherit one. Leaving API Platform's write stage enabled (what a hand-declared
+        // tool needs, since its processor is the tool body) runs that processor over the
+        // provider's result: CmsPage's 403s on cms-pages/write, and Order's replaces the
+        // collection with a single empty Order.
+        $token = adminToken();
+        $session = mcpSession($token);
+
+        foreach (['content_cms_pages_list', 'sales_orders_list'] as $name) {
+            $response = mcpTool($name, [], $token, $session);
+            expect($response['json']['error'] ?? null)->toBeNull("{$name} was refused");
+
+            $payload = json_decode($response['json']['result']['content'][0]['text'] ?? '{}', true);
+            expect($payload['@type'] ?? null)->toBe('Collection', "{$name} did not return a collection");
+        }
+    });
+
+    it('still runs the write stage for a write tool', function (): void {
+        $token = serviceToken();
+        $session = mcpSession($token);
+
+        $created = mcpTool('content_cms_blocks_create', [
+            'title' => 'MCP write stage',
+            'identifier' => 'mcp_write_stage_' . bin2hex(random_bytes(4)),
+            'content' => 'body',
+            'isActive' => true,
+            'stores' => [0],
+        ], $token, $session);
+
+        $payload = json_decode($created['json']['result']['content'][0]['text'] ?? '{}', true);
+        $id = $payload['id'] ?? null;
+        expect($id)->toBeInt();
+        trackCreated('cms_block', $id);
+
+        $deleted = mcpTool('content_cms_blocks_delete', ['id' => $id], $token, $session);
+        expect($deleted['json']['error'] ?? null)->toBeNull();
+    });
+
+    it('scopes an idempotency key to the tool it was sent with', function (): void {
+        // Every call is the same POST /api/mcp, so a key scoped by path and method
+        // alone answers the second tool from the first one's stored response.
+        $token = adminToken();
+        $session = mcpSession($token);
+        $key = 'mcp-idempotency-' . bin2hex(random_bytes(6));
+
+        $pages = mcpTool('content_cms_pages_list', ['itemsPerPage' => 1], $token, $session, ['X-Idempotency-Key' => $key]);
+        $orders = mcpTool('sales_orders_list', ['itemsPerPage' => 1], $token, $session, ['X-Idempotency-Key' => $key]);
+
+        expect(json_decode($pages['json']['result']['content'][0]['text'] ?? '{}', true)['@id'] ?? null)
+            ->toBe('/api/rest/v2/cms-pages');
+        expect(json_decode($orders['json']['result']['content'][0]['text'] ?? '{}', true)['@id'] ?? null)
+            ->toBe('/api/rest/v2/orders');
+    });
+
+    it('scopes an idempotency key to the record the call targets', function (): void {
+        // The tool name is REST's path without the identifier, which for a write is
+        // the whole point of it: updating two blocks is two operations, not one retried.
+        $token = serviceToken();
+        $session = mcpSession($token);
+        $key = 'mcp-idempotency-' . bin2hex(random_bytes(6));
+
+        $ids = [];
+        foreach (['first', 'second'] as $which) {
+            $created = mcpTool('content_cms_blocks_create', [
+                'title' => "MCP idempotent target {$which}",
+                'identifier' => "mcp_idempotent_target_{$which}_" . bin2hex(random_bytes(4)),
+                'content' => 'body',
+                'isActive' => true,
+                'stores' => [0],
+            ], $token, $session);
+            $id = json_decode($created['json']['result']['content'][0]['text'] ?? '{}', true)['id'] ?? null;
+            expect($id)->toBeInt();
+            trackCreated('cms_block', $id);
+            $ids[$which] = $id;
+        }
+
+        $headers = ['X-Idempotency-Key' => $key];
+        mcpTool('content_cms_blocks_update', ['id' => $ids['first'], 'title' => 'First updated'], $token, $session, $headers);
+        $second = mcpTool('content_cms_blocks_update', ['id' => $ids['second'], 'title' => 'Second updated'], $token, $session, $headers);
+
+        $payload = json_decode($second['json']['result']['content'][0]['text'] ?? '{}', true);
+
+        expect($payload['id'] ?? null)->toBe($ids['second']);
+        expect($payload['title'] ?? null)->toBe('Second updated');
+    });
+
+    it('does not replay a refused tool call for the retry that fixes it', function (): void {
+        // A refusal still leaves the transport at HTTP 200, so a status-code check
+        // alone would store it and answer the corrected retry with it for a day.
+        $token = serviceToken();
+        $session = mcpSession($token);
+        $key = 'mcp-idempotency-' . bin2hex(random_bytes(6));
+
+        $created = mcpTool('content_cms_blocks_create', [
+            'title' => 'MCP idempotent retry',
+            'identifier' => 'mcp_idempotent_retry_' . bin2hex(random_bytes(4)),
+            'content' => 'body',
+            'isActive' => true,
+            'stores' => [0],
+        ], $token, $session);
+        $id = json_decode($created['json']['result']['content'][0]['text'] ?? '{}', true)['id'] ?? null;
+        expect($id)->toBeInt();
+        trackCreated('cms_block', $id);
+
+        $missing = mcpTool('content_cms_blocks_update', ['id' => 999999999, 'title' => 'Nope'], $token, $session, ['X-Idempotency-Key' => $key]);
+        $refused = ($missing['json']['error'] ?? null) !== null
+            || ($missing['json']['result']['isError'] ?? false) === true;
+        expect($refused)->toBeTrue('updating a missing block was not refused');
+
+        $retried = mcpTool('content_cms_blocks_update', ['id' => $id, 'title' => 'MCP idempotent retry fixed'], $token, $session, ['X-Idempotency-Key' => $key]);
+        $payload = json_decode($retried['json']['result']['content'][0]['text'] ?? '{}', true);
+
+        expect($payload['title'] ?? null)->toBe('MCP idempotent retry fixed');
+    });
+
+    it('refuses an unauthenticated call to a non-public tool', function (): void {
+        $session = mcpSession();
+        $response = mcpTool('catalog_products_delete', ['id' => 1], null, $session);
+
+        expect($response['json']['error']['message'] ?? '')->toContain('Authentication required');
+    });
+
+    it('refuses a write tool the token has no permission for', function (): void {
+        // Granted cms-pages only; the catalog write must be denied by the same
+        // ApiUserVoter expression that gates POST /api/rest/v2/products.
+        $token = serviceToken(['cms_pages/all']);
+        $session = mcpSession($token);
+        $response = mcpTool('catalog_products_create', ['sku' => 'mcp-denied', 'name' => 'Denied'], $token, $session);
+
+        expect($response['json']['result'] ?? null)->toBeNull();
+        expect($response['json']['error'] ?? null)->not->toBeNull();
+    });
+
+    it('applies admin ACL to admin tokens', function (): void {
+        // A role granting catalog only must not reach a sales tool: the request
+        // attributes AdminAclListener keys off are absent under MCP, so this
+        // proves McpDispatchProvider is doing the gating instead.
+        $token = adminTokenWithAcl(['catalog/products'], 'pest_mcp_acl_deny');
+        $session = mcpSession($token);
+        $response = mcpTool('sales_orders_list', [], $token, $session);
+
+        expect($response['json']['error']['message'] ?? '')->toContain('does not grant access');
+    });
+});
+
+describe('MCP protocol toggle', function (): void {
+
+    it('404s the endpoint when the protocol is disabled', function (): void {
+        $config = Mage::getModel('core/config');
+        $config->saveConfig('apiplatform/protocols/mcp', '0', 'default', 0);
+        Mage::app()->getCache()->cleanType('config');
+
+        try {
+            $response = mcpCall(['jsonrpc' => '2.0', 'id' => 1, 'method' => 'initialize', 'params' => []]);
+            expect($response['status'])->toBe(404);
+        } finally {
+            $config->saveConfig('apiplatform/protocols/mcp', '1', 'default', 0);
+            Mage::app()->getCache()->cleanType('config');
+        }
+    });
+});

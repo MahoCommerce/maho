@@ -16,6 +16,9 @@ use ApiPlatform\Metadata\Post;
 use Symfony\Component\Serializer\Attribute\SerializedName;
 
 #[ApiResource(
+    // No MCP tools: a client already holds a token to reach /api/mcp, and logout
+    // would let an agent revoke its own credential mid-session.
+    mcp: [],
     security: "is_granted('ROLE_ADMIN')",
     shortName: 'AuthToken',
     description: 'Authentication token management',

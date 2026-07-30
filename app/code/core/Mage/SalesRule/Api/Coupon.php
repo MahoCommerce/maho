@@ -71,6 +71,10 @@ use Maho\Config\ApiResource;
             name: 'collection_query',
             description: 'Get all coupons',
             security: "is_granted('ROLE_ADMIN') or is_granted('coupons/read')",
+            extraArgs: [
+                'code' => ['type' => 'String', 'description' => 'Partial coupon-code match'],
+                'is_active' => ['type' => 'Boolean', 'description' => 'Only coupons whose parent rule is active'],
+            ],
         ),
         new Mutation(
             name: 'create',

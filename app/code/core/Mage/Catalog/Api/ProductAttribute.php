@@ -50,6 +50,7 @@ use Maho\Config\ApiResource;
             security: "is_granted('ROLE_ADMIN') or is_granted('product-attributes/read')",
             extraArgs: [
                 'code' => ['type' => 'String', 'description' => 'Exact attribute-code lookup (returns 0 or 1 attribute)'],
+                'search' => ['type' => 'String', 'description' => 'Partial match on the attribute code or label'],
             ],
         ),
     ],

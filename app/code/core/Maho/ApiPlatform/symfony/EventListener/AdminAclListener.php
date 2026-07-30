@@ -11,12 +11,10 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\EventListener;
 
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
-use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Security\OperationAccessChecker;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
  * Enforces Maho admin ACL on every API Platform request made with an admin
@@ -44,16 +42,19 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  * by each operation's `security:` expression, which API Platform evaluates for
  * REST and GraphQL alike and routes to ApiUserVoter.
  *
+ * The rules themselves live in {@see OperationAccessChecker}; this listener is
+ * the HTTP binding of them. MCP dispatches many operations inside one POST and
+ * so never sets `_api_resource_class`, and applies the same checker from
+ * {@see \Maho\ApiPlatform\State\McpDispatchProvider} instead.
+ *
  * Priority 4: after the firewall (8), after StoreContextAuthorizationListener
  * (6), and before any controller code runs.
  */
 #[AsEventListener(event: KernelEvents::REQUEST, priority: 4)]
 class AdminAclListener
 {
-    public const RESOURCE_CONSTANT = 'ADMIN_RESOURCE';
-
     public function __construct(
-        private readonly TokenStorageInterface $tokenStorage,
+        private readonly OperationAccessChecker $accessChecker,
         private readonly ResourceMetadataCollectionFactoryInterface $resourceMetadataFactory,
     ) {}
 
@@ -75,89 +76,14 @@ class AdminAclListener
             return;
         }
 
-        $token = $this->tokenStorage->getToken();
-        $user = $token?->getUser();
-        if (!$user instanceof ApiUser) {
-            return;
-        }
-
-        // Only gate admin tokens. Service-account and customer (ROLE_CUSTOMER) tokens are gated by
-        // their own permission systems.
-        if ($user->getAdminId() === null) {
-            return;
-        }
-
-        // Public operations (security: 'true') let anyone in by design,
-        // /countries, /store-config, /auth/token, etc. Admins should reach
-        // them just like customers and unauthenticated callers do, so skip
-        // the ACL gate when the operation declares itself public.
-        if ($this->isPublicOperation($resourceClass, $operationName)) {
-            return;
-        }
-
-        $aclPath = self::resolveAdminResource($resourceClass);
-        if ($aclPath === null) {
-            // Default-deny: the resource class didn't declare ADMIN_RESOURCE.
-            // Every admin-callable resource must opt in by declaring it,
-            // exactly like Mage_Adminhtml_Controller_Action subclasses do.
-            \Mage::log(
-                sprintf(
-                    'Admin token denied on %s: resource declares no ADMIN_RESOURCE constant.',
-                    $resourceClass,
-                ),
-                \Mage::LOG_WARNING,
-                'api.log',
-            );
-            throw new AccessDeniedHttpException('This endpoint is not admin-accessible.');
-        }
-
-        $session = \Mage::getSingleton('admin/session');
-        if (!$session->getUser()) {
-            // OAuth2Authenticator's admin branch hydrates the session. If
-            // it's missing here, something is wrong with the auth pipeline.
-            throw new AccessDeniedHttpException('Admin session unavailable.');
-        }
-
-        if (!$session->isAllowed($aclPath)) {
-            throw new AccessDeniedHttpException(
-                sprintf('Your admin role does not grant access to "%s".', $aclPath),
-            );
-        }
-    }
-
-    /**
-     * Read the resource class's ADMIN_RESOURCE constant via reflection.
-     * The constant may reference another class's constant (e.g. a backend
-     * controller's ADMIN_RESOURCE), in which case PHP resolves the chain
-     * automatically.
-     */
-    private static function resolveAdminResource(string $resourceClass): ?string
-    {
         try {
-            $reflection = new \ReflectionClass($resourceClass);
-            if (!$reflection->hasConstant(self::RESOURCE_CONSTANT)) {
-                return null;
-            }
-            $value = $reflection->getConstant(self::RESOURCE_CONSTANT);
-            return is_string($value) && $value !== '' ? $value : null;
-        } catch (\ReflectionException) {
-            return null;
-        }
-    }
-
-    /**
-     * True when the matched operation declares `security: 'true'`. API
-     * Platform may quote-wrap the value, so we trim quotes before comparing.
-     */
-    private function isPublicOperation(string $resourceClass, string $operationName): bool
-    {
-        try {
-            $metadata = $this->resourceMetadataFactory->create($resourceClass);
-            $operation = $metadata->getOperation($operationName);
-            $security = $operation->getSecurity();
+            $operation = $this->resourceMetadataFactory->create($resourceClass)->getOperation($operationName);
         } catch (\Throwable) {
-            return false;
+            // An operation we can't resolve can't be proven public either, and
+            // the checker treats null as non-public rather than waving it through.
+            $operation = null;
         }
-        return $security !== null && trim($security, '" ') === 'true';
+
+        $this->accessChecker->checkAdminAcl($resourceClass, $operation);
     }
 }

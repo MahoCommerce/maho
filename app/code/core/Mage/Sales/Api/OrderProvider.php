@@ -271,14 +271,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $this->requireAdminOrApiUser('Order listing requires admin or API access');
 
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context);
-        $filters = $context['filters'] ?? [];
-        $status = $filters['status'] ?? null;
-        $email = $filters['email'] ?? null;
-        $emailLike = $filters['emailLike'] ?? null;
-        $incrementId = $filters['incrementId'] ?? null;
-        $since = $filters['since'] ?? null;
-
-        $result = $this->orderService->getAllOrders($page, $pageSize, $status, $email, $incrementId, $emailLike, $since);
+        $result = $this->orderService->getAllOrders($page, $pageSize, $context['filters'] ?? []);
 
         $orders = [];
         foreach ($result['orders'] as $order) {

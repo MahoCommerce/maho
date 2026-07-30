@@ -12,6 +12,7 @@ namespace Maho\ApiPlatform;
 
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\Service\StoreContext;
+use Maho\ApiPlatform\Trait\DateRangeFilterTrait;
 
 /**
  * Convention-based provider for CrudResource subclasses.
@@ -25,6 +26,8 @@ use Maho\ApiPlatform\Service\StoreContext;
  */
 class CrudProvider extends Provider
 {
+    use DateRangeFilterTrait;
+
     /** @var class-string<CrudResource>|null */
     protected ?string $resourceClass = null;
 
@@ -100,6 +103,13 @@ class CrudProvider extends Provider
             $collection->setStoreId($storeId);
         }
 
+        $this->applyDateRangeFilters(
+            $collection,
+            $filters,
+            $this->timestampColumn('createdAt'),
+            $this->timestampColumn('updatedAt'),
+        );
+
         // EAV collections need explicit attribute selection, only load what the DTO needs
         if ($collection instanceof \Mage_Eav_Model_Entity_Collection_Abstract
             && $this->resourceClass
@@ -115,6 +125,26 @@ class CrudProvider extends Provider
                 }
             }
         }
+    }
+
+    /**
+     * The column behind a DTO timestamp, or null when the resource has none. Entities
+     * disagree on the name (`cms_page` has creation_time, `blog_post` created_at), and
+     * the DTO already declares the mapping.
+     */
+    private function timestampColumn(string $dtoField): ?string
+    {
+        if (!$this->resourceClass || !is_subclass_of($this->resourceClass, CrudResource::class)) {
+            return null;
+        }
+
+        foreach ($this->resourceClass::metadata()->fields as $field) {
+            if ($field->property === $dtoField) {
+                return $field->modelField;
+            }
+        }
+
+        return null;
     }
 
     /**

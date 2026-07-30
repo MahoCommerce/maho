@@ -98,6 +98,11 @@ use Symfony\Component\Serializer\Attribute\Groups;
                 'sku' => ['type' => 'String', 'description' => 'Exact SKU lookup (returns 0 or 1 product)'],
                 'barcode' => ['type' => 'String', 'description' => 'Exact barcode lookup (returns 0 or 1 product)'],
             ],
+            extraArgs: [
+                'createdFrom' => ['type' => 'String', 'description' => 'Created at or after this UTC date or datetime; a bare date means from 00:00:00'],
+                'createdTo' => ['type' => 'String', 'description' => 'Created at or before this UTC date or datetime; a bare date includes the whole day'],
+                'updatedSince' => ['type' => 'String', 'description' => 'Updated at or after this UTC date or datetime'],
+            ],
         ),
         // Named 'category' → field `categoryProducts` (not `categoryProductsProducts`).
         new QueryCollection(
