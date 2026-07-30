@@ -316,11 +316,12 @@ class ApiV2Helper
      * server-sent events rather than plain JSON, so the payload is unwrapped here.
      *
      * @param array<string, mixed> $payload
+     * @param array<string, string> $extraHeaders
      * @return array{status: int, json: array, raw: string, headers: array, session: ?string}
      */
-    public static function mcp(array $payload, ?string $token = null, ?string $sessionId = null): array
+    public static function mcp(array $payload, ?string $token = null, ?string $sessionId = null, array $extraHeaders = []): array
     {
-        $headers = [
+        $headers = $extraHeaders + [
             'Accept' => 'application/json, text/event-stream',
             'MCP-Protocol-Version' => self::MCP_PROTOCOL_VERSION,
         ];
@@ -368,16 +369,17 @@ class ApiV2Helper
      * Call one MCP tool on an existing session.
      *
      * @param array<string, mixed> $arguments
+     * @param array<string, string> $extraHeaders
      * @return array{status: int, json: array, raw: string, headers: array, session: ?string}
      */
-    public static function mcpTool(string $name, array $arguments, ?string $token, ?string $sessionId): array
+    public static function mcpTool(string $name, array $arguments, ?string $token, ?string $sessionId, array $extraHeaders = []): array
     {
         return self::mcp([
             'jsonrpc' => '2.0',
             'id' => 2,
             'method' => 'tools/call',
             'params' => ['name' => $name, 'arguments' => $arguments],
-        ], $token, $sessionId);
+        ], $token, $sessionId, $extraHeaders);
     }
 
     /**

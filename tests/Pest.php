@@ -104,9 +104,9 @@ function mcpCall(array $payload, ?string $token = null, ?string $sessionId = nul
     return ApiV2Helper::mcp($payload, $token, $sessionId);
 }
 
-function mcpTool(string $name, array $arguments, ?string $token, ?string $sessionId): array
+function mcpTool(string $name, array $arguments, ?string $token, ?string $sessionId, array $extraHeaders = []): array
 {
-    return ApiV2Helper::mcpTool($name, $arguments, $token, $sessionId);
+    return ApiV2Helper::mcpTool($name, $arguments, $token, $sessionId, $extraHeaders);
 }
 
 function mcpTools(?string $token, ?string $sessionId): array

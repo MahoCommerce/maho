@@ -359,6 +359,83 @@ describe('MCP tool dispatch', function (): void {
         expect($deleted['json']['error'] ?? null)->toBeNull();
     });
 
+    it('scopes an idempotency key to the tool it was sent with', function (): void {
+        // Every call is the same POST /api/mcp, so a key scoped by path and method
+        // alone answers the second tool from the first one's stored response.
+        $token = adminToken();
+        $session = mcpSession($token);
+        $key = 'mcp-idempotency-' . bin2hex(random_bytes(6));
+
+        $pages = mcpTool('content_cms_pages_list', ['itemsPerPage' => 1], $token, $session, ['X-Idempotency-Key' => $key]);
+        $orders = mcpTool('sales_orders_list', ['itemsPerPage' => 1], $token, $session, ['X-Idempotency-Key' => $key]);
+
+        expect(json_decode($pages['json']['result']['content'][0]['text'] ?? '{}', true)['@id'] ?? null)
+            ->toBe('/api/rest/v2/cms-pages');
+        expect(json_decode($orders['json']['result']['content'][0]['text'] ?? '{}', true)['@id'] ?? null)
+            ->toBe('/api/rest/v2/orders');
+    });
+
+    it('scopes an idempotency key to the record the call targets', function (): void {
+        // The tool name is REST's path without the identifier, which for a write is
+        // the whole point of it: updating two blocks is two operations, not one retried.
+        $token = serviceToken();
+        $session = mcpSession($token);
+        $key = 'mcp-idempotency-' . bin2hex(random_bytes(6));
+
+        $ids = [];
+        foreach (['first', 'second'] as $which) {
+            $created = mcpTool('content_cms_blocks_create', [
+                'title' => "MCP idempotent target {$which}",
+                'identifier' => "mcp_idempotent_target_{$which}_" . bin2hex(random_bytes(4)),
+                'content' => 'body',
+                'isActive' => true,
+                'stores' => [0],
+            ], $token, $session);
+            $id = json_decode($created['json']['result']['content'][0]['text'] ?? '{}', true)['id'] ?? null;
+            expect($id)->toBeInt();
+            trackCreated('cms_block', $id);
+            $ids[$which] = $id;
+        }
+
+        $headers = ['X-Idempotency-Key' => $key];
+        mcpTool('content_cms_blocks_update', ['id' => $ids['first'], 'title' => 'First updated'], $token, $session, $headers);
+        $second = mcpTool('content_cms_blocks_update', ['id' => $ids['second'], 'title' => 'Second updated'], $token, $session, $headers);
+
+        $payload = json_decode($second['json']['result']['content'][0]['text'] ?? '{}', true);
+
+        expect($payload['id'] ?? null)->toBe($ids['second']);
+        expect($payload['title'] ?? null)->toBe('Second updated');
+    });
+
+    it('does not replay a refused tool call for the retry that fixes it', function (): void {
+        // A refusal still leaves the transport at HTTP 200, so a status-code check
+        // alone would store it and answer the corrected retry with it for a day.
+        $token = serviceToken();
+        $session = mcpSession($token);
+        $key = 'mcp-idempotency-' . bin2hex(random_bytes(6));
+
+        $created = mcpTool('content_cms_blocks_create', [
+            'title' => 'MCP idempotent retry',
+            'identifier' => 'mcp_idempotent_retry_' . bin2hex(random_bytes(4)),
+            'content' => 'body',
+            'isActive' => true,
+            'stores' => [0],
+        ], $token, $session);
+        $id = json_decode($created['json']['result']['content'][0]['text'] ?? '{}', true)['id'] ?? null;
+        expect($id)->toBeInt();
+        trackCreated('cms_block', $id);
+
+        $missing = mcpTool('content_cms_blocks_update', ['id' => 999999999, 'title' => 'Nope'], $token, $session, ['X-Idempotency-Key' => $key]);
+        $refused = ($missing['json']['error'] ?? null) !== null
+            || ($missing['json']['result']['isError'] ?? false) === true;
+        expect($refused)->toBeTrue('updating a missing block was not refused');
+
+        $retried = mcpTool('content_cms_blocks_update', ['id' => $id, 'title' => 'MCP idempotent retry fixed'], $token, $session, ['X-Idempotency-Key' => $key]);
+        $payload = json_decode($retried['json']['result']['content'][0]['text'] ?? '{}', true);
+
+        expect($payload['title'] ?? null)->toBe('MCP idempotent retry fixed');
+    });
+
     it('refuses an unauthenticated call to a non-public tool', function (): void {
         $session = mcpSession();
         $response = mcpTool('catalog_products_delete', ['id' => 1], null, $session);
