@@ -94,6 +94,16 @@ function gqlQuery(string $query, array $variables = [], ?string $token = null): 
     return ApiV2Helper::graphql($query, $variables, $token);
 }
 
+/**
+ * Mirrors Maho\ApiPlatform\Kernel::isMcpAvailable(). Without the packages the
+ * endpoint is never routed, so the tests would report 404s, not a missing feature.
+ */
+function mcpPackagesInstalled(): bool
+{
+    return class_exists(\Symfony\AI\McpBundle\McpBundle::class)
+        && \Composer\InstalledVersions::isInstalled('psr/http-factory-implementation');
+}
+
 function mcpSession(?string $token = null): ?string
 {
     return ApiV2Helper::mcpSession($token);
@@ -328,6 +338,14 @@ uses()
         }
     })
     ->in('Api/V2');
+
+uses()
+    ->beforeEach(function (): void {
+        if (!mcpPackagesInstalled()) {
+            $this->markTestSkipped('MCP packages not installed - run composer require symfony/mcp-bundle nyholm/psr7');
+        }
+    })
+    ->in('Api/V2/Mcp');
 
 uses()
     // The Api/V2 suite above runs before this one in the same test database and
