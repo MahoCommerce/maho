@@ -45,7 +45,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
  * The rules themselves live in {@see OperationAccessChecker}; this listener is
  * the HTTP binding of them. MCP dispatches many operations inside one POST and
  * so never sets `_api_resource_class`, and applies the same checker from
- * {@see \Maho\ApiPlatform\State\McpAclProvider} instead.
+ * {@see \Maho\ApiPlatform\State\McpDispatchProvider} instead.
  *
  * Priority 4: after the firewall (8), after StoreContextAuthorizationListener
  * (6), and before any controller code runs.

@@ -320,10 +320,6 @@ class OrderService
      * Build an order collection with billing address joined and common filters applied.
      *
      * @param int|null $customerId When set, restrict to this customer's orders
-     * @param string|null $status Filter by order status
-     * @param string|null $since Filter by updated_at >= value (ISO datetime)
-     */
-    /**
      * @param array<string, mixed> $filters
      */
     private function buildOrderCollection(
