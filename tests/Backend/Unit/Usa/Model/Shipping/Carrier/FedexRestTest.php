@@ -57,6 +57,33 @@ final class FedexRestProbe extends Mage_Usa_Model_Shipping_Carrier_Fedex
     {
         $this->_rawRequest = $request;
     }
+
+    /** Canned cancel responses, popped one per cancelShipment() call. */
+    public array $cancelResponses = [];
+
+    /** @var list<array> */
+    public array $cancelRequests = [];
+
+    #[\Override]
+    protected function _getRestClient(): Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient
+    {
+        $probe = $this;
+
+        return new class ($probe) extends Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient {
+            public function __construct(private FedexRestProbe $probe)
+            {
+                // Deliberately not calling parent::__construct: nothing here touches the network.
+            }
+
+            #[\Override]
+            public function cancelShipment(array $requestData): array
+            {
+                $this->probe->cancelRequests[] = $requestData;
+
+                return array_shift($this->probe->cancelResponses) ?? [];
+            }
+        };
+    }
 }
 
 function fedexProbe(array $config = []): FedexRestProbe
@@ -554,6 +581,56 @@ describe('FedEx REST shipment request payload', function () {
         $shipment = fedexProbe()->formShipmentRequest($shipmentRequest(['is_return' => true]))['requestedShipment'];
 
         expect($shipment['shippingChargesPayment']['paymentType'])->toBe('RECIPIENT');
+    });
+});
+
+describe('FedEx REST shipment rollback', function () {
+    $ok = ['output' => ['cancelledShipment' => true, 'message' => 'Shipment is successfully cancelled']];
+    $refused = ['output' => ['cancelledShipment' => false, 'message' => 'We are unable to process this request.']];
+
+    it('cancels every package it is handed', function () use ($ok) {
+        $probe = fedexProbe(['account' => '510087020']);
+        $probe->cancelResponses = [$ok, $ok];
+
+        expect($probe->rollBack([
+            ['tracking_number' => '794846961014'],
+            ['tracking_number' => '794846963407'],
+        ]))->toBeTrue();
+
+        expect($probe->cancelRequests)->toHaveCount(2);
+        expect($probe->cancelRequests[0])->toBe([
+            'accountNumber' => ['value' => '510087020'],
+            'trackingNumber' => '794846961014',
+            'deletionControl' => 'DELETE_ONE_PACKAGE',
+        ]);
+        expect($probe->cancelRequests[1]['trackingNumber'])->toBe('794846963407');
+    });
+
+    it('reports failure when FedEx refuses a cancel despite answering HTTP 200', function () use ($refused) {
+        $probe = fedexProbe();
+        $probe->cancelResponses = [$refused];
+
+        expect($probe->rollBack([['tracking_number' => '794846961014']]))->toBeFalse();
+    });
+
+    it('still attempts the remaining packages after one is refused', function () use ($ok, $refused) {
+        $probe = fedexProbe();
+        $probe->cancelResponses = [$refused, $ok];
+
+        expect($probe->rollBack([
+            ['tracking_number' => '111111111111'],
+            ['tracking_number' => '222222222222'],
+        ]))->toBeFalse();
+
+        // A label left live because we gave up early is a label the merchant gets billed for.
+        expect($probe->cancelRequests)->toHaveCount(2);
+    });
+
+    it('treats an empty or error response as a failed cancel', function () {
+        $probe = fedexProbe();
+        $probe->cancelResponses = [['errors' => [['code' => 'FORBIDDEN.ERROR', 'message' => 'nope']]]];
+
+        expect($probe->rollBack([['tracking_number' => '794846961014']]))->toBeFalse();
     });
 });
 

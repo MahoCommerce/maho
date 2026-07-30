@@ -129,6 +129,82 @@ it('quotes domestic rates for a US shipment', function () {
     expect($reply['ratedShipmentDetails'][0])->toHaveKey('rateType');
 });
 
+it('creates a real shipping label and cancels it again', function () {
+    $payload = [
+        'labelResponseOptions' => 'LABEL',
+        'accountNumber' => ['value' => FedexSandbox::account()],
+        'requestedShipment' => [
+            'shipper' => [
+                'contact' => ['personName' => 'Maho Test', 'phoneNumber' => '9012638716'],
+                'address' => [
+                    'streetLines' => ['10 FedEx Parkway'],
+                    'city' => 'Collierville',
+                    'stateOrProvinceCode' => 'TN',
+                    'postalCode' => '38017',
+                    'countryCode' => 'US',
+                ],
+            ],
+            'recipients' => [[
+                'contact' => ['personName' => 'Maho Recipient', 'phoneNumber' => '9012637890'],
+                'address' => [
+                    'streetLines' => ['20 Rodeo Drive'],
+                    'city' => 'Beverly Hills',
+                    'stateOrProvinceCode' => 'CA',
+                    'postalCode' => '90210',
+                    'countryCode' => 'US',
+                ],
+            ]],
+            'shipDatestamp' => Mage_Core_Model_Locale::todayUtc(),
+            'serviceType' => 'FEDEX_GROUND',
+            'packagingType' => 'YOUR_PACKAGING',
+            'pickupType' => 'USE_SCHEDULED_PICKUP',
+            'shippingChargesPayment' => ['paymentType' => 'SENDER'],
+            'labelSpecification' => ['imageType' => 'PDF', 'labelStockType' => 'PAPER_85X11_TOP_HALF_LABEL'],
+            'requestedPackageLineItems' => [['weight' => ['units' => 'LB', 'value' => 10]]],
+        ],
+    ];
+
+    $response = fedexRetryTransient(
+        fn() => $this->client->createShipment($payload),
+        fn(array $r) => $r['errors'][0]['code'] ?? null,
+    );
+
+    expect(Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient::extractErrorMessage($response))->toBeNull();
+
+    $shipment = $response['output']['transactionShipments'][0];
+    $piece = $shipment['pieceResponses'][0];
+    $trackingNumber = $shipment['masterTrackingNumber'];
+
+    expect($trackingNumber)->toBeString()->not->toBeEmpty();
+
+    // The carrier base64-decodes this into setShippingLabelContent, so it has to be a real PDF.
+    $label = base64_decode($piece['packageDocuments'][0]['encodedLabel'], true);
+    expect($label)->toBeString();
+    expect(strlen($label))->toBeGreaterThan(1000);
+    expect(substr($label, 0, 4))->toBe('%PDF');
+
+    // Clean up after ourselves, and prove the cancel path works while we hold a live label.
+    $cancelled = $this->client->cancelShipment([
+        'accountNumber' => ['value' => FedexSandbox::account()],
+        'trackingNumber' => $trackingNumber,
+        'deletionControl' => 'DELETE_ONE_PACKAGE',
+    ]);
+
+    expect($cancelled['output']['cancelledShipment'])->toBeTrue();
+});
+
+it('reports a refused cancellation instead of claiming success', function () {
+    // An unknown tracking number is refused with HTTP 200 and cancelledShipment false, which
+    // is exactly the shape rollBack() has to notice rather than returning true regardless.
+    $response = $this->client->cancelShipment([
+        'accountNumber' => ['value' => FedexSandbox::account()],
+        'trackingNumber' => '999999999999',
+        'deletionControl' => 'DELETE_ONE_PACKAGE',
+    ]);
+
+    expect($response['output']['cancelledShipment'] ?? false)->toBeFalse();
+});
+
 it('collects priced rates through the carrier, as checkout does', function () {
     $store = Mage::app()->getStore();
     $store->setConfig('carriers/fedex/active', '1');

@@ -1191,14 +1191,33 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     #[\Override]
     public function rollBack($data)
     {
+        $rolledBack = true;
+
         foreach ($data as $item) {
-            $this->_getRestClient()->cancelShipment([
+            $response = $this->_getRestClient()->cancelShipment([
                 'accountNumber' => ['value' => $this->getConfigData('account')],
                 'trackingNumber' => $item['tracking_number'],
                 'deletionControl' => 'DELETE_ONE_PACKAGE',
             ]);
+
+            // A refused cancel answers HTTP 200 with cancelledShipment false and no errors[],
+            // so the flag is the only signal that the label is still live.
+            if (empty($response['output']['cancelledShipment'])) {
+                $rolledBack = false;
+                Mage::log(
+                    sprintf(
+                        'FedEx did not cancel shipment %s: %s',
+                        $item['tracking_number'],
+                        $response['output']['message']
+                            ?? Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient::extractErrorMessage($response)
+                            ?? 'no reason given',
+                    ),
+                    Mage::LOG_ERROR,
+                );
+            }
         }
-        return true;
+
+        return $rolledBack;
     }
 
     /**
