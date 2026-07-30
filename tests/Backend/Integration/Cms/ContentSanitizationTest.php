@@ -70,6 +70,38 @@ describe('CMS page content sanitization', function () {
 
         $page->delete();
     });
+
+    it('preserves accordion and tabs markup through save', function () {
+        // The WYSIWYG accordion is plain <details> markup, and every part of it carries
+        // meaning on the storefront: `open` picks the visible panel, `name` keeps a tab
+        // group exclusive, and data-style decides accordion or tabs.
+        $content = '<div data-type="maho-accordion" data-style="tabs">'
+            . '<details name="maho-accordion-abc123" open><summary>Description</summary>'
+            . '<div data-type="detailsContent"><p>First panel</p></div></details>'
+            . '<details name="maho-accordion-abc123"><summary>Reviews</summary>'
+            . '<div data-type="detailsContent"><p>Second panel</p></div></details>'
+            . '</div>';
+
+        $page = Mage::getModel('cms/page');
+        $page->setTitle('Accordion Page')
+            ->setIdentifier('accordion-page-' . uniqid())
+            ->setIsActive(1)
+            ->setRootTemplate('one_column')
+            ->setStores([0])
+            ->setContent($content)
+            ->save();
+
+        $loaded = Mage::getModel('cms/page')->load($page->getId());
+
+        expect($loaded->getContent())->toContain('data-type="maho-accordion"')
+            ->and($loaded->getContent())->toContain('data-style="tabs"')
+            ->and($loaded->getContent())->toContain('<summary>Description</summary>')
+            ->and($loaded->getContent())->toContain('data-type="detailsContent"')
+            ->and($loaded->getContent())->toContain('name="maho-accordion-abc123"')
+            ->and($loaded->getContent())->toMatch('/<details[^>]* open/');
+
+        $page->delete();
+    });
 });
 
 describe('CMS block content sanitization', function () {

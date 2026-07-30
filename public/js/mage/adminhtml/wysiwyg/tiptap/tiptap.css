@@ -1061,9 +1061,15 @@
     --accent-hover: #0e7490;
 }
 
+.ProseMirror [data-type="maho-accordion"] {
+    --accent: #d97706;
+    --accent-hover: #b45309;
+}
+
 /* Container */
 .ProseMirror [data-type="maho-columns"],
-.ProseMirror [data-type="maho-bento"] {
+.ProseMirror [data-type="maho-bento"],
+.ProseMirror [data-type="maho-accordion"] {
     margin: 1rem 0;
 }
 
@@ -1104,14 +1110,14 @@
 }
 
 /* Badge visibility on hover/selection */
-.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"]):hover .grid-badge,
-.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"]).ProseMirror-selectednode .grid-badge {
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"], [data-type="maho-accordion"]):hover .grid-badge,
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"], [data-type="maho-accordion"]).ProseMirror-selectednode .grid-badge {
     opacity: 1;
 }
 
 /* Hover/selected outline */
-.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"]):hover,
-.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"]).ProseMirror-selectednode {
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"], [data-type="maho-accordion"]):hover,
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"], [data-type="maho-accordion"]).ProseMirror-selectednode {
     outline: 2px dashed var(--accent);
     outline-offset: 4px;
     border-radius: 4px;
@@ -1283,3 +1289,86 @@
     }
 }
 
+
+
+/* ========================================
+   ACCORDION & TABS — SPECIFIC STYLES
+   ======================================== */
+
+/* Overrides the display:table shared by the maho-* placeholder nodes */
+.ProseMirror div[data-type="maho-accordion"] {
+    display: block;
+}
+
+.ProseMirror .accordion-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* An item: toggle button next to the summary and content wrapper */
+.ProseMirror [data-type="details"] {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--tt-color-border);
+    border-radius: var(--tt-radius-md);
+    background: var(--tt-color-bg);
+
+    > button {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-top: 0.1rem;
+        padding: 0;
+        border: none;
+        border-radius: var(--tt-radius-sm);
+        background: transparent;
+        color: var(--tt-color-text-muted);
+        cursor: pointer;
+
+        svg {
+            width: 1rem;
+            height: 1rem;
+            transition: transform 0.15s;
+            transform: rotate(-90deg);
+        }
+
+        &:hover {
+            background: var(--tt-color-bg-hover);
+        }
+    }
+
+    > div {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    &.is-open > button svg {
+        transform: rotate(0deg);
+    }
+}
+
+.ProseMirror [data-type="details"] summary {
+    font-weight: 600;
+    color: var(--tt-color-heading);
+    list-style: none;
+}
+
+.ProseMirror [data-type="detailsContent"] {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--tt-color-border);
+
+    > *:first-child {
+        margin-top: 0;
+    }
+
+    > *:last-child {
+        margin-bottom: 0;
+    }
+}
