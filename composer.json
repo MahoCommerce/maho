@@ -182,6 +182,7 @@
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "magento-hackathon/magento-composer-installer": false,
             "mahocommerce/maho-composer-plugin": true,
+            "php-http/discovery": false,
             "pestphp/pest-plugin": true
         },
         "platform": {
