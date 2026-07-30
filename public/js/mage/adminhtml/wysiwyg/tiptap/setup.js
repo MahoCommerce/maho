@@ -219,6 +219,10 @@ class tiptapWysiwygSetup {
         const bentoBubbleMenu = this.createBentoBubbleMenu();
         this.wrapper.appendChild(bentoBubbleMenu);
 
+        // Create accordion bubble menu
+        const accordionBubbleMenu = this.createAccordionBubbleMenu();
+        this.wrapper.appendChild(accordionBubbleMenu);
+
         // Create container for Tiptap editor content
         const container = document.createElement('div');
         container.id = `${this.id}_editor`;
@@ -314,6 +318,22 @@ class tiptapWysiwygSetup {
                     bubbleMenu: bentoBubbleMenu,
                 }),
                 TiptapModules.MahoBentoCell,
+                TiptapModules.MahoAccordion.configure({
+                    bubbleMenu: accordionBubbleMenu,
+                }),
+                // Without persist, `open` is outside the schema: the toggle only expands an item
+                // for editing, so opening sections to type in them never publishes them expanded
+                TiptapModules.MahoDetails.configure({
+                    persist: false,
+                    renderToggleButton: ({ element, isOpen }) => {
+                        const label = this.translate(isOpen ? 'Collapse' : 'Expand');
+                        element.innerHTML = this.getIcon('chevron-down');
+                        element.title = label;
+                        element.setAttribute('aria-label', label);
+                    },
+                }),
+                TiptapModules.DetailsSummary,
+                TiptapModules.DetailsContent,
                 TiptapModules.MahoFullscreen,
                 TiptapModules.DragHandle.configure({
                     render: () => {
@@ -443,6 +463,17 @@ class tiptapWysiwygSetup {
                     { title: 'Banner + Cards', icon: 'bento-banner-cards', command: 'insertBentoGrid', args: ['banner-cards'] },
                 ],
             },
+            {
+                type: 'dropdown',
+                title: 'Accordion',
+                icon: 'accordion',
+                showTitle: false,
+                showChevron: false,
+                items: [
+                    { title: 'Accordion', icon: 'accordion', command: 'insertAccordion', args: ['accordion'] },
+                    { title: 'Tabs', icon: 'tabs', command: 'insertAccordion', args: ['tabs'] },
+                ],
+            },
             { type: 'button', title: 'Insert Image', icon: 'image', command: 'insertMahoImage', enabled: this.config.add_images },
             { type: 'button', title: 'Insert Slideshow', icon: 'slideshow', command: 'insertMahoSlideshow', enabled: this.config.add_images && this.config.add_slideshows !== false },
             { type: 'button', title: 'Insert Widget', icon: 'widget', command: 'insertMahoWidget', enabled: this.config.add_widgets },
@@ -514,15 +545,15 @@ class tiptapWysiwygSetup {
     createColumnsBubbleMenu() {
         const bubbleMenu = this.createToolbar([
             { type: 'label', text: 'Gap:' },
-            { type: 'button', title: 'No Gap', icon: 'gap-none', command: 'setColumnsGap', args: ['none'], dataGap: 'none' },
-            { type: 'button', title: 'Small', icon: 'gap-small', command: 'setColumnsGap', args: ['small'], dataGap: 'small' },
-            { type: 'button', title: 'Medium', icon: 'gap-medium', command: 'setColumnsGap', args: ['medium'], dataGap: 'medium' },
-            { type: 'button', title: 'Large', icon: 'gap-large', command: 'setColumnsGap', args: ['large'], dataGap: 'large' },
+            { type: 'button', title: 'No Gap', icon: 'gap-none', command: 'setColumnsGap', args: ['none'], data: { gap: 'none' } },
+            { type: 'button', title: 'Small', icon: 'gap-small', command: 'setColumnsGap', args: ['small'], data: { gap: 'small' } },
+            { type: 'button', title: 'Medium', icon: 'gap-medium', command: 'setColumnsGap', args: ['medium'], data: { gap: 'medium' } },
+            { type: 'button', title: 'Large', icon: 'gap-large', command: 'setColumnsGap', args: ['large'], data: { gap: 'large' } },
             { type: 'separator' },
             { type: 'label', text: 'Style:' },
-            { type: 'button', title: 'None', icon: 'style-none', command: 'setColumnsStyle', args: ['none'], dataGridStyle: 'none' },
-            { type: 'button', title: 'Cards', icon: 'style-cards', command: 'setColumnsStyle', args: ['cards'], dataGridStyle: 'cards' },
-            { type: 'button', title: 'Separated', icon: 'style-separated', command: 'setColumnsStyle', args: ['separated'], dataGridStyle: 'separated' },
+            { type: 'button', title: 'None', icon: 'style-none', command: 'setColumnsStyle', args: ['none'], data: { gridStyle: 'none' } },
+            { type: 'button', title: 'Cards', icon: 'style-cards', command: 'setColumnsStyle', args: ['cards'], data: { gridStyle: 'cards' } },
+            { type: 'button', title: 'Separated', icon: 'style-separated', command: 'setColumnsStyle', args: ['separated'], data: { gridStyle: 'separated' } },
             { type: 'separator' },
             { type: 'button', title: 'Delete Columns', icon: 'trash', command: 'deleteColumns' },
         ]);
@@ -536,19 +567,37 @@ class tiptapWysiwygSetup {
     createBentoBubbleMenu() {
         const bubbleMenu = this.createToolbar([
             { type: 'label', text: 'Gap:' },
-            { type: 'button', title: 'No Gap', icon: 'gap-none', command: 'setBentoGap', args: ['none'], dataGap: 'none' },
-            { type: 'button', title: 'Small', icon: 'gap-small', command: 'setBentoGap', args: ['small'], dataGap: 'small' },
-            { type: 'button', title: 'Medium', icon: 'gap-medium', command: 'setBentoGap', args: ['medium'], dataGap: 'medium' },
-            { type: 'button', title: 'Large', icon: 'gap-large', command: 'setBentoGap', args: ['large'], dataGap: 'large' },
+            { type: 'button', title: 'No Gap', icon: 'gap-none', command: 'setBentoGap', args: ['none'], data: { gap: 'none' } },
+            { type: 'button', title: 'Small', icon: 'gap-small', command: 'setBentoGap', args: ['small'], data: { gap: 'small' } },
+            { type: 'button', title: 'Medium', icon: 'gap-medium', command: 'setBentoGap', args: ['medium'], data: { gap: 'medium' } },
+            { type: 'button', title: 'Large', icon: 'gap-large', command: 'setBentoGap', args: ['large'], data: { gap: 'large' } },
             { type: 'separator' },
             { type: 'label', text: 'Style:' },
-            { type: 'button', title: 'None', icon: 'style-none', command: 'setBentoStyle', args: ['none'], dataGridStyle: 'none' },
-            { type: 'button', title: 'Cards', icon: 'style-cards', command: 'setBentoStyle', args: ['cards'], dataGridStyle: 'cards' },
+            { type: 'button', title: 'None', icon: 'style-none', command: 'setBentoStyle', args: ['none'], data: { gridStyle: 'none' } },
+            { type: 'button', title: 'Cards', icon: 'style-cards', command: 'setBentoStyle', args: ['cards'], data: { gridStyle: 'cards' } },
             { type: 'separator' },
             { type: 'button', title: 'Delete Bento Grid', icon: 'trash', command: 'deleteBentoGrid' },
         ]);
 
         bubbleMenu.id = `${this.id}_bento_bubble_menu`;
+        bubbleMenu.className = 'tiptap-bubble-menu';
+        bubbleMenu.style.display = 'none';
+        return bubbleMenu;
+    }
+
+    createAccordionBubbleMenu() {
+        const bubbleMenu = this.createToolbar([
+            { type: 'label', text: 'Style:' },
+            { type: 'button', title: 'Accordion', icon: 'accordion', command: 'setAccordionStyle', args: ['accordion'], data: { accordionStyle: 'accordion' } },
+            { type: 'button', title: 'Tabs', icon: 'tabs', command: 'setAccordionStyle', args: ['tabs'], data: { accordionStyle: 'tabs' } },
+            { type: 'separator' },
+            { type: 'button', title: 'Add Item', icon: 'plus', command: 'addAccordionItem' },
+            { type: 'button', title: 'Delete Item', icon: 'row-remove', command: 'deleteAccordionItem' },
+            { type: 'separator' },
+            { type: 'button', title: 'Delete Accordion', icon: 'trash', command: 'deleteAccordion' },
+        ]);
+
+        bubbleMenu.id = `${this.id}_accordion_bubble_menu`;
         bubbleMenu.className = 'tiptap-bubble-menu';
         bubbleMenu.style.display = 'none';
         return bubbleMenu;
@@ -670,11 +719,8 @@ class tiptapWysiwygSetup {
                     button.dataset.command = item.command;
                     button.dataset.args = JSON.stringify(item.args);
                 }
-                if (item.dataGap) {
-                    button.dataset.gap = item.dataGap;
-                }
-                if (item.dataGridStyle) {
-                    button.dataset.gridStyle = item.dataGridStyle;
+                for (const [key, value] of Object.entries(item.data ?? {})) {
+                    button.dataset[key] = value;
                 }
                 group.append(button);
             }
@@ -779,6 +825,11 @@ class tiptapWysiwygSetup {
         'block': '<path d="M3 3m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"/><path d="M9 9h6v6h-6z"/><path d="M3 15h6m6 0h6m-18 -6h6m6 0h6"/>',
         'variable': '<path d="M5 4c-2.5 5 -2.5 10 0 16m14 -16c2.5 5 2.5 10 0 16m-10 -11h1c1 0 1 1 2.016 3.527c.984 2.473 .984 3.473 1.984 3.473h1"/><path d="M8 16c1.5 0 3 -2 4 -3.5s2.5 -3.5 4 -3.5"/>',
         'slideshow': '<path d="M15 6l.01 0"/><path d="M3 3m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z"/><path d="M3 13l4 -4a3 5 0 0 1 3 0l4 4"/><path d="M13 12l2 -2a3 5 0 0 1 3 0l3 3"/><path d="M8 21l.01 0"/><path d="M12 21l.01 0"/><path d="M16 21l.01 0"/>',
+
+        // Accordion icons
+        'accordion': '<rect x="3" y="4" width="18" height="5" rx="1"/><rect x="3" y="12" width="18" height="8" rx="1"/><path d="M15 6.5h3"/>',
+        'tabs': '<path d="M3 8h18v11a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1z"/><path d="M4 8v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3"/>',
+        'plus': '<path d="M12 5l0 14"/><path d="M5 12l14 0"/>',
 
         // Table operation icons
         'column-insert-left': '<path d="M14 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-14a1 1 0 0 1 1 -1z"/><path d="M5 12l4 0"/><path d="M7 10l0 4"/>',

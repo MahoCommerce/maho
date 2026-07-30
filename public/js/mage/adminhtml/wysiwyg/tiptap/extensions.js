@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
-import { Editor, Node, Mark, Extension, mergeAttributes, ResizableNodeView } from 'https://esm.sh/@tiptap/core@3.27.1';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.27.1';
-import Image from 'https://esm.sh/@tiptap/extension-image@3.27.1';
-import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.27.1';
-import { Table, TableRow as BaseTableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.27.1';
-import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.27.1';
-import DragHandle from 'https://esm.sh/@tiptap/extension-drag-handle@3.27.1';
+import { Editor, Node, Mark, Extension, mergeAttributes, ResizableNodeView } from 'https://esm.sh/@tiptap/core@3.29.2';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.29.2';
+import Image from 'https://esm.sh/@tiptap/extension-image@3.29.2';
+import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.29.2';
+import { Table, TableRow as BaseTableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.29.2';
+import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.29.2';
+import DragHandle from 'https://esm.sh/@tiptap/extension-drag-handle@3.29.2';
 import { MahoColumns, MahoColumn, COLUMN_PRESETS } from './extensions/columns.js';
 import { MahoBentoGrid, MahoBentoCell, BENTO_PRESETS } from './extensions/bento.js';
+import { MahoAccordion, MahoDetails, DetailsSummary, DetailsContent, ACCORDION_STYLES } from './extensions/details.js';
 
 // prosemirror-tables has no parse rules for the table wrappers browsers (and TipTap itself) emit,
 // so with `enableContentCheck` on TipTap's catch-all rule flags them and falsely warns that valid
@@ -32,6 +33,7 @@ export {
     Table, TableRow, TableCell, TableHeader, BubbleMenu, DragHandle,
     MahoColumns, MahoColumn, COLUMN_PRESETS,
     MahoBentoGrid, MahoBentoCell, BENTO_PRESETS,
+    MahoAccordion, MahoDetails, DetailsSummary, DetailsContent, ACCORDION_STYLES,
 };
 
 const parseDirective = (directiveStr) => {
@@ -132,6 +134,7 @@ export const GlobalAttributes = Extension.create({
                     'tableRow', 'tableCell', 'tableHeader', 'table',
                     'mahoColumns', 'mahoColumn',
                     'mahoBentoGrid', 'mahoBentoCell',
+                    'mahoAccordion', 'details', 'detailsSummary', 'detailsContent',
                 ],
                 attributes: {
                     class: {

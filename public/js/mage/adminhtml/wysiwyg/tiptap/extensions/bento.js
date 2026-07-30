@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
-import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.27.1';
+import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.29.2';
 import { findParentNodeOfType, createGridNodeView } from './grid-utils.js';
 
 /**
@@ -235,10 +235,12 @@ export const MahoBentoGrid = Node.create({
                 parseHTML: element => element.getAttribute('data-gap') || 'medium',
                 renderHTML: attributes => ({ 'data-gap': attributes.gap }),
             },
-            style: {
+            // Not named `style`: that shadows the global style attribute preserved on every
+            // node, so any inline style on the element would be dropped on the next save
+            gridStyle: {
                 default: 'none',
                 parseHTML: element => element.getAttribute('data-style') || 'none',
-                renderHTML: attributes => ({ 'data-style': attributes.style }),
+                renderHTML: attributes => ({ 'data-style': attributes.gridStyle }),
             },
         };
     },
@@ -254,7 +256,7 @@ export const MahoBentoGrid = Node.create({
             'data-type': 'maho-bento',
             'data-preset': node.attrs.preset,
             'data-gap': node.attrs.gap,
-            'data-style': node.attrs.style,
+            'data-style': node.attrs.gridStyle,
             'style': `grid-template-areas: ${node.attrs.areas}; grid-template-columns: ${node.attrs.columns}; grid-template-rows: ${node.attrs.rows}`,
         }), 0];
     },
@@ -270,7 +272,7 @@ export const MahoBentoGrid = Node.create({
             setDataAttrs(dom, node) {
                 dom.setAttribute('data-preset', node.attrs.preset);
                 dom.setAttribute('data-gap', node.attrs.gap);
-                dom.setAttribute('data-style', node.attrs.style);
+                dom.setAttribute('data-style', node.attrs.gridStyle);
             },
 
             updateGridStyles(contentDOM, node, gap) {
@@ -281,7 +283,7 @@ export const MahoBentoGrid = Node.create({
             },
 
             onBadgeClick(node, bubbleMenu) {
-                const currentStyle = node.attrs.style || 'none';
+                const currentStyle = node.attrs.gridStyle || 'none';
                 for (const btn of bubbleMenu.querySelectorAll('[data-grid-style]')) {
                     btn.classList.toggle('is-active', btn.dataset.gridStyle === currentStyle);
                 }
@@ -394,7 +396,7 @@ export const MahoBentoGrid = Node.create({
                 if (dispatch) {
                     tr.setNodeMarkup(bentoNode.pos, null, {
                         ...bentoNode.node.attrs,
-                        style,
+                        gridStyle: style,
                     });
                     dispatch(tr);
                 }

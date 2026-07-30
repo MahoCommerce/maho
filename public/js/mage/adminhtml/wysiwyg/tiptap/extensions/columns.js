@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
 // SPDX-License-Identifier: AFL-3.0
 
-import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.27.1';
+import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.29.2';
 import { findParentNodeOfType, createGridNodeView } from './grid-utils.js';
 
 /**
@@ -112,10 +112,12 @@ export const MahoColumns = Node.create({
                 parseHTML: element => element.getAttribute('data-gap') || 'medium',
                 renderHTML: attributes => ({ 'data-gap': attributes.gap }),
             },
-            style: {
+            // Not named `style`: that shadows the global style attribute preserved on every
+            // node, so any inline style on the element would be dropped on the next save
+            gridStyle: {
                 default: 'none',
                 parseHTML: element => element.getAttribute('data-style') || 'none',
-                renderHTML: attributes => ({ 'data-style': attributes.style }),
+                renderHTML: attributes => ({ 'data-style': attributes.gridStyle }),
             },
         };
     },
@@ -131,7 +133,7 @@ export const MahoColumns = Node.create({
             'data-type': 'maho-columns',
             'data-preset': node.attrs.preset,
             'data-gap': node.attrs.gap,
-            'data-style': node.attrs.style,
+            'data-style': node.attrs.gridStyle,
         };
 
         // Only inline grid-template-columns for custom (drag-resized) layouts;
@@ -154,7 +156,7 @@ export const MahoColumns = Node.create({
             setDataAttrs(dom, node) {
                 dom.setAttribute('data-preset', node.attrs.preset);
                 dom.setAttribute('data-gap', node.attrs.gap);
-                dom.setAttribute('data-style', node.attrs.style);
+                dom.setAttribute('data-style', node.attrs.gridStyle);
             },
 
             updateGridStyles(contentDOM, node, gap) {
@@ -180,7 +182,7 @@ export const MahoColumns = Node.create({
             },
 
             onBadgeClick(node, bubbleMenu) {
-                const currentStyle = node.attrs.style || 'none';
+                const currentStyle = node.attrs.gridStyle || 'none';
                 for (const btn of bubbleMenu.querySelectorAll('[data-grid-style]')) {
                     btn.classList.toggle('is-active', btn.dataset.gridStyle === currentStyle);
                 }
@@ -254,7 +256,7 @@ export const MahoColumns = Node.create({
                 if (dispatch) {
                     tr.setNodeMarkup(columnsNode.pos, null, {
                         ...columnsNode.node.attrs,
-                        style,
+                        gridStyle: style,
                     });
                     dispatch(tr);
                 }
