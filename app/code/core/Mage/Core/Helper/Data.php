@@ -404,15 +404,13 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Get encryption method depending on the presence of the function - password_hash.
+     * Get the hash version used for newly generated hashes.
      *
      * @return int
      */
     public function getVersionHash(Mage_Core_Model_Encryption $encryptionModel)
     {
-        return function_exists('password_hash')
-            ? $encryptionModel::HASH_VERSION_LATEST
-            : $encryptionModel::HASH_VERSION_SHA512;
+        return $encryptionModel::HASH_VERSION_LATEST;
     }
 
     /**

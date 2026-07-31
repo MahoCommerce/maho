@@ -59,9 +59,6 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
      */
     protected $_htmlId = '';
 
-    protected $_max;
-    protected $_min;
-
     /**
      * Initialize object
      */
@@ -125,10 +122,8 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
     /**
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function processData(): array
+    public function processData(): void
     {
-        $params = [];
-
         $this->_allSeries = $this->getRowsData($this->_dataRows);
         foreach ($this->_axisMaps as $axis => $attr) {
             $this->setAxisLabels($axis, $this->getRowsData($attr, true));
@@ -182,146 +177,34 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
             $dates[] = $d;
         }
 
-        // setting skip step
-        if (count($dates) > 8 && count($dates) < 15) {
-            $c = 1;
-        } elseif (count($dates) >= 15) {
-            $c = 2;
-        } else {
-            $c = 0;
-        }
-
         $this->_axisLabels['x'] = $dates;
         $this->_allSeries = $datas;
 
-        // Image-Charts Awesome data format values
-        $params['chd'] = 'a:';
-        $dataDelimiter = ',';
-        $dataSetdelimiter = '|';
-        $dataMissing = '_';
-        $localmaxlength = [];
-        $localmaxvalue = [];
-        $localminvalue = [];
-
-        // process each string in the array, and find the max length
-        foreach ($this->getAllSeries() as $index => $serie) {
-            $localmaxlength[$index] = count($serie);
-            $localmaxvalue[$index] = max($serie);
-            $localminvalue[$index] = min($serie);
-        }
-
-        if (is_numeric($this->_max)) {
-            $maxvalue = $this->_max;
-        } else {
-            $maxvalue = max($localmaxvalue);
-        }
-        if (is_numeric($this->_min)) {
-            $minvalue = $this->_min;
-        } else {
-            $minvalue = min($localminvalue);
-        }
-
-        // default values
-        $yLabels = [];
-        $miny = 0;
-        $maxy = 0;
-        $yorigin = 0;
-
-        if ($minvalue >= 0 && $maxvalue >= 0) {
-            $miny = 0;
-            if ($maxvalue > 10) {
-                $p = 10 ** $this->_getPow($maxvalue);
-                $maxy = (ceil($maxvalue / $p)) * $p;
-                $yLabels = range($miny, $maxy, $p);
-            } else {
-                $maxy = ceil($maxvalue + 1);
-                $yLabels = range($miny, $maxy, 1);
+        foreach ($this->_axisLabels['x'] as $_index => $_label) {
+            if ($_label == '') {
+                $this->_axisLabels['x'][$_index] = '';
+                continue;
+            }
+            switch ($this->getDataHelper()->getParam('period')) {
+                case '24h':
+                    $dateTime = DateTime::createFromFormat('Y-m-d H:00', $_label) ?: new DateTime($_label);
+                    $this->_axisLabels['x'][$_index] = $this->formatTime($dateTime, 'short');
+                    break;
+                case '7d':
+                case '1m':
+                    $this->_axisLabels['x'][$_index] = $this->formatDate(
+                        DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $_label) ?: new DateTime($_label),
+                    );
+                    break;
+                case '1y':
+                case '2y':
+                    $formats = Mage::app()->getLocale()->getTranslationList('datetime');
+                    $format = $formats['yyMM'] ?? 'MM/yyyy';
+                    $format = str_replace(['yyyy', 'yy', 'MM'], ['Y', 'y', 'm'], $format);
+                    $this->_axisLabels['x'][$_index] = date($format, strtotime($_label));
+                    break;
             }
         }
-
-        $chartdata = [];
-
-        foreach ($this->getAllSeries() as $serie) {
-            $thisdataarray = $serie;
-            $thisdataarrayCount = count($thisdataarray);
-            for ($j = 0; $j < $thisdataarrayCount; $j++) {
-                $currentvalue = $thisdataarray[$j];
-                if (is_numeric($currentvalue)) {
-                    $ylocation = $yorigin + $currentvalue;
-                    $chartdata[] = $ylocation . $dataDelimiter;
-                } else {
-                    $chartdata[] = $dataMissing . $dataDelimiter;
-                }
-            }
-            $chartdata[] = $dataSetdelimiter;
-        }
-        $buffer = implode('', $chartdata);
-
-        $buffer = rtrim($buffer, $dataSetdelimiter);
-        $buffer = rtrim($buffer, $dataDelimiter);
-        $buffer = str_replace(($dataDelimiter . $dataSetdelimiter), $dataSetdelimiter, $buffer);
-
-        $params['chd'] .= $buffer;
-
-        $valueBuffer = [];
-
-        if (count($this->_axisLabels)) {
-            $params['chxt'] = implode(',', array_keys($this->_axisLabels));
-            $indexid = 0;
-            foreach (array_keys($this->_axisLabels) as $idx) {
-                if ($idx === 'x') {
-                    // format date
-                    foreach ($this->_axisLabels[$idx] as $_index => $_label) {
-                        if ($_label != '') {
-                            switch ($this->getDataHelper()->getParam('period')) {
-                                case '24h':
-                                    $dateTime = DateTime::createFromFormat('Y-m-d H:00', $_label) ?: new DateTime($_label);
-                                    $this->_axisLabels[$idx][$_index] = $this->formatTime(
-                                        $dateTime,
-                                        'short',
-                                    );
-                                    break;
-                                case '7d':
-                                case '1m':
-                                    $this->_axisLabels[$idx][$_index] = $this->formatDate(
-                                        DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $_label) ?: new DateTime($_label),
-                                    );
-                                    break;
-                                case '1y':
-                                case '2y':
-                                    $formats = Mage::app()->getLocale()->getTranslationList('datetime');
-                                    $format = $formats['yyMM'] ?? 'MM/yyyy';
-                                    $format = str_replace(['yyyy', 'yy', 'MM'], ['Y', 'y', 'm'], $format);
-                                    $this->_axisLabels[$idx][$_index] = date($format, strtotime($_label));
-                                    break;
-                            }
-                        } else {
-                            $this->_axisLabels[$idx][$_index] = '';
-                        }
-                    }
-
-                    $tmpstring = implode('|', $this->_axisLabels[$idx]);
-
-                    $valueBuffer[] = $indexid . ':|' . $tmpstring;
-                    if (count($this->_axisLabels[$idx]) > 1) {
-                        $deltaX = 100 / (count($this->_axisLabels[$idx]) - 1);
-                    } else {
-                        $deltaX = 100;
-                    }
-                } elseif ($idx === 'y') {
-                    $valueBuffer[] = $indexid . ':|' . implode('|', $yLabels);
-                    if (count($yLabels) - 1) {
-                        $deltaY = 100 / (count($yLabels) - 1);
-                    } else {
-                        $deltaY = 100;
-                    }
-                }
-                $indexid++;
-            }
-            $params['chxl'] = implode('|', $valueBuffer);
-        }
-
-        return $params;
     }
 
     /**
@@ -377,22 +260,6 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
     public function getHtmlId()
     {
         return $this->_htmlId;
-    }
-
-    /**
-     * Return pow
-     *
-     * @param int $number
-     * @return int
-     */
-    protected function _getPow($number)
-    {
-        $pow = 0;
-        while ($number >= 10) {
-            $number = $number / 10;
-            $pow++;
-        }
-        return $pow;
     }
 
     /**

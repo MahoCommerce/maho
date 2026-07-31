@@ -732,9 +732,7 @@ class Payment {
             // Handle free method
             if (method === 'free' &&
                 typeof quoteBaseGrandTotal !== 'undefined' &&
-                quoteBaseGrandTotal > 0.0001 &&
-                !((document.getElementById('use_reward_points')?.checked) ||
-                    (document.getElementById('use_customer_balance')?.checked))) {
+                quoteBaseGrandTotal > 0.0001) {
 
                 const methodElement = document.getElementById('p_method_' + method);
                 if (methodElement) {
