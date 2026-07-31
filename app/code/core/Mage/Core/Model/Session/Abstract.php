@@ -247,8 +247,9 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     }
 
     /**
-     * Symfony would create this with 0777 against the current umask, which can leave the cron
-     * reaper unable to unlink what the web user wrote, so mirror the parent directory instead.
+     * Unlinking needs write and execute on the directory, so Symfony creating this with 0777 minus
+     * the umask can leave the cron reaper unable to reap what the web user wrote. Mirroring the
+     * parent carries setgid too, which is what keeps a shared web and cron group working.
      */
     private function prepareSessionSaveDir(string $path): void
     {
@@ -257,14 +258,14 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         }
 
         $perms = @fileperms(dirname($path));
-        $mode = $perms === false ? 0770 : $perms & 0777;
+        $mode = $perms === false ? 0770 : $perms & 07777;
 
         // is_dir() again: a concurrent request may have won the race
         if (!@mkdir($path, $mode, true) && !is_dir($path)) {
             throw new Mage_Core_Exception("Unable to create session directory: {$path}");
         }
 
-        // mkdir() subtracts the umask from its mode argument, chmod() does not
+        // mkdir() subtracts the umask from its mode and drops setgid, chmod() does neither
         @chmod($path, $mode);
     }
 
