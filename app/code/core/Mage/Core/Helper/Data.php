@@ -379,16 +379,11 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      * Generate password hash for user
      *
      * @param string $password
-     * @param mixed $salt
+     * @param mixed $salt ignored, password_hash() generates its own salt
      * @return string
      */
     public function getHashPassword(#[\SensitiveParameter] $password, $salt = false)
     {
-        $encryptionModel = $this->getEncryptor();
-        $latestVersionHash = $this->getVersionHash($encryptionModel);
-        if ($latestVersionHash == $encryptionModel::HASH_VERSION_SHA512) {
-            return $this->getEncryptor()->getHashPassword($password, $salt);
-        }
         return $this->getEncryptor()->getHashPassword($password, Mage_Admin_Model_User::HASH_SALT_EMPTY);
     }
 
