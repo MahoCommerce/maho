@@ -197,6 +197,20 @@ function setRouteParams(url, params = {}) {
 }
 
 /**
+ * Parse Varien type route params, i.e. /id/1/, into an object usable by setRouteParams()
+ *
+ * @param {string} params - route params, with or without surrounding slashes
+ */
+function parseRouteParams(params) {
+    const parts = String(params ?? '').split('/').filter((part) => part !== '');
+    const result = {};
+    for (let i = 0; i < parts.length; i += 2) {
+        result[parts[i]] = parts[i + 1] ?? '';
+    }
+    return result;
+}
+
+/**
  * Set query params, i.e. ?id=1
  *
  * @param {string} url - the base URL

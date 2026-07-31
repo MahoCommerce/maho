@@ -38,20 +38,20 @@
 </p>
 <script>
     function switchStore(obj) {
-        var storeParam = obj.value ? 'store/' + obj.value + '/' : '';
-        if (obj.switchParams) {
-            storeParam += obj.switchParams;
-        }
+        const url = setRouteParams('<?= $this->getSwitchUrl() ?>', {
+            store: obj.value || null,
+            ...parseRouteParams(obj.switchParams),
+        });
     <?php if ($this->getUseConfirm()): ?>
         if (confirm('<?= $this->jsQuoteEscape($this->__('Please confirm site switching. All data that hasn\'t been saved will be lost.')) ?>')) {
-            setLocation('<?= $this->getSwitchUrl() ?>' + storeParam);
+            setLocation(url);
             return true;
         } else {
             obj.value = '<?= $this->getStoreId() ?>';
         }
         return false;
     <?php else: ?>
-        setLocation('<?= $this->getSwitchUrl() ?>' + storeParam);
+        setLocation(url);
     <?php endif ?>
     }
 </script>

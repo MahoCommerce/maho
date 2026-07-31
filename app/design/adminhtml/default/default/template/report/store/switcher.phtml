@@ -38,18 +38,20 @@
 </p>
 <script>
     function switchStore(obj){
-        if (obj.options[obj.selectedIndex].getAttribute('website') == 'true') {
-            var selectionType = 'website';
-        } else if (obj.options[obj.selectedIndex].getAttribute('group') == 'true') {
-            var selectionType = 'group';
-        } else {
-            var selectionType = 'store';
+        const option = obj.options[obj.selectedIndex];
+        const selectionType = option.getAttribute('website') == 'true' ? 'website'
+            : (option.getAttribute('group') == 'true' ? 'group' : 'store');
+
+        // The scope params are read in store/website/group order, so the unselected ones
+        // must be dropped rather than left over from the current URL.
+        const params = { website: null, group: null, store: null };
+        if (obj.value) {
+            params[selectionType] = obj.value;
         }
-        var storeParam = obj.value ? selectionType + '/' + obj.value + '/' : '';
-        if(obj.switchParams){
-            storeParam+= obj.switchParams;
-        }
-        setLocation('<?= $this->getSwitchUrl() ?>'+storeParam);
+        setLocation(setRouteParams('<?= $this->getSwitchUrl() ?>', {
+            ...params,
+            ...parseRouteParams(obj.switchParams),
+        }));
     }
 </script>
 <?php endif ?>
