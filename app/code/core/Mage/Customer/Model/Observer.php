@@ -299,20 +299,14 @@ class Mage_Customer_Model_Observer
             /** @var Mage_Customer_Model_Session $session */
             $session = Mage::getSingleton('customer/session');
 
-            if ($session->getRememberMe() && Mage::getStoreConfigFlag('web/cookie/remember_enabled')) {
-                $lifetime = Mage::getStoreConfigAsInt('web/cookie/remember_cookie_lifetime');
-            } else {
-                $lifetime = Mage::getStoreConfigAsInt('web/cookie/cookie_lifetime');
-            }
-            $lifetime = min($lifetime, Mage_Core_Controller_Front_Action::SESSION_MAX_LIFETIME);
-            $lifetime = max($lifetime, Mage_Core_Controller_Front_Action::SESSION_MIN_LIFETIME);
+            $lifetime = Mage_Core_Model_Session_Abstract::resolveConfiguredSessionLifetime(
+                Mage_Core_Controller_Front_Action::SESSION_NAMESPACE,
+                (bool) $session->getRememberMe(),
+            );
 
             /** @var Mage_Core_Model_Cookie $cookie */
             $cookie = $observer->getCookie();
             $cookie->setLifetime($lifetime);
-
-            // Expire the stored session on the same schedule as the cookie pointing at it
-            $observer->getSession()->setSessionLifetime($lifetime);
         }
     }
 }

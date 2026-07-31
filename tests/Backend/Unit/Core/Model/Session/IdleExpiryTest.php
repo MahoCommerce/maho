@@ -12,10 +12,6 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 uses(Tests\MahoBackendTestCase::class);
 
-/**
- * File sessions have no storage-level expiry, so the session is expired when it is read.
- */
-
 function idleSession(?int $idleSeconds): Session
 {
     $storage = new MockArraySessionStorage(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE);
@@ -39,11 +35,25 @@ function expireIdle(Mage_Core_Model_Session_Abstract $model, Session $session, ?
 
 function sessionWithLifetime(int $lifetime): Mage_Core_Model_Session_Abstract
 {
-    return Mage::getSingleton('core/session')->setSessionLifetime($lifetime);
+    $session = Mage::getSingleton('core/session');
+    (new ReflectionProperty(Mage_Core_Model_Session_Abstract::class, 'sessionLifetime'))
+        ->setValue($session, $lifetime);
+
+    return $session;
+}
+
+function isForeign(string $sessionName): bool
+{
+    $model = Mage::getSingleton('core/session');
+    Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, new Session(new MockArraySessionStorage($sessionName)), true);
+
+    return (new ReflectionMethod(Mage_Core_Model_Session_Abstract::class, 'isForeignNamespace'))
+        ->invoke($model);
 }
 
 beforeEach(function () {
     $_SESSION = [];
+    Mage::unregister(Mage_Core_Model_Session_Abstract::REGISTRY_KEY);
 
     // Keep customer accounts global so the customer session namespace does not resolve a website
     Mage::app()->getStore()->setConfig(
@@ -74,25 +84,26 @@ it('keeps a session still inside its lifetime', function () {
         ->and($_SESSION['core'])->toBe(['visitor' => 1]);
 });
 
-it('keeps a session sitting exactly on the boundary', function () {
-    expect(expireIdle(sessionWithLifetime(604800), idleSession(604800)))->toBeFalse();
+it('keeps a session sitting on the boundary', function () {
+    // One second short, so a clock tick lands on the boundary itself rather than flipping the test
+    expect(expireIdle(sessionWithLifetime(604800), idleSession(604800 - 1)))->toBeFalse();
 });
 
-it('never expires a session that carries no metadata', function () {
+it('expires a session one second past the boundary', function () {
+    expect(expireIdle(sessionWithLifetime(604800), idleSession(604800 + 1)))->toBeTrue();
+});
+
+it('never expires a session that carries no last-used stamp', function () {
     // Also every session written before read-time expiry existed
-    expect(expireIdle(sessionWithLifetime(60), idleSession(null)))->toBeFalse();
+    expect(expireIdle(sessionWithLifetime(60), idleSession(null), 0))->toBeFalse();
 });
 
 it('does not expire when the clock has stepped backwards', function () {
     expect(expireIdle(sessionWithLifetime(604800), idleSession(60), time() + 3600))->toBeFalse();
 });
 
-it('honors the Remember Me lifetime an observer supplied', function () {
-    // Why the check runs after session_before_renew_cookie
-    $tenDaysIdle = 10 * 86400;
-
-    expect(expireIdle(sessionWithLifetime(2592000), idleSession($tenDaysIdle)))->toBeFalse()
-        ->and(expireIdle(sessionWithLifetime(604800), idleSession($tenDaysIdle)))->toBeTrue();
+it('keeps a session inside the Remember Me lifetime the record is graded on', function () {
+    expect(expireIdle(sessionWithLifetime(2592000), idleSession(10 * 86400)))->toBeFalse();
 });
 
 it('stops a session model constructed during the dispatch from serving the expired data', function () {
@@ -114,7 +125,25 @@ it('clears the validator keys instead of leaving them set but empty', function (
         ->and(isset($_SESSION[Mage_Core_Model_Session_Abstract::SECURE_COOKIE_CHECK_KEY]))->toBeFalse();
 });
 
-it('uses the last-used value captured before the observers ran', function () {
+it('treats a record belonging to another session namespace as foreign', function () {
+    // Regression: the record is keyed on the id alone, so ?SID= let a storefront id be graded and
+    // re-stamped on the admin policy, and vice versa
+    $_SESSION[Mage_Core_Model_Session_Abstract::NAMESPACE_KEY] = Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE;
+
+    expect(isForeign(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE))->toBeTrue();
+});
+
+it('adopts a record whose namespace matches', function () {
+    $_SESSION[Mage_Core_Model_Session_Abstract::NAMESPACE_KEY] = Mage_Core_Controller_Front_Action::SESSION_NAMESPACE;
+
+    expect(isForeign(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE))->toBeFalse();
+});
+
+it('adopts a record written before namespaces were recorded', function () {
+    expect(isForeign(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE))->toBeFalse();
+});
+
+it('uses the last-used value captured before validate() re-stamped it', function () {
     // A check reading getLastUsed() at this point would never expire anything
     $session = idleSession(604800 + 60);
     $captured = $session->getMetadataBag()->getLastUsed();

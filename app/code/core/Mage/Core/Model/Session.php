@@ -120,9 +120,9 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
      */
     protected function _getFileSessionMaxIdleTime(): int
     {
-        $maxIdleTime = $this->getLongestConfiguredSessionLifetime();
+        $maxIdleTime = self::getLongestConfiguredSessionLifetime();
         foreach (Mage::app()->getStores() as $store) {
-            $maxIdleTime = max($maxIdleTime, $this->getLongestConfiguredSessionLifetime($store));
+            $maxIdleTime = max($maxIdleTime, self::getLongestConfiguredSessionLifetime($store));
         }
 
         return $maxIdleTime;

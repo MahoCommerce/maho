@@ -13,11 +13,6 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 uses(Tests\MahoFrontendTestCase::class);
 
-/**
- * Remember Me is set from the POST before the credentials are checked, so a failed attempt used
- * to leave the flag on an unauthenticated session, stretching its lifetime to the Remember Me one.
- */
-
 beforeEach(function () {
     Mage::unregister(Mage_Core_Model_Session_Abstract::REGISTRY_KEY);
     $session = new Session(new MockArraySessionStorage());
@@ -31,6 +26,8 @@ beforeEach(function () {
 });
 
 it('clears Remember Me when the credentials are rejected', function () {
+    // Regression: the flag is set from the POST before the credentials are checked, so a failed
+    // attempt left it on an unauthenticated session and stretched its lifetime
     $request = new Mage_Core_Controller_Request_Http(
         SymfonyRequest::create('/customer/account/loginPost', 'POST', [
             'form_key' => Mage::getSingleton('core/session')->getFormKey(),

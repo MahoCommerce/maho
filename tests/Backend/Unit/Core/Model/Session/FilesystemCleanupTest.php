@@ -9,11 +9,6 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-/**
- * The reaper only reclaims disk, so its threshold must never undercut the longest configured
- * lifetime, or it deletes sessions their owners are still entitled to.
- */
-
 function cleanupSavePath(): string
 {
     return Mage::getBaseDir('var') . DS . 'session-cleanup-test';
@@ -44,12 +39,14 @@ beforeEach(function () {
     $store = Mage::app()->getStore();
     $store->setConfig('admin/security/session_cookie_lifetime', '10800');
     $store->setConfig('web/cookie/cookie_lifetime', '604800');
+    $store->setConfig('web/cookie/remember_enabled', '1');
     $store->setConfig('web/cookie/remember_cookie_lifetime', '2592000');
 });
 
 afterEach(function () {
-    foreach (glob(cleanupSavePath() . DS . '*') ?: [] as $file) {
-        @unlink($file);
+    // Not glob(): it skips the dotfile one of the cases seeds, leaving the directory undeletable
+    foreach (new FilesystemIterator(cleanupSavePath()) as $file) {
+        @unlink($file->getPathname());
     }
     @rmdir(cleanupSavePath());
 });
@@ -79,10 +76,37 @@ it('keeps a Remember Me session past the plain cookie lifetime', function () {
     expect(file_exists($path))->toBeTrue();
 });
 
-it('respects a store view that configures a longer lifetime than the default scope', function () {
-    // The reaper runs in one scope, but the lifetimes are per store view
-    Mage::app()->getStore()->setConfig('web/cookie/remember_cookie_lifetime', '86400');
+it('does not retain for Remember Me when the feature is disabled', function () {
+    Mage::app()->getStore()->setConfig('web/cookie/remember_enabled', '0');
     foreach (Mage::app()->getStores() as $store) {
+        $store->setConfig('web/cookie/remember_enabled', '0');
+    }
+
+    $path = seedSessionFile('sess_not_remembered', 14 * 86400);
+
+    runSessionCleanup();
+
+    expect(file_exists($path))->toBeFalse();
+});
+
+it('respects a store view that configures a longer lifetime than the current scope', function () {
+    // The reaper runs in one scope, but the lifetimes are per store view. getStores() hands back
+    // the very object getStore() returns, so the current store has to be skipped or the short
+    // value below is overwritten and the case proves nothing.
+    $current = Mage::app()->getStore();
+    $others = array_filter(
+        Mage::app()->getStores(),
+        fn(Mage_Core_Model_Store $store): bool => $store->getId() !== $current->getId(),
+    );
+
+    if ($others === []) {
+        $this->markTestSkipped('Needs a second store view');
+    }
+
+    $current->setConfig('web/cookie/cookie_lifetime', '3600');
+    $current->setConfig('web/cookie/remember_cookie_lifetime', '86400');
+    foreach ($others as $store) {
+        $store->setConfig('web/cookie/remember_enabled', '1');
         $store->setConfig('web/cookie/remember_cookie_lifetime', '2592000');
     }
 

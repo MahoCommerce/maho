@@ -174,7 +174,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 }
 
                 // A failed attempt must not leave Remember Me set, or an unauthenticated visitor
-                // stretches their cookie and stored session to the Remember Me lifetime
+                // stretches their session cookie to the Remember Me lifetime
                 if (!$session->isLoggedIn()) {
                     $session->unsRememberMe();
                 }
