@@ -42,18 +42,8 @@ function sessionWithLifetime(int $lifetime): Mage_Core_Model_Session_Abstract
     return $session;
 }
 
-function isForeign(string $sessionName): bool
-{
-    $model = Mage::getSingleton('core/session');
-    Mage::register(Mage_Core_Model_Session_Abstract::REGISTRY_KEY, new Session(new MockArraySessionStorage($sessionName)), true);
-
-    return (new ReflectionMethod(Mage_Core_Model_Session_Abstract::class, 'isForeignNamespace'))
-        ->invoke($model);
-}
-
 beforeEach(function () {
     $_SESSION = [];
-    Mage::unregister(Mage_Core_Model_Session_Abstract::REGISTRY_KEY);
 
     // Keep customer accounts global so the customer session namespace does not resolve a website
     Mage::app()->getStore()->setConfig(
@@ -123,24 +113,6 @@ it('clears the validator keys instead of leaving them set but empty', function (
     expect(expireIdle(sessionWithLifetime(604800), idleSession(604800 + 60)))->toBeTrue()
         ->and(isset($_SESSION[Mage_Core_Model_Session_Abstract::VALIDATOR_KEY]))->toBeFalse()
         ->and(isset($_SESSION[Mage_Core_Model_Session_Abstract::SECURE_COOKIE_CHECK_KEY]))->toBeFalse();
-});
-
-it('treats a record belonging to another session namespace as foreign', function () {
-    // Regression: the record is keyed on the id alone, so ?SID= let a storefront id be graded and
-    // re-stamped on the admin policy, and vice versa
-    $_SESSION[Mage_Core_Model_Session_Abstract::NAMESPACE_KEY] = Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE;
-
-    expect(isForeign(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE))->toBeTrue();
-});
-
-it('adopts a record whose namespace matches', function () {
-    $_SESSION[Mage_Core_Model_Session_Abstract::NAMESPACE_KEY] = Mage_Core_Controller_Front_Action::SESSION_NAMESPACE;
-
-    expect(isForeign(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE))->toBeFalse();
-});
-
-it('adopts a record written before namespaces were recorded', function () {
-    expect(isForeign(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE))->toBeFalse();
 });
 
 it('uses the last-used value captured before validate() re-stamped it', function () {

@@ -26,7 +26,6 @@ class Mage_Newsletter_Helper_Data extends Mage_Core_Helper_Abstract
             ->getUrl('newsletter/subscriber/confirm', [
                 'id'     => $subscriber->getId(),
                 'code'   => $subscriber->getCode(),
-                '_nosid' => true,
             ]);
     }
 
@@ -43,7 +42,6 @@ class Mage_Newsletter_Helper_Data extends Mage_Core_Helper_Abstract
             ->getUrl('newsletter/subscriber/unsubscribe', [
                 'id'     => $subscriber->getId(),
                 'code'   => $subscriber->getCode(),
-                '_nosid' => true,
             ]);
     }
 

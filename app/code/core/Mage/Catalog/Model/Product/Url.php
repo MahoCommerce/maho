@@ -103,21 +103,11 @@ class Mage_Catalog_Model_Product_Url extends \Maho\DataObject
      * Retrieve Product URL
      *
      * @param  Mage_Catalog_Model_Product $product
-     * @param  bool $useSid forced SID mode
      * @return string
      */
-    public function getProductUrl($product, $useSid = null)
+    public function getProductUrl($product)
     {
-        if ($useSid === null) {
-            $useSid = Mage::app()->getUseSessionInUrl();
-        }
-
-        $params = [];
-        if (!$useSid) {
-            $params['_nosid'] = true;
-        }
-
-        return $this->getUrl($product, $params);
+        return $this->getUrl($product, []);
     }
 
     /**

@@ -37,7 +37,6 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     public const VALIDATOR_REMOTE_ADDR_KEY             = 'remote_addr';
     public const VALIDATOR_PASSWORD_CREATE_TIMESTAMP   = 'password_create_timestamp';
     public const SECURE_COOKIE_CHECK_KEY               = '_secure_cookie_check';
-    public const NAMESPACE_KEY                         = '_session_namespace';
 
     public const XML_PATH_COOKIE_DOMAIN        = 'web/cookie/cookie_domain';
     public const XML_PATH_COOKIE_PATH          = 'web/cookie/cookie_path';
@@ -52,11 +51,8 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     public const XML_PATH_USE_HTTP_VIA         = 'web/session/use_http_via';
     public const XML_PATH_USE_X_FORWARDED      = 'web/session/use_http_x_forwarded_for';
     public const XML_PATH_USE_USER_AGENT       = 'web/session/use_http_user_agent';
-    public const XML_PATH_USE_FRONTEND_SID     = 'web/session/use_frontend_sid';
 
     public const XML_NODE_USET_AGENT_SKIP      = 'global/session/validation/http_user_agent_skip';
-
-    public const SESSION_ID_QUERY_PARAM        = 'SID';
 
     /** Lifetime floor, in seconds, wherever no area policy narrows it */
     private const DEFAULT_SESSION_LIFETIME = 86400;
@@ -72,25 +68,6 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
      * @example ['host.name' => true]
      */
     protected array $_sessionHosts = [];
-
-    /**
-     * URL host cache
-     */
-    protected static array $_urlHostCache = [];
-
-    /**
-     * Encrypted session id cache
-     *
-     * @var string
-     */
-    protected static $_encryptedSessionId;
-
-    /**
-     * Skip session id flag
-     *
-     * @var bool
-     */
-    protected $_skipSessionIdFlag   = false;
 
     /**
      * Return the symfony session instance from the registry
@@ -291,7 +268,6 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         $this->setSessionName($sessionName);
 
         // Call any custom logic in child classes for setting the session id
-        // I.e. Checking the SID query param to enable switching between hosts
         $this->setSessionId();
 
         // If we still do not have a session id, then read from the cookie value
@@ -307,12 +283,6 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
 
         // Read before anything constructs a session model, whose validate() re-stamps this
         $lastUsed = $symfonySession->getMetadataBag()->getLastUsed();
-
-        if ($this->isForeignNamespace()) {
-            // Kept rather than destroyed: the requester may not own the id it presented
-            session_regenerate_id(false);
-            session_unset();
-        }
 
         $this->expireIdleSession($symfonySession, $lastUsed);
 
@@ -357,9 +327,6 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         // Observers can change settings of the cookie such as lifetime, regenerate the session id, etc
         Mage::dispatchEvent('session_before_renew_cookie', ['cookie' => $cookie, 'session_name' => $sessionName]);
 
-        // Last, so the branches above that clear $_SESSION cannot leave the record unstamped
-        $_SESSION[self::NAMESPACE_KEY] = $sessionName;
-
         // Set or renew regular session cookie
         $this->setSessionCookie();
 
@@ -371,18 +338,6 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         \Maho\Profiler::stop(__METHOD__ . '/start');
 
         return $this;
-    }
-
-    /**
-     * The record is keyed on the session id alone while its lifetime comes from the namespace, so
-     * an id presented to a different namespace (SID) would be graded and re-stamped on the wrong
-     * policy. Records written before this key existed carry no namespace and are adopted.
-     */
-    private function isForeignNamespace(): bool
-    {
-        $recorded = $_SESSION[self::NAMESPACE_KEY] ?? null;
-
-        return is_string($recorded) && $recorded !== $this->getSessionName();
     }
 
     private function expireIdleSession(Session $symfonySession, int $lastUsed): bool
@@ -604,15 +559,6 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     }
 
     /**
-     * Check whether SID can be used for session initialization
-     * Admin area will always have this feature enabled
-     */
-    public function useSid(): bool
-    {
-        return Mage::app()->getStore()->isAdmin() || Mage::getStoreConfig(self::XML_PATH_USE_FRONTEND_SID);
-    }
-
-    /**
      * Retrieve skip User Agent validation strings (Flash etc)
      */
     public function getValidateHttpUserAgentSkip(): array
@@ -765,117 +711,12 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
      */
     public function setSessionId(?string $id = null): self
     {
-        if (is_null($id) && $this->useSid()) {
-            $queryParam = $this->getSessionIdQueryParam();
-            if (isset($_GET[$queryParam]) && Mage::getSingleton('core/url')->isOwnOriginUrl()) {
-                $id = $_GET[$queryParam];
-            }
-        }
-
         if (!is_null($id) && preg_match('#^[0-9a-zA-Z,-]+$#', $id)) {
             $this->getSymfonySession()->setId($id);
         }
 
         $this->addHost(true);
         return $this;
-    }
-
-    /**
-     * Get encrypted session identifier.
-     * No reason use crypt key for session id encryption, we can use session identifier as is.
-     */
-    public function getEncryptedSessionId(): string
-    {
-        if (!self::$_encryptedSessionId) {
-            self::$_encryptedSessionId = $this->getSessionId();
-        }
-        return self::$_encryptedSessionId;
-    }
-
-    public function getSessionIdQueryParam(): string
-    {
-        $sessionName = $this->getSessionName();
-        if ($sessionName && $queryParam = (string) Mage::getConfig()->getNode($sessionName . '/session/query_param')) {
-            return $queryParam;
-        }
-        return self::SESSION_ID_QUERY_PARAM;
-    }
-
-    /**
-     * Set skip flag if need skip generating of _GET session_id_key param
-     */
-    public function setSkipSessionIdFlag(bool $flag): self
-    {
-        $this->_skipSessionIdFlag = $flag;
-        return $this;
-    }
-
-    /**
-     * Retrieve session id skip flag
-     */
-    public function getSkipSessionIdFlag(): bool
-    {
-        return $this->_skipSessionIdFlag;
-    }
-
-    /**
-     * If session cookie is not applicable due to host or path mismatch - add session id to query
-     *
-     * @param string $urlHost can be host or url
-     * @return string {session_id_key}={session_id_encrypted}
-     */
-    public function getSessionIdForHost(string $urlHost): string
-    {
-        if ($this->getSkipSessionIdFlag() === true) {
-            return '';
-        }
-
-        $httpHost = Mage::app()->getFrontController()->getRequest()->getHttpHost();
-        if (!$httpHost) {
-            return '';
-        }
-
-        $urlHostArr = explode('/', $urlHost, 4);
-        if (!empty($urlHostArr[2])) {
-            $urlHost = $urlHostArr[2];
-        }
-        $urlPath = empty($urlHostArr[3]) ? '' : $urlHostArr[3];
-
-        if (!isset(self::$_urlHostCache[$urlHost])) {
-            $urlHostArr = explode(':', $urlHost);
-            $urlHost = $urlHostArr[0];
-            $sessionId = $httpHost !== $urlHost && !$this->isValidForHost($urlHost)
-                ? $this->getEncryptedSessionId() : '';
-            self::$_urlHostCache[$urlHost] = $sessionId;
-        }
-
-        return Mage::app()->getStore()->isAdmin() || $this->isValidForPath($urlPath) ? self::$_urlHostCache[$urlHost]
-            : $this->getEncryptedSessionId();
-    }
-
-    /**
-     * Check if session is valid for given hostname
-     */
-    public function isValidForHost(string $host): bool
-    {
-        $hostArr = explode(':', $host);
-        $hosts = $this->getSessionHosts();
-        return !empty($hosts[$hostArr[0]]);
-    }
-
-    /**
-     * Check if session is valid for given path
-     */
-    public function isValidForPath(string $path): bool
-    {
-        $cookiePath = trim($this->getCookiePath(), '/') . '/';
-        if ($cookiePath == '/') {
-            return true;
-        }
-
-        $urlPath = trim($path, '/') . '/';
-
-        return str_starts_with($urlPath, $cookiePath);
     }
 
     /**

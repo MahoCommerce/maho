@@ -295,11 +295,7 @@ class Mage_Core_Model_Controller_Front_Observer
             return;
         }
 
-        $url = $this->getSecureUrl($request);
-        if ($request->getRouteName() !== 'adminhtml' && Mage::app()->getUseSessionInUrl()) {
-            $url = Mage::getSingleton('core/url')->getRedirectUrl($url);
-        }
-        $response->setRedirect($url);
+        $response->setRedirect($this->getSecureUrl($request));
     }
 
     private function getRoutePath(Mage_Core_Controller_Request_Http $request): string
