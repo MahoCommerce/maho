@@ -172,6 +172,12 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 } catch (Exception $e) {
                     // Mage::logException($e); // PA DSS violation: this exception log can disclose customer password
                 }
+
+                // A failed attempt must not leave Remember Me set, or an unauthenticated visitor
+                // stretches their cookie and stored session to the Remember Me lifetime
+                if (!$session->isLoggedIn()) {
+                    $session->unsRememberMe();
+                }
             } else {
                 $session->addError($this->__('Login and password are required.'));
             }
