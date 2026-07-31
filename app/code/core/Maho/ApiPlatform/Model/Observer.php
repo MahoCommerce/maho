@@ -188,7 +188,11 @@ class Maho_ApiPlatform_Model_Observer
     }
 
     /**
-     * Clean API cache by tags and mark the api_data cache type as invalidated
+     * Clean API cache by tags.
+     *
+     * Every api_data consumer caches under one of these tags, so the clean is the
+     * whole job: never invalidate the type here, or ordinary catalog activity would
+     * leave the admin permanently asking for a refresh that has nothing to refresh.
      *
      * @param string[] $tags Cache tags to clean
      */
@@ -196,7 +200,6 @@ class Maho_ApiPlatform_Model_Observer
     {
         try {
             Mage::app()->getCache()->clean($tags);
-            Mage::app()->getCache()->invalidateType('api_data');
         } catch (\Throwable $e) {
             Mage::log('Failed to clean API cache: ' . $e->getMessage(), Mage::LOG_WARNING);
         }
