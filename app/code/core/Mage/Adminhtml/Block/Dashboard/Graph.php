@@ -181,8 +181,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
         $this->_allSeries = $datas;
 
         foreach ($this->_axisLabels['x'] as $_index => $_label) {
-            if ($_label == '') {
-                $this->_axisLabels['x'][$_index] = '';
+            if ($_label === '') {
                 continue;
             }
             switch ($this->getDataHelper()->getParam('period')) {

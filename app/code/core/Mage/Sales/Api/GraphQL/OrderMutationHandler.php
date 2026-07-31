@@ -339,7 +339,6 @@ class OrderMutationHandler
         ];
     }
 
-
     /**
      * Map order summary for list views
      */
