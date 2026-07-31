@@ -40,7 +40,7 @@
     function switchStore(obj) {
         const url = setRouteParams('<?= $this->getSwitchUrl() ?>', {
             store: obj.value || null,
-            ...parseRouteParams(obj.switchParams),
+            ...obj.switchParams,
         });
     <?php if ($this->getUseConfirm()): ?>
         if (confirm('<?= $this->jsQuoteEscape($this->__('Please confirm site switching. All data that hasn\'t been saved will be lost.')) ?>')) {

@@ -48,10 +48,7 @@
         if (obj.value) {
             params[selectionType] = obj.value;
         }
-        setLocation(setRouteParams('<?= $this->getSwitchUrl() ?>', {
-            ...params,
-            ...parseRouteParams(obj.switchParams),
-        }));
+        setLocation(setRouteParams('<?= $this->getSwitchUrl() ?>', params));
     }
 </script>
 <?php endif ?>

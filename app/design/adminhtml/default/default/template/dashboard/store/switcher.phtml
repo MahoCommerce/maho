@@ -53,10 +53,7 @@
         }
         params.period = select.value || null;
 
-        setLocation(setRouteParams('<?= $this->getSwitchUrl() ?>', {
-            ...params,
-            ...parseRouteParams(obj.switchParams),
-        }));
+        setLocation(setRouteParams('<?= $this->getSwitchUrl() ?>', params));
     }
 //]]>
 </script>
