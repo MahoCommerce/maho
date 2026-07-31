@@ -117,7 +117,6 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
                 'name' => $sessionName,
                 'use_cookies' => false,
                 'gc_probability' => '0',
-                'gc_maxlifetime' => $this->getSessionLifetime(),
             ],
             $handler,
             // Use Symfony's default MetadataBag - no custom one needed!
@@ -217,8 +216,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
             $options['prefix'] = $prefix;
         }
 
-        // PHP refuses ini_set('session.gc_maxlifetime') once a session is active, so a lifetime an
-        // observer supplies after start, such as Remember Me, can only reach storage through this
+        // Deferred: the lifetime is not settled until the observers run, long after this
         $options['ttl'] = fn(): int => $this->getSessionLifetime();
 
         $redis = RedisAdapter::createConnection($dsn);
@@ -288,6 +286,9 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         // Start session using modern Symfony approach
         $symfonySession->start();
 
+        // Read here: the observers below construct session models whose validate() re-stamps this
+        $lastUsed = $symfonySession->getMetadataBag()->getLastUsed();
+
         // Secure cookie check to prevent MITM attack
         if (Mage::app()->getFrontController()->getRequest()->isSecure() && !$cookie->isSecure()) {
             $secureCookieName = $this->getSessionName() . '_cid';
@@ -330,6 +331,11 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         // Observers can change settings of the cookie such as lifetime, regenerate the session id, etc
         Mage::dispatchEvent('session_before_renew_cookie', ['cookie' => $cookie, 'session' => $this, 'session_name' => $sessionName]);
 
+        // Only now is the lifetime authoritative: Remember Me lives inside the session
+        if ($this->expireIdleSession($symfonySession, $lastUsed)) {
+            unset($secureCookieValue);
+        }
+
         // Set or renew regular session cookie
         $this->setSessionCookie();
 
@@ -341,6 +347,41 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         \Maho\Profiler::stop(__METHOD__ . '/start');
 
         return $this;
+    }
+
+    /**
+     * Unlike the secure cookie check above, destroying the record is safe here: nothing the
+     * requester supplies moves the decision, only the stored stamp and store configuration.
+     */
+    private function expireIdleSession(Session $symfonySession, int $lastUsed): bool
+    {
+        if ($lastUsed <= 0 || time() - $lastUsed <= $this->getSessionLifetime()) {
+            return false;
+        }
+
+        // Emptied through the reference: the observers above bound session models to these keys,
+        // and reassigning $_SESSION would leave them holding what this call is expiring
+        foreach (array_keys($_SESSION) as $key) {
+            $_SESSION[$key] = [];
+        }
+
+        // Set but empty, these would fail validate() and fake a secure cookie mismatch
+        unset($_SESSION[self::VALIDATOR_KEY], $_SESSION[self::SECURE_COOKIE_CHECK_KEY]);
+
+        $symfonySession->migrate(true);
+
+        return true;
+    }
+
+    /** Longest lifetime a store can hand out, for callers that cannot know which policy applies */
+    public function getLongestConfiguredSessionLifetime(mixed $store = null): int
+    {
+        return max(
+            Mage::getStoreConfigAsInt('admin/security/session_cookie_lifetime', $store),
+            Mage::getStoreConfigAsInt(self::XML_PATH_COOKIE_LIFETIME, $store),
+            Mage::getStoreConfigAsInt('web/cookie/remember_cookie_lifetime', $store),
+            self::DEFAULT_SESSION_LIFETIME,
+        );
     }
 
     public function setSessionCookie(): self

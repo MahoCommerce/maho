@@ -88,17 +88,13 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
             return;
         }
 
-        $sessionSavePath = (string) Mage::getConfig()->getNode('global/session_save_path') ?: Mage::getBaseDir('var') . DS . 'session';
+        $sessionSavePath = $this->getSessionSavePath();
         if (!is_dir($sessionSavePath) || !is_readable($sessionSavePath)) {
             Mage::log("Session cleanup skipped: directory not accessible: {$sessionSavePath}", Mage::LOG_WARNING);
             return;
         }
 
-        $maxIdleTime = max(
-            (int) Mage::getStoreConfig('admin/security/session_cookie_lifetime'),
-            (int) Mage::getStoreConfig('web/cookie/cookie_lifetime'),
-            86400,
-        );
+        $maxIdleTime = $this->_getFileSessionMaxIdleTime();
 
         $deletedCount = 0;
         $processedCount = 0;
@@ -116,6 +112,20 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
         }
 
         Mage::log("Session cleanup: processed {$processedCount} files, deleted {$deletedCount} expired filesystem sessions", Mage::LOG_INFO);
+    }
+
+    /**
+     * Read-time expiry enforces the policy, so this only reclaims disk and must never undercut it:
+     * the lifetimes are per store view, while this runs in a single scope.
+     */
+    protected function _getFileSessionMaxIdleTime(): int
+    {
+        $maxIdleTime = $this->getLongestConfiguredSessionLifetime();
+        foreach (Mage::app()->getStores() as $store) {
+            $maxIdleTime = max($maxIdleTime, $this->getLongestConfiguredSessionLifetime($store));
+        }
+
+        return $maxIdleTime;
     }
 
     /**
