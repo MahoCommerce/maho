@@ -20,6 +20,12 @@ function storedLifetime(string $sessionName): int
         ->invoke(null, $sessionName);
 }
 
+function sessionKeyspace(string $sessionName): string
+{
+    return (new ReflectionMethod(Mage_Core_Model_Session_Abstract::class, 'getSessionKeyspace'))
+        ->invoke(null, $sessionName);
+}
+
 function renewCookieObserver(string $sessionName): \Maho\Event\Observer
 {
     return new \Maho\Event\Observer([
@@ -221,5 +227,23 @@ describe('cookie lifetime', function () {
             ->setCookieLifetime(renewCookieObserver(Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE));
 
         expect(Mage::getSingleton('core/cookie')->getLifetime())->toBe(42);
+    });
+});
+
+describe('storage keyspace', function () {
+    it('leaves the storefront keyspace bare so existing sessions survive the upgrade', function () {
+        expect(sessionKeyspace(Mage_Core_Controller_Front_Action::SESSION_NAMESPACE))->toBe('');
+    });
+
+    it('gives the admin session name a keyspace of its own', function () {
+        // Regression: records are keyed on the id alone and a cookie name does not constrain the
+        // value a requester sends, so a storefront id presented as maho_admin_session was read,
+        // graded and re-stamped on the admin policy
+        expect(sessionKeyspace(Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE))
+            ->toBe(Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE);
+    });
+
+    it('gives a session name with no area of its own a keyspace too', function () {
+        expect(sessionKeyspace('third_party_session'))->toBe('third_party_session');
     });
 });

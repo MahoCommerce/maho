@@ -14,9 +14,11 @@ function cleanupSavePath(): string
     return Mage::getBaseDir('var') . DS . 'session-cleanup-test';
 }
 
-function seedSessionFile(string $name, int $ageSeconds): string
+function seedSessionFile(string $name, int $ageSeconds, string $subDir = ''): string
 {
-    $path = cleanupSavePath() . DS . $name;
+    $dir = cleanupSavePath() . ($subDir === '' ? '' : DS . $subDir);
+    @mkdir($dir, 0777, true);
+    $path = $dir . DS . $name;
     file_put_contents($path, 'x');
     touch($path, time() - $ageSeconds);
 
@@ -45,8 +47,12 @@ beforeEach(function () {
 
 afterEach(function () {
     // Not glob(): it skips the dotfile one of the cases seeds, leaving the directory undeletable
-    foreach (new FilesystemIterator(cleanupSavePath()) as $file) {
-        @unlink($file->getPathname());
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator(cleanupSavePath(), FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST,
+    );
+    foreach ($iterator as $file) {
+        $file->isDir() ? @rmdir($file->getPathname()) : @unlink($file->getPathname());
     }
     @rmdir(cleanupSavePath());
 });
@@ -119,6 +125,22 @@ it('respects a store view that configures a longer lifetime than the current sco
 
 it('leaves files that are not sessions alone', function () {
     $path = seedSessionFile('.gitignore', 2592000 + 86400);
+
+    runSessionCleanup();
+
+    expect(file_exists($path))->toBeTrue();
+});
+
+it('reaps a session name that keeps its records in a subdirectory', function () {
+    $path = seedSessionFile('sess_admin', 2592000 + 86400, Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE);
+
+    runSessionCleanup();
+
+    expect(file_exists($path))->toBeFalse();
+});
+
+it('keeps a recent session inside a subdirectory', function () {
+    $path = seedSessionFile('sess_admin_recent', 60, Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE);
 
     runSessionCleanup();
 

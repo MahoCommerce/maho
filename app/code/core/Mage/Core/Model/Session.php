@@ -98,20 +98,38 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
 
         $deletedCount = 0;
         $processedCount = 0;
-        foreach (new DirectoryIterator($sessionSavePath) as $file) {
-            if (!$file->isFile() || !str_starts_with($file->getFilename(), 'sess_')) {
-                continue;
-            }
+        foreach ($this->_getSessionSaveDirs($sessionSavePath) as $directory) {
+            foreach (new DirectoryIterator($directory) as $file) {
+                if (!$file->isFile() || !str_starts_with($file->getFilename(), 'sess_')) {
+                    continue;
+                }
 
-            $processedCount++;
-            if ($this->_isFileSessionExpired($file, $maxIdleTime)) {
-                if (unlink($file->getPathname())) {
-                    $deletedCount++;
+                $processedCount++;
+                if ($this->_isFileSessionExpired($file, $maxIdleTime)) {
+                    if (unlink($file->getPathname())) {
+                        $deletedCount++;
+                    }
                 }
             }
         }
 
         Mage::log("Session cleanup: processed {$processedCount} files, deleted {$deletedCount} expired filesystem sessions", Mage::LOG_INFO);
+    }
+
+    /**
+     * @return string[] the save path plus the subdirectory each non-storefront session name keeps
+     *                  its records in
+     */
+    protected function _getSessionSaveDirs(string $savePath): array
+    {
+        $dirs = [$savePath];
+        foreach (new DirectoryIterator($savePath) as $entry) {
+            if ($entry->isDir() && !$entry->isDot() && $entry->isReadable()) {
+                $dirs[] = $entry->getPathname();
+            }
+        }
+
+        return $dirs;
     }
 
     /**

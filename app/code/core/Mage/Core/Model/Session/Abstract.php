@@ -88,7 +88,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         // Before createSessionHandler(), which hands it to the Redis handler as its ttl
         $this->sessionLifetime = self::resolveStoredSessionLifetime($sessionName);
 
-        $handler = $this->createSessionHandler();
+        $handler = $this->createSessionHandler($sessionName);
 
         $storage = new NativeSessionStorage(
             [
@@ -182,19 +182,32 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     /**
      * Create appropriate session handler based on configuration
      */
-    private function createSessionHandler(): \SessionHandlerInterface
+    private function createSessionHandler(string $sessionName): \SessionHandlerInterface
     {
         $method = $this->getSessionSaveMethod();
         return match ($method) {
-            'redis' => $this->createRedisSessionHandler(),
-            default => $this->createFileSessionHandler(),
+            'redis' => $this->createRedisSessionHandler($sessionName),
+            default => $this->createFileSessionHandler($sessionName),
         };
+    }
+
+    /**
+     * Storage keyspace for a session name, empty for the storefront.
+     *
+     * Records are keyed on the session id alone, and a cookie name does not constrain the value a
+     * requester sends, so one shared keyspace let an id presented to another session name be read,
+     * graded and re-stamped under that name's policy. Separate keyspaces make it miss instead.
+     * The storefront keeps the bare keyspace so existing customer sessions survive the upgrade.
+     */
+    private static function getSessionKeyspace(string $sessionName): string
+    {
+        return $sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE ? '' : $sessionName;
     }
 
     /**
      * Create Redis session handler using Symfony's RedisSessionHandler
      */
-    private function createRedisSessionHandler(): \SessionHandlerInterface
+    private function createRedisSessionHandler(string $sessionName): \SessionHandlerInterface
     {
         $redisConfig = Mage::getConfig()->getNode('global/redis_session');
         if (!$redisConfig) {
@@ -208,8 +221,11 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
 
         $options = [];
 
-        // Set prefix option if configured
-        if ($prefix = (string) $redisConfig->key_prefix) {
+        $prefix = (string) $redisConfig->key_prefix;
+        if ($keyspace = self::getSessionKeyspace($sessionName)) {
+            $prefix .= $keyspace . ':';
+        }
+        if ($prefix !== '') {
             $options['prefix'] = $prefix;
         }
 
@@ -219,10 +235,37 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
         return new RedisSessionHandler($redis, $options);
     }
 
-    private function createFileSessionHandler(): \SessionHandlerInterface
+    private function createFileSessionHandler(string $sessionName): \SessionHandlerInterface
     {
         $savePath = $this->getSessionSavePath();
+        if ($keyspace = self::getSessionKeyspace($sessionName)) {
+            $savePath .= DS . $keyspace;
+            $this->prepareSessionSaveDir($savePath);
+        }
+
         return new NativeFileSessionHandler($savePath);
+    }
+
+    /**
+     * Symfony would create this with 0777 against the current umask, which can leave the cron
+     * reaper unable to unlink what the web user wrote, so mirror the parent directory instead.
+     */
+    private function prepareSessionSaveDir(string $path): void
+    {
+        if (is_dir($path)) {
+            return;
+        }
+
+        $perms = @fileperms(dirname($path));
+        $mode = $perms === false ? 0770 : $perms & 0777;
+
+        // is_dir() again: a concurrent request may have won the race
+        if (!@mkdir($path, $mode, true) && !is_dir($path)) {
+            throw new Mage_Core_Exception("Unable to create session directory: {$path}");
+        }
+
+        // mkdir() subtracts the umask from its mode argument, chmod() does not
+        @chmod($path, $mode);
     }
 
     /**
