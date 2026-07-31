@@ -78,7 +78,7 @@ function recalculateTax() {
 function bindActiveProductTab(event) {
     const storeSwitcher = document.getElementById('store_switcher');
     if (event.tab && event.tab.name && storeSwitcher) {
-        storeSwitcher.switchParams = 'active_tab/'+event.tab.name+'/';
+        storeSwitcher.switchParams = { active_tab: event.tab.name };
     }
 }
 varienGlobalEvents.attachEventHandler('showTab', bindActiveProductTab);
@@ -87,7 +87,7 @@ varienGlobalEvents.attachEventHandler('showTab', bindActiveProductTab);
 <?php if($tabsBlock = $this->getLayout()->getBlock('product_tabs')): ?>
 const storeSwitcher = document.getElementById('store_switcher');
 if (<?= $tabsBlock->getJsObjectName() ?> && <?= $tabsBlock->getJsObjectName() ?>.activeTab && storeSwitcher) {
-    storeSwitcher.switchParams = 'active_tab/'+<?= $tabsBlock->getJsObjectName() ?>.activeTab.name+'/';
+    storeSwitcher.switchParams = { active_tab: <?= $tabsBlock->getJsObjectName() ?>.activeTab.name };
 }
 <?php endif ?>
 </script>
