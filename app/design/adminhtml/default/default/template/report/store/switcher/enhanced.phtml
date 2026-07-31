@@ -37,11 +37,7 @@
 </p>
 <script>
     function switchStore(obj){
-        var storeParam = obj.value ? 'store_ids/' + obj.value + '/' : '';
-        if(obj.switchParams){
-            storeParam+= obj.switchParams;
-        }
-        setLocation('<?= $this->getSwitchUrl() ?>'+storeParam);
+        setLocation(setRouteParams('<?= $this->getSwitchUrl() ?>', { store_ids: obj.value || null }));
     }
 </script>
 <?php endif ?>
