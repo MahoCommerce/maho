@@ -274,15 +274,14 @@ class Mage_CurrencySymbol_Model_System_Currencysymbol
     }
 
     /**
-     * Clear translate cache
+     * Clear the caches holding the old symbol
      *
      * @return $this
      */
     public function clearCache()
     {
-        // clear cache for frontend
         foreach ($this->_cacheTypes as $cacheType) {
-            Mage::app()->getCache()->invalidateType($cacheType);
+            Mage::app()->getCache()->cleanType($cacheType);
         }
         return $this;
     }

@@ -11371,18 +11371,6 @@ parameters:
 			path: app/code/core/Mage/CatalogRule/Model/Rule.php
 
 		-
-			rawMessage: 'Parameter #1 $product of method Mage_CatalogRule_Model_Resource_Rule::applyAllRules() expects int|Mage_Catalog_Model_Product|null, Mage_Core_Model_Abstract given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/CatalogRule/Model/Rule.php
-
-		-
-			rawMessage: 'Parameter #2 $product of method Mage_CatalogRule_Model_Resource_Rule::applyToProduct() expects Mage_Catalog_Model_Product, Mage_Core_Model_Abstract given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/CatalogRule/Model/Rule.php
-
-		-
 			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 1
