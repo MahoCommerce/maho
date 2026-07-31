@@ -43,8 +43,7 @@
             });
 
             const params = new URLSearchParams(formData).toString();
-            const encodedParams = btoa(params);
-            setLocation('<?= $this->getFilterUrl() ?>filter/' + encodedParams + '/');
+            setLocation(setRouteParams('<?= $this->getFilterUrl() ?>', { filter: btoa(params) }));
         }
     }
 </script>
