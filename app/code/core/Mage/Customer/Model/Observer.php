@@ -310,6 +310,9 @@ class Mage_Customer_Model_Observer
             /** @var Mage_Core_Model_Cookie $cookie */
             $cookie = $observer->getCookie();
             $cookie->setLifetime($lifetime);
+
+            // Expire the stored session on the same schedule as the cookie pointing at it
+            $observer->getSession()->setSessionLifetime($lifetime);
         }
     }
 }
