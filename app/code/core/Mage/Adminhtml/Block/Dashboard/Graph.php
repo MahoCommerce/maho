@@ -131,8 +131,9 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
 
         $timezoneLocal = new DateTimeZone(Mage::app()->getStore()->getConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_TIMEZONE));
 
+        $period = $this->getDataHelper()->getParam('period');
         $dateRange = Mage::getResourceModel('reports/order_collection')
-            ->getDateRange($this->getDataHelper()->getParam('period'), '', '', true);
+            ->getDateRange($period, '', '', true);
         [$dateStart, $dateEnd] = $dateRange;
 
         // Convert to DateTimeImmutable to prevent mutation of original objects
@@ -144,7 +145,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
         $datas = [];
 
         while ($dateStart < $dateEnd) {
-            switch ($this->getDataHelper()->getParam('period')) {
+            switch ($period) {
                 case '24h':
                     $d = $dateStart->format('Y-m-d H:00');
                     $dateStart = $dateStart->modify('+1 hour');
@@ -180,11 +181,12 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
         $this->_axisLabels['x'] = $dates;
         $this->_allSeries = $datas;
 
+        $format = null;
         foreach ($this->_axisLabels['x'] as $_index => $_label) {
             if ($_label === '') {
                 continue;
             }
-            switch ($this->getDataHelper()->getParam('period')) {
+            switch ($period) {
                 case '24h':
                     $dateTime = DateTime::createFromFormat('Y-m-d H:00', $_label) ?: new DateTime($_label);
                     $this->_axisLabels['x'][$_index] = $this->formatTime($dateTime, 'short');
@@ -197,9 +199,11 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
                     break;
                 case '1y':
                 case '2y':
-                    $formats = Mage::app()->getLocale()->getTranslationList('datetime');
-                    $format = $formats['yyMM'] ?? 'MM/yyyy';
-                    $format = str_replace(['yyyy', 'yy', 'MM'], ['Y', 'y', 'm'], $format);
+                    $format ??= str_replace(
+                        ['yyyy', 'yy', 'MM'],
+                        ['Y', 'y', 'm'],
+                        Mage::app()->getLocale()->getTranslationList('datetime')['yyMM'] ?? 'MM/yyyy',
+                    );
                     $this->_axisLabels['x'][$_index] = date($format, strtotime($_label));
                     break;
             }
