@@ -82,7 +82,10 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         $this->requireAdminOrApiUser('Review moderation requires admin or API access');
         $this->requireApiPermission('reviews/write');
 
-        if (!isset(self::STATUS_MAP[$data->status])) {
+        if ($data->status === null && ($data->stores === null || $data->stores === [])) {
+            throw new BadRequestHttpException('Provide a status and/or stores to moderate');
+        }
+        if ($data->status !== null && !isset(self::STATUS_MAP[$data->status])) {
             throw new BadRequestHttpException('status must be one of: ' . implode(', ', array_keys(self::STATUS_MAP)));
         }
 
@@ -102,7 +105,9 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         ));
         $this->validateEntityStoreAccess($reviewStoreIds === [] ? [0] : $reviewStoreIds, $user, 'review');
 
-        $review->setStatusId(self::STATUS_MAP[$data->status]);
+        if ($data->status !== null) {
+            $review->setStatusId(self::STATUS_MAP[$data->status]);
+        }
         if ($data->stores !== null && $data->stores !== []) {
             $review->setStores($this->resolveModerationStores($data->stores, $user));
         }

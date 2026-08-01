@@ -99,6 +99,25 @@ describe('Review moderation', function (): void {
         }
     });
 
+    it('keeps the status when a moderation Put only touches stores', function (): void {
+        // Approved by the previous test; a stores-only body must not demote it.
+        $reviewId = pestModerationReviewId();
+        $token = serviceToken(['reviews/write', 'reviews/read']);
+
+        $response = apiPut("/api/rest/v2/reviews/{$reviewId}", [
+            'stores' => [1],
+        ], $token);
+
+        expect($response['status'])->toBe(200);
+        expect($response['json']['status'])->toBe('approved');
+    });
+
+    it('rejects a moderation Put with neither status nor stores', function (): void {
+        $response = apiPut('/api/rest/v2/reviews/' . pestModerationReviewId(), [], adminToken());
+
+        expect($response['status'])->toBe(400);
+    });
+
     it('lets an admin token move the review to not_approved', function (): void {
         $reviewId = pestModerationReviewId();
 

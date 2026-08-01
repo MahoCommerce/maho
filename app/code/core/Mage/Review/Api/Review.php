@@ -143,7 +143,7 @@ class Review extends CrudResource
 
     /** approved | pending | not_approved. Writable through the moderation Put only; submit always forces pending. */
     #[ApiProperty(extraProperties: ['computed' => true])]
-    public string $status = 'pending';
+    public ?string $status = null;
 
     #[ApiProperty(writable: false)]
     public ?string $createdAt = null;

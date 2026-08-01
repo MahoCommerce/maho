@@ -108,7 +108,8 @@ class GiftCard extends CrudResource
     /** Writable only through the admin/service-gated Post and Put operations. */
     public ?float $balance = null;
 
-    public float $initialBalance = 0.0;
+    /** Nullable so an omitted field isn't written as 0.0, letting the model mirror balance into it. */
+    public ?float $initialBalance = null;
 
     /** Writable only through the admin/service-gated Post and Put operations. */
     public ?string $status = null;

@@ -66,6 +66,15 @@ describe('GET /api/rest/v2/giftcards/{id} (admin read)', function (): void {
         expect($read['json']['emailSentAt'] ?? null)->toBeNull();
     });
 
+    it('mirrors balance into initialBalance when a create only provides balance', function (): void {
+        $create = apiPost('/api/rest/v2/giftcards', ['balance' => 50.0], adminToken());
+
+        expect($create['status'])->toBeSuccessful();
+        trackAdminGiftCard($create['json']['code']);
+        expect((float) $create['json']['balance'])->toBe(50.0);
+        expect((float) $create['json']['initialBalance'])->toBe(50.0);
+    });
+
     it('rejects a create whose balance is out of range, even with a valid initialBalance', function (): void {
         $overLimit = apiPost('/api/rest/v2/giftcards', [
             'initialBalance' => 10.0,
