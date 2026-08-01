@@ -77,7 +77,7 @@ afterAll(function (): void {
 
 test('M1 blowfish-encrypted data decrypts and re-encrypts to sodium', function () {
     if (($installError = mcryptCompatEnsureInstalled()) !== null) {
-        $this->markTestSkipped($installError);
+        $this->fail($installError);
     }
 
     $script = <<<'PHP'
@@ -143,7 +143,7 @@ test('M1 blowfish-encrypted data decrypts and re-encrypts to sodium', function (
 
 test('M1 data yields an empty string when mcrypt support is absent', function () {
     if (function_exists('mcrypt_module_open')) {
-        $this->markTestSkipped('mcrypt functions are loaded in this process');
+        $this->fail('mcrypt functions leaked into the main test process; they must only ever load in the subprocess');
     }
 
     $command = mcryptCompatCommandWithKeys(
