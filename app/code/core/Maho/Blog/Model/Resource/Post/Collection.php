@@ -46,7 +46,7 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
     }
 
     /**
-     * @param int|Mage_Core_Model_Store $store
+     * @param int|int[]|Mage_Core_Model_Store $store
      */
     public function addStoreFilter($store, bool $withAdmin = true): self
     {

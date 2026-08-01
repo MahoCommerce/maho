@@ -24,16 +24,33 @@ final class CmsBlockProvider extends CrudProvider
 {
     protected array $defaultSort = ['title' => 'ASC'];
 
+    protected bool $supportsScopeAll = true;
+
     /**
      * Disabled blocks must not be readable through the public GET /cms-blocks/{id}
      * route. The base provider only store-scopes; enforce is_active here so the
-     * numeric-id path matches the identifier and collection paths.
+     * numeric-id path matches the identifier and collection paths. Back-office
+     * readers bypass both checks so drafts and foreign-store blocks stay readable.
      */
     #[\Override]
     protected function provideItem(int|string $id): ?CmsBlock
     {
         $block = \Mage::getModel('cms/block')->load($id);
-        if (!$block->getId() || !$block->getIsActive()) {
+        if (!$block->getId()) {
+            return null;
+        }
+
+        if ($this->isBackOfficeReader()) {
+            $resource = $block->getResource();
+            if (method_exists($resource, 'lookupStoreIds')) {
+                $this->assertReadableStores($resource->lookupStoreIds($block->getId()), 'block');
+            }
+
+            /** @var CmsBlock */
+            return $this->toDto($block);
+        }
+
+        if (!$block->getIsActive()) {
             return null;
         }
 
@@ -70,9 +87,18 @@ final class CmsBlockProvider extends CrudProvider
     private function getByIdentifier(string $identifier): ?CmsBlock
     {
         $collection = \Mage::getModel('cms/block')->getCollection();
-        $collection->addStoreFilter(StoreContext::getStoreId());
         $collection->addFieldToFilter('identifier', $identifier);
-        $collection->addFieldToFilter('is_active', 1);
+
+        if ($this->isBackOfficeReader()) {
+            $allowed = $this->allowedStoreIds();
+            if ($allowed !== null) {
+                $collection->addStoreFilter($allowed, false);
+            }
+        } else {
+            $collection->addStoreFilter(StoreContext::getStoreId());
+            $collection->addFieldToFilter('is_active', 1);
+        }
+
         $collection->setPageSize(1);
 
         $block = $collection->getFirstItem();
@@ -86,7 +112,9 @@ final class CmsBlockProvider extends CrudProvider
     {
         parent::applyCollectionFilters($collection, $filters);
 
-        $collection->addFieldToFilter('is_active', 1);
+        if (!$this->isScopeAll($filters)) {
+            $collection->addFieldToFilter('is_active', 1);
+        }
 
         if (!empty($filters['identifier'])) {
             $collection->addFieldToFilter('identifier', ['like' => '%' . $filters['identifier'] . '%']);
