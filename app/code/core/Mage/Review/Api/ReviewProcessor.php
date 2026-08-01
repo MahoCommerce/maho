@@ -12,6 +12,7 @@ namespace Mage\Review\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Put;
+use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -91,7 +92,20 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Review not found');
         }
 
+        // A store-restricted token may only moderate reviews assigned to a
+        // store on its allowlist. Store 0 is a marker row every save adds, so
+        // only a review with no real store assignment counts as all-stores.
+        $user = $this->getAuthorizedUser();
+        $reviewStoreIds = array_values(array_filter(
+            array_map('intval', (array) $review->getStores()),
+            static fn(int $id): bool => $id !== 0,
+        ));
+        $this->validateEntityStoreAccess($reviewStoreIds === [] ? [0] : $reviewStoreIds, $user, 'review');
+
         $review->setStatusId(self::STATUS_MAP[$data->status]);
+        if ($data->stores !== null && $data->stores !== []) {
+            $review->setStores($this->resolveModerationStores($data->stores, $user));
+        }
         $review->save();
         $review->aggregate();
 
@@ -107,6 +121,22 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         }
 
         return $dto;
+    }
+
+    /**
+     * Resolve the moderation Put's stores payload (store ids, codes, or
+     * ['all']) into store ids, enforcing the token's store allowlist.
+     *
+     * @param array<int|string> $stores
+     * @return array<int>
+     */
+    private function resolveModerationStores(array $stores, ApiUser $user): array
+    {
+        try {
+            return $this->resolveStoreIds(array_map('strval', $stores), $user);
+        } catch (\Mage_Core_Model_Store_Exception) {
+            throw new BadRequestHttpException('stores contains an unknown store');
+        }
     }
 
     private function submitReview(

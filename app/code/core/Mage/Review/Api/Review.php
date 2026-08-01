@@ -58,6 +58,15 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('reviews/read')",
             description: 'Get current customer submitted reviews',
         ),
+        // Moderation queue: back-office callers with reviews/read see all
+        // reviews across stores (optional ?status= filter); everyone else gets
+        // an empty list, so the route can stay publicly routable.
+        new GetCollection(
+            uriTemplate: '/reviews',
+            name: 'list_reviews',
+            security: 'true',
+            description: 'List reviews across stores, newest first (admin/service tokens with reviews/read; optional status=pending|approved|not_approved filter)',
+        ),
         // Moderation: deliberately no ROLE_CUSTOMER in the expression, and the
         // permission voter only grants 'reviews/write' to API-key users, so
         // customer tokens can never reach the status write path.
@@ -147,8 +156,14 @@ class Review extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?array $ratings = null;
 
-    /** @var int[]|null Store ids the review is assigned to */
-    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    /**
+     * Store ids the review is assigned to. Writable on the moderation Put only
+     * (accepts store ids, codes, or ['all']); public submit ignores it and
+     * always assigns the current store.
+     *
+     * @var array<int|string>|null
+     */
+    #[ApiProperty(extraProperties: ['computed' => true])]
     public ?array $stores = null;
 
     // Not serialized in responses: the author's internal customer id has no
