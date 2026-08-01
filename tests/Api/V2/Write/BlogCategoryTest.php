@@ -222,3 +222,32 @@ describe('Blog Category CRUD Lifecycle (REST)', function (): void {
     });
 
 });
+
+describe('Blog Category Back-Office Reads (REST)', function (): void {
+
+    it('lets a back-office token read a disabled category by id and list it with ?scope=all', function (): void {
+        $token = serviceToken(['blog-categories/write']);
+
+        $create = apiPost('/api/rest/v2/blog-categories', [
+            'name' => 'Test Draft Category',
+            'urlKey' => 'test-pest-draft-category',
+            'isActive' => false,
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        $categoryId = (int) $create['json']['id'];
+        trackBlogCategory($categoryId);
+
+        // Anonymous storefront readers must not see it; the creator must.
+        expect(apiGet("/api/rest/v2/blog-categories/{$categoryId}")['status'])->toBe(404);
+        $read = apiGet("/api/rest/v2/blog-categories/{$categoryId}", $token);
+        expect($read['status'])->toBe(200);
+        expect($read['json']['isActive'])->toBeFalse();
+
+        $list = apiGet('/api/rest/v2/blog-categories?scope=all&pageSize=100', $token);
+        expect($list['status'])->toBe(200);
+        expect(array_column(getItems($list), 'id'))->toContain($categoryId);
+
+        expect(apiGet('/api/rest/v2/blog-categories?scope=all')['status'])->toBe(401);
+    });
+
+});

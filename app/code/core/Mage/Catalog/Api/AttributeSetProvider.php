@@ -26,6 +26,12 @@ final class AttributeSetProvider extends CrudProvider
 
     private ?int $productEntityTypeId = null;
 
+    /** @var array<int, array<string>> */
+    private array $prefetchedCodes = [];
+
+    /** @var array<int, array<array{name: string, sortOrder: int, attributes: array<array{code: string, sortOrder: int}>}>> */
+    private array $prefetchedGroups = [];
+
     private function getProductEntityTypeId(): int
     {
         return $this->productEntityTypeId ??= (int) \Mage::getSingleton('eav/config')
@@ -74,8 +80,11 @@ final class AttributeSetProvider extends CrudProvider
 
         $total = (int) $collection->getSize();
 
+        $models = iterator_to_array($collection);
+        $this->prefetchSetData(array_map(static fn($set): int => (int) $set->getId(), $models));
+
         $items = [];
-        foreach ($collection as $set) {
+        foreach ($models as $set) {
             $items[] = $this->toDto($set);
         }
 
@@ -92,32 +101,42 @@ final class AttributeSetProvider extends CrudProvider
             return;
         }
 
-        $collection = \Mage::getResourceModel('catalog/product_attribute_collection')
-            ->setAttributeSetFilter((int) $model->getId());
-
-        $codes = [];
-        foreach ($collection as $attribute) {
-            $codes[] = (string) $attribute->getAttributeCode();
+        $setId = (int) $model->getId();
+        if (!array_key_exists($setId, $this->prefetchedCodes)) {
+            $this->prefetchSetData([$setId]);
         }
-        $dto->attributeCodes = $codes;
-        $dto->groups = $this->loadGroups((int) $model->getId());
+        $dto->attributeCodes = $this->prefetchedCodes[$setId];
+        $dto->groups = $this->prefetchedGroups[$setId];
     }
 
     /**
-     * @return array<array{name: string, sortOrder: int, attributes: array<array{code: string, sortOrder: int}>}>
+     * Batch-load attribute codes and group structures for a page of sets in two
+     * queries instead of three per set.
+     *
+     * @param array<int> $setIds
      */
-    private function loadGroups(int $setId): array
+    private function prefetchSetData(array $setIds): void
     {
+        foreach ($setIds as $setId) {
+            $this->prefetchedCodes[$setId] = [];
+            $this->prefetchedGroups[$setId] = [];
+        }
+        if ($setIds === []) {
+            return;
+        }
+
         $resource = \Mage::getSingleton('core/resource');
         $adapter = $resource->getConnection('core_read');
 
         $attributesByGroup = [];
         $attributeSelect = $adapter->select()
-            ->from(['ea' => $resource->getTableName('eav/entity_attribute')], ['attribute_group_id', 'sort_order'])
+            ->from(['ea' => $resource->getTableName('eav/entity_attribute')], ['attribute_set_id', 'attribute_group_id', 'sort_order'])
             ->join(['a' => $resource->getTableName('eav/attribute')], 'a.attribute_id = ea.attribute_id', ['attribute_code'])
-            ->where('ea.attribute_set_id = ?', $setId)
+            ->where('ea.attribute_set_id IN (?)', $setIds)
             ->order('ea.sort_order ASC');
         foreach ($adapter->fetchAll($attributeSelect) as $row) {
+            $setId = (int) $row['attribute_set_id'];
+            $this->prefetchedCodes[$setId][] = (string) $row['attribute_code'];
             $attributesByGroup[(int) $row['attribute_group_id']][] = [
                 'code' => (string) $row['attribute_code'],
                 'sortOrder' => (int) $row['sort_order'],
@@ -125,19 +144,15 @@ final class AttributeSetProvider extends CrudProvider
         }
 
         $groupSelect = $adapter->select()
-            ->from($resource->getTableName('eav/attribute_group'), ['attribute_group_id', 'attribute_group_name', 'sort_order'])
-            ->where('attribute_set_id = ?', $setId)
+            ->from($resource->getTableName('eav/attribute_group'), ['attribute_set_id', 'attribute_group_id', 'attribute_group_name', 'sort_order'])
+            ->where('attribute_set_id IN (?)', $setIds)
             ->order('sort_order ASC');
-
-        $groups = [];
         foreach ($adapter->fetchAll($groupSelect) as $row) {
-            $groups[] = [
+            $this->prefetchedGroups[(int) $row['attribute_set_id']][] = [
                 'name' => (string) $row['attribute_group_name'],
                 'sortOrder' => (int) $row['sort_order'],
                 'attributes' => $attributesByGroup[(int) $row['attribute_group_id']] ?? [],
             ];
         }
-
-        return $groups;
     }
 }

@@ -74,8 +74,26 @@ describe('Back-office reads of disabled CMS pages', function (): void {
         expect(array_column(getItems($default), 'id'))->not->toContain($pageId);
     });
 
+    it('denies a store-restricted service token content outside its allowlist', function (): void {
+        $create = apiPost('/api/rest/v2/cms-pages', [
+            'identifier' => 'test-backoffice-restricted-page',
+            'title' => 'Back-Office Restricted Page',
+            'content' => '<p>draft</p>',
+            'isActive' => false,
+            'stores' => ['all'],
+        ], serviceToken(['cms-pages/write']));
+
+        expect($create['status'])->toBeIn([200, 201]);
+        $pageId = $create['json']['id'];
+        trackCreated('cms_page', $pageId);
+
+        // All-stores content is off limits for store-restricted tokens.
+        $restricted = serviceToken(['cms-pages/write'], [1]);
+        expect(apiGet("/api/rest/v2/cms-pages/{$pageId}", $restricted)['status'])->toBeIn([403, 404]);
+    });
+
     it('denies ?scope=all to anonymous and customer callers', function (): void {
-        expect(apiGet('/api/rest/v2/cms-pages?scope=all')['status'])->toBe(403);
+        expect(apiGet('/api/rest/v2/cms-pages?scope=all')['status'])->toBe(401);
         expect(apiGet('/api/rest/v2/cms-pages?scope=all', customerToken())['status'])->toBe(403);
     });
 
@@ -128,7 +146,7 @@ describe('Back-office reads of disabled blog posts', function (): void {
         expect($anonymous['status'])->toBe(200);
         expect(array_column(getItems($anonymous), 'id'))->not->toContain($postId);
 
-        expect(apiGet('/api/rest/v2/blog-posts?scope=all')['status'])->toBe(403);
+        expect(apiGet('/api/rest/v2/blog-posts?scope=all')['status'])->toBe(401);
     });
 
 });

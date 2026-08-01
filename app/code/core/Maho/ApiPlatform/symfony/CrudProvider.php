@@ -170,7 +170,11 @@ class CrudProvider extends Provider
             // Cross-store listing: no current-store filter. A store-restricted
             // token is still pinned to its allowlist, without the admin (0) rows.
             $allowed = $this->allowedStoreIds();
-            if ($allowed !== null && method_exists($collection, 'addStoreFilter')) {
+            if ($allowed !== null) {
+                if (!method_exists($collection, 'addStoreFilter')) {
+                    // Failing open would leak cross-store data to a restricted token.
+                    throw new \LogicException(static::class . ': supportsScopeAll requires an addStoreFilter() collection');
+                }
                 $collection->addStoreFilter($allowed, false);
             }
         } else {

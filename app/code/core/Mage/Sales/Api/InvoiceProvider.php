@@ -51,7 +51,10 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
             ? '/api/rest/v2/customers/me/orders/' . $orderId . '/invoices/'
             : '/api/rest/v2/orders/' . $orderId . '/invoices/';
 
-        foreach ($order->getInvoiceCollection() as $invoice) {
+        $models = iterator_to_array($order->getInvoiceCollection());
+        $this->preloadItemsAndComments($models);
+
+        foreach ($models as $invoice) {
             // Reuse the already-loaded order so afterLoad's getOrder() doesn't
             // re-load it per invoice.
             $dto = Invoice::fromModel($invoice->setOrder($order));
@@ -60,6 +63,40 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
         }
 
         return $invoices;
+    }
+
+    /**
+     * Batch-load items and comments for a set of invoices (2 queries instead of
+     * 2 per invoice); Invoice::afterLoad() consumes the preloaded sets.
+     *
+     * @param array<\Mage_Sales_Model_Order_Invoice> $invoices
+     */
+    private function preloadItemsAndComments(array $invoices): void
+    {
+        if ($invoices === []) {
+            return;
+        }
+        $invoiceIds = array_map(static fn($invoice): int => (int) $invoice->getId(), $invoices);
+
+        $itemsByInvoice = [];
+        $itemCollection = \Mage::getResourceModel('sales/order_invoice_item_collection')
+            ->addFieldToFilter('parent_id', ['in' => $invoiceIds]);
+        foreach ($itemCollection as $item) {
+            $itemsByInvoice[(int) $item->getParentId()][] = $item;
+        }
+
+        $commentsByInvoice = [];
+        $commentCollection = \Mage::getResourceModel('sales/order_invoice_comment_collection')
+            ->addFieldToFilter('parent_id', ['in' => $invoiceIds]);
+        foreach ($commentCollection as $comment) {
+            $commentsByInvoice[(int) $comment->getParentId()][] = $comment;
+        }
+
+        foreach ($invoices as $invoice) {
+            $id = (int) $invoice->getId();
+            $invoice->setData('_preloaded_items', $itemsByInvoice[$id] ?? []);
+            $invoice->setData('_preloaded_comments', $commentsByInvoice[$id] ?? []);
+        }
     }
 
     private function downloadPdf(array $uriVariables, string $operationName): Response

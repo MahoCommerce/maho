@@ -240,7 +240,7 @@ describe('Admin-scope reads (?store=admin)', function (): void {
         $productId = (int) $GLOBALS['_scope_test_product_id'];
 
         $anonymous = apiGet("/api/rest/v2/products/{$productId}?store=admin");
-        expect($anonymous['status'])->toBe(403);
+        expect($anonymous['status'])->toBe(401);
 
         $customer = apiGet("/api/rest/v2/products/{$productId}?store=admin", customerToken());
         expect($customer['status'])->toBe(403);

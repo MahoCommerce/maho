@@ -89,6 +89,9 @@ use Maho\ApiPlatform\CrudResource;
             description: 'Cancel an open invoice',
         ),
     ],
+    // No GraphQL surface: the provider resolves invoices through their order,
+    // and auto-generated operations would dangle off the class-level security.
+    graphQlOperations: [],
 )]
 class Invoice extends CrudResource
 {
@@ -207,7 +210,7 @@ class Invoice extends CrudResource
         $dto->orderIncrementId = $order ? $order->getIncrementId() : null;
 
         $dto->items = [];
-        foreach ($model->getAllItems() as $item) {
+        foreach ($model->getData('_preloaded_items') ?? $model->getAllItems() as $item) {
             $itemDto = new InvoiceItem();
             $itemDto->id = (int) $item->getId();
             $itemDto->orderItemId = (int) $item->getOrderItemId();
@@ -231,7 +234,7 @@ class Invoice extends CrudResource
         }
 
         $dto->comments = [];
-        foreach ($model->getCommentsCollection() as $comment) {
+        foreach ($model->getData('_preloaded_comments') ?? $model->getCommentsCollection() as $comment) {
             $dto->comments[] = [
                 'id' => (int) $comment->getId(),
                 'comment' => $comment->getComment(),
