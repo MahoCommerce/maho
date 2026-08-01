@@ -250,12 +250,18 @@ describe('GET /api/rest/v2/orders/{id}', function (): void {
 
         $order = $response['json'];
         expect($order)->toHaveKeys([
-            'customerGroupId', 'customerIsGuest', 'isVirtual',
+            'customerIsGuest', 'isVirtual',
             'quoteId', 'weight', 'emailSent',
             'storeName', 'baseCurrencyCode', 'globalCurrencyCode',
             'appliedRuleIds', 'giftcardCodes',
         ]);
         expect($order['customerIsGuest'])->toBeBool();
+
+        // sales_flat_order.customer_group_id is nullable with no default, unlike the
+        // quote column it is copied from, so an order can legitimately carry no group.
+        if (array_key_exists('customerGroupId', $order)) {
+            expect($order['customerGroupId'])->toBeInt();
+        }
         expect($order['appliedRuleIds'])->toBeArray();
         expect($order['giftcardCodes'])->toBeArray();
         expect($order['storeName'])->not->toBeEmpty();

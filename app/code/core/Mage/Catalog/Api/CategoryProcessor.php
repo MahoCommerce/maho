@@ -33,6 +33,13 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 {
     use ActivityLogTrait;
 
+    /**
+     * Upper bound for ids stored in SMALLINT columns (cms_block.block_id). PostgreSQL has no
+     * unsigned integers, so comparing such a column against a larger value is a query error
+     * rather than a non-match: out-of-range ids must be rejected before they reach SQL.
+     */
+    private const MAX_SMALLINT = 32767;
+
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Category
     {
@@ -363,6 +370,9 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
     {
         if ($blockId <= 0) {
             return null;
+        }
+        if ($blockId > self::MAX_SMALLINT) {
+            throw new BadRequestHttpException("CMS block {$blockId} not found");
         }
         $block = Mage::getModel('cms/block')->load($blockId);
         if (!$block->getId()) {

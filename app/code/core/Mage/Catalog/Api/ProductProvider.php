@@ -33,6 +33,21 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
     private ?bool $backOfficeReader = null;
 
+    /**
+     * Stock item columns that describe back-office inventory policy rather than
+     * anything a shopper can act on: the out-of-stock threshold, the admin
+     * low-stock alert level, the backorder policy and whether stock is tracked
+     * at all. Every `use_config_*` flag joins them, being pure admin config
+     * inheritance metadata.
+     */
+    private const BACK_OFFICE_STOCK_COLUMNS = [
+        'min_qty' => true,
+        'notify_stock_qty' => true,
+        'backorders' => true,
+        'low_stock_date' => true,
+        'manage_stock' => true,
+    ];
+
     private function getMediaConfig(): \Mage_Catalog_Model_Product_Media_Config
     {
         return $this->mediaConfig ??= \Mage::getModel('catalog/product_media_config');
@@ -40,7 +55,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
     /**
      * Whether the caller may see back-office-only product data (cost, the raw
-     * user-defined attribute map).
+     * user-defined attribute map, the inventory policy columns).
      */
     private function isBackOfficeReader(): bool
     {
@@ -58,8 +73,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     private function filterForCaller(?Product $dto): ?Product
     {
         if ($dto !== null && !$this->isBackOfficeReader()) {
-            $dto->cost = null;
-            $dto->customAttributes = null;
+            $this->stripBackOfficeData($dto);
         }
         return $dto;
     }
@@ -72,11 +86,25 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     {
         if (!$this->isBackOfficeReader()) {
             foreach ($dtos as $dto) {
-                $dto->cost = null;
-                $dto->customAttributes = null;
+                $this->stripBackOfficeData($dto);
             }
         }
         return $dtos;
+    }
+
+    private function stripBackOfficeData(Product $dto): void
+    {
+        $dto->cost = null;
+        $dto->customAttributes = null;
+
+        if ($dto->stockItem === null) {
+            return;
+        }
+        foreach (array_keys($dto->stockItem) as $column) {
+            if (isset(self::BACK_OFFICE_STOCK_COLUMNS[$column]) || str_starts_with((string) $column, 'use_config_')) {
+                unset($dto->stockItem[$column]);
+            }
+        }
     }
 
     /**
@@ -593,6 +621,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $dto->websiteIds = array_map('intval', $product->getWebsiteIds());
 
         if ($stockData) {
+            // Full column set on purpose: this feeds the cache, and
+            // stripBackOfficeData() drops the policy columns per request.
             $dto->stockItem = [];
             $columns = ['qty' => 'float', 'is_in_stock' => 'bool', 'manage_stock' => 'bool'] + self::STOCK_ITEM_EXTENDED_COLUMNS;
             foreach ($columns as $column => $type) {

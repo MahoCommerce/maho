@@ -523,7 +523,7 @@ describe('Product Extended Fields (REST)', function (): void {
         expect($badBulk['status'])->toBe(400);
     });
 
-    it('writes extended stock data on create and reads it back through stockItem', function (): void {
+    it('writes extended stock data on create and reads it back through stockItem, back-office columns only for privileged callers', function (): void {
         $token = serviceToken(['products/write', 'products/delete']);
         $suffix = substr(uniqid(), -8);
 
@@ -558,7 +558,28 @@ describe('Product Extended Fields (REST)', function (): void {
         $productId = $create['json']['id'];
         trackCreated('product', $productId);
 
-        $read = apiGet("/api/rest/v2/products/{$productId}");
+        // Anonymous: only the columns that constrain what a shopper may order.
+        $public = apiGet("/api/rest/v2/products/{$productId}");
+        expect($public['status'])->toBe(200);
+        $publicStock = $public['json']['stockItem'] ?? null;
+        expect($publicStock)->toBeArray();
+        expect((float) $publicStock['qty'])->toBe(25.0);
+        expect($publicStock['is_in_stock'])->toBeTrue();
+        expect((float) $publicStock['min_sale_qty'])->toBe(3.0);
+        expect((float) $publicStock['max_sale_qty'])->toBe(10.0);
+        expect((float) $publicStock['qty_increments'])->toBe(5.0);
+        expect($publicStock['enable_qty_increments'])->toBeTrue();
+        expect($publicStock)->toHaveKey('is_qty_decimal');
+
+        foreach (['min_qty', 'notify_stock_qty', 'backorders', 'manage_stock', 'low_stock_date'] as $column) {
+            expect($publicStock)->not->toHaveKey($column);
+        }
+        foreach (array_keys($publicStock) as $column) {
+            expect($column)->not->toStartWith('use_config_');
+        }
+
+        // Privileged: the full admin inventory structure.
+        $read = apiGet("/api/rest/v2/products/{$productId}", $token);
         expect($read['status'])->toBe(200);
         $stockItem = $read['json']['stockItem'] ?? null;
         expect($stockItem)->toBeArray();
@@ -574,6 +595,67 @@ describe('Product Extended Fields (REST)', function (): void {
         expect($stockItem['enable_qty_increments'])->toBeTrue();
         expect($stockItem['use_config_backorders'])->toBeFalse();
         expect($stockItem['use_config_manage_stock'])->toBeFalse();
+    });
+
+    it('keeps stock item visibility per caller regardless of who warms the response cache', function (): void {
+        $token = serviceToken(['products/write', 'products/delete']);
+        $suffix = substr(uniqid(), -8);
+        $stockData = [
+            'qty' => 20,
+            'is_in_stock' => true,
+            'min_qty' => 2,
+            'min_sale_qty' => 3,
+            'use_config_min_qty' => false,
+            'use_config_min_sale_qty' => false,
+        ];
+
+        $create = apiPost('/api/rest/v2/products', [
+            'sku' => "PEST-STOCKCACHE-A-{$suffix}",
+            'name' => 'Pest Stock Cache Public First',
+            'price' => 11.00,
+            'websiteIds' => [1],
+            'stockData' => $stockData,
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        $publicFirstId = $create['json']['id'];
+        trackCreated('product', $publicFirstId);
+
+        // Anonymous read warms the cache: the privileged read after it must
+        // still see the back-office columns.
+        $publicStock = (apiGet("/api/rest/v2/products/{$publicFirstId}"))['json']['stockItem'];
+        expect($publicStock)->not->toHaveKey('min_qty');
+        expect($publicStock)->not->toHaveKey('use_config_min_qty');
+        expect((float) $publicStock['min_sale_qty'])->toBe(3.0);
+
+        $privilegedStock = (apiGet("/api/rest/v2/products/{$publicFirstId}", $token))['json']['stockItem'];
+        expect((float) $privilegedStock['min_qty'])->toBe(2.0);
+        expect($privilegedStock['use_config_min_qty'])->toBeFalse();
+
+        expect((apiGet("/api/rest/v2/products/{$publicFirstId}"))['json']['stockItem'])->not->toHaveKey('min_qty');
+
+        $create = apiPost('/api/rest/v2/products', [
+            'sku' => "PEST-STOCKCACHE-B-{$suffix}",
+            'name' => 'Pest Stock Cache Privileged First',
+            'price' => 12.00,
+            'websiteIds' => [1],
+            'stockData' => $stockData,
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        $privilegedFirstId = $create['json']['id'];
+        trackCreated('product', $privilegedFirstId);
+
+        // Privileged read warms the cache: the anonymous read after it must not
+        // receive the back-office columns.
+        $privilegedStock = (apiGet("/api/rest/v2/products/{$privilegedFirstId}", $token))['json']['stockItem'];
+        expect((float) $privilegedStock['min_qty'])->toBe(2.0);
+        expect($privilegedStock['use_config_min_qty'])->toBeFalse();
+
+        $publicStock = (apiGet("/api/rest/v2/products/{$privilegedFirstId}"))['json']['stockItem'];
+        expect($publicStock)->not->toHaveKey('min_qty');
+        expect($publicStock)->not->toHaveKey('use_config_min_qty');
+        expect((float) $publicStock['min_sale_qty'])->toBe(3.0);
+
+        expect((float) (apiGet("/api/rest/v2/products/{$privilegedFirstId}", $token))['json']['stockItem']['min_qty'])->toBe(2.0);
     });
 
     it('updates extended stock fields via the inventory endpoint', function (): void {
@@ -605,7 +687,7 @@ describe('Product Extended Fields (REST)', function (): void {
         expect($update['json']['backorders'])->toBe(2);
         expect($update['json']['useConfigBackorders'])->toBeFalse();
 
-        $read = apiGet("/api/rest/v2/products/{$productId}");
+        $read = apiGet("/api/rest/v2/products/{$productId}", $token);
         expect($read['status'])->toBe(200);
         $stockItem = $read['json']['stockItem'] ?? null;
         expect($stockItem)->toBeArray();

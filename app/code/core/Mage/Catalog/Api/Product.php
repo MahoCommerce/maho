@@ -484,7 +484,7 @@ class Product extends CrudResource
 
     /** @var array<string, mixed>|null Full inventory settings keyed by cataloginventory_stock_item column */
     #[Groups(['product:detail'])]
-    #[ApiProperty(description: 'Inventory settings keyed by stock item column (round-trips with stockData)', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Inventory settings keyed by stock item column (round-trips with stockData); back-office columns (min_qty, notify_stock_qty, backorders, manage_stock, use_config_*) are only returned to admin and API tokens', writable: false, extraProperties: ['computed' => true])]
     public ?array $stockItem = null;
 
     #[Groups(['product:read'])]
