@@ -4,6 +4,25 @@ SPDX-FileCopyrightText: 2025-2026 Maho <https://mahocommerce.com>
 SPDX-License-Identifier: OSL-3.0
 -->
 <layout>
+    <!-- Customer-facing "Check Gift Card Balance" page under My Account. -->
+    <customer_account>
+        <reference name="customer_account_navigation">
+            <action method="addLink" translate="label" module="giftcard">
+                <name>giftcard_balance</name>
+                <path>giftcard/balance</path>
+                <label>Gift Card Balance</label>
+            </action>
+        </reference>
+    </customer_account>
+
+    <giftcard_balance_index translate="label">
+        <label>Customer Gift Card Balance</label>
+        <update handle="customer_account"/>
+        <reference name="my.account.wrapper">
+            <block type="giftcard/customer_balance" name="customer_giftcard_balance" template="giftcard/customer/balance.phtml"/>
+        </reference>
+    </giftcard_balance_index>
+
     <!-- Category listing - Add gift card price block -->
     <catalog_category_default>
         <reference name="product_list">

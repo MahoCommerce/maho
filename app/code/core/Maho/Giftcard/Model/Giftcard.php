@@ -15,8 +15,6 @@ declare(strict_types=1);
  * @method $this setCode(string $value)
  * @method string getStatus()
  * @method $this setStatus(string $value)
- * @method int getWebsiteId()
- * @method $this setWebsiteId(int $value)
  * @method $this setBalance(float $value)
  * @method float getInitialBalance()
  * @method $this setInitialBalance(float $value)
@@ -71,8 +69,11 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
                 $this->setCode($helper->generateCode());
             }
 
-            if (!$this->getWebsiteId()) {
-                $this->setWebsiteId((int) Mage::app()->getStore()->getWebsiteId());
+            // Default to the current website when no associations were set,
+            // so programmatic creations and imports never produce an orphaned
+            // card that fails closed on every website.
+            if ($this->getData('website_ids') === null) {
+                $this->setWebsiteIds([(int) Mage::app()->getStore()->getWebsiteId()]);
             }
 
             // Only fill a default when the field wasn't provided. Explicit null
@@ -121,11 +122,16 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Get website
+     * Get the card's website: the first (lowest-id) website it is associated
+     * with. All associated websites are required to share one base currency
+     * (enforced on save), so any of them is a valid currency source; the
+     * lowest id keeps the choice deterministic. Falls back to the default
+     * website for an orphaned card with no associations.
      */
     public function getWebsite(): Mage_Core_Model_Website
     {
-        return Mage::app()->getWebsite($this->getWebsiteId());
+        $websiteIds = $this->getWebsiteIds();
+        return Mage::app()->getWebsite($websiteIds[0] ?? null);
     }
 
     /**
@@ -188,6 +194,11 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
 
     /**
      * Check if gift card is valid for use on a specific website
+     *
+     * Membership lookup against the giftcard_website junction. A card with no
+     * websites assigned (orphaned from a botched import or hand-crafted row)
+     * is treated as not valid anywhere — fail closed rather than opening the
+     * card up to every website silently.
      */
     public function isValidForWebsite(int $websiteId): bool
     {
@@ -195,7 +206,62 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             return false;
         }
 
-        return (int) $this->getWebsiteId() === $websiteId;
+        return in_array($websiteId, $this->getWebsiteIds(), true);
+    }
+
+    /**
+     * Lazily-loaded snapshot of the card's junction rows. Deliberately kept
+     * out of the `website_ids` data key: that key means "pending change to
+     * persist" to the resource's _afterSave sync, so caching a mere read
+     * there would re-sync the junction on every subsequent save (checkout
+     * and refund call getWebsiteIds() before saving balance changes).
+     *
+     * @var int[]|null
+     */
+    private ?array $loadedWebsiteIds = null;
+
+    /**
+     * Get the list of website IDs this card is valid on.
+     *
+     * Returns the pending set from setWebsiteIds() when one exists, otherwise
+     * lazy-loads the current associations from the giftcard_website junction.
+     *
+     * @return int[]
+     */
+    public function getWebsiteIds(): array
+    {
+        $ids = $this->getData('website_ids');
+        if ($ids !== null) {
+            return array_map('intval', (array) $ids);
+        }
+        if (!$this->getId()) {
+            return [];
+        }
+        if ($this->loadedWebsiteIds === null) {
+            /** @var Maho_Giftcard_Model_Resource_Giftcard $resource */
+            $resource = $this->getResource();
+            $this->loadedWebsiteIds = $resource->getWebsiteIds((int) $this->getId());
+        }
+        return $this->loadedWebsiteIds;
+    }
+
+    /**
+     * Set the list of website IDs this card is valid on. The resource
+     * model's _afterSave hook persists the change to the junction.
+     *
+     * @param int[] $websiteIds
+     */
+    public function setWebsiteIds(array $websiteIds): self
+    {
+        $clean = [];
+        foreach ($websiteIds as $id) {
+            $id = (int) $id;
+            if ($id > 0) {
+                $clean[$id] = true;
+            }
+        }
+        $this->setData('website_ids', array_keys($clean));
+        return $this;
     }
 
     /**

@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Maho_Giftcard>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
         </Maho_Giftcard>
     </modules>
 
@@ -31,6 +31,9 @@
                     <history>
                         <table>giftcard_history</table>
                     </history>
+                    <website>
+                        <table>giftcard_website</table>
+                    </website>
                 </entities>
             </giftcard_resource>
         </models>

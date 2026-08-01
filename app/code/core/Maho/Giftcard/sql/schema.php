@@ -17,7 +17,6 @@ return function (Schema $schema): void {
     $giftcard->addColumn('giftcard_id', Types::INTEGER, ['unsigned' => true, 'autoincrement' => true]);
     $giftcard->addColumn('code', Types::STRING, ['length' => 64]);
     $giftcard->addColumn('status', Types::STRING, ['length' => 32, 'default' => 'active']);
-    $giftcard->addColumn('website_id', Types::SMALLINT, ['unsigned' => true]);
     $giftcard->addColumn('balance', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
     $giftcard->addColumn('initial_balance', Types::DECIMAL, ['precision' => 12, 'scale' => 4, 'default' => '0.0000']);
     $giftcard->addColumn('recipient_name', Types::STRING, ['length' => 255, 'notnull' => false]);
@@ -36,17 +35,10 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('giftcard_id')->create(),
     );
     $giftcard->addUniqueIndex(['code']);
-    $giftcard->addIndex(['website_id']);
     $giftcard->addIndex(['status']);
     $giftcard->addIndex(['status', 'expires_at']);
     $giftcard->addIndex(['purchase_order_id']);
     $giftcard->addIndex(['email_scheduled_at', 'email_sent_at']);
-    $giftcard->addForeignKeyConstraint(
-        'core_website',
-        ['website_id'],
-        ['website_id'],
-        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
-    );
     $giftcard->addForeignKeyConstraint(
         'sales_flat_order',
         ['purchase_order_id'],
@@ -134,4 +126,28 @@ return function (Schema $schema): void {
         'precision' => 12, 'scale' => 4, 'notnull' => false, 'default' => '0.0000',
         'comment' => 'Base Gift Card Amount',
     ]);
+
+    // Junction table for multi-website gift card associations (1.1.0+).
+    // A card can be valid on any subset of websites; apply-time validation is
+    // a membership check against these rows.
+    $website = $schema->createTable('giftcard_website');
+    $website->addColumn('giftcard_id', Types::INTEGER, ['unsigned' => true]);
+    $website->addColumn('website_id', Types::SMALLINT, ['unsigned' => true]);
+    $website->addPrimaryKeyConstraint(
+        PrimaryKeyConstraint::editor()->setUnquotedColumnNames('giftcard_id', 'website_id')->create(),
+    );
+    $website->addIndex(['website_id']);
+    $website->addForeignKeyConstraint(
+        'giftcard',
+        ['giftcard_id'],
+        ['giftcard_id'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+    );
+    $website->addForeignKeyConstraint(
+        'core_website',
+        ['website_id'],
+        ['website_id'],
+        ['onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE'],
+    );
+    $website->setComment('Gift Card to Website Associations');
 };

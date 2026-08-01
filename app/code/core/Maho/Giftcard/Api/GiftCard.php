@@ -69,7 +69,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
                 'senderName' => ['type' => 'String', 'description' => 'Sender name'],
                 'senderEmail' => ['type' => 'String', 'description' => 'Sender email'],
                 'message' => ['type' => 'String', 'description' => 'Gift card message'],
-                'websiteId' => ['type' => 'Int', 'description' => 'Website ID (defaults to current)'],
+                'websiteIds' => ['type' => '[Int!]', 'description' => 'Website IDs the card is valid on (defaults to current website)'],
                 'expiresAt' => ['type' => 'String', 'description' => 'Expiration date (YYYY-MM-DD)'],
             ],
             description: 'Create a new gift card',
@@ -120,4 +120,22 @@ class GiftCard extends CrudResource
     public ?string $senderName = null;
     public ?string $senderEmail = null;
     public ?string $message = null;
+
+    /**
+     * Websites the card is valid on (giftcard_website junction). Maps to the
+     * model's `website_ids` pending-change key, so applyToModel() feeds the
+     * junction sync; omitting it on create falls back to the current website.
+     *
+     * @var int[]|null
+     */
+    public ?array $websiteIds = null;
+
+    public static function afterLoad(self $dto, object $model): void
+    {
+        // The junction is lazy-loaded, never present in the model's data
+        // array, so fromModel()'s convention mapping leaves this null.
+        if ($model instanceof \Maho_Giftcard_Model_Giftcard && $model->getId()) {
+            $dto->websiteIds = $model->getWebsiteIds();
+        }
+    }
 }

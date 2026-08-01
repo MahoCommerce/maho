@@ -65,6 +65,31 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     }
 
     /**
+     * AJAX grid action for the Transaction History tab on the edit page.
+     *
+     * Registers the current gift card so the tab block scopes its
+     * collection correctly, then renders the grid in isolation (Mage's
+     * Tabs widget reloads the inner grid via this URL on page filter/sort).
+     */
+    #[Maho\Config\Route('/admin/giftcard/historyGrid')]
+    public function historyGridAction(): void
+    {
+        $model = Mage::getModel('giftcard/giftcard');
+        $id = (int) $this->getRequest()->getParam('id');
+        if ($id > 0) {
+            $model->load($id);
+        }
+        Mage::register('current_giftcard', $model);
+
+        $this->loadLayout();
+        $this->getResponse()->setBody(
+            $this->getLayout()
+                ->createBlock('giftcard/adminhtml_giftcard_edit_history')
+                ->toHtml(),
+        );
+    }
+
+    /**
      * New gift card
      */
     #[Maho\Config\Route('/admin/giftcard/new')]
@@ -103,8 +128,11 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
 
         Mage::register('current_giftcard', $model);
 
+        // Layout XML handle adminhtml_giftcard_edit registers the Form_Container
+        // in `content` and the Tabs block in `left`; loadLayout() picks both
+        // up automatically via the handle. The form and the transaction-history
+        // grid render as separate tabs of the same edit form.
         $this->_initAction();
-        $this->_addContent($this->getLayout()->createBlock('giftcard/adminhtml_giftcard_edit'));
         $this->renderLayout();
     }
 
@@ -123,15 +151,39 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             }
 
             try {
+                // Normalise the multiselect post: the form sends website_ids[]
+                // (or, if the JS is bypassed, sometimes a single value).
+                $websiteIds = $data['website_ids'] ?? [];
+                if (!is_array($websiteIds)) {
+                    $websiteIds = $websiteIds === '' ? [] : [$websiteIds];
+                }
+                $websiteIds = array_values(array_unique(array_filter(array_map('intval', $websiteIds))));
+                if (empty($websiteIds)) {
+                    // Nothing posted (e.g. an old form, an API caller) — fall
+                    // back to the current admin website so saves never land
+                    // with an empty association set that would orphan the card.
+                    $websiteIds = [(int) Mage::app()->getWebsite()->getId()];
+                }
+                $data['website_ids'] = $websiteIds;
+
                 // If balance changed on existing card, record as adjustment
                 $oldBalance = (float) $model->getBalance();
                 $newBalance = isset($data['balance']) ? (float) $data['balance'] : $oldBalance;
+                $isBalanceAdjustment = $model->getId() && $oldBalance != $newBalance;
+
+                if ($isBalanceAdjustment) {
+                    // Keep the model on the old balance through this first save so
+                    // adjustBalance() (below) computes the correct delta and writes
+                    // the new balance plus an accurate history entry. Setting the
+                    // new balance here would make adjustBalance() see a zero change.
+                    $data['balance'] = $oldBalance;
+                }
 
                 $model->setData($data);
                 $model->save();
 
                 // Record balance adjustment if changed
-                if ($model->getId() && $oldBalance != $newBalance) {
+                if ($isBalanceAdjustment) {
                     $model->adjustBalance($newBalance, $data['comment'] ?? 'Admin adjustment');
                 }
 
@@ -294,7 +346,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             'balance' => $giftcard->getBalance(),
             'initial_balance' => $giftcard->getInitialBalance(),
             'currency_code' => $giftcard->getCurrencyCode(),
-            'website_id' => $giftcard->getWebsiteId(),
+            'website_ids' => $giftcard->getWebsiteIds(),
             'status' => $giftcard->getStatus(),
             'is_valid' => $giftcard->isValid(),
             'expires_at' => $giftcard->getExpiresAt(),

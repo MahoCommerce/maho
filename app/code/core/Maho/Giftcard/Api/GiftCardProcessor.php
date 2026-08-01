@@ -95,9 +95,11 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             'sender_name' => $args['senderName'] ?? null,
             'sender_email' => $args['senderEmail'] ?? null,
             'message' => $args['message'] ?? null,
-            'website_id' => isset($args['websiteId']) ? (int) $args['websiteId'] : null,
             'expires_at' => $args['expiresAt'] ?? null,
         ]);
+        if (!empty($args['websiteIds'])) {
+            $giftcard->setWebsiteIds(array_map('intval', (array) $args['websiteIds']));
+        }
         $giftcard->save();
         $this->sendEmailToRecipient($giftcard);
 

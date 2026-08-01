@@ -11,6 +11,28 @@ SPDX-License-Identifier: OSL-3.0
         </reference>
     </adminhtml_giftcard_index>
 
+    <!-- Gift Card New/Edit Page — tabbed layout matching the Mage_Adminhtml
+         CMS Page edit pattern: Form_Container in `content` for header chrome
+         and save buttons, Tabs in `left` so each tab (General form fields,
+         Transaction History grid) is bound to the edit_form element via
+         the destElementId. -->
+    <adminhtml_giftcard_new>
+        <update handle="adminhtml_giftcard_edit" />
+    </adminhtml_giftcard_new>
+    <adminhtml_giftcard_edit>
+        <reference name="content">
+            <block type="giftcard/adminhtml_giftcard_edit" name="giftcard_edit" />
+        </reference>
+        <reference name="left">
+            <block type="giftcard/adminhtml_giftcard_edit_tabs" name="giftcard_edit_tabs">
+                <block type="giftcard/adminhtml_giftcard_edit_tab_form" name="giftcard_edit_tab_form" />
+                <block type="giftcard/adminhtml_giftcard_edit_history" name="giftcard_edit_tab_history" />
+                <action method="addTab"><name>general</name><block>giftcard_edit_tab_form</block></action>
+                <action method="addTab"><name>history</name><block>giftcard_edit_tab_history</block></action>
+            </block>
+        </reference>
+    </adminhtml_giftcard_edit>
+
     <!-- Gift Card History Grid Page -->
     <adminhtml_giftcard_history_index>
         <reference name="content">

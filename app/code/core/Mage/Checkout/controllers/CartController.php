@@ -855,7 +855,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
 
             // Check website validity
             $websiteId = (int) $quote->getStore()->getWebsiteId();
-            if ((int) $giftcard->getWebsiteId() !== $websiteId) {
+            if (!in_array($websiteId, $giftcard->getWebsiteIds(), true)) {
                 return ['success' => false, 'message' => ''];
             }
 
