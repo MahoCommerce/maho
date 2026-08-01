@@ -122,7 +122,6 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                     $eventData = [];
                     $eventData['value'] = (float) $helper->formatPrice($totalValue); // Sum of displayed product prices
                     $eventData['currency'] = Mage::app()->getStore()->getCurrentCurrencyCode();
-                    ;
                     $eventData['content_name'] = $category->getName();
                     $eventData['content_ids'] = $contentIds;
                     $eventData['content_type'] = 'product_group'; // Use 'product_group' for lists/categories
@@ -152,12 +151,13 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                         $_product = $item->getProduct();
                         $productId = $_product->getSku();
                         $contentIds[] = $productId;
+                        $itemPrice = (float) ($item->getPriceInclTax() ?? $helper->getPriceInclTax($_product));
                         $contents[] = [
                             'id' => $productId,
                             'quantity' => (int) $item->getQty(),
-                            'item_price' => (float) $helper->formatPrice($item->getBasePriceInclTax() ?? $item->getBasePrice()),
+                            'item_price' => (float) $helper->formatPrice($itemPrice),
                         ];
-                        $totalValue += $item->getBaseRowTotalInclTax() ?? $item->getBaseRowTotal();
+                        $totalValue += $item->getRowTotalInclTax() ?? $itemPrice * $item->getQty();
                         $numItems += (int) $item->getQty();
                     }
 

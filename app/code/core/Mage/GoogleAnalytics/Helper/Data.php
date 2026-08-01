@@ -174,7 +174,7 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Final price including tax, regardless of the store's price display settings
+     * Final price including tax, in the current display currency, regardless of the store's price display settings
      */
     public function getPriceInclTax(Mage_Catalog_Model_Product $product): float
     {
@@ -183,17 +183,17 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
         $store = Mage::app()->getStore();
         $price = (float) $product->getFinalPrice();
         if ($taxHelper->needPriceConversion($store)) {
-            return (float) $taxHelper->getPrice($product, $price, true);
+            $price = (float) $taxHelper->getPrice($product, $price, true);
+        } elseif ($price && $product->getTaxClassId()) {
+            // Prices entered and displayed excluding tax: getPrice() skips conversion, so apply the rate directly
+            /** @var Mage_Tax_Model_Calculation $calculation */
+            $calculation = Mage::getSingleton('tax/calculation');
+            $rate = $calculation->getRate(
+                $calculation->getRateRequest(null, null, null, $store)->setProductClassId($product->getTaxClassId()),
+            );
+            $price *= 1 + $rate / 100;
         }
-        // Prices entered and displayed excluding tax: getPrice() skips conversion, so apply the rate directly
-        if (!$price || !$product->getTaxClassId()) {
-            return $price;
-        }
-        /** @var Mage_Tax_Model_Calculation $calculation */
-        $calculation = Mage::getSingleton('tax/calculation');
-        $rate = $calculation->getRate(
-            $calculation->getRateRequest(null, null, null, $store)->setProductClassId($product->getTaxClassId()),
-        );
-        return $store->roundPrice($price * (1 + $rate / 100));
+        // Catalog prices are in base currency; every event pairs this value with the current currency code
+        return $store->roundPrice($store->convertPrice($price));
     }
 }

@@ -212,7 +212,7 @@ gtag('set', 'user_id', '{$customer->getId()}');
                     continue;
                 }
                 $_product = $productInCart->getProduct();
-                $productPrice = $helper->getPriceInclTax($_product);
+                $productPrice = (float) ($productInCart->getPriceInclTax() ?? $helper->getPriceInclTax($_product));
                 $_item = [
                     'item_id' => $_product->getSku(),
                     'item_name' => $_product->getName(),
@@ -245,7 +245,7 @@ gtag('set', 'user_id', '{$customer->getId()}');
                         continue;
                     }
                     $_product = $productInCart->getProduct();
-                    $productPrice = $helper->getPriceInclTax($_product);
+                    $productPrice = (float) ($productInCart->getPriceInclTax() ?? $helper->getPriceInclTax($_product));
                     $_item = [
                         'item_id' => $_product->getSku(),
                         'item_name' => $_product->getName(),
