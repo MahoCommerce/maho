@@ -70,4 +70,8 @@ describe('GA4 purchase event', function () {
 
         expect($this->block->getPurchaseEventData($order)['items'][0]['price'])->toBe('100.00');
     });
+
+    it('returns null for an order without items', function () {
+        expect($this->block->getPurchaseEventData(Mage::getModel('sales/order')))->toBeNull();
+    });
 });

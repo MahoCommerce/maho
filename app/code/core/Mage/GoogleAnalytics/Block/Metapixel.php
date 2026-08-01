@@ -61,7 +61,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
             // @see https://developers.facebook.com/docs/meta-pixel/reference#standard-events
             $productViewed = Mage::registry('current_product');
             if ($productViewed) {
-                $productPrice = (float) $helper->formatPrice($helper->getPriceInclTax($productViewed));
+                $productPrice = $helper->getPriceInclTax($productViewed);
                 $eventData = [];
                 $eventData['value'] = $productPrice;
                 $eventData['currency'] = Mage::app()->getStore()->getCurrentCurrencyCode();
@@ -109,7 +109,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
 
                     foreach ($productCollection as $productViewed) {
                         $productId = $productViewed->getSku();
-                        $productPrice = (float) $helper->formatPrice($helper->getPriceInclTax($productViewed));
+                        $productPrice = $helper->getPriceInclTax($productViewed);
                         $contentIds[] = $productId;
                         $contents[] = [
                             'id' => $productId,

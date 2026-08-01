@@ -95,7 +95,7 @@
  * @method $this setProductId(int $value)
  * @method $this setProductOrderOptions(array $value)
  * @method $this setProductType(string $value)
- * @method float getPriceInclTax()
+ * @method float|null getPriceInclTax()
  * @method $this setPriceInclTax(float $value)
  *
  * @method int getQuoteId()
@@ -110,7 +110,7 @@
  * @method $this setRedirectUrl(string $value)
  * @method float getRowTotal()
  * @method $this setRowTotal(float $value)
- * @method float getRowTotalInclTax()
+ * @method float|null getRowTotalInclTax()
  * @method $this setRowTotalInclTax(float $value)
  * @method float getRowTotalWithDiscount()
  * @method $this setRowTotalWithDiscount(float $value)

@@ -275,7 +275,10 @@ gtag('set', 'user_id', '{$customer->getId()}');
                 ->addFieldToFilter('entity_id', ['in' => $orderIds]);
             /** @var Mage_Sales_Model_Order $order */
             foreach ($collection as $order) {
-                $result[] = ['purchase', $this->getPurchaseEventData($order)];
+                $orderData = $this->getPurchaseEventData($order);
+                if ($orderData !== null) {
+                    $result[] = ['purchase', $orderData];
+                }
             }
         }
 
@@ -295,22 +298,14 @@ gtag('set', 'user_id', '{$customer->getId()}');
     }
 
     /**
-     * Purchase event payload for one order.
+     * Purchase event payload for one order, null when the order has no items.
      *
-     * @return array<string, mixed>
+     * @return array<string, mixed>|null
      */
-    public function getPurchaseEventData(Mage_Sales_Model_Order $order): array
+    public function getPurchaseEventData(Mage_Sales_Model_Order $order): ?array
     {
         $helper = Mage::helper('googleanalytics');
-        $orderData = [
-            'currency' => $order->getBaseCurrencyCode(),
-            'transaction_id' => $order->getIncrementId(),
-            'value' => $helper->formatPrice($order->getBaseGrandTotal()),
-            'coupon' => strtoupper((string) $order->getCouponCode()),
-            'shipping' => $helper->formatPrice($order->getBaseShippingAmount()),
-            'tax' => $helper->formatPrice($order->getBaseTaxAmount()),
-            'items' => [],
-        ];
+        $items = [];
 
         /** @var Mage_Sales_Model_Order_Item $item */
         foreach ($order->getAllItems() as $item) {
@@ -333,9 +328,22 @@ gtag('set', 'user_id', '{$customer->getId()}');
             if ($itemCategory) {
                 $_item['item_category'] = $itemCategory;
             }
-            $orderData['items'][] = $_item;
+            $items[] = $_item;
         }
-        return $orderData;
+
+        if (empty($items)) {
+            return null;
+        }
+
+        return [
+            'currency' => $order->getBaseCurrencyCode(),
+            'transaction_id' => $order->getIncrementId(),
+            'value' => $helper->formatPrice($order->getBaseGrandTotal()),
+            'coupon' => strtoupper((string) $order->getCouponCode()),
+            'shipping' => $helper->formatPrice($order->getBaseShippingAmount()),
+            'tax' => $helper->formatPrice($order->getBaseTaxAmount()),
+            'items' => $items,
+        ];
     }
 
     protected function _isAvailable(): bool
