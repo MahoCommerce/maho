@@ -195,15 +195,24 @@ describe('expanded order read surface', function (): void {
         expect($order)->toHaveKeys([
             'customerGroupId', 'weight', 'emailSent', 'storeName',
             'baseCurrencyCode', 'globalCurrencyCode',
-            'extOrderId', 'extCustomerId',
-            'couponRuleName', 'discountDescription',
-            'holdBeforeState', 'holdBeforeStatus',
-            'customerMiddlename', 'customerPrefix', 'customerSuffix',
-            'customerTaxvat', 'customerDob', 'customerGender',
         ]);
         expect($order['appliedRuleIds'])->toBeArray();
         expect($order['giftcardCodes'])->toBeArray();
         expect($order['baseCurrencyCode'])->not->toBeEmpty();
+        expect($order['storeName'])->not->toBeEmpty();
+
+        // Null fields are omitted from REST responses (skip_null_values). This
+        // order comes from a plain checkout by a customer with no name parts or
+        // demographics, so none of these carry a value.
+        foreach ([
+            'extOrderId', 'extCustomerId', 'couponRuleName',
+            'holdBeforeState', 'holdBeforeStatus',
+            'customerMiddlename', 'customerPrefix', 'customerSuffix',
+            'customerTaxvat', 'customerDob', 'customerGender',
+        ] as $key) {
+            expect($order[$key] ?? null)->toBeNull();
+        }
+        expect($order['discountDescription'] ?? null)->toBeEmpty();
 
         // Base and lifecycle totals
         expect($order['prices'])->toHaveKeys([
@@ -220,15 +229,21 @@ describe('expanded order read surface', function (): void {
         expect($order['items'])->not->toBeEmpty();
         $item = $order['items'][0];
         expect($item)->toHaveKeys([
-            'productOptions', 'qtyInvoiced', 'qtyBackordered', 'originalPrice', 'baseCost',
-            'weight', 'rowWeight', 'isVirtual', 'isQtyDecimal', 'freeShipping', 'noDiscount',
-            'description', 'additionalData', 'extOrderItemId',
+            'productOptions', 'qtyInvoiced', 'originalPrice', 'rowWeight',
+            'isVirtual', 'isQtyDecimal', 'freeShipping', 'noDiscount',
             'basePrice', 'baseRowTotal', 'baseTaxAmount', 'baseDiscountAmount',
-            'amountRefunded', 'taxRefunded', 'discountRefunded',
             'storeId', 'createdAt',
         ]);
         expect($item['productOptions'])->toBeArray();
         expect($item['basePrice'])->toBeGreaterThan(0);
+        expect($item['baseRowTotal'])->toBeGreaterThan(0);
+
+        // Nothing in a plain checkout writes these, so they stay null and are
+        // omitted from the response.
+        foreach (['baseCost', 'description', 'additionalData', 'extOrderItemId',
+            'amountRefunded', 'taxRefunded', 'discountRefunded'] as $key) {
+            expect($item[$key] ?? null)->toBeNull();
+        }
 
         // Status history entries carry the status they moved the order to,
         // and include the placement note
@@ -239,17 +254,29 @@ describe('expanded order read surface', function (): void {
         $notes = array_column($order['statusHistory'], 'note');
         expect($notes)->toContain($note);
 
-        // Fraud metadata is admin-only: the customer-facing read must not carry it
-        expect($order['remoteIp'] ?? null)->toBeNull();
-        expect($order['xForwardedFor'] ?? null)->toBeNull();
+        // Fraud metadata is admin-only. Nothing on the API checkout path records
+        // the request IP, so stamp it on the order and read it back through both
+        // surfaces: only the admin one may return it.
+        expect($order['id'] ?? null)->not->toBeEmpty();
+        $orderId = (int) $order['id'];
 
-        // Admin read of the same order exposes the admin-only keys
-        if (!empty($order['id'])) {
-            $adminRead = apiGet('/api/rest/v2/orders/' . $order['id'], adminToken());
-            expect($adminRead['status'])->toBe(200);
-            expect($adminRead['json'])->toHaveKeys(['remoteIp', 'xForwardedFor']);
-            expect($adminRead['json']['customerNote'])->toBe($note);
-        }
+        $resource = Mage::getSingleton('core/resource');
+        $resource->getConnection('core_write')->update(
+            $resource->getTableName('sales/order'),
+            ['remote_ip' => '203.0.113.7', 'x_forwarded_for' => '198.51.100.9'],
+            ['entity_id = ?' => $orderId],
+        );
+
+        $customerRead = apiGet("/api/rest/v2/orders/{$orderId}", customerToken());
+        expect($customerRead['status'])->toBe(200);
+        expect($customerRead['json']['remoteIp'] ?? null)->toBeNull();
+        expect($customerRead['json']['xForwardedFor'] ?? null)->toBeNull();
+
+        $adminRead = apiGet("/api/rest/v2/orders/{$orderId}", adminToken());
+        expect($adminRead['status'])->toBe(200);
+        expect($adminRead['json']['remoteIp'])->toBe('203.0.113.7');
+        expect($adminRead['json']['xForwardedFor'])->toBe('198.51.100.9');
+        expect($adminRead['json']['customerNote'])->toBe($note);
     });
 
 });

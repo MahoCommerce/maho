@@ -17,6 +17,24 @@ declare(strict_types=1);
  * @group read
  */
 
+/**
+ * Look up a single product attribute by its exact code through the collection
+ * search filter (REST has no by-code route).
+ */
+function attributeByCode(string $code): ?array
+{
+    $response = apiGet('/api/rest/v2/product-attributes?search=' . $code, adminToken());
+    expect($response['status'])->toBe(200);
+
+    foreach (getItems($response) as $attribute) {
+        if (($attribute['attributeCode'] ?? null) === $code) {
+            return $attribute;
+        }
+    }
+
+    return null;
+}
+
 describe('Product Attribute Extended Flags', function (): void {
 
     it('exposes search, frontend, and listing flags on the collection', function (): void {
@@ -30,8 +48,8 @@ describe('Product Attribute Extended Flags', function (): void {
             'isSearchable', 'isFilterable', 'isFilterableInSearch', 'isComparable',
             'isVisibleOnFront', 'isHtmlAllowedOnFront', 'isUsedForPriceRules',
             'usedInProductListing', 'usedForSortBy', 'isVisibleInAdvancedSearch',
-            'isWysiwygEnabled', 'isConfigurable', 'applyTo', 'frontendClass',
-            'note', 'position', 'isGlobal', 'scope',
+            'isWysiwygEnabled', 'isConfigurable', 'applyTo',
+            'position', 'isGlobal', 'scope',
         ] as $key) {
             expect($first)->toHaveKey($key);
         }
@@ -40,6 +58,26 @@ describe('Product Attribute Extended Flags', function (): void {
         expect($first['isGlobal'])->toBeInt();
         expect($first['isFilterable'])->toBeInt();
         expect($first['isSearchable'])->toBeBool();
+    });
+
+    it('returns the stored frontend validation class', function (): void {
+        // special_price gets its class from the catalog data upgrade, so every
+        // install has one attribute with a known frontend_class.
+        $attribute = attributeByCode('special_price');
+        expect($attribute)->not->toBeNull();
+        expect($attribute['frontendClass'])->toBe('validate-special-price');
+    });
+
+    it('returns the stored admin note', function (): void {
+        // meta_description is created with a note by the catalog setup.
+        $attribute = attributeByCode('meta_description');
+        expect($attribute)->not->toBeNull();
+        expect($attribute['note'])->toBe('Maximum 255 chars');
+
+        // Null fields are omitted from REST responses (skip_null_values), so an
+        // attribute without a note carries no key at all.
+        $withoutNote = attributeByCode('special_price');
+        expect($withoutNote['note'] ?? null)->toBeNull();
     });
 
     it('keeps the derived scope string consistent with the raw isGlobal flag', function (): void {

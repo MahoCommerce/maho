@@ -182,13 +182,13 @@ final class ReviewProvider extends CrudProvider
             throw new NotFoundHttpException('Review not found');
         }
 
-        // Non-approved reviews are visible to their author and to admin/service
-        // callers (moderation needs to load pending reviews); everyone else gets 404.
-        $customerId = $this->getAuthenticatedCustomerId();
+        // Non-approved reviews are visible to their author, to admins and to
+        // service tokens scoped for moderation; everyone else gets 404.
         if ((int) $review->getStatusId() !== \Mage_Review_Model_Review::STATUS_APPROVED
             && !$this->isAdmin()
-            && !$this->isApiUser()
+            && !$this->canReadModerationQueue()
         ) {
+            $customerId = $this->getAuthenticatedCustomerId();
             if (!$customerId || (int) $review->getCustomerId() !== $customerId) {
                 throw new NotFoundHttpException('Review not found');
             }
@@ -201,6 +201,15 @@ final class ReviewProvider extends CrudProvider
         $dto->productName = $productNames[$dto->productId] ?? null;
 
         return $dto;
+    }
+
+    /**
+     * A service token sees pending/rejected content only when scoped for it:
+     * an unrelated scope (say newsletter/read) must not read the queue.
+     */
+    private function canReadModerationQueue(): bool
+    {
+        return $this->isApiUser() && $this->getAuthorizedUser()->hasPermission('reviews/read');
     }
 
     /**

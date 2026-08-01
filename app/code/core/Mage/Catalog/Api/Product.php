@@ -199,7 +199,7 @@ class Product extends CrudResource
     public ?string $specialToDate = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Product cost')]
+    #[ApiProperty(description: 'Product cost; only returned to admin and API tokens')]
     public ?float $cost = null;
 
     #[Groups(['product:read'])]
@@ -479,7 +479,7 @@ class Product extends CrudResource
 
     /** @var array<string, mixed>|null User-defined EAV attribute values keyed by attribute_code (read counterpart of customAttributesWrite) */
     #[Groups(['product:detail'])]
-    #[ApiProperty(description: 'User-defined EAV attribute values keyed by attribute_code', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'User-defined EAV attribute values keyed by attribute_code; only returned to admin and API tokens', writable: false, extraProperties: ['computed' => true])]
     public ?array $customAttributes = null;
 
     /** @var array<string, mixed>|null Full inventory settings keyed by cataloginventory_stock_item column */

@@ -101,10 +101,10 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
         $shipment = $this->resolveShipment($uriVariables, $context);
 
         $shipment->addComment($comment, $notifyCustomer, $visibleOnFront);
+        $shipment->save();
         if ($notifyCustomer) {
             $shipment->sendUpdateEmail(true, $comment);
         }
-        $shipment->save();
 
         return Shipment::fromModel(\Mage::getModel('sales/order_shipment')->load($shipment->getId()));
     }

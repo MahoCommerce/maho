@@ -31,9 +31,52 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
     private ?\Mage_Catalog_Model_Product_Media_Config $mediaConfig = null;
 
+    private ?bool $backOfficeReader = null;
+
     private function getMediaConfig(): \Mage_Catalog_Model_Product_Media_Config
     {
         return $this->mediaConfig ??= \Mage::getModel('catalog/product_media_config');
+    }
+
+    /**
+     * Whether the caller may see back-office-only product data (cost, the raw
+     * user-defined attribute map).
+     */
+    private function isBackOfficeReader(): bool
+    {
+        return $this->backOfficeReader ??= $this->isAdmin() || $this->isApiUser();
+    }
+
+    /**
+     * Strip back-office-only fields from a DTO on its way to the response.
+     *
+     * The response cache has no auth dimension (admin, service token and guest
+     * all resolve to customer group 0), so the cached payload must stay the same
+     * for everyone and the filtering has to happen per request, after the cache
+     * is read. Every provider path that can return a cached DTO runs this.
+     */
+    private function filterForCaller(?Product $dto): ?Product
+    {
+        if ($dto !== null && !$this->isBackOfficeReader()) {
+            $dto->cost = null;
+            $dto->customAttributes = null;
+        }
+        return $dto;
+    }
+
+    /**
+     * @param Product[] $dtos
+     * @return Product[]
+     */
+    private function filterListForCaller(array $dtos): array
+    {
+        if (!$this->isBackOfficeReader()) {
+            foreach ($dtos as $dto) {
+                $dto->cost = null;
+                $dto->customAttributes = null;
+            }
+        }
+        return $dtos;
     }
 
     /**
@@ -71,11 +114,11 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         if ($operation instanceof CollectionOperationInterface) {
             $sku = $context['args']['sku'] ?? null;
             if ($sku) {
-                return $this->singleItemPaginator($this->getProductBySku($sku));
+                return $this->singleItemPaginator($this->filterForCaller($this->getProductBySku($sku)));
             }
             $barcode = $context['args']['barcode'] ?? null;
             if ($barcode) {
-                return $this->singleItemPaginator($this->getProductByBarcode($barcode));
+                return $this->singleItemPaginator($this->filterForCaller($this->getProductByBarcode($barcode)));
             }
             return $this->getCollection($context);
         }
@@ -97,7 +140,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         if ($cached !== false) {
             $data = \Mage::helper('core')->jsonDecode($cached, true);
             if ($data !== null) {
-                return Product::fromArray($data);
+                return $this->filterForCaller(Product::fromArray($data));
             }
         }
 
@@ -113,7 +156,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             $this->getCacheTtl(),
         );
 
-        return $dto;
+        return $this->filterForCaller($dto);
     }
 
     /**
@@ -247,6 +290,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         foreach ($collection as $product) {
             $products[] = $this->toDto($product, forListing: true);
         }
+        $products = $this->filterListForCaller($products);
 
         return new TraversablePaginator(new \ArrayIterator($products), $page, $pageSize, (int) $collection->getSize());
     }
@@ -273,7 +317,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 $cachedData = \Mage::helper('core')->jsonDecode($cached, true);
                 if ($cachedData !== null) {
                     // Reconstruct Product DTOs from cached data
-                    $products = array_map(fn($data) => Product::fromArray($data), $cachedData['products']);
+                    $products = $this->filterListForCaller(array_map(fn($data) => Product::fromArray($data), $cachedData['products']));
                     return new TraversablePaginator(new \ArrayIterator($products), $cachedData['page'], $cachedData['pageSize'], $cachedData['total']);
                 }
             }
@@ -481,7 +525,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         // Return paginator with total count for proper pagination
-        return new TraversablePaginator(new \ArrayIterator($products), $page, $pageSize, (int) $result['total']);
+        return new TraversablePaginator(new \ArrayIterator($this->filterListForCaller($products)), $page, $pageSize, (int) $result['total']);
     }
 
     /**
@@ -501,6 +545,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      *
      * Called after Product::fromModel() which handles basic field mapping and
      * computed fields (status/visibility enums, prices, image URLs, barcode).
+     *
+     * Builds the unfiltered DTO, back-office fields included: this is what the
+     * response cache stores, and filterForCaller() strips them per request.
      */
     private function enrichProduct(
         Product $dto,
@@ -510,12 +557,6 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         ?array $categoryIds = null,
         ?\Mage_CatalogInventory_Model_Stock_Item $stockItem = null,
     ): void {
-        // Purchase cost is for back-office eyes only, never echoed to
-        // public or customer-token readers.
-        if ($dto->cost !== null && !$this->isAdmin() && !$this->isApiUser()) {
-            $dto->cost = null;
-        }
-
         $stockData = $stockItem ?? $product->getStockItem();
         if ($stockData) {
             $dto->stockQty = (float) $stockData->getQty();
@@ -561,6 +602,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
         // Generic EAV read: user-defined attribute values not covered by a
         // dedicated DTO property (the read counterpart of customAttributesWrite).
+        // Back-office only, like cost: it ignores is_visible_on_front and would
+        // otherwise expose internal data. Storefront callers get the curated
+        // additionalAttributes list below instead.
         $dedicated = Product::dedicatedAttributeCodes();
         $dto->customAttributes = [];
         foreach ($product->getAttributes() as $code => $attribute) {

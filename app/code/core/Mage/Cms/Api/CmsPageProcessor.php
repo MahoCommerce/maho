@@ -27,18 +27,25 @@ final class CmsPageProcessor extends CrudProcessor
     #[\Override]
     protected function beforeSave(object $model, CrudResource $data, ApiUser $user): void
     {
-        // applyToModel() copied the raw strings onto the model; re-set the date
-        // fields normalized ('' clears to null, anything else validated to Y-m-d).
-        foreach (['custom_theme_from', 'custom_theme_to'] as $field) {
-            $value = $model->getData($field);
-            if ($value !== null) {
-                $model->setData($field, $this->normalizeDateInput((string) $value, $field));
+        // Validate only what the request actually sent, never what is already stored:
+        // a legacy or imported value outside the allowed set would otherwise make the
+        // page permanently un-updatable through the API.
+        if ($data instanceof CmsPage) {
+            if ($data->customThemeFrom !== null) {
+                $model->setData('custom_theme_from', $this->normalizeDateInput($data->customThemeFrom, 'customThemeFrom'));
             }
-        }
-
-        $metaRobots = $model->getData('meta_robots');
-        if ($metaRobots !== null) {
-            $model->setData('meta_robots', $this->normalizeMetaRobots((string) $metaRobots));
+            if ($data->customThemeTo !== null) {
+                $model->setData('custom_theme_to', $this->normalizeDateInput($data->customThemeTo, 'customThemeTo'));
+            }
+            if ($data->metaRobots !== null) {
+                $model->setData('meta_robots', $this->normalizeMetaRobots($data->metaRobots));
+            }
+            if ($data->layoutUpdateXml !== null) {
+                $model->setData('layout_update_xml', $this->validateLayoutUpdate($data->layoutUpdateXml, 'layoutUpdateXml'));
+            }
+            if ($data->customLayoutUpdateXml !== null) {
+                $model->setData('custom_layout_update_xml', $this->validateLayoutUpdate($data->customLayoutUpdateXml, 'customLayoutUpdateXml'));
+            }
         }
 
         // On create, apply defaults for fields omitted from the request. They are nullable on
@@ -73,6 +80,35 @@ final class CmsPageProcessor extends CrudProcessor
         } catch (\Exception) {
             throw new BadRequestHttpException("Invalid date for {$field}; use Y-m-d format.");
         }
+    }
+
+    /**
+     * Layout updates are executed when the storefront renders the page, so the API
+     * must apply the same validator the admin form does (blocked templates,
+     * disallowed blocks, helper attributes) instead of storing arbitrary XML.
+     */
+    private function validateLayoutUpdate(string $xml, string $field): ?string
+    {
+        if (trim($xml) === '') {
+            return null;
+        }
+
+        $this->requireAdminOrApiUser('Layout updates require admin or API access');
+
+        /** @var \Mage_Adminhtml_Model_LayoutUpdate_Validator $validator */
+        $validator = \Mage::getModel('adminhtml/layoutUpdate_validator');
+        try {
+            $isValid = $validator->isValid($xml);
+        } catch (\Throwable) {
+            $isValid = false;
+        }
+
+        if (!$isValid) {
+            $messages = implode(' ', $validator->getMessages());
+            throw new BadRequestHttpException(trim("{$field} is not a valid layout update. " . $messages));
+        }
+
+        return $xml;
     }
 
     private function normalizeMetaRobots(string $value): ?string

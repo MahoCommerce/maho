@@ -28,6 +28,14 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class CustomerProcessor extends \Maho\ApiPlatform\Processor
 {
+    /**
+     * Upper bound for ids stored in a SMALLINT key column (customer_group.customer_group_id,
+     * core_website.website_id). PostgreSQL has no unsigned integers, so comparing such a column
+     * against a larger value is a query error rather than a non-match: out-of-range ids must be
+     * rejected before they reach SQL.
+     */
+    private const MAX_SMALLINT = 32767;
+
     private readonly CustomerService $customerService;
 
     public function __construct(Security $security)
@@ -112,9 +120,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Update current customer profile (REST entry point)
-     */
-    /**
+     * Update current customer profile (REST entry point).
+     *
      * Admin-only fields (groupId, isActive, websiteId, taxvat,
      * disableAutoGroupChange) are deliberately never read here, so a
      * customer's own token cannot touch them.
@@ -162,6 +169,9 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         // websiteId is honored on create only: pick which website the account
         // lives on, defaulting the store to that website's default store.
         if ($data->websiteId !== null) {
+            if ($data->websiteId < 0 || $data->websiteId > self::MAX_SMALLINT) {
+                throw new BadRequestHttpException("Website {$data->websiteId} does not exist");
+            }
             try {
                 $website = \Mage::app()->getWebsite($data->websiteId);
             } catch (\Throwable) {
@@ -545,6 +555,9 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             $profile['suffix'] = $data->suffix;
         }
         if ($data->gender !== null) {
+            if ($data->gender !== 0) {
+                $this->validateGenderOption($data->gender);
+            }
             $profile['gender'] = $data->gender ?: null;
         }
         if ($data->dob !== null) {
@@ -569,23 +582,55 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
 
     private function validateGroupExists(int $groupId): void
     {
-        if (!\Mage::getModel('customer/group')->load($groupId)->getId()) {
+        if ($groupId < 0 || $groupId > self::MAX_SMALLINT || !\Mage::getModel('customer/group')->load($groupId)->getId()) {
             throw new BadRequestHttpException("Customer group {$groupId} does not exist");
+        }
+    }
+
+    /** Gender is a select attribute: only its own option ids are storable */
+    private function validateGenderOption(int $genderId): void
+    {
+        $attribute = \Mage::getSingleton('eav/config')->getAttribute('customer', 'gender');
+        $options = $attribute && $attribute->usesSource() ? $attribute->getSource()->getAllOptions() : [];
+
+        // The source prepends an empty option; only positive ids are real values.
+        $optionIds = array_values(array_filter(
+            array_map('intval', array_column($options, 'value')),
+            fn(int $id): bool => $id > 0,
+        ));
+
+        if (!in_array($genderId, $optionIds, true)) {
+            throw new BadRequestHttpException(
+                "Invalid gender {$genderId}; allowed: " . implode(', ', $optionIds) . ' (0 clears)',
+            );
         }
     }
 
     /**
      * Normalize a dob input to the midnight 'Y-m-d H:i:s' form the admin
      * stores; empty string clears the value (returns null).
+     *
+     * formatDateForDb() reads a numeric string as a unix timestamp and accepts
+     * relative expressions like 'tomorrow', so the calendar-date shape is
+     * enforced here to match the documented Y-m-d contract.
      */
     private function normalizeDobInput(string $value): ?string
     {
-        try {
-            $date = \Mage::app()->getLocale()->formatDateForDb($value, withTime: false);
-        } catch (\Exception) {
+        $value = trim($value);
+        if ($value === '') {
+            return null;
+        }
+
+        $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $value, new \DateTimeZone('UTC'));
+        $errors = \DateTimeImmutable::getLastErrors();
+        if ($date === false || ($errors && ($errors['warning_count'] || $errors['error_count']))) {
             throw new BadRequestHttpException('Invalid date for dob; use Y-m-d format.');
         }
-        return $date === null ? null : $date . ' 00:00:00';
+        if ($date > new \DateTimeImmutable('now', new \DateTimeZone('UTC'))) {
+            throw new BadRequestHttpException('Date of birth cannot be in the future.');
+        }
+
+        return $date->format(\Mage_Core_Model_Locale::DATETIME_FORMAT);
     }
 
     /**

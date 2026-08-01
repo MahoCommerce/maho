@@ -110,6 +110,18 @@ describe('Review moderation', function (): void {
         expect($reject['json']['status'])->toBe('not_approved');
     });
 
+    it('hides the non-approved review from a service token without reviews/read', function (): void {
+        // Left at not_approved by the previous test.
+        $reviewId = pestModerationReviewId();
+
+        $unscoped = apiGet("/api/rest/v2/reviews/{$reviewId}", serviceToken(['newsletter/read']));
+        expect($unscoped['status'])->toBe(404);
+
+        $scoped = apiGet("/api/rest/v2/reviews/{$reviewId}", serviceToken(['reviews/read']));
+        expect($scoped['status'])->toBe(200);
+        expect($scoped['json']['status'])->not->toBe('approved');
+    });
+
     it('rejects an invalid status value', function (): void {
         $response = apiPut('/api/rest/v2/reviews/' . pestModerationReviewId(), [
             'status' => 'sideways',

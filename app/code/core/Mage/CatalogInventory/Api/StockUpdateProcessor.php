@@ -177,6 +177,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         /** @var \Mage_Catalog_Model_Resource_Product $productResource */
         $productResource = \Mage::getResourceSingleton('catalog/product');
         $skuToProductId = [];
+        $extendedByIndex = [];
 
         foreach ($items as $index => $item) {
             $sku = $item['sku'] ?? '';
@@ -186,6 +187,9 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             if (isset($item['qty'])) {
                 $this->validateStockQty((float) $item['qty']);
             }
+            // Extract (and thereby validate) before the transaction opens, so a
+            // rejected value 400s cleanly instead of aborting a partial write.
+            $extendedByIndex[$index] = $this->extractExtendedStockColumns($item);
 
             $productId = $productResource->getIdBySku($sku);
             if (!$productId) {
@@ -201,12 +205,12 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 
         $write->beginTransaction();
         try {
-            foreach ($items as $item) {
+            foreach ($items as $index => $item) {
                 $sku = $item['sku'];
                 $qty = isset($item['qty']) ? (float) $item['qty'] : null;
                 $isInStock = isset($item['isInStock']) ? (bool) $item['isInStock'] : null;
                 $manageStock = isset($item['manageStock']) ? (bool) $item['manageStock'] : null;
-                $extended = $this->extractExtendedStockColumns($item);
+                $extended = $extendedByIndex[$index];
                 $productId = $skuToProductId[$sku];
 
                 $stockData = array_merge($this->buildStockData($qty, $isInStock, $manageStock), $extended);

@@ -29,24 +29,34 @@ use Maho\ApiPlatform\CrudResource;
         new GetCollection(
             uriTemplate: '/orders/{orderId}/invoices',
             name: 'order_invoices',
+            uriVariables: ['orderId' => new Link(toProperty: 'orderId')],
             description: 'List invoices for an order',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
         ),
         new Get(
             uriTemplate: '/orders/{orderId}/invoices/{id}/pdf',
             name: 'invoice_pdf',
+            uriVariables: [
+                'orderId' => new Link(toProperty: 'orderId'),
+                'id' => new Link(identifiers: ['id']),
+            ],
             description: 'Download invoice PDF',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
         ),
         new GetCollection(
             uriTemplate: '/customers/me/orders/{orderId}/invoices',
             name: 'my_order_invoices',
+            uriVariables: ['orderId' => new Link(toProperty: 'orderId')],
             description: 'List invoices for an authenticated customer\'s order',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
         ),
         new Get(
             uriTemplate: '/customers/me/orders/{orderId}/invoices/{id}/pdf',
             name: 'my_invoice_pdf',
+            uriVariables: [
+                'orderId' => new Link(toProperty: 'orderId'),
+                'id' => new Link(identifiers: ['id']),
+            ],
             description: 'Download invoice PDF for an authenticated customer\'s order',
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('invoices/read')",
         ),

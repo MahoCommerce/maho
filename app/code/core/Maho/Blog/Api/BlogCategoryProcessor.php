@@ -53,8 +53,22 @@ final class BlogCategoryProcessor extends CrudProcessor
     {
         $model = $this->loadOrFail($this->modelAlias, $id, 'Blog category not found');
         $this->authorizeEntity($model, $user);
+
+        /** @var \Maho_Blog_Model_Resource_Category $resource */
+        $resource = \Mage::getResourceSingleton('blog/category');
+
+        // The subtree goes with the category, so every descendant must be in the
+        // caller's store scope too: a store-scoped token must not take out a child
+        // category that belongs to a store it was never granted.
+        foreach ($resource->getDescendantIds((int) $model->getId()) as $descendantId) {
+            $descendant = \Mage::getModel('blog/category')->load($descendantId);
+            if ($descendant->getId()) {
+                $this->authorizeEntity($descendant, $user);
+            }
+        }
+
         $oldData = $model->getData();
-        \Mage::getResourceSingleton('blog/category')->deleteDescendants((int) $model->getId());
+        $resource->deleteDescendants((int) $model->getId());
         $this->safeDelete($model, "delete {$this->entityLabel}");
         $this->logApiActivity($this->entityType, 'delete', $oldData, null, $user);
         return null;

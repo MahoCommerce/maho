@@ -50,6 +50,11 @@ trait StockWriterTrait
         'use_config_manage_stock' => 'bool',
     ];
 
+    /** Columns whose stored value is meaningless below zero. */
+    private const NON_NEGATIVE_STOCK_COLUMNS = [
+        'min_qty', 'min_sale_qty', 'max_sale_qty', 'notify_stock_qty', 'qty_increments',
+    ];
+
     /**
      * Extract the extended stock item columns from an input map. Accepts both
      * snake_case column names and their camelCase aliases (minQty,
@@ -75,7 +80,33 @@ trait StockWriterTrait
                 default => (int) (bool) $value,
             };
         }
+        $this->validateExtendedStockColumns($columns);
         return $columns;
+    }
+
+    /**
+     * Reject values the constrained stock columns can't hold. These paths write
+     * the row directly, so nothing else validates them; every caller goes
+     * through extractExtendedStockColumns(), which runs this.
+     *
+     * @param array<string, int|float> $columns
+     */
+    protected function validateExtendedStockColumns(array $columns): void
+    {
+        $allowedBackorders = [
+            \Mage_CatalogInventory_Model_Stock::BACKORDERS_NO,
+            \Mage_CatalogInventory_Model_Stock::BACKORDERS_YES_NONOTIFY,
+            \Mage_CatalogInventory_Model_Stock::BACKORDERS_YES_NOTIFY,
+        ];
+        if (isset($columns['backorders']) && !in_array((int) $columns['backorders'], $allowedBackorders, true)) {
+            throw new BadRequestHttpException('backorders must be one of: ' . implode(', ', $allowedBackorders));
+        }
+
+        foreach (self::NON_NEGATIVE_STOCK_COLUMNS as $column) {
+            if (isset($columns[$column]) && $columns[$column] < 0) {
+                throw new BadRequestHttpException("{$column} cannot be negative");
+            }
+        }
     }
 
     /**

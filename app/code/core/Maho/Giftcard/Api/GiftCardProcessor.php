@@ -59,6 +59,11 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             ($data->code !== null && $data->code !== '') ? $data->code : null,
             $model->getId() ? (int) $model->getId() : null,
         );
+        // balance is written independently of initialBalance, so it needs its own
+        // bounds check or a create could smuggle a balance past the limit above.
+        if ($data->balance !== null) {
+            $this->assertBalanceBounds((float) $data->balance);
+        }
         $this->assertValidStatus($data->status);
         if ($data->websiteId !== null) {
             try {
@@ -99,12 +104,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
 
         if ($data->balance !== null) {
             $newBalance = (float) $data->balance;
-            if ($newBalance < 0) {
-                throw new BadRequestHttpException('Gift card balance cannot be negative');
-            }
-            if ($newBalance > self::MAX_BALANCE) {
-                throw new BadRequestHttpException('Gift card balance cannot exceed ' . self::MAX_BALANCE);
-            }
+            $this->assertBalanceBounds($newBalance);
             if ($newBalance !== (float) $model->getBalance()) {
                 $model->adjustBalance($newBalance, $data->comment ?? 'API balance adjustment');
             }
@@ -122,6 +122,17 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
         // email, which a status/balance update must never trigger early.
         $reloaded = \Mage::getModel($this->modelAlias)->load($model->getId());
         return GiftCard::fromModel($reloaded->getId() ? $reloaded : $model);
+    }
+
+    /** Bounds every writable balance must satisfy, on create and on adjustment alike. */
+    private function assertBalanceBounds(float $balance): void
+    {
+        if ($balance < 0) {
+            throw new BadRequestHttpException('Gift card balance cannot be negative');
+        }
+        if ($balance > self::MAX_BALANCE) {
+            throw new BadRequestHttpException('Gift card balance cannot exceed ' . self::MAX_BALANCE);
+        }
     }
 
     /**
@@ -210,6 +221,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             throw new NotFoundHttpException('Gift card not found');
         }
 
+        $this->assertBalanceBounds($newBalance);
         $giftcard->adjustBalance($newBalance, $args['comment'] ?? null);
 
         return GiftCard::fromModel($giftcard);

@@ -152,6 +152,60 @@ describe('Blog Category CRUD Lifecycle (REST)', function (): void {
         expect(apiGet("/api/rest/v2/blog-categories/{$childId}")['status'])->toBeNotFound();
     });
 
+    it('repaths the whole subtree when a category moves', function (): void {
+        $token = serviceToken(['blog-categories/write', 'blog-categories/delete']);
+        $suffix = substr(uniqid(), -8);
+
+        $a = apiPost('/api/rest/v2/blog-categories', [
+            'name' => 'Move Grandparent',
+            'urlKey' => "test-pest-move-a-{$suffix}",
+        ], $token);
+        expect($a['status'])->toBeIn([200, 201]);
+        $aId = (int) $a['json']['id'];
+        trackBlogCategory($aId);
+
+        $b = apiPost('/api/rest/v2/blog-categories', [
+            'name' => 'Move Parent',
+            'urlKey' => "test-pest-move-b-{$suffix}",
+            'parentId' => $aId,
+        ], $token);
+        expect($b['status'])->toBeIn([200, 201]);
+        $bId = (int) $b['json']['id'];
+        trackBlogCategory($bId);
+
+        $c = apiPost('/api/rest/v2/blog-categories', [
+            'name' => 'Move Child',
+            'urlKey' => "test-pest-move-c-{$suffix}",
+            'parentId' => $bId,
+        ], $token);
+        expect($c['status'])->toBeIn([200, 201]);
+        $cId = (int) $c['json']['id'];
+        trackBlogCategory($cId);
+        expect($c['json']['path'])->toBe("{$aId}/{$bId}/{$cId}");
+        expect($c['json']['level'])->toBe(3);
+
+        // Move the middle category to the root: the child must follow it.
+        $move = apiPut("/api/rest/v2/blog-categories/{$bId}", [
+            'parentId' => 0,
+        ], $token);
+        expect($move['status'])->toBe(200);
+        expect($move['json']['path'])->toBe((string) $bId);
+        expect($move['json']['level'])->toBe(1);
+
+        $child = apiGet("/api/rest/v2/blog-categories/{$cId}");
+        expect($child['status'])->toBe(200);
+        expect($child['json']['path'])->toBe("{$bId}/{$cId}");
+        expect($child['json']['level'])->toBe(2);
+
+        // The old branch no longer owns the child: deleting it leaves the child alone.
+        expect(apiDelete("/api/rest/v2/blog-categories/{$aId}", $token)['status'])->toBeIn([200, 204]);
+        expect(apiGet("/api/rest/v2/blog-categories/{$cId}")['status'])->toBe(200);
+
+        // The new branch does: deleting the moved category takes the child with it.
+        expect(apiDelete("/api/rest/v2/blog-categories/{$bId}", $token)['status'])->toBeIn([200, 204]);
+        expect(apiGet("/api/rest/v2/blog-categories/{$cId}")['status'])->toBeNotFound();
+    });
+
     it('rejects an unknown parentId and a create without name', function (): void {
         $token = serviceToken(['blog-categories/write']);
 

@@ -112,6 +112,40 @@ describe('CMS Page CRUD Lifecycle (REST)', function (): void {
         expect($gone['status'])->toBeNotFound();
     });
 
+    it('leaves omitted fields untouched on a partial update', function (): void {
+        $token = serviceToken(['cms-pages/write', 'cms-pages/delete']);
+        $suffix = substr(uniqid(), -8);
+
+        $create = apiPost('/api/rest/v2/cms-pages', [
+            'identifier' => "test-pest-partial-{$suffix}",
+            'title' => 'Partial Update Page',
+            'content' => '<p>Original content</p>',
+            'contentHeading' => 'Original heading',
+            'isActive' => true,
+            'stores' => ['all'],
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        $pageId = $create['json']['id'];
+        trackCreated('cms_page', $pageId);
+
+        // Only sortOrder. Blanking the omitted identifier would fail the model's URL
+        // key validation, so a regression here surfaces as a 422 rather than bad data.
+        $update = apiPut("/api/rest/v2/cms-pages/{$pageId}", ['sortOrder' => 3], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['identifier'])->toBe("test-pest-partial-{$suffix}");
+        expect($update['json']['title'])->toBe('Partial Update Page');
+        expect($update['json']['sortOrder'])->toBe(3);
+
+        $verify = apiGet("/api/rest/v2/cms-pages/{$pageId}");
+        expect($verify['status'])->toBe(200);
+        expect($verify['json']['identifier'])->toBe("test-pest-partial-{$suffix}");
+        expect($verify['json']['title'])->toBe('Partial Update Page');
+        expect($verify['json']['contentHeading'])->toBe('Original heading');
+        expect($verify['json']['content'])->toContain('Original content');
+
+        expect(apiDelete("/api/rest/v2/cms-pages/{$pageId}", $token)['status'])->toBeIn([200, 204]);
+    });
+
 });
 
 describe('CMS Page CRUD with "all" permission', function (): void {
@@ -178,16 +212,23 @@ describe('CMS Page layout and meta fields (REST)', function (): void {
         $pageId = $create['json']['id'];
         trackCreated('cms_page', $pageId);
 
+        // Design fields round-trip on the write response, which is permission-gated.
+        expect($create['json']['layoutUpdateXml'])->toBe('<reference name="content"/>');
+        expect($create['json']['customTheme'])->toBe('default/custom');
+        expect($create['json']['customRootTemplate'])->toBe('two_columns_left');
+        expect($create['json']['customLayoutUpdateXml'])->toBe('<reference name="root"/>');
+        expect($create['json']['customThemeFrom'])->toBe('2026-01-01');
+        expect($create['json']['customThemeTo'])->toBe('2026-12-31');
+
         $read = apiGet("/api/rest/v2/cms-pages/{$pageId}");
         expect($read['status'])->toBe(200);
         expect($read['json']['sortOrder'])->toBe(7);
-        expect($read['json']['layoutUpdateXml'])->toBe('<reference name="content"/>');
-        expect($read['json']['customTheme'])->toBe('default/custom');
-        expect($read['json']['customRootTemplate'])->toBe('two_columns_left');
-        expect($read['json']['customLayoutUpdateXml'])->toBe('<reference name="root"/>');
-        expect((string) $read['json']['customThemeFrom'])->toContain('2026-01-01');
-        expect((string) $read['json']['customThemeTo'])->toContain('2026-12-31');
         expect($read['json']['metaRobots'])->toBe('NOINDEX,FOLLOW');
+        // Design and layout internals stay out of the public read payload.
+        expect($read['json'])->not->toHaveKey('layoutUpdateXml');
+        expect($read['json'])->not->toHaveKey('customLayoutUpdateXml');
+        expect($read['json'])->not->toHaveKey('customTheme');
+        expect($read['json'])->not->toHaveKey('customThemeFrom');
 
         $update = apiPut("/api/rest/v2/cms-pages/{$pageId}", [
             'customThemeFrom' => '',
@@ -197,8 +238,16 @@ describe('CMS Page layout and meta fields (REST)', function (): void {
         expect($update['json']['customThemeFrom'] ?? null)->toBeNull();
         expect($update['json']['customThemeTo'] ?? null)->toBeNull();
         // Untouched fields survive the partial update.
+        expect($update['json']['identifier'])->toBe('test-pest-layout-page');
+        expect($update['json']['title'])->toBe('Layout Fields Page');
         expect($update['json']['metaRobots'])->toBe('NOINDEX,FOLLOW');
         expect($update['json']['sortOrder'])->toBe(7);
+        expect($update['json']['layoutUpdateXml'])->toBe('<reference name="content"/>');
+
+        $verify = apiGet("/api/rest/v2/cms-pages/{$pageId}");
+        expect($verify['status'])->toBe(200);
+        expect($verify['json']['identifier'])->toBe('test-pest-layout-page');
+        expect($verify['json']['title'])->toBe('Layout Fields Page');
 
         expect(apiDelete("/api/rest/v2/cms-pages/{$pageId}", $token)['status'])->toBeIn([200, 204]);
     });
@@ -214,6 +263,58 @@ describe('CMS Page layout and meta fields (REST)', function (): void {
 
         expect($response['status'])->toBeGreaterThanOrEqual(400);
         expect($response['status'])->toBeLessThan(500);
+    });
+
+    it('keeps updating a page whose stored metaRobots is out of the allowed set', function (): void {
+        $token = serviceToken(['cms-pages/write', 'cms-pages/delete']);
+        $suffix = substr(uniqid(), -8);
+
+        $create = apiPost('/api/rest/v2/cms-pages', [
+            'identifier' => "test-pest-legacy-robots-{$suffix}",
+            'title' => 'Legacy Robots Page',
+            'isActive' => true,
+            'stores' => ['all'],
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        $pageId = (int) $create['json']['id'];
+        trackCreated('cms_page', $pageId);
+
+        // Simulate an imported/legacy value the API enum does not know about.
+        Tests\Helpers\ApiV2Helper::ensureMahoBootstrapped();
+        $resource = Mage::getSingleton('core/resource');
+        $resource->getConnection('core_write')->update(
+            $resource->getTableName('cms/page'),
+            ['meta_robots' => 'ARCHIVE'],
+            ['page_id = ?' => $pageId],
+        );
+
+        $update = apiPut("/api/rest/v2/cms-pages/{$pageId}", [
+            'title' => 'Legacy Robots Page Updated',
+        ], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['title'])->toBe('Legacy Robots Page Updated');
+
+        expect(apiDelete("/api/rest/v2/cms-pages/{$pageId}", $token)['status'])->toBeIn([200, 204]);
+    });
+
+    it('rejects layout XML that injects a template path or is malformed', function (): void {
+        $token = serviceToken(['cms-pages/write']);
+
+        $injection = apiPost('/api/rest/v2/cms-pages', [
+            'identifier' => 'test-pest-layout-injection',
+            'title' => 'Layout Injection',
+            'layoutUpdateXml' => '<reference name="content">'
+                . '<block type="core/template" template="../../../../app/etc/local.xml"/>'
+                . '</reference>',
+        ], $token);
+        expect($injection['status'])->toBeIn([400, 422]);
+
+        $malformed = apiPost('/api/rest/v2/cms-pages', [
+            'identifier' => 'test-pest-layout-malformed',
+            'title' => 'Layout Malformed',
+            'customLayoutUpdateXml' => '<reference name="content"><block type="core/template">',
+        ], $token);
+        expect($malformed['status'])->toBeIn([400, 422]);
     });
 
 });

@@ -320,7 +320,6 @@ describe('Product Extended Fields (REST)', function (): void {
             'sku' => "PEST-EXT-{$suffix}",
             'name' => 'Pest Extended Fields Product',
             'price' => 99.95,
-            'cost' => 55.25,
             'msrp' => 129.99,
             'msrpEnabled' => 1,
             'msrpDisplayActualPriceType' => 1,
@@ -333,7 +332,6 @@ describe('Product Extended Fields (REST)', function (): void {
         ], $token);
 
         expect($create['status'])->toBeIn([200, 201]);
-        expect($create['json']['cost'])->toBe(55.25);
         expect($create['json']['msrp'])->toBe(129.99);
         expect($create['json']['msrpEnabled'])->toBe(1);
         expect($create['json']['newsFromDate'])->toBe('2026-08-01');
@@ -341,15 +339,8 @@ describe('Product Extended Fields (REST)', function (): void {
         $productId = $create['json']['id'];
         trackCreated('product', $productId);
 
-        // Purchase cost is back-office only: hidden on public reads,
-        // visible to service tokens.
-        $publicRead = apiGet("/api/rest/v2/products/{$productId}");
-        expect($publicRead['status'])->toBe(200);
-        expect($publicRead['json']['cost'] ?? null)->toBeNull();
-
         $read = apiGet("/api/rest/v2/products/{$productId}", $token);
         expect($read['status'])->toBe(200);
-        expect($read['json']['cost'])->toBe(55.25);
         expect($read['json']['msrp'])->toBe(129.99);
         expect($read['json']['msrpDisplayActualPriceType'])->toBe(1);
         expect($read['json']['newsFromDate'])->toBe('2026-08-01');
@@ -410,14 +401,126 @@ describe('Product Extended Fields (REST)', function (): void {
             $productId = $create['json']['id'];
             trackCreated('product', $productId);
 
-            $read = apiGet("/api/rest/v2/products/{$productId}");
+            $read = apiGet("/api/rest/v2/products/{$productId}", $token);
             expect($read['status'])->toBe(200);
             expect($read['json']['customAttributes'])->toBeArray();
             expect($read['json']['customAttributes'][$code] ?? null)->toBe('pest-value');
+
+            // The raw attribute map ignores is_visible_on_front, so it is
+            // back-office only; the response cache must not leak it.
+            $public = apiGet("/api/rest/v2/products/{$productId}");
+            expect($public['status'])->toBe(200);
+            expect($public['json']['customAttributes'] ?? null)->toBeNull();
+
+            $reread = apiGet("/api/rest/v2/products/{$productId}", $token);
+            expect($reread['json']['customAttributes'][$code] ?? null)->toBe('pest-value');
         } finally {
             $setup->removeAttribute(\Mage_Catalog_Model_Product::ENTITY, $code);
             \Mage::app()->getCache()->cleanType('eav');
         }
+    });
+
+    it('keeps cost visibility per caller regardless of who warms the response cache', function (): void {
+        $type = costApplicableProductType();
+        if ($type === null) {
+            $this->markTestSkipped('The cost attribute applies to no createable product type in this install');
+        }
+
+        $token = serviceToken(['products/write', 'products/delete']);
+        $suffix = substr(uniqid(), -8);
+
+        $create = apiPost('/api/rest/v2/products', [
+            'sku' => "PEST-COSTCACHE-A-{$suffix}",
+            'name' => 'Pest Cost Cache Public First',
+            'type' => $type,
+            'price' => 60.00,
+            'cost' => 42.50,
+            'websiteIds' => [1],
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        $publicFirstId = $create['json']['id'];
+        trackCreated('product', $publicFirstId);
+
+        // Anonymous read warms the cache: the privileged read after it must
+        // still see the cost.
+        expect((apiGet("/api/rest/v2/products/{$publicFirstId}"))['json']['cost'] ?? null)->toBeNull();
+        expect((apiGet("/api/rest/v2/products/{$publicFirstId}", $token))['json']['cost'])->toBe(42.50);
+        expect((apiGet("/api/rest/v2/products/{$publicFirstId}"))['json']['cost'] ?? null)->toBeNull();
+
+        $create = apiPost('/api/rest/v2/products', [
+            'sku' => "PEST-COSTCACHE-B-{$suffix}",
+            'name' => 'Pest Cost Cache Privileged First',
+            'type' => $type,
+            'price' => 30.00,
+            'cost' => 17.25,
+            'websiteIds' => [1],
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        $privilegedFirstId = $create['json']['id'];
+        trackCreated('product', $privilegedFirstId);
+
+        // Privileged read warms the cache: the anonymous read after it must
+        // not receive the cost.
+        expect((apiGet("/api/rest/v2/products/{$privilegedFirstId}", $token))['json']['cost'])->toBe(17.25);
+        expect((apiGet("/api/rest/v2/products/{$privilegedFirstId}"))['json']['cost'] ?? null)->toBeNull();
+        expect((apiGet("/api/rest/v2/products/{$privilegedFirstId}", $token))['json']['cost'])->toBe(17.25);
+    });
+
+    it('rejects an unseparated numeric date instead of storing a unix timestamp', function (): void {
+        $token = serviceToken(['products/write', 'products/delete']);
+        $suffix = substr(uniqid(), -8);
+
+        $create = apiPost('/api/rest/v2/products', [
+            'sku' => "PEST-BADDATE-{$suffix}",
+            'name' => 'Pest Numeric Date Product',
+            'price' => 4.00,
+            'websiteIds' => [1],
+            'specialFromDate' => '20260801',
+        ], $token);
+
+        expect($create['status'])->toBe(400);
+    });
+
+    it('rejects out-of-range extended stock values', function (): void {
+        $token = serviceToken(['products/write', 'products/delete', 'inventory/write']);
+        $suffix = substr(uniqid(), -8);
+        $sku = "PEST-STOCKVAL-{$suffix}";
+
+        $create = apiPost('/api/rest/v2/products', [
+            'sku' => $sku,
+            'name' => 'Pest Stock Validation Product',
+            'price' => 6.00,
+            'websiteIds' => [1],
+            'stockData' => ['qty' => 5, 'is_in_stock' => true],
+        ], $token);
+        expect($create['status'])->toBeIn([200, 201]);
+        trackCreated('product', $create['json']['id']);
+
+        $badBackorders = apiPut('/api/rest/v2/inventory', [
+            'sku' => $sku,
+            'backorders' => 5,
+        ], $token);
+        expect($badBackorders['status'])->toBe(400);
+
+        $negativeMinQty = apiPut('/api/rest/v2/inventory', [
+            'sku' => $sku,
+            'minQty' => -3,
+        ], $token);
+        expect($negativeMinQty['status'])->toBe(400);
+
+        $goodBulk = apiPut('/api/rest/v2/inventory/bulk', [
+            'items' => [
+                ['sku' => $sku, 'qty' => 2, 'qtyIncrements' => 1],
+            ],
+        ], $token);
+        expect($goodBulk['status'])->toBeIn([200, 201]);
+
+        $badBulk = apiPut('/api/rest/v2/inventory/bulk', [
+            'items' => [
+                ['sku' => $sku, 'qty' => 2, 'qtyIncrements' => -1],
+            ],
+        ], $token);
+        expect($badBulk['status'])->toBe(400);
     });
 
     it('writes extended stock data on create and reads it back through stockItem', function (): void {
@@ -626,3 +729,32 @@ describe('Product Type Fields - Read Verification', function (): void {
     });
 
 });
+
+/**
+ * A product type the `cost` attribute applies to, or null when there is none.
+ *
+ * _isApplicableAttribute() silently drops a value whose attribute does not apply
+ * to the product's type, and apply_to for cost differs between a Maho core
+ * install (simple,virtual) and a sample-data one (virtual,downloadable), so the
+ * type has to be read from the attribute rather than hard-coded.
+ */
+function costApplicableProductType(): ?string
+{
+    Tests\Helpers\ApiV2Helper::ensureMahoBootstrapped();
+
+    $attribute = Mage::getSingleton('eav/config')
+        ->getAttribute(Mage_Catalog_Model_Product::ENTITY, 'cost');
+
+    $applyTo = $attribute ? $attribute->getApplyTo() : [];
+    if ($applyTo === []) {
+        return Mage_Catalog_Model_Product_Type::TYPE_SIMPLE;
+    }
+
+    foreach ([Mage_Catalog_Model_Product_Type::TYPE_SIMPLE, Mage_Catalog_Model_Product_Type::TYPE_VIRTUAL] as $type) {
+        if (in_array($type, $applyTo, true)) {
+            return $type;
+        }
+    }
+
+    return null;
+}

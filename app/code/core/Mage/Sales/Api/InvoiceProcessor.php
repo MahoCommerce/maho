@@ -56,6 +56,21 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Invalid capture mode; expected one of: ' . implode(', ', self::CAPTURE_CASES));
         }
 
+        $items = $args['items'] ?? null;
+        if ($items !== null && !is_array($items)) {
+            throw new BadRequestHttpException('Items must be a list of {orderItemId, qty} objects');
+        }
+
+        $comment = $args['comment'] ?? null;
+        if ($comment !== null && !is_string($comment)) {
+            throw new BadRequestHttpException('Comment must be a string');
+        }
+
+        $notifyCustomer = $args['notifyCustomer'] ?? false;
+        if (!is_scalar($notifyCustomer)) {
+            throw new BadRequestHttpException('notifyCustomer must be a boolean');
+        }
+
         $order = \Mage::getModel('sales/order')->load($orderId);
         if (!$order->getId()) {
             throw new NotFoundHttpException('Order not found');
@@ -74,13 +89,7 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
         try {
             // Re-read under the lock so canInvoice() reflects the live state.
             $order->load($orderId);
-            return $this->buildAndRegisterInvoice(
-                $order,
-                $args['items'] ?? null,
-                $captureCase,
-                $args['comment'] ?? null,
-                (bool) ($args['notifyCustomer'] ?? false),
-            );
+            return $this->buildAndRegisterInvoice($order, $items, $captureCase, $comment, (bool) $notifyCustomer);
         } finally {
             $write->releaseLock($lockName);
         }
@@ -100,21 +109,48 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
         $qtyMap = [];
         if ($items !== null && count($items) > 0) {
             foreach ($items as $itemData) {
-                $orderItemId = (int) ($itemData['orderItemId'] ?? 0);
-                $qty = (float) ($itemData['qty'] ?? 0);
+                if (!is_array($itemData)) {
+                    throw new BadRequestHttpException('Each item must be an object with orderItemId and qty');
+                }
 
-                if ($orderItemId <= 0) {
+                $orderItemId = $itemData['orderItemId'] ?? null;
+                $qty = $itemData['qty'] ?? null;
+
+                if (!is_numeric($orderItemId) || (int) $orderItemId <= 0) {
                     throw new BadRequestHttpException('Each item must have a valid orderItemId');
                 }
-                if ($qty <= 0) {
+                if (!is_numeric($qty) || (float) $qty <= 0) {
                     throw new BadRequestHttpException('Each item must have qty > 0');
+                }
+
+                $orderItemId = (int) $orderItemId;
+                $qty = (float) $qty;
+
+                $orderItem = $order->getItemById($orderItemId);
+                if (!$orderItem) {
+                    throw new BadRequestHttpException("Order item {$orderItemId} does not belong to this order");
+                }
+
+                // Dummy (bundle/configurable parent) items take their qty from the
+                // order, so neither check applies to them.
+                if (!$orderItem->isDummy()) {
+                    if (!$orderItem->getIsQtyDecimal() && fmod($qty, 1.0) !== 0.0) {
+                        throw new BadRequestHttpException("Order item {$orderItemId} does not accept a fractional qty");
+                    }
+                    if ($qty > (float) $orderItem->getQtyToInvoice()) {
+                        throw new BadRequestHttpException("Qty to invoice for order item {$orderItemId} exceeds the qty available to invoice");
+                    }
                 }
 
                 $qtyMap[$orderItemId] = $qty;
             }
         }
 
-        $invoice = \Mage::getModel('sales/service_order', $order)->prepareInvoice($qtyMap);
+        try {
+            $invoice = \Mage::getModel('sales/service_order', $order)->prepareInvoice($qtyMap);
+        } catch (\Mage_Core_Exception $e) {
+            throw new BadRequestHttpException($e->getMessage());
+        }
 
         if (!$invoice->getTotalQty()) {
             throw new BadRequestHttpException('Cannot create invoice: no items to invoice');

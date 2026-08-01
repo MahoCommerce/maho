@@ -97,9 +97,7 @@ describe('API v2 Invoices', function (): void {
 
             expect($response['status'])->toBeIn([200, 404]);
             if ($response['status'] === 200) {
-                expect($response['json'])->toHaveKey('invoices');
-                expect($response['json']['invoices'])->toBeArray();
-                expect($response['json'])->toHaveKey('count');
+                expect(getItems($response))->toBeArray();
             }
         });
 

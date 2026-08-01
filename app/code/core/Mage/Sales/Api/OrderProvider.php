@@ -473,8 +473,10 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $dto->extOrderItemId = $item->getExtOrderItemId();
         $dto->storeId = $item->getStoreId() ? (int) $item->getStoreId() : null;
         $dto->createdAt = $item->getCreatedAt();
-        $dto->productOptions = $item->getProductOptions();
-
+        // unserialize() hands back the raw value when a legacy row holds neither
+        // JSON nor a serialized payload, so never trust it to be an array.
+        $productOptions = $item->getProductOptions();
+        $dto->productOptions = is_array($productOptions) ? $productOptions : [];
 
         \Mage::dispatchEvent('api_order_item_dto_build', ['item' => $item, 'dto' => $dto]);
         return $dto;

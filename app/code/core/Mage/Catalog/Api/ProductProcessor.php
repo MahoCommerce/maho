@@ -472,7 +472,39 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
                 $attrData[$attrCode] = $this->normalizeDateInput($data->$prop, $prop);
             }
         }
+        if (isset($attrData['custom_layout_update'])) {
+            $this->validateLayoutUpdateXml((string) $attrData['custom_layout_update']);
+        }
         return $attrData;
+    }
+
+    /**
+     * Reject layout-update XML the admin form would reject (disallowed blocks,
+     * template overrides, helper attributes). The fast-update path writes EAV
+     * values directly, bypassing the attribute backend model that guards the
+     * model-save path, so both paths validate here.
+     */
+    private function validateLayoutUpdateXml(string $xml): void
+    {
+        $xml = trim($xml);
+        if ($xml === '') {
+            return;
+        }
+
+        /** @var \Mage_Adminhtml_Model_LayoutUpdate_Validator $validator */
+        $validator = Mage::getModel('adminhtml/layoutUpdate_validator');
+        try {
+            $isValid = $validator->isValid($xml);
+            $messages = $validator->getMessages();
+        } catch (\Throwable) {
+            $isValid = false;
+            $messages = [];
+        }
+
+        if (!$isValid) {
+            $message = $messages === [] ? 'XML data is invalid.' : (string) reset($messages);
+            throw new BadRequestHttpException("Invalid customLayoutUpdate: {$message}");
+        }
     }
 
     private function attributeExists(string $code): bool
@@ -580,6 +612,11 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
 
         /** @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
         $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
+
+        // Stock_Item::_beforeSave() resets qty to 0 unless isQty() recognises the
+        // product type. It normally reads type_id off the joined product row, which
+        // a product with no stock row yet cannot supply, so state it explicitly.
+        $stockItem->setProductTypeId($product->getTypeId());
 
         $isNew = !$stockItem->getId();
         if ($isNew) {
@@ -727,6 +764,11 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
      */
     private function normalizeDateInput(string $value, string $field): ?string
     {
+        // formatDateForDb() reads a numeric string as a unix timestamp, so an
+        // unseparated date such as "20260801" would silently store 1970-08-22.
+        if (is_numeric($value)) {
+            throw new BadRequestHttpException("Invalid date for {$field}; use Y-m-d format.");
+        }
         try {
             $date = Mage::app()->getLocale()->formatDateForDb($value, withTime: false);
         } catch (\Exception) {

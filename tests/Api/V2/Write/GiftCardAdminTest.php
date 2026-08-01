@@ -53,12 +53,31 @@ describe('GET /api/rest/v2/giftcards/{id} (admin read)', function (): void {
         $read = apiGet("/api/rest/v2/giftcards/{$id}", adminToken());
         expect($read['status'])->toBe(200);
         expect($read['json']['websiteId'])->toBe(1);
-        expect($read['json'])->toHaveKey('purchaseOrderId');
-        expect($read['json'])->toHaveKey('purchaseOrderItemId');
-        expect($read['json'])->toHaveKey('emailScheduledAt');
-        expect($read['json'])->toHaveKey('emailSentAt');
+        expect($read['json']['createdAt'])->not->toBeEmpty();
         expect($read['json']['updatedAt'])->not->toBeEmpty();
         expect($read['json']['history'])->toBeArray();
+
+        // The purchase and delivery fields are written only by the gift card
+        // product order flow, so a card created in the admin has none of them.
+        // Null fields are omitted from REST responses (skip_null_values).
+        expect($read['json']['purchaseOrderId'] ?? null)->toBeNull();
+        expect($read['json']['purchaseOrderItemId'] ?? null)->toBeNull();
+        expect($read['json']['emailScheduledAt'] ?? null)->toBeNull();
+        expect($read['json']['emailSentAt'] ?? null)->toBeNull();
+    });
+
+    it('rejects a create whose balance is out of range, even with a valid initialBalance', function (): void {
+        $overLimit = apiPost('/api/rest/v2/giftcards', [
+            'initialBalance' => 10.0,
+            'balance' => 99999.0,
+        ], adminToken());
+        expect($overLimit['status'])->toBe(400);
+
+        $negative = apiPost('/api/rest/v2/giftcards', [
+            'initialBalance' => 10.0,
+            'balance' => -5.0,
+        ], adminToken());
+        expect($negative['status'])->toBe(400);
     });
 
     it('rejects an unknown websiteId on create', function (): void {
@@ -134,6 +153,42 @@ describe('PUT /api/rest/v2/giftcards/{id} (admin write)', function (): void {
 
         expect(apiPut("/api/rest/v2/giftcards/{$id}", ['balance' => -1.0], adminToken())['status'])->toBe(400);
         expect(apiPut("/api/rest/v2/giftcards/{$id}", ['balance' => 10001.0], adminToken())['status'])->toBe(400);
+    });
+
+});
+
+describe('GraphQL adjustBalanceGiftCard', function (): void {
+
+    it('rejects an out-of-range balance like the REST update does', function (): void {
+        $code = 'PEST-GQL-BOUNDS-' . time();
+        $create = apiPost('/api/rest/v2/giftcards', [
+            'initialBalance' => 20.0,
+            'code' => $code,
+        ], adminToken());
+        expect($create['status'])->toBeSuccessful();
+        trackAdminGiftCard($code);
+        $id = (int) $create['json']['id'];
+
+        foreach ([-1.0, 10001.0] as $newBalance) {
+            $mutation = <<<GRAPHQL
+            mutation {
+                adjustBalanceGiftCard(input: {
+                    code: "{$code}",
+                    newBalance: {$newBalance}
+                }) {
+                    giftCard {
+                        balance
+                    }
+                }
+            }
+            GRAPHQL;
+
+            $response = gqlQuery($mutation, [], adminToken());
+            expect($response['json'])->toHaveKey('errors');
+        }
+
+        $read = apiGet("/api/rest/v2/giftcards/{$id}", adminToken());
+        expect((float) $read['json']['balance'])->toBe(20.0);
     });
 
 });

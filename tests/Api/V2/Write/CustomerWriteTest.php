@@ -114,6 +114,26 @@ describe('POST /api/rest/v2/customers (extended fields)', function (): void {
         expect($response['status'])->toBe(400);
     });
 
+    it('rejects a dob that is not a Y-m-d calendar date', function (): void {
+        // '1990' would be read as a unix timestamp, 'tomorrow' as a relative date
+        foreach (['1990', '0', 'tomorrow', '15/04/1990', '1990-13-45'] as $dob) {
+            [$response] = createTestCustomer(['dob' => $dob]);
+            expect($response['status'])->toBe(400, "dob '{$dob}' should be rejected");
+        }
+    });
+
+    it('rejects a dob in the future', function (): void {
+        [$response] = createTestCustomer(['dob' => date('Y-m-d', strtotime('+1 day'))]);
+
+        expect($response['status'])->toBe(400);
+    });
+
+    it('rejects a gender that is not an option of the gender attribute', function (): void {
+        [$response] = createTestCustomer(['gender' => 999]);
+
+        expect($response['status'])->toBe(400);
+    });
+
 });
 
 describe('PUT /api/rest/v2/customers/{id}', function (): void {
@@ -149,6 +169,20 @@ describe('PUT /api/rest/v2/customers/{id}', function (): void {
         ], adminToken());
 
         expect($update['status'])->toBe(400);
+    });
+
+    it('denies the admin update endpoint to a service token without customers/write', function (): void {
+        [$create] = createTestCustomer();
+        $id = (int) $create['json']['id'];
+
+        $update = apiPut("/api/rest/v2/customers/{$id}", [
+            'groupId' => 3,
+        ], serviceToken(['customers/read']));
+
+        expect($update['status'])->toBeForbidden();
+
+        $read = apiGet("/api/rest/v2/customers/{$id}", adminToken());
+        expect($read['json']['groupId'])->not->toBe(3);
     });
 
     it('denies the admin update endpoint to a customer token', function (): void {

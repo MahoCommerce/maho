@@ -250,19 +250,31 @@ describe('GET /api/rest/v2/orders/{id}', function (): void {
 
         $order = $response['json'];
         expect($order)->toHaveKeys([
-            'customerNote', 'customerGroupId', 'customerIsGuest', 'isVirtual',
+            'customerGroupId', 'customerIsGuest', 'isVirtual',
             'quoteId', 'weight', 'emailSent',
-            'extOrderId', 'extCustomerId',
             'storeName', 'baseCurrencyCode', 'globalCurrencyCode',
-            'appliedRuleIds', 'couponRuleName', 'discountDescription', 'giftcardCodes',
-            'customerMiddlename', 'customerPrefix', 'customerSuffix',
-            'customerTaxvat', 'customerDob', 'customerGender',
-            'holdBeforeState', 'holdBeforeStatus',
-            'remoteIp', 'xForwardedFor',
+            'appliedRuleIds', 'giftcardCodes',
         ]);
         expect($order['customerIsGuest'])->toBeBool();
         expect($order['appliedRuleIds'])->toBeArray();
         expect($order['giftcardCodes'])->toBeArray();
+        expect($order['storeName'])->not->toBeEmpty();
+        expect($order['baseCurrencyCode'])->not->toBeEmpty();
+
+        // Null fields are omitted from REST responses (skip_null_values). The
+        // fixture order is a plain store checkout, so everything an external
+        // system, a coupon, a hold or a full customer profile would fill stays
+        // unset.
+        foreach ([
+            'customerNote', 'extOrderId', 'extCustomerId', 'couponRuleName',
+            'holdBeforeState', 'holdBeforeStatus',
+            'customerMiddlename', 'customerPrefix', 'customerSuffix',
+            'customerTaxvat', 'customerDob', 'customerGender',
+            'remoteIp', 'xForwardedFor',
+        ] as $key) {
+            expect($order[$key] ?? null)->toBeNull();
+        }
+        expect($order['discountDescription'] ?? null)->toBeEmpty();
 
         expect($order['prices'])->toHaveKeys([
             'baseGrandTotal', 'baseSubtotal', 'baseTaxAmount', 'baseShippingAmount',
@@ -278,12 +290,18 @@ describe('GET /api/rest/v2/orders/{id}', function (): void {
         }
 
         if (!empty($order['items'])) {
-            expect($order['items'][0])->toHaveKeys([
-                'productOptions', 'qtyInvoiced', 'originalPrice', 'baseCost',
-                'weight', 'rowWeight', 'isVirtual', 'extOrderItemId',
-                'basePrice', 'baseRowTotal', 'storeId', 'createdAt',
+            $item = $order['items'][0];
+            expect($item)->toHaveKeys([
+                'productOptions', 'qtyInvoiced', 'originalPrice', 'rowWeight',
+                'isVirtual', 'basePrice', 'baseRowTotal', 'storeId', 'createdAt',
             ]);
-            expect($order['items'][0]['productOptions'])->toBeArray();
+            expect($item['productOptions'])->toBeArray();
+            expect($item['basePrice'])->toBeGreaterThan(0);
+
+            // Purchase cost and the external item reference are never written by
+            // a store checkout, so both stay null and are omitted.
+            expect($item['baseCost'] ?? null)->toBeNull();
+            expect($item['extOrderItemId'] ?? null)->toBeNull();
         }
     });
 

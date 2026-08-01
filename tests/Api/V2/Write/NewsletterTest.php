@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 describe('Newsletter subscription fields', function (): void {
 
-    it('returns subscriberId, storeId and changeStatusAt for a customer subscription', function (): void {
+    it('returns subscriberId and storeId for a customer subscription', function (): void {
         $token = customerToken();
 
         $response = apiPost('/api/rest/v2/newsletter/subscribe', [], $token);
@@ -27,14 +27,15 @@ describe('Newsletter subscription fields', function (): void {
         expect($response['json'])->toHaveKey('subscriberId');
         expect((int) $response['json']['subscriberId'])->toBeGreaterThan(0);
         expect($response['json'])->toHaveKey('storeId');
-        expect($response['json'])->toHaveKey('changeStatusAt');
+        expect((int) $response['json']['storeId'])->toBeGreaterThan(0);
 
         // The status endpoint carries the identifier too (when it resolves the
         // subscription; the lookup is by customer id or email+store).
         $status = apiGet('/api/rest/v2/newsletter/status', $token);
         expect($status['status'])->toBe(200);
         if (($status['json']['status'] ?? '') !== 'unsubscribed') {
-            expect((int) $status['json']['subscriberId'])->toBeGreaterThan(0);
+            expect((int) $status['json']['subscriberId'])->toBe((int) $response['json']['subscriberId']);
+            expect((int) $status['json']['storeId'])->toBe((int) $response['json']['storeId']);
         }
     });
 

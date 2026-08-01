@@ -22,18 +22,21 @@ final class TaxRateProcessor extends CrudProcessor
     {
         /** @var TaxRate $data */
 
-        // Code and country are required on create; on update an omitted value
-        // leaves the existing one untouched.
+        // Code, country and rate are required on create; on update an omitted
+        // value arrives as null and leaves the existing one untouched.
         if ($isNew) {
-            if (trim($data->code) === '') {
+            if (trim((string) $data->code) === '') {
                 throw new BadRequestHttpException('Tax rate code is required.');
             }
-            if (trim($data->taxCountryId) === '') {
+            if (trim((string) $data->taxCountryId) === '') {
                 throw new BadRequestHttpException('Tax country is required.');
+            }
+            if ($data->rate === null) {
+                throw new BadRequestHttpException('Rate is required.');
             }
         }
 
-        if (!is_numeric($data->rate) || $data->rate < 0) {
+        if ($data->rate !== null && $data->rate < 0) {
             throw new BadRequestHttpException('Rate must be a number greater than or equal to zero.');
         }
     }

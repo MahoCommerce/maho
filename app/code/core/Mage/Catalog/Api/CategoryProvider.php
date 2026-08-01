@@ -222,12 +222,17 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $dto->availableSortBy = is_array($availableSortBy) ? array_values($availableSortBy) : [];
         $dto->defaultSortBy = $category->getData('default_sort_by') ?: null;
 
-        $dto->customDesign = $category->getData('custom_design') ?: null;
-        $customDesignFrom = $category->getData('custom_design_from');
-        $dto->customDesignFrom = $customDesignFrom ? substr((string) $customDesignFrom, 0, 10) : null;
-        $customDesignTo = $category->getData('custom_design_to');
-        $dto->customDesignTo = $customDesignTo ? substr((string) $customDesignTo, 0, 10) : null;
-        $dto->customLayoutUpdate = $category->getData('custom_layout_update') ?: null;
+        // Design and layout internals are back-office data: the layout update is
+        // executable markup and the theme/design assignment leaks the storefront's
+        // internals. Category reads are public, so only admin and API tokens see them.
+        if ($this->isAdmin() || $this->isApiUser()) {
+            $dto->customDesign = $category->getData('custom_design') ?: null;
+            $customDesignFrom = $category->getData('custom_design_from');
+            $dto->customDesignFrom = $customDesignFrom ? substr((string) $customDesignFrom, 0, 10) : null;
+            $customDesignTo = $category->getData('custom_design_to');
+            $dto->customDesignTo = $customDesignTo ? substr((string) $customDesignTo, 0, 10) : null;
+            $dto->customLayoutUpdate = $category->getData('custom_layout_update') ?: null;
+        }
         $customUseParent = $category->getData('custom_use_parent_settings');
         $dto->customUseParentSettings = $customUseParent === null ? null : (bool) $customUseParent;
         $customApply = $category->getData('custom_apply_to_products');

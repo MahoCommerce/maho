@@ -90,10 +90,15 @@ class TaxRate extends CrudResource
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 
-    public string $code = '';
+    /**
+     * code, taxCountryId and rate are nullable so that a partial PUT that omits
+     * them leaves the stored value alone: applyToModel() skips null but writes a
+     * non-null default, which would blank a required column.
+     */
+    public ?string $code = null;
 
     #[ApiProperty(extraProperties: ['modelField' => 'tax_country_id'])]
-    public string $taxCountryId = '';
+    public ?string $taxCountryId = null;
 
     #[ApiProperty(extraProperties: ['modelField' => 'tax_region_id'])]
     public ?int $taxRegionId = null;
@@ -101,7 +106,7 @@ class TaxRate extends CrudResource
     #[ApiProperty(extraProperties: ['modelField' => 'tax_postcode'])]
     public ?string $taxPostcode = null;
 
-    public float $rate = 0.0;
+    public ?float $rate = null;
 
     #[ApiProperty(extraProperties: ['modelField' => 'zip_is_range'])]
     public ?bool $zipIsRange = null;
