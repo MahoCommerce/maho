@@ -1240,18 +1240,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Dashboard/Graph.php
 
 		-
-			rawMessage: Property Mage_Adminhtml_Block_Dashboard_Graph::$_max has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Dashboard/Graph.php
-
-		-
-			rawMessage: Property Mage_Adminhtml_Block_Dashboard_Graph::$_min has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Dashboard/Graph.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Dashboard_Orders_Grid::_preparePage() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -11182,12 +11170,6 @@ parameters:
 			path: app/code/core/Mage/CatalogRule/Model/Action/Index/Refresh.php
 
 		-
-			rawMessage: 'Method Mage_CatalogRule_Model_Action_Index_Refresh::_fillIndexData() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogRule/Model/Action/Index/Refresh.php
-
-		-
 			rawMessage: 'Method Mage_CatalogRule_Model_Action_Index_Refresh::_getProduct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -11373,18 +11355,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_CatalogRule_Model_Rule::setProductsFilter() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogRule/Model/Rule.php
-
-		-
-			rawMessage: 'Parameter #1 $product of method Mage_CatalogRule_Model_Resource_Rule::applyAllRules() expects int|Mage_Catalog_Model_Product|null, Mage_Core_Model_Abstract given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/CatalogRule/Model/Rule.php
-
-		-
-			rawMessage: 'Parameter #2 $product of method Mage_CatalogRule_Model_Resource_Rule::applyToProduct() expects Mage_Catalog_Model_Product, Mage_Core_Model_Abstract given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogRule/Model/Rule.php
 
@@ -19005,7 +18975,7 @@ parameters:
 				since 26.7 Use Maho_ApiPlatform instead.
 			'''
 			identifier: method.deprecatedClass
-			count: 9
+			count: 8
 			path: app/code/core/Mage/Sales/Model/Order/Creditmemo/Api.php
 
 		-

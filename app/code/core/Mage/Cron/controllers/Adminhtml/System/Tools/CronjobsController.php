@@ -6,6 +6,8 @@
  * @package Mage_Cron
  */
 
+use Maho\Job\StepState;
+
 class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'system/tools/cronjobs';
@@ -155,32 +157,12 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
             ->setExecutedAt($now)
             ->save();
 
-        $scheduleId = $schedule->getId();
-
-        // Send response immediately with schedule ID
-        while (ob_get_level() > 0) {
-            ob_end_clean();
-        }
-
-        $json = Mage::helper('core')->jsonEncode(['schedule_id' => $scheduleId]);
-        header('Content-Type: application/json');
-        header('Content-Length: ' . strlen($json));
-        header('Connection: close');
-        echo $json;
-
-        if (function_exists('fastcgi_finish_request')) {
-            fastcgi_finish_request();
-        } else {
-            flush();
-        }
-
-        // Continue execution in background
-        ignore_user_abort(true);
-        set_time_limit(0);
-
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_write_close();
-        }
+        // Answer immediately with the run handle, then keep working in the background
+        $this->getResponse()->sendJsonAndDetach([
+            'token' => (string) $schedule->getId(),
+            'finished' => false,
+            'steps' => [$this->_scheduleStep($schedule)],
+        ]);
 
         try {
             call_user_func([$model, $run[2]], $schedule);
@@ -202,7 +184,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
     #[Maho\Config\Route('/admin/system_tools_cronjobs/runStatus')]
     public function runStatusAction(): void
     {
-        $scheduleId = (int) $this->getRequest()->getParam('schedule_id');
+        $scheduleId = (int) $this->getRequest()->getParam('token');
         if (!$scheduleId) {
             $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('No schedule ID specified.')]);
             return;
@@ -214,30 +196,38 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
             return;
         }
 
-        $status = $schedule->getStatus();
-        $data = [
-            'status' => $status,
-            'finished' => in_array($status, [
-                Mage_Cron_Model_Schedule::STATUS_SUCCESS,
-                Mage_Cron_Model_Schedule::STATUS_ERROR,
-                Mage_Cron_Model_Schedule::STATUS_MISSED,
-            ], true),
-        ];
+        $step = $this->_scheduleStep($schedule);
 
-        if ($data['finished']) {
-            $data['executed_at'] = $schedule->getExecutedAt();
-            $data['finished_at'] = $schedule->getFinishedAt();
-            $data['messages'] = $schedule->getMessages();
+        $this->getResponse()->setBodyJson([
+            'finished' => $step['state'] !== StepState::Running->value,
+            'steps' => [$step],
+        ]);
+    }
 
-            if ($schedule->getExecutedAt() && $schedule->getFinishedAt()) {
-                $duration = strtotime($schedule->getFinishedAt()) - strtotime($schedule->getExecutedAt());
-                /** @var Mage_Cron_Helper_Data $helper */
-                $helper = Mage::helper('cron');
-                $data['duration'] = $helper->formatDuration($duration);
-            }
+    /**
+     * Describe a schedule the way MahoJobDialog expects a step
+     */
+    protected function _scheduleStep(Mage_Cron_Model_Schedule $schedule): array
+    {
+        $state = match ($schedule->getStatus()) {
+            Mage_Cron_Model_Schedule::STATUS_SUCCESS => StepState::Success,
+            Mage_Cron_Model_Schedule::STATUS_MISSED => StepState::Skipped,
+            Mage_Cron_Model_Schedule::STATUS_ERROR => StepState::Error,
+            default => StepState::Running,
+        };
+
+        $duration = null;
+        if ($schedule->getExecutedAt() && $schedule->getFinishedAt()) {
+            $duration = strtotime($schedule->getFinishedAt()) - strtotime($schedule->getExecutedAt());
         }
 
-        $this->getResponse()->setBodyJson($data);
+        return [
+            'code' => $schedule->getJobCode(),
+            'name' => $schedule->getJobCode(),
+            'state' => $state->value,
+            'duration' => $duration,
+            'message' => $schedule->getMessages() ?: null,
+        ];
     }
 
     #[Maho\Config\Route('/admin/system_tools_cronjobs/toggle')]

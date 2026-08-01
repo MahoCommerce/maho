@@ -100,6 +100,7 @@ SPDX-License-Identifier: AFL-3.0
                 <rest_v2>0</rest_v2>
                 <graphql>0</graphql>
                 <admin_graphql>0</admin_graphql>
+                <mcp>0</mcp>
                 <legacy_rest>0</legacy_rest>
                 <soap>0</soap>
                 <v2_soap>0</v2_soap>

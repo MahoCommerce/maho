@@ -170,8 +170,8 @@ class Mage_Cms_Model_Resource_Page extends Mage_Core_Model_Resource_Db_Abstract
             $this->_getWriteAdapter()->insertMultiple($table, $data);
         }
 
-        //Mark layout cache as invalidated
-        Mage::app()->getCache()->invalidateType('layout');
+        // Layout cache is tagged by handle; a page render only contributes `cms_page`.
+        Mage::app()->cleanCache(['cms_page']);
 
         return parent::_afterSave($object);
     }

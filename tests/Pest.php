@@ -94,6 +94,36 @@ function gqlQuery(string $query, array $variables = [], ?string $token = null): 
     return ApiV2Helper::graphql($query, $variables, $token);
 }
 
+/**
+ * Mirrors Maho\ApiPlatform\Kernel::isMcpAvailable(). Without the packages the
+ * endpoint is never routed, so the tests would report 404s, not a missing feature.
+ */
+function mcpPackagesInstalled(): bool
+{
+    return class_exists(\Symfony\AI\McpBundle\McpBundle::class)
+        && \Composer\InstalledVersions::isInstalled('psr/http-factory-implementation');
+}
+
+function mcpSession(?string $token = null): ?string
+{
+    return ApiV2Helper::mcpSession($token);
+}
+
+function mcpCall(array $payload, ?string $token = null, ?string $sessionId = null): array
+{
+    return ApiV2Helper::mcp($payload, $token, $sessionId);
+}
+
+function mcpTool(string $name, array $arguments, ?string $token, ?string $sessionId, array $extraHeaders = []): array
+{
+    return ApiV2Helper::mcpTool($name, $arguments, $token, $sessionId, $extraHeaders);
+}
+
+function mcpTools(?string $token, ?string $sessionId): array
+{
+    return ApiV2Helper::mcpTools($token, $sessionId);
+}
+
 function customerToken(?int $customerId = null): string
 {
     return ApiV2Helper::generateCustomerToken($customerId);
@@ -102,6 +132,68 @@ function customerToken(?int $customerId = null): string
 function adminToken(): string
 {
     return ApiV2Helper::generateAdminToken();
+}
+
+/**
+ * Create an admin role granting only the listed ACL paths, plus an admin
+ * user assigned to that role. Returns a JWT for the user.
+ *
+ * @param list<string> $allowedAclPaths e.g. ['catalog/products', 'sales']
+ */
+function adminTokenWithAcl(array $allowedAclPaths, string $username): string
+{
+    ApiV2Helper::ensureMahoBootstrapped();
+
+    // The JWT secret is auto-generated on the kernel's first HTTP boot.
+    // Trigger it with a public no-auth request before issuing tokens,
+    // mirrors what apiGet/apiPost do implicitly in other tests, but those
+    // tests issue tokens after their first HTTP call.
+    static $kernelBooted = false;
+    if (!$kernelBooted) {
+        apiGet('/api/rest/v2/store-config');
+        Mage::app()->getCache()->cleanType('config');
+        Mage::app()->reinitStores();
+        $kernelBooted = true;
+    }
+
+    /** @var Mage_Admin_Model_Role $role */
+    $role = Mage::getModel('admin/role');
+    $role->setData([
+        'role_name' => $username . '_role',
+        'role_type' => Mage_Admin_Model_Acl::ROLE_TYPE_GROUP,
+        'parent_id' => 0,
+    ])->save();
+    trackCreated('admin_role', (int) $role->getId());
+
+    Mage::getModel('admin/rules')
+        ->setRoleId($role->getId())
+        ->setResources($allowedAclPaths)
+        ->saveRel();
+
+    /** @var Mage_Admin_Model_User $user */
+    $user = Mage::getModel('admin/user');
+    $user->setData([
+        'username' => $username,
+        'firstname' => 'Pest',
+        'lastname' => 'Acl',
+        'email' => $username . '@example.test',
+        'password' => 'pest-acl-password-1234',
+        'is_active' => 1,
+    ])->save();
+    trackCreated('admin_user', (int) $user->getId());
+
+    Mage::getModel('admin/user')
+        ->setRoleId($role->getId())
+        ->setUserId($user->getId())
+        ->add();
+
+    return ApiV2Helper::generateToken([
+        'sub' => 'admin_' . $user->getId(),
+        'admin_id' => (int) $user->getId(),
+        'email' => $user->getEmail(),
+        'type' => 'admin',
+        'roles' => ['ROLE_ADMIN'],
+    ]);
 }
 
 function expiredToken(): string
@@ -202,7 +294,7 @@ uses()
         \Mage::app();
         $config = \Mage::getModel('core/config');
 
-        $protocols = ['rest_v2', 'graphql', 'admin_graphql', 'legacy_rest', 'soap', 'v2_soap', 'xmlrpc', 'jsonrpc'];
+        $protocols = ['rest_v2', 'graphql', 'admin_graphql', 'mcp', 'legacy_rest', 'soap', 'v2_soap', 'xmlrpc', 'jsonrpc'];
         foreach ($protocols as $protocol) {
             $config->saveConfig('apiplatform/protocols/' . $protocol, '1', 'default', 0);
         }
@@ -246,6 +338,14 @@ uses()
         }
     })
     ->in('Api/V2');
+
+uses()
+    ->beforeEach(function (): void {
+        if (!mcpPackagesInstalled()) {
+            $this->markTestSkipped('MCP packages not installed - run composer require symfony/mcp-bundle nyholm/psr7');
+        }
+    })
+    ->in('Api/V2/Mcp');
 
 uses()
     // The Api/V2 suite above runs before this one in the same test database and
@@ -309,4 +409,27 @@ expect()->extend('toBeSuccessful', function () {
 function browserTestsReady(): bool
 {
     return is_file(dirname(__DIR__) . '/node_modules/.bin/playwright');
+}
+
+/**
+ * Block until the browser has finished loading the page $selector belongs to.
+ *
+ * The plugin's own waits are no-ops (waitForEvent/waitForFunction never iterate the generator
+ * Client::execute() returns) and navigate() can return on the previous navigation's load event.
+ * $selector has to belong to the awaited page and not the one being left, since about:blank and
+ * the previous page both report readyState 'complete'; a bare tag name reads as link text.
+ */
+function waitForPageLoad(object $page, string $selector): object
+{
+    $page->text($selector);
+
+    $deadline = microtime(true) + 5;
+    while ($page->script('document.readyState') !== 'complete') {
+        if (microtime(true) >= $deadline) {
+            throw new RuntimeException("The page holding [{$selector}] did not finish loading within 5s");
+        }
+        usleep(50_000);
+    }
+
+    return $page;
 }

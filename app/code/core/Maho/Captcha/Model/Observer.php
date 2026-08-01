@@ -31,8 +31,16 @@ class Maho_Captcha_Model_Observer
             return;
         }
 
-        $isAjax = $controller->getRequest()->isAjax();
-        $this->failedVerification($controller, $isAjax);
+        $this->failedVerification($controller, $this->isAjaxRequest($controller->getRequest()));
+    }
+
+    /**
+     * Sec-Fetch-Dest is set by the browser, so a fetch()/XHR that sends neither X-Requested-With
+     * nor the isAjax param still gets JSON instead of a redirect it would blindly follow.
+     */
+    protected function isAjaxRequest(Mage_Core_Controller_Request_Http $request): bool
+    {
+        return $request->isAjax() || $request->getHeader('Sec-Fetch-Dest') === 'empty';
     }
 
     #[Maho\Config\Observer('api_verify_captcha', area: 'api')]

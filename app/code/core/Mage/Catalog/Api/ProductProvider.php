@@ -15,12 +15,15 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Maho\ApiPlatform\Trait\DateRangeFilterTrait;
 
 /**
  * Product State Provider - Fetches product data for API Platform.
  */
 final class ProductProvider extends \Maho\ApiPlatform\Provider
 {
+    use DateRangeFilterTrait;
+
     /** Whitelist of fields the client may sort by; everything else is rejected to keep ORDER BY injection-safe. */
     private const SORTABLE_FIELDS = ['name', 'price', 'special_price', 'created_at', 'updated_at', 'position', 'sku', 'entity_id'];
 
@@ -133,6 +136,13 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      */
     public function getProductByBarcode(string $barcode, bool $visibleOnly = true): ?Product
     {
+        // The attribute ships with Maho but an older install may not have it yet, and
+        // filtering an unknown attribute throws rather than returning nothing.
+        $attribute = \Mage::getSingleton('eav/config')->getAttribute(\Mage_Catalog_Model_Product::ENTITY, 'barcode');
+        if (!$attribute || !$attribute->getId()) {
+            return null;
+        }
+
         $row = \Mage::getModel('catalog/product')
             ->getCollection()
             ->addAttributeToFilter('barcode', $barcode)
@@ -373,6 +383,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             }
             $collection->addAttributeToFilter($code, $value);
         }
+
+        // EAV entity table columns, so addAttributeToFilter resolves them without a join.
+        $this->applyDateRangeFilters($collection, $requestFilters);
 
         if (!empty($requestFilters['sortBy'])) {
             $sortBy = (string) $requestFilters['sortBy'];

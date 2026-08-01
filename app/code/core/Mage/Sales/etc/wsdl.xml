@@ -932,7 +932,6 @@
         <part name="comment" type="xsd:string" />
         <part name="notifyCustomer" type="xsd:int" />
         <part name="includeComment" type="xsd:int" />
-        <part name="refundToStoreCreditAmount" type="xsd:string" />
     </message>
     <message name="salesOrderCreditmemoCreateResponse">
         <part name="result" type="xsd:string" />

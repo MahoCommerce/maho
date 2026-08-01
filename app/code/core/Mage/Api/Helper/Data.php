@@ -343,7 +343,6 @@ class Mage_Api_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $request = Mage::app()->getRequest();
         $routeParams ??= [];
-        $routeParams['_nosid'] = true;
 
         /** @var Mage_Core_Model_Url $urlModel */
         $urlModel = Mage::getSingleton('core/url');

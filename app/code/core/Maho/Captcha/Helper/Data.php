@@ -14,6 +14,7 @@ use AltchaOrg\Altcha\CreateChallengeOptions;
 use AltchaOrg\Altcha\Payload;
 use AltchaOrg\Altcha\Solution;
 use AltchaOrg\Altcha\VerifySolutionOptions;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 {
@@ -21,6 +22,9 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_FRONTEND_SELECTORS = 'admin/captcha/selectors';
     public const CACHE_TAG = 'maho_captcha';
     public const CHALLENGE_EXPIRATION = 60;
+    public const MAX_PAYLOAD_USES = 20;
+
+    private const OWNER_NONE = 'none';
 
     protected $_moduleName = 'Maho_Captcha';
 
@@ -65,7 +69,6 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
         return new \Maho\DataObject([
             'challenge' => $this->getChallengeUrl(),
             'id' => 'maho_captcha',
-            'auto' => 'onload',
             'hideLogo' => '',
             'hideFooter' => '',
         ]);
@@ -94,10 +97,13 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
             return self::$_payloadVerificationCache[$payload];
         }
 
-        // If challenge is already in cache, it was already solved, validation fails for replay attack protection
+        // One page legitimately posts the same form more than once (the checkout re-saves the
+        // billing step), so a solved payload is reusable rather than spent on first use.
         $cacheKey = sha1($payload);
-        if (Mage::app()->getCache()->test($cacheKey)) {
-            return false;
+        $owner = $this->getPayloadOwner();
+        $cached = Mage::app()->getCache()->load($cacheKey);
+        if ($cached !== false) {
+            return self::$_payloadVerificationCache[$payload] = $this->acceptReuse($cacheKey, (string) $cached, $owner);
         }
 
         try {
@@ -123,7 +129,9 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
                 algorithm: $algorithm,
             ));
             $isValid = $result->verified;
-            Mage::app()->getCache()->save('1', $cacheKey, [self::CACHE_TAG], self::CHALLENGE_EXPIRATION);
+            if ($isValid) {
+                $this->rememberPayload($cacheKey, $owner, $payloadObj->challenge->parameters->expiresAt);
+            }
         } catch (Exception $e) {
             $isValid = false;
             Mage::logException($e);
@@ -131,5 +139,46 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
 
         self::$_payloadVerificationCache[$payload] = $isValid;
         return $isValid;
+    }
+
+    protected function rememberPayload(string $cacheKey, ?string $owner, ?int $expiresAt): void
+    {
+        $expiresAt ??= time() + self::CHALLENGE_EXPIRATION;
+        $lifetime = $expiresAt - time();
+        if ($lifetime > 0) {
+            $value = implode('|', [$owner ?? self::OWNER_NONE, $expiresAt, 1]);
+            Mage::app()->getCache()->save($value, $cacheKey, [self::CACHE_TAG], $lifetime);
+        }
+    }
+
+    protected function acceptReuse(string $cacheKey, string $cached, ?string $owner): bool
+    {
+        [$cachedOwner, $expiresAt, $uses] = array_pad(explode('|', $cached, 3), 3, '');
+        $lifetime = (int) $expiresAt - time();
+
+        if ($owner === null || !hash_equals($cachedOwner, $owner)
+            || $lifetime <= 0 || (int) $uses >= self::MAX_PAYLOAD_USES
+        ) {
+            return false;
+        }
+
+        $value = implode('|', [$cachedOwner, (int) $expiresAt, (int) $uses + 1]);
+        Mage::app()->getCache()->save($value, $cacheKey, [self::CACHE_TAG], $lifetime);
+        return true;
+    }
+
+    /**
+     * The session that solved a payload, or null when there is none (API callers), which keeps
+     * the payload single-use.
+     */
+    protected function getPayloadOwner(): ?string
+    {
+        // Read from the registry, not Mage::getSingleton('core/session'), so no session is started
+        // here: it holds null (untyped, hence the instanceof) until something starts one.
+        $session = Mage::registry(Mage_Core_Model_Session_Abstract::REGISTRY_KEY);
+        if ($session instanceof SessionInterface && $session->getId() !== '') {
+            return 'session:' . sha1($session->getId());
+        }
+        return null;
     }
 }

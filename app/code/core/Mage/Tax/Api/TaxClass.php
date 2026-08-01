@@ -67,6 +67,10 @@ use Maho\ApiPlatform\CrudResource;
             name: 'collection_query',
             description: 'Get tax classes',
             security: "is_granted('ROLE_ADMIN') or is_granted('tax-classes/read')",
+            extraArgs: [
+                'search' => ['type' => 'String', 'description' => 'Partial match on the class name'],
+                'classType' => ['type' => 'String', 'description' => 'Either CUSTOMER or PRODUCT'],
+            ],
         ),
     ],
 )]

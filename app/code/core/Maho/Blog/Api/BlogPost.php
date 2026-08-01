@@ -69,7 +69,14 @@ use Maho\ApiPlatform\CrudResource;
             name: 'collection_query',
             // extraArgs (not args) so the auto-generated cursor pagination
             // args (first/last/before/after) survive alongside the lookup arg.
-            extraArgs: ['urlKey' => ['type' => 'String']],
+            extraArgs: [
+                'urlKey' => ['type' => 'String', 'description' => 'Exact URL-key lookup (returns 0 or 1 post)'],
+                'search' => ['type' => 'String', 'description' => 'Partial match on the post title or body'],
+                'categoryId' => ['type' => 'Int', 'description' => 'Only posts in this blog category'],
+                'createdFrom' => ['type' => 'String', 'description' => 'Created at or after this UTC date or datetime; a bare date means from 00:00:00'],
+                'createdTo' => ['type' => 'String', 'description' => 'Created at or before this UTC date or datetime; a bare date includes the whole day'],
+                'updatedSince' => ['type' => 'String', 'description' => 'Updated at or after this UTC date or datetime'],
+            ],
             description: 'Get blog posts, optionally filter by URL key',
         ),
     ],

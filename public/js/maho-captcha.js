@@ -7,7 +7,10 @@ const MahoCaptcha = {
     altchaWidget: null,
     altchaState: null,
     frontendSelectors: '',
-    onVerifiedCallback: null,
+    scriptsPromise: null,
+    verificationPromise: null,
+    resolveVerification: null,
+    lastRearmAt: 0,
     loaderEl: null,
     loaderTimeoutId: null,
 
@@ -17,22 +20,34 @@ const MahoCaptcha = {
         this.loadingImageUrl = config.loadingImageUrl ?? '';
         this.verifyingText = config.verifyingText ?? 'Verifying...';
 
-        if (document.readyState === 'loadingImageUrl') {
+        if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', this.initForms.bind(this));
         } else {
             this.initForms();
         }
 
+        this.altchaWidget.addEventListener('statechange', this.onStateChange.bind(this));
         this.altchaWidget.addEventListener('load', () => {
-            const state = this.altchaWidget.getState();
-            this.onStateChange({detail: {state}});
-            this.altchaWidget.addEventListener('statechange', this.onStateChange.bind(this));
+            this.onStateChange({ detail: { state: this.altchaWidget.getState() } });
+            // Never let the widget's own auto mode do this: two solves in flight abort each other.
+            this.startVerification();
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && (this.altchaState === 'expired' || this.altchaState === 'error')) {
+                this.lastRearmAt = 0;
+                this.startVerification();
+            }
         });
     },
 
+    getForms() {
+        return this.frontendSelectors ? document.querySelectorAll(this.frontendSelectors) : [];
+    },
+
     initForms() {
-        for (const formEl of document.querySelectorAll(this.frontendSelectors)) {
-            formEl.addEventListener('focusin', this.loadAltchaScripts.bind(this), { capture: true, once: true });
+        for (const formEl of this.getForms()) {
+            formEl.addEventListener('focusin', () => this.loadAltchaScripts().catch(() => {}), { capture: true, once: true });
             formEl.addEventListener('submit', this.onFormSubmit.bind(this), true);
             for (const buttonEl of formEl.querySelectorAll('button[type=submit]')) {
                 buttonEl.addEventListener('click', this.onFormButtonClick.bind(this), true);
@@ -40,7 +55,17 @@ const MahoCaptcha = {
         }
     },
 
-    async loadAltchaScripts() {
+    // Several forms (and a submit) can race to load the script. A failure is not memoized, so a
+    // later submit retries instead of finding the form permanently dead.
+    loadAltchaScripts() {
+        this.scriptsPromise ??= this.fetchAltchaScripts().catch((error) => {
+            this.scriptsPromise = null;
+            throw error;
+        });
+        return this.scriptsPromise;
+    },
+
+    async fetchAltchaScripts() {
         if (typeof customElements.get('altcha-widget') === 'function') return;
 
         await new Promise((resolve, reject) => {
@@ -69,40 +94,80 @@ const MahoCaptcha = {
         document.head.appendChild(styleEl);
     },
 
-    onFormSubmit(event) {
+    async onFormSubmit(event) {
+        if (this.altchaState === 'verified') {
+            return;
+        }
         const formEl = event.target;
-        if (this.altchaState !== 'verified') {
-            event.preventDefault();
-            event.stopPropagation();
+        const submitter = event.submitter;
 
-            this.showLoader();
-            this.onVerifiedCallback = () => {
-                this.hideLoader();
-                formEl.requestSubmit(event.submitter)
-            }
-            this.startVerification();
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (await this.verifyWithLoader()) {
+            formEl.requestSubmit(submitter);
         }
     },
 
-    onFormButtonClick(event) {
-        const buttonEl = event.target;
-        if (this.altchaState !== 'verified') {
-            event.preventDefault();
-            event.stopPropagation();
+    async onFormButtonClick(event) {
+        if (this.altchaState === 'verified') {
+            return;
+        }
+        // Not target: a click landing on markup inside the button replays into nothing.
+        const buttonEl = event.currentTarget;
 
-            this.showLoader();
-            this.onVerifiedCallback = () => {
-                this.hideLoader();
-                buttonEl.dispatchEvent(new PointerEvent('click'));
-            }
-            this.startVerification();
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (await this.verifyWithLoader()) {
+            buttonEl.dispatchEvent(new PointerEvent('click'));
+        }
+    },
+
+    async verifyWithLoader() {
+        this.showLoader();
+        try {
+            await this.loadAltchaScripts();
+            return await this.waitForVerification();
+        } catch (error) {
+            console.error('MahoCaptcha error:', error);
+            return false;
+        } finally {
+            this.hideLoader();
+        }
+    },
+
+    waitForVerification() {
+        if (this.altchaState === 'verified') {
+            return Promise.resolve(true);
+        }
+        // Held in a local: startVerification() can settle synchronously, clearing the field.
+        const promise = this.verificationPromise ??= new Promise((resolve) => {
+            this.resolveVerification = resolve;
+        });
+        this.startVerification();
+        return promise;
+    },
+
+    settleVerification(verified) {
+        const resolve = this.resolveVerification;
+        this.verificationPromise = null;
+        this.resolveVerification = null;
+        if (resolve) {
+            setTimeout(() => resolve(verified), 0);
         }
     },
 
     startVerification() {
-        if (this.altchaState === 'unverified' || this.altchaState === 'error') {
-            this.altchaWidget.verify();
+        // Nothing to drive before the widget has loaded: its load handler starts the first one.
+        if (this.altchaState === null || this.altchaState === 'verifying') {
+            return;
         }
+        // The widget only solves a new challenge from the unverified state.
+        if (this.altchaState !== 'unverified') {
+            this.altchaWidget.reset();
+        }
+        this.altchaWidget.verify();
     },
 
     onStateChange(event) {
@@ -115,18 +180,39 @@ const MahoCaptcha = {
             checkbox.disabled = state === 'verifying';
         }
 
-        // Replicate maho_captcha input into all forms
-        if (state === 'verified' && typeof payload === 'string') {
-            for (const formEl of document.querySelectorAll(this.frontendSelectors)) {
-                this.setHiddenInputValue(formEl, payload);
+        if (state === 'verified') {
+            // The load event carries no payload of its own, so fall back to the widget's input.
+            const value = typeof payload === 'string' ? payload : this.getWidgetPayload();
+            for (const formEl of this.getForms()) {
+                this.setHiddenInputValue(formEl, value);
             }
+            this.settleVerification(value !== '');
+        } else if (state === 'expired') {
+            // Re-arm: an AJAX post fires no submit event for us to intercept.
+            if (this.canRearm()) {
+                this.startVerification();
+            } else {
+                this.settleVerification(false);
+            }
+        } else if (state === 'error') {
+            // No re-arm: retrying a failing challenge endpoint would spin.
+            this.settleVerification(false);
         }
+    },
 
-        // Call stored form submit event on the next event loop
-        if (state === 'verified' && typeof this.onVerifiedCallback === 'function') {
-            setTimeout(this.onVerifiedCallback.bind(this), 0);
+    getWidgetPayload() {
+        return this.altchaWidget.querySelector('input[name="altcha"]')?.value ?? '';
+    },
+
+    // Re-arming every expiry is the point; the throttle only stops a challenge that arrives
+    // already expired, from a client clock ahead of the server, from looping.
+    canRearm() {
+        const now = performance.now();
+        if (document.hidden || now - this.lastRearmAt < 5000) {
+            return false;
         }
-        this.onVerifiedCallback = null;
+        this.lastRearmAt = now;
+        return true;
     },
 
     setHiddenInputValue(formEl, payload) {
@@ -149,7 +235,7 @@ const MahoCaptcha = {
             this.loaderEl.className = 'maho-captcha-verifying';
             this.loaderEl.innerHTML = (this.loadingImageUrl ? '<img src="' + this.loadingImageUrl + '">' : '') + ' ' + this.verifyingText;
             this.loaderEl.addEventListener('close', () => {
-                this.onVerifiedCallback = null;
+                this.settleVerification(false);
                 this.hideLoader();
             });
             document.body.appendChild(this.loaderEl);

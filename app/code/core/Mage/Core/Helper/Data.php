@@ -137,6 +137,22 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Render a byte count in the largest unit that keeps it readable, e.g. "1.5 KB".
+     * Binary units (1 KB = 1024 B), since every caller measures storage or memory.
+     */
+    public function formatFileSize(int $bytes, int $precision = 2): string
+    {
+        if ($bytes <= 0) {
+            return '0 B';
+        }
+
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $unit = min((int) floor(log($bytes, 1024)), count($units) - 1);
+
+        return round($bytes / 1024 ** $unit, $unit === 0 ? 0 : $precision) . ' ' . $units[$unit];
+    }
+
+    /**
      * Format date for display using the store's locale and timezone.
      *
      * Produces locale-aware output (e.g. "April 16, 2026" in en_US, "16 avril 2026" in fr_FR).
@@ -363,16 +379,11 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      * Generate password hash for user
      *
      * @param string $password
-     * @param mixed $salt
+     * @param mixed $salt ignored, password_hash() generates its own salt
      * @return string
      */
     public function getHashPassword(#[\SensitiveParameter] $password, $salt = false)
     {
-        $encryptionModel = $this->getEncryptor();
-        $latestVersionHash = $this->getVersionHash($encryptionModel);
-        if ($latestVersionHash == $encryptionModel::HASH_VERSION_SHA512) {
-            return $this->getEncryptor()->getHashPassword($password, $salt);
-        }
         return $this->getEncryptor()->getHashPassword($password, Mage_Admin_Model_User::HASH_SALT_EMPTY);
     }
 
@@ -388,15 +399,13 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Get encryption method depending on the presence of the function - password_hash.
+     * Get the hash version used for newly generated hashes.
      *
      * @return int
      */
     public function getVersionHash(Mage_Core_Model_Encryption $encryptionModel)
     {
-        return function_exists('password_hash')
-            ? $encryptionModel::HASH_VERSION_LATEST
-            : $encryptionModel::HASH_VERSION_SHA512;
+        return $encryptionModel::HASH_VERSION_LATEST;
     }
 
     /**
@@ -1223,18 +1232,24 @@ XML;
      * isn't installed, or '' when it is. Used by system-config sources that
      * surface optional dependencies inline (SMTP transports, AI providers).
      *
+     * @param string $package one package, or a comma-separated list when a feature
+     *                        needs several. Only the missing ones are named.
      * @param string $separator string inserted before the warning - " " for
      *                          dropdown labels, "<br>" for heading rows.
      */
     public function packageInstallWarning(string $package, string $separator = ' '): string
     {
-        if (\Composer\InstalledVersions::isInstalled($package)) {
+        $missing = array_filter(
+            array_map('trim', explode(',', $package)),
+            static fn(string $name): bool => $name !== '' && !\Composer\InstalledVersions::isInstalled($name),
+        );
+        if ($missing === []) {
             return '';
         }
         // Result lands in raw admin <option> labels and config UI strings;
         // escape so a community provider supplying an arbitrary package
         // name can't inject HTML.
-        return $separator . '⚠️ Install ' . htmlspecialchars($package, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        return $separator . '⚠️ Install ' . htmlspecialchars(implode(' ', $missing), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 
     /**

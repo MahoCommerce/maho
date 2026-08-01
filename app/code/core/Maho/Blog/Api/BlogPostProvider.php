@@ -82,6 +82,27 @@ final class BlogPostProvider extends CrudProvider
                 ['lteq' => $this->publishedCutoff()],
             ],
         ]);
+
+        $search = $filters['search'] ?? null;
+        if (is_string($search) && trim($search) !== '') {
+            $like = '%' . trim($search) . '%';
+            $collection->addAttributeToFilter([
+                ['attribute' => 'title', 'like' => $like],
+                ['attribute' => 'content', 'like' => $like],
+            ]);
+        }
+
+        if (($filters['categoryId'] ?? '') !== '') {
+            // Posts belong to many categories through a link table, so filter the link
+            // rather than a column on the post.
+            $select = $collection->getSelect();
+            $alias = (string) array_key_first((array) $select->getPart(\Maho\Db\Select::FROM));
+            $select->joinInner(
+                ['post_category' => \Mage::getSingleton('core/resource')->getTableName('blog/post_category')],
+                "post_category.post_id = {$alias}.entity_id",
+                [],
+            )->where('post_category.category_id = ?', (int) $filters['categoryId']);
+        }
     }
 
     private function getPostByUrlKey(string $urlKey): ?Resource

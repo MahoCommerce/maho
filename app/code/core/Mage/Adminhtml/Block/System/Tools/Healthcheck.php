@@ -243,12 +243,6 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
 
     private function formatBytes(int $bytes): string
     {
-        if ($bytes === 0) {
-            return '0 B';
-        }
-
-        $units = ['B', 'KB', 'MB', 'GB'];
-        $i = (int) floor(log($bytes, 1024));
-        return round($bytes / (1024 ** $i), 1) . ' ' . $units[$i];
+        return Mage::helper('core')->formatFileSize($bytes);
     }
 }

@@ -669,8 +669,8 @@ class OneStepCheckout {
                         return;
                     }
                     originalSave();
-                }).catch(() => {
-                    alert(self.config.messages.saveBillingError);
+                }).catch((error) => {
+                    alert(error?.message || self.config.messages.saveBillingError);
                 });
                 return;
             }

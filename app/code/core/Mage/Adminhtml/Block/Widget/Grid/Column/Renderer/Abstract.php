@@ -43,10 +43,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
     public function render(\Maho\DataObject $row)
     {
         if ($this->getColumn()->getEditable()) {
-            $value = $this->_getValue($row);
-            return $value
-                   . ($this->getColumn()->getEditOnly() ? '' : ($value != '' ? '' : '&nbsp;'))
-                   . $this->_getInputValueElement($row);
+            return $this->_getInputValueElement($row);
         }
         return $this->_getValue($row);
     }
@@ -58,6 +55,9 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
      */
     public function renderExport(\Maho\DataObject $row)
     {
+        if ($this->getColumn()->getEditable()) {
+            return (string) $this->_getValue($row);
+        }
         return $this->render($row);
     }
 

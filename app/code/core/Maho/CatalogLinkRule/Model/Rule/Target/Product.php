@@ -10,6 +10,13 @@ declare(strict_types=1);
 
 class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Mage_CatalogRule_Model_Rule_Condition_Product
 {
+    /**
+     * Operators that compare the target product against the source product instead of a fixed
+     * value. A condition using one of these makes the whole rule source-dependent, so
+     * Maho_CatalogLinkRule_Model_Rule reads this list too: keep it the single source of truth.
+     */
+    public const SOURCE_MATCH_OPERATORS = ['~=', '~!'];
+
     public function __construct()
     {
         parent::__construct();
@@ -40,6 +47,14 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Mage_CatalogRule_Mo
     }
 
     /**
+     * Whether this condition compares the target product against the source product.
+     */
+    public function isSourceMatchOperator(): bool
+    {
+        return in_array((string) $this->getOperator(), self::SOURCE_MATCH_OPERATORS, true);
+    }
+
+    /**
      * Add source matching operators to all input types
      */
     #[\Override]
@@ -47,9 +62,10 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Mage_CatalogRule_Mo
     {
         $operators = parent::getDefaultOperatorInputByType();
         // Add source matching operators to all input types
-        foreach ($operators as $type => $ops) {
-            $operators[$type][] = '~=';
-            $operators[$type][] = '~!';
+        foreach (array_keys($operators) as $type) {
+            foreach (self::SOURCE_MATCH_OPERATORS as $sourceMatchOperator) {
+                $operators[$type][] = $sourceMatchOperator;
+            }
         }
         return $operators;
     }
@@ -60,10 +76,10 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Mage_CatalogRule_Mo
     #[\Override]
     public function validate(Maho\DataObject $object): bool
     {
-        $operator = $this->getOperator();
+        $operator = (string) $this->getOperator();
 
         // Handle source matching operators
-        if ($operator === '~=' || $operator === '~!') {
+        if ($this->isSourceMatchOperator()) {
             return $this->validateSourceMatch($object, $operator);
         }
 
@@ -138,10 +154,8 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Mage_CatalogRule_Mo
     #[\Override]
     public function getValueElementHtml(): string
     {
-        $operator = $this->getOperator();
-
         // No value input needed for source matching
-        if ($operator === '~=' || $operator === '~!') {
+        if ($this->isSourceMatchOperator()) {
             return '';
         }
 
@@ -154,9 +168,7 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Mage_CatalogRule_Mo
     #[\Override]
     public function getValueAfterElementHtml(): string
     {
-        $operator = $this->getOperator();
-
-        if ($operator === '~=' || $operator === '~!') {
+        if ($this->isSourceMatchOperator()) {
             return '<div style="margin-top: 5px; font-style: italic; color: #666;">'
                 . Mage::helper('cataloglinkrule')->__('Target product attribute will be compared to source product')
                 . '</div>';
@@ -172,9 +184,8 @@ class Maho_CatalogLinkRule_Model_Rule_Target_Product extends Mage_CatalogRule_Mo
     public function asArray(array $arrAttributes = []): array
     {
         $out = parent::asArray($arrAttributes);
-        $operator = $this->getOperator();
 
-        if ($operator === '~=' || $operator === '~!') {
+        if ($this->isSourceMatchOperator()) {
             $out['value'] = ''; // No value for source matching
         }
 

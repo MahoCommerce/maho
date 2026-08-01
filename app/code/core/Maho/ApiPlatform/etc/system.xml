@@ -43,6 +43,16 @@ SPDX-License-Identifier: AFL-3.0
                             <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
                         </admin_graphql>
+                        <mcp translate="label comment">
+                            <label>MCP (Model Context Protocol)</label>
+                            <comment>Exposes the REST v2 resource surface to AI agents at /api/mcp. Same bearer tokens and permissions as REST.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <frontend_model>adminhtml/system_config_form_field_packagecheck</frontend_model>
+                            <mandatory_package>symfony/mcp-bundle,nyholm/psr7</mandatory_package>
+                            <sort_order>35</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </mcp>
                         <legacy_rest translate="label comment">
                             <label>Legacy REST (Magento 1)</label>
                             <comment>Original Magento 1 REST API at /api/rest/*</comment>

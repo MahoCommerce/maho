@@ -55,6 +55,9 @@ class LayeredFilter extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Sort position')]
     public int $position = 0;
 
+    #[ApiProperty(description: 'Whether several options can be selected at once (OR within the facet)')]
+    public bool $multiple = false;
+
     /** @var array<int, array<string, mixed>> FilterOption entries; plain-DTO elements kept as Iterable scalar. */
     #[ApiProperty(description: 'Available filter options with counts')]
     public array $options = [];

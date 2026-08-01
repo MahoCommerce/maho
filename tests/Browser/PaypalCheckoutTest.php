@@ -8,25 +8,17 @@
 declare(strict_types=1);
 
 use Tests\Browser\MahoServer;
-use Tests\MahoFrontendTestCase;
+use Tests\MahoBrowserTestCase;
 
-uses(MahoFrontendTestCase::class)->group('browser', 'paypal');
-
-afterAll(fn() => MahoServer::stop());
+uses(MahoBrowserTestCase::class)->group('browser', 'paypal');
 
 beforeEach(function () {
-    if (!browserTestsReady()) {
-        test()->markTestSkipped('Playwright is not installed');
-    }
     // Needs the store actually configured with PayPal credentials (the test harness or CI
     // injects them at install time); without them the real checkout can't run.
     if (!Mage::getModel('paypal/config')->hasCredentials()) {
         test()->markTestSkipped('PayPal sandbox credentials not configured on the store');
     }
-    // Maho is already bootstrapped by MahoFrontendTestCase::setUp(). Each test sets its
-    // own display currency, then (re)starts the server so it serves the configured DB.
     ensureSaleable(aProductId());
-    MahoServer::start();
 });
 
 /**

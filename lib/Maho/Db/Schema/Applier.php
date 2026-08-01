@@ -24,14 +24,25 @@ use Maho\Db\Adapter\AdapterInterface;
 final class Applier
 {
     /**
+     * Non-transactional engines, converted away from. An allowlist rather than
+     * "anything but InnoDB": ARCHIVE, CSV, BLACKHOLE, FEDERATED and MRG_MyISAM
+     * are deliberate choices a conversion would break.
+     */
+    private const LEGACY_ENGINES = ['MyISAM', 'MEMORY', 'HEAP', 'Aria', 'MARIA'];
+
+    /**
      * Compute the SQL needed to reconcile the live database with the target Schema.
      *
      * The introspected current schema is scoped to only the tables declared in
      * $target, so unrelated existing tables are never considered for DROP.
      *
+     * $tablePrefix scopes the storage-engine pass, which is the one part of the
+     * plan that looks beyond the declared tables. Pass '' when the database
+     * belongs to Maho alone.
+     *
      * @return list<string> SQL statements (empty when no changes are needed)
      */
-    public static function plan(Connection $connection, Schema $target): array
+    public static function plan(Connection $connection, Schema $target, string $tablePrefix = ''): array
     {
         $schemaManager = $connection->createSchemaManager();
         $platform = $connection->getDatabasePlatform();
@@ -135,7 +146,73 @@ final class Applier
         // after every PK is in place. Runs last (all PKs settled).
         $alters = array_merge($alters, self::autoIncrementRestores($platform, $existingTables, $tablesToAlter));
 
-        return array_merge($creates, $alters);
+        // Conversions lead the batch: InnoDB refuses a foreign key referencing a
+        // MyISAM table (errno 150), which FOREIGN_KEY_CHECKS=0 does not lift.
+        return array_merge(self::engineConversions($connection, $platform, $tablePrefix), $creates, $alters);
+    }
+
+    /**
+     * ALTER TABLE ... ENGINE=InnoDB for every live table still on a legacy engine.
+     *
+     * DBAL's Comparator never diffs table options, so a live MyISAM table and an
+     * InnoDB target produce no ALTER and a migrated store never self-heals.
+     *
+     * @return list<string>
+     */
+    private static function engineConversions(Connection $connection, AbstractPlatform $platform, string $tablePrefix): array
+    {
+        if (!$platform instanceof AbstractMySQLPlatform) {
+            return [];
+        }
+
+        return self::engineConversionStatements($platform, array_keys(self::legacyEngineTables($connection, $tablePrefix)));
+    }
+
+    /**
+     * Live tables still on a non-transactional engine, name => engine. Scans the
+     * whole database, not just declared tables: plan() introspects only what the
+     * target declares, and legacy tables are typically third-party. Callers must
+     * have established that the connection is MySQL or MariaDB.
+     *
+     * @return array<string, string>
+     */
+    public static function legacyEngineTables(Connection $connection, string $tablePrefix = ''): array
+    {
+        $sql = 'SELECT TABLE_NAME, ENGINE FROM information_schema.TABLES'
+            . " WHERE TABLE_SCHEMA = DATABASE() AND TABLE_TYPE = 'BASE TABLE'"
+            . ' AND ENGINE IN (' . implode(', ', array_fill(0, count(self::LEGACY_ENGINES), '?')) . ')'
+            . ' ORDER BY TABLE_NAME';
+
+        $tables = $connection->fetchAllKeyValue($sql, self::LEGACY_ENGINES);
+
+        // A prefix means the database may be shared. Filtered here rather than
+        // with LIKE, whose pattern would need escaping ('_' is a wildcard).
+        if ($tablePrefix !== '') {
+            $tables = array_filter(
+                $tables,
+                static fn(string $name): bool => str_starts_with($name, $tablePrefix),
+                ARRAY_FILTER_USE_KEY,
+            );
+        }
+
+        return $tables;
+    }
+
+    /**
+     * Split from the query above so the statement shape is testable connectionless.
+     *
+     * @param list<string> $tableNames
+     * @return list<string>
+     */
+    private static function engineConversionStatements(AbstractPlatform $platform, array $tableNames): array
+    {
+        return array_map(
+            static fn(string $name): string => sprintf(
+                'ALTER TABLE %s ENGINE=InnoDB',
+                $platform->quoteSingleIdentifier($name),
+            ),
+            $tableNames,
+        );
     }
 
     /**
@@ -580,7 +657,7 @@ final class Applier
         }
 
         $connection = $adapter->getConnection();
-        $sql = self::plan($connection, $target);
+        $sql = self::plan($connection, $target, Collector::tablePrefix());
         if ($sql === []) {
             return ['contributors' => $contributors, 'executed' => []];
         }

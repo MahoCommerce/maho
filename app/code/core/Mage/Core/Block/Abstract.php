@@ -1346,38 +1346,6 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
     }
 
     /**
-     * Prepare url for save to cache
-     *
-     * @return $this
-     */
-    protected function _beforeCacheUrl()
-    {
-        if ($this->_getApp()->useCache(self::CACHE_GROUP)) {
-            $this->_getApp()->setUseSessionVar(true);
-        }
-        return $this;
-    }
-
-    /**
-     * Replace URLs from cache
-     *
-     * @param string $html
-     * @return string
-     */
-    protected function _afterCacheUrl($html)
-    {
-        if ($this->_getApp()->useCache(self::CACHE_GROUP)) {
-            $this->_getApp()->setUseSessionVar(false);
-            \Maho\Profiler::start('CACHE_URL');
-            $model = Mage::getSingleton($this->_getUrlModelClass());
-            assert($model instanceof \Mage_Core_Model_Url);
-            $html = $model->sessionUrlVar($html);
-            \Maho\Profiler::stop('CACHE_URL');
-        }
-        return $html;
-    }
-
-    /**
      * Get cache key informative items
      * Provide string array key to share specific info item with FPC placeholder
      *
@@ -1506,11 +1474,6 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
         $cacheData = $this->_getApp()->loadCache($cacheKey);
         if ($cacheData) {
             $cacheData = str_replace(
-                $this->_getSidPlaceholder($cacheKey),
-                $session->getSessionIdQueryParam() . '=' . $session->getEncryptedSessionId(),
-                $cacheData,
-            );
-            $cacheData = str_replace(
                 $this->_getFormKeyPlaceholder($cacheKey),
                 $session->getFormKey(),
                 $cacheData,
@@ -1538,11 +1501,6 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
         $cacheKey = $this->getCacheKey();
         /** @var Mage_Core_Model_Session $session */
         $session = Mage::getSingleton('core/session');
-        $data = str_replace(
-            $session->getSessionIdQueryParam() . '=' . $session->getEncryptedSessionId(),
-            $this->_getSidPlaceholder($cacheKey),
-            $data,
-        );
         $data = str_replace(
             $session->getFormKey(),
             $this->_getFormKeyPlaceholder($cacheKey),
@@ -1572,21 +1530,6 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
         $cacheKey = empty($cacheKey) ? $this->getCacheKey() : $cacheKey;
         $cacheKey = md5($cacheKey . '_tags');
         return $cacheKey;
-    }
-
-    /**
-     * Get SID placeholder for cache
-     *
-     * @param null|string $cacheKey
-     * @return string
-     */
-    protected function _getSidPlaceholder($cacheKey = null)
-    {
-        if (is_null($cacheKey)) {
-            $cacheKey = $this->getCacheKey();
-        }
-
-        return '<!--SID=' . $cacheKey . '-->';
     }
 
     /**

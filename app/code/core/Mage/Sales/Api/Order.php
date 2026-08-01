@@ -136,7 +136,7 @@ use Mage\Customer\Api\Address;
             requirements: ['incrementId' => '[a-zA-Z0-9_-]+'],
             extraProperties: ['no_iri' => true],
             security: 'true',
-            description: 'Read an order using the per-order one-time access token (X-Order-Token header)',
+            description: 'Read an order by increment ID, authorised by the one-time guest access token issued at checkout. The token travels in the X-Order-Token request header, not in the payload.',
         ),
     ],
     graphQlOperations: [
@@ -149,6 +149,18 @@ use Mage\Customer\Api\Address;
             name: 'collection_query',
             description: 'Get orders',
             security: "is_granted('ROLE_ADMIN') or is_granted('orders/read')",
+            extraArgs: [
+                'createdFrom' => ['type' => 'String', 'description' => 'Created at or after this UTC date or datetime; a bare date means from 00:00:00'],
+                'createdTo' => ['type' => 'String', 'description' => 'Created at or before this UTC date or datetime; a bare date includes the whole day'],
+                'updatedSince' => ['type' => 'String', 'description' => 'Updated at or after this UTC date or datetime'],
+                'state' => ['type' => 'String', 'description' => 'Filter by order state (new, processing, complete, closed, canceled, holded)'],
+                'storeId' => ['type' => 'Int', 'description' => 'Filter by store view ID'],
+                'customerId' => ['type' => 'Int', 'description' => 'All orders belonging to one customer'],
+                'status' => ['type' => 'String', 'description' => 'Filter by order status (pending, processing, complete, …)'],
+                'email' => ['type' => 'String', 'description' => 'Exact customer-email match'],
+                'emailLike' => ['type' => 'String', 'description' => 'Partial customer-email match'],
+                'incrementId' => ['type' => 'String', 'description' => 'Exact increment-ID lookup (returns 0 or 1 order)'],
+            ],
         ),
         new Query(
             // Named 'guest' → field `guestOrder` (not `guestOrderOrder`).
