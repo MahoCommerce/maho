@@ -201,7 +201,17 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
      */
     private static function getSessionKeyspace(string $sessionName): string
     {
-        return $sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE ? '' : $sessionName;
+        if ($sessionName === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
+            return '';
+        }
+
+        // The name becomes a directory under the save path, so reject anything unsafe before it
+        // reaches the filesystem rather than relying on session_name() to do it later
+        if (!preg_match('/^[A-Za-z0-9_-]+$/', $sessionName)) {
+            Mage::throwException("Invalid session name: {$sessionName}");
+        }
+
+        return $sessionName;
     }
 
     /**
@@ -262,7 +272,7 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
 
         // is_dir() again: a concurrent request may have won the race
         if (!@mkdir($path, $mode, true) && !is_dir($path)) {
-            throw new Mage_Core_Exception("Unable to create session directory: {$path}");
+            Mage::throwException("Unable to create session directory: {$path}");
         }
 
         // mkdir() subtracts the umask from its mode and drops setgid, chmod() does neither

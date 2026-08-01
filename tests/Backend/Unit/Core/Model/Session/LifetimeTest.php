@@ -246,4 +246,10 @@ describe('storage keyspace', function () {
     it('gives a session name with no area of its own a keyspace too', function () {
         expect(sessionKeyspace('third_party_session'))->toBe('third_party_session');
     });
+
+    it('rejects a session name that cannot be a safe directory name', function () {
+        // The keyspace becomes a directory under the save path, so a name an extension derives
+        // from anything request-shaped must fail before it reaches the filesystem
+        expect(fn() => sessionKeyspace('../evil'))->toThrow(Mage_Core_Exception::class);
+    });
 });

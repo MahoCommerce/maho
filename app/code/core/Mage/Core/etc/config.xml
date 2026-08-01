@@ -325,7 +325,6 @@ SPDX-License-Identifier: AFL-3.0
                 <use_http_via>0</use_http_via>
                 <use_http_x_forwarded_for>0</use_http_x_forwarded_for>
                 <use_http_user_agent>0</use_http_user_agent>
-                <use_admin_sid>0</use_admin_sid>
             </session>
         </web>
         <admin>
