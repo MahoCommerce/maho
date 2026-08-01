@@ -158,6 +158,23 @@ describe('Product write scope (REST)', function (): void {
         expect($rows[0] ?? null)->toBe('Scope Test Global Name');
     });
 
+    it('rejects an empty or unknown store parameter instead of writing globally', function (): void {
+        $productId = (int) $GLOBALS['_scope_test_product_id'];
+        $token = serviceToken(['products/write']);
+
+        $empty = apiPut("/api/rest/v2/products/{$productId}?store=", [
+            'name' => 'Should Never Land',
+        ], $token);
+        expect($empty['status'])->toBe(400);
+
+        $unknown = apiPut("/api/rest/v2/products/{$productId}?store=does_not_exist", [
+            'name' => 'Should Never Land',
+        ], $token);
+        expect($unknown['status'])->toBe(400);
+
+        expect(nameRowsByStore($productId)[0] ?? null)->toBe('Scope Test Global Name');
+    });
+
     it('rejects useDefault without a store context', function (): void {
         $productId = (int) $GLOBALS['_scope_test_product_id'];
         $token = serviceToken(['products/write']);
