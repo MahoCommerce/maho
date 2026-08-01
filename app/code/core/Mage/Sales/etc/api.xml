@@ -228,10 +228,6 @@ SPDX-License-Identifier: AFL-3.0
                         <code>104</code>
                         <message>Credit memo status not changed</message>
                     </status_not_changed>
-                    <cannot_refund_to_storecredit>
-                        <code>105</code>
-                        <message>Money can not be refunded to the store credit account as order was created by guest</message>
-                    </cannot_refund_to_storecredit>
                     <cannot_create_creditmemo>
                         <code>106</code>
                         <message>Credit memo for requested order can not be created.</message>

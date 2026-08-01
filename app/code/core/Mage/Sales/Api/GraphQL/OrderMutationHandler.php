@@ -193,7 +193,6 @@ class OrderMutationHandler
         AdminAcl::checkResource(CreditMemo::class);
         $orderId = $variables['orderId'] ?? null;
         $items = $variables['items'] ?? [];
-        $refundToStoreCredit = $variables['refundToStoreCredit'] ?? false;
         $adjustmentPositive = (float) ($variables['adjustmentPositive'] ?? 0);
         $adjustmentNegative = (float) ($variables['adjustmentNegative'] ?? 0);
         $comment = $variables['comment'] ?? 'Return';
@@ -203,6 +202,9 @@ class OrderMutationHandler
         }
         if (empty($items)) {
             throw ValidationException::requiredField('items');
+        }
+        if (!empty($variables['refundToStoreCredit'])) {
+            throw ValidationException::invalidValue('refundToStoreCredit', 'store credit refunds are not supported');
         }
 
         $order = \Mage::getModel('sales/order')->load($orderId);
@@ -231,7 +233,7 @@ class OrderMutationHandler
                 throw ValidationException::invalidValue('orderId', 'cannot create credit memo for this order');
             }
 
-            return $this->buildProcessReturn($order, $items, $comment, $adjustmentPositive, $adjustmentNegative, $refundToStoreCredit);
+            return $this->buildProcessReturn($order, $items, $comment, $adjustmentPositive, $adjustmentNegative);
         } finally {
             $write->releaseLock($lockName);
         }
@@ -247,7 +249,6 @@ class OrderMutationHandler
         ?string $comment,
         float $adjustmentPositive,
         float $adjustmentNegative,
-        bool $refundToStoreCredit,
     ): array {
         // Build credit memo data
         $creditmemoData = [
@@ -284,12 +285,6 @@ class OrderMutationHandler
                 throw ValidationException::invalidValue('adjustmentPositive', 'refund amount exceeds the order\'s refundable balance');
             }
 
-            // Set refund to store credit if requested
-            if ($refundToStoreCredit && $order->getCustomerId()) {
-                $creditmemo->setCustomerBalanceRefundFlag(true);
-                $creditmemo->setPaymentRefundDisallowed(1.0);
-            }
-
             if ($comment !== null && $comment !== '') {
                 $creditmemo->addComment($comment, false);
             }
@@ -301,15 +296,6 @@ class OrderMutationHandler
                 ->addObject($creditmemo)
                 ->addObject($creditmemo->getOrder());
             $transactionSave->save();
-
-            // If refunding to store credit, create store credit
-            if ($refundToStoreCredit && $order->getCustomerId()) {
-                $this->createStoreCredit(
-                    (int) $order->getCustomerId(),
-                    (float) $creditmemo->getGrandTotal(),
-                    'Refund from Order #' . $order->getIncrementId(),
-                );
-            }
 
             return ['processReturn' => [
                 'success' => true,
@@ -351,25 +337,6 @@ class OrderMutationHandler
             'invoice' => $invoice ? ['invoiceId' => (int) $invoice->getId(), 'incrementId' => $invoice->getIncrementId()] : null,
             'shipment' => $shipment ? ['shipmentId' => (int) $shipment->getId(), 'incrementId' => $shipment->getIncrementId()] : null,
         ];
-    }
-
-    /**
-     * Create store credit for customer
-     */
-    private function createStoreCredit(int $customerId, float $amount, string $comment): void
-    {
-        // Check if enterprise customer balance module exists
-        $balanceClass = \Mage::getConfig()->getModelClassName('enterprise_customerbalance/balance');
-        if ($balanceClass && class_exists($balanceClass)) {
-            $balance = new $balanceClass();
-            $balance->setCustomerId($customerId)
-                ->setWebsiteId(\Mage::app()->getWebsite()->getId())
-                ->setAmountDelta($amount)
-                ->setComment($comment)
-                ->save();
-        }
-        // For community edition, you might use a custom store credit module
-        // This is a placeholder that can be extended
     }
 
     /**

@@ -151,10 +151,6 @@
  *
  * @method string getUpdatedAt()
  * @method $this setUpdatedAt(string $value)
- * @method bool getUseCustomerBalance()
- * @method $this setUseCustomerBalance(bool $value)
- * @method bool getUseRewardPoints()
- * @method $this setUseRewardPoints(bool $value)
  *
  * @method float getVirtualItemsQty()
  * @method $this setVirtualItemsQty(float $value)

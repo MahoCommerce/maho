@@ -613,12 +613,15 @@ class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
     }
 
     /**
-     * Retrieve skip User Agent validation strings (Flash etc)
+     * Retrieve User Agent strings exempted from session validation
      */
     public function getValidateHttpUserAgentSkip(): array
     {
         $userAgents = [];
         $skip = Mage::getConfig()->getNode(self::XML_NODE_USET_AGENT_SKIP);
+        if (!$skip) {
+            return $userAgents;
+        }
         foreach ($skip->children() as $userAgent) {
             $userAgents[] = (string) $userAgent;
         }

@@ -146,10 +146,7 @@ SPDX-License-Identifier: AFL-3.0
         </cache>
         <session>
             <validation>
-                <http_user_agent_skip>
-                    <flash>Shockwave Flash</flash>
-                    <flash_mac><![CDATA[Adobe Flash Player\s{1,}\w{1,10}]]></flash_mac>
-                </http_user_agent_skip>
+                <http_user_agent_skip/>
             </validation>
         </session>
         <request>

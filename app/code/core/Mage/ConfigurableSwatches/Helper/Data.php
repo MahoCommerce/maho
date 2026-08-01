@@ -43,10 +43,7 @@ class Mage_ConfigurableSwatches_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getHyphenatedString($str)
     {
-        $result = false;
-        if (function_exists('iconv')) {
-            $result = @iconv('UTF-8', 'ASCII//TRANSLIT', $str); // will issue a notice on failure, we handle failure
-        }
+        $result = @iconv('UTF-8', 'ASCII//TRANSLIT', $str); // will issue a notice on failure, we handle failure
 
         if (!$result) {
             $result = dechex(crc32(self::normalizeKey($str)));
@@ -57,7 +54,7 @@ class Mage_ConfigurableSwatches_Helper_Data extends Mage_Core_Helper_Abstract
 
     /**
      * Trims and lower-cases strings used as array indexes in json and for string matching in a
-     * multi-byte compatible way if the mbstring module is available.
+     * multi-byte compatible way.
      *
      * @param string $key
      * @return string
@@ -67,10 +64,7 @@ class Mage_ConfigurableSwatches_Helper_Data extends Mage_Core_Helper_Abstract
         if ($key === null || $key === '') {
             return '';
         }
-        if (function_exists('mb_strtolower')) {
-            return trim(mb_strtolower($key, 'UTF-8'));
-        }
-        return trim(strtolower($key));
+        return trim(mb_strtolower($key, 'UTF-8'));
     }
 
     /**
