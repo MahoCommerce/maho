@@ -61,8 +61,11 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
             // @see https://developers.facebook.com/docs/meta-pixel/reference#standard-events
             $productViewed = Mage::registry('current_product');
             if ($productViewed) {
+                $productPrice = (float) $helper->formatPrice(
+                    Mage::helper('tax')->getPrice($productViewed, $productViewed->getFinalPrice(), true),
+                );
                 $eventData = [];
-                $eventData['value'] = (float) $helper->formatPrice($productViewed->getFinalPrice());
+                $eventData['value'] = $productPrice;
                 $eventData['currency'] = Mage::app()->getStore()->getCurrentCurrencyCode();
                 $eventData['content_name'] = $productViewed->getName();
                 $eventData['content_ids'] = [$productViewed->getSku()];
@@ -71,7 +74,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                     [
                         'id' => $productViewed->getSku(),
                         'quantity' => 1,
-                        'item_price' => (float) $helper->formatPrice($productViewed->getFinalPrice()),
+                        'item_price' => $productPrice,
                     ],
                 ];
                 $category = Mage::registry('current_category');
@@ -87,7 +90,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
             $category = $layer->getCurrentCategory();
             if ($category) {
                 $productCollection = clone $layer->getProductCollection();
-                $productCollection->addAttributeToSelect(['sku', 'name', 'price', 'special_price', 'final_price']); // Select necessary attributes
+                $productCollection->addAttributeToSelect(['sku', 'name', 'price', 'special_price', 'final_price', 'tax_class_id']); // Select necessary attributes
 
                 $toolbarBlock = Mage::app()->getLayout()->getBlock('product_list_toolbar');
                 if ($toolbarBlock) {
@@ -108,14 +111,16 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
 
                     foreach ($productCollection as $productViewed) {
                         $productId = $productViewed->getSku();
-                        $productPrice = (float) $helper->formatPrice($productViewed->getFinalPrice());
+                        $productPrice = (float) $helper->formatPrice(
+                            Mage::helper('tax')->getPrice($productViewed, $productViewed->getFinalPrice(), true),
+                        );
                         $contentIds[] = $productId;
                         $contents[] = [
                             'id' => $productId,
                             'quantity' => 1, // Quantity is typically 1 for a list view item
                             'item_price' => $productPrice,
                         ];
-                        $totalValue += $productViewed->getFinalPrice();
+                        $totalValue += $productPrice;
                     }
 
                     $eventData = [];
@@ -154,9 +159,9 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                         $contents[] = [
                             'id' => $productId,
                             'quantity' => (int) $item->getQty(),
-                            'item_price' => (float) $helper->formatPrice($item->getBasePrice()),
+                            'item_price' => (float) $helper->formatPrice($item->getBasePriceInclTax()),
                         ];
-                        $totalValue += $item->getBaseRowTotal();
+                        $totalValue += $item->getBaseRowTotalInclTax();
                         $numItems += (int) $item->getQty();
                     }
 
@@ -181,32 +186,8 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
 
             /** @var Mage_Sales_Model_Order $order */
             foreach ($collection as $order) {
-                $contentIds = [];
-                $contents = [];
-                $numItems = 0;
-
-                // Use visible items to avoid double counting configurables, etc.
-                /** @var Mage_Sales_Model_Order_Item $item */
-                foreach ($order->getAllVisibleItems() as $item) {
-                    $productId = $item->getSku();
-                    $contentIds[] = $productId;
-                    $contents[] = [
-                        'id' => $productId,
-                        'quantity' => (int) $item->getQtyOrdered(),
-                        'item_price' => (float) $helper->formatPrice($item->getBasePrice()),
-                    ];
-                    $numItems += (int) $item->getQtyOrdered();
-                }
-
-                if (!empty($contents)) {
-                    $eventData = [];
-                    $eventData['value'] = (float) $helper->formatPrice($order->getBaseGrandTotal());
-                    $eventData['currency'] = $order->getBaseCurrencyCode();
-                    $eventData['content_ids'] = $contentIds;
-                    $eventData['content_type'] = 'product';
-                    $eventData['contents'] = $contents;
-                    $eventData['num_items'] = $numItems;
-                    $eventData['order_id'] = $order->getIncrementId();
+                $eventData = $this->getPurchaseEventData($order);
+                if ($eventData !== null) {
                     $result[] = ['Purchase', $eventData];
                 }
             }
@@ -224,6 +205,47 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
             $eventStrings[] = "fbq('track', '{$metaEvent[0]}', {$eventDataJsonEscaped});";
         }
         return implode("\n", $eventStrings);
+    }
+
+    /**
+     * Purchase event payload for one order, null when the order has no visible items.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function getPurchaseEventData(Mage_Sales_Model_Order $order): ?array
+    {
+        $helper = Mage::helper('googleanalytics');
+        $contentIds = [];
+        $contents = [];
+        $numItems = 0;
+
+        // Use visible items to avoid double counting configurables, etc.
+        /** @var Mage_Sales_Model_Order_Item $item */
+        foreach ($order->getAllVisibleItems() as $item) {
+            // The catalog product SKU, not the order item's composite one, so it matches the catalogue feed
+            $productId = $item->getProduct()->getSku() ?: $item->getSku();
+            $contentIds[] = $productId;
+            $contents[] = [
+                'id' => $productId,
+                'quantity' => (int) $item->getQtyOrdered(),
+                'item_price' => (float) $helper->formatPrice($item->getBasePriceInclTax()),
+            ];
+            $numItems += (int) $item->getQtyOrdered();
+        }
+
+        if (empty($contents)) {
+            return null;
+        }
+
+        return [
+            'value' => (float) $helper->formatPrice($order->getBaseGrandTotal()),
+            'currency' => $order->getBaseCurrencyCode(),
+            'content_ids' => $contentIds,
+            'content_type' => 'product',
+            'contents' => $contents,
+            'num_items' => $numItems,
+            'order_id' => $order->getIncrementId(),
+        ];
     }
 
     /**
