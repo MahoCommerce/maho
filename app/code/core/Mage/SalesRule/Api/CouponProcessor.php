@@ -12,6 +12,7 @@ namespace Mage\SalesRule\Api;
 
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Operation;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -145,8 +146,9 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             $rule->setUsesPerCustomer((int) $data['usagePerCustomer']);
         }
 
-        // When omitted the rule keeps the historical all-groups/all-websites default;
-        // when provided, only the validated ids are assigned.
+        // When omitted the rule keeps the historical all-groups default; websites
+        // default to the CURRENT store's website (not all websites) so a coupon
+        // never silently spans websites the caller didn't ask for.
         $rule->setCustomerGroupIds(
             isset($data['customerGroupIds'])
                 ? $this->normalizeCustomerGroupIds($data['customerGroupIds'])
@@ -155,7 +157,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $rule->setWebsiteIds(
             isset($data['websiteIds'])
                 ? $this->normalizeWebsiteIds($data['websiteIds'])
-                : array_keys(\Mage::app()->getWebsites()),
+                : [(int) \Maho\ApiPlatform\Service\StoreContext::getStore()->getWebsiteId()],
         );
 
         if (isset($data['minimumSubtotal']) && (float) $data['minimumSubtotal'] > 0) {
@@ -197,6 +199,8 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         if (!$rule->getId()) {
             throw new NotFoundHttpException('Associated price rule not found');
         }
+
+        $this->assertRuleWebsitesAllowed($rule);
 
         if (isset($data['code'])) {
             $this->validateCouponCode($data['code']);
@@ -323,12 +327,30 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $rule->load($coupon->getRuleId());
 
         if ($rule->getId()) {
+            $this->assertRuleWebsitesAllowed($rule);
             $rule->delete();
         } else {
             $coupon->delete();
         }
 
         return null;
+    }
+
+    /**
+     * Hide rules outside the token's website scope from mutations, matching
+     * the read-side filter (404, not 403, to avoid disclosing existence).
+     */
+    private function assertRuleWebsitesAllowed(\Mage_SalesRule_Model_Rule $rule): void
+    {
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->getAuthorizedUser());
+        if ($allowedWebsiteIds === null) {
+            return;
+        }
+
+        $ruleWebsiteIds = array_map('intval', (array) $rule->getWebsiteIds());
+        if (array_intersect($ruleWebsiteIds, $allowedWebsiteIds) === []) {
+            throw new NotFoundHttpException('Coupon not found');
+        }
     }
 
     private function doValidate(string $code, ?int $cartId): Coupon
@@ -500,7 +522,19 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
     private function normalizeWebsiteIds(mixed $value): array
     {
         $known = array_map('intval', array_keys(\Mage::app()->getWebsites()));
-        return $this->normalizeIdList($value, $known, 'websiteIds', 'website');
+        $ids = $this->normalizeIdList($value, $known, 'websiteIds', 'website');
+
+        // A restricted token may only target websites its store allowlist maps to.
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->getAuthorizedUser());
+        if ($allowedWebsiteIds !== null) {
+            foreach ($ids as $id) {
+                if (!in_array($id, $allowedWebsiteIds, true)) {
+                    throw new AccessDeniedHttpException("Access denied for website: {$id}");
+                }
+            }
+        }
+
+        return $ids;
     }
 
     /** @return int[] */

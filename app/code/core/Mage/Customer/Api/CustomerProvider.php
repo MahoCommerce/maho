@@ -80,7 +80,18 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
             $this->authorizeCustomerAccess($requestedId);
         }
 
-        return $this->getItem($requestedId);
+        $mahoCustomer = $this->customerService->getCustomerById($requestedId);
+        if (!$mahoCustomer) {
+            return null;
+        }
+
+        // Website allowlist enforcement for back-office tokens; a customer's
+        // own token was already limited to itself above.
+        if ($this->isAdmin() || $this->isApiUser()) {
+            $this->assertWebsiteAllowed($mahoCustomer->getWebsiteId(), $this->getAuthorizedUser(), 'customer');
+        }
+
+        return $this->mapToDto($mahoCustomer);
     }
 
     /**
@@ -111,6 +122,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
             telephone: $telephone,
             page: $page,
             pageSize: $pageSize,
+            websiteIds: $this->allowedWebsiteIds($this->getAuthorizedUser()),
         );
 
         if (empty($result['customers'])) {

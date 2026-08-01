@@ -41,6 +41,19 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
             throw new NotFoundHttpException('Coupon not found');
         }
 
+        // A restricted token only sees coupons whose rule targets at least one
+        // allowed website; hide the rest like the collection filter does.
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->getAuthorizedUser());
+        if ($allowedWebsiteIds !== null) {
+            /** @var \Mage_SalesRule_Model_Rule $rule */
+            $rule = \Mage::getModel('salesrule/rule');
+            $rule->load($coupon->getRuleId());
+            $ruleWebsiteIds = array_map('intval', (array) $rule->getWebsiteIds());
+            if (array_intersect($ruleWebsiteIds, $allowedWebsiteIds) === []) {
+                throw new NotFoundHttpException('Coupon not found');
+            }
+        }
+
         return Coupon::fromModel($coupon);
     }
 
@@ -51,6 +64,16 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
         $collection = \Mage::getResourceModel('salesrule/coupon_collection');
 
         $this->applyCollectionFilters($collection, $context['filters'] ?? []);
+
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->getAuthorizedUser());
+        if ($allowedWebsiteIds !== null) {
+            $collection->getSelect()->where(
+                'main_table.rule_id IN (SELECT rule_id FROM '
+                    . $collection->getResource()->getTable('salesrule/website')
+                    . ' WHERE website_id IN (?))',
+                $allowedWebsiteIds === [] ? [-1] : $allowedWebsiteIds,
+            );
+        }
 
         foreach ($this->defaultSort as $field => $dir) {
             $collection->setOrder($field, $dir);

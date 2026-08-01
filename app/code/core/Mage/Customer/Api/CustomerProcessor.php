@@ -182,6 +182,9 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             if ($defaultStore) {
                 $storeId = (int) $defaultStore->getId();
             }
+            // Only privileged callers reach here (assertNoAdminOnlyFields above),
+            // so the authenticated ApiUser is guaranteed to exist.
+            $this->assertWebsiteAllowed($websiteId, $this->getAuthorizedUser(), 'customer');
         }
 
         $coreHelper = \Mage::helper('core');
@@ -468,6 +471,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         if (!$customer) {
             throw new NotFoundHttpException('Customer not found');
         }
+
+        $this->assertWebsiteAllowed($customer->getWebsiteId(), $this->getAuthorizedUser(), 'customer');
 
         if ($data->websiteId !== null && $data->websiteId !== (int) $customer->getWebsiteId()) {
             throw new BadRequestHttpException('websiteId can only be set when creating a customer');

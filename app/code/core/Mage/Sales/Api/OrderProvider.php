@@ -197,6 +197,12 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
+        // Store allowlist enforcement for back-office tokens; customer tokens
+        // are identity-bound above and stay untouched.
+        if ($this->isAdmin() || $this->isApiUser()) {
+            $this->assertStoreAllowed($order->getStoreId(), $this->getAuthorizedUser(), 'order');
+        }
+
         return $this->mapToDto($order);
     }
 
@@ -271,7 +277,12 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $this->requireAdminOrApiUser('Order listing requires admin or API access');
 
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context);
-        $result = $this->orderService->getAllOrders($page, $pageSize, $context['filters'] ?? []);
+        $result = $this->orderService->getAllOrders(
+            $page,
+            $pageSize,
+            $context['filters'] ?? [],
+            $this->getAuthorizedUser()->getAllowedStoreIds(),
+        );
 
         $orders = [];
         foreach ($result['orders'] as $order) {

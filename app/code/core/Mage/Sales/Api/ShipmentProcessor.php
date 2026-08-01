@@ -57,6 +57,8 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Shipment not found');
         }
 
+        $this->assertStoreAllowed($shipment->getStoreId(), $this->getAuthorizedUser(), 'shipment');
+
         return $shipment;
     }
 
@@ -188,6 +190,8 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
         if (!$order->getId()) {
             throw new NotFoundHttpException('Order not found');
         }
+
+        $this->assertStoreAllowed($order->getStoreId(), $this->getAuthorizedUser(), 'order');
 
         // Serialize with the order's other state transitions so two concurrent
         // requests can't both pass canShip() and both register a shipment,

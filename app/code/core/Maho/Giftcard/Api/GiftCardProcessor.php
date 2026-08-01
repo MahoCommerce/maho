@@ -13,6 +13,7 @@ namespace Maho\Giftcard\Api;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -42,6 +43,25 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
     protected function afterSave(object $model, CrudResource $data): void
     {
         $this->sendEmailToRecipient($model);
+    }
+
+    /**
+     * REST create path: default an omitted websiteId to the current store's
+     * website (a NULL-website card is unredeemable everywhere), then enforce
+     * the token's website scope on the resolved value.
+     */
+    #[\Override]
+    protected function beforeSave(object $model, CrudResource $data, ApiUser $user): void
+    {
+        if (!$model->getId() && !$model->getData('website_id')) {
+            $model->setData('website_id', (int) StoreContext::getStore()->getWebsiteId());
+        }
+        if ($model->getId()) {
+            // The card as stored must be in scope too, or a restricted token
+            // could claim a foreign card by rewriting its websiteId.
+            $this->assertWebsiteAllowed($model->getOrigData('website_id'), $user, 'gift card');
+        }
+        $this->assertWebsiteAllowed((int) $model->getData('website_id'), $user, 'gift card');
     }
 
     /** Balance bounds and duplicate-code check for the REST CRUD create/update path. */
@@ -98,6 +118,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
 
         /** @var \Maho_Giftcard_Model_Giftcard $model */
         $model = $this->loadOrFail($this->modelAlias, $id, 'Gift card not found');
+        $this->assertWebsiteAllowed($model->getWebsiteId(), $user, 'gift card');
         $oldData = $model->getData();
 
         $this->assertValidStatus($data->status);
@@ -167,6 +188,19 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             null,
         );
 
+        // Default an omitted websiteId to the current store's website (the
+        // documented behavior; a NULL-website card is unredeemable everywhere)
+        // and enforce the token's website scope on the resolved value.
+        $websiteId = isset($args['websiteId'])
+            ? (int) $args['websiteId']
+            : (int) StoreContext::getStore()->getWebsiteId();
+        try {
+            \Mage::app()->getWebsite($websiteId);
+        } catch (\Throwable) {
+            throw new BadRequestHttpException("Unknown website id {$websiteId}");
+        }
+        $this->assertWebsiteAllowed($websiteId, $this->getAuthorizedUser(), 'gift card');
+
         $giftcard = \Mage::getModel('giftcard/giftcard');
         $giftcard->setData([
             'balance' => (float) ($args['initialBalance'] ?? 0),
@@ -177,7 +211,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             'sender_name' => $args['senderName'] ?? null,
             'sender_email' => $args['senderEmail'] ?? null,
             'message' => $args['message'] ?? null,
-            'website_id' => isset($args['websiteId']) ? (int) $args['websiteId'] : null,
+            'website_id' => $websiteId,
             'expires_at' => $args['expiresAt'] ?? null,
         ]);
         $giftcard->save();
@@ -220,6 +254,8 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
         if (!$giftcard->getId()) {
             throw new NotFoundHttpException('Gift card not found');
         }
+
+        $this->assertWebsiteAllowed($giftcard->getWebsiteId(), $this->getAuthorizedUser(), 'gift card');
 
         $this->assertBalanceBounds($newBalance);
         $giftcard->adjustBalance($newBalance, $args['comment'] ?? null);

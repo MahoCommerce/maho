@@ -85,6 +85,8 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
                 // Don't disclose existence to a non-owner.
                 throw new NotFoundHttpException('Order not found');
             }
+        } else {
+            $this->assertStoreAllowed($order->getStoreId(), $this->getAuthorizedUser(), 'order');
         }
 
         return $order;

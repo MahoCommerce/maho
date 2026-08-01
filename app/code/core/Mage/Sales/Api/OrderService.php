@@ -234,6 +234,7 @@ class OrderService
      * @param array<string, mixed> $filters status, state, storeId, customerId, email,
      *   emailLike, incrementId, createdFrom, createdTo, updatedSince (`since` is accepted
      *   as the legacy name for the last)
+     * @param int[]|null $allowedStoreIds Token store allowlist; null means unrestricted
      * @return array{orders: array, total: int}
      */
     public function getAllOrders(
@@ -241,9 +242,17 @@ class OrderService
         int $pageSize = 20,
         #[\SensitiveParameter]
         array $filters = [],
+        ?array $allowedStoreIds = null,
     ): array {
         $customerId = ($filters['customerId'] ?? '') !== '' ? (int) $filters['customerId'] : null;
         $collection = $this->buildOrderCollection($customerId, $filters);
+
+        if ($allowedStoreIds !== null) {
+            $collection->getSelect()->where(
+                'main_table.store_id IN (?)',
+                $allowedStoreIds === [] ? [-1] : $allowedStoreIds,
+            );
+        }
 
         $email = $filters['email'] ?? null;
         $emailLike = $filters['emailLike'] ?? null;

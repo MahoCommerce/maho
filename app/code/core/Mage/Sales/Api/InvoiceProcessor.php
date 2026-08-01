@@ -76,6 +76,8 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Order not found');
         }
 
+        $this->assertStoreAllowed($order->getStoreId(), $this->getAuthorizedUser(), 'order');
+
         // Serialize with the order's other state transitions so two concurrent
         // requests can't both pass canInvoice() and both register an invoice,
         // double-invoicing the order. Shared per-order lock name, see
@@ -203,6 +205,8 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
         if (!$invoice->getId()) {
             throw new NotFoundHttpException('Invoice not found');
         }
+
+        $this->assertStoreAllowed($invoice->getStoreId(), $this->getAuthorizedUser(), 'invoice');
 
         // Same per-order critical section as invoice/shipment/refund creation:
         // capture/void/cancel mutate order totals and must not interleave.
