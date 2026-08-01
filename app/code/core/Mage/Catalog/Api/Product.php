@@ -465,6 +465,10 @@ class Product extends CrudResource
     #[ApiProperty(description: 'Stock data for write operations', readable: false)]
     public ?array $stockData = null;
 
+    /** @var string[]|null Attribute codes whose store override reverts to the default value; only valid with an explicit ?store= scope */
+    #[ApiProperty(description: 'Attribute codes to revert to their default (non-store) values; requires ?store=', readable: false)]
+    public ?array $useDefault = null;
+
     #[Groups(['product:read'])]
     #[ApiProperty(description: 'Attribute set ID', extraProperties: ['modelField' => 'attribute_set_id'])]
     public ?int $attributeSetId = null;

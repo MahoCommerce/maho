@@ -18,6 +18,7 @@ use Mage_Catalog_Model_Product_Status;
 use Mage_Catalog_Model_Product_Type;
 use Mage_Catalog_Model_Product_Visibility;
 use Mage_CatalogInventory_Model_Stock_Item;
+use Mage_Core_Model_App;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Trait\ActivityLogTrait;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
@@ -149,6 +150,11 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             'tax_class_id' => $data->taxClassId ?? 0,
         ]);
 
+        // Creates always write the global (admin) scope so every store view starts
+        // from the same values; store overrides come from an update with ?store=.
+        // Set after setData(), which replaced the whole data array.
+        $product->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID);
+
         $this->applyProductData($product, $data);
 
         $websiteIds = $data->websiteIds ?? $this->getDefaultWebsiteIds($user);
@@ -171,15 +177,11 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
     private function handleUpdate(int $id, Product $data, ApiUser $user): Product
     {
         StoreContext::ensureStore();
+        $storeId = $this->resolveWriteScope($user);
 
         /** @var Mage_Catalog_Model_Product $product */
         $product = Mage::getModel('catalog/product');
-
-        $storeId = StoreContext::getStoreId();
-        if ($storeId) {
-            $product->setStoreId($storeId);
-        }
-
+        $product->setStoreId($storeId);
         $product->load($id);
 
         if (!$product->getId()) {
@@ -219,6 +221,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $this->applyProductData($product, $data);
+        $this->applyUseDefault($product, $data, $storeId);
 
         if ($data->websiteIds !== null) {
             $this->validateSubmittedWebsiteIds($data->websiteIds, $user);
@@ -247,13 +250,11 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
     private function handleFastUpdate(int $id, Product $data, ApiUser $user): Product
     {
         StoreContext::ensureStore();
-        $storeId = StoreContext::getStoreId();
+        $storeId = $this->resolveWriteScope($user);
 
         /** @var Mage_Catalog_Model_Product $product */
         $product = Mage::getModel('catalog/product');
-        if ($storeId) {
-            $product->setStoreId($storeId);
-        }
+        $product->setStoreId($storeId);
         $product->load($id);
 
         if (!$product->getId()) {
@@ -261,12 +262,6 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $this->authorizeProductWebsites($product, $user);
-
-        // A store-restricted user may only write attribute values into a store
-        // they're allowed to (storeId 0 = admin/default scope = all stores).
-        if ($storeId && $user->getAllowedStoreIds() !== null && !$user->canAccessStore($storeId)) {
-            throw new AccessDeniedHttpException("Access denied for store: {$storeId}");
-        }
 
         $oldData = $product->getData();
 
@@ -344,13 +339,17 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         if (!empty($attrData)) {
             try {
                 Mage::getSingleton('catalog/product_action')
-                    ->updateAttributes([$id], $attrData, $storeId ?: 0);
+                    ->updateAttributes([$id], $attrData, $storeId);
             } catch (\Throwable $e) {
                 throw new UnprocessableEntityHttpException('Failed to update product: ' . $e->getMessage());
             }
             // Reflect the written values so refreshDto() and the activity log
             // echo the new state, not the pre-update snapshot.
             $product->addData($attrData);
+        }
+
+        if (!empty($data->useDefault)) {
+            $this->deleteStoreValuesDirect($id, $data, $storeId);
         }
 
         // Direct SQL for stock
@@ -450,6 +449,67 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         if (!empty($data->customAttributesWrite)) {
             $this->applyCustomAttributes($product, $data->customAttributesWrite);
         }
+    }
+
+    /**
+     * Revert store overrides to the default value. Catalog EAV treats `false` as
+     * the "use default" sentinel: saving it at a store scope deletes that store's
+     * value row, so reads fall back to the global value again.
+     */
+    private function applyUseDefault(Mage_Catalog_Model_Product $product, Product $data, int $storeId): void
+    {
+        foreach ($this->resolveUseDefaultAttributes($data, $storeId) as $attribute) {
+            $product->setData($attribute->getAttributeCode(), false);
+        }
+    }
+
+    /**
+     * Fast-update variant of applyUseDefault(): deletes the store value rows
+     * directly, matching the path's model-save bypass.
+     */
+    private function deleteStoreValuesDirect(int $id, Product $data, int $storeId): void
+    {
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+        foreach ($this->resolveUseDefaultAttributes($data, $storeId) as $attribute) {
+            $adapter->delete($attribute->getBackend()->getTable(), [
+                'entity_id = ?' => $id,
+                'attribute_id = ?' => (int) $attribute->getId(),
+                'store_id = ?' => $storeId,
+            ]);
+        }
+    }
+
+    /**
+     * Validate the useDefault input and resolve it to attribute models: requires
+     * an explicit store scope, and only non-global attributes can have a store
+     * override to revert.
+     *
+     * @return list<\Mage_Catalog_Model_Resource_Eav_Attribute>
+     */
+    private function resolveUseDefaultAttributes(Product $data, int $storeId): array
+    {
+        if (empty($data->useDefault)) {
+            return [];
+        }
+
+        if ($storeId === Mage_Core_Model_App::ADMIN_STORE_ID) {
+            throw new BadRequestHttpException('useDefault requires a store context (?store=): global values have no default to revert to.');
+        }
+
+        $attributes = [];
+        foreach ($data->useDefault as $code) {
+            $code = (string) $code;
+            $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $code);
+            if (!$attribute instanceof \Mage_Catalog_Model_Resource_Eav_Attribute || !$attribute->getId() || $attribute->getBackend()->isStatic()) {
+                throw new BadRequestHttpException("Unknown attribute in useDefault: {$code}");
+            }
+            if ($attribute->isScopeGlobal()) {
+                throw new BadRequestHttpException("Attribute '{$code}' is global scope and has no store override to revert.");
+            }
+            $attributes[] = $attribute;
+        }
+
+        return $attributes;
     }
 
     /**

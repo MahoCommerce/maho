@@ -117,12 +117,11 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
     private function handleUpdate(int $id, Category $data, ApiUser $user): Category
     {
         StoreContext::ensureStore();
+        $storeId = $this->resolveWriteScope($user);
 
         /** @var Mage_Catalog_Model_Category $category */
         $category = Mage::getModel('catalog/category');
-
-        $this->useAdminScope($category);
-
+        $category->setStoreId($storeId);
         $category->load($id);
 
         if (!$category->getId()) {
@@ -153,6 +152,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $this->applyCategoryData($category, $data);
+        $this->applyUseDefault($category, $data, $storeId);
 
         $this->safeSave($category, 'update category');
 
@@ -528,16 +528,42 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 
 
     /**
-     * Category writes load and save in the admin scope, the scope every store view
-     * falls back to. A store-scoped write only ever adds an override on top of it:
-     * values the caller never mentioned stay invisible to the other stores, and a
-     * cleared value keeps resolving to the global row the override was layered on,
-     * with no "use default value" toggle in the API to remove it. `?store=` still
-     * scopes reads and the root-tree authorization check.
+     * Creates always write the admin scope, the scope every store view falls back
+     * to, so a new category starts with the same values everywhere. Updates pick
+     * their scope via resolveWriteScope(): global without ?store=, a store
+     * override with it, and useDefault to remove an override again.
      */
     private function useAdminScope(Mage_Catalog_Model_Category $category): void
     {
         $category->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID);
+    }
+
+    /**
+     * Revert store overrides to the default value. Catalog EAV treats `false` as
+     * the "use default" sentinel: saving it at a store scope deletes that store's
+     * value row, so reads fall back to the global value again.
+     */
+    private function applyUseDefault(Mage_Catalog_Model_Category $category, Category $data, int $storeId): void
+    {
+        if (empty($data->useDefault)) {
+            return;
+        }
+
+        if ($storeId === Mage_Core_Model_App::ADMIN_STORE_ID) {
+            throw new BadRequestHttpException('useDefault requires a store context (?store=): global values have no default to revert to.');
+        }
+
+        foreach ($data->useDefault as $code) {
+            $code = (string) $code;
+            $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Category::ENTITY, $code);
+            if (!$attribute instanceof \Mage_Catalog_Model_Resource_Eav_Attribute || !$attribute->getId() || $attribute->getBackend()->isStatic()) {
+                throw new BadRequestHttpException("Unknown attribute in useDefault: {$code}");
+            }
+            if ($attribute->isScopeGlobal()) {
+                throw new BadRequestHttpException("Attribute '{$code}' is global scope and has no store override to revert.");
+            }
+            $category->setData($code, false);
+        }
     }
 
     private function refreshDto(Mage_Catalog_Model_Category $category, Category $data): Category

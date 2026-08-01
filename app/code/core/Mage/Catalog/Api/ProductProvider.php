@@ -142,11 +142,11 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         if ($operation instanceof CollectionOperationInterface) {
             $sku = $context['args']['sku'] ?? null;
             if ($sku) {
-                return $this->singleItemPaginator($this->filterForCaller($this->getProductBySku($sku)));
+                return $this->singleItemPaginator($this->filterForCaller($this->getProductBySku($sku, !$this->isBackOfficeReader())));
             }
             $barcode = $context['args']['barcode'] ?? null;
             if ($barcode) {
-                return $this->singleItemPaginator($this->filterForCaller($this->getProductByBarcode($barcode)));
+                return $this->singleItemPaginator($this->filterForCaller($this->getProductByBarcode($barcode, !$this->isBackOfficeReader())));
             }
             return $this->getCollection($context);
         }
@@ -159,6 +159,13 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      */
     private function getItem(int $id): ?Product
     {
+        // Back-office readers may load disabled and other-website products (and
+        // raw global values via ?store=admin). Bypass the shared DTO cache both
+        // ways so their unfiltered view never leaks into anonymous reads.
+        if ($this->isBackOfficeReader()) {
+            return $this->filterForCaller($this->loadProductDto($id, visibleOnly: false));
+        }
+
         $storeId = StoreContext::getStoreId();
         $groupId = $this->getCustomerGroupId();
         $currency = $this->resolveCurrencyCode();

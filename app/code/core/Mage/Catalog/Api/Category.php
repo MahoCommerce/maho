@@ -217,6 +217,10 @@ class Category extends CrudResource
     #[ApiProperty(description: 'Positions to set on already-assigned products: {"productId": position}', readable: false)]
     public ?array $productPositions = null;
 
+    /** @var string[]|null Attribute codes whose store override reverts to the default value; only valid with an explicit ?store= scope */
+    #[ApiProperty(description: 'Attribute codes to revert to their default (non-store) values; requires ?store=', readable: false)]
+    public ?array $useDefault = null;
+
     #[Groups(['category:read'])]
     #[ApiProperty(writable: false)]
     public ?string $createdAt = null;

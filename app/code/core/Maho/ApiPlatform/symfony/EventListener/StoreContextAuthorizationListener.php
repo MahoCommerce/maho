@@ -56,6 +56,15 @@ class StoreContextAuthorizationListener
         $token = $this->tokenStorage->getToken();
         $user = $token?->getUser();
 
+        // The admin store (0) is the global scope: raw default attribute values and
+        // the full category tree. Only back-office callers may request it; guests
+        // and customer tokens are limited to real store views.
+        if ((int) $resolvedStoreId === 0) {
+            if (!$user instanceof ApiUser || !($user->isAdmin() || $user->isApiUser())) {
+                throw new AccessDeniedHttpException('The admin scope is restricted to back-office tokens.');
+            }
+        }
+
         if ($user instanceof ApiUser) {
             if (!$user->canAccessStore((int) $resolvedStoreId)) {
                 throw new AccessDeniedHttpException('Token is not authorized for the requested store.');

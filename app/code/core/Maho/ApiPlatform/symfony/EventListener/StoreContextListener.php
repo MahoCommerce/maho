@@ -48,8 +48,11 @@ class StoreContextListener
 
         try {
             $store = \Mage::app()->getStore($storeCode);
-            if ($store && $store->getId()) {
-                \Mage::app()->setCurrentStore($store);
+            // Store id 0 is the admin store: a legitimate explicit request for the
+            // global scope (gated to back-office callers by the authorization
+            // listener), so it must not be dropped by a truthiness check.
+            if ($store && ($store->getId() !== null && $store->getId() !== '')) {
+                \Maho\ApiPlatform\Service\StoreContext::setExplicitStore((int) $store->getId());
                 $request->attributes->set(self::ATTR_REQUESTED_STORE_CODE, $storeCode);
                 $request->attributes->set(self::ATTR_RESOLVED_STORE_ID, (int) $store->getId());
             }
