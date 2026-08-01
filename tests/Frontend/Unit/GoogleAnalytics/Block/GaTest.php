@@ -58,4 +58,16 @@ describe('GA4 purchase event', function () {
 
         expect($this->block->getPurchaseEventData($order)['items'][0]['item_id'])->toBe('deleted-sku');
     });
+
+    it('falls back to the tax-exclusive price when the incl-tax column is null', function () {
+        $item = Mage::getModel('sales/order_item')
+            ->setSku('legacy-sku')
+            ->setQtyOrdered(1)
+            ->setBasePrice(100.00)
+            ->setProduct(Mage::getModel('catalog/product')->setCategoryIds([]));
+        $order = Mage::getModel('sales/order')->setBaseGrandTotal(100.00);
+        $order->addItem($item);
+
+        expect($this->block->getPurchaseEventData($order)['items'][0]['price'])->toBe('100.00');
+    });
 });

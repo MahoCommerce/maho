@@ -61,9 +61,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
             // @see https://developers.facebook.com/docs/meta-pixel/reference#standard-events
             $productViewed = Mage::registry('current_product');
             if ($productViewed) {
-                $productPrice = (float) $helper->formatPrice(
-                    Mage::helper('tax')->getPrice($productViewed, $productViewed->getFinalPrice(), true),
-                );
+                $productPrice = (float) $helper->formatPrice($helper->getPriceInclTax($productViewed));
                 $eventData = [];
                 $eventData['value'] = $productPrice;
                 $eventData['currency'] = Mage::app()->getStore()->getCurrentCurrencyCode();
@@ -111,9 +109,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
 
                     foreach ($productCollection as $productViewed) {
                         $productId = $productViewed->getSku();
-                        $productPrice = (float) $helper->formatPrice(
-                            Mage::helper('tax')->getPrice($productViewed, $productViewed->getFinalPrice(), true),
-                        );
+                        $productPrice = (float) $helper->formatPrice($helper->getPriceInclTax($productViewed));
                         $contentIds[] = $productId;
                         $contents[] = [
                             'id' => $productId,
@@ -159,9 +155,9 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
                         $contents[] = [
                             'id' => $productId,
                             'quantity' => (int) $item->getQty(),
-                            'item_price' => (float) $helper->formatPrice($item->getBasePriceInclTax()),
+                            'item_price' => (float) $helper->formatPrice($item->getBasePriceInclTax() ?? $item->getBasePrice()),
                         ];
-                        $totalValue += $item->getBaseRowTotalInclTax();
+                        $totalValue += $item->getBaseRowTotalInclTax() ?? $item->getBaseRowTotal();
                         $numItems += (int) $item->getQty();
                     }
 
@@ -228,7 +224,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
             $contents[] = [
                 'id' => $productId,
                 'quantity' => (int) $item->getQtyOrdered(),
-                'item_price' => (float) $helper->formatPrice($item->getBasePriceInclTax()),
+                'item_price' => (float) $helper->formatPrice($item->getBasePriceInclTax() ?? $item->getBasePrice()),
             ];
             $numItems += (int) $item->getQtyOrdered();
         }

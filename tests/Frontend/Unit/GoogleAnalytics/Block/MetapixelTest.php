@@ -204,6 +204,18 @@ describe('Meta Pixel Purchase event', function () {
         expect($this->block->getPurchaseEventData($order)['content_ids'])->toBe(['deleted-sku']);
     });
 
+    it('falls back to the tax-exclusive price when the incl-tax column is null', function () {
+        $item = Mage::getModel('sales/order_item')
+            ->setSku('legacy-sku')
+            ->setQtyOrdered(1)
+            ->setBasePrice(100.00)
+            ->setProduct(Mage::getModel('catalog/product'));
+        $order = Mage::getModel('sales/order')->setBaseGrandTotal(100.00);
+        $order->addItem($item);
+
+        expect($this->block->getPurchaseEventData($order)['contents'][0]['item_price'])->toBe(100.0);
+    });
+
     it('returns null for an order without visible items', function () {
         expect($this->block->getPurchaseEventData(Mage::getModel('sales/order')))->toBeNull();
     });

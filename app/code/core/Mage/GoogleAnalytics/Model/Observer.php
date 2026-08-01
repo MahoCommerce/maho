@@ -78,7 +78,7 @@ class Mage_GoogleAnalytics_Model_Observer
                 'sku' => $product->getSku(),
                 'name' => $product->getName(),
                 'qty' => $addedQty ?: $removedQty,
-                'price' => Mage::helper('tax')->getPrice($product, $product->getFinalPrice(), true),
+                'price' => Mage::helper('googleanalytics')->getPriceInclTax($product),
                 'manufacturer' => $manufacturer,
                 'category' => Mage::helper('googleanalytics')->getLastCategoryName($product),
             ];

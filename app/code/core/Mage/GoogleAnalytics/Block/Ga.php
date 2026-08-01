@@ -139,9 +139,7 @@ gtag('set', 'user_id', '{$customer->getId()}');
             // @see https://developers.google.com/tag-platform/gtagjs/reference/events#view_item
             $productViewed = Mage::registry('current_product');
             $category = Mage::registry('current_category') ? Mage::registry('current_category')->getName() : false;
-            $productPrice = $helper->formatPrice(
-                Mage::helper('tax')->getPrice($productViewed, $productViewed->getFinalPrice(), true),
-            );
+            $productPrice = $helper->formatPrice($helper->getPriceInclTax($productViewed));
             $eventData = [];
             $eventData['currency'] = Mage::app()->getStore()->getCurrentCurrencyCode();
             $eventData['value'] = $productPrice;
@@ -181,7 +179,7 @@ gtag('set', 'user_id', '{$customer->getId()}');
 
             $index = 1;
             foreach ($productCollection as $key => $productViewed) {
-                $productPrice = Mage::helper('tax')->getPrice($productViewed, $productViewed->getFinalPrice(), true);
+                $productPrice = $helper->getPriceInclTax($productViewed);
                 $_item = [
                     'item_id' => $productViewed->getSku(),
                     'index' => $index,
@@ -214,7 +212,7 @@ gtag('set', 'user_id', '{$customer->getId()}');
                     continue;
                 }
                 $_product = $productInCart->getProduct();
-                $productPrice = Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice(), true);
+                $productPrice = $helper->getPriceInclTax($_product);
                 $_item = [
                     'item_id' => $_product->getSku(),
                     'item_name' => $_product->getName(),
@@ -247,7 +245,7 @@ gtag('set', 'user_id', '{$customer->getId()}');
                         continue;
                     }
                     $_product = $productInCart->getProduct();
-                    $productPrice = Mage::helper('tax')->getPrice($_product, $_product->getFinalPrice(), true);
+                    $productPrice = $helper->getPriceInclTax($_product);
                     $_item = [
                         'item_id' => $_product->getSku(),
                         'item_name' => $_product->getName(),
@@ -325,7 +323,7 @@ gtag('set', 'user_id', '{$customer->getId()}');
                 'item_id' => $_product->getSku() ?: $item->getSku(),
                 'item_name' => $item->getName(),
                 'quantity' => (int) $item->getQtyOrdered(),
-                'price' => $helper->formatPrice($item->getBasePriceInclTax()),
+                'price' => $helper->formatPrice($item->getBasePriceInclTax() ?? $item->getBasePrice()),
                 'discount' => $helper->formatPrice($item->getBaseDiscountAmount()),
             ];
             if ($_product->getAttributeText('manufacturer')) {

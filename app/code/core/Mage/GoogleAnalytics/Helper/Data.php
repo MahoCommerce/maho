@@ -166,10 +166,34 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * @param int|float|string $price
+     * @param int|float|string|null $price
      */
     public function formatPrice($price): string
     {
-        return number_format($price, 2, '.', '');
+        return number_format((float) $price, 2, '.', '');
+    }
+
+    /**
+     * Final price including tax, regardless of the store's price display settings
+     */
+    public function getPriceInclTax(Mage_Catalog_Model_Product $product): float
+    {
+        /** @var Mage_Tax_Helper_Data $taxHelper */
+        $taxHelper = Mage::helper('tax');
+        $store = Mage::app()->getStore();
+        $price = (float) $product->getFinalPrice();
+        if ($taxHelper->needPriceConversion($store)) {
+            return (float) $taxHelper->getPrice($product, $price, true);
+        }
+        // Prices entered and displayed excluding tax: getPrice() skips conversion, so apply the rate directly
+        if (!$price || !$product->getTaxClassId()) {
+            return $price;
+        }
+        /** @var Mage_Tax_Model_Calculation $calculation */
+        $calculation = Mage::getSingleton('tax/calculation');
+        $rate = $calculation->getRate(
+            $calculation->getRateRequest(null, null, null, $store)->setProductClassId($product->getTaxClassId()),
+        );
+        return $store->roundPrice($price * (1 + $rate / 100));
     }
 }
