@@ -23,6 +23,8 @@ use Maho\ApiPlatform\Trait\DateRangeFilterTrait;
 final class ProductProvider extends \Maho\ApiPlatform\Provider
 {
     use DateRangeFilterTrait;
+    // Read-side reuse only: shares the stock item column list with the write paths.
+    use \Maho\ApiPlatform\Trait\StockWriterTrait;
 
     /** Whitelist of fields the client may sort by; everything else is rejected to keep ORDER BY injection-safe. */
     private const SORTABLE_FIELDS = ['name', 'price', 'special_price', 'created_at', 'updated_at', 'position', 'sku', 'entity_id'];
@@ -508,6 +510,12 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         ?array $categoryIds = null,
         ?\Mage_CatalogInventory_Model_Stock_Item $stockItem = null,
     ): void {
+        // Purchase cost is for back-office eyes only, never echoed to
+        // public or customer-token readers.
+        if ($dto->cost !== null && !$this->isAdmin() && !$this->isApiUser()) {
+            $dto->cost = null;
+        }
+
         $stockData = $stockItem ?? $product->getStockItem();
         if ($stockData) {
             $dto->stockQty = (float) $stockData->getQty();
@@ -538,6 +546,31 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         if ($forListing) {
             \Mage::dispatchEvent('api_product_dto_build', ['product' => $product, 'for_listing' => true, 'dto' => $dto, 'customer_group_id' => $this->getCustomerGroupId()]);
             return;
+        }
+
+        // Detail-only: an extra query per product, too costly for listings.
+        $dto->websiteIds = array_map('intval', $product->getWebsiteIds());
+
+        if ($stockData) {
+            $dto->stockItem = [];
+            $columns = ['qty' => 'float', 'is_in_stock' => 'bool', 'manage_stock' => 'bool'] + self::STOCK_ITEM_EXTENDED_COLUMNS;
+            foreach ($columns as $column => $type) {
+                $dto->stockItem[$column] = $this->castStockColumnValue($stockData->getData($column), $type);
+            }
+        }
+
+        // Generic EAV read: user-defined attribute values not covered by a
+        // dedicated DTO property (the read counterpart of customAttributesWrite).
+        $dedicated = Product::dedicatedAttributeCodes();
+        $dto->customAttributes = [];
+        foreach ($product->getAttributes() as $code => $attribute) {
+            if (!$attribute->getIsUserDefined() || isset($dedicated[$code])) {
+                continue;
+            }
+            $value = $product->getData($code);
+            if ($value !== null && $value !== '') {
+                $dto->customAttributes[$code] = $value;
+            }
         }
 
         $typeId = $product->getTypeId();

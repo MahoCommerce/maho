@@ -83,7 +83,7 @@ final class AttributeSetProvider extends CrudProvider
     }
 
     /**
-     * Populate the attribute codes assigned to the set.
+     * Populate the attribute codes and grouped structure assigned to the set.
      */
     #[\Override]
     protected function afterMap(Resource $dto, object $model): void
@@ -100,5 +100,44 @@ final class AttributeSetProvider extends CrudProvider
             $codes[] = (string) $attribute->getAttributeCode();
         }
         $dto->attributeCodes = $codes;
+        $dto->groups = $this->loadGroups((int) $model->getId());
+    }
+
+    /**
+     * @return array<array{name: string, sortOrder: int, attributes: array<array{code: string, sortOrder: int}>}>
+     */
+    private function loadGroups(int $setId): array
+    {
+        $resource = \Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+
+        $attributesByGroup = [];
+        $attributeSelect = $adapter->select()
+            ->from(['ea' => $resource->getTableName('eav/entity_attribute')], ['attribute_group_id', 'sort_order'])
+            ->join(['a' => $resource->getTableName('eav/attribute')], 'a.attribute_id = ea.attribute_id', ['attribute_code'])
+            ->where('ea.attribute_set_id = ?', $setId)
+            ->order('ea.sort_order ASC');
+        foreach ($adapter->fetchAll($attributeSelect) as $row) {
+            $attributesByGroup[(int) $row['attribute_group_id']][] = [
+                'code' => (string) $row['attribute_code'],
+                'sortOrder' => (int) $row['sort_order'],
+            ];
+        }
+
+        $groupSelect = $adapter->select()
+            ->from($resource->getTableName('eav/attribute_group'), ['attribute_group_id', 'attribute_group_name', 'sort_order'])
+            ->where('attribute_set_id = ?', $setId)
+            ->order('sort_order ASC');
+
+        $groups = [];
+        foreach ($adapter->fetchAll($groupSelect) as $row) {
+            $groups[] = [
+                'name' => (string) $row['attribute_group_name'],
+                'sortOrder' => (int) $row['sort_order'],
+                'attributes' => $attributesByGroup[(int) $row['attribute_group_id']] ?? [],
+            ];
+        }
+
+        return $groups;
     }
 }

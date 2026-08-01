@@ -12,6 +12,8 @@ namespace Mage\Customer\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
 use Mage\Sales\Api\AccountTokenService;
@@ -70,6 +72,11 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             return $this->updateProfile($data);
         }
 
+        // Handle REST PUT /customers/{id} (admin / service-token update)
+        if ($operation instanceof Put && isset($uriVariables['id'])) {
+            return $this->updateCustomerAdmin((int) $uriVariables['id'], $data);
+        }
+
         // Handle REST POST /customers/me/password (change password)
         if ($operationName === 'change_password') {
             return $this->changePassword($data);
@@ -107,12 +114,18 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Update current customer profile (REST entry point)
      */
+    /**
+     * Admin-only fields (groupId, isActive, websiteId, taxvat,
+     * disableAutoGroupChange) are deliberately never read here, so a
+     * customer's own token cannot touch them.
+     */
     private function updateProfile(Customer $data): Customer
     {
         return $this->doUpdateProfile(
             firstName: $data->firstname,
             lastName: $data->lastname,
             email: $data->email !== '' ? $data->email : null,
+            profile: $this->extractProfileFields($data),
         );
     }
 
@@ -133,9 +146,33 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     private function createCustomer(Customer $data, array $context): Customer
     {
         StoreContext::ensureStore();
-        $this->checkRateLimitByIp('create_customer', 'customer_register', 3600);
+
+        // POST /customers is public (registration). Admin-only fields are accepted
+        // only from an admin or a service token holding customers/create; anyone
+        // else supplying them is rejected before the rate limiter records a hit.
+        $isPrivileged = $this->canWriteAdminFields('customers/create');
+        if (!$isPrivileged) {
+            $this->assertNoAdminOnlyFields($data);
+            $this->checkRateLimitByIp('create_customer', 'customer_register', 3600);
+        }
+
         $storeId = StoreContext::getStoreId();
         $websiteId = \Mage::app()->getStore($storeId)->getWebsiteId();
+
+        // websiteId is honored on create only: pick which website the account
+        // lives on, defaulting the store to that website's default store.
+        if ($data->websiteId !== null) {
+            try {
+                $website = \Mage::app()->getWebsite($data->websiteId);
+            } catch (\Throwable) {
+                throw new BadRequestHttpException("Website {$data->websiteId} does not exist");
+            }
+            $websiteId = (int) $website->getId();
+            $defaultStore = $website->getDefaultStore();
+            if ($defaultStore) {
+                $storeId = (int) $defaultStore->getId();
+            }
+        }
 
         $coreHelper = \Mage::helper('core');
 
@@ -165,7 +202,27 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $customer->setFirstname($data->firstname ?? '');
         $customer->setLastname($data->lastname ?? '');
         $customer->setPassword($data->password);
-        $customer->setGroupId((int) (\Mage::getStoreConfig('customer/create_account/default_group') ?: 1));
+
+        $groupId = (int) (\Mage::getStoreConfig('customer/create_account/default_group') ?: 1);
+        if ($data->groupId !== null) {
+            $this->validateGroupExists($data->groupId);
+            $groupId = $data->groupId;
+        }
+        $customer->setGroupId($groupId);
+
+        foreach ($this->extractProfileFields($data) as $field => $value) {
+            $customer->setData($field, $value);
+        }
+        $this->applyAdminOnlyFields($customer, $data);
+        if ($data->isActive === null) {
+            $customer->setData('is_active', 1);
+        }
+
+        // Email confirmation protects self-registration; accounts created by an
+        // admin or service token are trusted, mirroring the admin backend.
+        if ($isPrivileged) {
+            $customer->setForceConfirmed(true);
+        }
 
         try {
             $customer->save();
@@ -185,9 +242,10 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         // it a confirmation-required store leaves the account unconfirmed and unable to log in. The
         // password is intentionally not passed: the new-account templates don't render it. The
         // account is already persisted, so a mail failure must not fail an otherwise-successful
-        // creation — log it and continue.
+        // creation — log it and continue. A force-confirmed (privileged) create has no pending
+        // confirmation key, so it gets the welcome email even on confirmation-required stores.
         try {
-            $emailType = $customer->isConfirmationRequired() ? 'confirmation' : 'registered';
+            $emailType = $customer->isConfirmationRequired() && $customer->getConfirmation() ? 'confirmation' : 'registered';
             $customer->sendNewAccountEmail($emailType, '', $storeId);
         } catch (\Exception $e) {
             \Mage::logException($e);
@@ -352,9 +410,12 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
 
     /**
      * Shared logic for updating customer profile (used by both REST and GraphQL)
+     *
+     * @param array<string, mixed> $profile Optional name-part/gender/dob fields; a null
+     *                                      value clears the attribute, an absent key is untouched
      */
     private function doUpdateProfile(?string $firstName, ?string $lastName, #[\SensitiveParameter]
-        ?string $email): Customer
+        ?string $email, array $profile = []): Customer
     {
         $customerId = $this->getAuthenticatedCustomerId();
         if (!$customerId) {
@@ -370,7 +431,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             'firstName' => $firstName,
             'lastName' => $lastName,
             'email' => $email,
-        ], fn($v) => $v !== null);
+        ], fn($v) => $v !== null) + $profile;
 
         try {
             $customer = $this->customerService->updateCustomer($customer, $data);
@@ -379,6 +440,152 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         }
 
         return Customer::fromModel($customer);
+    }
+
+    /**
+     * Update any customer as an admin or a service token holding customers/write.
+     * The route security already excludes customer tokens; this re-checks in depth.
+     */
+    private function updateCustomerAdmin(int $customerId, Customer $data): Customer
+    {
+        if ($this->isApiUser()) {
+            $this->requireApiPermission('customers/write');
+        } else {
+            $this->requireAdmin();
+        }
+
+        $customer = $this->customerService->getCustomerById($customerId);
+        if (!$customer) {
+            throw new NotFoundHttpException('Customer not found');
+        }
+
+        if ($data->websiteId !== null && $data->websiteId !== (int) $customer->getWebsiteId()) {
+            throw new BadRequestHttpException('websiteId can only be set when creating a customer');
+        }
+
+        if ($data->email !== '' && $data->email !== $customer->getEmail()) {
+            if (!\Mage::helper('core')->isValidEmail($data->email)) {
+                throw new BadRequestHttpException('Invalid email address');
+            }
+            $this->ensureEmailUnique($data->email, (int) $customer->getWebsiteId());
+            $customer->setEmail($data->email);
+        }
+
+        if ($data->firstname !== null) {
+            $customer->setFirstname($data->firstname);
+        }
+        if ($data->lastname !== null) {
+            $customer->setLastname($data->lastname);
+        }
+        foreach ($this->extractProfileFields($data) as $field => $value) {
+            $customer->setData($field, $value);
+        }
+        if ($data->groupId !== null) {
+            $this->validateGroupExists($data->groupId);
+            $customer->setGroupId($data->groupId);
+        }
+        $this->applyAdminOnlyFields($customer, $data);
+
+        try {
+            $customer->save();
+        } catch (\Mage_Core_Exception $e) {
+            throw new BadRequestHttpException($e->getMessage());
+        }
+
+        return Customer::fromModel($customer);
+    }
+
+    /**
+     * Whether the caller may write admin-only customer fields: an admin token,
+     * or a service (API-user) token holding the given permission.
+     */
+    private function canWriteAdminFields(string $permission): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        $user = $this->security?->getUser();
+        return $user instanceof ApiUser && $user->isApiUser() && $user->hasPermission($permission);
+    }
+
+    /** @throws AccessDeniedHttpException when a non-privileged caller supplies an admin-only field */
+    private function assertNoAdminOnlyFields(Customer $data): void
+    {
+        $adminOnly = [
+            'groupId' => $data->groupId,
+            'isActive' => $data->isActive,
+            'websiteId' => $data->websiteId,
+            'taxvat' => $data->taxvat,
+            'disableAutoGroupChange' => $data->disableAutoGroupChange,
+        ];
+        foreach ($adminOnly as $field => $value) {
+            if ($value !== null) {
+                throw new AccessDeniedHttpException("Field {$field} requires an admin or service token");
+            }
+        }
+    }
+
+    /**
+     * Self-service-safe profile fields with a non-null value on the DTO,
+     * normalized and keyed by model attribute; a null value clears the attribute.
+     *
+     * @return array<string, mixed>
+     */
+    private function extractProfileFields(Customer $data): array
+    {
+        $profile = [];
+        if ($data->prefix !== null) {
+            $profile['prefix'] = $data->prefix;
+        }
+        if ($data->middlename !== null) {
+            $profile['middlename'] = $data->middlename;
+        }
+        if ($data->suffix !== null) {
+            $profile['suffix'] = $data->suffix;
+        }
+        if ($data->gender !== null) {
+            $profile['gender'] = $data->gender ?: null;
+        }
+        if ($data->dob !== null) {
+            $profile['dob'] = $this->normalizeDobInput($data->dob);
+        }
+        return $profile;
+    }
+
+    /** Apply admin-only scalar fields; callers have already verified privilege */
+    private function applyAdminOnlyFields(\Mage_Customer_Model_Customer $customer, Customer $data): void
+    {
+        if ($data->taxvat !== null) {
+            $customer->setData('taxvat', $data->taxvat === '' ? null : $data->taxvat);
+        }
+        if ($data->isActive !== null) {
+            $customer->setData('is_active', (int) $data->isActive);
+        }
+        if ($data->disableAutoGroupChange !== null) {
+            $customer->setData('disable_auto_group_change', (int) $data->disableAutoGroupChange);
+        }
+    }
+
+    private function validateGroupExists(int $groupId): void
+    {
+        if (!\Mage::getModel('customer/group')->load($groupId)->getId()) {
+            throw new BadRequestHttpException("Customer group {$groupId} does not exist");
+        }
+    }
+
+    /**
+     * Normalize a dob input to the midnight 'Y-m-d H:i:s' form the admin
+     * stores; empty string clears the value (returns null).
+     */
+    private function normalizeDobInput(string $value): ?string
+    {
+        try {
+            $date = \Mage::app()->getLocale()->formatDateForDb($value, withTime: false);
+        } catch (\Exception) {
+            throw new BadRequestHttpException('Invalid date for dob; use Y-m-d format.');
+        }
+        return $date === null ? null : $date . ' 00:00:00';
     }
 
     /**

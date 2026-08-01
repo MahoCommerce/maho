@@ -293,15 +293,46 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $dto->customerEmail = $order->getCustomerEmail();
         $dto->customerFirstname = $order->getCustomerFirstname();
         $dto->customerLastname = $order->getCustomerLastname();
+        $dto->customerMiddlename = $order->getCustomerMiddlename();
+        $dto->customerPrefix = $order->getCustomerPrefix();
+        $dto->customerSuffix = $order->getCustomerSuffix();
+        $dto->customerTaxvat = $order->getCustomerTaxvat();
+        $dto->customerDob = $order->getCustomerDob();
+        $dto->customerGender = $order->getCustomerGender() !== null ? (int) $order->getCustomerGender() : null;
+        $dto->customerGroupId = $order->getCustomerGroupId() !== null ? (int) $order->getCustomerGroupId() : null;
+        $dto->customerIsGuest = (bool) $order->getCustomerIsGuest();
+        $dto->customerNote = $order->getCustomerNote();
         $dto->status = $order->getStatus();
         $dto->state = $order->getState();
+        $dto->holdBeforeState = $order->getHoldBeforeState();
+        $dto->holdBeforeStatus = $order->getHoldBeforeStatus();
         $dto->storeId = (int) $order->getStoreId();
+        $dto->storeName = $order->getStoreName();
+        $dto->quoteId = $order->getQuoteId() ? (int) $order->getQuoteId() : null;
+        $dto->isVirtual = (bool) $order->getIsVirtual();
+        $dto->weight = $order->getWeight() !== null ? (float) $order->getWeight() : null;
+        $dto->emailSent = (bool) $order->getEmailSent();
+        $dto->extOrderId = $order->getExtOrderId();
+        $dto->extCustomerId = $order->getExtCustomerId();
         $dto->currency = $order->getOrderCurrencyCode() ?: \Mage::app()->getStore()->getDefaultCurrencyCode();
+        $dto->baseCurrencyCode = $order->getBaseCurrencyCode();
+        $dto->globalCurrencyCode = $order->getGlobalCurrencyCode();
         $dto->totalItemCount = (int) $order->getTotalItemCount();
         $dto->totalQtyOrdered = (float) $order->getTotalQtyOrdered();
         $dto->createdAt = $order->getCreatedAt();
         $dto->updatedAt = $order->getUpdatedAt();
         $dto->couponCode = $order->getCouponCode();
+        $dto->couponRuleName = $order->getCouponRuleName();
+        $dto->discountDescription = $order->getDiscountDescription();
+        $dto->appliedRuleIds = $this->parseAppliedRuleIds($order->getAppliedRuleIds());
+        $dto->giftcardCodes = $this->parseGiftcardCodes($order->getData('giftcard_codes'));
+
+        // Fraud-relevant request metadata is for back-office eyes only, never
+        // echoed to customer or guest-token readers.
+        if ($this->isAdmin() || $this->isApiUser()) {
+            $dto->remoteIp = $order->getRemoteIp();
+            $dto->xForwardedFor = $order->getXForwardedFor();
+        }
 
         // Set access token for guest orders
         if ($accessToken) {
@@ -420,10 +451,29 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $dto->productId = $item->getProductId() ? (int) $item->getProductId() : null;
         $dto->productType = $item->getProductType();
         $dto->parentItemId = $item->getParentItemId() ? (int) $item->getParentItemId() : null;
-
-
-
-
+        $dto->description = $item->getDescription();
+        $dto->qtyInvoiced = (float) $item->getQtyInvoiced();
+        $dto->qtyBackordered = $item->getQtyBackordered() !== null ? (float) $item->getQtyBackordered() : null;
+        $dto->originalPrice = $item->getOriginalPrice() !== null ? (float) $item->getOriginalPrice() : null;
+        $dto->basePrice = (float) $item->getBasePrice();
+        $dto->baseRowTotal = (float) $item->getBaseRowTotal();
+        $dto->baseTaxAmount = $item->getBaseTaxAmount() !== null ? (float) $item->getBaseTaxAmount() : null;
+        $dto->baseDiscountAmount = $item->getBaseDiscountAmount() !== null ? (float) $item->getBaseDiscountAmount() : null;
+        $dto->baseCost = $item->getBaseCost() !== null ? (float) $item->getBaseCost() : null;
+        $dto->amountRefunded = $item->getAmountRefunded() !== null ? (float) $item->getAmountRefunded() : null;
+        $dto->taxRefunded = $item->getTaxRefunded() !== null ? (float) $item->getTaxRefunded() : null;
+        $dto->discountRefunded = $item->getDiscountRefunded() !== null ? (float) $item->getDiscountRefunded() : null;
+        $dto->weight = $item->getWeight() !== null ? (float) $item->getWeight() : null;
+        $dto->rowWeight = $item->getRowWeight() !== null ? (float) $item->getRowWeight() : null;
+        $dto->isVirtual = (bool) $item->getIsVirtual();
+        $dto->isQtyDecimal = (bool) $item->getIsQtyDecimal();
+        $dto->freeShipping = (bool) $item->getFreeShipping();
+        $dto->noDiscount = (bool) $item->getNoDiscount();
+        $dto->additionalData = $item->getAdditionalData();
+        $dto->extOrderItemId = $item->getExtOrderItemId();
+        $dto->storeId = $item->getStoreId() ? (int) $item->getStoreId() : null;
+        $dto->createdAt = $item->getCreatedAt();
+        $dto->productOptions = $item->getProductOptions();
 
 
         \Mage::dispatchEvent('api_order_item_dto_build', ['item' => $item, 'dto' => $dto]);
@@ -448,10 +498,42 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
                 ? (float) $order->getShippingInclTax()
                 : null,
             'taxAmount' => (float) $order->getTaxAmount(),
+            'shippingTaxAmount' => $order->getShippingTaxAmount() !== null
+                ? (float) $order->getShippingTaxAmount()
+                : null,
+            'hiddenTaxAmount' => $order->getHiddenTaxAmount() !== null
+                ? (float) $order->getHiddenTaxAmount()
+                : null,
+            'shippingDiscountAmount' => $order->getShippingDiscountAmount() !== null
+                ? (float) $order->getShippingDiscountAmount()
+                : null,
             'grandTotal' => (float) $order->getGrandTotal(),
             'totalPaid' => (float) $order->getTotalPaid(),
             'totalRefunded' => (float) $order->getTotalRefunded(),
             'totalDue' => (float) $order->getTotalDue(),
+            'totalCanceled' => $order->getTotalCanceled() !== null ? (float) $order->getTotalCanceled() : null,
+            'totalInvoiced' => $order->getTotalInvoiced() !== null ? (float) $order->getTotalInvoiced() : null,
+            'subtotalCanceled' => $order->getSubtotalCanceled() !== null ? (float) $order->getSubtotalCanceled() : null,
+            'subtotalInvoiced' => $order->getSubtotalInvoiced() !== null ? (float) $order->getSubtotalInvoiced() : null,
+            'subtotalRefunded' => $order->getSubtotalRefunded() !== null ? (float) $order->getSubtotalRefunded() : null,
+            'adjustmentPositive' => $order->getAdjustmentPositive() !== null
+                ? (float) $order->getAdjustmentPositive()
+                : null,
+            'adjustmentNegative' => $order->getAdjustmentNegative() !== null
+                ? (float) $order->getAdjustmentNegative()
+                : null,
+            'baseGrandTotal' => (float) $order->getBaseGrandTotal(),
+            'baseSubtotal' => (float) $order->getBaseSubtotal(),
+            'baseTaxAmount' => (float) $order->getBaseTaxAmount(),
+            'baseShippingAmount' => $order->getBaseShippingAmount() !== null
+                ? (float) $order->getBaseShippingAmount()
+                : null,
+            'baseDiscountAmount' => $order->getBaseDiscountAmount()
+                ? abs((float) $order->getBaseDiscountAmount())
+                : null,
+            'baseTotalPaid' => (float) $order->getBaseTotalPaid(),
+            'baseTotalRefunded' => (float) $order->getBaseTotalRefunded(),
+            'baseTotalDue' => (float) $order->getBaseTotalDue(),
             'giftcardAmount' => null,
         ];
 
@@ -461,6 +543,51 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         }
 
         return $prices;
+    }
+
+    /**
+     * @return int[]
+     */
+    private function parseAppliedRuleIds(?string $ruleIds): array
+    {
+        if (!$ruleIds) {
+            return [];
+        }
+
+        return array_values(array_map(
+            'intval',
+            array_filter(array_map('trim', explode(',', $ruleIds)), fn(string $id): bool => $id !== ''),
+        ));
+    }
+
+    /**
+     * Decode the giftcard_codes column ({"CODE": appliedAmount} JSON, copied
+     * verbatim from the quote at conversion).
+     *
+     * @return array<string, float>
+     */
+    private function parseGiftcardCodes(mixed $raw): array
+    {
+        if (!is_string($raw) || $raw === '') {
+            return [];
+        }
+
+        try {
+            $decoded = \Mage::helper('core')->jsonDecode($raw);
+        } catch (\JsonException) {
+            return [];
+        }
+
+        if (!is_array($decoded)) {
+            return [];
+        }
+
+        $codes = [];
+        foreach ($decoded as $code => $amount) {
+            $codes[(string) $code] = (float) $amount;
+        }
+
+        return $codes;
     }
 
     /**

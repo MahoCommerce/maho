@@ -111,4 +111,30 @@ class TaxRate extends CrudResource
 
     #[ApiProperty(extraProperties: ['modelField' => 'zip_to'])]
     public ?string $zipTo = null;
+
+    /**
+     * Per-store display titles (tax_calculation_rate_title). Null on input means
+     * untouched; an entry with an empty title clears that store's title.
+     *
+     * @var array<int, array{storeId: int, title: string}>|null
+     */
+    #[ApiProperty(extraProperties: ['computed' => true])]
+    public ?array $titles = null;
+
+    public static function afterLoad(self $dto, object $model): void
+    {
+        if (!$model->getId()) {
+            return;
+        }
+
+        /** @var \Mage_Tax_Model_Calculation_Rate $model */
+        $titles = [];
+        foreach ($model->getTitles() as $title) {
+            $titles[] = [
+                'storeId' => (int) $title->getStoreId(),
+                'title' => (string) $title->getValue(),
+            ];
+        }
+        $dto->titles = $titles;
+    }
 }

@@ -45,7 +45,9 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
         // (GET /customers/me); GraphQL uses 'current' (field `currentCustomer`).
         // They must differ: a REST and GraphQL op sharing a name collide in the
         // resource metadata and break the schema (see OperationNamingTest).
-        if ($operationName === 'current' || $operationName === 'me_rest') {
+        // 'update_profile' (PUT /customers/me) lands here too when API Platform's
+        // read phase runs for the PUT; it has no {id} uri variable.
+        if ($operationName === 'current' || $operationName === 'me_rest' || $operationName === 'update_profile') {
             $customerId = $this->getAuthenticatedCustomerId();
             return $customerId ? $this->getItem($customerId) : null;
         }
@@ -71,7 +73,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
         // key dump every customer's profile + addresses. ROLE_CUSTOMER (a
         // customer's own token) falls through to authorizeCustomerAccess(),
         // which enforces self-only.
-        $requestedId = (int) $uriVariables['id'];
+        $requestedId = (int) ($uriVariables['id'] ?? 0);
         if ($this->isApiUser()) {
             $this->requireApiPermission('customers/read');
         } elseif (!$this->isAdmin()) {

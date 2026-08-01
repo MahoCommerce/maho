@@ -136,8 +136,12 @@ class OrderService
                 $order->save();
             }
 
-            // Add order note if provided
+            // Persist the note both as the readable customer_note snapshot and
+            // as a status-history entry, so the placement orderNote round-trips
+            // through the order read surface.
             if ($orderNote) {
+                $order->setCustomerNote($orderNote);
+                $order->save();
                 $order->addStatusHistoryComment($orderNote, false)
                     ->setIsCustomerNotified(false)
                     ->save();
@@ -558,6 +562,7 @@ class OrderService
         foreach ($order->getStatusHistoryCollection() as $status) {
             $notes[] = [
                 'note' => $status->getComment(),
+                'status' => $status->getStatus(),
                 'createdAt' => $status->getCreatedAt(),
                 'isCustomerNotified' => (bool) $status->getIsCustomerNotified(),
                 'isVisibleOnFront' => (bool) $status->getIsVisibleOnFront(),

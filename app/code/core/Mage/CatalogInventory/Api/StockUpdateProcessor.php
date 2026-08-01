@@ -50,6 +50,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             isset($body['qty']) ? (float) $body['qty'] : null,
             isset($body['isInStock']) ? (bool) $body['isInStock'] : null,
             isset($body['manageStock']) ? (bool) $body['manageStock'] : null,
+            $this->extractExtendedStockColumns($body),
         );
     }
 
@@ -62,6 +63,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             isset($args['qty']) ? (float) $args['qty'] : null,
             isset($args['isInStock']) ? (bool) $args['isInStock'] : null,
             isset($args['manageStock']) ? (bool) $args['manageStock'] : null,
+            $this->extractExtendedStockColumns($args),
         );
     }
 
@@ -71,7 +73,10 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         return $this->doBulkUpdate($args['items'] ?? []);
     }
 
-    private function doSingleUpdate(string $sku, ?float $qty, ?bool $isInStock, ?bool $manageStock): StockUpdate
+    /**
+     * @param array<string, int|float> $extended from extractExtendedStockColumns()
+     */
+    private function doSingleUpdate(string $sku, ?float $qty, ?bool $isInStock, ?bool $manageStock, array $extended = []): StockUpdate
     {
         if (empty($sku)) {
             throw new BadRequestHttpException('SKU is required');
@@ -80,8 +85,8 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         // A missing qty must leave the stored quantity untouched (partial update
         // of availability/manage flags). Coercing it to 0 would silently wipe a
         // product's stock when the caller only flips isInStock/manageStock.
-        if ($qty === null && $isInStock === null && $manageStock === null) {
-            throw new BadRequestHttpException('At least one of qty, isInStock or manageStock must be provided');
+        if ($qty === null && $isInStock === null && $manageStock === null && $extended === []) {
+            throw new BadRequestHttpException('At least one stock field must be provided');
         }
 
         if ($qty !== null) {
@@ -96,7 +101,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException("Product not found for SKU: {$sku}");
         }
 
-        $stockData = $this->buildStockData($qty, $isInStock, $manageStock);
+        $stockData = array_merge($this->buildStockData($qty, $isInStock, $manageStock), $extended);
         $upsert = $this->upsertStockItemRow((int) $productId, $stockData);
 
         // Invalidate cache
@@ -115,9 +120,26 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         $dto->isInStock = $this->resolveIsInStock($stockData, (int) $productId);
         $dto->manageStock = (bool) $upsert['manageStock'];
         $dto->previousQty = $upsert['previousQty'];
+        $this->reflectExtendedColumns($dto, $extended);
         $dto->success = true;
 
         return $dto;
+    }
+
+    /**
+     * Echo the extended columns this write set back onto the DTO's camelCase
+     * properties, cast to the property types.
+     *
+     * @param array<string, int|float> $extended
+     */
+    private function reflectExtendedColumns(StockUpdate $dto, array $extended): void
+    {
+        foreach ($extended as $column => $value) {
+            $property = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $column))));
+            if (property_exists($dto, $property)) {
+                $dto->$property = self::STOCK_ITEM_EXTENDED_COLUMNS[$column] === 'bool' ? (bool) $value : $value;
+            }
+        }
     }
 
     /**
@@ -184,9 +206,10 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
                 $qty = isset($item['qty']) ? (float) $item['qty'] : null;
                 $isInStock = isset($item['isInStock']) ? (bool) $item['isInStock'] : null;
                 $manageStock = isset($item['manageStock']) ? (bool) $item['manageStock'] : null;
+                $extended = $this->extractExtendedStockColumns($item);
                 $productId = $skuToProductId[$sku];
 
-                $stockData = $this->buildStockData($qty, $isInStock, $manageStock);
+                $stockData = array_merge($this->buildStockData($qty, $isInStock, $manageStock), $extended);
                 $upsert = $this->upsertStockItemRow((int) $productId, $stockData);
 
                 $cacheTags[] = "API_PRODUCT_{$productId}";
@@ -197,6 +220,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
                 $result->isInStock = $this->resolveIsInStock($stockData, (int) $productId);
                 $result->manageStock = (bool) $upsert['manageStock'];
                 $result->previousQty = $upsert['previousQty'];
+                $this->reflectExtendedColumns($result, $extended);
                 $result->success = true;
                 $results[] = $result;
             }

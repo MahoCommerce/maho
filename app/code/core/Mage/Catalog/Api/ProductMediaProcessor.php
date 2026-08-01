@@ -74,6 +74,9 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
         $types = $body['types'] ?? [];
         $label = $body['label'] ?? null;
 
+        $position = $body['position'] ?? null;
+        $disabled = $body['disabled'] ?? null;
+
         $tmpPath = null;
 
         if ($base64 !== null) {
@@ -150,8 +153,19 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
                 false,
             );
 
-            // Set label if provided via the gallery backend API
+            // Apply label/position/disabled to the just-added image via the
+            // gallery backend API
+            $updateData = [];
             if ($label !== null) {
+                $updateData['label'] = $label;
+            }
+            if ($position !== null) {
+                $updateData['position'] = (int) $position;
+            }
+            if ($disabled !== null) {
+                $updateData['disabled'] = $disabled ? 1 : 0;
+            }
+            if (!empty($updateData)) {
                 $gallery = $product->getData('media_gallery');
                 if (!empty($gallery['images'])) {
                     $lastImage = end($gallery['images']);
@@ -159,7 +173,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
                     if ($file) {
                         /** @var \Mage_Catalog_Model_Product_Attribute_Backend_Media $backend */
                         $backend = $product->getResource()->getAttribute('media_gallery')->getBackend();
-                        $backend->updateImage($product, $file, ['label' => $label]);
+                        $backend->updateImage($product, $file, $updateData);
                     }
                 }
             }
@@ -174,15 +188,48 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        // Get the last added image
-        $product = $this->loadProduct($productId);
-        $images = $this->provider->getMediaGallery($product);
-        if (!empty($images)) {
-            return end($images);
+        return $this->mapNewestGalleryImage($this->loadProduct($productId));
+    }
+
+    /**
+     * Map the most recently inserted gallery row (highest value_id) to a DTO.
+     *
+     * Works from the raw media_gallery data instead of getMediaGalleryImages()
+     * so an image uploaded with disabled=true is still returned, and a custom
+     * position can't make end() pick the wrong entry.
+     */
+    private function mapNewestGalleryImage(\Mage_Catalog_Model_Product $product): ProductMedia
+    {
+        $newest = null;
+        $gallery = $product->getData('media_gallery');
+        foreach ($gallery['images'] ?? [] as $image) {
+            if ($newest === null || (int) ($image['value_id'] ?? 0) > (int) ($newest['value_id'] ?? 0)) {
+                $newest = $image;
+            }
         }
 
         $dto = new ProductMedia();
-        $dto->id = 0;
+        if ($newest === null) {
+            $dto->id = 0;
+            return $dto;
+        }
+
+        $file = (string) ($newest['file'] ?? '');
+        $dto->id = (int) ($newest['value_id'] ?? 0);
+        $dto->file = $file;
+        $dto->url = $file !== '' ? (string) $product->getMediaConfig()->getMediaUrl($file) : null;
+        $dto->label = ($newest['label'] ?? null) ?: null;
+        $dto->position = (int) ($newest['position'] ?? 0);
+        $dto->disabled = (bool) ($newest['disabled'] ?? false);
+
+        $types = [];
+        foreach (['image', 'small_image', 'thumbnail'] as $role) {
+            if ($product->getData($role) === $file) {
+                $types[] = $role;
+            }
+        }
+        $dto->types = $types;
+
         return $dto;
     }
 

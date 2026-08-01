@@ -134,11 +134,19 @@ final class ShipmentProvider extends CrudProvider
                 $itemsByShipment[(int) $item->getParentId()][] = $item;
             }
 
+            $commentsByShipment = [];
+            $commentCollection = \Mage::getResourceModel('sales/order_shipment_comment_collection')
+                ->addFieldToFilter('parent_id', ['in' => $shipmentIds]);
+            foreach ($commentCollection as $comment) {
+                $commentsByShipment[(int) $comment->getParentId()][] = $comment;
+            }
+
             foreach ($models as $shipment) {
                 $sid = (int) $shipment->getId();
                 $shipment->setData('_preloaded_order_increment_id', $incrementIds[$shipment->getOrderId()] ?? null);
                 $shipment->setData('_preloaded_tracks', $tracksByShipment[$sid] ?? []);
                 $shipment->setData('_preloaded_items', $itemsByShipment[$sid] ?? []);
+                $shipment->setData('_preloaded_comments', $commentsByShipment[$sid] ?? []);
             }
         }
 

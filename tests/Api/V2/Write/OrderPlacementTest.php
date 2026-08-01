@@ -153,3 +153,103 @@ describe('POST /api/rest/v2/orders', function (): void {
     });
 
 });
+
+describe('expanded order read surface', function (): void {
+
+    it('round-trips orderNote into customerNote and exposes the new fields', function (): void {
+        $cartId = makeOrderCartWithItem();
+        if ($cartId === null) {
+            $this->markTestSkipped('Could not seed a purchasable cart (no write_test_sku or add-to-cart failed)');
+        }
+
+        $note = 'Please leave the parcel at the back door';
+        $orderResponse = apiPost('/api/rest/v2/orders', [
+            'cartId' => $cartId,
+            'shippingAddress' => orderPlacementAddress(),
+            'billingAddress' => orderPlacementAddress(),
+            'paymentMethod' => 'cashondelivery',
+            'shippingMethod' => 'freeshipping_freeshipping',
+            'orderNote' => $note,
+        ], customerToken());
+
+        expect($orderResponse['status'])->toBeLessThan(500);
+        if ($orderResponse['status'] >= 400) {
+            $this->markTestSkipped(
+                'Checkout could not complete in this store (status ' . $orderResponse['status'] . '): '
+                . ($orderResponse['json']['message'] ?? $orderResponse['json']['error'] ?? 'unknown'),
+            );
+        }
+
+        $order = $orderResponse['json'];
+        if (!empty($order['id'])) {
+            trackCreated('order', (int) $order['id']);
+        }
+
+        // The placement note is readable back as customerNote
+        expect($order['customerNote'] ?? null)->toBe($note);
+
+        // New scalar fields
+        expect($order['customerIsGuest'])->toBeFalse();
+        expect($order['isVirtual'])->toBeFalse();
+        expect($order['quoteId'])->toBe($cartId);
+        expect($order)->toHaveKeys([
+            'customerGroupId', 'weight', 'emailSent', 'storeName',
+            'baseCurrencyCode', 'globalCurrencyCode',
+            'extOrderId', 'extCustomerId',
+            'couponRuleName', 'discountDescription',
+            'holdBeforeState', 'holdBeforeStatus',
+            'customerMiddlename', 'customerPrefix', 'customerSuffix',
+            'customerTaxvat', 'customerDob', 'customerGender',
+        ]);
+        expect($order['appliedRuleIds'])->toBeArray();
+        expect($order['giftcardCodes'])->toBeArray();
+        expect($order['baseCurrencyCode'])->not->toBeEmpty();
+
+        // Base and lifecycle totals
+        expect($order['prices'])->toHaveKeys([
+            'baseGrandTotal', 'baseSubtotal', 'baseTaxAmount', 'baseShippingAmount',
+            'baseDiscountAmount', 'baseTotalPaid', 'baseTotalRefunded', 'baseTotalDue',
+            'shippingTaxAmount', 'hiddenTaxAmount', 'shippingDiscountAmount',
+            'adjustmentPositive', 'adjustmentNegative',
+            'totalCanceled', 'totalInvoiced',
+            'subtotalCanceled', 'subtotalInvoiced', 'subtotalRefunded',
+        ]);
+        expect($order['prices']['baseGrandTotal'])->toBeGreaterThan(0);
+
+        // New item fields including decoded product options
+        expect($order['items'])->not->toBeEmpty();
+        $item = $order['items'][0];
+        expect($item)->toHaveKeys([
+            'productOptions', 'qtyInvoiced', 'qtyBackordered', 'originalPrice', 'baseCost',
+            'weight', 'rowWeight', 'isVirtual', 'isQtyDecimal', 'freeShipping', 'noDiscount',
+            'description', 'additionalData', 'extOrderItemId',
+            'basePrice', 'baseRowTotal', 'baseTaxAmount', 'baseDiscountAmount',
+            'amountRefunded', 'taxRefunded', 'discountRefunded',
+            'storeId', 'createdAt',
+        ]);
+        expect($item['productOptions'])->toBeArray();
+        expect($item['basePrice'])->toBeGreaterThan(0);
+
+        // Status history entries carry the status they moved the order to,
+        // and include the placement note
+        expect($order['statusHistory'])->not->toBeEmpty();
+        foreach ($order['statusHistory'] as $entry) {
+            expect($entry)->toHaveKeys(['note', 'status', 'createdAt', 'isCustomerNotified', 'isVisibleOnFront']);
+        }
+        $notes = array_column($order['statusHistory'], 'note');
+        expect($notes)->toContain($note);
+
+        // Fraud metadata is admin-only: the customer-facing read must not carry it
+        expect($order['remoteIp'] ?? null)->toBeNull();
+        expect($order['xForwardedFor'] ?? null)->toBeNull();
+
+        // Admin read of the same order exposes the admin-only keys
+        if (!empty($order['id'])) {
+            $adminRead = apiGet('/api/rest/v2/orders/' . $order['id'], adminToken());
+            expect($adminRead['status'])->toBe(200);
+            expect($adminRead['json'])->toHaveKeys(['remoteIp', 'xForwardedFor']);
+            expect($adminRead['json']['customerNote'])->toBe($note);
+        }
+    });
+
+});

@@ -237,4 +237,54 @@ describe('GET /api/rest/v2/orders/{id}', function (): void {
         expect($response['status'])->toBeUnauthorized();
     });
 
+    it('exposes the expanded order read surface to admin', function (): void {
+        $orderId = fixtures('order_id');
+
+        if (!$orderId) {
+            $this->markTestSkipped('No order_id configured in fixtures');
+        }
+
+        $response = apiGet("/api/rest/v2/orders/{$orderId}", adminToken());
+
+        expect($response['status'])->toBe(200);
+
+        $order = $response['json'];
+        expect($order)->toHaveKeys([
+            'customerNote', 'customerGroupId', 'customerIsGuest', 'isVirtual',
+            'quoteId', 'weight', 'emailSent',
+            'extOrderId', 'extCustomerId',
+            'storeName', 'baseCurrencyCode', 'globalCurrencyCode',
+            'appliedRuleIds', 'couponRuleName', 'discountDescription', 'giftcardCodes',
+            'customerMiddlename', 'customerPrefix', 'customerSuffix',
+            'customerTaxvat', 'customerDob', 'customerGender',
+            'holdBeforeState', 'holdBeforeStatus',
+            'remoteIp', 'xForwardedFor',
+        ]);
+        expect($order['customerIsGuest'])->toBeBool();
+        expect($order['appliedRuleIds'])->toBeArray();
+        expect($order['giftcardCodes'])->toBeArray();
+
+        expect($order['prices'])->toHaveKeys([
+            'baseGrandTotal', 'baseSubtotal', 'baseTaxAmount', 'baseShippingAmount',
+            'baseDiscountAmount', 'baseTotalPaid', 'baseTotalRefunded', 'baseTotalDue',
+            'shippingTaxAmount', 'hiddenTaxAmount', 'shippingDiscountAmount',
+            'adjustmentPositive', 'adjustmentNegative',
+            'totalCanceled', 'totalInvoiced',
+            'subtotalCanceled', 'subtotalInvoiced', 'subtotalRefunded',
+        ]);
+
+        foreach ($order['statusHistory'] ?? [] as $entry) {
+            expect($entry)->toHaveKeys(['note', 'status', 'createdAt']);
+        }
+
+        if (!empty($order['items'])) {
+            expect($order['items'][0])->toHaveKeys([
+                'productOptions', 'qtyInvoiced', 'originalPrice', 'baseCost',
+                'weight', 'rowWeight', 'isVirtual', 'extOrderItemId',
+                'basePrice', 'baseRowTotal', 'storeId', 'createdAt',
+            ]);
+            expect($order['items'][0]['productOptions'])->toBeArray();
+        }
+    });
+
 });

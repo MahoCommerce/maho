@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Mage\Review\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Maho\ApiPlatform\CrudResource;
+use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -25,6 +25,12 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class ReviewProcessor extends \Maho\ApiPlatform\Processor
 {
+    private const STATUS_MAP = [
+        'approved' => \Mage_Review_Model_Review::STATUS_APPROVED,
+        'pending' => \Mage_Review_Model_Review::STATUS_PENDING,
+        'not_approved' => \Mage_Review_Model_Review::STATUS_NOT_APPROVED,
+    ];
+
     /**
      * @param Review $data
      * @return Review
@@ -46,6 +52,10 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
             );
         }
 
+        if ($operation instanceof Put && isset($uriVariables['id']) && $data instanceof Review) {
+            return $this->moderateReview((int) $uriVariables['id'], $data);
+        }
+
         $productId = (int) ($uriVariables['productId'] ?? 0);
         if ($productId && $data instanceof Review) {
             return $this->submitReview(
@@ -58,6 +68,45 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         }
 
         throw new BadRequestHttpException('Invalid review operation');
+    }
+
+    /**
+     * Moderation is admin/service-token only. The route security already excludes
+     * customer tokens (no ROLE_CUSTOMER, and the permission voter never grants
+     * 'reviews/write' to non-API-key users); this re-checks in the processor so
+     * the gate holds even if the operation metadata is ever loosened.
+     */
+    private function moderateReview(int $reviewId, Review $data): Review
+    {
+        $this->requireAdminOrApiUser('Review moderation requires admin or API access');
+        $this->requireApiPermission('reviews/write');
+
+        if (!isset(self::STATUS_MAP[$data->status])) {
+            throw new BadRequestHttpException('status must be one of: ' . implode(', ', array_keys(self::STATUS_MAP)));
+        }
+
+        /** @var \Mage_Review_Model_Review $review */
+        $review = \Mage::getModel('review/review')->load($reviewId);
+        if (!$review->getId()) {
+            throw new NotFoundHttpException('Review not found');
+        }
+
+        $review->setStatusId(self::STATUS_MAP[$data->status]);
+        $review->save();
+        $review->aggregate();
+
+        // Approved-review lists are cached (see ReviewProvider); a status flip must show up.
+        \Mage::app()->cleanCache(['API_REVIEWS']);
+
+        $review = \Mage::getModel('review/review')->load($reviewId);
+        $dto = Review::fromModel($review);
+
+        $product = \Mage::getModel('catalog/product')->load((int) $review->getEntityPkValue());
+        if ($product->getId()) {
+            $dto->productName = $product->getName();
+        }
+
+        return $dto;
     }
 
     private function submitReview(
@@ -128,7 +177,7 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
 
         $review->save();
 
-        $this->addRatingVote($review, $rating, $productId, $customerId, $storeId);
+        $this->addRatingVote($review, $rating, $productId, $customerId);
         $review->aggregate();
 
         $dto = Review::fromModel($review);
@@ -144,7 +193,6 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         int $rating,
         int $productId,
         int $customerId,
-        int $storeId,
     ): void {
         /** @var \Mage_Rating_Model_Resource_Rating_Collection $ratingCollection */
         $ratingCollection = \Mage::getModel('rating/rating')->getCollection()

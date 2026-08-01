@@ -182,8 +182,13 @@ final class ReviewProvider extends CrudProvider
             throw new NotFoundHttpException('Review not found');
         }
 
+        // Non-approved reviews are visible to their author and to admin/service
+        // callers (moderation needs to load pending reviews); everyone else gets 404.
         $customerId = $this->getAuthenticatedCustomerId();
-        if ((int) $review->getStatusId() !== \Mage_Review_Model_Review::STATUS_APPROVED) {
+        if ((int) $review->getStatusId() !== \Mage_Review_Model_Review::STATUS_APPROVED
+            && !$this->isAdmin()
+            && !$this->isApiUser()
+        ) {
             if (!$customerId || (int) $review->getCustomerId() !== $customerId) {
                 throw new NotFoundHttpException('Review not found');
             }
@@ -233,9 +238,11 @@ final class ReviewProvider extends CrudProvider
             'detail' => $review->detail,
             'nickname' => $review->nickname,
             'rating' => $review->rating,
+            'ratings' => $review->ratings,
             'status' => $review->status,
             'createdAt' => $review->createdAt,
             'customerId' => $review->customerId,
+            'stores' => $review->stores,
         ];
     }
 
@@ -249,9 +256,11 @@ final class ReviewProvider extends CrudProvider
         $review->detail = $data['detail'];
         $review->nickname = $data['nickname'];
         $review->rating = (int) $data['rating'];
+        $review->ratings = $data['ratings'] ?? null;
         $review->status = $data['status'];
         $review->createdAt = $data['createdAt'];
         $review->customerId = isset($data['customerId']) ? (int) $data['customerId'] : null;
+        $review->stores = $data['stores'] ?? null;
 
         return $review;
     }

@@ -93,6 +93,12 @@ class CreditMemo extends CrudResource
     public ?int $orderId = null;
 
     #[ApiProperty(writable: false)]
+    public ?int $invoiceId = null;
+
+    #[ApiProperty(writable: false)]
+    public ?int $storeId = null;
+
+    #[ApiProperty(writable: false)]
     public ?string $incrementId = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
@@ -123,20 +129,76 @@ class CreditMemo extends CrudResource
     public float $discountAmount = 0;
 
     #[ApiProperty(writable: false)]
+    public float $subtotalInclTax = 0;
+
+    #[ApiProperty(writable: false)]
+    public float $shippingInclTax = 0;
+
+    #[ApiProperty(writable: false)]
+    public float $shippingTaxAmount = 0;
+
+    #[ApiProperty(writable: false)]
+    public float $hiddenTaxAmount = 0;
+
+    #[ApiProperty(writable: false)]
+    public float $baseSubtotal = 0;
+
+    #[ApiProperty(writable: false)]
+    public float $baseTaxAmount = 0;
+
+    #[ApiProperty(writable: false)]
+    public float $baseShippingAmount = 0;
+
+    #[ApiProperty(writable: false)]
+    public float $baseDiscountAmount = 0;
+
+    #[ApiProperty(writable: false)]
+    public float $adjustment = 0;
+
+    #[ApiProperty(writable: false)]
+    public float $baseAdjustment = 0;
+
+    #[ApiProperty(writable: false)]
     public float $adjustmentPositive = 0;
 
     #[ApiProperty(writable: false)]
     public float $adjustmentNegative = 0;
 
     #[ApiProperty(writable: false)]
+    public ?string $transactionId = null;
+
+    #[ApiProperty(writable: false)]
+    public ?int $creditmemoStatus = null;
+
+    #[ApiProperty(writable: false)]
+    public bool $emailSent = false;
+
+    #[ApiProperty(writable: false)]
+    public ?string $orderCurrencyCode = null;
+
+    #[ApiProperty(writable: false)]
+    public ?string $baseCurrencyCode = null;
+
+    #[ApiProperty(writable: false)]
+    public ?string $discountDescription = null;
+
+    #[ApiProperty(writable: false)]
     public ?string $createdAt = null;
+
+    #[ApiProperty(writable: false)]
+    public ?string $updatedAt = null;
 
     /** @var array<int, array<string, mixed>> Credit memo line items; CreditMemoItem is a plain DTO so kept as Iterable scalar (see Cart.items / Order.items rationale). */
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public array $items = [];
 
+    /** First comment's text, kept for backward compatibility; see $comments for the full list. */
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $comment = null;
+
+    /** @var array<int, array<string, mixed>> Credit memo comments; plain arrays, same Iterable rationale as $items. */
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    public array $comments = [];
 
     public static function afterLoad(self $dto, object $model): void
     {
@@ -157,21 +219,35 @@ class CreditMemo extends CrudResource
             $itemDto = new CreditMemoItem();
             $itemDto->id = (int) $item->getId();
             $itemDto->orderItemId = (int) $item->getOrderItemId();
+            $itemDto->productId = $item->getProductId() !== null ? (int) $item->getProductId() : null;
             $itemDto->sku = $item->getSku() ?? '';
             $itemDto->name = $item->getName() ?? '';
+            $itemDto->description = $item->getDescription();
             $itemDto->qty = (float) $item->getQty();
             $itemDto->price = (float) $item->getPrice();
+            $itemDto->priceInclTax = (float) $item->getPriceInclTax();
             $itemDto->rowTotal = (float) $item->getRowTotal();
+            $itemDto->rowTotalInclTax = (float) $item->getRowTotalInclTax();
             $itemDto->taxAmount = (float) $item->getTaxAmount();
             $itemDto->discountAmount = (float) $item->getDiscountAmount();
+            $itemDto->basePrice = (float) $item->getBasePrice();
+            $itemDto->baseRowTotal = (float) $item->getBaseRowTotal();
+            $itemDto->baseTaxAmount = (float) $item->getBaseTaxAmount();
+            $itemDto->baseDiscountAmount = (float) $item->getBaseDiscountAmount();
             $itemDto->backToStock = (bool) $item->getBackToStock();
             $dto->items[] = $itemDto;
         }
 
-        $comments = $model->getCommentsCollection();
-        if ($comments && $comments->getSize() > 0) {
-            $firstComment = $comments->getFirstItem();
-            $dto->comment = $firstComment->getComment();
+        $dto->comments = [];
+        foreach ($model->getCommentsCollection() as $comment) {
+            $dto->comments[] = [
+                'id' => (int) $comment->getId(),
+                'comment' => $comment->getComment(),
+                'createdAt' => $comment->getCreatedAt(),
+                'isCustomerNotified' => (bool) $comment->getIsCustomerNotified(),
+                'isVisibleOnFront' => (bool) $comment->getIsVisibleOnFront(),
+            ];
         }
+        $dto->comment = $dto->comments[0]['comment'] ?? null;
     }
 }

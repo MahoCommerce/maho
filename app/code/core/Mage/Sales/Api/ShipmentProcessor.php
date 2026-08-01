@@ -35,6 +35,7 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
             'create' => $this->createShipment($context),
             'add_shipment_track', 'addTrack' => $this->addTrack($uriVariables, $context),
             'remove_shipment_track', 'removeTrack' => $this->removeTrack($uriVariables, $context),
+            'shipment_add_comment' => $this->addComment($uriVariables, $context),
             default => $this->createShipmentFromRest($uriVariables, $context),
         };
     }
@@ -82,6 +83,30 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
         $shipment->save();
 
         return Shipment::fromModel($shipment->load($shipment->getId()));
+    }
+
+    /**
+     * Add a comment to an existing shipment, optionally emailing the customer.
+     */
+    private function addComment(array $uriVariables, array $context): Shipment
+    {
+        $args = $context['args']['input'] ?? [];
+        $comment = trim((string) ($args['comment'] ?? ''));
+        if ($comment === '') {
+            throw new BadRequestHttpException('Comment text is required');
+        }
+        $notifyCustomer = (bool) ($args['notifyCustomer'] ?? false);
+        $visibleOnFront = (bool) ($args['visibleOnFront'] ?? false);
+
+        $shipment = $this->resolveShipment($uriVariables, $context);
+
+        $shipment->addComment($comment, $notifyCustomer, $visibleOnFront);
+        if ($notifyCustomer) {
+            $shipment->sendUpdateEmail(true, $comment);
+        }
+        $shipment->save();
+
+        return Shipment::fromModel(\Mage::getModel('sales/order_shipment')->load($shipment->getId()));
     }
 
     /**

@@ -23,6 +23,7 @@ return function (Schema $schema): void {
     $post->addColumn('is_active', Types::SMALLINT, ['unsigned' => true, 'default' => 1]);
     $post->addColumn('publish_date', Types::DATE_MUTABLE);
     $post->addColumn('content', Types::TEXT, ['length' => 2097152, 'notnull' => false]);
+    $post->addColumn('short_content', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $post->addColumn('meta_description', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $post->addColumn('meta_keywords', Types::TEXT, ['length' => 65535, 'notnull' => false]);
     $post->addColumn('meta_title', Types::STRING, ['length' => 255, 'notnull' => false]);

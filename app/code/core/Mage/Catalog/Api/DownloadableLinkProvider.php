@@ -44,6 +44,7 @@ final class DownloadableLinkProvider extends \Maho\ApiPlatform\Provider
             $dto->price = (float) $link->getPrice();
             $dto->sortOrder = (int) $link->getSortOrder();
             $dto->numberOfDownloads = (int) $link->getNumberOfDownloads();
+            $dto->isShareable = (int) $link->getIsShareable();
             $dto->linkType = (string) $link->getLinkType();
             $dto->linkUrl = $link->getLinkUrl();
             $dto->sampleUrl = $link->getSampleUrl();

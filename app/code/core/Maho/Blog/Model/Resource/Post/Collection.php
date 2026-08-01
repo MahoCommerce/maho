@@ -19,6 +19,7 @@ class Maho_Blog_Model_Resource_Post_Collection extends Mage_Eav_Model_Entity_Col
         'is_active',
         'publish_date',
         'content',
+        'short_content',
         'meta_description',
         'meta_keywords',
         'meta_title',

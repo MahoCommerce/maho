@@ -87,6 +87,21 @@ class CmsPage extends CrudResource
     #[ApiProperty(extraProperties: ['modelField' => 'root_template'])]
     public ?string $pageLayout = null;
 
+    public ?int $sortOrder = null;
+    public ?string $layoutUpdateXml = null;
+    public ?string $customTheme = null;
+    public ?string $customRootTemplate = null;
+    public ?string $customLayoutUpdateXml = null;
+
+    /** Date string (Y-m-d); empty string clears */
+    public ?string $customThemeFrom = null;
+
+    /** Date string (Y-m-d); empty string clears */
+    public ?string $customThemeTo = null;
+
+    /** One of INDEX,FOLLOW / NOINDEX,FOLLOW / INDEX,NOFOLLOW / NOINDEX,NOFOLLOW; empty string clears */
+    public ?string $metaRobots = null;
+
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public string $status = 'enabled';
 

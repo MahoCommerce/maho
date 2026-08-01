@@ -14,6 +14,7 @@ use ApiPlatform\Metadata\ApiProperty;
 use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
@@ -24,7 +25,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
     mahoId: 'giftcards',
     mahoLabel: 'Gift Cards',
     mahoSection: 'Other',
-    mahoOperations: ['read' => 'Check Balance', 'create' => 'Create', 'write' => 'Adjust Balance'],
+    mahoOperations: ['read' => 'Check Balance', 'create' => 'Create', 'write' => 'Update Status & Adjust Balance'],
     shortName: 'GiftCard',
     description: 'Gift Card resource',
     provider: GiftCardProvider::class,
@@ -39,6 +40,11 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             uriTemplate: '/giftcards',
             security: "is_granted('ROLE_ADMIN') or is_granted('giftcards/create')",
             description: 'Create a new gift card',
+        ),
+        new Put(
+            uriTemplate: '/giftcards/{id}',
+            security: "is_granted('ROLE_ADMIN') or is_granted('giftcards/write')",
+            description: 'Update gift card status and/or adjust its balance (records a history entry)',
         ),
     ],
     graphQlOperations: [
@@ -99,15 +105,16 @@ class GiftCard extends CrudResource
 
     public ?string $code = null;
 
-    #[ApiProperty(writable: false)]
-    public float $balance = 0.0;
+    /** Writable only through the admin/service-gated Post and Put operations. */
+    public ?float $balance = null;
 
     public float $initialBalance = 0.0;
 
-    #[ApiProperty(writable: false)]
+    /** Writable only through the admin/service-gated Post and Put operations. */
     public ?string $status = null;
 
     public ?string $expiresAt = null;
+    public ?int $websiteId = null;
 
     #[ApiProperty(writable: false)]
     public ?string $currencyCode = null;
@@ -115,9 +122,54 @@ class GiftCard extends CrudResource
     #[ApiProperty(writable: false)]
     public ?string $createdAt = null;
 
+    #[ApiProperty(writable: false)]
+    public ?string $updatedAt = null;
+
+    #[ApiProperty(writable: false)]
+    public ?int $purchaseOrderId = null;
+
+    #[ApiProperty(writable: false)]
+    public ?int $purchaseOrderItemId = null;
+
+    #[ApiProperty(writable: false)]
+    public ?string $emailScheduledAt = null;
+
+    #[ApiProperty(writable: false)]
+    public ?string $emailSentAt = null;
+
     public ?string $recipientName = null;
     public ?string $recipientEmail = null;
     public ?string $senderName = null;
     public ?string $senderEmail = null;
     public ?string $message = null;
+
+    /** Not persisted on the card: recorded as the giftcard_history comment of a balance adjustment. */
+    #[ApiProperty(readable: false)]
+    public ?string $comment = null;
+
+    /**
+     * Balance change log, newest first. Populated only on the permission-gated
+     * reads (fromModel); the public balance check builds its DTO by hand and
+     * never includes it.
+     * @var array<int, array<string, mixed>>
+     */
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    public array $history = [];
+
+    public static function afterLoad(self $dto, object $model): void
+    {
+        $dto->currencyCode = $model->getCurrencyCode();
+
+        foreach ($model->getHistoryCollection() as $entry) {
+            $dto->history[] = [
+                'action' => $entry->getData('action'),
+                'amount' => (float) $entry->getData('base_amount'),
+                'balanceBefore' => (float) $entry->getData('balance_before'),
+                'balanceAfter' => (float) $entry->getData('balance_after'),
+                'orderId' => $entry->getData('order_id') !== null ? (int) $entry->getData('order_id') : null,
+                'comment' => $entry->getData('comment'),
+                'createdAt' => $entry->getData('created_at'),
+            ];
+        }
+    }
 }

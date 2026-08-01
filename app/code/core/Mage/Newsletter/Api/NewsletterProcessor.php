@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Mage\Newsletter\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -73,6 +74,19 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
         $coreHelper = \Mage::helper('core');
         if (!$coreHelper->isValidEmail($email)) {
             throw new BadRequestHttpException('Invalid email address');
+        }
+
+        // Multi-store targeting: subscribe() stamps the subscriber with the ambient
+        // store, so a validated storeId is applied by switching the store context.
+        $storeId = $data->storeId
+            ?? (isset($context['args']['input']['storeId']) ? (int) $context['args']['input']['storeId'] : null);
+        if ($storeId !== null) {
+            if (!isset(\Mage::app()->getStores()[$storeId])) {
+                throw new BadRequestHttpException("Unknown store ID: {$storeId}");
+            }
+            StoreContext::setStore($storeId);
+        } else {
+            StoreContext::ensureStore();
         }
 
         // IP-level cap first: the per-email bucket alone is trivially bypassed

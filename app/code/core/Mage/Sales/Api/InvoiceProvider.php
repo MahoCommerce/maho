@@ -24,12 +24,18 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
         parent::__construct($security);
     }
 
+    private const WRITE_OPERATIONS = ['order_invoice_create', 'invoice_capture', 'invoice_void', 'invoice_cancel'];
+
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Invoice|Response
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Invoice|Response|null
     {
         $operationName = $operation->getName();
 
         return match (true) {
+            // POST operations are handled entirely by InvoiceProcessor; the
+            // read pass (triggered because the ops have uri variables) must
+            // not resolve anything here.
+            in_array($operationName, self::WRITE_OPERATIONS, true) => null,
             str_contains($operationName, 'pdf') => $this->downloadPdf($uriVariables, $operationName),
             default => $this->listInvoices($uriVariables, $operationName),
         };
@@ -46,7 +52,9 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
             : '/api/rest/v2/orders/' . $orderId . '/invoices/';
 
         foreach ($order->getInvoiceCollection() as $invoice) {
-            $dto = Invoice::fromModel($invoice);
+            // Reuse the already-loaded order so afterLoad's getOrder() doesn't
+            // re-load it per invoice.
+            $dto = Invoice::fromModel($invoice->setOrder($order));
             $dto->pdfUrl = $basePath . $invoice->getId() . '/pdf';
             $invoices[] = $dto;
         }

@@ -51,6 +51,48 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         'catalog_search' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH,
     ];
 
+    /**
+     * Dedicated scalar DTO fields applied verbatim, property => attribute code.
+     * Wired into both write paths (model save and fast EAV update); null means
+     * "leave unchanged".
+     */
+    private const SCALAR_ATTRIBUTE_FIELDS = [
+        'cost' => 'cost',
+        'msrp' => 'msrp',
+        'msrpEnabled' => 'msrp_enabled',
+        'msrpDisplayActualPriceType' => 'msrp_display_actual_price_type',
+        'giftMessageAvailable' => 'gift_message_available',
+        'optionsContainer' => 'options_container',
+        'metaRobots' => 'meta_robots',
+        'gtin' => 'gtin',
+        'mpn' => 'mpn',
+        'countryOfManufacture' => 'country_of_manufacture',
+        'customDesign' => 'custom_design',
+        'customLayoutUpdate' => 'custom_layout_update',
+        'imageLabel' => 'image_label',
+        'smallImageLabel' => 'small_image_label',
+        'thumbnailLabel' => 'thumbnail_label',
+        'skuType' => 'sku_type',
+        'priceType' => 'price_type',
+        'weightType' => 'weight_type',
+        'priceView' => 'price_view',
+        'shipmentType' => 'shipment_type',
+        'linksTitle' => 'links_title',
+        'linksPurchasedSeparately' => 'links_purchased_separately',
+        'samplesTitle' => 'samples_title',
+    ];
+
+    /** Dedicated date DTO fields (special_from_date semantics), property => attribute code. */
+    private const DATE_ATTRIBUTE_FIELDS = [
+        'newsFromDate' => 'news_from_date',
+        'newsToDate' => 'news_to_date',
+        'customDesignFrom' => 'custom_design_from',
+        'customDesignTo' => 'custom_design_to',
+    ];
+
+    /** These attributes ship with the catalog data upgrades but may be absent on older installs; skip silently then. */
+    private const OPTIONAL_ATTRIBUTE_CODES = ['gtin', 'mpn'];
+
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Product
     {
@@ -245,6 +287,17 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         if ($data->specialPrice !== null) {
             $attrData['special_price'] = $data->specialPrice;
         }
+        if ($data->specialFromDate !== null) {
+            $attrData['special_from_date'] = $this->normalizeDateInput($data->specialFromDate, 'specialFromDate');
+        }
+        if ($data->specialToDate !== null) {
+            $attrData['special_to_date'] = $this->normalizeDateInput($data->specialToDate, 'specialToDate');
+        }
+        $attrData = array_merge($attrData, $this->collectAttributeData($data));
+        $effective = fn(string $code): mixed => array_key_exists($code, $attrData) ? $attrData[$code] : ($oldData[$code] ?? null);
+        $this->validateDateRange($effective('special_from_date'), $effective('special_to_date'), 'specialFromDate', 'specialToDate');
+        $this->validateDateRange($effective('news_from_date'), $effective('news_to_date'), 'newsFromDate', 'newsToDate');
+        $this->validateDateRange($effective('custom_design_from'), $effective('custom_design_to'), 'customDesignFrom', 'customDesignTo');
         if ($data->weight !== null) {
             $attrData['weight'] = $data->weight;
         }
@@ -295,6 +348,9 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             } catch (\Throwable $e) {
                 throw new UnprocessableEntityHttpException('Failed to update product: ' . $e->getMessage());
             }
+            // Reflect the written values so refreshDto() and the activity log
+            // echo the new state, not the pre-update snapshot.
+            $product->addData($attrData);
         }
 
         // Direct SQL for stock
@@ -355,6 +411,21 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         if ($data->specialPrice !== null) {
             $product->setSpecialPrice($data->specialPrice);
         }
+        if ($data->specialFromDate !== null) {
+            $product->setData('special_from_date', $this->normalizeDateInput($data->specialFromDate, 'specialFromDate'));
+        }
+        if ($data->specialToDate !== null) {
+            $product->setData('special_to_date', $this->normalizeDateInput($data->specialToDate, 'specialToDate'));
+        }
+        foreach ($this->collectAttributeData($data) as $attrCode => $value) {
+            if (in_array($attrCode, self::OPTIONAL_ATTRIBUTE_CODES, true) && !$this->attributeExists($attrCode)) {
+                continue;
+            }
+            $product->setData($attrCode, $value);
+        }
+        $this->validateDateRange($product->getData('special_from_date'), $product->getData('special_to_date'), 'specialFromDate', 'specialToDate');
+        $this->validateDateRange($product->getData('news_from_date'), $product->getData('news_to_date'), 'newsFromDate', 'newsToDate');
+        $this->validateDateRange($product->getData('custom_design_from'), $product->getData('custom_design_to'), 'customDesignFrom', 'customDesignTo');
         if ($data->weight !== null) {
             $product->setWeight($data->weight);
         }
@@ -379,6 +450,35 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         if (!empty($data->customAttributesWrite)) {
             $this->applyCustomAttributes($product, $data->customAttributesWrite);
         }
+    }
+
+    /**
+     * Collect the dedicated attribute fields the request provided, as
+     * attribute_code => value: dates normalized to midnight datetimes, bools
+     * cast to int. Shared by the model-save and fast-update write paths.
+     *
+     * @return array<string, mixed>
+     */
+    private function collectAttributeData(Product $data): array
+    {
+        $attrData = [];
+        foreach (self::SCALAR_ATTRIBUTE_FIELDS as $prop => $attrCode) {
+            if ($data->$prop !== null) {
+                $attrData[$attrCode] = is_bool($data->$prop) ? (int) $data->$prop : $data->$prop;
+            }
+        }
+        foreach (self::DATE_ATTRIBUTE_FIELDS as $prop => $attrCode) {
+            if ($data->$prop !== null) {
+                $attrData[$attrCode] = $this->normalizeDateInput($data->$prop, $prop);
+            }
+        }
+        return $attrData;
+    }
+
+    private function attributeExists(string $code): bool
+    {
+        $attribute = Mage::getSingleton('eav/config')->getAttribute(Mage_Catalog_Model_Product::ENTITY, $code);
+        return (bool) ($attribute && $attribute->getId());
     }
 
     /**
@@ -431,35 +531,43 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Resolve the stock qty / availability / manage-stock the caller supplied,
-     * coalescing the structured stockData map and the flat stockQty shortcut.
-     * Returns null when the request carries no stock change to apply (matching
-     * the original early-return: only manage_stock with no qty/availability is
-     * treated as "nothing to do").
+     * Resolve the stock changes the caller supplied, coalescing the structured
+     * stockData map (snake_case or camelCase keys) and the flat stockQty
+     * shortcut. Extended inventory columns (min_qty, backorders, the
+     * use_config_* family, ...) are extracted alongside the core trio. Returns
+     * null when the request carries no stock change to apply (matching the
+     * original early-return: only manage_stock with no qty/availability and no
+     * extended columns is treated as "nothing to do").
      *
-     * @return array{qty: ?float, isInStock: ?bool, manageStock: ?bool}|null
+     * @return array{qty: ?float, isInStock: ?bool, manageStock: ?bool, extended: array<string, int|float>}|null
      */
     private function extractStockInput(Product $data): ?array
     {
         $qty = null;
         $isInStock = null;
         $manageStock = null;
+        $extended = [];
 
         if ($data->stockData !== null) {
-            $qty = isset($data->stockData['qty']) ? (float) $data->stockData['qty'] : null;
-            $isInStock = isset($data->stockData['is_in_stock']) ? (bool) $data->stockData['is_in_stock'] : null;
-            $manageStock = isset($data->stockData['manage_stock']) ? (bool) $data->stockData['manage_stock'] : null;
+            $stockData = [];
+            foreach ($data->stockData as $key => $value) {
+                $stockData[Product::camelToSnake((string) $key)] = $value;
+            }
+            $qty = isset($stockData['qty']) ? (float) $stockData['qty'] : null;
+            $isInStock = isset($stockData['is_in_stock']) ? (bool) $stockData['is_in_stock'] : null;
+            $manageStock = isset($stockData['manage_stock']) ? (bool) $stockData['manage_stock'] : null;
+            $extended = $this->extractExtendedStockColumns($stockData);
         }
 
         if ($qty === null && $data->stockQty !== null) {
             $qty = $data->stockQty;
         }
 
-        if ($qty === null && $isInStock === null) {
+        if ($qty === null && $isInStock === null && $extended === []) {
             return null;
         }
 
-        return ['qty' => $qty, 'isInStock' => $isInStock, 'manageStock' => $manageStock];
+        return ['qty' => $qty, 'isInStock' => $isInStock, 'manageStock' => $manageStock, 'extended' => $extended];
     }
 
     private function updateStockData(Mage_Catalog_Model_Product $product, Product $data): void
@@ -468,7 +576,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         if ($input === null) {
             return;
         }
-        ['qty' => $qty, 'isInStock' => $isInStock, 'manageStock' => $manageStock] = $input;
+        ['qty' => $qty, 'isInStock' => $isInStock, 'manageStock' => $manageStock, 'extended' => $extended] = $input;
 
         /** @var Mage_CatalogInventory_Model_Stock_Item $stockItem */
         $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
@@ -497,6 +605,10 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             $stockItem->setManageStock(1);
         }
 
+        foreach ($extended as $column => $value) {
+            $stockItem->setData($column, $value);
+        }
+
         $this->safeSave($stockItem, 'update stock');
     }
 
@@ -509,13 +621,13 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         if ($input === null) {
             return;
         }
-        ['qty' => $qty, 'isInStock' => $isInStock, 'manageStock' => $manageStock] = $input;
+        ['qty' => $qty, 'isInStock' => $isInStock, 'manageStock' => $manageStock, 'extended' => $extended] = $input;
 
         if ($qty !== null) {
             $this->validateStockQty($qty);
         }
 
-        $stockData = $this->buildStockData($qty, $isInStock, $manageStock);
+        $stockData = array_merge($this->buildStockData($qty, $isInStock, $manageStock), $extended);
         $this->upsertStockItemRow($productId, $stockData);
     }
 
@@ -609,6 +721,47 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         Mage::app()->cleanCache(["API_PRODUCT_{$productId}", 'API_PRODUCTS']);
     }
 
+    /**
+     * Normalize a date input to the midnight 'Y-m-d H:i:s' form the admin
+     * stores; empty string clears the value (returns null).
+     */
+    private function normalizeDateInput(string $value, string $field): ?string
+    {
+        try {
+            $date = Mage::app()->getLocale()->formatDateForDb($value, withTime: false);
+        } catch (\Exception) {
+            throw new BadRequestHttpException("Invalid date for {$field}; use Y-m-d format.");
+        }
+        return $date === null ? null : $date . ' 00:00:00';
+    }
+
+    private function validateDateRange(?string $from, ?string $to, string $fromField, string $toField): void
+    {
+        if ($from !== null && $to !== null && $from > $to) {
+            throw new BadRequestHttpException("{$fromField} must not be later than {$toField}.");
+        }
+    }
+
+    private static function floatOrNull(mixed $value): ?float
+    {
+        return $value !== null && $value !== '' ? (float) $value : null;
+    }
+
+    private static function intOrNull(mixed $value): ?int
+    {
+        return $value !== null && $value !== '' ? (int) $value : null;
+    }
+
+    private static function stringOrNull(mixed $value): ?string
+    {
+        return $value !== null && $value !== '' ? (string) $value : null;
+    }
+
+    private static function dateOrNull(mixed $value): ?string
+    {
+        return $value ? substr((string) $value, 0, 10) : null;
+    }
+
     private function refreshDto(Mage_Catalog_Model_Product $product, Product $data): Product
     {
         $data->id = (int) $product->getId();
@@ -633,6 +786,38 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $data->description = $product->getDescription();
         $data->shortDescription = $product->getShortDescription();
         $data->urlKey = $product->getData('url_key');
+        $data->specialFromDate = self::dateOrNull($product->getData('special_from_date'));
+        $data->specialToDate = self::dateOrNull($product->getData('special_to_date'));
+        $data->newsFromDate = self::dateOrNull($product->getData('news_from_date'));
+        $data->newsToDate = self::dateOrNull($product->getData('news_to_date'));
+        $data->customDesignFrom = self::dateOrNull($product->getData('custom_design_from'));
+        $data->customDesignTo = self::dateOrNull($product->getData('custom_design_to'));
+        $data->cost = self::floatOrNull($product->getData('cost'));
+        $data->msrp = self::floatOrNull($product->getData('msrp'));
+        $data->msrpEnabled = self::intOrNull($product->getData('msrp_enabled'));
+        $data->msrpDisplayActualPriceType = self::intOrNull($product->getData('msrp_display_actual_price_type'));
+        $data->giftMessageAvailable = self::intOrNull($product->getData('gift_message_available'));
+        $data->optionsContainer = self::stringOrNull($product->getData('options_container'));
+        $data->metaRobots = self::stringOrNull($product->getData('meta_robots'));
+        $data->gtin = self::stringOrNull($product->getData('gtin'));
+        $data->mpn = self::stringOrNull($product->getData('mpn'));
+        $data->countryOfManufacture = self::stringOrNull($product->getData('country_of_manufacture'));
+        $data->customDesign = self::stringOrNull($product->getData('custom_design'));
+        $data->customLayoutUpdate = self::stringOrNull($product->getData('custom_layout_update'));
+        $data->imageLabel = self::stringOrNull($product->getData('image_label'));
+        $data->smallImageLabel = self::stringOrNull($product->getData('small_image_label'));
+        $data->thumbnailLabel = self::stringOrNull($product->getData('thumbnail_label'));
+        $data->urlPath = self::stringOrNull($product->getData('url_path'));
+        $data->skuType = self::intOrNull($product->getData('sku_type'));
+        $data->priceType = self::intOrNull($product->getData('price_type'));
+        $data->weightType = self::intOrNull($product->getData('weight_type'));
+        $data->priceView = self::intOrNull($product->getData('price_view'));
+        $data->shipmentType = self::intOrNull($product->getData('shipment_type'));
+        $data->linksTitle = self::stringOrNull($product->getData('links_title'));
+        $data->linksPurchasedSeparately = $product->getData('links_purchased_separately') !== null
+            ? (bool) $product->getData('links_purchased_separately') : null;
+        $data->samplesTitle = self::stringOrNull($product->getData('samples_title'));
+        $data->websiteIds = array_map('intval', $product->getWebsiteIds());
         return $data;
     }
 

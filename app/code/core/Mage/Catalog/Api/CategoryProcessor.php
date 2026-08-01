@@ -201,6 +201,192 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         if ($data->pageLayout !== null) {
             $category->setData('page_layout', $data->pageLayout);
         }
+        if ($data->metaRobots !== null) {
+            $category->setData('meta_robots', $data->metaRobots !== '' ? $data->metaRobots : null);
+        }
+        if ($data->isAnchor !== null) {
+            $category->setData('is_anchor', $data->isAnchor ? 1 : 0);
+        }
+        if ($data->availableSortBy !== null) {
+            $category->setData('available_sort_by', $this->validateSortByCodes($data->availableSortBy));
+        }
+        if ($data->defaultSortBy !== null) {
+            if ($data->defaultSortBy === '') {
+                $category->setData('default_sort_by');
+            } else {
+                $this->validateSortByCodes([$data->defaultSortBy]);
+                $category->setData('default_sort_by', $data->defaultSortBy);
+            }
+        }
+        if ($data->landingPageId !== null) {
+            $category->setData('landing_page', $this->validateLandingPage($data->landingPageId));
+        }
+        if ($data->image !== null) {
+            $category->setData('image', $this->validateImageFilename($data->image));
+        }
+        if ($data->customDesign !== null) {
+            $category->setData('custom_design', $data->customDesign !== '' ? $data->customDesign : null);
+        }
+        if ($data->customDesignFrom !== null) {
+            $category->setData('custom_design_from', $this->normalizeDateInput($data->customDesignFrom, 'customDesignFrom'));
+        }
+        if ($data->customDesignTo !== null) {
+            $category->setData('custom_design_to', $this->normalizeDateInput($data->customDesignTo, 'customDesignTo'));
+        }
+        if ($data->customLayoutUpdate !== null) {
+            $category->setData('custom_layout_update', $data->customLayoutUpdate !== '' ? $data->customLayoutUpdate : null);
+        }
+        if ($data->customUseParentSettings !== null) {
+            $category->setData('custom_use_parent_settings', $data->customUseParentSettings ? 1 : 0);
+        }
+        if ($data->customApplyToProducts !== null) {
+            $category->setData('custom_apply_to_products', $data->customApplyToProducts ? 1 : 0);
+        }
+        if ($data->filterPriceRange !== null) {
+            $category->setData('filter_price_range', $data->filterPriceRange > 0 ? $data->filterPriceRange : null);
+        }
+        if (!empty($data->customAttributesWrite)) {
+            $this->applyCustomAttributes($category, $data->customAttributesWrite);
+        }
+        if (!empty($data->productPositions) && $category->getId()) {
+            $this->applyProductPositions($category, $data->productPositions);
+        }
+
+        // The sortby backend implodes an array on save and wipes any non-array
+        // value to ''. A loaded category carries the stored comma string, so an
+        // untouched save would silently clear it; re-explode before saving.
+        $availableSortBy = $category->getData('available_sort_by');
+        if (is_string($availableSortBy) && $availableSortBy !== '') {
+            $category->setData('available_sort_by', explode(',', $availableSortBy));
+        }
+    }
+
+    /**
+     * @param string[] $codes
+     * @return string[]
+     */
+    private function validateSortByCodes(array $codes): array
+    {
+        $valid = array_keys(Mage::getSingleton('catalog/config')->getAttributeUsedForSortByArray());
+        foreach ($codes as $code) {
+            if (!is_string($code) || !in_array($code, $valid, true)) {
+                $label = is_scalar($code) ? (string) $code : gettype($code);
+                throw new BadRequestHttpException(
+                    'Invalid sort-by code "' . $label . '". Valid: ' . implode(', ', $valid),
+                );
+            }
+        }
+        return array_values($codes);
+    }
+
+    private function validateLandingPage(int $blockId): ?int
+    {
+        if ($blockId <= 0) {
+            return null;
+        }
+        $block = Mage::getModel('cms/block')->load($blockId);
+        if (!$block->getId()) {
+            throw new BadRequestHttpException("CMS block {$blockId} not found");
+        }
+        return $blockId;
+    }
+
+    /**
+     * Accept a bare media filename as stored by the admin (media/catalog/category).
+     */
+    private function validateImageFilename(string $image): ?string
+    {
+        if ($image === '') {
+            return null;
+        }
+        if (str_contains($image, '/') || str_contains($image, '\\') || str_contains($image, '..')) {
+            throw new BadRequestHttpException('image must be a bare filename (stored under media/catalog/category)');
+        }
+        $extension = strtolower(pathinfo($image, PATHINFO_EXTENSION));
+        if (!in_array($extension, \Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS, true)) {
+            throw new BadRequestHttpException('image must have a valid image file extension');
+        }
+        return $image;
+    }
+
+    private function normalizeDateInput(string $value, string $field): ?string
+    {
+        if ($value === '') {
+            return null;
+        }
+        try {
+            return Mage::app()->getLocale()->formatDateForDb($value, withTime: false);
+        } catch (\Throwable) {
+            throw new BadRequestHttpException("{$field} must be a valid date (Y-m-d)");
+        }
+    }
+
+    /**
+     * Codes handled by dedicated DTO fields or structural/system columns. They
+     * must never be written through the generic customAttributesWrite bag.
+     */
+    private const PROTECTED_ATTRIBUTE_CODES = [
+        'entity_id', 'entity_type_id', 'attribute_set_id', 'parent_id', 'path',
+        'level', 'position', 'children_count', 'children', 'all_children',
+        'url_path', 'created_at', 'updated_at',
+    ];
+
+    /**
+     * Apply arbitrary EAV attribute values supplied via customAttributesWrite.
+     *
+     * Protected/system codes are rejected outright; unknown codes (not real
+     * catalog_category EAV attributes) are skipped silently so a typo can't
+     * inject an arbitrary column.
+     *
+     * @param array<string, mixed> $attributes
+     */
+    private function applyCustomAttributes(Mage_Catalog_Model_Category $category, array $attributes): void
+    {
+        $eavConfig = Mage::getSingleton('eav/config');
+
+        foreach ($attributes as $code => $value) {
+            $code = (string) $code;
+
+            if (in_array($code, self::PROTECTED_ATTRIBUTE_CODES, true)) {
+                throw new BadRequestHttpException(
+                    "Attribute '{$code}' cannot be set via customAttributes; use the dedicated field.",
+                );
+            }
+
+            $attribute = $eavConfig->getAttribute(Mage_Catalog_Model_Category::ENTITY, $code);
+            if (!$attribute || !$attribute->getId()) {
+                // Unknown attribute, skip silently.
+                continue;
+            }
+
+            $category->setData($code, $value);
+        }
+    }
+
+    /**
+     * Update positions of products already assigned to the category. Products
+     * not currently assigned are ignored; assignment itself is managed on the
+     * product resource (categoryIds).
+     *
+     * @param array<int|string, mixed> $positions
+     */
+    private function applyProductPositions(Mage_Catalog_Model_Category $category, array $positions): void
+    {
+        $existing = $category->getProductsPosition();
+
+        $changed = false;
+        foreach ($positions as $productId => $position) {
+            $productId = (int) $productId;
+            if (!array_key_exists($productId, $existing)) {
+                continue;
+            }
+            $existing[$productId] = (int) $position;
+            $changed = true;
+        }
+
+        if ($changed) {
+            $category->setPostedProducts($existing);
+        }
     }
 
     private function moveCategory(Mage_Catalog_Model_Category $category, int $newParentId, ApiUser $user): void

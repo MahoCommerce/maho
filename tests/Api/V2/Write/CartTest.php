@@ -132,3 +132,32 @@ describe('Cart Prices Field (Regression)', function (): void {
     });
 
 });
+
+describe('expanded cart read surface', function (): void {
+
+    it('exposes customerEmail, customerNote, reservedOrderId and base totals', function (): void {
+        $createResponse = apiPost('/api/rest/v2/guest-carts', []);
+        expect($createResponse['status'])->toBe(201);
+
+        trackCreated('quote', (int) $createResponse['json']['id']);
+        $maskedId = $createResponse['json']['maskedId'];
+
+        expect($createResponse['json'])->toHaveKeys(['customerEmail', 'customerNote', 'reservedOrderId']);
+        expect($createResponse['json']['reservedOrderId'])->toBeNull();
+
+        $addResponse = apiPost("/api/rest/v2/guest-carts/{$maskedId}/items", [
+            'sku' => fixtures('write_test_sku'),
+            'qty' => 1,
+        ]);
+        expect($addResponse['status'])->toBe(200);
+
+        $prices = $addResponse['json']['prices'];
+        expect($prices)->toHaveKeys([
+            'baseGrandTotal', 'baseSubtotal', 'baseTaxAmount',
+            'baseShippingAmount', 'baseDiscountAmount', 'shippingTaxAmount',
+        ]);
+        expect($prices['baseGrandTotal'])->toBeGreaterThan(0);
+        expect($prices['baseSubtotal'])->toBeGreaterThan(0);
+    });
+
+});

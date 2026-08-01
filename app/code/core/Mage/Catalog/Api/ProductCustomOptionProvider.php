@@ -165,6 +165,8 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
             $dto->sku = $option->getSku();
             $dto->maxCharacters = $option->getMaxCharacters() ? (int) $option->getMaxCharacters() : null;
             $dto->fileExtensions = $option->getFileExtension() ?: null;
+            $dto->imageSizeX = $option->getImageSizeX() ? (int) $option->getImageSizeX() : null;
+            $dto->imageSizeY = $option->getImageSizeY() ? (int) $option->getImageSizeY() : null;
         }
 
         return $dto;

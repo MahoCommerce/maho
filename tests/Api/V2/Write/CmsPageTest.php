@@ -153,6 +153,71 @@ describe('CMS Page CRUD with "all" permission', function (): void {
 
 });
 
+describe('CMS Page layout and meta fields (REST)', function (): void {
+
+    it('round-trips design and meta fields, and clears custom theme dates with an empty string', function (): void {
+        $token = serviceToken(['cms-pages/write', 'cms-pages/delete']);
+
+        $create = apiPost('/api/rest/v2/cms-pages', [
+            'identifier' => 'test-pest-layout-page',
+            'title' => 'Layout Fields Page',
+            'content' => '<p>Layout fields</p>',
+            'isActive' => true,
+            'stores' => ['all'],
+            'sortOrder' => 7,
+            'layoutUpdateXml' => '<reference name="content"/>',
+            'customTheme' => 'default/custom',
+            'customRootTemplate' => 'two_columns_left',
+            'customLayoutUpdateXml' => '<reference name="root"/>',
+            'customThemeFrom' => '2026-01-01',
+            'customThemeTo' => '2026-12-31',
+            'metaRobots' => 'NOINDEX,FOLLOW',
+        ], $token);
+
+        expect($create['status'])->toBeIn([200, 201]);
+        $pageId = $create['json']['id'];
+        trackCreated('cms_page', $pageId);
+
+        $read = apiGet("/api/rest/v2/cms-pages/{$pageId}");
+        expect($read['status'])->toBe(200);
+        expect($read['json']['sortOrder'])->toBe(7);
+        expect($read['json']['layoutUpdateXml'])->toBe('<reference name="content"/>');
+        expect($read['json']['customTheme'])->toBe('default/custom');
+        expect($read['json']['customRootTemplate'])->toBe('two_columns_left');
+        expect($read['json']['customLayoutUpdateXml'])->toBe('<reference name="root"/>');
+        expect((string) $read['json']['customThemeFrom'])->toContain('2026-01-01');
+        expect((string) $read['json']['customThemeTo'])->toContain('2026-12-31');
+        expect($read['json']['metaRobots'])->toBe('NOINDEX,FOLLOW');
+
+        $update = apiPut("/api/rest/v2/cms-pages/{$pageId}", [
+            'customThemeFrom' => '',
+            'customThemeTo' => '',
+        ], $token);
+        expect($update['status'])->toBe(200);
+        expect($update['json']['customThemeFrom'] ?? null)->toBeNull();
+        expect($update['json']['customThemeTo'] ?? null)->toBeNull();
+        // Untouched fields survive the partial update.
+        expect($update['json']['metaRobots'])->toBe('NOINDEX,FOLLOW');
+        expect($update['json']['sortOrder'])->toBe(7);
+
+        expect(apiDelete("/api/rest/v2/cms-pages/{$pageId}", $token)['status'])->toBeIn([200, 204]);
+    });
+
+    it('rejects an invalid metaRobots value', function (): void {
+        $token = serviceToken(['cms-pages/write']);
+
+        $response = apiPost('/api/rest/v2/cms-pages', [
+            'identifier' => 'test-pest-bad-robots',
+            'title' => 'Bad Robots',
+            'metaRobots' => 'PLEASE,CRAWL',
+        ], $token);
+
+        expect($response['status'])->toBeGreaterThanOrEqual(400);
+        expect($response['status'])->toBeLessThan(500);
+    });
+
+});
+
 describe('CMS Page via GraphQL (read)', function (): void {
 
     it('reads pages collection via GraphQL', function (): void {

@@ -113,7 +113,11 @@ class CustomerService
         // Load full customer models only for the paginated results
         $collection = \Mage::getModel('customer/customer')
             ->getCollection()
-            ->addAttributeToSelect(['firstname', 'lastname', 'email', 'default_billing', 'group_id'])
+            ->addAttributeToSelect([
+                'firstname', 'lastname', 'email', 'default_billing', 'group_id',
+                'prefix', 'middlename', 'suffix', 'gender', 'dob', 'taxvat',
+                'created_in', 'confirmation',
+            ])
             ->addFieldToFilter('entity_id', ['in' => $customerIds['ids']]);
 
         // Build a map by ID for ordering
@@ -428,6 +432,13 @@ class CustomerService
 
         if (isset($data['isSubscribed'])) {
             $customer->setIsSubscribed($data['isSubscribed']);
+        }
+
+        // Optional profile attributes; a present-but-null value clears the attribute
+        foreach (['prefix', 'middlename', 'suffix', 'gender', 'dob'] as $field) {
+            if (array_key_exists($field, $data)) {
+                $customer->setData($field, $data[$field]);
+            }
         }
 
         $customer->save();
