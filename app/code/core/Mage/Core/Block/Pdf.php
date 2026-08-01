@@ -85,14 +85,12 @@ class Mage_Core_Block_Pdf extends Mage_Core_Block_Template
         }
 
         $mimeType = null;
-        if (function_exists('finfo_buffer')) {
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            if ($finfo) {
-                $mimeType = finfo_buffer($finfo, $content);
-            }
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        if ($finfo) {
+            $mimeType = finfo_buffer($finfo, $content);
         }
 
-        if (!$mimeType && function_exists('mime_content_type')) {
+        if (!$mimeType) {
             $mimeType = mime_content_type($logoPath);
         }
 

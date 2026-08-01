@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -56,7 +57,6 @@ class Mage_Downloadable_Block_Sales_Order_Email_Items_Downloadable extends Mage_
             'id'        => $item->getLinkHash(),
             '_store'    => $this->getOrder()->getStore(),
             '_secure'   => true,
-            '_nosid'    => true,
         ]);
     }
 }

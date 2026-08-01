@@ -82,7 +82,6 @@ class Mage_Sales_Model_Order_Creditmemo_Api extends Mage_Sales_Model_Api_Resourc
      * @param string|null $comment
      * @param bool $notifyCustomer
      * @param bool $includeComment
-     * @param string $refundToStoreCreditAmount
      * @return string $creditmemoIncrementId
      */
     public function create(
@@ -91,7 +90,6 @@ class Mage_Sales_Model_Order_Creditmemo_Api extends Mage_Sales_Model_Api_Resourc
         $comment = null,
         $notifyCustomer = false,
         $includeComment = false,
-        $refundToStoreCreditAmount = null,
     ) {
         /** @var Mage_Sales_Model_Order $order */
         $order = Mage::getModel('sales/order')->load($orderIncrementId, 'increment_id');
@@ -107,28 +105,6 @@ class Mage_Sales_Model_Order_Creditmemo_Api extends Mage_Sales_Model_Api_Resourc
         $service = Mage::getModel('sales/service_order', $order);
         $creditmemo = $service->prepareCreditmemo($creditmemoData);
 
-        // refund to Store Credit
-        if ($refundToStoreCreditAmount) {
-            // check if refund to Store Credit is available
-            if ($order->getCustomerIsGuest()) {
-                $this->_fault('cannot_refund_to_storecredit');
-            }
-            $refundToStoreCreditAmount = max(
-                0,
-                min($creditmemo->getBaseCustomerBalanceReturnMax(), $refundToStoreCreditAmount),
-            );
-            if ($refundToStoreCreditAmount) {
-                $refundToStoreCreditAmount = $creditmemo->getStore()->roundPrice($refundToStoreCreditAmount);
-                $creditmemo->setBaseCustomerBalanceTotalRefunded($refundToStoreCreditAmount);
-                $refundToStoreCreditAmount = $creditmemo->getStore()->roundPrice(
-                    $refundToStoreCreditAmount * $order->getStoreToOrderRate(),
-                );
-                // this field can be used by customer balance observer
-                $creditmemo->setBsCustomerBalTotalRefunded($refundToStoreCreditAmount);
-                // setting flag to make actual refund to customer balance after credit memo save
-                $creditmemo->setCustomerBalanceRefundFlag(true);
-            }
-        }
         $creditmemo->setPaymentRefundDisallowed(true)->register();
         // add comment to creditmemo
         if (!empty($comment)) {

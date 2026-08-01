@@ -89,7 +89,7 @@ class Mage_Core_Model_Encryption
      */
     public function hash(#[\SensitiveParameter] $data, $version = self::HASH_VERSION_MD5)
     {
-        if (self::HASH_VERSION_LATEST === $version && $version === $this->_helper->getVersionHash($this)) {
+        if (self::HASH_VERSION_LATEST === $version) {
             return password_hash($data, PASSWORD_DEFAULT);
         }
         if (self::HASH_VERSION_SHA256 == $version) {
@@ -131,7 +131,7 @@ class Mage_Core_Model_Encryption
      */
     public function validateHashByVersion(#[\SensitiveParameter] $password, #[\SensitiveParameter] $hash, $version = self::HASH_VERSION_MD5)
     {
-        if ($version == self::HASH_VERSION_LATEST && $version == $this->_helper->getVersionHash($this)) {
+        if ($version == self::HASH_VERSION_LATEST) {
             return password_verify($password, $hash);
         }
         // look for salt

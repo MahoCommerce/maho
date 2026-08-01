@@ -205,21 +205,6 @@ class Mage_Core_Model_App
     protected $_updateMode = false;
 
     /**
-     * Use session in URL flag
-     *
-     * @see Mage_Core_Model_Url
-     * @var bool
-     */
-    protected $_useSessionInUrl = true;
-
-    /**
-     * Use session var instead of SID for session in URL
-     *
-     * @var bool
-     */
-    protected $_useSessionVar = false;
-
-    /**
      * Cache locked flag
      *
      * @var null|bool
@@ -493,9 +478,6 @@ class Mage_Core_Model_App
             $this->_checkCookieStore($scopeType);
             $this->_checkGetStore($scopeType);
         }
-        $this->_useSessionInUrl = (bool) $this->getStore()->getConfig(
-            Mage_Core_Model_Session_Abstract::XML_PATH_USE_FRONTEND_SID,
-        );
         return $this;
     }
 
@@ -1486,28 +1468,6 @@ class Mage_Core_Model_App
     }
 
     /**
-     * Set use session var instead of SID for URL
-     *
-     * @param bool $var
-     * @return $this
-     */
-    public function setUseSessionVar($var)
-    {
-        $this->_useSessionVar = (bool) $var;
-        return $this;
-    }
-
-    /**
-     * Retrieve use flag session var instead of SID for URL
-     *
-     * @return bool
-     */
-    public function getUseSessionVar()
-    {
-        return $this->_useSessionVar;
-    }
-
-    /**
      * Get either default or any store view
      *
      * @return Mage_Core_Model_Store|void
@@ -1521,28 +1481,6 @@ class Mage_Core_Model_App
         foreach ($this->getStores() as $store) {
             return $store;
         }
-    }
-
-    /**
-     * Set Use session in URL flag
-     *
-     * @param bool $flag
-     * @return $this
-     */
-    public function setUseSessionInUrl($flag = true)
-    {
-        $this->_useSessionInUrl = (bool) $flag;
-        return $this;
-    }
-
-    /**
-     * Retrieve use session in URL flag
-     *
-     * @return bool
-     */
-    public function getUseSessionInUrl()
-    {
-        return $this->_useSessionInUrl;
     }
 
     /**

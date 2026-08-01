@@ -1114,7 +1114,6 @@
                         <xsd:element minOccurs="0" maxOccurs="1" name="comment" type="xsd:string" />
                         <xsd:element minOccurs="0" maxOccurs="1" name="notifyCustomer" type="xsd:int" />
                         <xsd:element minOccurs="0" maxOccurs="1" name="includeComment" type="xsd:int" />
-                        <xsd:element minOccurs="0" maxOccurs="1" name="refundToStoreCreditAmount" type="xsd:string" />
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>

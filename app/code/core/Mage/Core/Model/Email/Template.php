@@ -274,8 +274,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     public function getProcessedTemplate(array $variables = [])
     {
         $processor = $this->getTemplateFilter();
-        $processor->setUseSessionInUrl(false)
-            ->setPlainTemplateMode($this->isPlain());
+        $processor->setPlainTemplateMode($this->isPlain());
 
         if (!$this->_preprocessFlag) {
             $variables['this'] = $this;

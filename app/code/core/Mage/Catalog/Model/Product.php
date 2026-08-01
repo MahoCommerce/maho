@@ -1661,12 +1661,11 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Retrieve Product URL
      *
-     * @param  bool $useSid
      * @return string
      */
-    public function getProductUrl($useSid = null)
+    public function getProductUrl()
     {
-        return $this->getUrlModel()->getProductUrl($this, $useSid);
+        return $this->getUrlModel()->getProductUrl($this);
     }
 
     /**

@@ -45,6 +45,57 @@ export function findParentNodeOfType(nodeType) {
 }
 
 /**
+ * Badge button that opens an extension's bubble menu below itself
+ *
+ * @param {string} label - Text shown on the badge
+ * @param {Object} editor - TipTap editor instance
+ * @param {string} storageName - Key in editor.storage holding the bubble menu ref
+ * @param {Function} [onOpen] - (bubbleMenu) => sync the menu to the current node before showing it
+ */
+export function createBadge(label, editor, storageName, onOpen) {
+    const badge = document.createElement('button');
+    badge.type = 'button';
+    badge.className = 'grid-badge';
+    badge.innerHTML = `<span class="grid-badge-label"></span>${SETTINGS_ICON}`;
+    badge.querySelector('.grid-badge-label').textContent = label;
+
+    badge.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const bubbleMenu = editor.storage[storageName]?.bubbleMenu;
+        if (!bubbleMenu) return;
+
+        onOpen?.(bubbleMenu);
+
+        // Position below the badge
+        const rect = badge.getBoundingClientRect();
+        bubbleMenu.style.position = 'fixed';
+        bubbleMenu.style.top = `${rect.bottom + 6}px`;
+        bubbleMenu.style.left = `${rect.left}px`;
+        bubbleMenu.style.display = 'flex';
+
+        // Close when clicking outside
+        const closeMenu = (event) => {
+            if (!bubbleMenu.contains(event.target) && event.target !== badge) {
+                bubbleMenu.style.display = 'none';
+                document.removeEventListener('click', closeMenu);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', closeMenu), 0);
+    });
+
+    return badge;
+}
+
+/**
+ * Update the text of a badge created by createBadge()
+ */
+export function setBadgeLabel(badge, label) {
+    badge.querySelector('.grid-badge-label').textContent = label;
+}
+
+/**
  * Factory for creating grid-based TipTap NodeViews (Columns, Bento Grid)
  *
  * Handles the shared boilerplate: outer wrapper, badge button with bubble menu,
@@ -74,18 +125,7 @@ export function createGridNodeView(config) {
         dom.style.width = '100%';
 
         // Badge button
-        const badge = document.createElement('button');
-        badge.type = 'button';
-        badge.className = 'grid-badge';
-        badge.innerHTML = `${config.badgeLabel} ${SETTINGS_ICON}`;
-
-        badge.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            const bubbleMenu = editor.storage[config.storageName]?.bubbleMenu;
-            if (!bubbleMenu) return;
-
+        const badge = createBadge(config.badgeLabel, editor, config.storageName, (bubbleMenu) => {
             // Update gap button active states
             const currentGap = node.attrs.gap || 'medium';
             for (const btn of bubbleMenu.querySelectorAll('[data-gap]')) {
@@ -94,22 +134,6 @@ export function createGridNodeView(config) {
 
             // Extension-specific bubble menu updates
             config.onBadgeClick?.(node, bubbleMenu);
-
-            // Position below the badge
-            const rect = badge.getBoundingClientRect();
-            bubbleMenu.style.position = 'fixed';
-            bubbleMenu.style.top = `${rect.bottom + 6}px`;
-            bubbleMenu.style.left = `${rect.left}px`;
-            bubbleMenu.style.display = 'flex';
-
-            // Close when clicking outside
-            const closeMenu = (event) => {
-                if (!bubbleMenu.contains(event.target) && event.target !== badge) {
-                    bubbleMenu.style.display = 'none';
-                    document.removeEventListener('click', closeMenu);
-                }
-            };
-            setTimeout(() => document.addEventListener('click', closeMenu), 0);
         });
 
         dom.appendChild(badge);
