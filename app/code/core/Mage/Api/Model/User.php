@@ -96,6 +96,11 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
             $data['is_active']  = (int) $this->getIsActive();
         }
 
+        // setData() below replaces the whole data array; carry the store restriction over
+        if ($this->hasData('allowed_store_ids')) {
+            $data['allowed_store_ids'] = $this->getData('allowed_store_ids');
+        }
+
         $this->setData($data);
         $this->_getResource()->save($this);
         $this->_afterSave();
