@@ -225,10 +225,41 @@ describe('CMS Page layout and meta fields (REST)', function (): void {
         expect($read['json']['sortOrder'])->toBe(7);
         expect($read['json']['metaRobots'])->toBe('NOINDEX,FOLLOW');
         // Design and layout internals stay out of the public read payload.
-        expect($read['json'])->not->toHaveKey('layoutUpdateXml');
-        expect($read['json'])->not->toHaveKey('customLayoutUpdateXml');
-        expect($read['json'])->not->toHaveKey('customTheme');
-        expect($read['json'])->not->toHaveKey('customThemeFrom');
+        expect($read['json']['layoutUpdateXml'] ?? null)->toBeNull();
+        expect($read['json']['customLayoutUpdateXml'] ?? null)->toBeNull();
+        expect($read['json']['customTheme'] ?? null)->toBeNull();
+        expect($read['json']['customRootTemplate'] ?? null)->toBeNull();
+        expect($read['json']['customThemeFrom'] ?? null)->toBeNull();
+        expect($read['json']['customThemeTo'] ?? null)->toBeNull();
+
+        // An authenticated back-office caller reading the same page does see them.
+        foreach ([adminToken(), $token] as $privileged) {
+            $privilegedRead = apiGet("/api/rest/v2/cms-pages/{$pageId}", $privileged);
+            expect($privilegedRead['status'])->toBe(200);
+            expect($privilegedRead['json']['layoutUpdateXml'])->toBe('<reference name="content"/>');
+            expect($privilegedRead['json']['customLayoutUpdateXml'])->toBe('<reference name="root"/>');
+            expect($privilegedRead['json']['customTheme'])->toBe('default/custom');
+            expect($privilegedRead['json']['customRootTemplate'])->toBe('two_columns_left');
+            expect($privilegedRead['json']['customThemeFrom'])->toBe('2026-01-01');
+            expect($privilegedRead['json']['customThemeTo'])->toBe('2026-12-31');
+        }
+
+        // The collection path is gated the same way: a leak there is just as bad.
+        $publicList = apiGet('/api/rest/v2/cms-pages?identifier=test-pest-layout-page');
+        expect($publicList['status'])->toBe(200);
+        $publicMember = ($publicList['json']['member'] ?? $publicList['json']['hydra:member'] ?? [])[0] ?? null;
+        expect($publicMember)->not->toBeNull();
+        expect($publicMember['layoutUpdateXml'] ?? null)->toBeNull();
+        expect($publicMember['customLayoutUpdateXml'] ?? null)->toBeNull();
+        expect($publicMember['customTheme'] ?? null)->toBeNull();
+
+        $adminList = apiGet('/api/rest/v2/cms-pages?identifier=test-pest-layout-page', adminToken());
+        expect($adminList['status'])->toBe(200);
+        $adminMember = ($adminList['json']['member'] ?? $adminList['json']['hydra:member'] ?? [])[0] ?? null;
+        expect($adminMember)->not->toBeNull();
+        expect($adminMember['layoutUpdateXml'])->toBe('<reference name="content"/>');
+        expect($adminMember['customLayoutUpdateXml'])->toBe('<reference name="root"/>');
+        expect($adminMember['customTheme'])->toBe('default/custom');
 
         $update = apiPut("/api/rest/v2/cms-pages/{$pageId}", [
             'customThemeFrom' => '',

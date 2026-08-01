@@ -13,17 +13,21 @@ namespace Mage\Cms\Api;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\CrudProvider;
+use Maho\ApiPlatform\Resource;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
  * CMS Page Provider, extends CrudProvider with page-specific filters and named queries.
  *
  * All field mapping and DTO construction is handled by CrudResource/CrudProvider.
- * This class only adds collection filters and identifier-based lookups.
+ * This class only adds collection filters, identifier-based lookups and the
+ * caller-aware gating of the design fields.
  */
 final class CmsPageProvider extends CrudProvider
 {
     protected array $defaultSort = ['title' => 'ASC'];
+
+    private ?bool $backOfficeReader = null;
 
     /**
      * Override provide() to handle identifier-based collection filtering
@@ -47,6 +51,34 @@ final class CmsPageProvider extends CrudProvider
         }
 
         return parent::provide($operation, $uriVariables, $context);
+    }
+
+    /**
+     * Design and layout internals are back-office data: the layout update is
+     * executable markup and the theme assignment leaks the storefront's internals.
+     * Page reads are public, so only admin and API tokens see them. Every read path
+     * (item by id, item by identifier, collection, GraphQL) builds its DTO here.
+     */
+    #[\Override]
+    public function toDto(object $model): Resource
+    {
+        $dto = parent::toDto($model);
+
+        if ($dto instanceof CmsPage && !$this->isBackOfficeReader()) {
+            $dto->layoutUpdateXml = null;
+            $dto->customLayoutUpdateXml = null;
+            $dto->customTheme = null;
+            $dto->customRootTemplate = null;
+            $dto->customThemeFrom = null;
+            $dto->customThemeTo = null;
+        }
+
+        return $dto;
+    }
+
+    private function isBackOfficeReader(): bool
+    {
+        return $this->backOfficeReader ??= $this->isAdmin() || $this->isApiUser();
     }
 
     #[\Override]

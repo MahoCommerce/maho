@@ -29,6 +29,14 @@ describe('Newsletter subscription fields', function (): void {
         expect($response['json'])->toHaveKey('storeId');
         expect((int) $response['json']['storeId'])->toBeGreaterThan(0);
 
+        // Every status transition stamps change_status_at, so a subscription made
+        // during this run carries a plausible UTC timestamp, never null.
+        expect($response['json']['changeStatusAt'] ?? null)->toBeString();
+        expect($response['json']['changeStatusAt'])->toMatch('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/');
+        $stampedAt = strtotime($response['json']['changeStatusAt'] . ' UTC');
+        expect($stampedAt)->toBeGreaterThan(time() - 86400);
+        expect($stampedAt)->toBeLessThan(time() + 120);
+
         // The status endpoint carries the identifier too (when it resolves the
         // subscription; the lookup is by customer id or email+store).
         $status = apiGet('/api/rest/v2/newsletter/status', $token);

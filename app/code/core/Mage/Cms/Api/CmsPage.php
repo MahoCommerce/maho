@@ -20,7 +20,6 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\CrudResource;
-use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ApiResource(
     mahoLabel: 'CMS Pages',
@@ -30,9 +29,6 @@ use Symfony\Component\Serializer\Attribute\Groups;
     description: 'CMS Page resource',
     provider: CmsPageProvider::class,
     processor: CmsPageProcessor::class,
-    // Page reads are public, so the design group is served only on the write
-    // operations, which are gated on ROLE_ADMIN or cms-pages/write.
-    normalizationContext: ['groups' => ['cmsPage:read']],
     operations: [
         new Get(uriTemplate: '/cms-pages/{id}', security: 'true'),
         new GetCollection(uriTemplate: '/cms-pages', security: 'true'),
@@ -41,14 +37,12 @@ use Symfony\Component\Serializer\Attribute\Groups;
             processor: CmsPageProcessor::class,
             security: "is_granted('ROLE_ADMIN') or is_granted('cms-pages/write')",
             description: 'Creates a new CMS page',
-            normalizationContext: ['groups' => ['cmsPage:read', 'cmsPage:design']],
         ),
         new Put(
             uriTemplate: '/cms-pages/{id}',
             processor: CmsPageProcessor::class,
             security: "is_granted('ROLE_ADMIN') or is_granted('cms-pages/write')",
             description: 'Updates a CMS page',
-            normalizationContext: ['groups' => ['cmsPage:read', 'cmsPage:design']],
         ),
         new Delete(
             uriTemplate: '/cms-pages/{id}',
@@ -80,77 +74,56 @@ class CmsPage extends CrudResource
     /** Admin ACL gate. Backend PageController has no ADMIN_RESOURCE; declare directly. */
     public const ADMIN_RESOURCE = 'cms/page';
 
-    #[Groups(['cmsPage:read'])]
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 
     // Nullable so an omitted field on a partial update stays omitted: a non-null
     // default would be written back over the stored value (see CrudResource::applyToModel()).
-    #[Groups(['cmsPage:read'])]
     public ?string $identifier = null;
 
-    #[Groups(['cmsPage:read'])]
     public ?string $title = null;
 
-    #[Groups(['cmsPage:read'])]
     public ?string $contentHeading = null;
 
-    #[Groups(['cmsPage:read'])]
     public ?string $content = null;
 
-    #[Groups(['cmsPage:read'])]
     public ?string $metaKeywords = null;
 
-    #[Groups(['cmsPage:read'])]
     public ?string $metaDescription = null;
 
-    #[Groups(['cmsPage:read'])]
     #[ApiProperty(extraProperties: ['modelField' => 'root_template'])]
     public ?string $pageLayout = null;
 
-    #[Groups(['cmsPage:read'])]
     public ?int $sortOrder = null;
 
-    #[Groups(['cmsPage:design'])]
     public ?string $layoutUpdateXml = null;
 
-    #[Groups(['cmsPage:design'])]
     public ?string $customTheme = null;
 
-    #[Groups(['cmsPage:design'])]
     public ?string $customRootTemplate = null;
 
-    #[Groups(['cmsPage:design'])]
     public ?string $customLayoutUpdateXml = null;
 
     /** Date string (Y-m-d); empty string clears */
-    #[Groups(['cmsPage:design'])]
     public ?string $customThemeFrom = null;
 
     /** Date string (Y-m-d); empty string clears */
-    #[Groups(['cmsPage:design'])]
     public ?string $customThemeTo = null;
 
     /** One of INDEX,FOLLOW / NOINDEX,FOLLOW / INDEX,NOFOLLOW / NOINDEX,NOFOLLOW; empty string clears */
-    #[Groups(['cmsPage:read'])]
     public ?string $metaRobots = null;
 
-    #[Groups(['cmsPage:read'])]
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public string $status = 'enabled';
 
-    #[Groups(['cmsPage:read'])]
     public ?bool $isActive = null;
 
     /** @var int[]|null */
-    #[Groups(['cmsPage:read'])]
     public ?array $stores = null;
 
-    #[Groups(['cmsPage:read'])]
     #[ApiProperty(writable: false, extraProperties: ['modelField' => 'creation_time'])]
     public ?string $createdAt = null;
 
-    #[Groups(['cmsPage:read'])]
     #[ApiProperty(writable: false, extraProperties: ['modelField' => 'update_time'])]
     public ?string $updatedAt = null;
 
