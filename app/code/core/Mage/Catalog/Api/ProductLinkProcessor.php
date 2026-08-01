@@ -80,7 +80,7 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleReplaceAll(int $productId, string $linkType, array $body): array
     {
-        $product = $this->loadProduct($productId);
+        $product = $this->loadProductForWrite($productId);
 
         $linkData = [];
         foreach ($body as $link) {
@@ -105,7 +105,7 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleAddLink(int $productId, string $linkType, array $body): ProductLink
     {
-        $product = $this->loadProduct($productId);
+        $product = $this->loadProductForWrite($productId);
 
         $linkedId = (int) ($body['linkedProductId'] ?? $body['linked_product_id'] ?? 0);
         if ($linkedId <= 0) {
@@ -142,7 +142,7 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleRemoveLink(int $productId, string $linkType, int $linkedProductId): null
     {
-        $product = $this->loadProduct($productId);
+        $product = $this->loadProductForWrite($productId);
 
         $existingLinks = $this->getExistingLinkData($product, $linkType);
         unset($existingLinks[$linkedProductId]);

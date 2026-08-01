@@ -321,7 +321,9 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
      */
     private function syncProductOptionFlags(int $productId): void
     {
-        $product = \Mage::getModel('catalog/product')->load($productId);
+        $product = \Mage::getModel('catalog/product')
+            ->setStoreId(\Mage_Core_Model_App::ADMIN_STORE_ID)
+            ->load($productId);
         if ($product->getId()) {
             $product->save();
         }

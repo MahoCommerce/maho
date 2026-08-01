@@ -8,6 +8,8 @@
 
 declare(strict_types=1);
 
+use Tests\Helpers\ApiV2Helper;
+
 /**
  * API v2 Product Media Upload Options Tests
  *
@@ -64,6 +66,22 @@ describe('Product Media Gallery, Upload With Position & Disabled', function (): 
         $images = getItems($read);
         expect(count($images))->toBe(1);
         expect($images[0]['position'])->toBe(7);
+
+        // The gallery save runs at global scope: it must not clone attribute
+        // values into store-view rows (those would mask later global updates).
+        // url_path is excluded, the URL-rewrite indexer writes it per store.
+        ApiV2Helper::ensureMahoBootstrapped();
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $storeRows = (int) $adapter->fetchOne(
+            $adapter->select()
+                ->from(['v' => $resource->getTableName('catalog_product_entity_varchar')], ['COUNT(*)'])
+                ->join(['a' => $resource->getTableName('eav/attribute')], 'a.attribute_id = v.attribute_id', [])
+                ->where('v.entity_id = ?', $productId)
+                ->where('v.store_id <> 0')
+                ->where("a.attribute_code <> 'url_path'"),
+        );
+        expect($storeRows)->toBe(0);
     });
 
     it('uploads a hidden image with disabled=true', function (): void {

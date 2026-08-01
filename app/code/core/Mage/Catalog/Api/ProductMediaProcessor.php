@@ -65,7 +65,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleUpload(int $productId, array $body): ProductMedia
     {
-        $product = $this->loadProduct($productId);
+        $product = $this->loadProductForWrite($productId);
 
         // Support base64-encoded image data
         $base64 = $body['base64'] ?? $body['imageData'] ?? $body['image_data'] ?? null;
@@ -235,7 +235,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleUpdate(int $productId, array $body): array
     {
-        $product = $this->loadProduct($productId);
+        $product = $this->loadProductForWrite($productId);
 
         $valueId = (int) ($body['valueId'] ?? $body['value_id'] ?? $body['id'] ?? 0);
         if ($valueId <= 0) {
@@ -302,7 +302,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleDelete(int $productId, int $valueId): null
     {
-        $product = $this->loadProduct($productId);
+        $product = $this->loadProductForWrite($productId);
 
         if ($valueId <= 0) {
             throw new BadRequestHttpException('valueId is required');

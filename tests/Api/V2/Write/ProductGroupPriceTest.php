@@ -128,3 +128,35 @@ describe('Product Group Prices, CRUD Lifecycle', function (): void {
     });
 
 });
+
+describe('Product Group Prices, Website Restriction', function (): void {
+
+    it('preserves out-of-scope rows from restricted-token replace and delete', function (): void {
+        $productId = fixtures('product_id');
+        $admin = serviceToken(['products/write', 'products/delete', 'products/read']);
+
+        // Global rows (websiteId 0) are outside a store-restricted token's scope.
+        $set = apiPut("/api/rest/v2/products/{$productId}/group-prices", [
+            ['customerGroupId' => 'all', 'price' => 21.5],
+        ], $admin);
+        expect($set['status'])->toBe(200);
+
+        $restricted = serviceToken(['products/write', 'products/delete', 'products/read'], [1]);
+
+        $replace = apiPut("/api/rest/v2/products/{$productId}/group-prices", [
+            ['customerGroupId' => 'all', 'price' => 5.0, 'websiteId' => 0],
+        ], $restricted);
+        expect($replace['status'])->toBe(403);
+
+        $delete = apiDelete("/api/rest/v2/products/{$productId}/group-prices", $restricted);
+        expect($delete['status'])->toBeIn([200, 204]);
+
+        // The delete may only remove in-scope rows; the global row survives.
+        $read = apiGet("/api/rest/v2/products/{$productId}/group-prices");
+        expect($read['status'])->toBe(200);
+        expect(array_column(getItems($read), 'price'))->toContain(21.5);
+
+        apiDelete("/api/rest/v2/products/{$productId}/group-prices", $admin);
+    });
+
+});

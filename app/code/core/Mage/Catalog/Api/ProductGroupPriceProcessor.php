@@ -40,7 +40,7 @@ final class ProductGroupPriceProcessor extends \Maho\ApiPlatform\Processor
 
         if ($operation instanceof DeleteOperationInterface) {
             $this->requirePermission($user, 'products/delete');
-            return $this->handleDeleteAll($productId);
+            return $this->handleDeleteAll($productId, $user);
         }
 
         $this->requirePermission($user, 'products/write');
@@ -101,18 +101,7 @@ final class ProductGroupPriceProcessor extends \Maho\ApiPlatform\Processor
             ];
         }
 
-        // True replace, in two steps. A minimally-loaded product carries no
-        // existing group prices in origData, so a single save of the new set
-        // would leave the previous rows behind (the group-price backend only
-        // deletes rows present in "old"). Saving an empty set first makes the
-        // backend clear every existing group price (its documented empty-set
-        // behaviour), then the second save inserts the new set onto a clean slate.
-        if (!empty($groupPrices)) {
-            $product->setData('group_price', []);
-            $this->safeSave($product, 'save group prices');
-        }
-        $product->setData('group_price', $groupPrices);
-        $this->safeSave($product, 'save group prices');
+        $this->replaceGroupPrices($product, $groupPrices, $allowedWebsiteIds);
 
         // Re-read and return
         return $this->provider->provide(
@@ -122,13 +111,54 @@ final class ProductGroupPriceProcessor extends \Maho\ApiPlatform\Processor
         );
     }
 
-    private function handleDeleteAll(int $productId): null
+    private function handleDeleteAll(int $productId, \Maho\ApiPlatform\Security\ApiUser $user): null
     {
         $product = $this->loadProductForGlobalPrice($productId);
-        $product->setData('group_price', []);
-        $this->safeSave($product, 'delete group prices');
+        $this->replaceGroupPrices($product, [], $this->getAllowedWebsiteIds($user));
 
         return null;
+    }
+
+    /**
+     * True replace scoped to the caller's websites. The backend's afterLoad sets
+     * both data and origData to the full existing rows (price_id included), so
+     * one save reconciles insert/update/delete; rows outside a restricted token's
+     * website allowlist are carried into the new set instead of wiped.
+     *
+     * @param array<array<string, mixed>> $groupPrices
+     * @param array<int>|null $allowedWebsiteIds
+     */
+    private function replaceGroupPrices(\Mage_Catalog_Model_Product $product, array $groupPrices, ?array $allowedWebsiteIds): void
+    {
+        $existing = $this->loadExistingGroupPrices($product);
+
+        if ($allowedWebsiteIds !== null) {
+            $preserved = array_values(array_filter(
+                $existing,
+                static fn(array $row): bool => !in_array((int) ($row['website_id'] ?? 0), $allowedWebsiteIds, true),
+            ));
+            $groupPrices = array_merge($preserved, $groupPrices);
+        }
+
+        $product->setData('group_price', $groupPrices);
+        $this->safeSave($product, 'save group prices');
+    }
+
+    /**
+     * @return array<array<string, mixed>>
+     */
+    private function loadExistingGroupPrices(\Mage_Catalog_Model_Product $product): array
+    {
+        $rows = $product->getData('group_price');
+        if ($rows === null) {
+            $attribute = $product->getResource()->getAttribute('group_price');
+            if ($attribute) {
+                $attribute->getBackend()->afterLoad($product);
+                $rows = $product->getData('group_price');
+            }
+        }
+
+        return is_array($rows) ? $rows : [];
     }
 
     /**
