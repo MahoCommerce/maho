@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2020-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -26,7 +27,6 @@ class Mage_Newsletter_Helper_Data extends Mage_Core_Helper_Abstract
             ->getUrl('newsletter/subscriber/confirm', [
                 'id'     => $subscriber->getId(),
                 'code'   => $subscriber->getCode(),
-                '_nosid' => true,
             ]);
     }
 
@@ -43,7 +43,6 @@ class Mage_Newsletter_Helper_Data extends Mage_Core_Helper_Abstract
             ->getUrl('newsletter/subscriber/unsubscribe', [
                 'id'     => $subscriber->getId(),
                 'code'   => $subscriber->getCode(),
-                '_nosid' => true,
             ]);
     }
 

@@ -957,7 +957,6 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      */
     public function getCurrentUrl($fromStore = true)
     {
-        $sidQueryParam = $this->_getSession()->getSessionIdQueryParam();
         $requestString = Mage::getSingleton('core/url')->escape(
             ltrim(Mage::app()->getRequest()->getRequestString(), '/'),
         );
@@ -973,12 +972,6 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         }
 
         $currQuery = Mage::app()->getRequest()->getQuery();
-        if (isset($currQuery[$sidQueryParam]) && !empty($currQuery[$sidQueryParam])
-            && $this->_getSession()->getSessionIdForHost($storeUrl) != $currQuery[$sidQueryParam]
-        ) {
-            unset($currQuery[$sidQueryParam]);
-        }
-
         foreach ($currQuery as $k => $v) {
             $storeParsedQuery[$k] = $v;
         }

@@ -630,23 +630,11 @@ abstract class Mage_Core_Controller_Varien_Action
     }
 
     /**
-     * Set redirect into response with session id in URL if it is enabled.
-     * It allows to distinguish primordial request from browser with cookies disabled.
-     *
      * @param   string $path
      * @return  $this
      */
     public function setRedirectWithCookieCheck($path, array $arguments = [])
     {
-        /** @var Mage_Core_Model_Session $session */
-        $session = Mage::getSingleton('core/session', ['name' => $this->_sessionNamespace]);
-        if ($session->getCookieShouldBeReceived() && Mage::app()->getUseSessionInUrl()
-            && $this->_sessionNamespace != Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE
-        ) {
-            $arguments += ['_query' => [
-                $session->getSessionIdQueryParam() => $session->getSessionId(),
-            ]];
-        }
         $this->getResponse()->setRedirect(Mage::getUrl($path, $arguments));
         return $this;
     }

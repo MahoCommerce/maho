@@ -60,12 +60,11 @@ class Mage_Adminhtml_Model_Observer
     public function setCookieLifetime(\Maho\Event\Observer $observer): void
     {
         if ($observer->getSessionName() === Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE) {
-            /** @var Mage_Adminhtml_Model_Session $session */
-            $session = Mage::getSingleton('adminhtml/session');
-
-            $lifetime = Mage::getStoreConfigAsInt('admin/security/session_cookie_lifetime');
-            $lifetime = min($lifetime, Mage_Adminhtml_Controller_Action::SESSION_MAX_LIFETIME);
-            $lifetime = max($lifetime, Mage_Adminhtml_Controller_Action::SESSION_MIN_LIFETIME);
+            // Admin scope, the same the stored record resolves at, so the cookie cannot outlive it
+            $lifetime = Mage_Core_Model_Session_Abstract::resolveConfiguredSessionLifetime(
+                Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE,
+                store: Mage_Core_Model_Store::ADMIN_CODE,
+            );
 
             /** @var Mage_Core_Model_Cookie $cookie */
             $cookie = $observer->getCookie();
