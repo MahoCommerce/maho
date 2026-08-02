@@ -11,7 +11,9 @@ declare(strict_types=1);
 namespace Mage\CatalogInventory\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Maho\ApiPlatform\Trait\StockWriterTrait;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -20,6 +22,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 {
+    use ProductLoaderTrait;
     use StockWriterTrait;
 
     #[\Override]
@@ -50,6 +53,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             isset($body['qty']) ? (float) $body['qty'] : null,
             isset($body['isInStock']) ? (bool) $body['isInStock'] : null,
             isset($body['manageStock']) ? (bool) $body['manageStock'] : null,
+            $this->extractExtendedStockColumns($body),
         );
     }
 
@@ -62,6 +66,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             isset($args['qty']) ? (float) $args['qty'] : null,
             isset($args['isInStock']) ? (bool) $args['isInStock'] : null,
             isset($args['manageStock']) ? (bool) $args['manageStock'] : null,
+            $this->extractExtendedStockColumns($args),
         );
     }
 
@@ -71,7 +76,10 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         return $this->doBulkUpdate($args['items'] ?? []);
     }
 
-    private function doSingleUpdate(string $sku, ?float $qty, ?bool $isInStock, ?bool $manageStock): StockUpdate
+    /**
+     * @param array<string, int|float> $extended from extractExtendedStockColumns()
+     */
+    private function doSingleUpdate(string $sku, ?float $qty, ?bool $isInStock, ?bool $manageStock, array $extended = []): StockUpdate
     {
         if (empty($sku)) {
             throw new BadRequestHttpException('SKU is required');
@@ -80,8 +88,8 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         // A missing qty must leave the stored quantity untouched (partial update
         // of availability/manage flags). Coercing it to 0 would silently wipe a
         // product's stock when the caller only flips isInStock/manageStock.
-        if ($qty === null && $isInStock === null && $manageStock === null) {
-            throw new BadRequestHttpException('At least one of qty, isInStock or manageStock must be provided');
+        if ($qty === null && $isInStock === null && $manageStock === null && $extended === []) {
+            throw new BadRequestHttpException('At least one stock field must be provided');
         }
 
         if ($qty !== null) {
@@ -96,7 +104,9 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException("Product not found for SKU: {$sku}");
         }
 
-        $stockData = $this->buildStockData($qty, $isInStock, $manageStock);
+        $this->authorizeStockWebsites([(int) $productId]);
+
+        $stockData = array_merge($this->buildStockData($qty, $isInStock, $manageStock), $extended);
         $upsert = $this->upsertStockItemRow((int) $productId, $stockData);
 
         // Invalidate cache
@@ -115,9 +125,26 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         $dto->isInStock = $this->resolveIsInStock($stockData, (int) $productId);
         $dto->manageStock = (bool) $upsert['manageStock'];
         $dto->previousQty = $upsert['previousQty'];
+        $this->reflectExtendedColumns($dto, $extended);
         $dto->success = true;
 
         return $dto;
+    }
+
+    /**
+     * Echo the extended columns this write set back onto the DTO's camelCase
+     * properties, cast to the property types.
+     *
+     * @param array<string, int|float> $extended
+     */
+    private function reflectExtendedColumns(StockUpdate $dto, array $extended): void
+    {
+        foreach ($extended as $column => $value) {
+            $property = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $column))));
+            if (property_exists($dto, $property)) {
+                $dto->$property = self::STOCK_ITEM_EXTENDED_COLUMNS[$column] === 'bool' ? (bool) $value : $value;
+            }
+        }
     }
 
     /**
@@ -155,6 +182,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         /** @var \Mage_Catalog_Model_Resource_Product $productResource */
         $productResource = \Mage::getResourceSingleton('catalog/product');
         $skuToProductId = [];
+        $extendedByIndex = [];
 
         foreach ($items as $index => $item) {
             $sku = $item['sku'] ?? '';
@@ -164,6 +192,9 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             if (isset($item['qty'])) {
                 $this->validateStockQty((float) $item['qty']);
             }
+            // Extract (and thereby validate) before the transaction opens, so a
+            // rejected value 400s cleanly instead of aborting a partial write.
+            $extendedByIndex[$index] = $this->extractExtendedStockColumns($item);
 
             $productId = $productResource->getIdBySku($sku);
             if (!$productId) {
@@ -172,6 +203,8 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             $skuToProductId[$sku] = $productId;
         }
 
+        $this->authorizeStockWebsites(array_map('intval', array_values($skuToProductId)));
+
         $write = \Mage::getSingleton('core/resource')->getConnection('core_write');
 
         $results = [];
@@ -179,14 +212,15 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 
         $write->beginTransaction();
         try {
-            foreach ($items as $item) {
+            foreach ($items as $index => $item) {
                 $sku = $item['sku'];
                 $qty = isset($item['qty']) ? (float) $item['qty'] : null;
                 $isInStock = isset($item['isInStock']) ? (bool) $item['isInStock'] : null;
                 $manageStock = isset($item['manageStock']) ? (bool) $item['manageStock'] : null;
+                $extended = $extendedByIndex[$index];
                 $productId = $skuToProductId[$sku];
 
-                $stockData = $this->buildStockData($qty, $isInStock, $manageStock);
+                $stockData = array_merge($this->buildStockData($qty, $isInStock, $manageStock), $extended);
                 $upsert = $this->upsertStockItemRow((int) $productId, $stockData);
 
                 $cacheTags[] = "API_PRODUCT_{$productId}";
@@ -197,6 +231,7 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
                 $result->isInStock = $this->resolveIsInStock($stockData, (int) $productId);
                 $result->manageStock = (bool) $upsert['manageStock'];
                 $result->previousQty = $upsert['previousQty'];
+                $this->reflectExtendedColumns($result, $extended);
                 $result->success = true;
                 $results[] = $result;
             }
@@ -224,6 +259,30 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         $dto->results = $results;
 
         return $dto;
+    }
+
+    /**
+     * Same website gate as every other product write path
+     * (authorizeProductWebsites), without loading full product models.
+     *
+     * @param int[] $productIds
+     */
+    private function authorizeStockWebsites(array $productIds): void
+    {
+        $allowedWebsiteIds = $this->getAllowedWebsiteIds($this->getAuthorizedUser());
+        if ($allowedWebsiteIds === null) {
+            return;
+        }
+
+        /** @var \Mage_Catalog_Model_Resource_Product $productResource */
+        $productResource = \Mage::getResourceSingleton('catalog/product');
+        $websiteIdsByProduct = $productResource->getWebsiteIdsByProductIds($productIds);
+        foreach ($productIds as $productId) {
+            $websiteIds = array_map('intval', $websiteIdsByProduct[$productId] ?? []);
+            if (array_intersect($websiteIds, $allowedWebsiteIds) === []) {
+                throw new AccessDeniedHttpException("Access denied for this product's websites");
+            }
+        }
     }
 
     /**

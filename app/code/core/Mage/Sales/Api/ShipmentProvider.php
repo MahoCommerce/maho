@@ -65,6 +65,9 @@ final class ShipmentProvider extends CrudProvider
         if (!$shipment->getId()) {
             throw new NotFoundHttpException('Shipment not found');
         }
+
+        $this->assertStoreAllowed($shipment->getStoreId(), $this->getAuthorizedUser(), 'shipment');
+
         return Shipment::fromModel($shipment);
     }
 
@@ -79,6 +82,8 @@ final class ShipmentProvider extends CrudProvider
         if (!$order->getId()) {
             throw new NotFoundHttpException('Order not found');
         }
+
+        $this->assertStoreAllowed($order->getStoreId(), $this->getAuthorizedUser(), 'order');
 
         $shipments = [];
         foreach ($order->getShipmentsCollection() as $shipment) {
@@ -102,6 +107,7 @@ final class ShipmentProvider extends CrudProvider
         ['page' => $page, 'pageSize' => $perPage] = $this->extractPagination($context);
 
         $collection = \Mage::getResourceModel('sales/order_shipment_collection');
+        $this->applyAllowedStoreFilter($collection, $this->getAuthorizedUser());
         $collection->setOrder('created_at', 'DESC');
         $collection->setPageSize($perPage)->setCurPage($page);
 
@@ -134,11 +140,19 @@ final class ShipmentProvider extends CrudProvider
                 $itemsByShipment[(int) $item->getParentId()][] = $item;
             }
 
+            $commentsByShipment = [];
+            $commentCollection = \Mage::getResourceModel('sales/order_shipment_comment_collection')
+                ->addFieldToFilter('parent_id', ['in' => $shipmentIds]);
+            foreach ($commentCollection as $comment) {
+                $commentsByShipment[(int) $comment->getParentId()][] = $comment;
+            }
+
             foreach ($models as $shipment) {
                 $sid = (int) $shipment->getId();
                 $shipment->setData('_preloaded_order_increment_id', $incrementIds[$shipment->getOrderId()] ?? null);
                 $shipment->setData('_preloaded_tracks', $tracksByShipment[$sid] ?? []);
                 $shipment->setData('_preloaded_items', $itemsByShipment[$sid] ?? []);
+                $shipment->setData('_preloaded_comments', $commentsByShipment[$sid] ?? []);
             }
         }
 

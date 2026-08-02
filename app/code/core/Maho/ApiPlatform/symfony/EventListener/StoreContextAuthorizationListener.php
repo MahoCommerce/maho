@@ -27,8 +27,8 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  *   so unrestricted keys are unaffected).
  * - Customer tokens with scoped allowedStoreIds may not switch to a store
  *   they aren't enrolled in.
- * - Guests pass through this listener untouched: the per-resource providers
- *   already gate guest visibility via store scope.
+ * - Guests and customer tokens are denied the admin scope (store 0); otherwise
+ *   guests pass through, the per-resource providers gate their visibility.
  */
 #[AsEventListener(event: KernelEvents::REQUEST, priority: 6)]
 class StoreContextAuthorizationListener
@@ -55,6 +55,15 @@ class StoreContextAuthorizationListener
 
         $token = $this->tokenStorage->getToken();
         $user = $token?->getUser();
+
+        // The admin store (0) is the global scope: raw default attribute values and
+        // the full category tree. Only back-office callers may request it; guests
+        // and customer tokens are limited to real store views.
+        if ((int) $resolvedStoreId === 0) {
+            if (!$user instanceof ApiUser || !($user->isAdmin() || $user->isApiUser())) {
+                throw new AccessDeniedHttpException('The admin scope is restricted to back-office tokens.');
+            }
+        }
 
         if ($user instanceof ApiUser) {
             if (!$user->canAccessStore((int) $resolvedStoreId)) {

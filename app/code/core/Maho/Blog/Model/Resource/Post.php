@@ -34,6 +34,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             'is_active',
             'publish_date',
             'content',
+            'short_content',
             'meta_description',
             'meta_keywords',
             'meta_title',
@@ -54,6 +55,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             'is_active',
             'publish_date',
             'content',
+            'short_content',
             'meta_description',
             'meta_keywords',
             'meta_title',
@@ -179,8 +181,13 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         // after; anything else wrapped in braces (e.g. {{<script>...}}) is left for the filter to
         // strip. A directive's own parameters are preserved as authored and resolved on output;
         // constraining what content directives may do is a separate, platform-wide concern.
-        if ($object->hasData('content')) {
-            $content = (string) $object->getData('content');
+        $filter = Mage::getModel('core/input_filter_maliciousCode');
+        foreach (['content', 'short_content'] as $field) {
+            if (!$object->hasData($field)) {
+                continue;
+            }
+
+            $content = (string) $object->getData($field);
 
             $directives = [];
             $content = (string) preg_replace_callback('/\{\{[a-z]{1,10}.*?\}\}/is', function (array $match) use (&$directives): string {
@@ -189,13 +196,12 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
                 return $token;
             }, $content);
 
-            $filter = Mage::getModel('core/input_filter_maliciousCode');
             $content = $filter->linkFilter($filter->filter($content));
 
             if ($directives !== []) {
                 $content = strtr($content, $directives);
             }
-            $object->setData('content', $content);
+            $object->setData($field, $content);
         }
 
         // Auto-generate URL key from title if empty
@@ -289,8 +295,9 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
 
     protected function _saveCategoryRelations(\Maho\DataObject $post): void
     {
-        $oldCategoryIds = $this->lookupCategoryIds($post->getId());
-        $newCategoryIds = (array) $post->getData('categories');
+        $oldCategoryIds = array_map('intval', $this->lookupCategoryIds((int) $post->getId()));
+        $newCategoryIds = array_map('intval', (array) $post->getData('categories'));
+        $positions = array_map('intval', (array) $post->getData('category_positions'));
 
         $table = $this->getTable('blog/post_category');
         $adapter = $this->_getWriteAdapter();
@@ -309,11 +316,20 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             foreach ($insert as $categoryId) {
                 $data[] = [
                     'post_id' => (int) $post->getId(),
-                    'category_id' => (int) $categoryId,
-                    'position' => 0,
+                    'category_id' => $categoryId,
+                    'position' => $positions[$categoryId] ?? 0,
                 ];
             }
             $adapter->insertMultiple($table, $data);
+        }
+
+        foreach (array_intersect($newCategoryIds, $oldCategoryIds) as $categoryId) {
+            if (isset($positions[$categoryId])) {
+                $adapter->update($table, ['position' => $positions[$categoryId]], [
+                    'post_id = ?' => (int) $post->getId(),
+                    'category_id = ?' => $categoryId,
+                ]);
+            }
         }
     }
 }

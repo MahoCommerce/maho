@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Mage\Checkout\Api;
 
+use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Service\StoreDefaults;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -47,12 +48,11 @@ class CartService
             }
             $quote->setStoreId((int) $store->getId());
         } else {
-            // Use the default store, Mage::app()->getStore() returns admin (0) under Symfony
-            $defaultStore = \Mage::app()->getDefaultStoreView();
-            if (!$defaultStore) {
-                throw new \RuntimeException('No default store view configured');
-            }
-            $quote->setStoreId((int) $defaultStore->getId() ?: 1);
+            // Bind to the active API store context (?store= / X-Store-Code),
+            // falling back to the default store view; a cart must never live
+            // on the admin store (0).
+            $contextStoreId = StoreContext::getStoreId();
+            $quote->setStoreId($contextStoreId ?: StoreContext::getDefaultStoreId());
         }
 
         if ($customerId) {

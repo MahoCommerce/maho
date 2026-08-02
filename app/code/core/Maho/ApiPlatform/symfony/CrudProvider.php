@@ -11,7 +11,11 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform;
 
 use ApiPlatform\Metadata\Operation;
+use ApiPlatform\State\Pagination\TraversablePaginator;
+use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
+use Maho\ApiPlatform\Trait\StoreAccessTrait;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Convention-based provider for CrudResource subclasses.
@@ -25,8 +29,25 @@ use Maho\ApiPlatform\Service\StoreContext;
  */
 class CrudProvider extends Provider
 {
+    use StoreAccessTrait;
+
     /** @var class-string<CrudResource>|null */
     protected ?string $resourceClass = null;
+
+    /** Whether this resource supports the back-office `scope=all` collection filter. */
+    protected bool $supportsScopeAll = false;
+
+    private ?bool $backOfficeReader = null;
+
+    /**
+     * Permission resource id (e.g. 'cms-pages') whose read or write grant makes
+     * an API-user token a back-office reader: drafts/disabled rows, cross-store
+     * item access and ?scope=all listings. Write counts so an integration can
+     * read back the draft it just created. Null keeps those reads admin-only,
+     * so a provider that never sets it cannot accidentally open them to every
+     * service token regardless of what that token was actually granted.
+     */
+    protected ?string $backOfficeResource = null;
 
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
@@ -42,6 +63,72 @@ class CrudProvider extends Provider
 
         // Delegate to parent, handles named operations, collection, single item
         return parent::provide($operation, $uriVariables, $context);
+    }
+
+    protected function isBackOfficeReader(): bool
+    {
+        return $this->backOfficeReader ??= $this->isAdmin()
+            || ($this->isApiUser()
+                && $this->backOfficeResource !== null
+                && ($this->getAuthorizedUser()->hasPermission($this->backOfficeResource . '/read')
+                    || $this->getAuthorizedUser()->hasPermission($this->backOfficeResource . '/write')));
+    }
+
+    /**
+     * Whether the caller requested a cross-store, unfiltered listing (?scope=all)
+     * on a resource that supports it. Back-office only: guests and customers must
+     * never see draft or foreign-store content, so anyone else gets a 403.
+     */
+    protected function isScopeAll(array $filters): bool
+    {
+        if (!$this->supportsScopeAll || ($filters['scope'] ?? null) !== 'all') {
+            return false;
+        }
+        if (!$this->isBackOfficeReader()) {
+            throw new AccessDeniedHttpException('scope=all requires a back-office token');
+        }
+        return true;
+    }
+
+    /**
+     * Allowed store ids of a store-restricted token, or null for unrestricted callers.
+     *
+     * @return array<int>|null
+     */
+    protected function allowedStoreIds(): ?array
+    {
+        $user = $this->security?->getUser();
+        return $user instanceof ApiUser ? $user->getAllowedStoreIds() : null;
+    }
+
+    /**
+     * Back-office item reads bypass the current-store availability check, but a
+     * store-restricted token must stay inside its allowlist (all-stores content
+     * included, which such tokens may not see).
+     *
+     * @param array<int|string> $entityStoreIds
+     */
+    protected function assertReadableStores(array $entityStoreIds, string $entityLabel): void
+    {
+        if ($this->allowedStoreIds() !== null) {
+            $this->validateEntityStoreAccess($entityStoreIds, $this->getAuthorizedUser(), $entityLabel);
+        }
+    }
+
+    /**
+     * GraphQL passes arguments in context['args'], not context['filters'];
+     * surface only `scope` so isScopeAll() sees it on both protocols.
+     *
+     * @return TraversablePaginator<Resource>
+     */
+    #[\Override]
+    protected function provideCollection(array $context): TraversablePaginator
+    {
+        if (isset($context['args']['scope']) && !isset($context['filters']['scope'])) {
+            $context['filters']['scope'] = $context['args']['scope'];
+        }
+
+        return parent::provideCollection($context);
     }
 
     /**
@@ -91,13 +178,26 @@ class CrudProvider extends Provider
     #[\Override]
     protected function applyCollectionFilters(object $collection, array $filters): void
     {
-        $storeId = StoreContext::getStoreId();
+        if ($this->isScopeAll($filters)) {
+            // Cross-store listing: no current-store filter. A store-restricted
+            // token is still pinned to its allowlist, without the admin (0) rows.
+            $allowed = $this->allowedStoreIds();
+            if ($allowed !== null) {
+                if (!method_exists($collection, 'addStoreFilter')) {
+                    // Failing open would leak cross-store data to a restricted token.
+                    throw new \LogicException(static::class . ': supportsScopeAll requires an addStoreFilter() collection');
+                }
+                $collection->addStoreFilter($allowed, false);
+            }
+        } else {
+            $storeId = StoreContext::getStoreId();
 
-        // Store filtering, auto-detect the collection's method
-        if (method_exists($collection, 'addStoreFilter')) {
-            $collection->addStoreFilter($storeId);
-        } elseif (method_exists($collection, 'setStoreId')) {
-            $collection->setStoreId($storeId);
+            // Store filtering, auto-detect the collection's method
+            if (method_exists($collection, 'addStoreFilter')) {
+                $collection->addStoreFilter($storeId);
+            } elseif (method_exists($collection, 'setStoreId')) {
+                $collection->setStoreId($storeId);
+            }
         }
 
         // EAV collections need explicit attribute selection, only load what the DTO needs

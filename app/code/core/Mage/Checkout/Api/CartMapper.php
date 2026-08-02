@@ -28,8 +28,13 @@ class CartMapper
 
         $cart = new Cart();
         $cart->id = (int) $quote->getId();
-        $cart->maskedId = $quote->getData('masked_quote_id');
+        // The masked id is the guest bearer credential; once a customer owns the
+        // cart it grants nothing (see verifyCartAccess), so don't echo it.
+        $cart->maskedId = $quote->getCustomerId() ? null : $quote->getData('masked_quote_id');
         $cart->customerId = $quote->getCustomerId() ? (int) $quote->getCustomerId() : null;
+        $cart->customerEmail = $quote->getCustomerEmail();
+        $cart->customerNote = $quote->getCustomerNote();
+        $cart->reservedOrderId = $quote->getReservedOrderId();
         $cart->storeId = (int) $quote->getStoreId();
         $cart->isActive = (bool) $quote->getIsActive();
         $cart->currency = $quote->getQuoteCurrencyCode() ?: \Mage::app()->getStore()->getDefaultCurrencyCode();
@@ -278,9 +283,9 @@ class CartMapper
     }
 
     /**
-     * Map Maho quote to prices array
+     * Map Maho quote to prices array (shape documented by the CartPrices DTO)
      *
-     * @return array{subtotal: float, subtotalInclTax: float, subtotalWithDiscount: float, discountAmount: ?float, shippingAmount: ?float, shippingAmountInclTax: ?float, taxAmount: float, grandTotal: float, giftcardAmount: ?float}
+     * @return array<string, float|null>
      */
     public function mapPricesToArray(\Mage_Sales_Model_Quote $quote): array
     {
@@ -297,7 +302,13 @@ class CartMapper
             'shippingAmount' => null,
             'shippingAmountInclTax' => null,
             'taxAmount' => 0.0,
+            'shippingTaxAmount' => null,
             'grandTotal' => (float) $quote->getGrandTotal(),
+            'baseGrandTotal' => (float) $quote->getBaseGrandTotal(),
+            'baseSubtotal' => (float) $quote->getBaseSubtotal(),
+            'baseTaxAmount' => 0.0,
+            'baseShippingAmount' => null,
+            'baseDiscountAmount' => null,
             'giftcardAmount' => null,
         ];
 
@@ -305,7 +316,11 @@ class CartMapper
             $prices['discountAmount'] = $totalsAddress->getDiscountAmount()
                 ? (float) abs($totalsAddress->getDiscountAmount())
                 : null;
+            $prices['baseDiscountAmount'] = $totalsAddress->getBaseDiscountAmount()
+                ? (float) abs($totalsAddress->getBaseDiscountAmount())
+                : null;
             $prices['taxAmount'] = (float) $totalsAddress->getTaxAmount();
+            $prices['baseTaxAmount'] = (float) $totalsAddress->getBaseTaxAmount();
         }
         if ($shippingAddress) {
             $prices['shippingAmount'] = $shippingAddress->getShippingAmount()
@@ -313,6 +328,12 @@ class CartMapper
                 : null;
             $prices['shippingAmountInclTax'] = $shippingAddress->getShippingInclTax()
                 ? (float) $shippingAddress->getShippingInclTax()
+                : null;
+            $prices['shippingTaxAmount'] = $shippingAddress->getShippingTaxAmount()
+                ? (float) $shippingAddress->getShippingTaxAmount()
+                : null;
+            $prices['baseShippingAmount'] = $shippingAddress->getBaseShippingAmount()
+                ? (float) $shippingAddress->getBaseShippingAmount()
                 : null;
         }
 

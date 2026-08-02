@@ -133,8 +133,12 @@ class OrderService
                 $order->save();
             }
 
-            // Add order note if provided
+            // Persist the note both as the readable customer_note snapshot and
+            // as a status-history entry, so the placement orderNote round-trips
+            // through the order read surface.
             if ($orderNote) {
+                $order->setCustomerNote($orderNote);
+                $order->save();
                 $order->addStatusHistoryComment($orderNote, false)
                     ->setIsCustomerNotified(false)
                     ->save();
@@ -231,6 +235,7 @@ class OrderService
      * @param string|null $incrementId Filter by order increment ID (exact match)
      * @param string|null $emailLike Filter by customer email (partial LIKE match, slower on large tables)
      * @param string|null $since Filter by updated_at >= value (ISO datetime)
+     * @param int[]|null $allowedStoreIds Token store allowlist; null means unrestricted
      * @return array{orders: array, total: int}
      */
     public function getAllOrders(
@@ -242,8 +247,16 @@ class OrderService
         ?string $incrementId = null,
         ?string $emailLike = null,
         ?string $since = null,
+        ?array $allowedStoreIds = null,
     ): array {
         $collection = $this->buildOrderCollection(null, $status, $since);
+
+        if ($allowedStoreIds !== null) {
+            $collection->getSelect()->where(
+                'main_table.store_id IN (?)',
+                $allowedStoreIds === [] ? [-1] : $allowedStoreIds,
+            );
+        }
 
         if ($email) {
             $collection->addFieldToFilter('customer_email', $email);
@@ -526,14 +539,16 @@ class OrderService
      * @param string $note Note text
      * @param bool $notifyCustomer Notify customer
      * @param bool $visibleOnFront Visible on frontend
+     * @param string|null $status New order status; caller must validate it against the order's state
      */
     public function addOrderNote(
         \Mage_Sales_Model_Order $order,
         string $note,
         bool $notifyCustomer = false,
         bool $visibleOnFront = false,
+        ?string $status = null,
     ): \Mage_Sales_Model_Order {
-        $order->addStatusHistoryComment($note, false)
+        $order->addStatusHistoryComment($note, $status ?? false)
             ->setIsCustomerNotified($notifyCustomer)
             ->setIsVisibleOnFront((int) $visibleOnFront);
 
@@ -555,6 +570,7 @@ class OrderService
         foreach ($order->getStatusHistoryCollection() as $status) {
             $notes[] = [
                 'note' => $status->getComment(),
+                'status' => $status->getStatus(),
                 'createdAt' => $status->getCreatedAt(),
                 'isCustomerNotified' => (bool) $status->getIsCustomerNotified(),
                 'isVisibleOnFront' => (bool) $status->getIsVisibleOnFront(),

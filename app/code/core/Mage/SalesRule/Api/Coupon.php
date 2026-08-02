@@ -86,6 +86,15 @@ use Maho\Config\ApiResource;
                 'fromDate' => ['type' => 'String'],
                 'toDate' => ['type' => 'String'],
                 'minimumSubtotal' => ['type' => 'Float'],
+                'expirationDate' => ['type' => 'String'],
+                'websiteIds' => ['type' => '[Int]'],
+                'customerGroupIds' => ['type' => '[Int]'],
+                'sortOrder' => ['type' => 'Int'],
+                'stopRulesProcessing' => ['type' => 'Boolean'],
+                'discountQty' => ['type' => 'Float'],
+                'discountStep' => ['type' => 'Int'],
+                'simpleFreeShipping' => ['type' => 'Int'],
+                'applyToShipping' => ['type' => 'Boolean'],
             ],
             security: "is_granted('ROLE_ADMIN') or is_granted('coupons/create')",
         ),
@@ -104,6 +113,15 @@ use Maho\Config\ApiResource;
                 'fromDate' => ['type' => 'String'],
                 'toDate' => ['type' => 'String'],
                 'minimumSubtotal' => ['type' => 'Float'],
+                'expirationDate' => ['type' => 'String'],
+                'websiteIds' => ['type' => '[Int]'],
+                'customerGroupIds' => ['type' => '[Int]'],
+                'sortOrder' => ['type' => 'Int'],
+                'stopRulesProcessing' => ['type' => 'Boolean'],
+                'discountQty' => ['type' => 'Float'],
+                'discountStep' => ['type' => 'Int'],
+                'simpleFreeShipping' => ['type' => 'Int'],
+                'applyToShipping' => ['type' => 'Boolean'],
             ],
             security: "is_granted('ROLE_ADMIN') or is_granted('coupons/write')",
         ),
@@ -119,7 +137,9 @@ use Maho\Config\ApiResource;
                 'code' => ['type' => 'String!'],
                 'cartId' => ['type' => 'Int'],
             ],
-            security: "is_granted('ROLE_CUSTOMER') or is_granted('coupons/write')",
+            // Public like POST /coupons/validate: the processor rate-limits and
+            // hides rule identity/amounts from anonymous callers
+            security: 'true',
         ),
     ],
 )]
@@ -179,6 +199,45 @@ class Coupon extends CrudResource
     #[ApiProperty(extraProperties: ['computed' => true])]
     public ?float $minimumSubtotal = null;
 
+    /** Per-coupon expiry (salesrule_coupon.expiration_date), distinct from the rule-level toDate */
+    public ?string $expirationDate = null;
+
+    #[ApiProperty(writable: false)]
+    public ?int $type = null;
+
+    #[ApiProperty(writable: false)]
+    public ?bool $isPrimary = null;
+
+    #[ApiProperty(writable: false)]
+    public ?string $createdAt = null;
+
+    /** @var int[]|null */
+    #[ApiProperty(extraProperties: ['computed' => true])]
+    public ?array $websiteIds = null;
+
+    /** @var int[]|null */
+    #[ApiProperty(extraProperties: ['computed' => true])]
+    public ?array $customerGroupIds = null;
+
+    #[ApiProperty(extraProperties: ['computed' => true])]
+    public ?int $sortOrder = null;
+
+    #[ApiProperty(extraProperties: ['computed' => true])]
+    public ?bool $stopRulesProcessing = null;
+
+    #[ApiProperty(extraProperties: ['computed' => true])]
+    public ?float $discountQty = null;
+
+    #[ApiProperty(extraProperties: ['computed' => true])]
+    public ?int $discountStep = null;
+
+    /** 0 = no, 1 = free shipping for matching items, 2 = free shipping for the whole shipment */
+    #[ApiProperty(extraProperties: ['computed' => true])]
+    public ?int $simpleFreeShipping = null;
+
+    #[ApiProperty(extraProperties: ['computed' => true])]
+    public ?bool $applyToShipping = null;
+
     /** @var bool|null Used in validate response */
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?bool $isValid = null;
@@ -206,6 +265,14 @@ class Coupon extends CrudResource
         $dto->usagePerCustomer = $rule->getUsesPerCustomer() ? (int) $rule->getUsesPerCustomer() : null;
         $dto->fromDate = $rule->getFromDate();
         $dto->toDate = $rule->getToDate();
+        $dto->websiteIds = array_map('intval', (array) $rule->getWebsiteIds());
+        $dto->customerGroupIds = array_map('intval', (array) $rule->getCustomerGroupIds());
+        $dto->sortOrder = (int) $rule->getSortOrder();
+        $dto->stopRulesProcessing = (bool) $rule->getStopRulesProcessing();
+        $dto->discountQty = $rule->getDiscountQty() !== null ? (float) $rule->getDiscountQty() : null;
+        $dto->discountStep = (int) $rule->getDiscountStep();
+        $dto->simpleFreeShipping = (int) $rule->getSimpleFreeShipping();
+        $dto->applyToShipping = (bool) $rule->getApplyToShipping();
 
         $conditions = $rule->getConditions();
         if ($conditions) {

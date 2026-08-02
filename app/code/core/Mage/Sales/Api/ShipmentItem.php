@@ -15,7 +15,14 @@ namespace Mage\Sales\Api;
  */
 class ShipmentItem extends \Maho\ApiPlatform\Resource
 {
+    public ?int $id = null;
+    public ?int $orderItemId = null;
+    public ?int $productId = null;
     public ?string $sku = null;
     public ?string $name = null;
     public float $qty = 0;
+    public float $price = 0;
+    public float $rowTotal = 0;
+    public float $weight = 0;
+    public ?string $description = null;
 }
