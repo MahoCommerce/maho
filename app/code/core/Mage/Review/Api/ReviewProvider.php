@@ -12,6 +12,7 @@ namespace Mage\Review\Api;
 
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
+use ApiPlatform\Metadata\Put;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\CrudProvider;
 use Maho\ApiPlatform\CrudResource;
@@ -78,7 +79,11 @@ final class ReviewProvider extends CrudProvider
 
         $reviewId = (int) ($uriVariables['id'] ?? 0);
         if ($reviewId) {
-            return $this->getReview($reviewId);
+            // The moderation Put reads the current state through this provider
+            // before the processor runs. Authorization for writes lives in the
+            // processor (403 on a review outside the token's store allowlist),
+            // so the read-visibility gates must not turn that into a 404 here.
+            return $this->getReview($reviewId, checkVisibility: !$operation instanceof Put);
         }
 
         return null;
@@ -234,7 +239,7 @@ final class ReviewProvider extends CrudProvider
         return new TraversablePaginator(new \ArrayIterator($reviews), $page, $pageSize, $total);
     }
 
-    private function getReview(int $reviewId): Review
+    private function getReview(int $reviewId, bool $checkVisibility = true): Review
     {
         /** @var \Mage_Review_Model_Review $review */
         $review = \Mage::getModel('review/review')->load($reviewId);
@@ -253,7 +258,7 @@ final class ReviewProvider extends CrudProvider
             array_map('intval', (array) $review->getStores()),
             static fn(int $id): bool => $id !== 0,
         ));
-        if (!$this->isAdmin() && $storeIds !== []) {
+        if ($checkVisibility && !$this->isAdmin() && $storeIds !== []) {
             if ($this->isApiUser()) {
                 $allowedStoreIds = $this->getAuthorizedUser()->getAllowedStoreIds();
                 if ($allowedStoreIds !== null && array_intersect($storeIds, $allowedStoreIds) === []) {
@@ -266,7 +271,8 @@ final class ReviewProvider extends CrudProvider
 
         // Non-approved reviews are visible to their author, to admins and to
         // service tokens scoped for moderation; everyone else gets 404.
-        if ((int) $review->getStatusId() !== \Mage_Review_Model_Review::STATUS_APPROVED
+        if ($checkVisibility
+            && (int) $review->getStatusId() !== \Mage_Review_Model_Review::STATUS_APPROVED
             && !$this->isAdmin()
             && !$this->canReadModerationQueue()
         ) {

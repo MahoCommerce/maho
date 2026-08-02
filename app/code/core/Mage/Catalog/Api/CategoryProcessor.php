@@ -569,12 +569,18 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Write responses mirror a GET of the saved entity: applyCategoryData()
      * normalizes several fields on save (empty string to null, image filename
-     * to URL on read), so echoing the request DTO back would return values
-     * that were never stored.
+     * to URL on read), and useDefault leaves the EAV `false` sentinel in the
+     * in-memory model, so the response is mapped from a fresh load in the same
+     * store scope rather than from the request-mutated instance.
      */
     private function refreshDto(Mage_Catalog_Model_Category $category): Category
     {
-        return (new CategoryProvider($this->security))->mapToDto($category);
+        /** @var Mage_Catalog_Model_Category $fresh */
+        $fresh = Mage::getModel('catalog/category');
+        $fresh->setStoreId((int) $category->getStoreId());
+        $fresh->load((int) $category->getId());
+
+        return (new CategoryProvider($this->security))->mapToDto($fresh);
     }
 
 }
