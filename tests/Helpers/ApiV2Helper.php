@@ -760,7 +760,7 @@ class ApiV2Helper
                 'configurable_sku' => $configurableSku,
                 'category_id' => $categoryId,
                 'invalid_product_id' => 999999,
-                'order_id' => self::lookupOrderId(),
+                'order_id' => $seed['order_id'] ?? self::lookupOrderId(),
                 'invalid_order_id' => 999999,
                 'invoice_id' => self::lookupInvoiceId(),
                 'customer_order_id' => $ownInvoice['orderId'] ?? null,
@@ -1062,6 +1062,7 @@ class ApiV2Helper
     {
         try {
             $order = \Mage::getModel('sales/order')->getCollection()
+                ->setOrder('entity_id', 'ASC')
                 ->setPageSize(1)
                 ->getFirstItem();
             return $order->getId() ? (int) $order->getId() : null;
@@ -1143,6 +1144,7 @@ class ApiV2Helper
     private static function seedSalesData(?int $customerId, ?string $sku): array
     {
         $seed = [
+            'order_id' => null,
             'giftcard_code' => null,
             'giftcard_id' => null,
             'review_product_id' => null,
@@ -1155,7 +1157,13 @@ class ApiV2Helper
             \Mage::app()->getStore(1)->resetConfig();
 
             // A fresh order: holdable, cancellable, and the generic order_id.
-            self::placeSeedOrder($customerId, $sku, false);
+            // Capture its id: earlier suites leave orders created directly via
+            // models (no quote), and an unordered "first order" lookup picks one
+            // of those on PostgreSQL, where heap order is not insertion order.
+            $fresh = self::placeSeedOrder($customerId, $sku, false);
+            if ($fresh?->getId()) {
+                $seed['order_id'] = (int) $fresh->getId();
+            }
 
             // An invoiced-but-unshipped customer order: drives customer_order_id
             // AND stays shippable for the shipment-creation tests.

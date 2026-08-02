@@ -66,7 +66,10 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         new Mutation(
             security: 'true',
             name: 'subscribe',
-            args: ['email' => ['type' => 'String']],
+            args: [
+                'email' => ['type' => 'String'],
+                'storeId' => ['type' => 'Int', 'description' => 'Store view to subscribe on (defaults to the ambient store)'],
+            ],
             description: 'Subscribe to newsletter',
         ),
         new Mutation(
@@ -84,10 +87,19 @@ class NewsletterSubscription extends CrudResource
     /** Admin ACL gate. Mirrors backend Mage_Adminhtml_Newsletter_SubscriberController. */
     public const ADMIN_RESOURCE = \Mage_Adminhtml_Newsletter_SubscriberController::ADMIN_RESOURCE;
 
+    #[ApiProperty(identifier: true, writable: false)]
+    public ?int $subscriberId = null;
+
     #[ApiProperty(extraProperties: ['modelField' => 'subscriber_email'])]
     public ?string $email = null;
 
     public ?int $customerId = null;
+
+    /** Writable on subscribe only; defaults to the ambient store */
+    public ?int $storeId = null;
+
+    #[ApiProperty(writable: false)]
+    public ?string $changeStatusAt = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public string $status = '';

@@ -89,8 +89,62 @@ class ProductAttribute extends CrudResource
     #[ApiProperty(writable: false, description: 'Value scope: global, website, or store', extraProperties: ['computed' => true])]
     public string $scope = 'global';
 
+    #[ApiProperty(writable: false, description: 'Raw scope flag (0 = store view, 1 = global, 2 = website)')]
+    public int $isGlobal = \Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_GLOBAL;
+
     #[ApiProperty(writable: false, description: 'Default value')]
     public ?string $defaultValue = null;
+
+    #[ApiProperty(writable: false, description: 'Whether the attribute is used in quick search')]
+    public bool $isSearchable = false;
+
+    #[ApiProperty(writable: false, description: 'Layered navigation use (0 = no, 1 = filterable with results, 2 = filterable no results)')]
+    public int $isFilterable = 0;
+
+    #[ApiProperty(writable: false, description: 'Whether the attribute is filterable in layered navigation on search results')]
+    public bool $isFilterableInSearch = false;
+
+    #[ApiProperty(writable: false, description: 'Whether the attribute is comparable on the frontend')]
+    public bool $isComparable = false;
+
+    #[ApiProperty(writable: false, description: 'Whether the attribute is visible on the frontend product page')]
+    public bool $isVisibleOnFront = false;
+
+    #[ApiProperty(writable: false, description: 'Whether HTML is allowed in the frontend value')]
+    public bool $isHtmlAllowedOnFront = false;
+
+    #[ApiProperty(writable: false, description: 'Whether the attribute can be used in catalog price rules')]
+    public bool $isUsedForPriceRules = false;
+
+    #[ApiProperty(writable: false, description: 'Whether the attribute is loaded in product listings')]
+    public bool $usedInProductListing = false;
+
+    #[ApiProperty(writable: false, description: 'Whether the attribute can be used to sort product listings')]
+    public bool $usedForSortBy = false;
+
+    #[ApiProperty(writable: false, description: 'Whether the attribute is visible in advanced search')]
+    public bool $isVisibleInAdvancedSearch = false;
+
+    #[ApiProperty(writable: false, description: 'Whether the WYSIWYG editor is enabled for the attribute')]
+    public bool $isWysiwygEnabled = false;
+
+    #[ApiProperty(writable: false, description: 'Whether the attribute can be used to create configurable products')]
+    public bool $isConfigurable = false;
+
+    /**
+     * @var string[]
+     */
+    #[ApiProperty(writable: false, description: 'Product types the attribute applies to (empty = all)', extraProperties: ['computed' => true])]
+    public array $applyTo = [];
+
+    #[ApiProperty(writable: false, description: 'Frontend input validation class')]
+    public ?string $frontendClass = null;
+
+    #[ApiProperty(writable: false, description: 'Admin note shown under the input')]
+    public ?string $note = null;
+
+    #[ApiProperty(writable: false, description: 'Position in layered navigation')]
+    public int $position = 0;
 
     /**
      * Source options for select/multiselect attributes. Populated by the provider.
@@ -101,7 +155,8 @@ class ProductAttribute extends CrudResource
     public array $options = [];
 
     /**
-     * Derive the human-readable scope from the catalog is_global flag.
+     * Derive the human-readable scope from the catalog is_global flag and the
+     * apply-to list from its comma-separated storage.
      */
     public static function afterLoad(self $dto, object $model): void
     {
@@ -110,5 +165,12 @@ class ProductAttribute extends CrudResource
             \Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_STORE => 'store',
             default => 'global',
         };
+
+        $applyTo = $model->getData('apply_to');
+        if (is_array($applyTo)) {
+            $dto->applyTo = array_values($applyTo);
+        } elseif (is_string($applyTo) && $applyTo !== '') {
+            $dto->applyTo = explode(',', $applyTo);
+        }
     }
 }

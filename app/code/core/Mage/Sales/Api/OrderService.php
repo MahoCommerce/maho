@@ -133,8 +133,12 @@ class OrderService
                 $order->save();
             }
 
-            // Add order note if provided
+            // Persist the note both as the readable customer_note snapshot and
+            // as a status-history entry, so the placement orderNote round-trips
+            // through the order read surface.
             if ($orderNote) {
+                $order->setCustomerNote($orderNote);
+                $order->save();
                 $order->addStatusHistoryComment($orderNote, false)
                     ->setIsCustomerNotified(false)
                     ->save();
@@ -224,6 +228,7 @@ class OrderService
     /**
      * Get all orders with billing address joined (no N+1 queries).
      *
+<<<<<<< HEAD
      * @param int $page Page number
      * @param int $pageSize Page size
      * @param string|null $status Filter by status
@@ -231,6 +236,12 @@ class OrderService
      * @param string|null $incrementId Filter by order increment ID (exact match)
      * @param string|null $emailLike Filter by customer email (partial LIKE match, slower on large tables)
      * @param string|null $since Filter by updated_at >= value (ISO datetime)
+=======
+     * @param array<string, mixed> $filters status, state, storeId, customerId, email,
+     *   emailLike, incrementId, createdFrom, createdTo, updatedSince (`since` is accepted
+     *   as the legacy name for the last)
+     * @param int[]|null $allowedStoreIds Token store allowlist; null means unrestricted
+>>>>>>> 46dc60e (Added missing REST/GraphQL API fields, operations, and store-scoped reads/writes across all resources (#1210))
      * @return array{orders: array, total: int}
      */
     public function getAllOrders(
@@ -238,13 +249,30 @@ class OrderService
         int $pageSize = 20,
         ?string $status = null,
         #[\SensitiveParameter]
+<<<<<<< HEAD
         ?string $email = null,
         ?string $incrementId = null,
         ?string $emailLike = null,
         ?string $since = null,
+=======
+        array $filters = [],
+        ?array $allowedStoreIds = null,
+>>>>>>> 46dc60e (Added missing REST/GraphQL API fields, operations, and store-scoped reads/writes across all resources (#1210))
     ): array {
         $collection = $this->buildOrderCollection(null, $status, $since);
 
+<<<<<<< HEAD
+=======
+        if ($allowedStoreIds !== null) {
+            $collection->getSelect()->where(
+                'main_table.store_id IN (?)',
+                $allowedStoreIds === [] ? [-1] : $allowedStoreIds,
+            );
+        }
+
+        $email = $filters['email'] ?? null;
+        $emailLike = $filters['emailLike'] ?? null;
+>>>>>>> 46dc60e (Added missing REST/GraphQL API fields, operations, and store-scoped reads/writes across all resources (#1210))
         if ($email) {
             $collection->addFieldToFilter('customer_email', $email);
         } elseif ($emailLike && mb_strlen($emailLike) >= 3) {
@@ -526,14 +554,16 @@ class OrderService
      * @param string $note Note text
      * @param bool $notifyCustomer Notify customer
      * @param bool $visibleOnFront Visible on frontend
+     * @param string|null $status New order status; caller must validate it against the order's state
      */
     public function addOrderNote(
         \Mage_Sales_Model_Order $order,
         string $note,
         bool $notifyCustomer = false,
         bool $visibleOnFront = false,
+        ?string $status = null,
     ): \Mage_Sales_Model_Order {
-        $order->addStatusHistoryComment($note, false)
+        $order->addStatusHistoryComment($note, $status ?? false)
             ->setIsCustomerNotified($notifyCustomer)
             ->setIsVisibleOnFront((int) $visibleOnFront);
 
@@ -555,6 +585,7 @@ class OrderService
         foreach ($order->getStatusHistoryCollection() as $status) {
             $notes[] = [
                 'note' => $status->getComment(),
+                'status' => $status->getStatus(),
                 'createdAt' => $status->getCreatedAt(),
                 'isCustomerNotified' => (bool) $status->getIsCustomerNotified(),
                 'isVisibleOnFront' => (bool) $status->getIsVisibleOnFront(),

@@ -13,17 +13,22 @@ namespace Mage\Cms\Api;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use Maho\ApiPlatform\CrudProvider;
+use Maho\ApiPlatform\Resource;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
  * CMS Page Provider, extends CrudProvider with page-specific filters and named queries.
  *
  * All field mapping and DTO construction is handled by CrudResource/CrudProvider.
- * This class only adds collection filters and identifier-based lookups.
+ * This class only adds collection filters, identifier-based lookups and the
+ * caller-aware gating of the design fields.
  */
 final class CmsPageProvider extends CrudProvider
 {
     protected array $defaultSort = ['title' => 'ASC'];
+
+    protected bool $supportsScopeAll = true;
+    protected ?string $backOfficeResource = 'cms-pages';
 
     /**
      * Override provide() to handle identifier-based collection filtering
@@ -49,12 +54,37 @@ final class CmsPageProvider extends CrudProvider
         return parent::provide($operation, $uriVariables, $context);
     }
 
+    /**
+     * Design and layout internals are back-office data: the layout update is
+     * executable markup and the theme assignment leaks the storefront's internals.
+     * Page reads are public, so only admin and API tokens see them. Every read path
+     * (item by id, item by identifier, collection, GraphQL) builds its DTO here.
+     */
+    #[\Override]
+    public function toDto(object $model): Resource
+    {
+        $dto = parent::toDto($model);
+
+        if ($dto instanceof CmsPage && !$this->isBackOfficeReader()) {
+            $dto->layoutUpdateXml = null;
+            $dto->customLayoutUpdateXml = null;
+            $dto->customTheme = null;
+            $dto->customRootTemplate = null;
+            $dto->customThemeFrom = null;
+            $dto->customThemeTo = null;
+        }
+
+        return $dto;
+    }
+
     #[\Override]
     protected function applyCollectionFilters(object $collection, array $filters): void
     {
         parent::applyCollectionFilters($collection, $filters);
 
-        $collection->addFieldToFilter('is_active', 1);
+        if (!$this->isScopeAll($filters)) {
+            $collection->addFieldToFilter('is_active', 1);
+        }
 
         if (!empty($filters['identifier'])) {
             $collection->addFieldToFilter('identifier', $filters['identifier']);
@@ -76,13 +106,28 @@ final class CmsPageProvider extends CrudProvider
     /**
      * Disabled pages must not be readable through the public GET /cms-pages/{id}
      * route. The base provider only store-scopes; enforce is_active here so the
-     * numeric-id path matches the identifier and collection paths.
+     * numeric-id path matches the identifier and collection paths. Back-office
+     * readers bypass both checks so drafts and foreign-store pages stay readable.
      */
     #[\Override]
     protected function provideItem(int|string $id): ?CmsPage
     {
         $page = \Mage::getModel('cms/page')->load($id);
-        if (!$page->getId() || !$page->getIsActive()) {
+        if (!$page->getId()) {
+            return null;
+        }
+
+        if ($this->isBackOfficeReader()) {
+            $resource = $page->getResource();
+            if (method_exists($resource, 'lookupStoreIds')) {
+                $this->assertReadableStores($resource->lookupStoreIds($page->getId()), 'page');
+            }
+
+            /** @var CmsPage */
+            return $this->toDto($page);
+        }
+
+        if (!$page->getIsActive()) {
             return null;
         }
 
@@ -100,6 +145,10 @@ final class CmsPageProvider extends CrudProvider
 
     private function getPageByIdentifier(string $identifier): ?CmsPage
     {
+        if ($this->isBackOfficeReader()) {
+            return $this->getPageByIdentifierBackOffice($identifier);
+        }
+
         $storeId = StoreContext::getStoreId();
         $page = \Mage::getModel('cms/page');
 
@@ -117,5 +166,43 @@ final class CmsPageProvider extends CrudProvider
 
         /** @var CmsPage */
         return $this->toDto($page);
+    }
+
+    /**
+     * checkIdentifier() only matches active, current-store pages; back-office
+     * readers resolve across every store and status. Current-store matches win
+     * over other stores when the identifier is reused.
+     */
+    private function getPageByIdentifierBackOffice(string $identifier): ?CmsPage
+    {
+        $collection = \Mage::getModel('cms/page')->getCollection();
+        $collection->addFieldToFilter('identifier', $identifier);
+
+        $allowed = $this->allowedStoreIds();
+        if ($allowed !== null) {
+            $collection->addStoreFilter($allowed, false);
+        }
+
+        $collection->setOrder('page_id', 'ASC');
+
+        $currentStoreId = StoreContext::getStoreId();
+        $match = null;
+        foreach ($collection as $page) {
+            $resource = $page->getResource();
+            if (method_exists($resource, 'lookupStoreIds')
+                && StoreContext::isAvailableForStore($resource->lookupStoreIds($page->getId()), $currentStoreId)
+            ) {
+                $match = $page;
+                break;
+            }
+            $match ??= $page;
+        }
+
+        if ($match === null) {
+            return null;
+        }
+
+        /** @var CmsPage */
+        return $this->toDto(\Mage::getModel('cms/page')->load($match->getId()));
     }
 }

@@ -24,16 +24,34 @@ final class CmsBlockProvider extends CrudProvider
 {
     protected array $defaultSort = ['title' => 'ASC'];
 
+    protected bool $supportsScopeAll = true;
+    protected ?string $backOfficeResource = 'cms-blocks';
+
     /**
      * Disabled blocks must not be readable through the public GET /cms-blocks/{id}
      * route. The base provider only store-scopes; enforce is_active here so the
-     * numeric-id path matches the identifier and collection paths.
+     * numeric-id path matches the identifier and collection paths. Back-office
+     * readers bypass both checks so drafts and foreign-store blocks stay readable.
      */
     #[\Override]
     protected function provideItem(int|string $id): ?CmsBlock
     {
         $block = \Mage::getModel('cms/block')->load($id);
-        if (!$block->getId() || !$block->getIsActive()) {
+        if (!$block->getId()) {
+            return null;
+        }
+
+        if ($this->isBackOfficeReader()) {
+            $resource = $block->getResource();
+            if (method_exists($resource, 'lookupStoreIds')) {
+                $this->assertReadableStores($resource->lookupStoreIds($block->getId()), 'block');
+            }
+
+            /** @var CmsBlock */
+            return $this->toDto($block);
+        }
+
+        if (!$block->getIsActive()) {
             return null;
         }
 
@@ -69,9 +87,13 @@ final class CmsBlockProvider extends CrudProvider
 
     private function getByIdentifier(string $identifier): ?CmsBlock
     {
+        if ($this->isBackOfficeReader()) {
+            return $this->getByIdentifierBackOffice($identifier);
+        }
+
         $collection = \Mage::getModel('cms/block')->getCollection();
-        $collection->addStoreFilter(StoreContext::getStoreId());
         $collection->addFieldToFilter('identifier', $identifier);
+        $collection->addStoreFilter(StoreContext::getStoreId());
         $collection->addFieldToFilter('is_active', 1);
         $collection->setPageSize(1);
 
@@ -81,12 +103,52 @@ final class CmsBlockProvider extends CrudProvider
         return $block->getId() ? $this->toDto($block) : null;
     }
 
+    /**
+     * Back-office readers resolve across every store and status. Current-store
+     * matches win over other stores when the identifier is reused (mirrors
+     * CmsPageProvider::getPageByIdentifierBackOffice()).
+     */
+    private function getByIdentifierBackOffice(string $identifier): ?CmsBlock
+    {
+        $collection = \Mage::getModel('cms/block')->getCollection();
+        $collection->addFieldToFilter('identifier', $identifier);
+
+        $allowed = $this->allowedStoreIds();
+        if ($allowed !== null) {
+            $collection->addStoreFilter($allowed, false);
+        }
+
+        $collection->setOrder('block_id', 'ASC');
+
+        $currentStoreId = StoreContext::getStoreId();
+        $match = null;
+        foreach ($collection as $block) {
+            $resource = $block->getResource();
+            if (method_exists($resource, 'lookupStoreIds')
+                && StoreContext::isAvailableForStore($resource->lookupStoreIds($block->getId()), $currentStoreId)
+            ) {
+                $match = $block;
+                break;
+            }
+            $match ??= $block;
+        }
+
+        if ($match === null) {
+            return null;
+        }
+
+        /** @var CmsBlock */
+        return $this->toDto(\Mage::getModel('cms/block')->load($match->getId()));
+    }
+
     #[\Override]
     protected function applyCollectionFilters(object $collection, array $filters): void
     {
         parent::applyCollectionFilters($collection, $filters);
 
-        $collection->addFieldToFilter('is_active', 1);
+        if (!$this->isScopeAll($filters)) {
+            $collection->addFieldToFilter('is_active', 1);
+        }
 
         if (!empty($filters['identifier'])) {
             $collection->addFieldToFilter('identifier', ['like' => '%' . $filters['identifier'] . '%']);

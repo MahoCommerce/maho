@@ -116,7 +116,7 @@ use Mage\Customer\Api\Address;
             name: 'order_add_comment',
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_ADMIN') or is_granted('orders/write')",
-            description: 'Add a status-history comment to an order',
+            description: 'Add a status-history comment to an order. Optional status must be one assigned to the order\'s current state',
         ),
         new Get(
             // Read an order by its human-readable increment id, authenticated
@@ -219,6 +219,7 @@ use Mage\Customer\Api\Address;
                 'orderId' => ['type' => 'ID'],
                 'incrementId' => ['type' => 'String'],
                 'comment' => ['type' => 'String!'],
+                'status' => ['type' => 'String', 'description' => 'New order status; must be one assigned to the order\'s current state'],
                 'notifyCustomer' => ['type' => 'Boolean'],
                 'visibleOnFront' => ['type' => 'Boolean'],
             ],
@@ -251,6 +252,33 @@ class Order extends CrudResource
 
     #[ApiProperty(writable: false, description: 'Customer last name')]
     public ?string $customerLastname = null;
+
+    #[ApiProperty(writable: false, description: 'Customer middle name snapshot')]
+    public ?string $customerMiddlename = null;
+
+    #[ApiProperty(writable: false, description: 'Customer name prefix snapshot')]
+    public ?string $customerPrefix = null;
+
+    #[ApiProperty(writable: false, description: 'Customer name suffix snapshot')]
+    public ?string $customerSuffix = null;
+
+    #[ApiProperty(writable: false, description: 'Customer VAT/tax number snapshot')]
+    public ?string $customerTaxvat = null;
+
+    #[ApiProperty(writable: false, description: 'Customer date of birth snapshot')]
+    public ?string $customerDob = null;
+
+    #[ApiProperty(writable: false, description: 'Customer gender option ID snapshot')]
+    public ?int $customerGender = null;
+
+    #[ApiProperty(writable: false, description: 'Customer group ID')]
+    public ?int $customerGroupId = null;
+
+    #[ApiProperty(writable: false, description: 'Whether the order was placed as a guest')]
+    public bool $customerIsGuest = false;
+
+    #[ApiProperty(writable: false, description: 'Customer note captured at checkout (orderNote at placement)')]
+    public ?string $customerNote = null;
 
     #[ApiProperty(writable: false, description: 'Order status (pending, processing, complete, canceled, etc.)')]
     public ?string $status = null;
@@ -294,11 +322,64 @@ class Order extends CrudResource
     #[ApiProperty(writable: false, description: 'Applied coupon code')]
     public ?string $couponCode = null;
 
+    #[ApiProperty(writable: false, description: 'Display name of the coupon rule')]
+    public ?string $couponRuleName = null;
+
+    #[ApiProperty(writable: false, description: 'Description of the applied discount')]
+    public ?string $discountDescription = null;
+
+    /** @var int[] */
+    #[ApiProperty(writable: false, description: 'Sales rule IDs applied to the order', extraProperties: ['computed' => true])]
+    public array $appliedRuleIds = [];
+
+    /** @var array<string, float> */
+    #[ApiProperty(writable: false, description: 'Applied gift card codes with the amount consumed per code', extraProperties: ['computed' => true])]
+    public array $giftcardCodes = [];
+
     #[ApiProperty(writable: false, description: 'Store ID')]
     public int $storeId = 1;
 
+    #[ApiProperty(writable: false, description: 'Store name snapshot at placement')]
+    public ?string $storeName = null;
+
+    #[ApiProperty(writable: false, description: 'Quote (cart) ID the order was placed from')]
+    public ?int $quoteId = null;
+
+    #[ApiProperty(writable: false, description: 'Whether the order contains only virtual products')]
+    public bool $isVirtual = false;
+
+    #[ApiProperty(writable: false, description: 'Total order weight')]
+    public ?float $weight = null;
+
+    #[ApiProperty(writable: false, description: 'Whether the order confirmation email was sent')]
+    public bool $emailSent = false;
+
+    #[ApiProperty(writable: false, description: 'External system order ID')]
+    public ?string $extOrderId = null;
+
+    #[ApiProperty(writable: false, description: 'External system customer ID')]
+    public ?string $extCustomerId = null;
+
     #[ApiProperty(writable: false, description: 'Order currency code', extraProperties: ['computed' => true])]
     public string $currency = 'USD';
+
+    #[ApiProperty(writable: false, description: 'Base (website) currency code')]
+    public ?string $baseCurrencyCode = null;
+
+    #[ApiProperty(writable: false, description: 'Global currency code')]
+    public ?string $globalCurrencyCode = null;
+
+    #[ApiProperty(writable: false, description: 'Order state before it was put on hold')]
+    public ?string $holdBeforeState = null;
+
+    #[ApiProperty(writable: false, description: 'Order status before it was put on hold')]
+    public ?string $holdBeforeStatus = null;
+
+    #[ApiProperty(writable: false, description: 'Client IP the order was placed from (admin/API readers only)', extraProperties: ['computed' => true])]
+    public ?string $remoteIp = null;
+
+    #[ApiProperty(writable: false, description: 'X-Forwarded-For header at placement (admin/API readers only)', extraProperties: ['computed' => true])]
+    public ?string $xForwardedFor = null;
 
     #[ApiProperty(writable: false, description: 'Total number of distinct items')]
     public int $totalItemCount = 0;
@@ -321,7 +402,7 @@ class Order extends CrudResource
     #[ApiProperty(writable: false, description: 'Last update date (UTC)')]
     public ?string $updatedAt = null;
 
-    /** @var array<array{note: string|null, createdAt: string, isCustomerNotified: bool, isVisibleOnFront: bool}> */
+    /** @var array<array{note: string|null, status: string|null, createdAt: string, isCustomerNotified: bool, isVisibleOnFront: bool}> */
     #[ApiProperty(writable: false, description: 'Order status change history', extraProperties: ['computed' => true])]
     public array $statusHistory = [];
 

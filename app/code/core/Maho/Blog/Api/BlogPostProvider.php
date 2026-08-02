@@ -26,6 +26,9 @@ final class BlogPostProvider extends CrudProvider
 {
     protected array $defaultSort = ['publish_date' => 'DESC'];
 
+    protected bool $supportsScopeAll = true;
+    protected ?string $backOfficeResource = 'blog-posts';
+
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
@@ -52,7 +55,17 @@ final class BlogPostProvider extends CrudProvider
     {
         $post = \Mage::getModel('blog/post')->load($id);
 
-        if (!$post->getId() || !$post->getIsActive()) {
+        if (!$post->getId()) {
+            return null;
+        }
+
+        if ($this->isBackOfficeReader()) {
+            $this->assertReadableStores($post->getStores(), 'post');
+
+            return $this->toDto($post);
+        }
+
+        if (!$post->getIsActive()) {
             return null;
         }
 
@@ -74,18 +87,54 @@ final class BlogPostProvider extends CrudProvider
     {
         parent::applyCollectionFilters($collection, $filters);
 
-        $collection->addFieldToFilter('is_active', 1);
+        if (!$this->isScopeAll($filters)) {
+            $collection->addFieldToFilter('is_active', 1);
 
+<<<<<<< HEAD
         $collection->addFieldToFilter('publish_date', [
             'or' => [
                 ['null' => true],
                 ['lteq' => $this->publishedCutoff()],
             ],
         ]);
+=======
+            $collection->addFieldToFilter('publish_date', [
+                'or' => [
+                    ['null' => true],
+                    ['lteq' => $this->publishedCutoff()],
+                ],
+            ]);
+        }
+
+        $search = $filters['search'] ?? null;
+        if (is_string($search) && trim($search) !== '') {
+            $like = '%' . trim($search) . '%';
+            $collection->addAttributeToFilter([
+                ['attribute' => 'title', 'like' => $like],
+                ['attribute' => 'content', 'like' => $like],
+            ]);
+        }
+
+        if (($filters['categoryId'] ?? '') !== '') {
+            // Posts belong to many categories through a link table, so filter the link
+            // rather than a column on the post.
+            $select = $collection->getSelect();
+            $alias = (string) array_key_first((array) $select->getPart(\Maho\Db\Select::FROM));
+            $select->joinInner(
+                ['post_category' => \Mage::getSingleton('core/resource')->getTableName('blog/post_category')],
+                "post_category.post_id = {$alias}.entity_id",
+                [],
+            )->where('post_category.category_id = ?', (int) $filters['categoryId']);
+        }
+>>>>>>> 46dc60e (Added missing REST/GraphQL API fields, operations, and store-scoped reads/writes across all resources (#1210))
     }
 
     private function getPostByUrlKey(string $urlKey): ?Resource
     {
+        if ($this->isBackOfficeReader()) {
+            return $this->getPostByUrlKeyBackOffice($urlKey);
+        }
+
         $storeId = StoreContext::getStoreId();
         $post = \Mage::getModel('blog/post');
         $postId = $post->getPostIdByUrlKey($urlKey, $storeId);
@@ -105,6 +154,28 @@ final class BlogPostProvider extends CrudProvider
         }
 
         return $this->toDto($post);
+    }
+
+    /**
+     * getPostIdByUrlKey() only matches active, current-store posts; back-office
+     * readers resolve across every store and status, then reuse the item path
+     * so the store-restricted-token check applies.
+     */
+    private function getPostByUrlKeyBackOffice(string $urlKey): ?Resource
+    {
+        /** @var \Maho_Blog_Model_Resource_Post_Collection $collection */
+        $collection = \Mage::getResourceModel('blog/post_collection');
+        $collection->addAttributeToFilter('url_key', $urlKey);
+
+        $allowed = $this->allowedStoreIds();
+        if ($allowed !== null) {
+            $collection->addStoreFilter($allowed, false);
+        }
+
+        $collection->setPageSize(1);
+        $post = $collection->getFirstItem();
+
+        return $post->getId() ? $this->provideItem((int) $post->getId()) : null;
     }
 
     /**

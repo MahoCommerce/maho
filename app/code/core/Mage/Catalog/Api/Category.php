@@ -110,7 +110,7 @@ class Category extends CrudResource
     public ?string $urlPath = null;
 
     #[Groups(['category:read'])]
-    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Read: full image URL. Write: media filename stored under media/catalog/category ("" clears)', extraProperties: ['computed' => true])]
     public ?string $image = null;
 
     #[Groups(['category:read'])]
@@ -124,6 +124,26 @@ class Category extends CrudResource
 
     #[Groups(['category:read'])]
     public ?bool $includeInMenu = null;
+
+    #[Groups(['category:read'])]
+    public ?bool $isAnchor = null;
+
+    /** @var string[]|null */
+    #[Groups(['category:read'])]
+    #[ApiProperty(description: 'Available product listing sort-by codes (empty = use config)', extraProperties: ['computed' => true])]
+    public ?array $availableSortBy = null;
+
+    #[Groups(['category:read'])]
+    #[ApiProperty(description: 'Default product listing sort-by code ("" clears, falls back to config)')]
+    public ?string $defaultSortBy = null;
+
+    #[Groups(['category:read'])]
+    #[ApiProperty(description: 'CMS static block ID shown on the category page (0 clears)', extraProperties: ['modelField' => 'landing_page'])]
+    public ?int $landingPageId = null;
+
+    #[Groups(['category:read'])]
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    public ?int $childrenCount = null;
 
     #[Groups(['category:read'])]
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
@@ -163,6 +183,44 @@ class Category extends CrudResource
     public ?string $pageLayout = null;
 
     #[Groups(['category:read'])]
+    public ?string $metaRobots = null;
+
+    #[Groups(['category:read'])]
+    public ?string $customDesign = null;
+
+    #[Groups(['category:read'])]
+    #[ApiProperty(description: 'Custom design active-from date (Y-m-d, "" clears)')]
+    public ?string $customDesignFrom = null;
+
+    #[Groups(['category:read'])]
+    #[ApiProperty(description: 'Custom design active-to date (Y-m-d, "" clears)')]
+    public ?string $customDesignTo = null;
+
+    #[Groups(['category:read'])]
+    public ?string $customLayoutUpdate = null;
+
+    #[Groups(['category:read'])]
+    public ?bool $customUseParentSettings = null;
+
+    #[Groups(['category:read'])]
+    public ?bool $customApplyToProducts = null;
+
+    #[Groups(['category:read'])]
+    public ?float $filterPriceRange = null;
+
+    /** @var array<string, mixed>|null Arbitrary EAV attributes to set: {"attribute_code": value} (write only) */
+    #[ApiProperty(description: 'Arbitrary EAV attributes to set: {"attribute_code": value}', readable: false)]
+    public ?array $customAttributesWrite = null;
+
+    /** @var array<int|string, int>|null Map of productId => position (write only, existing assignments) */
+    #[ApiProperty(description: 'Positions to set on already-assigned products: {"productId": position}', readable: false)]
+    public ?array $productPositions = null;
+
+    /** @var string[]|null Attribute codes whose store override reverts to the default value; only valid with an explicit ?store= scope */
+    #[ApiProperty(description: 'Attribute codes to revert to their default (non-store) values; requires ?store=', readable: false)]
+    public ?array $useDefault = null;
+
+    #[Groups(['category:read'])]
     #[ApiProperty(writable: false)]
     public ?string $createdAt = null;
 
@@ -174,6 +232,7 @@ class Category extends CrudResource
     #[Groups(['category:read'])]
     #[ApiProperty(description: 'Module-provided extension data')]
     public array $extensions = [];
+<<<<<<< HEAD
 
     public static function afterLoad(self $dto, object $model): void
     {
@@ -216,4 +275,6 @@ class Category extends CrudResource
             return null;
         }
     }
+=======
+>>>>>>> 46dc60e (Added missing REST/GraphQL API fields, operations, and store-scoped reads/writes across all resources (#1210))
 }

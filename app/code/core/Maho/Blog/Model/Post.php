@@ -29,6 +29,7 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
         'is_active',
         'publish_date',
         'content',
+        'short_content',
         'meta_description',
         'meta_keywords',
         'meta_title',

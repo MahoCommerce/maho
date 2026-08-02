@@ -19,4 +19,9 @@ class ShipmentTrack extends \Maho\ApiPlatform\Resource
     public ?string $carrier = null;
     public ?string $title = null;
     public ?string $trackNumber = null;
+    public ?string $description = null;
+    public ?float $weight = null;
+    public ?float $qty = null;
+    public ?string $createdAt = null;
+    public ?string $updatedAt = null;
 }

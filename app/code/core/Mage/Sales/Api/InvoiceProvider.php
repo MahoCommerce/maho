@@ -24,12 +24,18 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
         parent::__construct($security);
     }
 
+    private const WRITE_OPERATIONS = ['order_invoice_create', 'invoice_capture', 'invoice_void', 'invoice_cancel'];
+
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Invoice|Response
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Invoice|Response|null
     {
         $operationName = $operation->getName();
 
         return match (true) {
+            // POST operations are handled entirely by InvoiceProcessor; the
+            // read pass (triggered because the ops have uri variables) must
+            // not resolve anything here.
+            in_array($operationName, self::WRITE_OPERATIONS, true) => null,
             str_contains($operationName, 'pdf') => $this->downloadPdf($uriVariables, $operationName),
             default => $this->listInvoices($uriVariables, $operationName),
         };
@@ -45,13 +51,52 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
             ? '/api/rest/v2/customers/me/orders/' . $orderId . '/invoices/'
             : '/api/rest/v2/orders/' . $orderId . '/invoices/';
 
-        foreach ($order->getInvoiceCollection() as $invoice) {
-            $dto = Invoice::fromModel($invoice);
+        $models = iterator_to_array($order->getInvoiceCollection());
+        $this->preloadItemsAndComments($models);
+
+        foreach ($models as $invoice) {
+            // Reuse the already-loaded order so afterLoad's getOrder() doesn't
+            // re-load it per invoice.
+            $dto = Invoice::fromModel($invoice->setOrder($order));
             $dto->pdfUrl = $basePath . $invoice->getId() . '/pdf';
             $invoices[] = $dto;
         }
 
         return $invoices;
+    }
+
+    /**
+     * Batch-load items and comments for a set of invoices (2 queries instead of
+     * 2 per invoice); Invoice::afterLoad() consumes the preloaded sets.
+     *
+     * @param array<\Mage_Sales_Model_Order_Invoice> $invoices
+     */
+    private function preloadItemsAndComments(array $invoices): void
+    {
+        if ($invoices === []) {
+            return;
+        }
+        $invoiceIds = array_map(static fn($invoice): int => (int) $invoice->getId(), $invoices);
+
+        $itemsByInvoice = [];
+        $itemCollection = \Mage::getResourceModel('sales/order_invoice_item_collection')
+            ->addFieldToFilter('parent_id', ['in' => $invoiceIds]);
+        foreach ($itemCollection as $item) {
+            $itemsByInvoice[(int) $item->getParentId()][] = $item;
+        }
+
+        $commentsByInvoice = [];
+        $commentCollection = \Mage::getResourceModel('sales/order_invoice_comment_collection')
+            ->addFieldToFilter('parent_id', ['in' => $invoiceIds]);
+        foreach ($commentCollection as $comment) {
+            $commentsByInvoice[(int) $comment->getParentId()][] = $comment;
+        }
+
+        foreach ($invoices as $invoice) {
+            $id = (int) $invoice->getId();
+            $invoice->setData('_preloaded_items', $itemsByInvoice[$id] ?? []);
+            $invoice->setData('_preloaded_comments', $commentsByInvoice[$id] ?? []);
+        }
     }
 
     private function downloadPdf(array $uriVariables, string $operationName): Response
@@ -96,9 +141,12 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
         } else {
             // Admins and API users (permission already enforced upstream by the
             // operation's `security:` expression) may access any order's
-            // invoices, matching OrderProvider::canAccessOrder(). Customers are
-            // limited to their own orders.
-            if (!$this->isAdmin() && !$this->isApiUser()) {
+            // invoices within their store allowlist, matching
+            // OrderProvider::canAccessOrder(). Customers are limited to their
+            // own orders.
+            if ($this->isAdmin() || $this->isApiUser()) {
+                $this->assertStoreAllowed($order->getStoreId(), $this->getAuthorizedUser(), 'order');
+            } else {
                 $customerId = $order->getCustomerId();
                 if ($customerId) {
                     $this->authorizeCustomerAccess((int) $customerId, 'You can only access your own order invoices');
