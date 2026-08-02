@@ -32,15 +32,14 @@ use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
  * - integer property (customer id): strict compare; 0/null means a guest row,
  *   owned by nobody.
  * - string property (email): case-insensitive compare against the caller's
- *   email, resolved once per customer with a single-column read.
+ *   email, resolved with a single-column read. Deliberately uncached: a stale
+ *   email after an account change must not decide ownership, and the lookup
+ *   runs at most once per item read.
  * - property missing on the object: deny and log, so a renamed DTO field can
  *   never fail open.
  */
 final class CustomerOwnership implements ExpressionFunctionProviderInterface
 {
-    /** @var array<int, ?string> */
-    private static array $emailByCustomerId = [];
-
     public static function isOwner(mixed $user, mixed $object, string $property): bool
     {
         if ($object === null) {
@@ -76,10 +75,6 @@ final class CustomerOwnership implements ExpressionFunctionProviderInterface
 
     private static function resolveCustomerEmail(int $customerId): ?string
     {
-        if (array_key_exists($customerId, self::$emailByCustomerId)) {
-            return self::$emailByCustomerId[$customerId];
-        }
-
         $resource = \Mage::getSingleton('core/resource');
         $read = $resource->getConnection('core_read');
         $select = $read->select()
@@ -88,7 +83,7 @@ final class CustomerOwnership implements ExpressionFunctionProviderInterface
             ->limit(1);
         $email = $read->fetchOne($select);
 
-        return self::$emailByCustomerId[$customerId] = is_string($email) && $email !== '' ? $email : null;
+        return is_string($email) && $email !== '' ? $email : null;
     }
 
     /** @return list<ExpressionFunction> */

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Snapshot of every field the API serializes for an unauthenticated caller.
+ * Snapshot of every readable API field carrying no property-level security gate.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -11,9 +11,11 @@ declare(strict_types=1);
 
 /*
  * PropertyAuthorizationTest compares the live surface against this file. A
- * property with no `#[ApiProperty(security: ...)]` is public, so adding one to a
- * DTO widens the public API by default; this snapshot turns that into a failing
- * test until someone either gates the property or records it here on purpose.
+ * property with no `#[ApiProperty(security: ...)]` is visible to every caller
+ * the operation-level gates let through (for publicly readable resources, that
+ * is anyone), so adding one to a DTO widens the exposed surface by default;
+ * this snapshot turns that into a failing test until someone either gates the
+ * property or records it here on purpose.
  *
  * Regenerate deliberately, never to silence a failure you have not read.
  */
