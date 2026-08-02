@@ -142,7 +142,7 @@ class Review extends CrudResource
     public int $rating = 5;
 
     /** approved | pending | not_approved. Writable through the moderation Put only; submit always forces pending. */
-    #[ApiProperty(extraProperties: ['computed' => true])]
+    #[ApiProperty(securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('reviews/write')", extraProperties: ['computed' => true])]
     public ?string $status = null;
 
     #[ApiProperty(writable: false)]
@@ -163,7 +163,7 @@ class Review extends CrudResource
      *
      * @var array<int|string>|null
      */
-    #[ApiProperty(extraProperties: ['computed' => true])]
+    #[ApiProperty(securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('reviews/write')", extraProperties: ['computed' => true])]
     public ?array $stores = null;
 
     // Not serialized in responses: the author's internal customer id has no

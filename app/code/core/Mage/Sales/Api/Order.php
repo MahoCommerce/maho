@@ -387,10 +387,12 @@ class Order extends CrudResource
     #[ApiProperty(writable: false, description: 'Order status before it was put on hold')]
     public ?string $holdBeforeStatus = null;
 
-    #[ApiProperty(writable: false, description: 'Client IP the order was placed from (admin/API readers only)', extraProperties: ['computed' => true])]
+    // Fraud-relevant request metadata, never echoed to a customer or
+    // guest-token reader.
+    #[ApiProperty(writable: false, description: 'Client IP the order was placed from (admin/API readers only)', security: "is_back_office('orders')", extraProperties: ['computed' => true])]
     public ?string $remoteIp = null;
 
-    #[ApiProperty(writable: false, description: 'X-Forwarded-For header at placement (admin/API readers only)', extraProperties: ['computed' => true])]
+    #[ApiProperty(writable: false, description: 'X-Forwarded-For header at placement (admin/API readers only)', security: "is_back_office('orders')", extraProperties: ['computed' => true])]
     public ?string $xForwardedFor = null;
 
     #[ApiProperty(writable: false, description: 'Total number of distinct items')]

@@ -400,6 +400,14 @@ class Kernel extends BaseKernel
             ->arg('$debug', '%kernel.debug%')
             ->tag('kernel.event_subscriber');
 
+        // Publishes is_back_office('<resource>') to every security expression,
+        // including the per-property ones the serializer evaluates. Tagged by
+        // hand: FrameworkBundle autoconfigures ExpressionFunctionProviderInterface
+        // onto the generic `expression_language_provider` tag, which the security
+        // expression language does not read.
+        $services->set(Security\BackOfficeAccess::class)
+            ->tag('security.expression_language_provider');
+
         $services->set(GraphQl\CustomQueryResolver::class)
             ->arg('$providerLocator', tagged_locator('maho.api.state_provider'))
             ->tag('api_platform.graphql.query_resolver');

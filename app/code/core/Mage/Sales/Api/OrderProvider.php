@@ -336,12 +336,9 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $dto->appliedRuleIds = $this->parseAppliedRuleIds($order->getAppliedRuleIds());
         $dto->giftcardCodes = $this->parseGiftcardCodes($order->getData('giftcard_codes'));
 
-        // Fraud-relevant request metadata is for back-office eyes only, never
-        // echoed to customer or guest-token readers.
-        if ($this->isAdmin() || $this->isApiUser()) {
-            $dto->remoteIp = $order->getRemoteIp();
-            $dto->xForwardedFor = $order->getXForwardedFor();
-        }
+        // Back-office only; the DTO properties carry the gate.
+        $dto->remoteIp = $order->getRemoteIp();
+        $dto->xForwardedFor = $order->getXForwardedFor();
 
         // Set access token for guest orders
         if ($accessToken) {

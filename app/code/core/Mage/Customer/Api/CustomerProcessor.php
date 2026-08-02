@@ -154,12 +154,11 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     {
         StoreContext::ensureStore();
 
-        // POST /customers is public (registration). Admin-only fields are accepted
-        // only from an admin or a service token holding customers/create; anyone
-        // else supplying them is rejected before the rate limiter records a hit.
+        // POST /customers is public (registration); the admin-only fields carry
+        // their own securityPostDenormalize gate, which has already reset them
+        // to their defaults for an unprivileged caller by the time we get here.
         $isPrivileged = $this->canWriteAdminFields('customers/create');
         if (!$isPrivileged) {
-            $this->assertNoAdminOnlyFields($data);
             $this->checkRateLimitByIp('create_customer', 'customer_register', 3600);
         }
 
@@ -182,7 +181,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             if ($defaultStore) {
                 $storeId = (int) $defaultStore->getId();
             }
-            // Only privileged callers reach here (assertNoAdminOnlyFields above),
+            // websiteId only survives denormalization for a privileged caller,
             // so the authenticated ApiUser is guaranteed to exist.
             $this->assertWebsiteAllowed($websiteId, $this->getAuthorizedUser(), 'customer');
         }
@@ -516,23 +515,6 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
 
         $user = $this->security?->getUser();
         return $user instanceof ApiUser && $user->isApiUser() && $user->hasPermission($permission);
-    }
-
-    /** @throws AccessDeniedHttpException when a non-privileged caller supplies an admin-only field */
-    private function assertNoAdminOnlyFields(Customer $data): void
-    {
-        $adminOnly = [
-            'groupId' => $data->groupId,
-            'isActive' => $data->isActive,
-            'websiteId' => $data->websiteId,
-            'taxvat' => $data->taxvat,
-            'disableAutoGroupChange' => $data->disableAutoGroupChange,
-        ];
-        foreach ($adminOnly as $field => $value) {
-            if ($value !== null) {
-                throw new AccessDeniedHttpException("Field {$field} requires an admin or service token");
-            }
-        }
     }
 
     /**

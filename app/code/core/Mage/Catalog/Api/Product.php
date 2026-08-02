@@ -199,7 +199,7 @@ class Product extends CrudResource
     public ?string $specialToDate = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Product cost; only returned to admin and API tokens')]
+    #[ApiProperty(description: 'Product cost; only visible to admin and API tokens', security: "is_back_office('products')")]
     public ?float $cost = null;
 
     #[Groups(['product:read'])]
@@ -275,19 +275,19 @@ class Product extends CrudResource
     public ?string $metaRobots = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Custom design/theme override')]
+    #[ApiProperty(description: 'Custom design/theme override; only visible to admin and API tokens', security: "is_back_office('products')")]
     public ?string $customDesign = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Custom design active from date (Y-m-d); empty string clears it')]
+    #[ApiProperty(description: 'Custom design active from date (Y-m-d); empty string clears it; only visible to admin and API tokens', security: "is_back_office('products')")]
     public ?string $customDesignFrom = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Custom design active to date (Y-m-d); empty string clears it')]
+    #[ApiProperty(description: 'Custom design active to date (Y-m-d); empty string clears it; only visible to admin and API tokens', security: "is_back_office('products')")]
     public ?string $customDesignTo = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Custom layout update XML')]
+    #[ApiProperty(description: 'Custom layout update XML; only visible to admin and API tokens', security: "is_back_office('products')")]
     public ?string $customLayoutUpdate = null;
 
     #[Groups(['product:read'])]
@@ -483,7 +483,7 @@ class Product extends CrudResource
 
     /** @var array<string, mixed>|null User-defined EAV attribute values keyed by attribute_code (read counterpart of customAttributesWrite) */
     #[Groups(['product:detail'])]
-    #[ApiProperty(description: 'User-defined EAV attribute values keyed by attribute_code; only returned to admin and API tokens', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'User-defined EAV attribute values keyed by attribute_code; only visible to admin and API tokens', writable: false, security: "is_back_office('products')", extraProperties: ['computed' => true])]
     public ?array $customAttributes = null;
 
     /** @var array<string, mixed>|null Full inventory settings keyed by cataloginventory_stock_item column */

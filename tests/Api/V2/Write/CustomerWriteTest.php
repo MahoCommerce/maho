@@ -83,17 +83,25 @@ describe('POST /api/rest/v2/customers (extended fields)', function (): void {
         expect($customer)->not->toHaveKey('confirmation');
     });
 
-    it('rejects admin-only fields on anonymous registration', function (): void {
+    it('ignores admin-only fields on anonymous registration', function (): void {
+        $email = CUSTOMER_WRITE_EMAIL_PREFIX . uniqid() . '@example.test';
         $response = apiPost('/api/rest/v2/customers', [
-            'email' => CUSTOMER_WRITE_EMAIL_PREFIX . uniqid() . '@example.test',
+            'email' => $email,
             'password' => 'PestWrite1234!',
             'firstname' => 'Anon',
             'lastname' => 'User',
             'groupId' => 2,
+            'taxvat' => 'IT12345678901',
         ]);
 
-        // AccessDenied surfaces as 401 for tokenless callers, 403 for tokened ones
-        expect($response['status'])->toBeIn([401, 403]);
+        // The admin-only properties carry a securityPostDenormalize gate, so an
+        // unprivileged caller's values are reset before the processor sees them:
+        // registration succeeds, on the default group, with no tax id.
+        expect($response['status'])->toBeSuccessful();
+
+        $read = apiGet('/api/rest/v2/customers/' . (int) $response['json']['id'], adminToken());
+        expect($read['json']['groupId'])->toBe(1)
+            ->and($read['json']['taxvat'])->toBeNull();
     });
 
     it('rejects a non-existent groupId', function (): void {
