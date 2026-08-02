@@ -22,13 +22,9 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  */
 final class ProductProvider extends \Maho\ApiPlatform\Provider
 {
-<<<<<<< HEAD
-=======
-    use DateRangeFilterTrait;
     // Read-side reuse only: shares the stock item column list with the write paths.
     use \Maho\ApiPlatform\Trait\StockWriterTrait;
 
->>>>>>> 46dc60e (Added missing REST/GraphQL API fields, operations, and store-scoped reads/writes across all resources (#1210))
     /** Whitelist of fields the client may sort by; everything else is rejected to keep ORDER BY injection-safe. */
     private const SORTABLE_FIELDS = ['name', 'price', 'special_price', 'created_at', 'updated_at', 'position', 'sku', 'entity_id'];
 

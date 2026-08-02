@@ -232,49 +232,4 @@ class Category extends CrudResource
     #[Groups(['category:read'])]
     #[ApiProperty(description: 'Module-provided extension data')]
     public array $extensions = [];
-<<<<<<< HEAD
-
-    public static function afterLoad(self $dto, object $model): void
-    {
-        // Image URL
-        if ($model->getImage()) {
-            $dto->image = $model->getImageUrl();
-        }
-
-        // Product count
-        $dto->productCount = (int) $model->getProductCount();
-
-        // Children IDs
-        $childrenIds = $model->getChildren();
-        if ($childrenIds) {
-            $dto->childrenIds = array_map('intval', explode(',', $childrenIds));
-        }
-
-        // Display mode
-        $dto->displayMode = $model->getDisplayMode() ?: null;
-        $dto->pageLayout = $model->getPageLayout() ?: null;
-
-        // CMS block from landing_page
-        $landingPage = $model->getLandingPage();
-        if ($landingPage) {
-            $dto->cmsBlock = self::renderCmsBlock((int) $landingPage);
-        }
-    }
-
-    private static function renderCmsBlock(int $blockId): ?string
-    {
-        try {
-            $cmsBlock = \Mage::getModel('cms/block')
-                ->setStoreId(\Mage::app()->getStore()->getId())
-                ->load($blockId);
-            if (!$cmsBlock->getIsActive() || !$cmsBlock->getContent()) {
-                return null;
-            }
-            return \Maho\ApiPlatform\CrudResource::filterContent($cmsBlock->getContent());
-        } catch (\Throwable) {
-            return null;
-        }
-    }
-=======
->>>>>>> 46dc60e (Added missing REST/GraphQL API fields, operations, and store-scoped reads/writes across all resources (#1210))
 }

@@ -90,14 +90,6 @@ final class BlogPostProvider extends CrudProvider
         if (!$this->isScopeAll($filters)) {
             $collection->addFieldToFilter('is_active', 1);
 
-<<<<<<< HEAD
-        $collection->addFieldToFilter('publish_date', [
-            'or' => [
-                ['null' => true],
-                ['lteq' => $this->publishedCutoff()],
-            ],
-        ]);
-=======
             $collection->addFieldToFilter('publish_date', [
                 'or' => [
                     ['null' => true],
@@ -126,7 +118,6 @@ final class BlogPostProvider extends CrudProvider
                 [],
             )->where('post_category.category_id = ?', (int) $filters['categoryId']);
         }
->>>>>>> 46dc60e (Added missing REST/GraphQL API fields, operations, and store-scoped reads/writes across all resources (#1210))
     }
 
     private function getPostByUrlKey(string $urlKey): ?Resource

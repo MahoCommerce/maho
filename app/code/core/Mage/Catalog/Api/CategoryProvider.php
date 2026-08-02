@@ -151,11 +151,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
 
         $collection = \Mage::getModel('catalog/category')
             ->getCollection()
-<<<<<<< HEAD
-            ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page', 'page_layout'])
-=======
             ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'is_anchor', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page', 'page_layout', 'available_sort_by', 'default_sort_by', 'meta_robots', 'filter_price_range', 'custom_design', 'custom_design_from', 'custom_design_to', 'custom_layout_update', 'custom_use_parent_settings', 'custom_apply_to_products'])
->>>>>>> 46dc60e (Added missing REST/GraphQL API fields, operations, and store-scoped reads/writes across all resources (#1210))
             ->addAttributeToFilter('is_active', 1)
             ->setOrder('position', 'ASC');
 
@@ -280,11 +276,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         if ($includeChildren && !empty($dto->childrenIds)) {
             $childCollection = \Mage::getModel('catalog/category')
                 ->getCollection()
-<<<<<<< HEAD
-                ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page', 'page_layout'])
-=======
                 ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'is_anchor', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page', 'page_layout', 'available_sort_by', 'default_sort_by', 'meta_robots', 'filter_price_range', 'custom_design', 'custom_design_from', 'custom_design_to', 'custom_layout_update', 'custom_use_parent_settings', 'custom_apply_to_products'])
->>>>>>> 46dc60e (Added missing REST/GraphQL API fields, operations, and store-scoped reads/writes across all resources (#1210))
                 ->addAttributeToFilter('entity_id', ['in' => $dto->childrenIds])
                 ->addAttributeToFilter('is_active', 1)
                 ->setOrder('position', 'ASC');

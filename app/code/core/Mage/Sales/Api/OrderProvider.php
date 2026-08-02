@@ -277,7 +277,6 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $this->requireAdminOrApiUser('Order listing requires admin or API access');
 
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context);
-<<<<<<< HEAD
         $filters = $context['filters'] ?? [];
         $status = $filters['status'] ?? null;
         $email = $filters['email'] ?? null;
@@ -285,15 +284,16 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $incrementId = $filters['incrementId'] ?? null;
         $since = $filters['since'] ?? null;
 
-        $result = $this->orderService->getAllOrders($page, $pageSize, $status, $email, $incrementId, $emailLike, $since);
-=======
         $result = $this->orderService->getAllOrders(
             $page,
             $pageSize,
-            $context['filters'] ?? [],
+            $status,
+            $email,
+            $incrementId,
+            $emailLike,
+            $since,
             $this->getAuthorizedUser()->getAllowedStoreIds(),
         );
->>>>>>> 46dc60e (Added missing REST/GraphQL API fields, operations, and store-scoped reads/writes across all resources (#1210))
 
         $orders = [];
         foreach ($result['orders'] as $order) {

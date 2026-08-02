@@ -14,12 +14,8 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
-<<<<<<< HEAD
-=======
-use Maho\ApiPlatform\Trait\DateRangeFilterTrait;
 use Maho\ApiPlatform\Trait\StoreAccessTrait;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
->>>>>>> 46dc60e (Added missing REST/GraphQL API fields, operations, and store-scoped reads/writes across all resources (#1210))
 
 /**
  * Convention-based provider for CrudResource subclasses.
@@ -33,12 +29,8 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  */
 class CrudProvider extends Provider
 {
-<<<<<<< HEAD
-=======
-    use DateRangeFilterTrait;
     use StoreAccessTrait;
 
->>>>>>> 46dc60e (Added missing REST/GraphQL API fields, operations, and store-scoped reads/writes across all resources (#1210))
     /** @var class-string<CrudResource>|null */
     protected ?string $resourceClass = null;
 

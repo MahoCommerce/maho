@@ -228,7 +228,6 @@ class OrderService
     /**
      * Get all orders with billing address joined (no N+1 queries).
      *
-<<<<<<< HEAD
      * @param int $page Page number
      * @param int $pageSize Page size
      * @param string|null $status Filter by status
@@ -236,12 +235,7 @@ class OrderService
      * @param string|null $incrementId Filter by order increment ID (exact match)
      * @param string|null $emailLike Filter by customer email (partial LIKE match, slower on large tables)
      * @param string|null $since Filter by updated_at >= value (ISO datetime)
-=======
-     * @param array<string, mixed> $filters status, state, storeId, customerId, email,
-     *   emailLike, incrementId, createdFrom, createdTo, updatedSince (`since` is accepted
-     *   as the legacy name for the last)
      * @param int[]|null $allowedStoreIds Token store allowlist; null means unrestricted
->>>>>>> 46dc60e (Added missing REST/GraphQL API fields, operations, and store-scoped reads/writes across all resources (#1210))
      * @return array{orders: array, total: int}
      */
     public function getAllOrders(
@@ -249,20 +243,14 @@ class OrderService
         int $pageSize = 20,
         ?string $status = null,
         #[\SensitiveParameter]
-<<<<<<< HEAD
         ?string $email = null,
         ?string $incrementId = null,
         ?string $emailLike = null,
         ?string $since = null,
-=======
-        array $filters = [],
         ?array $allowedStoreIds = null,
->>>>>>> 46dc60e (Added missing REST/GraphQL API fields, operations, and store-scoped reads/writes across all resources (#1210))
     ): array {
         $collection = $this->buildOrderCollection(null, $status, $since);
 
-<<<<<<< HEAD
-=======
         if ($allowedStoreIds !== null) {
             $collection->getSelect()->where(
                 'main_table.store_id IN (?)',
@@ -270,9 +258,6 @@ class OrderService
             );
         }
 
-        $email = $filters['email'] ?? null;
-        $emailLike = $filters['emailLike'] ?? null;
->>>>>>> 46dc60e (Added missing REST/GraphQL API fields, operations, and store-scoped reads/writes across all resources (#1210))
         if ($email) {
             $collection->addFieldToFilter('customer_email', $email);
         } elseif ($emailLike && mb_strlen($emailLike) >= 3) {
