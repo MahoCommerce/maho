@@ -542,14 +542,16 @@ class OrderService
      * @param string $note Note text
      * @param bool $notifyCustomer Notify customer
      * @param bool $visibleOnFront Visible on frontend
+     * @param string|null $status New order status; caller must validate it against the order's state
      */
     public function addOrderNote(
         \Mage_Sales_Model_Order $order,
         string $note,
         bool $notifyCustomer = false,
         bool $visibleOnFront = false,
+        ?string $status = null,
     ): \Mage_Sales_Model_Order {
-        $order->addStatusHistoryComment($note, false)
+        $order->addStatusHistoryComment($note, $status ?? false)
             ->setIsCustomerNotified($notifyCustomer)
             ->setIsVisibleOnFront((int) $visibleOnFront);
 

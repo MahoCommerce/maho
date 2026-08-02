@@ -116,7 +116,7 @@ use Mage\Customer\Api\Address;
             name: 'order_add_comment',
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_ADMIN') or is_granted('orders/write')",
-            description: 'Add a status-history comment to an order',
+            description: 'Add a status-history comment to an order. Optional status must be one assigned to the order\'s current state',
         ),
         new Get(
             // Read an order by its human-readable increment id, authenticated
@@ -231,6 +231,7 @@ use Mage\Customer\Api\Address;
                 'orderId' => ['type' => 'ID'],
                 'incrementId' => ['type' => 'String'],
                 'comment' => ['type' => 'String!'],
+                'status' => ['type' => 'String', 'description' => 'New order status; must be one assigned to the order\'s current state'],
                 'notifyCustomer' => ['type' => 'Boolean'],
                 'visibleOnFront' => ['type' => 'Boolean'],
             ],
