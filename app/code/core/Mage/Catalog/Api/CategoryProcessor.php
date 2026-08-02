@@ -330,8 +330,6 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
             return null;
         }
 
-        $this->requireAdminOrApiUser('Layout updates require admin or API access');
-
         /** @var \Mage_Adminhtml_Model_LayoutUpdate_Validator $validator */
         $validator = Mage::getModel('adminhtml/layoutUpdate_validator');
         try {

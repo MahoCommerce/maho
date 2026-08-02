@@ -55,28 +55,15 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
 
 
         if ($operation instanceof CollectionOperationInterface) {
-            // SECURITY: Only admins and API users with customers/read can list customers
-            if (!$this->isAdmin()) {
-                if ($this->isApiUser()) {
-                    $this->requireApiPermission('customers/read');
-                } else {
-                    $this->requireAdmin('Listing all customers requires admin or API user access');
-                }
-            }
             return $this->getCollection($context);
         }
 
-        // Single customer lookup. Admin tokens can read any customer (admins
-        // are gated by Maho ACL anyway). API-user tokens must hold the
-        // explicit customers/read permission to cross customer boundaries,
-        // otherwise a bare service-account token would let any client_credentials
-        // key dump every customer's profile + addresses. ROLE_CUSTOMER (a
-        // customer's own token) falls through to authorizeCustomerAccess(),
-        // which enforces self-only.
+        // Single customer lookup. The operation's security already limited this
+        // to admin tokens, API-user tokens holding customers/read, and a
+        // customer's own token; only the last needs a row-level check, since
+        // ROLE_CUSTOMER says nothing about *which* customer is being read.
         $requestedId = (int) ($uriVariables['id'] ?? 0);
-        if ($this->isApiUser()) {
-            $this->requireApiPermission('customers/read');
-        } elseif (!$this->isAdmin()) {
+        if (!$this->isAdmin() && !$this->isApiUser()) {
             $this->authorizeCustomerAccess($requestedId);
         }
 

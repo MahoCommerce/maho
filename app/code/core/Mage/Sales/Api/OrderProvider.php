@@ -274,8 +274,6 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
      */
     private function getCollection(array $context): TraversablePaginator
     {
-        $this->requireAdminOrApiUser('Order listing requires admin or API access');
-
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context);
         $result = $this->orderService->getAllOrders(
             $page,

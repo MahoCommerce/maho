@@ -28,7 +28,6 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Invoice
     {
-        $this->requireAdminOrApiUser('Invoice management requires admin or API access');
         $operationName = $operation->getName();
 
         $this->normalizeGraphQlInput($context);
@@ -43,8 +42,6 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
 
     private function createInvoice(array $uriVariables, array $context): Invoice
     {
-        $this->requireApiPermission('invoices/create');
-
         $orderId = (int) ($uriVariables['orderId'] ?? 0);
         if (!$orderId) {
             throw new BadRequestHttpException('Order ID is required');
@@ -194,8 +191,6 @@ final class InvoiceProcessor extends \Maho\ApiPlatform\Processor
      */
     private function executeLifecycleAction(string $action, array $uriVariables): Invoice
     {
-        $this->requireApiPermission('invoices/write');
-
         $invoiceId = (int) ($uriVariables['id'] ?? 0);
         if (!$invoiceId) {
             throw new BadRequestHttpException('Invoice ID is required');

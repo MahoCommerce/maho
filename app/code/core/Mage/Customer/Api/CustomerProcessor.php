@@ -457,16 +457,10 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
 
     /**
      * Update any customer as an admin or a service token holding customers/write.
-     * The route security already excludes customer tokens; this re-checks in depth.
+     * The operation's security already excludes customer tokens.
      */
     private function updateCustomerAdmin(int $customerId, Customer $data): Customer
     {
-        if ($this->isApiUser()) {
-            $this->requireApiPermission('customers/write');
-        } else {
-            $this->requireAdmin();
-        }
-
         $customer = $this->customerService->getCustomerById($customerId);
         if (!$customer) {
             throw new NotFoundHttpException('Customer not found');

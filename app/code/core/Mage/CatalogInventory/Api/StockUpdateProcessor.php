@@ -28,8 +28,6 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): StockUpdate
     {
-        $this->requireAdminOrApiUser('Stock update requires admin or API access');
-        $this->requireApiPermission('inventory/write');
         $operationName = $operation->getName();
 
         return match ($operationName) {

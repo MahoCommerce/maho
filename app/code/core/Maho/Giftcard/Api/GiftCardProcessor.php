@@ -178,8 +178,6 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
 
     private function createGiftcardFromGraphQl(array $context): GiftCard
     {
-        $this->requireAdminOrApiUser('Gift card management requires admin or API access');
-        $this->requireApiPermission('giftcards/create');
         $args = $context['args']['input'] ?? [];
 
         $this->assertValidGiftcard(
@@ -239,8 +237,6 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
 
     private function adjustBalance(array $context): GiftCard
     {
-        $this->requireAdminOrApiUser('Gift card management requires admin or API access');
-        $this->requireApiPermission('giftcards/write');
         $args = $context['args']['input'] ?? [];
 
         $code = trim((string) ($args['code'] ?? ''));

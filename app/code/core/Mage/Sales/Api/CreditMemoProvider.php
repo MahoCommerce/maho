@@ -21,7 +21,6 @@ final class CreditMemoProvider extends CrudProvider
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): CreditMemo|TraversablePaginator|null
     {
-        $this->requireAdminOrApiUser('Credit memo access requires admin or API access');
         $this->resourceClass = $operation->getClass();
         $this->modelAlias = 'sales/order_creditmemo';
 

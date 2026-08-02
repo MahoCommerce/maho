@@ -133,14 +133,21 @@ class ApiUser implements UserInterface
     }
 
     /**
-     * Check if user has a specific permission
+     * Whether the user holds a `resource/operation` grant, directly or through
+     * the `resource/all` or global `all` wildcards. Same rule ApiUserVoter
+     * applies to `is_granted()`, so a direct call here and an operation's
+     * `security:` expression can never disagree about the same grant.
      */
     public function hasPermission(string $permission): bool
     {
-        if (in_array('all', $this->permissions, true)) {
+        if (in_array('all', $this->permissions, true)
+            || in_array($permission, $this->permissions, true)
+        ) {
             return true;
         }
-        return in_array($permission, $this->permissions, true);
+
+        [$resource] = explode('/', $permission, 2);
+        return $resource !== $permission && in_array($resource . '/all', $this->permissions, true);
     }
 
     /**

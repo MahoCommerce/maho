@@ -46,9 +46,6 @@ final class MediaProvider implements ProviderInterface
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {
-        // requireApiPermission() short-circuits for admin tokens (Maho ACL gates those)
-        $this->requireApiPermission('media/read');
-
         return $this->listFiles();
     }
 
