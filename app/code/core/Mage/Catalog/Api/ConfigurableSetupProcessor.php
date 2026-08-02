@@ -83,7 +83,7 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleSetup(int $productId, array $body): ConfigurableSetup
     {
-        $product = $this->loadProductForWrite($productId, Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
+        $product = $this->loadProductForWrite($productId, $this->getAuthorizedUser(), Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
         /** @var \Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
         $typeInstance = $product->getTypeInstance(true);
 
@@ -134,7 +134,7 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleAddChild(int $productId, array $body): ConfigurableSetup
     {
-        $product = $this->loadProductForWrite($productId, Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
+        $product = $this->loadProductForWrite($productId, $this->getAuthorizedUser(), Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
 
         $childId = (int) ($body['childProductId'] ?? $body['child_product_id'] ?? $body['childId'] ?? 0);
         if ($childId <= 0) {
@@ -161,7 +161,7 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('childProductId is required and must be positive');
         }
 
-        $product = $this->loadProductForWrite($productId, Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
+        $product = $this->loadProductForWrite($productId, $this->getAuthorizedUser(), Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
 
         $existingChildren = $this->getExistingChildIds($product);
         unset($existingChildren[$childId]);

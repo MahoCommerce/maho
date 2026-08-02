@@ -30,6 +30,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 trait ProductLoaderTrait
 {
+    use StoreAccessTrait;
+
     protected function loadProduct(int $id, ?string $requiredType = null): Mage_Catalog_Model_Product
     {
         StoreContext::ensureStore();
@@ -57,12 +59,13 @@ trait ProductLoaderTrait
      * Load for a model save: global scope unless the request names a store.
      * Saving a product loaded at a store view clones every store-scope attribute
      * into that store (the _canUpdateAttribute store-view rule), so writes must
-     * not inherit the read context's default store.
+     * not inherit the read context's default store. resolveWriteScope() keeps
+     * store-restricted tokens off the global scope.
      */
-    protected function loadProductForWrite(int $id, ?string $requiredType = null): Mage_Catalog_Model_Product
+    protected function loadProductForWrite(int $id, ApiUser $user, ?string $requiredType = null): Mage_Catalog_Model_Product
     {
         StoreContext::ensureStore();
-        $storeId = StoreContext::getExplicitStoreId() ?? \Mage_Core_Model_App::ADMIN_STORE_ID;
+        $storeId = $this->resolveWriteScope($user);
 
         /** @var Mage_Catalog_Model_Product $product */
         $product = Mage::getModel('catalog/product');

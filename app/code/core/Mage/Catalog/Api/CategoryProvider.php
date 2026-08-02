@@ -10,8 +10,10 @@ declare(strict_types=1);
 
 namespace Mage\Catalog\Api;
 
+use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
+use ApiPlatform\Metadata\Put;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 
@@ -40,21 +42,29 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
             return $this->getCollection($context);
         }
 
-        return $this->getItem((int) $uriVariables['id']);
+        // Writes read current state through this provider before the processor
+        // runs; authorization (403) lives in the processor, so the visibility
+        // gate must not turn that into a 404 here.
+        $checkVisibility = !$operation instanceof Put && !$operation instanceof DeleteOperationInterface;
+        return $this->getItem((int) $uriVariables['id'], $checkVisibility);
     }
 
     /**
      * Get a single category by ID
      */
-    private function getItem(int $id): ?Category
+    private function getItem(int $id, bool $checkVisibility = true): ?Category
     {
         $mahoCategory = \Mage::getModel('catalog/category')->load($id);
+
+        if (!$mahoCategory->getId()) {
+            return null;
+        }
 
         // Single-item reads must apply the same is_active + store-tree scoping
         // the collection path applies; otherwise a disabled category, or one
         // belonging to another store's root tree (including its rendered
         // landing_page CMS block), is readable by guessing its id.
-        if (!$this->isAccessibleCategory($mahoCategory)) {
+        if ($checkVisibility && !$this->isAccessibleCategory($mahoCategory)) {
             return null;
         }
 

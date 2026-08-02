@@ -211,8 +211,15 @@ final class ReviewProvider extends CrudProvider
 
         $user = $this->security?->getUser();
         if ($user instanceof ApiUser && $user->getAllowedStoreIds() !== null) {
-            $collection->addStoreFilter($user->getAllowedStoreIds());
-            $collection->getSelect()->distinct();
+            // An IN-subquery, not addStoreFilter()'s join: a review in several
+            // allowed stores duplicates join rows and inflates getSize()'s COUNT(*).
+            $storeSelect = $collection->getConnection()->select()
+                ->from($collection->getTable('review/review_store'), 'review_id')
+                ->where('store_id IN (?)', $user->getAllowedStoreIds() ?: [-1]);
+            $collection->getSelect()->where(
+                'main_table.review_id IN (?)',
+                new \Maho\Db\Expr('(' . $storeSelect->assemble() . ')'),
+            );
         }
 
         $collection->setDateOrder();

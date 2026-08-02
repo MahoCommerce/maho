@@ -231,7 +231,56 @@ describe('Website-restricted back-office product reads', function (): void {
 
 });
 
+describe('Store-restricted product sub-resource writes', function (): void {
+
+    it('denies global-scope media writes for a store-restricted token unless it names an allowlisted store', function (): void {
+        $productId = fixtures('product_id');
+        if (!$productId) {
+            $this->markTestSkipped('No product fixture available');
+        }
+
+        // The request-level gate passes (store 1 is the ambient default), but
+        // without ?store= the write would resolve the global (store 0) scope.
+        $restricted = serviceToken(['products/read', 'products/write'], [1]);
+        $denied = apiPut("/api/rest/v2/products/{$productId}/media", ['valueId' => 999999, 'label' => 'x'], $restricted);
+        expect($denied['status'])->toBe(403);
+
+        // Naming an allowlisted store passes the guard on to normal validation.
+        $storeCode = Mage::app()->getStore(1)->getCode();
+        $scoped = apiPut("/api/rest/v2/products/{$productId}/media?store={$storeCode}", ['valueId' => 999999, 'label' => 'x'], $restricted);
+        expect($scoped['status'])->not->toBe(403);
+    });
+
+});
+
 describe('Store-restricted review access', function (): void {
+
+    it('counts a multi-store review once in the moderation queue total', function (): void {
+        $token = serviceToken(['reviews/read'], [1, restrictStoreId()]);
+
+        $before = apiGet('/api/rest/v2/reviews', $token);
+        expect($before['status'])->toBe(200);
+        $beforeTotal = (int) ($before['json']['hydra:totalItems'] ?? $before['json']['totalItems'] ?? 0);
+
+        $review = Mage::getModel('review/review');
+        $review->setEntityId((int) $review->getEntityIdByCode(Mage_Review_Model_Review::ENTITY_PRODUCT_CODE))
+            ->setEntityPkValue((int) fixtures('product_id'))
+            ->setStatusId(Mage_Review_Model_Review::STATUS_APPROVED)
+            ->setTitle('Multi-store moderation count review')
+            ->setDetail('Assigned to two stores on the token allowlist.')
+            ->setNickname('PestRestrict')
+            ->setStoreId(1)
+            ->setStores([1, restrictStoreId()])
+            ->save();
+        trackCreated('review', (int) $review->getId());
+
+        $after = apiGet('/api/rest/v2/reviews', $token);
+        expect($after['status'])->toBe(200);
+        $afterTotal = (int) ($after['json']['hydra:totalItems'] ?? $after['json']['totalItems'] ?? 0);
+
+        // A review in two allowed stores must not be double-counted.
+        expect($afterTotal)->toBe($beforeTotal + 1);
+    });
 
     it('denies reading a review outside the allowlist while an unrestricted token still sees it', function (): void {
         $review = Mage::getModel('review/review');

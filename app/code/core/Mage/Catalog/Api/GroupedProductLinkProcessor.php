@@ -81,7 +81,7 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleReplaceAll(int $productId, array $body): array
     {
-        $product = $this->loadProductForWrite($productId, Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
+        $product = $this->loadProductForWrite($productId, $this->getAuthorizedUser(), Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
 
         $linkData = [];
         foreach ($body as $link) {
@@ -108,7 +108,7 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleAdd(int $productId, array $body): array
     {
-        $product = $this->loadProductForWrite($productId, Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
+        $product = $this->loadProductForWrite($productId, $this->getAuthorizedUser(), Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
 
         $childId = (int) ($body['childProductId'] ?? $body['child_product_id'] ?? 0);
         if ($childId <= 0) {
@@ -140,7 +140,7 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('childProductId is required and must be positive');
         }
 
-        $product = $this->loadProductForWrite($productId, Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
+        $product = $this->loadProductForWrite($productId, $this->getAuthorizedUser(), Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
 
         $existing = $this->getExistingLinkData($product);
         unset($existing[$childProductId]);

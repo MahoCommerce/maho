@@ -56,7 +56,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
     /**
      * Whether the caller may see back-office-only product data (cost, the raw
-     * user-defined attribute map, the inventory policy columns) and load
+     * user-defined attribute map, the inventory policy columns, the custom
+     * design/layout overrides) and load
      * disabled or other-website products by id/sku/barcode. Admin tokens are
      * governed by the admin ACL; an API-user token must actually hold a
      * products grant (write counts so an integration can read back what it
@@ -123,6 +124,10 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     {
         $dto->cost = null;
         $dto->customAttributes = null;
+        $dto->customDesign = null;
+        $dto->customDesignFrom = null;
+        $dto->customDesignTo = null;
+        $dto->customLayoutUpdate = null;
 
         if ($dto->stockItem === null) {
             return;

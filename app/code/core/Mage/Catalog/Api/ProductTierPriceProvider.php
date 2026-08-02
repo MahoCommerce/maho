@@ -31,8 +31,12 @@ final class ProductTierPriceProvider extends \Maho\ApiPlatform\Provider
 
         // Storefront callers only see the rows that price them: their own
         // customer group (or the all-groups row) on the current website. The
-        // full matrix segmented by group and website is back-office data.
-        $backOffice = $this->isAdmin() || $this->isApiUser();
+        // full matrix is back-office data and needs an actual products grant
+        // (mirrors ProductProvider::isBackOfficeReader()).
+        $backOffice = $this->isAdmin()
+            || ($this->isApiUser()
+                && ($this->getAuthorizedUser()->hasPermission('products/read')
+                    || $this->getAuthorizedUser()->hasPermission('products/write')));
         $callerGroupId = $this->getCustomerGroupId();
         $websiteId = (int) StoreContext::getStore()->getWebsiteId();
 

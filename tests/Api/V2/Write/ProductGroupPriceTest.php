@@ -167,6 +167,23 @@ describe('Product Group Prices, Storefront Scoping', function (): void {
         apiDelete("/api/rest/v2/products/{$productId}/group-prices", $admin);
     });
 
+    it('treats an API token without a products grant as a storefront caller', function (): void {
+        ApiV2Helper::ensureMahoBootstrapped();
+        $productId = fixtures('product_id');
+        $admin = serviceToken(['products/write', 'products/delete', 'products/read']);
+
+        $set = apiPut("/api/rest/v2/products/{$productId}/group-prices", [
+            ['customerGroupId' => 'all', 'price' => 30.0],
+            ['customerGroupId' => 2, 'price' => 25.0],
+        ], $admin);
+        expect($set['status'])->toBe(200);
+
+        $foreign = apiGet("/api/rest/v2/products/{$productId}/group-prices", serviceToken(['cms-pages/write']));
+        expect(array_column(getItems($foreign), 'customerGroupId'))->toBe(['all']);
+
+        apiDelete("/api/rest/v2/products/{$productId}/group-prices", $admin);
+    });
+
 });
 
 describe('Product Group Prices, Website Restriction', function (): void {

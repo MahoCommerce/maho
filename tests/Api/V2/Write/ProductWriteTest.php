@@ -124,6 +124,30 @@ describe('Product Permission Enforcement (REST)', function (): void {
         expect(apiGet("/api/rest/v2/products/{$productId}", $foreignToken)['json']['cost'] ?? null)->toBeNull();
     });
 
+    it('strips custom design fields from reads by tokens without a products grant', function (): void {
+        $writeToken = serviceToken(['products/read', 'products/write', 'products/delete']);
+        $suffix = substr(uniqid(), -8);
+
+        $create = apiPost('/api/rest/v2/products', [
+            'sku' => "PEST-BODSGN-{$suffix}",
+            'name' => 'Pest Back-Office Design Product',
+            'type' => 'simple',
+            'price' => 10.00,
+            'customDesign' => 'base/default',
+            'isActive' => true,
+            'websiteIds' => [1],
+        ], $writeToken);
+        expect($create['status'])->toBeIn([200, 201]);
+        $productId = $create['json']['id'];
+        trackCreated('product', $productId);
+
+        expect(apiGet("/api/rest/v2/products/{$productId}", $writeToken)['json']['customDesign'])->toBe('base/default');
+
+        $foreign = apiGet("/api/rest/v2/products/{$productId}", serviceToken(['cms-pages/write']))['json'];
+        expect($foreign['customDesign'] ?? null)->toBeNull();
+        expect($foreign['customLayoutUpdate'] ?? null)->toBeNull();
+    });
+
 });
 
 describe('Product Create Lifecycle (REST)', function (): void {
