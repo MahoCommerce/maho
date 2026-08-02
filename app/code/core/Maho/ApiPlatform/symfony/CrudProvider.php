@@ -41,6 +41,16 @@ class CrudProvider extends Provider
 
     private ?bool $backOfficeReader = null;
 
+    /**
+     * Permission resource id (e.g. 'cms-pages') whose read or write grant makes
+     * an API-user token a back-office reader: drafts/disabled rows, cross-store
+     * item access and ?scope=all listings. Write counts so an integration can
+     * read back the draft it just created. Null keeps those reads admin-only,
+     * so a provider that never sets it cannot accidentally open them to every
+     * service token regardless of what that token was actually granted.
+     */
+    protected ?string $backOfficeResource = null;
+
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
@@ -59,7 +69,11 @@ class CrudProvider extends Provider
 
     protected function isBackOfficeReader(): bool
     {
-        return $this->backOfficeReader ??= $this->isAdmin() || $this->isApiUser();
+        return $this->backOfficeReader ??= $this->isAdmin()
+            || ($this->isApiUser()
+                && $this->backOfficeResource !== null
+                && ($this->getAuthorizedUser()->hasPermission($this->backOfficeResource . '/read')
+                    || $this->getAuthorizedUser()->hasPermission($this->backOfficeResource . '/write')));
     }
 
     /**

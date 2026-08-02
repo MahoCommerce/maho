@@ -97,6 +97,26 @@ describe('Back-office reads of disabled CMS pages', function (): void {
         expect(apiGet('/api/rest/v2/cms-pages?scope=all', customerToken())['status'])->toBe(403);
     });
 
+    it('denies back-office reads to a service token without a cms-pages grant', function (): void {
+        $create = apiPost('/api/rest/v2/cms-pages', [
+            'identifier' => 'test-backoffice-foreign-token-page',
+            'title' => 'Back-Office Foreign Token Page',
+            'content' => '<p>draft</p>',
+            'isActive' => false,
+            'stores' => ['all'],
+        ], serviceToken(['cms-pages/write']));
+
+        expect($create['status'])->toBeIn([200, 201]);
+        $pageId = $create['json']['id'];
+        trackCreated('cms_page', $pageId);
+
+        // A token granted only unrelated resources is not a back-office reader
+        // for CMS pages: drafts stay hidden and ?scope=all is off limits.
+        $foreign = serviceToken(['products/write']);
+        expect(apiGet("/api/rest/v2/cms-pages/{$pageId}", $foreign)['status'])->toBe(404);
+        expect(apiGet('/api/rest/v2/cms-pages?scope=all', $foreign)['status'])->toBe(403);
+    });
+
 });
 
 describe('Back-office reads of disabled blog posts', function (): void {

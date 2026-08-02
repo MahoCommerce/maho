@@ -28,6 +28,7 @@ final class CmsPageProvider extends CrudProvider
     protected array $defaultSort = ['title' => 'ASC'];
 
     protected bool $supportsScopeAll = true;
+    protected ?string $backOfficeResource = 'cms-pages';
 
     /**
      * Override provide() to handle identifier-based collection filtering

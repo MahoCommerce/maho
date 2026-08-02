@@ -25,6 +25,7 @@ final class CmsBlockProvider extends CrudProvider
     protected array $defaultSort = ['title' => 'ASC'];
 
     protected bool $supportsScopeAll = true;
+    protected ?string $backOfficeResource = 'cms-blocks';
 
     /**
      * Disabled blocks must not be readable through the public GET /cms-blocks/{id}

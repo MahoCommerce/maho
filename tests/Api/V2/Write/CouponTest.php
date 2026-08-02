@@ -128,6 +128,40 @@ describe('Coupon expiration date', function (): void {
         expect(apiDelete("/api/rest/v2/coupons/{$id}", $token)['status'])->toBeIn([200, 204]);
     });
 
+    it('keeps a custom expirationDate across updates that do not touch it', function (): void {
+        $token = adminToken();
+        $code = 'PestExpK' . substr(uniqid(), -6);
+
+        $create = apiPost('/api/rest/v2/coupons', [
+            'code' => $code,
+            'discountType' => 'percent',
+            'discountAmount' => 15,
+            'expirationDate' => '2030-12-31',
+        ], $token);
+        expect($create['status'])->toBeSuccessful();
+        $id = (int) $create['json']['id'];
+
+        // Saving the rule re-syncs the coupon expiration to the rule's (unset)
+        // toDate, so an unrelated update must not wipe the custom date.
+        $update = apiPut("/api/rest/v2/coupons/{$id}", [
+            'discountAmount' => 20,
+        ], $token);
+        expect($update['status'])->toBe(200);
+        expect((string) ($update['json']['expirationDate'] ?? ''))->toContain('2030-12-31');
+
+        $get = apiGet("/api/rest/v2/coupons/{$id}", $token);
+        expect((string) ($get['json']['expirationDate'] ?? ''))->toContain('2030-12-31');
+
+        // An explicit toDate change re-syncs the coupon to the rule window.
+        $sync = apiPut("/api/rest/v2/coupons/{$id}", [
+            'toDate' => '2031-06-30',
+        ], $token);
+        expect($sync['status'])->toBe(200);
+        expect((string) ($sync['json']['expirationDate'] ?? ''))->toContain('2031-06-30');
+
+        expect(apiDelete("/api/rest/v2/coupons/{$id}", $token)['status'])->toBeIn([200, 204]);
+    });
+
 });
 
 describe('Coupon rule-level knobs', function (): void {

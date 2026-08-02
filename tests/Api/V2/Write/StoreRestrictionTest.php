@@ -161,6 +161,76 @@ describe('Store-restricted order access', function (): void {
 
 });
 
+describe('Store-restricted sales document access', function (): void {
+
+    it('denies invoice reads and lifecycle actions outside the allowlist', function (): void {
+        $invoiceId = fixtures('invoice_id');
+        if (!$invoiceId) {
+            $this->markTestSkipped('No invoice fixture available');
+        }
+        $orderId = (int) Mage::getModel('sales/order_invoice')->load($invoiceId)->getOrderId();
+
+        $restricted = serviceToken(['invoices/read', 'invoices/write'], [restrictStoreId()]);
+        $denied = apiGet("/api/rest/v2/orders/{$orderId}/invoices?store=" . RESTRICT_STORE_CODE, $restricted);
+        expect($denied['status'])->toBeIn([403, 404]);
+
+        $cancel = apiPost("/api/rest/v2/invoices/{$invoiceId}/cancel?store=" . RESTRICT_STORE_CODE, [], $restricted);
+        expect($cancel['status'])->toBeIn([403, 404]);
+
+        $allowed = apiGet("/api/rest/v2/orders/{$orderId}/invoices", serviceToken(['invoices/read']));
+        expect($allowed['status'])->toBe(200);
+    });
+
+    it('denies shipment reads outside the allowlist while an unrestricted token still sees it', function (): void {
+        $shipment = Mage::getResourceModel('sales/order_shipment_collection')
+            ->setOrder('entity_id', 'DESC')->setPageSize(1)->getFirstItem();
+        if (!$shipment->getId()) {
+            $this->markTestSkipped('No shipments found in database');
+        }
+        $shipmentId = (int) $shipment->getId();
+
+        $restricted = serviceToken(['shipments/read'], [restrictStoreId()]);
+        expect(apiGet("/api/rest/v2/shipments/{$shipmentId}?store=" . RESTRICT_STORE_CODE, $restricted)['status'])->toBeIn([403, 404]);
+
+        expect(apiGet("/api/rest/v2/shipments/{$shipmentId}", serviceToken(['shipments/read']))['status'])->toBe(200);
+    });
+
+    it('denies credit memo reads outside the allowlist while an unrestricted token still sees it', function (): void {
+        $creditmemo = Mage::getResourceModel('sales/order_creditmemo_collection')
+            ->setOrder('entity_id', 'DESC')->setPageSize(1)->getFirstItem();
+        if (!$creditmemo->getId()) {
+            $this->markTestSkipped('No credit memos found in database');
+        }
+        $creditmemoId = (int) $creditmemo->getId();
+
+        $restricted = serviceToken(['credit-memos/read'], [restrictStoreId()]);
+        expect(apiGet("/api/rest/v2/credit-memos/{$creditmemoId}?store=" . RESTRICT_STORE_CODE, $restricted)['status'])->toBeIn([403, 404]);
+
+        expect(apiGet("/api/rest/v2/credit-memos/{$creditmemoId}", serviceToken(['credit-memos/read']))['status'])->toBe(200);
+    });
+
+});
+
+describe('Website-restricted back-office product reads', function (): void {
+
+    it('denies a back-office product read outside the token website allowlist', function (): void {
+        $productId = fixtures('product_id');
+        if (!$productId) {
+            $this->markTestSkipped('No product fixture available');
+        }
+
+        // The fixture product belongs to website 1 only; a products token
+        // restricted to the extra website must not load it by id even though
+        // back-office reads skip the current-store visibility check.
+        $restricted = serviceToken(['products/read'], [restrictStoreId()]);
+        $denied = apiGet("/api/rest/v2/products/{$productId}?store=" . RESTRICT_STORE_CODE, $restricted);
+        expect($denied['status'])->toBeIn([403, 404]);
+
+        expect(apiGet("/api/rest/v2/products/{$productId}", serviceToken(['products/read']))['status'])->toBe(200);
+    });
+
+});
+
 describe('Store-restricted review access', function (): void {
 
     it('denies reading a review outside the allowlist while an unrestricted token still sees it', function (): void {

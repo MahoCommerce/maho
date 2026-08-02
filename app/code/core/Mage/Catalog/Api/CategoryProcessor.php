@@ -516,7 +516,11 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 
         $allowedRootIds = [];
         foreach ($allowedStoreIds as $storeId) {
-            $allowedRootIds[] = (int) Mage::app()->getStore($storeId)->getRootCategoryId();
+            try {
+                $allowedRootIds[] = (int) Mage::app()->getStore($storeId)->getRootCategoryId();
+            } catch (\Mage_Core_Model_Store_Exception) {
+                // deleted or unknown store: grants access to no category tree
+            }
         }
 
         // The store root and every descendant carry the root id in their path.

@@ -27,6 +27,7 @@ final class BlogCategoryProvider extends CrudProvider
     protected array $defaultSort = ['position' => 'ASC'];
 
     protected bool $supportsScopeAll = true;
+    protected ?string $backOfficeResource = 'blog-categories';
 
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null

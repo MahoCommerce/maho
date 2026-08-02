@@ -290,14 +290,24 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             $this->setMinimumSubtotalCondition($rule, (float) $data['minimumSubtotal']);
         }
 
+        // Saving the rule re-syncs the primary coupon's expiration_date to the rule's
+        // toDate (Rule::_afterSave), which would wipe a custom per-coupon date on any
+        // unrelated update. An explicit expirationDate wins by being set last; when the
+        // body carries neither expirationDate nor toDate the stored date is restored.
+        $preservedExpiration = $coupon->getData('expiration_date');
+
         $rule->save();
 
-        // After the rule save: a changed toDate re-syncs every coupon's expiration_date
-        // (updateSpecificCoupons), so an explicit per-coupon date must win by being set last.
         if (array_key_exists('expirationDate', $data)) {
             $coupon->load($id);
             $coupon->setData('expiration_date', $this->normalizeExpirationDate($data['expirationDate']));
             $coupon->save();
+        } elseif (!array_key_exists('toDate', $data)) {
+            $coupon->load($id);
+            if ($coupon->getData('expiration_date') !== $preservedExpiration) {
+                $coupon->setData('expiration_date', $preservedExpiration);
+                $coupon->save();
+            }
         }
 
         $coupon->load($id);

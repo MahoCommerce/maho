@@ -27,6 +27,7 @@ final class BlogPostProvider extends CrudProvider
     protected array $defaultSort = ['publish_date' => 'DESC'];
 
     protected bool $supportsScopeAll = true;
+    protected ?string $backOfficeResource = 'blog-posts';
 
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null

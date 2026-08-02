@@ -224,8 +224,12 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
 
         // Design and layout internals are back-office data: the layout update is
         // executable markup and the theme/design assignment leaks the storefront's
-        // internals. Category reads are public, so only admin and API tokens see them.
-        if ($this->isAdmin() || $this->isApiUser()) {
+        // internals. Category reads are public, so only admin tokens and API
+        // tokens actually granted a categories permission see them.
+        if ($this->isAdmin() || ($this->isApiUser()
+            && ($this->getAuthorizedUser()->hasPermission('categories/read')
+                || $this->getAuthorizedUser()->hasPermission('categories/write')))
+        ) {
             $dto->customDesign = $category->getData('custom_design') ?: null;
             $customDesignFrom = $category->getData('custom_design_from');
             $dto->customDesignFrom = $customDesignFrom ? substr((string) $customDesignFrom, 0, 10) : null;

@@ -99,7 +99,11 @@ trait ProductLoaderTrait
 
         $websiteIds = [];
         foreach ($allowedStoreIds as $storeId) {
-            $websiteIds[] = (int) Mage::app()->getStore($storeId)->getWebsiteId();
+            try {
+                $websiteIds[] = (int) Mage::app()->getStore($storeId)->getWebsiteId();
+            } catch (\Mage_Core_Model_Store_Exception) {
+                // deleted or unknown store: grants access to no website
+            }
         }
 
         return array_values(array_unique($websiteIds));

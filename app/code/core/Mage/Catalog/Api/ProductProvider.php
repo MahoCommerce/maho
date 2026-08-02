@@ -14,6 +14,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\StoreContext;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Maho\ApiPlatform\Trait\DateRangeFilterTrait;
 
@@ -55,11 +56,37 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
     /**
      * Whether the caller may see back-office-only product data (cost, the raw
-     * user-defined attribute map, the inventory policy columns).
+     * user-defined attribute map, the inventory policy columns) and load
+     * disabled or other-website products by id/sku/barcode. Admin tokens are
+     * governed by the admin ACL; an API-user token must actually hold a
+     * products grant (write counts so an integration can read back what it
+     * writes), not merely be a service account.
      */
     private function isBackOfficeReader(): bool
     {
-        return $this->backOfficeReader ??= $this->isAdmin() || $this->isApiUser();
+        return $this->backOfficeReader ??= $this->isAdmin()
+            || ($this->isApiUser()
+                && ($this->getAuthorizedUser()->hasPermission('products/read')
+                    || $this->getAuthorizedUser()->hasPermission('products/write')));
+    }
+
+    /**
+     * A back-office read bypasses the current-store website check, but a
+     * store-restricted token must stay inside the websites its allowed stores
+     * map to, exactly like every product write path (authorizeProductWebsites).
+     */
+    private function assertBackOfficeProductAccess(?Product $dto): ?Product
+    {
+        if ($dto === null) {
+            return null;
+        }
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->getAuthorizedUser());
+        if ($allowedWebsiteIds !== null
+            && array_intersect(array_map('intval', $dto->websiteIds ?? []), $allowedWebsiteIds) === []
+        ) {
+            throw new AccessDeniedHttpException("Access denied for this product's websites");
+        }
+        return $dto;
     }
 
     /**
@@ -142,11 +169,19 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         if ($operation instanceof CollectionOperationInterface) {
             $sku = $context['args']['sku'] ?? null;
             if ($sku) {
-                return $this->singleItemPaginator($this->filterForCaller($this->getProductBySku($sku, !$this->isBackOfficeReader())));
+                $dto = $this->getProductBySku($sku, !$this->isBackOfficeReader());
+                if ($this->isBackOfficeReader()) {
+                    $dto = $this->assertBackOfficeProductAccess($dto);
+                }
+                return $this->singleItemPaginator($this->filterForCaller($dto));
             }
             $barcode = $context['args']['barcode'] ?? null;
             if ($barcode) {
-                return $this->singleItemPaginator($this->filterForCaller($this->getProductByBarcode($barcode, !$this->isBackOfficeReader())));
+                $dto = $this->getProductByBarcode($barcode, !$this->isBackOfficeReader());
+                if ($this->isBackOfficeReader()) {
+                    $dto = $this->assertBackOfficeProductAccess($dto);
+                }
+                return $this->singleItemPaginator($this->filterForCaller($dto));
             }
             return $this->getCollection($context);
         }
@@ -163,7 +198,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // raw global values via ?store=admin). Bypass the shared DTO cache both
         // ways so their unfiltered view never leaks into anonymous reads.
         if ($this->isBackOfficeReader()) {
-            return $this->filterForCaller($this->loadProductDto($id, visibleOnly: false));
+            return $this->filterForCaller($this->assertBackOfficeProductAccess($this->loadProductDto($id, visibleOnly: false)));
         }
 
         $storeId = StoreContext::getStoreId();
