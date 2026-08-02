@@ -160,3 +160,63 @@ describe('Meta Pixel Advanced Matching', function () {
         });
     });
 });
+
+describe('Meta Pixel Purchase event', function () {
+    beforeEach(function () {
+        $this->block = new Mage_GoogleAnalytics_Block_Metapixel();
+    });
+
+    it('sends the catalog product SKU and tax-inclusive prices', function () {
+        $product = Mage::getModel('catalog/product')->setSku('basesku123');
+        $item = Mage::getModel('sales/order_item')
+            ->setSku('basesku123-custom option')
+            ->setQtyOrdered(2)
+            ->setBasePrice(100.00)
+            ->setBasePriceInclTax(122.00)
+            ->setProduct($product);
+        $order = Mage::getModel('sales/order')
+            ->setBaseGrandTotal(254.00)
+            ->setBaseCurrencyCode('EUR')
+            ->setIncrementId('100000042');
+        $order->addItem($item);
+
+        $eventData = $this->block->getPurchaseEventData($order);
+
+        expect($eventData['content_ids'])->toBe(['basesku123']);
+        expect($eventData['contents'][0]['id'])->toBe('basesku123');
+        expect($eventData['contents'][0]['quantity'])->toBe(2);
+        expect($eventData['contents'][0]['item_price'])->toBe(122.0);
+        expect($eventData['value'])->toBe(254.0);
+        expect($eventData['currency'])->toBe('EUR');
+        expect($eventData['num_items'])->toBe(2);
+        expect($eventData['order_id'])->toBe('100000042');
+    });
+
+    it('falls back to the order item SKU when the product no longer exists', function () {
+        $item = Mage::getModel('sales/order_item')
+            ->setSku('deleted-sku')
+            ->setQtyOrdered(1)
+            ->setBasePriceInclTax(10.00)
+            ->setProduct(Mage::getModel('catalog/product'));
+        $order = Mage::getModel('sales/order')->setBaseGrandTotal(10.00);
+        $order->addItem($item);
+
+        expect($this->block->getPurchaseEventData($order)['content_ids'])->toBe(['deleted-sku']);
+    });
+
+    it('falls back to the tax-exclusive price when the incl-tax column is null', function () {
+        $item = Mage::getModel('sales/order_item')
+            ->setSku('legacy-sku')
+            ->setQtyOrdered(1)
+            ->setBasePrice(100.00)
+            ->setProduct(Mage::getModel('catalog/product'));
+        $order = Mage::getModel('sales/order')->setBaseGrandTotal(100.00);
+        $order->addItem($item);
+
+        expect($this->block->getPurchaseEventData($order)['contents'][0]['item_price'])->toBe(100.0);
+    });
+
+    it('returns null for an order without visible items', function () {
+        expect($this->block->getPurchaseEventData(Mage::getModel('sales/order')))->toBeNull();
+    });
+});
