@@ -85,6 +85,8 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
                 // Don't disclose existence to a non-owner.
                 throw new NotFoundHttpException('Order not found');
             }
+        } else {
+            $this->assertStoreAllowed($order->getStoreId(), $this->getAuthorizedUser(), 'order');
         }
 
         return $order;
@@ -286,6 +288,9 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
 
     /**
      * Add a status-history comment to an order (admin / orders-write only).
+     * An optional status is validated against the statuses assigned to the
+     * order's current state, the same constraint the admin comment form
+     * enforces, and applied via addStatusHistoryComment().
      */
     private function addOrderComment(array $context, array $uriVariables = []): Order
     {
@@ -296,9 +301,28 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         }
         $notifyCustomer = (bool) ($args['notifyCustomer'] ?? false);
         $visibleOnFront = (bool) ($args['visibleOnFront'] ?? false);
+        $status = $args['status'] ?? null;
+        if ($status !== null && !is_string($status)) {
+            throw new BadRequestHttpException('Status must be a string');
+        }
+        $status = $status !== null ? trim($status) : null;
+        if ($status === '') {
+            $status = null;
+        }
 
         $order = $this->resolveManagedOrder($context, $uriVariables);
-        $order = $this->orderService->addOrderNote($order, $comment, $notifyCustomer, $visibleOnFront);
+        if ($status !== null) {
+            $allowed = $order->getConfig()->getStateStatuses($order->getState(), false);
+            if (!in_array($status, $allowed, true)) {
+                throw new BadRequestHttpException(sprintf(
+                    'Status "%s" is not assigned to the order\'s current state "%s"; allowed: %s',
+                    $status,
+                    (string) $order->getState(),
+                    implode(', ', $allowed),
+                ));
+            }
+        }
+        $order = $this->orderService->addOrderNote($order, $comment, $notifyCustomer, $visibleOnFront, $status);
 
         return $this->orderProvider->mapToDto($order);
     }

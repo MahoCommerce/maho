@@ -77,15 +77,41 @@ class CmsPage extends CrudResource
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 
-    public string $identifier = '';
-    public string $title = '';
+    // Nullable so an omitted field on a partial update stays omitted: a non-null
+    // default would be written back over the stored value (see CrudResource::applyToModel()).
+    public ?string $identifier = null;
+
+    public ?string $title = null;
+
     public ?string $contentHeading = null;
+
     public ?string $content = null;
+
     public ?string $metaKeywords = null;
+
     public ?string $metaDescription = null;
 
     #[ApiProperty(extraProperties: ['modelField' => 'root_template'])]
     public ?string $pageLayout = null;
+
+    public ?int $sortOrder = null;
+
+    public ?string $layoutUpdateXml = null;
+
+    public ?string $customTheme = null;
+
+    public ?string $customRootTemplate = null;
+
+    public ?string $customLayoutUpdateXml = null;
+
+    /** Date string (Y-m-d); empty string clears */
+    public ?string $customThemeFrom = null;
+
+    /** Date string (Y-m-d); empty string clears */
+    public ?string $customThemeTo = null;
+
+    /** One of INDEX,FOLLOW / NOINDEX,FOLLOW / INDEX,NOFOLLOW / NOINDEX,NOFOLLOW; empty string clears */
+    public ?string $metaRobots = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public string $status = 'enabled';
@@ -108,6 +134,11 @@ class CmsPage extends CrudResource
     {
         $dto->content = self::filterContent($dto->content ?? '');
         $dto->status = ($dto->isActive ?? false) ? 'enabled' : 'disabled';
+
+        // The resource model re-formats these with a time part before saving, so
+        // MySQL/Postgres date columns and SQLite text columns read back differently.
+        $dto->customThemeFrom = $dto->customThemeFrom ? substr($dto->customThemeFrom, 0, 10) : null;
+        $dto->customThemeTo = $dto->customThemeTo ? substr($dto->customThemeTo, 0, 10) : null;
 
         if (method_exists($model->getResource(), 'lookupStoreIds')) {
             $dto->stores = array_map('intval', $model->getResource()->lookupStoreIds($model->getId()));

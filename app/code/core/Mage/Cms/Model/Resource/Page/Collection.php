@@ -111,7 +111,7 @@ class Mage_Cms_Model_Resource_Page_Collection extends Mage_Core_Model_Resource_D
     /**
      * Add filter by store
      *
-     * @param int|Mage_Core_Model_Store $store
+     * @param int|int[]|Mage_Core_Model_Store $store
      * @param bool $withAdmin
      * @return $this
      */

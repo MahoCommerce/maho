@@ -23,7 +23,7 @@ final class ConfigurableSetupProvider extends \Maho\ApiPlatform\Provider
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {
         $productId = (int) ($uriVariables['productId'] ?? 0);
-        $product = $this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
+        $product = $this->loadProductForRead($productId, Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
         return [$this->getSetup($product)];
     }
 

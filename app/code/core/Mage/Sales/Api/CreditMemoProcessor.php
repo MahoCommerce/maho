@@ -87,6 +87,8 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Order not found');
         }
 
+        $this->assertStoreAllowed($order->getStoreId(), $this->getAuthorizedUser(), 'order');
+
         // Serialize concurrent refunds on the same order. Without this, two
         // simultaneous requests both pass canCreditmemo() and both register(),
         // issuing a double refund. The lock gives a per-order critical section

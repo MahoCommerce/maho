@@ -47,12 +47,13 @@ final class MediaProcessor implements ProcessorInterface
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Media
     {
         $user = $this->getAuthorizedUser();
-        $this->requirePermission($user, 'media/write');
 
         if ($operation instanceof DeleteOperationInterface) {
+            $this->requirePermission($user, 'media/delete');
             return $this->handleDelete($uriVariables['path'], $user);
         }
 
+        $this->requirePermission($user, 'media/write');
         return $this->handleUpload($user);
     }
 

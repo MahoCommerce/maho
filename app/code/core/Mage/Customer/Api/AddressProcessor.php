@@ -314,6 +314,20 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         $address->setPostcode($data->postcode);
         $address->setCountryId($data->countryId);
         $address->setTelephone($data->telephone);
+
+        // Optional attributes: null means untouched (partial update), '' clears
+        $optional = [
+            'prefix' => $data->prefix,
+            'middlename' => $data->middlename,
+            'suffix' => $data->suffix,
+            'fax' => $data->fax,
+            'vat_id' => $data->vatId,
+        ];
+        foreach ($optional as $field => $value) {
+            if ($value !== null) {
+                $address->setData($field, $value === '' ? null : $value);
+            }
+        }
     }
 
     /**

@@ -49,6 +49,22 @@ use Maho\ApiPlatform\CrudResource;
                 'qty' => ['type' => 'Float!'],
                 'isInStock' => ['type' => 'Boolean'],
                 'manageStock' => ['type' => 'Boolean'],
+                'minQty' => ['type' => 'Float'],
+                'minSaleQty' => ['type' => 'Float'],
+                'maxSaleQty' => ['type' => 'Float'],
+                'backorders' => ['type' => 'Int'],
+                'notifyStockQty' => ['type' => 'Float'],
+                'isQtyDecimal' => ['type' => 'Boolean'],
+                'qtyIncrements' => ['type' => 'Float'],
+                'enableQtyIncrements' => ['type' => 'Boolean'],
+                'useConfigMinQty' => ['type' => 'Boolean'],
+                'useConfigMinSaleQty' => ['type' => 'Boolean'],
+                'useConfigMaxSaleQty' => ['type' => 'Boolean'],
+                'useConfigBackorders' => ['type' => 'Boolean'],
+                'useConfigNotifyStockQty' => ['type' => 'Boolean'],
+                'useConfigQtyIncrements' => ['type' => 'Boolean'],
+                'useConfigEnableQtyInc' => ['type' => 'Boolean'],
+                'useConfigManageStock' => ['type' => 'Boolean'],
             ],
             security: "is_granted('ROLE_ADMIN') or is_granted('inventory/write')",
         ),
@@ -77,6 +93,39 @@ class StockUpdate extends CrudResource
     public ?bool $isInStock = null;
 
     public ?bool $manageStock = null;
+
+    public ?float $minQty = null;
+
+    public ?float $minSaleQty = null;
+
+    public ?float $maxSaleQty = null;
+
+    #[ApiProperty(description: 'Backorders mode: 0 = no, 1 = allow qty below 0, 2 = allow and notify customer')]
+    public ?int $backorders = null;
+
+    public ?float $notifyStockQty = null;
+
+    public ?bool $isQtyDecimal = null;
+
+    public ?float $qtyIncrements = null;
+
+    public ?bool $enableQtyIncrements = null;
+
+    public ?bool $useConfigMinQty = null;
+
+    public ?bool $useConfigMinSaleQty = null;
+
+    public ?bool $useConfigMaxSaleQty = null;
+
+    public ?bool $useConfigBackorders = null;
+
+    public ?bool $useConfigNotifyStockQty = null;
+
+    public ?bool $useConfigQtyIncrements = null;
+
+    public ?bool $useConfigEnableQtyInc = null;
+
+    public ?bool $useConfigManageStock = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?float $previousQty = null;

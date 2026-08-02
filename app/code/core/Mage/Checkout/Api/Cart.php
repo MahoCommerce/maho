@@ -461,6 +461,15 @@ class Cart extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Associated customer ID, null for guest carts', writable: false)]
     public ?int $customerId = null;
 
+    #[ApiProperty(description: 'Customer email on the cart (guest email once set at checkout)', writable: false)]
+    public ?string $customerEmail = null;
+
+    #[ApiProperty(description: 'Customer note on the cart', writable: false)]
+    public ?string $customerNote = null;
+
+    #[ApiProperty(description: 'Order increment ID reserved for this cart', writable: false)]
+    public ?string $reservedOrderId = null;
+
     #[ApiProperty(description: 'Store ID', writable: false)]
     public int $storeId = 1;
 
@@ -487,7 +496,7 @@ class Cart extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Cart line items', writable: false)]
     public array $items = [];
 
-    /** @var array{subtotal: float, subtotalInclTax: float, subtotalWithDiscount: float, discountAmount: ?float, shippingAmount: ?float, shippingAmountInclTax: ?float, taxAmount: float, grandTotal: float, giftcardAmount: ?float}|array{} */
+    /** @var array<string, float|null>|array{} Totals in the shape documented by CartPrices */
     #[ApiProperty(description: 'Cart price totals', writable: false)]
     public array $prices = [];
 

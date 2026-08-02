@@ -45,7 +45,9 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
         // (GET /customers/me); GraphQL uses 'current' (field `currentCustomer`).
         // They must differ: a REST and GraphQL op sharing a name collide in the
         // resource metadata and break the schema (see OperationNamingTest).
-        if ($operationName === 'current' || $operationName === 'me_rest') {
+        // 'update_profile' (PUT /customers/me) lands here too when API Platform's
+        // read phase runs for the PUT; it has no {id} uri variable.
+        if ($operationName === 'current' || $operationName === 'me_rest' || $operationName === 'update_profile') {
             $customerId = $this->getAuthenticatedCustomerId();
             return $customerId ? $this->getItem($customerId) : null;
         }
@@ -71,14 +73,43 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
         // key dump every customer's profile + addresses. ROLE_CUSTOMER (a
         // customer's own token) falls through to authorizeCustomerAccess(),
         // which enforces self-only.
-        $requestedId = (int) $uriVariables['id'];
+        $requestedId = (int) ($uriVariables['id'] ?? 0);
         if ($this->isApiUser()) {
             $this->requireApiPermission('customers/read');
         } elseif (!$this->isAdmin()) {
             $this->authorizeCustomerAccess($requestedId);
         }
 
-        return $this->getItem($requestedId);
+        $mahoCustomer = $this->customerService->getCustomerById($requestedId);
+        if (!$mahoCustomer) {
+            return null;
+        }
+
+        // Website allowlist enforcement for back-office tokens; a customer's
+        // own token was already limited to itself above.
+        if ($this->isAdmin() || $this->isApiUser()) {
+            $this->assertWebsiteAllowed($mahoCustomer->getWebsiteId(), $this->getAuthorizedUser(), 'customer');
+        }
+
+        return $this->mapToDto($mahoCustomer);
+    }
+
+    /**
+     * Caller's website allowlist (null = unrestricted), for the admin GraphQL handler.
+     *
+     * @return int[]|null
+     */
+    public function allowedWebsiteIdsForCaller(): ?array
+    {
+        return $this->allowedWebsiteIds($this->getAuthorizedUser());
+    }
+
+    /**
+     * Same website gate as the REST single-customer read, for the admin GraphQL handler.
+     */
+    public function assertCustomerWebsiteAllowed(\Mage_Customer_Model_Customer $customer): void
+    {
+        $this->assertWebsiteAllowed($customer->getWebsiteId(), $this->getAuthorizedUser(), 'customer');
     }
 
     /**
@@ -109,6 +140,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
             telephone: $telephone,
             page: $page,
             pageSize: $pageSize,
+            websiteIds: $this->allowedWebsiteIds($this->getAuthorizedUser()),
         );
 
         if (empty($result['customers'])) {

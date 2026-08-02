@@ -24,6 +24,104 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 trait StockWriterTrait
 {
     /**
+     * Extended cataloginventory_stock_item columns accepted from API input
+     * (the full admin inventory tab / M1 catalogInventoryStockItemUpdate set,
+     * beyond qty / is_in_stock / manage_stock), column => value type.
+     * Also the single source for the read-side stockItem field list.
+     *
+     * @var array<string, string>
+     */
+    protected const STOCK_ITEM_EXTENDED_COLUMNS = [
+        'min_qty' => 'float',
+        'min_sale_qty' => 'float',
+        'max_sale_qty' => 'float',
+        'backorders' => 'int',
+        'notify_stock_qty' => 'float',
+        'is_qty_decimal' => 'bool',
+        'qty_increments' => 'float',
+        'enable_qty_increments' => 'bool',
+        'use_config_min_qty' => 'bool',
+        'use_config_min_sale_qty' => 'bool',
+        'use_config_max_sale_qty' => 'bool',
+        'use_config_backorders' => 'bool',
+        'use_config_notify_stock_qty' => 'bool',
+        'use_config_qty_increments' => 'bool',
+        'use_config_enable_qty_inc' => 'bool',
+        'use_config_manage_stock' => 'bool',
+    ];
+
+    /** Columns whose stored value is meaningless below zero. */
+    private const NON_NEGATIVE_STOCK_COLUMNS = [
+        'min_qty', 'min_sale_qty', 'max_sale_qty', 'notify_stock_qty', 'qty_increments',
+    ];
+
+    /**
+     * Extract the extended stock item columns from an input map. Accepts both
+     * snake_case column names and their camelCase aliases (minQty,
+     * useConfigManageStock, ...). Values are normalized to the column type;
+     * flags are stored as 0/1. Null values and unknown keys are skipped, so an
+     * omitted field leaves the stored value untouched.
+     *
+     * @param array<string, mixed> $input
+     * @return array<string, int|float>
+     */
+    protected function extractExtendedStockColumns(array $input): array
+    {
+        $columns = [];
+        foreach ($input as $key => $value) {
+            $column = strtolower((string) preg_replace('/[A-Z]/', '_$0', (string) $key));
+            $type = self::STOCK_ITEM_EXTENDED_COLUMNS[$column] ?? null;
+            if ($type === null || $value === null) {
+                continue;
+            }
+            $columns[$column] = match ($type) {
+                'float' => (float) $value,
+                'int' => (int) $value,
+                default => (int) (bool) $value,
+            };
+        }
+        $this->validateExtendedStockColumns($columns);
+        return $columns;
+    }
+
+    /**
+     * Reject values the constrained stock columns can't hold. These paths write
+     * the row directly, so nothing else validates them; every caller goes
+     * through extractExtendedStockColumns(), which runs this.
+     *
+     * @param array<string, int|float> $columns
+     */
+    protected function validateExtendedStockColumns(array $columns): void
+    {
+        $allowedBackorders = [
+            \Mage_CatalogInventory_Model_Stock::BACKORDERS_NO,
+            \Mage_CatalogInventory_Model_Stock::BACKORDERS_YES_NONOTIFY,
+            \Mage_CatalogInventory_Model_Stock::BACKORDERS_YES_NOTIFY,
+        ];
+        if (isset($columns['backorders']) && !in_array((int) $columns['backorders'], $allowedBackorders, true)) {
+            throw new BadRequestHttpException('backorders must be one of: ' . implode(', ', $allowedBackorders));
+        }
+
+        foreach (self::NON_NEGATIVE_STOCK_COLUMNS as $column) {
+            if (isset($columns[$column]) && $columns[$column] < 0) {
+                throw new BadRequestHttpException("{$column} cannot be negative");
+            }
+        }
+    }
+
+    /**
+     * Cast a raw stock item column value for read-side exposure.
+     */
+    protected function castStockColumnValue(mixed $value, string $type): float|int|bool
+    {
+        return match ($type) {
+            'float' => (float) $value,
+            'int' => (int) $value,
+            default => (bool) $value,
+        };
+    }
+
+    /**
      * Reject negative stock. These direct-SQL paths bypass the stock item model,
      * so this is the only guard; the DECIMAL(12,4) column rejects oversized values
      * on its own, so there's no arbitrary upper cap here.

@@ -48,8 +48,15 @@ class CustomerQueryHandler
         $page = $variables['page'] ?? 1;
         $pageSize = $variables['pageSize'] ?? 20;
 
-        // Pass telephone and email separately to service
-        $result = $this->customerService->searchCustomers($search, $email, $telephone, $page, $pageSize);
+        // Scoped to the caller's website allowlist like the REST collection
+        $result = $this->customerService->searchCustomers(
+            $search,
+            $email,
+            $telephone,
+            $page,
+            $pageSize,
+            websiteIds: $this->customerProvider->allowedWebsiteIdsForCaller(),
+        );
         $customers = $result['customers'] ?? [];
         $edges = array_map(fn($c) => ['node' => $this->mapCustomer($c)], $customers);
         return ['customers' => [
@@ -70,6 +77,9 @@ class CustomerQueryHandler
             throw ValidationException::requiredField('customerId');
         }
         $customer = $this->customerService->getCustomerById((int) $id);
+        if ($customer) {
+            $this->customerProvider->assertCustomerWebsiteAllowed($customer);
+        }
         return ['customer' => $customer ? $this->mapCustomer($customer) : null];
     }
 

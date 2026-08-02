@@ -2058,23 +2058,6 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     }
 
     /**
-     * Set original loaded data if needed
-     *
-     * @param string $key
-     * @param mixed $data
-     * @return \Maho\DataObject
-     */
-    #[\Override]
-    public function setOrigData($key = null, $data = null)
-    {
-        if (Mage::app()->getStore()->isAdmin()) {
-            return parent::setOrigData($key, $data);
-        }
-
-        return $this;
-    }
-
-    /**
      * Reset all model data
      *
      * @return $this

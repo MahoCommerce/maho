@@ -34,6 +34,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             'is_active',
             'publish_date',
             'content',
+            'short_content',
             'meta_description',
             'meta_keywords',
             'meta_title',
@@ -54,6 +55,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             'is_active',
             'publish_date',
             'content',
+            'short_content',
             'meta_description',
             'meta_keywords',
             'meta_title',
@@ -177,14 +179,16 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         // is not sanitized, so a crafted parameter still reaches the page. Links get
         // target="_blank" — blog content is article-style, so an outbound link should not
         // navigate the reader away from the post.
-        if ($object->hasData('content')) {
-            $object->setData('content', Mage::getSingleton('core/input_filter_maliciousCode')
-                ->filterPreservingDirectives(
-                    $object->getData('content'),
-                    true,
-                    // Matches Maho_Blog_Model_Post::getFilteredContent(), which renders it.
-                    Mage::helper('cms')->getPageTemplateProcessor(),
-                ));
+        foreach (['content', 'short_content'] as $field) {
+            if ($object->hasData($field)) {
+                $object->setData($field, Mage::getSingleton('core/input_filter_maliciousCode')
+                    ->filterPreservingDirectives(
+                        $object->getData($field),
+                        true,
+                        // Matches Maho_Blog_Model_Post::getFilteredContent(), which renders it.
+                        Mage::helper('cms')->getPageTemplateProcessor(),
+                    ));
+            }
         }
 
         // Auto-generate URL key from title if empty
@@ -278,8 +282,9 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
 
     protected function _saveCategoryRelations(\Maho\DataObject $post): void
     {
-        $oldCategoryIds = $this->lookupCategoryIds($post->getId());
-        $newCategoryIds = (array) $post->getData('categories');
+        $oldCategoryIds = array_map('intval', $this->lookupCategoryIds((int) $post->getId()));
+        $newCategoryIds = array_map('intval', (array) $post->getData('categories'));
+        $positions = array_map('intval', (array) $post->getData('category_positions'));
 
         $table = $this->getTable('blog/post_category');
         $adapter = $this->_getWriteAdapter();
@@ -298,11 +303,20 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             foreach ($insert as $categoryId) {
                 $data[] = [
                     'post_id' => (int) $post->getId(),
-                    'category_id' => (int) $categoryId,
-                    'position' => 0,
+                    'category_id' => $categoryId,
+                    'position' => $positions[$categoryId] ?? 0,
                 ];
             }
             $adapter->insertMultiple($table, $data);
+        }
+
+        foreach (array_intersect($newCategoryIds, $oldCategoryIds) as $categoryId) {
+            if (isset($positions[$categoryId])) {
+                $adapter->update($table, ['position' => $positions[$categoryId]], [
+                    'post_id = ?' => (int) $post->getId(),
+                    'category_id = ?' => $categoryId,
+                ]);
+            }
         }
     }
 }

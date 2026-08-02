@@ -14,6 +14,7 @@ use ApiPlatform\Metadata\ApiProperty;
 use Maho\Config\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Post;
 use Maho\ApiPlatform\CrudResource;
 
@@ -43,6 +44,10 @@ use Maho\ApiPlatform\CrudResource;
         new Post(
             uriTemplate: '/stores/switch/{storeCode}',
             name: 'switch_store',
+            // String-typed Link so the converter passes the code through; the
+            // processor resolves it itself, so skip the read phase.
+            uriVariables: ['storeCode' => new Link(fromClass: self::class, identifiers: ['code'])],
+            read: false,
             processor: StoreProcessor::class,
             security: 'true',
             description: 'Switch current store context',

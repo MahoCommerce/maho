@@ -60,6 +60,8 @@ final class CreditMemoProvider extends CrudProvider
             throw new NotFoundHttpException('Credit memo not found');
         }
 
+        $this->assertStoreAllowed((int) $creditmemo->getStoreId(), $this->getAuthorizedUser(), 'credit memo');
+
         return CreditMemo::fromModel($creditmemo);
     }
 
@@ -72,6 +74,8 @@ final class CreditMemoProvider extends CrudProvider
             throw new NotFoundHttpException('Order not found');
         }
 
+        $this->assertStoreAllowed($order->getStoreId(), $this->getAuthorizedUser(), 'order');
+
         ['page' => $page, 'pageSize' => $perPage] = $this->extractPagination($context);
 
         $collection = \Mage::getResourceModel('sales/order_creditmemo_collection');
@@ -79,9 +83,14 @@ final class CreditMemoProvider extends CrudProvider
         $collection->setOrder('created_at', 'DESC');
         $collection->setPageSize($perPage)->setCurPage($page);
 
+        $models = array_values(iterator_to_array($collection));
+        $this->preloadItemsAndComments($models);
+
         $creditmemos = [];
-        foreach ($collection as $creditmemo) {
-            $creditmemos[] = CreditMemo::fromModel($creditmemo);
+        foreach ($models as $creditmemo) {
+            // Reuse the already-loaded order so afterLoad's getOrder() doesn't
+            // re-load it per credit memo.
+            $creditmemos[] = CreditMemo::fromModel($creditmemo->setOrder($order));
         }
 
         return new TraversablePaginator(new \ArrayIterator($creditmemos), $page, $perPage, (int) $collection->getSize());
@@ -98,14 +107,65 @@ final class CreditMemoProvider extends CrudProvider
         ['page' => $page, 'pageSize' => $perPage] = $this->extractPagination($context);
 
         $collection = \Mage::getResourceModel('sales/order_creditmemo_collection');
+        $this->applyAllowedStoreFilter($collection, $this->getAuthorizedUser());
         $collection->setOrder('created_at', 'DESC');
         $collection->setPageSize($perPage)->setCurPage($page);
 
-        $creditmemos = [];
-        foreach ($collection as $creditmemo) {
-            $creditmemos[] = CreditMemo::fromModel($creditmemo);
+        $models = array_values(iterator_to_array($collection));
+        $this->preloadItemsAndComments($models);
+
+        // Orders differ per memo here, so batch just the increment ids the DTO
+        // needs instead of loading every order.
+        if ($models !== []) {
+            $orderIds = array_unique(array_map(static fn($creditmemo): int => (int) $creditmemo->getOrderId(), $models));
+            $read = \Mage::getSingleton('core/resource')->getConnection('core_read');
+            $incrementIds = $read->fetchPairs(
+                $read->select()
+                    ->from(\Mage::getSingleton('core/resource')->getTableName('sales/order'), ['entity_id', 'increment_id'])
+                    ->where('entity_id IN (?)', $orderIds),
+            );
+            foreach ($models as $creditmemo) {
+                $creditmemo->setData('_preloaded_order_increment_id', $incrementIds[$creditmemo->getOrderId()] ?? null);
+            }
         }
 
+        $creditmemos = array_map(CreditMemo::fromModel(...), $models);
+
         return new TraversablePaginator(new \ArrayIterator($creditmemos), $page, $perPage, (int) $collection->getSize());
+    }
+
+    /**
+     * Batch-load items and comments for a page of credit memos (2 queries
+     * instead of 2 per memo); CreditMemo::afterLoad() consumes the preloaded
+     * sets.
+     *
+     * @param array<\Mage_Sales_Model_Order_Creditmemo> $creditmemos
+     */
+    private function preloadItemsAndComments(array $creditmemos): void
+    {
+        if ($creditmemos === []) {
+            return;
+        }
+        $creditmemoIds = array_map(static fn($creditmemo): int => (int) $creditmemo->getId(), $creditmemos);
+
+        $itemsByCreditmemo = [];
+        $itemCollection = \Mage::getResourceModel('sales/order_creditmemo_item_collection')
+            ->addFieldToFilter('parent_id', ['in' => $creditmemoIds]);
+        foreach ($itemCollection as $item) {
+            $itemsByCreditmemo[(int) $item->getParentId()][] = $item;
+        }
+
+        $commentsByCreditmemo = [];
+        $commentCollection = \Mage::getResourceModel('sales/order_creditmemo_comment_collection')
+            ->addFieldToFilter('parent_id', ['in' => $creditmemoIds]);
+        foreach ($commentCollection as $comment) {
+            $commentsByCreditmemo[(int) $comment->getParentId()][] = $comment;
+        }
+
+        foreach ($creditmemos as $creditmemo) {
+            $id = (int) $creditmemo->getId();
+            $creditmemo->setData('_preloaded_items', $itemsByCreditmemo[$id] ?? []);
+            $creditmemo->setData('_preloaded_comments', $commentsByCreditmemo[$id] ?? []);
+        }
     }
 }

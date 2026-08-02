@@ -20,6 +20,7 @@ use Maho\ApiPlatform\Trait\ModelPersistenceTrait;
 use Maho\ApiPlatform\Trait\RateLimitTrait;
 use Maho\ApiPlatform\Trait\RawResponseTrait;
 use Maho\ApiPlatform\Trait\StoreAccessTrait;
+use Maho\ApiPlatform\Trait\StoreRestrictionTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -44,6 +45,7 @@ abstract class Processor implements ProcessorInterface
     use ActivityLogTrait;
     use RawResponseTrait;
     use StoreAccessTrait;
+    use StoreRestrictionTrait;
     use RateLimitTrait;
 
     protected ?string $modelAlias = null;
