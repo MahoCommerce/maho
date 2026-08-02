@@ -28,7 +28,9 @@ class CartMapper
 
         $cart = new Cart();
         $cart->id = (int) $quote->getId();
-        $cart->maskedId = $quote->getData('masked_quote_id');
+        // The masked id is the guest bearer credential; once a customer owns the
+        // cart it grants nothing (see verifyCartAccess), so don't echo it.
+        $cart->maskedId = $quote->getCustomerId() ? null : $quote->getData('masked_quote_id');
         $cart->customerId = $quote->getCustomerId() ? (int) $quote->getCustomerId() : null;
         $cart->customerEmail = $quote->getCustomerEmail();
         $cart->customerNote = $quote->getCustomerNote();

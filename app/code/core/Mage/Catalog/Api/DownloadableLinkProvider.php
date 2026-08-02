@@ -23,7 +23,7 @@ final class DownloadableLinkProvider extends \Maho\ApiPlatform\Provider
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {
         $productId = (int) ($uriVariables['productId'] ?? 0);
-        $product = $this->loadProduct($productId, Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE);
+        $product = $this->loadProductForRead($productId, Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE);
         return $this->getLinks($product);
     }
 

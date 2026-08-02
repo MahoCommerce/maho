@@ -141,7 +141,9 @@ use Maho\Config\ApiResource;
                 'code' => ['type' => 'String!'],
                 'cartId' => ['type' => 'Int'],
             ],
-            security: "is_granted('ROLE_CUSTOMER') or is_granted('coupons/write')",
+            // Public like POST /coupons/validate: the processor rate-limits and
+            // hides rule identity/amounts from anonymous callers
+            security: 'true',
         ),
     ],
 )]

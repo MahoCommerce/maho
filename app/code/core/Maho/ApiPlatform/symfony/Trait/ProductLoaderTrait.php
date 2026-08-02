@@ -12,6 +12,7 @@ namespace Maho\ApiPlatform\Trait;
 
 use Mage;
 use Mage_Catalog_Model_Product;
+use Mage_Catalog_Model_Product_Status;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -53,6 +54,48 @@ trait ProductLoaderTrait
         }
 
         return $product;
+    }
+
+    /**
+     * Load for a public sub-resource read: non-back-office callers only reach
+     * enabled products on the current store's website (same rule as
+     * ProductProvider::loadProductDto), so hidden products 404 before the
+     * type check can disclose them.
+     */
+    protected function loadProductForRead(int $id, ?string $requiredType = null): Mage_Catalog_Model_Product
+    {
+        $product = $this->loadProduct($id);
+
+        if ($this->canReadBackOfficeProducts()) {
+            if ($this->isApiUser()) {
+                $this->authorizeProductWebsites($product, $this->getAuthorizedUser());
+            }
+        } else {
+            $websiteId = (int) StoreContext::getStore()->getWebsiteId();
+            if (!in_array($websiteId, array_map('intval', $product->getWebsiteIds()), true)
+                || (int) $product->getStatus() !== Mage_Catalog_Model_Product_Status::STATUS_ENABLED
+            ) {
+                throw new NotFoundHttpException('Product not found');
+            }
+        }
+
+        if ($requiredType !== null && $product->getTypeId() !== $requiredType) {
+            throw new BadRequestHttpException("Product is not a {$requiredType} product");
+        }
+
+        return $product;
+    }
+
+    /**
+     * Admin tokens, or an API user holding a products grant (write counts so
+     * an integration can read back what it writes).
+     */
+    protected function canReadBackOfficeProducts(): bool
+    {
+        return $this->isAdmin()
+            || ($this->isApiUser()
+                && ($this->getAuthorizedUser()->hasPermission('products/read')
+                    || $this->getAuthorizedUser()->hasPermission('products/write')));
     }
 
     /**

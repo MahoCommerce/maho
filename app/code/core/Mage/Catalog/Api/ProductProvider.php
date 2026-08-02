@@ -75,8 +75,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      * A back-office read bypasses the current-store website check, but a
      * store-restricted token must stay inside the websites its allowed stores
      * map to, exactly like every product write path (authorizeProductWebsites).
+     * Public: the admin GraphQL ProductQueryHandler applies the same allowlist.
      */
-    private function assertBackOfficeProductAccess(?Product $dto): ?Product
+    public function assertBackOfficeProductAccess(?Product $dto): ?Product
     {
         if ($dto === null) {
             return null;

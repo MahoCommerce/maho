@@ -453,3 +453,35 @@ describe('Website-restricted customer access', function (): void {
     });
 
 });
+
+describe('Store-restricted stock updates', function (): void {
+
+    it('rejects stock writes for products outside the token websites', function (): void {
+        $sku = fixtures('product_sku');
+        $restricted = serviceToken(['inventory/write'], [restrictStoreId()]);
+
+        $denied = apiPut('/api/rest/v2/inventory?store=' . RESTRICT_STORE_CODE, [
+            'sku' => $sku,
+            'isInStock' => true,
+        ], $restricted);
+        expect($denied['status'])->toBe(403);
+
+        $deniedBulk = apiPut('/api/rest/v2/inventory/bulk?store=' . RESTRICT_STORE_CODE, [
+            'items' => [['sku' => $sku, 'isInStock' => true]],
+        ], $restricted);
+        expect($deniedBulk['status'])->toBe(403);
+    });
+
+    it('allows an unrestricted token to update the same SKU', function (): void {
+        $sku = fixtures('product_sku');
+
+        $response = apiPut('/api/rest/v2/inventory', [
+            'sku' => $sku,
+            'isInStock' => true,
+        ], serviceToken(['inventory/write']));
+
+        expect($response['status'])->toBe(200);
+        expect($response['json']['success'])->toBeTrue();
+    });
+
+});

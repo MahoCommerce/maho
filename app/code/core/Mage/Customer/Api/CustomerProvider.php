@@ -95,6 +95,24 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
+     * Caller's website allowlist (null = unrestricted), for the admin GraphQL handler.
+     *
+     * @return int[]|null
+     */
+    public function allowedWebsiteIdsForCaller(): ?array
+    {
+        return $this->allowedWebsiteIds($this->getAuthorizedUser());
+    }
+
+    /**
+     * Same website gate as the REST single-customer read, for the admin GraphQL handler.
+     */
+    public function assertCustomerWebsiteAllowed(\Mage_Customer_Model_Customer $customer): void
+    {
+        $this->assertWebsiteAllowed($customer->getWebsiteId(), $this->getAuthorizedUser(), 'customer');
+    }
+
+    /**
      * Get a single customer by ID
      */
     private function getItem(int $id): ?Customer

@@ -35,7 +35,7 @@ final class ProductLinkProvider extends \Maho\ApiPlatform\Provider
             throw new BadRequestHttpException("Invalid link type: {$linkType}. Valid types: related, cross-sell, up-sell");
         }
 
-        $product = $this->loadProduct($productId);
+        $product = $this->loadProductForRead($productId);
         return $this->getLinks($product, $linkType);
     }
 

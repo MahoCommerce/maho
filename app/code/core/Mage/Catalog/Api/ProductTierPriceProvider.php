@@ -22,7 +22,7 @@ final class ProductTierPriceProvider extends \Maho\ApiPlatform\Provider
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {
         $productId = (int) ($uriVariables['productId'] ?? 0);
-        $product = $this->loadProduct($productId);
+        $product = $this->loadProductForRead($productId);
 
         $tierPrices = $product->getTierPrice();
         if (!is_array($tierPrices)) {
@@ -31,12 +31,8 @@ final class ProductTierPriceProvider extends \Maho\ApiPlatform\Provider
 
         // Storefront callers only see the rows that price them: their own
         // customer group (or the all-groups row) on the current website. The
-        // full matrix is back-office data and needs an actual products grant
-        // (mirrors ProductProvider::isBackOfficeReader()).
-        $backOffice = $this->isAdmin()
-            || ($this->isApiUser()
-                && ($this->getAuthorizedUser()->hasPermission('products/read')
-                    || $this->getAuthorizedUser()->hasPermission('products/write')));
+        // full matrix is back-office data and needs an actual products grant.
+        $backOffice = $this->canReadBackOfficeProducts();
         $callerGroupId = $this->getCustomerGroupId();
         $websiteId = (int) StoreContext::getStore()->getWebsiteId();
 

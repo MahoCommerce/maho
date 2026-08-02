@@ -11,7 +11,9 @@ declare(strict_types=1);
 namespace Mage\CatalogInventory\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Maho\ApiPlatform\Trait\StockWriterTrait;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -20,6 +22,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 {
+    use ProductLoaderTrait;
     use StockWriterTrait;
 
     #[\Override]
@@ -100,6 +103,8 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         if (!$productId) {
             throw new NotFoundHttpException("Product not found for SKU: {$sku}");
         }
+
+        $this->authorizeStockWebsites([(int) $productId]);
 
         $stockData = array_merge($this->buildStockData($qty, $isInStock, $manageStock), $extended);
         $upsert = $this->upsertStockItemRow((int) $productId, $stockData);
@@ -198,6 +203,8 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
             $skuToProductId[$sku] = $productId;
         }
 
+        $this->authorizeStockWebsites(array_map('intval', array_values($skuToProductId)));
+
         $write = \Mage::getSingleton('core/resource')->getConnection('core_write');
 
         $results = [];
@@ -252,6 +259,30 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
         $dto->results = $results;
 
         return $dto;
+    }
+
+    /**
+     * Same website gate as every other product write path
+     * (authorizeProductWebsites), without loading full product models.
+     *
+     * @param int[] $productIds
+     */
+    private function authorizeStockWebsites(array $productIds): void
+    {
+        $allowedWebsiteIds = $this->getAllowedWebsiteIds($this->getAuthorizedUser());
+        if ($allowedWebsiteIds === null) {
+            return;
+        }
+
+        /** @var \Mage_Catalog_Model_Resource_Product $productResource */
+        $productResource = \Mage::getResourceSingleton('catalog/product');
+        $websiteIdsByProduct = $productResource->getWebsiteIdsByProductIds($productIds);
+        foreach ($productIds as $productId) {
+            $websiteIds = array_map('intval', $websiteIdsByProduct[$productId] ?? []);
+            if (array_intersect($websiteIds, $allowedWebsiteIds) === []) {
+                throw new AccessDeniedHttpException("Access denied for this product's websites");
+            }
+        }
     }
 
     /**

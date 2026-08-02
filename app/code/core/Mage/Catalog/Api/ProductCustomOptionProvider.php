@@ -33,7 +33,7 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
         }
 
         $productId = (int) ($uriVariables['productId'] ?? 0);
-        $product = $this->loadProduct($productId);
+        $product = $this->loadProductForRead($productId);
 
         // Single option for PUT/DELETE
         if (isset($uriVariables['optionId'])) {
