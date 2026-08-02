@@ -15,7 +15,6 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Wishlist State Provider.
@@ -132,8 +131,10 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
         $wishlistId = $item->getWishlistId();
         /** @var \Mage_Wishlist_Model_Wishlist $wishlist */
         $wishlist = \Mage::getModel('wishlist/wishlist')->load($wishlistId);
+        // Reported as missing rather than forbidden, so the endpoint cannot be
+        // used to probe which wishlist item ids exist.
         if (!$wishlist->getId() || (int) $wishlist->getCustomerId() !== $customerId) {
-            throw new AccessDeniedHttpException('Access denied to this wishlist item');
+            throw new NotFoundHttpException('Wishlist item not found');
         }
 
         return WishlistItem::fromModel($item);

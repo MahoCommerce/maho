@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Trait;
 
 use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Security\BackOfficeAccess;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
@@ -90,6 +91,18 @@ trait AuthenticationTrait
     protected function isAdmin(): bool
     {
         return $this->security !== null && $this->security->isGranted('ROLE_ADMIN');
+    }
+
+    /**
+     * Whether the caller may see this resource's back-office view: drafts and
+     * disabled rows, cross-store items, admin-only columns. Delegates to the
+     * same rule `is_back_office('<resource>')` applies inside a security
+     * expression, so a provider and a property gate can never disagree.
+     */
+    protected function isBackOffice(string $resourceId): bool
+    {
+        return $this->security !== null
+            && BackOfficeAccess::isGrantedBy($this->security->isGranted(...), $resourceId);
     }
 
     protected function isApiUser(): bool

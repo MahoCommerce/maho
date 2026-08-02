@@ -92,10 +92,7 @@ trait ProductLoaderTrait
      */
     protected function canReadBackOfficeProducts(): bool
     {
-        return $this->isAdmin()
-            || ($this->isApiUser()
-                && ($this->getAuthorizedUser()->hasPermission('products/read')
-                    || $this->getAuthorizedUser()->hasPermission('products/write')));
+        return $this->isBackOffice('products');
     }
 
     /**

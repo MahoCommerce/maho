@@ -32,8 +32,6 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
     private ?\Mage_Catalog_Model_Product_Media_Config $mediaConfig = null;
 
-    private ?bool $backOfficeReader = null;
-
     private function getMediaConfig(): \Mage_Catalog_Model_Product_Media_Config
     {
         return $this->mediaConfig ??= \Mage::getModel('catalog/product_media_config');
@@ -50,10 +48,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      */
     private function isBackOfficeReader(): bool
     {
-        return $this->backOfficeReader ??= $this->isAdmin()
-            || ($this->isApiUser()
-                && ($this->getAuthorizedUser()->hasPermission('products/read')
-                    || $this->getAuthorizedUser()->hasPermission('products/write')));
+        return $this->isBackOffice('products');
     }
 
     /**

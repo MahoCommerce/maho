@@ -111,14 +111,17 @@ describe('API v2 Customer Addresses', function (): void {
             }
             $addressId = (int) $create['json']['id'];
 
-            // Customer B must not read A's address by id (AddressProvider loads
-            // the address, then authorizeCustomerAccess() denies the non-owner).
+            // Customer B must not read A's address by id. 404, not 403: a
+            // distinguishable response would turn this into an address-id oracle.
             $read = apiGet("/api/rest/v2/addresses/{$addressId}", customerToken($intruderId));
-            expect($read['status'])->toBeIn([403, 404]);
+            expect($read['status'])->toBe(404);
+            expect(apiGet('/api/rest/v2/addresses/99999999', customerToken($intruderId))['status'])
+                ->toBe($read['status']);
 
-            // Customer B must not delete A's address.
+            // Customer B must not delete A's address, and again cannot tell it apart
+            // from an address that does not exist.
             $delete = apiDelete("/api/rest/v2/customers/me/addresses/{$addressId}", customerToken($intruderId));
-            expect($delete['status'])->toBeIn([403, 404]);
+            expect($delete['status'])->toBe(404);
 
             // Owner removes their own address (no tracked-cleanup type for addresses).
             apiDelete("/api/rest/v2/customers/me/addresses/{$addressId}", customerToken($ownerId));
