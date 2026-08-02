@@ -111,7 +111,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 
         $this->logApiActivity('catalog/category', 'create', null, $category, $user);
 
-        return $this->refreshDto($category, $data);
+        return $this->refreshDto($category);
     }
 
     private function handleUpdate(int $id, Category $data, ApiUser $user): Category
@@ -158,7 +158,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
 
         $this->logApiActivity('catalog/category', 'update', $oldData, $category, $user);
 
-        return $this->refreshDto($category, $data);
+        return $this->refreshDto($category);
     }
 
     private function handleDelete(int $id, ApiUser $user): null
@@ -566,14 +566,15 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
-    private function refreshDto(Mage_Catalog_Model_Category $category, Category $data): Category
+    /**
+     * Write responses mirror a GET of the saved entity: applyCategoryData()
+     * normalizes several fields on save (empty string to null, image filename
+     * to URL on read), so echoing the request DTO back would return values
+     * that were never stored.
+     */
+    private function refreshDto(Mage_Catalog_Model_Category $category): Category
     {
-        $data->id = (int) $category->getId();
-        $data->path = $category->getPath();
-        $data->level = (int) $category->getLevel();
-        $data->createdAt = $category->getCreatedAt();
-        $data->updatedAt = $category->getUpdatedAt();
-        return $data;
+        return (new CategoryProvider($this->security))->mapToDto($category);
     }
 
 }

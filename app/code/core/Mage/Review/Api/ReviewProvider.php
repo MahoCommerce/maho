@@ -246,13 +246,20 @@ final class ReviewProvider extends CrudProvider
         // Store scoping: outside the back office a review is only visible in
         // the store views it is assigned to. Store 0 is a marker row added on
         // every save, so it grants visibility only when the review carries no
-        // real store assignment (a deliberate all-stores review).
-        if (!$this->isAdmin() && !$this->isApiUser()) {
-            $storeIds = array_values(array_filter(
-                array_map('intval', (array) $review->getStores()),
-                static fn(int $id): bool => $id !== 0,
-            ));
-            if ($storeIds !== [] && !in_array(StoreContext::getStoreId(), $storeIds, true)) {
+        // real store assignment (a deliberate all-stores review). Service
+        // tokens bypass the current-store check but a store-restricted one
+        // still only sees reviews assigned to at least one allowed store.
+        $storeIds = array_values(array_filter(
+            array_map('intval', (array) $review->getStores()),
+            static fn(int $id): bool => $id !== 0,
+        ));
+        if (!$this->isAdmin() && $storeIds !== []) {
+            if ($this->isApiUser()) {
+                $allowedStoreIds = $this->getAuthorizedUser()->getAllowedStoreIds();
+                if ($allowedStoreIds !== null && array_intersect($storeIds, $allowedStoreIds) === []) {
+                    throw new NotFoundHttpException('Review not found');
+                }
+            } elseif (!in_array(StoreContext::getStoreId(), $storeIds, true)) {
                 throw new NotFoundHttpException('Review not found');
             }
         }

@@ -211,11 +211,15 @@ class CreditMemo extends CrudResource
 
         $dto->currency = $model->getOrderCurrencyCode() ?: \Mage::app()->getStore()->getCurrentCurrencyCode();
 
-        $order = $model->getOrder();
-        $dto->orderIncrementId = $order ? $order->getIncrementId() : null;
+        if ($model->hasData('_preloaded_order_increment_id')) {
+            $dto->orderIncrementId = $model->getData('_preloaded_order_increment_id');
+        } else {
+            $order = $model->getOrder();
+            $dto->orderIncrementId = $order ? $order->getIncrementId() : null;
+        }
 
         $dto->items = [];
-        foreach ($model->getAllItems() as $item) {
+        foreach ($model->getData('_preloaded_items') ?? $model->getAllItems() as $item) {
             $itemDto = new CreditMemoItem();
             $itemDto->id = (int) $item->getId();
             $itemDto->orderItemId = (int) $item->getOrderItemId();
@@ -239,7 +243,7 @@ class CreditMemo extends CrudResource
         }
 
         $dto->comments = [];
-        foreach ($model->getCommentsCollection() as $comment) {
+        foreach ($model->getData('_preloaded_comments') ?? $model->getCommentsCollection() as $comment) {
             $dto->comments[] = [
                 'id' => (int) $comment->getId(),
                 'comment' => $comment->getComment(),

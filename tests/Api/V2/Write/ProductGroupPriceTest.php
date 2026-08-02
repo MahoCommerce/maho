@@ -8,6 +8,8 @@
 
 declare(strict_types=1);
 
+use Tests\Helpers\ApiV2Helper;
+
 /**
  * API v2 Product Group Price Sub-Resource Tests
  *
@@ -61,8 +63,8 @@ describe('Product Group Prices, CRUD Lifecycle', function (): void {
         ], $token);
         expect($set['status'])->toBe(200);
 
-        // Read back
-        $read = apiGet("/api/rest/v2/products/{$productId}/group-prices");
+        // Read back: the full matrix is back-office data, so read with the token
+        $read = apiGet("/api/rest/v2/products/{$productId}/group-prices", $token);
         expect($read['status'])->toBe(200);
         $items = getItems($read);
         expect(count($items))->toBeGreaterThanOrEqual(2);
@@ -99,7 +101,7 @@ describe('Product Group Prices, CRUD Lifecycle', function (): void {
         ], $token);
         expect($set2['status'])->toBe(200);
 
-        $read = apiGet("/api/rest/v2/products/{$productId}/group-prices");
+        $read = apiGet("/api/rest/v2/products/{$productId}/group-prices", $token);
         $items = getItems($read);
         expect(count($items))->toBe(1);
 
@@ -125,6 +127,44 @@ describe('Product Group Prices, CRUD Lifecycle', function (): void {
             ['customerGroupId' => 'all', 'price' => -10],
         ], $token);
         expect($response['status'])->toBeIn([400, 422]);
+    });
+
+});
+
+describe('Product Group Prices, Storefront Scoping', function (): void {
+
+    it('shows storefront callers only the rows pricing their own customer group', function (): void {
+        ApiV2Helper::ensureMahoBootstrapped();
+        $productId = fixtures('product_id');
+        $admin = serviceToken(['products/write', 'products/delete', 'products/read']);
+        $customerGroupId = (int) Mage::getModel('customer/customer')
+            ->load((int) fixtures('customer_id'))
+            ->getGroupId();
+        $otherGroupId = $customerGroupId === 2 ? 3 : 2;
+
+        $set = apiPut("/api/rest/v2/products/{$productId}/group-prices", [
+            ['customerGroupId' => 'all', 'price' => 30.0],
+            ['customerGroupId' => $customerGroupId, 'price' => 25.0],
+            ['customerGroupId' => $otherGroupId, 'price' => 20.0],
+        ], $admin);
+        expect($set['status'])->toBe(200);
+
+        // Back-office tokens see the full matrix.
+        $full = apiGet("/api/rest/v2/products/{$productId}/group-prices", $admin);
+        expect(count(getItems($full)))->toBe(3);
+
+        // Anonymous callers are the NOT LOGGED IN group: only the all-groups row.
+        $anon = apiGet("/api/rest/v2/products/{$productId}/group-prices");
+        expect(array_column(getItems($anon), 'customerGroupId'))->toBe(['all']);
+
+        // A logged-in customer additionally sees their own group's row, nobody else's.
+        $mine = apiGet("/api/rest/v2/products/{$productId}/group-prices", customerToken());
+        $groups = array_column(getItems($mine), 'customerGroupId');
+        expect($groups)->toContain('all');
+        expect($groups)->toContain($customerGroupId);
+        expect($groups)->not->toContain($otherGroupId);
+
+        apiDelete("/api/rest/v2/products/{$productId}/group-prices", $admin);
     });
 
 });

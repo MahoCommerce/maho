@@ -86,25 +86,58 @@ final class CmsBlockProvider extends CrudProvider
 
     private function getByIdentifier(string $identifier): ?CmsBlock
     {
-        $collection = \Mage::getModel('cms/block')->getCollection();
-        $collection->addFieldToFilter('identifier', $identifier);
-
         if ($this->isBackOfficeReader()) {
-            $allowed = $this->allowedStoreIds();
-            if ($allowed !== null) {
-                $collection->addStoreFilter($allowed, false);
-            }
-        } else {
-            $collection->addStoreFilter(StoreContext::getStoreId());
-            $collection->addFieldToFilter('is_active', 1);
+            return $this->getByIdentifierBackOffice($identifier);
         }
 
+        $collection = \Mage::getModel('cms/block')->getCollection();
+        $collection->addFieldToFilter('identifier', $identifier);
+        $collection->addStoreFilter(StoreContext::getStoreId());
+        $collection->addFieldToFilter('is_active', 1);
         $collection->setPageSize(1);
 
         $block = $collection->getFirstItem();
 
         /** @var CmsBlock|null */
         return $block->getId() ? $this->toDto($block) : null;
+    }
+
+    /**
+     * Back-office readers resolve across every store and status. Current-store
+     * matches win over other stores when the identifier is reused (mirrors
+     * CmsPageProvider::getPageByIdentifierBackOffice()).
+     */
+    private function getByIdentifierBackOffice(string $identifier): ?CmsBlock
+    {
+        $collection = \Mage::getModel('cms/block')->getCollection();
+        $collection->addFieldToFilter('identifier', $identifier);
+
+        $allowed = $this->allowedStoreIds();
+        if ($allowed !== null) {
+            $collection->addStoreFilter($allowed, false);
+        }
+
+        $collection->setOrder('block_id', 'ASC');
+
+        $currentStoreId = StoreContext::getStoreId();
+        $match = null;
+        foreach ($collection as $block) {
+            $resource = $block->getResource();
+            if (method_exists($resource, 'lookupStoreIds')
+                && StoreContext::isAvailableForStore($resource->lookupStoreIds($block->getId()), $currentStoreId)
+            ) {
+                $match = $block;
+                break;
+            }
+            $match ??= $block;
+        }
+
+        if ($match === null) {
+            return null;
+        }
+
+        /** @var CmsBlock */
+        return $this->toDto(\Mage::getModel('cms/block')->load($match->getId()));
     }
 
     #[\Override]

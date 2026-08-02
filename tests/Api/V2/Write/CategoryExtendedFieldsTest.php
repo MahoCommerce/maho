@@ -87,6 +87,12 @@ describe('Category Extended Fields (REST)', function (): void {
         ], $token);
         expect($update['status'])->toBe(200);
 
+        // The write response reflects the persisted values, not the raw input:
+        // the empty-string clear is stored (and thus answered) as null.
+        expect($update['json']['isAnchor'])->toBeFalse();
+        expect($update['json']['availableSortBy'])->toBe(['position']);
+        expect($update['json']['defaultSortBy'])->toBeNull();
+
         $verify = apiGet("/api/rest/v2/categories/{$categoryId}");
         expect($verify['status'])->toBe(200);
         expect($verify['json']['isAnchor'])->toBeFalse();
@@ -160,11 +166,12 @@ describe('Category Extended Fields (REST)', function (): void {
         expect($read['status'])->toBe(200);
         expect($read['json']['landingPageId'])->toBe($blockId);
 
-        // 0 clears the landing page
+        // 0 clears the landing page; the write response already answers null.
         $clear = apiPut("/api/rest/v2/categories/{$categoryId}", [
             'landingPageId' => 0,
         ], $categoryToken);
         expect($clear['status'])->toBe(200);
+        expect($clear['json']['landingPageId'])->toBeNull();
 
         $verify = apiGet("/api/rest/v2/categories/{$categoryId}");
         expect($verify['json']['landingPageId'])->toBeNull();

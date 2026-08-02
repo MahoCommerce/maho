@@ -161,6 +161,32 @@ describe('Store-restricted order access', function (): void {
 
 });
 
+describe('Store-restricted review access', function (): void {
+
+    it('denies reading a review outside the allowlist while an unrestricted token still sees it', function (): void {
+        $review = Mage::getModel('review/review');
+        $review->setEntityId((int) $review->getEntityIdByCode(Mage_Review_Model_Review::ENTITY_PRODUCT_CODE))
+            ->setEntityPkValue((int) fixtures('product_id'))
+            ->setStatusId(Mage_Review_Model_Review::STATUS_APPROVED)
+            ->setTitle('Store restriction review')
+            ->setDetail('Review assigned to the default store only.')
+            ->setNickname('PestRestrict')
+            ->setStoreId(1)
+            ->setStores([1])
+            ->save();
+        $reviewId = (int) $review->getId();
+        trackCreated('review', $reviewId);
+
+        $restricted = serviceToken(['reviews/read'], [restrictStoreId()]);
+        $denied = apiGet("/api/rest/v2/reviews/{$reviewId}?store=" . RESTRICT_STORE_CODE, $restricted);
+        expect($denied['status'])->toBe(404);
+
+        $allowed = apiGet("/api/rest/v2/reviews/{$reviewId}", serviceToken(['reviews/read']));
+        expect($allowed['status'])->toBe(200);
+    });
+
+});
+
 describe('Website-restricted coupon access', function (): void {
 
     it('defaults omitted websiteIds to the current store website on create', function (): void {
