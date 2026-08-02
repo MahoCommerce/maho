@@ -100,7 +100,9 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
                 continue;
             }
 
-            $items[] = WishlistItem::fromModel($item);
+            $dto = WishlistItem::fromModel($item);
+            $dto->customerId = $customerId;
+            $items[] = $dto;
         }
 
         \Mage::app()->getCache()->save(
@@ -114,12 +116,12 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Get single wishlist item
+     * Get single wishlist item. Ownership is not checked here: the parent
+     * wishlist's customer id is set on the DTO and the operation's
+     * `is_owner(object, 'customerId')` expression does the denying post-read.
      */
     private function getItem(int $itemId): WishlistItem
     {
-        $customerId = $this->requireAuthentication();
-
         /** @var \Mage_Wishlist_Model_Item $item */
         $item = \Mage::getModel('wishlist/item')->load($itemId);
 
@@ -127,17 +129,16 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
             throw new NotFoundHttpException('Wishlist item not found');
         }
 
-        // Verify ownership - load wishlist explicitly
-        $wishlistId = $item->getWishlistId();
         /** @var \Mage_Wishlist_Model_Wishlist $wishlist */
-        $wishlist = \Mage::getModel('wishlist/wishlist')->load($wishlistId);
-        // Reported as missing rather than forbidden, so the endpoint cannot be
-        // used to probe which wishlist item ids exist.
-        if (!$wishlist->getId() || (int) $wishlist->getCustomerId() !== $customerId) {
+        $wishlist = \Mage::getModel('wishlist/wishlist')->load($item->getWishlistId());
+        if (!$wishlist->getId()) {
             throw new NotFoundHttpException('Wishlist item not found');
         }
 
-        return WishlistItem::fromModel($item);
+        $dto = WishlistItem::fromModel($item);
+        $dto->customerId = $wishlist->getCustomerId() ? (int) $wishlist->getCustomerId() : null;
+
+        return $dto;
     }
 
     /**
@@ -147,6 +148,7 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
     {
         return [
             'id' => $item->id,
+            'customerId' => $item->customerId,
             'productId' => $item->productId,
             'productName' => $item->productName,
             'productSku' => $item->productSku,
@@ -166,6 +168,7 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
     {
         $item = new WishlistItem();
         $item->id = (int) $data['id'];
+        $item->customerId = isset($data['customerId']) ? (int) $data['customerId'] : null;
         $item->productId = (int) $data['productId'];
         $item->productName = $data['productName'];
         $item->productSku = $data['productSku'];

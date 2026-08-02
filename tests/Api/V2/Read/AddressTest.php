@@ -111,6 +111,11 @@ describe('API v2 Customer Addresses', function (): void {
             }
             $addressId = (int) $create['json']['id'];
 
+            // The owner reads their own address: proves the ownership gate lets
+            // owners through (a fail-closed misconfiguration would 404 here).
+            $ownerRead = apiGet("/api/rest/v2/addresses/{$addressId}", customerToken($ownerId));
+            expect($ownerRead['status'])->toBe(200);
+
             // Customer B must not read A's address by id. 404, not 403: a
             // distinguishable response would turn this into an address-id oracle.
             $read = apiGet("/api/rest/v2/addresses/{$addressId}", customerToken($intruderId));

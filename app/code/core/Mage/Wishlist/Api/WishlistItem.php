@@ -61,7 +61,8 @@ use Maho\ApiPlatform\CrudResource;
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'item_query', description: 'Get a wishlist item by ID', security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('wishlists/read')"),
+        // Row-level denial is converted to a null result by OwnershipDenialProvider.
+        new Query(name: 'item_query', description: 'Get a wishlist item by ID', security: "is_back_office('wishlists') or is_owner(object, 'customerId')"),
         new QueryCollection(name: 'collection_query', description: 'Get wishlist items', security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('wishlists/read')"),
         new QueryCollection(
             name: 'my',
@@ -111,6 +112,12 @@ class WishlistItem extends CrudResource
 
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
+
+    // Owner of the parent wishlist, set by WishlistProvider from the wishlist it
+    // already holds (wishlist_item has no customer_id column). Never serialized;
+    // exists for the is_owner(object, 'customerId') security expression.
+    #[ApiProperty(readable: false, writable: false)]
+    public ?int $customerId = null;
 
     public ?int $productId = null;
 

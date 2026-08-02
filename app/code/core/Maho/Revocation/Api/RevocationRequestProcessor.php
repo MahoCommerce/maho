@@ -155,6 +155,6 @@ final class RevocationRequestProcessor extends Processor
 
         $model->save();
 
-        return RevocationRequest::fromModel($model, adminView: true);
+        return RevocationRequest::fromModel($model);
     }
 }

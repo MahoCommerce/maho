@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\EventListener;
 
+use ApiPlatform\Metadata\HttpOperation;
 use Maho\ApiPlatform\Exception\ApiException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -128,6 +129,29 @@ class ApiExceptionListener implements EventSubscriberInterface
             // InsufficientAuthenticationException as the `previous`.
             $isNotAuthenticated = $exception->getPrevious() instanceof InsufficientAuthenticationException
                 || !$hasBearerToken;
+
+            // Honor the operation's exceptionToStatus mapping (e.g. row-level
+            // ownership denials mapped to 404 so a foreign id is
+            // indistinguishable from a missing one), but only for authenticated
+            // callers: an unauthenticated caller must keep the 401 +
+            // WWW-Authenticate affordance below. is_a() matching mirrors API
+            // Platform's own ErrorListener; the security stage throws a subclass
+            // of the mapped Symfony AccessDeniedException.
+            if (!$isNotAuthenticated) {
+                $operation = $request?->attributes->get('_api_operation');
+                if ($operation instanceof HttpOperation) {
+                    foreach ($operation->getExceptionToStatus() ?? [] as $class => $mappedStatus) {
+                        if (is_a($exception::class, $class, true)) {
+                            return new JsonResponse([
+                                'error' => $this->getErrorCodeFromStatusCode($mappedStatus),
+                                'message' => $this->getDefaultMessageForStatusCode($mappedStatus),
+                                'code' => $mappedStatus,
+                            ], $mappedStatus);
+                        }
+                    }
+                }
+            }
+
             $statusCode = $isNotAuthenticated ? 401 : 403;
             $error = $isNotAuthenticated ? 'unauthorized' : 'forbidden';
             $message = $isNotAuthenticated ? 'Authentication required' : 'Access denied';

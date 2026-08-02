@@ -23,6 +23,7 @@ use ApiPlatform\Metadata\GraphQl\Mutation;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 use Mage\Customer\Api\Address;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 #[ApiResource(
     mahoOperations: ['read' => 'View', 'create' => 'Place', 'write' => 'Manage'],
@@ -34,7 +35,11 @@ use Mage\Customer\Api\Address;
     operations: [
         new Get(
             uriTemplate: '/orders/{id}',
-            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/read')",
+            // Row-level: the object clause defers evaluation to post-read, and a
+            // denial maps to 404 so a foreign id is indistinguishable from a
+            // missing one.
+            security: "is_back_office('orders') or is_owner(object, 'customerId')",
+            exceptionToStatus: [AccessDeniedException::class => 404],
             description: 'Get an order by ID',
         ),
         new GetCollection(
@@ -143,7 +148,9 @@ use Mage\Customer\Api\Address;
         new Query(
             name: 'item_query',
             description: 'Get an order by ID',
-            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/read')",
+            // Row-level denial is converted to a null result by
+            // OwnershipDenialProvider, matching the missing-row shape.
+            security: "is_back_office('orders') or is_owner(object, 'customerId')",
         ),
         new QueryCollection(
             name: 'collection_query',

@@ -195,9 +195,9 @@ return [
         'ratings', 'status', 'stores', 'title',
     ],
     'RevocationRequest' => [
-        'adminNote', 'customerName', 'email', 'extensions', 'id', 'ip', 'orderId', 'orderReference',
+        'customerName', 'email', 'extensions', 'id', 'orderId', 'orderReference',
         'processedAt', 'processedStatus', 'reason', 'receivedAt', 'storeId', 'suppressedAt',
-        'suppressedReason', 'userAgent', 'verified',
+        'suppressedReason', 'verified',
     ],
     'Shipment' => [
         'comments', 'createdAt', 'emailSent', 'extensions', 'id', 'incrementId', 'items', 'orderId',

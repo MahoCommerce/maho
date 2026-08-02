@@ -189,56 +189,16 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        // Verify access to this order
-        // - Admins can access any order
-        // - API users with orders/read permission can access any order (for integrations)
-        // - Customers can only access their own orders
-        if (!$this->canAccessOrder($order)) {
-            return null;
-        }
+        // Ownership is not checked here: the operation's
+        // `is_owner(object, 'customerId')` expression does the denying post-read.
 
         // Store allowlist enforcement for back-office tokens; customer tokens
-        // are identity-bound above and stay untouched.
+        // are identity-bound by the ownership expression and stay untouched.
         if ($this->isAdmin() || $this->isApiUser()) {
             $this->assertStoreAllowed($order->getStoreId(), $this->getAuthorizedUser(), 'order');
         }
 
         return $this->mapToDto($order);
-    }
-
-    /**
-     * Check if current user can access the given order
-     *
-     * - Admins: full access
-     * - API service accounts: full access (permission already checked by the operation security expression)
-     * - Customers: own orders only
-     */
-    private function canAccessOrder(\Mage_Sales_Model_Order $order): bool
-    {
-        // Admins can access any order
-        if ($this->isAdmin()) {
-            return true;
-        }
-
-        // API users with orders/read permission can access any order. The
-        // granular orders/read check is enforced upstream by the operation's
-        // `security: is_granted('orders/read')` expression (via ApiUserVoter)
-        // before this runs, so by the time we get here the key is already
-        // authorized to read orders.
-        $user = $this->security->getUser();
-        if ($user instanceof \Maho\ApiPlatform\Security\ApiUser && $user->isApiUser()) {
-            return true;
-        }
-
-        // Customers can only access their own orders
-        $authenticatedCustomerId = $this->getAuthenticatedCustomerId();
-        if ($authenticatedCustomerId !== null) {
-            $orderCustomerId = $order->getCustomerId();
-            return $orderCustomerId && (int) $orderCustomerId === $authenticatedCustomerId;
-        }
-
-        // No valid authentication context
-        return false;
     }
 
     /**
