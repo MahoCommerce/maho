@@ -349,6 +349,39 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * Prove the store can encrypt and read the value back, rather than inferring it from
+     * the key's shape: an encryptor can be configured, and its key the right shape, while
+     * the thing that does the work is missing. mahocommerce/module-mcrypt-compat copied
+     * into a code pool by hand rather than required through Composer is exactly that, its
+     * mcrypt_* functions come from phpseclib/mcrypt_compat and every call fails without it.
+     */
+    public static function findEncryptionFailure(): ?string
+    {
+        $probe = 'maho-health-check-probe';
+        try {
+            $helper = Mage::helper('core');
+            if ($helper->decrypt($helper->encrypt($probe)) === $probe) {
+                return null;
+            }
+            $reason = 'a test value did not survive an encrypt/decrypt round trip';
+        } catch (\Throwable $e) {
+            $reason = sprintf('encrypting a test value failed with %s: %s', $e::class, $e->getMessage());
+        }
+
+        if (self::isLegacyEncryptionActive() && !\Composer\InstalledVersions::isInstalled('phpseclib/mcrypt_compat')) {
+            return sprintf(
+                'Encryption is not working: %s. The store loads the legacy mcrypt encryptor, but '
+                . 'phpseclib/mcrypt_compat is not installed, so the mcrypt functions it calls do not exist. '
+                . 'Install the compatibility module through Composer with '
+                . '"composer require mahocommerce/module-mcrypt-compat", which pulls it in.',
+                $reason,
+            );
+        }
+
+        return sprintf('Encryption is not working: %s.', $reason);
+    }
+
+    /**
      * Judge the key by the legacy encryptor's rules: Blowfish takes any key up to
      * MCRYPT_MAX_KEY_LENGTH bytes and nothing longer. Two states are broken rather
      * than merely dated, and both are silent at runtime, so the check must name them.
@@ -641,11 +674,13 @@ class HealthCheck extends BaseMahoCommand
             ),
         ];
 
-        $keyIssue = self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex());
-        $legacyOk = $keyIssue === null && self::isLegacyEncryptionActive();
+        // The verdict is measured, not inferred; findEncryptionKeyIssue() only explains it.
+        $failure = self::findEncryptionFailure();
+        $keyIssue = $failure === null ? null : (self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex()) ?? $failure);
+        $legacyOk = $failure === null && self::isLegacyEncryptionActive();
         $checks[] = [
             'check' => 'Encryption Key',
-            'severity' => $legacyOk ? 'warning' : ($keyIssue === null ? 'ok' : 'error'),
+            'severity' => $legacyOk ? 'warning' : ($failure === null ? 'ok' : 'error'),
             'details' => $legacyOk ? self::LEGACY_ENCRYPTOR_ADVICE : ($keyIssue ?? ''),
         ];
 
@@ -1231,8 +1266,9 @@ class HealthCheck extends BaseMahoCommand
     private function checkEncryption(OutputInterface $output): bool
     {
         $output->write('Checking encryption key... ');
-        $keyIssue = self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex());
-        if ($keyIssue === null && self::isLegacyEncryptionActive()) {
+        $failure = self::findEncryptionFailure();
+        $keyIssue = $failure === null ? null : (self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex()) ?? $failure);
+        if ($failure === null && self::isLegacyEncryptionActive()) {
             $output->writeln('<comment>LEGACY</comment>');
             $output->writeln(wordwrap(self::LEGACY_ENCRYPTOR_ADVICE, 100));
             $output->writeln('Checking encrypted data... <comment>SKIPPED (legacy mcrypt encryptor)</comment>');
