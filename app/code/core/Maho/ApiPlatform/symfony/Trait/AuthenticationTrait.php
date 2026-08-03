@@ -171,6 +171,13 @@ trait AuthenticationTrait
         return $user;
     }
 
+    /**
+     * Deliberately duplicates the operation's `security:` expression on write
+     * paths. It is the only backstop for the two mistakes the coverage tests
+     * cannot catch: an operation accidentally shipped with `security: 'true'`
+     * (non-empty, so the fail-open check passes) or gated by a valid but
+     * wrong permission id. Do not remove as a redundancy cleanup.
+     */
     protected function assertPermission(ApiUser $user, string $permission): void
     {
         // Admin tokens carry no API-user permission grants; their authorization
