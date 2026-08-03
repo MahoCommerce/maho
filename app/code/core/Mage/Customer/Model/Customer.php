@@ -534,16 +534,10 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
 
     /**
      * Hash customer password
-     *
-     * @param   string $password
-     * @param   int    $salt
-     * @return  string
      */
-    public function hashPassword(#[\SensitiveParameter] $password, $salt = null)
+    public function hashPassword(#[\SensitiveParameter] string $password): string
     {
-        /** @var Mage_Core_Helper_Data $helper */
-        $helper = Mage::helper('core');
-        return $helper->getHash(trim($password), (bool) $salt ? $salt : Mage_Admin_Model_User::HASH_SALT_LENGTH);
+        return Mage::helper('core')->getHashPassword(trim($password));
     }
 
     /**
