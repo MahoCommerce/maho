@@ -17,6 +17,7 @@ dataset('legacy password hash formats', [
     'm1 salted md5',
     'openmage salted sha256',
     'openmage salted sha512',
+    'bcrypt with outdated cost',
 ]);
 
 function passwordMigrationLegacyHash(string $format, string $password): string
@@ -27,6 +28,8 @@ function passwordMigrationLegacyHash(string $format, string $password): string
         'm1 salted md5' => md5('xY' . $password) . ':xY',
         'openmage salted sha256' => hash('sha256', 'RandomSalt123' . $password) . ':RandomSalt123',
         'openmage salted sha512' => hash('sha512', 'RandomSalt123' . $password) . ':RandomSalt123',
+        // cost 4 is below every PHP default, so this hash needs a cost upgrade on any version
+        'bcrypt with outdated cost' => password_hash($password, PASSWORD_BCRYPT, ['cost' => 4]),
     };
 }
 
@@ -144,11 +147,11 @@ describe('Legacy hash validation', function () {
         expect(Mage::helper('core')->hashNeedsUpgrade($hash))->toBeTrue();
     })->with('legacy password hash formats');
 
-    // A bcrypt hash minted elsewhere (OpenMage, or PHP 8.3 where the default cost is 10)
-    // is already in the canonical format: accept it and leave the stored hash alone.
-    test('accepts a foreign bcrypt hash without re-hashing it', function () {
+    // A bcrypt hash minted elsewhere at the current default cost is already canonical:
+    // accept it and leave the stored hash alone.
+    test('accepts a foreign bcrypt hash at the current default cost without re-hashing it', function () {
         $password = 'Legacy-P@ssw0rd-1';
-        $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 10]);
+        $hash = password_hash($password, PASSWORD_DEFAULT);
         $helper = Mage::helper('core');
 
         expect($helper->validateHash($password, $hash))->toBeTrue()

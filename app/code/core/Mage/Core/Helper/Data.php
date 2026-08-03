@@ -384,7 +384,8 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Whether a stored credential hash predates the current hash version and should be re-hashed
+     * Whether a stored credential hash predates the current hash version or bcrypt cost
+     * and should be re-hashed
      */
     public function hashNeedsUpgrade(#[\SensitiveParameter] string $hash): bool
     {

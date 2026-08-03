@@ -72,14 +72,21 @@ class Mage_Core_Model_Encryption
     }
 
     /**
-     * Whether a stored credential still uses a legacy digest and must be re-hashed on next login.
+     * Whether a stored credential should be re-hashed on next login: a legacy digest,
+     * or a bcrypt hash that no longer matches the current default algorithm and cost.
      *
-     * Deliberately takes no password: only the format of the stored hash matters, and running
+     * Deliberately takes no password: only the shape of the stored hash matters, and running
      * password_verify() again would repeat the bcrypt cost already paid to authenticate.
      */
     public function hashNeedsUpgrade(#[\SensitiveParameter] string $hash): bool
     {
-        return password_get_info($hash)['algo'] === null;
+        $algo = password_get_info($hash)['algo'];
+        if ($algo === null) {
+            return true;
+        }
+        // bcrypt is the format Maho mints, so track it against the current default;
+        // other password_hash() formats (argon2) are imported credentials, leave them alone
+        return $algo === PASSWORD_BCRYPT && password_needs_rehash($hash, PASSWORD_DEFAULT);
     }
 
     /**
