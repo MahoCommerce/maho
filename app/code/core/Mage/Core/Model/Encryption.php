@@ -206,6 +206,10 @@ class Mage_Core_Model_Encryption
         return $plaintext;
     }
 
+    /**
+     * Validate a raw binary key. Keys exist in hex form everywhere a store touches
+     * them (local.xml, the installer), so those callers want validateKeyAsHex().
+     */
     public function validateKey(#[\SensitiveParameter] string $key): bool
     {
         return strlen($key) === self::KEY_LENGTH_BINARY;

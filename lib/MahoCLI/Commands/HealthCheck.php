@@ -48,6 +48,11 @@ class HealthCheck extends BaseMahoCommand
     private const DESIGN_PATH = 'app/design/frontend';
     private const SKIN_PATH = 'public/skin/frontend';
 
+    private const UNDECRYPTABLE_ADVICE = 'They read as empty at runtime. This usually means the database was '
+        . 'encrypted under a different key (a Magento/OpenMage import, or a copy from another install): restore '
+        . 'the key those values were encrypted with in app/etc/local.xml, then run '
+        . '"./maho sys:encryptionkey:regenerate". Otherwise, if they were stored unencrypted, re-enter them.';
+
     /**
      * Mapping of deprecated Varien_ classes to their Maho\ replacements
      */
@@ -287,9 +292,11 @@ class HealthCheck extends BaseMahoCommand
 
     /**
      * Validate the configured encryption key, returning the reason it is unusable
-     * or null when it is a proper libsodium key. Magento/OpenMage stores carry a
-     * 32 character mcrypt key: copied into local.xml as-is it is not even valid
-     * hex, so `Mage::getEncryptionKeyAsBinary()` throws on every encrypt/decrypt.
+     * or null when it is a proper libsodium key. Magento/OpenMage stores carry an
+     * mcrypt key (32 hex characters by default, but the installer took any key up
+     * to the Blowfish maximum): copied into local.xml as-is it is the wrong length
+     * and often not even hex, so `Mage::getEncryptionKeyAsBinary()` throws on every
+     * encrypt/decrypt.
      */
     public static function findEncryptionKeyIssue(#[\SensitiveParameter] string $key): ?string
     {
@@ -300,14 +307,22 @@ class HealthCheck extends BaseMahoCommand
         if (Mage::helper('core')->validateKeyAsHex($key)) {
             return null;
         }
+        if (strlen($key) !== \Mage_Core_Model_Encryption::KEY_LENGTH_HEX) {
+            return sprintf(
+                'The key in app/etc/local.xml is %d characters long, a libsodium key is %d hexadecimal ones. '
+                . 'Stores migrated from Magento/OpenMage carry an mcrypt key (32 characters by default), which '
+                . 'makes every encrypt/decrypt call fail. Install mahocommerce/module-mcrypt-compat, then run '
+                . '"./maho sys:encryptionkey:regenerate" to re-encrypt your data under a new libsodium key.',
+                strlen($key),
+                \Mage_Core_Model_Encryption::KEY_LENGTH_HEX,
+            );
+        }
 
         return sprintf(
-            'The key in app/etc/local.xml is not a libsodium key (expected %d hex characters, found %d). '
-            . 'Stores migrated from Magento/OpenMage carry a 32 character mcrypt key, which makes every '
-            . 'encrypt/decrypt call fail. Install mahocommerce/module-mcrypt-compat, then run '
-            . '"./maho sys:encryptionkey:regenerate" to re-encrypt your data under a new libsodium key.',
+            'The key in app/etc/local.xml is %d characters long but is not hexadecimal, so it is not a libsodium '
+            . 'key and every encrypt/decrypt call fails. Restore the key your data was encrypted under, or run '
+            . '"./maho sys:encryptionkey:regenerate" if there is no encrypted data left to keep.',
             \Mage_Core_Model_Encryption::KEY_LENGTH_HEX,
-            strlen($key),
         );
     }
 
@@ -358,6 +373,7 @@ class HealthCheck extends BaseMahoCommand
                 $failures[] = sprintf('%s #%s (twofa_secret)', $adminTable, $row['user_id']);
             }
         }
+        sodium_memzero($key);
 
         return $failures;
     }
@@ -391,13 +407,11 @@ class HealthCheck extends BaseMahoCommand
     {
         $shown = array_slice($failures, 0, 10);
         return sprintf(
-            '%d encrypted value(s) cannot be decrypted with the current key: %s%s. They read as empty at runtime. '
-            . 'This usually means the database was encrypted under a different key (a Magento/OpenMage import, or a '
-            . 'copy from another install): restore the key those values were encrypted with in app/etc/local.xml, '
-            . 'then run "./maho sys:encryptionkey:regenerate". Otherwise, if they were stored unencrypted, re-enter them.',
+            '%d encrypted value(s) cannot be decrypted with the current key: %s%s. %s',
             count($failures),
             implode(', ', $shown),
             count($failures) > count($shown) ? ', ...' : '',
+            self::UNDECRYPTABLE_ADVICE,
         );
     }
 
@@ -572,7 +586,13 @@ class HealthCheck extends BaseMahoCommand
             'details' => $keyIssue ?? '',
         ];
 
-        if ($keyIssue === null) {
+        if ($keyIssue !== null) {
+            $checks[] = [
+                'check' => 'Encrypted Data',
+                'severity' => 'warning',
+                'details' => 'Not checked: nothing can be decrypted until the encryption key is fixed.',
+            ];
+        } else {
             try {
                 $undecryptable = self::findUndecryptableData();
                 $checks[] = [
@@ -1152,7 +1172,14 @@ class HealthCheck extends BaseMahoCommand
         $output->writeln('<info>OK</info>');
 
         $output->write('Checking encrypted data... ');
-        $undecryptable = self::findUndecryptableData();
+        try {
+            $undecryptable = self::findUndecryptableData();
+        } catch (\Exception $e) {
+            $output->writeln('');
+            $output->writeln('<error>Error: unable to check encrypted data: ' . $e->getMessage() . '</error>');
+            $output->writeln('');
+            return false;
+        }
         if (empty($undecryptable)) {
             $output->writeln('<info>OK</info>');
             return true;
@@ -1166,10 +1193,7 @@ class HealthCheck extends BaseMahoCommand
         foreach ($undecryptable as $failure) {
             $output->writeln('- ' . $failure);
         }
-        $output->writeln('They read as empty at runtime. This usually means the database was encrypted under a');
-        $output->writeln('different key (a Magento/OpenMage import, or a copy from another install): restore that');
-        $output->writeln('key in app/etc/local.xml and run "./maho sys:encryptionkey:regenerate". Otherwise, if');
-        $output->writeln('they were stored unencrypted, re-enter them.');
+        $output->writeln(wordwrap(self::UNDECRYPTABLE_ADVICE, 100));
         $output->writeln('');
 
         return false;

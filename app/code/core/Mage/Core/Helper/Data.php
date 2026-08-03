@@ -341,7 +341,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         return ($result !== '') ? $result : null;
     }
 
-    public function validateKey(string $key): bool
+    public function validateKey(#[\SensitiveParameter] string $key): bool
     {
         return $this->getEncryptor()->validateKey($key);
     }

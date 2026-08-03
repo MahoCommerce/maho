@@ -26,25 +26,69 @@ function healthCheckForeignCiphertext(string $plaintext): string
     return sodium_bin2base64($nonce . sodium_crypto_secretbox($plaintext, $nonce, $key), SODIUM_BASE64_VARIANT_ORIGINAL);
 }
 
+/**
+ * Run $assert with $path holding $value, restoring whatever was there before.
+ * (scope, scope_id, path) is unique, so an install that already configures the
+ * path must be updated rather than inserted into.
+ */
+function healthCheckWithConfigValue(string $path, string $value, callable $assert): void
+{
+    $resource = Mage::getSingleton('core/resource');
+    $write = $resource->getConnection('core_write');
+    $table = $resource->getTableName('core_config_data');
+
+    $existing = $write->fetchRow(
+        $write->select()
+            ->from($table, ['config_id', 'value'])
+            ->where('scope = ?', 'default')
+            ->where('scope_id = ?', 0)
+            ->where('path = ?', $path),
+    );
+
+    if ($existing) {
+        $configId = (int) $existing['config_id'];
+        $write->update($table, ['value' => $value], ['config_id = ?' => $configId]);
+    } else {
+        $write->insert($table, ['scope' => 'default', 'scope_id' => 0, 'path' => $path, 'value' => $value]);
+        $configId = (int) $write->lastInsertId($table);
+    }
+
+    try {
+        $assert(sprintf('%s #%d (%s)', $table, $configId, $path));
+    } finally {
+        if ($existing) {
+            $write->update($table, ['value' => $existing['value']], ['config_id = ?' => $configId]);
+        } else {
+            $write->delete($table, ['config_id = ?' => $configId]);
+        }
+    }
+}
+
 it('accepts a libsodium key', function () {
     expect(HealthCheck::findEncryptionKeyIssue(Mage::generateEncryptionKeyAsHex()))->toBeNull();
     expect(HealthCheck::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex()))->toBeNull();
 });
 
-it('flags a legacy Magento/OpenMage mcrypt key', function () {
-    $issue = HealthCheck::findEncryptionKeyIssue(Mage::helper('core')->getRandomString(32));
+it('flags a legacy Magento/OpenMage mcrypt key', function (int $length) {
+    $issue = HealthCheck::findEncryptionKeyIssue(Mage::helper('core')->getRandomString($length));
 
     expect($issue)->toBeString()
         ->and($issue)->toContain('sys:encryptionkey:regenerate')
         ->and($issue)->toContain('mcrypt');
-});
+})->with([
+    'default md5 key' => 32,
+    'custom shorter key' => 16,
+    'custom longer key' => 56,
+]);
 
 it('flags a missing key', function () {
     expect(HealthCheck::findEncryptionKeyIssue(''))->toContain('No encryption key');
 });
 
 it('flags a key of the right length that is not hex', function () {
-    expect(HealthCheck::findEncryptionKeyIssue(str_repeat('z', 64)))->toBeString();
+    $issue = HealthCheck::findEncryptionKeyIssue(str_repeat('z', Mage_Core_Model_Encryption::KEY_LENGTH_HEX));
+
+    expect($issue)->toContain('not hexadecimal');
 });
 
 it('reports no undecryptable data on a healthy install', function () {
@@ -52,43 +96,23 @@ it('reports no undecryptable data on a healthy install', function () {
 });
 
 it('flags config values encrypted under a different key', function () {
-    $resource = Mage::getSingleton('core/resource');
-    $write = $resource->getConnection('core_write');
-    $table = $resource->getTableName('core_config_data');
-
-    $write->insert($table, [
-        'scope' => 'default',
-        'scope_id' => 0,
-        'path' => 'system/smtp/password',
-        'value' => healthCheckForeignCiphertext('hunter2'),
-    ]);
-
-    try {
-        $undecryptable = HealthCheck::findUndecryptableData();
-        expect($undecryptable)->toHaveCount(1)
-            ->and($undecryptable[0])->toContain('system/smtp/password');
-    } finally {
-        $write->delete($table, ['path = ?' => 'system/smtp/password']);
-    }
+    healthCheckWithConfigValue(
+        'system/smtp/password',
+        healthCheckForeignCiphertext('hunter2'),
+        function (string $expectedFailure) {
+            expect(HealthCheck::findUndecryptableData())->toContain($expectedFailure);
+        },
+    );
 });
 
 it('accepts config values encrypted under the current key', function () {
-    $resource = Mage::getSingleton('core/resource');
-    $write = $resource->getConnection('core_write');
-    $table = $resource->getTableName('core_config_data');
-
-    $write->insert($table, [
-        'scope' => 'default',
-        'scope_id' => 0,
-        'path' => 'system/smtp/password',
-        'value' => Mage::helper('core')->encrypt('hunter2'),
-    ]);
-
-    try {
-        expect(HealthCheck::findUndecryptableData())->toBe([]);
-    } finally {
-        $write->delete($table, ['path = ?' => 'system/smtp/password']);
-    }
+    healthCheckWithConfigValue(
+        'system/smtp/password',
+        Mage::helper('core')->encrypt('hunter2'),
+        function (string $failureIfBroken) {
+            expect(HealthCheck::findUndecryptableData())->not->toContain($failureIfBroken);
+        },
+    );
 });
 
 it('flags admin two-factor secrets encrypted under a different key', function () {
@@ -107,16 +131,16 @@ it('flags admin two-factor secrets encrypted under a different key', function ()
 
     $resource = Mage::getSingleton('core/resource');
     $write = $resource->getConnection('core_write');
+    $table = $resource->getTableName('admin/user');
     $write->update(
-        $resource->getTableName('admin/user'),
+        $table,
         ['twofa_secret' => healthCheckForeignCiphertext('JBSWY3DPEHPK3PXP')],
         ['user_id = ?' => (int) $user->getId()],
     );
 
     try {
-        $undecryptable = HealthCheck::findUndecryptableData();
-        expect($undecryptable)->toHaveCount(1)
-            ->and($undecryptable[0])->toContain('twofa_secret');
+        expect(HealthCheck::findUndecryptableData())
+            ->toContain(sprintf('%s #%d (twofa_secret)', $table, (int) $user->getId()));
     } finally {
         $user->delete();
     }

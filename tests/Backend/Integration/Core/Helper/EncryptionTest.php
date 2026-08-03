@@ -409,10 +409,20 @@ describe('Encryption key validation', function () {
 
     test('rejects an invalid key during install', function () {
         $installer = Mage::getModel('install/installer');
-        $installer->setDataModel(new Mage_Install_Model_Installer_Data());
+        $dataModel = new Mage_Install_Model_Installer_Data();
+        $installer->setDataModel($dataModel);
 
         expect($installer->validateEncryptionKey(Mage::generateEncryptionKeyAsHex()))->toBeTrue()
-            ->and($installer->validateEncryptionKey(''))->toBeTrue()
-            ->and($installer->validateEncryptionKey(str_repeat('z', 32)))->toBeArray();
+            ->and($installer->validateEncryptionKey(''))->toBeTrue();
+
+        $errors = $installer->validateEncryptionKey(str_repeat('z', 32));
+
+        expect($errors)->toBeArray()
+            ->and($errors[0])->toContain('hexadecimal')
+            ->and($dataModel->getErrors())->toBe($errors);
+    });
+
+    test('lists the config paths stored encrypted', function () {
+        expect(Mage::helper('core')->getEncryptedConfigPaths())->toContain('system/smtp/password');
     });
 });
