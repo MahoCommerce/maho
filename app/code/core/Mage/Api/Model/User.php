@@ -84,7 +84,9 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
             $data['username']   = $this->getUsername();
         }
 
-        if ($this->getApiKey()) {
+        // A loaded user carries the stored hash in api_key, and the edit form leaves the field
+        // blank to keep the current key: only encode a value that differs from what was loaded
+        if ($this->getApiKey() && $this->getApiKey() !== $this->getOrigData('api_key')) {
             $data['api_key']   = $this->_getEncodedApiKey($this->getApiKey());
         }
 
@@ -345,7 +347,7 @@ class Mage_Api_Model_User extends Mage_Core_Model_Abstract
      */
     protected function _getEncodedApiKey(#[\SensitiveParameter] $apiKey)
     {
-        return Mage::helper('core')->getHash($apiKey, Mage_Admin_Model_User::HASH_SALT_LENGTH);
+        return Mage::helper('core')->getHashPassword($apiKey);
     }
 
     /**
