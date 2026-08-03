@@ -15,7 +15,7 @@ use Tests\Helpers\ApiV2Helper;
  *
  * Verifies the EAV write-scope contract: a plain update writes the global
  * (admin) scope, ?store= writes a store-view override, useDefault removes the
- * override again, and ?store=admin exposes raw global values to back-office
+ * override again, and ?store=admin exposes raw global values to backend
  * readers only. Runs against a temporary second store view so multi-store
  * semantics apply (a single-store install collapses every scope to global).
  *
@@ -227,7 +227,7 @@ describe('Product write scope (REST)', function (): void {
 
 describe('Admin-scope reads (?store=admin)', function (): void {
 
-    it('returns raw global values for back-office tokens', function (): void {
+    it('returns raw global values for backend tokens', function (): void {
         $productId = (int) $GLOBALS['_scope_test_product_id'];
         $token = serviceToken(['products/read', 'products/write']);
 

@@ -17,9 +17,9 @@ use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
 
 /**
  * Publishes `is_owner(object, '<property>')` to every security expression, the
- * row-level counterpart of `is_back_office()`. Used on item read operations of
+ * row-level counterpart of `has_backend_access()`. Used on item read operations of
  * `mahoCustomerScoped` resources as
- * `security: "is_back_office('<resource>') or is_owner(object, 'customerId')"`,
+ * `security: "has_backend_access('<resource>') or is_owner(object, 'customerId')"`,
  * evaluated by API Platform's AccessCheckerProvider after the provider has
  * loaded the row (the literal `object` token in the expression is what defers
  * evaluation to post-read, so never wrap or alias it).
@@ -28,7 +28,7 @@ use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
  * - `object` null: allow. Nothing was loaded, the 404/null path stands (only
  *   reachable on GraphQL; REST's ReadProvider throws 404 before security runs).
  * - caller without a customer identity: deny. Admin and service tokens are
- *   decided by the `is_back_office()` clause, never by ownership.
+ *   decided by the `has_backend_access()` clause, never by ownership.
  * - integer property (customer id): strict compare; 0/null means a guest row,
  *   owned by nobody.
  * - string property (email): case-insensitive compare against the caller's

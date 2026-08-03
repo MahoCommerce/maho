@@ -44,7 +44,7 @@ final class StoreContext implements ResetInterface
         $currentStoreId = (int) \Mage::app()->getStore()->getId();
 
         // On admin store (0), switch to the default store unless the caller
-        // explicitly requested the admin scope (?store=admin, back-office only).
+        // explicitly requested the admin scope (?store=admin, backend only).
         if ($currentStoreId === 0 && self::$explicitStoreId !== 0) {
             $currentStoreId = self::getDefaultStoreId();
             self::setStore($currentStoreId);

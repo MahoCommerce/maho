@@ -47,7 +47,7 @@ final class AddressProvider extends \Maho\ApiPlatform\Provider
             if (!$customerId) {
                 throw new NotFoundHttpException('Authentication required');
             }
-            $this->authorizeCustomerAccess($customerId);
+            $this->assertCustomerAccess($customerId);
             $customer = \Mage::getModel('customer/customer')->load($customerId);
             if (!$customer->getId()) {
                 throw new NotFoundHttpException('Customer not found');
@@ -73,7 +73,7 @@ final class AddressProvider extends \Maho\ApiPlatform\Provider
             throw new NotFoundHttpException('Customer ID is required');
         }
 
-        $this->authorizeCustomerAccess($customerId);
+        $this->assertCustomerAccess($customerId);
 
         $customer = \Mage::getModel('customer/customer')->load($customerId);
         if (!$customer->getId()) {

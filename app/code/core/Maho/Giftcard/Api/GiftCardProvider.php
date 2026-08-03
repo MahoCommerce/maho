@@ -59,7 +59,7 @@ final class GiftCardProvider extends CrudProvider
     {
         $dto = parent::provideItem($id);
         if ($dto instanceof GiftCard) {
-            $this->assertWebsiteAllowed($dto->websiteId, $this->getAuthorizedUser(), 'gift card');
+            $this->assertWebsiteAllowed($dto->websiteId, $this->requireUser(), 'gift card');
         }
         return $dto;
     }
@@ -72,7 +72,7 @@ final class GiftCardProvider extends CrudProvider
     protected function applyCollectionFilters(object $collection, array $filters): void
     {
         parent::applyCollectionFilters($collection, $filters);
-        $this->applyAllowedWebsiteFilter($collection, $this->getAuthorizedUser());
+        $this->applyAllowedWebsiteFilter($collection, $this->requireUser());
     }
 
     /**

@@ -64,7 +64,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
         // ROLE_CUSTOMER says nothing about *which* customer is being read.
         $requestedId = (int) ($uriVariables['id'] ?? 0);
         if (!$this->isAdmin() && !$this->isApiUser()) {
-            $this->authorizeCustomerAccess($requestedId);
+            $this->assertCustomerAccess($requestedId);
         }
 
         $mahoCustomer = $this->customerService->getCustomerById($requestedId);
@@ -72,10 +72,10 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        // Website allowlist enforcement for back-office tokens; a customer's
+        // Website allowlist enforcement for backend tokens; a customer's
         // own token was already limited to itself above.
         if ($this->isAdmin() || $this->isApiUser()) {
-            $this->assertWebsiteAllowed($mahoCustomer->getWebsiteId(), $this->getAuthorizedUser(), 'customer');
+            $this->assertWebsiteAllowed($mahoCustomer->getWebsiteId(), $this->requireUser(), 'customer');
         }
 
         return $this->mapToDto($mahoCustomer);
@@ -88,7 +88,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
      */
     public function allowedWebsiteIdsForCaller(): ?array
     {
-        return $this->allowedWebsiteIds($this->getAuthorizedUser());
+        return $this->allowedWebsiteIds($this->requireUser());
     }
 
     /**
@@ -96,7 +96,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
      */
     public function assertCustomerWebsiteAllowed(\Mage_Customer_Model_Customer $customer): void
     {
-        $this->assertWebsiteAllowed($customer->getWebsiteId(), $this->getAuthorizedUser(), 'customer');
+        $this->assertWebsiteAllowed($customer->getWebsiteId(), $this->requireUser(), 'customer');
     }
 
     /**
@@ -127,7 +127,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
             telephone: $telephone,
             page: $page,
             pageSize: $pageSize,
-            websiteIds: $this->allowedWebsiteIds($this->getAuthorizedUser()),
+            websiteIds: $this->allowedWebsiteIds($this->requireUser()),
         );
 
         if (empty($result['customers'])) {

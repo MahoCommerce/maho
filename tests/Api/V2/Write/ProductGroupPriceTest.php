@@ -63,7 +63,7 @@ describe('Product Group Prices, CRUD Lifecycle', function (): void {
         ], $token);
         expect($set['status'])->toBe(200);
 
-        // Read back: the full matrix is back-office data, so read with the token
+        // Read back: the full matrix is backend data, so read with the token
         $read = apiGet("/api/rest/v2/products/{$productId}/group-prices", $token);
         expect($read['status'])->toBe(200);
         $items = getItems($read);
@@ -149,7 +149,7 @@ describe('Product Group Prices, Storefront Scoping', function (): void {
         ], $admin);
         expect($set['status'])->toBe(200);
 
-        // Back-office tokens see the full matrix.
+        // Backend tokens see the full matrix.
         $full = apiGet("/api/rest/v2/products/{$productId}/group-prices", $admin);
         expect(count(getItems($full)))->toBe(3);
 

@@ -214,7 +214,7 @@ gtag('set', 'user_id', '{$customer->getId()}');
                 $_product = $productInCart->getProduct();
                 $productPrice = (float) ($productInCart->getPriceInclTax() ?? $helper->getPriceInclTax($_product));
                 $_item = [
-                    'item_id' => $_product->getSku(),
+                    'item_id' => $helper->getTrackingSku($_product) ?: $productInCart->getSku(),
                     'item_name' => $_product->getName(),
                     'price' => $helper->formatPrice($productPrice),
                     'quantity' => (int) $productInCart->getQty(),
@@ -247,7 +247,7 @@ gtag('set', 'user_id', '{$customer->getId()}');
                     $_product = $productInCart->getProduct();
                     $productPrice = (float) ($productInCart->getPriceInclTax() ?? $helper->getPriceInclTax($_product));
                     $_item = [
-                        'item_id' => $_product->getSku(),
+                        'item_id' => $helper->getTrackingSku($_product) ?: $productInCart->getSku(),
                         'item_name' => $_product->getName(),
                         'price' => $helper->formatPrice($productPrice),
                         'quantity' => (int) $productInCart->getQty(),
@@ -314,8 +314,10 @@ gtag('set', 'user_id', '{$customer->getId()}');
             }
             $_product = $item->getProduct();
             $_item = [
-                // The catalog product SKU, not the order item's composite one, so it matches the merchant feed
-                'item_id' => $_product->getSku() ?: $item->getSku(),
+                // The catalog (or variant) SKU, not the item's composite one, so it matches the merchant feed
+                'item_id' => $item->getProductOptionByCode('simple_sku')
+                    ?: $helper->getTrackingSku($_product)
+                    ?: $item->getSku(),
                 'item_name' => $item->getName(),
                 'quantity' => (int) $item->getQtyOrdered(),
                 'price' => $helper->formatPrice($item->getBasePriceInclTax() ?? $item->getBasePrice()),

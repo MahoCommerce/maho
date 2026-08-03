@@ -70,10 +70,10 @@ it('requires authentication for the gift card item GraphQL query', function (): 
     $ops = graphQlOperationsOf(Maho\Giftcard\Api\GiftCard::class);
 
     expect($ops)->toHaveKey('item_query');
-    // Authorization is now granular: the role-based ROLE_API_USER check was
-    // replaced by the per-resource `giftcards/read` permission (admins keep the
-    // ROLE_ADMIN branch). The read must still be non-public to guard the gift
-    // card PII leak this test was written for.
+    // Authorization is granular: service tokens are gated by the per-resource
+    // `giftcards/read` permission (admins keep the ROLE_ADMIN branch). The read
+    // must still be non-public to guard the gift card PII leak this test was
+    // written for.
     expect($ops['item_query']->getSecurity())
         ->not->toBeNull()
         ->toContain('ROLE_ADMIN')

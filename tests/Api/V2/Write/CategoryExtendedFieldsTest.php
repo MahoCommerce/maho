@@ -203,7 +203,7 @@ describe('Category Extended Fields (REST)', function (): void {
         $categoryId = $create['json']['id'];
         trackCreated('category', $categoryId);
 
-        // Design fields are back-office data, so they need an API token to read.
+        // Design fields are backend data, so they need an API token to read.
         $read = apiGet("/api/rest/v2/categories/{$categoryId}", $token);
         expect($read['status'])->toBe(200);
         expect($read['json']['customDesignFrom'])->toBe('2026-01-01');

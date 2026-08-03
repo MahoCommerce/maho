@@ -64,7 +64,7 @@ final class ShipmentProvider extends CrudProvider
             throw new NotFoundHttpException('Shipment not found');
         }
 
-        $this->assertStoreAllowed($shipment->getStoreId(), $this->getAuthorizedUser(), 'shipment');
+        $this->assertStoreAllowed($shipment->getStoreId(), $this->requireUser(), 'shipment');
 
         return Shipment::fromModel($shipment);
     }
@@ -79,7 +79,7 @@ final class ShipmentProvider extends CrudProvider
             throw new NotFoundHttpException('Order not found');
         }
 
-        $this->assertStoreAllowed($order->getStoreId(), $this->getAuthorizedUser(), 'order');
+        $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         $shipments = [];
         foreach ($order->getShipmentsCollection() as $shipment) {
@@ -101,7 +101,7 @@ final class ShipmentProvider extends CrudProvider
         ['page' => $page, 'pageSize' => $perPage] = $this->extractPagination($context);
 
         $collection = \Mage::getResourceModel('sales/order_shipment_collection');
-        $this->applyAllowedStoreFilter($collection, $this->getAuthorizedUser());
+        $this->applyAllowedStoreFilter($collection, $this->requireUser());
         $collection->setOrder('created_at', 'DESC');
         $collection->setPageSize($perPage)->setCurPage($page);
 

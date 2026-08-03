@@ -62,7 +62,7 @@ use Maho\ApiPlatform\CrudResource;
     ],
     graphQlOperations: [
         // Row-level denial is converted to a null result by OwnershipDenialProvider.
-        new Query(name: 'item_query', description: 'Get a wishlist item by ID', security: "is_back_office('wishlists') or is_owner(object, 'customerId')"),
+        new Query(name: 'item_query', description: 'Get a wishlist item by ID', security: "has_backend_access('wishlists') or is_owner(object, 'customerId')"),
         new QueryCollection(name: 'collection_query', description: 'Get wishlist items', security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('wishlists/read')"),
         new QueryCollection(
             name: 'my',

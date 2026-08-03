@@ -50,7 +50,7 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
             if (!$customerId) {
                 return null;
             }
-            $this->authorizeCustomerAccess((int) $customerId);
+            $this->assertCustomerAccess((int) $customerId);
             $quote = $this->cartService->getCustomerCart((int) $customerId);
             return $this->cartMapper->mapQuoteToCart($quote);
         }
@@ -63,18 +63,18 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        // isBackOffice: admin, or a service token holding a carts grant. A bare
+        // hasBackendAccess: admin, or a service token holding a carts grant. A bare
         // api_user token without the grant must NOT bypass cart ownership
         // (mirrors the write side's isPrivilegedCartActor()).
         $this->cartService->verifyCartAccess(
             $quote,
             $byMasked,
             $this->getAuthenticatedCustomerId(),
-            $this->isBackOffice('carts'),
+            $this->hasBackendAccess('carts'),
         );
 
         // Guest sub-resource endpoints return a bare, focused JSON shape (not the
-        // full Cart), matching the documented storefront contract: /totals is the
+        // full Cart), matching the documented frontend contract: /totals is the
         // flat totals object and /payment-methods a plain list of methods. The
         // authenticated /carts/{id}/* variants deliberately return the full Cart.
         if ($operationName === 'get_guest_totals') {

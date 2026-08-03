@@ -129,15 +129,15 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
      * they're trusted here. A service token is trusted only when it actually
      * holds the carts/write grant: a bare service-account token without it is
      * treated as an ordinary caller and can't reach arbitrary carts through the
-     * enumerable numeric /carts/{id} path. This closes the gap left by the
-     * overridden process() bypassing the base Processor's requirePermission().
+     * enumerable numeric /carts/{id} path, even on the public guest operations
+     * whose security expression admits everyone.
      */
     private function isPrivilegedCartActor(): bool
     {
         if ($this->isAdmin()) {
             return true;
         }
-        return $this->isApiUser() && $this->getAuthorizedUser()->hasPermission('carts/write');
+        return $this->isApiUser() && $this->requireUser()->hasPermission('carts/write');
     }
 
     /**
@@ -412,7 +412,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             $quote = $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($address));
         }
 
-        // Guest storefront contract: return the plain list of available shipping
+        // Guest frontend contract: return the plain list of available shipping
         // methods (code/title/price). The authenticated /carts/{id} variant
         // returns the full Cart (availableShippingMethods included).
         if ($focused) {

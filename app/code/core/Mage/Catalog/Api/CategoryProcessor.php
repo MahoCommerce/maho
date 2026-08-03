@@ -43,14 +43,11 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Category
     {
-        $user = $this->getAuthorizedUser();
+        $user = $this->requireUser();
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->requirePermission($user, 'categories/delete');
             return $this->handleDelete((int) $uriVariables['id'], $user);
         }
-
-        $this->requirePermission($user, 'categories/write');
 
         assert($data instanceof Category);
 
@@ -527,7 +524,6 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
             throw new AccessDeniedHttpException("Access denied for this category's store");
         }
     }
-
 
     /**
      * Creates always write the admin scope, the scope every store view falls back

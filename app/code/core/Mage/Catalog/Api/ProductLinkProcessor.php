@@ -47,12 +47,12 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ProductLink|array|null
     {
-        $user = $this->getAuthorizedUser();
+        $user = $this->requireUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
 
         // Enforce website scope for store-restricted API users on every
         // sub-resource write/delete (mirrors ProductProcessor's main CRUD check).
-        $this->authorizeProductWebsites($this->loadProduct($productId), $user);
+        $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
         $linkType = ProductLinkProvider::extractLinkType($context);
 
         if (!isset(self::LINK_SETTER_MAP[$linkType])) {
@@ -60,12 +60,9 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->requirePermission($user, 'products/delete');
             $linkedProductId = ProductLinkProvider::extractLinkedProductId($context);
             return $this->handleRemoveLink($productId, $linkType, $linkedProductId);
         }
-
-        $this->requirePermission($user, 'products/write');
 
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);
@@ -80,7 +77,7 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleReplaceAll(int $productId, string $linkType, array $body): array
     {
-        $product = $this->loadProductForWrite($productId, $this->getAuthorizedUser());
+        $product = $this->loadProductForWrite($productId, $this->requireUser());
 
         $linkData = [];
         foreach ($body as $link) {
@@ -105,7 +102,7 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleAddLink(int $productId, string $linkType, array $body): ProductLink
     {
-        $product = $this->loadProductForWrite($productId, $this->getAuthorizedUser());
+        $product = $this->loadProductForWrite($productId, $this->requireUser());
 
         $linkedId = (int) ($body['linkedProductId'] ?? $body['linked_product_id'] ?? 0);
         if ($linkedId <= 0) {
@@ -142,7 +139,7 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleRemoveLink(int $productId, string $linkType, int $linkedProductId): null
     {
-        $product = $this->loadProductForWrite($productId, $this->getAuthorizedUser());
+        $product = $this->loadProductForWrite($productId, $this->requireUser());
 
         $existingLinks = $this->getExistingLinkData($product, $linkType);
         unset($existingLinks[$linkedProductId]);
@@ -176,11 +173,11 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
      */
     private function authorizeAssociatedProductWebsites(int $linkedId): void
     {
-        $user = $this->getAuthorizedUser();
+        $user = $this->requireUser();
         if ($this->getAllowedWebsiteIds($user) === null) {
             return;
         }
-        $this->authorizeProductWebsites($this->loadProduct($linkedId), $user);
+        $this->assertProductWebsitesAllowed($this->loadProduct($linkedId), $user);
     }
 
 }

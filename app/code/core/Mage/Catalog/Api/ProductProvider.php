@@ -38,31 +38,25 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Whether the caller may see back-office-only product data (cost, the raw
-     * user-defined attribute map, the inventory policy columns, the custom
-     * design/layout overrides) and load
-     * disabled or other-website products by id/sku/barcode. Admin tokens are
-     * governed by the admin ACL; an API-user token must actually hold a
-     * products grant (write counts so an integration can read back what it
-     * writes), not merely be a service account.
-     */
-    private function isBackOfficeReader(): bool
-    {
-        return $this->isBackOffice('products');
-    }
-
-    /**
-     * A back-office read bypasses the current-store website check, but a
+     * hasBackendAccess('products') gates the backend-only product data (cost,
+     * the raw user-defined attribute map, the inventory policy columns, the
+     * custom design/layout overrides) and loading disabled or other-website
+     * products by id/sku/barcode. Admin tokens are governed by the admin ACL;
+     * an API-user token must actually hold a products grant (write counts so
+     * an integration can read back what it writes), not merely be a service
+     * account.
+     *
+     * A backend read bypasses the current-store website check, but a
      * store-restricted token must stay inside the websites its allowed stores
-     * map to, exactly like every product write path (authorizeProductWebsites).
+     * map to, exactly like every product write path (assertProductWebsitesAllowed).
      * Public: the admin GraphQL ProductQueryHandler applies the same allowlist.
      */
-    public function assertBackOfficeProductAccess(?Product $dto): ?Product
+    public function assertBackendProductAccess(?Product $dto): ?Product
     {
         if ($dto === null) {
             return null;
         }
-        $allowedWebsiteIds = $this->allowedWebsiteIds($this->getAuthorizedUser());
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
         if ($allowedWebsiteIds !== null
             && array_intersect(array_map('intval', $dto->websiteIds ?? []), $allowedWebsiteIds) === []
         ) {
@@ -104,19 +98,20 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         if ($operation instanceof CollectionOperationInterface) {
+            $backend = $this->hasBackendAccess('products');
             $sku = $context['args']['sku'] ?? null;
             if ($sku) {
-                $dto = $this->getProductBySku($sku, !$this->isBackOfficeReader());
-                if ($this->isBackOfficeReader()) {
-                    $dto = $this->assertBackOfficeProductAccess($dto);
+                $dto = $this->getProductBySku($sku, !$backend);
+                if ($backend) {
+                    $dto = $this->assertBackendProductAccess($dto);
                 }
                 return $this->singleItemPaginator($dto);
             }
             $barcode = $context['args']['barcode'] ?? null;
             if ($barcode) {
-                $dto = $this->getProductByBarcode($barcode, !$this->isBackOfficeReader());
-                if ($this->isBackOfficeReader()) {
-                    $dto = $this->assertBackOfficeProductAccess($dto);
+                $dto = $this->getProductByBarcode($barcode, !$backend);
+                if ($backend) {
+                    $dto = $this->assertBackendProductAccess($dto);
                 }
                 return $this->singleItemPaginator($dto);
             }
@@ -131,11 +126,11 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      */
     private function getItem(int $id): ?Product
     {
-        // Back-office readers may load disabled and other-website products (and
+        // Backend readers may load disabled and other-website products (and
         // raw global values via ?store=admin), so they bypass the shared DTO
         // cache, whose key has no auth dimension.
-        if ($this->isBackOfficeReader()) {
-            return $this->assertBackOfficeProductAccess($this->loadProductDto($id, visibleOnly: false));
+        if ($this->hasBackendAccess('products')) {
+            return $this->assertBackendProductAccess($this->loadProductDto($id, visibleOnly: false));
         }
 
         $storeId = StoreContext::getStoreId();
@@ -552,7 +547,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      * Called after Product::fromModel() which handles basic field mapping and
      * computed fields (status/visibility enums, prices, image URLs, barcode).
      *
-     * Builds the unfiltered DTO, back-office fields included: this is what the
+     * Builds the unfiltered DTO, backend fields included: this is what the
      * response cache stores. Serialization drops them per request, so the cached
      * payload can stay the same for every caller.
      */
@@ -611,8 +606,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
         // Generic EAV read: user-defined attribute values not covered by a
         // dedicated DTO property (the read counterpart of customAttributesWrite).
-        // Back-office only, like cost: it ignores is_visible_on_front and would
-        // otherwise expose internal data. Storefront callers get the curated
+        // Backend only, like cost: it ignores is_visible_on_front and would
+        // otherwise expose internal data. Frontend callers get the curated
         // additionalAttributes list below instead.
         $dedicated = Product::dedicatedAttributeCodes();
         $dto->customAttributes = [];
