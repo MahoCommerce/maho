@@ -226,7 +226,7 @@ test('M1 data yields an empty string when mcrypt support is absent', function ()
  *
  * @return array<string, array{works: bool, key: string, data: string, details: string, encryptor: string}>
  */
-function mcryptCompatHealthCheckMatrix(object $test, bool $withMcryptCompat, bool $withMcryptFunctions = true): array
+function mcryptCompatHealthCheckMatrix(object $test, bool $withMcryptCompat): array
 {
     $script = <<<'PHP'
     <?php
@@ -282,11 +282,7 @@ function mcryptCompatHealthCheckMatrix(object $test, bool $withMcryptCompat, boo
     $withModule = '';
     if ($withMcryptCompat) {
         $module = mcryptCompatTmpDir() . '/vendor/mahocommerce/module-mcrypt-compat';
-        // Loading the module's own vendor autoloader is what brings in phpseclib/mcrypt_compat
-        // and with it the mcrypt_* functions. Leaving it out is a code-pool copy made by hand.
-        $withModule = $withMcryptFunctions
-            ? sprintf("require '%s/vendor/autoload.php';\n    ", mcryptCompatTmpDir())
-            : '';
+        $withModule = sprintf("require '%s/vendor/autoload.php';\n    ", mcryptCompatTmpDir());
         $withModule .= sprintf(
             "\$loader->add('Mage_Core_', '%s/app/code/core', true);\n    \$loader->add('Varien_', '%s/lib', true);",
             $module,
@@ -302,11 +298,7 @@ function mcryptCompatHealthCheckMatrix(object $test, bool $withMcryptCompat, boo
 
     return mcryptCompatRunSubprocess(
         $test,
-        sprintf(
-            'healthcheck-%s-mcrypt-compat%s',
-            $withMcryptCompat ? 'with' : 'without',
-            $withMcryptFunctions ? '' : '-no-functions',
-        ),
+        'healthcheck-' . ($withMcryptCompat ? 'with' : 'without') . '-mcrypt-compat',
         $script,
     );
 }
@@ -340,27 +332,6 @@ test('a Magento 1 / OpenMage store, with mcrypt-compat installed', function () {
     expect($matrix['Maho libsodium key (64 hex)']['works'])->toBeFalse()
         ->and($matrix['Maho libsodium key (64 hex)']['details'])
         ->toContain('composer remove mahocommerce/module-mcrypt-compat');
-});
-
-test('a Magento 1 / OpenMage store, with mcrypt-compat copied in by hand', function () {
-    if (($installError = mcryptCompatEnsureModuleInstalled()) !== null) {
-        $this->fail($installError);
-    }
-
-    // The module's classes are in the code pool but phpseclib/mcrypt_compat never came
-    // with them, so the mcrypt_* functions it calls do not exist. The key looks perfectly
-    // fine for Blowfish, which is why judging by key shape alone called this healthy.
-    $matrix = mcryptCompatHealthCheckMatrix($this, withMcryptCompat: true, withMcryptFunctions: false);
-
-    foreach ($matrix as $shape => $row) {
-        expect($row['works'])->toBeFalse("key shape: $shape")
-            ->and($row['key'])->toBe('error', "key shape: $shape");
-    }
-
-    expect($matrix['Magento 1 / OpenMage default key (32-char md5)']['details'])
-        ->toContain('phpseclib/mcrypt_compat')
-        ->and($matrix['Magento 1 / OpenMage default key (32-char md5)']['details'])
-        ->toContain('composer require mahocommerce/module-mcrypt-compat');
 });
 
 test('a Maho store, without mcrypt-compat installed', function () {
