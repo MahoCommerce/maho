@@ -25,6 +25,12 @@ class Mage_Core_Model_Encryption
     public const MAXIMUM_PASSWORD_LENGTH = 256;
 
     /**
+     * Encryption key length, as stored in app/etc/local.xml (hex) and as used by libsodium (binary)
+     */
+    public const KEY_LENGTH_BINARY = SODIUM_CRYPTO_SECRETBOX_KEYBYTES;
+    public const KEY_LENGTH_HEX = self::KEY_LENGTH_BINARY * 2;
+
+    /**
      * @var Mage_Core_Helper_Data
      */
     protected $_helper;
@@ -69,24 +75,6 @@ class Mage_Core_Model_Encryption
     public function getHashPassword(#[\SensitiveParameter] string $password): string
     {
         return $this->hash($password, $this->_helper->getVersionHash($this));
-    }
-
-    /**
-     * Whether a stored credential should be re-hashed on next login: a legacy digest,
-     * or a bcrypt hash that no longer matches the current default algorithm and cost.
-     *
-     * Deliberately takes no password: only the shape of the stored hash matters, and running
-     * password_verify() again would repeat the bcrypt cost already paid to authenticate.
-     */
-    public function hashNeedsUpgrade(#[\SensitiveParameter] string $hash): bool
-    {
-        $algo = password_get_info($hash)['algo'];
-        if ($algo === null) {
-            return true;
-        }
-        // bcrypt is the format Maho mints, so track it against the current default;
-        // other password_hash() formats (argon2) are imported credentials, leave them alone
-        return $algo === PASSWORD_BCRYPT && password_needs_rehash($hash, PASSWORD_DEFAULT);
     }
 
     /**
@@ -209,8 +197,22 @@ class Mage_Core_Model_Encryption
         return $plaintext;
     }
 
+    /**
+     * Validate a raw binary key. Keys exist in hex form everywhere a store touches
+     * them (local.xml, the installer), so those callers want validateKeyAsHex().
+     */
     public function validateKey(#[\SensitiveParameter] string $key): bool
     {
-        return strlen($key) === SODIUM_CRYPTO_SECRETBOX_KEYBYTES;
+        return strlen($key) === self::KEY_LENGTH_BINARY;
+    }
+
+    /**
+     * Validate a key in the form it is stored in app/etc/local.xml, which is what
+     * Mage::getEncryptionKeyAsHex() returns. Anything else (a Magento/OpenMage
+     * mcrypt key, most of all) makes Mage::getEncryptionKeyAsBinary() throw.
+     */
+    public function validateKeyAsHex(#[\SensitiveParameter] string $key): bool
+    {
+        return strlen($key) === self::KEY_LENGTH_HEX && ctype_xdigit($key);
     }
 }

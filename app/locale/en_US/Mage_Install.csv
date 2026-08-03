@@ -104,6 +104,7 @@
 "Skip Sample Data","Skip Sample Data"
 "Starting...","Starting..."
 "Tables Prefix","Tables Prefix"
+"The encryption key must be %d hexadecimal characters long.","The encryption key must be %d hexadecimal characters long."
 "The table prefix should contain only letters (a-z), numbers (0-9) or underscores (_), the first character should be a letter.","The table prefix should contain only letters (a-z), numbers (0-9) or underscores (_), the first character should be a letter."
 "The URL ""%s"" is invalid.","The URL ""%s"" is invalid."
 "The URL ""%s"" is not accessible.","The URL ""%s"" is not accessible."
