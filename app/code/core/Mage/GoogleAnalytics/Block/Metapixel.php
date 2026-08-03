@@ -149,7 +149,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
 
                     foreach ($productCollection as $item) {
                         $_product = $item->getProduct();
-                        $productId = $_product->getSku();
+                        $productId = $helper->getTrackingSku($_product) ?: $item->getSku();
                         $contentIds[] = $productId;
                         $itemPrice = (float) ($item->getPriceInclTax() ?? $helper->getPriceInclTax($_product));
                         $contents[] = [
@@ -218,8 +218,10 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
         // Use visible items to avoid double counting configurables, etc.
         /** @var Mage_Sales_Model_Order_Item $item */
         foreach ($order->getAllVisibleItems() as $item) {
-            // The catalog product SKU, not the order item's composite one, so it matches the catalogue feed
-            $productId = $item->getProduct()->getSku() ?: $item->getSku();
+            // The catalog (or variant) SKU, not the item's composite one, so it matches the catalogue feed
+            $productId = $item->getProductOptionByCode('simple_sku')
+                ?: $helper->getTrackingSku($item->getProduct())
+                ?: $item->getSku();
             $contentIds[] = $productId;
             $contents[] = [
                 'id' => $productId,
