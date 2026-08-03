@@ -15,7 +15,7 @@ class Mage_Catalog_Helper_Product_Url extends Mage_Core_Helper_Url
     /** @var array<string, bool>|null */
     protected static ?array $_transliteratorIds = null;
 
-    /** @var array<string, Transliterator> */
+    /** @var array<string, Transliterator|null> */
     protected static array $_transliterators = [];
 
     /**
@@ -68,25 +68,22 @@ class Mage_Catalog_Helper_Product_Url extends Mage_Core_Helper_Url
             self::$_transliteratorIds ??= array_fill_keys(transliterator_list_ids() ?: [], true);
             $code = str_replace('_', '-', strtolower($locale)) . '_Latn/BGN';
             if (isset(self::$_transliteratorIds[$code])) {
-                return self::transliterate($code . '; Any-Latin; Latin-ASCII; [^\u001F-\u007f] remove' . ($lower ? '; Lower()' : ''), $string);
+                return static::transliterate($code . '; Any-Latin; Latin-ASCII; [^\u001F-\u007f] remove' . ($lower ? '; Lower()' : ''), $string);
             }
         }
 
-        return self::transliterate('Any-Latin; Latin-ASCII; [^\u001F-\u007f] remove' . ($lower ? '; Lower()' : ''), $string);
+        return static::transliterate('Any-Latin; Latin-ASCII; [^\u001F-\u007f] remove' . ($lower ? '; Lower()' : ''), $string);
     }
 
     protected static function transliterate(string $rules, string $string): string
     {
-        if (!isset(self::$_transliterators[$rules])) {
-            $transliterator = Transliterator::create($rules);
-            if ($transliterator === null) {
-                return $string;
-            }
-            self::$_transliterators[$rules] = $transliterator;
+        // null is cached too, so an unusable rule set is not retried on every call
+        if (!array_key_exists($rules, self::$_transliterators)) {
+            self::$_transliterators[$rules] = Transliterator::create($rules);
         }
 
-        $result = self::$_transliterators[$rules]->transliterate($string);
+        $result = self::$_transliterators[$rules]?->transliterate($string);
 
-        return $result === false ? $string : $result;
+        return is_string($result) ? $result : $string;
     }
 }
