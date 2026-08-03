@@ -67,6 +67,7 @@ final class AuthzCoverageKernel extends Kernel
                     ApiPermissionRegistry::class,
                     ResourceNameCollectionFactoryInterface::class,
                     ResourceMetadataCollectionFactoryInterface::class,
+                    'security.expression_language',
                 ];
                 foreach ($expose as $id) {
                     if ($container->hasAlias($id)) {
@@ -206,14 +207,10 @@ it('references only real, grantable permissions in every security expression (no
 });
 
 it('parses every security expression against the registered expression functions', function (): void {
-    $language = new \Symfony\Component\ExpressionLanguage\ExpressionLanguage(null, [
-        new \Maho\ApiPlatform\Security\BackendAccess(),
-        new \Maho\ApiPlatform\Security\CustomerOwnership(),
-    ]);
-    // The security component's built-ins; parse() only needs the names to exist.
-    foreach (['is_granted', 'is_authenticated', 'is_fully_authenticated', 'is_remember_me'] as $builtin) {
-        $language->register($builtin, static fn(): string => 'true', static fn(): bool => true);
-    }
+    // The real service carries the built-ins and every tagged provider, so a
+    // provider added later is covered without touching this test.
+    /** @var \Symfony\Component\ExpressionLanguage\ExpressionLanguage $language */
+    $language = authzContainer()->get('security.expression_language');
     $variables = ['token', 'user', 'object', 'subject', 'request', 'roles', 'auth_checker', 'previous_object'];
 
     $invalid = [];
