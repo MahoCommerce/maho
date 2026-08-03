@@ -53,14 +53,7 @@ class ApiUserVoter extends Voter
             return false;
         }
 
-        // "all" grants unrestricted access.
-        if ($user->hasPermission('all')) {
-            return true;
-        }
-
-        [$resource] = explode('/', $attribute, 2);
-
-        return $user->hasPermission($attribute)
-            || $user->hasPermission($resource . '/all');
+        // hasPermission() resolves the `all` and `resource/all` wildcards.
+        return $user->hasPermission($attribute);
     }
 }

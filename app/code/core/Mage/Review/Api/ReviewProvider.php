@@ -70,7 +70,7 @@ final class ReviewProvider extends CrudProvider
                 ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 10, 100);
                 return $this->getProductReviews($productId, $page, $pageSize);
             }
-            if ($this->isAdmin() || $this->canReadModerationQueue()) {
+            if ($this->isBackOffice('reviews')) {
                 ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 10, 100);
                 return $this->getModerationQueue($context, $page, $pageSize);
             }
@@ -280,8 +280,7 @@ final class ReviewProvider extends CrudProvider
         // service tokens scoped for moderation; everyone else gets 404.
         if ($checkVisibility
             && (int) $review->getStatusId() !== \Mage_Review_Model_Review::STATUS_APPROVED
-            && !$this->isAdmin()
-            && !$this->canReadModerationQueue()
+            && !$this->isBackOffice('reviews')
         ) {
             $customerId = $this->getAuthenticatedCustomerId();
             if (!$customerId || (int) $review->getCustomerId() !== $customerId) {
@@ -296,15 +295,6 @@ final class ReviewProvider extends CrudProvider
         $dto->productName = $productNames[$dto->productId] ?? null;
 
         return $dto;
-    }
-
-    /**
-     * A service token sees pending/rejected content only when scoped for it:
-     * an unrelated scope (say newsletter/read) must not read the queue.
-     */
-    private function canReadModerationQueue(): bool
-    {
-        return $this->isApiUser() && $this->getAuthorizedUser()->hasPermission('reviews/read');
     }
 
     /**

@@ -63,11 +63,14 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
+        // isBackOffice: admin, or a service token holding a carts grant. A bare
+        // api_user token without the grant must NOT bypass cart ownership
+        // (mirrors the write side's isPrivilegedCartActor()).
         $this->cartService->verifyCartAccess(
             $quote,
             $byMasked,
             $this->getAuthenticatedCustomerId(),
-            $this->isPrivilegedCartReader(),
+            $this->isBackOffice('carts'),
         );
 
         // Guest sub-resource endpoints return a bare, focused JSON shape (not the
@@ -83,18 +86,5 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
         }
 
         return $this->cartMapper->mapQuoteToCart($quote);
-    }
-
-    /**
-     * Admin, or an API service account holding carts/read. A bare api_user token
-     * without the grant must NOT bypass cart ownership (mirrors the write side's
-     * isPrivilegedCartActor()).
-     */
-    private function isPrivilegedCartReader(): bool
-    {
-        if ($this->isAdmin()) {
-            return true;
-        }
-        return $this->isApiUser() && $this->getAuthorizedUser()->hasPermission('carts/read');
     }
 }

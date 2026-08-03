@@ -49,14 +49,12 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
     private function createFromGraphQl(array $context): Coupon
     {
-        $this->requireAdminOrApiUser('Coupon creation requires admin or API access');
         $args = $context['args']['input'] ?? [];
         return $this->doCreate($args);
     }
 
     private function updateFromGraphQl(array $context): Coupon
     {
-        $this->requireAdminOrApiUser('Coupon update requires admin or API access');
         $args = $context['args']['input'] ?? [];
         $id = (int) ($args['id'] ?? 0);
         if (!$id) {
@@ -67,7 +65,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
     private function deleteFromGraphQl(array $context): null
     {
-        $this->requireAdminOrApiUser('Coupon deletion requires admin or API access');
         $id = (int) ($context['args']['input']['id'] ?? 0);
         return $this->doDelete($id);
     }
@@ -92,9 +89,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
     private function doCreate(array $data): Coupon
     {
-        $this->requireAdminOrApiUser('Coupon creation requires admin or API access');
-        $this->requireApiPermission('coupons/create');
-
         $code = $data['code'] ?? '';
         $this->validateCouponCode($code);
 
@@ -181,9 +175,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
     private function doUpdate(int $id, array $data): Coupon
     {
-        $this->requireAdminOrApiUser('Coupon update requires admin or API access');
-        $this->requireApiPermission('coupons/write');
-
         /** @var \Mage_SalesRule_Model_Coupon $coupon */
         $coupon = \Mage::getModel('salesrule/coupon');
         $coupon->load($id);
@@ -317,9 +308,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
     private function doDelete(int $id): null
     {
-        $this->requireAdminOrApiUser('Coupon deletion requires admin or API access');
-        $this->requireApiPermission('coupons/delete');
-
         if (!$id) {
             throw new BadRequestHttpException('Coupon ID is required');
         }

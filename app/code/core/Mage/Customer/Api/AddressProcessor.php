@@ -18,7 +18,6 @@ use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Address State Processor - Handles address mutations.
@@ -159,9 +158,10 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Address not found');
         }
 
-        // Verify address belongs to the customer
+        // Another customer's address is reported exactly like a missing one: a
+        // 403 here and a 404 there would make the endpoint an address-id oracle.
         if ((int) $address->getCustomerId() !== (int) $customer->getId()) {
-            throw new AccessDeniedHttpException('Address does not belong to this customer');
+            throw new NotFoundHttpException('Address not found');
         }
 
         $this->validateAddress($data);
@@ -217,9 +217,10 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Address not found');
         }
 
-        // Verify address belongs to the customer
+        // Another customer's address is reported exactly like a missing one: a
+        // 403 here and a 404 there would make the endpoint an address-id oracle.
         if ((int) $address->getCustomerId() !== (int) $customer->getId()) {
-            throw new AccessDeniedHttpException('Address does not belong to this customer');
+            throw new NotFoundHttpException('Address not found');
         }
 
         try {

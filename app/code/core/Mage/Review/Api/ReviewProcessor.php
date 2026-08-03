@@ -72,16 +72,12 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Moderation is admin/service-token only. The route security already excludes
-     * customer tokens (no ROLE_CUSTOMER, and the permission voter never grants
-     * 'reviews/write' to non-API-key users); this re-checks in the processor so
-     * the gate holds even if the operation metadata is ever loosened.
+     * Moderation is admin/service-token only, enforced by the operation's own
+     * `security:` expression: no ROLE_CUSTOMER, and the permission voter never
+     * grants 'reviews/write' to a non-API-key token.
      */
     private function moderateReview(int $reviewId, Review $data): Review
     {
-        $this->requireAdminOrApiUser('Review moderation requires admin or API access');
-        $this->requireApiPermission('reviews/write');
-
         if ($data->status === null && ($data->stores === null || $data->stores === [])) {
             throw new BadRequestHttpException('Provide a status and/or stores to moderate');
         }

@@ -20,9 +20,10 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 /**
  * Reads revocation requests for the owning customer and for admins.
  *
- * Customer-facing operations are scoped to the authenticated account email
- * (the declaration's natural key); admins see every request and the
- * internal-only fields (admin note, IP, user agent).
+ * Item reads are ownership-gated by the operation's `is_owner(object, 'email')`
+ * expression (the declaration's natural key); the customer collection is scoped
+ * to the authenticated account email at the query. Internal-only fields (admin
+ * note, IP, user agent) are gated per-property by `is_back_office()`.
  */
 final class RevocationRequestProvider extends Provider
 {
@@ -41,7 +42,6 @@ final class RevocationRequestProvider extends Provider
         }
 
         if ($operation instanceof CollectionOperationInterface) {
-            $this->requireAdminView();
             return $this->provideAdminCollection($context);
         }
 
@@ -55,7 +55,7 @@ final class RevocationRequestProvider extends Provider
         $collection = \Mage::getModel($this->modelAlias)->getCollection()
             ->addFieldToFilter('email', $email);
 
-        return $this->paginate($collection, $context, adminView: false);
+        return $this->paginate($collection, $context);
     }
 
     private function provideAdminCollection(array $context): TraversablePaginator
@@ -76,7 +76,7 @@ final class RevocationRequestProvider extends Provider
             $collection->addFieldToFilter('order_id', (int) $filters['orderId']);
         }
 
-        return $this->paginate($collection, $context, adminView: true);
+        return $this->paginate($collection, $context);
     }
 
     private function provideSingle(int $id): ?RevocationRequest
@@ -90,20 +90,12 @@ final class RevocationRequestProvider extends Provider
             return null;
         }
 
-        if ($this->isAdminView()) {
-            return RevocationRequest::fromModel($model, adminView: true);
-        }
-
-        // Customer path: only the owner (matched by account email) may read it.
-        $email = $this->requireCustomerEmail();
-        if (strcasecmp((string) $model->getEmail(), $email) !== 0) {
-            throw new NotFoundHttpException('Revocation request not found');
-        }
-
-        return RevocationRequest::fromModel($model, adminView: false);
+        // Ownership is enforced by the operation's `is_owner(object, 'email')`
+        // expression post-read; a denial maps to 404 / null.
+        return RevocationRequest::fromModel($model);
     }
 
-    private function paginate(object $collection, array $context, bool $adminView): TraversablePaginator
+    private function paginate(object $collection, array $context): TraversablePaginator
     {
         foreach ($this->defaultSort as $field => $dir) {
             $collection->setOrder($field, $dir);
@@ -121,23 +113,10 @@ final class RevocationRequestProvider extends Provider
 
         $items = [];
         foreach ($collection as $model) {
-            $items[] = RevocationRequest::fromModel($model, $adminView);
+            $items[] = RevocationRequest::fromModel($model);
         }
 
         return new TraversablePaginator(new \ArrayIterator($items), $page, $pageSize, $total);
-    }
-
-    /** Admins and API users see every request and the internal-only fields. */
-    private function isAdminView(): bool
-    {
-        return $this->isAdmin() || $this->isApiUser();
-    }
-
-    private function requireAdminView(): void
-    {
-        if (!$this->isAdminView()) {
-            throw new \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException('Admin access required');
-        }
     }
 
     private function requireCustomerEmail(): string

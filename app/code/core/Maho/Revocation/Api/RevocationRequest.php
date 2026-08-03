@@ -20,6 +20,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\Resource;
 use Maho\Config\ApiResource;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 #[ApiResource(
     mahoSection: 'Sales',
@@ -44,7 +45,11 @@ use Maho\Config\ApiResource;
         ),
         new Get(
             uriTemplate: '/revocation-requests/{id}',
-            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('revocation-requests/read')",
+            // Row-level: ownership is the email on the declaration (guest
+            // submissions have no customer id). Denial maps to 404 so a foreign
+            // id is indistinguishable from a missing one.
+            security: "is_back_office('revocation-requests') or is_owner(object, 'email')",
+            exceptionToStatus: [AccessDeniedException::class => 404],
             requirements: ['id' => '\d+'],
             description: 'Get a single revocation request (own request for customers, any for admins)',
         ),
@@ -65,7 +70,9 @@ use Maho\Config\ApiResource;
         new Query(
             name: 'item_query',
             description: 'Get a revocation request by ID',
-            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('revocation-requests/read')",
+            // Row-level denial is converted to a null result by
+            // OwnershipDenialProvider.
+            security: "is_back_office('revocation-requests') or is_owner(object, 'email')",
         ),
         new QueryCollection(
             name: 'collection_query',
@@ -136,13 +143,13 @@ class RevocationRequest extends Resource
     #[ApiProperty(description: 'When the declaration was processed (UTC)', writable: false)]
     public ?string $processedAt = null;
 
-    #[ApiProperty(description: 'Internal admin note (admin only)', writable: true)]
+    #[ApiProperty(description: 'Internal admin note (admin only)', writable: true, security: "is_back_office('revocation-requests')")]
     public ?string $adminNote = null;
 
-    #[ApiProperty(description: 'IP address the declaration was submitted from (admin only)', writable: false)]
+    #[ApiProperty(description: 'IP address the declaration was submitted from (admin only)', writable: false, security: "is_back_office('revocation-requests')")]
     public ?string $ip = null;
 
-    #[ApiProperty(description: 'User agent the declaration was submitted from (admin only)', writable: false)]
+    #[ApiProperty(description: 'User agent the declaration was submitted from (admin only)', writable: false, security: "is_back_office('revocation-requests')")]
     public ?string $userAgent = null;
 
     #[ApiProperty(description: 'When the customer receipt email was suppressed (UTC), if any', writable: false)]
@@ -151,11 +158,7 @@ class RevocationRequest extends Resource
     #[ApiProperty(description: 'Reason the customer receipt email was suppressed, if any', writable: false)]
     public ?string $suppressedReason = null;
 
-    /**
-     * Build a DTO from a revocation request model. Internal-only fields
-     * (admin note, IP, user agent) are populated only for the admin view.
-     */
-    public static function fromModel(object $model, bool $adminView = false): self
+    public static function fromModel(object $model): self
     {
         $dto = new self();
         $dto->id = (int) $model->getId();
@@ -171,12 +174,9 @@ class RevocationRequest extends Resource
         $dto->processedAt = $model->getProcessedAt();
         $dto->suppressedAt = $model->getSuppressedAt();
         $dto->suppressedReason = $model->getSuppressedReason();
-
-        if ($adminView) {
-            $dto->adminNote = $model->getAdminNote();
-            $dto->ip = $model->getIp();
-            $dto->userAgent = $model->getUserAgent();
-        }
+        $dto->adminNote = $model->getAdminNote();
+        $dto->ip = $model->getIp();
+        $dto->userAgent = $model->getUserAgent();
 
         return $dto;
     }

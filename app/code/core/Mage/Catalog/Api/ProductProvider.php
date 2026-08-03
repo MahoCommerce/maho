@@ -32,23 +32,6 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
     private ?\Mage_Catalog_Model_Product_Media_Config $mediaConfig = null;
 
-    private ?bool $backOfficeReader = null;
-
-    /**
-     * Stock item columns that describe back-office inventory policy rather than
-     * anything a shopper can act on: the out-of-stock threshold, the admin
-     * low-stock alert level, the backorder policy and whether stock is tracked
-     * at all. Every `use_config_*` flag joins them, being pure admin config
-     * inheritance metadata.
-     */
-    private const BACK_OFFICE_STOCK_COLUMNS = [
-        'min_qty' => true,
-        'notify_stock_qty' => true,
-        'backorders' => true,
-        'low_stock_date' => true,
-        'manage_stock' => true,
-    ];
-
     private function getMediaConfig(): \Mage_Catalog_Model_Product_Media_Config
     {
         return $this->mediaConfig ??= \Mage::getModel('catalog/product_media_config');
@@ -65,10 +48,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      */
     private function isBackOfficeReader(): bool
     {
-        return $this->backOfficeReader ??= $this->isAdmin()
-            || ($this->isApiUser()
-                && ($this->getAuthorizedUser()->hasPermission('products/read')
-                    || $this->getAuthorizedUser()->hasPermission('products/write')));
+        return $this->isBackOffice('products');
     }
 
     /**
@@ -89,55 +69,6 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             throw new AccessDeniedHttpException("Access denied for this product's websites");
         }
         return $dto;
-    }
-
-    /**
-     * Strip back-office-only fields from a DTO on its way to the response.
-     *
-     * The response cache has no auth dimension (admin, service token and guest
-     * all resolve to customer group 0), so the cached payload must stay the same
-     * for everyone and the filtering has to happen per request, after the cache
-     * is read. Every provider path that can return a cached DTO runs this.
-     */
-    private function filterForCaller(?Product $dto): ?Product
-    {
-        if ($dto !== null && !$this->isBackOfficeReader()) {
-            $this->stripBackOfficeData($dto);
-        }
-        return $dto;
-    }
-
-    /**
-     * @param Product[] $dtos
-     * @return Product[]
-     */
-    private function filterListForCaller(array $dtos): array
-    {
-        if (!$this->isBackOfficeReader()) {
-            foreach ($dtos as $dto) {
-                $this->stripBackOfficeData($dto);
-            }
-        }
-        return $dtos;
-    }
-
-    private function stripBackOfficeData(Product $dto): void
-    {
-        $dto->cost = null;
-        $dto->customAttributes = null;
-        $dto->customDesign = null;
-        $dto->customDesignFrom = null;
-        $dto->customDesignTo = null;
-        $dto->customLayoutUpdate = null;
-
-        if ($dto->stockItem === null) {
-            return;
-        }
-        foreach (array_keys($dto->stockItem) as $column) {
-            if (isset(self::BACK_OFFICE_STOCK_COLUMNS[$column]) || str_starts_with((string) $column, 'use_config_')) {
-                unset($dto->stockItem[$column]);
-            }
-        }
     }
 
     /**
@@ -179,7 +110,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 if ($this->isBackOfficeReader()) {
                     $dto = $this->assertBackOfficeProductAccess($dto);
                 }
-                return $this->singleItemPaginator($this->filterForCaller($dto));
+                return $this->singleItemPaginator($dto);
             }
             $barcode = $context['args']['barcode'] ?? null;
             if ($barcode) {
@@ -187,7 +118,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 if ($this->isBackOfficeReader()) {
                     $dto = $this->assertBackOfficeProductAccess($dto);
                 }
-                return $this->singleItemPaginator($this->filterForCaller($dto));
+                return $this->singleItemPaginator($dto);
             }
             return $this->getCollection($context);
         }
@@ -201,10 +132,10 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     private function getItem(int $id): ?Product
     {
         // Back-office readers may load disabled and other-website products (and
-        // raw global values via ?store=admin). Bypass the shared DTO cache both
-        // ways so their unfiltered view never leaks into anonymous reads.
+        // raw global values via ?store=admin), so they bypass the shared DTO
+        // cache, whose key has no auth dimension.
         if ($this->isBackOfficeReader()) {
-            return $this->filterForCaller($this->assertBackOfficeProductAccess($this->loadProductDto($id, visibleOnly: false)));
+            return $this->assertBackOfficeProductAccess($this->loadProductDto($id, visibleOnly: false));
         }
 
         $storeId = StoreContext::getStoreId();
@@ -216,7 +147,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         if ($cached !== false) {
             $data = \Mage::helper('core')->jsonDecode($cached, true);
             if ($data !== null) {
-                return $this->filterForCaller(Product::fromArray($data));
+                return Product::fromArray($data);
             }
         }
 
@@ -232,7 +163,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             $this->getCacheTtl(),
         );
 
-        return $this->filterForCaller($dto);
+        return $dto;
     }
 
     /**
@@ -366,7 +297,6 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         foreach ($collection as $product) {
             $products[] = $this->toDto($product, forListing: true);
         }
-        $products = $this->filterListForCaller($products);
 
         return new TraversablePaginator(new \ArrayIterator($products), $page, $pageSize, (int) $collection->getSize());
     }
@@ -393,7 +323,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 $cachedData = \Mage::helper('core')->jsonDecode($cached, true);
                 if ($cachedData !== null) {
                     // Reconstruct Product DTOs from cached data
-                    $products = $this->filterListForCaller(array_map(fn($data) => Product::fromArray($data), $cachedData['products']));
+                    $products = array_map(fn($data) => Product::fromArray($data), $cachedData['products']);
                     return new TraversablePaginator(new \ArrayIterator($products), $cachedData['page'], $cachedData['pageSize'], $cachedData['total']);
                 }
             }
@@ -601,7 +531,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         // Return paginator with total count for proper pagination
-        return new TraversablePaginator(new \ArrayIterator($this->filterListForCaller($products)), $page, $pageSize, (int) $result['total']);
+        return new TraversablePaginator(new \ArrayIterator($products), $page, $pageSize, (int) $result['total']);
     }
 
     /**
@@ -623,7 +553,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      * computed fields (status/visibility enums, prices, image URLs, barcode).
      *
      * Builds the unfiltered DTO, back-office fields included: this is what the
-     * response cache stores, and filterForCaller() strips them per request.
+     * response cache stores. Serialization drops them per request, so the cached
+     * payload can stay the same for every caller.
      */
     private function enrichProduct(
         Product $dto,
@@ -670,7 +601,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
         if ($stockData) {
             // Full column set on purpose: this feeds the cache, and
-            // stripBackOfficeData() drops the policy columns per request.
+            // ProductStockItemNormalizer drops the policy columns per request.
             $dto->stockItem = [];
             $columns = ['qty' => 'float', 'is_in_stock' => 'bool', 'manage_stock' => 'bool'] + self::STOCK_ITEM_EXTENDED_COLUMNS;
             foreach ($columns as $column => $type) {

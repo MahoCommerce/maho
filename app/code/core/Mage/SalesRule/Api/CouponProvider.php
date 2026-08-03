@@ -10,7 +10,6 @@ declare(strict_types=1);
 
 namespace Mage\SalesRule\Api;
 
-use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Resource;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -22,13 +21,6 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
 {
     protected ?string $modelAlias = 'salesrule/coupon';
     protected array $defaultSort = ['coupon_id' => 'DESC'];
-
-    #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
-    {
-        $this->requireAdminOrApiUser('Coupon access requires admin or API access');
-        return parent::provide($operation, $uriVariables, $context);
-    }
 
     #[\Override]
     protected function provideItem(int|string $id): Resource

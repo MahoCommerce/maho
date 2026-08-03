@@ -22,6 +22,8 @@ use Maho\ApiPlatform\Mcp\OperationRequestFactory;
 use Maho\ApiPlatform\Mcp\SourceOperationResolver;
 use Maho\ApiPlatform\Security\OperationAccessChecker;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -94,7 +96,24 @@ final class McpDispatchProvider implements ProviderInterface
             $context['request'] = $substituted;
         }
 
-        $data = $this->decorated->provide($operation, $uriVariables, $context);
+        try {
+            $data = $this->decorated->provide($operation, $uriVariables, $context);
+        } catch (AccessDeniedException $e) {
+            // MCP errors never reach kernel.exception (the MCP server answers
+            // from its own request loop), so the operation's exceptionToStatus
+            // mapping is honored here instead of in ApiExceptionListener. A
+            // row-level denial mapped to 404 must be byte-identical to what
+            // ReadProvider throws for a genuinely missing row.
+            if ($operation instanceof HttpOperation) {
+                foreach ($operation->getExceptionToStatus() ?? [] as $class => $status) {
+                    if ($status === 404 && is_a($e::class, $class, true)) {
+                        throw new NotFoundHttpException('Not Found', $e);
+                    }
+                }
+            }
+
+            throw $e;
+        }
 
         if ($substituted !== null && $original instanceof Request) {
             // The read stage wrote these onto the request it was handed; the MCP handler

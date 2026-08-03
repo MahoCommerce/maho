@@ -23,6 +23,7 @@ use ApiPlatform\Metadata\GraphQl\Mutation;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 use Mage\Customer\Api\Address;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 #[ApiResource(
     mahoOperations: ['read' => 'View', 'create' => 'Place', 'write' => 'Manage'],
@@ -34,7 +35,11 @@ use Mage\Customer\Api\Address;
     operations: [
         new Get(
             uriTemplate: '/orders/{id}',
-            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/read')",
+            // Row-level: the object clause defers evaluation to post-read, and a
+            // denial maps to 404 so a foreign id is indistinguishable from a
+            // missing one.
+            security: "is_back_office('orders') or is_owner(object, 'customerId')",
+            exceptionToStatus: [AccessDeniedException::class => 404],
             description: 'Get an order by ID',
         ),
         new GetCollection(
@@ -143,7 +148,9 @@ use Mage\Customer\Api\Address;
         new Query(
             name: 'item_query',
             description: 'Get an order by ID',
-            security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('orders/read')",
+            // Row-level denial is converted to a null result by
+            // OwnershipDenialProvider, matching the missing-row shape.
+            security: "is_back_office('orders') or is_owner(object, 'customerId')",
         ),
         new QueryCollection(
             name: 'collection_query',
@@ -387,10 +394,12 @@ class Order extends CrudResource
     #[ApiProperty(writable: false, description: 'Order status before it was put on hold')]
     public ?string $holdBeforeStatus = null;
 
-    #[ApiProperty(writable: false, description: 'Client IP the order was placed from (admin/API readers only)', extraProperties: ['computed' => true])]
+    // Fraud-relevant request metadata, never echoed to a customer or
+    // guest-token reader.
+    #[ApiProperty(writable: false, description: 'Client IP the order was placed from (admin/API readers only)', security: "is_back_office('orders')", extraProperties: ['computed' => true])]
     public ?string $remoteIp = null;
 
-    #[ApiProperty(writable: false, description: 'X-Forwarded-For header at placement (admin/API readers only)', extraProperties: ['computed' => true])]
+    #[ApiProperty(writable: false, description: 'X-Forwarded-For header at placement (admin/API readers only)', security: "is_back_office('orders')", extraProperties: ['computed' => true])]
     public ?string $xForwardedFor = null;
 
     #[ApiProperty(writable: false, description: 'Total number of distinct items')]

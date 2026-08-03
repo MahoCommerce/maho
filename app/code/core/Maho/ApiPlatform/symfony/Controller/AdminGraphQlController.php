@@ -26,6 +26,18 @@ use Symfony\Component\Routing\Attribute\Route;
  *
  * Handles GraphQL requests for authenticated admin users.
  * Uses handler-based resolution for clean separation of concerns.
+ *
+ * Deliberately a separate authorization surface from REST and storefront
+ * GraphQL. Dispatch is a hand-rolled match table rather than API Platform
+ * operations, so nothing here evaluates an operation `security:` expression,
+ * and the handlers hand-serialize with `$dto->toArray()` rather than going
+ * through the serializer, so per-property `#[ApiProperty(security: …)]` gates
+ * do not apply either. What gates it instead: the firewall admits only
+ * fully-authenticated admin sessions, and every dispatched handler method calls
+ * `AdminAcl::checkResource()` against the same ADMIN_RESOURCE constant
+ * AdminAclListener enforces on the REST surface, which is what makes
+ * back-office field visibility correct here (every caller holds the resource's
+ * admin ACL). AdminGraphQlAclCoverageTest keeps that per-handler check honest.
  */
 #[Route('/api/admin/graphql', name: 'api_admin_graphql', methods: ['GET', 'POST'])]
 class AdminGraphQlController

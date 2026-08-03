@@ -77,7 +77,42 @@ describe('GET /api/rest/v2/orders', function (): void {
 
         $response = apiGet("/api/rest/v2/orders/{$orderId}", customerToken());
 
-        expect($response['status'])->toBeIn([403, 404]);
+        // 404 and not 403: a status differing from the missing-id response
+        // would make the endpoint an order-id oracle. The body must match too,
+        // or the oracle survives at the message level.
+        expect($response['status'])->toBe(404);
+        $missing = apiGet('/api/rest/v2/orders/99999999', customerToken());
+        expect($missing['status'])->toBe($response['status']);
+        expect($response['json']['error'] ?? null)->toBe($missing['json']['error'] ?? null);
+        expect($response['json']['message'] ?? null)->toBe($missing['json']['message'] ?? null);
+    });
+
+    it('still answers 401 with WWW-Authenticate on an unauthenticated item read', function (): void {
+        // The ownership clause is evaluated post-read, so this 401 rests solely
+        // on the listener's missing-Bearer check; pin the affordance.
+        $response = apiGetRaw('/api/rest/v2/orders/1');
+
+        expect($response['status'])->toBe(401);
+        expect($response['headers']['www-authenticate'][0] ?? '')->toContain('Bearer');
+    });
+
+    it('returns null (not an Access Denied error) for a foreign order via GraphQL', function (): void {
+        $orderId = fixtures('other_customer_order_id');
+        if (!$orderId) {
+            $this->markTestSkipped('No other_customer_order_id configured in fixtures');
+        }
+
+        $foreign = gqlQuery("{ order(id: \"/api/rest/v2/orders/{$orderId}\") { _id } }", [], customerToken());
+        $missing = gqlQuery('{ order(id: "/api/rest/v2/orders/99999999") { _id } }', [], customerToken());
+
+        // Foreign row and nonexistent id must be indistinguishable: data.order
+        // null in both, and no errors[] entry disclosing "Access Denied".
+        foreach ([$foreign, $missing] as $response) {
+            expect($response['status'])->toBe(200);
+            expect($response['json'])->not->toHaveKey('errors');
+            expect($response['json']['data'] ?? [])->toHaveKey('order');
+            expect($response['json']['data']['order'])->toBeNull();
+        }
     });
 
 });

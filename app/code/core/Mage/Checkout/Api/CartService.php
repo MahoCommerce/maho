@@ -12,7 +12,6 @@ namespace Mage\Checkout\Api;
 
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Service\StoreDefaults;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -192,9 +191,11 @@ class CartService
     }
 
     /**
-     * Verify the caller has access to this cart.
+     * Verify the caller has access to this cart. Denials are 404, not 403:
+     * cart ids are enumerable ints, so a status that differs from the
+     * missing-cart response would leak which ids exist.
      *
-     * @throws AccessDeniedHttpException
+     * @throws NotFoundHttpException
      */
     public function verifyCartAccess(
         \Mage_Sales_Model_Quote $quote,
@@ -212,7 +213,7 @@ class CartService
         // Customer-owned cart: verify ownership
         if ($cartCustomerId !== null) {
             if ($authenticatedCustomerId === null || $cartCustomerId !== $authenticatedCustomerId) {
-                throw new AccessDeniedHttpException('You can only access your own cart');
+                throw new NotFoundHttpException('Cart not found');
             }
             return;
         }
@@ -221,7 +222,7 @@ class CartService
         // path is enumerable, so even authenticated customers must not see
         // someone else's pre-login cart through it.
         if (!$accessedByMaskedId) {
-            throw new AccessDeniedHttpException('Guest carts must be accessed via masked ID');
+            throw new NotFoundHttpException('Cart not found');
         }
     }
 

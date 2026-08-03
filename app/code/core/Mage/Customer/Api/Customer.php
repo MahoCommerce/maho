@@ -206,7 +206,7 @@ class Customer extends CrudResource
     #[ApiProperty(description: 'Date of birth as Y-m-d; empty string clears')]
     public ?string $dob = null;
 
-    #[ApiProperty(description: 'Tax/VAT number; admin or service token only')]
+    #[ApiProperty(description: 'Tax/VAT number; admin or service token only', securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('customers/create') or is_granted('customers/write')")]
     public ?string $taxvat = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
@@ -215,13 +215,13 @@ class Customer extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public bool $isSubscribed = false;
 
-    #[ApiProperty(description: 'Customer group id; admin or service token only')]
+    #[ApiProperty(description: 'Customer group id; admin or service token only', securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('customers/create') or is_granted('customers/write')")]
     public ?int $groupId = null;
 
-    #[ApiProperty(description: 'Account enabled flag; admin or service token only')]
+    #[ApiProperty(description: 'Account enabled flag; admin or service token only', securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('customers/create') or is_granted('customers/write')")]
     public ?bool $isActive = null;
 
-    #[ApiProperty(description: 'Website id; admin or service token, settable on create only')]
+    #[ApiProperty(description: 'Website id; admin or service token, settable on create only', securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('customers/create') or is_granted('customers/write')")]
     public ?int $websiteId = null;
 
     #[ApiProperty(writable: false)]
@@ -230,7 +230,7 @@ class Customer extends CrudResource
     #[ApiProperty(writable: false)]
     public ?string $createdIn = null;
 
-    #[ApiProperty(description: 'Exclude from automatic (VAT) group changes; admin or service token only')]
+    #[ApiProperty(description: 'Exclude from automatic (VAT) group changes; admin or service token only', securityPostDenormalize: "is_granted('ROLE_ADMIN') or is_granted('customers/create') or is_granted('customers/write')")]
     public ?bool $disableAutoGroupChange = null;
 
     /** True when the account needs no (or has completed) email confirmation */

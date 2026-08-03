@@ -39,8 +39,6 @@ class CrudProvider extends Provider
     /** Whether this resource supports the back-office `scope=all` collection filter. */
     protected bool $supportsScopeAll = false;
 
-    private ?bool $backOfficeReader = null;
-
     /**
      * Permission resource id (e.g. 'cms-pages') whose read or write grant makes
      * an API-user token a back-office reader: drafts/disabled rows, cross-store
@@ -69,11 +67,8 @@ class CrudProvider extends Provider
 
     protected function isBackOfficeReader(): bool
     {
-        return $this->backOfficeReader ??= $this->isAdmin()
-            || ($this->isApiUser()
-                && $this->backOfficeResource !== null
-                && ($this->getAuthorizedUser()->hasPermission($this->backOfficeResource . '/read')
-                    || $this->getAuthorizedUser()->hasPermission($this->backOfficeResource . '/write')));
+        return $this->isAdmin()
+            || ($this->backOfficeResource !== null && $this->isBackOffice($this->backOfficeResource));
     }
 
     /**

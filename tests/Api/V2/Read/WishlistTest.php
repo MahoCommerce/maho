@@ -118,9 +118,12 @@ describe('API v2 Wishlist - cross-tenant isolation', function (): void {
         );
         expect($intruderIds)->not->toContain($itemId);
 
-        // Customer B must not be able to delete A's item.
+        // Customer B must not be able to delete A's item, and cannot tell it apart
+        // from an item id that does not exist at all.
         $delete = apiDelete("/api/rest/v2/customers/me/wishlist/{$itemId}", customerToken($intruderId));
-        expect($delete['status'])->toBeIn([403, 404]);
+        expect($delete['status'])->toBe(404);
+        expect(apiDelete('/api/rest/v2/customers/me/wishlist/99999999', customerToken($intruderId))['status'])
+            ->toBe($delete['status']);
 
         // The item must still exist for its owner.
         $ownerList = apiGet('/api/rest/v2/customers/me/wishlist', customerToken($ownerId));

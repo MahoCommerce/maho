@@ -17,7 +17,6 @@ use Mage\Checkout\Api\CartService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Wishlist State Processor.
@@ -207,8 +206,10 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         $wishlistId = $item->getWishlistId();
         /** @var \Mage_Wishlist_Model_Wishlist $wishlist */
         $wishlist = \Mage::getModel('wishlist/wishlist')->load($wishlistId);
+        // Reported as missing rather than forbidden, so the endpoint cannot be
+        // used to probe which wishlist item ids exist.
         if (!$wishlist->getId() || (int) $wishlist->getCustomerId() !== $customerId) {
-            throw new AccessDeniedHttpException('Access denied to this wishlist item');
+            throw new NotFoundHttpException('Wishlist item not found');
         }
 
         $item->delete();
@@ -236,8 +237,10 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         $wishlistId = $item->getWishlistId();
         /** @var \Mage_Wishlist_Model_Wishlist $wishlist */
         $wishlist = \Mage::getModel('wishlist/wishlist')->load($wishlistId);
+        // Reported as missing rather than forbidden, so the endpoint cannot be
+        // used to probe which wishlist item ids exist.
         if (!$wishlist->getId() || (int) $wishlist->getCustomerId() !== $customerId) {
-            throw new AccessDeniedHttpException('Access denied to this wishlist item');
+            throw new NotFoundHttpException('Wishlist item not found');
         }
 
         $product = $item->getProduct();

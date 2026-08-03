@@ -133,16 +133,6 @@ final class RevocationRequestProcessor extends Processor
 
     private function processAdminUpdate(int $id, mixed $data): RevocationRequest
     {
-        $this->requireAdminOrApiUser();
-
-        // Admin tokens are gated by ROLE_ADMIN; API-user tokens must hold the
-        // granular write permission rather than passing on role alone, so a
-        // read-only API key cannot change processing status or admin notes.
-        $user = $this->getAuthorizedUser();
-        if ($user->isApiUser()) {
-            $this->requirePermission($user, 'revocation-requests/write');
-        }
-
         $model = \Mage::getModel('revocation/request')->load($id);
         if (!$model->getId()) {
             throw new NotFoundHttpException('Revocation request not found');
@@ -165,6 +155,6 @@ final class RevocationRequestProcessor extends Processor
 
         $model->save();
 
-        return RevocationRequest::fromModel($model, adminView: true);
+        return RevocationRequest::fromModel($model);
     }
 }
