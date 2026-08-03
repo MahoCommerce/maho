@@ -103,7 +103,6 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             return $this->handleDelete((int) $uriVariables['id'], $user);
         }
 
-
         assert($data instanceof Product);
 
         if (isset($uriVariables['id'])) {
@@ -761,7 +760,6 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             ]);
         }
     }
-
 
     /**
      * Default website assignment when the request omits websiteIds.

@@ -49,7 +49,6 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
             return $this->handleRemoveChild($productId, $childId);
         }
 
-
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);
 

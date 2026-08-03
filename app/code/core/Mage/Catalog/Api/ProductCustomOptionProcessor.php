@@ -53,7 +53,6 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
             return $this->handleDelete($productId, (int) ($uriVariables['id'] ?? 0));
         }
 
-
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);
 

@@ -47,7 +47,6 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
             return $this->handleRemove($productId, $childProductId);
         }
 
-
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);
 

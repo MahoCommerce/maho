@@ -60,7 +60,6 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
             return $this->handleDelete($productId, $optionId);
         }
 
-
         if ($operation instanceof Post) {
             return $this->handleCreate($productId, $body);
         }

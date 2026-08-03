@@ -54,7 +54,6 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
             return $this->handleDelete($productId, $linkId);
         }
 
-
         if ($operation instanceof Post) {
             return $this->handleCreate($productId, $body);
         }

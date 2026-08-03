@@ -53,7 +53,6 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             return $this->handleDelete($productId, $valueId);
         }
 
-
         if ($operation instanceof Post) {
             return $this->handleUpload($productId, $body);
         }
@@ -336,7 +335,6 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
 
         return null;
     }
-
 
     /**
      * Validate image URL to prevent SSRF attacks.

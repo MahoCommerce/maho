@@ -64,7 +64,6 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
             return $this->handleRemoveLink($productId, $linkType, $linkedProductId);
         }
 
-
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);
 

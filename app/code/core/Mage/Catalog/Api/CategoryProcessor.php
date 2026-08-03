@@ -49,7 +49,6 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
             return $this->handleDelete((int) $uriVariables['id'], $user);
         }
 
-
         assert($data instanceof Category);
 
         if (isset($uriVariables['id'])) {
@@ -525,7 +524,6 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
             throw new AccessDeniedHttpException("Access denied for this category's store");
         }
     }
-
 
     /**
      * Creates always write the admin scope, the scope every store view falls back
