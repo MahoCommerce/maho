@@ -210,45 +210,42 @@ test('M1 data yields an empty string when mcrypt support is absent', function ()
 });
 
 /**
- * Before the migration: the compatibility module owns Mage_Core_Model_Encryption, so the
- * encryptor has no validateKeyAsHex() and no KEY_LENGTH_* constants, and a key is valid
- * by Blowfish's rules (any length up to 56) rather than libsodium's.
+ * The health check runs on two encryption backends and has to be right on both.
  *
- * The health check has to survive that and, for every key shape, agree with what the store
- * actually does: if encrypt/decrypt works it is a dated store to migrate (warning); if it
- * throws the store is broken (error). The 64-hex row is the trap in the middle of the
- * migration, where regeneration has run but the module was never removed.
+ * WITHOUT mahocommerce/module-mcrypt-compat: Maho's own libsodium encryptor, where a key
+ * is 64 hexadecimal characters and nothing else.
+ *
+ * WITH it: the module's Mage_Core_Model_Encryption resolves ahead of core's from its own
+ * code pool, so the encryptor is Blowfish. It has no validateKeyAsHex() and no KEY_LENGTH_*
+ * constants, and a key is anything up to 56 bytes.
+ *
+ * For every key shape the verdict has to match what the store actually does: if encrypt and
+ * decrypt work it is a dated store to migrate (warning), if they throw the store is broken
+ * (error). Both halves run the same script through the same code path, the only difference
+ * being whether the module is installed, so the two columns are directly comparable.
+ *
+ * @return array<string, array{works: bool, key: string, data: string, details: string, encryptor: string}>
  */
-test('the health check agrees with reality on every key shape, before the migration', function () {
-    if (($installError = mcryptCompatEnsureModuleInstalled()) !== null) {
-        $this->fail($installError);
-    }
-
+function mcryptCompatHealthCheckMatrix(object $test, bool $withMcryptCompat): array
+{
     $script = <<<'PHP'
     <?php
     error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
     define('MAHO_ROOT_DIR', '%PROJECT%');
     chdir(MAHO_ROOT_DIR);
-    require '%PROJECT_VENDOR%/autoload.php';
-    require '%TMP_VENDOR%/autoload.php';
-
-    // Defining the module's classes up front is what the module code pool does by
-    // resolving ahead of core: Mage_Core_Model_Encryption is now the mcrypt one.
-    require '%MODULE%/lib/Varien/Crypt/Abstract.php';
-    require '%MODULE%/lib/Varien/Crypt/Mcrypt.php';
-    require '%MODULE%/lib/Varien/Crypt.php';
-    require '%MODULE%/app/code/core/Mage/Core/Model/Encryption.php';
+    $loader = require '%PROJECT_VENDOR%/autoload.php';
+    %WITH_MODULE%
 
     Mage::app();
 
     $shapes = [
-        'libsodium 64-hex'  => sodium_bin2hex(sodium_crypto_secretbox_keygen()),
-        'mcrypt 32-hex'     => md5('m1-era-encryption-key'),
-        'mcrypt 32 non-hex' => 'ThisIsAnOldMagentoKey_32charsXX!',
-        'blowfish maximum'  => str_repeat('Kk9', 18) . 'zz',
-        '64 non-hex'        => str_repeat('zy', 32),
-        'odd-length hex'    => str_repeat('ab', 31) . 'c',
-        'empty'             => '',
+        'Maho libsodium key (64 hex)'                        => sodium_bin2hex(sodium_crypto_secretbox_keygen()),
+        'Magento 1 / OpenMage default key (32-char md5)'     => md5('m1-era-encryption-key'),
+        'Magento 1 / OpenMage custom key (32, not hex)'      => 'ThisIsAnOldMagentoKey_32charsXX!',
+        'Magento 1 / OpenMage custom key (56, Blowfish max)' => str_repeat('Kk9', 18) . 'zz',
+        'corrupted key (64 chars, not hex)'                  => str_repeat('zy', 32),
+        'corrupted key (63 hex, truncated)'                  => str_repeat('ab', 31) . 'c',
+        'no key configured'                                  => '',
     ];
 
     $result = [];
@@ -272,59 +269,88 @@ test('the health check agrees with reality on every key shape, before the migrat
             'key' => $severity['Encryption Key'],
             'data' => $severity['Encrypted Data'],
             'details' => $details['Encryption Key'],
+            'encryptor' => (new ReflectionClass('Mage_Core_Model_Encryption'))->getFileName(),
         ];
     }
 
     echo 'RESULT:' . json_encode($result);
     PHP;
 
-    $script = str_replace(
-        ['%PROJECT_VENDOR%', '%TMP_VENDOR%', '%PROJECT%', '%MODULE%'],
-        [
-            dirname(__DIR__, 4) . '/vendor',
+    // Registering the module's code pool ahead of core's on the PSR-0 prefix is exactly what
+    // the Maho composer plugin does for an installed maho-module, so Mage_Core_Model_Encryption
+    // is resolved from the real package by the autoloader rather than substituted by the test.
+    $withModule = '';
+    if ($withMcryptCompat) {
+        $module = mcryptCompatTmpDir() . '/vendor/mahocommerce/module-mcrypt-compat';
+        $withModule = sprintf(
+            "require '%s/autoload.php';\n    \$loader->add('Mage_Core_', '%s/app/code/core', true);\n    \$loader->add('Varien_', '%s/lib', true);",
             mcryptCompatTmpDir() . '/vendor',
-            dirname(__DIR__, 4),
-            mcryptCompatTmpDir() . '/vendor/mahocommerce/module-mcrypt-compat',
-        ],
+            $module,
+            $module,
+        );
+    }
+
+    $script = str_replace(
+        ['%PROJECT_VENDOR%', '%PROJECT%', '%WITH_MODULE%'],
+        [dirname(__DIR__, 4) . '/vendor', dirname(__DIR__, 4), $withModule],
         $script,
     );
 
-    $result = mcryptCompatRunSubprocess($this, 'healthcheck-legacy', $script);
+    return mcryptCompatRunSubprocess(
+        $test,
+        'healthcheck-' . ($withMcryptCompat ? 'with' : 'without') . '-mcrypt-compat',
+        $script,
+    );
+}
 
-    // The check ran at all: before this it died with an uncaught Error on every shape.
-    expect($result)->toHaveCount(7);
+test('a Magento 1 / OpenMage store, with mcrypt-compat installed', function () {
+    if (($installError = mcryptCompatEnsureModuleInstalled()) !== null) {
+        $this->fail($installError);
+    }
 
-    foreach ($result as $shape => $row) {
+    $matrix = mcryptCompatHealthCheckMatrix($this, withMcryptCompat: true);
+
+    // The encryptor really is the installed module's, resolved by the autoloader.
+    expect($matrix)->toHaveCount(7)
+        ->and($matrix['Magento 1 / OpenMage default key (32-char md5)']['encryptor'])
+        ->toContain('mahocommerce/module-mcrypt-compat');
+
+    foreach ($matrix as $shape => $row) {
         expect($row['key'])
             ->toBe($row['works'] ? 'warning' : 'error', "key shape: $shape")
             ->and($row['data'])->toBe('warning', "key shape: $shape");
     }
 
-    // An mcrypt key is the right key here, so the store works and only wants migrating.
-    expect($result['mcrypt 32-hex']['works'])->toBeTrue()
-        ->and($result['mcrypt 32 non-hex']['works'])->toBeTrue()
-        ->and($result['blowfish maximum']['works'])->toBeTrue();
+    // An mcrypt key is the right key for an mcrypt encryptor: the store works and only
+    // wants migrating, so none of these may be reported as a broken key.
+    expect($matrix['Magento 1 / OpenMage default key (32-char md5)']['works'])->toBeTrue()
+        ->and($matrix['Magento 1 / OpenMage custom key (32, not hex)']['works'])->toBeTrue()
+        ->and($matrix['Magento 1 / OpenMage custom key (56, Blowfish max)']['works'])->toBeTrue();
 
-    // Regeneration ran but the module was never removed: Blowfish cannot take a key this
-    // long, so every crypt call throws and the check must say so rather than shrug.
-    expect($result['libsodium 64-hex']['works'])->toBeFalse()
-        ->and($result['libsodium 64-hex']['details'])->toContain('composer remove mahocommerce/module-mcrypt-compat');
+    // Halfway through the migration: sys:encryptionkey:regenerate has run, but the module
+    // was never removed. Blowfish cannot take a 64-byte key, so the store is broken.
+    expect($matrix['Maho libsodium key (64 hex)']['works'])->toBeFalse()
+        ->and($matrix['Maho libsodium key (64 hex)']['details'])
+        ->toContain('composer remove mahocommerce/module-mcrypt-compat');
 });
 
-test('the health check reads clean once the module is gone, after the migration', function () {
-    // getCheckResults() builds paths from MAHO_ROOT_DIR, which only the CLI/web entry
-    // points define; the subprocess above defines its own.
-    if (!defined('MAHO_ROOT_DIR')) {
-        define('MAHO_ROOT_DIR', dirname(__DIR__, 3));
+test('a Maho store, without mcrypt-compat installed', function () {
+    $matrix = mcryptCompatHealthCheckMatrix($this, withMcryptCompat: false);
+
+    expect($matrix)->toHaveCount(7)
+        ->and($matrix['Maho libsodium key (64 hex)']['encryptor'])
+        ->not()->toContain('mcrypt-compat');
+
+    foreach ($matrix as $shape => $row) {
+        expect($row['key'])->toBe($row['works'] ? 'ok' : 'error', "key shape: $shape");
     }
 
-    // This process has no compatibility module, which is the finished migration: the
-    // sodium encryptor, the sodium key already in local.xml, and data encrypted under it.
-    $severity = array_column(\MahoCLI\Commands\HealthCheck::getCheckResults(), 'severity', 'check');
-
-    expect(Mage::helper('core')->isLegacyEncryptor())->toBeFalse()
-        ->and($severity['Encryption Key'])->toBe('ok')
-        ->and($severity['Encrypted Data'])->toBe('ok');
+    // The finished migration is the only shape libsodium accepts; every Magento 1 /
+    // OpenMage key must be reported as unusable, pointing at the compatibility module.
+    expect($matrix['Maho libsodium key (64 hex)']['works'])->toBeTrue()
+        ->and($matrix['Magento 1 / OpenMage default key (32-char md5)']['works'])->toBeFalse()
+        ->and($matrix['Magento 1 / OpenMage default key (32-char md5)']['details'])
+        ->toContain('mahocommerce/module-mcrypt-compat');
 });
 
 test('sodium-encrypted data re-encrypts from old key to new key', function () {
