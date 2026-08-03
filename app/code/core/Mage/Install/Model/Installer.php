@@ -224,22 +224,17 @@ class Mage_Install_Model_Installer extends Maho\DataObject
      */
     public function validateEncryptionKey($key)
     {
-        $errors = [];
-
-        try {
-            if ($key) {
-                Mage::helper('core')->validateKey($key);
-            }
-        } catch (Exception $e) {
-            $errors[] = $e->getMessage();
-            $this->getDataModel()->addError($e->getMessage());
+        if (!$key || Mage::helper('core')->validateKeyAsHex($key)) {
+            return true;
         }
 
-        if (!empty($errors)) {
-            return $errors;
-        }
+        $error = Mage::helper('install')->__(
+            'The encryption key must be %d hexadecimal characters long.',
+            Mage_Core_Model_Encryption::KEY_LENGTH_HEX,
+        );
+        $this->getDataModel()->addError($error);
 
-        return true;
+        return [$error];
     }
 
     public function installEnryptionKey(): self
