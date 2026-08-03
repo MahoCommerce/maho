@@ -341,14 +341,28 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         return ($result !== '') ? $result : null;
     }
 
+    /**
+     * True when the configured encryptor predates libsodium, i.e. the store still
+     * runs on mahocommerce/module-mcrypt-compat. That module replaces this class'
+     * encryptor wholesale, so key format is Blowfish's business, not sodium's.
+     */
+    public function isLegacyEncryptor(): bool
+    {
+        return !method_exists($this->getEncryptor(), 'validateKeyAsHex');
+    }
+
     public function validateKey(#[\SensitiveParameter] string $key): bool
     {
-        return $this->getEncryptor()->validateKey($key);
+        try {
+            return $this->getEncryptor()->validateKey($key) !== false;
+        } catch (Throwable) {
+            return false;
+        }
     }
 
     public function validateKeyAsHex(#[\SensitiveParameter] string $key): bool
     {
-        return $this->getEncryptor()->validateKeyAsHex($key);
+        return !$this->isLegacyEncryptor() && $this->getEncryptor()->validateKeyAsHex($key);
     }
 
     /**

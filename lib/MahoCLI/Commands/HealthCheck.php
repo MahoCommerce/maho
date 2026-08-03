@@ -53,6 +53,11 @@ class HealthCheck extends BaseMahoCommand
         . 'the key those values were encrypted with in app/etc/local.xml, then run '
         . '"./maho sys:encryptionkey:regenerate". Otherwise, if they were stored unencrypted, re-enter them.';
 
+    private const LEGACY_ENCRYPTOR_ADVICE = 'This store runs on the legacy mcrypt encryptor '
+        . '(mahocommerce/module-mcrypt-compat), so its key is an mcrypt one and libsodium key rules do not apply. '
+        . 'Encryption works, but that module is a migration aid: run "./maho sys:encryptionkey:regenerate" to '
+        . 'move to a libsodium key, then remove it.';
+
     /**
      * Mapping of deprecated Varien_ classes to their Maho\ replacements
      */
@@ -304,6 +309,11 @@ class HealthCheck extends BaseMahoCommand
             return 'No encryption key configured in app/etc/local.xml (<crypt><key>). '
                 . 'Nothing can be encrypted or decrypted without it.';
         }
+        // An mcrypt key is the right key for an mcrypt encryptor, and under that module
+        // Mage_Core_Model_Encryption is its class, so KEY_LENGTH_HEX does not exist here.
+        if (self::isLegacyEncryptionActive()) {
+            return null;
+        }
         if (Mage::helper('core')->validateKeyAsHex($key)) {
             return null;
         }
@@ -327,6 +337,14 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * True when the store still runs on the legacy mcrypt encryptor rather than libsodium.
+     */
+    public static function isLegacyEncryptionActive(): bool
+    {
+        return Mage::helper('core')->isLegacyEncryptor() && Mage::getEncryptionKeyAsHex() !== '';
+    }
+
+    /**
      * Find encrypted values that no longer open under the current key, which is what
      * an imported Magento/OpenMage database looks like next to a freshly generated
      * key. Decryption yields an empty string rather than an error, so payment and
@@ -339,6 +357,11 @@ class HealthCheck extends BaseMahoCommand
      */
     public static function findUndecryptableData(): array
     {
+        // Values under the legacy encryptor are not sodium ciphertext and the key is
+        // not hex, so getEncryptionKeyAsBinary() would throw before the first row.
+        if (self::isLegacyEncryptionActive()) {
+            return [];
+        }
         if (self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex()) !== null) {
             return [];
         }
@@ -579,14 +602,21 @@ class HealthCheck extends BaseMahoCommand
             ),
         ];
 
+        $isLegacy = self::isLegacyEncryptionActive();
         $keyIssue = self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex());
         $checks[] = [
             'check' => 'Encryption Key',
-            'severity' => $keyIssue === null ? 'ok' : 'error',
-            'details' => $keyIssue ?? '',
+            'severity' => $isLegacy ? 'warning' : ($keyIssue === null ? 'ok' : 'error'),
+            'details' => $isLegacy ? self::LEGACY_ENCRYPTOR_ADVICE : ($keyIssue ?? ''),
         ];
 
-        if ($keyIssue !== null) {
+        if ($isLegacy) {
+            $checks[] = [
+                'check' => 'Encrypted Data',
+                'severity' => 'warning',
+                'details' => 'Not checked: the store is still on the legacy mcrypt encryptor.',
+            ];
+        } elseif ($keyIssue !== null) {
             $checks[] = [
                 'check' => 'Encrypted Data',
                 'severity' => 'warning',
@@ -1162,10 +1192,19 @@ class HealthCheck extends BaseMahoCommand
     private function checkEncryption(OutputInterface $output): bool
     {
         $output->write('Checking encryption key... ');
+        if (self::isLegacyEncryptionActive()) {
+            $output->writeln('<comment>LEGACY</comment>');
+            $output->writeln(wordwrap(self::LEGACY_ENCRYPTOR_ADVICE, 100));
+            $output->writeln('Checking encrypted data... <comment>SKIPPED (legacy mcrypt encryptor)</comment>');
+            $output->writeln('');
+            return true;
+        }
+
         $keyIssue = self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex());
         if ($keyIssue !== null) {
             $output->writeln('');
             $output->writeln('<error>Error: ' . $keyIssue . '</error>');
+            $output->writeln('Checking encrypted data... <comment>SKIPPED (fix the key first)</comment>');
             $output->writeln('');
             return false;
         }
