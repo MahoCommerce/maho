@@ -376,13 +376,9 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Generate password hash for user
-     *
-     * @param string $password
-     * @param mixed $salt ignored, password_hash() generates its own salt
-     * @return string
+     * Generate a password hash in the current hash version, for admin users, customers and API keys
      */
-    public function getHashPassword(#[\SensitiveParameter] $password, $salt = false)
+    public function getHashPassword(#[\SensitiveParameter] string $password): string
     {
         return $this->getEncryptor()->getHashPassword($password, Mage_Admin_Model_User::HASH_SALT_EMPTY);
     }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Migration of Magento 1 and OpenMage era password hashes to the canonical salted SHA256 format.
+ * Migration of Magento 1 and OpenMage era password hashes to the canonical bcrypt format.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -15,8 +15,8 @@ uses(Tests\MahoBackendTestCase::class);
 dataset('legacy password hash formats', [
     'm1 unsalted md5',
     'm1 salted md5',
+    'openmage salted sha256',
     'openmage salted sha512',
-    'openmage bcrypt',
 ]);
 
 function passwordMigrationLegacyHash(string $format, string $password): string
@@ -25,21 +25,20 @@ function passwordMigrationLegacyHash(string $format, string $password): string
         // M1 generated 2-character salts for customers and admins
         'm1 unsalted md5' => md5($password),
         'm1 salted md5' => md5('xY' . $password) . ':xY',
+        'openmage salted sha256' => hash('sha256', 'RandomSalt123' . $password) . ':RandomSalt123',
         'openmage salted sha512' => hash('sha512', 'RandomSalt123' . $password) . ':RandomSalt123',
-        'openmage bcrypt' => password_hash($password, PASSWORD_DEFAULT),
     };
 }
 
 function passwordMigrationCanonicalHash(string $password): string
 {
-    return Mage::helper('core')->getHash($password, Mage_Admin_Model_User::HASH_SALT_LENGTH);
+    return Mage::helper('core')->getHashPassword($password);
 }
 
 function passwordMigrationExpectCanonical(string $hash, string $password): void
 {
-    expect($hash)->toContain(':');
-    [$digest, $salt] = explode(':', $hash, 2);
-    expect($digest)->toBe(hash('sha256', $salt . $password));
+    expect(password_verify($password, $hash))->toBeTrue()
+        ->and(password_needs_rehash($hash, PASSWORD_DEFAULT))->toBeFalse();
 }
 
 function passwordMigrationCreateCustomer(string $passwordHash): Mage_Customer_Model_Customer
@@ -86,14 +85,39 @@ function passwordMigrationCreateAdmin(string $passwordHash): array
         ->setUserId($user->getId())
         ->add();
 
-    // Overwrite directly: saving through the model would re-hash the password
-    Mage::getSingleton('core/resource')->getConnection('core_write')->update(
-        Mage::getSingleton('core/resource')->getTableName('admin/user'),
-        ['password' => $passwordHash],
-        ['user_id = ?' => (int) $user->getId()],
-    );
+    passwordMigrationOverwriteHash('admin/user', 'password', 'user_id', (int) $user->getId(), $passwordHash);
 
     return [$user, $role];
+}
+
+function passwordMigrationCreateApiUser(string $apiKeyHash): Mage_Api_Model_User
+{
+    $username = 'legacy_api_' . uniqid();
+
+    /** @var Mage_Api_Model_User $user */
+    $user = Mage::getModel('api/user');
+    $user->setData([
+        'username' => $username,
+        'firstname' => 'Legacy',
+        'lastname' => 'Hash',
+        'email' => $username . '@example.test',
+        'api_key' => 'Temporary-4pi-Key',
+        'is_active' => 1,
+    ])->save();
+
+    passwordMigrationOverwriteHash('api/user', 'api_key', 'user_id', (int) $user->getId(), $apiKeyHash);
+
+    return $user;
+}
+
+/** Saving through the model would re-hash, so write the legacy hash straight to the column */
+function passwordMigrationOverwriteHash(string $table, string $column, string $idColumn, int $id, string $hash): void
+{
+    Mage::getSingleton('core/resource')->getConnection('core_write')->update(
+        Mage::getSingleton('core/resource')->getTableName($table),
+        [$column => $hash],
+        [$idColumn . ' = ?' => $id],
+    );
 }
 
 describe('Legacy hash validation', function () {
@@ -106,7 +130,7 @@ describe('Legacy hash validation', function () {
             ->and($helper->validateHash('wrong-password', $hash))->toBeFalse();
     })->with('legacy password hash formats');
 
-    test('getHash produces the canonical salted sha256 format', function () {
+    test('getHashPassword produces the canonical bcrypt format', function () {
         $password = 'Current-P@ssw0rd-1';
         $hash = passwordMigrationCanonicalHash($password);
 
@@ -116,7 +140,19 @@ describe('Legacy hash validation', function () {
 });
 
 describe('Customer password migration on login', function () {
-    test('upgrades legacy hash to canonical salted sha256', function (string $format) {
+    test('stores new passwords as bcrypt', function () {
+        $password = 'Customer-P@ss-42';
+        $customer = passwordMigrationCreateCustomer(passwordMigrationCanonicalHash('irrelevant'));
+
+        try {
+            $customer->setPassword($password)->save();
+            passwordMigrationExpectCanonical((string) $customer->getPasswordHash(), $password);
+        } finally {
+            $customer->delete();
+        }
+    });
+
+    test('upgrades legacy hash to canonical bcrypt', function (string $format) {
         $password = 'Customer-P@ss-42';
         $legacyHash = passwordMigrationLegacyHash($format, $password);
         $customer = passwordMigrationCreateCustomer($legacyHash);
@@ -156,7 +192,22 @@ describe('Customer password migration on login', function () {
 });
 
 describe('Admin password migration on login', function () {
-    test('upgrades legacy hash to canonical salted sha256', function (string $format) {
+    test('stores new passwords as bcrypt', function () {
+        $password = 'Admin-P@ss-42';
+        [$user, $role] = passwordMigrationCreateAdmin(passwordMigrationCanonicalHash('irrelevant'));
+
+        try {
+            $user->setNewPassword($password)->save();
+
+            $reloaded = Mage::getModel('admin/user')->load($user->getId());
+            passwordMigrationExpectCanonical((string) $reloaded->getPassword(), $password);
+        } finally {
+            $user->delete();
+            $role->delete();
+        }
+    });
+
+    test('upgrades legacy hash to canonical bcrypt', function (string $format) {
         $password = 'Admin-P@ss-42';
         $legacyHash = passwordMigrationLegacyHash($format, $password);
         [$user, $role] = passwordMigrationCreateAdmin($legacyHash);
@@ -189,6 +240,55 @@ describe('Admin password migration on login', function () {
         } finally {
             $user->delete();
             $role->delete();
+        }
+    });
+});
+
+describe('API key migration on login', function () {
+    test('stores new api keys as bcrypt', function () {
+        $apiKey = 'Api-K3y-42';
+        $user = passwordMigrationCreateApiUser(passwordMigrationCanonicalHash('irrelevant'));
+
+        try {
+            $user->setNewApiKey($apiKey)->save();
+
+            $reloaded = Mage::getModel('api/user')->load($user->getId());
+            passwordMigrationExpectCanonical((string) $reloaded->getApiKey(), $apiKey);
+        } finally {
+            $user->delete();
+        }
+    });
+
+    test('upgrades legacy hash to canonical bcrypt', function (string $format) {
+        $apiKey = 'Api-K3y-42';
+        $legacyHash = passwordMigrationLegacyHash($format, $apiKey);
+        $user = passwordMigrationCreateApiUser($legacyHash);
+
+        try {
+            Mage::getModel('api/user')->setSessid(uniqid())->login($user->getUsername(), $apiKey);
+
+            $reloaded = Mage::getModel('api/user')->load($user->getId());
+            $newHash = (string) $reloaded->getApiKey();
+
+            expect($newHash)->not->toBe($legacyHash);
+            passwordMigrationExpectCanonical($newHash, $apiKey);
+        } finally {
+            $user->delete();
+        }
+    })->with('legacy password hash formats');
+
+    test('leaves an already canonical hash untouched', function () {
+        $apiKey = 'Api-K3y-42';
+        $canonicalHash = passwordMigrationCanonicalHash($apiKey);
+        $user = passwordMigrationCreateApiUser($canonicalHash);
+
+        try {
+            Mage::getModel('api/user')->setSessid(uniqid())->login($user->getUsername(), $apiKey);
+
+            $reloaded = Mage::getModel('api/user')->load($user->getId());
+            expect((string) $reloaded->getApiKey())->toBe($canonicalHash);
+        } finally {
+            $user->delete();
         }
     });
 });

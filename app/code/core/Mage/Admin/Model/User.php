@@ -429,7 +429,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
                 }
 
                 // Upgrade hash version
-                if (!$this->getPasswordUpgraded() && !$this->validatePasswordHashSha256($password, $this->getPassword())) {
+                if (!$this->getPasswordUpgraded() && !$this->validatePasswordHashLatest($password, $this->getPassword())) {
                     $this->setNewPassword($password)
                         ->setForceNewPassword(true)
                         ->setPasswordUpgraded(true)
@@ -568,9 +568,9 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return Mage::helper('core')->validateHash($string1, $string2);
     }
 
-    public function validatePasswordHashSha256(#[\SensitiveParameter] string $string1, string $string2): bool
+    public function validatePasswordHashLatest(#[\SensitiveParameter] string $string1, string $string2): bool
     {
-        return Mage::helper('core')->getEncryptor()->validateHashByVersion($string1, $string2, Mage_Core_Model_Encryption::HASH_VERSION_SHA256);
+        return Mage::helper('core')->getEncryptor()->validateHashByVersion($string1, $string2, Mage_Core_Model_Encryption::HASH_VERSION_LATEST);
     }
 
     /**
@@ -636,7 +636,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
      */
     protected function _getEncodedPassword(#[\SensitiveParameter] $password)
     {
-        return Mage::helper('core')->getHash($password, self::HASH_SALT_LENGTH);
+        return Mage::helper('core')->getHashPassword($password);
     }
 
     /**
