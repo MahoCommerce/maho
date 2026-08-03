@@ -47,6 +47,41 @@ describe('GA4 purchase event', function () {
         expect($orderData['items'][0]['price'])->toBe('122.00');
     });
 
+    it('sends the base SKU when the item product carries SKU-altering custom options', function () {
+        $product = Mage::getModel('catalog/product')
+            ->setSku('basesku123')
+            ->setCategoryIds([]);
+        $option = Mage::getModel('catalog/product_option')
+            ->setId(7)
+            ->setType(Mage_Catalog_Model_Product_Option::OPTION_TYPE_FIELD)
+            ->setSku('mycustom option');
+        $product->addOption($option);
+        $product->addCustomOption('option_ids', '7');
+        $product->addCustomOption('option_7', 'engraved text');
+        $item = Mage::getModel('sales/order_item')
+            ->setSku('basesku123-mycustom option')
+            ->setQtyOrdered(1)
+            ->setBasePriceInclTax(10.00)
+            ->setProduct($product);
+        $order = Mage::getModel('sales/order')->setBaseGrandTotal(10.00);
+        $order->addItem($item);
+
+        expect($this->block->getPurchaseEventData($order)['items'][0]['item_id'])->toBe('basesku123');
+    });
+
+    it('sends the variant SKU for configurable items', function () {
+        $item = Mage::getModel('sales/order_item')
+            ->setSku('TSHIRT-M-mycustom option')
+            ->setQtyOrdered(1)
+            ->setBasePriceInclTax(10.00)
+            ->setProductOptions(['simple_sku' => 'TSHIRT-M'])
+            ->setProduct(Mage::getModel('catalog/product')->setSku('TSHIRT')->setCategoryIds([]));
+        $order = Mage::getModel('sales/order')->setBaseGrandTotal(10.00);
+        $order->addItem($item);
+
+        expect($this->block->getPurchaseEventData($order)['items'][0]['item_id'])->toBe('TSHIRT-M');
+    });
+
     it('falls back to the order item SKU when the product no longer exists', function () {
         $item = Mage::getModel('sales/order_item')
             ->setSku('deleted-sku')
