@@ -43,12 +43,10 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
         $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->assertPermission($user, 'products/delete');
             $childProductId = self::extractChildProductId($context);
             return $this->handleRemove($productId, $childProductId);
         }
 
-        $this->assertPermission($user, 'products/write');
 
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);

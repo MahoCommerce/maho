@@ -129,8 +129,8 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
      * they're trusted here. A service token is trusted only when it actually
      * holds the carts/write grant: a bare service-account token without it is
      * treated as an ordinary caller and can't reach arbitrary carts through the
-     * enumerable numeric /carts/{id} path. This closes the gap left by the
-     * overridden process() bypassing the base Processor's assertPermission().
+     * enumerable numeric /carts/{id} path, even on the public guest operations
+     * whose security expression admits everyone.
      */
     private function isPrivilegedCartActor(): bool
     {

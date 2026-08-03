@@ -45,12 +45,10 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
         $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->assertPermission($user, 'products/delete');
             $childId = self::extractChildId($context);
             return $this->handleRemoveChild($productId, $childId);
         }
 
-        $this->assertPermission($user, 'products/write');
 
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);

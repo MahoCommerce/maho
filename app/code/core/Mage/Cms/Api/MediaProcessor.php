@@ -49,11 +49,9 @@ final class MediaProcessor implements ProcessorInterface
         $user = $this->requireUser();
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->assertPermission($user, 'media/delete');
             return $this->handleDelete($uriVariables['path'], $user);
         }
 
-        $this->assertPermission($user, 'media/write');
         return $this->handleUpload($user);
     }
 

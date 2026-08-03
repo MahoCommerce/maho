@@ -346,8 +346,8 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
      * (Order::ADMIN_RESOURCE); a service token is trusted only when it holds the
      * orders/create grant. A bare service-account token without it stays subject
      * to the guest masked-id / customer-ownership rules, so it can't place an
-     * order from an arbitrary enumerable cart id. Closes the gap left by the
-     * overridden process() bypassing the base Processor's assertPermission().
+     * order from an arbitrary enumerable cart id, even on the public guest
+     * operations whose security expression admits everyone.
      */
     private function isPrivilegedOrderActor(): bool
     {

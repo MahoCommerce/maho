@@ -50,11 +50,9 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
         $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->assertPermission($user, 'products/delete');
             return $this->handleDelete($productId, (int) ($uriVariables['id'] ?? 0));
         }
 
-        $this->assertPermission($user, 'products/write');
 
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);

@@ -170,25 +170,4 @@ trait AuthenticationTrait
 
         return $user;
     }
-
-    /**
-     * Deliberately duplicates the operation's `security:` expression on write
-     * paths. It is the only backstop for the two mistakes the coverage tests
-     * cannot catch: an operation accidentally shipped with `security: 'true'`
-     * (non-empty, so the fail-open check passes) or gated by a valid but
-     * wrong permission id. Do not remove as a redundancy cleanup.
-     */
-    protected function assertPermission(ApiUser $user, string $permission): void
-    {
-        // Admin tokens carry no API-user permission grants; their authorization
-        // is enforced separately by AdminAclListener (Maho admin ACL) before the
-        // controller runs. Checking hasPermission() here would always fail for
-        // admins and wrongly 403 every admin REST write. Defer to the ACL gate.
-        if ($user->isAdmin()) {
-            return;
-        }
-        if (!$user->hasPermission($permission)) {
-            throw new AccessDeniedHttpException("Missing permission: {$permission}");
-        }
-    }
 }

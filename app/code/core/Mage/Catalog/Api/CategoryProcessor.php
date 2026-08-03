@@ -46,11 +46,9 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         $user = $this->requireUser();
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->assertPermission($user, 'categories/delete');
             return $this->handleDelete((int) $uriVariables['id'], $user);
         }
 
-        $this->assertPermission($user, 'categories/write');
 
         assert($data instanceof Category);
 

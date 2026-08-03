@@ -56,12 +56,10 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->assertPermission($user, 'products/delete');
             $optionId = (int) ($uriVariables['id'] ?? $body['optionId'] ?? $body['option_id'] ?? 0) ?: $pathOptionId;
             return $this->handleDelete($productId, $optionId);
         }
 
-        $this->assertPermission($user, 'products/write');
 
         if ($operation instanceof Post) {
             return $this->handleCreate($productId, $body);

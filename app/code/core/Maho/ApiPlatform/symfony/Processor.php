@@ -49,8 +49,6 @@ abstract class Processor implements ProcessorInterface
     use RateLimitTrait;
 
     protected ?string $modelAlias = null;
-    protected ?string $writePermission = null;
-    protected ?string $deletePermission = null;
     protected ?string $entityType = null;
     protected ?string $entityLabel = null;
 
@@ -62,6 +60,8 @@ abstract class Processor implements ProcessorInterface
     /**
      * Default process() routing: delete → update → create.
      *
+     * Permissions are enforced declaratively by each operation's `security:`
+     * expression before this runs; no imperative permission check here.
      * Override this entirely for resources with non-standard write logic.
      */
     #[\Override]
@@ -70,11 +70,8 @@ abstract class Processor implements ProcessorInterface
         $user = $this->requireUser();
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->assertPermission($user, $this->deletePermission ?? $this->writePermission);
             return $this->processDelete((int) $uriVariables['id'], $user);
         }
-
-        $this->assertPermission($user, $this->writePermission);
 
         if (isset($uriVariables['id'])) {
             return $this->processUpdate((int) $uriVariables['id'], $data, $user);

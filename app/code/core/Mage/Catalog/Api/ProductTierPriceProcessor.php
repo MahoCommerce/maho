@@ -41,11 +41,9 @@ final class ProductTierPriceProcessor extends \Maho\ApiPlatform\Processor
         $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->assertPermission($user, 'products/delete');
             return $this->handleDeleteAll($productId);
         }
 
-        $this->assertPermission($user, 'products/write');
         return $this->handleReplace($productId, $context, $user);
     }
 

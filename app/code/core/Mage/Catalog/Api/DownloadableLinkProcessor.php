@@ -47,7 +47,6 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
         $body = $this->parseRequestBody($request);
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->assertPermission($user, 'products/delete');
             $linkId = (int) ($body['linkId'] ?? $body['link_id'] ?? 0);
             if ($linkId <= 0) {
                 $linkId = (int) ($request?->query->get('linkId') ?? 0);
@@ -55,7 +54,6 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
             return $this->handleDelete($productId, $linkId);
         }
 
-        $this->assertPermission($user, 'products/write');
 
         if ($operation instanceof Post) {
             return $this->handleCreate($productId, $body);

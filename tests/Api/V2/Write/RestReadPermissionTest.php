@@ -11,10 +11,9 @@ declare(strict_types=1);
 /**
  * API v2 REST read-permission enforcement tests.
  *
- * Granular read permissions for API-user tokens are enforced by each read
- * operation's `security: is_granted('<resource>/read')` expression (evaluated
- * by ApiUserVoter) on REST GET requests, the read-side counterpart to the
- * assertPermission() checks in the Processors. A key must hold
+ * Granular permissions for API-user tokens are enforced by each operation's
+ * `security: is_granted('<resource>/op')` expression (evaluated by
+ * ApiUserVoter) on reads and writes alike. A key must hold
  * `<resource>/read` (or `<resource>/all`, or `all`) to read a non-public
  * resource. Public operations (security: 'true') stay reachable regardless.
  *

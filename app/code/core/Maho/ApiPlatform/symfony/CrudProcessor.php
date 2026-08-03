@@ -47,15 +47,9 @@ class CrudProcessor extends Processor
                 $this->entityType = strtolower((string) preg_replace('/[A-Z]/', '_$0', lcfirst($short)));
                 $this->entityLabel = $short;
             }
-
-            if (!$this->writePermission && $operation instanceof \ApiPlatform\Metadata\HttpOperation) {
-                $base = trim(preg_replace('#/\{[^}]+\}#', '', $operation->getUriTemplate() ?? ''), '/');
-                $this->writePermission = $base . '/write';
-                $this->deletePermission = $base . '/delete';
-            }
         }
 
-        // Parent handles auth check, permission check, and create/update/delete routing
+        // Parent handles the auth check and create/update/delete routing
         return parent::process($data, $operation, $uriVariables, $context);
     }
 

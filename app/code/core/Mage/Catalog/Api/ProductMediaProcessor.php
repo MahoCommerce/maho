@@ -46,7 +46,6 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
         $body = $this->parseRequestBody($request);
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->assertPermission($user, 'products/delete');
             $valueId = (int) ($body['valueId'] ?? $body['value_id'] ?? $body['id'] ?? 0);
             if ($valueId <= 0) {
                 $valueId = (int) ($request?->query->get('valueId') ?? 0);
@@ -54,7 +53,6 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             return $this->handleDelete($productId, $valueId);
         }
 
-        $this->assertPermission($user, 'products/write');
 
         if ($operation instanceof Post) {
             return $this->handleUpload($productId, $body);

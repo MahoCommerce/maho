@@ -60,12 +60,10 @@ final class ProductLinkProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->assertPermission($user, 'products/delete');
             $linkedProductId = ProductLinkProvider::extractLinkedProductId($context);
             return $this->handleRemoveLink($productId, $linkType, $linkedProductId);
         }
 
-        $this->assertPermission($user, 'products/write');
 
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);

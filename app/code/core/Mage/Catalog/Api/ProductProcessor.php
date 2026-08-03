@@ -100,11 +100,9 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         $user = $this->requireUser();
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->assertPermission($user, 'products/delete');
             return $this->handleDelete((int) $uriVariables['id'], $user);
         }
 
-        $this->assertPermission($user, 'products/write');
 
         assert($data instanceof Product);
 
