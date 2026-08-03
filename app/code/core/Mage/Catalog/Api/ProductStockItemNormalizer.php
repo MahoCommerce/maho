@@ -33,6 +33,8 @@ final class ProductStockItemNormalizer implements NormalizerInterface, Normalize
 {
     use NormalizerAwareTrait;
 
+    // Propagates into nested normalizations: fine while variants/linked
+    // products are plain arrays, not Product DTOs with their own stockItem.
     private const ALREADY_CALLED = 'maho_product_stock_item_normalizer';
 
     private const BACK_OFFICE_COLUMNS = [

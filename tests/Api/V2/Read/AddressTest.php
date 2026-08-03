@@ -118,10 +118,13 @@ describe('API v2 Customer Addresses', function (): void {
 
             // Customer B must not read A's address by id. 404, not 403: a
             // distinguishable response would turn this into an address-id oracle.
+            // The body must match too, or the oracle survives at the message level.
             $read = apiGet("/api/rest/v2/addresses/{$addressId}", customerToken($intruderId));
             expect($read['status'])->toBe(404);
-            expect(apiGet('/api/rest/v2/addresses/99999999', customerToken($intruderId))['status'])
-                ->toBe($read['status']);
+            $missingRead = apiGet('/api/rest/v2/addresses/99999999', customerToken($intruderId));
+            expect($missingRead['status'])->toBe($read['status']);
+            expect($read['json']['error'] ?? null)->toBe($missingRead['json']['error'] ?? null);
+            expect($read['json']['message'] ?? null)->toBe($missingRead['json']['message'] ?? null);
 
             // Customer B must not delete A's address, and again cannot tell it apart
             // from an address that does not exist.

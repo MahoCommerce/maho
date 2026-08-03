@@ -25,7 +25,7 @@ uses(MahoBackendTestCase::class);
  *
  * Which fields a caller sees is decided by API Platform's per-property
  * `security:` / `securityPostDenormalize:` expressions, evaluated by
- * AbstractItemNormalizer — so one declaration covers REST, GraphQL and MCP,
+ * AbstractItemNormalizer, so one declaration covers REST, GraphQL and MCP,
  * in both directions. Nothing strips fields in a provider any more, which
  * makes these expressions the only gate and worth pinning down:
  *

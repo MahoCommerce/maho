@@ -142,9 +142,11 @@ class ApiExceptionListener implements EventSubscriberInterface
                 if ($operation instanceof HttpOperation) {
                     foreach ($operation->getExceptionToStatus() ?? [] as $class => $mappedStatus) {
                         if (is_a($exception::class, $class, true)) {
+                            // A 404-mapped denial must match a missing row's body
+                            // (ReadProvider's 'Not Found') or the masking leaks.
                             return new JsonResponse([
                                 'error' => $this->getErrorCodeFromStatusCode($mappedStatus),
-                                'message' => $this->getDefaultMessageForStatusCode($mappedStatus),
+                                'message' => $mappedStatus === 404 ? 'Not Found' : $this->getDefaultMessageForStatusCode($mappedStatus),
                                 'code' => $mappedStatus,
                             ], $mappedStatus);
                         }

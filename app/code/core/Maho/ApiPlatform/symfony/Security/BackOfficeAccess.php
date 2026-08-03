@@ -23,8 +23,8 @@ use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
  *
  * Registering this as a `security.expression_language_provider` publishes the rule
  * as an `is_back_office('<resource>')` function usable anywhere API Platform
- * evaluates a security expression: operation `security:`, and — the reason it
- * exists — per-property `#[ApiProperty(security: ...)]`, which the serializer
+ * evaluates a security expression: operation `security:`, and (the reason it
+ * exists) per-property `#[ApiProperty(security: ...)]`, which the serializer
  * enforces for REST, GraphQL and MCP alike. Field visibility therefore lives on
  * the field instead of in a per-provider stripping routine.
  */

@@ -27,7 +27,10 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  * conversion is deliberately scoped to item Queries whose security expression
  * references `object`, i.e. exactly the post-read row-level case: role/grant
  * denials on admin-locked queries keep their explicit "Access Denied." error,
- * where no existence is leaked and the affordance helps the caller.
+ * where no existence is leaked and the affordance helps the caller. The catch
+ * is by exception type, so imperative denials from the provider chain (e.g.
+ * the store-allowlist check) are masked too; they are equally row-scoped, so
+ * null is the right answer there as well.
  *
  * @implements ProviderInterface<object>
  */
