@@ -64,6 +64,10 @@ function healthCheckWithConfigValue(string $path, string $value, callable $asser
     }
 }
 
+it('proves encryption and credential hashing work on a healthy install', function () {
+    expect(HealthCheck::findEncryptionFailure())->toBeNull();
+});
+
 it('accepts a libsodium key', function () {
     expect(HealthCheck::findEncryptionKeyIssue(Mage::generateEncryptionKeyAsHex()))->toBeNull();
     expect(HealthCheck::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex()))->toBeNull();

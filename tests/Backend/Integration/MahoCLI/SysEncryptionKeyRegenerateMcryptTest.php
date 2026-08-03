@@ -224,7 +224,13 @@ test('M1 data yields an empty string when mcrypt support is absent', function ()
  * (error). Both halves run the same script through the same code path, the only difference
  * being whether the module is installed, so the two columns are directly comparable.
  *
- * @return array<string, array{works: bool, key: string, data: string, details: string, encryptor: string}>
+ * Every successful login also mints, verifies and judges the credential hash
+ * (getHashPassword/validateHash/hashNeedsUpgrade, see Mage_Admin_Model_User::authenticate()).
+ * Hashing never touches the encryption key, so `login` must hold in every cell, on both
+ * encryptors: the compat module's predates part of that surface, which is exactly what
+ * this column exists to catch.
+ *
+ * @return array<string, array{works: bool, login: bool, key: string, data: string, details: string, encryptor: string}>
  */
 function mcryptCompatHealthCheckMatrix(object $test, bool $withMcryptCompat): array
 {
@@ -260,12 +266,22 @@ function mcryptCompatHealthCheckMatrix(object $test, bool $withMcryptCompat): ar
         } catch (Throwable) {
         }
 
+        $login = false;
+        try {
+            $hash = $helper->getHashPassword('probe-password');
+            $login = $helper->validateHash('probe-password', $hash)
+                && !$helper->hashNeedsUpgrade($hash)
+                && $helper->hashNeedsUpgrade(md5('a-legacy-stored-hash'));
+        } catch (Throwable) {
+        }
+
         $rows = \MahoCLI\Commands\HealthCheck::getCheckResults();
         $severity = array_column($rows, 'severity', 'check');
         $details = array_column($rows, 'details', 'check');
 
         $result[$name] = [
             'works' => $works,
+            'login' => $login,
             'key' => $severity['Encryption Key'],
             'data' => $severity['Encrypted Data'],
             'details' => $details['Encryption Key'],
@@ -323,7 +339,8 @@ test('a Magento 1 / OpenMage store, with mcrypt-compat installed', function () {
     foreach ($matrix as $shape => $row) {
         expect($row['key'])
             ->toBe($row['works'] ? 'warning' : 'error', "key shape: $shape")
-            ->and($row['data'])->toBe('warning', "key shape: $shape");
+            ->and($row['data'])->toBe('warning', "key shape: $shape")
+            ->and($row['login'])->toBeTrue("credential hashing, key shape: $shape");
     }
 
     // An mcrypt key is the right key for an mcrypt encryptor: the store works and only
@@ -347,7 +364,8 @@ test('a Maho store, without mcrypt-compat installed', function () {
         ->not()->toContain('mcrypt-compat');
 
     foreach ($matrix as $shape => $row) {
-        expect($row['key'])->toBe($row['works'] ? 'ok' : 'error', "key shape: $shape");
+        expect($row['key'])->toBe($row['works'] ? 'ok' : 'error', "key shape: $shape")
+            ->and($row['login'])->toBeTrue("credential hashing, key shape: $shape");
     }
 
     // The finished migration is the only shape libsodium accepts; every Magento 1 /

@@ -352,21 +352,43 @@ class HealthCheck extends BaseMahoCommand
      * Prove the store can encrypt a value and read it back, rather than deciding from the
      * key's shape whether it ought to be able to. Whatever the encryptor is, this is the
      * question the check exists to answer, and the answer cannot go stale.
+     *
+     * Every successful login also hashes and judges credentials through the same
+     * encryptor (getHashPassword()/hashNeedsUpgrade()), so the probe exercises that
+     * surface too: interface drift there breaks logins, not encrypt/decrypt.
      */
     public static function findEncryptionFailure(): ?string
     {
         $probe = 'maho-health-check-probe';
         try {
             $helper = Mage::helper('core');
-            if ($helper->decrypt($helper->encrypt($probe)) === $probe) {
-                return null;
+            if ($helper->decrypt($helper->encrypt($probe)) !== $probe) {
+                return 'Encryption is not working: a test value did not survive an encrypt/decrypt round trip.';
             }
-            $reason = 'a test value did not survive an encrypt/decrypt round trip';
+            if ($helper->hashNeedsUpgrade($helper->getHashPassword($probe))) {
+                return 'Credential hashing is not working: a freshly generated hash already reports it needs an upgrade.';
+            }
+            return null;
         } catch (\Throwable $e) {
-            $reason = sprintf('encrypting a test value failed with %s: %s', $e::class, $e->getMessage());
+            return sprintf('Encryption is not working: probing it failed with %s: %s.', $e::class, $e->getMessage());
         }
+    }
 
-        return sprintf('Encryption is not working: %s.', $reason);
+    /**
+     * The one verdict both the CLI output and getCheckResults() render: measured by
+     * findEncryptionFailure(), explained by findEncryptionKeyIssue() where the key is
+     * the cause and by the failure itself where it is not.
+     *
+     * @return array{failure: ?string, keyIssue: ?string, legacyOk: bool}
+     */
+    private static function encryptionVerdict(): array
+    {
+        $failure = self::findEncryptionFailure();
+        return [
+            'failure' => $failure,
+            'keyIssue' => $failure === null ? null : (self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex()) ?? $failure),
+            'legacyOk' => $failure === null && self::isLegacyEncryptionActive(),
+        ];
     }
 
     /**
@@ -662,10 +684,7 @@ class HealthCheck extends BaseMahoCommand
             ),
         ];
 
-        // The verdict is measured, not inferred; findEncryptionKeyIssue() only explains it.
-        $failure = self::findEncryptionFailure();
-        $keyIssue = $failure === null ? null : (self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex()) ?? $failure);
-        $legacyOk = $failure === null && self::isLegacyEncryptionActive();
+        ['failure' => $failure, 'keyIssue' => $keyIssue, 'legacyOk' => $legacyOk] = self::encryptionVerdict();
         $checks[] = [
             'check' => 'Encryption Key',
             'severity' => $legacyOk ? 'warning' : ($failure === null ? 'ok' : 'error'),
@@ -692,7 +711,7 @@ class HealthCheck extends BaseMahoCommand
                     'severity' => empty($undecryptable) ? 'ok' : 'error',
                     'details' => empty($undecryptable) ? '' : self::formatUndecryptableSummary($undecryptable),
                 ];
-            } catch (\Exception) {
+            } catch (\Throwable) {
                 $checks[] = [
                     'check' => 'Encrypted Data',
                     'severity' => 'error',
@@ -1254,9 +1273,8 @@ class HealthCheck extends BaseMahoCommand
     private function checkEncryption(OutputInterface $output): bool
     {
         $output->write('Checking encryption key... ');
-        $failure = self::findEncryptionFailure();
-        $keyIssue = $failure === null ? null : (self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex()) ?? $failure);
-        if ($failure === null && self::isLegacyEncryptionActive()) {
+        ['keyIssue' => $keyIssue, 'legacyOk' => $legacyOk] = self::encryptionVerdict();
+        if ($legacyOk) {
             $output->writeln('<comment>LEGACY</comment>');
             $output->writeln(wordwrap(self::LEGACY_ENCRYPTOR_ADVICE, 100));
             $output->writeln('Checking encrypted data... <comment>SKIPPED (legacy mcrypt encryptor)</comment>');
@@ -1276,7 +1294,7 @@ class HealthCheck extends BaseMahoCommand
         $output->write('Checking encrypted data... ');
         try {
             $undecryptable = self::findUndecryptableData();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $output->writeln('');
             $output->writeln('<error>Error: unable to check encrypted data: ' . $e->getMessage() . '</error>');
             $output->writeln('');
@@ -1292,8 +1310,8 @@ class HealthCheck extends BaseMahoCommand
             '<error>Error: %d encrypted value(s) cannot be decrypted with the current key:</error>',
             count($undecryptable),
         ));
-        foreach ($undecryptable as $failure) {
-            $output->writeln('- ' . $failure);
+        foreach ($undecryptable as $row) {
+            $output->writeln('- ' . $row);
         }
         $output->writeln(wordwrap(self::UNDECRYPTABLE_ADVICE, 100));
         $output->writeln('');

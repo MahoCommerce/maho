@@ -403,12 +403,24 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Whether a stored credential hash predates the current hash version or bcrypt cost
-     * and should be re-hashed
+     * Whether a stored credential should be re-hashed on next login: a legacy digest,
+     * or a bcrypt hash that no longer matches the current default algorithm and cost.
+     *
+     * Deliberately takes no password: only the shape of the stored hash matters, and running
+     * password_verify() again would repeat the bcrypt cost already paid to authenticate.
+     * Also deliberately not the encryptor's business: that class is replaceable
+     * (XML_PATH_ENCRYPTION_MODEL, mahocommerce/module-mcrypt-compat), this runs inside
+     * every successful login, and every encryptor mints bcrypt for HASH_VERSION_LATEST.
      */
     public function hashNeedsUpgrade(#[\SensitiveParameter] string $hash): bool
     {
-        return $this->getEncryptor()->hashNeedsUpgrade($hash);
+        $algo = password_get_info($hash)['algo'];
+        if ($algo === null) {
+            return true;
+        }
+        // bcrypt is the format Maho mints, so track it against the current default;
+        // other password_hash() formats (argon2) are imported credentials, leave them alone
+        return $algo === PASSWORD_BCRYPT && password_needs_rehash($hash, PASSWORD_DEFAULT);
     }
 
     /**
