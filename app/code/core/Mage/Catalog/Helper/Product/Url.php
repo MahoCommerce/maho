@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-FileCopyrightText: 2022-2024 The OpenMage Contributors <https://openmage.org>
  * SPDX-FileCopyrightText: 2006-2020 Magento, Inc. <https://magento.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -10,6 +11,12 @@
 class Mage_Catalog_Helper_Product_Url extends Mage_Core_Helper_Url
 {
     protected $_moduleName = 'Mage_Catalog';
+
+    /** @var array<string, bool>|null */
+    protected static ?array $_transliteratorIds = null;
+
+    /** @var array<string, Transliterator> */
+    protected static array $_transliterators = [];
 
     /**
      * Symbol convert table
@@ -58,13 +65,28 @@ class Mage_Catalog_Helper_Product_Url extends Mage_Core_Helper_Url
         $string = strtr($string, $this->getConvertTable());
 
         if (!empty($locale)) {
-            $opts = transliterator_list_ids();
+            self::$_transliteratorIds ??= array_fill_keys(transliterator_list_ids() ?: [], true);
             $code = str_replace('_', '-', strtolower($locale)) . '_Latn/BGN';
-            if (in_array($code, $opts)) {
-                return transliterator_transliterate($code . '; Any-Latin; Latin-ASCII; [^\u001F-\u007f] remove' . ($lower ? '; Lower()' : ''), $string);
+            if (isset(self::$_transliteratorIds[$code])) {
+                return self::transliterate($code . '; Any-Latin; Latin-ASCII; [^\u001F-\u007f] remove' . ($lower ? '; Lower()' : ''), $string);
             }
         }
 
-        return transliterator_transliterate('Any-Latin; Latin-ASCII; [^\u001F-\u007f] remove' . ($lower ? '; Lower()' : ''), $string);
+        return self::transliterate('Any-Latin; Latin-ASCII; [^\u001F-\u007f] remove' . ($lower ? '; Lower()' : ''), $string);
+    }
+
+    protected static function transliterate(string $rules, string $string): string
+    {
+        if (!isset(self::$_transliterators[$rules])) {
+            $transliterator = Transliterator::create($rules);
+            if ($transliterator === null) {
+                return $string;
+            }
+            self::$_transliterators[$rules] = $transliterator;
+        }
+
+        $result = self::$_transliterators[$rules]->transliterate($string);
+
+        return $result === false ? $string : $result;
     }
 }
