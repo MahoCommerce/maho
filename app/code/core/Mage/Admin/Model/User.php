@@ -85,16 +85,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public const XML_PATH_MIN_ADMIN_PASSWORD_LENGTH = 'admin/security/min_admin_password_length';
 
     /**
-     * Length of salt
-     */
-    public const HASH_SALT_LENGTH = 32;
-
-    /**
-     * Empty hash salt
-     */
-    public const HASH_SALT_EMPTY = null;
-
-    /**
      * Authentication error codes
      */
     public const AUTH_ERR_ACCOUNT_INACTIVE = 1;
