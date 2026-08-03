@@ -166,6 +166,22 @@ class Mage_GoogleAnalytics_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Feed-matching SKU: the raw catalog SKU (the variant's for configurables), never the
+     * composite one getSku() builds on cart products from custom options or bundle selections
+     */
+    public function getTrackingSku(?Mage_Catalog_Model_Product $product): ?string
+    {
+        if (!$product) {
+            return null;
+        }
+        $simpleOption = $product->getCustomOption('simple_product');
+        if ($simpleOption?->getProduct()) {
+            return $simpleOption->getProduct()->getData('sku');
+        }
+        return $product->getData('sku');
+    }
+
+    /**
      * @param int|float|string|null $price
      */
     public function formatPrice($price): string

@@ -75,7 +75,7 @@ class Mage_GoogleAnalytics_Model_Observer
             $manufacturer = $attribute ? $attribute->getFrontend()->getValue($product) : '';
             $dataForAnalytics = [
                 'id' => $product->getId(),
-                'sku' => $product->getSku(),
+                'sku' => Mage::helper('googleanalytics')->getTrackingSku($product) ?: $item->getSku(),
                 'name' => $product->getName(),
                 'qty' => $addedQty ?: $removedQty,
                 'price' => Mage::helper('googleanalytics')->getPriceInclTax($product),
