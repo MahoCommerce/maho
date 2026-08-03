@@ -9,11 +9,11 @@
 declare(strict_types=1);
 
 /**
- * API v2 back-office content reads.
+ * API v2 backend content reads.
  *
- * Back-office callers (admin or service tokens) must be able to read back
+ * Backend callers (admin or service tokens) must be able to read back
  * what they write: disabled CMS pages by id, and the full cross-store
- * catalog via ?scope=all. Guests and customers keep the storefront view:
+ * catalog via ?scope=all. Guests and customers keep the frontend view:
  * active, current-store content only, and no scope=all.
  *
  * @group write
@@ -23,14 +23,14 @@ afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Back-office reads of disabled CMS pages', function (): void {
+describe('Backend reads of disabled CMS pages', function (): void {
 
     it('lets the creating service token read a disabled page by id, while anonymous gets 404', function (): void {
         $token = serviceToken(['cms-pages/write']);
 
         $create = apiPost('/api/rest/v2/cms-pages', [
-            'identifier' => 'test-backoffice-disabled-page',
-            'title' => 'Back-Office Draft Page',
+            'identifier' => 'test-backend-disabled-page',
+            'title' => 'Backend Draft Page',
             'content' => '<p>draft</p>',
             'isActive' => false,
             'stores' => ['all'],
@@ -42,7 +42,7 @@ describe('Back-office reads of disabled CMS pages', function (): void {
 
         $read = apiGet("/api/rest/v2/cms-pages/{$pageId}", $token);
         expect($read['status'])->toBe(200);
-        expect($read['json']['identifier'])->toBe('test-backoffice-disabled-page');
+        expect($read['json']['identifier'])->toBe('test-backend-disabled-page');
         expect($read['json']['isActive'])->toBeFalsy();
 
         expect(apiGet("/api/rest/v2/cms-pages/{$pageId}")['status'])->toBe(404);
@@ -52,8 +52,8 @@ describe('Back-office reads of disabled CMS pages', function (): void {
         $token = serviceToken(['cms-pages/write']);
 
         $create = apiPost('/api/rest/v2/cms-pages', [
-            'identifier' => 'test-backoffice-scope-all-page',
-            'title' => 'Back-Office Scope All Page',
+            'identifier' => 'test-backend-scope-all-page',
+            'title' => 'Backend Scope All Page',
             'content' => '<p>draft</p>',
             'isActive' => false,
             'stores' => ['all'],
@@ -68,7 +68,7 @@ describe('Back-office reads of disabled CMS pages', function (): void {
         $ids = array_column(getItems($list), 'id');
         expect($ids)->toContain($pageId);
 
-        // Without scope=all the same token still gets the storefront view.
+        // Without scope=all the same token still gets the frontend view.
         $default = apiGet('/api/rest/v2/cms-pages?pageSize=100', $token);
         expect($default['status'])->toBe(200);
         expect(array_column(getItems($default), 'id'))->not->toContain($pageId);
@@ -76,8 +76,8 @@ describe('Back-office reads of disabled CMS pages', function (): void {
 
     it('denies a store-restricted service token content outside its allowlist', function (): void {
         $create = apiPost('/api/rest/v2/cms-pages', [
-            'identifier' => 'test-backoffice-restricted-page',
-            'title' => 'Back-Office Restricted Page',
+            'identifier' => 'test-backend-restricted-page',
+            'title' => 'Backend Restricted Page',
             'content' => '<p>draft</p>',
             'isActive' => false,
             'stores' => ['all'],
@@ -97,10 +97,10 @@ describe('Back-office reads of disabled CMS pages', function (): void {
         expect(apiGet('/api/rest/v2/cms-pages?scope=all', customerToken())['status'])->toBe(403);
     });
 
-    it('denies back-office reads to a service token without a cms-pages grant', function (): void {
+    it('denies backend reads to a service token without a cms-pages grant', function (): void {
         $create = apiPost('/api/rest/v2/cms-pages', [
-            'identifier' => 'test-backoffice-foreign-token-page',
-            'title' => 'Back-Office Foreign Token Page',
+            'identifier' => 'test-backend-foreign-token-page',
+            'title' => 'Backend Foreign Token Page',
             'content' => '<p>draft</p>',
             'isActive' => false,
             'stores' => ['all'],
@@ -110,7 +110,7 @@ describe('Back-office reads of disabled CMS pages', function (): void {
         $pageId = $create['json']['id'];
         trackCreated('cms_page', $pageId);
 
-        // A token granted only unrelated resources is not a back-office reader
+        // A token granted only unrelated resources is not a backend reader
         // for CMS pages: drafts stay hidden and ?scope=all is off limits.
         $foreign = serviceToken(['products/write']);
         expect(apiGet("/api/rest/v2/cms-pages/{$pageId}", $foreign)['status'])->toBe(404);
@@ -119,14 +119,14 @@ describe('Back-office reads of disabled CMS pages', function (): void {
 
 });
 
-describe('Back-office reads of disabled blog posts', function (): void {
+describe('Backend reads of disabled blog posts', function (): void {
 
     it('lets a service token read a disabled post by id, while anonymous gets 404', function (): void {
         $token = serviceToken(['blog-posts/write']);
 
         $create = apiPost('/api/rest/v2/blog-posts', [
-            'title' => 'Back-Office Draft Post',
-            'urlKey' => 'test-backoffice-disabled-post',
+            'title' => 'Backend Draft Post',
+            'urlKey' => 'test-backend-disabled-post',
             'content' => '<p>draft</p>',
             'isActive' => false,
             'stores' => ['all'],
@@ -138,7 +138,7 @@ describe('Back-office reads of disabled blog posts', function (): void {
 
         $read = apiGet("/api/rest/v2/blog-posts/{$postId}", $token);
         expect($read['status'])->toBe(200);
-        expect($read['json']['urlKey'])->toBe('test-backoffice-disabled-post');
+        expect($read['json']['urlKey'])->toBe('test-backend-disabled-post');
 
         expect(apiGet("/api/rest/v2/blog-posts/{$postId}")['status'])->toBe(404);
     });
@@ -147,8 +147,8 @@ describe('Back-office reads of disabled blog posts', function (): void {
         $token = serviceToken(['blog-posts/write']);
 
         $create = apiPost('/api/rest/v2/blog-posts', [
-            'title' => 'Back-Office Scope All Post',
-            'urlKey' => 'test-backoffice-scope-all-post',
+            'title' => 'Backend Scope All Post',
+            'urlKey' => 'test-backend-scope-all-post',
             'content' => '<p>draft</p>',
             'isActive' => false,
             'stores' => ['all'],

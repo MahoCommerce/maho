@@ -261,13 +261,13 @@ final class StockUpdateProcessor extends \Maho\ApiPlatform\Processor
 
     /**
      * Same website gate as every other product write path
-     * (authorizeProductWebsites), without loading full product models.
+     * (assertProductWebsitesAllowed), without loading full product models.
      *
      * @param int[] $productIds
      */
     private function authorizeStockWebsites(array $productIds): void
     {
-        $allowedWebsiteIds = $this->getAllowedWebsiteIds($this->getAuthorizedUser());
+        $allowedWebsiteIds = $this->getAllowedWebsiteIds($this->requireUser());
         if ($allowedWebsiteIds === null) {
             return;
         }

@@ -72,13 +72,13 @@ describe('Product Permission Enforcement (REST)', function (): void {
         expect($response['status'])->toBeForbidden();
     });
 
-    it('limits back-office product reads to tokens holding a products grant', function (): void {
+    it('limits backend product reads to tokens holding a products grant', function (): void {
         $writeToken = serviceToken(['products/write', 'products/delete']);
         $suffix = substr(uniqid(), -8);
 
         $create = apiPost('/api/rest/v2/products', [
             'sku' => "PEST-BOREAD-{$suffix}",
-            'name' => 'Pest Back-Office Read Product',
+            'name' => 'Pest Backend Read Product',
             'price' => 10.00,
             'isActive' => false,
             'websiteIds' => [1],
@@ -90,7 +90,7 @@ describe('Product Permission Enforcement (REST)', function (): void {
         // The creating write token reads its own disabled product back.
         expect(apiGet("/api/rest/v2/products/{$productId}", $writeToken)['status'])->toBe(200);
 
-        // A service token without any products grant is not a back-office
+        // A service token without any products grant is not a backend
         // reader: the disabled product stays hidden like it is for guests.
         $foreignToken = serviceToken(['cms-pages/write']);
         expect(apiGet("/api/rest/v2/products/{$productId}", $foreignToken)['status'])->toBe(404);
@@ -107,7 +107,7 @@ describe('Product Permission Enforcement (REST)', function (): void {
 
         $create = apiPost('/api/rest/v2/products', [
             'sku' => "PEST-BOCOST-{$suffix}",
-            'name' => 'Pest Back-Office Cost Product',
+            'name' => 'Pest Backend Cost Product',
             'type' => $type,
             'price' => 10.00,
             'cost' => 6.50,
@@ -130,7 +130,7 @@ describe('Product Permission Enforcement (REST)', function (): void {
 
         $create = apiPost('/api/rest/v2/products', [
             'sku' => "PEST-BODSGN-{$suffix}",
-            'name' => 'Pest Back-Office Design Product',
+            'name' => 'Pest Backend Design Product',
             'type' => 'simple',
             'price' => 10.00,
             'customDesign' => 'base/default',
@@ -483,7 +483,7 @@ describe('Product Extended Fields (REST)', function (): void {
             expect($read['json']['customAttributes'][$code] ?? null)->toBe('pest-value');
 
             // The raw attribute map ignores is_visible_on_front, so it is
-            // back-office only; the response cache must not leak it.
+            // backend only; the response cache must not leak it.
             $public = apiGet("/api/rest/v2/products/{$productId}");
             expect($public['status'])->toBe(200);
             expect($public['json']['customAttributes'] ?? null)->toBeNull();
@@ -599,7 +599,7 @@ describe('Product Extended Fields (REST)', function (): void {
         expect($badBulk['status'])->toBe(400);
     });
 
-    it('writes extended stock data on create and reads it back through stockItem, back-office columns only for privileged callers', function (): void {
+    it('writes extended stock data on create and reads it back through stockItem, backend columns only for privileged callers', function (): void {
         $token = serviceToken(['products/write', 'products/delete']);
         $suffix = substr(uniqid(), -8);
 
@@ -697,7 +697,7 @@ describe('Product Extended Fields (REST)', function (): void {
         trackCreated('product', $publicFirstId);
 
         // Anonymous read warms the cache: the privileged read after it must
-        // still see the back-office columns.
+        // still see the backend columns.
         $publicStock = (apiGet("/api/rest/v2/products/{$publicFirstId}"))['json']['stockItem'];
         expect($publicStock)->not->toHaveKey('min_qty');
         expect($publicStock)->not->toHaveKey('use_config_min_qty');
@@ -721,7 +721,7 @@ describe('Product Extended Fields (REST)', function (): void {
         trackCreated('product', $privilegedFirstId);
 
         // Privileged read warms the cache: the anonymous read after it must not
-        // receive the back-office columns.
+        // receive the backend columns.
         $privilegedStock = (apiGet("/api/rest/v2/products/{$privilegedFirstId}", $token))['json']['stockItem'];
         expect((float) $privilegedStock['min_qty'])->toBe(2.0);
         expect($privilegedStock['use_config_min_qty'])->toBeFalse();

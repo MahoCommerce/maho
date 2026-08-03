@@ -68,7 +68,7 @@ describe('GET /api/rest/v2/customers/{id}', function (): void {
         $differentCustomerId = $customerId + 1;
         $response = apiGet("/api/rest/v2/customers/{$customerId}", customerToken($differentCustomerId));
 
-        // CustomerProvider::provide() calls authorizeCustomerAccess(), which
+        // CustomerProvider::provide() calls assertCustomerAccess(), which
         // throws AccessDeniedHttpException unless the caller is the owner or
         // an admin. Expect 403 (or 404 if the requested ID doesn't exist).
         expect($response['status'])->toBeIn([403, 404]);
@@ -88,8 +88,8 @@ describe('GET /api/rest/v2/customers', function (): void {
     it('prevents non-admin from listing all customers', function (): void {
         $response = apiGet('/api/rest/v2/customers', customerToken());
 
-        // CustomerProvider's collection branch enforces admin-or-api-user via
-        // requireAdmin(); a ROLE_CUSTOMER token gets 403.
+        // The collection operation's security expression only admits admin
+        // tokens and service tokens with customers/read; a ROLE_CUSTOMER token gets 403.
         expect($response['status'])->toBe(403);
     });
 

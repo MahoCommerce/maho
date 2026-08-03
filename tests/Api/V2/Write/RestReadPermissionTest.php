@@ -14,10 +14,9 @@ declare(strict_types=1);
  * Granular read permissions for API-user tokens are enforced by each read
  * operation's `security: is_granted('<resource>/read')` expression (evaluated
  * by ApiUserVoter) on REST GET requests, the read-side counterpart to the
- * requirePermission() checks in the Processors. A key must hold
- * `<resource>/read` (or `<resource>/all`, or `all`) to read a resource that is
- * gated to ROLE_API_USER. Public operations (security: 'true') stay reachable
- * regardless.
+ * assertPermission() checks in the Processors. A key must hold
+ * `<resource>/read` (or `<resource>/all`, or `all`) to read a non-public
+ * resource. Public operations (security: 'true') stay reachable regardless.
  *
  * @group write
  */

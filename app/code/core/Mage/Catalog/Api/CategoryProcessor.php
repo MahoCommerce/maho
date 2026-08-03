@@ -43,14 +43,14 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Category
     {
-        $user = $this->getAuthorizedUser();
+        $user = $this->requireUser();
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->requirePermission($user, 'categories/delete');
+            $this->assertPermission($user, 'categories/delete');
             return $this->handleDelete((int) $uriVariables['id'], $user);
         }
 
-        $this->requirePermission($user, 'categories/write');
+        $this->assertPermission($user, 'categories/write');
 
         assert($data instanceof Category);
 

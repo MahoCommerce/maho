@@ -183,7 +183,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             }
             // websiteId only survives denormalization for a privileged caller,
             // so the authenticated ApiUser is guaranteed to exist.
-            $this->assertWebsiteAllowed($websiteId, $this->getAuthorizedUser(), 'customer');
+            $this->assertWebsiteAllowed($websiteId, $this->requireUser(), 'customer');
         }
 
         $coreHelper = \Mage::helper('core');
@@ -465,7 +465,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Customer not found');
         }
 
-        $this->assertWebsiteAllowed($customer->getWebsiteId(), $this->getAuthorizedUser(), 'customer');
+        $this->assertWebsiteAllowed($customer->getWebsiteId(), $this->requireUser(), 'customer');
 
         if ($data->websiteId !== null && $data->websiteId !== (int) $customer->getWebsiteId()) {
             throw new BadRequestHttpException('websiteId can only be set when creating a customer');

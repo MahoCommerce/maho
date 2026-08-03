@@ -36,12 +36,12 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): BundleOption|array|null
     {
-        $user = $this->getAuthorizedUser();
+        $user = $this->requireUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
 
         // Enforce website scope for store-restricted API users on every
         // sub-resource write/delete (mirrors ProductProcessor's main CRUD check).
-        $this->authorizeProductWebsites($this->loadProduct($productId), $user);
+        $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
 
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);
@@ -56,12 +56,12 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
         }
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->requirePermission($user, 'products/delete');
+            $this->assertPermission($user, 'products/delete');
             $optionId = (int) ($uriVariables['id'] ?? $body['optionId'] ?? $body['option_id'] ?? 0) ?: $pathOptionId;
             return $this->handleDelete($productId, $optionId);
         }
 
-        $this->requirePermission($user, 'products/write');
+        $this->assertPermission($user, 'products/write');
 
         if ($operation instanceof Post) {
             return $this->handleCreate($productId, $body);
@@ -227,11 +227,11 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
      */
     private function authorizeAssociatedProductWebsites(int $selProductId): void
     {
-        $user = $this->getAuthorizedUser();
+        $user = $this->requireUser();
         if ($this->getAllowedWebsiteIds($user) === null) {
             return;
         }
-        $this->authorizeProductWebsites($this->loadProduct($selProductId), $user);
+        $this->assertProductWebsitesAllowed($this->loadProduct($selProductId), $user);
     }
 
 }

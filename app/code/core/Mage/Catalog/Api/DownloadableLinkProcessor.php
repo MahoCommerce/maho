@@ -36,18 +36,18 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): DownloadableLink|array|null
     {
-        $user = $this->getAuthorizedUser();
+        $user = $this->requireUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
 
         // Enforce website scope for store-restricted API users on every
         // sub-resource write/delete (mirrors ProductProcessor's main CRUD check).
-        $this->authorizeProductWebsites($this->loadProduct($productId), $user);
+        $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
 
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->requirePermission($user, 'products/delete');
+            $this->assertPermission($user, 'products/delete');
             $linkId = (int) ($body['linkId'] ?? $body['link_id'] ?? 0);
             if ($linkId <= 0) {
                 $linkId = (int) ($request?->query->get('linkId') ?? 0);
@@ -55,7 +55,7 @@ final class DownloadableLinkProcessor extends \Maho\ApiPlatform\Processor
             return $this->handleDelete($productId, $linkId);
         }
 
-        $this->requirePermission($user, 'products/write');
+        $this->assertPermission($user, 'products/write');
 
         if ($operation instanceof Post) {
             return $this->handleCreate($productId, $body);

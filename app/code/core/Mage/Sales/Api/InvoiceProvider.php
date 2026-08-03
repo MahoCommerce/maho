@@ -144,11 +144,11 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
             // invoices within their store allowlist. Customers are limited to
             // their own orders.
             if ($this->isAdmin() || $this->isApiUser()) {
-                $this->assertStoreAllowed($order->getStoreId(), $this->getAuthorizedUser(), 'order');
+                $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
             } else {
                 $customerId = $order->getCustomerId();
                 if ($customerId) {
-                    $this->authorizeCustomerAccess((int) $customerId, 'You can only access your own order invoices');
+                    $this->assertCustomerAccess((int) $customerId, 'You can only access your own order invoices');
                 } else {
                     throw new AccessDeniedHttpException('Access denied');
                 }

@@ -25,12 +25,12 @@ final class CmsBlockProvider extends CrudProvider
     protected array $defaultSort = ['title' => 'ASC'];
 
     protected bool $supportsScopeAll = true;
-    protected ?string $backOfficeResource = 'cms-blocks';
+    protected ?string $backendResource = 'cms-blocks';
 
     /**
      * Disabled blocks must not be readable through the public GET /cms-blocks/{id}
      * route. The base provider only store-scopes; enforce is_active here so the
-     * numeric-id path matches the identifier and collection paths. Back-office
+     * numeric-id path matches the identifier and collection paths. Backend
      * readers bypass both checks so drafts and foreign-store blocks stay readable.
      */
     #[\Override]
@@ -41,7 +41,7 @@ final class CmsBlockProvider extends CrudProvider
             return null;
         }
 
-        if ($this->isBackOfficeReader()) {
+        if ($this->isBackendReader()) {
             $resource = $block->getResource();
             if (method_exists($resource, 'lookupStoreIds')) {
                 $this->assertReadableStores($resource->lookupStoreIds($block->getId()), 'block');
@@ -87,8 +87,8 @@ final class CmsBlockProvider extends CrudProvider
 
     private function getByIdentifier(string $identifier): ?CmsBlock
     {
-        if ($this->isBackOfficeReader()) {
-            return $this->getByIdentifierBackOffice($identifier);
+        if ($this->isBackendReader()) {
+            return $this->getByIdentifierBackend($identifier);
         }
 
         $collection = \Mage::getModel('cms/block')->getCollection();
@@ -104,11 +104,11 @@ final class CmsBlockProvider extends CrudProvider
     }
 
     /**
-     * Back-office readers resolve across every store and status. Current-store
+     * Backend readers resolve across every store and status. Current-store
      * matches win over other stores when the identifier is reused (mirrors
-     * CmsPageProvider::getPageByIdentifierBackOffice()).
+     * CmsPageProvider::getPageByIdentifierBackend()).
      */
-    private function getByIdentifierBackOffice(string $identifier): ?CmsBlock
+    private function getByIdentifierBackend(string $identifier): ?CmsBlock
     {
         $collection = \Mage::getModel('cms/block')->getCollection();
         $collection->addFieldToFilter('identifier', $identifier);

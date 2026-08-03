@@ -223,9 +223,9 @@ describe('Blog Category CRUD Lifecycle (REST)', function (): void {
 
 });
 
-describe('Blog Category Back-Office Reads (REST)', function (): void {
+describe('Blog Category Backend Reads (REST)', function (): void {
 
-    it('lets a back-office token read a disabled category by id and list it with ?scope=all', function (): void {
+    it('lets a backend token read a disabled category by id and list it with ?scope=all', function (): void {
         $token = serviceToken(['blog-categories/write']);
 
         $create = apiPost('/api/rest/v2/blog-categories', [

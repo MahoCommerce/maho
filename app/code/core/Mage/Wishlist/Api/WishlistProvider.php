@@ -66,7 +66,7 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
      */
     private function getWishlistItems(): array
     {
-        $customerId = $this->requireAuthentication();
+        $customerId = $this->requireCustomerId();
         $storeId = \Mage::app()->getStore()->getId();
         $cacheKey = "api_wishlist_{$customerId}_{$storeId}";
 

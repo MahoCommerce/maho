@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Drops back-office inventory policy columns from a serialized Product.
+ * Drops backend inventory policy columns from a serialized Product.
  *
  * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
  * SPDX-License-Identifier: OSL-3.0
@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Mage\Catalog\Api;
 
-use Maho\ApiPlatform\Security\BackOfficeAccess;
+use Maho\ApiPlatform\Security\BackendAccess;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareTrait;
@@ -21,7 +21,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 /**
  * `stockItem` is a column-keyed map rather than a typed sub-resource, so
  * `#[ApiProperty(security: ...)]` cannot reach the individual columns; this
- * normalizer applies the same `is_back_office('products')` rule to the keys.
+ * normalizer applies the same `has_backend_access('products')` rule to the keys.
  *
  * The columns it removes describe inventory policy, not availability: the
  * out-of-stock threshold, the admin low-stock alert level, the backorder policy
@@ -37,7 +37,7 @@ final class ProductStockItemNormalizer implements NormalizerInterface, Normalize
     // products are plain arrays, not Product DTOs with their own stockItem.
     private const ALREADY_CALLED = 'maho_product_stock_item_normalizer';
 
-    private const BACK_OFFICE_COLUMNS = [
+    private const BACKEND_COLUMNS = [
         'min_qty' => true,
         'notify_stock_qty' => true,
         'backorders' => true,
@@ -69,13 +69,13 @@ final class ProductStockItemNormalizer implements NormalizerInterface, Normalize
 
         if (!is_array($data)
             || !is_array($data['stockItem'] ?? null)
-            || BackOfficeAccess::isGrantedBy($this->authorizationChecker->isGranted(...), 'products')
+            || BackendAccess::isGrantedBy($this->authorizationChecker->isGranted(...), 'products')
         ) {
             return $data;
         }
 
         foreach (array_keys($data['stockItem']) as $column) {
-            if (isset(self::BACK_OFFICE_COLUMNS[$column]) || str_starts_with((string) $column, 'use_config_')) {
+            if (isset(self::BACKEND_COLUMNS[$column]) || str_starts_with((string) $column, 'use_config_')) {
                 unset($data['stockItem'][$column]);
             }
         }

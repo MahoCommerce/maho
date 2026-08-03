@@ -43,7 +43,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
 
         // Bridge raw REST body into context args. API Platform deserialises POST
         // bodies into the resource DTO (Order here), but the place-order
-        // endpoint receives a storefront-shaped payload (shippingAddress,
+        // endpoint receives a frontend-shaped payload (shippingAddress,
         // billingAddress, paymentData, etc.) that doesn't map onto Order
         // fields. Parse the raw body so the placeOrder handler can read it.
         // GraphQL invocations already populate $context['args']['input'].
@@ -86,7 +86,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
                 throw new NotFoundHttpException('Order not found');
             }
         } else {
-            $this->assertStoreAllowed($order->getStoreId(), $this->getAuthorizedUser(), 'order');
+            $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
         }
 
         return $order;
@@ -96,7 +96,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
      * Place order from cart. Accepts the cart identifier from the request body
      * (cartId / maskedId) OR from the URI (e.g. /guest-carts/{id}/place-order).
      * Also applies shipping/billing address, customer email, and payment-method
-     * additionalInformation from the request body, storefront callers send the
+     * additionalInformation from the request body, frontend callers send the
      * full checkout state in one shot rather than pre-mutating the cart.
      */
     private function placeOrder(array $context, array $uriVariables = []): Order
@@ -152,7 +152,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // Verify cart ownership
         $this->verifyCartOwnership($quote, $maskedId !== null);
 
-        // Storefront callers send the full checkout state in the body, apply
+        // Frontend callers send the full checkout state in the body, apply
         // any provided addresses to the quote before order placement so the
         // rate calculator and address validations see the right data.
         if (isset($args['shippingAddress']) && is_array($args['shippingAddress'])) {
@@ -193,7 +193,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        // Set shipping method directly on the in-memory address. The storefront
+        // Set shipping method directly on the in-memory address. The frontend
         // sends a composite carrier_method string in the body, and we preserve
         // the in-memory quote state through to placeAdminOrder rather than
         // save + reload through cartService->setShippingMethod.
@@ -347,14 +347,14 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
      * orders/create grant. A bare service-account token without it stays subject
      * to the guest masked-id / customer-ownership rules, so it can't place an
      * order from an arbitrary enumerable cart id. Closes the gap left by the
-     * overridden process() bypassing the base Processor's requirePermission().
+     * overridden process() bypassing the base Processor's assertPermission().
      */
     private function isPrivilegedOrderActor(): bool
     {
         if ($this->isAdmin()) {
             return true;
         }
-        return $this->isApiUser() && $this->getAuthorizedUser()->hasPermission('orders/create');
+        return $this->isApiUser() && $this->requireUser()->hasPermission('orders/create');
     }
 
 }

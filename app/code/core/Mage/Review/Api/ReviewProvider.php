@@ -70,7 +70,7 @@ final class ReviewProvider extends CrudProvider
                 ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 10, 100);
                 return $this->getProductReviews($productId, $page, $pageSize);
             }
-            if ($this->isBackOffice('reviews')) {
+            if ($this->hasBackendAccess('reviews')) {
                 ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 10, 100);
                 return $this->getModerationQueue($context, $page, $pageSize);
             }
@@ -185,7 +185,7 @@ final class ReviewProvider extends CrudProvider
     }
 
     /**
-     * Cross-store moderation listing for back-office callers, newest first.
+     * Cross-store moderation listing for backend callers, newest first.
      * Optional status filter (?status=pending|approved|not_approved); tokens
      * restricted to specific stores only see reviews assigned to those stores.
      * Not cached: results depend on the token and change on every moderation.
@@ -255,7 +255,7 @@ final class ReviewProvider extends CrudProvider
             throw new NotFoundHttpException('Review not found');
         }
 
-        // Store scoping: outside the back office a review is only visible in
+        // Store scoping: outside the backend a review is only visible in
         // the store views it is assigned to. Store 0 is a marker row added on
         // every save, so it grants visibility only when the review carries no
         // real store assignment (a deliberate all-stores review). Service
@@ -267,7 +267,7 @@ final class ReviewProvider extends CrudProvider
         ));
         if ($checkVisibility && !$this->isAdmin() && $storeIds !== []) {
             if ($this->isApiUser()) {
-                $allowedStoreIds = $this->getAuthorizedUser()->getAllowedStoreIds();
+                $allowedStoreIds = $this->requireUser()->getAllowedStoreIds();
                 if ($allowedStoreIds !== null && array_intersect($storeIds, $allowedStoreIds) === []) {
                     throw new NotFoundHttpException('Review not found');
                 }
@@ -280,7 +280,7 @@ final class ReviewProvider extends CrudProvider
         // service tokens scoped for moderation; everyone else gets 404.
         if ($checkVisibility
             && (int) $review->getStatusId() !== \Mage_Review_Model_Review::STATUS_APPROVED
-            && !$this->isBackOffice('reviews')
+            && !$this->hasBackendAccess('reviews')
         ) {
             $customerId = $this->getAuthenticatedCustomerId();
             if (!$customerId || (int) $review->getCustomerId() !== $customerId) {

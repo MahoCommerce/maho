@@ -65,8 +65,8 @@ describe('Admin ACL, REST', function (): void {
     });
 
     it('non-admin tokens are not affected by AdminAclListener', function (): void {
-        // A service token (ROLE_API_USER) with explicit cms-pages permission
-        // must work, AdminAclListener must skip non-admin tokens entirely.
+        // A service token with an explicit cms-pages permission must work,
+        // AdminAclListener must skip non-admin tokens entirely.
         $token = serviceToken(['cms_pages/all']);
         $response = apiGet('/api/rest/v2/cms-pages', $token);
         expect($response['status'])->not->toBe(403);

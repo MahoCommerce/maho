@@ -27,7 +27,7 @@ final class CmsPageProvider extends CrudProvider
     protected array $defaultSort = ['title' => 'ASC'];
 
     protected bool $supportsScopeAll = true;
-    protected ?string $backOfficeResource = 'cms-pages';
+    protected ?string $backendResource = 'cms-pages';
 
     /**
      * Override provide() to handle identifier-based collection filtering
@@ -82,7 +82,7 @@ final class CmsPageProvider extends CrudProvider
     /**
      * Disabled pages must not be readable through the public GET /cms-pages/{id}
      * route. The base provider only store-scopes; enforce is_active here so the
-     * numeric-id path matches the identifier and collection paths. Back-office
+     * numeric-id path matches the identifier and collection paths. Backend
      * readers bypass both checks so drafts and foreign-store pages stay readable.
      */
     #[\Override]
@@ -93,7 +93,7 @@ final class CmsPageProvider extends CrudProvider
             return null;
         }
 
-        if ($this->isBackOfficeReader()) {
+        if ($this->isBackendReader()) {
             $resource = $page->getResource();
             if (method_exists($resource, 'lookupStoreIds')) {
                 $this->assertReadableStores($resource->lookupStoreIds($page->getId()), 'page');
@@ -121,8 +121,8 @@ final class CmsPageProvider extends CrudProvider
 
     private function getPageByIdentifier(string $identifier): ?CmsPage
     {
-        if ($this->isBackOfficeReader()) {
-            return $this->getPageByIdentifierBackOffice($identifier);
+        if ($this->isBackendReader()) {
+            return $this->getPageByIdentifierBackend($identifier);
         }
 
         $storeId = StoreContext::getStoreId();
@@ -145,11 +145,11 @@ final class CmsPageProvider extends CrudProvider
     }
 
     /**
-     * checkIdentifier() only matches active, current-store pages; back-office
+     * checkIdentifier() only matches active, current-store pages; backend
      * readers resolve across every store and status. Current-store matches win
      * over other stores when the identifier is reused.
      */
-    private function getPageByIdentifierBackOffice(string $identifier): ?CmsPage
+    private function getPageByIdentifierBackend(string $identifier): ?CmsPage
     {
         $collection = \Mage::getModel('cms/page')->getCollection();
         $collection->addFieldToFilter('identifier', $identifier);

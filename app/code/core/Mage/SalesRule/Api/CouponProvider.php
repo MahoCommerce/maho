@@ -35,7 +35,7 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
 
         // A restricted token only sees coupons whose rule targets at least one
         // allowed website; hide the rest like the collection filter does.
-        $allowedWebsiteIds = $this->allowedWebsiteIds($this->getAuthorizedUser());
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
         if ($allowedWebsiteIds !== null) {
             /** @var \Mage_SalesRule_Model_Rule $rule */
             $rule = \Mage::getModel('salesrule/rule');
@@ -57,7 +57,7 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
 
         $this->applyCollectionFilters($collection, $context['filters'] ?? []);
 
-        $allowedWebsiteIds = $this->allowedWebsiteIds($this->getAuthorizedUser());
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
         if ($allowedWebsiteIds !== null) {
             $collection->getSelect()->where(
                 'main_table.rule_id IN (SELECT rule_id FROM '

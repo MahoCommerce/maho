@@ -67,14 +67,14 @@ abstract class Processor implements ProcessorInterface
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
     {
-        $user = $this->getAuthorizedUser();
+        $user = $this->requireUser();
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->requirePermission($user, $this->deletePermission ?? $this->writePermission);
+            $this->assertPermission($user, $this->deletePermission ?? $this->writePermission);
             return $this->processDelete((int) $uriVariables['id'], $user);
         }
 
-        $this->requirePermission($user, $this->writePermission);
+        $this->assertPermission($user, $this->writePermission);
 
         if (isset($uriVariables['id'])) {
             return $this->processUpdate((int) $uriVariables['id'], $data, $user);

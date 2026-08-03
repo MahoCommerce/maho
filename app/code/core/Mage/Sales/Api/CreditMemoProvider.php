@@ -59,7 +59,7 @@ final class CreditMemoProvider extends CrudProvider
             throw new NotFoundHttpException('Credit memo not found');
         }
 
-        $this->assertStoreAllowed((int) $creditmemo->getStoreId(), $this->getAuthorizedUser(), 'credit memo');
+        $this->assertStoreAllowed((int) $creditmemo->getStoreId(), $this->requireUser(), 'credit memo');
 
         return CreditMemo::fromModel($creditmemo);
     }
@@ -73,7 +73,7 @@ final class CreditMemoProvider extends CrudProvider
             throw new NotFoundHttpException('Order not found');
         }
 
-        $this->assertStoreAllowed($order->getStoreId(), $this->getAuthorizedUser(), 'order');
+        $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
 
         ['page' => $page, 'pageSize' => $perPage] = $this->extractPagination($context);
 
@@ -106,7 +106,7 @@ final class CreditMemoProvider extends CrudProvider
         ['page' => $page, 'pageSize' => $perPage] = $this->extractPagination($context);
 
         $collection = \Mage::getResourceModel('sales/order_creditmemo_collection');
-        $this->applyAllowedStoreFilter($collection, $this->getAuthorizedUser());
+        $this->applyAllowedStoreFilter($collection, $this->requireUser());
         $collection->setOrder('created_at', 'DESC');
         $collection->setPageSize($perPage)->setCurPage($page);
 

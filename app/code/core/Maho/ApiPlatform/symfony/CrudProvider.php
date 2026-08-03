@@ -36,18 +36,18 @@ class CrudProvider extends Provider
     /** @var class-string<CrudResource>|null */
     protected ?string $resourceClass = null;
 
-    /** Whether this resource supports the back-office `scope=all` collection filter. */
+    /** Whether this resource supports the backend `scope=all` collection filter. */
     protected bool $supportsScopeAll = false;
 
     /**
      * Permission resource id (e.g. 'cms-pages') whose read or write grant makes
-     * an API-user token a back-office reader: drafts/disabled rows, cross-store
+     * an API-user token a backend reader: drafts/disabled rows, cross-store
      * item access and ?scope=all listings. Write counts so an integration can
      * read back the draft it just created. Null keeps those reads admin-only,
      * so a provider that never sets it cannot accidentally open them to every
      * service token regardless of what that token was actually granted.
      */
-    protected ?string $backOfficeResource = null;
+    protected ?string $backendResource = null;
 
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
@@ -65,15 +65,15 @@ class CrudProvider extends Provider
         return parent::provide($operation, $uriVariables, $context);
     }
 
-    protected function isBackOfficeReader(): bool
+    protected function isBackendReader(): bool
     {
         return $this->isAdmin()
-            || ($this->backOfficeResource !== null && $this->isBackOffice($this->backOfficeResource));
+            || ($this->backendResource !== null && $this->hasBackendAccess($this->backendResource));
     }
 
     /**
      * Whether the caller requested a cross-store, unfiltered listing (?scope=all)
-     * on a resource that supports it. Back-office only: guests and customers must
+     * on a resource that supports it. Backend only: guests and customers must
      * never see draft or foreign-store content, so anyone else gets a 403.
      */
     protected function isScopeAll(array $filters): bool
@@ -81,8 +81,8 @@ class CrudProvider extends Provider
         if (!$this->supportsScopeAll || ($filters['scope'] ?? null) !== 'all') {
             return false;
         }
-        if (!$this->isBackOfficeReader()) {
-            throw new AccessDeniedHttpException('scope=all requires a back-office token');
+        if (!$this->isBackendReader()) {
+            throw new AccessDeniedHttpException('scope=all requires a backend token');
         }
         return true;
     }
@@ -99,7 +99,7 @@ class CrudProvider extends Provider
     }
 
     /**
-     * Back-office item reads bypass the current-store availability check, but a
+     * Backend item reads bypass the current-store availability check, but a
      * store-restricted token must stay inside its allowlist (all-stores content
      * included, which such tokens may not see).
      *
@@ -108,7 +108,7 @@ class CrudProvider extends Provider
     protected function assertReadableStores(array $entityStoreIds, string $entityLabel): void
     {
         if ($this->allowedStoreIds() !== null) {
-            $this->validateEntityStoreAccess($entityStoreIds, $this->getAuthorizedUser(), $entityLabel);
+            $this->validateEntityStoreAccess($entityStoreIds, $this->requireUser(), $entityLabel);
         }
     }
 

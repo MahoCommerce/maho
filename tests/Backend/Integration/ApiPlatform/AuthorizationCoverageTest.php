@@ -27,8 +27,8 @@ uses(MahoBackendTestCase::class);
  *
  * That makes the `security:` expression the ONLY gate, so this test boots the
  * real API kernel in-process (no HTTP server), enumerates every operation the
- * metadata exposes, and asserts two invariants that together close the
- * fail-open / phantom-permission classes of bug:
+ * metadata exposes, and asserts three invariants that together close the
+ * fail-open / phantom-permission / unknown-function classes of bug:
  *
  *   1. Every operation declares a non-empty security expression. A null/empty
  *      one means the access checker never runs and the operation is open to any
@@ -38,6 +38,10 @@ uses(MahoBackendTestCase::class);
  *      grantable permission id (present in ApiPermissionRegistry). A typo'd or
  *      phantom permission can never be granted, so the operation would be
  *      silently always-denied — a latent availability bug.
+ *   3. Every expression parses with the registered expression functions.
+ *      Operation expressions are only evaluated at request time, so a stale
+ *      function name (e.g. a missed has_backend_access rename) compiles fine
+ *      at metadata time and 500s in production on first use.
  */
 
 /**
@@ -198,5 +202,35 @@ it('references only real, grantable permissions in every security expression (no
     expect($phantom)->toBe(
         [],
         'Security expressions referencing non-grantable permissions (never satisfiable): ' . implode(', ', $phantom),
+    );
+});
+
+it('parses every security expression against the registered expression functions', function (): void {
+    $language = new \Symfony\Component\ExpressionLanguage\ExpressionLanguage(null, [
+        new \Maho\ApiPlatform\Security\BackendAccess(),
+        new \Maho\ApiPlatform\Security\CustomerOwnership(),
+    ]);
+    // The security component's built-ins; parse() only needs the names to exist.
+    foreach (['is_granted', 'is_authenticated', 'is_fully_authenticated', 'is_remember_me'] as $builtin) {
+        $language->register($builtin, static fn(): string => 'true', static fn(): bool => true);
+    }
+    $variables = ['token', 'user', 'object', 'subject', 'request', 'roles', 'auth_checker', 'previous_object'];
+
+    $invalid = [];
+    foreach (authzOperations() as $op) {
+        $security = $op['security'];
+        if (!is_string($security)) {
+            continue;
+        }
+        try {
+            $language->parse($security, $variables);
+        } catch (\Throwable $e) {
+            $invalid[] = "{$op['label']}: {$e->getMessage()}";
+        }
+    }
+
+    expect($invalid)->toBe(
+        [],
+        'Security expressions that fail to parse (would 500 at request time): ' . implode(', ', $invalid),
     );
 });

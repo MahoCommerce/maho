@@ -29,10 +29,10 @@ final class ProductTierPriceProvider extends \Maho\ApiPlatform\Provider
             return [];
         }
 
-        // Storefront callers only see the rows that price them: their own
+        // Frontend callers only see the rows that price them: their own
         // customer group (or the all-groups row) on the current website. The
-        // full matrix is back-office data and needs an actual products grant.
-        $backOffice = $this->canReadBackOfficeProducts();
+        // full matrix is backend data and needs an actual products grant.
+        $backend = $this->canReadBackendProducts();
         $callerGroupId = $this->getCustomerGroupId();
         $websiteId = (int) StoreContext::getStore()->getWebsiteId();
 
@@ -41,7 +41,7 @@ final class ProductTierPriceProvider extends \Maho\ApiPlatform\Provider
         foreach ($tierPrices as $tp) {
             $rowGroupId = (int) ($tp['cust_group'] ?? \Mage_Customer_Model_Group::CUST_GROUP_ALL);
             $rowWebsiteId = (int) ($tp['website_id'] ?? 0);
-            if (!$backOffice) {
+            if (!$backend) {
                 if ($rowGroupId !== \Mage_Customer_Model_Group::CUST_GROUP_ALL && $rowGroupId !== $callerGroupId) {
                     continue;
                 }

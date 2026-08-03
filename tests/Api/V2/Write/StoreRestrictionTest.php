@@ -211,9 +211,9 @@ describe('Store-restricted sales document access', function (): void {
 
 });
 
-describe('Website-restricted back-office product reads', function (): void {
+describe('Website-restricted backend product reads', function (): void {
 
-    it('denies a back-office product read outside the token website allowlist', function (): void {
+    it('denies a backend product read outside the token website allowlist', function (): void {
         $productId = fixtures('product_id');
         if (!$productId) {
             $this->markTestSkipped('No product fixture available');
@@ -221,7 +221,7 @@ describe('Website-restricted back-office product reads', function (): void {
 
         // The fixture product belongs to website 1 only; a products token
         // restricted to the extra website must not load it by id even though
-        // back-office reads skip the current-store visibility check.
+        // backend reads skip the current-store visibility check.
         $restricted = serviceToken(['products/read'], [restrictStoreId()]);
         $denied = apiGet("/api/rest/v2/products/{$productId}?store=" . RESTRICT_STORE_CODE, $restricted);
         expect($denied['status'])->toBeIn([403, 404]);
