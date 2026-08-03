@@ -274,6 +274,11 @@ function mcryptCompatHealthCheckMatrix(object $test, bool $withMcryptCompat): ar
     }
 
     echo 'RESULT:' . json_encode($result);
+
+    // The module registers a shutdown function per crypt object, and the one built for the
+    // empty key has no key to deinitialize, so it warns once the result above is printed.
+    // Developer mode would turn that into an uncaught fatal and lose the whole run.
+    set_error_handler(fn(int $errno, string $error): bool => str_contains($error, 'mcrypt_generic_deinit'));
     PHP;
 
     // Registering the module's code pool ahead of core's on the PSR-0 prefix is exactly what
