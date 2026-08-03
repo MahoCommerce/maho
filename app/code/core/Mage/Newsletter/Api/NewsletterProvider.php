@@ -31,7 +31,7 @@ final class NewsletterProvider extends CrudProvider
 
     private function getSubscriptionStatus(): NewsletterSubscription
     {
-        $customerId = $this->requireAuthentication();
+        $customerId = $this->requireCustomerId();
 
         $customer = \Mage::getModel('customer/customer')->load($customerId);
         if (!$customer->getId()) {

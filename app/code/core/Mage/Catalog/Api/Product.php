@@ -199,7 +199,7 @@ class Product extends CrudResource
     public ?string $specialToDate = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Product cost; only visible to admin and API tokens', security: "is_back_office('products')")]
+    #[ApiProperty(description: 'Product cost; only visible to admin and API tokens', security: "has_backend_access('products')")]
     public ?float $cost = null;
 
     #[Groups(['product:read'])]
@@ -275,19 +275,19 @@ class Product extends CrudResource
     public ?string $metaRobots = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Custom design/theme override; only visible to admin and API tokens', security: "is_back_office('products')")]
+    #[ApiProperty(description: 'Custom design/theme override; only visible to admin and API tokens', security: "has_backend_access('products')")]
     public ?string $customDesign = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Custom design active from date (Y-m-d); empty string clears it; only visible to admin and API tokens', security: "is_back_office('products')")]
+    #[ApiProperty(description: 'Custom design active from date (Y-m-d); empty string clears it; only visible to admin and API tokens', security: "has_backend_access('products')")]
     public ?string $customDesignFrom = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Custom design active to date (Y-m-d); empty string clears it; only visible to admin and API tokens', security: "is_back_office('products')")]
+    #[ApiProperty(description: 'Custom design active to date (Y-m-d); empty string clears it; only visible to admin and API tokens', security: "has_backend_access('products')")]
     public ?string $customDesignTo = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Custom layout update XML; only visible to admin and API tokens', security: "is_back_office('products')")]
+    #[ApiProperty(description: 'Custom layout update XML; only visible to admin and API tokens', security: "has_backend_access('products')")]
     public ?string $customLayoutUpdate = null;
 
     #[Groups(['product:read'])]
@@ -483,12 +483,12 @@ class Product extends CrudResource
 
     /** @var array<string, mixed>|null User-defined EAV attribute values keyed by attribute_code (read counterpart of customAttributesWrite) */
     #[Groups(['product:detail'])]
-    #[ApiProperty(description: 'User-defined EAV attribute values keyed by attribute_code; only visible to admin and API tokens', writable: false, security: "is_back_office('products')", extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'User-defined EAV attribute values keyed by attribute_code; only visible to admin and API tokens', writable: false, security: "has_backend_access('products')", extraProperties: ['computed' => true])]
     public ?array $customAttributes = null;
 
     /** @var array<string, mixed>|null Full inventory settings keyed by cataloginventory_stock_item column */
     #[Groups(['product:detail'])]
-    #[ApiProperty(description: 'Inventory settings keyed by stock item column (round-trips with stockData); back-office columns (min_qty, notify_stock_qty, backorders, manage_stock, use_config_*) are only returned to admin and API tokens', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Inventory settings keyed by stock item column (round-trips with stockData); backend columns (min_qty, notify_stock_qty, backorders, manage_stock, use_config_*) are only returned to admin and API tokens', writable: false, extraProperties: ['computed' => true])]
     public ?array $stockItem = null;
 
     #[Groups(['product:read'])]

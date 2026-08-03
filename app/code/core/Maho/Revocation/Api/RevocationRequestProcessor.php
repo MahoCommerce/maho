@@ -66,7 +66,7 @@ final class RevocationRequestProcessor extends Processor
             throw new NotFoundHttpException('Revocation is not available');
         }
 
-        $customerId = $this->requireAuthentication();
+        $customerId = $this->requireCustomerId();
         $customer = \Mage::getModel('customer/customer')->load($customerId);
         if (!$customer->getId()) {
             throw new NotFoundHttpException('Customer not found');

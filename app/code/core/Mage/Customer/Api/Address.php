@@ -39,7 +39,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             description: 'Get a specific address by ID',
             // Row-level: post-read ownership, denial maps to 404 so a foreign
             // id is indistinguishable from a missing one.
-            security: "is_back_office('addresses') or is_owner(object, 'customerId')",
+            security: "has_backend_access('addresses') or is_owner(object, 'customerId')",
             exceptionToStatus: [AccessDeniedException::class => 404],
         ),
         new Put(
@@ -80,7 +80,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             name: 'get_me_address',
             uriTemplate: '/customers/me/addresses/{id}',
             description: 'Get an address for the authenticated customer',
-            security: "is_back_office('addresses') or is_owner(object, 'customerId')",
+            security: "has_backend_access('addresses') or is_owner(object, 'customerId')",
             exceptionToStatus: [AccessDeniedException::class => 404],
         ),
         new Put(
@@ -116,7 +116,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
     ],
     graphQlOperations: [
         // Row-level denial is converted to a null result by OwnershipDenialProvider.
-        new Query(name: 'item_query', description: 'Get an address by ID', security: "is_back_office('addresses') or is_owner(object, 'customerId')"),
+        new Query(name: 'item_query', description: 'Get an address by ID', security: "has_backend_access('addresses') or is_owner(object, 'customerId')"),
         new QueryCollection(name: 'collection_query', description: 'Get addresses', security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('addresses/read')"),
         // Named 'my' → field `myAddresses` (not `myAddressesAddresses`).
         new QueryCollection(

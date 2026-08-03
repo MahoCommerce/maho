@@ -38,7 +38,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             // Row-level: the object clause defers evaluation to post-read, and a
             // denial maps to 404 so a foreign id is indistinguishable from a
             // missing one.
-            security: "is_back_office('orders') or is_owner(object, 'customerId')",
+            security: "has_backend_access('orders') or is_owner(object, 'customerId')",
             exceptionToStatus: [AccessDeniedException::class => 404],
             description: 'Get an order by ID',
         ),
@@ -150,7 +150,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
             description: 'Get an order by ID',
             // Row-level denial is converted to a null result by
             // OwnershipDenialProvider, matching the missing-row shape.
-            security: "is_back_office('orders') or is_owner(object, 'customerId')",
+            security: "has_backend_access('orders') or is_owner(object, 'customerId')",
         ),
         new QueryCollection(
             name: 'collection_query',
@@ -396,10 +396,10 @@ class Order extends CrudResource
 
     // Fraud-relevant request metadata, never echoed to a customer or
     // guest-token reader.
-    #[ApiProperty(writable: false, description: 'Client IP the order was placed from (admin/API readers only)', security: "is_back_office('orders')", extraProperties: ['computed' => true])]
+    #[ApiProperty(writable: false, description: 'Client IP the order was placed from (admin/API readers only)', security: "has_backend_access('orders')", extraProperties: ['computed' => true])]
     public ?string $remoteIp = null;
 
-    #[ApiProperty(writable: false, description: 'X-Forwarded-For header at placement (admin/API readers only)', security: "is_back_office('orders')", extraProperties: ['computed' => true])]
+    #[ApiProperty(writable: false, description: 'X-Forwarded-For header at placement (admin/API readers only)', security: "has_backend_access('orders')", extraProperties: ['computed' => true])]
     public ?string $xForwardedFor = null;
 
     #[ApiProperty(writable: false, description: 'Total number of distinct items')]

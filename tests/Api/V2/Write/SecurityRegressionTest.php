@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 describe('Sub-resources of hidden products', function (): void {
 
-    it('hides disabled product sub-resources from anonymous callers but not from back-office tokens', function (): void {
+    it('hides disabled product sub-resources from anonymous callers but not from backend tokens', function (): void {
         $token = serviceToken(['products/write', 'products/read']);
         $create = apiPost('/api/rest/v2/products', [
             'sku' => 'TEST-SUBRES-HIDDEN',

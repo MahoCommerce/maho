@@ -35,20 +35,17 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?array
     {
-        $user = $this->getAuthorizedUser();
+        $user = $this->requireUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
 
         // Enforce website scope for store-restricted API users on every
         // sub-resource write/delete (mirrors ProductProcessor's main CRUD check).
-        $this->authorizeProductWebsites($this->loadProduct($productId), $user);
+        $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->requirePermission($user, 'products/delete');
             $childProductId = self::extractChildProductId($context);
             return $this->handleRemove($productId, $childProductId);
         }
-
-        $this->requirePermission($user, 'products/write');
 
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);
@@ -81,7 +78,7 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleReplaceAll(int $productId, array $body): array
     {
-        $product = $this->loadProductForWrite($productId, $this->getAuthorizedUser(), Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
+        $product = $this->loadProductForWrite($productId, $this->requireUser(), Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
 
         $linkData = [];
         foreach ($body as $link) {
@@ -108,7 +105,7 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleAdd(int $productId, array $body): array
     {
-        $product = $this->loadProductForWrite($productId, $this->getAuthorizedUser(), Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
+        $product = $this->loadProductForWrite($productId, $this->requireUser(), Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
 
         $childId = (int) ($body['childProductId'] ?? $body['child_product_id'] ?? 0);
         if ($childId <= 0) {
@@ -140,7 +137,7 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('childProductId is required and must be positive');
         }
 
-        $product = $this->loadProductForWrite($productId, $this->getAuthorizedUser(), Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
+        $product = $this->loadProductForWrite($productId, $this->requireUser(), Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
 
         $existing = $this->getExistingLinkData($product);
         unset($existing[$childProductId]);
@@ -175,11 +172,11 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
      */
     private function authorizeAssociatedProductWebsites(int $childId): void
     {
-        $user = $this->getAuthorizedUser();
+        $user = $this->requireUser();
         if ($this->getAllowedWebsiteIds($user) === null) {
             return;
         }
-        $this->authorizeProductWebsites($this->loadProduct($childId), $user);
+        $this->assertProductWebsitesAllowed($this->loadProduct($childId), $user);
     }
 
 }

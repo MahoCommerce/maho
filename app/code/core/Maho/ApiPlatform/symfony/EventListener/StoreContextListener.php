@@ -62,7 +62,7 @@ class StoreContextListener
         }
 
         // Store id 0 is the admin store: a legitimate explicit request for the
-        // global scope (gated to back-office callers by the authorization
+        // global scope (gated to backend callers by the authorization
         // listener), so it must not be dropped by a truthiness check.
         if ($store->getId() === null || $store->getId() === '') {
             throw new BadRequestHttpException("Unknown store: {$storeCode}");

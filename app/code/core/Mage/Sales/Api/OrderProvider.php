@@ -192,10 +192,10 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         // Ownership is not checked here: the operation's
         // `is_owner(object, 'customerId')` expression does the denying post-read.
 
-        // Store allowlist enforcement for back-office tokens; customer tokens
+        // Store allowlist enforcement for backend tokens; customer tokens
         // are identity-bound by the ownership expression and stay untouched.
         if ($this->isAdmin() || $this->isApiUser()) {
-            $this->assertStoreAllowed($order->getStoreId(), $this->getAuthorizedUser(), 'order');
+            $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
         }
 
         return $this->mapToDto($order);
@@ -239,7 +239,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             $page,
             $pageSize,
             $context['filters'] ?? [],
-            $this->getAuthorizedUser()->getAllowedStoreIds(),
+            $this->requireUser()->getAllowedStoreIds(),
         );
 
         $orders = [];
@@ -296,7 +296,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $dto->appliedRuleIds = $this->parseAppliedRuleIds($order->getAppliedRuleIds());
         $dto->giftcardCodes = $this->parseGiftcardCodes($order->getData('giftcard_codes'));
 
-        // Back-office only; the DTO properties carry the gate.
+        // Backend only; the DTO properties carry the gate.
         $dto->remoteIp = $order->getRemoteIp();
         $dto->xForwardedFor = $order->getXForwardedFor();
 

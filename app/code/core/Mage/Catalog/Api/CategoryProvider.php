@@ -232,13 +232,13 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
         $dto->availableSortBy = is_array($availableSortBy) ? array_values($availableSortBy) : [];
         $dto->defaultSortBy = $category->getData('default_sort_by') ?: null;
 
-        // Design and layout internals are back-office data: the layout update is
+        // Design and layout internals are backend data: the layout update is
         // executable markup and the theme/design assignment leaks the storefront's
         // internals. Category reads are public, so only admin tokens and API
         // tokens actually granted a categories permission see them.
         if ($this->isAdmin() || ($this->isApiUser()
-            && ($this->getAuthorizedUser()->hasPermission('categories/read')
-                || $this->getAuthorizedUser()->hasPermission('categories/write')))
+            && ($this->requireUser()->hasPermission('categories/read')
+                || $this->requireUser()->hasPermission('categories/write')))
         ) {
             $dto->customDesign = $category->getData('custom_design') ?: null;
             $customDesignFrom = $category->getData('custom_design_from');

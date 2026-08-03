@@ -27,7 +27,7 @@ final class BlogCategoryProvider extends CrudProvider
     protected array $defaultSort = ['position' => 'ASC'];
 
     protected bool $supportsScopeAll = true;
-    protected ?string $backOfficeResource = 'blog-categories';
+    protected ?string $backendResource = 'blog-categories';
 
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
@@ -59,7 +59,7 @@ final class BlogCategoryProvider extends CrudProvider
             return null;
         }
 
-        if ($this->isBackOfficeReader()) {
+        if ($this->isBackendReader()) {
             $this->assertReadableStores($category->getStores(), 'category');
 
             return $this->toDto($category);
@@ -90,8 +90,8 @@ final class BlogCategoryProvider extends CrudProvider
 
     private function getCategoryByUrlKey(string $urlKey): ?Resource
     {
-        if ($this->isBackOfficeReader()) {
-            return $this->getCategoryByUrlKeyBackOffice($urlKey);
+        if ($this->isBackendReader()) {
+            return $this->getCategoryByUrlKeyBackend($urlKey);
         }
 
         $storeId = StoreContext::getStoreId();
@@ -107,10 +107,10 @@ final class BlogCategoryProvider extends CrudProvider
 
     /**
      * getCategoryIdByUrlKey() only matches active, current-store categories;
-     * back-office readers resolve across every store and status, then reuse
+     * backend readers resolve across every store and status, then reuse
      * the item path so the store-restricted-token check applies.
      */
-    private function getCategoryByUrlKeyBackOffice(string $urlKey): ?Resource
+    private function getCategoryByUrlKeyBackend(string $urlKey): ?Resource
     {
         /** @var \Maho_Blog_Model_Resource_Category_Collection $collection */
         $collection = \Mage::getResourceModel('blog/category_collection');

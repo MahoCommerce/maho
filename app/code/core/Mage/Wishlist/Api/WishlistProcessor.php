@@ -134,7 +134,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
      */
     private function addToWishlist(int $productId, int $qty = 1, ?string $description = null): WishlistItem
     {
-        $customerId = $this->requireAuthentication();
+        $customerId = $this->requireCustomerId();
 
         // Load product
         /** @var \Mage_Catalog_Model_Product $product */
@@ -193,7 +193,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
      */
     private function removeFromWishlist(int $itemId): null
     {
-        $customerId = $this->requireAuthentication();
+        $customerId = $this->requireCustomerId();
 
         /** @var \Mage_Wishlist_Model_Item $item */
         $item = \Mage::getModel('wishlist/item')->load($itemId);
@@ -224,7 +224,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
      */
     private function moveToCart(int $itemId, int $qty = 1, ?string $cartId = null): WishlistItem
     {
-        $customerId = $this->requireAuthentication();
+        $customerId = $this->requireCustomerId();
 
         /** @var \Mage_Wishlist_Model_Item $item */
         $item = \Mage::getModel('wishlist/item')->load($itemId);
@@ -311,7 +311,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
      */
     private function syncWishlist(array $productIds): array
     {
-        $customerId = $this->requireAuthentication();
+        $customerId = $this->requireCustomerId();
         $wishlist = $this->getWishlist($customerId);
 
         // Get existing product IDs in wishlist. Use a fresh unfiltered collection
@@ -359,7 +359,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
      */
     private function getFirstWishlistItem(): WishlistItem
     {
-        $customerId = $this->requireAuthentication();
+        $customerId = $this->requireCustomerId();
         $wishlist = $this->getWishlist($customerId);
 
         $itemCollection = $wishlist->getItemsCollection();

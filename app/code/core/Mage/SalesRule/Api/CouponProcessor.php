@@ -340,7 +340,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
      */
     private function assertRuleWebsitesAllowed(\Mage_SalesRule_Model_Rule $rule): void
     {
-        $allowedWebsiteIds = $this->allowedWebsiteIds($this->getAuthorizedUser());
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
         if ($allowedWebsiteIds === null) {
             return;
         }
@@ -523,7 +523,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $ids = $this->normalizeIdList($value, $known, 'websiteIds', 'website');
 
         // A restricted token may only target websites its store allowlist maps to.
-        $allowedWebsiteIds = $this->allowedWebsiteIds($this->getAuthorizedUser());
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
         if ($allowedWebsiteIds !== null) {
             foreach ($ids as $id) {
                 if (!in_array($id, $allowedWebsiteIds, true)) {

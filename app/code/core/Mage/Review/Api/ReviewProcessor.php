@@ -94,7 +94,7 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         // A store-restricted token may only moderate reviews assigned to a
         // store on its allowlist. Store 0 is a marker row every save adds, so
         // only a review with no real store assignment counts as all-stores.
-        $user = $this->getAuthorizedUser();
+        $user = $this->requireUser();
         $reviewStoreIds = array_values(array_filter(
             array_map('intval', (array) $review->getStores()),
             static fn(int $id): bool => $id !== 0,
@@ -147,7 +147,7 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         string $nickname,
         int $rating,
     ): Review {
-        $customerId = $this->requireAuthentication();
+        $customerId = $this->requireCustomerId();
 
         // Limit by IP and by account: the IP check is skipped when the client IP
         // is unknown and can be sidestepped by IP rotation, so a per-customer

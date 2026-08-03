@@ -232,7 +232,7 @@ describe('CMS Page layout and meta fields (REST)', function (): void {
         expect($read['json']['customThemeFrom'] ?? null)->toBeNull();
         expect($read['json']['customThemeTo'] ?? null)->toBeNull();
 
-        // An authenticated back-office caller reading the same page does see them.
+        // An authenticated backend caller reading the same page does see them.
         foreach ([adminToken(), $token] as $privileged) {
             $privilegedRead = apiGet("/api/rest/v2/cms-pages/{$pageId}", $privileged);
             expect($privilegedRead['status'])->toBe(200);

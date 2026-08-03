@@ -98,25 +98,25 @@ class CmsPage extends CrudResource
 
     // Design and layout internals: the layout update is executable markup and
     // the theme assignment leaks the storefront's internals, while page reads
-    // are public. Back-office callers only, in both directions.
-    #[ApiProperty(security: "is_back_office('cms-pages')")]
+    // are public. Backend callers only, in both directions.
+    #[ApiProperty(security: "has_backend_access('cms-pages')")]
     public ?string $layoutUpdateXml = null;
 
-    #[ApiProperty(security: "is_back_office('cms-pages')")]
+    #[ApiProperty(security: "has_backend_access('cms-pages')")]
     public ?string $customTheme = null;
 
-    #[ApiProperty(security: "is_back_office('cms-pages')")]
+    #[ApiProperty(security: "has_backend_access('cms-pages')")]
     public ?string $customRootTemplate = null;
 
-    #[ApiProperty(security: "is_back_office('cms-pages')")]
+    #[ApiProperty(security: "has_backend_access('cms-pages')")]
     public ?string $customLayoutUpdateXml = null;
 
     /** Date string (Y-m-d); empty string clears */
-    #[ApiProperty(security: "is_back_office('cms-pages')")]
+    #[ApiProperty(security: "has_backend_access('cms-pages')")]
     public ?string $customThemeFrom = null;
 
     /** Date string (Y-m-d); empty string clears */
-    #[ApiProperty(security: "is_back_office('cms-pages')")]
+    #[ApiProperty(security: "has_backend_access('cms-pages')")]
     public ?string $customThemeTo = null;
 
     /** One of INDEX,FOLLOW / NOINDEX,FOLLOW / INDEX,NOFOLLOW / NOINDEX,NOFOLLOW; empty string clears */

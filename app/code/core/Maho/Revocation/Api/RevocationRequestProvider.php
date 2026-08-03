@@ -23,7 +23,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * Item reads are ownership-gated by the operation's `is_owner(object, 'email')`
  * expression (the declaration's natural key); the customer collection is scoped
  * to the authenticated account email at the query. Internal-only fields (admin
- * note, IP, user agent) are gated per-property by `is_back_office()`.
+ * note, IP, user agent) are gated per-property by `has_backend_access()`.
  */
 final class RevocationRequestProvider extends Provider
 {
@@ -121,7 +121,7 @@ final class RevocationRequestProvider extends Provider
 
     private function requireCustomerEmail(): string
     {
-        $customerId = $this->requireAuthentication();
+        $customerId = $this->requireCustomerId();
         $customer = \Mage::getModel('customer/customer')->load($customerId);
         $email = (string) $customer->getEmail();
         if ($email === '') {

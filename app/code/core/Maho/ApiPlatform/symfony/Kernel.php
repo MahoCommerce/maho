@@ -304,7 +304,7 @@ class Kernel extends BaseKernel
             // No role hierarchy: authorization uses exactly two roles in the
             // operation `security:` expressions — ROLE_CUSTOMER (customer, own data)
             // and ROLE_ADMIN (admin, then gated per-resource by AdminAclListener
-            // via ADMIN_RESOURCE). API service accounts (ROLE_API_USER) are not
+            // via ADMIN_RESOURCE). API service accounts carry no roles and are not
             // matched by role at all; they're authorized by their granular
             // `resource/op` permissions in ApiUserVoter. Admins are deliberately
             // not granted ROLE_CUSTOMER, so customer-only `/me` endpoints stay out
@@ -400,12 +400,12 @@ class Kernel extends BaseKernel
             ->arg('$debug', '%kernel.debug%')
             ->tag('kernel.event_subscriber');
 
-        // Publishes is_back_office('<resource>') to every security expression,
+        // Publishes has_backend_access('<resource>') to every security expression,
         // including the per-property ones the serializer evaluates. Tagged by
         // hand: FrameworkBundle autoconfigures ExpressionFunctionProviderInterface
         // onto the generic `expression_language_provider` tag, which the security
         // expression language does not read.
-        $services->set(Security\BackOfficeAccess::class)
+        $services->set(Security\BackendAccess::class)
             ->tag('security.expression_language_provider');
 
         // Row-level counterpart: is_owner(object, '<property>') for the item

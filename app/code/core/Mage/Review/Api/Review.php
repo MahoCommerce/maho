@@ -58,7 +58,7 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_CUSTOMER') or is_granted('ROLE_ADMIN') or is_granted('reviews/read')",
             description: 'Get current customer submitted reviews',
         ),
-        // Moderation queue: back-office callers with reviews/read see all
+        // Moderation queue: backend callers with reviews/read see all
         // reviews across stores (optional ?status= filter); everyone else gets
         // an empty list, so the route can stay publicly routable.
         new GetCollection(

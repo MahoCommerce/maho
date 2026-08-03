@@ -97,14 +97,11 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Product
     {
-        $user = $this->getAuthorizedUser();
+        $user = $this->requireUser();
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->requirePermission($user, 'products/delete');
             return $this->handleDelete((int) $uriVariables['id'], $user);
         }
-
-        $this->requirePermission($user, 'products/write');
 
         assert($data instanceof Product);
 
@@ -188,7 +185,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Product not found');
         }
 
-        $this->authorizeProductWebsites($product, $user);
+        $this->assertProductWebsitesAllowed($product, $user);
 
         $oldData = $product->getData();
 
@@ -261,7 +258,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Product not found');
         }
 
-        $this->authorizeProductWebsites($product, $user);
+        $this->assertProductWebsitesAllowed($product, $user);
 
         $oldData = $product->getData();
 
@@ -384,7 +381,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Product not found');
         }
 
-        $this->authorizeProductWebsites($product, $user);
+        $this->assertProductWebsitesAllowed($product, $user);
 
         $oldData = $product->getData();
 
@@ -763,7 +760,6 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             ]);
         }
     }
-
 
     /**
      * Default website assignment when the request omits websiteIds.

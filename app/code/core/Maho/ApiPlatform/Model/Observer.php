@@ -157,6 +157,24 @@ class Maho_ApiPlatform_Model_Observer
     }
 
     /**
+     * The compiled Symfony container lives outside the Maho cache backend and
+     * bakes in expression function names, so a full flush must remove it too.
+     * Renaming first keeps the swap atomic for in-flight requests; the doomed
+     * tree (and any leftover from an interrupted flush) is deleted afterwards.
+     */
+    #[Maho\Config\Observer('adminhtml_cache_flush_all')]
+    public function flushCompiledApiContainer(\Maho\Event\Observer $_observer): void
+    {
+        $dir = BP . '/var/cache/api_platform';
+        if (is_dir($dir) && !@rename($dir, $dir . '.old.' . uniqid())) {
+            \Maho\Io\File::rmdirRecursive($dir);
+        }
+        foreach (glob($dir . '.old.*') ?: [] as $doomed) {
+            \Maho\Io\File::rmdirRecursive($doomed);
+        }
+    }
+
+    /**
      * Purge idempotency-key rows older than the listener's TTL window.
      *
      * The IdempotencyListener stores response replays for 24 hours; rows beyond

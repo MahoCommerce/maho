@@ -197,7 +197,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
         } catch (\Throwable) {
             throw new BadRequestHttpException("Unknown website id {$websiteId}");
         }
-        $this->assertWebsiteAllowed($websiteId, $this->getAuthorizedUser(), 'gift card');
+        $this->assertWebsiteAllowed($websiteId, $this->requireUser(), 'gift card');
 
         $giftcard = \Mage::getModel('giftcard/giftcard');
         $giftcard->setData([
@@ -251,7 +251,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             throw new NotFoundHttpException('Gift card not found');
         }
 
-        $this->assertWebsiteAllowed($giftcard->getWebsiteId(), $this->getAuthorizedUser(), 'gift card');
+        $this->assertWebsiteAllowed($giftcard->getWebsiteId(), $this->requireUser(), 'gift card');
 
         $this->assertBalanceBounds($newBalance);
         $giftcard->adjustBalance($newBalance, $args['comment'] ?? null);

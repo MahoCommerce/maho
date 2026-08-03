@@ -29,7 +29,7 @@ uses(MahoBackendTestCase::class);
  * in both directions. Nothing strips fields in a provider any more, which
  * makes these expressions the only gate and worth pinning down:
  *
- *   1. `is_back_office('<resource>')` resolves the way the grant model says it
+ *   1. `has_backend_access('<resource>')` resolves the way the grant model says it
  *      should, wildcards included.
  *   2. Round-tripping a DTO through the real serializer actually drops the
  *      gated fields, including the stockItem policy columns a property
@@ -113,7 +113,9 @@ function propertyAuthzAuthenticate(?string $kind, array $permissions = []): void
     $user = match ($kind) {
         'admin' => new ApiUser('admin', ['ROLE_ADMIN'], null, 1),
         'customer' => new ApiUser('customer', ['ROLE_CUSTOMER'], 1),
-        'api' => new ApiUser('service', ['ROLE_API_USER'], null, null, 1, $permissions),
+        // Production service tokens carry no roles (OAuth2Authenticator);
+        // authorization comes solely from granular grants via ApiUserVoter.
+        'api' => new ApiUser('service', [], null, null, 1, $permissions),
     };
 
     $storage->setToken(new UsernamePasswordToken($user, 'api', $user->getRoles()));
@@ -147,7 +149,7 @@ afterEach(function (): void {
     propertyAuthzAuthenticate(null);
 });
 
-it('grants is_back_office to admins and to service tokens holding the resource', function (): void {
+it('grants has_backend_access to admins and to service tokens holding the resource', function (): void {
     $cases = [
         'unauthenticated' => [null, [], false],
         'admin' => ['admin', [], true],
@@ -162,12 +164,12 @@ it('grants is_back_office to admins and to service tokens holding the resource',
 
     foreach ($cases as $label => [$kind, $permissions, $expected]) {
         propertyAuthzAuthenticate($kind, $permissions);
-        expect(propertyAuthzEvaluate("is_back_office('products')"))
-            ->toBe($expected, "is_back_office('products') for {$label}");
+        expect(propertyAuthzEvaluate("has_backend_access('products')"))
+            ->toBe($expected, "has_backend_access('products') for {$label}");
     }
 });
 
-it('omits back-office product fields for a caller without a products grant', function (): void {
+it('omits backend product fields for a caller without a products grant', function (): void {
     $product = new Mage\Catalog\Api\Product();
     $product->id = 1;
     $product->sku = 'SKU-1';
@@ -222,7 +224,7 @@ it('omits inventory policy columns from stockItem for a caller without a product
     expect($columns)->toContain(...$policy)->toContain(...$public);
 });
 
-it('omits back-office fields on other resources for unprivileged callers', function (): void {
+it('omits backend fields on other resources for unprivileged callers', function (): void {
     $page = new Mage\Cms\Api\CmsPage();
     $page->id = 1;
     $page->title = 'Home';
@@ -294,7 +296,7 @@ it('references only real, grantable permissions in every property security expre
     $phantom = [];
 
     foreach (propertyAuthzSecuredProperties() as $label => $expression) {
-        // `is_granted('resource/op')` and `is_back_office('resource')` both name a
+        // `is_granted('resource/op')` and `has_backend_access('resource')` both name a
         // resource that has to exist; a typo in either is silently always-denied.
         preg_match_all("/is_granted\\(\\s*['\"]([^'\"]+)['\"]/", $expression, $granted);
         foreach (array_filter($granted[1], static fn(string $a): bool => str_contains($a, '/')) as $permission) {
@@ -303,10 +305,10 @@ it('references only real, grantable permissions in every property security expre
             }
         }
 
-        preg_match_all("/is_back_office\\(\\s*['\"]([^'\"]+)['\"]/", $expression, $backOffice);
-        foreach ($backOffice[1] as $resourceId) {
+        preg_match_all("/has_backend_access\\(\\s*['\"]([^'\"]+)['\"]/", $expression, $backend);
+        foreach ($backend[1] as $resourceId) {
             if (!in_array($resourceId . '/read', $valid, true) && !in_array($resourceId . '/write', $valid, true)) {
-                $phantom[] = "{$label} -> is_back_office({$resourceId})";
+                $phantom[] = "{$label} -> has_backend_access({$resourceId})";
             }
         }
     }
@@ -329,7 +331,7 @@ it('exposes exactly the snapshotted set of fields to an unauthenticated caller',
             $expected[$shortName] ?? [],
             "Fields readable without authentication changed for {$shortName}. If the change is "
             . 'intended, update ' . basename($snapshotFile) . '; if not, gate the new property with '
-            . "#[ApiProperty(security: \"is_back_office('…')\")].",
+            . "#[ApiProperty(security: \"has_backend_access('…')\")].",
         );
     }
 

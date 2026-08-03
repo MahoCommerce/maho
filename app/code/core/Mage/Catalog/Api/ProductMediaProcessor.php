@@ -35,26 +35,23 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ProductMedia|array|null
     {
-        $user = $this->getAuthorizedUser();
+        $user = $this->requireUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
 
         // Enforce website scope for store-restricted API users on every
         // sub-resource write/delete (mirrors ProductProcessor's main CRUD check).
-        $this->authorizeProductWebsites($this->loadProduct($productId), $user);
+        $this->assertProductWebsitesAllowed($this->loadProduct($productId), $user);
 
         $request = $context['request'] ?? null;
         $body = $this->parseRequestBody($request);
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->requirePermission($user, 'products/delete');
             $valueId = (int) ($body['valueId'] ?? $body['value_id'] ?? $body['id'] ?? 0);
             if ($valueId <= 0) {
                 $valueId = (int) ($request?->query->get('valueId') ?? 0);
             }
             return $this->handleDelete($productId, $valueId);
         }
-
-        $this->requirePermission($user, 'products/write');
 
         if ($operation instanceof Post) {
             return $this->handleUpload($productId, $body);
@@ -65,7 +62,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleUpload(int $productId, array $body): ProductMedia
     {
-        $product = $this->loadProductForWrite($productId, $this->getAuthorizedUser());
+        $product = $this->loadProductForWrite($productId, $this->requireUser());
 
         // Support base64-encoded image data
         $base64 = $body['base64'] ?? $body['imageData'] ?? $body['image_data'] ?? null;
@@ -235,7 +232,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleUpdate(int $productId, array $body): array
     {
-        $product = $this->loadProductForWrite($productId, $this->getAuthorizedUser());
+        $product = $this->loadProductForWrite($productId, $this->requireUser());
 
         $valueId = (int) ($body['valueId'] ?? $body['value_id'] ?? $body['id'] ?? 0);
         if ($valueId <= 0) {
@@ -302,7 +299,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleDelete(int $productId, int $valueId): null
     {
-        $product = $this->loadProductForWrite($productId, $this->getAuthorizedUser());
+        $product = $this->loadProductForWrite($productId, $this->requireUser());
 
         if ($valueId <= 0) {
             throw new BadRequestHttpException('valueId is required');
@@ -338,7 +335,6 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
 
         return null;
     }
-
 
     /**
      * Validate image URL to prevent SSRF attacks.

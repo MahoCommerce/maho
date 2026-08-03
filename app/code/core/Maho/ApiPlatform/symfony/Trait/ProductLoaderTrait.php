@@ -57,7 +57,7 @@ trait ProductLoaderTrait
     }
 
     /**
-     * Load for a public sub-resource read: non-back-office callers only reach
+     * Load for a public sub-resource read: non-backend callers only reach
      * enabled products on the current store's website (same rule as
      * ProductProvider::loadProductDto), so hidden products 404 before the
      * type check can disclose them.
@@ -66,9 +66,9 @@ trait ProductLoaderTrait
     {
         $product = $this->loadProduct($id);
 
-        if ($this->canReadBackOfficeProducts()) {
+        if ($this->canReadBackendProducts()) {
             if ($this->isApiUser()) {
-                $this->authorizeProductWebsites($product, $this->getAuthorizedUser());
+                $this->assertProductWebsitesAllowed($product, $this->requireUser());
             }
         } else {
             $websiteId = (int) StoreContext::getStore()->getWebsiteId();
@@ -90,9 +90,9 @@ trait ProductLoaderTrait
      * Admin tokens, or an API user holding a products grant (write counts so
      * an integration can read back what it writes).
      */
-    protected function canReadBackOfficeProducts(): bool
+    protected function canReadBackendProducts(): bool
     {
-        return $this->isBackOffice('products');
+        return $this->hasBackendAccess('products');
     }
 
     /**
@@ -160,7 +160,7 @@ trait ProductLoaderTrait
      * tier prices, links, bundle/configurable setup, …), so none can be used to
      * reach a product outside the user's website scope.
      */
-    protected function authorizeProductWebsites(Mage_Catalog_Model_Product $product, ApiUser $user): void
+    protected function assertProductWebsitesAllowed(Mage_Catalog_Model_Product $product, ApiUser $user): void
     {
         $allowedWebsiteIds = $this->getAllowedWebsiteIds($user);
         if ($allowedWebsiteIds === null) {
