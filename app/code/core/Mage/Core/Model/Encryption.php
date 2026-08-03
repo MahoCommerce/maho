@@ -64,20 +64,22 @@ class Mage_Core_Model_Encryption
     }
 
     /**
-     * Generate hash for customer password
-     *
-     * @param string $password
-     * @param mixed $salt
-     * @return string
+     * Generate a credential hash in the current hash version, for admin users, customers and API keys
      */
-    public function getHashPassword(#[\SensitiveParameter] $password, $salt = null)
+    public function getHashPassword(#[\SensitiveParameter] string $password): string
     {
-        if (is_int($salt)) {
-            $salt = $this->_helper->getRandomString($salt);
-        }
-        return (bool) $salt
-            ? $this->hash($salt . $password, $this->_helper->getVersionHash($this)) . ':' . $salt
-            : $this->hash($password, $this->_helper->getVersionHash($this));
+        return $this->hash($password, $this->_helper->getVersionHash($this));
+    }
+
+    /**
+     * Whether a stored credential still uses a legacy digest and must be re-hashed on next login.
+     *
+     * Deliberately takes no password: only the format of the stored hash matters, and running
+     * password_verify() again would repeat the bcrypt cost already paid to authenticate.
+     */
+    public function hashNeedsUpgrade(#[\SensitiveParameter] string $hash): bool
+    {
+        return password_get_info($hash)['algo'] === null;
     }
 
     /**

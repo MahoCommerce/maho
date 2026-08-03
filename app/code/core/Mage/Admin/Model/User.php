@@ -429,7 +429,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
                 }
 
                 // Upgrade hash version
-                if (!$this->getPasswordUpgraded() && !$this->validatePasswordHashLatest($password, $this->getPassword())) {
+                if (!$this->getPasswordUpgraded() && $this->passwordHashNeedsUpgrade()) {
                     $this->setNewPassword($password)
                         ->setForceNewPassword(true)
                         ->setPasswordUpgraded(true)
@@ -568,9 +568,9 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
         return Mage::helper('core')->validateHash($string1, $string2);
     }
 
-    public function validatePasswordHashLatest(#[\SensitiveParameter] string $string1, string $string2): bool
+    public function passwordHashNeedsUpgrade(): bool
     {
-        return Mage::helper('core')->getEncryptor()->validateHashByVersion($string1, $string2, Mage_Core_Model_Encryption::HASH_VERSION_LATEST);
+        return Mage::helper('core')->hashNeedsUpgrade((string) $this->getPassword());
     }
 
     /**

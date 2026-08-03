@@ -380,7 +380,15 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getHashPassword(#[\SensitiveParameter] string $password): string
     {
-        return $this->getEncryptor()->getHashPassword($password, Mage_Admin_Model_User::HASH_SALT_EMPTY);
+        return $this->getEncryptor()->getHashPassword($password);
+    }
+
+    /**
+     * Whether a stored credential hash predates the current hash version and should be re-hashed
+     */
+    public function hashNeedsUpgrade(#[\SensitiveParameter] string $hash): bool
+    {
+        return $this->getEncryptor()->hashNeedsUpgrade($hash);
     }
 
     /**

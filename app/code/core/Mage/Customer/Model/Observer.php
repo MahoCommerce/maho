@@ -276,9 +276,11 @@ class Mage_Customer_Model_Observer
         $password = $observer->getEvent()->getPassword();
         $model = $observer->getEvent()->getModel();
 
-        $encryptor = Mage::helper('core')->getEncryptor();
-        if (!$encryptor->validateHashByVersion($password, $model->getPasswordHash(), Mage_Core_Model_Encryption::HASH_VERSION_LATEST)) {
-            $model->changePassword($password);
+        // Only the hash is rewritten: changePassword() would also bump password_created_at,
+        // and that logs the customer out of every other session (see Mage_Core_Model_Session_Abstract)
+        if (Mage::helper('core')->hashNeedsUpgrade((string) $model->getPasswordHash())) {
+            $model->setPasswordHash($model->hashPassword($password));
+            $model->getResource()->saveAttribute($model, 'password_hash');
         }
     }
 

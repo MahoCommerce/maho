@@ -38,7 +38,7 @@ function passwordMigrationCanonicalHash(string $password): string
 function passwordMigrationExpectCanonical(string $hash, string $password): void
 {
     expect(password_verify($password, $hash))->toBeTrue()
-        ->and(password_needs_rehash($hash, PASSWORD_DEFAULT))->toBeFalse();
+        ->and(Mage::helper('core')->hashNeedsUpgrade($hash))->toBeFalse();
 }
 
 function passwordMigrationCreateCustomer(string $passwordHash): Mage_Customer_Model_Customer
@@ -137,6 +137,39 @@ describe('Legacy hash validation', function () {
         passwordMigrationExpectCanonical($hash, $password);
         expect(Mage::helper('core')->validateHash($password, $hash))->toBeTrue();
     });
+
+    test('flags every legacy format as needing an upgrade', function (string $format) {
+        $hash = passwordMigrationLegacyHash($format, 'Legacy-P@ssw0rd-1');
+
+        expect(Mage::helper('core')->hashNeedsUpgrade($hash))->toBeTrue();
+    })->with('legacy password hash formats');
+
+    // A bcrypt hash minted elsewhere (OpenMage, or PHP 8.3 where the default cost is 10)
+    // is already in the canonical format: accept it and leave the stored hash alone.
+    test('accepts a foreign bcrypt hash without re-hashing it', function () {
+        $password = 'Legacy-P@ssw0rd-1';
+        $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 10]);
+        $helper = Mage::helper('core');
+
+        expect($helper->validateHash($password, $hash))->toBeTrue()
+            ->and($helper->validateHash('wrong-password', $hash))->toBeFalse()
+            ->and($helper->hashNeedsUpgrade($hash))->toBeFalse();
+    });
+
+    // Imported argon2 credentials already verify through password_verify(), so leave them
+    // alone instead of re-hashing them down to bcrypt on the owner's next login.
+    test('accepts an argon2 hash without re-hashing it', function () {
+        $password = 'Legacy-P@ssw0rd-1';
+        $hash = password_hash($password, PASSWORD_ARGON2ID);
+        $helper = Mage::helper('core');
+
+        expect($helper->validateHash($password, $hash))->toBeTrue()
+            ->and($helper->hashNeedsUpgrade($hash))->toBeFalse();
+    })->skip(!defined('PASSWORD_ARGON2ID'), 'PHP built without argon2 support');
+
+    test('flags an empty stored hash as needing an upgrade', function () {
+        expect(Mage::helper('core')->hashNeedsUpgrade(''))->toBeTrue();
+    });
 });
 
 describe('Customer password migration on login', function () {
@@ -172,6 +205,29 @@ describe('Customer password migration on login', function () {
             $customer->delete();
         }
     })->with('legacy password hash formats');
+
+    // A transparent re-hash is not a password change: bumping password_created_at would
+    // invalidate the customer's sessions on every other device (see Mage_Core_Model_Session_Abstract).
+    test('preserves password_created_at while upgrading the hash', function () {
+        $password = 'Customer-P@ss-42';
+        $passwordCreatedAt = 1700000000;
+        $customer = passwordMigrationCreateCustomer(passwordMigrationLegacyHash('m1 salted md5', $password));
+
+        try {
+            $customer->setPasswordCreatedAt($passwordCreatedAt);
+            $customer->getResource()->saveAttribute($customer, 'password_created_at');
+
+            $authenticated = Mage::getModel('customer/customer')
+                ->setWebsiteId(Mage::app()->getWebsite(true)->getId());
+            expect($authenticated->authenticate($customer->getEmail(), $password))->toBeTrue();
+
+            $reloaded = Mage::getModel('customer/customer')->load($customer->getId());
+            passwordMigrationExpectCanonical((string) $reloaded->getPasswordHash(), $password);
+            expect((int) $reloaded->getPasswordCreatedAt())->toBe($passwordCreatedAt);
+        } finally {
+            $customer->delete();
+        }
+    });
 
     test('leaves an already canonical hash untouched', function () {
         $password = 'Customer-P@ss-42';
