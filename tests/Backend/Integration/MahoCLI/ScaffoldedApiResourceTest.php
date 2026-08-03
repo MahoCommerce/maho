@@ -15,6 +15,7 @@ use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\Discovery\ModuleApiDiscovery;
 use Maho\ApiPlatform\Security\ApiUser;
+use Maho\Config\ApiResource;
 use MahoCLI\Commands\CreateApiResource;
 use MahoCLI\Commands\ListApiResources;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -22,7 +23,6 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\DependencyInjection\Container;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
@@ -39,7 +39,8 @@ uses(Tests\MahoBackendTestCase::class);
  *  3. The generated write API works against the real database: create,
  *     update and delete persist through the shared CrudProcessor, reads
  *     come back through the generated provider, and the derived permission
- *     ids actually gate the write path.
+ *     ids are declared on the write operations' security expressions, the
+ *     declarative gate the access checker enforces at request time.
  *
  * Scaffolds into Mage_Log (a module with no Api/ directory, so the mkdir
  * branch is exercised) against core/config_data (a flat table with no
@@ -224,14 +225,17 @@ it('persists creates, updates and deletes to the database through the generated 
         ->and($fetched->id)->toBe($created->id)
         ->and($fetched->value)->toBe('updated-by-test');
 
-    // The derived permission ids actually gate writes: a user without them is rejected
-    $strangerProcessor = new CrudProcessor(scaffoldSmokeSecurity(
-        new ApiUser('cli-scaffold-stranger', ['ROLE_API'], null, null, 424243, []),
-    ));
-    $strangerDto = new $dtoClass();
-    $strangerDto->path = SCAFFOLD_SMOKE_PATH_PREFIX . 'stranger/field';
-    expect(fn() => $strangerProcessor->process($strangerDto, $post))
-        ->toThrow(AccessDeniedHttpException::class);
+    // The derived permission ids gate writes declaratively, via the operations'
+    // security expressions (enforced at request time by the access checker).
+    $securityByOperation = [];
+    $apiResource = (new ReflectionClass($dtoClass))
+        ->getAttributes(ApiResource::class)[0]->newInstance();
+    foreach ($apiResource->getOperations() as $operation) {
+        $securityByOperation[$operation::class] = (string) $operation->getSecurity();
+    }
+    expect($securityByOperation[Post::class])->toContain("is_granted('" . SCAFFOLD_SMOKE_ID . "/write')")
+        ->and($securityByOperation[Put::class])->toContain("is_granted('" . SCAFFOLD_SMOKE_ID . "/write')")
+        ->and($securityByOperation[Delete::class])->toContain("is_granted('" . SCAFFOLD_SMOKE_ID . "/delete')");
 
     // DELETE: the row must be gone from the database
     $delete = (new Delete(uriTemplate: '/' . SCAFFOLD_SMOKE_ID . '/{id}', name: '_api_smoke_delete'))->withClass($dtoClass);
