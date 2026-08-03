@@ -58,7 +58,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         $backupPath = 'app/etc/local.xml.bak.' . $currentDate;
 
         // If it's an M1 encryption key check for mcrypt_compat
-        if (strlen($oldKey) !== SODIUM_CRYPTO_SECRETBOX_KEYBYTES * 2) {
+        if (!Mage::helper('core')->validateKeyAsHex($oldKey)) {
             $this->isOldEncryptionKeyM1 = true;
             $output->writeln('');
             $output->writeln('<error>It seems your encryption key is an old M1 one.</error>');

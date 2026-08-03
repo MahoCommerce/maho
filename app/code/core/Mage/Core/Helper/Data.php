@@ -346,6 +346,11 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         return $this->getEncryptor()->validateKey($key);
     }
 
+    public function validateKeyAsHex(#[\SensitiveParameter] string $key): bool
+    {
+        return $this->getEncryptor()->validateKeyAsHex($key);
+    }
+
     /**
      * @param int $len
      * @param string|null $chars

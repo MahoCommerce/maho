@@ -25,6 +25,12 @@ class Mage_Core_Model_Encryption
     public const MAXIMUM_PASSWORD_LENGTH = 256;
 
     /**
+     * Encryption key length, as stored in app/etc/local.xml (hex) and as used by libsodium (binary)
+     */
+    public const KEY_LENGTH_BINARY = SODIUM_CRYPTO_SECRETBOX_KEYBYTES;
+    public const KEY_LENGTH_HEX = self::KEY_LENGTH_BINARY * 2;
+
+    /**
      * @var Mage_Core_Helper_Data
      */
     protected $_helper;
@@ -202,6 +208,16 @@ class Mage_Core_Model_Encryption
 
     public function validateKey(#[\SensitiveParameter] string $key): bool
     {
-        return strlen($key) === SODIUM_CRYPTO_SECRETBOX_KEYBYTES;
+        return strlen($key) === self::KEY_LENGTH_BINARY;
+    }
+
+    /**
+     * Validate a key in the form it is stored in app/etc/local.xml, which is what
+     * Mage::getEncryptionKeyAsHex() returns. Anything else (a Magento/OpenMage
+     * mcrypt key, most of all) makes Mage::getEncryptionKeyAsBinary() throw.
+     */
+    public function validateKeyAsHex(#[\SensitiveParameter] string $key): bool
+    {
+        return strlen($key) === self::KEY_LENGTH_HEX && ctype_xdigit($key);
     }
 }

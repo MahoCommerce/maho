@@ -293,13 +293,11 @@ class HealthCheck extends BaseMahoCommand
      */
     public static function findEncryptionKeyIssue(#[\SensitiveParameter] string $key): ?string
     {
-        $expectedLength = SODIUM_CRYPTO_SECRETBOX_KEYBYTES * 2;
-
         if ($key === '') {
             return 'No encryption key configured in app/etc/local.xml (<crypt><key>). '
                 . 'Nothing can be encrypted or decrypted without it.';
         }
-        if (strlen($key) === $expectedLength && ctype_xdigit($key)) {
+        if (Mage::helper('core')->validateKeyAsHex($key)) {
             return null;
         }
 
@@ -308,7 +306,7 @@ class HealthCheck extends BaseMahoCommand
             . 'Stores migrated from Magento/OpenMage carry a 32 character mcrypt key, which makes every '
             . 'encrypt/decrypt call fail. Install mahocommerce/module-mcrypt-compat, then run '
             . '"./maho sys:encryptionkey:regenerate" to re-encrypt your data under a new libsodium key.',
-            $expectedLength,
+            \Mage_Core_Model_Encryption::KEY_LENGTH_HEX,
             strlen($key),
         );
     }
