@@ -1299,6 +1299,30 @@ XML;
     }
 
     /**
+     * Config paths whose values are stored encrypted.
+     *
+     * @return string[]
+     */
+    public function getEncryptedConfigPaths(): array
+    {
+        $encryptedPaths = [];
+        $sections = Mage::getSingleton('adminhtml/config')->getSections();
+        if (!$sections) {
+            return $encryptedPaths;
+        }
+        foreach ($sections->children() as $sectionId => $section) {
+            foreach ($section->groups?->children() ?? [] as $groupId => $group) {
+                foreach ($group->fields?->children() ?? [] as $fieldId => $field) {
+                    if ((string) $field->backend_model === 'adminhtml/system_config_backend_encrypted') {
+                        $encryptedPaths[] = "$sectionId/$groupId/$fieldId";
+                    }
+                }
+            }
+        }
+        return $encryptedPaths;
+    }
+
+    /**
      * Re-encrypt columns in a table using batched queries to avoid memory exhaustion.
      *
      * @param string[] $columns

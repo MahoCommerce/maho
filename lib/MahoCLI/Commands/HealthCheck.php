@@ -286,6 +286,124 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * Validate the configured encryption key, returning the reason it is unusable
+     * or null when it is a proper libsodium key. Magento/OpenMage stores carry a
+     * 32 character mcrypt key: copied into local.xml as-is it is not even valid
+     * hex, so `Mage::getEncryptionKeyAsBinary()` throws on every encrypt/decrypt.
+     */
+    public static function findEncryptionKeyIssue(#[\SensitiveParameter] string $key): ?string
+    {
+        $expectedLength = SODIUM_CRYPTO_SECRETBOX_KEYBYTES * 2;
+
+        if ($key === '') {
+            return 'No encryption key configured in app/etc/local.xml (<crypt><key>). '
+                . 'Nothing can be encrypted or decrypted without it.';
+        }
+        if (strlen($key) === $expectedLength && ctype_xdigit($key)) {
+            return null;
+        }
+
+        return sprintf(
+            'The key in app/etc/local.xml is not a libsodium key (expected %d hex characters, found %d). '
+            . 'Stores migrated from Magento/OpenMage carry a 32 character mcrypt key, which makes every '
+            . 'encrypt/decrypt call fail. Install mahocommerce/module-mcrypt-compat, then run '
+            . '"./maho sys:encryptionkey:regenerate" to re-encrypt your data under a new libsodium key.',
+            $expectedLength,
+            strlen($key),
+        );
+    }
+
+    /**
+     * Find encrypted values that no longer open under the current key, which is what
+     * an imported Magento/OpenMage database looks like next to a freshly generated
+     * key. Decryption yields an empty string rather than an error, so payment and
+     * SMTP credentials read as blank instead of failing loudly.
+     *
+     * Scans core_config_data and admin_user only: both are small and bounded, and a
+     * key mismatch fails every row anyway.
+     *
+     * @return list<string>
+     */
+    public static function findUndecryptableData(): array
+    {
+        if (self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex()) !== null) {
+            return [];
+        }
+
+        $key = Mage::getEncryptionKeyAsBinary();
+        $resource = Mage::getSingleton('core/resource');
+        $read = $resource->getConnection('core_read');
+        $failures = [];
+
+        $encryptedPaths = Mage::helper('core')->getEncryptedConfigPaths();
+        if (!empty($encryptedPaths)) {
+            $configTable = $resource->getTableName('core_config_data');
+            $select = $read->select()
+                ->from($configTable, ['config_id', 'path', 'value'])
+                ->where('value IS NOT NULL')
+                ->where("value != ''")
+                ->where('path IN (?)', $encryptedPaths);
+            foreach ($read->fetchAll($select) as $row) {
+                if (!self::canDecrypt($key, (string) $row['value'])) {
+                    $failures[] = sprintf('%s #%s (%s)', $configTable, $row['config_id'], $row['path']);
+                }
+            }
+        }
+
+        $adminTable = $resource->getTableName('admin_user');
+        $select = $read->select()
+            ->from($adminTable, ['user_id', 'twofa_secret'])
+            ->where('twofa_secret IS NOT NULL')
+            ->where("twofa_secret != ''");
+        foreach ($read->fetchAll($select) as $row) {
+            if (!self::canDecrypt($key, (string) $row['twofa_secret'])) {
+                $failures[] = sprintf('%s #%s (twofa_secret)', $adminTable, $row['user_id']);
+            }
+        }
+
+        return $failures;
+    }
+
+    /**
+     * Decrypt without going through the encryptor, which logs an exception per
+     * failure: a health check must not fill exception.log with its own findings.
+     */
+    private static function canDecrypt(#[\SensitiveParameter] string $key, string $value): bool
+    {
+        try {
+            $decoded = sodium_base642bin($value, SODIUM_BASE64_VARIANT_ORIGINAL);
+        } catch (\SodiumException) {
+            return false;
+        }
+        if (strlen($decoded) < SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + SODIUM_CRYPTO_SECRETBOX_MACBYTES) {
+            return false;
+        }
+
+        return sodium_crypto_secretbox_open(
+            substr($decoded, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES),
+            substr($decoded, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES),
+            $key,
+        ) !== false;
+    }
+
+    /**
+     * @param list<string> $failures
+     */
+    private static function formatUndecryptableSummary(array $failures): string
+    {
+        $shown = array_slice($failures, 0, 10);
+        return sprintf(
+            '%d encrypted value(s) cannot be decrypted with the current key: %s%s. They read as empty at runtime. '
+            . 'This usually means the database was encrypted under a different key (a Magento/OpenMage import, or a '
+            . 'copy from another install): restore the key those values were encrypted with in app/etc/local.xml, '
+            . 'then run "./maho sys:encryptionkey:regenerate". Otherwise, if they were stored unencrypted, re-enter them.',
+            count($failures),
+            implode(', ', $shown),
+            count($failures) > count($shown) ? ', ...' : '',
+        );
+    }
+
+    /**
      * Detect a legacy `<admin><routers><adminhtml><args><frontName>` declaration
      * in `app/etc/local.xml`. The constant `Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_ROUTER_FRONTNAME`
      * now resolves to `admin/base_path`; an entry at the old path is silently ignored,
@@ -448,6 +566,30 @@ class HealthCheck extends BaseMahoCommand
                 '#[Maho\\Config\\CronJob]',
             ),
         ];
+
+        $keyIssue = self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex());
+        $checks[] = [
+            'check' => 'Encryption Key',
+            'severity' => $keyIssue === null ? 'ok' : 'error',
+            'details' => $keyIssue ?? '',
+        ];
+
+        if ($keyIssue === null) {
+            try {
+                $undecryptable = self::findUndecryptableData();
+                $checks[] = [
+                    'check' => 'Encrypted Data',
+                    'severity' => empty($undecryptable) ? 'ok' : 'error',
+                    'details' => empty($undecryptable) ? '' : self::formatUndecryptableSummary($undecryptable),
+                ];
+            } catch (\Exception) {
+                $checks[] = [
+                    'check' => 'Encrypted Data',
+                    'severity' => 'error',
+                    'details' => 'Unable to check encrypted data.',
+                ];
+            }
+        }
 
         $legacyAdminPath = self::findLegacyLocalXmlAdminPath();
         $checks[] = [
@@ -974,8 +1116,12 @@ class HealthCheck extends BaseMahoCommand
             $output->writeln('');
         }
 
-        // Check for orphaned role resources (requires database)
+        // Checks below need the application (and its database) bootstrapped
         $this->initMaho();
+
+        if (!$this->checkEncryption($output)) {
+            $hasErrors = true;
+        }
 
         $this->checkOrphanedResources($input, $output, Mage::getResourceModel('admin/rules'), 'admin');
         $this->checkOrphanedResources($input, $output, Mage::getResourceModel('api/rules'), 'API');
@@ -989,6 +1135,46 @@ class HealthCheck extends BaseMahoCommand
         }
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Report an unusable encryption key, and data that no longer decrypts under it.
+     * Returns false when either check failed.
+     */
+    private function checkEncryption(OutputInterface $output): bool
+    {
+        $output->write('Checking encryption key... ');
+        $keyIssue = self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex());
+        if ($keyIssue !== null) {
+            $output->writeln('');
+            $output->writeln('<error>Error: ' . $keyIssue . '</error>');
+            $output->writeln('');
+            return false;
+        }
+        $output->writeln('<info>OK</info>');
+
+        $output->write('Checking encrypted data... ');
+        $undecryptable = self::findUndecryptableData();
+        if (empty($undecryptable)) {
+            $output->writeln('<info>OK</info>');
+            return true;
+        }
+
+        $output->writeln('');
+        $output->writeln(sprintf(
+            '<error>Error: %d encrypted value(s) cannot be decrypted with the current key:</error>',
+            count($undecryptable),
+        ));
+        foreach ($undecryptable as $failure) {
+            $output->writeln('- ' . $failure);
+        }
+        $output->writeln('They read as empty at runtime. This usually means the database was encrypted under a');
+        $output->writeln('different key (a Magento/OpenMage import, or a copy from another install): restore that');
+        $output->writeln('key in app/etc/local.xml and run "./maho sys:encryptionkey:regenerate". Otherwise, if');
+        $output->writeln('they were stored unencrypted, re-enter them.');
+        $output->writeln('');
+
+        return false;
     }
 
     /**
