@@ -58,6 +58,9 @@ class HealthCheck extends BaseMahoCommand
         . 'Encryption works, but that module is a migration aid: run "./maho sys:encryptionkey:regenerate" to '
         . 'move to a libsodium key, then remove it.';
 
+    /** Blowfish, the cipher module-mcrypt-compat defaults to, takes no longer key. */
+    private const MCRYPT_MAX_KEY_LENGTH = 56;
+
     /**
      * Mapping of deprecated Varien_ classes to their Maho\ replacements
      */
@@ -309,10 +312,11 @@ class HealthCheck extends BaseMahoCommand
             return 'No encryption key configured in app/etc/local.xml (<crypt><key>). '
                 . 'Nothing can be encrypted or decrypted without it.';
         }
-        // An mcrypt key is the right key for an mcrypt encryptor, and under that module
-        // Mage_Core_Model_Encryption is its class, so KEY_LENGTH_HEX does not exist here.
+        // An mcrypt key is the right key for an mcrypt encryptor, so judge it by that
+        // cipher's rules. Under that module Mage_Core_Model_Encryption is its class,
+        // which has neither validateKeyAsHex() nor the KEY_LENGTH_* constants below.
         if (self::isLegacyEncryptionActive()) {
-            return null;
+            return self::findLegacyEncryptionKeyIssue($key);
         }
         if (Mage::helper('core')->validateKeyAsHex($key)) {
             return null;
@@ -341,7 +345,42 @@ class HealthCheck extends BaseMahoCommand
      */
     public static function isLegacyEncryptionActive(): bool
     {
-        return Mage::helper('core')->isLegacyEncryptor() && Mage::getEncryptionKeyAsHex() !== '';
+        return Mage::helper('core')->isLegacyEncryptor();
+    }
+
+    /**
+     * Judge the key by the legacy encryptor's rules: Blowfish takes any key up to
+     * MCRYPT_MAX_KEY_LENGTH bytes and nothing longer. Two states are broken rather
+     * than merely dated, and both are silent at runtime, so the check must name them.
+     */
+    private static function findLegacyEncryptionKeyIssue(#[\SensitiveParameter] string $key): ?string
+    {
+        if (self::looksLikeSodiumKey($key)) {
+            return 'The key in app/etc/local.xml is already a libsodium key, but the store still loads the '
+                . 'legacy mcrypt encryptor from mahocommerce/module-mcrypt-compat, which cannot take a key '
+                . 'this long: every encrypt and decrypt call throws. The key regeneration is done, so finish '
+                . 'it with "composer remove mahocommerce/module-mcrypt-compat".';
+        }
+        if (strlen($key) > self::MCRYPT_MAX_KEY_LENGTH) {
+            return sprintf(
+                'The key in app/etc/local.xml is %d characters long, but the legacy mcrypt encryptor from '
+                . 'mahocommerce/module-mcrypt-compat (Blowfish) takes at most %d, so every encrypt and '
+                . 'decrypt call throws. Restore the key this store was encrypted under.',
+                strlen($key),
+                self::MCRYPT_MAX_KEY_LENGTH,
+            );
+        }
+
+        return null;
+    }
+
+    /**
+     * Shape test only, and deliberately not routed through the encryptor: under the
+     * compat module that object has no validateKeyAsHex() to ask.
+     */
+    private static function looksLikeSodiumKey(#[\SensitiveParameter] string $key): bool
+    {
+        return strlen($key) === SODIUM_CRYPTO_SECRETBOX_KEYBYTES * 2 && ctype_xdigit($key);
     }
 
     /**
@@ -602,15 +641,15 @@ class HealthCheck extends BaseMahoCommand
             ),
         ];
 
-        $isLegacy = self::isLegacyEncryptionActive();
         $keyIssue = self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex());
+        $legacyOk = $keyIssue === null && self::isLegacyEncryptionActive();
         $checks[] = [
             'check' => 'Encryption Key',
-            'severity' => $isLegacy ? 'warning' : ($keyIssue === null ? 'ok' : 'error'),
-            'details' => $isLegacy ? self::LEGACY_ENCRYPTOR_ADVICE : ($keyIssue ?? ''),
+            'severity' => $legacyOk ? 'warning' : ($keyIssue === null ? 'ok' : 'error'),
+            'details' => $legacyOk ? self::LEGACY_ENCRYPTOR_ADVICE : ($keyIssue ?? ''),
         ];
 
-        if ($isLegacy) {
+        if ($legacyOk) {
             $checks[] = [
                 'check' => 'Encrypted Data',
                 'severity' => 'warning',
@@ -1192,7 +1231,8 @@ class HealthCheck extends BaseMahoCommand
     private function checkEncryption(OutputInterface $output): bool
     {
         $output->write('Checking encryption key... ');
-        if (self::isLegacyEncryptionActive()) {
+        $keyIssue = self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex());
+        if ($keyIssue === null && self::isLegacyEncryptionActive()) {
             $output->writeln('<comment>LEGACY</comment>');
             $output->writeln(wordwrap(self::LEGACY_ENCRYPTOR_ADVICE, 100));
             $output->writeln('Checking encrypted data... <comment>SKIPPED (legacy mcrypt encryptor)</comment>');
@@ -1200,7 +1240,6 @@ class HealthCheck extends BaseMahoCommand
             return true;
         }
 
-        $keyIssue = self::findEncryptionKeyIssue(Mage::getEncryptionKeyAsHex());
         if ($keyIssue !== null) {
             $output->writeln('');
             $output->writeln('<error>Error: ' . $keyIssue . '</error>');
