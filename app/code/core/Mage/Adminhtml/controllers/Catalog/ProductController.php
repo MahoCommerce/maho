@@ -521,8 +521,19 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
 
         try {
             $productData = $this->getRequest()->getPost('product');
+            if (empty($productData)) {
+                Mage::log(sprintf(
+                    'Product validate request for product ID %s contained no product data, POST keys received: %s',
+                    $this->getRequest()->getParam('id'),
+                    implode(', ', array_keys($this->getRequest()->getPost())),
+                ), Mage::LOG_WARNING);
+                $response->setError(true);
+                $response->setMessage($this->__('No product data was received, the page may not have fully loaded yet. Please try saving again.'));
+                $this->getResponse()->setBodyJson($response);
+                return;
+            }
 
-            if ($productData && !isset($productData['stock_data']['use_config_manage_stock'])) {
+            if (!isset($productData['stock_data']['use_config_manage_stock'])) {
                 $productData['stock_data']['use_config_manage_stock'] = 0;
             }
             /** @var Mage_Catalog_Model_Product $product */
@@ -744,6 +755,20 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
 
         $data = $this->getRequest()->getPost();
         if ($data) {
+            if (empty($data['product'])) {
+                Mage::log(sprintf(
+                    'Product save request for product ID %s contained no product data, POST keys received: %s',
+                    $productId,
+                    implode(', ', array_keys($data)),
+                ), Mage::LOG_WARNING);
+                $this->_getSession()->addError($this->__('No product data was received, the page may not have fully loaded yet. Please try saving again.'));
+                $this->_redirect('*/*/edit', [
+                    'id' => $productId,
+                    '_current' => true,
+                ]);
+                return;
+            }
+
             $this->_filterStockData($data['product']['stock_data']);
 
             $product = $this->_initProductSave();

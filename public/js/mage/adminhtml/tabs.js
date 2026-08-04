@@ -43,7 +43,12 @@ class varienTabs {
         });
 
         this.displayFirst = activeTabId;
-        window.addEventListener('load', () => this.moveTabContentInDest());
+        // move tab contents at DOMContentLoaded, waiting for window load would leave the form submittable while still empty
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.moveTabContentInDest());
+        } else {
+            this.moveTabContentInDest();
+        }
     }
 
     setSkipDisplayFirstTab() {

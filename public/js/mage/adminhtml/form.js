@@ -62,7 +62,12 @@ class varienForm {
             this._processValidationResult(data);
         })
         .catch(error => {
-            this._processFailure();
+            // show server-side validation errors, only redirect on genuine fetch failures
+            if (error?.response?.error) {
+                this._processValidationResult(error.response);
+            } else {
+                this._processFailure();
+            }
         });
     }
 

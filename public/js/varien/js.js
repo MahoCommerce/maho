@@ -67,7 +67,9 @@ async function mahoFetch(url, options) {
         if (typeof result === 'object' && result !== null) {
             if (result.error) {
                 const message = result.message ?? result.error;
-                throw new MahoError(typeof message === 'string' ? message : 'An error occurred.');
+                const error = new MahoError(typeof message === 'string' ? message : 'An error occurred.');
+                error.response = result;
+                throw error;
             } else if (result.ajaxExpired && result.ajaxRedirect) {
                 setLocation(result.ajaxRedirect);
                 await new Promise((resolve) => {});
