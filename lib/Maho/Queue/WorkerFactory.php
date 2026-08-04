@@ -62,6 +62,8 @@ final class WorkerFactory
             }
         });
 
+        $dispatcher->addSubscriber(new StopWorkerOnConfigChangeListener());
+
         if (isset($options['limit']) && $options['limit'] > 0) {
             $dispatcher->addSubscriber(new StopWorkerOnMessageLimitListener($options['limit']));
         }

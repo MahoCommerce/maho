@@ -29,7 +29,7 @@ uses(Tests\MahoBackendTestCase::class);
  * retry-in-place and reject-no-op transport semantics stay pinned even if a
  * Messenger minor release changes the listener/worker interplay.
  */
-function runQueueWorker(callable $handler, int $maxRetries, int $retryDelayMs): void
+function runQueueWorker(callable $handler, int $maxRetries, int $retryDelayMs, array $extraSubscribers = []): void
 {
     $transport = QueueManager::dbTransport();
     $bus = new MessageBus([
@@ -45,6 +45,9 @@ function runQueueWorker(callable $handler, int $maxRetries, int $retryDelayMs): 
         new ServiceLocator(['db' => new MultiplierRetryStrategy($maxRetries, $retryDelayMs, 1, 0, 0)]),
     ));
     $dispatcher->addSubscriber(new StopWorkerWhenIdleListener());
+    foreach ($extraSubscribers as $subscriber) {
+        $dispatcher->addSubscriber($subscriber);
+    }
 
     (new Worker(['db' => $transport], $bus, $dispatcher))->run(['sleep' => 0]);
 }
@@ -119,6 +122,24 @@ it('fails immediately on an unrecoverable exception', function () {
     $rows = fetchQueueRows();
     expect($rows[0]['status'])->toBe(DbTransport::STATUS_FAILED);
     expect((int) $rows[0]['retries'])->toBe(0);
+});
+
+it('stops the worker when store configuration changes', function () {
+    QueueManager::dispatch(makeEmailMessage('first'));
+    QueueManager::dispatch(makeEmailMessage('second'));
+
+    $listener = new \Maho\Queue\StopWorkerOnConfigChangeListener(0);
+    try {
+        runQueueWorker(function (): void {
+            Mage::getConfig()->saveConfig('queue_test/probe/value', uniqid());
+        }, 3, 0, [$listener]);
+
+        $rows = fetchQueueRows();
+        expect($rows)->toHaveCount(1);
+        expect($rows[0]['status'])->toBe(DbTransport::STATUS_PENDING);
+    } finally {
+        Mage::getConfig()->deleteConfig('queue_test/probe/value');
+    }
 });
 
 it('keeps completed rows when a retention period is configured', function () {
