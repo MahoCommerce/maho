@@ -50,7 +50,7 @@ use Symfony\Component\Mime\Address;
  * @method $this setOrigTemplateCode(string $value)
  * @method string getOrigTemplateVariables()
  * @method $this setOrigTemplateVariables(string $value)
- * @method $this setQueue(Mage_Core_Model_Abstract $value)
+ * @method $this setQueue(Mage_Core_Model_Email_Queue $value)
  * @method Mage_Core_Model_Email_Queue getQueue()
  * @method int hasQueue()
  * @method bool getSentSuccess()

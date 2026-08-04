@@ -62,6 +62,9 @@ $application->addCommand(new \MahoCLI\Commands\CronList());
 $application->addCommand(new \MahoCLI\Commands\CronRun());
 $application->addCommand(new \MahoCLI\Commands\CronUnlock());
 
+$application->addCommand(new \MahoCLI\Commands\QueueList());
+$application->addCommand(new \MahoCLI\Commands\QueueWork());
+
 $application->addCommand(new \MahoCLI\Commands\LogClean());
 $application->addCommand(new \MahoCLI\Commands\LogStatus());
 

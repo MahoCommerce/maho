@@ -105,6 +105,9 @@ public function handleFrontendEvent(\Maho\Event\Observer $observer) {}
 
 #[Maho\Config\CronJob('my_cron_job', schedule: '0 2 * * *')]
 public function runJob(Mage_Cron_Model_Schedule $schedule) {}
+
+#[Maho\Config\MessageHandler]
+public function __invoke(My_Module_Model_SomeMessage $message): void {}
 ```
 
 - Prefer the global area (default, omit `area:`) unless the observer must be area-restricted
@@ -166,6 +169,10 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
 ### Other key systems
 
 - **Events**: `Mage::dispatchEvent('event_name', ['data' => $data])`
+- **Async queue**: `\Maho\Queue\QueueManager::dispatch($messageDto)` queues a flat DTO for a
+  `#[Maho\Config\MessageHandler]` method (message class inferred from the first parameter type);
+  cron automatically keeps a detached `queue:work` worker alive, with retries/backoff and an
+  admin grid under System > Message Queue
 - **Layout**: XML-based block hierarchy and template assignment
 - **Sessions**: `Mage::getSingleton('customer/session')`, `'admin/session'`, `'checkout/session'`
 - **Translations**: `$this->__('Text')`, CSVs in `app/locale/[locale]/`

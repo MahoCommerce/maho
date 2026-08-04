@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ */
+-->
+<config>
+    <modules>
+        <Maho_Queue>
+            <version>1.0.0</version>
+        </Maho_Queue>
+    </modules>
+
+    <global>
+        <models>
+            <queue>
+                <class>Maho_Queue_Model</class>
+                <resourceModel>queue_resource</resourceModel>
+            </queue>
+            <queue_resource>
+                <class>Maho_Queue_Model_Resource</class>
+                <entities>
+                    <message>
+                        <table>maho_queue_message</table>
+                    </message>
+                </entities>
+            </queue_resource>
+        </models>
+
+        <helpers>
+            <queue>
+                <class>Maho_Queue_Helper</class>
+            </queue>
+        </helpers>
+
+        <blocks>
+            <queue>
+                <class>Maho_Queue_Block</class>
+            </queue>
+        </blocks>
+    </global>
+
+    <adminhtml>
+        <translate>
+            <modules>
+                <Maho_Queue>
+                    <files>
+                        <default>Maho_Queue.csv</default>
+                    </files>
+                </Maho_Queue>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <maho_queue>
+                    <file>queue.xml</file>
+                </maho_queue>
+            </updates>
+        </layout>
+    </adminhtml>
+
+    <default>
+        <system>
+            <queue>
+                <max_retries>3</max_retries>
+                <retry_delay>60</retry_delay>
+                <retry_multiplier>4</retry_multiplier>
+                <retry_max_delay>21600</retry_max_delay>
+                <redeliver_after>3600</redeliver_after>
+                <completed_retention>0</completed_retention>
+                <failed_retention>30</failed_retention>
+            </queue>
+        </system>
+    </default>
+</config>

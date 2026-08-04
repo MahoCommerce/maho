@@ -433,3 +433,41 @@ function waitForPageLoad(object $page, string $selector): object
 
     return $page;
 }
+
+/*
+|--------------------------------------------------------------------------
+| Message Queue Helper Functions
+|--------------------------------------------------------------------------
+|
+| Shared by tests in tests/Backend/Integration/Queue/.
+|
+*/
+
+function queueAdapter(): \Maho\Db\Adapter\AdapterInterface
+{
+    return Mage::getSingleton('core/resource')->getConnection('core_write');
+}
+
+function clearQueueTable(): void
+{
+    queueAdapter()->delete(\Maho\Queue\QueueManager::tableName());
+}
+
+function makeEmailMessage(string $subject = 'Test subject'): Mage_Core_Model_Email_SendMessage
+{
+    return new Mage_Core_Model_Email_SendMessage(
+        subject: $subject,
+        body: '<p>Body</p>',
+        isPlain: false,
+        fromEmail: 'from@example.com',
+        fromName: 'From',
+        recipients: [['to@example.com', 'To', Mage_Core_Model_Email_Queue::EMAIL_TYPE_TO]],
+    );
+}
+
+function fetchQueueRows(): array
+{
+    return queueAdapter()->fetchAll(
+        queueAdapter()->select()->from(\Maho\Queue\QueueManager::tableName())->order('message_id ASC'),
+    );
+}
