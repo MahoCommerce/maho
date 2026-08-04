@@ -91,12 +91,9 @@ it('rejects a message without recipients', function () {
         ->toThrow(Mage_Core_Exception::class, 'Message recipients data must be set.');
 });
 
-it('queues instead of sending when enable_queue is on', function () {
-    Mage::app()->getStore()->setConfig('system/smtp/enable_queue', '1');
-
+it('always queues template sends outside developer mode', function () {
     $template = Mage::getModel('core/email_template');
-    $template->setQueue(Mage::getModel('core/email_queue'))
-        ->setSenderName('Shop')
+    $template->setSenderName('Shop')
         ->setSenderEmail('shop@example.com')
         ->setTemplateType(Mage_Core_Model_Template::TYPE_TEXT)
         ->setTemplateText('Queued body')
@@ -108,4 +105,24 @@ it('queues instead of sending when enable_queue is on', function () {
     expect($rows)->toHaveCount(1);
     expect($rows[0]['queue'])->toBe('email');
     expect($rows[0]['message_class'])->toBe(Mage_Core_Model_Email_SendMessage::class);
+});
+
+it('carries dispatch-time headers on the queued message', function () {
+    $template = Mage::getModel('core/email_template');
+    $template->setSenderName('Shop')
+        ->setSenderEmail('shop@example.com')
+        ->setTemplateType(Mage_Core_Model_Template::TYPE_TEXT)
+        ->setTemplateText('Body')
+        ->setTemplateSubject('Subject')
+        ->setTemplateId(42);
+
+    expect($template->send('dest@example.com', 'Dest'))->toBeTrue();
+
+    $rows = fetchQueueRows();
+    $message = \Maho\Queue\QueueManager::serializer()->decode([
+        'body' => (string) $rows[0]['body'],
+        'headers' => ['type' => (string) $rows[0]['message_class']],
+    ])->getMessage();
+    expect($message->headers)->toHaveKey('X-Maho-Template');
+    expect($message->headers['X-Maho-Template'])->toBe('42');
 });

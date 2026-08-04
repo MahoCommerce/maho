@@ -8,9 +8,6 @@
  * @package Mage_Core
  */
 
-use Symfony\Component\Mailer\Mailer;
-use Symfony\Component\Mime\Email;
-use Symfony\Component\Mime\Address;
 
 /**
  * Template model
@@ -377,7 +374,6 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         $text = $this->getProcessedTemplate($variables, true);
         $subject = $this->getProcessedTemplateSubject($variables);
 
-        $emailTransport = Mage::getStoreConfig('system/smtp/enabled');
         $setReturnPath = Mage::getStoreConfig(self::XML_PATH_SENDING_SET_RETURN_PATH);
         $returnPathEmail = match ($setReturnPath) {
             1 => $this->getSenderEmail(),
@@ -385,95 +381,69 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             default => null,
         };
 
-        $useQueue = $this->hasQueue()
-            && $this->getQueue() instanceof Mage_Core_Model_Email_Queue
-            && !Mage::getIsDeveloperMode()
-            && Mage::getStoreConfigFlag('system/smtp/enable_queue');
+        $recipients = [];
+        foreach ($emails as $key => $recipientEmail) {
+            $recipients[] = [$recipientEmail, $names[$key], Mage_Core_Model_Email_Queue::EMAIL_TYPE_TO];
+        }
+        foreach ($this->_bccEmails as $bccEmail) {
+            $recipients[] = [$bccEmail, '', Mage_Core_Model_Email_Queue::EMAIL_TYPE_BCC];
+        }
 
-        if ($useQueue) {
-            $emailQueue = $this->getQueue();
-            $emailQueue->clearRecipients();
-            $emailQueue->setMessageBody($text);
-            $emailQueue->setMessageParameters([
-                'subject'           => $subject,
-                'return_path_email' => $returnPathEmail,
-                'is_plain'          => $this->isPlain(),
-                'from_email'        => $this->getSenderEmail(),
-                'from_name'         => $this->getSenderName(),
-                'reply_to'          => $this->_replyToEmail,
-                'return_to'         => $this->_returnPathEmail,
-                'attachments'       => array_map(fn($a) => $a->toArray(), $this->_attachments),
-            ])
-                ->addRecipients($emails, $names, Mage_Core_Model_Email_Queue::EMAIL_TYPE_TO)
-                ->addRecipients($this->_bccEmails, [], Mage_Core_Model_Email_Queue::EMAIL_TYPE_BCC);
-            $emailQueue->addMessageToQueue();
+        $headers = new \Maho\DataObject();
+        if ($this->getTemplateId()) {
+            $headers->setData('X-Maho-Template', (string) $this->getTemplateId());
+        }
+        Mage::dispatchEvent('email_template_dispatch_before', [
+            'template'  => $this,
+            'variables' => $variables,
+            'headers'   => $headers,
+        ]);
 
-            return true;
+        $queueMeta = $this->hasQueue() && $this->getQueue() instanceof Mage_Core_Model_Email_Queue
+            ? $this->getQueue()
+            : null;
+
+        $message = new Mage_Core_Model_Email_SendMessage(
+            subject: $subject,
+            body: $text,
+            isPlain: $this->isPlain(),
+            fromEmail: $this->getSenderEmail(),
+            fromName: $this->getSenderName(),
+            recipients: $recipients,
+            replyTo: $this->_replyToEmail,
+            returnPath: $this->_returnPathEmail ?? $returnPathEmail,
+            attachments: array_map(fn($a) => $a->toArray(), $this->_attachments),
+            headers: $headers->getData(),
+            entityId: $queueMeta?->getData('entity_id') !== null ? (int) $queueMeta->getData('entity_id') : null,
+            entityType: $queueMeta?->getData('entity_type'),
+            eventType: $queueMeta?->getData('event_type'),
+        );
+
+        // Developer mode shortcut: same builder, no queue, so errors surface immediately
+        // and no worker is needed locally.
+        if (Mage::getIsDeveloperMode()) {
+            try {
+                Mage::getSingleton('core/email_sendMessageHandler')->__invoke($message);
+                return true;
+            } catch (Throwable $e) {
+                Mage::logException($e);
+                return false;
+            }
+        }
+
+        $dedupeKey = null;
+        if ($queueMeta?->getIsForceCheck()) {
+            $dedupeKey = md5(implode('|', [
+                (string) $queueMeta->getData('entity_id'),
+                (string) $queueMeta->getData('entity_type'),
+                (string) $queueMeta->getData('event_type'),
+                md5($text),
+                md5(serialize($recipients)),
+            ]));
         }
 
         try {
-            $email = new Email();
-            $email->subject($subject);
-            $email->from(new Address($this->getSenderEmail(), $this->getSenderName()));
-            if ($returnPathEmail !== null) {
-                $email->returnPath($returnPathEmail);
-            }
-            if ($this->_returnPathEmail !== null) {
-                $email->returnPath($this->_returnPathEmail);
-            }
-            if ($this->_replyToEmail !== null) {
-                $email->replyTo($this->_replyToEmail);
-            }
-            foreach ($emails as $key => $recipient) {
-                $email->addTo(new Address($recipient, $names[$key]));
-            }
-            if (!empty($this->_bccEmails)) {
-                foreach ($this->_bccEmails as $bccEmail) {
-                    $email->addBcc($bccEmail);
-                }
-            }
-            if ($this->isPlain()) {
-                $email->text($text);
-            } else {
-                $email->html($text);
-            }
-
-            if ($this->getTemplateId()) {
-                $email->getHeaders()->addTextHeader('X-Maho-Template', (string) $this->getTemplateId());
-            }
-
-            Mage_Core_Model_Email_Attachment::applyDescriptors(
-                $email,
-                array_map(fn($a) => $a->toArray(), $this->_attachments),
-            );
-
-            $transport = Mage::helper('core')->getMailTransport();
-            if (!$transport) {
-                // This means email sending is disabled
-                return true;
-            }
-            $mailer = new Mailer($transport);
-
-            $transportObj = new \Maho\DataObject();
-            Mage::dispatchEvent('email_template_send_before', [
-                'mail'      => $email,
-                'template'  => $this,
-                'transport' => $transportObj,
-                'variables' => $variables,
-            ]);
-
-            $mailer->send($email);
-
-            foreach ($emails as $recipientEmail) {
-                Mage::dispatchEvent('email_template_send_after', [
-                    'to'         => $recipientEmail,
-                    'html'       => !$this->isPlain(),
-                    'subject'    => $subject,
-                    'template'   => $this->getTemplateId(),
-                    'email_body' => $text,
-                ]);
-            }
-
+            \Maho\Queue\QueueManager::dispatch($message, queue: Mage_Core_Model_Email_Queue::QUEUE_NAME, dedupeKey: $dedupeKey);
             return true;
         } catch (Exception $e) {
             Mage::logException($e);

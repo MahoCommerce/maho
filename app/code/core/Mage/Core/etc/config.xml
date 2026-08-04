@@ -234,7 +234,6 @@ SPDX-License-Identifier: AFL-3.0
             </cache>
             <smtp>
                 <enabled>sendmail</enabled>
-                <enable_queue>1</enable_queue>
                 <log_enabled>0</log_enabled>
                 <log_clean_after_days>30</log_clean_after_days>
             </smtp>

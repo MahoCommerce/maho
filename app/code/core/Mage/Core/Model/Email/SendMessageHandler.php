@@ -57,6 +57,9 @@ class Mage_Core_Model_Email_SendMessageHandler
             if ($message->returnPath !== null) {
                 $email->returnPath($message->returnPath);
             }
+            foreach ($message->headers as $headerName => $headerValue) {
+                $email->getHeaders()->addTextHeader($headerName, $headerValue);
+            }
 
             Mage_Core_Model_Email_Attachment::applyDescriptors($email, $message->attachments);
         } catch (RfcComplianceException $e) {

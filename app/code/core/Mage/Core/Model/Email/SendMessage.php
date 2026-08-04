@@ -17,6 +17,7 @@ final readonly class Mage_Core_Model_Email_SendMessage
     /**
      * @param list<array{0: string, 1: string, 2: int}> $recipients  [email, name, type] triples (type: Mage_Core_Model_Email_Queue::EMAIL_TYPE_*)
      * @param list<array<string, mixed>>                $attachments Attachment descriptors for Mage_Core_Model_Email_Attachment::applyDescriptors()
+     * @param array<string, string>                     $headers     Extra text headers (e.g. List-Unsubscribe, X-Maho-Template)
      */
     public function __construct(
         public string $subject,
@@ -28,6 +29,7 @@ final readonly class Mage_Core_Model_Email_SendMessage
         public ?string $replyTo = null,
         public ?string $returnPath = null,
         public array $attachments = [],
+        public array $headers = [],
         public ?int $entityId = null,
         public ?string $entityType = null,
         public ?string $eventType = null,
