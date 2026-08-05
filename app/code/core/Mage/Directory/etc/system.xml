@@ -83,7 +83,7 @@ SPDX-License-Identifier: AFL-3.0
                                 <active>1</active>
                             </depends>
                         </timeout>
-                        <sort_order translate="label">
+                        <sort_order translate="label comment">
                             <label>Sort Order</label>
                             <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
@@ -123,7 +123,7 @@ SPDX-License-Identifier: AFL-3.0
                                 <active>1</active>
                             </depends>
                         </timeout>
-                        <sort_order translate="label">
+                        <sort_order translate="label comment">
                             <label>Sort Order</label>
                             <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
@@ -162,7 +162,7 @@ SPDX-License-Identifier: AFL-3.0
                                 <active>1</active>
                             </depends>
                         </timeout>
-                        <sort_order translate="label">
+                        <sort_order translate="label comment">
                             <label>Sort Order</label>
                             <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
@@ -174,7 +174,7 @@ SPDX-License-Identifier: AFL-3.0
                                 <active>1</active>
                             </depends>
                         </sort_order>
-                        <api_key translate="label">
+                        <api_key translate="label comment">
                             <label>API Access Key</label>
                             <frontend_type>obscure</frontend_type>
                             <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
