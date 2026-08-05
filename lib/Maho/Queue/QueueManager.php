@@ -63,7 +63,7 @@ final class QueueManager
      * @param object               $message      A flat DTO with a compiled `#[Maho\Config\MessageHandler]` handler
      * @param ?int                 $delaySeconds Earliest handling delay
      * @param string               $queue        Logical queue name, consumable in isolation via `queue:work --queue=<name>`
-     * @param ?string              $dedupeKey    While a pending message with this key exists, dispatch is a no-op (DB transport)
+     * @param ?string              $dedupeKey    While a pending or processing message with this key exists, dispatch is a no-op (DB transport)
      * @param list<StampInterface> $stamps       Additional Messenger stamps
      */
     public static function dispatch(
@@ -145,9 +145,11 @@ final class QueueManager
     }
 
     /**
-     * Re-queue a stored message from the admin grid or CLI. DB mode flips the
-     * row back to pending with a fresh retry budget; Redis failure rows are
-     * re-dispatched through the bus and the stored row removed.
+     * Re-queue a stored failed message from the admin grid or CLI. DB mode
+     * flips the row back to pending with a fresh retry budget; Redis failure
+     * rows are re-dispatched through the bus and the stored row removed.
+     * Only failed rows are retryable: flipping a claimed row would race the
+     * worker's ack.
      */
     public static function retryStoredMessage(int $messageId): bool
     {
@@ -156,22 +158,23 @@ final class QueueManager
         $row = $adapter->fetchRow(
             $adapter->select()->from($table)->where('message_id = ?', $messageId),
         );
-        if ($row === false || !in_array($row['status'], [DbTransport::STATUS_FAILED, DbTransport::STATUS_PROCESSING], true)) {
+        if ($row === false || $row['status'] !== DbTransport::STATUS_FAILED) {
             return false;
         }
 
         if (self::transportName() === self::TRANSPORT_DB) {
             $now = \Mage_Core_Model_Locale::nowUtc();
-            $adapter->update($table, [
+            return $adapter->update($table, [
                 'status' => DbTransport::STATUS_PENDING,
                 'retries' => 0,
                 'available_at' => $now,
                 'claimed_at' => null,
                 'processed_at' => null,
                 'updated_at' => $now,
-            ], ['message_id = ?' => $messageId]);
-
-            return true;
+            ], [
+                'message_id = ?' => $messageId,
+                'status = ?' => DbTransport::STATUS_FAILED,
+            ]) === 1;
         }
 
         $envelope = self::serializer()->decode([

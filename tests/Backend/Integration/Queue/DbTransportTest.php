@@ -9,6 +9,11 @@ declare(strict_types=1);
 
 use Maho\Queue\QueueManager;
 use Maho\Queue\Transport\DbTransport;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Stamp\ErrorDetailsStamp;
+use Symfony\Component\Messenger\Stamp\RedeliveryStamp;
+use Symfony\Component\Messenger\Stamp\SentToFailureTransportStamp;
+use Symfony\Component\Messenger\Stamp\TransportMessageIdStamp;
 
 uses(Tests\MahoBackendTestCase::class);
 
@@ -73,13 +78,55 @@ it('routes messages to named queues and consumes them in isolation', function ()
     expect([...$transport->getFromQueues(['other'])])->toHaveCount(1);
 });
 
-it('skips dispatch while a pending message with the same dedupe key exists', function () {
+it('skips dispatch while a pending or processing message with the same dedupe key exists', function () {
     QueueManager::dispatch(makeEmailMessage(), dedupeKey: 'abc');
     QueueManager::dispatch(makeEmailMessage(), dedupeKey: 'abc');
     expect(fetchQueueRows())->toHaveCount(1);
 
     QueueManager::dispatch(makeEmailMessage(), dedupeKey: 'other');
     expect(fetchQueueRows())->toHaveCount(2);
+
+    $transport = QueueManager::dbTransport();
+    $envelopes = [...$transport->getFromQueues(['default'])];
+    expect($envelopes)->toHaveCount(1);
+    QueueManager::dispatch(makeEmailMessage(), dedupeKey: 'abc');
+    expect(fetchQueueRows())->toHaveCount(2);
+
+    $transport->ack($envelopes[0]);
+    QueueManager::dispatch(makeEmailMessage(), dedupeKey: 'abc');
+    expect(fetchQueueRows())->toHaveCount(2);
+});
+
+it('inserts a failure-transport send as a failed row instead of updating by the foreign message id', function () {
+    $envelope = (new Envelope(makeEmailMessage()))->with(
+        new TransportMessageIdStamp('1712345678901-0'),
+        new RedeliveryStamp(0),
+        new SentToFailureTransportStamp('redis'),
+        ErrorDetailsStamp::create(new RuntimeException('handler blew up')),
+    );
+
+    QueueManager::dbTransport()->send($envelope);
+
+    $rows = fetchQueueRows();
+    expect($rows)->toHaveCount(1);
+    expect($rows[0]['status'])->toBe(DbTransport::STATUS_FAILED);
+    expect($rows[0]['error_message'])->toContain('handler blew up');
+});
+
+it('retries only failed stored messages, refusing rows a worker holds', function () {
+    QueueManager::dispatch(makeEmailMessage());
+    $transport = QueueManager::dbTransport();
+    $envelopes = [...$transport->get()];
+    $id = (int) fetchQueueRows()[0]['message_id'];
+
+    expect(QueueManager::retryStoredMessage($id))->toBeFalse();
+    expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PROCESSING);
+
+    $transport->reject($envelopes[0]);
+    expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_FAILED);
+
+    expect(QueueManager::retryStoredMessage($id))->toBeTrue();
+    expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PENDING);
 });
 
 it('re-queues stale processing claims after redeliver_after', function () {

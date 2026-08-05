@@ -12,8 +12,8 @@ namespace Maho\Queue\Stamp;
 use Symfony\Component\Messenger\Stamp\StampInterface;
 
 /**
- * Sender-side deduplication: while a pending message with the same key exists,
- * dispatching another one is a silent no-op. DB transport only.
+ * Sender-side deduplication: while a pending or processing message with the
+ * same key exists, dispatching another one is a silent no-op. DB transport only.
  */
 final readonly class DedupeKeyStamp implements StampInterface
 {

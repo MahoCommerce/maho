@@ -66,7 +66,9 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
 
         $messageIdStamp = $envelope->last(TransportMessageIdStamp::class);
         $redeliveryStamp = $envelope->last(RedeliveryStamp::class);
-        if ($messageIdStamp !== null && $redeliveryStamp !== null) {
+        // A failure-transport send carries both stamps too, but its id is a Redis stream id: insert, not update.
+        if ($messageIdStamp !== null && $redeliveryStamp !== null
+            && $envelope->last(SentToFailureTransportStamp::class) === null) {
             $this->adapter->update($this->table, [
                 'status' => self::STATUS_PENDING,
                 'retries' => $redeliveryStamp->getRetryCount(),
@@ -80,7 +82,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
         }
 
         $dedupeKey = $envelope->last(DedupeKeyStamp::class)?->key;
-        if ($dedupeKey !== null && $this->pendingRowExists($dedupeKey)) {
+        if ($dedupeKey !== null && $this->inFlightRowExists($dedupeKey)) {
             return $envelope;
         }
 
@@ -136,22 +138,17 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
     #[\Override]
     public function reject(Envelope $envelope): void
     {
-        $messageId = $this->messageId($envelope);
-        $status = $this->adapter->fetchOne(
-            $this->adapter->select()->from($this->table, 'status')->where('message_id = ?', $messageId),
-        );
-        if ($status === false || $status === null || $status === self::STATUS_PENDING) {
-            // Already re-queued in place by the retry listener (or gone): not a final failure.
-            return;
-        }
-
         $now = \Mage_Core_Model_Locale::nowUtc();
+        // A row the retry listener already re-queued in place stays pending.
         $this->adapter->update($this->table, [
             'status' => self::STATUS_FAILED,
             'error_message' => $envelope->last(ErrorDetailsStamp::class)?->getExceptionMessage(),
             'processed_at' => $now,
             'updated_at' => $now,
-        ], ['message_id = ?' => $messageId]);
+        ], [
+            'message_id = ?' => $this->messageId($envelope),
+            'status = ?' => self::STATUS_PROCESSING,
+        ]);
     }
 
     #[\Override]
@@ -259,13 +256,13 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
         ]);
     }
 
-    private function pendingRowExists(string $dedupeKey): bool
+    private function inFlightRowExists(string $dedupeKey): bool
     {
         $existing = $this->adapter->fetchOne(
             $this->adapter->select()
                 ->from($this->table, 'message_id')
                 ->where('dedupe_key = ?', $dedupeKey)
-                ->where('status = ?', self::STATUS_PENDING)
+                ->where('status IN (?)', [self::STATUS_PENDING, self::STATUS_PROCESSING])
                 ->limit(1),
         );
 

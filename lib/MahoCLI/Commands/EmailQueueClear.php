@@ -69,7 +69,10 @@ class EmailQueueClear extends BaseMahoCommand
         $statusLabel = $status;
         if (in_array($status, $validStatuses, true)) {
             $collection->addFieldToFilter('status', $status);
-        } elseif ($status !== 'all') {
+        } elseif ($status === 'all') {
+            // Never delete rows a worker currently holds.
+            $collection->addFieldToFilter('status', ['in' => $validStatuses]);
+        } else {
             $output->writeln('<error>Invalid status. Use: pending, failed, completed, or all</error>');
             return Command::FAILURE;
         }
