@@ -20,6 +20,10 @@ declare(strict_types=1);
  * the lock is obtained. Acquired locks are tracked statically, so they stay
  * held until released or until the process ends, regardless of how this model
  * is instantiated.
+ *
+ * A machine-local lock always uses the file backend, whatever the configured
+ * one: its scope is deliberately this server only (e.g. the queue worker
+ * liveness lock, where every frontend runs its own worker).
  */
 class Mage_Core_Model_Lock
 {
@@ -44,14 +48,14 @@ class Mage_Core_Model_Lock
 
     protected ?bool $_useDb = null;
 
-    public function acquire(string $name, bool $blocking = false): bool
+    public function acquire(string $name, bool $blocking = false, bool $machineLocal = false): bool
     {
         // Already held by this process: not re-entrant, fail like a separate process would
         if (isset(self::$_locks[$name])) {
             return false;
         }
 
-        if ($this->_useDbBackend()) {
+        if (!$machineLocal && $this->_useDbBackend()) {
             $connection = $this->_getConnection();
             $dbLockName = $this->_prepareDbLockName($name);
             if (!$blocking) {
@@ -103,13 +107,13 @@ class Mage_Core_Model_Lock
     /**
      * Whether anyone (including this process) holds the lock
      */
-    public function isHeld(string $name): bool
+    public function isHeld(string $name, bool $machineLocal = false): bool
     {
         if (isset(self::$_locks[$name])) {
             return true;
         }
 
-        if ($this->_useDbBackend()) {
+        if (!$machineLocal && $this->_useDbBackend()) {
             return $this->_getConnection()->isLocked($this->_prepareDbLockName($name));
         }
 

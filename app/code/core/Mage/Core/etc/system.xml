@@ -972,15 +972,6 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>1</show_in_store>
                             <depends><enabled separator=",">ses+smtp,ses+https,ses+api,azure+api,scaleway+smtp,scaleway+api,mailgun+smtp,mailgun+https,mailgun+api</enabled></depends>
                         </region>
-                        <enable_queue translate="label comment">
-                            <label>Enable Email Queue</label>
-                            <comment>When enabled, emails are queued for background sending. Automatically disabled in developer mode for immediate feedback.</comment>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>95</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </enable_queue>
                         <log_enabled translate="label comment">
                             <label>Enable Email Logging</label>
                             <comment>When enabled, all sent emails are logged for debugging and auditing purposes.</comment>
