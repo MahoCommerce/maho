@@ -12,16 +12,16 @@ use Maho\Queue\QueueManager;
 
 class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/maho_queue';
+    public const ADMIN_RESOURCE = 'system/tools/maho_queue';
 
     private const ACTION_RESOURCES = [
-        'index'       => 'system/maho_queue/view',
-        'grid'        => 'system/maho_queue/view',
-        'view'        => 'system/maho_queue/view',
-        'retry'       => 'system/maho_queue/retry',
-        'massretry'   => 'system/maho_queue/retry',
-        'discard'     => 'system/maho_queue/discard',
-        'massdiscard' => 'system/maho_queue/discard',
+        'index'       => 'system/tools/maho_queue/view',
+        'grid'        => 'system/tools/maho_queue/view',
+        'view'        => 'system/tools/maho_queue/view',
+        'retry'       => 'system/tools/maho_queue/retry',
+        'massretry'   => 'system/tools/maho_queue/retry',
+        'discard'     => 'system/tools/maho_queue/discard',
+        'massdiscard' => 'system/tools/maho_queue/discard',
     ];
 
     #[\Override]
@@ -42,7 +42,7 @@ class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Act
     protected function _initAction(): static
     {
         $this->loadLayout()
-            ->_setActiveMenu('system/maho_queue')
+            ->_setActiveMenu('system/tools/maho_queue')
             ->_addBreadcrumb(
                 Mage::helper('queue')->__('Message Queue'),
                 Mage::helper('queue')->__('Message Queue'),

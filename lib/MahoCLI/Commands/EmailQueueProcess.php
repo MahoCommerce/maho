@@ -58,7 +58,7 @@ class EmailQueueProcess extends BaseMahoCommand
             if ($isDbTransport) {
                 $failedCount = $this->getFailedCount();
                 if ($failedCount > 0) {
-                    $output->writeln("<comment>{$failedCount} email(s) are in failed state; inspect them in System > Message Queue or with ./maho queue:list.</comment>");
+                    $output->writeln("<comment>{$failedCount} email(s) are in failed state; inspect them in System > Tools > Message Queue or with ./maho queue:list.</comment>");
                 }
             }
 
