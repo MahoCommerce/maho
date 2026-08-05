@@ -137,7 +137,8 @@ final class MediaProvider implements ProviderInterface
             $media = new Media();
             $media->url = $fileUrl;
             $media->directive = $directive;
-            $media->size = (int) filesize($fullPath);
+            $size = filesize($fullPath);
+            $media->size = $size === false ? null : $size;
             $media->dimensions = $dimensions;
             $media->filename = $filename;
             $media->path = $relativePath;
