@@ -5755,18 +5755,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/System/Convert/ProfileController.php
 
 		-
-			rawMessage: 'Cannot call method fetchRates() on Mage_Core_Model_Abstract|false.'
-			identifier: method.nonObject
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/System/CurrencyController.php
-
-		-
-			rawMessage: 'Parameter #1 $modelAlias of static method Mage::getModel() expects string, array given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/System/CurrencyController.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_TagController::_initAction() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -15681,12 +15669,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Directory_Model_Observer::scheduledUpdateCurrencyRates() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Directory/Model/Observer.php
-
-		-
-			rawMessage: 'Parameter #1 $modelAlias of static method Mage::getModel() expects string, array given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Directory/Model/Observer.php
 
