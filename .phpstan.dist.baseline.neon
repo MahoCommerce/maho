@@ -12688,12 +12688,6 @@ parameters:
 			path: app/code/core/Mage/Core/Model/Email/Template.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Core_Model_Email_Queue::setMessageParameters() expects string, array<string, mixed> given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Email/Template.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Core_Model_Email_Template::setId() expects int, string given.'
 			identifier: argument.type
 			count: 1
@@ -13001,12 +12995,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Design.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Email_Queue::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Email/Queue.php
 
 		-
 			rawMessage: 'Method Mage_Core_Model_Resource_Email_Template::_construct() has no return type specified.'

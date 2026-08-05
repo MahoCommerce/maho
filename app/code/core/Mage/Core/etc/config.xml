@@ -8,7 +8,7 @@ SPDX-License-Identifier: AFL-3.0
 <config>
     <modules>
         <Mage_Core>
-            <version>2.0.0</version>
+            <version>2.1.0</version>
         </Mage_Core>
     </modules>
     <global>
@@ -72,12 +72,6 @@ SPDX-License-Identifier: AFL-3.0
                     <flag>
                         <table>core_flag</table>
                     </flag>
-                    <email_queue>
-                        <table>core_email_queue</table>
-                    </email_queue>
-                    <email_recipients>
-                        <table>core_email_queue_recipients</table>
-                    </email_recipients>
                     <email_log>
                         <table>core_email_log</table>
                     </email_log>
@@ -240,7 +234,6 @@ SPDX-License-Identifier: AFL-3.0
             </cache>
             <smtp>
                 <enabled>sendmail</enabled>
-                <enable_queue>1</enable_queue>
                 <log_enabled>0</log_enabled>
                 <log_clean_after_days>30</log_clean_after_days>
             </smtp>

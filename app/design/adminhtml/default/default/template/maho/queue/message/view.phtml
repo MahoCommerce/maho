@@ -1,0 +1,62 @@
+<?php
+/**
+ * SPDX-FileCopyrightText: 2026 Maho <https://mahocommerce.com>
+ * SPDX-License-Identifier: AFL-3.0
+ * @package Maho_Queue
+ */
+
+/** @var Maho_Queue_Block_Adminhtml_Message_View $this */
+$message = $this->getMessage();
+$helper = Mage::helper('queue');
+$statusOptions = Maho_Queue_Model_Message::getStatusOptions();
+?>
+<div class="content-header">
+    <table cellspacing="0">
+        <tr>
+            <td><h3 class="icon-head head-edit-form"><?php echo $helper->__('Message #%s', $this->escapeHtml($message->getId())) ?></h3></td>
+            <td class="form-buttons">
+                <?php if ($this->isRetryable()): ?>
+                <button type="button" class="scalable" onclick="if (confirm('<?php echo $this->jsQuoteEscape($helper->__('Re-queue this message?')) ?>')) setLocation('<?php echo $this->escapeUrl($this->getRetryUrl()) ?>')"><span><?php echo $helper->__('Retry') ?></span></button>
+                <?php endif; ?>
+                <button type="button" class="scalable delete" onclick="if (confirm('<?php echo $this->jsQuoteEscape($helper->__('Permanently delete this message?')) ?>')) setLocation('<?php echo $this->escapeUrl($this->getDiscardUrl()) ?>')"><span><?php echo $helper->__('Discard') ?></span></button>
+                <a href="<?php echo $this->escapeUrl($this->getBackUrl()) ?>" class="scalable back"><span><?php echo $helper->__('Back') ?></span></a>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<h3><?php echo $helper->__('Message Details') ?></h3>
+<table class="form-list" cellspacing="0">
+    <tr>
+        <td class="label"><?php echo $helper->__('Status') ?></td>
+        <td class="value"><?php echo $this->escapeHtml($statusOptions[$message->getStatus()] ?? $message->getStatus()) ?></td>
+        <td class="label"><?php echo $helper->__('Queue') ?></td>
+        <td class="value"><?php echo $this->escapeHtml($message->getQueue()) ?></td>
+    </tr>
+    <tr>
+        <td class="label"><?php echo $helper->__('Message Class') ?></td>
+        <td class="value"><?php echo $this->escapeHtml($message->getMessageClass()) ?></td>
+        <td class="label"><?php echo $helper->__('Retries') ?></td>
+        <td class="value"><?php echo (int) $message->getRetries() ?></td>
+    </tr>
+    <tr>
+        <td class="label"><?php echo $helper->__('Queued (UTC)') ?></td>
+        <td class="value"><?php echo $this->escapeHtml($message->getCreatedAt()) ?></td>
+        <td class="label"><?php echo $helper->__('Available (UTC)') ?></td>
+        <td class="value"><?php echo $this->escapeHtml($message->getAvailableAt()) ?></td>
+    </tr>
+    <tr>
+        <td class="label"><?php echo $helper->__('Claimed (UTC)') ?></td>
+        <td class="value"><?php echo $this->escapeHtml($message->getClaimedAt() ?: '-') ?></td>
+        <td class="label"><?php echo $helper->__('Processed (UTC)') ?></td>
+        <td class="value"><?php echo $this->escapeHtml($message->getProcessedAt() ?: '-') ?></td>
+    </tr>
+</table>
+
+<?php if ($message->getErrorMessage()): ?>
+<h3><?php echo $helper->__('Error') ?></h3>
+<pre style="white-space: pre-wrap; overflow-wrap: anywhere; background: #fff4f4; border: 1px solid #e0b4b4; padding: 10px;"><?php echo $this->escapeHtml($message->getErrorMessage()) ?></pre>
+<?php endif; ?>
+
+<h3><?php echo $helper->__('Body (serialized)') ?></h3>
+<pre style="white-space: pre-wrap; overflow-wrap: anywhere; background: #f7f7f7; border: 1px solid #d6d6d6; padding: 10px;"><?php echo $this->escapeHtml($message->getBody()) ?></pre>
