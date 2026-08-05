@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'giftcard/manage';
+    public const ADMIN_RESOURCE = 'sales/giftcard/manage';
 
     /**
      * Create gift card product(s) action
@@ -171,11 +171,5 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
         $option->save();
 
         return $product;
-    }
-
-    #[\Override]
-    protected function _isAllowed(): bool
-    {
-        return Mage::getSingleton('admin/session')->isAllowed('giftcard/manage');
     }
 }
