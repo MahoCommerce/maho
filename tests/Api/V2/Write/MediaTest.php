@@ -98,6 +98,29 @@ describe('Media Upload (REST)', function (): void {
         expect($response['json']['dimensions'])->toHaveKey('height');
     });
 
+    // The size comes from filesize(), which is int|false, assigned to a ?int DTO property.
+    // Nothing can make the stat fail here on demand, so this pins the successful direction:
+    // an int, never null and never 0, so the null branch cannot be widened into the happy path.
+    it('reports the upload size as a positive integer', function (): void {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'pest_media_') . '.png';
+        $img = imagecreatetruecolor(8, 8);
+        imagefill($img, 0, 0, imagecolorallocate($img, 0, 128, 255));
+        imagepng($img, $tmpFile);
+
+        $token = serviceToken(['media/write']);
+        $response = apiPostMultipart(
+            '/api/rest/v2/media',
+            ['folder' => 'test', 'filename' => 'pest-size-check'],
+            ['file' => $tmpFile],
+            $token,
+        );
+        unlink($tmpFile);
+
+        expect($response['status'])->toBeIn([200, 201]);
+        expect($response['json']['size'])->toBeInt();
+        expect($response['json']['size'])->toBeGreaterThan(0);
+    });
+
     it('uploads with custom folder', function (): void {
         $tmpFile = tempnam(sys_get_temp_dir(), 'pest_media_') . '.png';
         $img = imagecreatetruecolor(1, 1);
