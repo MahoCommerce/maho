@@ -161,9 +161,8 @@ final class MediaProcessor implements ProcessorInterface
         $media = new Media();
         $media->url = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . $relativePath;
         $media->directive = sprintf('{{media url="%s"}}', $relativePath);
-        // filesize() returns false if the file is removed between the save above and this stat,
-        // which strict_types refuses to assign to ?int. The save itself already threw on failure.
-        $media->size = is_int($size = filesize($targetPath)) ? $size : null;
+        $size = filesize($targetPath);
+        $media->size = $size === false ? null : $size;
         $media->dimensions = $imageSize ? ['width' => $imageSize[0], 'height' => $imageSize[1]] : null;
         $media->filename = $targetFilename;
         $media->path = $relativePath;

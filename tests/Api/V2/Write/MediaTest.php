@@ -98,9 +98,6 @@ describe('Media Upload (REST)', function (): void {
         expect($response['json']['dimensions'])->toHaveKey('height');
     });
 
-    // The size comes from filesize(), which is int|false, assigned to a ?int DTO property.
-    // Nothing can make the stat fail here on demand, so this pins the successful direction:
-    // an int, never null and never 0, so the null branch cannot be widened into the happy path.
     it('reports the upload size as a positive integer', function (): void {
         $tmpFile = tempnam(sys_get_temp_dir(), 'pest_media_') . '.png';
         $img = imagecreatetruecolor(8, 8);
