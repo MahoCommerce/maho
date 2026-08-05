@@ -172,10 +172,4 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
 
         return $product;
     }
-
-    #[\Override]
-    protected function _isAllowed(): bool
-    {
-        return Mage::getSingleton('admin/session')->isAllowed('sales/giftcard/manage');
-    }
 }

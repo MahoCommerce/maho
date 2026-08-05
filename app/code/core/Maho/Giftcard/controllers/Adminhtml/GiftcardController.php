@@ -300,10 +300,4 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             'expires_at' => $giftcard->getExpiresAt(),
         ]));
     }
-
-    #[\Override]
-    protected function _isAllowed(): bool
-    {
-        return Mage::getSingleton('admin/session')->isAllowed('sales/giftcard/manage');
-    }
 }

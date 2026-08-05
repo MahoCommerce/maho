@@ -127,10 +127,4 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
             $this->_redirect('*/giftcard/edit', ['id' => $id]);
         }
     }
-
-    #[\Override]
-    protected function _isAllowed(): bool
-    {
-        return Mage::getSingleton('admin/session')->isAllowed('sales/giftcard/manage');
-    }
 }
