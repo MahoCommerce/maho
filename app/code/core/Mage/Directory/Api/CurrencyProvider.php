@@ -31,7 +31,10 @@ class CurrencyProvider extends \Maho\ApiPlatform\Provider
 
             $dto = Currency::fromModel($currency);
             $dto->symbol = $currency->getCurrencySymbol();
-            $dto->exchangeRate = $rates[$currencyCode] ?? null;
+            // Rates come from a DECIMAL column, so they arrive as strings. Under strict_types
+            // the assignment to ?float would throw for every currency that has a rate row.
+            $rate = $rates[$currencyCode] ?? null;
+            $dto->exchangeRate = $rate === null ? null : (float) $rate;
             $currencies[] = $dto;
         }
 
