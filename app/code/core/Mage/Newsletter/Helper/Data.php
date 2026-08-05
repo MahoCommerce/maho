@@ -11,8 +11,44 @@
 class Mage_Newsletter_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_TEMPLATE_FILTER = 'global/newsletter/tempate_filter';
+    public const XML_PATH_SEND_BATCH_SIZE = 'newsletter/sending/batch_size';
 
     protected $_moduleName = 'Mage_Newsletter';
+
+    /**
+     * Recipients handled by a single queue message
+     */
+    public function getSendBatchSize(): int
+    {
+        return max(1, (int) Mage::getStoreConfig(self::XML_PATH_SEND_BATCH_SIZE));
+    }
+
+    /**
+     * Queue a batch for every campaign whose start date has come.
+     *
+     * Campaigns are normally dispatched the moment they are started or
+     * scheduled; this is the safety net that picks up the ones whose chain of
+     * batches was lost with a worker, and the ones scheduled before the queue
+     * existed. Returns the number of campaigns dispatched.
+     */
+    public function scheduleDueQueues(): int
+    {
+        $collection = Mage::getResourceModel('newsletter/queue_collection')
+            ->addOnlyForSendingFilter();
+
+        $dispatched = 0;
+        /** @var Mage_Newsletter_Model_Queue $queue */
+        foreach ($collection as $queue) {
+            try {
+                $queue->scheduleSending();
+                $dispatched++;
+            } catch (Throwable $e) {
+                Mage::logException($e);
+            }
+        }
+
+        return $dispatched;
+    }
 
     /**
      * Retrieve subsription confirmation url

@@ -101,6 +101,8 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
             $queue->setQueueStartAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->setQueueStatus(Queue::STATUS_SENDING)
                 ->save();
+
+            $this->_scheduleSending($queue);
         }
 
         $this->_redirect('*/*');
@@ -137,6 +139,8 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
         $queue->setQueueStatus(Queue::STATUS_SENDING);
         $queue->save();
 
+        $this->_scheduleSending($queue);
+
         $this->_redirect('*/*');
     }
 
@@ -157,20 +161,13 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
         $this->_redirect('*/*');
     }
 
+    /**
+     * Same job as the newsletter_send_all cron, for hosts driving it by URL
+     */
     #[Maho\Config\Route('/admin/newsletter_queue/sending')]
     public function sendingAction(): void
     {
-        // Todo: put it somewhere in config!
-        $countOfQueue  = 3;
-        $countOfSubscritions = 20;
-
-        $collection = Mage::getResourceModel('newsletter/queue_collection')
-            ->setPageSize($countOfQueue)
-            ->setCurPage(1)
-            ->addOnlyForSendingFilter()
-            ->load();
-
-        $collection->walk('sendPerSubscriber', [$countOfSubscritions]);
+        Mage::helper('newsletter')->scheduleDueQueues();
     }
 
     #[Maho\Config\Route('/admin/newsletter_queue/edit')]
@@ -257,6 +254,7 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
             }
 
             $queue->save();
+            $this->_scheduleSending($queue);
             $this->_redirect('*/*');
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
@@ -266,6 +264,22 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
             } else {
                 $this->_redirectReferer();
             }
+        }
+    }
+
+    /**
+     * A campaign that cannot be queued would sit there looking scheduled, so
+     * say so; the cron retries it either way.
+     */
+    protected function _scheduleSending(Queue $queue): void
+    {
+        try {
+            $queue->scheduleSending();
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $this->_getSession()->addError(
+                Mage::helper('newsletter')->__('The newsletter was saved but could not be queued for sending: %s', $e->getMessage()),
+            );
         }
     }
 }
