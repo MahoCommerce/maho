@@ -461,7 +461,9 @@ class Mage_Core_Model_App
      *
      * The verdict is cached under the fingerprint it was computed for and
      * tagged with the config cache, so a flush or a changed sql/schema.php
-     * re-checks and nothing else pays for the introspection. Installs that opt
+     * re-checks and nothing else pays for the introspection. A cached refusal
+     * is confirmed against the recorded fingerprint each time, since the
+     * migration that lifts it leaves the fingerprint alone. Installs that opt
      * out of automatic updates (skip_process_modules_updates) drive their own
      * upgrades and are never held back.
      */
@@ -476,12 +478,26 @@ class Mage_Core_Model_App
 
         $fingerprint = \Maho\Db\Schema\Status::fingerprint();
         $cached = $this->loadCache(self::CACHE_ID_SCHEMA_STATE);
-        if (is_string($cached) && str_ends_with($cached, ":$fingerprint")) {
-            return $this->_schemaUpdatePending = str_starts_with($cached, 'pending:');
+        if ($cached === "ok:$fingerprint") {
+            return $this->_schemaUpdatePending = false;
         }
 
         /** @var \Maho\Db\Adapter\AdapterInterface $adapter */
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_setup');
+
+        // A cached "pending" is re-checked rather than trusted: `./maho migrate`
+        // converges the database without changing the fingerprint the verdict was
+        // cached under, so a request that raced the migration (the refused pages
+        // themselves keep repopulating this entry) would otherwise keep the site
+        // refused for good. One primary-key lookup, and only while refusing.
+        if ($cached === "pending:$fingerprint") {
+            if (!\Maho\Db\Schema\Status::isRecorded($adapter, $fingerprint)) {
+                return $this->_schemaUpdatePending = true;
+            }
+            $this->saveCache("ok:$fingerprint", self::CACHE_ID_SCHEMA_STATE, [Mage_Core_Model_Config::CACHE_TAG]);
+            return $this->_schemaUpdatePending = false;
+        }
+
         $pending = !\Maho\Db\Schema\Status::isConverged($adapter, $fingerprint);
         if ($pending) {
             Mage::log(
