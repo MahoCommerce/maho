@@ -59,7 +59,7 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
      */
     public function validateFormKey($formKey)
     {
-        return ($formKey === $this->getFormKey());
+        return is_string($formKey) && hash_equals($this->getFormKey(), $formKey);
     }
 
     public function getOrderIds(bool $clear = false): array

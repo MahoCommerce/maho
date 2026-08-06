@@ -15,17 +15,18 @@ uses(MahoBrowserTestCase::class)->group('browser');
 /**
  * Regression for admin screens that append route params to a url built with _current => true.
  *
- * setLocation() puts ?form_key=... on every same-origin navigation, so any page reached
- * through a button carries a query string, and _current copies it into the next url. Code
- * that then concatenates "key/value/" onto that url writes the segment into the last query
- * param's value instead of the path, and the param never arrives. Same defect as the store
- * switcher; these are the two other places that had it.
+ * _current copies the current query string into the next url. Code that then concatenates
+ * "key/value/" onto that url writes the segment into the last query param's value instead of
+ * the path, and the param never arrives. Same defect as the store switcher; these are the two
+ * other places that had it.
  *
- * Secret keys are turned off for the run so the screens can be addressed directly.
+ * Secret keys are turned off for the run so the screens can be addressed directly; the query
+ * string the screens have to survive is therefore supplied by the test itself.
  */
 
 const QUERY_URLS_ADMIN_USER = 'query-urls-admin';
 const QUERY_URLS_ADMIN_PASSWORD = 'Password123!';
+const QUERY_URLS_QUERY = 'pest_query=PestQueryStringUrls';
 
 beforeEach(function () {
     Mage::getModel('core/config')->saveConfig(Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_SECURITY_USE_FORM_KEY, 0);
@@ -104,9 +105,9 @@ function submitReportFilter(object $page, string $from, string $to): string
 }
 
 it('keeps the report filter in the path when the report is run twice', function () {
-    // The first run navigates through setLocation(), so the second one starts from a url
-    // that already carries ?form_key=... - which is where the segment used to land.
-    $page = visitAdminPage('/admin/report_product/viewed', '#filter_form');
+    // _current carries the query string into the url the first run navigates to, so the
+    // second one starts from a url that ends in one - which is where the segment used to land.
+    $page = visitAdminPage('/admin/report_product/viewed?' . QUERY_URLS_QUERY, '#filter_form');
     $first = submitReportFilter($page, '2026-07-01', '2026-07-31');
     $second = submitReportFilter($page, '2026-06-01', '2026-06-30');
 
@@ -116,10 +117,10 @@ it('keeps the report filter in the path when the report is run twice', function 
 });
 
 it('reloads the dashboard diagram when the period changes on a url with a query string', function () {
-    $page = visitAdminPage('/admin/dashboard/?form_key=PestDashboardFormKey', '#order_orders_period');
+    $page = visitAdminPage('/admin/dashboard/?' . QUERY_URLS_QUERY, '#order_orders_period');
 
     // ajaxBlock answers with an empty body when it gets no block param, which pre-fix is
-    // exactly what happened: "block/tab_orders/" went into the form key's value.
+    // exactly what happened: "block/tab_orders/" went into the last query param's value.
     $page->select('#order_orders_period', '1y')->wait(2);
 
     expect(trim((string) $page->page()->locator('#diagram_tab_orders_content')->innerHTML()))->not->toBe('');
