@@ -76,7 +76,7 @@ class Mage_Directory_Block_Adminhtml_Country_Grid extends Mage_Adminhtml_Block_W
                 ],
                 [
                     'caption' => Mage::helper('adminhtml')->__('Delete'),
-                    'url' => ['base' => '*/*/delete', 'params' => [Mage_Core_Model_Url::FORM_KEY => $this->getFormKey()]],
+                    'url' => ['base' => '*/*/delete', 'params' => $this->getUrlSecureParams()],
                     'field' => 'id',
                     'confirm' => Mage::helper('directory')->__('Are you sure you want to delete this country?'),
                 ],
