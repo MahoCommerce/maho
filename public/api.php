@@ -20,6 +20,14 @@ if (!Mage::isInstalled()) {
 
 Mage::$headersSentThrowsException = false;
 Mage::init('admin');
+
+if (Mage::app()->isSchemaUpdatePending()) {
+    header('Retry-After: 3600');
+    http_response_code(503);
+    echo 'The database is behind the installed code, run "./maho migrate".';
+    exit;
+}
+
 Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
 Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_ADMINHTML, Mage_Core_Model_App_Area::PART_EVENTS);
 

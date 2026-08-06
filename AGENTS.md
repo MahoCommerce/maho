@@ -89,6 +89,12 @@ and add a new `upgrade-X.Y.Z-A.B.C.php` (or `maho-X.Y.Z.php`) script. Fresh inst
 install plus every upgrade in sequence, so the new script repairs both fresh and existing
 installs. This applies even to "obvious cleanups" (e.g. adding a missing explicit `default`).
 
+Table structure itself is declarative (`sql/schema.php`) and is **only** applied by
+`./maho migrate` and the installer, never implicitly, since convergence can drop an index or
+foreign key no module declares. Until it runs, a database behind the declared schema makes web
+requests answer 503 with the "run `./maho migrate`" page and holds back every setup script, so
+a data script can rely on the declared tables being there.
+
 ### Configuration via PHP attributes
 
 Observers, cron jobs, routes, and API resources are declared with PHP attributes in

@@ -231,6 +231,32 @@ final class Maho
     }
 
     /**
+     * Display the database-update-required page and exit
+     *
+     * Shown when the declarative schema declares changes the database hasn't
+     * got yet; every web entry point refuses to serve until `./maho migrate`
+     * has applied them.
+     */
+    public static function databaseUpdatePage(): never
+    {
+        header('HTTP/1.1 503 Service Unavailable', true, 503);
+        header('Retry-After: 3600');
+        header('X-Robots-Tag: noindex');
+        header('Content-Type: text/html; charset=UTF-8');
+
+        $template = self::findFile('app/design/maintenance/database-update.phtml');
+
+        if ($template !== false) {
+            include $template;
+        } else {
+            echo '<h1>Database update required</h1>'
+                . '<p>Run <code>./maho migrate</code> to bring the database up to date with the installed code.</p>';
+        }
+
+        exit;
+    }
+
+    /**
      * Find the maintenance template file using Maho's fallback system
      */
     private static function findMaintenanceTemplate(): string|false
