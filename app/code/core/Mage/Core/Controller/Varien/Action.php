@@ -812,12 +812,11 @@ abstract class Mage_Core_Controller_Varien_Action
      */
     protected function _validateFormKey()
     {
-        if (!($formKey = $this->getRequest()->getParam('form_key'))
-            || $formKey != Mage::getSingleton('core/session')->getFormKey()
-        ) {
+        $formKey = $this->getRequest()->getParam('form_key');
+        if (!is_string($formKey) || $formKey === '') {
             return false;
         }
-        return true;
+        return hash_equals(Mage::getSingleton('core/session')->getFormKey(), $formKey);
     }
 
     /**
