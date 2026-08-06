@@ -262,9 +262,6 @@ class Kernel extends BaseKernel
                 'description' => 'Maho Commerce store data and operations',
                 'instructions' => $this->mcpInstructions(),
                 'client_transports' => ['http' => true],
-                // Defaults to ['src'] under getProjectDir(), which doesn't exist. Nothing
-                // to scan: every tool comes from ApiResource metadata, not #[AsMcpTool].
-                'discovery' => ['scan_dirs' => []],
                 'http' => [
                     // Under /api so the `^/api` firewall gives it bearer auth for free.
                     'path' => '/api/mcp',
