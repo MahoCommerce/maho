@@ -135,9 +135,8 @@ class Mage_Adminhtml_Block_Widget_Form_Container extends Mage_Adminhtml_Block_Wi
      */
     public function getDeleteUrl()
     {
-        return $this->getUrl('*/*/delete', [
+        return $this->getUrlSecure('*/*/delete', [
             $this->_objectId => $this->getRequest()->getParam($this->_objectId),
-            Mage_Core_Model_Url::FORM_KEY => $this->getFormKey(),
         ]);
     }
 

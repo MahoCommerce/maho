@@ -22,18 +22,12 @@ class Maho_Queue_Block_Adminhtml_Message_View extends Mage_Adminhtml_Block_Widge
 
     public function getRetryUrl(): string
     {
-        return $this->getUrl('*/*/retry', [
-            'id' => $this->getMessage()?->getId(),
-            'form_key' => Mage::getSingleton('core/session')->getFormKey(),
-        ]);
+        return $this->getUrlSecure('*/*/retry', ['id' => $this->getMessage()?->getId()]);
     }
 
     public function getDiscardUrl(): string
     {
-        return $this->getUrl('*/*/discard', [
-            'id' => $this->getMessage()?->getId(),
-            'form_key' => Mage::getSingleton('core/session')->getFormKey(),
-        ]);
+        return $this->getUrlSecure('*/*/discard', ['id' => $this->getMessage()?->getId()]);
     }
 
     public function isRetryable(): bool
