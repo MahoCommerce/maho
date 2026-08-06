@@ -33,6 +33,7 @@ function adminUrlBlock(): Mage_Adminhtml_Block_Template
 
 afterEach(function () {
     Mage::app()->getStore()->resetConfig();
+    Mage::unregister('current_creditmemo');
 });
 
 it('keeps the form key out of admin urls when secret keys are on', function () {
@@ -102,6 +103,45 @@ it('carries the form key on buttons that build their own forced-action url', fun
     'queue discard' => ['queue/adminhtml_message_view', 'getDiscardUrl'],
     'revocation resend' => ['revocation/adminhtml_request_view', 'getResendUrl'],
 ]);
+
+/**
+ * Cancel and void on a credit memo are the same shape as their invoice counterparts: a plain GET
+ * navigation into a forced-form-key action. The state keeps every button branch in the constructor
+ * from touching an order that isn't there; only the urls are under test.
+ */
+it('carries the form key on the credit memo cancel and void urls', function (string $method) {
+    Mage::register('current_creditmemo', Mage::getModel('sales/order_creditmemo')
+        ->setId(1)
+        ->setState(Mage_Sales_Model_Order_Creditmemo::STATE_CANCELED));
+
+    $block = Mage::app()->getLayout()->createBlock('adminhtml/sales_order_creditmemo_view');
+
+    adminUrlSetSecretKey(false);
+    expect($block->{$method}())->toContain('form_key/' . Mage::getSingleton('core/session')->getFormKey());
+
+    adminUrlSetSecretKey(true);
+    expect($block->{$method}())->not->toContain('form_key');
+})->with(['getCancelUrl', 'getVoidUrl']);
+
+/**
+ * A grid action column builds its own href and navigates through setLocation(), so an action on the
+ * forced-form-key list has to put the key in the column config itself.
+ */
+it('carries the form key on the feed destination grid test action', function () {
+    $testAction = function (): array {
+        $block = Mage::app()->getLayout()->createBlock('feedmanager/adminhtml_destination_grid');
+        Closure::bind(fn() => $this->_prepareColumns(), $block, $block::class)();
+        $actions = $block->getColumn('action')->getActions();
+        return array_values(array_filter($actions, fn(array $a) => $a['url']['base'] === '*/*/test'))[0];
+    };
+
+    adminUrlSetSecretKey(false);
+    expect($testAction()['url']['params'])
+        ->toBe([Mage_Core_Model_Url::FORM_KEY => Mage::getSingleton('core/session')->getFormKey()]);
+
+    adminUrlSetSecretKey(true);
+    expect($testAction()['url']['params'])->toBe([]);
+});
 
 /**
  * Instantiated directly because _prepareLayout() needs a registered category; only the url
