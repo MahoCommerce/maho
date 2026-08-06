@@ -216,18 +216,7 @@ final class Maho
      */
     public static function maintenancePage(): never
     {
-        header('HTTP/1.1 503 Service Unavailable', true, 503);
-        header('Retry-After: 3600');
-        header('X-Robots-Tag: noindex');
-        header('Content-Type: text/html; charset=UTF-8');
-
-        $template = self::findMaintenanceTemplate();
-
-        if ($template !== false) {
-            include $template;
-        }
-
-        exit;
+        self::renderMaintenanceTemplate();
     }
 
     /**
@@ -239,18 +228,32 @@ final class Maho
      */
     public static function databaseUpdatePage(): never
     {
+        self::renderMaintenanceTemplate(
+            heading: 'Database update required',
+            message: "The database doesn't match the installed code yet. Run:",
+            command: './maho migrate',
+        );
+    }
+
+    /**
+     * Render the 503 template and exit. One template serves every reason to
+     * refuse a request, so a store themes a single file: it prints what it is
+     * given here and falls back to its own scheduled-maintenance copy.
+     */
+    private static function renderMaintenanceTemplate(
+        ?string $heading = null,
+        ?string $message = null,
+        ?string $command = null,
+    ): never {
         header('HTTP/1.1 503 Service Unavailable', true, 503);
         header('Retry-After: 3600');
         header('X-Robots-Tag: noindex');
         header('Content-Type: text/html; charset=UTF-8');
 
-        $template = self::findFile('app/design/maintenance/database-update.phtml');
+        $template = self::findMaintenanceTemplate();
 
         if ($template !== false) {
             include $template;
-        } else {
-            echo '<h1>Database update required</h1>'
-                . '<p>Run <code>./maho migrate</code> to bring the database up to date with the installed code.</p>';
         }
 
         exit;
