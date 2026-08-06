@@ -63,10 +63,7 @@ class Mage_Adminhtml_Block_System_Design_Edit extends Mage_Adminhtml_Block_Widge
      */
     public function getDeleteUrl()
     {
-        return $this->getUrlSecure('*/*/delete', [
-            'id' => $this->getDesignChangeId(),
-            Mage_Core_Model_Url::FORM_KEY => $this->getFormKey(),
-        ]);
+        return $this->getUrlSecure('*/*/delete', ['id' => $this->getDesignChangeId()]);
     }
 
     /**

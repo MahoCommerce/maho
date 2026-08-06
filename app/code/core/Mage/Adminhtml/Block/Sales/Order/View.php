@@ -284,7 +284,7 @@ class Mage_Adminhtml_Block_Sales_Order_View extends Mage_Adminhtml_Block_Widget_
      */
     public function getHoldUrl()
     {
-        return $this->getUrl('*/*/hold');
+        return $this->getUrlSecure('*/*/hold');
     }
 
     /**
@@ -292,7 +292,7 @@ class Mage_Adminhtml_Block_Sales_Order_View extends Mage_Adminhtml_Block_Widget_
      */
     public function getUnholdUrl()
     {
-        return $this->getUrl('*/*/unhold');
+        return $this->getUrlSecure('*/*/unhold');
     }
 
     /**
