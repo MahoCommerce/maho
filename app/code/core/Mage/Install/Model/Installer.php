@@ -116,6 +116,7 @@ class Mage_Install_Model_Installer extends Maho\DataObject
         /** @var \Maho\Db\Adapter\AdapterInterface $adapter */
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_setup');
         \Maho\Db\Schema\Applier::applyAll($adapter);
+        \Maho\Db\Schema\Status::markApplied($adapter);
 
         Mage_Core_Model_Resource_Setup::applyAllUpdates();
         $data = $this->getDataModel()->getConfigData();
