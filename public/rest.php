@@ -35,6 +35,15 @@ Mage::$headersSentThrowsException = false;
 // the response body.
 Mage::setIsDeveloperMode(false);
 Mage::init('admin');
+
+if (Mage::app()->isSchemaUpdatePending()) {
+    header('Content-Type: application/json');
+    header('Retry-After: 3600');
+    http_response_code(503);
+    echo json_encode(['error' => 'The database is behind the installed code, run "./maho migrate".']);
+    exit;
+}
+
 Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
 Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_API, Mage_Core_Model_App_Area::PART_EVENTS);
 

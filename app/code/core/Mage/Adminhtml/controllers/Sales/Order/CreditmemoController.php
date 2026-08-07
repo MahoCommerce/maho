@@ -10,6 +10,13 @@
 
 class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Controller_Sales_Creditmemo
 {
+    #[\Override]
+    public function preDispatch()
+    {
+        $this->_setForcedFormKeyActions(['cancel', 'void']);
+        return parent::preDispatch();
+    }
+
     /**
      * Get requested items qtys and return to stock flags
      */

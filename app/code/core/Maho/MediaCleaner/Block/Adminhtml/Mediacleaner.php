@@ -67,8 +67,6 @@ class Maho_MediaCleaner_Block_Adminhtml_Mediacleaner extends Mage_Adminhtml_Bloc
 
     protected function getActionUrl(string $action): string
     {
-        return $this->getUrl('*/*/' . $action, [
-            'form_key' => Mage::getSingleton('core/session')->getFormKey(),
-        ]);
+        return $this->getUrlSecure('*/*/' . $action);
     }
 }

@@ -161,7 +161,8 @@ final class MediaProcessor implements ProcessorInterface
         $media = new Media();
         $media->url = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . $relativePath;
         $media->directive = sprintf('{{media url="%s"}}', $relativePath);
-        $media->size = filesize($targetPath);
+        $size = filesize($targetPath);
+        $media->size = $size === false ? null : $size;
         $media->dimensions = $imageSize ? ['width' => $imageSize[0], 'height' => $imageSize[1]] : null;
         $media->filename = $targetFilename;
         $media->path = $relativePath;

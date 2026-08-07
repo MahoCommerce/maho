@@ -180,7 +180,7 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
         if (!$isValidFormKey || !$isValidSecretKey) {
             $this->setFlag('', self::FLAG_NO_DISPATCH, true);
             $this->setFlag('', self::FLAG_NO_POST_DISPATCH, true);
-            if ($this->getRequest()->getQuery('isAjax', false) || $this->getRequest()->getQuery('ajax', false)) {
+            if ($this->getRequest()->getParam('isAjax', false) || $this->getRequest()->getParam('ajax', false)) {
                 $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
                     'error' => true,
                     'message' => $keyErrorMsg,

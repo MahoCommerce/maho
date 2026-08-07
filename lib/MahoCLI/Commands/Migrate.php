@@ -13,6 +13,7 @@ use Mage;
 use Mage_Core_Model_Resource_Setup;
 use Maho\Db\Schema\Applier;
 use Maho\Db\Schema\Collector;
+use Maho\Db\Schema\Status;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,6 +26,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class Migrate extends BaseMahoCommand
 {
+    protected bool $warnOnPendingSchemaUpdates = false;
+
     #[\Override]
     protected function configure(): void
     {
@@ -78,6 +81,8 @@ class Migrate extends BaseMahoCommand
                     ));
                 }
             }
+
+            Status::markApplied($adapter);
 
             // Enumerated before applying: the per-phase counts below let the CI
             // idempotency check assert a second run applies zero scripts, not
