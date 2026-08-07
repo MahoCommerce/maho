@@ -59,12 +59,26 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
         $select = $this->getConnection()->select()
             ->from(['qlt' => $this->getTable('newsletter/queue_link')], 'COUNT(qlt.queue_link_id)')
             ->where('qlt.queue_id = main_table.queue_id');
-        $totalExpr = new Maho\Db\Expr(sprintf('(%s)', $select->assemble()));
+        $linked = sprintf('(%s)', $select->assemble());
         $select = $this->getConnection()->select()
             ->from(['qls' => $this->getTable('newsletter/queue_link')], 'COUNT(qls.queue_link_id)')
             ->where('qls.queue_id = main_table.queue_id')
             ->where('qls.letter_sent_at IS NOT NULL');
         $sentExpr  = new Maho\Db\Expr(sprintf('(%s)', $select->assemble()));
+
+        // Recipients are only linked once the first batch goes out, so a
+        // campaign still waiting reports the audience it would reach today.
+        $select = $this->getConnection()->select()
+            ->from(['qsl' => $this->getTable('newsletter/queue_store_link')], 'COUNT(*)')
+            ->join(['sub' => $this->getTable('newsletter/subscriber')], 'sub.store_id = qsl.store_id', [])
+            ->where('qsl.queue_id = main_table.queue_id')
+            ->where('sub.subscriber_status = ?', Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED);
+        $totalExpr = new Maho\Db\Expr(sprintf(
+            'CASE WHEN main_table.queue_status = %d THEN (%s) ELSE %s END',
+            Mage_Newsletter_Model_Queue::STATUS_NEVER,
+            $select->assemble(),
+            $linked,
+        ));
 
         $this->getSelect()->columns([
             'subscribers_sent'  => $sentExpr,

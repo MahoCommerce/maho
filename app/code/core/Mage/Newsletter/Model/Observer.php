@@ -67,8 +67,8 @@ class Mage_Newsletter_Model_Observer
     }
 
     /**
-     * Campaigns are sent by the message queue; this only makes sure every due
-     * one has a batch queued.
+     * Campaigns are sent by the message queue; this makes sure every campaign
+     * whose start date has come has a batch queued.
      */
     #[Maho\Config\CronJob('newsletter_send_all', schedule: '*/5 * * * *')]
     public function scheduledSend(): void

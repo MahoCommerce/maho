@@ -10,6 +10,11 @@
 
 class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_Abstract
 {
+    /**
+     * Recipient links written per INSERT when snapshotting the audience
+     */
+    public const LINK_INSERT_CHUNK = 1000;
+
     #[\Override]
     protected function _construct()
     {
@@ -37,21 +42,62 @@ class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_A
             ->where('subscriber_id in (?)', $subscriberIds);
 
         $usedIds = $adapter->fetchCol($select);
+        $rows = [];
+        foreach (array_diff($subscriberIds, $usedIds) as $subscriberId) {
+            $rows[] = ['queue_id' => $queue->getId(), 'subscriber_id' => $subscriberId];
+        }
+
+        if ($rows === []) {
+            return;
+        }
+
         $adapter->beginTransaction();
         try {
-            foreach ($subscriberIds as $subscriberId) {
-                if (in_array($subscriberId, $usedIds)) {
-                    continue;
-                }
-                $data = [];
-                $data['queue_id'] = $queue->getId();
-                $data['subscriber_id'] = $subscriberId;
-                $adapter->insert($this->getTable('newsletter/queue_link'), $data);
+            foreach (array_chunk($rows, self::LINK_INSERT_CHUNK) as $chunk) {
+                $adapter->insertMultiple($this->getTable('newsletter/queue_link'), $chunk);
             }
             $adapter->commit();
         } catch (Exception $e) {
             $adapter->rollBack();
         }
+    }
+
+    /**
+     * Snapshot the campaign audience as queue links, once.
+     *
+     * Deferred to the first batch rather than done on save: the recipients are
+     * then the ones subscribed when the campaign goes out, not when it was
+     * written, and editing a draft no longer rewrites the whole audience.
+     */
+    public function materializeRecipients(Mage_Newsletter_Model_Queue $queue): void
+    {
+        $stores = $this->getStores($queue);
+        if ($stores === [] || $this->getRecipientCount($queue) > 0) {
+            return;
+        }
+
+        $subscriberIds = Mage::getResourceModel('newsletter/subscriber_collection')
+            ->addFieldToFilter('store_id', ['in' => $stores])
+            ->useOnlySubscribed()
+            ->getAllIds();
+
+        if ($subscriberIds !== []) {
+            $this->addSubscribersToQueue($queue, $subscriberIds);
+        }
+    }
+
+    /**
+     * Recipients linked to this campaign, sent or not
+     */
+    public function getRecipientCount(Mage_Newsletter_Model_Queue $queue): int
+    {
+        $adapter = $this->_getReadAdapter();
+
+        return (int) $adapter->fetchOne(
+            $adapter->select()
+                ->from($this->getTable('newsletter/queue_link'), new Maho\Db\Expr('COUNT(*)'))
+                ->where('queue_id = ?', $queue->getId()),
+        );
     }
 
     /**
@@ -99,27 +145,10 @@ class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_A
             $data['queue_id'] = $queue->getId();
             $adapter->insert($this->getTable('newsletter/queue_store_link'), $data);
         }
+
+        // The audience is snapshotted at the first batch, so only drop what has
+        // not gone out yet: a store change before then must be honoured.
         $this->removeSubscribersFromQueue($queue);
-
-        if (count($stores) == 0) {
-            return $this;
-        }
-
-        $subscribers = Mage::getResourceSingleton('newsletter/subscriber_collection')
-            ->addFieldToFilter('store_id', ['in' => $stores])
-            ->useOnlySubscribed()
-            ->load();
-
-        $subscriberIds = [];
-
-        /** @var Mage_Newsletter_Model_Subscriber $subscriber */
-        foreach ($subscribers as $subscriber) {
-            $subscriberIds[] = $subscriber->getId();
-        }
-
-        if (count($subscriberIds) > 0) {
-            $this->addSubscribersToQueue($queue, $subscriberIds);
-        }
 
         return $this;
     }

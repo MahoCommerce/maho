@@ -40,7 +40,9 @@ class Mage_Newsletter_Model_Queue_SendMessageHandler
         }
 
         // Anything but SENDING means the campaign is over (sent) or the admin
-        // stopped it while this batch was going out.
+        // stopped it while this batch was going out; the latter only shows in a
+        // fresh read, the copy this handler started with still says SENDING.
+        $queue->load((int) $queue->getId());
         if ((int) $queue->getQueueStatus() !== Mage_Newsletter_Model_Queue::STATUS_SENDING) {
             return;
         }

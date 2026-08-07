@@ -26,10 +26,10 @@ class Mage_Newsletter_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Queue a batch for every campaign whose start date has come.
      *
-     * Campaigns are normally dispatched the moment they are started or
-     * scheduled; this is the safety net that picks up the ones whose chain of
-     * batches was lost with a worker, and the ones scheduled before the queue
-     * existed. Returns the number of campaigns dispatched.
+     * A campaign started by hand is dispatched right away; one scheduled for
+     * later enters the queue here, when its time arrives, rather than sitting
+     * in it as a long-delayed message. This also picks up campaigns whose chain
+     * of batches was lost with a worker. Returns the number dispatched.
      */
     public function scheduleDueQueues(): int
     {

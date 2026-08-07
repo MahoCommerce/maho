@@ -131,15 +131,25 @@ it('dispatches one batch onto the newsletter queue and dedupes repeat dispatches
     expect($rows[0]['dedupe_key'])->toBe('newsletter_' . $queue->getId());
 });
 
-it('holds a scheduled campaign until its start date', function () {
+it('queues nothing for a campaign scheduled for later', function () {
     $queue = makeNewsletterCampaign(1, '+1 hour', Mage_Newsletter_Model_Queue::STATUS_NEVER);
 
     $queue->scheduleSending();
 
+    expect(newsletterQueueRows((int) $queue->getId()))->toHaveCount(0);
+    expect($queue->isReadyToSend())->toBeFalse();
+});
+
+it('dispatches a scheduled campaign once its start date is moved up', function () {
+    $queue = makeNewsletterCampaign(1, '+1 day', Mage_Newsletter_Model_Queue::STATUS_NEVER);
+
+    $queue->scheduleSending();
+    $queue->setQueueStartAt(Mage::app()->getLocale()->formatDateForDb('now'))->save();
+    $queue->scheduleSending();
+
     $rows = newsletterQueueRows((int) $queue->getId());
     expect($rows)->toHaveCount(1);
-    expect($rows[0]['available_at'])->toBeGreaterThan(Mage_Core_Model_Locale::nowUtc());
-    expect($queue->isReadyToSend())->toBeFalse();
+    expect($rows[0]['available_at'])->toBeLessThanOrEqual(Mage_Core_Model_Locale::nowUtc());
 });
 
 it('sends a batch, marks its recipients and chains the next batch', function () {
@@ -211,6 +221,35 @@ it('leaves the campaign alone while another batch holds the lock', function () {
     }
 
     expect(fetchQueueRows())->toHaveCount(0);
+});
+
+it('links recipients at the first batch, not at save', function () {
+    $queue = makeNewsletterCampaign(0, 'now', Mage_Newsletter_Model_Queue::STATUS_NEVER);
+
+    /** @var Mage_Newsletter_Model_Subscriber $subscriber */
+    $subscriber = Mage::getModel('newsletter/subscriber');
+    $subscriber->setStoreId(1)
+        ->setSubscriberEmail(NEWSLETTER_TEST_PREFIX . '-' . uniqid() . '@example.com')
+        ->setSubscriberStatus(Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED)
+        ->save();
+
+    $queue->setStores([1])->save();
+    expect(newsletterLinkRows((int) $queue->getId()))->toHaveCount(0);
+
+    Mage::getSingleton('newsletter/queue_sendMessageHandler')
+        ->__invoke(new Mage_Newsletter_Model_Queue_SendMessage((int) $queue->getId()));
+
+    $linked = array_map('intval', array_column(newsletterLinkRows((int) $queue->getId()), 'subscriber_id'));
+    expect($linked)->toContain((int) $subscriber->getId());
+});
+
+it('drops a not-yet-sent audience when the campaign stores change', function () {
+    $queue = makeNewsletterCampaign(2, 'now', Mage_Newsletter_Model_Queue::STATUS_NEVER);
+    expect(newsletterLinkRows((int) $queue->getId()))->toHaveCount(2);
+
+    $queue->setStores([])->save();
+
+    expect(newsletterLinkRows((int) $queue->getId()))->toHaveCount(0);
 });
 
 it('schedules due campaigns only', function () {

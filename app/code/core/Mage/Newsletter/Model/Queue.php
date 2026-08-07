@@ -145,29 +145,23 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
     }
 
     /**
-     * Dispatch a batch of this campaign onto the message queue, delayed until
-     * its start date when that is still in the future. The dedupe key makes a
-     * repeated dispatch (admin action plus safety-net cron) a no-op while a
-     * batch of this campaign is already queued.
+     * Dispatch a batch of this campaign onto the message queue, but only once
+     * its start date has come. A campaign scheduled for later is not parked in
+     * the queue as a long-delayed message; the cron that sweeps due campaigns
+     * picks it up when its time arrives. The dedupe key makes a repeated
+     * dispatch (admin action plus that cron) a no-op while a batch of this
+     * campaign is already queued.
      *
      * @return $this
      */
     public function scheduleSending()
     {
-        if (!$this->getId() || !in_array((int) $this->getQueueStatus(), [self::STATUS_NEVER, self::STATUS_SENDING], true)) {
+        if (!$this->getId() || !$this->isReadyToSend()) {
             return $this;
         }
-
-        $startAt = $this->_getStartAtUtc();
-        if ($startAt === null) {
-            return $this;
-        }
-
-        $delay = (new DateTimeImmutable($startAt, new DateTimeZone('UTC')))->getTimestamp() - time();
 
         \Maho\Queue\QueueManager::dispatch(
             new Mage_Newsletter_Model_Queue_SendMessage((int) $this->getId()),
-            delaySeconds: $delay > 0 ? $delay : null,
             queue: self::QUEUE_NAME,
             dedupeKey: self::QUEUE_NAME . '_' . $this->getId(),
         );
@@ -196,6 +190,10 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
     {
         if (!$this->isReadyToSend()) {
             return $this;
+        }
+
+        if ((int) $this->getQueueStatus() === self::STATUS_NEVER) {
+            $this->_getResource()->materializeRecipients($this);
         }
 
         $collection = $this->getSubscribersCollection()
