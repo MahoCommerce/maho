@@ -32,6 +32,35 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     public const RATE_REQUEST_SMARTPOST = 'SMART_POST';
 
     /**
+     * Legacy SOAP DropoffType values mapped onto their REST pickupType equivalent.
+     *
+     * None of the SOAP names survive into REST. Stores migrated by
+     * upgrade-2.0.0-2.0.1.php already hold REST values, so this only covers config
+     * written before the migration or by third-party code.
+     */
+    protected const PICKUP_TYPE_ALIASES = [
+        'REGULAR_PICKUP'          => 'USE_SCHEDULED_PICKUP',
+        'REQUEST_COURIER'         => 'CONTACT_FEDEX_TO_SCHEDULE',
+        'DROP_BOX'                => 'DROPOFF_AT_FEDEX_LOCATION',
+        'BUSINESS_SERVICE_CENTER' => 'DROPOFF_AT_FEDEX_LOCATION',
+        'STATION'                 => 'DROPOFF_AT_FEDEX_LOCATION',
+    ];
+
+    /**
+     * Rate endpoints. The standard one suits a normal shipping account; FedEx requires
+     * registered Integrator Providers to use the comprehensive one instead, and answers
+     * 403 on the other. Both take the same payload and return the same response shape.
+     */
+    public const RATE_ENDPOINT_STANDARD = 'standard';
+    public const RATE_ENDPOINT_COMPREHENSIVE = 'comprehensive';
+
+    /**
+     * Preference order for the rate flavours FedEx returns per service, best first.
+     * ACCOUNT is the negotiated rate, LIST the published one.
+     */
+    protected const RATE_TYPE_PREFERENCE = ['ACCOUNT', 'PREFERRED', 'INCENTIVE', 'LIST'];
+
+    /**
      * Code of the carrier
      *
      * @var string
@@ -60,90 +89,18 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     protected $_result = null;
 
     /**
-     * Path to wsdl file of rate service
-     *
-     * @var string
-     */
-    protected $_rateServiceWsdl;
-
-    /**
-     * Path to wsdl file of ship service
-     *
-     * @var string
-     */
-    protected $_shipServiceWsdl = null;
-
-    /**
-     * Path to wsdl file of track service
-     *
-     * @var string
-     */
-    protected $_trackServiceWsdl = null;
-
-    /**
      * Container types that could be customized for FedEx carrier
      *
      * @var array
      */
     protected $_customizableContainerTypes = ['YOUR_PACKAGING'];
 
-    public function __construct()
-    {
-        parent::__construct();
-        $wsdlBasePath = Mage::getModuleDir('etc', 'Mage_Usa') . DS . 'wsdl' . DS . 'FedEx' . DS;
-        $this->_shipServiceWsdl = $wsdlBasePath . 'ShipService_v10.wsdl';
-        $this->_rateServiceWsdl = $wsdlBasePath . 'RateService_v10.wsdl';
-        $this->_trackServiceWsdl = $wsdlBasePath . 'TrackService_v5.wsdl';
-    }
-
     /**
-     * Create soap client with selected wsdl
-     *
-     * @param string $wsdl
-     * @param bool|int $trace
-     * @return SoapClient
+     * Raw tracking request data
      */
-    protected function _createSoapClient($wsdl, $trace = false)
-    {
-        $client = new SoapClient($wsdl, ['trace' => $trace]);
-        $client->__setLocation(
-            $this->getConfigFlag('sandbox_mode')
-            ? 'https://wsbeta.fedex.com:443/web-services'
-            : 'https://ws.fedex.com:443/web-services',
-        );
+    protected ?\Maho\DataObject $_rawTrackingRequest = null;
 
-        return $client;
-    }
-
-    /**
-     * Create rate soap client
-     *
-     * @return SoapClient
-     */
-    protected function _createRateSoapClient()
-    {
-        return $this->_createSoapClient($this->_rateServiceWsdl);
-    }
-
-    /**
-     * Create ship soap client
-     *
-     * @return SoapClient
-     */
-    protected function _createShipSoapClient()
-    {
-        return $this->_createSoapClient($this->_shipServiceWsdl, 1);
-    }
-
-    /**
-     * Create track soap client
-     *
-     * @return SoapClient
-     */
-    protected function _createTrackSoapClient()
-    {
-        return $this->_createSoapClient($this->_trackServiceWsdl, 1);
-    }
+    protected ?Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient $_restClient = null;
 
     /**
      * Collect and get rates
@@ -154,6 +111,12 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {
         if (!$this->getConfigFlag($this->_activeFlag)) {
+            return false;
+        }
+        // Without credentials every quote would pay for a doomed OAuth round trip, so bail
+        // out here instead of rendering the generic carrier error on each cart.
+        if (!$this->getConfigData('client_id') || !$this->getConfigData('client_secret')) {
+            Mage::log('FedEx is enabled but has no Client ID/Secret configured; skipping rates.', Mage::LOG_WARNING);
             return false;
         }
         $this->setRequest($request);
@@ -240,10 +203,6 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
         $r->setValue($request->getPackagePhysicalValue());
         $r->setValueWithDiscount($request->getPackageValueWithDiscount());
 
-        $r->setMeterNumber($this->getConfigData('meter_number'));
-        $r->setKey($this->getConfigData('key'));
-        $r->setPassword($this->getConfigData('password'));
-
         $r->setIsReturn($request->getIsReturn());
 
         $r->setBaseSubtotalInclTax($request->getBaseSubtotalInclTax());
@@ -264,18 +223,36 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     }
 
     /**
-     * Get version of rates request
-     *
-     * @return array
+     * Get a REST client bound to the configured credentials and environment
      */
-    public function getVersionInfo()
+    protected function _getRestClient(): Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient
     {
-        return [
-            'ServiceId'    => 'crs',
-            'Major'        => '10',
-            'Intermediate' => '0',
-            'Minor'        => '0',
-        ];
+        if ($this->_restClient === null) {
+            $sandbox = (bool) $this->getConfigFlag('sandbox_mode');
+            $oauthClient = new Mage_Usa_Model_Shipping_Carrier_Fedex_OAuthClient(
+                (string) $this->getConfigData('client_id'),
+                (string) $this->getConfigData('client_secret'),
+                Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient::getBaseUrl($sandbox),
+            );
+            $this->_restClient = new Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient(
+                $oauthClient,
+                $sandbox,
+                (bool) $this->getConfigFlag('debug'),
+                (string) ($this->getConfigData('rate_endpoint') ?: self::RATE_ENDPOINT_STANDARD),
+            );
+        }
+
+        return $this->_restClient;
+    }
+
+    /**
+     * Resolve the REST pickupType for a configured dropoff value
+     */
+    protected function _getPickupType(?string $dropoffType): string
+    {
+        $dropoffType = (string) $dropoffType;
+
+        return self::PICKUP_TYPE_ALIASES[$dropoffType] ?? ($dropoffType ?: 'USE_SCHEDULED_PICKUP');
     }
 
     /**
@@ -287,110 +264,101 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     protected function _formRateRequest($purpose)
     {
         $r = $this->_rawRequest;
-        $ratesRequest = [
-            'WebAuthenticationDetail' => [
-                'UserCredential' => [
-                    'Key'      => $r->getKey(),
-                    'Password' => $r->getPassword(),
+        $currencyCode = $this->getCurrencyCode();
+        $weight = (float) $r->getWeight();
+        $value = (float) $r->getValue();
+
+        $requestedShipment = [
+            'shipper' => [
+                'address' => [
+                    'postalCode'  => $r->getOrigPostal(),
+                    'countryCode' => $r->getOrigCountry(),
                 ],
             ],
-            'ClientDetail' => [
-                'AccountNumber' => $r->getAccount(),
-                'MeterNumber'   => $r->getMeterNumber(),
+            'recipient' => [
+                'address' => [
+                    'postalCode'  => $r->getDestPostal(),
+                    'countryCode' => $r->getDestCountry(),
+                    'residential' => (bool) $this->getConfigData('residence_delivery'),
+                ],
             ],
-            'Version' => $this->getVersionInfo(),
-            'RequestedShipment' => [
-                'DropoffType'   => $r->getDropoffType(),
-                'ShipTimestamp' => date('c'),
-                'PackagingType' => $r->getPackaging(),
-                'TotalInsuredValue' => [
-                    'Amount'  => $r->getValue(),
-                    'Currency' => $this->getCurrencyCode(),
-                ],
-                'Shipper' => [
-                    'Address' => [
-                        'PostalCode'  => $r->getOrigPostal(),
-                        'CountryCode' => $r->getOrigCountry(),
-                    ],
-                ],
-                'Recipient' => [
-                    'Address' => [
-                        'PostalCode'  => $r->getDestPostal(),
-                        'CountryCode' => $r->getDestCountry(),
-                        'Residential' => (bool) $this->getConfigData('residence_delivery'),
-                    ],
-                ],
-                'ShippingChargesPayment' => [
-                    'PaymentType' => 'SENDER',
-                    'Payor' => [
-                        'AccountNumber' => $r->getAccount(),
-                        'CountryCode'   => $r->getOrigCountry(),
-                    ],
-                ],
-                'CustomsClearanceDetail' => [
-                    'CustomsValue' => [
-                        'Amount' => $r->getValue(),
-                        'Currency' => $this->getCurrencyCode(),
-                    ],
-                ],
-                'RateRequestTypes' => 'LIST',
-                'PackageCount'     => '1',
-                'PackageDetail'    => 'INDIVIDUAL_PACKAGES',
-                'RequestedPackageLineItems' => [
-                    '0' => [
-                        'Weight' => [
-                            'Value' => (float) $r->getWeight(),
-                            'Units' => $this->getConfigData('unit_of_measure'),
-                        ],
-                        'GroupPackageCount' => 1,
+            'shipDateStamp' => Mage_Core_Model_Locale::todayUtc(),
+            'pickupType' => $this->_getPickupType($r->getDropoffType()),
+            'packagingType' => $r->getPackaging(),
+            'rateRequestType' => ['ACCOUNT', 'LIST'],
+            'totalPackageCount' => 1,
+            'requestedPackageLineItems' => [
+                [
+                    'groupPackageCount' => 1,
+                    'weight' => [
+                        'units' => $this->getConfigData('unit_of_measure'),
+                        'value' => $weight,
                     ],
                 ],
             ],
         ];
 
-        if ($purpose == self::RATE_REQUEST_GENERAL) {
-            $ratesRequest['RequestedShipment']['RequestedPackageLineItems'][0]['InsuredValue'] = [
-                'Amount'  => $r->getValue(),
-                'Currency' => $this->getCurrencyCode(),
-            ];
-        } elseif ($purpose == self::RATE_REQUEST_SMARTPOST) {
-            $ratesRequest['RequestedShipment']['ServiceType'] = self::RATE_REQUEST_SMARTPOST;
-            $ratesRequest['RequestedShipment']['SmartPostDetail'] = [
-                'Indicia' => ((float) $r->getWeight() >= 1) ? 'PARCEL_SELECT' : 'PRESORTED_STANDARD',
-                'HubId' => $this->getConfigData('smartpost_hubid'),
+        if ($r->getOrigCountry() !== $r->getDestCountry()) {
+            $requestedShipment['customsClearanceDetail'] = [
+                'commodities' => [
+                    [
+                        'customsValue' => [
+                            'amount' => $value,
+                            'currency' => $currencyCode,
+                        ],
+                    ],
+                ],
             ];
         }
 
-        return $ratesRequest;
+        if ($purpose == self::RATE_REQUEST_GENERAL) {
+            $requestedShipment['requestedPackageLineItems'][0]['declaredValue'] = [
+                'amount' => $value,
+                'currency' => $currencyCode,
+            ];
+        } elseif ($purpose == self::RATE_REQUEST_SMARTPOST) {
+            $requestedShipment['serviceType'] = self::RATE_REQUEST_SMARTPOST;
+            $requestedShipment['smartPostInfoDetail'] = [
+                'indicia' => $weight >= 1 ? 'PARCEL_SELECT' : 'PRESORTED_STANDARD',
+                'hubId' => $this->getConfigData('smartpost_hubid'),
+            ];
+        }
+
+        return [
+            'accountNumber' => ['value' => $r->getAccount()],
+            'rateRequestControlParameters' => ['returnTransitTimes' => false],
+            'requestedShipment' => $requestedShipment,
+        ];
     }
 
     /**
      * Makes remote request to the carrier and returns a response
      *
      * @param string $purpose
-     * @return mixed
+     * @return array
      */
     protected function _doRatesRequest($purpose)
     {
         $ratesRequest = $this->_formRateRequest($purpose);
         $requestString = serialize($ratesRequest);
-        $response = $this->_getCachedQuotes($requestString);
+        $cached = $this->_getCachedQuotes($requestString);
         $debugData = ['request' => $ratesRequest];
-        if ($response === null) {
-            try {
-                $client = $this->_createRateSoapClient();
-                $response = $client->getRates($ratesRequest);
+
+        if ($cached === null) {
+            $response = $this->_getRestClient()->getRates($ratesRequest);
+            if (!isset($response['errors'])) {
                 $this->_setCachedQuotes($requestString, serialize($response));
-                $debugData['result'] = $response;
-            } catch (Exception $e) {
-                $debugData['result'] = ['error' => $e->getMessage(), 'code' => $e->getCode()];
-                Mage::logException($e);
             }
         } else {
-            $response = unserialize($response, ['allowed_classes' => false]);
-            $debugData['result'] = $response;
+            $response = unserialize($cached, ['allowed_classes' => false]);
+            if (!is_array($response)) {
+                $response = [];
+            }
         }
+
+        $debugData['result'] = $response;
         $this->_debug($debugData);
+
         return $response;
     }
 
@@ -449,46 +417,33 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     /**
      * Prepare shipping rate result based on response
      *
-     * @param mixed $response
+     * @param array $response
      * @return Mage_Shipping_Model_Rate_Result
      */
     protected function _prepareRateResponse($response)
     {
         $costArr = [];
         $priceArr = [];
-        $errorTitle = 'Unable to retrieve tracking';
 
-        if (is_object($response)) {
-            if ($response->HighestSeverity == 'FAILURE' || $response->HighestSeverity == 'ERROR') {
-                if (is_array($response->Notifications)) {
-                    $notification = array_pop($response->Notifications);
-                    $errorTitle = (string) $notification->Message;
-                } else {
-                    $errorTitle = (string) $response->Notifications->Message;
-                }
-            } elseif (isset($response->RateReplyDetails)) {
-                $allowedMethods = explode(',', $this->getConfigData('allowed_methods'));
+        if (is_array($response) && !isset($response['errors'])) {
+            $allowedMethods = explode(',', (string) $this->getConfigData('allowed_methods'));
 
-                if (is_array($response->RateReplyDetails)) {
-                    foreach ($response->RateReplyDetails as $rate) {
-                        $serviceName = (string) $rate->ServiceType;
-                        if (in_array($serviceName, $allowedMethods)) {
-                            $amount = $this->_getRateAmountOriginBased($rate);
-                            $costArr[$serviceName]  = $amount;
-                            $priceArr[$serviceName] = $this->getMethodPrice($amount, $serviceName);
-                        }
-                    }
-                    asort($priceArr);
-                } else {
-                    $rate = $response->RateReplyDetails;
-                    $serviceName = (string) $rate->ServiceType;
-                    if (in_array($serviceName, $allowedMethods)) {
-                        $amount = $this->_getRateAmountOriginBased($rate);
-                        $costArr[$serviceName]  = $amount;
-                        $priceArr[$serviceName] = $this->getMethodPrice($amount, $serviceName);
-                    }
+            foreach ($response['output']['rateReplyDetails'] ?? [] as $rate) {
+                if (!is_array($rate) || empty($rate['serviceType'])) {
+                    continue;
                 }
+                $serviceName = (string) $rate['serviceType'];
+                if (!in_array($serviceName, $allowedMethods)) {
+                    continue;
+                }
+                $amount = $this->_getRateAmountOriginBased($rate);
+                if ($amount === null) {
+                    continue;
+                }
+                $costArr[$serviceName]  = $amount;
+                $priceArr[$serviceName] = $this->getMethodPrice($amount, $serviceName);
             }
+            asort($priceArr);
         }
 
         $result = Mage::getModel('shipping/rate_result');
@@ -496,7 +451,6 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
             $error = Mage::getModel('shipping/rate_result_error');
             $error->setCarrier($this->_code);
             $error->setCarrierTitle($this->getConfigData('title'));
-            $error->setErrorMessage($errorTitle);
             $error->setErrorMessage($this->getConfigData('specificerrmsg'));
             $result->append($error);
         } else {
@@ -517,46 +471,37 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     /**
      * Get origin based amount form response of rate estimation
      *
-     * @param stdClass $rate
+     * @param array $rate
      * @return null|float
      */
     protected function _getRateAmountOriginBased($rate)
     {
-        $amount = null;
         $rateTypeAmounts = [];
 
-        if (is_object($rate)) {
-            // The "RATED..." rates are expressed in the currency of the origin country
-            foreach ($rate->RatedShipmentDetails as $ratedShipmentDetail) {
-                $netAmount = (string) $ratedShipmentDetail->ShipmentRateDetail->TotalNetCharge->Amount;
-                $rateType = (string) $ratedShipmentDetail->ShipmentRateDetail->RateType;
-                $rateTypeAmounts[$rateType] = $netAmount;
+        foreach ($rate['ratedShipmentDetails'] ?? [] as $ratedShipmentDetail) {
+            if (!is_array($ratedShipmentDetail)) {
+                continue;
             }
-
-            // Order is important
-            $ratesOrder = [
-                'RATED_ACCOUNT_PACKAGE',
-                'PAYOR_ACCOUNT_PACKAGE',
-                'RATED_ACCOUNT_SHIPMENT',
-                'PAYOR_ACCOUNT_SHIPMENT',
-                'RATED_LIST_PACKAGE',
-                'PAYOR_LIST_PACKAGE',
-                'RATED_LIST_SHIPMENT',
-                'PAYOR_LIST_SHIPMENT',
-            ];
-            foreach ($ratesOrder as $rateType) {
-                if (!empty($rateTypeAmounts[$rateType])) {
-                    $amount = $rateTypeAmounts[$rateType];
-                    break;
-                }
+            $netAmount = $ratedShipmentDetail['totalNetCharge']
+                ?? $ratedShipmentDetail['shipmentRateDetail']['totalNetCharge']
+                ?? null;
+            if ($netAmount === null) {
+                continue;
             }
+            $rateTypeAmounts[(string) ($ratedShipmentDetail['rateType'] ?? '')] = (float) $netAmount;
+        }
 
-            if (is_null($amount)) {
-                $amount = (string) $rate->RatedShipmentDetails[0]->ShipmentRateDetail->TotalNetCharge->Amount;
+        if ($rateTypeAmounts === []) {
+            return null;
+        }
+
+        foreach (self::RATE_TYPE_PREFERENCE as $rateType) {
+            if (isset($rateTypeAmounts[$rateType])) {
+                return $rateTypeAmounts[$rateType];
             }
         }
 
-        return (float) $amount;
+        return reset($rateTypeAmounts);
     }
 
     /**
@@ -570,90 +515,6 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
         $weight = $this->getTotalNumOfBoxes($r->getFreeMethodWeight());
         $r->setWeight($weight);
         $r->setService($freeMethod);
-    }
-
-    /**
-     * Prepare shipping rate result based on response
-     *
-     * @param mixed $response
-     * @return Mage_Shipping_Model_Rate_Result
-     */
-    protected function _parseXmlResponse($response)
-    {
-        $costArr = [];
-        $priceArr = [];
-
-        if (trim($response) !== '') {
-            if ($xml = $this->_parseXml($response)) {
-                if (is_object($xml->Error) && is_object($xml->Error->Message)) {
-                    $errorTitle = (string) $xml->Error->Message;
-                } elseif (is_object($xml->SoftError) && is_object($xml->SoftError->Message)) {
-                    $errorTitle = (string) $xml->SoftError->Message;
-                } else {
-                    $errorTitle = 'Unknown error';
-                }
-
-                $allowedMethods = explode(',', $this->getConfigData('allowed_methods'));
-
-                foreach ($xml->Entry as $entry) {
-                    if (in_array((string) $entry->Service, $allowedMethods)) {
-                        $costArr[(string) $entry->Service] =
-                           (string) $entry->EstimatedCharges->DiscountedCharges->NetCharge;
-                        $priceArr[(string) $entry->Service] = $this->getMethodPrice(
-                            (float) $entry->EstimatedCharges->DiscountedCharges->NetCharge,
-                            (string) $entry->Service,
-                        );
-                    }
-                }
-
-                asort($priceArr);
-            } else {
-                $errorTitle = 'Response is in the wrong format.';
-            }
-        } else {
-            $errorTitle = 'Unable to retrieve tracking';
-        }
-
-        $result = Mage::getModel('shipping/rate_result');
-        if (empty($priceArr)) {
-            $error = Mage::getModel('shipping/rate_result_error');
-            $error->setCarrier('fedex');
-            $error->setCarrierTitle($this->getConfigData('title'));
-            $error->setErrorMessage($this->getConfigData('specificerrmsg'));
-            $result->append($error);
-        } else {
-            foreach ($priceArr as $method => $price) {
-                $rate = Mage::getModel('shipping/rate_result_method');
-                $rate->setCarrier('fedex');
-                $rate->setCarrierTitle($this->getConfigData('title'));
-                $rate->setMethod($method);
-                $rate->setMethodTitle($this->getCode('method', $method));
-                $rate->setCost($costArr[$method]);
-                $rate->setPrice($price);
-                $result->append($rate);
-            }
-        }
-        return $result;
-    }
-
-    /**
-     * Parse XML string and return XML document object or false
-     *
-     * @param string $xmlContent
-     * @return SimpleXMLElement|bool
-     */
-    protected function _parseXml($xmlContent)
-    {
-        try {
-            try {
-                return simplexml_load_string($xmlContent);
-            } catch (Exception $e) {
-                throw new Exception(Mage::helper('usa')->__('Failed to parse xml document: %s', $xmlContent));
-            }
-        } catch (Exception $e) {
-            Mage::logException($e);
-            return false;
-        }
     }
 
     /**
@@ -681,20 +542,33 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                 'INTERNATIONAL_ECONOMY_FREIGHT'       => Mage::helper('usa')->__('Intl Economy Freight'),
                 'INTERNATIONAL_FIRST'                 => Mage::helper('usa')->__('International First'),
                 'INTERNATIONAL_GROUND'                => Mage::helper('usa')->__('International Ground'),
-                'INTERNATIONAL_PRIORITY'              => Mage::helper('usa')->__('International Priority'),
+                'FEDEX_INTERNATIONAL_PRIORITY'         => Mage::helper('usa')->__('International Priority'),
+                'FEDEX_INTERNATIONAL_PRIORITY_EXPRESS' => Mage::helper('usa')->__('International Priority Express'),
+                'FEDEX_FIRST'                         => Mage::helper('usa')->__('First'),
+                'FEDEX_PRIORITY'                      => Mage::helper('usa')->__('Priority'),
+                'FEDEX_PRIORITY_EXPRESS'              => Mage::helper('usa')->__('Priority Express'),
+                'FEDEX_PRIORITY_EXPRESS_FREIGHT'      => Mage::helper('usa')->__('Priority Express Freight'),
+                'FEDEX_PRIORITY_FREIGHT'              => Mage::helper('usa')->__('Priority Freight'),
+                'FEDEX_ECONOMY_SELECT'                => Mage::helper('usa')->__('Economy Select'),
                 'INTERNATIONAL_PRIORITY_FREIGHT'      => Mage::helper('usa')->__('Intl Priority Freight'),
                 'PRIORITY_OVERNIGHT'                  => Mage::helper('usa')->__('Priority Overnight'),
-                'SMART_POST'                          => Mage::helper('usa')->__('Smart Post'),
+                'SMART_POST'                          => Mage::helper('usa')->__('Ground Economy'),
                 'STANDARD_OVERNIGHT'                  => Mage::helper('usa')->__('Standard Overnight'),
                 'FEDEX_FREIGHT'                       => Mage::helper('usa')->__('Freight'),
                 'FEDEX_NATIONAL_FREIGHT'              => Mage::helper('usa')->__('National Freight'),
             ],
             'dropoff' => [
-                'REGULAR_PICKUP'          => Mage::helper('usa')->__('Regular Pickup'),
-                'REQUEST_COURIER'         => Mage::helper('usa')->__('Request Courier'),
-                'DROP_BOX'                => Mage::helper('usa')->__('Drop Box'),
-                'BUSINESS_SERVICE_CENTER' => Mage::helper('usa')->__('Business Service Center'),
-                'STATION'                 => Mage::helper('usa')->__('Station'),
+                'USE_SCHEDULED_PICKUP'      => Mage::helper('usa')->__('Use Scheduled Pickup'),
+                'CONTACT_FEDEX_TO_SCHEDULE' => Mage::helper('usa')->__('Contact FedEx to Schedule'),
+                'DROPOFF_AT_FEDEX_LOCATION' => Mage::helper('usa')->__('Dropoff at FedEx Location'),
+                'ON_CALL'                   => Mage::helper('usa')->__('On Call'),
+                'PACKAGE_RETURN_PROGRAM'    => Mage::helper('usa')->__('Package Return Program'),
+                'REGULAR_STOP'              => Mage::helper('usa')->__('Regular Stop'),
+                'TAG'                       => Mage::helper('usa')->__('Tag'),
+            ],
+            'rate_endpoint' => [
+                self::RATE_ENDPOINT_STANDARD      => Mage::helper('usa')->__('Rates and Transit Times'),
+                self::RATE_ENDPOINT_COMPREHENSIVE => Mage::helper('usa')->__('Comprehensive Rates and Transit Times'),
             ],
             'packaging' => [
                 'FEDEX_ENVELOPE' => Mage::helper('usa')->__('FedEx Envelope'),
@@ -723,7 +597,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                             'method' => [
                                 'INTERNATIONAL_FIRST',
                                 'INTERNATIONAL_ECONOMY',
-                                'INTERNATIONAL_PRIORITY',
+                                'FEDEX_INTERNATIONAL_PRIORITY',
                             ],
                         ],
                     ],
@@ -749,7 +623,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                             'method' => [
                                 'INTERNATIONAL_FIRST',
                                 'INTERNATIONAL_ECONOMY',
-                                'INTERNATIONAL_PRIORITY',
+                                'FEDEX_INTERNATIONAL_PRIORITY',
                             ],
                         ],
                     ],
@@ -758,7 +632,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                     'containers' => ['FEDEX_10KG_BOX', 'FEDEX_25KG_BOX'],
                     'filters'    => [
                         'within_us' => [],
-                        'from_us' => ['method' => ['INTERNATIONAL_PRIORITY']],
+                        'from_us' => ['method' => ['FEDEX_INTERNATIONAL_PRIORITY']],
                     ],
                 ],
                 [
@@ -786,7 +660,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                             'method' => [
                                 'INTERNATIONAL_FIRST',
                                 'INTERNATIONAL_ECONOMY',
-                                'INTERNATIONAL_PRIORITY',
+                                'FEDEX_INTERNATIONAL_PRIORITY',
                                 'INTERNATIONAL_GROUND',
                                 'FEDEX_FREIGHT',
                                 'FEDEX_1_DAY_FREIGHT',
@@ -867,7 +741,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
         }
 
         foreach ($trackings as $tracking) {
-            $this->_getXMLTracking($tracking);
+            $this->_doTrackingRequest((string) $tracking);
         }
 
         return $this->_result;
@@ -888,55 +762,26 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
 
     /**
      * Send request for tracking
-     *
-     * @param array $tracking
      */
-    protected function _getXMLTracking($tracking)
+    protected function _doTrackingRequest(string $tracking): void
     {
-        $trackRequest = [
-            'WebAuthenticationDetail' => [
-                'UserCredential' => [
-                    'Key'      => $this->getConfigData('key'),
-                    'Password' => $this->getConfigData('password'),
-                ],
-            ],
-            'ClientDetail' => [
-                'AccountNumber' => $this->getConfigData('account'),
-                'MeterNumber'   => $this->getConfigData('meter_number'),
-            ],
-            'Version' => [
-                'ServiceId'    => 'trck',
-                'Major'        => '5',
-                'Intermediate' => '0',
-                'Minor'        => '0',
-            ],
-            'PackageIdentifier' => [
-                'Type'  => 'TRACKING_NUMBER_OR_DOORTAG',
-                'Value' => $tracking,
-            ],
-            /*
-             * 0 = summary data, one single scan structure with the most recent scan
-             * 1 = multiple scan activity for each package
-             */
-            'IncludeDetailedScans' => 1,
-        ];
-        $requestString = serialize($trackRequest);
-        $response = $this->_getCachedQuotes($requestString);
-        $debugData = ['request' => $trackRequest];
-        if ($response === null) {
-            try {
-                $client = $this->_createTrackSoapClient();
-                $response = $client->track($trackRequest);
+        $requestString = serialize(['track' => $tracking]);
+        $cached = $this->_getCachedQuotes($requestString);
+        $debugData = ['request' => ['trackingNumber' => $tracking]];
+
+        if ($cached === null) {
+            $response = $this->_getRestClient()->track((string) $tracking);
+            if (!isset($response['errors'])) {
                 $this->_setCachedQuotes($requestString, serialize($response));
-                $debugData['result'] = $response;
-            } catch (Exception $e) {
-                $debugData['result'] = ['error' => $e->getMessage(), 'code' => $e->getCode()];
-                Mage::logException($e);
             }
         } else {
-            $response = unserialize($response, ['allowed_classes' => false]);
-            $debugData['result'] = $response;
+            $response = unserialize($cached, ['allowed_classes' => false]);
+            if (!is_array($response)) {
+                $response = [];
+            }
         }
+
+        $debugData['result'] = $response;
         $this->_debug($debugData);
 
         $this->_parseTrackingResponse($tracking, $response);
@@ -944,86 +789,18 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
 
     /**
      * Parse tracking response
-     *
-     * @param array $trackingValue
-     * @param stdClass $response
      */
-    protected function _parseTrackingResponse($trackingValue, $response)
+    protected function _parseTrackingResponse(string $trackingValue, array $response): void
     {
-        $errorTitle = '';
+        $errorTitle = Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient::extractErrorMessage($response);
+        $resultArray = null;
 
-        if (is_object($response)) {
-            if ($response->HighestSeverity == 'FAILURE' || $response->HighestSeverity == 'ERROR') {
-                $errorTitle = (string) $response->Notifications->Message;
-            } elseif (isset($response->TrackDetails)) {
-                $trackInfo = $response->TrackDetails;
-                $resultArray['status'] = (string) $trackInfo->StatusDescription;
-                $resultArray['service'] = (string) $trackInfo->ServiceInfo;
-                $timestamp = $trackInfo->EstimatedDeliveryTimestamp ?? $trackInfo->ActualDeliveryTimestamp;
-                $timestamp = strtotime((string) $timestamp);
-                if ($timestamp) {
-                    $resultArray['deliverydate'] = date(Mage_Core_Model_Locale::DATE_FORMAT, $timestamp);
-                    $resultArray['deliverytime'] = date('H:i:s', $timestamp);
-                }
-
-                $deliveryLocation = $trackInfo->EstimatedDeliveryAddress ?? $trackInfo->ActualDeliveryAddress;
-                $deliveryLocationArray = [];
-                if (isset($deliveryLocation->City)) {
-                    $deliveryLocationArray[] = (string) $deliveryLocation->City;
-                }
-                if (isset($deliveryLocation->StateOrProvinceCode)) {
-                    $deliveryLocationArray[] = (string) $deliveryLocation->StateOrProvinceCode;
-                }
-                if (isset($deliveryLocation->CountryCode)) {
-                    $deliveryLocationArray[] = (string) $deliveryLocation->CountryCode;
-                }
-                if ($deliveryLocationArray) {
-                    $resultArray['deliverylocation'] = implode(', ', $deliveryLocationArray);
-                }
-
-                $resultArray['signedby'] = (string) $trackInfo->DeliverySignatureName;
-                $resultArray['shippeddate'] = date(Mage_Core_Model_Locale::DATE_FORMAT, (int) $trackInfo->ShipTimestamp);
-                if (isset($trackInfo->PackageWeight) && isset($trackInfo->Units)) {
-                    $weight = (string) $trackInfo->PackageWeight;
-                    $unit = (string) $trackInfo->Units;
-                    $resultArray['weight'] = "{$weight} {$unit}";
-                }
-
-                $packageProgress = [];
-                if (isset($trackInfo->Events)) {
-                    $events = $trackInfo->Events;
-                    if (isset($events->Address)) {
-                        $events = [$events];
-                    }
-                    foreach ($events as $event) {
-                        $tempArray = [];
-                        $tempArray['activity'] = (string) $event->EventDescription;
-                        $timestamp = strtotime((string) $event->Timestamp);
-                        if ($timestamp) {
-                            $tempArray['deliverydate'] = date(Mage_Core_Model_Locale::DATE_FORMAT, $timestamp);
-                            $tempArray['deliverytime'] = date('H:i:s', $timestamp);
-                        }
-                        if (isset($event->Address)) {
-                            $addressArray = [];
-                            $address = $event->Address;
-                            if (isset($address->City)) {
-                                $addressArray[] = (string) $address->City;
-                            }
-                            if (isset($address->StateOrProvinceCode)) {
-                                $addressArray[] = (string) $address->StateOrProvinceCode;
-                            }
-                            if (isset($address->CountryCode)) {
-                                $addressArray[] = (string) $address->CountryCode;
-                            }
-                            if ($addressArray) {
-                                $tempArray['deliverylocation'] = implode(', ', $addressArray);
-                            }
-                        }
-                        $packageProgress[] = $tempArray;
-                    }
-                }
-
-                $resultArray['progressdetail'] = $packageProgress;
+        $trackInfo = $response['output']['completeTrackResults'][0]['trackResults'][0] ?? null;
+        if (is_array($trackInfo)) {
+            if (isset($trackInfo['error'])) {
+                $errorTitle = $trackInfo['error']['message'] ?? $trackInfo['error']['code'] ?? null;
+            } else {
+                $resultArray = $this->_extractTrackingData($trackInfo);
             }
         }
 
@@ -1031,21 +808,110 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
             $this->_result = Mage::getModel('shipping/tracking_result');
         }
 
-        if (isset($resultArray)) {
+        if ($resultArray !== null) {
             $tracking = Mage::getModel('shipping/tracking_result_status');
-            $tracking->setCarrier('fedex');
+            $tracking->setCarrier($this->_code);
             $tracking->setCarrierTitle($this->getConfigData('title'));
             $tracking->setTracking($trackingValue);
             $tracking->addData($resultArray);
             $this->_result->append($tracking);
         } else {
             $error = Mage::getModel('shipping/tracking_result_error');
-            $error->setCarrier('fedex');
+            $error->setCarrier($this->_code);
             $error->setCarrierTitle($this->getConfigData('title'));
             $error->setTracking($trackingValue);
             $error->setErrorMessage($errorTitle ?: Mage::helper('usa')->__('Unable to retrieve tracking'));
             $this->_result->append($error);
         }
+    }
+
+    /**
+     * Flatten a REST trackResults entry into the shipping/tracking_result_status shape
+     */
+    protected function _extractTrackingData(array $trackInfo): array
+    {
+        $resultArray = [
+            'status' => (string) ($trackInfo['latestStatusDetail']['statusByLocale']
+                ?? $trackInfo['latestStatusDetail']['description'] ?? ''),
+            'service' => (string) ($trackInfo['serviceDetail']['description']
+                ?? $trackInfo['serviceDetail']['type'] ?? ''),
+        ];
+
+        $dateAndTimes = [];
+        foreach ($trackInfo['dateAndTimes'] ?? [] as $entry) {
+            if (isset($entry['type'], $entry['dateTime'])) {
+                $dateAndTimes[(string) $entry['type']] = (string) $entry['dateTime'];
+            }
+        }
+
+        $deliveryTimestamp = strtotime(
+            $dateAndTimes['ACTUAL_DELIVERY']
+            ?? $dateAndTimes['ESTIMATED_DELIVERY']
+            ?? $trackInfo['estimatedDeliveryTimeWindow']['window']['ends'] ?? '',
+        );
+        if ($deliveryTimestamp) {
+            $resultArray['deliverydate'] = date(Mage_Core_Model_Locale::DATE_FORMAT, $deliveryTimestamp);
+            $resultArray['deliverytime'] = date('H:i:s', $deliveryTimestamp);
+        }
+
+        $shipTimestamp = strtotime($dateAndTimes['SHIP'] ?? $dateAndTimes['ACTUAL_PICKUP'] ?? '');
+        if ($shipTimestamp) {
+            $resultArray['shippeddate'] = date(Mage_Core_Model_Locale::DATE_FORMAT, $shipTimestamp);
+        }
+
+        $deliveryLocation = $this->_formatTrackingAddress(
+            $trackInfo['deliveryDetails']['actualDeliveryAddress']
+            ?? $trackInfo['lastUpdatedDestinationAddress']
+            ?? [],
+        );
+        if ($deliveryLocation !== '') {
+            $resultArray['deliverylocation'] = $deliveryLocation;
+        }
+
+        if (!empty($trackInfo['deliveryDetails']['receivedByName'])) {
+            $resultArray['signedby'] = (string) $trackInfo['deliveryDetails']['receivedByName'];
+        }
+
+        $weight = $trackInfo['packageDetails']['weightAndDimensions']['weight'][0] ?? null;
+        if (isset($weight['value'], $weight['unit'])) {
+            $resultArray['weight'] = "{$weight['value']} {$weight['unit']}";
+        }
+
+        $packageProgress = [];
+        foreach ($trackInfo['scanEvents'] ?? [] as $event) {
+            if (!is_array($event)) {
+                continue;
+            }
+            $tempArray = ['activity' => (string) ($event['eventDescription'] ?? '')];
+            $timestamp = strtotime((string) ($event['date'] ?? ''));
+            if ($timestamp) {
+                $tempArray['deliverydate'] = date(Mage_Core_Model_Locale::DATE_FORMAT, $timestamp);
+                $tempArray['deliverytime'] = date('H:i:s', $timestamp);
+            }
+            $location = $this->_formatTrackingAddress($event['scanLocation'] ?? []);
+            if ($location !== '') {
+                $tempArray['deliverylocation'] = $location;
+            }
+            $packageProgress[] = $tempArray;
+        }
+        $resultArray['progressdetail'] = $packageProgress;
+
+        return $resultArray;
+    }
+
+    /**
+     * Render a REST address object as "City, State, Country"
+     */
+    protected function _formatTrackingAddress(array $address): string
+    {
+        $parts = [];
+        foreach (['city', 'stateOrProvinceCode', 'countryCode'] as $key) {
+            if (!empty($address[$key])) {
+                $parts[] = (string) $address[$key];
+            }
+        }
+
+        return implode(', ', $parts);
     }
 
     /**
@@ -1089,36 +955,6 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
             $arr[$k] = $this->getCode('method', $k);
         }
         return $arr;
-    }
-
-    /**
-     * Return array of authenticated information
-     *
-     * @return array
-     */
-    protected function _getAuthDetails()
-    {
-        return [
-            'WebAuthenticationDetail' => [
-                'UserCredential' => [
-                    'Key'      => $this->getConfigData('key'),
-                    'Password' => $this->getConfigData('password'),
-                ],
-            ],
-            'ClientDetail' => [
-                'AccountNumber' => $this->getConfigData('account'),
-                'MeterNumber'   => $this->getConfigData('meter_number'),
-            ],
-            'TransactionDetail' => [
-                'CustomerTransactionId' => '*** Express Domestic Shipping Request v9 using PHP ***',
-            ],
-            'Version' => [
-                'ServiceId'     => 'ship',
-                'Major'         => '10',
-                'Intermediate'  => '0',
-                'Minor'         => '0',
-            ],
-        ];
     }
 
     /**
@@ -1170,138 +1006,148 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
         }
 
         $paymentType = $request->getIsReturn() ? 'RECIPIENT' : 'SENDER';
-        $requestClient = [
-            'RequestedShipment' => [
-                'ShipTimestamp' => time(),
-                'DropoffType'   => $this->getConfigData('dropoff'),
-                'PackagingType' => $request->getPackagingType(),
-                'ServiceType' => $request->getShippingMethod(),
-                'Shipper' => [
-                    'Contact' => [
-                        'PersonName' => $request->getShipperContactPersonName(),
-                        'CompanyName' => $request->getShipperContactCompanyName(),
-                        'PhoneNumber' => $request->getShipperContactPhoneNumber(),
-                    ],
-                    'Address' => [
-                        'StreetLines' => [
-                            $request->getShipperAddressStreet1(),
-                            $request->getShipperAddressStreet2(),
-                        ],
-                        'City' => $request->getShipperAddressCity(),
-                        'StateOrProvinceCode' => $request->getShipperAddressStateOrProvinceCode(),
-                        'PostalCode' => $request->getShipperAddressPostalCode(),
-                        'CountryCode' => $request->getShipperAddressCountryCode(),
-                    ],
-                ],
-                'Recipient' => [
-                    'Contact' => [
-                        'PersonName' => $request->getRecipientContactPersonName(),
-                        'CompanyName' => $request->getRecipientContactCompanyName(),
-                        'PhoneNumber' => $request->getRecipientContactPhoneNumber(),
-                    ],
-                    'Address' => [
-                        'StreetLines' => [
-                            $request->getRecipientAddressStreet1(),
-                            $request->getRecipientAddressStreet2(),
-                        ],
-                        'City' => $request->getRecipientAddressCity(),
-                        'StateOrProvinceCode' => $request->getRecipientAddressStateOrProvinceCode(),
-                        'PostalCode' => $request->getRecipientAddressPostalCode(),
-                        'CountryCode' => $request->getRecipientAddressCountryCode(),
-                        'Residential' => (bool) $this->getConfigData('residence_delivery'),
-                    ],
-                ],
-                'ShippingChargesPayment' => [
-                    'PaymentType' => $paymentType,
-                    'Payor' => [
-                        'AccountNumber' => $this->getConfigData('account'),
-                        'CountryCode'   => Mage::getStoreConfig(
-                            Mage_Shipping_Model_Shipping::XML_PATH_STORE_COUNTRY_ID,
-                            $request->getStoreId(),
-                        ),
-                    ],
-                ],
-                'LabelSpecification' => [
-                    'LabelFormatType' => 'COMMON2D',
-                    'ImageType' => 'PNG',
-                    'LabelStockType' => 'PAPER_8.5X11_TOP_HALF_LABEL',
-                ],
-                'RateRequestTypes'  => ['ACCOUNT'],
-                'PackageCount'      => 1,
-                'RequestedPackageLineItems' => [
-                    'SequenceNumber' => '1',
-                    'Weight' => [
-                        'Units' => $weightUnits,
-                        'Value' =>  $request->getPackageWeight(),
-                    ],
-                    'CustomerReferences' => [
-                        'CustomerReferenceType' => 'CUSTOMER_REFERENCE',
-                        'Value' => $referenceData,
-                    ],
-                    'SpecialServicesRequested' => [
-                        'SpecialServiceTypes' => 'SIGNATURE_OPTION',
-                        'SignatureOptionDetail' => ['OptionType' => $packageParams->getDeliveryConfirmation()],
-                    ],
+        $originCountry = Mage::getStoreConfig(
+            Mage_Shipping_Model_Shipping::XML_PATH_STORE_COUNTRY_ID,
+            $request->getStoreId(),
+        );
+
+        $packageLineItem = [
+            'sequenceNumber' => 1,
+            'weight' => [
+                'units' => $weightUnits,
+                'value' => (float) $request->getPackageWeight(),
+            ],
+            'customerReferences' => [
+                [
+                    'customerReferenceType' => 'CUSTOMER_REFERENCE',
+                    'value' => $referenceData,
                 ],
             ],
         ];
 
+        if ($packageParams->getDeliveryConfirmation()) {
+            $packageLineItem['packageSpecialServices'] = [
+                'specialServiceTypes' => ['SIGNATURE_OPTION'],
+                'signatureOptionType' => $packageParams->getDeliveryConfirmation(),
+            ];
+        }
+
+        if ($length || $width || $height) {
+            $packageLineItem['dimensions'] = [
+                'length' => $length,
+                'width'  => $width,
+                'height' => $height,
+                'units'  => $dimensionsUnits,
+            ];
+        }
+
+        $requestedShipment = [
+            // Not a typo: the Ship API spells it shipDatestamp while Rate uses shipDateStamp.
+            'shipDatestamp' => Mage_Core_Model_Locale::todayUtc(),
+            'pickupType' => $this->_getPickupType($this->getConfigData('dropoff')),
+            'packagingType' => $request->getPackagingType(),
+            'serviceType' => $request->getShippingMethod(),
+            'shipper' => [
+                'contact' => [
+                    'personName' => $request->getShipperContactPersonName(),
+                    'companyName' => $request->getShipperContactCompanyName(),
+                    'phoneNumber' => $request->getShipperContactPhoneNumber(),
+                ],
+                'address' => [
+                    'streetLines' => array_values(array_filter([
+                        $request->getShipperAddressStreet1(),
+                        $request->getShipperAddressStreet2(),
+                    ])),
+                    'city' => $request->getShipperAddressCity(),
+                    'stateOrProvinceCode' => $request->getShipperAddressStateOrProvinceCode(),
+                    'postalCode' => $request->getShipperAddressPostalCode(),
+                    'countryCode' => $request->getShipperAddressCountryCode(),
+                ],
+            ],
+            'recipients' => [
+                [
+                    'contact' => [
+                        'personName' => $request->getRecipientContactPersonName(),
+                        'companyName' => $request->getRecipientContactCompanyName(),
+                        'phoneNumber' => $request->getRecipientContactPhoneNumber(),
+                    ],
+                    'address' => [
+                        'streetLines' => array_values(array_filter([
+                            $request->getRecipientAddressStreet1(),
+                            $request->getRecipientAddressStreet2(),
+                        ])),
+                        'city' => $request->getRecipientAddressCity(),
+                        'stateOrProvinceCode' => $request->getRecipientAddressStateOrProvinceCode(),
+                        'postalCode' => $request->getRecipientAddressPostalCode(),
+                        'countryCode' => $request->getRecipientAddressCountryCode(),
+                        'residential' => (bool) $this->getConfigData('residence_delivery'),
+                    ],
+                ],
+            ],
+            'shippingChargesPayment' => [
+                'paymentType' => $paymentType,
+                'payor' => [
+                    'responsibleParty' => [
+                        'accountNumber' => ['value' => $this->getConfigData('account')],
+                        'address' => ['countryCode' => $originCountry],
+                    ],
+                ],
+            ],
+            'labelSpecification' => [
+                'labelFormatType' => 'COMMON2D',
+                'imageType' => 'PDF',
+                'labelStockType' => 'PAPER_85X11_TOP_HALF_LABEL',
+            ],
+            'rateRequestType' => ['ACCOUNT'],
+            'totalPackageCount' => 1,
+            'requestedPackageLineItems' => [$packageLineItem],
+        ];
+
         // for international shipping
         if ($request->getShipperAddressCountryCode() != $request->getRecipientAddressCountryCode()) {
-            $requestClient['RequestedShipment']['CustomsClearanceDetail'] =
-                [
-                    'CustomsValue' =>
+            $requestedShipment['customsClearanceDetail'] = [
+                'dutiesPayment' => [
+                    'paymentType' => $paymentType,
+                    'payor' => [
+                        'responsibleParty' => [
+                            'accountNumber' => ['value' => $this->getConfigData('account')],
+                            'address' => ['countryCode' => $originCountry],
+                        ],
+                    ],
+                ],
+                'commodities' => [
                     [
-                        'Currency' => $request->getBaseCurrencyCode(),
-                        'Amount' => $customsValue,
-                    ],
-                    'DutiesPayment' => [
-                        'PaymentType' => $paymentType,
-                        'Payor' => [
-                            'AccountNumber' => $this->getConfigData('account'),
-                            'CountryCode'   => Mage::getStoreConfig(
-                                Mage_Shipping_Model_Shipping::XML_PATH_STORE_COUNTRY_ID,
-                                $request->getStoreId(),
-                            ),
+                        'weight' => [
+                            'units' => $weightUnits,
+                            'value' => (float) $request->getPackageWeight(),
+                        ],
+                        'numberOfPieces' => 1,
+                        'countryOfManufacture' => implode(',', array_unique($countriesOfManufacture)),
+                        'description' => implode(', ', $itemsDesc),
+                        'quantity' => (int) ceil($itemsQty),
+                        'quantityUnits' => 'pcs',
+                        'unitPrice' => [
+                            'currency' => $request->getBaseCurrencyCode(),
+                            'amount' => $unitPrice,
+                        ],
+                        'customsValue' => [
+                            'currency' => $request->getBaseCurrencyCode(),
+                            'amount' => $customsValue,
                         ],
                     ],
-                    'Commodities' => [
-                        'Weight' => [
-                            'Units' => $weightUnits,
-                            'Value' =>  $request->getPackageWeight(),
-                        ],
-                        'NumberOfPieces' => 1,
-                        'CountryOfManufacture' => implode(',', array_unique($countriesOfManufacture)),
-                        'Description' => implode(', ', $itemsDesc),
-                        'Quantity' => ceil($itemsQty),
-                        'QuantityUnits' => 'pcs',
-                        'UnitPrice' => [
-                            'Currency' => $request->getBaseCurrencyCode(),
-                            'Amount' =>  $unitPrice,
-                        ],
-                        'CustomsValue' => [
-                            'Currency' => $request->getBaseCurrencyCode(),
-                            'Amount' =>  $customsValue,
-                        ],
-                    ],
-                ];
+                ],
+            ];
         }
 
         if ($request->getMasterTrackingId()) {
-            $requestClient['RequestedShipment']['MasterTrackingId'] = $request->getMasterTrackingId();
+            $requestedShipment['masterTrackingId'] = ['trackingNumber' => $request->getMasterTrackingId()];
         }
 
-        // set dimensions
-        if ($length || $width || $height) {
-            $requestClient['RequestedShipment']['RequestedPackageLineItems']['Dimensions'] = [];
-            $dimenssions = &$requestClient['RequestedShipment']['RequestedPackageLineItems']['Dimensions'];
-            $dimenssions['Length'] = $length;
-            $dimenssions['Width']  = $width;
-            $dimenssions['Height'] = $height;
-            $dimenssions['Units'] = $dimensionsUnits;
-        }
-
-        return $this->_getAuthDetails() + $requestClient;
+        return [
+            'labelResponseOptions' => 'LABEL',
+            'accountNumber' => ['value' => $this->getConfigData('account')],
+            'requestedShipment' => $requestedShipment,
+        ];
     }
 
     /**
@@ -1314,39 +1160,23 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     {
         $this->_prepareShipmentRequest($request);
         $result = new \Maho\DataObject();
-        $client = $this->_createShipSoapClient();
         $requestClient = $this->_formShipmentRequest($request);
-        $response = $client->processShipment($requestClient);
+        $response = $this->_getRestClient()->createShipment($requestClient);
 
-        if ($response->HighestSeverity != 'FAILURE' && $response->HighestSeverity != 'ERROR') {
-            $shippingLabelContent = $response->CompletedShipmentDetail->CompletedPackageDetails->Label->Parts->Image;
-            $trackingNumber = $response->CompletedShipmentDetail->CompletedPackageDetails->TrackingIds->TrackingNumber;
-            $result->setShippingLabelContent($shippingLabelContent);
-            $result->setTrackingNumber($trackingNumber);
-            $debugData = ['request' => $client->__getLastRequest(), 'result' => $client->__getLastResponse()];
-            $this->_debug($debugData);
+        $error = Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient::extractErrorMessage($response);
+        if ($error === null) {
+            $shipment = $response['output']['transactionShipments'][0] ?? [];
+            $pieceResponse = $shipment['pieceResponses'][0] ?? [];
+            $encodedLabel = $pieceResponse['packageDocuments'][0]['encodedLabel'] ?? null;
+
+            $result->setShippingLabelContent($encodedLabel !== null ? base64_decode($encodedLabel) : null);
+            $result->setTrackingNumber(
+                $shipment['masterTrackingNumber'] ?? $pieceResponse['trackingNumber'] ?? null,
+            );
         } else {
-            $debugData = [
-                'request' => $client->__getLastRequest(),
-                'result' => [
-                    'error' => '',
-                    'code' => '',
-                    'xml' => $client->__getLastResponse(),
-                ],
-            ];
-            if (is_array($response->Notifications)) {
-                foreach ($response->Notifications as $notification) {
-                    $debugData['result']['code'] .= $notification->Code . '; ';
-                    $debugData['result']['error'] .= $notification->Message . '; ';
-                }
-            } else {
-                $debugData['result']['code'] = $response->Notifications->Code . ' ';
-                $debugData['result']['error'] = $response->Notifications->Message . ' ';
-            }
-            $this->_debug($debugData);
-            $result->setErrors($debugData['result']['error']);
+            $result->setErrors($error);
         }
-        $result->setGatewayResponse($client->__getLastResponse());
+        $result->setGatewayResponse(Mage::helper('core')->jsonEncode($response));
 
         return $result;
     }
@@ -1361,14 +1191,33 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     #[\Override]
     public function rollBack($data)
     {
-        $requestData = $this->_getAuthDetails();
-        $requestData['DeletionControl'] = 'DELETE_ONE_PACKAGE';
-        foreach ($data as &$item) {
-            $requestData['TrackingId'] = $item['tracking_number'];
-            $client = $this->_createShipSoapClient();
-            $client->deleteShipment($requestData);
+        $rolledBack = true;
+
+        foreach ($data as $item) {
+            $response = $this->_getRestClient()->cancelShipment([
+                'accountNumber' => ['value' => $this->getConfigData('account')],
+                'trackingNumber' => $item['tracking_number'],
+                'deletionControl' => 'DELETE_ONE_PACKAGE',
+            ]);
+
+            // A refused cancel answers HTTP 200 with cancelledShipment false and no errors[],
+            // so the flag is the only signal that the label is still live.
+            if (empty($response['output']['cancelledShipment'])) {
+                $rolledBack = false;
+                Mage::log(
+                    sprintf(
+                        'FedEx did not cancel shipment %s: %s',
+                        $item['tracking_number'],
+                        $response['output']['message']
+                            ?? Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient::extractErrorMessage($response)
+                            ?? 'no reason given',
+                    ),
+                    Mage::LOG_ERROR,
+                );
+            }
         }
-        return true;
+
+        return $rolledBack;
     }
 
     /**
