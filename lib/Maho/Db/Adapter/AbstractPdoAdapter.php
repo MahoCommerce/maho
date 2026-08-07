@@ -221,6 +221,11 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     #[\Override]
     public function closeConnection(): void
     {
+        if ($this->_transactionLevel > 0) {
+            // The destructor's leaked-transaction check never sees this one
+            \Mage::log('Closed a connection with an open transaction, discarding it', \Mage::LOG_WARNING);
+        }
+
         $this->_connection?->close();
         $this->_connection = null;
         $this->_connectionFlagsSet = false;

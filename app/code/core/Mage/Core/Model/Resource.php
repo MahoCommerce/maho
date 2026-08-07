@@ -131,7 +131,11 @@ class Mage_Core_Model_Resource
                 continue;
             }
             $closed[$id] = true;
-            $connection->closeConnection();
+            try {
+                $connection->closeConnection();
+            } catch (\Throwable) {
+                // one driver failing to close must not leave the others open
+            }
         }
     }
 

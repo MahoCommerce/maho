@@ -49,6 +49,21 @@ it('abandons open setup state when the connection is closed', function () {
     $adapter->endSetup();
 });
 
+it('discards an open transaction when the connection is closed', function () {
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+    $adapter->beginTransaction();
+    $adapter->closeConnection();
+
+    expect($adapter->getTransactionLevel())->toBe(0);
+    expect($adapter->isTransaction())->toBeFalse();
+
+    $adapter->beginTransaction();
+    expect($adapter->getTransactionLevel())->toBe(1);
+    $adapter->rollBack();
+
+    expect((int) $adapter->fetchOne('SELECT 1'))->toBe(1);
+});
+
 it('leaves no connection open behind Mage::reset()', function () {
     $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
     $adapter->fetchOne('SELECT 1');
