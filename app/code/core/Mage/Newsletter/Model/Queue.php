@@ -61,11 +61,11 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
     protected $_saveStoresFlag = false;
 
     /**
-     * Stores assigned to queue.
+     * Stores assigned to queue, null until set or loaded.
      *
-     * @var array
+     * @var array|null
      */
-    protected $_stores = [];
+    protected $_stores = null;
 
     public const STATUS_NEVER = 0;
     public const STATUS_SENDING = 1;
@@ -331,6 +331,8 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
     public function setStores(array $storesIds)
     {
         $this->setSaveStoresFlag(true);
+        // Stores live outside _data, so save() would short-circuit without this
+        $this->setDataChanges(true);
         $this->_stores = $storesIds;
         return $this;
     }
@@ -342,7 +344,7 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
      */
     public function getStores()
     {
-        if (!$this->_stores) {
+        if ($this->_stores === null) {
             $this->_stores = $this->_getResource()->getStores($this);
         }
 
