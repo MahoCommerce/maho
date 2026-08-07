@@ -192,9 +192,7 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
             return $this;
         }
 
-        if ((int) $this->getQueueStatus() === self::STATUS_NEVER) {
-            $this->_getResource()->materializeRecipients($this);
-        }
+        $this->_getResource()->materializeRecipients($this);
 
         $collection = $this->getSubscribersCollection()
             ->useOnlyUnsent()

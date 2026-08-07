@@ -16873,12 +16873,6 @@ parameters:
 			path: app/code/core/Mage/Newsletter/Model/Resource/Queue.php
 
 		-
-			rawMessage: 'Method Mage_Newsletter_Model_Resource_Queue::removeSubscribersFromQueue() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Newsletter/Model/Resource/Queue.php
-
-		-
 			rawMessage: 'Method Mage_Newsletter_Model_Resource_Subscriber::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1

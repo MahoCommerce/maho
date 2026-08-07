@@ -33,6 +33,7 @@
 "24h","24h"
 "<h1 class=""page-heading"">404 Error</h1><p>Page not found.</p>","<h1 class=""page-heading"">404 Error</h1><p>Page not found.</p>"
 "<strong>%s</strong> requests access to your account","<strong>%s</strong> requests access to your account"
+"A campaign can no longer be edited once it has started; it can only be paused, resumed or cancelled.","A campaign can no longer be edited once it has started; it can only be paused, resumed or cancelled."
 "Abandoned Carts","Abandoned Carts"
 "Access Denied","Access Denied"
 "Access denied","Access denied"

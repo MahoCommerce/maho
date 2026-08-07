@@ -59,6 +59,7 @@ class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_A
             $adapter->commit();
         } catch (Exception $e) {
             $adapter->rollBack();
+            throw $e;
         }
     }
 
@@ -103,22 +104,15 @@ class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_A
     /**
      * Removes subscriber from queue
      */
-    public function removeSubscribersFromQueue(Mage_Newsletter_Model_Queue $queue)
+    public function removeSubscribersFromQueue(Mage_Newsletter_Model_Queue $queue): void
     {
-        $adapter = $this->_getWriteAdapter();
-        try {
-            $adapter->delete(
-                $this->getTable('newsletter/queue_link'),
-                [
-                    'queue_id = ?' => $queue->getId(),
-                    'letter_sent_at IS NULL',
-                ],
-            );
-
-            $adapter->commit();
-        } catch (Exception $e) {
-            $adapter->rollBack();
-        }
+        $this->_getWriteAdapter()->delete(
+            $this->getTable('newsletter/queue_link'),
+            [
+                'queue_id = ?' => $queue->getId(),
+                'letter_sent_at IS NULL',
+            ],
+        );
     }
 
     /**
@@ -128,6 +122,12 @@ class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_A
      */
     public function setStores(Mage_Newsletter_Model_Queue $queue)
     {
+        // Stores decide the audience, which is snapshotted at the first batch: changing
+        // them afterwards could only strand the recipients already linked.
+        if ((int) $queue->getQueueStatus() !== Mage_Newsletter_Model_Queue::STATUS_NEVER) {
+            return $this;
+        }
+
         $adapter = $this->_getWriteAdapter();
         $adapter->delete(
             $this->getTable('newsletter/queue_store_link'),
@@ -146,8 +146,6 @@ class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_A
             $adapter->insert($this->getTable('newsletter/queue_store_link'), $data);
         }
 
-        // The audience is snapshotted at the first batch, so only drop what has
-        // not gone out yet: a store change before then must be honoured.
         $this->removeSubscribersFromQueue($queue);
 
         return $this;

@@ -40,13 +40,7 @@ function makeNewsletterCampaign(int $recipients, ?string $startAt = 'now', int $
 
     $subscriberIds = [];
     for ($i = 0; $i < $recipients; $i++) {
-        /** @var Mage_Newsletter_Model_Subscriber $subscriber */
-        $subscriber = Mage::getModel('newsletter/subscriber');
-        $subscriber->setStoreId(1)
-            ->setSubscriberEmail(NEWSLETTER_TEST_PREFIX . '-' . uniqid() . '@example.com')
-            ->setSubscriberStatus(Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED)
-            ->save();
-        $subscriberIds[] = (int) $subscriber->getId();
+        $subscriberIds[] = (int) makeNewsletterSubscriber()->getId();
     }
 
     if ($subscriberIds !== []) {
@@ -54,6 +48,18 @@ function makeNewsletterCampaign(int $recipients, ?string $startAt = 'now', int $
     }
 
     return $queue;
+}
+
+function makeNewsletterSubscriber(int $storeId = 1): Mage_Newsletter_Model_Subscriber
+{
+    /** @var Mage_Newsletter_Model_Subscriber $subscriber */
+    $subscriber = Mage::getModel('newsletter/subscriber');
+    $subscriber->setStoreId($storeId)
+        ->setSubscriberEmail(NEWSLETTER_TEST_PREFIX . '-' . uniqid() . '@example.com')
+        ->setSubscriberStatus(Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED)
+        ->save();
+
+    return $subscriber;
 }
 
 function newsletterQueueRows(?int $queueId = null): array
@@ -225,13 +231,7 @@ it('leaves the campaign alone while another batch holds the lock', function () {
 
 it('links recipients at the first batch, not at save', function () {
     $queue = makeNewsletterCampaign(0, 'now', Mage_Newsletter_Model_Queue::STATUS_NEVER);
-
-    /** @var Mage_Newsletter_Model_Subscriber $subscriber */
-    $subscriber = Mage::getModel('newsletter/subscriber');
-    $subscriber->setStoreId(1)
-        ->setSubscriberEmail(NEWSLETTER_TEST_PREFIX . '-' . uniqid() . '@example.com')
-        ->setSubscriberStatus(Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED)
-        ->save();
+    $subscriber = makeNewsletterSubscriber();
 
     $queue->setStores([1])->save();
     expect(newsletterLinkRows((int) $queue->getId()))->toHaveCount(0);
@@ -241,6 +241,34 @@ it('links recipients at the first batch, not at save', function () {
 
     $linked = array_map('intval', array_column(newsletterLinkRows((int) $queue->getId()), 'subscriber_id'));
     expect($linked)->toContain((int) $subscriber->getId());
+});
+
+it('links recipients for a campaign flipped to sending before its first batch', function () {
+    $queue = makeNewsletterCampaign(0, 'now', Mage_Newsletter_Model_Queue::STATUS_NEVER);
+    $subscriber = makeNewsletterSubscriber();
+
+    $queue->setStores([1])->save();
+    $queue->setQueueStatus(Mage_Newsletter_Model_Queue::STATUS_SENDING)->save();
+
+    Mage::getSingleton('newsletter/queue_sendMessageHandler')
+        ->__invoke(new Mage_Newsletter_Model_Queue_SendMessage((int) $queue->getId()));
+
+    $linked = array_map('intval', array_column(newsletterLinkRows((int) $queue->getId()), 'subscriber_id'));
+    expect($linked)->toContain((int) $subscriber->getId());
+});
+
+it('keeps the stores and the unsent audience of a campaign that has started', function () {
+    $queue = makeNewsletterCampaign(0, 'now', Mage_Newsletter_Model_Queue::STATUS_NEVER);
+    $queue->setStores([1])->save();
+
+    $queue->setQueueStatus(Mage_Newsletter_Model_Queue::STATUS_SENDING)->save();
+    $queue->addSubscribersToQueue([(int) makeNewsletterSubscriber()->getId()]);
+
+    $queue->setStores([])->save();
+
+    $reloaded = Mage::getModel('newsletter/queue')->load($queue->getId());
+    expect(array_map('intval', $reloaded->getStores()))->toBe([1]);
+    expect(newsletterLinkRows((int) $queue->getId()))->toHaveCount(1);
 });
 
 it('drops a not-yet-sent audience when the campaign stores change', function () {
