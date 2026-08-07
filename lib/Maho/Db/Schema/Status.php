@@ -12,8 +12,7 @@ declare(strict_types=1);
 namespace Maho\Db\Schema;
 
 use Maho\Db\Adapter\AdapterInterface;
-use Maho\Db\Expr;
-use RuntimeException;
+use Throwable;
 
 final class Status
 {
@@ -80,7 +79,10 @@ final class Status
             [$target, $contributors] = Collector::collect();
             $pending = $contributors !== []
                 && Applier::plan($adapter->getConnection(), $target, Collector::tablePrefix(), false) !== [];
-        } catch (RuntimeException) {
+        } catch (Throwable) {
+            // Throwable, not RuntimeException: DBAL raises a malformed declaration
+            // as a LogicException, and nothing may escape a boot whose whole job is
+            // to keep a mismatched database from fatalling.
             return false;
         }
 
@@ -116,18 +118,14 @@ final class Status
             return;
         }
 
-        $fingerprint ??= self::fingerprint();
-        $select = $adapter->select()
-            ->from($table, new Expr('COUNT(*)'))
-            ->where('code = ?', self::RESOURCE_CODE);
-
-        // On the row, not on the value: a row whose version is NULL or empty
-        // still owns the primary key, and an INSERT would collide with it.
-        if ((int) $adapter->fetchOne($select) === 0) {
-            $adapter->insert($table, ['code' => self::RESOURCE_CODE, 'version' => $fingerprint]);
-        } else {
-            $adapter->update($table, ['version' => $fingerprint], ['code = ?' => self::RESOURCE_CODE]);
-        }
+        // Upsert rather than check-then-insert: isConverged() records from the
+        // request path, so concurrent requests would otherwise race between the
+        // existence check and the INSERT and collide on the primary key.
+        $adapter->insertOnDuplicate(
+            $table,
+            ['code' => self::RESOURCE_CODE, 'version' => $fingerprint ?? self::fingerprint()],
+            ['version'],
+        );
     }
 
     private static function appliedFingerprint(AdapterInterface $adapter): ?string

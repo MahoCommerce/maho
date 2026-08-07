@@ -22,6 +22,7 @@ Mage::$headersSentThrowsException = false;
 Mage::init('admin');
 
 if (Mage::app()->isSchemaUpdatePending()) {
+    header('Content-Type: text/plain; charset=UTF-8');
     header('Retry-After: 3600');
     http_response_code(503);
     echo 'The database is behind the installed code, run "./maho migrate".';
