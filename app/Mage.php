@@ -122,7 +122,11 @@ final class Mage
     {
         $resource = self::$_registry['_singleton/core/resource'] ?? null;
         if ($resource instanceof Mage_Core_Model_Resource) {
-            $resource->closeConnections();
+            try {
+                $resource->closeConnections();
+            } catch (\Throwable) {
+                // reset() has to clear state whatever the driver does on close
+            }
         }
 
         self::$_registry        = [];

@@ -280,6 +280,20 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
+     * Setup state tracks session settings (the relaxed SQL_MODE, the
+     * @OLD_FOREIGN_KEY_CHECKS variable) that die with the connection, so a
+     * close abandons any setup still open rather than restoring it onto a
+     * connection that never had it.
+     */
+    #[\Override]
+    public function closeConnection(): void
+    {
+        parent::closeConnection();
+        $this->_setupNesting = 0;
+        $this->_setupSqlMode = null;
+    }
+
+    /**
      * Run RAW Query
      *
      * @throws \PDOException

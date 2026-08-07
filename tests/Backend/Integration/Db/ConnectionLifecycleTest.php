@@ -31,6 +31,24 @@ it('reconnects on demand after a close', function () {
     expect((int) $adapter->fetchOne('SELECT 1'))->toBe(1);
 });
 
+it('abandons open setup state when the connection is closed', function () {
+    $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
+    if (!$adapter instanceof Maho\Db\Adapter\Pdo\Mysql) {
+        $this->markTestSkipped('Setup session state is MySQL-specific');
+    }
+
+    $adapter->startSetup();
+    $adapter->closeConnection();
+
+    expect((new ReflectionProperty($adapter, '_setupNesting'))->getValue($adapter))->toBe(0);
+
+    // The relaxed SQL_MODE died with the connection, so this has to count as a
+    // fresh setup and relax it again rather than nest inside the closed one.
+    $adapter->startSetup();
+    expect((string) $adapter->fetchOne('SELECT @@SESSION.sql_mode'))->not->toContain('NO_ZERO_DATE');
+    $adapter->endSetup();
+});
+
 it('leaves no connection open behind Mage::reset()', function () {
     $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
     $adapter->fetchOne('SELECT 1');
