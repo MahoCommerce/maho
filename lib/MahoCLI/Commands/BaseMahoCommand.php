@@ -54,4 +54,15 @@ abstract class BaseMahoCommand extends Command
     {
         return Mage::helper('core')->formatFileSize($bytes);
     }
+
+    /**
+     * Queues carrying mail: newsletters ride their own so a blast can be given
+     * a dedicated worker, but the email commands still cover them.
+     *
+     * @return list<string>
+     */
+    protected function mailQueues(): array
+    {
+        return [\Mage_Core_Model_Email_Queue::QUEUE_NAME, \Mage_Newsletter_Model_Queue::QUEUE_NAME];
+    }
 }

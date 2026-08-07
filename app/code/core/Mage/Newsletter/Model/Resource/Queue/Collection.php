@@ -55,36 +55,56 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
      */
     protected function _addSubscriberInfoToSelect()
     {
-        /** @var Maho\Db\Select $select */
-        $select = $this->getConnection()->select()
-            ->from(['qlt' => $this->getTable('newsletter/queue_link')], 'COUNT(qlt.queue_link_id)')
-            ->where('qlt.queue_id = main_table.queue_id');
-        $linked = sprintf('(%s)', $select->assemble());
-        $select = $this->getConnection()->select()
-            ->from(['qls' => $this->getTable('newsletter/queue_link')], 'COUNT(qls.queue_link_id)')
-            ->where('qls.queue_id = main_table.queue_id')
-            ->where('qls.letter_sent_at IS NOT NULL');
-        $sentExpr  = new Maho\Db\Expr(sprintf('(%s)', $select->assemble()));
-
-        // Recipients are only linked once the first batch goes out, so a
-        // campaign still waiting reports the audience it would reach today.
-        $select = $this->getConnection()->select()
-            ->from(['qsl' => $this->getTable('newsletter/queue_store_link')], 'COUNT(*)')
-            ->join(['sub' => $this->getTable('newsletter/subscriber')], 'sub.store_id = qsl.store_id', [])
-            ->where('qsl.queue_id = main_table.queue_id')
-            ->where('sub.subscriber_status = ?', Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED);
-        $totalExpr = new Maho\Db\Expr(sprintf(
-            'CASE WHEN main_table.queue_status = %d THEN (%s) ELSE %s END',
-            Mage_Newsletter_Model_Queue::STATUS_NEVER,
-            $select->assemble(),
-            $linked,
-        ));
-
         $this->getSelect()->columns([
-            'subscribers_sent'  => $sentExpr,
-            'subscribers_total' => $totalExpr,
+            'subscribers_sent'  => new Maho\Db\Expr($this->_getSubscribersSentExpr('main_table.queue_id')),
+            'subscribers_total' => new Maho\Db\Expr(
+                $this->_getSubscribersTotalExpr('main_table.queue_id', 'main_table.queue_status'),
+            ),
         ]);
         return $this;
+    }
+
+    /**
+     * Recipients already mailed, as a scalar correlated on $queueIdColumn.
+     */
+    protected function _getSubscribersSentExpr(string $queueIdColumn): string
+    {
+        $select = $this->getConnection()->select()
+            ->from(['qls' => $this->getTable('newsletter/queue_link')], 'COUNT(qls.queue_link_id)')
+            ->where("qls.queue_id = $queueIdColumn")
+            ->where('qls.letter_sent_at IS NOT NULL');
+
+        return sprintf('(%s)', $select->assemble());
+    }
+
+    /**
+     * Recipients are only linked once the first batch goes out, so a campaign
+     * with nothing linked yet reports the audience it would reach today. The
+     * grid column and the grid filter both come from here, or they would
+     * disagree about the very same number.
+     */
+    protected function _getSubscribersTotalExpr(string $queueIdColumn, string $statusColumn): string
+    {
+        $linked = sprintf('(%s)', $this->getConnection()->select()
+            ->from(['qlt' => $this->getTable('newsletter/queue_link')], 'COUNT(qlt.queue_link_id)')
+            ->where("qlt.queue_id = $queueIdColumn")
+            ->assemble());
+
+        $projected = sprintf('(%s)', $this->getConnection()->select()
+            ->from(['qsl' => $this->getTable('newsletter/queue_store_link')], 'COUNT(*)')
+            ->join(['sub' => $this->getTable('newsletter/subscriber')], 'sub.store_id = qsl.store_id', [])
+            ->where("qsl.queue_id = $queueIdColumn")
+            ->where('sub.subscriber_status = ?', Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED)
+            ->assemble());
+
+        return sprintf(
+            '(CASE WHEN %s = %d AND %s = 0 THEN %s ELSE %s END)',
+            $statusColumn,
+            Mage_Newsletter_Model_Queue::STATUS_NEVER,
+            $linked,
+            $projected,
+            $linked,
+        );
     }
 
     /**
@@ -125,7 +145,9 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
     }
 
     /**
-     * Returns ids from queue_link table
+     * Campaign ids whose recipient count matches, using the same expressions the
+     * grid displays: counting queue_link rows here would hide every campaign
+     * that has not started yet, the ones showing a projected audience.
      *
      * @param string $field
      * @param mixed $condition
@@ -133,17 +155,13 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
      */
     protected function _getIdsFromLink($field, $condition)
     {
-        $select = $this->getConnection()->select()
-            ->from(
-                $this->getTable('newsletter/queue_link'),
-                ['queue_id', 'total' => new Maho\Db\Expr('COUNT(queue_link_id)')],
-            )
-            ->group('queue_id')
-            ->having($this->_getConditionSql('COUNT(queue_link_id)', $condition));
+        $expr = $field === 'subscribers_sent'
+            ? $this->_getSubscribersSentExpr('q.queue_id')
+            : $this->_getSubscribersTotalExpr('q.queue_id', 'q.queue_status');
 
-        if ($field == 'subscribers_sent') {
-            $select->where('letter_sent_at IS NOT NULL');
-        }
+        $select = $this->getConnection()->select()
+            ->from(['q' => $this->getMainTable()], 'queue_id')
+            ->where($this->_getConditionSql($expr, $condition));
 
         $idList = $this->getConnection()->fetchCol($select);
 

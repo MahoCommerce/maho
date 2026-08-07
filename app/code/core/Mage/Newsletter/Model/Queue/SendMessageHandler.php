@@ -12,6 +12,7 @@
 declare(strict_types=1);
 
 use Maho\Queue\QueueManager;
+use Maho\Queue\Stamp\DedupeKeyStamp;
 
 class Mage_Newsletter_Model_Queue_SendMessageHandler
 {
@@ -47,11 +48,13 @@ class Mage_Newsletter_Model_Queue_SendMessageHandler
             return;
         }
 
-        // No dedupe key: this message's own row is still in flight under the
-        // campaign key and would swallow its own continuation.
+        // Non-enforcing key: this message's own row is still in flight under the
+        // campaign key and would swallow its own continuation, but the key has to
+        // travel with the chain or the cron sweep starts a rival one every run.
         QueueManager::dispatch(
             new Mage_Newsletter_Model_Queue_SendMessage((int) $queue->getId()),
             queue: Mage_Newsletter_Model_Queue::QUEUE_NAME,
+            stamps: [new DedupeKeyStamp($queue->getDispatchDedupeKey(), enforce: false)],
         );
     }
 }

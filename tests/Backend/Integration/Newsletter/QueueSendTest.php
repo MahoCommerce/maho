@@ -178,6 +178,21 @@ it('sends a batch, marks its recipients and chains the next batch', function () 
     expect($queue->getUnsentSubscribersCount())->toBe(1);
 });
 
+it('keeps the cron sweep out of a campaign whose chain is still running', function () {
+    $queue = makeNewsletterCampaign(3);
+
+    Mage::getSingleton('newsletter/queue_sendMessageHandler')
+        ->__invoke(new Mage_Newsletter_Model_Queue_SendMessage((int) $queue->getId()));
+
+    $rows = newsletterQueueRows((int) $queue->getId());
+    expect($rows)->toHaveCount(1);
+    expect($rows[0]['dedupe_key'])->toBe('newsletter_' . $queue->getId());
+
+    Mage::helper('newsletter')->scheduleDueQueues();
+
+    expect(newsletterQueueRows((int) $queue->getId()))->toHaveCount(1);
+});
+
 it('finishes the campaign once the last batch has gone out', function () {
     $queue = makeNewsletterCampaign(1);
 
@@ -278,6 +293,26 @@ it('drops a not-yet-sent audience when the campaign stores change', function () 
     $queue->setStores([])->save();
 
     expect(newsletterLinkRows((int) $queue->getId()))->toHaveCount(0);
+});
+
+it('filters by the recipient count the grid shows for a campaign that has not started', function () {
+    $queue = makeNewsletterCampaign(0, 'now', Mage_Newsletter_Model_Queue::STATUS_NEVER);
+    $queue->setStores([1])->save();
+    makeNewsletterSubscriber();
+    makeNewsletterSubscriber();
+
+    $displayed = (int) Mage::getResourceModel('newsletter/queue_collection')
+        ->addSubscribersInfo()
+        ->addFieldToFilter('main_table.queue_id', $queue->getId())
+        ->getFirstItem()
+        ->getSubscribersTotal();
+
+    expect(newsletterLinkRows((int) $queue->getId()))->toHaveCount(0);
+    expect($displayed)->toBeGreaterThanOrEqual(2);
+
+    $filtered = Mage::getResourceModel('newsletter/queue_collection')
+        ->addFieldToFilter('subscribers_total', ['eq' => $displayed]);
+    expect(array_map('intval', array_keys($filtered->getItems())))->toContain((int) $queue->getId());
 });
 
 it('schedules due campaigns only', function () {

@@ -163,10 +163,19 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
         \Maho\Queue\QueueManager::dispatch(
             new Mage_Newsletter_Model_Queue_SendMessage((int) $this->getId()),
             queue: self::QUEUE_NAME,
-            dedupeKey: self::QUEUE_NAME . '_' . $this->getId(),
+            dedupeKey: $this->getDispatchDedupeKey(),
         );
 
         return $this;
+    }
+
+    /**
+     * Every message of a campaign carries this key, so one in flight is enough
+     * to make any further dispatch of the same campaign a no-op.
+     */
+    public function getDispatchDedupeKey(): string
+    {
+        return self::QUEUE_NAME . '_' . $this->getId();
     }
 
     /**

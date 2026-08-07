@@ -23,17 +23,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class EmailQueueProcess extends BaseMahoCommand
 {
-    /**
-     * Queues carrying mail: newsletters ride their own so a blast can be given
-     * a dedicated worker, but a host draining by hand still wants them sent.
-     *
-     * @return list<string>
-     */
-    private function mailQueues(): array
-    {
-        return [\Mage_Core_Model_Email_Queue::QUEUE_NAME, \Mage_Newsletter_Model_Queue::QUEUE_NAME];
-    }
-
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {

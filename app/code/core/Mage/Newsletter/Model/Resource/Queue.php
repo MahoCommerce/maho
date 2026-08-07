@@ -11,7 +11,9 @@
 class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
-     * Recipient links written per INSERT when snapshotting the audience
+     * Recipient links probed and written per statement when snapshotting the
+     * audience: a blast can reach hundreds of thousands of subscribers, so
+     * neither the IN() list nor the row array may hold the whole audience.
      */
     public const LINK_INSERT_CHUNK = 1000;
 
@@ -35,26 +37,26 @@ class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_A
         }
 
         $adapter = $this->_getWriteAdapter();
-
-        $select = $adapter->select();
-        $select->from($this->getTable('newsletter/queue_link'), 'subscriber_id')
-            ->where('queue_id = ?', $queue->getId())
-            ->where('subscriber_id in (?)', $subscriberIds);
-
-        $usedIds = $adapter->fetchCol($select);
-        $rows = [];
-        foreach (array_diff($subscriberIds, $usedIds) as $subscriberId) {
-            $rows[] = ['queue_id' => $queue->getId(), 'subscriber_id' => $subscriberId];
-        }
-
-        if ($rows === []) {
-            return;
-        }
+        $table = $this->getTable('newsletter/queue_link');
 
         $adapter->beginTransaction();
         try {
-            foreach (array_chunk($rows, self::LINK_INSERT_CHUNK) as $chunk) {
-                $adapter->insertMultiple($this->getTable('newsletter/queue_link'), $chunk);
+            foreach (array_chunk($subscriberIds, self::LINK_INSERT_CHUNK) as $chunk) {
+                $usedIds = $adapter->fetchCol(
+                    $adapter->select()
+                        ->from($table, 'subscriber_id')
+                        ->where('queue_id = ?', $queue->getId())
+                        ->where('subscriber_id in (?)', $chunk),
+                );
+
+                $rows = [];
+                foreach (array_diff($chunk, $usedIds) as $subscriberId) {
+                    $rows[] = ['queue_id' => $queue->getId(), 'subscriber_id' => $subscriberId];
+                }
+
+                if ($rows !== []) {
+                    $adapter->insertMultiple($table, $rows);
+                }
             }
             $adapter->commit();
         } catch (Exception $e) {

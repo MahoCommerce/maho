@@ -26,6 +26,7 @@ return function (Schema $schema): void {
     );
     $subscriber->addIndex(['customer_id']);
     $subscriber->addIndex(['store_id']);
+    $subscriber->addIndex(['store_id', 'subscriber_status']);
     $subscriber->addForeignKeyConstraint(
         'core_store',
         ['store_id'],

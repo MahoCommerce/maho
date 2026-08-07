@@ -29,25 +29,26 @@ class Mage_Newsletter_Helper_Data extends Mage_Core_Helper_Abstract
      * A campaign started by hand is dispatched right away; one scheduled for
      * later enters the queue here, when its time arrives, rather than sitting
      * in it as a long-delayed message. This also picks up campaigns whose chain
-     * of batches was lost with a worker. Returns the number dispatched.
+     * of batches was lost with a worker. Returns the number of campaigns swept;
+     * a sweep is a no-op when a batch of that campaign is already queued.
      */
     public function scheduleDueQueues(): int
     {
         $collection = Mage::getResourceModel('newsletter/queue_collection')
             ->addOnlyForSendingFilter();
 
-        $dispatched = 0;
+        $swept = 0;
         /** @var Mage_Newsletter_Model_Queue $queue */
         foreach ($collection as $queue) {
             try {
                 $queue->scheduleSending();
-                $dispatched++;
+                $swept++;
             } catch (Throwable $e) {
                 Mage::logException($e);
             }
         }
 
-        return $dispatched;
+        return $swept;
     }
 
     /**
