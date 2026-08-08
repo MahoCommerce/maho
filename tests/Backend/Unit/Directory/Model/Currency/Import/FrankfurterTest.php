@@ -71,7 +71,9 @@ describe('Frankfurter currency import', function () {
         expect($rates['USD']['EUR'])->toEqualWithDelta(1 / 1.10, 0.000001);
     });
 
-    it('passes the service error through, since v2 rejects the whole request over one bad code', function () {
+    // Unknown quote codes are dropped silently by v2 (covered below); a 422 error object comes
+    // from a rejected request as a whole, e.g. an unsupported base.
+    it('passes a rejected request through as a service error', function () {
         $importer = (new FrankfurterHarness())
             ->setCurrencies(['EUR', 'USD'], ['USD'])
             ->setHttpClient(frankfurterClient(

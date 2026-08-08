@@ -113,10 +113,6 @@ abstract class Mage_Directory_Model_Currency_Import_Eurbased extends Mage_Direct
         @set_time_limit($timeLimitCalculated);
         try {
             $response = $this->_getServiceResponse($url);
-        } catch (Exception $e) {
-            Mage::log(static::class . ' exception: ' . $e->getMessage(), Mage::LOG_ERROR);
-            $this->_messages[] = Mage::helper('directory')->__('Currency rates can\'t be retrieved.');
-            return null;
         } finally {
             ini_restore('max_execution_time');
         }

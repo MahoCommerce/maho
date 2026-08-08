@@ -45,7 +45,7 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
 
         return str_replace(
             ['{{ACCESS_KEY}}', '{{SYMBOLS}}'],
-            [$accessKey, implode(',', $symbols)],
+            [rawurlencode((string) $accessKey), implode(',', $symbols)],
             $this->_url,
         );
     }
