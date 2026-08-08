@@ -34,6 +34,7 @@
 "<h1 class=""page-heading"">404 Error</h1><p>Page not found.</p>","<h1 class=""page-heading"">404 Error</h1><p>Page not found.</p>"
 "<strong>%s</strong> requests access to your account","<strong>%s</strong> requests access to your account"
 "Abandoned Carts","Abandoned Carts"
+"A campaign can no longer be edited once it has started; it can only be paused, resumed or cancelled.","A campaign can no longer be edited once it has started; it can only be paused, resumed or cancelled."
 "Access Denied","Access Denied"
 "Access denied","Access denied"
 "Access denied.","Access denied."

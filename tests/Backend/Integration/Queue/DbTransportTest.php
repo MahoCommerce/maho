@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use Maho\Queue\QueueManager;
+use Maho\Queue\Stamp\DedupeKeyStamp;
 use Maho\Queue\Transport\DbTransport;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Stamp\ErrorDetailsStamp;
@@ -95,6 +96,26 @@ it('skips dispatch while a pending or processing message with the same dedupe ke
     $transport->ack($envelopes[0]);
     QueueManager::dispatch(makeEmailMessage(), dedupeKey: 'abc');
     expect(fetchQueueRows())->toHaveCount(2);
+});
+
+it('carries the dedupe key without enforcing it when a handler continues its own chain', function () {
+    QueueManager::dispatch(makeEmailMessage(), dedupeKey: 'abc');
+    $envelopes = [...QueueManager::dbTransport()->getFromQueues(['default'])];
+    expect($envelopes)->toHaveCount(1);
+
+    // The handler's own row is processing under 'abc', so an enforcing dispatch
+    // would swallow the continuation.
+    QueueManager::dispatch(makeEmailMessage(), stamps: [new DedupeKeyStamp('abc', enforce: false)]);
+
+    $rows = fetchQueueRows();
+    expect($rows)->toHaveCount(2);
+    expect(array_column($rows, 'dedupe_key'))->toBe(['abc', 'abc']);
+
+    // The continuation is in flight under the key, so an outside dispatcher
+    // still sees the chain and stays out of it.
+    QueueManager::dbTransport()->ack($envelopes[0]);
+    QueueManager::dispatch(makeEmailMessage(), dedupeKey: 'abc');
+    expect(fetchQueueRows())->toHaveCount(1);
 });
 
 it('inserts a failure-transport send as a failed row instead of updating by the foreign message id', function () {

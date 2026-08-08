@@ -50,7 +50,7 @@ class EmailQueueProcess extends BaseMahoCommand
             $worker = WorkerFactory::create(['stopWhenIdle' => true]);
             $options = [];
             if ($isDbTransport) {
-                $options['queues'] = [\Mage_Core_Model_Email_Queue::QUEUE_NAME];
+                $options['queues'] = $this->mailQueues();
             }
             $worker->run($options);
 
@@ -73,7 +73,7 @@ class EmailQueueProcess extends BaseMahoCommand
     private function getPendingCount(): int
     {
         return Mage::getModel('queue/message')->getCollection()
-            ->addFieldToFilter('queue', \Mage_Core_Model_Email_Queue::QUEUE_NAME)
+            ->addFieldToFilter('queue', ['in' => $this->mailQueues()])
             ->addFieldToFilter('status', \Maho_Queue_Model_Message::STATUS_PENDING)
             ->getSize();
     }
@@ -81,7 +81,7 @@ class EmailQueueProcess extends BaseMahoCommand
     private function getFailedCount(): int
     {
         return Mage::getModel('queue/message')->getCollection()
-            ->addFieldToFilter('queue', \Mage_Core_Model_Email_Queue::QUEUE_NAME)
+            ->addFieldToFilter('queue', ['in' => $this->mailQueues()])
             ->addFieldToFilter('status', \Maho_Queue_Model_Message::STATUS_FAILED)
             ->getSize();
     }

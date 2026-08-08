@@ -61,17 +61,24 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
     protected $_saveStoresFlag = false;
 
     /**
-     * Stores assigned to queue.
+     * Stores assigned to queue, null until set or loaded.
      *
-     * @var array
+     * @var array|null
      */
-    protected $_stores = [];
+    protected $_stores = null;
 
     public const STATUS_NEVER = 0;
     public const STATUS_SENDING = 1;
     public const STATUS_CANCEL = 2;
     public const STATUS_SENT = 3;
     public const STATUS_PAUSE = 4;
+
+    /**
+     * Logical queue carrying both the campaign batches and the newsletters
+     * themselves, so a blast can be consumed by a worker of its own
+     * (`queue:work --queue=newsletter`) instead of delaying transactional mail.
+     */
+    public const QUEUE_NAME = 'newsletter';
 
     #[\Override]
     protected function _construct()
@@ -123,6 +130,66 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
     }
 
     /**
+     * Whether this campaign may send right now: not cancelled or finished, and
+     * its start date has come.
+     */
+    public function isReadyToSend(): bool
+    {
+        if (!in_array((int) $this->getQueueStatus(), [self::STATUS_NEVER, self::STATUS_SENDING], true)) {
+            return false;
+        }
+
+        $startAt = $this->_getStartAtUtc();
+
+        return $startAt !== null && $startAt <= Mage_Core_Model_Locale::nowUtc();
+    }
+
+    /**
+     * Dispatch a batch of this campaign onto the message queue, but only once
+     * its start date has come. A campaign scheduled for later is not parked in
+     * the queue as a long-delayed message; the cron that sweeps due campaigns
+     * picks it up when its time arrives. The dedupe key makes a repeated
+     * dispatch (admin action plus that cron) a no-op while a batch of this
+     * campaign is already queued.
+     *
+     * @return $this
+     */
+    public function scheduleSending()
+    {
+        if (!$this->getId() || !$this->isReadyToSend()) {
+            return $this;
+        }
+
+        \Maho\Queue\QueueManager::dispatch(
+            new Mage_Newsletter_Model_Queue_SendMessage((int) $this->getId()),
+            queue: self::QUEUE_NAME,
+            dedupeKey: $this->getDispatchDedupeKey(),
+        );
+
+        return $this;
+    }
+
+    /**
+     * Every message of a campaign carries this key, so one in flight is enough
+     * to make any further dispatch of the same campaign a no-op.
+     */
+    public function getDispatchDedupeKey(): string
+    {
+        return self::QUEUE_NAME . '_' . $this->getId();
+    }
+
+    /**
+     * Recipients of this campaign that have not been sent to yet
+     */
+    public function getUnsentSubscribersCount(): int
+    {
+        return (int) Mage::getResourceModel('newsletter/subscriber_collection')
+            ->useQueue($this)
+            ->useOnlyUnsent()
+            ->getSize();
+    }
+
+    /**
      * Send messages to subscribers for this queue
      *
      * @param   int     $count
@@ -130,16 +197,11 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
      */
     public function sendPerSubscriber($count = 20, array $additionalVariables = [])
     {
-        if ($this->getQueueStatus() != self::STATUS_SENDING
-            && ($this->getQueueStatus() != self::STATUS_NEVER && $this->getQueueStartAt())
-        ) {
+        if (!$this->isReadyToSend()) {
             return $this;
         }
 
-        if ($this->getSubscribersCollection()->getSize() == 0) {
-            $this->_finishQueue();
-            return $this;
-        }
+        $this->_getResource()->materializeRecipients($this);
 
         $collection = $this->getSubscribersCollection()
             ->useOnlyUnsent()
@@ -148,6 +210,17 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
             ->setCurPage(1)
             ->load();
 
+        if (count($collection->getItems()) === 0) {
+            $this->_finishQueue();
+            return $this;
+        }
+
+        // Content and recipients are frozen once the first batch leaves, which
+        // is what the edit form and the grid read the status for.
+        if ((int) $this->getQueueStatus() === self::STATUS_NEVER) {
+            $this->setQueueStatus(self::STATUS_SENDING)->save();
+        }
+
         $sender = Mage::getModel('core/email_template');
         $sender->setSenderName($this->getNewsletterSenderName())
             ->setSenderEmail($this->getNewsletterSenderEmail())
@@ -155,7 +228,8 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
             ->setTemplateSubject($this->getNewsletterSubject())
             ->setTemplateText($this->getNewsletterText())
             ->setTemplateStyles($this->getNewsletterStyles())
-            ->setTemplateFilter(Mage::helper('newsletter')->getTemplateProcessor());
+            ->setTemplateFilter(Mage::helper('newsletter')->getTemplateProcessor())
+            ->setQueueName(self::QUEUE_NAME);
 
         /** @var Mage_Newsletter_Model_Subscriber $item */
         foreach ($collection->getItems() as $item) {
@@ -179,10 +253,21 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
             }
         }
 
-        if (count($collection->getItems()) < $count - 1 || count($collection->getItems()) == 0) {
+        // A short batch means the recipient list is exhausted
+        if (count($collection->getItems()) < $count) {
             $this->_finishQueue();
         }
         return $this;
+    }
+
+    /**
+     * Start date as a UTC 'Y-m-d H:i:s' string, null when the campaign has none
+     */
+    protected function _getStartAtUtc(): ?string
+    {
+        $startAt = $this->getQueueStartAt();
+
+        return empty($startAt) ? null : Mage::app()->getLocale()->formatDateForDb($startAt);
     }
 
     /**
@@ -255,6 +340,8 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
     public function setStores(array $storesIds)
     {
         $this->setSaveStoresFlag(true);
+        // Stores live outside _data, so save() would short-circuit without this
+        $this->setDataChanges(true);
         $this->_stores = $storesIds;
         return $this;
     }
@@ -266,7 +353,7 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
      */
     public function getStores()
     {
-        if (!$this->_stores) {
+        if ($this->_stores === null) {
             $this->_stores = $this->_getResource()->getStores($this);
         }
 

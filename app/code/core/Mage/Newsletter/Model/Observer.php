@@ -67,21 +67,12 @@ class Mage_Newsletter_Model_Observer
     }
 
     /**
-     * @param \Maho\Event\Observer $schedule
+     * Campaigns are sent by the message queue; this makes sure every campaign
+     * whose start date has come has a batch queued.
      */
     #[Maho\Config\CronJob('newsletter_send_all', schedule: '*/5 * * * *')]
-    public function scheduledSend($schedule)
+    public function scheduledSend(): void
     {
-        $countOfQueue  = 3;
-        $countOfSubscritions = 20;
-
-        /** @var Mage_Newsletter_Model_Resource_Queue_Collection $collection */
-        $collection = Mage::getModel('newsletter/queue')->getCollection()
-            ->setPageSize($countOfQueue)
-            ->setCurPage(1)
-            ->addOnlyForSendingFilter()
-            ->load();
-
-        $collection->walk('sendPerSubscriber', [$countOfSubscritions]);
+        Mage::helper('newsletter')->scheduleDueQueues();
     }
 }

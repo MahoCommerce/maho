@@ -81,8 +81,9 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
             return $envelope;
         }
 
-        $dedupeKey = $envelope->last(DedupeKeyStamp::class)?->key;
-        if ($dedupeKey !== null && $this->inFlightRowExists($dedupeKey)) {
+        $dedupeStamp = $envelope->last(DedupeKeyStamp::class);
+        $dedupeKey = $dedupeStamp?->key;
+        if ($dedupeStamp?->enforce === true && $this->inFlightRowExists($dedupeStamp->key)) {
             return $envelope;
         }
 
