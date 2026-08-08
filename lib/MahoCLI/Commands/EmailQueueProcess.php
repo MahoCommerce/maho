@@ -47,7 +47,7 @@ class EmailQueueProcess extends BaseMahoCommand
         }
 
         try {
-            $worker = WorkerFactory::create(['stopWhenIdle' => true]);
+            $worker = WorkerFactory::create(['idleTimeout' => 0]);
             $options = [];
             if ($isDbTransport) {
                 $options['queues'] = [\Mage_Core_Model_Email_Queue::QUEUE_NAME];

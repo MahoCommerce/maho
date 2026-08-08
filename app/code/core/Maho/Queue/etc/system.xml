@@ -13,7 +13,7 @@ SPDX-License-Identifier: AFL-3.0
                     <show_in_default>1</show_in_default>
                     <show_in_website>0</show_in_website>
                     <show_in_store>0</show_in_store>
-                    <comment>Background message processing. Maho cron keeps a detached "queue:work" worker running automatically: respawned within a minute if it dies, recycled hourly.</comment>
+                    <comment>Background message processing. Maho cron keeps one detached "queue:work" worker running per pool: a resident "fast" worker so short jobs never queue behind long ones, plus a "slow" catch-all started only while it has work. Both are respawned within a minute if they die. Pools are declared in config.xml under global/queue/pools.</comment>
                     <fields>
                         <max_retries translate="label comment">
                             <label>Max Retries</label>
@@ -57,7 +57,7 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                             <validate>required-entry validate-digits validate-greater-than-zero</validate>
-                            <comment>Messages claimed by a worker that died are re-queued after this long. Keep above the runtime of your slowest handler.</comment>
+                            <comment>Messages claimed by a worker that died are re-queued after this long. Keep above the runtime of your slowest handler. Pools that declare their own redeliver_after override this for the queues they consume.</comment>
                         </redeliver_after>
                         <completed_retention translate="label comment">
                             <label>Keep Completed Messages (days)</label>

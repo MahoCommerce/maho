@@ -7,10 +7,45 @@
 
 declare(strict_types=1);
 
+use Maho\Queue\PoolRegistry;
 use Maho\Queue\QueueManager;
 use Maho\Queue\Transport\DbTransport;
 
 uses(Tests\MahoBackendTestCase::class);
+
+/**
+ * @return list<string> "pool:index" for each worker the watchdog would start
+ */
+function pendingWorkers(): array
+{
+    return array_map(
+        fn(array $worker) => $worker[0]->name . ':' . $worker[1],
+        Mage::getModel('queue/cron')->workersToSpawn(),
+    );
+}
+
+/**
+ * @param callable():void $body
+ */
+function withAllPoolLocks(callable $body): void
+{
+    $lock = Mage::getSingleton('core/lock');
+    $held = [];
+    foreach (PoolRegistry::all() as $pool) {
+        for ($index = 0; $index < $pool->count; $index++) {
+            expect($lock->acquire($pool->lockName($index), machineLocal: true))->toBeTrue();
+            $held[] = $pool->lockName($index);
+        }
+    }
+
+    try {
+        $body();
+    } finally {
+        foreach ($held as $name) {
+            $lock->release($name);
+        }
+    }
+}
 
 beforeEach(function () {
     QueueManager::reset();
@@ -22,19 +57,33 @@ afterEach(function () {
     QueueManager::reset();
 });
 
-it('does not spawn a second worker while the lock is held', function () {
+it('does not spawn a second worker while the pool lock is held', function () {
     QueueManager::dispatch(makeEmailMessage());
 
-    $lock = Mage::getSingleton('core/lock');
-    expect($lock->acquire(Maho_Queue_Model_Cron::WORKER_LOCK, machineLocal: true))->toBeTrue();
-    try {
+    withAllPoolLocks(function () {
+        expect(pendingWorkers())->toBe([]);
+
         Mage::getModel('queue/cron')->process();
         $rows = fetchQueueRows();
         expect($rows)->toHaveCount(1);
         expect($rows[0]['status'])->toBe(DbTransport::STATUS_PENDING);
-    } finally {
-        $lock->release(Maho_Queue_Model_Cron::WORKER_LOCK);
-    }
+    });
+});
+
+it('keeps the resident tier running even with nothing queued', function () {
+    expect(pendingWorkers())->toBe(['fast:0']);
+});
+
+it('starts the on-demand tier only once its queues have work due', function () {
+    QueueManager::dispatch(
+        makeEmailMessage(),
+        delaySeconds: 7 * 86400,
+        queue: Mage_Newsletter_Model_Queue::QUEUE_NAME,
+    );
+    expect(pendingWorkers())->toBe(['fast:0']);
+
+    QueueManager::dispatch(makeEmailMessage('due now'), queue: Mage_Newsletter_Model_Queue::QUEUE_NAME);
+    expect(pendingWorkers())->toBe(['fast:0', 'slow:0']);
 });
 
 it('removes old failed messages during cleanup', function () {

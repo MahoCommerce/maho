@@ -11,6 +11,7 @@ namespace MahoCLI\Commands;
 
 use Mage;
 use Maho\Db\Expr;
+use Maho\Queue\PoolRegistry;
 use Maho\Queue\QueueManager;
 use Maho\Queue\Transport\DbTransport;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -68,10 +69,14 @@ class QueueList extends BaseMahoCommand
         }
 
         $table = new Table($output);
-        $table->setHeaders(['Queue', 'Pending', 'Processing', 'Failed', 'Completed', 'Oldest pending (UTC)']);
+        $table->setHeaders(['Queue', 'Pool', 'Pending', 'Processing', 'Failed', 'Completed', 'Oldest pending (UTC)']);
+        $orphaned = false;
         foreach ($queues as $queue => $counts) {
+            $pool = PoolRegistry::poolFor((string) $queue);
+            $orphaned = $orphaned || $pool === null;
             $table->addRow([
                 $queue,
+                $pool === null ? '<error>none</error>' : $pool->name,
                 $counts[DbTransport::STATUS_PENDING],
                 $counts[DbTransport::STATUS_PROCESSING],
                 $counts[DbTransport::STATUS_FAILED],
@@ -80,6 +85,10 @@ class QueueList extends BaseMahoCommand
             ]);
         }
         $table->render();
+
+        if ($orphaned) {
+            $output->writeln('<error>Queues with no pool are never consumed; mark a pool catch_all or list them under global/queue/pools.</error>');
+        }
 
         return Command::SUCCESS;
     }

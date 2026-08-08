@@ -39,6 +39,31 @@
                 <class>Maho_Queue_Block</class>
             </queue>
         </blocks>
+
+        <!--
+            Worker pools, one detached "queue:work" process each, split by whether a human is
+            waiting: "fast" stays resident, "slow" is the catch-all and runs only while it has
+            work. Route your own queue to a tier by adding a <yourqueue>fast</yourqueue> node
+            under routing from your own config.xml; anything unrouted falls to the catch-all.
+        -->
+        <queue>
+            <routing>
+                <email>fast</email>
+            </routing>
+            <pools>
+                <fast>
+                    <redeliver_after>900</redeliver_after>
+                    <sort_order>10</sort_order>
+                </fast>
+                <slow>
+                    <catch_all>1</catch_all>
+                    <idle_timeout>60</idle_timeout>
+                    <memory_limit>512M</memory_limit>
+                    <redeliver_after>10800</redeliver_after>
+                    <sort_order>20</sort_order>
+                </slow>
+            </pools>
+        </queue>
     </global>
 
     <adminhtml>
