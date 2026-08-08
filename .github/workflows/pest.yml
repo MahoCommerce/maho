@@ -330,8 +330,6 @@ jobs:
           API_BASE_URL: http://127.0.0.1:8080
           PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
-          USE_ZEND_ALLOC: 0
-          MALLOC_CHECK_: 3
         run: |
           ulimit -c unlimited
           ./vendor/bin/pest --display-errors --display-warnings
