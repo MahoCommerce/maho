@@ -304,7 +304,10 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
             if (empty($options['model'])) {
                 continue;
             }
-            if ($enabledOnly && Mage::getStoreConfig("currency/{$code}/active") === '0') {
+            if ($enabledOnly
+                && Mage::getStoreConfig("currency/{$code}/active") !== null
+                && !Mage::getStoreConfigFlag("currency/{$code}/active")
+            ) {
                 continue;
             }
             $result[$code] = [

@@ -21,20 +21,13 @@ $installer->startSetup();
 $connection = $installer->getConnection();
 $table = $installer->getTable('core/config_data');
 
-$usesRemovedService = (bool) $connection->fetchOne(
-    $connection->select()
-        ->from($table, ['config_id'])
-        ->where('path = ?', 'currency/import/service')
-        ->where('value = ?', 'currencyconverterapi')
-        ->limit(1),
+$moved = $connection->update(
+    $table,
+    ['value' => 'frankfurter'],
+    ['path = ?' => 'currency/import/service', 'value = ?' => 'currencyconverterapi'],
 );
 
-if ($usesRemovedService) {
-    $connection->update(
-        $table,
-        ['value' => 'frankfurter'],
-        ['path = ?' => 'currency/import/service', 'value = ?' => 'currencyconverterapi'],
-    );
+if ($moved > 0) {
     $installer->setConfigData('currency/frankfurter/active', '1');
 }
 

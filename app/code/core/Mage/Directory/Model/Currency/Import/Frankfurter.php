@@ -34,8 +34,9 @@ class Mage_Directory_Model_Currency_Import_Frankfurter extends Mage_Directory_Mo
     #[\Override]
     protected function _extractRates(array $response): ?array
     {
-        // Success is a flat list of {date, base, quote, rate}; anything else is an error object.
-        if (!array_is_list($response)) {
+        // Success is a non-empty flat list of {date, base, quote, rate}; anything else is an
+        // error object, or the empty array a transport failure decodes to.
+        if ($response === [] || !array_is_list($response)) {
             $message = isset($response['message']) ? (string) $response['message'] : null;
             Mage::log('Frankfurter error: ' . ($message ?? 'unexpected response'), Mage::LOG_ERROR);
             $this->_messages[] = $message !== null

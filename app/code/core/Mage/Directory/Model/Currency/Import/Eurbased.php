@@ -11,13 +11,6 @@
 abstract class Mage_Directory_Model_Currency_Import_Eurbased extends Mage_Directory_Model_Currency_Import_Abstract
 {
     /**
-     * Information messages stack
-     *
-     * @var array
-     */
-    protected $_messages = [];
-
-    /**
      * @var \Symfony\Contracts\HttpClient\HttpClientInterface
      */
     protected $_httpClient;
@@ -122,8 +115,10 @@ abstract class Mage_Directory_Model_Currency_Import_Eurbased extends Mage_Direct
             $response = $this->_getServiceResponse($url);
         } catch (Exception $e) {
             Mage::log(static::class . ' exception: ' . $e->getMessage(), Mage::LOG_ERROR);
-            ini_restore('max_execution_time');
+            $this->_messages[] = Mage::helper('directory')->__('Currency rates can\'t be retrieved.');
             return null;
+        } finally {
+            ini_restore('max_execution_time');
         }
 
         $rates = $this->_extractRates($response);
