@@ -200,6 +200,7 @@ jobs:
           API_BASE_URL: http://127.0.0.1:8080
           PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
+          FIXERIO_API_KEY: ${{ secrets.FIXERIO_API_KEY }}
         run: ./vendor/bin/pest --display-errors --display-warnings
 
       - name: Upload browser test failure diagnostics
@@ -323,6 +324,7 @@ jobs:
           API_BASE_URL: http://127.0.0.1:8080
           PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
+          FIXERIO_API_KEY: ${{ secrets.FIXERIO_API_KEY }}
         run: ./vendor/bin/pest --display-errors --display-warnings
 
       - name: Upload browser test failure diagnostics
