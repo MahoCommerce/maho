@@ -87,7 +87,7 @@ class QueueList extends BaseMahoCommand
         $table->render();
 
         if ($orphaned) {
-            $output->writeln('<error>Queues with no pool are never consumed; mark a pool catch_all or list them under global/queue/pools.</error>');
+            $output->writeln('<error>Queues with no pool are never consumed; mark a pool catch_all under global/queue/pools or route them under global/queue/routing.</error>');
         }
 
         return Command::SUCCESS;

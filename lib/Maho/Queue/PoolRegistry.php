@@ -51,6 +51,22 @@ final class PoolRegistry
         return null;
     }
 
+    /**
+     * The longest redelivery window any pool declares, or null when none
+     * overrides the store default. A worker that consumes every queue must not
+     * requeue a claim sooner than the pool owning it would, or the handler runs
+     * a second time alongside the first.
+     */
+    public static function widestRedeliveryWindow(): ?int
+    {
+        $windows = array_filter(
+            array_map(static fn(Pool $pool): ?int => $pool->redeliverAfter, self::all()),
+            static fn(?int $window): bool => $window !== null,
+        );
+
+        return $windows === [] ? null : max($windows);
+    }
+
     public static function reset(): void
     {
         self::$pools = null;
@@ -148,7 +164,10 @@ final class PoolRegistry
             );
         }
 
-        return $pools;
+        // Every declared pool was dropped (none marked catch_all, none routed a
+        // queue): without a fallback the watchdog would start nothing at all and
+        // the queue would stall silently.
+        return $pools === [] ? [self::FALLBACK_POOL => new Pool(self::FALLBACK_POOL)] : $pools;
     }
 
     /**

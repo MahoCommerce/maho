@@ -78,11 +78,11 @@ it('starts the on-demand tier only once its queues have work due', function () {
     QueueManager::dispatch(
         makeEmailMessage(),
         delaySeconds: 7 * 86400,
-        queue: Mage_Newsletter_Model_Queue::QUEUE_NAME,
+        queue: 'newsletter',
     );
     expect(pendingWorkers())->toBe(['fast:0']);
 
-    QueueManager::dispatch(makeEmailMessage('due now'), queue: Mage_Newsletter_Model_Queue::QUEUE_NAME);
+    QueueManager::dispatch(makeEmailMessage('due now'), queue: 'newsletter');
     expect(pendingWorkers())->toBe(['fast:0', 'slow:0']);
 });
 

@@ -107,7 +107,7 @@ it('ships a resident fast tier and an on-demand slow catch-all', function () {
 it('keeps the catch-all off the queues another pool claims', function () {
     expect(queuePool('slow')->excludedQueues)->toBe([Mage_Core_Model_Email_Queue::QUEUE_NAME]);
     expect(queuePool('slow')->consumes(Mage_Core_Model_Email_Queue::QUEUE_NAME))->toBeFalse();
-    expect(queuePool('slow')->consumes(Mage_Newsletter_Model_Queue::QUEUE_NAME))->toBeTrue();
+    expect(queuePool('slow')->consumes('newsletter'))->toBeTrue();
 });
 
 it('routes an unclassified queue to the slow tier rather than leaving it unconsumed', function () {
@@ -136,7 +136,7 @@ it('skips a pool with nothing routed to it instead of letting it rival the catch
 
 it('does not hand the catch-all worker a message belonging to another pool', function () {
     QueueManager::dispatch(makeEmailMessage(), queue: Mage_Core_Model_Email_Queue::QUEUE_NAME);
-    QueueManager::dispatch(makeEmailMessage('newsletter batch'), queue: Mage_Newsletter_Model_Queue::QUEUE_NAME);
+    QueueManager::dispatch(makeEmailMessage('newsletter batch'), queue: 'newsletter');
 
     expect(iterator_to_array(poolTransport('slow')->get()))->toHaveCount(1);
 
@@ -145,17 +145,17 @@ it('does not hand the catch-all worker a message belonging to another pool', fun
         fn($row) => $row['status'] === DbTransport::STATUS_PROCESSING,
     ));
     expect($processing)->toHaveCount(1);
-    expect($processing[0]['queue'])->toBe(Mage_Newsletter_Model_Queue::QUEUE_NAME);
+    expect($processing[0]['queue'])->toBe('newsletter');
 });
 
 it('counts only work that is due, not a campaign scheduled for later', function () {
-    // The regression this guards: scheduleSending() queues a campaign as a
-    // long-delayed message, so a watchdog probing raw pending counts would
-    // respawn the on-demand worker every cron tick until its send date.
+    // The regression this guards: a campaign queued as a long-delayed message
+    // would make a watchdog probing raw pending counts respawn the on-demand
+    // worker every cron tick until its send date.
     QueueManager::dispatch(
         makeEmailMessage(),
         delaySeconds: 7 * 86400,
-        queue: Mage_Newsletter_Model_Queue::QUEUE_NAME,
+        queue: 'newsletter',
     );
 
     expect(poolTransport('slow')->getMessageCount())->toBe(1);
@@ -164,7 +164,7 @@ it('counts only work that is due, not a campaign scheduled for later', function 
 
 it('counts a message abandoned by a dead worker as due', function () {
     insertQueueRow(
-        Mage_Newsletter_Model_Queue::QUEUE_NAME,
+        'newsletter',
         DbTransport::STATUS_PROCESSING,
         gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 4 * 3600),
     );
@@ -176,7 +176,7 @@ it('counts a message abandoned by a dead worker as due', function () {
 
 it('leaves a claim still inside the pool redelivery window alone', function () {
     insertQueueRow(
-        Mage_Newsletter_Model_Queue::QUEUE_NAME,
+        'newsletter',
         DbTransport::STATUS_PROCESSING,
         gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 1800),
     );
@@ -187,7 +187,7 @@ it('leaves a claim still inside the pool redelivery window alone', function () {
 
 it('does not let a fast worker requeue a slow job running under a longer window', function () {
     insertQueueRow(
-        Mage_Newsletter_Model_Queue::QUEUE_NAME,
+        'newsletter',
         DbTransport::STATUS_PROCESSING,
         gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 1800),
     );

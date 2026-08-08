@@ -71,7 +71,12 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
         }
 
         // Unbounded unless asked: a hand-run worker keeps the limits it had before pools existed.
-        $base = $pool ?? new Pool(name: 'ad-hoc', memoryLimit: '', timeLimit: 0);
+        $base = $pool ?? new Pool(
+            name: 'ad-hoc',
+            memoryLimit: '',
+            timeLimit: 0,
+            redeliverAfter: $this->adHocRedeliveryWindow(),
+        );
         $effective = new Pool(
             name: $base->name,
             queues: $input->getOption('queue') ?: $base->queues,
@@ -139,6 +144,19 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
         $this->worker?->stop();
 
         return false;
+    }
+
+    /**
+     * A worker with no pool consumes every queue, so it must not requeue a claim
+     * before the pool owning that queue would: take the widest window in play.
+     */
+    private function adHocRedeliveryWindow(): ?int
+    {
+        $widest = PoolRegistry::widestRedeliveryWindow();
+
+        return $widest === null
+            ? null
+            : max($widest, (int) \Mage::getStoreConfig(QueueManager::XML_PATH_REDELIVER_AFTER));
     }
 
     private function parseMemoryLimit(string $limit): ?int

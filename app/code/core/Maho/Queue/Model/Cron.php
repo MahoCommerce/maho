@@ -52,30 +52,34 @@ class Maho_Queue_Model_Cron
         $spawn = [];
 
         foreach (PoolRegistry::all() as $pool) {
-            $hasWork = null;
+            $due = null;
+            $started = 0;
             for ($index = 0; $index < $pool->count; $index++) {
                 if ($lock->isHeld($pool->lockName($index), machineLocal: true)) {
                     continue;
                 }
+                // One process per due message: an on-demand pool holding its
+                // whole roster open for a single message would idle them all out.
                 if ($pool->isOnDemand()) {
-                    $hasWork ??= $this->hasDueWork($pool);
-                    if (!$hasWork) {
+                    $due ??= $this->dueWorkCount($pool);
+                    if ($started >= $due) {
                         break;
                     }
                 }
                 $spawn[] = [$pool, $index];
+                $started++;
             }
         }
 
         return $spawn;
     }
 
-    private function hasDueWork(Pool $pool): bool
+    private function dueWorkCount(Pool $pool): int
     {
         $transport = QueueManager::workerTransport($pool);
 
         // Redis cannot be probed per queue; spawn and let the worker idle out.
-        return !$transport instanceof DbTransport || $transport->countDue($pool->queues) > 0;
+        return $transport instanceof DbTransport ? $transport->countDue($pool->queues) : PHP_INT_MAX;
     }
 
     #[Maho\Config\CronJob('queue_clean_up', schedule: '0 2 * * *')]
