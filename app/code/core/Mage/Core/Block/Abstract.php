@@ -998,10 +998,20 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      */
     public function getUrlSecure($route = '', $params = [])
     {
+        return $this->getUrl($route, $this->getUrlSecureParams($params));
+    }
+
+    /**
+     * Same rule as getUrlSecure() for callers that build the url themselves, e.g. grid action
+     * columns. The form key is the root the per-action secret key is derived from, so it may
+     * only travel in a url when it is itself the token being checked.
+     */
+    public function getUrlSecureParams(array $params = []): array
+    {
         if (!Mage::helper('adminhtml')->isEnabledSecurityKeyUrl()) {
             $params[Mage_Core_Model_Url::FORM_KEY] = $this->getFormKey();
         }
-        return $this->getUrl($route, $params);
+        return $params;
     }
 
     /**

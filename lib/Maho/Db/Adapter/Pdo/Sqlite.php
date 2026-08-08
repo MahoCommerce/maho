@@ -122,6 +122,16 @@ class Sqlite extends AbstractPdoAdapter
     }
 
     /**
+     * Keep the connection open. SQLite has no server to run out of connections,
+     * so there is nothing to release, and releasing is not free: pdo_sqlite
+     * frees the PHP callbacks behind the REGEXP/GREATEST/LEAST functions
+     * registered above as it tears the handle down, which corrupts the heap and
+     * segfaults the process later, in an unrelated allocation.
+     */
+    #[\Override]
+    public function closeConnection(): void {}
+
+    /**
      * Register custom SQLite functions for compatibility with MySQL/PostgreSQL
      */
     protected function _registerCustomFunctions(): void

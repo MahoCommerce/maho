@@ -116,6 +116,30 @@ class Mage_Core_Model_Resource
     }
 
     /**
+     * Release every open connection, reconnecting on next use. Several names
+     * share one adapter, so each is closed once.
+     */
+    public function closeConnections(): void
+    {
+        $closed = [];
+        foreach ($this->_connections as $connection) {
+            if (!$connection instanceof Maho\Db\Adapter\AdapterInterface) {
+                continue;
+            }
+            $id = spl_object_id($connection);
+            if (isset($closed[$id])) {
+                continue;
+            }
+            $closed[$id] = true;
+            try {
+                $connection->closeConnection();
+            } catch (\Throwable) {
+                // one driver failing to close must not leave the others open
+            }
+        }
+    }
+
+    /**
      * Determine connection type from config
      *
      * Supports new 'engine' config (mysql, pgsql, sqlite) which derives type as pdo_{engine},

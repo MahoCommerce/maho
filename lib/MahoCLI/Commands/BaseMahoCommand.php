@@ -14,10 +14,20 @@ use Symfony\Component\Console\Command\Command;
 
 abstract class BaseMahoCommand extends Command
 {
+    /**
+     * Whether to point out pending schema updates on boot. Off for the
+     * command that applies them.
+     */
+    protected bool $warnOnPendingSchemaUpdates = true;
+
     protected function initMaho(): void
     {
         Mage::register('isSecureArea', true, true);
         Mage::app('admin');
+
+        if ($this->warnOnPendingSchemaUpdates && Mage::app()->isSchemaUpdatePending()) {
+            fwrite(STDERR, "Warning: the database is behind the installed code, run \"./maho migrate\".\n");
+        }
     }
 
     /**
