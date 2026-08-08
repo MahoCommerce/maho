@@ -318,12 +318,36 @@ jobs:
           PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
 
+      - name: TEMP DEBUG - enable core dumps
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y gdb
+          sudo sysctl -w kernel.core_pattern=/tmp/core.%e.%p
+          sudo sysctl -w fs.suid_dumpable=1
+
       - name: Run Pest Tests
         env:
           API_BASE_URL: http://127.0.0.1:8080
           PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
           PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
-        run: ./vendor/bin/pest --display-errors --display-warnings
+        run: |
+          ulimit -c unlimited
+          ./vendor/bin/pest --display-errors --display-warnings
+
+      - name: TEMP DEBUG - backtrace from core dump
+        if: failure()
+        run: |
+          ls -la /tmp/core.* 2>/dev/null || echo "no core files"
+          for core in /tmp/core.*; do
+            [ -f "$core" ] || continue
+            echo "=================== $core ==================="
+            gdb -batch -n \
+              -ex "set pagination off" \
+              -ex "info sharedlibrary" \
+              -ex "thread apply all bt full" \
+              -ex quit \
+              "$(which php)" "$core" 2>&1 | tail -300
+          done
 
       - name: Upload browser test failure diagnostics
         if: failure()
