@@ -139,6 +139,31 @@ final class QueueManager
         );
     }
 
+    /**
+     * The transport a pool's worker consumes from: the shared one unless the
+     * pool narrows what it sees or overrides the redelivery window, in which
+     * case it gets its own instance. Redis cannot be narrowed at all, so pools
+     * fall back to consuming everything there.
+     */
+    public static function workerTransport(?Pool $pool = null): TransportInterface
+    {
+        if ($pool === null
+            || self::transportName() === self::TRANSPORT_REDIS
+            || ($pool->excludedQueues === [] && $pool->redeliverAfter === null)
+        ) {
+            return self::transport();
+        }
+
+        return new DbTransport(
+            self::writeAdapter(),
+            self::tableName(),
+            self::serializer(),
+            $pool->redeliverAfter ?? (int) \Mage::getStoreConfig(self::XML_PATH_REDELIVER_AFTER),
+            (int) \Mage::getStoreConfig(self::XML_PATH_COMPLETED_RETENTION),
+            $pool->excludedQueues,
+        );
+    }
+
     public static function serializer(): Serializer
     {
         return self::$serializer ??= new Serializer();
@@ -208,6 +233,7 @@ final class QueueManager
         self::$serializer = null;
         self::$transportName = null;
         HandlerRegistry::reset();
+        PoolRegistry::reset();
     }
 
     private static function redisDsn(): ?string

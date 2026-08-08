@@ -28,12 +28,12 @@ use Symfony\Component\Messenger\Worker;
 final class WorkerFactory
 {
     /**
-     * @param array{limit?: ?int, memoryLimit?: ?int, stopWhenIdle?: bool} $options
+     * @param array{limit?: ?int, memoryLimit?: ?int, idleTimeout?: ?int, pool?: ?Pool} $options
      */
     public static function create(array $options = []): Worker
     {
         $transportName = QueueManager::transportName();
-        $transport = QueueManager::transport();
+        $transport = QueueManager::workerTransport($options['pool'] ?? null);
 
         $dispatcher = new EventDispatcher();
         $dispatcher->addSubscriber(new AddErrorDetailsStampListener());
@@ -70,8 +70,8 @@ final class WorkerFactory
         if (isset($options['memoryLimit']) && $options['memoryLimit'] > 0) {
             $dispatcher->addSubscriber(new StopWorkerOnMemoryLimitListener($options['memoryLimit']));
         }
-        if ($options['stopWhenIdle'] ?? false) {
-            $dispatcher->addSubscriber(new StopWorkerWhenIdleListener());
+        if (isset($options['idleTimeout'])) {
+            $dispatcher->addSubscriber(new StopWorkerWhenIdleListener($options['idleTimeout']));
         }
 
         return new Worker([$transportName => $transport], QueueManager::bus(), $dispatcher);

@@ -47,12 +47,16 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
 
     public const DEFAULT_QUEUE = 'default';
 
+    /**
+     * @param list<string> $excludedQueues Queues this instance never consumes, so a pool worker can be "everything but"
+     */
     public function __construct(
         private readonly AdapterInterface $adapter,
         private readonly string $table,
         private readonly Serializer $serializer,
         private readonly int $redeliverAfterSeconds,
         private readonly int $completedRetentionDays,
+        private readonly array $excludedQueues = [],
     ) {}
 
     #[\Override]
@@ -190,12 +194,51 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
     }
 
     /**
+     * Work this instance would pick up right now: rows past their availability
+     * plus rows a dead worker abandoned. Messages scheduled for the future are
+     * deliberately excluded, or the watchdog would respawn an on-demand worker
+     * every cron tick until a delayed campaign's send date.
+     *
+     * @param list<string>|null $queues
+     */
+    public function countDue(?array $queues = null): int
+    {
+        $clauses = ['(' . $this->adapter->quoteInto('status = ?', self::STATUS_PENDING)
+            . ' AND ' . $this->adapter->quoteInto('available_at <= ?', \Mage_Core_Model_Locale::nowUtc()) . ')'];
+
+        if ($this->redeliverAfterSeconds > 0) {
+            $clauses[] = '(' . $this->adapter->quoteInto('status = ?', self::STATUS_PROCESSING)
+                . ' AND ' . $this->adapter->quoteInto('claimed_at < ?', $this->staleClaimCutoff()) . ')';
+        }
+
+        $select = $this->adapter->select()
+            ->from($this->table, new \Maho\Db\Expr('COUNT(*)'))
+            ->where(implode(' OR ', $clauses));
+        $this->applyQueueFilter($select, $queues);
+
+        return (int) $this->adapter->fetchOne($select);
+    }
+
+    /**
+     * @param list<string>|null $queues
+     */
+    private function applyQueueFilter(\Maho\Db\Select $select, ?array $queues): void
+    {
+        if ($queues !== null && $queues !== []) {
+            $select->where('queue IN (?)', $queues);
+        }
+        if ($this->excludedQueues !== []) {
+            $select->where('queue NOT IN (?)', $this->excludedQueues);
+        }
+    }
+
+    /**
      * @param  list<string>|null $queues
      * @return list<Envelope>
      */
     private function claimNext(?array $queues): array
     {
-        $this->requeueStaleClaims();
+        $this->requeueStaleClaims($queues);
         $now = \Mage_Core_Model_Locale::nowUtc();
 
         for ($attempt = 0; $attempt < 5; $attempt++) {
@@ -205,9 +248,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
                 ->where('available_at <= ?', $now)
                 ->order(['available_at ASC', 'message_id ASC'])
                 ->limit(1);
-            if ($queues !== null && $queues !== []) {
-                $select->where('queue IN (?)', $queues);
-            }
+            $this->applyQueueFilter($select, $queues);
 
             $row = $this->adapter->fetchRow($select);
             if ($row === false) {
@@ -239,21 +280,39 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
     /**
      * Crash recovery: rows claimed longer ago than redeliver_after belong to a
      * worker that died without ack/reject; put them back up for grabs.
+     *
+     * Scoped to the queues this instance consumes, because pools carry their own
+     * window: a fast worker must not requeue a feed a slow worker is still running.
+     *
+     * @param list<string>|null $queues
      */
-    private function requeueStaleClaims(): void
+    private function requeueStaleClaims(?array $queues): void
     {
         if ($this->redeliverAfterSeconds <= 0) {
             return;
+        }
+
+        $where = [
+            'status = ?' => self::STATUS_PROCESSING,
+            'claimed_at < ?' => $this->staleClaimCutoff(),
+        ];
+        if ($queues !== null && $queues !== []) {
+            $where['queue IN (?)'] = $queues;
+        }
+        if ($this->excludedQueues !== []) {
+            $where['queue NOT IN (?)'] = $this->excludedQueues;
         }
 
         $this->adapter->update($this->table, [
             'status' => self::STATUS_PENDING,
             'claimed_at' => null,
             'updated_at' => \Mage_Core_Model_Locale::nowUtc(),
-        ], [
-            'status = ?' => self::STATUS_PROCESSING,
-            'claimed_at < ?' => gmdate(\Mage_Core_Model_Locale::DATETIME_FORMAT, time() - $this->redeliverAfterSeconds),
-        ]);
+        ], $where);
+    }
+
+    private function staleClaimCutoff(): string
+    {
+        return gmdate(\Mage_Core_Model_Locale::DATETIME_FORMAT, time() - $this->redeliverAfterSeconds);
     }
 
     private function inFlightRowExists(string $dedupeKey): bool

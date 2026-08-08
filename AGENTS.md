@@ -171,8 +171,12 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
 - **Events**: `Mage::dispatchEvent('event_name', ['data' => $data])`
 - **Async queue**: `\Maho\Queue\QueueManager::dispatch($messageDto)` queues a flat DTO for a
   `#[Maho\Config\MessageHandler]` method (message class inferred from the first parameter type);
-  cron automatically keeps a detached `queue:work` worker alive, with retries/backoff and an
-  admin grid under System > Message Queue
+  cron keeps a detached `queue:work` worker alive per pool, with retries/backoff and an admin
+  grid under System > Message Queue. Worker pools split latency classes: `fast` is resident,
+  `slow` is the on-demand catch-all. Pass `queue:` to `dispatch()`, then route that queue with
+  `<global><queue><routing><yourqueue>fast</yourqueue></routing></queue></global>`; anything
+  unrouted lands in the catch-all, so a long-running handler never blocks short ones. Pool
+  resourcing (count, limits, idle timeout, redelivery) lives under `global/queue/pools`
 - **Layout**: XML-based block hierarchy and template assignment
 - **Sessions**: `Mage::getSingleton('customer/session')`, `'admin/session'`, `'checkout/session'`
 - **Translations**: `$this->__('Text')`, CSVs in `app/locale/[locale]/`

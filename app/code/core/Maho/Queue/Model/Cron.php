@@ -8,36 +8,26 @@
 
 declare(strict_types=1);
 
+use Maho\Queue\Pool;
+use Maho\Queue\PoolRegistry;
 use Maho\Queue\QueueManager;
 use Maho\Queue\Transport\DbTransport;
 
 class Maho_Queue_Model_Cron
 {
-    /**
-     * Held by the exclusive worker for its whole life; deliberately a
-     * machine-local kernel flock even when the db lock backend is configured,
-     * so every frontend server runs one worker of its own (parallel
-     * consumption is safe, the transport claim is atomic) and the flock
-     * disappears the moment the process dies, doubling as the liveness probe.
-     */
-    public const WORKER_LOCK = 'queue.worker';
-
-    /** Worker recycling cadence: picks up deployed code and frees memory. */
-    public const WORKER_TIME_LIMIT = 3600;
-    public const WORKER_MEMORY_LIMIT = '256M';
-
     private const SPAWN_WAIT_ATTEMPTS = 10;
     private const SPAWN_WAIT_MICROSECONDS = 500_000;
 
     /**
-     * Watchdog: when no worker holds the lock, start a detached
-     * `queue:work --exclusive` (respawned within a minute of any death,
-     * recycled hourly via its time limit).
+     * Watchdog: start a detached `queue:work --exclusive` for every configured
+     * pool with no live worker, so each latency tier gets a process of its own
+     * and a slow handler can never sit in front of a fast one.
      */
     #[Maho\Config\CronJob('queue_process', schedule: '* * * * *')]
     public function process(): void
     {
-        if (Mage::getSingleton('core/lock')->isHeld(self::WORKER_LOCK, machineLocal: true)) {
+        $pending = $this->workersToSpawn();
+        if ($pending === []) {
             return;
         }
 
@@ -46,7 +36,50 @@ class Maho_Queue_Model_Cron
             return;
         }
 
-        $this->spawnWorker();
+        foreach ($pending as [$pool, $index]) {
+            $this->spawnWorker($pool, $index);
+        }
+    }
+
+    /**
+     * Split out from process() so the decision is testable without spawning.
+     *
+     * @return list<array{Pool, int}>
+     */
+    public function workersToSpawn(): array
+    {
+        $lock = Mage::getSingleton('core/lock');
+        $spawn = [];
+
+        foreach (PoolRegistry::all() as $pool) {
+            $due = null;
+            $started = 0;
+            for ($index = 0; $index < $pool->count; $index++) {
+                if ($lock->isHeld($pool->lockName($index), machineLocal: true)) {
+                    continue;
+                }
+                // One process per due message: an on-demand pool holding its
+                // whole roster open for a single message would idle them all out.
+                if ($pool->isOnDemand()) {
+                    $due ??= $this->dueWorkCount($pool);
+                    if ($started >= $due) {
+                        break;
+                    }
+                }
+                $spawn[] = [$pool, $index];
+                $started++;
+            }
+        }
+
+        return $spawn;
+    }
+
+    private function dueWorkCount(Pool $pool): int
+    {
+        $transport = QueueManager::workerTransport($pool);
+
+        // Redis cannot be probed per queue; spawn and let the worker idle out.
+        return $transport instanceof DbTransport ? $transport->countDue($pool->queues) : PHP_INT_MAX;
     }
 
     #[Maho\Config\CronJob('queue_clean_up', schedule: '0 2 * * *')]
@@ -72,25 +105,29 @@ class Maho_Queue_Model_Cron
         }
     }
 
-    private function spawnWorker(): void
+    private function spawnWorker(Pool $pool, int $index): void
     {
         exec(sprintf(
-            'nohup %s %s queue:work --exclusive --time-limit=%d --memory-limit=%s >> %s 2>&1 &',
+            'nohup %s %s queue:work --exclusive --pool=%s --index=%d >> %s 2>&1 &',
             escapeshellarg(PHP_BINARY),
             escapeshellarg(Mage::getBaseDir() . '/maho'),
-            self::WORKER_TIME_LIMIT,
-            escapeshellarg(self::WORKER_MEMORY_LIMIT),
+            escapeshellarg($pool->name),
+            $index,
             escapeshellarg(Mage::getBaseDir('var') . '/log/queue-worker.log'),
         ));
 
         $lock = Mage::getSingleton('core/lock');
         for ($attempt = 0; $attempt < self::SPAWN_WAIT_ATTEMPTS; $attempt++) {
             usleep(self::SPAWN_WAIT_MICROSECONDS);
-            if ($lock->isHeld(self::WORKER_LOCK, machineLocal: true)) {
+            if ($lock->isHeld($pool->lockName($index), machineLocal: true)) {
                 return;
             }
         }
 
-        Mage::log('Queue worker did not start after spawning; check var/log/queue-worker.log', Mage::LOG_ERROR);
+        // An on-demand worker may have drained its queue and exited inside the wait window.
+        Mage::log(
+            sprintf('Queue worker for pool "%s" did not start after spawning; check var/log/queue-worker.log', $pool->name),
+            $pool->isOnDemand() ? Mage::LOG_NOTICE : Mage::LOG_ERROR,
+        );
     }
 }
