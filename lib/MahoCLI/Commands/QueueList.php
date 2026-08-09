@@ -57,12 +57,6 @@ class QueueList extends BaseMahoCommand
         }
         ksort($queues);
 
-        $transportName = QueueManager::transportName();
-        $output->writeln("<info>Active transport: {$transportName}</info>");
-        if ($transportName === QueueManager::TRANSPORT_REDIS) {
-            $output->writeln('<comment>Pending messages live in Redis; the counts below only cover messages stored in the database (failures).</comment>');
-        }
-
         if ($queues === []) {
             $output->writeln('The queue is empty.');
             return Command::SUCCESS;

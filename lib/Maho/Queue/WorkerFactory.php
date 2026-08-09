@@ -14,7 +14,6 @@ use Symfony\Component\Messenger\Event\WorkerMessageFailedEvent;
 use Symfony\Component\Messenger\EventListener\AddErrorDetailsStampListener;
 use Symfony\Component\Messenger\EventListener\DispatchPcntlSignalListener;
 use Symfony\Component\Messenger\EventListener\SendFailedMessageForRetryListener;
-use Symfony\Component\Messenger\EventListener\SendFailedMessageToFailureTransportListener;
 use Symfony\Component\Messenger\EventListener\StopWorkerOnMemoryLimitListener;
 use Symfony\Component\Messenger\EventListener\StopWorkerOnMessageLimitListener;
 use Symfony\Component\Messenger\Retry\MultiplierRetryStrategy;
@@ -28,12 +27,12 @@ use Symfony\Component\Messenger\Worker;
 final class WorkerFactory
 {
     /**
-     * @param array{limit?: ?int, memoryLimit?: ?int, idleTimeout?: ?int, pool?: ?Pool} $options
+     * @param array{limit?: ?int, memoryLimit?: ?int, idleTimeout?: ?int, pool?: ?Pool, workerId?: ?string} $options
      */
     public static function create(array $options = []): Worker
     {
-        $transportName = QueueManager::transportName();
-        $transport = QueueManager::workerTransport($options['pool'] ?? null);
+        $transportName = QueueManager::TRANSPORT_DB;
+        $transport = QueueManager::workerTransport($options['pool'] ?? null, $options['workerId'] ?? null);
 
         $dispatcher = new EventDispatcher();
         $dispatcher->addSubscriber(new AddErrorDetailsStampListener());
@@ -48,13 +47,6 @@ final class WorkerFactory
                 (int) \Mage::getStoreConfig(QueueManager::XML_PATH_RETRY_MAX_DELAY) * 1000,
             )]),
         ));
-
-        if ($transportName === QueueManager::TRANSPORT_REDIS) {
-            // Final failures on Redis land in the DB table so the admin grid sees them.
-            $dispatcher->addSubscriber(new SendFailedMessageToFailureTransportListener(
-                new ServiceLocator([$transportName => QueueManager::dbTransport()]),
-            ));
-        }
 
         $dispatcher->addListener(WorkerMessageFailedEvent::class, static function (WorkerMessageFailedEvent $event): void {
             if (!$event->willRetry()) {

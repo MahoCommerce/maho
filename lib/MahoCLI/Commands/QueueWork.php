@@ -13,6 +13,7 @@ use Maho\Queue\Pool;
 use Maho\Queue\PoolRegistry;
 use Maho\Queue\QueueManager;
 use Maho\Queue\WorkerFactory;
+use Maho\Queue\WorkerIdentity;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\SignalableCommandInterface;
@@ -62,12 +63,24 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
             }
         }
 
+        $index = (int) $input->getOption('index');
+        if ($pool !== null && ($index < 0 || $index >= $pool->count)) {
+            // Out of range takes a lock the watchdog never probes, so it would
+            // spawn a duplicate worker for the index this one is impersonating.
+            $output->writeln("<error>Pool {$pool->name} runs {$pool->count} worker(s); --index must be 0.." . ($pool->count - 1) . '</error>');
+            return Command::INVALID;
+        }
+
+        // Only a worker holding its lock may stamp claims: without one, a free
+        // lock would make every claim look orphaned the moment it is taken.
+        $workerId = null;
         if ($input->getOption('exclusive')) {
-            $lockName = $pool?->lockName((int) $input->getOption('index')) ?? Pool::LOCK_PREFIX;
+            $lockName = $pool?->lockName($index) ?? Pool::LOCK_PREFIX;
             if (!\Mage::getSingleton('core/lock')->acquire($lockName, machineLocal: true)) {
                 $output->writeln("<error>Another exclusive queue worker already holds {$lockName}</error>");
                 return Command::INVALID;
             }
+            $workerId = WorkerIdentity::forLock($lockName);
         }
 
         // Unbounded unless asked: a hand-run worker keeps the limits it had before pools existed.
@@ -105,11 +118,11 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
             'memoryLimit' => $memoryLimit,
             'idleTimeout' => $effective->idleTimeout,
             'pool' => $effective,
+            'workerId' => $workerId,
         ]);
 
         $output->writeln(sprintf(
-            '<info>Consuming messages from the %s transport%s%s%s (press Ctrl-C to stop gracefully)</info>',
-            QueueManager::transportName(),
+            '<info>Consuming messages%s%s%s (press Ctrl-C to stop gracefully)</info>',
             $pool !== null ? ', pool: ' . $pool->name : '',
             $effective->queues !== [] ? ', queues: ' . implode(', ', $effective->queues) : '',
             $effective->excludedQueues !== [] ? ', excluding: ' . implode(', ', $effective->excludedQueues) : '',

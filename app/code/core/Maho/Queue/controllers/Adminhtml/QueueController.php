@@ -54,12 +54,6 @@ class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Act
     #[Maho\Config\Route('/admin/queue')]
     public function indexAction(): void
     {
-        if (QueueManager::transportName() === QueueManager::TRANSPORT_REDIS) {
-            Mage::getSingleton('adminhtml/session')->addNotice(
-                Mage::helper('queue')->__('The Redis transport is active: pending messages live in Redis and are not listed here, only failures are.'),
-            );
-        }
-
         $this->_title(Mage::helper('queue')->__('Message Queue'));
         $this->_initAction();
         $this->renderLayout();

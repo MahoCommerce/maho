@@ -22,7 +22,6 @@ use Symfony\Component\Messenger\Middleware\SendMessageMiddleware;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Messenger\Stamp\StampInterface;
 use Symfony\Component\Messenger\Transport\Sender\SendersLocator;
-use Symfony\Component\Messenger\Transport\TransportInterface;
 
 /**
  * Entry point of the Maho message queue: dispatch a message object and a
@@ -32,16 +31,14 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
  * \Maho\Queue\QueueManager::dispatch(new My_Module_Model_SomeMessage(...));
  * ```
  *
- * The default transport stores messages in the maho_queue_message table; a
- * `<queue><dsn>redis://...</dsn></queue>` node under `<global>` in
- * app/etc/local.xml switches to Redis (requires symfony/redis-messenger).
- * With the DB transport, dispatching inside a database transaction
- * participates in it: the message becomes visible only on commit.
+ * Messages are stored in the maho_queue_message table, so dispatching inside a
+ * database transaction participates in it: the message becomes visible only on
+ * commit.
  */
 final class QueueManager
 {
+    /** The name this transport is registered under with Messenger. */
     public const TRANSPORT_DB = 'db';
-    public const TRANSPORT_REDIS = 'redis';
 
     public const XML_PATH_MAX_RETRIES = 'system/queue/max_retries';
     public const XML_PATH_RETRY_DELAY = 'system/queue/retry_delay';
@@ -52,10 +49,8 @@ final class QueueManager
     public const XML_PATH_FAILED_RETENTION = 'system/queue/failed_retention';
 
     private static ?MessageBus $bus = null;
-    private static ?TransportInterface $transport = null;
     private static ?DbTransport $dbTransport = null;
     private static ?Serializer $serializer = null;
-    private static ?string $transportName = null;
 
     /**
      * Dispatch a message for asynchronous handling.
@@ -93,39 +88,11 @@ final class QueueManager
         return self::$bus ??= new MessageBus([
             new AddBusNameStampMiddleware('maho'),
             new SendMessageMiddleware(new SendersLocator(
-                ['*' => [self::transportName()]],
-                new ServiceLocator([self::transportName() => self::transport()]),
+                ['*' => [self::TRANSPORT_DB]],
+                new ServiceLocator([self::TRANSPORT_DB => self::dbTransport()]),
             )),
             new HandleMessageMiddleware(HandlerRegistry::handlersLocator()),
         ]);
-    }
-
-    public static function transport(): TransportInterface
-    {
-        if (self::$transport !== null) {
-            return self::$transport;
-        }
-
-        if (self::transportName() === self::TRANSPORT_REDIS) {
-            $factory = new \Symfony\Component\Messenger\Bridge\Redis\Transport\RedisTransportFactory(); // @phpstan-ignore class.notFound
-            return self::$transport = $factory->createTransport((string) self::redisDsn(), [], self::serializer()); // @phpstan-ignore class.notFound
-        }
-
-        return self::$transport = self::dbTransport();
-    }
-
-    public static function transportName(): string
-    {
-        if (self::$transportName !== null) {
-            return self::$transportName;
-        }
-
-        $dsn = self::redisDsn();
-        if ($dsn !== null && !class_exists('Symfony\Component\Messenger\Bridge\Redis\Transport\RedisTransportFactory')) {
-            throw new \RuntimeException('global/queue/dsn is set in app/etc/local.xml but the symfony/redis-messenger package is not installed; run "composer require symfony/redis-messenger" or remove the node');
-        }
-
-        return self::$transportName = $dsn !== null ? self::TRANSPORT_REDIS : self::TRANSPORT_DB;
     }
 
     public static function dbTransport(): DbTransport
@@ -141,17 +108,19 @@ final class QueueManager
 
     /**
      * The transport a pool's worker consumes from: the shared one unless the
-     * pool narrows what it sees or overrides the redelivery window, in which
-     * case it gets its own instance. Redis cannot be narrowed at all, so pools
-     * fall back to consuming everything there.
+     * pool narrows what it sees, overrides the redelivery window, or the caller
+     * claims under a worker id, in which case it gets its own instance.
+     *
+     * @param ?string $workerId Only a pool worker holding its lock passes one; see WorkerIdentity
      */
-    public static function workerTransport(?Pool $pool = null): TransportInterface
+    public static function workerTransport(?Pool $pool = null, ?string $workerId = null): DbTransport
     {
-        if ($pool === null
-            || self::transportName() === self::TRANSPORT_REDIS
-            || ($pool->excludedQueues === [] && $pool->redeliverAfter === null)
-        ) {
-            return self::transport();
+        if ($pool === null) {
+            return self::dbTransport();
+        }
+
+        if ($workerId === null && $pool->excludedQueues === [] && $pool->redeliverAfter === null) {
+            return self::dbTransport();
         }
 
         return new DbTransport(
@@ -161,6 +130,7 @@ final class QueueManager
             $pool->redeliverAfter ?? (int) \Mage::getStoreConfig(self::XML_PATH_REDELIVER_AFTER),
             (int) \Mage::getStoreConfig(self::XML_PATH_COMPLETED_RETENTION),
             $pool->excludedQueues,
+            $workerId,
         );
     }
 
@@ -170,11 +140,9 @@ final class QueueManager
     }
 
     /**
-     * Re-queue a stored failed message from the admin grid or CLI. DB mode
-     * flips the row back to pending with a fresh retry budget; Redis failure
-     * rows are re-dispatched through the bus and the stored row removed.
-     * Only failed rows are retryable: flipping a claimed row would race the
-     * worker's ack.
+     * Re-queue a stored failed message from the admin grid or CLI, flipping the
+     * row back to pending with a fresh retry budget. Only failed rows are
+     * retryable: flipping a claimed row would race the worker's ack.
      */
     public static function retryStoredMessage(int $messageId): bool
     {
@@ -187,29 +155,20 @@ final class QueueManager
             return false;
         }
 
-        if (self::transportName() === self::TRANSPORT_DB) {
-            $now = \Mage_Core_Model_Locale::nowUtc();
-            return $adapter->update($table, [
-                'status' => DbTransport::STATUS_PENDING,
-                'retries' => 0,
-                'available_at' => $now,
-                'claimed_at' => null,
-                'processed_at' => null,
-                'updated_at' => $now,
-            ], [
-                'message_id = ?' => $messageId,
-                'status = ?' => DbTransport::STATUS_FAILED,
-            ]) === 1;
-        }
+        $now = \Mage_Core_Model_Locale::nowUtc();
 
-        $envelope = self::serializer()->decode([
-            'body' => (string) $row['body'],
-            'headers' => ['type' => (string) $row['message_class']],
-        ]);
-        self::bus()->dispatch($envelope->getMessage(), [new QueueNameStamp((string) $row['queue'])]);
-        $adapter->delete($table, ['message_id = ?' => $messageId]);
-
-        return true;
+        return $adapter->update($table, [
+            'status' => DbTransport::STATUS_PENDING,
+            'retries' => 0,
+            'available_at' => $now,
+            'claimed_at' => null,
+            'claimed_by' => null,
+            'processed_at' => null,
+            'updated_at' => $now,
+        ], [
+            'message_id = ?' => $messageId,
+            'status = ?' => DbTransport::STATUS_FAILED,
+        ]) === 1;
     }
 
     public static function discardStoredMessage(int $messageId): bool
@@ -228,23 +187,10 @@ final class QueueManager
     public static function reset(): void
     {
         self::$bus = null;
-        self::$transport = null;
         self::$dbTransport = null;
         self::$serializer = null;
-        self::$transportName = null;
         HandlerRegistry::reset();
         PoolRegistry::reset();
-    }
-
-    private static function redisDsn(): ?string
-    {
-        $node = \Mage::getConfig()->getNode('global/queue/dsn');
-        if ($node === false) {
-            return null;
-        }
-        $dsn = trim((string) $node);
-
-        return $dsn === '' ? null : $dsn;
     }
 
     private static function writeAdapter(): \Maho\Db\Adapter\AdapterInterface

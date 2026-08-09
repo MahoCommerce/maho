@@ -101,7 +101,7 @@ it('inserts a failure-transport send as a failed row instead of updating by the 
     $envelope = (new Envelope(makeEmailMessage()))->with(
         new TransportMessageIdStamp('1712345678901-0'),
         new RedeliveryStamp(0),
-        new SentToFailureTransportStamp('redis'),
+        new SentToFailureTransportStamp('origin'),
         ErrorDetailsStamp::create(new RuntimeException('handler blew up')),
     );
 

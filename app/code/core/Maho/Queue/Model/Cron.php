@@ -49,25 +49,39 @@ class Maho_Queue_Model_Cron
     public function workersToSpawn(): array
     {
         $lock = Mage::getSingleton('core/lock');
+
+        // A hand-run `queue:work --exclusive` consumes every queue, so it stands
+        // in for the whole roster and the watchdog keeps out of its way.
+        if ($lock->isHeld(Pool::LOCK_PREFIX, machineLocal: true)) {
+            return [];
+        }
+
         $spawn = [];
 
         foreach (PoolRegistry::all() as $pool) {
             $due = null;
-            $started = 0;
+            $live = 0;
+            $free = [];
             for ($index = 0; $index < $pool->count; $index++) {
                 if ($lock->isHeld($pool->lockName($index), machineLocal: true)) {
-                    continue;
+                    $live++;
+                } else {
+                    $free[] = $index;
                 }
-                // One process per due message: an on-demand pool holding its
-                // whole roster open for a single message would idle them all out.
+            }
+
+            foreach ($free as $index) {
+                // One process per due message, workers already alive included: an
+                // on-demand pool holding its whole roster open for a single
+                // message would idle them all out.
                 if ($pool->isOnDemand()) {
                     $due ??= $this->dueWorkCount($pool);
-                    if ($started >= $due) {
+                    if ($live >= $due) {
                         break;
                     }
                 }
                 $spawn[] = [$pool, $index];
-                $started++;
+                $live++;
             }
         }
 
@@ -76,10 +90,7 @@ class Maho_Queue_Model_Cron
 
     private function dueWorkCount(Pool $pool): int
     {
-        $transport = QueueManager::workerTransport($pool);
-
-        // Redis cannot be probed per queue; spawn and let the worker idle out.
-        return $transport instanceof DbTransport ? $transport->countDue($pool->queues) : PHP_INT_MAX;
+        return QueueManager::workerTransport($pool)->countDue($pool->queues);
     }
 
     #[Maho\Config\CronJob('queue_clean_up', schedule: '0 2 * * *')]

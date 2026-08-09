@@ -22,6 +22,7 @@ use Maho\Queue\Transport\DbTransport;
  * @method int getRetries()
  * @method string getAvailableAt()
  * @method ?string getClaimedAt()
+ * @method ?string getClaimedBy()
  * @method ?string getProcessedAt()
  * @method string getCreatedAt()
  * @method string getUpdatedAt()

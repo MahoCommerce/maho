@@ -12,6 +12,7 @@ use Maho\Queue\PoolRegistry;
 use Maho\Queue\QueueManager;
 use Maho\Queue\StopWorkerWhenIdleListener;
 use Maho\Queue\Transport\DbTransport;
+use Maho\Queue\WorkerIdentity;
 use Symfony\Component\Messenger\Event\WorkerRunningEvent;
 use Symfony\Component\Messenger\Worker;
 
@@ -22,12 +23,39 @@ function queuePool(string $name): Pool
     return PoolRegistry::get($name) ?? throw new RuntimeException("pool {$name} is missing");
 }
 
-function poolTransport(string $name): DbTransport
+function poolTransport(string $name, ?string $workerId = null): DbTransport
 {
-    $transport = QueueManager::workerTransport(queuePool($name));
+    $transport = QueueManager::workerTransport(queuePool($name), $workerId);
     assert($transport instanceof DbTransport);
 
     return $transport;
+}
+
+function poolWorkerId(string $name, int $index = 0): string
+{
+    return WorkerIdentity::forLock(queuePool($name)->lockName($index))
+        ?? throw new RuntimeException('this host has no worker identity');
+}
+
+/**
+ * Hold a pool's worker lock for the duration of the assertions, the way a live
+ * `queue:work --exclusive` holds it.
+ *
+ * @param callable():void $body
+ */
+function withWorkerLock(string $name, callable $body): void
+{
+    $lock = Mage::getSingleton('core/lock');
+    $lockName = queuePool($name)->lockName();
+    if (!$lock->acquire($lockName, machineLocal: true)) {
+        throw new RuntimeException("could not take {$lockName}");
+    }
+
+    try {
+        $body();
+    } finally {
+        $lock->release($lockName);
+    }
 }
 
 /**
@@ -54,7 +82,7 @@ function withQueueConfig(string $xml, callable $body): void
     }
 }
 
-function insertQueueRow(string $queue, string $status, ?string $claimedAt = null): void
+function insertQueueRow(string $queue, string $status, ?string $claimedAt = null, ?string $claimedBy = null): void
 {
     $now = Mage_Core_Model_Locale::nowUtc();
     queueAdapter()->insert(QueueManager::tableName(), [
@@ -64,9 +92,15 @@ function insertQueueRow(string $queue, string $status, ?string $claimedAt = null
         'body' => serialize(makeEmailMessage()),
         'available_at' => $now,
         'claimed_at' => $claimedAt,
+        'claimed_by' => $claimedBy,
         'created_at' => $now,
         'updated_at' => $now,
     ]);
+}
+
+function agoUtc(int $seconds): string
+{
+    return gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - $seconds);
 }
 
 /**
@@ -163,42 +197,71 @@ it('counts only work that is due, not a campaign scheduled for later', function 
 });
 
 it('counts a message abandoned by a dead worker as due', function () {
-    insertQueueRow(
-        'newsletter',
-        DbTransport::STATUS_PROCESSING,
-        gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 4 * 3600),
-    );
+    insertQueueRow('newsletter', DbTransport::STATUS_PROCESSING, agoUtc(4 * 3600));
 
     // Without this the row is invisible to the probe, nothing respawns, and the
     // message is stranded for good instead of for one redelivery window.
     expect(poolTransport('slow')->countDue())->toBe(1);
 });
 
-it('leaves a claim still inside the pool redelivery window alone', function () {
-    insertQueueRow(
-        'newsletter',
-        DbTransport::STATUS_PROCESSING,
-        gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 1800),
-    );
+it('leaves an unattributed claim still inside the pool redelivery window alone', function () {
+    insertQueueRow('newsletter', DbTransport::STATUS_PROCESSING, agoUtc(1800));
 
     // Slow allows 3h, so a 30-minute-old claim is a running feed, not a corpse.
     expect(poolTransport('slow')->countDue())->toBe(0);
 });
 
 it('does not let a fast worker requeue a slow job running under a longer window', function () {
-    insertQueueRow(
-        'newsletter',
-        DbTransport::STATUS_PROCESSING,
-        gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 1800),
-    );
+    insertQueueRow('newsletter', DbTransport::STATUS_PROCESSING, agoUtc(7200));
 
-    // Fast redelivers after 15 minutes, but the claim is on a queue it does not
+    // Fast redelivers after an hour, but the claim is on a queue it does not
     // own; requeueing it would run the handler a second time alongside the first.
     iterator_to_array(poolTransport('fast')->getFromQueues(queuePool('fast')->queues));
 
     $rows = fetchQueueRows();
     expect($rows)->toHaveCount(1);
     expect($rows[0]['status'])->toBe(DbTransport::STATUS_PROCESSING);
+});
+
+it('stamps the claiming worker on the row', function () {
+    QueueManager::dispatch(makeEmailMessage('feed'), queue: 'newsletter');
+    $workerId = poolWorkerId('slow');
+
+    expect(iterator_to_array(poolTransport('slow', $workerId)->get()))->toHaveCount(1);
+    expect(fetchQueueRows()[0]['claimed_by'])->toBe($workerId);
+});
+
+it('reclaims a local worker crash at once, without waiting out the window', function () {
+    // Fresh claim, nowhere near the 3h window, but nobody holds slow's lock, so
+    // the process that took it is provably gone.
+    insertQueueRow('newsletter', DbTransport::STATUS_PROCESSING, agoUtc(5), poolWorkerId('slow'));
+
+    expect(poolTransport('slow')->countDue())->toBe(1);
+    expect(iterator_to_array(poolTransport('slow')->get()))->toHaveCount(1);
+});
+
+it('never requeues a claim whose local worker still holds its lock', function () {
+    // The duplicate this guards: a handler slower than the window used to be
+    // requeued underneath itself and run a second time alongside the first.
+    withWorkerLock('slow', function () {
+        insertQueueRow('newsletter', DbTransport::STATUS_PROCESSING, agoUtc(4 * 3600), poolWorkerId('slow'));
+
+        expect(poolTransport('slow')->countDue())->toBe(0);
+        expect(iterator_to_array(poolTransport('slow')->get()))->toHaveCount(0);
+        expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PROCESSING);
+    });
+});
+
+it('falls back to the window for a claim held by another server', function () {
+    // No lock of ours to read, so the timer is all this machine has to go on.
+    $elsewhere = 'ffffffffffff:' . queuePool('slow')->lockName();
+
+    insertQueueRow('newsletter', DbTransport::STATUS_PROCESSING, agoUtc(1800), $elsewhere);
+    expect(poolTransport('slow')->countDue())->toBe(0);
+
+    clearQueueTable();
+    insertQueueRow('newsletter', DbTransport::STATUS_PROCESSING, agoUtc(4 * 3600), $elsewhere);
+    expect(poolTransport('slow')->countDue())->toBe(1);
 });
 
 it('stops an idle worker immediately when no grace period is set', function () {

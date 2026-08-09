@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Maho\Queue\Pool;
 use Maho\Queue\PoolRegistry;
 use Maho\Queue\QueueManager;
 use Maho\Queue\Transport\DbTransport;
@@ -84,6 +85,42 @@ it('starts the on-demand tier only once its queues have work due', function () {
 
     QueueManager::dispatch(makeEmailMessage('due now'), queue: 'newsletter');
     expect(pendingWorkers())->toBe(['fast:0', 'slow:0']);
+});
+
+it('stands aside for a hand-run exclusive worker', function () {
+    QueueManager::dispatch(makeEmailMessage());
+
+    $lock = Mage::getSingleton('core/lock');
+    expect($lock->acquire(Pool::LOCK_PREFIX, machineLocal: true))->toBeTrue();
+    try {
+        expect(pendingWorkers())->toBe([]);
+    } finally {
+        $lock->release(Pool::LOCK_PREFIX);
+    }
+});
+
+it('counts the on-demand workers already alive against the due budget', function () {
+    $node = Mage::getConfig()->getNode('global/queue');
+    $node->extend(new Maho\Simplexml\Element('<queue><pools><slow><count>3</count></slow></pools></queue>'), true);
+    QueueManager::reset();
+
+    $lock = Mage::getSingleton('core/lock');
+    $slow = PoolRegistry::get('slow');
+    expect($slow?->count)->toBe(3);
+    $held = $slow->lockName(0);
+    expect($lock->acquire($held, machineLocal: true))->toBeTrue();
+
+    try {
+        QueueManager::dispatch(makeEmailMessage('due now'), queue: 'newsletter');
+
+        // One message, one worker already consuming it: a second process would
+        // boot only to idle straight back out.
+        expect(pendingWorkers())->toBe(['fast:0']);
+    } finally {
+        $lock->release($held);
+        unset($node->pools->slow->count);
+        QueueManager::reset();
+    }
 });
 
 it('removes old failed messages during cleanup', function () {

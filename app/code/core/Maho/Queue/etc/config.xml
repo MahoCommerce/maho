@@ -52,7 +52,6 @@
             </routing>
             <pools>
                 <fast>
-                    <redeliver_after>900</redeliver_after>
                     <sort_order>10</sort_order>
                 </fast>
                 <slow>

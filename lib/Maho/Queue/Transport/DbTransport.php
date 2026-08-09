@@ -12,6 +12,7 @@ namespace Maho\Queue\Transport;
 use Maho\Db\Adapter\AdapterInterface;
 use Maho\Queue\Stamp\DedupeKeyStamp;
 use Maho\Queue\Stamp\QueueNameStamp;
+use Maho\Queue\WorkerIdentity;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\MessageDecodingFailedException;
 use Symfony\Component\Messenger\Exception\TransportException;
@@ -49,6 +50,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
 
     /**
      * @param list<string> $excludedQueues Queues this instance never consumes, so a pool worker can be "everything but"
+     * @param ?string      $workerId       Stamped on every claim; set only by a worker holding its lock, so a free lock proves the claim is orphaned
      */
     public function __construct(
         private readonly AdapterInterface $adapter,
@@ -57,6 +59,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
         private readonly int $redeliverAfterSeconds,
         private readonly int $completedRetentionDays,
         private readonly array $excludedQueues = [],
+        private readonly ?string $workerId = null,
     ) {}
 
     #[\Override]
@@ -70,7 +73,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
 
         $messageIdStamp = $envelope->last(TransportMessageIdStamp::class);
         $redeliveryStamp = $envelope->last(RedeliveryStamp::class);
-        // A failure-transport send carries both stamps too, but its id is a Redis stream id: insert, not update.
+        // A failure-transport send carries both stamps too, but its id belongs to the origin transport: insert, not update.
         if ($messageIdStamp !== null && $redeliveryStamp !== null
             && $envelope->last(SentToFailureTransportStamp::class) === null) {
             $this->adapter->update($this->table, [
@@ -79,6 +82,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
                 'available_at' => $availableAt,
                 'error_message' => $envelope->last(ErrorDetailsStamp::class)?->getExceptionMessage(),
                 'claimed_at' => null,
+                'claimed_by' => null,
                 'updated_at' => $now,
             ], ['message_id = ?' => (int) $messageIdStamp->getId()]);
 
@@ -103,6 +107,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
             'dedupe_key' => $dedupeKey,
             'available_at' => $availableAt,
             'claimed_at' => null,
+            'claimed_by' => null,
             'processed_at' => $isFailure ? $now : null,
             'created_at' => $now,
             'updated_at' => $now,
@@ -186,11 +191,12 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
     #[\Override]
     public function getMessageCount(): int
     {
-        return (int) $this->adapter->fetchOne(
-            $this->adapter->select()
-                ->from($this->table, new \Maho\Db\Expr('COUNT(*)'))
-                ->where('status = ?', self::STATUS_PENDING),
-        );
+        $select = $this->adapter->select()
+            ->from($this->table, new \Maho\Db\Expr('COUNT(*)'))
+            ->where('status = ?', self::STATUS_PENDING);
+        $this->applyQueueFilter($select, null);
+
+        return (int) $this->adapter->fetchOne($select);
     }
 
     /**
@@ -206,9 +212,10 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
         $clauses = ['(' . $this->adapter->quoteInto('status = ?', self::STATUS_PENDING)
             . ' AND ' . $this->adapter->quoteInto('available_at <= ?', \Mage_Core_Model_Locale::nowUtc()) . ')'];
 
-        if ($this->redeliverAfterSeconds > 0) {
+        $abandoned = $this->abandonedClaimClause();
+        if ($abandoned !== null) {
             $clauses[] = '(' . $this->adapter->quoteInto('status = ?', self::STATUS_PROCESSING)
-                . ' AND ' . $this->adapter->quoteInto('claimed_at < ?', $this->staleClaimCutoff()) . ')';
+                . ' AND ' . $abandoned . ')';
         }
 
         $select = $this->adapter->select()
@@ -258,6 +265,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
             $claimed = $this->adapter->update($this->table, [
                 'status' => self::STATUS_PROCESSING,
                 'claimed_at' => $now,
+                'claimed_by' => $this->workerId,
                 'updated_at' => $now,
             ], [
                 'message_id = ?' => (int) $row['message_id'],
@@ -278,8 +286,8 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
     }
 
     /**
-     * Crash recovery: rows claimed longer ago than redeliver_after belong to a
-     * worker that died without ack/reject; put them back up for grabs.
+     * Crash recovery: a row still processing whose worker died without ack or
+     * reject goes back up for grabs.
      *
      * Scoped to the queues this instance consumes, because pools carry their own
      * window: a fast worker must not requeue a feed a slow worker is still running.
@@ -288,13 +296,14 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
      */
     private function requeueStaleClaims(?array $queues): void
     {
-        if ($this->redeliverAfterSeconds <= 0) {
+        $abandoned = $this->abandonedClaimClause();
+        if ($abandoned === null) {
             return;
         }
 
         $where = [
             'status = ?' => self::STATUS_PROCESSING,
-            'claimed_at < ?' => $this->staleClaimCutoff(),
+            $abandoned,
         ];
         if ($queues !== null && $queues !== []) {
             $where['queue IN (?)'] = $queues;
@@ -306,8 +315,43 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
         $this->adapter->update($this->table, [
             'status' => self::STATUS_PENDING,
             'claimed_at' => null,
+            'claimed_by' => null,
             'updated_at' => \Mage_Core_Model_Locale::nowUtc(),
         ], $where);
+    }
+
+    /**
+     * Rows whose claiming worker is gone, to AND with `status = processing`.
+     *
+     * A claim from this machine is settled by its worker lock, not by the clock:
+     * a free lock proves the process died, a held one proves the handler is
+     * still running however long it takes. Claims from another machine have no
+     * lock to read here, so they keep the redeliver_after timer, as do rows with
+     * no id (mid-upgrade, or a worker running without --exclusive).
+     */
+    private function abandonedClaimClause(): ?string
+    {
+        if ($this->redeliverAfterSeconds <= 0) {
+            return null;
+        }
+
+        $clauses = [];
+
+        $dead = WorkerIdentity::deadLocalIds();
+        if ($dead !== []) {
+            $clauses[] = $this->adapter->quoteInto('claimed_by IN (?)', $dead);
+        }
+
+        $timer = $this->adapter->quoteInto('claimed_at < ?', $this->staleClaimCutoff());
+        $local = WorkerIdentity::localIds();
+        if ($local !== []) {
+            $timer .= ' AND (claimed_by IS NULL OR '
+                . $this->adapter->quoteInto('claimed_by NOT IN (?)', $local) . ')';
+        }
+        $clauses[] = $timer;
+
+        // Wrapped whole: the caller ANDs this with a status and a queue filter.
+        return '((' . implode(') OR (', $clauses) . '))';
     }
 
     private function staleClaimCutoff(): string

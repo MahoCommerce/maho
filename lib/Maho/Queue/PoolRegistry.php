@@ -80,19 +80,6 @@ final class PoolRegistry
         $node = \Mage::getConfig()->getNode('global/queue');
         $poolsNode = $node !== false && isset($node->pools) ? $node->pools : false;
 
-        // Symfony's Redis transport is not a QueueReceiverInterface, so Worker::run()
-        // rejects any queue filter: on Redis a single catch-all worker is all we can run.
-        if (QueueManager::transportName() === QueueManager::TRANSPORT_REDIS) {
-            if ($poolsNode !== false && $poolsNode->children()->count() > 1) {
-                \Mage::log(
-                    'Queue pools are ignored on the Redis transport (it cannot filter by queue name); running a single worker over all queues',
-                    \Mage::LOG_NOTICE,
-                );
-            }
-
-            return [self::FALLBACK_POOL => new Pool(self::FALLBACK_POOL)];
-        }
-
         $definitions = [];
         if ($poolsNode !== false) {
             foreach ($poolsNode->children() as $name => $child) {
