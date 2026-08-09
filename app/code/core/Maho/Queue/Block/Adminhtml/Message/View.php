@@ -31,14 +31,20 @@ class Maho_Queue_Block_Adminhtml_Message_View extends Mage_Adminhtml_Block_Widge
     }
 
     /**
-     * Failed, plus a claim a dead worker left behind: nothing re-queues those
-     * automatically, so the grid is the only way back.
+     * Failed, plus a claim old enough to belong to a dead worker: nothing
+     * re-queues those automatically, so the grid is the only way back. A fresh
+     * claim is not offered, since re-queueing it would run the handler a second
+     * time alongside the worker still holding it.
      */
     public function isRetryable(): bool
     {
-        return in_array($this->getMessage()?->getStatus(), [
-            Maho_Queue_Model_Message::STATUS_FAILED,
-            Maho_Queue_Model_Message::STATUS_PROCESSING,
-        ], true);
+        $message = $this->getMessage();
+
+        return match ($message?->getStatus()) {
+            Maho_Queue_Model_Message::STATUS_FAILED => true,
+            Maho_Queue_Model_Message::STATUS_PROCESSING => $message->getClaimedAt() !== null
+                && $message->getClaimedAt() < \Maho\Queue\Transport\DbTransport::abandonedBefore(),
+            default => false,
+        };
     }
 }

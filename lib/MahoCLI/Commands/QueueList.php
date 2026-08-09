@@ -22,7 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'queue:list',
-    description: 'Show per-queue message counts and the active transport',
+    description: 'Show per-queue message counts and the worker pool each queue is consumed by',
 )]
 class QueueList extends BaseMahoCommand
 {

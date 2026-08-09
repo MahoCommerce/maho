@@ -97,6 +97,23 @@ it('skips dispatch while a pending or processing message with the same dedupe ke
     expect(fetchQueueRows())->toHaveCount(2);
 });
 
+it('lets a dedupe key be dispatched again once its claim is abandoned', function () {
+    QueueManager::dispatch(makeEmailMessage(), dedupeKey: 'abc');
+    $transport = QueueManager::dbTransport();
+    expect([...$transport->getFromQueues(['default'])])->toHaveCount(1);
+
+    QueueManager::dispatch(makeEmailMessage(), dedupeKey: 'abc');
+    expect(fetchQueueRows())->toHaveCount(1);
+
+    // A claim nobody will finish must stop suppressing later sends, or every
+    // future dispatch of this key is silently dropped instead of one being parked.
+    queueAdapter()->update(QueueManager::tableName(), [
+        'claimed_at' => gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 7200),
+    ]);
+    QueueManager::dispatch(makeEmailMessage(), dedupeKey: 'abc');
+    expect(fetchQueueRows())->toHaveCount(2);
+});
+
 it('inserts a failure-transport send as a failed row instead of updating by the foreign message id', function () {
     $envelope = (new Envelope(makeEmailMessage()))->with(
         new TransportMessageIdStamp('1712345678901-0'),
@@ -113,7 +130,7 @@ it('inserts a failure-transport send as a failed row instead of updating by the 
     expect($rows[0]['error_message'])->toContain('handler blew up');
 });
 
-it('retries a failed row and a claim a dead worker left behind, but not a pending one', function () {
+it('retries a failed row and an abandoned claim, but not a pending or freshly claimed one', function () {
     QueueManager::dispatch(makeEmailMessage());
     $transport = QueueManager::dbTransport();
     $id = (int) fetchQueueRows()[0]['message_id'];
@@ -121,9 +138,15 @@ it('retries a failed row and a claim a dead worker left behind, but not a pendin
     // Pending needs no help.
     expect(QueueManager::retryStoredMessage($id))->toBeFalse();
 
-    // Claimed: nothing requeues this automatically, so the grid must be able to.
+    // A live worker is still inside this one: re-queueing it runs the handler twice.
     $envelopes = [...$transport->get()];
     expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PROCESSING);
+    expect(QueueManager::retryStoredMessage($id))->toBeFalse();
+
+    // Old enough to belong to a dead worker: nothing else requeues it, so the grid must.
+    queueAdapter()->update(QueueManager::tableName(), [
+        'claimed_at' => gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 7200),
+    ]);
     expect(QueueManager::retryStoredMessage($id))->toBeTrue();
     expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PENDING);
 

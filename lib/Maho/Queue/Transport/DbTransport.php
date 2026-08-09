@@ -48,6 +48,14 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
     public const DEFAULT_QUEUE = 'default';
 
     /**
+     * A claim held longer than this is read as abandoned by a worker that died.
+     * Nothing redelivers on it: it gates the admin notice, the admin retry, and
+     * the dedupe check, so an honest handler that overruns costs a notice rather
+     * than a second run.
+     */
+    public const ABANDONED_AFTER_SECONDS = 3600;
+
+    /**
      * @param list<string> $excludedQueues Queues this instance never consumes, so a pool worker can be "everything but"
      */
     public function __construct(
@@ -221,10 +229,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
         $select = $this->adapter->select()
             ->from($this->table, new \Maho\Db\Expr('COUNT(*)'))
             ->where('status = ?', self::STATUS_PROCESSING)
-            ->where('claimed_at < ?', gmdate(
-                \Mage_Core_Model_Locale::DATETIME_FORMAT,
-                time() - $olderThanSeconds,
-            ));
+            ->where('claimed_at < ?', self::abandonedBefore($olderThanSeconds));
         $this->applyQueueFilter($select, null);
 
         return (int) $this->adapter->fetchOne($select);
@@ -289,15 +294,26 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
 
     private function inFlightRowExists(string $dedupeKey): bool
     {
+        // A claim a dead worker left behind waits for an operator forever, so it
+        // must not keep suppressing new dispatches of the same key: that would
+        // silently drop every later send instead of parking one message.
+        // Pending rows always have a null claimed_at, so they are never excluded.
         $existing = $this->adapter->fetchOne(
             $this->adapter->select()
                 ->from($this->table, 'message_id')
                 ->where('dedupe_key = ?', $dedupeKey)
                 ->where('status IN (?)', [self::STATUS_PENDING, self::STATUS_PROCESSING])
+                ->where('claimed_at IS NULL OR claimed_at >= ?', self::abandonedBefore())
                 ->limit(1),
         );
 
         return $existing !== false && $existing !== null;
+    }
+
+    /** UTC cut-off before which a claim counts as abandoned. */
+    public static function abandonedBefore(int $olderThanSeconds = self::ABANDONED_AFTER_SECONDS): string
+    {
+        return gmdate(\Mage_Core_Model_Locale::DATETIME_FORMAT, time() - $olderThanSeconds);
     }
 
     /**

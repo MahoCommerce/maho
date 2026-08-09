@@ -176,7 +176,9 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   `slow` is the on-demand catch-all. Pass `queue:` to `dispatch()`, then route that queue with
   `<global><queue><routing><yourqueue>fast</yourqueue></routing></queue></global>`; anything
   unrouted lands in the catch-all, so a long-running handler never blocks short ones. Pool
-  resourcing (count, limits, idle timeout, redelivery) lives under `global/queue/pools`
+  resourcing (count, memory/time limits, idle timeout) lives under `global/queue/pools`. A crash
+  parks a claimed message for an operator instead of redelivering it: retry or discard it in the
+  grid
 - **Layout**: XML-based block hierarchy and template assignment
 - **Sessions**: `Mage::getSingleton('customer/session')`, `'admin/session'`, `'checkout/session'`
 - **Translations**: `$this->__('Text')`, CSVs in `app/locale/[locale]/`

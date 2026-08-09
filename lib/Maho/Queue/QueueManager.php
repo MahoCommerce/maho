@@ -130,20 +130,35 @@ final class QueueManager
 
     /**
      * Re-queue a stored message from the admin grid or CLI, flipping the row
-     * back to pending with a fresh retry budget. Failed rows and rows a dead
-     * worker left claimed are both retryable; nothing else, since a pending row
-     * needs no help and a completed one is done. Nothing re-queues an abandoned
-     * claim automatically, so this is the only way one comes back.
+     * back to pending with a fresh retry budget. Failed rows and claims old
+     * enough to belong to a dead worker are both retryable; nothing else, since
+     * a pending row needs no help and a completed one is done. Nothing re-queues
+     * an abandoned claim automatically, so this is the only way one comes back.
+     *
+     * A fresh claim is refused on purpose: re-queueing a row a live worker is
+     * still inside runs the handler a second time, the very thing dropping
+     * timer-based redelivery was meant to make impossible. The age cut-off is
+     * applied in the UPDATE, so a worker that claims the row between the read
+     * and the write keeps it.
      */
     public static function retryStoredMessage(int $messageId): bool
     {
-        $retryable = [DbTransport::STATUS_FAILED, DbTransport::STATUS_PROCESSING];
         $adapter = self::writeAdapter();
         $table = self::tableName();
         $row = $adapter->fetchRow(
             $adapter->select()->from($table)->where('message_id = ?', $messageId),
         );
-        if ($row === false || !in_array($row['status'], $retryable, true)) {
+        if ($row === false) {
+            return false;
+        }
+
+        $where = ['message_id = ?' => $messageId];
+        if ($row['status'] === DbTransport::STATUS_PROCESSING) {
+            $where['status = ?'] = DbTransport::STATUS_PROCESSING;
+            $where['claimed_at < ?'] = DbTransport::abandonedBefore();
+        } elseif ($row['status'] === DbTransport::STATUS_FAILED) {
+            $where['status = ?'] = DbTransport::STATUS_FAILED;
+        } else {
             return false;
         }
 
@@ -156,10 +171,7 @@ final class QueueManager
             'claimed_at' => null,
             'processed_at' => null,
             'updated_at' => $now,
-        ], [
-            'message_id = ?' => $messageId,
-            'status IN (?)' => $retryable,
-        ]) === 1;
+        ], $where) === 1;
     }
 
     public static function discardStoredMessage(int $messageId): bool
