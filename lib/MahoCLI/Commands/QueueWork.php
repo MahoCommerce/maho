@@ -79,10 +79,14 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
 
         // Unbounded unless asked: a hand-run worker keeps the limits it had before pools existed.
         $base = $pool ?? new Pool(name: 'ad-hoc', memoryLimit: '', timeLimit: 0);
+        $queues = $input->getOption('queue');
         $effective = new Pool(
             name: $base->name,
-            queues: $input->getOption('queue') ?: $base->queues,
-            excludedQueues: $input->getOption('exclude-queue') ?: $base->excludedQueues,
+            queues: $queues ?: $base->queues,
+            // An explicit allow-list already narrows the worker, and keeping the
+            // pool's "everything but" list on top of it would leave
+            // `--pool=slow --queue=email` consuming nothing at all.
+            excludedQueues: $input->getOption('exclude-queue') ?: ($queues ? [] : $base->excludedQueues),
             idleTimeout: match (true) {
                 $input->getOption('idle-timeout') !== null => max(0, (int) $input->getOption('idle-timeout')),
                 (bool) $input->getOption('stop-when-empty') => 0,

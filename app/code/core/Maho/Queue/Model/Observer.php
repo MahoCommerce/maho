@@ -9,16 +9,9 @@
 declare(strict_types=1);
 
 use Maho\Queue\QueueManager;
-use Maho\Queue\Transport\DbTransport;
 
 class Maho_Queue_Model_Observer
 {
-    /**
-     * A claim older than this is reported as abandoned. Nothing redelivers on
-     * it, so an honest handler that overruns costs a notice, not a second run.
-     */
-    public const STUCK_AFTER_SECONDS = DbTransport::ABANDONED_AFTER_SECONDS;
-
     /**
      * Nothing re-queues a claim a dead worker left behind, so the grid is the
      * only way one comes back and somebody has to be told to look at it.
@@ -52,6 +45,6 @@ class Maho_Queue_Model_Observer
             return 0;
         }
 
-        return QueueManager::dbTransport()->countAbandoned(self::STUCK_AFTER_SECONDS);
+        return QueueManager::dbTransport()->countAbandoned();
     }
 }

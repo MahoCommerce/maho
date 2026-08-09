@@ -224,7 +224,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
      * acts on this: it drives the admin notice, so an honest handler that
      * overruns costs a notice rather than a second run.
      */
-    public function countAbandoned(int $olderThanSeconds): int
+    public function countAbandoned(int $olderThanSeconds = self::ABANDONED_AFTER_SECONDS): int
     {
         $select = $this->adapter->select()
             ->from($this->table, new \Maho\Db\Expr('COUNT(*)'))

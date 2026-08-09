@@ -39,6 +39,8 @@ class Maho_Queue_Model_Cron
         foreach ($pending as [$pool, $index]) {
             $this->spawnWorker($pool, $index);
         }
+
+        $this->reportWorkersThatDidNotStart($pending);
     }
 
     /**
@@ -126,19 +128,35 @@ class Maho_Queue_Model_Cron
             $index,
             escapeshellarg(Mage::getBaseDir('var') . '/log/queue-worker.log'),
         ));
+    }
 
+    /**
+     * One shared wait for the whole batch: waiting out each pool in turn would
+     * cost a cron tick five seconds per worker slow to take its lock.
+     *
+     * @param list<array{Pool, int}> $spawned
+     */
+    private function reportWorkersThatDidNotStart(array $spawned): void
+    {
         $lock = Mage::getSingleton('core/lock');
-        for ($attempt = 0; $attempt < self::SPAWN_WAIT_ATTEMPTS; $attempt++) {
+        for ($attempt = 0; $attempt < self::SPAWN_WAIT_ATTEMPTS && $spawned !== []; $attempt++) {
             usleep(self::SPAWN_WAIT_MICROSECONDS);
-            if ($lock->isHeld($pool->lockName($index), machineLocal: true)) {
-                return;
-            }
+            $spawned = array_values(array_filter(
+                $spawned,
+                fn(array $worker) => !$lock->isHeld($worker[0]->lockName($worker[1]), machineLocal: true),
+            ));
         }
 
-        // An on-demand worker may have drained its queue and exited inside the wait window.
-        Mage::log(
-            sprintf('Queue worker for pool "%s" did not start after spawning; check var/log/queue-worker.log', $pool->name),
-            $pool->isOnDemand() ? Mage::LOG_NOTICE : Mage::LOG_ERROR,
-        );
+        foreach ($spawned as [$pool]) {
+            // An on-demand worker that drained its queue and exited inside the
+            // wait window did its job; only a pool still owed work failed.
+            if ($pool->isOnDemand() && $this->dueWorkCount($pool) === 0) {
+                continue;
+            }
+            Mage::log(
+                sprintf('Queue worker for pool "%s" did not start after spawning; check var/log/queue-worker.log', $pool->name),
+                Mage::LOG_ERROR,
+            );
+        }
     }
 }
