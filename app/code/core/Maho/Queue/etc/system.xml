@@ -50,15 +50,6 @@ SPDX-License-Identifier: AFL-3.0
                             <validate>required-entry validate-digits validate-zero-or-greater</validate>
                             <comment>Upper bound for the backoff. 0 means no bound.</comment>
                         </retry_max_delay>
-                        <redeliver_after translate="label comment">
-                            <label>Redeliver Stuck Messages After (seconds)</label>
-                            <sort_order>80</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <validate>required-entry validate-digits validate-greater-than-zero</validate>
-                            <comment>A worker that dies on this server is detected from its lock and its messages are re-queued at once, so this timer only covers a worker on another server, whose lock is not visible here. Keep it above the runtime of your slowest handler. Pools that declare their own redeliver_after override this for the queues they consume.</comment>
-                        </redeliver_after>
                         <completed_retention translate="label comment">
                             <label>Keep Completed Messages (days)</label>
                             <sort_order>90</sort_order>

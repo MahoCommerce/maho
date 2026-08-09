@@ -98,7 +98,7 @@ class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Act
         if (QueueManager::retryStoredMessage($id)) {
             Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('queue')->__('Message re-queued.'));
         } else {
-            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('queue')->__('Only failed messages can be retried.'));
+            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('queue')->__('Only failed or stuck messages can be retried.'));
         }
         $this->_redirect('*/*/');
     }

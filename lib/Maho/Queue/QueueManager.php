@@ -44,7 +44,6 @@ final class QueueManager
     public const XML_PATH_RETRY_DELAY = 'system/queue/retry_delay';
     public const XML_PATH_RETRY_MULTIPLIER = 'system/queue/retry_multiplier';
     public const XML_PATH_RETRY_MAX_DELAY = 'system/queue/retry_max_delay';
-    public const XML_PATH_REDELIVER_AFTER = 'system/queue/redeliver_after';
     public const XML_PATH_COMPLETED_RETENTION = 'system/queue/completed_retention';
     public const XML_PATH_FAILED_RETENTION = 'system/queue/failed_retention';
 
@@ -101,25 +100,17 @@ final class QueueManager
             self::writeAdapter(),
             self::tableName(),
             self::serializer(),
-            (int) \Mage::getStoreConfig(self::XML_PATH_REDELIVER_AFTER),
             (int) \Mage::getStoreConfig(self::XML_PATH_COMPLETED_RETENTION),
         );
     }
 
     /**
      * The transport a pool's worker consumes from: the shared one unless the
-     * pool narrows what it sees, overrides the redelivery window, or the caller
-     * claims under a worker id, in which case it gets its own instance.
-     *
-     * @param ?string $workerId Only a pool worker holding its lock passes one; see WorkerIdentity
+     * pool narrows what it sees, in which case it gets its own instance.
      */
-    public static function workerTransport(?Pool $pool = null, ?string $workerId = null): DbTransport
+    public static function workerTransport(?Pool $pool = null): DbTransport
     {
-        if ($pool === null) {
-            return self::dbTransport();
-        }
-
-        if ($workerId === null && $pool->excludedQueues === [] && $pool->redeliverAfter === null) {
+        if ($pool === null || $pool->excludedQueues === []) {
             return self::dbTransport();
         }
 
@@ -127,10 +118,8 @@ final class QueueManager
             self::writeAdapter(),
             self::tableName(),
             self::serializer(),
-            $pool->redeliverAfter ?? (int) \Mage::getStoreConfig(self::XML_PATH_REDELIVER_AFTER),
             (int) \Mage::getStoreConfig(self::XML_PATH_COMPLETED_RETENTION),
             $pool->excludedQueues,
-            $workerId,
         );
     }
 
@@ -140,18 +129,21 @@ final class QueueManager
     }
 
     /**
-     * Re-queue a stored failed message from the admin grid or CLI, flipping the
-     * row back to pending with a fresh retry budget. Only failed rows are
-     * retryable: flipping a claimed row would race the worker's ack.
+     * Re-queue a stored message from the admin grid or CLI, flipping the row
+     * back to pending with a fresh retry budget. Failed rows and rows a dead
+     * worker left claimed are both retryable; nothing else, since a pending row
+     * needs no help and a completed one is done. Nothing re-queues an abandoned
+     * claim automatically, so this is the only way one comes back.
      */
     public static function retryStoredMessage(int $messageId): bool
     {
+        $retryable = [DbTransport::STATUS_FAILED, DbTransport::STATUS_PROCESSING];
         $adapter = self::writeAdapter();
         $table = self::tableName();
         $row = $adapter->fetchRow(
             $adapter->select()->from($table)->where('message_id = ?', $messageId),
         );
-        if ($row === false || $row['status'] !== DbTransport::STATUS_FAILED) {
+        if ($row === false || !in_array($row['status'], $retryable, true)) {
             return false;
         }
 
@@ -162,12 +154,11 @@ final class QueueManager
             'retries' => 0,
             'available_at' => $now,
             'claimed_at' => null,
-            'claimed_by' => null,
             'processed_at' => null,
             'updated_at' => $now,
         ], [
             'message_id = ?' => $messageId,
-            'status = ?' => DbTransport::STATUS_FAILED,
+            'status IN (?)' => $retryable,
         ]) === 1;
     }
 

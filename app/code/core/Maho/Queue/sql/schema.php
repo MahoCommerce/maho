@@ -26,8 +26,6 @@ return function (Schema $schema): void {
     $message->addColumn('dedupe_key', Types::STRING, ['length' => 64, 'notnull' => false]);
     $message->addColumn('available_at', Types::DATETIME_MUTABLE, []);
     $message->addColumn('claimed_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
-    // Worker holding the claim, as machine:lock-name; crash recovery reads its lock.
-    $message->addColumn('claimed_by', Types::STRING, ['length' => 128, 'notnull' => false]);
     $message->addColumn('processed_at', Types::DATETIME_MUTABLE, ['notnull' => false]);
     $message->addColumn('created_at', Types::DATETIME_MUTABLE, ['default' => new CurrentTimestamp()]);
     // Transport keeps updated_at current on every write; the on-update

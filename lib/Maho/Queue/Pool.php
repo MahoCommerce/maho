@@ -11,7 +11,7 @@ namespace Maho\Queue;
 
 /**
  * A worker pool: one or more `queue:work` processes consuming a subset of the
- * logical queues, with their own limits and redelivery window. Pools keep
+ * logical queues, with their own limits. Pools keep
  * latency classes apart, so a ten-minute feed build cannot sit in front of an
  * order confirmation email.
  */
@@ -23,7 +23,6 @@ final readonly class Pool
      * @param list<string> $queues         Consume only these queues; empty consumes every queue not excluded
      * @param list<string> $excludedQueues Never consume these; the catch-all pool excludes every other pool's queues
      * @param ?int         $idleTimeout    Seconds of continuous idleness before exiting; null keeps the worker resident
-     * @param ?int         $redeliverAfter Per-pool override of system/queue/redeliver_after
      */
     public function __construct(
         public string $name,
@@ -33,7 +32,6 @@ final readonly class Pool
         public ?int $idleTimeout = null,
         public string $memoryLimit = '256M',
         public int $timeLimit = 3600,
-        public ?int $redeliverAfter = null,
     ) {}
 
     /**

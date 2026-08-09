@@ -51,22 +51,6 @@ final class PoolRegistry
         return null;
     }
 
-    /**
-     * The longest redelivery window any pool declares, or null when none
-     * overrides the store default. A worker that consumes every queue must not
-     * requeue a claim sooner than the pool owning it would, or the handler runs
-     * a second time alongside the first.
-     */
-    public static function widestRedeliveryWindow(): ?int
-    {
-        $windows = array_filter(
-            array_map(static fn(Pool $pool): ?int => $pool->redeliverAfter, self::all()),
-            static fn(?int $window): bool => $window !== null,
-        );
-
-        return $windows === [] ? null : max($windows);
-    }
-
     public static function reset(): void
     {
         self::$pools = null;
@@ -147,7 +131,6 @@ final class PoolRegistry
                 idleTimeout: isset($child->idle_timeout) ? max(0, (int) $child->idle_timeout) : null,
                 memoryLimit: trim((string) ($child->memory_limit ?? '')) ?: '256M',
                 timeLimit: max(0, (int) ($child->time_limit ?? 3600)),
-                redeliverAfter: isset($child->redeliver_after) ? max(0, (int) $child->redeliver_after) : null,
             );
         }
 

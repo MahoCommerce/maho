@@ -27,12 +27,12 @@ use Symfony\Component\Messenger\Worker;
 final class WorkerFactory
 {
     /**
-     * @param array{limit?: ?int, memoryLimit?: ?int, idleTimeout?: ?int, pool?: ?Pool, workerId?: ?string} $options
+     * @param array{limit?: ?int, memoryLimit?: ?int, idleTimeout?: ?int, pool?: ?Pool} $options
      */
     public static function create(array $options = []): Worker
     {
         $transportName = QueueManager::TRANSPORT_DB;
-        $transport = QueueManager::workerTransport($options['pool'] ?? null, $options['workerId'] ?? null);
+        $transport = QueueManager::workerTransport($options['pool'] ?? null);
 
         $dispatcher = new EventDispatcher();
         $dispatcher->addSubscriber(new AddErrorDetailsStampListener());

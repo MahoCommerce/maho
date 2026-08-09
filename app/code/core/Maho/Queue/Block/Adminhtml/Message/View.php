@@ -30,8 +30,15 @@ class Maho_Queue_Block_Adminhtml_Message_View extends Mage_Adminhtml_Block_Widge
         return $this->getUrlSecure('*/*/discard', ['id' => $this->getMessage()?->getId()]);
     }
 
+    /**
+     * Failed, plus a claim a dead worker left behind: nothing re-queues those
+     * automatically, so the grid is the only way back.
+     */
     public function isRetryable(): bool
     {
-        return $this->getMessage()?->getStatus() === Maho_Queue_Model_Message::STATUS_FAILED;
+        return in_array($this->getMessage()?->getStatus(), [
+            Maho_Queue_Model_Message::STATUS_FAILED,
+            Maho_Queue_Model_Message::STATUS_PROCESSING,
+        ], true);
     }
 }

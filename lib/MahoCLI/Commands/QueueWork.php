@@ -11,9 +11,7 @@ namespace MahoCLI\Commands;
 
 use Maho\Queue\Pool;
 use Maho\Queue\PoolRegistry;
-use Maho\Queue\QueueManager;
 use Maho\Queue\WorkerFactory;
-use Maho\Queue\WorkerIdentity;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\SignalableCommandInterface;
@@ -71,25 +69,16 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
             return Command::INVALID;
         }
 
-        // Only a worker holding its lock may stamp claims: without one, a free
-        // lock would make every claim look orphaned the moment it is taken.
-        $workerId = null;
         if ($input->getOption('exclusive')) {
             $lockName = $pool?->lockName($index) ?? Pool::LOCK_PREFIX;
             if (!\Mage::getSingleton('core/lock')->acquire($lockName, machineLocal: true)) {
                 $output->writeln("<error>Another exclusive queue worker already holds {$lockName}</error>");
                 return Command::INVALID;
             }
-            $workerId = WorkerIdentity::forLock($lockName);
         }
 
         // Unbounded unless asked: a hand-run worker keeps the limits it had before pools existed.
-        $base = $pool ?? new Pool(
-            name: 'ad-hoc',
-            memoryLimit: '',
-            timeLimit: 0,
-            redeliverAfter: $this->adHocRedeliveryWindow(),
-        );
+        $base = $pool ?? new Pool(name: 'ad-hoc', memoryLimit: '', timeLimit: 0);
         $effective = new Pool(
             name: $base->name,
             queues: $input->getOption('queue') ?: $base->queues,
@@ -101,7 +90,6 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
             },
             memoryLimit: (string) ($input->getOption('memory-limit') ?? $base->memoryLimit),
             timeLimit: (int) ($input->getOption('time-limit') ?? $base->timeLimit),
-            redeliverAfter: $base->redeliverAfter,
         );
 
         $memoryLimit = null;
@@ -118,7 +106,6 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
             'memoryLimit' => $memoryLimit,
             'idleTimeout' => $effective->idleTimeout,
             'pool' => $effective,
-            'workerId' => $workerId,
         ]);
 
         $output->writeln(sprintf(
@@ -157,19 +144,6 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
         $this->worker?->stop();
 
         return false;
-    }
-
-    /**
-     * A worker with no pool consumes every queue, so it must not requeue a claim
-     * before the pool owning that queue would: take the widest window in play.
-     */
-    private function adHocRedeliveryWindow(): ?int
-    {
-        $widest = PoolRegistry::widestRedeliveryWindow();
-
-        return $widest === null
-            ? null
-            : max($widest, (int) \Mage::getStoreConfig(QueueManager::XML_PATH_REDELIVER_AFTER));
     }
 
     private function parseMemoryLimit(string $limit): ?int

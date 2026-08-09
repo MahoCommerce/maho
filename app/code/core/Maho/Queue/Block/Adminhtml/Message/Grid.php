@@ -114,7 +114,7 @@ class Maho_Queue_Block_Adminhtml_Message_Grid extends Mage_Adminhtml_Block_Widge
         $this->getMassactionBlock()->addItem('retry', [
             'label'   => $helper->__('Retry'),
             'url'     => $this->getUrl('*/*/massRetry'),
-            'confirm' => $helper->__('Re-queue the selected failed messages?'),
+            'confirm' => $helper->__('Re-queue the selected messages?'),
         ]);
 
         $this->getMassactionBlock()->addItem('discard', [

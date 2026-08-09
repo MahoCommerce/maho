@@ -51,10 +51,6 @@ $statusOptions = Maho_Queue_Model_Message::getStatusOptions();
         <td class="label"><?php echo $helper->__('Processed (UTC)') ?></td>
         <td class="value"><?php echo $this->escapeHtml($message->getProcessedAt() ?: '-') ?></td>
     </tr>
-    <tr>
-        <td class="label"><?php echo $helper->__('Claimed By') ?></td>
-        <td class="value" colspan="3"><?php echo $this->escapeHtml($message->getClaimedBy() ?: '-') ?></td>
-    </tr>
 </table>
 
 <?php if ($message->getErrorMessage()): ?>

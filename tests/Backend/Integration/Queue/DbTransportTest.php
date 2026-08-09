@@ -113,23 +113,28 @@ it('inserts a failure-transport send as a failed row instead of updating by the 
     expect($rows[0]['error_message'])->toContain('handler blew up');
 });
 
-it('retries only failed stored messages, refusing rows a worker holds', function () {
+it('retries a failed row and a claim a dead worker left behind, but not a pending one', function () {
     QueueManager::dispatch(makeEmailMessage());
     $transport = QueueManager::dbTransport();
-    $envelopes = [...$transport->get()];
     $id = (int) fetchQueueRows()[0]['message_id'];
 
+    // Pending needs no help.
     expect(QueueManager::retryStoredMessage($id))->toBeFalse();
-    expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PROCESSING);
 
+    // Claimed: nothing requeues this automatically, so the grid must be able to.
+    $envelopes = [...$transport->get()];
+    expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PROCESSING);
+    expect(QueueManager::retryStoredMessage($id))->toBeTrue();
+    expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PENDING);
+
+    [...$transport->get()];
     $transport->reject($envelopes[0]);
     expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_FAILED);
-
     expect(QueueManager::retryStoredMessage($id))->toBeTrue();
     expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PENDING);
 });
 
-it('re-queues stale processing claims after redeliver_after', function () {
+it('never hands out a claim again on its own, however old it is', function () {
     QueueManager::dispatch(makeEmailMessage());
     $transport = QueueManager::dbTransport();
     expect([...$transport->get()])->toHaveCount(1);
@@ -138,8 +143,10 @@ it('re-queues stale processing claims after redeliver_after', function () {
         'claimed_at' => gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 7200),
     ]);
 
-    $envelopes = [...$transport->get()];
-    expect($envelopes)->toHaveCount(1);
+    // A claim is parked for an operator, never redelivered on a timer: running
+    // a handler a second time is not something a clock gets to decide.
+    expect([...$transport->get()])->toHaveCount(0);
+    expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PROCESSING);
 });
 
 it('fails a claimed row whose message class has no registered handler', function () {

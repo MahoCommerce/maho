@@ -58,7 +58,6 @@
                     <catch_all>1</catch_all>
                     <idle_timeout>60</idle_timeout>
                     <memory_limit>512M</memory_limit>
-                    <redeliver_after>10800</redeliver_after>
                     <sort_order>20</sort_order>
                 </slow>
             </pools>
@@ -91,7 +90,6 @@
                 <retry_delay>60</retry_delay>
                 <retry_multiplier>4</retry_multiplier>
                 <retry_max_delay>21600</retry_max_delay>
-                <redeliver_after>3600</redeliver_after>
                 <completed_retention>0</completed_retention>
                 <failed_retention>30</failed_retention>
             </queue>
