@@ -212,6 +212,25 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
     }
 
     /**
+     * Claims old enough to be read as abandoned by a worker that died. Nothing
+     * acts on this: it drives the admin notice, so an honest handler that
+     * overruns costs a notice rather than a second run.
+     */
+    public function countAbandoned(int $olderThanSeconds): int
+    {
+        $select = $this->adapter->select()
+            ->from($this->table, new \Maho\Db\Expr('COUNT(*)'))
+            ->where('status = ?', self::STATUS_PROCESSING)
+            ->where('claimed_at < ?', gmdate(
+                \Mage_Core_Model_Locale::DATETIME_FORMAT,
+                time() - $olderThanSeconds,
+            ));
+        $this->applyQueueFilter($select, null);
+
+        return (int) $this->adapter->fetchOne($select);
+    }
+
+    /**
      * @param list<string>|null $queues
      */
     private function applyQueueFilter(\Maho\Db\Select $select, ?array $queues): void

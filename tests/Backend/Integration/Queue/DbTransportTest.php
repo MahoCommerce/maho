@@ -147,6 +147,10 @@ it('never hands out a claim again on its own, however old it is', function () {
     // a handler a second time is not something a clock gets to decide.
     expect([...$transport->get()])->toHaveCount(0);
     expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PROCESSING);
+
+    // It is still reported, so the admin notice can point an operator at it.
+    expect($transport->countAbandoned(3600))->toBe(1);
+    expect($transport->countAbandoned(4 * 3600))->toBe(0);
 });
 
 it('fails a claimed row whose message class has no registered handler', function () {
