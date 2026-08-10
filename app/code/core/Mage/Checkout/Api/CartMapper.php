@@ -115,16 +115,20 @@ class CartMapper
         if ($giftcardCodesJson) {
             $giftcardCodes = \Mage::helper('core')->jsonDecode($giftcardCodesJson, true);
             if (is_array($giftcardCodes)) {
-                // giftcard_codes stores {code: applied_amount} in the website
-                // base currency (the total collector owns that format), and the
-                // card balance is stored in the issuing website's base currency
-                // too. Convert both to quote currency: everything non-base* in
-                // this response is quote currency. The live card balance must be
-                // loaded from the model. This is the single source for applied
-                // gift cards: the GraphQL cart handler maps through here too,
-                // so REST and GraphQL return identical values.
-                $quoteCurrency = $cart->currency;
+                // giftcard_codes stores {code: applied_amount} in base currency,
+                // and the live card balance is base currency too. Convert both
+                // with the same guarded forward rate so the two fields of one
+                // element can never disagree (getBalance($currency) throws on a
+                // missing rate row). Single source for applied gift cards: the
+                // GraphQL cart handler maps through here too.
                 $store = $quote->getStore();
+                $rate = 1.0;
+                if ($store->getCurrentCurrencyCode() !== $store->getBaseCurrencyCode()) {
+                    $currentRate = (float) $store->getCurrentCurrencyRate();
+                    if ($currentRate > 0) {
+                        $rate = $currentRate;
+                    }
+                }
                 foreach ($giftcardCodes as $code => $appliedAmount) {
                     /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
                     $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
@@ -133,8 +137,8 @@ class CartMapper
                     }
                     $cart->appliedGiftcards[] = [
                         'code' => (string) $code,
-                        'balance' => (float) $giftcard->getBalance($quoteCurrency),
-                        'appliedAmount' => (float) $store->convertPrice((float) $appliedAmount, false),
+                        'balance' => (float) $store->roundPrice($giftcard->getBalance() * $rate),
+                        'appliedAmount' => (float) $store->roundPrice((float) $appliedAmount * $rate),
                     ];
                 }
             }

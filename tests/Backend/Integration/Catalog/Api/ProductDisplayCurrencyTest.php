@@ -120,6 +120,48 @@ describe('Product API display-currency conversion (issue #1238)', function (): v
         expect($found->price)->toBeLessThanOrEqual($eurPrice + 0.51);
     });
 
+    test('a price band equal to the rounded display price keeps the product', function (): void {
+        $product = catalogPickPlainSimpleProduct();
+        $eurPrice = round((float) $product->getFinalPrice() * $this->rate, 2);
+
+        $method = new ReflectionMethod(ProductProvider::class, 'getCollection');
+        $paginator = $method->invoke($this->provider, [
+            'filters' => [
+                'priceMin' => $eurPrice,
+                'priceMax' => $eurPrice,
+                'pageSize' => 50,
+            ],
+        ]);
+
+        $found = false;
+        foreach ($paginator as $dto) {
+            if ($dto->id === (int) $product->getId()) {
+                $found = true;
+            }
+        }
+
+        // The display price is rounded after conversion, so a band placed
+        // exactly on it must not exclude the product it was read from.
+        expect($found)->toBeTrue();
+    });
+
+    test('priceMax=0 filters to free products instead of being ignored', function (): void {
+        $product = catalogPickPlainSimpleProduct();
+
+        $method = new ReflectionMethod(ProductProvider::class, 'getCollection');
+        $paginator = $method->invoke($this->provider, [
+            'filters' => ['priceMax' => 0, 'pageSize' => 50],
+        ]);
+
+        $ids = [];
+        foreach ($paginator as $dto) {
+            $ids[] = $dto->id;
+        }
+
+        // Zero is a meaningful bound: a priced product must not come back.
+        expect($ids)->not->toContain((int) $product->getId());
+    });
+
     test('listing DTOs convert prices to the display currency', function (): void {
         $product = catalogPickPlainSimpleProduct();
         $expected = round((float) $product->getPrice() * $this->rate, 2);

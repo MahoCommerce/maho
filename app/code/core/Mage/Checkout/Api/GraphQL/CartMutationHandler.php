@@ -248,10 +248,12 @@ class CartMutationHandler
         if (!$giftcard->getId()) {
             throw NotFoundException::giftCard($code);
         }
+        // getBalance() with no argument returns the issuing website's base currency.
+        $currencyCode = \Mage::app()->getStore()->getCurrentCurrencyCode();
         return ['checkGiftCardBalance' => [
             'code' => $giftcard->getCode(),
-            'currency' => \Mage::app()->getStore()->getCurrentCurrencyCode(),
-            'balance' => (float) $giftcard->getBalance(),
+            'currency' => $currencyCode,
+            'balance' => (float) $giftcard->getBalance($currencyCode),
             'status' => $giftcard->getStatus(),
             'isValid' => $giftcard->isValid(),
             'expiresAt' => $giftcard->getExpiresAt(),

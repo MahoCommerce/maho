@@ -631,12 +631,17 @@ class CartService
         // is a base-currency map (the total collector rewrites it in base on
         // every collectTotals()), so snapshot in base too; the requested amount
         // arrives in quote currency, what the client sees, and is converted
-        // first. revalidateGiftcards() re-checks at placement, but the capped
-        // value here keeps quote totals and pre-auth correct in the meantime.
+        // first, dividing by the forward rate (rate imports only maintain
+        // base-to-allowed rows, so a quote-to-base lookup would throw). The
+        // collector ignores the stored amount and applies the full balance,
+        // so the cap only bounds the snapshot.
         $baseCurrency = $quote->getBaseCurrencyCode() ?: $quote->getStore()->getBaseCurrencyCode();
         $quoteCurrency = $quote->getQuoteCurrencyCode() ?: $quote->getStore()->getCurrentCurrencyCode();
         if ($amount !== null && $quoteCurrency !== $baseCurrency) {
-            $amount = (float) \Mage::helper('directory')->currencyConvert($amount, $quoteCurrency, $baseCurrency);
+            $rate = (float) $quote->getStore()->getBaseCurrency()->getRate($quoteCurrency);
+            if ($rate > 0) {
+                $amount /= $rate;
+            }
         }
         $balance = (float) $giftcard->getBalance($baseCurrency);
         $appliedCodes[$giftcardCode] = $amount === null ? $balance : min($amount, $balance);

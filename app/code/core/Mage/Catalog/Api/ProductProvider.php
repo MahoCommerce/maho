@@ -73,18 +73,40 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         return StoreContext::getStore()->getCurrentCurrencyCode();
     }
 
+    /** Set by displayCurrencyRate(); <= 0 means no conversion. */
+    private ?float $displayRate = null;
+
+    /**
+     * Forward base-to-display rate, or null when prices stay in base currency:
+     * backend tokens (lossless read-modify-write), display equals base, or no
+     * imported rate for the display code. Memoized, hasBackendAccess() runs
+     * security voters on every call.
+     */
+    private function displayCurrencyRate(): ?float
+    {
+        if ($this->displayRate === null) {
+            $this->displayRate = -1.0;
+            if (!$this->hasBackendAccess('products')) {
+                $store = StoreContext::getStore();
+                $currencyCode = $store->getCurrentCurrencyCode();
+                if ($currencyCode !== $store->getBaseCurrencyCode()) {
+                    $rate = (float) $store->getBaseCurrency()->getRate($currencyCode);
+                    if ($rate > 0) {
+                        $this->displayRate = $rate;
+                    }
+                }
+            }
+        }
+        return $this->displayRate > 0 ? $this->displayRate : null;
+    }
+
     /**
      * Whether outgoing DTO prices must be converted to the store display
-     * currency. Public reads only: backend tokens read the raw base-currency
-     * values they write, so admin read-modify-write round trips stay lossless.
+     * currency.
      */
     private function shouldConvertPrices(): bool
     {
-        if ($this->hasBackendAccess('products')) {
-            return false;
-        }
-        $store = StoreContext::getStore();
-        return $store->getCurrentCurrencyCode() !== $store->getBaseCurrencyCode();
+        return $this->displayCurrencyRate() !== null;
     }
 
     /**
@@ -483,18 +505,17 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // The bounds arrive in the same display currency the DTO prices are
         // reported in; the index stores base amounts, so translate the bounds
         // back to base before filtering or filters and output would disagree.
-        $priceRate = 1.0;
-        if ($this->shouldConvertPrices()) {
-            $currentRate = (float) StoreContext::getStore()->getCurrentCurrencyRate();
-            if ($currentRate > 0) {
-                $priceRate = $currentRate;
-            }
+        // Display prices round to 2dp after conversion, so widen each bound by
+        // half a cent; zero is a meaningful bound (priceMax=0 means free).
+        $priceRate = $this->displayCurrencyRate() ?? 1.0;
+        $boundEpsilon = $priceRate === 1.0 ? 0.0 : 0.005;
+        $priceMin = $requestFilters['priceMin'] ?? null;
+        $priceMax = $requestFilters['priceMax'] ?? null;
+        if ($priceMin !== null && $priceMin !== '') {
+            $collection->getSelect()->where('price_index.min_price >= ?', ((float) $priceMin - $boundEpsilon) / $priceRate);
         }
-        if (!empty($requestFilters['priceMin'])) {
-            $collection->getSelect()->where('price_index.min_price >= ?', (float) $requestFilters['priceMin'] / $priceRate);
-        }
-        if (!empty($requestFilters['priceMax'])) {
-            $collection->getSelect()->where('price_index.min_price <= ?', (float) $requestFilters['priceMax'] / $priceRate);
+        if ($priceMax !== null && $priceMax !== '') {
+            $collection->getSelect()->where('price_index.min_price <= ?', ((float) $priceMax + $boundEpsilon) / $priceRate);
         }
 
         // Extract attribute filters, REST uses attr_ prefix, GraphQL uses JSON string
@@ -695,8 +716,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         if ($forListing) {
-            $this->applyDisplayCurrency($dto);
+            // Event before conversion, so listeners see base-currency DTO values.
             \Mage::dispatchEvent('api_product_dto_build', ['product' => $product, 'for_listing' => true, 'dto' => $dto, 'customer_group_id' => $this->getCustomerGroupId()]);
+            $this->applyDisplayCurrency($dto);
             return;
         }
 
@@ -1027,8 +1049,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             ];
         }
 
-        $this->applyDisplayCurrency($dto);
+        // Event before conversion, so listeners see base-currency DTO values.
         \Mage::dispatchEvent('api_product_dto_build', ['product' => $product, 'for_listing' => false, 'dto' => $dto, 'customer_group_id' => $this->getCustomerGroupId()]);
+        $this->applyDisplayCurrency($dto);
     }
 
     /**
