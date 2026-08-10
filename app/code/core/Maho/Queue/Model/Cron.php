@@ -130,5 +130,4 @@ class Maho_Queue_Model_Cron
             escapeshellarg(Mage::getBaseDir('var') . '/log/queue-worker.log'),
         ));
     }
-
 }

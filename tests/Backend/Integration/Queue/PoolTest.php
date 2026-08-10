@@ -139,6 +139,19 @@ it('skips a pool with nothing routed to it instead of letting it rival the catch
     });
 });
 
+it('reads pool flags with core config semantics, so "true" means on', function () {
+    withQueueConfig('<queue><routing><zz_q>zz_flag</zz_q></routing><pools><zz_flag><active>true</active><sort_order>5</sort_order></zz_flag></pools></queue>', function () {
+        expect(PoolRegistry::get('zz_flag'))->not->toBeNull();
+    });
+});
+
+it('drops a pool declared inactive with "false"', function () {
+    withQueueConfig('<queue><routing><zz_q>zz_flag</zz_q></routing><pools><zz_flag><active>false</active><sort_order>5</sort_order></zz_flag></pools></queue>', function () {
+        expect(PoolRegistry::get('zz_flag'))->toBeNull();
+        expect(PoolRegistry::poolFor('zz_q')?->name)->toBe('slow');
+    });
+});
+
 it('does not hand the catch-all worker a message belonging to another pool', function () {
     QueueManager::dispatch(makeEmailMessage(), queue: Mage_Core_Model_Email_Queue::QUEUE_NAME);
     QueueManager::dispatch(makeEmailMessage('newsletter batch'), queue: 'newsletter');

@@ -34,7 +34,11 @@ return function (Schema $schema): void {
     $message->addPrimaryKeyConstraint(
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('message_id')->create(),
     );
+    // (status, available_at, queue) serves unfiltered polls and countDue's date
+    // bound; (status, queue, available_at) lets a pool worker's queue IN (...)
+    // poll seek instead of walking every due row of the other pools' backlogs.
     $message->addIndex(['status', 'available_at', 'queue']);
+    $message->addIndex(['status', 'queue', 'available_at']);
     $message->addIndex(['dedupe_key']);
     $message->addIndex(['created_at']);
     $message->addIndex(['status', 'processed_at']);

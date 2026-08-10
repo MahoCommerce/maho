@@ -119,14 +119,21 @@ class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Act
     public function massRetryAction(): void
     {
         $retried = 0;
+        $skipped = 0;
         foreach ($this->getMessageIds() as $id) {
             if (QueueManager::retryStoredMessage($id)) {
                 $retried++;
+            } else {
+                $skipped++;
             }
         }
-        Mage::getSingleton('adminhtml/session')->addSuccess(
-            Mage::helper('queue')->__('%s message(s) re-queued.', $retried),
-        );
+        $session = Mage::getSingleton('adminhtml/session');
+        if ($retried > 0) {
+            $session->addSuccess(Mage::helper('queue')->__('%s message(s) re-queued.', $retried));
+        }
+        if ($skipped > 0) {
+            $session->addNotice(Mage::helper('queue')->__('%s message(s) were skipped: only failed or stuck messages can be retried.', $skipped));
+        }
         $this->_redirect('*/*/');
     }
 

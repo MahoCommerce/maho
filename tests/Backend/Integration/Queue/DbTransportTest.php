@@ -230,6 +230,28 @@ it('does not revive a claim that is no longer processing', function () {
     expect($row['claimed_at'])->toBeNull();
 });
 
+it('does not let a late ack swallow a row an operator already retried', function () {
+    QueueManager::dispatch(makeEmailMessage());
+
+    $transport = QueueManager::dbTransport();
+    $envelopes = [...$transport->get()];
+    $id = (int) fetchQueueRows()[0]['message_id'];
+
+    // The claim goes stale (the worker looks dead), so the operator re-queues it.
+    queueAdapter()->update(QueueManager::tableName(), [
+        'claimed_at' => gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 7200),
+    ], ['message_id = ?' => $id]);
+    expect(QueueManager::retryStoredMessage($id))->toBeTrue();
+
+    // The worker was alive after all and finishes: its ack must not delete or
+    // complete the pending row, or the operator's retry silently vanishes.
+    $transport->ack($envelopes[0]);
+
+    $rows = fetchQueueRows();
+    expect($rows)->toHaveCount(1);
+    expect($rows[0]['status'])->toBe(DbTransport::STATUS_PENDING);
+});
+
 it('counts pending messages and finds stored ones', function () {
     QueueManager::dispatch(makeEmailMessage());
     QueueManager::dispatch(makeEmailMessage('second'));

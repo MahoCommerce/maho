@@ -145,18 +145,15 @@ final class QueueManager
     {
         $adapter = self::writeAdapter();
         $table = self::tableName();
-        $row = $adapter->fetchRow(
-            $adapter->select()->from($table)->where('message_id = ?', $messageId),
+        $status = $adapter->fetchOne(
+            $adapter->select()->from($table, 'status')->where('message_id = ?', $messageId),
         );
-        if ($row === false) {
-            return false;
-        }
 
         $where = ['message_id = ?' => $messageId];
-        if ($row['status'] === DbTransport::STATUS_PROCESSING) {
+        if ($status === DbTransport::STATUS_PROCESSING) {
             $where['status = ?'] = DbTransport::STATUS_PROCESSING;
             $where['claimed_at < ?'] = DbTransport::abandonedBefore();
-        } elseif ($row['status'] === DbTransport::STATUS_FAILED) {
+        } elseif ($status === DbTransport::STATUS_FAILED) {
             $where['status = ?'] = DbTransport::STATUS_FAILED;
         } else {
             return false;

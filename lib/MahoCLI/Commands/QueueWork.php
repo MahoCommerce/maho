@@ -71,6 +71,13 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
         }
 
         if ($input->getOption('exclusive')) {
+            // The exclusive lock tells the watchdog this process covers the whole
+            // roster (or a whole pool); a queue filter would make that a lie and
+            // silently starve every queue the filter leaves out.
+            if ($input->getOption('queue') !== [] || $input->getOption('exclude-queue') !== []) {
+                $output->writeln('<error>--exclusive cannot be combined with --queue or --exclude-queue: the lock claims coverage the filter takes away</error>');
+                return Command::INVALID;
+            }
             $lockName = $pool?->lockName($index) ?? Pool::LOCK_PREFIX;
             if (!\Mage::getSingleton('core/lock')->acquire($lockName, machineLocal: true)) {
                 $output->writeln("<error>Another exclusive queue worker already holds {$lockName}</error>");
@@ -86,8 +93,12 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
             queues: $queues ?: $base->queues,
             // An explicit allow-list already narrows the worker, and keeping the
             // pool's "everything but" list on top of it would leave
-            // `--pool=slow --queue=email` consuming nothing at all.
-            excludedQueues: $input->getOption('exclude-queue') ?: ($queues ? [] : $base->excludedQueues),
+            // `--pool=slow --queue=email` consuming nothing at all. Without an
+            // allow-list the pool's own exclusions stay: they are the catch-all's
+            // isolation boundary, and an extra --exclude-queue must not erase it.
+            excludedQueues: $queues
+                ? $input->getOption('exclude-queue')
+                : array_values(array_unique(array_merge($base->excludedQueues, $input->getOption('exclude-queue')))),
             idleTimeout: match (true) {
                 $input->getOption('idle-timeout') !== null => max(0, (int) $input->getOption('idle-timeout')),
                 (bool) $input->getOption('stop-when-empty') => 0,
@@ -131,9 +142,26 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
         // Drives keepalive(): without it a slow handler is indistinguishable from a dead worker.
         if (SignalRegistry::isSupported()) {
             $this->getApplication()?->setAlarmInterval(DbTransport::KEEPALIVE_INTERVAL_SECONDS);
+        } else {
+            $output->writeln(sprintf(
+                '<comment>pcntl is unavailable, so claims are not refreshed while a handler runs: a handler longer than %d seconds is reported as abandoned even though its worker is alive</comment>',
+                DbTransport::ABANDONED_AFTER_SECONDS,
+            ));
         }
 
-        $this->worker->run($options);
+        try {
+            $this->worker->run($options);
+        } finally {
+            // The recurring alarm outlives run(): the command's return pops the
+            // SIGALRM handler back to SIG_DFL while an alarm is still pending,
+            // and SIG_DFL terminates the process. Harmless for a detached worker
+            // about to exit, fatal for a parent command (email:queue:process)
+            // that invoked queue:work in-process and still has work to do.
+            if (SignalRegistry::isSupported()) {
+                $this->getApplication()?->setAlarmInterval(null);
+                pcntl_alarm(0);
+            }
+        }
 
         return Command::SUCCESS;
     }

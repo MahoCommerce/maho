@@ -133,19 +133,27 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
         return $this->claimNext($queueNames);
     }
 
+    /**
+     * The status guard mirrors reject() and keepalive(): a row an operator
+     * already flipped back to pending must survive the late ack of the worker
+     * that used to hold it, or the retry is silently swallowed.
+     */
     #[\Override]
     public function ack(Envelope $envelope): void
     {
-        $messageId = $this->messageId($envelope);
+        $where = [
+            'message_id = ?' => $this->messageId($envelope),
+            'status = ?' => self::STATUS_PROCESSING,
+        ];
         if ($this->completedRetentionDays > 0) {
             $now = \Mage_Core_Model_Locale::nowUtc();
             $this->adapter->update($this->table, [
                 'status' => self::STATUS_COMPLETED,
                 'processed_at' => $now,
                 'updated_at' => $now,
-            ], ['message_id = ?' => $messageId]);
+            ], $where);
         } else {
-            $this->adapter->delete($this->table, ['message_id = ?' => $messageId]);
+            $this->adapter->delete($this->table, $where);
         }
     }
 

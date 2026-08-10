@@ -173,8 +173,9 @@ final class PoolRegistry
         return $queuesByPool;
     }
 
+    /** Defers to is() so '<catch_all>true</catch_all>' means the same as everywhere else in config. */
     private static function flag(\Mage_Core_Model_Config_Element $node, string $child, bool $default): bool
     {
-        return isset($node->{$child}) ? (bool) (int) $node->{$child} : $default;
+        return isset($node->{$child}) ? $node->is($child) : $default;
     }
 }

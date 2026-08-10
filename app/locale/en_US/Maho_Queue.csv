@@ -1,5 +1,6 @@
 "%s message(s) discarded.","%s message(s) discarded."
 "%s message(s) re-queued.","%s message(s) re-queued."
+"%s message(s) were skipped: only failed or stuck messages can be retried.","%s message(s) were skipped: only failed or stuck messages can be retried."
 "%s queue message(s) were claimed by a worker that never finished. They are not re-queued automatically: <a href=""%s"">retry or discard them</a>.","%s queue message(s) were claimed by a worker that never finished. They are not re-queued automatically: <a href=""%s"">retry or discard them</a>."
 "0 keeps failed messages forever.","0 keeps failed messages forever."
 "0 removes messages immediately on success; a positive value keeps them visible in the grid for this many days.","0 removes messages immediately on success; a positive value keeps them visible in the grid for this many days."
