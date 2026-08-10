@@ -637,9 +637,12 @@ class CartService
         $quoteCurrency = $quote->getQuoteCurrencyCode() ?: $quote->getStore()->getCurrentCurrencyCode();
         if ($amount !== null && $quoteCurrency !== $baseCurrency) {
             $rate = (float) $quote->getStore()->getBaseCurrency()->getRate($quoteCurrency);
-            if ($rate > 0) {
-                $amount /= $rate;
+            // Fail loudly like the totals pipeline would: silently skipping the
+            // division would store a quote-currency number as a base snapshot.
+            if ($rate <= 0) {
+                throw new BadRequestHttpException('No exchange rate available for "' . $quoteCurrency . '"');
             }
+            $amount /= $rate;
         }
         $balance = (float) $giftcard->getBalance($baseCurrency);
         $appliedCodes[$giftcardCode] = $amount === null ? $balance : min($amount, $balance);

@@ -73,20 +73,27 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         return StoreContext::getStore()->getCurrentCurrencyCode();
     }
 
-    /** Set by displayCurrencyRate(); <= 0 means no conversion. */
+    private ?bool $backendProductsAccess = null;
+
+    /** Memoized per request; hasBackendAccess() runs security voters on every call. */
+    private function backendProductsAccess(): bool
+    {
+        return $this->backendProductsAccess ??= $this->hasBackendAccess('products');
+    }
+
+    private bool $displayRateResolved = false;
     private ?float $displayRate = null;
 
     /**
      * Forward base-to-display rate, or null when prices stay in base currency:
      * backend tokens (lossless read-modify-write), display equals base, or no
-     * imported rate for the display code. Memoized, hasBackendAccess() runs
-     * security voters on every call.
+     * imported rate for the display code.
      */
     private function displayCurrencyRate(): ?float
     {
-        if ($this->displayRate === null) {
-            $this->displayRate = -1.0;
-            if (!$this->hasBackendAccess('products')) {
+        if (!$this->displayRateResolved) {
+            $this->displayRateResolved = true;
+            if (!$this->backendProductsAccess()) {
                 $store = StoreContext::getStore();
                 $currencyCode = $store->getCurrentCurrencyCode();
                 if ($currencyCode !== $store->getBaseCurrencyCode()) {
@@ -97,7 +104,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 }
             }
         }
-        return $this->displayRate > 0 ? $this->displayRate : null;
+        return $this->displayRate;
     }
 
     /**
@@ -116,25 +123,31 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     {
         $store = StoreContext::getStore();
 
-        if ($this->displayCurrencyRate() === null) {
+        $rate = $this->displayCurrencyRate();
+        if ($rate === null) {
             $dto->currency = $store->getBaseCurrencyCode();
             return;
         }
 
-        $convert = fn(float|int|null $value): ?float => $value === null
+        $convert = fn(?float $value): ?float => $value === null
             ? null
-            : (float) $store->roundPrice($store->convertPrice((float) $value, false));
+            : (float) $store->roundPrice($value * $rate);
 
         $dto->price = $convert($dto->price);
-        $dto->specialPrice = $convert($dto->specialPrice);
         $dto->finalPrice = $convert($dto->finalPrice);
         $dto->minimalPrice = $convert($dto->minimalPrice);
         $dto->msrp = $convert($dto->msrp);
 
-        foreach ($dto->tierPrices as &$tier) {
-            $tier['price'] = $convert((float) $tier['price']);
+        // Bundle special_price and tier price rows are percent discounts
+        // (Mage_Bundle_Model_Product_Price applies them as finalPrice * pct/100),
+        // not amounts, so multiplying them by the rate would corrupt them.
+        if ($dto->type !== \Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
+            $dto->specialPrice = $convert($dto->specialPrice);
+            foreach ($dto->tierPrices as &$tier) {
+                $tier['price'] = $convert((float) $tier['price']);
+            }
+            unset($tier);
         }
-        unset($tier);
 
         foreach ($dto->variants as &$variant) {
             $variant['price'] = $convert((float) $variant['price']);
@@ -205,7 +218,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         if ($operation instanceof CollectionOperationInterface) {
-            $backend = $this->hasBackendAccess('products');
+            $backend = $this->backendProductsAccess();
             $sku = $context['args']['sku'] ?? null;
             if ($sku) {
                 $dto = $this->getProductBySku($sku, !$backend);
@@ -236,7 +249,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // Backend readers may load disabled and other-website products (and
         // raw global values via ?store=admin), so they bypass the shared DTO
         // cache, whose key has no auth dimension.
-        if ($this->hasBackendAccess('products')) {
+        if ($this->backendProductsAccess()) {
             return $this->assertBackendProductAccess($this->loadProductDto($id, visibleOnly: false));
         }
 
@@ -363,7 +376,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // Backend readers get unconverted base-currency DTOs, so they must not
         // share cached entries with public readers of the same store/currency.
         $scope = StoreContext::getStoreId() . '_' . $this->getCustomerGroupId() . '_' . $this->resolveCurrencyCode()
-            . ($this->hasBackendAccess('products') ? '_backend' : '');
+            . ($this->backendProductsAccess() ? '_backend' : '');
         return 'api_products_' . md5(\Mage::helper('core')->jsonEncode($keyData) . '_' . $scope);
     }
 

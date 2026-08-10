@@ -231,7 +231,7 @@ class Product extends CrudResource
     public ?float $minimalPrice = null;
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Currency code for all price fields', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Currency code for all price fields except the giftcard amount fields, which stay in the website base currency', writable: false, extraProperties: ['computed' => true])]
     public string $currency = '';
 
     #[Groups(['product:detail'])]
@@ -433,15 +433,15 @@ class Product extends CrudResource
 
     /** @var float[] */
     #[Groups(['product:detail'])]
-    #[ApiProperty(description: 'Preset amounts (giftcard fixed/combined types)', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Preset amounts (giftcard fixed/combined types), in website base currency: pass back verbatim as the add-to-cart amount', writable: false, extraProperties: ['computed' => true])]
     public array $giftcardAmounts = [];
 
     #[Groups(['product:detail'])]
-    #[ApiProperty(description: 'Minimum custom amount (giftcard range/combined)', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Minimum custom amount (giftcard range/combined), in website base currency', writable: false, extraProperties: ['computed' => true])]
     public ?float $giftcardMinAmount = null;
 
     #[Groups(['product:detail'])]
-    #[ApiProperty(description: 'Maximum custom amount (giftcard range/combined)', writable: false, extraProperties: ['computed' => true])]
+    #[ApiProperty(description: 'Maximum custom amount (giftcard range/combined), in website base currency', writable: false, extraProperties: ['computed' => true])]
     public ?float $giftcardMaxAmount = null;
 
     #[Groups(['product:detail'])]

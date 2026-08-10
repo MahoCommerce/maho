@@ -115,13 +115,12 @@ class CartMapper
         if ($giftcardCodesJson) {
             $giftcardCodes = \Mage::helper('core')->jsonDecode($giftcardCodesJson, true);
             if (is_array($giftcardCodes)) {
-                // giftcard_codes stores {code: applied_amount} in the quote's
-                // base currency. Skip cards the total collector skips (wrong
-                // website, expired, drained), then convert both fields exactly
-                // like the collector converts the discount, so the element
-                // agrees with prices['giftcardAmount']. Single source for
-                // applied gift cards: the GraphQL cart handler maps through
-                // here too.
+                // giftcard_codes stores {code: applied_amount} in base
+                // currency; the collector prunes invalid cards on collect,
+                // skip any lingering in a not-yet-collected quote. Convert
+                // both fields like the collector converts the discount so the
+                // element agrees with prices['giftcardAmount']. The GraphQL
+                // cart handler maps through here too.
                 $store = $quote->getStore();
                 $websiteId = (int) $store->getWebsiteId();
                 foreach ($giftcardCodes as $code => $appliedAmount) {
@@ -130,7 +129,10 @@ class CartMapper
                     if (!$giftcard->getId() || !$giftcard->isValidForWebsite($websiteId)) {
                         continue;
                     }
-                    $balance = $giftcard->getBalance($store->getBaseCurrencyCode());
+                    // isValidForWebsite() ensures the card belongs to this
+                    // website, so its raw balance is already base currency;
+                    // the bare call cannot throw on a missing rate row.
+                    $balance = $giftcard->getBalance();
                     $cart->appliedGiftcards[] = [
                         'code' => (string) $code,
                         'balance' => (float) $store->roundPrice($store->convertPrice($balance, false)),
@@ -167,7 +169,9 @@ class CartMapper
         // getPrice() is website base currency; getCalculationPrice() is the
         // converted (or custom) unit price the totals pipeline multiplies, and
         // calcRowTotal() rounds it first, so round here to keep price * qty
-        // equal to rowTotal.
+        // equal to rowTotal. Tax-inclusive Row/Total calculation derives the
+        // unit price from an already-rounded row total, so there the two can
+        // still differ by up to one cent.
         $dto->price = (float) $item->getStore()->roundPrice($item->getCalculationPrice());
         $dto->priceInclTax = (float) $item->getPriceInclTax();
         $dto->rowTotal = (float) $item->getRowTotal();
