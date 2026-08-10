@@ -54,12 +54,6 @@ class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Act
     #[Maho\Config\Route('/admin/queue')]
     public function indexAction(): void
     {
-        if (QueueManager::transportName() === QueueManager::TRANSPORT_REDIS) {
-            Mage::getSingleton('adminhtml/session')->addNotice(
-                Mage::helper('queue')->__('The Redis transport is active: pending messages live in Redis and are not listed here, only failures are.'),
-            );
-        }
-
         $this->_title(Mage::helper('queue')->__('Message Queue'));
         $this->_initAction();
         $this->renderLayout();
@@ -104,8 +98,9 @@ class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Act
         if (QueueManager::retryStoredMessage($id)) {
             Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('queue')->__('Message re-queued.'));
         } else {
-            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('queue')->__('Only failed messages can be retried.'));
+            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('queue')->__('The message was not retried: only failed or stuck messages without a newer copy of their dedupe key can be retried.'));
         }
+        $this->refreshAbandonedNotice();
         $this->_redirect('*/*/');
     }
 
@@ -118,6 +113,7 @@ class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Act
         } else {
             Mage::getSingleton('adminhtml/session')->addError(Mage::helper('queue')->__('Message not found.'));
         }
+        $this->refreshAbandonedNotice();
         $this->_redirect('*/*/');
     }
 
@@ -125,14 +121,22 @@ class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Act
     public function massRetryAction(): void
     {
         $retried = 0;
+        $skipped = 0;
         foreach ($this->getMessageIds() as $id) {
             if (QueueManager::retryStoredMessage($id)) {
                 $retried++;
+            } else {
+                $skipped++;
             }
         }
-        Mage::getSingleton('adminhtml/session')->addSuccess(
-            Mage::helper('queue')->__('%s message(s) re-queued.', $retried),
-        );
+        $session = Mage::getSingleton('adminhtml/session');
+        if ($retried > 0) {
+            $session->addSuccess(Mage::helper('queue')->__('%s message(s) re-queued.', $retried));
+        }
+        if ($skipped > 0) {
+            $session->addNotice(Mage::helper('queue')->__('%s message(s) were skipped: only failed or stuck messages without a newer copy of their dedupe key can be retried.', $skipped));
+        }
+        $this->refreshAbandonedNotice();
         $this->_redirect('*/*/');
     }
 
@@ -148,7 +152,14 @@ class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Act
         Mage::getSingleton('adminhtml/session')->addSuccess(
             Mage::helper('queue')->__('%s message(s) discarded.', $discarded),
         );
+        $this->refreshAbandonedNotice();
         $this->_redirect('*/*/');
+    }
+
+    /** The abandoned-count notice is cached; an operator action must not leave it stale. */
+    private function refreshAbandonedNotice(): void
+    {
+        Mage::app()->removeCache(Maho_Queue_Model_Observer::ABANDONED_COUNT_CACHE_KEY);
     }
 
     /**

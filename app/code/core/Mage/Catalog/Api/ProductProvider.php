@@ -73,6 +73,126 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         return StoreContext::getStore()->getCurrentCurrencyCode();
     }
 
+    private ?bool $backendProductsAccess = null;
+
+    /** Memoized per request; hasBackendAccess() runs security voters on every call. */
+    private function backendProductsAccess(): bool
+    {
+        return $this->backendProductsAccess ??= $this->hasBackendAccess('products');
+    }
+
+    private bool $displayRateResolved = false;
+    private ?float $displayRate = null;
+
+    /**
+     * Forward base-to-display rate, or null when prices stay in base currency:
+     * backend tokens (lossless read-modify-write), display equals base, or no
+     * imported rate for the display code.
+     */
+    private function displayCurrencyRate(): ?float
+    {
+        if (!$this->displayRateResolved) {
+            $this->displayRateResolved = true;
+            if (!$this->backendProductsAccess()) {
+                $store = StoreContext::getStore();
+                $currencyCode = $store->getCurrentCurrencyCode();
+                if ($currencyCode !== $store->getBaseCurrencyCode()) {
+                    $rate = (float) $store->getBaseCurrency()->getRate($currencyCode);
+                    if ($rate > 0) {
+                        $this->displayRate = $rate;
+                    }
+                }
+            }
+        }
+        return $this->displayRate;
+    }
+
+    /**
+     * Make every money field agree with the DTO's single `currency` label.
+     *
+     * Public reads convert from website base currency to the store display
+     * currency (the storefront does the same before rendering); backend reads
+     * keep base values and relabel `currency` to the base code. Two deliberate
+     * exceptions stay in base currency: `cost` (backend-only, never converted)
+     * and the gift card amount fields, which are buy-request values validated
+     * against the stored base amounts on add-to-cart, so converting them would
+     * break the round trip. Linked-product summaries are converted by their own
+     * enrichment pass and are not touched here.
+     */
+    private function applyDisplayCurrency(Product $dto): void
+    {
+        $store = StoreContext::getStore();
+
+        $rate = $this->displayCurrencyRate();
+        if ($rate === null) {
+            $dto->currency = $store->getBaseCurrencyCode();
+            return;
+        }
+
+        $convert = fn(?float $value): ?float => $value === null
+            ? null
+            : (float) $store->roundPrice($value * $rate);
+
+        $dto->price = $convert($dto->price);
+        $dto->finalPrice = $convert($dto->finalPrice);
+        $dto->minimalPrice = $convert($dto->minimalPrice);
+        $dto->msrp = $convert($dto->msrp);
+
+        // Bundle special_price and tier price rows are percent discounts
+        // (Mage_Bundle_Model_Product_Price applies them as finalPrice * pct/100),
+        // not amounts, so multiplying them by the rate would corrupt them.
+        if ($dto->type !== \Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
+            $dto->specialPrice = $convert($dto->specialPrice);
+            foreach ($dto->tierPrices as &$tier) {
+                $tier['price'] = $convert((float) $tier['price']);
+            }
+            unset($tier);
+        }
+
+        foreach ($dto->variants as &$variant) {
+            $variant['price'] = $convert((float) $variant['price']);
+            $variant['finalPrice'] = $convert((float) $variant['finalPrice']);
+        }
+        unset($variant);
+
+        foreach ($dto->groupedProducts as &$child) {
+            $child['price'] = $convert((float) $child['price']);
+            $child['finalPrice'] = $convert((float) $child['finalPrice']);
+        }
+        unset($child);
+
+        foreach ($dto->customOptions as &$option) {
+            foreach ($option['values'] as &$value) {
+                if (($value['priceType'] ?? 'fixed') !== 'percent') {
+                    $value['price'] = $convert((float) $value['price']);
+                }
+            }
+            unset($value);
+        }
+        unset($option);
+
+        // Dynamic bundles price selections off the child product, so the value
+        // is an amount regardless of the stored selection price type.
+        $bundleIsDynamic = ($dto->priceType ?? 1) === 0;
+        foreach ($dto->bundleOptions as &$bundleOption) {
+            foreach ($bundleOption['selections'] as &$selection) {
+                if ($bundleIsDynamic || ($selection['priceType'] ?? 'fixed') !== 'percent') {
+                    $selection['price'] = $convert((float) $selection['price']);
+                }
+                foreach ($selection['tierPrices'] ?? [] as $i => $tier) {
+                    $selection['tierPrices'][$i]['price'] = $convert((float) $tier['price']);
+                }
+            }
+            unset($selection);
+        }
+        unset($bundleOption);
+
+        foreach ($dto->downloadableLinks as &$link) {
+            $link['price'] = $convert((float) $link['price']);
+        }
+        unset($link);
+    }
+
     /**
      * Provide product data based on operation type
      *
@@ -98,7 +218,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         if ($operation instanceof CollectionOperationInterface) {
-            $backend = $this->hasBackendAccess('products');
+            $backend = $this->backendProductsAccess();
             $sku = $context['args']['sku'] ?? null;
             if ($sku) {
                 $dto = $this->getProductBySku($sku, !$backend);
@@ -129,7 +249,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // Backend readers may load disabled and other-website products (and
         // raw global values via ?store=admin), so they bypass the shared DTO
         // cache, whose key has no auth dimension.
-        if ($this->hasBackendAccess('products')) {
+        if ($this->backendProductsAccess()) {
             return $this->assertBackendProductAccess($this->loadProductDto($id, visibleOnly: false));
         }
 
@@ -253,7 +373,10 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     {
         $keyData = array_filter($filters, fn($v) => $v !== '' && $v !== null);
         ksort($keyData);
-        $scope = StoreContext::getStoreId() . '_' . $this->getCustomerGroupId() . '_' . $this->resolveCurrencyCode();
+        // Backend readers get unconverted base-currency DTOs, so they must not
+        // share cached entries with public readers of the same store/currency.
+        $scope = StoreContext::getStoreId() . '_' . $this->getCustomerGroupId() . '_' . $this->resolveCurrencyCode()
+            . ($this->backendProductsAccess() ? '_backend' : '');
         return 'api_products_' . md5(\Mage::helper('core')->jsonEncode($keyData) . '_' . $scope);
     }
 
@@ -382,11 +505,23 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // reports index min_price as `price` for products whose own EAV price is
         // 0 (configurable/bundle/grouped). Filtering the EAV attribute would drop
         // every such product and mismatch the value the client sees.
-        if (!empty($requestFilters['priceMin'])) {
-            $collection->getSelect()->where('price_index.min_price >= ?', (float) $requestFilters['priceMin']);
+        //
+        // The bounds arrive in the same display currency the DTO prices are
+        // reported in; the index stores base amounts, so translate the bounds
+        // back to base before filtering or filters and output would disagree.
+        // Display prices round to 2dp after conversion, so widen each bound by
+        // half a cent whenever conversion runs (a parity rate of exactly 1.0
+        // still rounds); zero is a meaningful bound (priceMax=0 means free).
+        $displayRate = $this->displayCurrencyRate();
+        $boundEpsilon = $displayRate === null ? 0.0 : 0.005;
+        $priceRate = $displayRate ?? 1.0;
+        $priceMin = $requestFilters['priceMin'] ?? null;
+        $priceMax = $requestFilters['priceMax'] ?? null;
+        if ($priceMin !== null && $priceMin !== '') {
+            $collection->getSelect()->where('price_index.min_price >= ?', ((float) $priceMin - $boundEpsilon) / $priceRate);
         }
-        if (!empty($requestFilters['priceMax'])) {
-            $collection->getSelect()->where('price_index.min_price <= ?', (float) $requestFilters['priceMax']);
+        if ($priceMax !== null && $priceMax !== '') {
+            $collection->getSelect()->where('price_index.min_price <= ?', ((float) $priceMax + $boundEpsilon) / $priceRate);
         }
 
         // Extract attribute filters, REST uses attr_ prefix, GraphQL uses JSON string
@@ -587,7 +722,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         if ($forListing) {
+            // Event before conversion, so listeners see base-currency DTO values.
             \Mage::dispatchEvent('api_product_dto_build', ['product' => $product, 'for_listing' => true, 'dto' => $dto, 'customer_group_id' => $this->getCustomerGroupId()]);
+            $this->applyDisplayCurrency($dto);
             return;
         }
 
@@ -852,15 +989,16 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         if ($typeId === \Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE) {
             /** @var \Mage_Downloadable_Model_Product_Type $typeInstance */
             $links = $typeInstance->getLinks($product);
-            $store = \Mage::app()->getStore();
-            $dto->downloadableLinks = $links ? array_values(array_map(function ($link) use ($store) {
+            // Base currency like every other price here; applyDisplayCurrency()
+            // converts the whole DTO in one place.
+            $dto->downloadableLinks = $links ? array_values(array_map(function ($link) {
                 $sampleUrl = $link->getSampleFile()
                     ? \Mage::getUrl('downloadable/download/linkSample', ['link_id' => $link->getId()])
                     : ($link->getSampleUrl() ?: null);
                 return [
                     'id' => (int) $link->getId(),
                     'title' => $link->getStoreTitle() ?: $link->getTitle(),
-                    'price' => (float) $store->convertPrice($link->getPrice(), false),
+                    'price' => (float) $link->getPrice(),
                     'sortOrder' => (int) $link->getSortOrder(),
                     'numberOfDownloads' => (int) $link->getNumberOfDownloads(),
                     'sampleUrl' => $sampleUrl,
@@ -917,7 +1055,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             ];
         }
 
+        // Event before conversion, so listeners see base-currency DTO values.
         \Mage::dispatchEvent('api_product_dto_build', ['product' => $product, 'for_listing' => false, 'dto' => $dto, 'customer_group_id' => $this->getCustomerGroupId()]);
+        $this->applyDisplayCurrency($dto);
     }
 
     /**

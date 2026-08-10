@@ -471,3 +471,68 @@ function fetchQueueRows(): array
         queueAdapter()->select()->from(\Maho\Queue\QueueManager::tableName())->order('message_id ASC'),
     );
 }
+
+function agoUtc(int $seconds): string
+{
+    return gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - $seconds);
+}
+
+/*
+|--------------------------------------------------------------------------
+| Display Currency Helpers
+|--------------------------------------------------------------------------
+|
+| Shared by the display-currency regression tests (issue #1238) in
+| tests/Backend/Integration/.
+|
+*/
+
+/** Switch a store to EUR display currency in-memory and return the USD→EUR rate. */
+function useEurDisplayCurrency(int $storeId = 1): float
+{
+    $store = Mage::app()->getStore($storeId);
+
+    if ($store->getBaseCurrencyCode() !== 'USD') {
+        test()->markTestSkipped('Test expects USD base currency on store ' . $storeId);
+    }
+
+    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_ALLOW, 'USD,EUR');
+    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT, 'EUR');
+    foreach (['available_currency_codes', 'disallowed_base_currency_code_index', 'current_currency', 'default_currency', 'base_currency'] as $memo) {
+        $store->unsetData($memo);
+    }
+
+    $rate = (float) $store->getBaseCurrency()->getRate('EUR');
+    if ($rate <= 0 || $rate == 1.0) {
+        test()->markTestSkipped('USD→EUR rate not available or trivially 1');
+    }
+
+    expect($store->getCurrentCurrencyCode())->toBe('EUR');
+
+    return $rate;
+}
+
+/**
+ * Merge extra queue config the way another module's config.xml would, run the
+ * assertions, then restore the original config exactly (a snapshot, so merging
+ * into an existing node does not delete it on the way out).
+ *
+ * @param callable():void $body
+ */
+function withQueueConfig(string $xml, callable $body): void
+{
+    $node = Mage::getConfig()->getNode('global/queue');
+    $snapshot = new Maho\Simplexml\Element($node->asXML());
+    $node->extend(new Maho\Simplexml\Element($xml), true);
+    \Maho\Queue\QueueManager::reset();
+
+    try {
+        $body();
+    } finally {
+        foreach (array_keys((array) $node->children()) as $child) {
+            unset($node->{$child});
+        }
+        $node->extend($snapshot, true);
+        \Maho\Queue\QueueManager::reset();
+    }
+}

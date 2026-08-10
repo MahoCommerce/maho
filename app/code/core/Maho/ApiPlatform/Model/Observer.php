@@ -134,6 +134,17 @@ class Maho_ApiPlatform_Model_Observer
     }
 
     /**
+     * Cached product DTOs carry prices converted at the rate current when they
+     * were built, so a rate change must flush them or the API serves the old
+     * rate until the TTL lapses.
+     */
+    #[Maho\Config\Observer('directory_currency_rates_save_after')]
+    public function invalidateCurrencyRateCache(\Maho\Event\Observer $_observer): void
+    {
+        $this->cleanApiCache(['API_PRODUCTS']);
+    }
+
+    /**
      * Invalidate API reviews cache when a review is saved/approved
      */
     #[Maho\Config\Observer('review_save_after')]
