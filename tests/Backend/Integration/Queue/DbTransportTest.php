@@ -135,6 +135,23 @@ it('lets a dedupe key be dispatched again once its claim is abandoned', function
     expect(fetchQueueRows())->toHaveCount(2);
 });
 
+it('never dedupes a failure-transport send against a live chain of the same key', function () {
+    QueueManager::dispatch(makeEmailMessage(), dedupeKey: 'abc');
+
+    $envelope = (new Envelope(makeEmailMessage()))->with(
+        new TransportMessageIdStamp('1712345678901-0'),
+        new RedeliveryStamp(0),
+        new SentToFailureTransportStamp('origin'),
+        new DedupeKeyStamp('abc'),
+        ErrorDetailsStamp::create(new RuntimeException('handler blew up')),
+    );
+    QueueManager::dbTransport()->send($envelope);
+
+    $rows = fetchQueueRows();
+    expect($rows)->toHaveCount(2);
+    expect($rows[1]['status'])->toBe(DbTransport::STATUS_FAILED);
+});
+
 it('inserts a failure-transport send as a failed row instead of updating by the foreign message id', function () {
     $envelope = (new Envelope(makeEmailMessage()))->with(
         new TransportMessageIdStamp('1712345678901-0'),

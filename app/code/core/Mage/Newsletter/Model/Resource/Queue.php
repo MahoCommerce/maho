@@ -11,9 +11,9 @@
 class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_Abstract
 {
     /**
-     * Recipient links probed and written per statement when snapshotting the
-     * audience: a blast can reach hundreds of thousands of subscribers, so
-     * neither the IN() list nor the row array may hold the whole audience.
+     * Recipient links probed and written per statement when adding explicit
+     * subscriber lists: a bulk addition can be large, so neither the IN() list
+     * nor the row array may hold the whole set at once.
      */
     public const LINK_INSERT_CHUNK = 1000;
 
@@ -79,14 +79,21 @@ class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_A
             return;
         }
 
-        $subscriberIds = Mage::getResourceModel('newsletter/subscriber_collection')
-            ->addFieldToFilter('store_id', ['in' => $stores])
-            ->useOnlySubscribed()
-            ->getAllIds();
+        // One server-side statement: hauling a six-figure audience through PHP
+        // would hold a long transaction that also blocks the worker keepalive.
+        $adapter = $this->_getWriteAdapter();
+        $select = $adapter->select()
+            ->from($this->getTable('newsletter/subscriber'), [
+                'queue_id' => new Maho\Db\Expr((string) (int) $queue->getId()),
+                'subscriber_id',
+            ])
+            ->where('store_id IN (?)', $stores)
+            ->where('subscriber_status = ?', Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED);
 
-        if ($subscriberIds !== []) {
-            $this->addSubscribersToQueue($queue, $subscriberIds);
-        }
+        $adapter->query($select->insertIgnoreFromSelect(
+            $this->getTable('newsletter/queue_link'),
+            ['queue_id', 'subscriber_id'],
+        ));
     }
 
     /**

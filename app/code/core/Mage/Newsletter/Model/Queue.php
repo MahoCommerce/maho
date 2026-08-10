@@ -80,10 +80,34 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
      */
     public const QUEUE_NAME = 'newsletter';
 
+    /**
+     * Frozen once a campaign has started: later batches must send exactly
+     * what the first one did. Status and schedule stay writable.
+     */
+    public const FROZEN_AFTER_START = [
+        'template_id', 'newsletter_type', 'newsletter_subject', 'newsletter_sender_name',
+        'newsletter_sender_email', 'newsletter_text', 'newsletter_styles', 'customer_segment_ids',
+    ];
+
     #[\Override]
     protected function _construct()
     {
         $this->_init('newsletter/queue');
+    }
+
+    #[\Override]
+    protected function _beforeSave()
+    {
+        if ((int) $this->getOrigData('queue_status') !== self::STATUS_NEVER) {
+            foreach (self::FROZEN_AFTER_START as $field) {
+                if ($this->dataHasChangedFor($field)) {
+                    Mage::throwException(Mage::helper('newsletter')->__(
+                        'A campaign can no longer be edited once it has started; it can only be paused, resumed or cancelled.',
+                    ));
+                }
+            }
+        }
+        return parent::_beforeSave();
     }
 
     /**
@@ -150,11 +174,12 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
      * the queue as a long-delayed message; the cron that sweeps due campaigns
      * picks it up when its time arrives. The dedupe key makes a repeated
      * dispatch (admin action plus that cron) a no-op while a batch of this
-     * campaign is already queued.
-     *
-     * @return $this
+     * campaign is already queued. A handler chaining its own continuation
+     * passes $enforceDedupe = false: its own row is still in flight under the
+     * key and would swallow the continuation, yet the key must stay on the new
+     * message so outside dispatchers keep seeing the chain.
      */
-    public function scheduleSending()
+    public function scheduleSending(bool $enforceDedupe = true): self
     {
         if (!$this->getId() || !$this->isReadyToSend()) {
             return $this;
@@ -163,7 +188,7 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
         \Maho\Queue\QueueManager::dispatch(
             new Mage_Newsletter_Model_Queue_SendMessage((int) $this->getId()),
             queue: self::QUEUE_NAME,
-            dedupeKey: $this->getDispatchDedupeKey(),
+            stamps: [new \Maho\Queue\Stamp\DedupeKeyStamp($this->getDispatchDedupeKey(), enforce: $enforceDedupe)],
         );
 
         return $this;
@@ -201,14 +226,15 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
             return $this;
         }
 
-        $this->_getResource()->materializeRecipients($this);
+        $collection = $this->_loadUnsentBatch($count);
 
-        $collection = $this->getSubscribersCollection()
-            ->useOnlyUnsent()
-            ->showCustomerInfo()
-            ->setPageSize($count)
-            ->setCurPage(1)
-            ->load();
+        // An empty batch means either an audience never snapshotted or one that
+        // is exhausted; materializing (a no-op past the first time) tells the
+        // two apart without paying its guard queries on every full batch.
+        if (count($collection->getItems()) === 0) {
+            $this->_getResource()->materializeRecipients($this);
+            $collection = $this->_loadUnsentBatch($count);
+        }
 
         if (count($collection->getItems()) === 0) {
             $this->_finishQueue();
@@ -253,11 +279,24 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
             }
         }
 
-        // A short batch means the recipient list is exhausted
-        if (count($collection->getItems()) < $count) {
+        // A short batch means the list is exhausted; a full one that emptied it
+        // finishes now instead of chaining a message just to find that out.
+        if (count($collection->getItems()) < $count || $this->getUnsentSubscribersCount() === 0) {
             $this->_finishQueue();
         }
         return $this;
+    }
+
+    protected function _loadUnsentBatch(int $count): Mage_Newsletter_Model_Resource_Subscriber_Collection
+    {
+        $this->_subscribersCollection = null;
+
+        return $this->getSubscribersCollection()
+            ->useOnlyUnsent()
+            ->showCustomerInfo()
+            ->setPageSize($count)
+            ->setCurPage(1)
+            ->load();
     }
 
     /**
@@ -339,6 +378,12 @@ class Mage_Newsletter_Model_Queue extends Mage_Core_Model_Template
      */
     public function setStores(array $storesIds)
     {
+        // Frozen once the campaign has started, like the resource-side guard:
+        // caching stores that will never persist would make getStores() lie.
+        if ((int) $this->getQueueStatus() !== self::STATUS_NEVER) {
+            return $this;
+        }
+
         $this->setSaveStoresFlag(true);
         // Stores live outside _data, so save() would short-circuit without this
         $this->setDataChanges(true);

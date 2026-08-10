@@ -315,6 +315,28 @@ it('filters by the recipient count the grid shows for a campaign that has not st
     expect(array_map('intval', array_keys($filtered->getItems())))->toContain((int) $queue->getId());
 });
 
+it('refuses any model-layer content change once the campaign has started', function () {
+    $queue = makeNewsletterCampaign(1);
+
+    $loaded = Mage::getModel('newsletter/queue')->load($queue->getId());
+    $loaded->setNewsletterSubject('Changed mid-send');
+
+    expect(fn() => $loaded->save())->toThrow(Mage_Core_Exception::class);
+
+    $reloaded = Mage::getModel('newsletter/queue')->load($queue->getId());
+    expect($reloaded->getNewsletterSubject())->toBe('Campaign');
+});
+
+it('still lets the send flow change status and finish date of a started campaign', function () {
+    $queue = makeNewsletterCampaign(1);
+
+    $loaded = Mage::getModel('newsletter/queue')->load($queue->getId());
+    $loaded->setQueueStatus(Mage_Newsletter_Model_Queue::STATUS_PAUSE)->save();
+
+    $reloaded = Mage::getModel('newsletter/queue')->load($queue->getId());
+    expect((int) $reloaded->getQueueStatus())->toBe(Mage_Newsletter_Model_Queue::STATUS_PAUSE);
+});
+
 it('schedules due campaigns only', function () {
     $due = makeNewsletterCampaign(1);
     $future = makeNewsletterCampaign(1, '+1 day', Mage_Newsletter_Model_Queue::STATUS_NEVER);

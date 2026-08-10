@@ -79,9 +79,10 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
 
     /**
      * Recipients are only linked once the first batch goes out, so a campaign
-     * with nothing linked yet reports the audience it would reach today. The
-     * grid column and the grid filter both come from here, or they would
-     * disagree about the very same number.
+     * with nothing linked yet reports the audience it would reach today; that
+     * covers drafts as well as started or paused campaigns waiting for their
+     * first batch. The grid column and the grid filter both come from here, or
+     * they would disagree about the very same number.
      */
     protected function _getSubscribersTotalExpr(string $queueIdColumn, string $statusColumn): string
     {
@@ -97,13 +98,17 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
             ->where('sub.subscriber_status = ?', Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED)
             ->assemble());
 
-        return sprintf(
-            '(CASE WHEN %s = %d AND %s = 0 THEN %s ELSE %s END)',
+        $notFinished = sprintf(
+            '%s IN (%d, %d, %d)',
             $statusColumn,
             Mage_Newsletter_Model_Queue::STATUS_NEVER,
-            $linked,
-            $projected,
-            $linked,
+            Mage_Newsletter_Model_Queue::STATUS_SENDING,
+            Mage_Newsletter_Model_Queue::STATUS_PAUSE,
+        );
+
+        return sprintf(
+            '(%s)',
+            $this->getConnection()->getCheckSql("$notFinished AND $linked = 0", $projected, $linked),
         );
     }
 

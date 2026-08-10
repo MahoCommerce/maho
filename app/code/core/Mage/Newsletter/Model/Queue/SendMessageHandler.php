@@ -11,9 +11,6 @@
 
 declare(strict_types=1);
 
-use Maho\Queue\QueueManager;
-use Maho\Queue\Stamp\DedupeKeyStamp;
-
 class Mage_Newsletter_Model_Queue_SendMessageHandler
 {
     #[Maho\Config\MessageHandler]
@@ -25,9 +22,10 @@ class Mage_Newsletter_Model_Queue_SendMessageHandler
             return;
         }
 
-        // Redelivery and the safety-net cron can both overlap a live chain, and
-        // two batches of one campaign would pick the same unsent recipients:
-        // whoever takes the lock owns the campaign, the others drop out.
+        // Two batches of one campaign would pick the same unsent recipients:
+        // whoever takes the lock owns the campaign, the others drop out. The
+        // default file lock backend is machine-local, so multi-server
+        // installs must set <global><lock><backend> to db.
         $lock = Mage::getSingleton('core/lock');
         $lockName = 'newsletter_queue_' . $queue->getId();
         if (!$lock->acquire($lockName)) {
@@ -43,18 +41,11 @@ class Mage_Newsletter_Model_Queue_SendMessageHandler
         // Anything but SENDING means the campaign is over (sent) or the admin
         // stopped it while this batch was going out; the latter only shows in a
         // fresh read, the copy this handler started with still says SENDING.
+        // The continuation must not enforce the dedupe key: this message's own
+        // row is still in flight under it and would swallow its own chain.
         $queue->load((int) $queue->getId());
-        if ((int) $queue->getQueueStatus() !== Mage_Newsletter_Model_Queue::STATUS_SENDING) {
-            return;
+        if ((int) $queue->getQueueStatus() === Mage_Newsletter_Model_Queue::STATUS_SENDING) {
+            $queue->scheduleSending(enforceDedupe: false);
         }
-
-        // Non-enforcing key: this message's own row is still in flight under the
-        // campaign key and would swallow its own continuation, but the key has to
-        // travel with the chain or the cron sweep starts a rival one every run.
-        QueueManager::dispatch(
-            new Mage_Newsletter_Model_Queue_SendMessage((int) $queue->getId()),
-            queue: Mage_Newsletter_Model_Queue::QUEUE_NAME,
-            stamps: [new DedupeKeyStamp($queue->getDispatchDedupeKey(), enforce: false)],
-        );
     }
 }

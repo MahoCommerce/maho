@@ -20,7 +20,7 @@ class Mage_Newsletter_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getSendBatchSize(): int
     {
-        return max(1, (int) Mage::getStoreConfig(self::XML_PATH_SEND_BATCH_SIZE));
+        return max(1, Mage::getStoreConfigAsInt(self::XML_PATH_SEND_BATCH_SIZE));
     }
 
     /**
