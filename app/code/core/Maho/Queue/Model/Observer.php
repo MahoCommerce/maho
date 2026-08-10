@@ -19,6 +19,11 @@ class Maho_Queue_Model_Observer
     #[Maho\Config\Observer('controller_action_layout_generate_blocks_before', area: 'adminhtml')]
     public function warnAboutAbandonedMessages(): void
     {
+        // An AJAX response renders no message block; the next full page load adds it back.
+        if (Mage::app()->getRequest()->isXmlHttpRequest()) {
+            return;
+        }
+
         if (!Mage::getSingleton('admin/session')->isAllowed('system/tools/maho_queue/view')) {
             return;
         }
@@ -38,13 +43,13 @@ class Maho_Queue_Model_Observer
         ]);
     }
 
+    /** Caught rather than probed: isTableExists() would introspect the schema on every request. */
     private function abandonedMessageCount(): int
     {
-        $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
-        if (!$adapter->isTableExists(QueueManager::tableName())) {
+        try {
+            return QueueManager::dbTransport()->countAbandoned();
+        } catch (Exception) {
             return 0;
         }
-
-        return QueueManager::dbTransport()->countAbandoned();
     }
 }

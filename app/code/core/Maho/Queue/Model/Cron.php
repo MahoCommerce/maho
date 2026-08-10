@@ -15,9 +15,6 @@ use Maho\Queue\Transport\DbTransport;
 
 class Maho_Queue_Model_Cron
 {
-    private const SPAWN_WAIT_ATTEMPTS = 10;
-    private const SPAWN_WAIT_MICROSECONDS = 500_000;
-
     /**
      * Watchdog: start a detached `queue:work --exclusive` for every configured
      * pool with no live worker, so each latency tier gets a process of its own
@@ -39,8 +36,6 @@ class Maho_Queue_Model_Cron
         foreach ($pending as [$pool, $index]) {
             $this->spawnWorker($pool, $index);
         }
-
-        $this->reportWorkersThatDidNotStart($pending);
     }
 
     /**
@@ -62,6 +57,7 @@ class Maho_Queue_Model_Cron
 
         foreach (PoolRegistry::all() as $pool) {
             $due = null;
+            $idle = null;
             $live = 0;
             $free = [];
             for ($index = 0; $index < $pool->count; $index++) {
@@ -73,17 +69,17 @@ class Maho_Queue_Model_Cron
             }
 
             foreach ($free as $index) {
-                // One process per due message, workers already alive included: an
-                // on-demand pool holding its whole roster open for a single
-                // message would idle them all out.
+                // One process per due message. A busy worker cannot take one, and holds
+                // exactly one claim, so live claims come off the roster.
                 if ($pool->isOnDemand()) {
                     $due ??= $this->dueWorkCount($pool);
-                    if ($live >= $due) {
+                    $idle ??= $live === 0 ? 0 : max(0, $live - $this->busyWorkerCount($pool));
+                    if ($idle >= $due) {
                         break;
                     }
+                    $idle++;
                 }
                 $spawn[] = [$pool, $index];
-                $live++;
             }
         }
 
@@ -93,6 +89,11 @@ class Maho_Queue_Model_Cron
     private function dueWorkCount(Pool $pool): int
     {
         return QueueManager::workerTransport($pool)->countDue($pool->queues);
+    }
+
+    private function busyWorkerCount(Pool $pool): int
+    {
+        return QueueManager::workerTransport($pool)->countClaimed($pool->queues);
     }
 
     #[Maho\Config\CronJob('queue_clean_up', schedule: '0 2 * * *')]
@@ -130,33 +131,4 @@ class Maho_Queue_Model_Cron
         ));
     }
 
-    /**
-     * One shared wait for the whole batch: waiting out each pool in turn would
-     * cost a cron tick five seconds per worker slow to take its lock.
-     *
-     * @param list<array{Pool, int}> $spawned
-     */
-    private function reportWorkersThatDidNotStart(array $spawned): void
-    {
-        $lock = Mage::getSingleton('core/lock');
-        for ($attempt = 0; $attempt < self::SPAWN_WAIT_ATTEMPTS && $spawned !== []; $attempt++) {
-            usleep(self::SPAWN_WAIT_MICROSECONDS);
-            $spawned = array_values(array_filter(
-                $spawned,
-                fn(array $worker) => !$lock->isHeld($worker[0]->lockName($worker[1]), machineLocal: true),
-            ));
-        }
-
-        foreach ($spawned as [$pool]) {
-            // An on-demand worker that drained its queue and exited inside the
-            // wait window did its job; only a pool still owed work failed.
-            if ($pool->isOnDemand() && $this->dueWorkCount($pool) === 0) {
-                continue;
-            }
-            Mage::log(
-                sprintf('Queue worker for pool "%s" did not start after spawning; check var/log/queue-worker.log', $pool->name),
-                Mage::LOG_ERROR,
-            );
-        }
-    }
 }

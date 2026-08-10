@@ -10,9 +10,9 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
-use Maho\Queue\WorkerFactory;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -41,8 +41,16 @@ class EmailQueueProcess extends BaseMahoCommand
         $output->writeln("<info>Processing email queue ({$pendingCount} emails pending)...</info>");
 
         try {
-            $worker = WorkerFactory::create(['idleTimeout' => 0]);
-            $worker->run(['queues' => [\Mage_Core_Model_Email_Queue::QUEUE_NAME]]);
+            // Not the command's own run(): only the full lifecycle registers its signal handlers.
+            $status = $this->getApplication()?->doRun(new ArrayInput([
+                'command' => 'queue:work',
+                '--queue' => [\Mage_Core_Model_Email_Queue::QUEUE_NAME],
+                '--idle-timeout' => '0',
+            ]), $output) ?? Command::FAILURE;
+
+            if ($status !== Command::SUCCESS) {
+                return $status;
+            }
 
             $output->writeln('<info>Queue processing completed.</info>');
             $failedCount = $this->getFailedCount();

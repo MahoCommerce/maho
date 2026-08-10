@@ -195,6 +195,41 @@ it('fails a claimed row whose message class has no registered handler', function
     expect($rows[0]['error_message'])->toContain('Nonexistent_Evil_Class');
 });
 
+it('keeps a live claim out of the abandoned set', function () {
+    QueueManager::dispatch(makeEmailMessage());
+
+    $transport = QueueManager::dbTransport();
+    $envelopes = [...$transport->get()];
+    expect($envelopes)->toHaveCount(1);
+
+    queueAdapter()->update(QueueManager::tableName(), [
+        'claimed_at' => gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - DbTransport::ABANDONED_AFTER_SECONDS - 60),
+    ], ['message_id = ?' => (int) fetchQueueRows()[0]['message_id']]);
+    expect($transport->countAbandoned())->toBe(1);
+
+    $transport->keepalive($envelopes[0]);
+
+    expect($transport->countAbandoned())->toBe(0);
+    expect($transport->countClaimed())->toBe(1);
+});
+
+it('does not revive a claim that is no longer processing', function () {
+    QueueManager::dispatch(makeEmailMessage());
+
+    $transport = QueueManager::dbTransport();
+    $envelopes = [...$transport->get()];
+    queueAdapter()->update(QueueManager::tableName(), [
+        'status' => DbTransport::STATUS_PENDING,
+        'claimed_at' => null,
+    ], ['message_id = ?' => (int) fetchQueueRows()[0]['message_id']]);
+
+    $transport->keepalive($envelopes[0]);
+
+    $row = fetchQueueRows()[0];
+    expect($row['status'])->toBe(DbTransport::STATUS_PENDING);
+    expect($row['claimed_at'])->toBeNull();
+});
+
 it('counts pending messages and finds stored ones', function () {
     QueueManager::dispatch(makeEmailMessage());
     QueueManager::dispatch(makeEmailMessage('second'));

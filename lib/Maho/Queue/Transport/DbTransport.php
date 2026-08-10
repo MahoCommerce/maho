@@ -20,6 +20,7 @@ use Symfony\Component\Messenger\Stamp\ErrorDetailsStamp;
 use Symfony\Component\Messenger\Stamp\RedeliveryStamp;
 use Symfony\Component\Messenger\Stamp\SentToFailureTransportStamp;
 use Symfony\Component\Messenger\Stamp\TransportMessageIdStamp;
+use Symfony\Component\Messenger\Transport\Receiver\KeepaliveReceiverInterface;
 use Symfony\Component\Messenger\Transport\Receiver\ListableReceiverInterface;
 use Symfony\Component\Messenger\Transport\Receiver\MessageCountAwareInterface;
 use Symfony\Component\Messenger\Transport\Receiver\QueueReceiverInterface;
@@ -38,7 +39,7 @@ use Symfony\Component\Messenger\Transport\TransportInterface;
  * The table is declared in Maho_Queue's sql/schema.php and is never
  * auto-created here.
  */
-final class DbTransport implements TransportInterface, QueueReceiverInterface, ListableReceiverInterface, MessageCountAwareInterface
+final class DbTransport implements TransportInterface, QueueReceiverInterface, ListableReceiverInterface, MessageCountAwareInterface, KeepaliveReceiverInterface
 {
     public const STATUS_PENDING = 'pending';
     public const STATUS_PROCESSING = 'processing';
@@ -47,13 +48,15 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
 
     public const DEFAULT_QUEUE = 'default';
 
+    /** How often a worker refreshes the claim of the message it is handling. */
+    public const KEEPALIVE_INTERVAL_SECONDS = 5;
+
     /**
-     * A claim held longer than this is read as abandoned by a worker that died.
-     * Nothing redelivers on it: it gates the admin notice, the admin retry, and
-     * the dedupe check, so an honest handler that overruns costs a notice rather
-     * than a second run.
+     * Sixty missed refreshes: a claim this stale belongs to a worker that died.
+     * Gates the admin notice, the admin retry and the dedupe check; nothing
+     * redelivers on it.
      */
-    public const ABANDONED_AFTER_SECONDS = 3600;
+    public const ABANDONED_AFTER_SECONDS = 300;
 
     /**
      * @param list<string> $excludedQueues Queues this instance never consumes, so a pool worker can be "everything but"
@@ -162,6 +165,23 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
         ]);
     }
 
+    /**
+     * Makes claimed_at mean "a worker is alive here", not "a worker started here
+     * a while ago". The status guard leaves a row an operator already retried alone.
+     */
+    #[\Override]
+    public function keepalive(Envelope $envelope, ?int $seconds = null): void
+    {
+        $now = \Mage_Core_Model_Locale::nowUtc();
+        $this->adapter->update($this->table, [
+            'claimed_at' => $now,
+            'updated_at' => $now,
+        ], [
+            'message_id = ?' => $this->messageId($envelope),
+            'status = ?' => self::STATUS_PROCESSING,
+        ]);
+    }
+
     #[\Override]
     public function all(?int $limit = null): iterable
     {
@@ -219,11 +239,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
         return (int) $this->adapter->fetchOne($select);
     }
 
-    /**
-     * Claims old enough to be read as abandoned by a worker that died. Nothing
-     * acts on this: it drives the admin notice, so an honest handler that
-     * overruns costs a notice rather than a second run.
-     */
+    /** Drives the admin notice. A working worker refreshes its claim, so this counts dead ones. */
     public function countAbandoned(int $olderThanSeconds = self::ABANDONED_AFTER_SECONDS): int
     {
         $select = $this->adapter->select()
@@ -231,6 +247,22 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
             ->where('status = ?', self::STATUS_PROCESSING)
             ->where('claimed_at < ?', self::abandonedBefore($olderThanSeconds));
         $this->applyQueueFilter($select, null);
+
+        return (int) $this->adapter->fetchOne($select);
+    }
+
+    /**
+     * Live claims, so the watchdog can tell a pool's busy workers from its idle ones.
+     *
+     * @param list<string>|null $queues
+     */
+    public function countClaimed(?array $queues = null): int
+    {
+        $select = $this->adapter->select()
+            ->from($this->table, new \Maho\Db\Expr('COUNT(*)'))
+            ->where('status = ?', self::STATUS_PROCESSING)
+            ->where('claimed_at >= ?', self::abandonedBefore());
+        $this->applyQueueFilter($select, $queues);
 
         return (int) $this->adapter->fetchOne($select);
     }

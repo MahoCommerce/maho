@@ -11,6 +11,7 @@ namespace MahoCLI\Commands;
 
 use Maho\Queue\Pool;
 use Maho\Queue\PoolRegistry;
+use Maho\Queue\Transport\DbTransport;
 use Maho\Queue\WorkerFactory;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -127,6 +128,11 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
             $options['queues'] = $effective->queues;
         }
 
+        // Drives keepalive(): without it a slow handler is indistinguishable from a dead worker.
+        if (SignalRegistry::isSupported()) {
+            $this->getApplication()?->setAlarmInterval(DbTransport::KEEPALIVE_INTERVAL_SECONDS);
+        }
+
         $this->worker->run($options);
 
         return Command::SUCCESS;
@@ -138,12 +144,23 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
     #[\Override]
     public function getSubscribedSignals(): array
     {
-        return SignalRegistry::isSupported() ? [\SIGTERM, \SIGINT] : [];
+        return SignalRegistry::isSupported() ? [\SIGTERM, \SIGINT, \SIGALRM] : [];
     }
 
     #[\Override]
     public function handleSignal(int $signal, int|false $previousExitCode = 0): int|false
     {
+        if ($signal === \SIGALRM) {
+            try {
+                $this->worker?->keepalive($this->getApplication()?->getAlarmInterval());
+            } catch (\Exception $e) {
+                // The alarm lands mid-handler, so an escaping error would unwind it half-done.
+                \Mage::log('Queue worker could not refresh its claim: ' . $e->getMessage(), \Mage::LOG_WARNING);
+            }
+
+            return false;
+        }
+
         // Finish the in-flight message, then exit cleanly.
         $this->worker?->stop();
 
