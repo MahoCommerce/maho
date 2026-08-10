@@ -11,6 +11,7 @@ namespace MahoCLI\Commands;
 
 use Mage;
 use Maho\Db\Expr;
+use Maho\Queue\PoolRegistry;
 use Maho\Queue\QueueManager;
 use Maho\Queue\Transport\DbTransport;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -21,7 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'queue:list',
-    description: 'Show per-queue message counts and the active transport',
+    description: 'Show per-queue message counts and the worker pool each queue is consumed by',
 )]
 class QueueList extends BaseMahoCommand
 {
@@ -56,22 +57,20 @@ class QueueList extends BaseMahoCommand
         }
         ksort($queues);
 
-        $transportName = QueueManager::transportName();
-        $output->writeln("<info>Active transport: {$transportName}</info>");
-        if ($transportName === QueueManager::TRANSPORT_REDIS) {
-            $output->writeln('<comment>Pending messages live in Redis; the counts below only cover messages stored in the database (failures).</comment>');
-        }
-
         if ($queues === []) {
             $output->writeln('The queue is empty.');
             return Command::SUCCESS;
         }
 
         $table = new Table($output);
-        $table->setHeaders(['Queue', 'Pending', 'Processing', 'Failed', 'Completed', 'Oldest pending (UTC)']);
+        $table->setHeaders(['Queue', 'Pool', 'Pending', 'Processing', 'Failed', 'Completed', 'Oldest pending (UTC)']);
+        $orphaned = false;
         foreach ($queues as $queue => $counts) {
+            $pool = PoolRegistry::poolFor((string) $queue);
+            $orphaned = $orphaned || $pool === null;
             $table->addRow([
                 $queue,
+                $pool === null ? '<error>none</error>' : $pool->name,
                 $counts[DbTransport::STATUS_PENDING],
                 $counts[DbTransport::STATUS_PROCESSING],
                 $counts[DbTransport::STATUS_FAILED],
@@ -80,6 +79,10 @@ class QueueList extends BaseMahoCommand
             ]);
         }
         $table->render();
+
+        if ($orphaned) {
+            $output->writeln('<error>Queues with no pool are never consumed; mark a pool catch_all under global/queue/pools or route them under global/queue/routing.</error>');
+        }
 
         return Command::SUCCESS;
     }

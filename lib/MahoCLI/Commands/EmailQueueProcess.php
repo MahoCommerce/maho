@@ -10,10 +10,9 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Mage;
-use Maho\Queue\QueueManager;
-use Maho\Queue\WorkerFactory;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -34,32 +33,29 @@ class EmailQueueProcess extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        $isDbTransport = QueueManager::transportName() === QueueManager::TRANSPORT_DB;
-        if ($isDbTransport) {
-            $pendingCount = $this->getPendingCount();
-            if ($pendingCount === 0) {
-                $output->writeln('<info>No emails in queue to process.</info>');
-                return Command::SUCCESS;
-            }
-            $output->writeln("<info>Processing email queue ({$pendingCount} emails pending)...</info>");
-        } else {
-            $output->writeln('<comment>Redis transport is active: consuming all queues until empty.</comment>');
+        $pendingCount = $this->getPendingCount();
+        if ($pendingCount === 0) {
+            $output->writeln('<info>No emails in queue to process.</info>');
+            return Command::SUCCESS;
         }
+        $output->writeln("<info>Processing email queue ({$pendingCount} emails pending)...</info>");
 
         try {
-            $worker = WorkerFactory::create(['stopWhenIdle' => true]);
-            $options = [];
-            if ($isDbTransport) {
-                $options['queues'] = [\Mage_Core_Model_Email_Queue::QUEUE_NAME];
+            // Not the command's own run(): only the full lifecycle registers its signal handlers.
+            $status = $this->getApplication()?->doRun(new ArrayInput([
+                'command' => 'queue:work',
+                '--queue' => [\Mage_Core_Model_Email_Queue::QUEUE_NAME],
+                '--idle-timeout' => '0',
+            ]), $output) ?? Command::FAILURE;
+
+            if ($status !== Command::SUCCESS) {
+                return $status;
             }
-            $worker->run($options);
 
             $output->writeln('<info>Queue processing completed.</info>');
-            if ($isDbTransport) {
-                $failedCount = $this->getFailedCount();
-                if ($failedCount > 0) {
-                    $output->writeln("<comment>{$failedCount} email(s) are in failed state; inspect them in System > Tools > Message Queue or with ./maho queue:list.</comment>");
-                }
+            $failedCount = $this->getFailedCount();
+            if ($failedCount > 0) {
+                $output->writeln("<comment>{$failedCount} email(s) are in failed state; inspect them in System > Tools > Message Queue or with ./maho queue:list.</comment>");
             }
 
             return Command::SUCCESS;

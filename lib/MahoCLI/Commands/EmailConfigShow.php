@@ -63,15 +63,11 @@ class EmailConfigShow extends BaseMahoCommand
         $table->addRow(['Return Path', $returnPathSetting]);
 
         // Queue System Information
-        if (\Maho\Queue\QueueManager::transportName() === \Maho\Queue\QueueManager::TRANSPORT_REDIS) {
-            $pendingDisplay = 'Unknown (pending messages live in Redis)';
-        } else {
-            $pendingCount = Mage::getModel('queue/message')->getCollection()
-                ->addFieldToFilter('queue', \Mage_Core_Model_Email_Queue::QUEUE_NAME)
-                ->addFieldToFilter('status', \Maho_Queue_Model_Message::STATUS_PENDING)
-                ->getSize();
-            $pendingDisplay = $pendingCount . ' emails';
-        }
+        $pendingCount = Mage::getModel('queue/message')->getCollection()
+            ->addFieldToFilter('queue', \Mage_Core_Model_Email_Queue::QUEUE_NAME)
+            ->addFieldToFilter('status', \Maho_Queue_Model_Message::STATUS_PENDING)
+            ->getSize();
+        $pendingDisplay = $pendingCount . ' emails';
 
         // Get cron schedules dynamically
         $cronHelper = Mage::helper('cron');

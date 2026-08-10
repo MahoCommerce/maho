@@ -46,16 +46,6 @@ SPDX-License-Identifier: AFL-3.0
             <backend>db</backend>
         </lock>
         -->
-        <!--
-            Message queue transport. Without this node messages are stored in the database
-            (maho_queue_message), which needs no extra infrastructure. Set a DSN to switch to
-            Redis for higher throughput (requires the symfony/redis-messenger package):
-        -->
-        <!--
-        <queue>
-            <dsn>redis://127.0.0.1:6379/messages</dsn>
-        </queue>
-        -->
     </global>
     <admin>
         <base_path>{{admin_frontname}}</base_path>
