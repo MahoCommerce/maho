@@ -626,12 +626,25 @@ class CartService
             throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is already applied');
         }
 
-        // Apply gift card - store the requested amount capped at the live
-        // balance (in quote currency), or the full balance when no amount is
-        // given. revalidateGiftcards() re-checks at placement, but the capped
-        // value here keeps quote totals and pre-auth correct in the meantime.
-        $quoteCurrency = $quote->getQuoteCurrencyCode();
-        $balance = (float) $giftcard->getBalance($quoteCurrency);
+        // giftcard_codes is a base-currency map (the total collector rewrites
+        // it in base whenever a discount applies), so snapshot in base too; the
+        // requested amount arrives in quote currency, what the client sees, and
+        // is converted first, dividing by the forward rate (rate imports only
+        // maintain base-to-allowed rows, so a quote-to-base lookup would
+        // throw). The collector ignores the stored amount and applies the full
+        // balance, so the cap only bounds the snapshot.
+        $baseCurrency = $quote->getStore()->getBaseCurrencyCode();
+        $quoteCurrency = $quote->getQuoteCurrencyCode() ?: $quote->getStore()->getCurrentCurrencyCode();
+        if ($amount !== null && $quoteCurrency !== $baseCurrency) {
+            $rate = (float) $quote->getStore()->getBaseCurrency()->getRate($quoteCurrency);
+            // Fail loudly like the totals pipeline would: silently skipping the
+            // division would store a quote-currency number as a base snapshot.
+            if ($rate <= 0) {
+                throw new BadRequestHttpException('No exchange rate available for "' . $quoteCurrency . '"');
+            }
+            $amount /= $rate;
+        }
+        $balance = (float) $giftcard->getBalance($baseCurrency);
         $appliedCodes[$giftcardCode] = $amount === null ? $balance : min($amount, $balance);
 
         $quote->setGiftcardCodes(\Mage::helper('core')->jsonEncode($appliedCodes));
@@ -660,7 +673,8 @@ class CartService
         }
 
         $changed = false;
-        $quoteCurrency = $quote->getQuoteCurrencyCode();
+        // The snapshot map is base currency; compare live balances in base too.
+        $baseCurrency = $quote->getStore()->getBaseCurrencyCode();
         $websiteId = (int) $quote->getStore()->getWebsiteId();
 
         foreach ($applied as $code => $snapshotBalance) {
@@ -669,7 +683,7 @@ class CartService
                 throw new BadRequestHttpException('Gift card "' . $code . '" is no longer valid');
             }
 
-            $live = (float) $card->getBalance($quoteCurrency);
+            $live = (float) $card->getBalance($baseCurrency);
             if ($live <= 0) {
                 throw new BadRequestHttpException('Gift card "' . $code . '" has no remaining balance');
             }
