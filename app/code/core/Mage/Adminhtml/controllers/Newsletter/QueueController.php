@@ -19,6 +19,16 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
     public const ADMIN_RESOURCE = 'newsletter/queue';
 
     /**
+     * Content and audience are frozen once a campaign starts, so the edit form disables
+     * these inputs and a browser posts none of them: applying the empties would blank
+     * the campaign, and a request that carries them anyway is refused.
+     */
+    protected const FROZEN_AFTER_START = [
+        'start_at', 'stores', 'customer_segments',
+        'subject', 'sender_name', 'sender_email', 'text', 'styles',
+    ];
+
+    /**
      * Queue list action
      */
     #[Maho\Config\Route('/admin/newsletter_queue/index')]
@@ -101,6 +111,8 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
             $queue->setQueueStartAt(Mage::app()->getLocale()->formatDateForDb('now'))
                 ->setQueueStatus(Queue::STATUS_SENDING)
                 ->save();
+
+            $this->_scheduleSending($queue);
         }
 
         $this->_redirect('*/*');
@@ -137,6 +149,8 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
         $queue->setQueueStatus(Queue::STATUS_SENDING);
         $queue->save();
 
+        $this->_scheduleSending($queue);
+
         $this->_redirect('*/*');
     }
 
@@ -157,20 +171,13 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
         $this->_redirect('*/*');
     }
 
+    /**
+     * Same job as the newsletter_send_all cron, for hosts driving it by URL
+     */
     #[Maho\Config\Route('/admin/newsletter_queue/sending')]
     public function sendingAction(): void
     {
-        // Todo: put it somewhere in config!
-        $countOfQueue  = 3;
-        $countOfSubscritions = 20;
-
-        $collection = Mage::getResourceModel('newsletter/queue_collection')
-            ->setPageSize($countOfQueue)
-            ->setCurPage(1)
-            ->addOnlyForSendingFilter()
-            ->load();
-
-        $collection->walk('sendPerSubscriber', [$countOfSubscritions]);
+        Mage::helper('newsletter')->scheduleDueQueues();
     }
 
     #[Maho\Config\Route('/admin/newsletter_queue/edit')]
@@ -234,15 +241,22 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
             }
 
             if ($queue->getQueueStatus() == Queue::STATUS_NEVER) {
-                $queue->setQueueStartAtByString($this->getRequest()->getParam('start_at'));
-            }
+                $queue->setQueueStartAtByString($this->getRequest()->getParam('start_at'))
+                    ->setStores($this->getRequest()->getParam('stores', []))
+                    ->setNewsletterSubject($this->getRequest()->getParam('subject'))
+                    ->setNewsletterSenderName($this->getRequest()->getParam('sender_name'))
+                    ->setNewsletterSenderEmail($this->getRequest()->getParam('sender_email'))
+                    ->setNewsletterText($this->getRequest()->getParam('text'))
+                    ->setNewsletterStyles($this->getRequest()->getParam('styles'));
 
-            $queue->setStores($this->getRequest()->getParam('stores', []))
-                ->setNewsletterSubject($this->getRequest()->getParam('subject'))
-                ->setNewsletterSenderName($this->getRequest()->getParam('sender_name'))
-                ->setNewsletterSenderEmail($this->getRequest()->getParam('sender_email'))
-                ->setNewsletterText($this->getRequest()->getParam('text'))
-                ->setNewsletterStyles($this->getRequest()->getParam('styles'));
+                // Save customer segment assignments if CustomerSegmentation module is enabled
+                if (Mage::helper('core')->isModuleEnabled('Maho_CustomerSegmentation')) {
+                    $segmentIds = $this->getRequest()->getParam('customer_segments', []);
+                    $queue->setCustomerSegmentIds(implode(',', array_filter($segmentIds)));
+                }
+            } else {
+                $this->_assertNothingFrozenWasPosted();
+            }
 
             if ($queue->getQueueStatus() == Queue::STATUS_PAUSE
                 && $this->getRequest()->getParam('_resume', false)
@@ -250,13 +264,8 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
                 $queue->setQueueStatus(Queue::STATUS_SENDING);
             }
 
-            // Save customer segment assignments if CustomerSegmentation module is enabled
-            if (Mage::helper('core')->isModuleEnabled('Maho_CustomerSegmentation')) {
-                $segmentIds = $this->getRequest()->getParam('customer_segments', []);
-                $queue->setCustomerSegmentIds(implode(',', array_filter($segmentIds)));
-            }
-
             $queue->save();
+            $this->_scheduleSending($queue);
             $this->_redirect('*/*');
         } catch (Mage_Core_Exception $e) {
             $this->_getSession()->addError($e->getMessage());
@@ -266,6 +275,33 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
             } else {
                 $this->_redirectReferer();
             }
+        }
+    }
+
+    protected function _assertNothingFrozenWasPosted(): void
+    {
+        foreach (self::FROZEN_AFTER_START as $field) {
+            if ($this->getRequest()->getParam($field) !== null) {
+                Mage::throwException(
+                    $this->__('A campaign can no longer be edited once it has started; it can only be paused, resumed or cancelled.'),
+                );
+            }
+        }
+    }
+
+    /**
+     * A campaign that cannot be queued would sit there looking scheduled, so
+     * say so; the cron retries it either way.
+     */
+    protected function _scheduleSending(Queue $queue): void
+    {
+        try {
+            $queue->scheduleSending();
+        } catch (Throwable $e) {
+            Mage::logException($e);
+            $this->_getSession()->addError(
+                Mage::helper('newsletter')->__('The newsletter was saved but could not be queued for sending: %s', $e->getMessage()),
+            );
         }
     }
 }

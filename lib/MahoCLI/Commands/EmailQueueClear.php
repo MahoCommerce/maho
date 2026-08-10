@@ -59,7 +59,7 @@ class EmailQueueClear extends BaseMahoCommand
         $olderThan = $input->getOption('older-than');
 
         $collection = Mage::getModel('queue/message')->getCollection()
-            ->addFieldToFilter('queue', \Mage_Core_Model_Email_Queue::QUEUE_NAME);
+            ->addFieldToFilter('queue', ['in' => $this->mailQueues()]);
 
         $validStatuses = [
             Maho_Queue_Model_Message::STATUS_PENDING,
