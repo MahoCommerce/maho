@@ -333,3 +333,38 @@ function waitForPageLoad(object $page, string $selector): object
 
     return $page;
 }
+
+/*
+|--------------------------------------------------------------------------
+| Display Currency Helpers
+|--------------------------------------------------------------------------
+|
+| Shared by the display-currency regression tests (issue #1238) in
+| tests/Backend/Integration/.
+|
+*/
+
+/** Switch a store to EUR display currency in-memory and return the USD→EUR rate. */
+function useEurDisplayCurrency(int $storeId = 1): float
+{
+    $store = Mage::app()->getStore($storeId);
+
+    if ($store->getBaseCurrencyCode() !== 'USD') {
+        test()->markTestSkipped('Test expects USD base currency on store ' . $storeId);
+    }
+
+    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_ALLOW, 'USD,EUR');
+    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT, 'EUR');
+    foreach (['available_currency_codes', 'disallowed_base_currency_code_index', 'current_currency', 'default_currency', 'base_currency'] as $memo) {
+        $store->unsetData($memo);
+    }
+
+    $rate = (float) $store->getBaseCurrency()->getRate('EUR');
+    if ($rate <= 0 || $rate == 1.0) {
+        test()->markTestSkipped('USD→EUR rate not available or trivially 1');
+    }
+
+    expect($store->getCurrentCurrencyCode())->toBe('EUR');
+
+    return $rate;
+}

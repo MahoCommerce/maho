@@ -178,7 +178,8 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
             $expires = new DateTime($this->getExpiresAt(), new DateTimeZone('UTC'));
 
             if ($now > $expires) {
-                $this->setStatus(self::STATUS_EXPIRED)->save();
+                // In-memory only; the cron job persists the flip
+                $this->setStatus(self::STATUS_EXPIRED);
                 return false;
             }
         }
