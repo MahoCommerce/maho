@@ -88,8 +88,8 @@ use Symfony\Component\Serializer\Attribute\Groups;
             args: [
                 'search' => ['type' => 'String', 'description' => 'Search query'],
                 'categoryId' => ['type' => 'Int', 'description' => 'Filter by category ID'],
-                'priceMin' => ['type' => 'Float', 'description' => 'Minimum price filter'],
-                'priceMax' => ['type' => 'Float', 'description' => 'Maximum price filter'],
+                'priceMin' => ['type' => 'Float', 'description' => 'Minimum price filter, in the same currency as the returned prices'],
+                'priceMax' => ['type' => 'Float', 'description' => 'Maximum price filter, in the same currency as the returned prices'],
                 'sortBy' => ['type' => 'String', 'description' => 'Sort field (name, price, created_at)'],
                 'sortDir' => ['type' => 'String', 'description' => 'Sort direction (asc, desc)'],
                 'pageSize' => ['type' => 'Int', 'description' => 'Items per page (max 100)'],
@@ -183,7 +183,7 @@ class Product extends CrudResource
     public string $stockStatus = 'in_stock';
 
     #[Groups(['product:read'])]
-    #[ApiProperty(description: 'Base price')]
+    #[ApiProperty(description: 'Price in the response currency: display currency for public reads, website base currency for backend tokens and writes')]
     public ?float $price = null;
 
     #[Groups(['product:read'])]

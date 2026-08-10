@@ -115,10 +115,16 @@ class CartMapper
         if ($giftcardCodesJson) {
             $giftcardCodes = \Mage::helper('core')->jsonDecode($giftcardCodesJson, true);
             if (is_array($giftcardCodes)) {
-                // giftcard_codes stores {code: applied_amount}. The live card
-                // balance must be loaded from the model. This is the single
-                // source for applied gift cards: the GraphQL cart handler maps
-                // through here too, so REST and GraphQL return identical values.
+                // giftcard_codes stores {code: applied_amount} in the website
+                // base currency (the total collector owns that format), and the
+                // card balance is stored in the issuing website's base currency
+                // too. Convert both to quote currency: everything non-base* in
+                // this response is quote currency. The live card balance must be
+                // loaded from the model. This is the single source for applied
+                // gift cards: the GraphQL cart handler maps through here too,
+                // so REST and GraphQL return identical values.
+                $quoteCurrency = $cart->currency;
+                $store = $quote->getStore();
                 foreach ($giftcardCodes as $code => $appliedAmount) {
                     /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
                     $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
@@ -127,8 +133,8 @@ class CartMapper
                     }
                     $cart->appliedGiftcards[] = [
                         'code' => (string) $code,
-                        'balance' => (float) $giftcard->getBalance(),
-                        'appliedAmount' => (float) $appliedAmount,
+                        'balance' => (float) $giftcard->getBalance($quoteCurrency),
+                        'appliedAmount' => (float) $store->convertPrice((float) $appliedAmount, false),
                     ];
                 }
             }
@@ -157,7 +163,12 @@ class CartMapper
         $dto->sku = $item->getSku();
         $dto->name = $item->getName() ?? '';
         $dto->qty = (float) $item->getQty();
-        $dto->price = (float) $item->getPrice();
+        // Quote currency, like every other non-base money field in the response.
+        // getPrice() is website base currency; getCalculationPrice() is the
+        // converted (or custom) unit price the totals pipeline multiplies, and
+        // calcRowTotal() rounds it first, so round here to keep price * qty
+        // equal to rowTotal.
+        $dto->price = (float) $item->getStore()->roundPrice($item->getCalculationPrice());
         $dto->priceInclTax = (float) $item->getPriceInclTax();
         $dto->rowTotal = (float) $item->getRowTotal();
         $dto->rowTotalInclTax = (float) $item->getRowTotalInclTax();
@@ -352,6 +363,11 @@ class CartMapper
         try {
             $address->collectShippingRates();
 
+            // Rate prices are website base currency; the shipping total collector
+            // converts the selected one into shipping_amount, so convert here too
+            // or the same method would change price once selected.
+            $store = $address->getQuote()->getStore();
+
             foreach ($address->getAllShippingRates() as $rate) {
                 $carrierCode = (string) $rate->getCarrier();
                 $methodCode = (string) $rate->getMethod();
@@ -367,7 +383,7 @@ class CartMapper
                     'methodCode' => $methodCode,
                     'carrierTitle' => $carrierTitle,
                     'methodTitle' => $methodTitle,
-                    'price' => (float) $rate->getPrice(),
+                    'price' => (float) $store->convertPrice((float) $rate->getPrice(), false),
                 ];
             }
         } catch (\Exception $e) {
