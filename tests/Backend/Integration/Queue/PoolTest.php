@@ -152,6 +152,12 @@ it('drops a pool declared inactive with "false"', function () {
     });
 });
 
+it('keeps memory_limit 0 as unbounded instead of falling back to the default', function () {
+    withQueueConfig('<queue><routing><zz_q>zz_pool</zz_q></routing><pools><zz_pool><sort_order>5</sort_order><memory_limit>0</memory_limit></zz_pool></pools></queue>', function () {
+        expect(queuePool('zz_pool')->memoryLimit)->toBe('0');
+    });
+});
+
 it('does not hand the catch-all worker a message belonging to another pool', function () {
     QueueManager::dispatch(makeEmailMessage(), queue: Mage_Core_Model_Email_Queue::QUEUE_NAME);
     QueueManager::dispatch(makeEmailMessage('newsletter batch'), queue: 'newsletter');

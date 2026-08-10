@@ -252,6 +252,54 @@ it('does not let a late ack swallow a row an operator already retried', function
     expect($rows[0]['status'])->toBe(DbTransport::STATUS_PENDING);
 });
 
+it('does not let a late retry re-send overwrite a row an operator already retried', function () {
+    QueueManager::dispatch(makeEmailMessage());
+
+    $transport = QueueManager::dbTransport();
+    $envelopes = [...$transport->get()];
+    $id = (int) fetchQueueRows()[0]['message_id'];
+
+    // The claim goes stale (the worker looks dead), so the operator re-queues it.
+    queueAdapter()->update(QueueManager::tableName(), [
+        'claimed_at' => gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 7200),
+    ], ['message_id = ?' => $id]);
+    expect(QueueManager::retryStoredMessage($id))->toBeTrue();
+
+    // The worker was alive after all and its handler fails: the retry listener's
+    // in-place re-send must leave the operator's fresh pending row alone.
+    $transport->send($envelopes[0]->with(
+        new RedeliveryStamp(1),
+        ErrorDetailsStamp::create(new RuntimeException('handler blew up')),
+    ));
+
+    $rows = fetchQueueRows();
+    expect($rows)->toHaveCount(1);
+    expect($rows[0]['status'])->toBe(DbTransport::STATUS_PENDING);
+    expect((int) $rows[0]['retries'])->toBe(0);
+});
+
+it('skips the keepalive refresh while the shared connection is inside a transaction', function () {
+    QueueManager::dispatch(makeEmailMessage());
+
+    $transport = QueueManager::dbTransport();
+    $envelopes = [...$transport->get()];
+    $id = (int) fetchQueueRows()[0]['message_id'];
+
+    $stale = gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 7200);
+    queueAdapter()->update(QueueManager::tableName(), ['claimed_at' => $stale], ['message_id = ?' => $id]);
+
+    queueAdapter()->beginTransaction();
+    try {
+        $transport->keepalive($envelopes[0]);
+        expect(fetchQueueRows()[0]['claimed_at'])->toBe($stale);
+    } finally {
+        queueAdapter()->rollBack();
+    }
+
+    $transport->keepalive($envelopes[0]);
+    expect(fetchQueueRows()[0]['claimed_at'])->not->toBe($stale);
+});
+
 it('counts pending messages and finds stored ones', function () {
     QueueManager::dispatch(makeEmailMessage());
     QueueManager::dispatch(makeEmailMessage('second'));

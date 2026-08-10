@@ -42,8 +42,7 @@ class Maho_Queue_Block_Adminhtml_Message_View extends Mage_Adminhtml_Block_Widge
 
         return match ($message?->getStatus()) {
             Maho_Queue_Model_Message::STATUS_FAILED => true,
-            Maho_Queue_Model_Message::STATUS_PROCESSING => $message->getClaimedAt() !== null
-                && $message->getClaimedAt() < \Maho\Queue\Transport\DbTransport::abandonedBefore(),
+            Maho_Queue_Model_Message::STATUS_PROCESSING => \Maho\Queue\Transport\DbTransport::isAbandonedClaim($message->getClaimedAt()),
             default => false,
         };
     }

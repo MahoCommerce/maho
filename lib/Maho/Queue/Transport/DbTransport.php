@@ -83,6 +83,8 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
         // A failure-transport send carries both stamps too, but its id belongs to the origin transport: insert, not update.
         if ($messageIdStamp !== null && $redeliveryStamp !== null
             && $envelope->last(SentToFailureTransportStamp::class) === null) {
+            // The status guard mirrors ack(): a row an operator already re-queued,
+            // completed or deleted must survive a stale worker's late re-send.
             $this->adapter->update($this->table, [
                 'status' => self::STATUS_PENDING,
                 'retries' => $redeliveryStamp->getRetryCount(),
@@ -90,7 +92,10 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
                 'error_message' => $envelope->last(ErrorDetailsStamp::class)?->getExceptionMessage(),
                 'claimed_at' => null,
                 'updated_at' => $now,
-            ], ['message_id = ?' => (int) $messageIdStamp->getId()]);
+            ], [
+                'message_id = ?' => (int) $messageIdStamp->getId(),
+                'status = ?' => self::STATUS_PROCESSING,
+            ]);
 
             return $envelope;
         }
@@ -180,6 +185,13 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
     #[\Override]
     public function keepalive(Envelope $envelope, ?int $seconds = null): void
     {
+        // The alarm can fire while the handler holds an open transaction on this
+        // shared connection; joining it would lock the row against the admin's
+        // retry and lose the refresh on rollback. Skip and let the next one land.
+        if ($this->adapter->getTransactionLevel() > 0) {
+            return;
+        }
+
         $now = \Mage_Core_Model_Locale::nowUtc();
         $this->adapter->update($this->table, [
             'claimed_at' => $now,
@@ -354,6 +366,12 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
     public static function abandonedBefore(int $olderThanSeconds = self::ABANDONED_AFTER_SECONDS): string
     {
         return gmdate(\Mage_Core_Model_Locale::DATETIME_FORMAT, time() - $olderThanSeconds);
+    }
+
+    /** True when a processing row's claim is old enough to belong to a dead worker. */
+    public static function isAbandonedClaim(?string $claimedAt): bool
+    {
+        return $claimedAt !== null && $claimedAt < self::abandonedBefore();
     }
 
     /**

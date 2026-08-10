@@ -70,7 +70,10 @@ class Maho_Queue_Model_Cron
 
             foreach ($free as $index) {
                 // One process per due message. A busy worker cannot take one, and holds
-                // exactly one claim, so live claims come off the roster.
+                // exactly one claim, so live claims come off the roster. Due and busy
+                // counts are cluster-global while locks are machine-local, so on
+                // multi-server installs each server may spawn for the same backlog;
+                // the excess is bounded by pool->count and drains via idle timeout.
                 if ($pool->isOnDemand()) {
                     $due ??= $this->dueWorkCount($pool);
                     $idle ??= $live === 0 ? 0 : max(0, $live - $this->busyWorkerCount($pool));

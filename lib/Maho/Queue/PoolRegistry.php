@@ -129,7 +129,7 @@ final class PoolRegistry
                 excludedQueues: $excluded,
                 count: max(1, (int) ($child->count ?? 1)),
                 idleTimeout: isset($child->idle_timeout) ? max(0, (int) $child->idle_timeout) : null,
-                memoryLimit: trim((string) ($child->memory_limit ?? '')) ?: '256M',
+                memoryLimit: isset($child->memory_limit) ? trim((string) $child->memory_limit) : '256M',
                 timeLimit: max(0, (int) ($child->time_limit ?? 3600)),
             );
         }
