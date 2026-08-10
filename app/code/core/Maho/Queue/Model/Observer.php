@@ -13,6 +13,14 @@ use Maho\Queue\QueueManager;
 class Maho_Queue_Model_Observer
 {
     /**
+     * Cached count so every admin page load does not pay a queue-table query;
+     * well under the abandonment threshold, so the notice is never meaningfully
+     * late. The retry/discard actions drop the key for instant feedback.
+     */
+    public const ABANDONED_COUNT_CACHE_KEY = 'maho_queue_abandoned_count';
+    private const ABANDONED_COUNT_CACHE_SECONDS = 60;
+
+    /**
      * Nothing re-queues a claim a dead worker left behind, so the grid is the
      * only way one comes back and somebody has to be told to look at it.
      */
@@ -46,10 +54,19 @@ class Maho_Queue_Model_Observer
     /** Caught rather than probed: isTableExists() would introspect the schema on every request. */
     private function abandonedMessageCount(): int
     {
+        $cached = Mage::app()->loadCache(self::ABANDONED_COUNT_CACHE_KEY);
+        if (is_string($cached) && $cached !== '') {
+            return (int) $cached;
+        }
+
         try {
-            return QueueManager::dbTransport()->countAbandoned();
+            $count = QueueManager::dbTransport()->countAbandoned();
         } catch (Exception) {
             return 0;
         }
+
+        Mage::app()->saveCache((string) $count, self::ABANDONED_COUNT_CACHE_KEY, [], self::ABANDONED_COUNT_CACHE_SECONDS);
+
+        return $count;
     }
 }

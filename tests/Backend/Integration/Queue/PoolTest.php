@@ -30,30 +30,6 @@ function poolTransport(string $name): DbTransport
     return $transport;
 }
 
-/**
- * Merge extra queue config the way another module's config.xml would, run the
- * assertions, then take it back out again.
- *
- * @param callable():void $body
- */
-function withQueueConfig(string $xml, callable $body): void
-{
-    $node = Mage::getConfig()->getNode('global/queue');
-    $node->extend(new Maho\Simplexml\Element($xml), true);
-    QueueManager::reset();
-
-    try {
-        $body();
-    } finally {
-        foreach (new Maho\Simplexml\Element($xml) as $section => $children) {
-            foreach (array_keys((array) $children->children()) as $name) {
-                unset($node->{$section}->{$name});
-            }
-        }
-        QueueManager::reset();
-    }
-}
-
 function insertQueueRow(string $queue, string $status, ?string $claimedAt = null): void
 {
     $now = Mage_Core_Model_Locale::nowUtc();
@@ -69,20 +45,19 @@ function insertQueueRow(string $queue, string $status, ?string $claimedAt = null
     ]);
 }
 
-function agoUtc(int $seconds): string
-{
-    return gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - $seconds);
-}
-
 /**
  * A Worker that only records stop(), so the idle listener can be driven
- * directly without a transport behind it.
+ * directly without a transport behind it. The parent constructor runs with
+ * empty receivers so inherited typed properties stay initialized.
  */
 class RecordingWorker extends Worker
 {
     public int $stopped = 0;
 
-    public function __construct() {}
+    public function __construct()
+    {
+        parent::__construct([], QueueManager::bus(), new Symfony\Component\EventDispatcher\EventDispatcher());
+    }
 
     #[\Override]
     public function stop(): void

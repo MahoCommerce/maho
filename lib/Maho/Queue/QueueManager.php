@@ -140,22 +140,36 @@ final class QueueManager
      * timer-based redelivery was meant to make impossible. The age cut-off is
      * applied in the UPDATE, so a worker that claims the row between the read
      * and the write keeps it.
+     *
+     * A deduped row is refused while a newer copy of its key is in flight:
+     * once an abandoned claim stops suppressing dispatches, the fresh copy
+     * supersedes it and retrying the old one would run the job twice. Discard
+     * is the way out for that row.
      */
     public static function retryStoredMessage(int $messageId): bool
     {
         $adapter = self::writeAdapter();
         $table = self::tableName();
-        $status = $adapter->fetchOne(
-            $adapter->select()->from($table, 'status')->where('message_id = ?', $messageId),
+        $row = $adapter->fetchRow(
+            $adapter->select()->from($table, ['status', 'dedupe_key'])->where('message_id = ?', $messageId),
         );
+        if ($row === false) {
+            return false;
+        }
 
         $where = ['message_id = ?' => $messageId];
-        if ($status === DbTransport::STATUS_PROCESSING) {
+        if ($row['status'] === DbTransport::STATUS_PROCESSING) {
             $where['status = ?'] = DbTransport::STATUS_PROCESSING;
             $where['claimed_at < ?'] = DbTransport::abandonedBefore();
-        } elseif ($status === DbTransport::STATUS_FAILED) {
+        } elseif ($row['status'] === DbTransport::STATUS_FAILED) {
             $where['status = ?'] = DbTransport::STATUS_FAILED;
         } else {
+            return false;
+        }
+
+        if ($row['dedupe_key'] !== null
+            && self::dbTransport()->inFlightRowExists((string) $row['dedupe_key'], $messageId)
+        ) {
             return false;
         }
 
@@ -166,6 +180,7 @@ final class QueueManager
             'retries' => 0,
             'available_at' => $now,
             'claimed_at' => null,
+            'claim_token' => null,
             'processed_at' => null,
             'updated_at' => $now,
         ], $where) === 1;

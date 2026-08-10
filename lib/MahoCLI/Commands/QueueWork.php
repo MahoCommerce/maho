@@ -83,6 +83,14 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
                 $output->writeln("<error>Another exclusive queue worker already holds {$lockName}</error>");
                 return Command::INVALID;
             }
+            if ($pool === null && ($running = $this->livePoolWorkers()) !== []) {
+                // The bare lock only stops the watchdog from spawning more; it
+                // does not evict workers already running.
+                $output->writeln(sprintf(
+                    '<comment>Pool worker(s) %s are still running and keep consuming until their own limits stop them</comment>',
+                    implode(', ', $running),
+                ));
+            }
         }
 
         // Unbounded unless asked: a hand-run worker keeps the limits it had before pools existed.
@@ -110,7 +118,7 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
 
         $memoryLimit = null;
         if ($effective->memoryLimit !== '') {
-            $memoryLimit = $this->parseMemoryLimit($effective->memoryLimit);
+            $memoryLimit = Pool::parseMemoryLimit($effective->memoryLimit);
             if ($memoryLimit === null) {
                 $output->writeln("<error>Invalid memory limit: {$effective->memoryLimit}</error>");
                 return Command::INVALID;
@@ -195,17 +203,21 @@ class QueueWork extends BaseMahoCommand implements SignalableCommandInterface
         return false;
     }
 
-    private function parseMemoryLimit(string $limit): ?int
+    /**
+     * @return list<string>
+     */
+    private function livePoolWorkers(): array
     {
-        if (!preg_match('/^(\d+)([KMG]?)$/i', trim($limit), $matches)) {
-            return null;
+        $lock = \Mage::getSingleton('core/lock');
+        $running = [];
+        foreach (PoolRegistry::all() as $pool) {
+            for ($index = 0; $index < $pool->count; $index++) {
+                if ($lock->isHeld($pool->lockName($index), machineLocal: true)) {
+                    $running[] = "{$pool->name}.{$index}";
+                }
+            }
         }
 
-        return (int) $matches[1] * match (strtoupper($matches[2])) {
-            'K' => 1024,
-            'M' => 1024 ** 2,
-            'G' => 1024 ** 3,
-            default => 1,
-        };
+        return $running;
     }
 }

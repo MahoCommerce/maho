@@ -57,4 +57,19 @@ final readonly class Pool
 
         return $this->queues === [] || in_array($queue, $this->queues, true);
     }
+
+    /** Bytes for a shorthand like "256M", or null when the string is not a memory limit at all. */
+    public static function parseMemoryLimit(string $limit): ?int
+    {
+        if (!preg_match('/^(\d+)([KMG]?)$/i', trim($limit), $matches)) {
+            return null;
+        }
+
+        return (int) $matches[1] * match (strtoupper($matches[2])) {
+            'K' => 1024,
+            'M' => 1024 ** 2,
+            'G' => 1024 ** 3,
+            default => 1,
+        };
+    }
 }

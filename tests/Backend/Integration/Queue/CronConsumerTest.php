@@ -100,53 +100,45 @@ it('stands aside for a hand-run exclusive worker', function () {
 });
 
 it('counts the on-demand workers already alive against the due budget', function () {
-    $node = Mage::getConfig()->getNode('global/queue');
-    $node->extend(new Maho\Simplexml\Element('<queue><pools><slow><count>3</count></slow></pools></queue>'), true);
-    QueueManager::reset();
+    withQueueConfig('<queue><pools><slow><count>3</count></slow></pools></queue>', function () {
+        $lock = Mage::getSingleton('core/lock');
+        $slow = PoolRegistry::get('slow');
+        expect($slow?->count)->toBe(3);
+        $held = $slow->lockName(0);
+        expect($lock->acquire($held, machineLocal: true))->toBeTrue();
 
-    $lock = Mage::getSingleton('core/lock');
-    $slow = PoolRegistry::get('slow');
-    expect($slow?->count)->toBe(3);
-    $held = $slow->lockName(0);
-    expect($lock->acquire($held, machineLocal: true))->toBeTrue();
+        try {
+            QueueManager::dispatch(makeEmailMessage('due now'), queue: 'newsletter');
 
-    try {
-        QueueManager::dispatch(makeEmailMessage('due now'), queue: 'newsletter');
-
-        // One message, one worker already consuming it: a second process would
-        // boot only to idle straight back out.
-        expect(pendingWorkers())->toBe(['fast:0']);
-    } finally {
-        $lock->release($held);
-        unset($node->pools->slow->count);
-        QueueManager::reset();
-    }
+            // One message, one worker already consuming it: a second process would
+            // boot only to idle straight back out.
+            expect(pendingWorkers())->toBe(['fast:0']);
+        } finally {
+            $lock->release($held);
+        }
+    });
 });
 
 it('does not count a worker inside a long handler as free to take the next message', function () {
-    $node = Mage::getConfig()->getNode('global/queue');
-    $node->extend(new Maho\Simplexml\Element('<queue><pools><slow><count>3</count></slow></pools></queue>'), true);
-    QueueManager::reset();
+    withQueueConfig('<queue><pools><slow><count>3</count></slow></pools></queue>', function () {
+        $lock = Mage::getSingleton('core/lock');
+        $slow = PoolRegistry::get('slow');
+        expect($slow?->count)->toBe(3);
+        $held = $slow->lockName(0);
+        expect($lock->acquire($held, machineLocal: true))->toBeTrue();
 
-    $lock = Mage::getSingleton('core/lock');
-    $slow = PoolRegistry::get('slow');
-    expect($slow?->count)->toBe(3);
-    $held = $slow->lockName(0);
-    expect($lock->acquire($held, machineLocal: true))->toBeTrue();
+        try {
+            QueueManager::dispatch(makeEmailMessage('long feed build'), queue: 'feed');
+            QueueManager::dispatch(makeEmailMessage('due now'), queue: 'newsletter');
 
-    try {
-        QueueManager::dispatch(makeEmailMessage('long feed build'), queue: 'feed');
-        QueueManager::dispatch(makeEmailMessage('due now'), queue: 'newsletter');
-
-        // The live worker is busy on the feed build, so it cannot take the
-        // newsletter: a free slot must be started rather than left idle behind it.
-        expect([...QueueManager::workerTransport($slow)->get()])->toHaveCount(1);
-        expect(pendingWorkers())->toBe(['fast:0', 'slow:1']);
-    } finally {
-        $lock->release($held);
-        unset($node->pools->slow->count);
-        QueueManager::reset();
-    }
+            // The live worker is busy on the feed build, so it cannot take the
+            // newsletter: a free slot must be started rather than left idle behind it.
+            expect([...QueueManager::workerTransport($slow)->get()])->toHaveCount(1);
+            expect(pendingWorkers())->toBe(['fast:0', 'slow:1']);
+        } finally {
+            $lock->release($held);
+        }
+    });
 });
 
 it('removes old failed messages during cleanup', function () {
@@ -157,7 +149,7 @@ it('removes old failed messages during cleanup', function () {
         'message_class' => Mage_Core_Model_Email_SendMessage::class,
         'body' => serialize(makeEmailMessage()),
         'available_at' => $now,
-        'processed_at' => gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 40 * 86400),
+        'processed_at' => agoUtc(40 * 86400),
         'created_at' => $now,
         'updated_at' => $now,
     ]);

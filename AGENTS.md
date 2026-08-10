@@ -179,7 +179,9 @@ class My_Module_Checkout_CartController extends Mage_Checkout_CartController { /
   resourcing (count, memory/time limits, idle timeout) lives under `global/queue/pools`. A crash
   parks a claimed message for an operator instead of redelivering it: retry or discard it in the
   grid. A handler may run as long as it needs: the worker refreshes its claim on Symfony's
-  keepalive alarm, so only a worker that actually died is reported as abandoned. Worker startup
+  keepalive alarm, so only a worker that actually died is reported as abandoned (the refresh
+  needs pcntl and cannot land while the handler holds an open transaction on the shared
+  connection, so such a worker can be misreported after 5 minutes). Worker startup
   failures land in `var/log/queue-worker.log`; production installs should prefer supervisord or
   systemd over the cron watchdog
 - **Layout**: XML-based block hierarchy and template assignment

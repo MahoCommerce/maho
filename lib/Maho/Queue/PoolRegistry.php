@@ -129,7 +129,7 @@ final class PoolRegistry
                 excludedQueues: $excluded,
                 count: max(1, (int) ($child->count ?? 1)),
                 idleTimeout: isset($child->idle_timeout) ? max(0, (int) $child->idle_timeout) : null,
-                memoryLimit: isset($child->memory_limit) ? trim((string) $child->memory_limit) : '256M',
+                memoryLimit: self::memoryLimit($child, (string) $name),
                 timeLimit: max(0, (int) ($child->time_limit ?? 3600)),
             );
         }
@@ -177,5 +177,24 @@ final class PoolRegistry
     private static function flag(\Mage_Core_Model_Config_Element $node, string $child, bool $default): bool
     {
         return isset($node->{$child}) ? $node->is($child) : $default;
+    }
+
+    /**
+     * Rejected here rather than in the spawned worker: an invalid limit there
+     * makes queue:work exit before taking its lock, so the watchdog would
+     * respawn it every minute while the pool's queues silently stop draining.
+     */
+    private static function memoryLimit(\Mage_Core_Model_Config_Element $child, string $name): string
+    {
+        $limit = isset($child->memory_limit) ? trim((string) $child->memory_limit) : '256M';
+        if ($limit !== '' && Pool::parseMemoryLimit($limit) === null) {
+            \Mage::log(
+                sprintf('Queue pool "%s" has an invalid memory_limit "%s"; using 256M', $name, $limit),
+                \Mage::LOG_ERROR,
+            );
+            return '256M';
+        }
+
+        return $limit;
     }
 }

@@ -471,3 +471,33 @@ function fetchQueueRows(): array
         queueAdapter()->select()->from(\Maho\Queue\QueueManager::tableName())->order('message_id ASC'),
     );
 }
+
+function agoUtc(int $seconds): string
+{
+    return gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - $seconds);
+}
+
+/**
+ * Merge extra queue config the way another module's config.xml would, run the
+ * assertions, then restore the original config exactly (a snapshot, so merging
+ * into an existing node does not delete it on the way out).
+ *
+ * @param callable():void $body
+ */
+function withQueueConfig(string $xml, callable $body): void
+{
+    $node = Mage::getConfig()->getNode('global/queue');
+    $snapshot = new Maho\Simplexml\Element($node->asXML());
+    $node->extend(new Maho\Simplexml\Element($xml), true);
+    \Maho\Queue\QueueManager::reset();
+
+    try {
+        $body();
+    } finally {
+        foreach (array_keys((array) $node->children()) as $child) {
+            unset($node->{$child});
+        }
+        $node->extend($snapshot, true);
+        \Maho\Queue\QueueManager::reset();
+    }
+}

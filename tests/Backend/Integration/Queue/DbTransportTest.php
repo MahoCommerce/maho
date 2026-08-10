@@ -108,7 +108,7 @@ it('lets a dedupe key be dispatched again once its claim is abandoned', function
     // A claim nobody will finish must stop suppressing later sends, or every
     // future dispatch of this key is silently dropped instead of one being parked.
     queueAdapter()->update(QueueManager::tableName(), [
-        'claimed_at' => gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 7200),
+        'claimed_at' => agoUtc(7200),
     ]);
     QueueManager::dispatch(makeEmailMessage(), dedupeKey: 'abc');
     expect(fetchQueueRows())->toHaveCount(2);
@@ -139,19 +139,20 @@ it('retries a failed row and an abandoned claim, but not a pending or freshly cl
     expect(QueueManager::retryStoredMessage($id))->toBeFalse();
 
     // A live worker is still inside this one: re-queueing it runs the handler twice.
-    $envelopes = [...$transport->get()];
+    expect([...$transport->get()])->toHaveCount(1);
     expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PROCESSING);
     expect(QueueManager::retryStoredMessage($id))->toBeFalse();
 
     // Old enough to belong to a dead worker: nothing else requeues it, so the grid must.
     queueAdapter()->update(QueueManager::tableName(), [
-        'claimed_at' => gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 7200),
+        'claimed_at' => agoUtc(7200),
     ]);
     expect(QueueManager::retryStoredMessage($id))->toBeTrue();
     expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PENDING);
 
-    [...$transport->get()];
-    $transport->reject($envelopes[0]);
+    // The row's owner (its re-claimer, not the stale envelope) can still fail it.
+    $reclaimed = [...$transport->get()];
+    $transport->reject($reclaimed[0]);
     expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_FAILED);
     expect(QueueManager::retryStoredMessage($id))->toBeTrue();
     expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PENDING);
@@ -163,7 +164,7 @@ it('never hands out a claim again on its own, however old it is', function () {
     expect([...$transport->get()])->toHaveCount(1);
 
     queueAdapter()->update(QueueManager::tableName(), [
-        'claimed_at' => gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 7200),
+        'claimed_at' => agoUtc(7200),
     ]);
 
     // A claim is parked for an operator, never redelivered on a timer: running
@@ -203,7 +204,7 @@ it('keeps a live claim out of the abandoned set', function () {
     expect($envelopes)->toHaveCount(1);
 
     queueAdapter()->update(QueueManager::tableName(), [
-        'claimed_at' => gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - DbTransport::ABANDONED_AFTER_SECONDS - 60),
+        'claimed_at' => agoUtc(DbTransport::ABANDONED_AFTER_SECONDS + 60),
     ], ['message_id = ?' => (int) fetchQueueRows()[0]['message_id']]);
     expect($transport->countAbandoned())->toBe(1);
 
@@ -239,7 +240,7 @@ it('does not let a late ack swallow a row an operator already retried', function
 
     // The claim goes stale (the worker looks dead), so the operator re-queues it.
     queueAdapter()->update(QueueManager::tableName(), [
-        'claimed_at' => gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 7200),
+        'claimed_at' => agoUtc(7200),
     ], ['message_id = ?' => $id]);
     expect(QueueManager::retryStoredMessage($id))->toBeTrue();
 
@@ -252,6 +253,59 @@ it('does not let a late ack swallow a row an operator already retried', function
     expect($rows[0]['status'])->toBe(DbTransport::STATUS_PENDING);
 });
 
+it('does not let a stale worker touch a row another worker has since claimed', function () {
+    QueueManager::dispatch(makeEmailMessage());
+
+    $transport = QueueManager::dbTransport();
+    $staleEnvelopes = [...$transport->get()];
+    $id = (int) fetchQueueRows()[0]['message_id'];
+
+    // The claim goes stale (worker A looks dead), the operator re-queues it,
+    // and worker B claims the row again.
+    queueAdapter()->update(QueueManager::tableName(), ['claimed_at' => agoUtc(7200)], ['message_id = ?' => $id]);
+    expect(QueueManager::retryStoredMessage($id))->toBeTrue();
+    $freshEnvelopes = [...$transport->get()];
+    expect($freshEnvelopes)->toHaveCount(1);
+
+    // Worker A was alive after all: its claim token no longer matches, so its
+    // late ack, reject and re-send must all leave B's claim alone.
+    $transport->ack($staleEnvelopes[0]);
+    expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PROCESSING);
+    $transport->reject($staleEnvelopes[0]);
+    expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PROCESSING);
+    $transport->send($staleEnvelopes[0]->with(
+        new RedeliveryStamp(1),
+        ErrorDetailsStamp::create(new RuntimeException('handler blew up')),
+    ));
+    expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PROCESSING);
+
+    // B still owns the row and its ack lands.
+    $transport->ack($freshEnvelopes[0]);
+    expect(fetchQueueRows())->toHaveCount(0);
+});
+
+it('refuses to retry a parked claim while a newer copy of its dedupe key is in flight', function () {
+    QueueManager::dispatch(makeEmailMessage(), dedupeKey: 'abc');
+    $transport = QueueManager::dbTransport();
+    expect([...$transport->get()])->toHaveCount(1);
+    $id = (int) fetchQueueRows()[0]['message_id'];
+
+    // The claim is abandoned, so a later dispatch of the same key inserts a
+    // fresh copy that supersedes the parked one.
+    queueAdapter()->update(QueueManager::tableName(), ['claimed_at' => agoUtc(7200)], ['message_id = ?' => $id]);
+    QueueManager::dispatch(makeEmailMessage(), dedupeKey: 'abc');
+    expect(fetchQueueRows())->toHaveCount(2);
+
+    // Retrying the parked claim would run the deduped job twice; discard is the way out.
+    expect(QueueManager::retryStoredMessage($id))->toBeFalse();
+
+    // Once the fresh copy is gone, the parked claim is retryable again.
+    $freshId = (int) fetchQueueRows()[1]['message_id'];
+    expect(QueueManager::discardStoredMessage($freshId))->toBeTrue();
+    expect(QueueManager::retryStoredMessage($id))->toBeTrue();
+    expect(fetchQueueRows()[0]['status'])->toBe(DbTransport::STATUS_PENDING);
+});
+
 it('does not let a late retry re-send overwrite a row an operator already retried', function () {
     QueueManager::dispatch(makeEmailMessage());
 
@@ -261,7 +315,7 @@ it('does not let a late retry re-send overwrite a row an operator already retrie
 
     // The claim goes stale (the worker looks dead), so the operator re-queues it.
     queueAdapter()->update(QueueManager::tableName(), [
-        'claimed_at' => gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 7200),
+        'claimed_at' => agoUtc(7200),
     ], ['message_id = ?' => $id]);
     expect(QueueManager::retryStoredMessage($id))->toBeTrue();
 
@@ -285,7 +339,7 @@ it('skips the keepalive refresh while the shared connection is inside a transact
     $envelopes = [...$transport->get()];
     $id = (int) fetchQueueRows()[0]['message_id'];
 
-    $stale = gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - 7200);
+    $stale = agoUtc(7200);
     queueAdapter()->update(QueueManager::tableName(), ['claimed_at' => $stale], ['message_id = ?' => $id]);
 
     queueAdapter()->beginTransaction();

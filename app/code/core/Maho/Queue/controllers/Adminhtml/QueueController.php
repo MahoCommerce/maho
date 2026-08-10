@@ -98,8 +98,9 @@ class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Act
         if (QueueManager::retryStoredMessage($id)) {
             Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('queue')->__('Message re-queued.'));
         } else {
-            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('queue')->__('Only failed or stuck messages can be retried.'));
+            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('queue')->__('The message was not retried: only failed or stuck messages without a newer copy of their dedupe key can be retried.'));
         }
+        $this->refreshAbandonedNotice();
         $this->_redirect('*/*/');
     }
 
@@ -112,6 +113,7 @@ class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Act
         } else {
             Mage::getSingleton('adminhtml/session')->addError(Mage::helper('queue')->__('Message not found.'));
         }
+        $this->refreshAbandonedNotice();
         $this->_redirect('*/*/');
     }
 
@@ -132,8 +134,9 @@ class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Act
             $session->addSuccess(Mage::helper('queue')->__('%s message(s) re-queued.', $retried));
         }
         if ($skipped > 0) {
-            $session->addNotice(Mage::helper('queue')->__('%s message(s) were skipped: only failed or stuck messages can be retried.', $skipped));
+            $session->addNotice(Mage::helper('queue')->__('%s message(s) were skipped: only failed or stuck messages without a newer copy of their dedupe key can be retried.', $skipped));
         }
+        $this->refreshAbandonedNotice();
         $this->_redirect('*/*/');
     }
 
@@ -149,7 +152,14 @@ class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Act
         Mage::getSingleton('adminhtml/session')->addSuccess(
             Mage::helper('queue')->__('%s message(s) discarded.', $discarded),
         );
+        $this->refreshAbandonedNotice();
         $this->_redirect('*/*/');
+    }
+
+    /** The abandoned-count notice is cached; an operator action must not leave it stale. */
+    private function refreshAbandonedNotice(): void
+    {
+        Mage::app()->removeCache(Maho_Queue_Model_Observer::ABANDONED_COUNT_CACHE_KEY);
     }
 
     /**

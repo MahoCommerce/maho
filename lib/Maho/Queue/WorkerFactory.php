@@ -31,7 +31,6 @@ final class WorkerFactory
      */
     public static function create(array $options = []): Worker
     {
-        $transportName = QueueManager::TRANSPORT_DB;
         $transport = QueueManager::workerTransport($options['pool'] ?? null);
 
         $dispatcher = new EventDispatcher();
@@ -39,8 +38,8 @@ final class WorkerFactory
         $dispatcher->addSubscriber(new DispatchPcntlSignalListener());
 
         $dispatcher->addSubscriber(new SendFailedMessageForRetryListener(
-            new ServiceLocator([$transportName => $transport]),
-            new ServiceLocator([$transportName => new MultiplierRetryStrategy(
+            new ServiceLocator([QueueManager::TRANSPORT_DB => $transport]),
+            new ServiceLocator([QueueManager::TRANSPORT_DB => new MultiplierRetryStrategy(
                 (int) \Mage::getStoreConfig(QueueManager::XML_PATH_MAX_RETRIES),
                 (int) \Mage::getStoreConfig(QueueManager::XML_PATH_RETRY_DELAY) * 1000,
                 (float) \Mage::getStoreConfig(QueueManager::XML_PATH_RETRY_MULTIPLIER),
@@ -66,6 +65,6 @@ final class WorkerFactory
             $dispatcher->addSubscriber(new StopWorkerWhenIdleListener($options['idleTimeout']));
         }
 
-        return new Worker([$transportName => $transport], QueueManager::bus(), $dispatcher);
+        return new Worker([QueueManager::TRANSPORT_DB => $transport], QueueManager::bus(), $dispatcher);
     }
 }

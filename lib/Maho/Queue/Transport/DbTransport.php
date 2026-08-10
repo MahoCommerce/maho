@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Maho\Queue\Transport;
 
 use Maho\Db\Adapter\AdapterInterface;
+use Maho\Queue\Stamp\ClaimTokenStamp;
 use Maho\Queue\Stamp\DedupeKeyStamp;
 use Maho\Queue\Stamp\QueueNameStamp;
 use Symfony\Component\Messenger\Envelope;
@@ -83,19 +84,18 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
         // A failure-transport send carries both stamps too, but its id belongs to the origin transport: insert, not update.
         if ($messageIdStamp !== null && $redeliveryStamp !== null
             && $envelope->last(SentToFailureTransportStamp::class) === null) {
-            // The status guard mirrors ack(): a row an operator already re-queued,
-            // completed or deleted must survive a stale worker's late re-send.
+            // The ownership guard mirrors ack(): a row an operator already re-queued,
+            // completed, deleted or that another worker has since claimed must
+            // survive a stale worker's late re-send.
             $this->adapter->update($this->table, [
                 'status' => self::STATUS_PENDING,
                 'retries' => $redeliveryStamp->getRetryCount(),
                 'available_at' => $availableAt,
                 'error_message' => $envelope->last(ErrorDetailsStamp::class)?->getExceptionMessage(),
                 'claimed_at' => null,
+                'claim_token' => null,
                 'updated_at' => $now,
-            ], [
-                'message_id = ?' => (int) $messageIdStamp->getId(),
-                'status = ?' => self::STATUS_PROCESSING,
-            ]);
+            ], $this->ownershipWhere($envelope));
 
             return $envelope;
         }
@@ -139,21 +139,20 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
     }
 
     /**
-     * The status guard mirrors reject() and keepalive(): a row an operator
-     * already flipped back to pending must survive the late ack of the worker
-     * that used to hold it, or the retry is silently swallowed.
+     * The ownership guard mirrors reject() and keepalive(): a row an operator
+     * already flipped back to pending, or that another worker has since
+     * claimed, must survive the late ack of the worker that used to hold it,
+     * or the retry (or the other worker's run) is silently swallowed.
      */
     #[\Override]
     public function ack(Envelope $envelope): void
     {
-        $where = [
-            'message_id = ?' => $this->messageId($envelope),
-            'status = ?' => self::STATUS_PROCESSING,
-        ];
+        $where = $this->ownershipWhere($envelope);
         if ($this->completedRetentionDays > 0) {
             $now = \Mage_Core_Model_Locale::nowUtc();
             $this->adapter->update($this->table, [
                 'status' => self::STATUS_COMPLETED,
+                'claim_token' => null,
                 'processed_at' => $now,
                 'updated_at' => $now,
             ], $where);
@@ -169,18 +168,17 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
         // A row the retry listener already re-queued in place stays pending.
         $this->adapter->update($this->table, [
             'status' => self::STATUS_FAILED,
+            'claim_token' => null,
             'error_message' => $envelope->last(ErrorDetailsStamp::class)?->getExceptionMessage(),
             'processed_at' => $now,
             'updated_at' => $now,
-        ], [
-            'message_id = ?' => $this->messageId($envelope),
-            'status = ?' => self::STATUS_PROCESSING,
-        ]);
+        ], $this->ownershipWhere($envelope));
     }
 
     /**
      * Makes claimed_at mean "a worker is alive here", not "a worker started here
-     * a while ago". The status guard leaves a row an operator already retried alone.
+     * a while ago". The ownership guard leaves a row an operator already retried
+     * (or another worker has since claimed) alone.
      */
     #[\Override]
     public function keepalive(Envelope $envelope, ?int $seconds = null): void
@@ -196,10 +194,30 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
         $this->adapter->update($this->table, [
             'claimed_at' => $now,
             'updated_at' => $now,
-        ], [
+        ], $this->ownershipWhere($envelope));
+    }
+
+    /**
+     * WHERE clause proving the caller still owns the row: the claim token
+     * written when it claimed, when the envelope carries one. Status alone
+     * cannot tell "my claim" from a newer claim another worker took after an
+     * operator retried this one.
+     *
+     * @return array<string, mixed>
+     */
+    private function ownershipWhere(Envelope $envelope): array
+    {
+        $where = [
             'message_id = ?' => $this->messageId($envelope),
             'status = ?' => self::STATUS_PROCESSING,
-        ]);
+        ];
+
+        $token = $envelope->last(ClaimTokenStamp::class)?->token;
+        if ($token !== null) {
+            $where['claim_token = ?'] = $token;
+        }
+
+        return $where;
     }
 
     #[\Override]
@@ -233,12 +251,7 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
     #[\Override]
     public function getMessageCount(): int
     {
-        $select = $this->adapter->select()
-            ->from($this->table, new \Maho\Db\Expr('COUNT(*)'))
-            ->where('status = ?', self::STATUS_PENDING);
-        $this->applyQueueFilter($select, null);
-
-        return (int) $this->adapter->fetchOne($select);
+        return $this->countRows(['status = ?' => self::STATUS_PENDING]);
     }
 
     /**
@@ -250,25 +263,19 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
      */
     public function countDue(?array $queues = null): int
     {
-        $select = $this->adapter->select()
-            ->from($this->table, new \Maho\Db\Expr('COUNT(*)'))
-            ->where('status = ?', self::STATUS_PENDING)
-            ->where('available_at <= ?', \Mage_Core_Model_Locale::nowUtc());
-        $this->applyQueueFilter($select, $queues);
-
-        return (int) $this->adapter->fetchOne($select);
+        return $this->countRows([
+            'status = ?' => self::STATUS_PENDING,
+            'available_at <= ?' => \Mage_Core_Model_Locale::nowUtc(),
+        ], $queues);
     }
 
     /** Drives the admin notice. A working worker refreshes its claim, so this counts dead ones. */
     public function countAbandoned(int $olderThanSeconds = self::ABANDONED_AFTER_SECONDS): int
     {
-        $select = $this->adapter->select()
-            ->from($this->table, new \Maho\Db\Expr('COUNT(*)'))
-            ->where('status = ?', self::STATUS_PROCESSING)
-            ->where('claimed_at < ?', self::abandonedBefore($olderThanSeconds));
-        $this->applyQueueFilter($select, null);
-
-        return (int) $this->adapter->fetchOne($select);
+        return $this->countRows([
+            'status = ?' => self::STATUS_PROCESSING,
+            'claimed_at < ?' => self::abandonedBefore($olderThanSeconds),
+        ]);
     }
 
     /**
@@ -278,10 +285,22 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
      */
     public function countClaimed(?array $queues = null): int
     {
-        $select = $this->adapter->select()
-            ->from($this->table, new \Maho\Db\Expr('COUNT(*)'))
-            ->where('status = ?', self::STATUS_PROCESSING)
-            ->where('claimed_at >= ?', self::abandonedBefore());
+        return $this->countRows([
+            'status = ?' => self::STATUS_PROCESSING,
+            'claimed_at >= ?' => self::abandonedBefore(),
+        ], $queues);
+    }
+
+    /**
+     * @param array<string, mixed>  $conditions
+     * @param list<string>|null     $queues
+     */
+    private function countRows(array $conditions, ?array $queues = null): int
+    {
+        $select = $this->adapter->select()->from($this->table, new \Maho\Db\Expr('COUNT(*)'));
+        foreach ($conditions as $condition => $value) {
+            $select->where($condition, $value);
+        }
         $this->applyQueueFilter($select, $queues);
 
         return (int) $this->adapter->fetchOne($select);
@@ -322,9 +341,11 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
                 return [];
             }
 
+            $token = bin2hex(random_bytes(16));
             $claimed = $this->adapter->update($this->table, [
                 'status' => self::STATUS_PROCESSING,
                 'claimed_at' => $now,
+                'claim_token' => $token,
                 'updated_at' => $now,
             ], [
                 'message_id = ?' => (int) $row['message_id'],
@@ -337,27 +358,33 @@ final class DbTransport implements TransportInterface, QueueReceiverInterface, L
 
             $envelope = $this->hydrateOrFail($row);
             if ($envelope !== null) {
-                return [$envelope];
+                return [$envelope->with(new ClaimTokenStamp($token))];
             }
         }
 
         return [];
     }
 
-    private function inFlightRowExists(string $dedupeKey): bool
+    /**
+     * A pending or freshly claimed row already carries this dedupe key: gates
+     * both new dispatches and the admin retry of an older copy.
+     */
+    public function inFlightRowExists(string $dedupeKey, ?int $excludeMessageId = null): bool
     {
         // A claim a dead worker left behind waits for an operator forever, so it
         // must not keep suppressing new dispatches of the same key: that would
         // silently drop every later send instead of parking one message.
         // Pending rows always have a null claimed_at, so they are never excluded.
-        $existing = $this->adapter->fetchOne(
-            $this->adapter->select()
-                ->from($this->table, 'message_id')
-                ->where('dedupe_key = ?', $dedupeKey)
-                ->where('status IN (?)', [self::STATUS_PENDING, self::STATUS_PROCESSING])
-                ->where('claimed_at IS NULL OR claimed_at >= ?', self::abandonedBefore())
-                ->limit(1),
-        );
+        $select = $this->adapter->select()
+            ->from($this->table, 'message_id')
+            ->where('dedupe_key = ?', $dedupeKey)
+            ->where('status IN (?)', [self::STATUS_PENDING, self::STATUS_PROCESSING])
+            ->where('claimed_at IS NULL OR claimed_at >= ?', self::abandonedBefore())
+            ->limit(1);
+        if ($excludeMessageId !== null) {
+            $select->where('message_id != ?', $excludeMessageId);
+        }
+        $existing = $this->adapter->fetchOne($select);
 
         return $existing !== false && $existing !== null;
     }
