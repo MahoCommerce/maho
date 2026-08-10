@@ -19,31 +19,6 @@ uses(Tests\MahoBackendTestCase::class);
  * so filters and output agree.
  */
 
-/** Switch store 1 to EUR display currency in-memory and return the USD→EUR rate. */
-function catalogUseEurDisplayCurrency(): float
-{
-    $store = Mage::app()->getStore(1);
-
-    if ($store->getBaseCurrencyCode() !== 'USD') {
-        test()->markTestSkipped('Test expects USD base currency on store 1');
-    }
-
-    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_ALLOW, 'USD,EUR');
-    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT, 'EUR');
-    foreach (['available_currency_codes', 'disallowed_base_currency_code_index', 'current_currency', 'default_currency', 'base_currency'] as $memo) {
-        $store->unsetData($memo);
-    }
-
-    $rate = (float) $store->getBaseCurrency()->getRate('EUR');
-    if ($rate <= 0 || $rate == 1.0) {
-        test()->markTestSkipped('USD→EUR rate not available or trivially 1');
-    }
-
-    expect($store->getCurrentCurrencyCode())->toBe('EUR');
-
-    return $rate;
-}
-
 /** A visible enabled simple product without special pricing, plus its base final price. */
 function catalogPickPlainSimpleProduct(): Mage_Catalog_Model_Product
 {
@@ -69,7 +44,7 @@ describe('Product API display-currency conversion (issue #1238)', function (): v
 
     beforeEach(function (): void {
         StoreContext::ensureStore(1);
-        $this->rate = catalogUseEurDisplayCurrency();
+        $this->rate = useEurDisplayCurrency();
         $this->provider = new ProductProvider(null);
         Mage::app()->getCache()->clean(['API_PRODUCTS']);
     });

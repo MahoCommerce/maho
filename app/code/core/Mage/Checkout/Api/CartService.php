@@ -626,16 +626,14 @@ class CartService
             throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is already applied');
         }
 
-        // Apply gift card - store the requested amount capped at the live
-        // balance, or the full balance when no amount is given. giftcard_codes
-        // is a base-currency map (the total collector rewrites it in base on
-        // every collectTotals()), so snapshot in base too; the requested amount
-        // arrives in quote currency, what the client sees, and is converted
-        // first, dividing by the forward rate (rate imports only maintain
-        // base-to-allowed rows, so a quote-to-base lookup would throw). The
-        // collector ignores the stored amount and applies the full balance,
-        // so the cap only bounds the snapshot.
-        $baseCurrency = $quote->getBaseCurrencyCode() ?: $quote->getStore()->getBaseCurrencyCode();
+        // giftcard_codes is a base-currency map (the total collector rewrites
+        // it in base whenever a discount applies), so snapshot in base too; the
+        // requested amount arrives in quote currency, what the client sees, and
+        // is converted first, dividing by the forward rate (rate imports only
+        // maintain base-to-allowed rows, so a quote-to-base lookup would
+        // throw). The collector ignores the stored amount and applies the full
+        // balance, so the cap only bounds the snapshot.
+        $baseCurrency = $quote->getStore()->getBaseCurrencyCode();
         $quoteCurrency = $quote->getQuoteCurrencyCode() ?: $quote->getStore()->getCurrentCurrencyCode();
         if ($amount !== null && $quoteCurrency !== $baseCurrency) {
             $rate = (float) $quote->getStore()->getBaseCurrency()->getRate($quoteCurrency);
@@ -673,7 +671,7 @@ class CartService
 
         $changed = false;
         // The snapshot map is base currency; compare live balances in base too.
-        $baseCurrency = $quote->getBaseCurrencyCode() ?: $quote->getStore()->getBaseCurrencyCode();
+        $baseCurrency = $quote->getStore()->getBaseCurrencyCode();
         $websiteId = (int) $quote->getStore()->getWebsiteId();
 
         foreach ($applied as $code => $snapshotBalance) {

@@ -101,15 +101,6 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Whether outgoing DTO prices must be converted to the store display
-     * currency.
-     */
-    private function shouldConvertPrices(): bool
-    {
-        return $this->displayCurrencyRate() !== null;
-    }
-
-    /**
      * Make every money field agree with the DTO's single `currency` label.
      *
      * Public reads convert from website base currency to the store display
@@ -125,7 +116,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     {
         $store = StoreContext::getStore();
 
-        if (!$this->shouldConvertPrices()) {
+        if ($this->displayCurrencyRate() === null) {
             $dto->currency = $store->getBaseCurrencyCode();
             return;
         }
@@ -506,9 +497,11 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // reported in; the index stores base amounts, so translate the bounds
         // back to base before filtering or filters and output would disagree.
         // Display prices round to 2dp after conversion, so widen each bound by
-        // half a cent; zero is a meaningful bound (priceMax=0 means free).
-        $priceRate = $this->displayCurrencyRate() ?? 1.0;
-        $boundEpsilon = $priceRate === 1.0 ? 0.0 : 0.005;
+        // half a cent whenever conversion runs (a parity rate of exactly 1.0
+        // still rounds); zero is a meaningful bound (priceMax=0 means free).
+        $displayRate = $this->displayCurrencyRate();
+        $boundEpsilon = $displayRate === null ? 0.0 : 0.005;
+        $priceRate = $displayRate ?? 1.0;
         $priceMin = $requestFilters['priceMin'] ?? null;
         $priceMax = $requestFilters['priceMax'] ?? null;
         if ($priceMin !== null && $priceMin !== '') {

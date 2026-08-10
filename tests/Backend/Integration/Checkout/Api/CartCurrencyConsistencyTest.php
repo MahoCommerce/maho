@@ -17,32 +17,8 @@ uses(Tests\MahoBackendTestCase::class);
  * from the website base currency, every non-base* money field in the cart API
  * response must be in quote currency. Store 1 is switched to EUR display
  * in-memory (base stays USD); the USD→EUR rate is seeded at install.
+ * useEurDisplayCurrency() lives in tests/Pest.php.
  */
-
-/** Switch store 1 to EUR display currency in-memory and return the USD→EUR rate. */
-function useEurDisplayCurrency(): float
-{
-    $store = Mage::app()->getStore(1);
-
-    if ($store->getBaseCurrencyCode() !== 'USD') {
-        test()->markTestSkipped('Test expects USD base currency on store 1');
-    }
-
-    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_ALLOW, 'USD,EUR');
-    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT, 'EUR');
-    foreach (['available_currency_codes', 'disallowed_base_currency_code_index', 'current_currency', 'default_currency', 'base_currency'] as $memo) {
-        $store->unsetData($memo);
-    }
-
-    $rate = (float) $store->getBaseCurrency()->getRate('EUR');
-    if ($rate <= 0 || $rate == 1.0) {
-        test()->markTestSkipped('USD→EUR rate not available or trivially 1');
-    }
-
-    expect($store->getCurrentCurrencyCode())->toBe('EUR');
-
-    return $rate;
-}
 
 function loadSimplePricedProduct(): Mage_Catalog_Model_Product
 {

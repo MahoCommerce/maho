@@ -248,12 +248,21 @@ class CartMutationHandler
         if (!$giftcard->getId()) {
             throw NotFoundException::giftCard($code);
         }
-        // getBalance() with no argument returns the issuing website's base currency.
+        // Report in the current display currency when a rate exists; the card
+        // is priced in its issuing website's base currency and no card-to-store
+        // rate row may exist (rate imports only maintain base-to-allowed rows),
+        // so fall back to the card's own currency instead of failing the query.
         $currencyCode = \Mage::app()->getStore()->getCurrentCurrencyCode();
+        try {
+            $balance = (float) $giftcard->getBalance($currencyCode);
+        } catch (\Exception) {
+            $currencyCode = $giftcard->getCurrencyCode();
+            $balance = (float) $giftcard->getBalance();
+        }
         return ['checkGiftCardBalance' => [
             'code' => $giftcard->getCode(),
             'currency' => $currencyCode,
-            'balance' => (float) $giftcard->getBalance($currencyCode),
+            'balance' => $balance,
             'status' => $giftcard->getStatus(),
             'isValid' => $giftcard->isValid(),
             'expiresAt' => $giftcard->getExpiresAt(),
