@@ -209,7 +209,10 @@ class CreditMemo extends CrudResource
         ];
         $dto->state = $stateMap[(int) $model->getState()] ?? 'unknown';
 
-        $dto->currency = $model->getOrderCurrencyCode() ?: \Mage::app()->getStore()->getCurrentCurrencyCode();
+        // Fall back to the credit memo's own store, never the viewer's display
+        // currency: these amounts were fixed at placement and must read the
+        // same for everyone.
+        $dto->currency = $model->getOrderCurrencyCode() ?: $model->getStore()->getBaseCurrencyCode();
 
         if ($model->hasData('_preloaded_order_increment_id')) {
             $dto->orderIncrementId = $model->getData('_preloaded_order_increment_id');

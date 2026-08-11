@@ -283,7 +283,9 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $dto->emailSent = (bool) $order->getEmailSent();
         $dto->extOrderId = $order->getExtOrderId();
         $dto->extCustomerId = $order->getExtCustomerId();
-        $dto->currency = $order->getOrderCurrencyCode() ?: \Mage::app()->getStore()->getDefaultCurrencyCode();
+        // Fall back to the order's own store, never the ambient display
+        // configuration: these amounts were fixed at placement.
+        $dto->currency = $order->getOrderCurrencyCode() ?: $order->getStore()->getBaseCurrencyCode();
         $dto->baseCurrencyCode = $order->getBaseCurrencyCode();
         $dto->globalCurrencyCode = $order->getGlobalCurrencyCode();
         $dto->totalItemCount = (int) $order->getTotalItemCount();
