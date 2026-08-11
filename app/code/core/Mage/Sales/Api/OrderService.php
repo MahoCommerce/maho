@@ -105,10 +105,8 @@ class OrderService
             // apply time must not discount this order. Collect totals once more
             // so submitAll() converts the freshly revalidated amounts.
             (new CartService())->revalidateGiftcards($quote);
-            // The conversion below copies the currency and rate off the quote,
-            // and collectTotals() converts at the store's live currency, so
-            // restate them together or the order is stamped with whichever
-            // currency the quote was last saved in.
+            // Restated together: submitAll() copies the currency off the quote,
+            // and the totals were just converted at the live one.
             $quote->collectTotals()->refreshCurrencyStamp();
 
             // Validate cash tendered covers the total BEFORE creating the order.

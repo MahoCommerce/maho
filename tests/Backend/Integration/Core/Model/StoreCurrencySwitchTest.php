@@ -30,7 +30,7 @@ describe('Store currency switch', function (): void {
             test()->markTestSkipped('USD to EUR rate not available or trivially 1');
         }
 
-        // Something converts a price first, memoising the resolved currency.
+        // Convert first, so the resolved currency is memoised.
         expect($store->getCurrentCurrency()->getCode())->toBe('USD');
         expect((float) $store->convertPrice(10.0, false))->toEqualWithDelta(10.0, 0.001);
 
@@ -50,8 +50,7 @@ describe('Store currency switch', function (): void {
             test()->markTestSkipped('USD to EUR rate not available or trivially 1');
         }
 
-        // getPriceFilter() memoises a filter built from the currency and its
-        // rate, so it has to be dropped alongside the currency itself.
+        // A second memo built from the same currency and rate.
         $before = $store->getPriceFilter()->filter(10.0);
         $store->setCurrentCurrencyCode('EUR');
         $after = $store->getPriceFilter()->filter(10.0);

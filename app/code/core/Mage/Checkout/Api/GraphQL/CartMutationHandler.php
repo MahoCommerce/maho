@@ -378,9 +378,7 @@ class CartMutationHandler
         $shippingAddress->collectShippingRates();
         $rates = $shippingAddress->getGroupedAllShippingRates();
         $store = $quote->getStore();
-        // convertPrice() below converts at the store's live currency, so take
-        // the label from the same currency object rather than the code stamped
-        // on the row, which goes stale as soon as the display currency changes.
+        // Same currency object convertPrice() uses below, so the two agree.
         $currency = $store->getCurrentCurrency()->getCode();
 
         $methods = [];

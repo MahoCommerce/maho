@@ -313,12 +313,8 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
 
     /**
      * Restate which currency this quote's amounts are in, from the store as it
-     * is right now.
-     *
-     * Saving does this, but the quote-to-order conversion reads these fields
-     * without one, so placement calls it directly rather than saving the whole
-     * quote for two columns. Both routes have to agree, which is why it lives
-     * here and not at either call site.
+     * is right now. Shared with placement, which needs these fields refreshed
+     * without saving, so the two can never drift apart.
      *
      * global - currency which is set for default in backend
      * base - currency which is set for current website. all attributes that

@@ -32,7 +32,6 @@ describe('GraphQL shipping estimate currency', function (): void {
         $quote = createPricedQuote($product, 2);
         expect($quote->getQuoteCurrencyCode())->toBe('EUR');
 
-        // Display currency changes after the last save; the row still says EUR.
         setStoreDisplayCurrency('USD', 'USD,EUR');
 
         $handler = new CartMutationHandler(new CartService(), new CartMapper());
@@ -50,14 +49,11 @@ describe('GraphQL shipping estimate currency', function (): void {
             test()->markTestSkipped('Flat rate shipping not available in this environment');
         }
 
-        // convertPrice() ran at the live USD currency, so the amount is the base
-        // price unconverted. The label must agree, or the client renders a USD
-        // number under an EUR sign.
+        // Amounts converted at live USD, so the label must read USD too.
         $baseRate = (float) $flatrate['amount'];
         expect($flatrate['currency'])->toBe('USD');
 
-        // And the same amount must not also be claimed as EUR by the injected
-        // free-shipping row, which reuses the same label.
+        // The injected free-shipping row shares the label.
         foreach ($methods as $method) {
             expect($method['currency'])->toBe('USD');
         }

@@ -45,15 +45,12 @@ test('the instructions name the base currency, not the default view display curr
     expect($instructions)->toContain('amounts are in USD, the base currency of the default website');
     expect($instructions)->toContain('"currency" field');
 
-    // Base currency is website-scoped (show_in_website in Directory's
-    // system.xml) and this line is compiled into the container once, so it
-    // must not present one website's base as global, nor as covering the cart
-    // and order surfaces, which report display currency.
+    // Base currency is website-scoped and the line is compiled once, so it
+    // must not read as global, nor as covering cart and order amounts.
     expect($instructions)->toContain('other websites may differ');
     expect($instructions)->toContain('not always USD');
 
-    // Scope the EUR check to the currency line: the store name is in the same
-    // text and may legitimately contain "EUR".
+    // Only the currency line: the store name may legitimately contain "EUR".
     $currencyLine = array_find(
         explode("\n", $instructions),
         fn(string $line): bool => str_contains($line, 'base currency of the default website'),

@@ -42,14 +42,13 @@ describe('Admin order currency', function (): void {
         $session->setStoreId(1);
         $session->setCurrencyId('EUR');
 
-        // getStore() applies the admin's chosen order currency to the store.
         $adminStore = $session->getStore();
 
-        // The currency must apply, so the order is priced as the admin asked...
+        // The currency applies to the order...
         expect($adminStore->getCurrentCurrency()->getCode())->toBe('EUR');
         expect((float) $adminStore->convertPrice(10.0, false))->toEqualWithDelta(10.0 * $rate, 0.011);
 
-        // ...without any of it reaching the browser making the request.
+        // ...without reaching the browser making the request.
         expect($this->cookie->writes)->not->toContain(Mage_Core_Model_Store::COOKIE_CURRENCY);
     });
 

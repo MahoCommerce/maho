@@ -39,8 +39,7 @@ describe('Gift card amount currency', function (): void {
         $giftcard->setInitialBalance(50.00);
         $giftcard->save();
 
-        // The EUR rate is withdrawn after the cart was stamped. getCurrentCurrency()
-        // now falls back to base, so the cart API advertises and serves USD.
+        // Withdraw the rate: the cart API now advertises and serves base USD.
         $write = Mage::getSingleton('core/resource')->getConnection('core_write');
         $table = Mage::getSingleton('core/resource')->getTableName('directory/currency_rate');
         $savedRate = $write->fetchOne(
@@ -57,8 +56,7 @@ describe('Gift card amount currency', function (): void {
             expect($store->getCurrentCurrency()->getCode())->toBe('USD');
             expect($quote->getQuoteCurrencyCode())->toBe('EUR');
 
-            // 20.00 in the advertised USD. Before the fix this resolves the
-            // amount against the stamped EUR, finds no rate, and rejects it.
+            // 20.00 in the advertised USD, not in the stamped EUR.
             (new CartService())->applyGiftcard($quote, $giftcard->getCode(), 20.00);
 
             expect($quote->getGiftcardCodes())->not->toBeEmpty();

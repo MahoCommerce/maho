@@ -41,9 +41,7 @@ describe('Store currency fallback', function (): void {
     test('the code accessor reports the fallback currency, whichever is read first', function (): void {
         $store = useNoRateDisplayCurrency('GBP', 'USD,GBP');
 
-        // Read the code before anything has resolved the currency object: the
-        // two must still agree, or a consumer that only reads the code labels
-        // base-converted amounts with the currency that has no rate.
+        // Nothing has resolved the currency object yet; they must still agree.
         expect($store->getCurrentCurrencyCode())->toBe('USD');
         expect($store->getCurrentCurrency()->getCode())->toBe('USD');
     });
@@ -51,9 +49,8 @@ describe('Store currency fallback', function (): void {
     test('the code accessor reports the fallback without a session to lean on', function (): void {
         $store = useNoRateDisplayCurrency('GBP', 'USD,GBP');
 
-        // The API has no store session: init() gets no session name and start()
-        // returns early, so nothing written there survives. Drop the session
-        // object and the memo to model a fresh stateless request.
+        // The API has no store session to lean on: init() gets no session name
+        // and start() returns early, so nothing written there survives.
         $session = new ReflectionProperty(Mage_Core_Model_Store::class, '_session');
         $session->setValue($store, null);
         $store->unsetData('current_currency');
@@ -64,8 +61,8 @@ describe('Store currency fallback', function (): void {
     test('the fallback leaves an explicit currency choice intact', function (): void {
         $store = useNoRateDisplayCurrency('GBP', 'USD,GBP');
 
-        // The shopper picked GBP; the rate is missing today. Resolving must not
-        // rewrite their choice, or importing the rate later would not restore it.
+        // Resolving must not rewrite the choice, or importing the rate later
+        // would not restore it.
         $store->setCurrentCurrencyCode('GBP');
         expect($store->getCurrentCurrency()->getCode())->toBe('USD');
 
@@ -108,8 +105,7 @@ describe('Store currency fallback', function (): void {
         $store->setCurrentCurrencyCode('EUR');
         $store->setCurrentCurrencyCode('USD');
 
-        // Otherwise a year-long cookie keeps advertising a currency the shopper
-        // has already switched away from.
+        // Otherwise a year-long cookie keeps naming the currency they left.
         expect($this->cookie->deletes)->toContain(Mage_Core_Model_Store::COOKIE_CURRENCY);
     });
 

@@ -685,10 +685,8 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Set current store currency code
      *
-     * Persisting is for an explicit shopper choice on the storefront, the only
-     * thing the currency cookie is meant to record. Pass $persist = false where
-     * the currency belongs to the work rather than to the visitor, such as
-     * admin order creation, to apply it for this request alone.
+     * $persist writes the session and cookie, which record an explicit shopper
+     * choice; pass false to apply the currency for this request alone.
      *
      * @param   string $code
      * @return  $this
@@ -697,8 +695,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     {
         $code = strtoupper($code);
         if (in_array($code, $this->getAvailableCurrencyCodes())) {
-            // Every memo derived from the currency has to go, or the switch
-            // only takes effect on the next request.
+            // Every memo derived from the currency, or the switch lands next request.
             $this->setData('requested_currency_code', $code);
             $this->unsetData('current_currency');
             $this->_priceFilter = null;
@@ -734,8 +731,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      */
     protected function _getRequestedCurrencyCode(): string
     {
-        // an in-memory choice outranks the session: a non-persisting caller has
-        // nowhere else to put it
+        // In-memory first: a non-persisting caller has nowhere else to put it.
         $code = $this->getData('requested_currency_code') ?: $this->_getSession()->getCurrencyCode();
         if (empty($code)) {
             $code = $this->getDefaultCurrencyCode();

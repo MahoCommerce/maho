@@ -15,12 +15,8 @@ namespace Mage\Sales\Api;
 final class OrderCurrency
 {
     /**
-     * Orders, invoices and credit memos record the currency their amounts were
-     * computed in, so the answer comes from the row rather than from whoever is
-     * reading it. Rows predating those columns fall back to the base currency
-     * recorded beside them, and report nothing when even that is absent: the
-     * store is deliberately not consulted, since the ambient one belongs to the
-     * reader and the row's own store may since have been deleted.
+     * From the row, never the store: the ambient one belongs to whoever is
+     * reading, and the row's own store may since have been deleted.
      *
      * @param \Mage_Sales_Model_Order|\Mage_Sales_Model_Order_Invoice|\Mage_Sales_Model_Order_Creditmemo $document
      */
