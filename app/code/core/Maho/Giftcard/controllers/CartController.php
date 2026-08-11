@@ -453,8 +453,11 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
         if ($appliedCodes) {
             $codes = json_decode($appliedCodes, true);
             if (is_array($codes)) {
-                $quoteCurrency = $quote->getQuoteCurrencyCode();
                 $store = $quote->getStore();
+                // The amounts below are in display currency (the collector
+                // converted them, and formatPrice renders in the same one), so
+                // the balance has to be, not the code stamped on the row.
+                $displayCurrency = $store->getCurrentCurrency()->getCode();
 
                 // Get the total display amount already calculated by the totals collector
                 // This is already converted to display currency
@@ -477,7 +480,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
                         'amount' => $displayAmount,
                         // Use formatPrice instead of currency() - amount is already in display currency
                         'amount_formatted' => $store->formatPrice($displayAmount, false),
-                        'balance' => $giftcard->getId() ? $giftcard->getBalance($quoteCurrency) : 0,
+                        'balance' => $giftcard->getId() ? $giftcard->getBalance($displayCurrency) : 0,
                     ];
                 }
             }
