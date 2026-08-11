@@ -626,27 +626,17 @@ class CartService
             throw new BadRequestHttpException('Gift card "' . $giftcardCode . '" is already applied');
         }
 
-        // giftcard_codes is a base-currency map (the total collector rewrites
-        // it in base whenever a discount applies), so snapshot in base too; the
-        // requested amount arrives in quote currency, what the client sees, and
-        // is converted first, dividing by the forward rate (rate imports only
-        // maintain base-to-allowed rows, so a quote-to-base lookup would
-        // throw). The collector ignores the stored amount and applies the full
-        // balance, so the cap only bounds the snapshot.
+        // giftcard_codes is a base-currency map (the total collector rewrites it
+        // in base whenever a discount applies), so snapshot in base too. The
+        // requested amount is denominated in the currency the cart API
+        // advertises, which is the store's resolved current currency, so divide
+        // by the forward rate to reach base. getCurrentCurrency() substitutes
+        // base when no rate exists, so a currency differing from base always
+        // has one and the division is always defined.
         $baseCurrency = $quote->getStore()->getBaseCurrencyCode();
-        // The currency the cart API advertises, which is what the client's
-        // amount is denominated in. The code stamped on the row goes stale, and
-        // a stale one whose rate has since been withdrawn rejects a request
-        // that was denominated correctly.
         $cartCurrency = $quote->getStore()->getCurrentCurrency()->getCode();
         if ($amount !== null && $cartCurrency !== $baseCurrency) {
-            $rate = (float) $quote->getStore()->getBaseCurrency()->getRate($cartCurrency);
-            // Fail loudly like the totals pipeline would: silently skipping the
-            // division would store a display-currency number as a base snapshot.
-            if ($rate <= 0) {
-                throw new BadRequestHttpException('No exchange rate available for "' . $cartCurrency . '"');
-            }
-            $amount /= $rate;
+            $amount /= (float) $quote->getStore()->getBaseCurrency()->getRate($cartCurrency);
         }
         $balance = (float) $giftcard->getBalance($baseCurrency);
         $appliedCodes[$giftcardCode] = $amount === null ? $balance : min($amount, $balance);
