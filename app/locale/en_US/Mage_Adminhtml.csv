@@ -1024,6 +1024,7 @@
 "The rating has been deleted.","The rating has been deleted."
 "The rating has been saved.","The rating has been saved."
 "There is an error in one of the option rows.","There is an error in one of the option rows."
+"These customer segments cover none of the selected stores: %s.","These customer segments cover none of the selected stores: %s."
 "The role has been deleted.","The role has been deleted."
 "The role has been saved.","The role has been saved."
 "The role has been successfully saved.","The role has been successfully saved."

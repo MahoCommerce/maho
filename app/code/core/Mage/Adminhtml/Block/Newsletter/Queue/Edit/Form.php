@@ -60,6 +60,8 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit_Form extends Mage_Adminhtml_Blo
                     'label'    => Mage::helper('newsletter')->__('Customer Segments'),
                     'title'    => Mage::helper('newsletter')->__('Customer Segments'),
                     'values'   => $this->getCustomerSegmentOptions(),
+                    'value'    => Mage::helper('customersegmentation')
+                        ->getQueueSegmentIds($queue->getCustomerSegmentIds()),
                 ]);
             }
         } else {

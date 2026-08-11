@@ -129,6 +129,41 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
         return $this;
     }
 
+    public function getSegmentMembershipSql(string $subscriberAlias, array $segmentIds): string
+    {
+        $select = $this->getSegmentMembershipSelect($subscriberAlias)
+            ->where('segment_customer.segment_id IN (?)', $segmentIds);
+
+        return sprintf('EXISTS (%s)', $select->assemble());
+    }
+
+    /**
+     * Same restriction driven by a column: an empty list means no restriction.
+     */
+    public function getCampaignSegmentMembershipSql(string $subscriberAlias, string $segmentIdsColumn): string
+    {
+        $adapter = $this->_getReadAdapter();
+        $select = $this->getSegmentMembershipSelect($subscriberAlias)
+            ->where((string) $adapter->getFindInSetExpr('segment_customer.segment_id', $segmentIdsColumn));
+
+        return sprintf(
+            '(%1$s IS NULL OR %1$s = %2$s OR EXISTS (%3$s))',
+            $segmentIdsColumn,
+            $adapter->quote(''),
+            $select->assemble(),
+        );
+    }
+
+    protected function getSegmentMembershipSelect(string $subscriberAlias): Maho\Db\Select
+    {
+        return $this->_getReadAdapter()->select()
+            ->from(
+                ['segment_customer' => $this->getTable('customersegmentation/segment_customer')],
+                [new Maho\Db\Expr('1')],
+            )
+            ->where("segment_customer.customer_id = {$subscriberAlias}.customer_id");
+    }
+
     public function getCustomerSegmentIds(int $customerId, ?int $websiteId = null): array
     {
         $select = $this->_getReadAdapter()->select()
