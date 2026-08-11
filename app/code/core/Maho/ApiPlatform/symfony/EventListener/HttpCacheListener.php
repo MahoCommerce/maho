@@ -62,7 +62,7 @@ class HttpCacheListener
         // is worse than the round-trip saved.
         if ($this->security->getUser() !== null && $this->security->isGranted('ROLE_ADMIN')) {
             $response->headers->set('Cache-Control', 'no-store');
-            $response->headers->set('Vary', 'Authorization, Accept, X-Store-Code');
+            $response->headers->set('Vary', 'Authorization, Accept, X-Store-Code, X-Currency-Code');
             return;
         }
 
@@ -80,7 +80,7 @@ class HttpCacheListener
         if ($ifNoneMatch !== null && $ifNoneMatch === $etag) {
             $event->setResponse(new Response('', Response::HTTP_NOT_MODIFIED, [
                 'ETag' => $etag,
-                'Vary' => 'Authorization, Accept, X-Store-Code',
+                'Vary' => 'Authorization, Accept, X-Store-Code, X-Currency-Code',
             ]));
             return;
         }
@@ -122,7 +122,7 @@ class HttpCacheListener
         }
 
         // Always add Vary header
-        $response->headers->set('Vary', 'Authorization, Accept, X-Store-Code');
+        $response->headers->set('Vary', 'Authorization, Accept, X-Store-Code, X-Currency-Code');
     }
 
     private function isPublicPath(string $path): bool
