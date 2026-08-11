@@ -64,14 +64,11 @@ describe('X-Currency-Code', function (): void {
             ->toEqualWithDelta(10.0 * $this->rate, 0.011);
     });
 
-    test('it neither writes a cookie nor a session, so responses stay cacheable', function (): void {
-        $cookie = new Tests\Helpers\RecordingCookie();
-        Mage::unregister('_singleton/core/cookie');
-        Mage::register('_singleton/core/cookie', $cookie);
-
+    test('it does not record the currency as an explicit choice', function (): void {
         dispatchCurrencyHeader('EUR');
 
-        expect($cookie->writes)->toBeEmpty();
+        // A header is per request. Recording it would leak one caller's choice
+        // into the next request on the same session.
         expect($_SESSION['store_' . $this->store->getCode()]['currency_code'] ?? null)->toBeNull();
     });
 

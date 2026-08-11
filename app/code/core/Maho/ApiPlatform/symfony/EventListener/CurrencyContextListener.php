@@ -68,8 +68,7 @@ class CurrencyContextListener
             throw new BadRequestHttpException("No exchange rate available for: {$code}");
         }
 
-        // Non-persisting: an API request carries no session, and a Set-Cookie
-        // would make the response uncacheable by any shared cache.
+        // A header applies to this request alone; there is no session to record it in.
         $store->setCurrentCurrencyCode($code, persist: false);
         $request->attributes->set(self::ATTR_REQUESTED_CURRENCY_CODE, $code);
     }

@@ -116,11 +116,6 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     public const COOKIE_NAME                     = 'store';
 
     /**
-     * Cookie currency key
-     */
-    public const COOKIE_CURRENCY                 = 'currency';
-
-    /**
      * Script name, which returns all the images
      */
     public const MEDIA_REWRITE_SCRIPT            = 'get.php/';
@@ -685,8 +680,8 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Set current store currency code
      *
-     * $persist writes the session and cookie, which record an explicit shopper
-     * choice; pass false to apply the currency for this request alone.
+     * $persist writes the session, which records an explicit shopper choice;
+     * pass false to apply the currency for this request alone.
      *
      * @param   string $code
      * @return  $this
@@ -699,14 +694,8 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
             $this->setData('requested_currency_code', $code);
             $this->unsetData('current_currency');
             $this->_priceFilter = null;
-            if (!$persist) {
-                return $this;
-            }
-            $this->_getSession()->setCurrencyCode($code);
-            if ($code === $this->getDefaultCurrencyCode()) {
-                Mage::app()->getCookie()->delete(self::COOKIE_CURRENCY);
-            } else {
-                Mage::app()->getCookie()->set(self::COOKIE_CURRENCY, $code, true);
+            if ($persist) {
+                $this->_getSession()->setCurrencyCode($code);
             }
         }
         return $this;

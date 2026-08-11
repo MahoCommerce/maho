@@ -7,29 +7,21 @@
 
 declare(strict_types=1);
 
-use Tests\Helpers\RecordingCookie;
-
 uses(Tests\MahoBackendTestCase::class);
 
 /**
- * The currency cookie belongs to a shopper's explicit choice on the storefront.
- * Admin order creation picks an order currency, which is not that, and on a
- * shared domain the cookie it writes lands in the admin's own browser.
+ * An order currency picked in the admin belongs to that order, not to the
+ * operator's own browsing, so it applies for the request without being
+ * recorded as an explicit choice.
  */
 
 describe('Admin order currency', function (): void {
-
-    beforeEach(function (): void {
-        $this->cookie = new RecordingCookie();
-        Mage::unregister('_singleton/core/cookie');
-        Mage::register('_singleton/core/cookie', $this->cookie);
-    });
 
     afterEach(function (): void {
         resetCurrencyState();
     });
 
-    test('choosing an order currency does not write the storefront cookie', function (): void {
+    test('choosing an order currency does not record a shopper choice', function (): void {
         requireUsdBaseStore();
         $store = setStoreDisplayCurrency('USD', 'USD,EUR');
 
@@ -48,8 +40,8 @@ describe('Admin order currency', function (): void {
         expect($adminStore->getCurrentCurrency()->getCode())->toBe('EUR');
         expect((float) $adminStore->convertPrice(10.0, false))->toEqualWithDelta(10.0 * $rate, 0.011);
 
-        // ...without reaching the browser making the request.
-        expect($this->cookie->writes)->not->toContain(Mage_Core_Model_Store::COOKIE_CURRENCY);
+        // ...without landing in the session the storefront reads back.
+        expect($_SESSION['store_' . $adminStore->getCode()]['currency_code'] ?? null)->toBeNull();
     });
 
 });

@@ -7,35 +7,18 @@
 
 declare(strict_types=1);
 
-use Tests\Helpers\RecordingCookie;
-
 uses(Tests\MahoBackendTestCase::class);
 
 /**
  * getCurrentCurrency() falls back to base when the display currency has no
  * imported rate. The code accessor must report that same fallback, and the
- * fallback must not write the currency cookie or overwrite the shopper's
- * chosen currency.
+ * fallback must leave the shopper's chosen currency alone.
  */
 
 describe('Store currency fallback', function (): void {
 
-    beforeEach(function (): void {
-        $this->cookie = new RecordingCookie();
-        Mage::unregister('_singleton/core/cookie');
-        Mage::register('_singleton/core/cookie', $this->cookie);
-    });
-
     afterEach(function (): void {
         resetCurrencyState();
-    });
-
-    test('the no-rate fallback does not write the currency cookie', function (): void {
-        $store = useNoRateDisplayCurrency('GBP', 'USD,GBP');
-
-        expect($store->getCurrentCurrency()->getCode())->toBe('USD');
-
-        expect($this->cookie->writes)->not->toContain(Mage_Core_Model_Store::COOKIE_CURRENCY);
     });
 
     test('the code accessor reports the fallback currency, whichever is read first', function (): void {
@@ -77,11 +60,9 @@ describe('Store currency fallback', function (): void {
 
         expect($store->getCurrentCurrency())->toBe($resolved);
         expect((float) $store->convertPrice(10.0, false))->toEqualWithDelta(10.0, 0.001);
-
-        expect($this->cookie->writes)->not->toContain(Mage_Core_Model_Store::COOKIE_CURRENCY);
     });
 
-    test('an explicit currency switch still writes the cookie', function (): void {
+    test('an explicit currency switch is recorded for the next request', function (): void {
         requireUsdBaseStore();
         $store = setStoreDisplayCurrency('USD', 'USD,EUR');
 
@@ -91,22 +72,7 @@ describe('Store currency fallback', function (): void {
 
         $store->setCurrentCurrencyCode('EUR');
 
-        expect($this->cookie->writes)->toContain(Mage_Core_Model_Store::COOKIE_CURRENCY);
-    });
-
-    test('switching back to the default currency clears the cookie', function (): void {
-        requireUsdBaseStore();
-        $store = setStoreDisplayCurrency('USD', 'USD,EUR');
-
-        if ((float) $store->getBaseCurrency()->getRate('EUR') <= 0) {
-            test()->markTestSkipped('USD to EUR rate not available');
-        }
-
-        $store->setCurrentCurrencyCode('EUR');
-        $store->setCurrentCurrencyCode('USD');
-
-        // Otherwise a year-long cookie keeps naming the currency they left.
-        expect($this->cookie->deletes)->toContain(Mage_Core_Model_Store::COOKIE_CURRENCY);
+        expect($_SESSION['store_' . $store->getCode()]['currency_code'] ?? null)->toBe('EUR');
     });
 
 });
