@@ -96,13 +96,13 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
     }
 
     /**
-     * Generate secret key for controller and action based on form key
+     * Generate secret key for controller and action based on form key.
+     *
+     * $formKey overrides the current session's form key as the salt; pass it to mint a key
+     * for a different session (e.g. tests deep-linking with a browser session's form key).
      *
      * @param string $controller Controller name
      * @param string $action Action name
-     * @param string $formKey Form key to salt with; defaults to the current session's form key.
-     *                        Pass it explicitly to mint a key for a different session (e.g. tests
-     *                        deep-linking with a browser session's form key).
      * @return string
      */
     public function getSecretKey($controller = null, $action = null, ?string $formKey = null)
@@ -115,14 +115,14 @@ class Mage_Adminhtml_Model_Url extends Mage_Core_Model_Url
         // Dispatched names come next; positional path parsing assumes the classic
         // admin/<controller>/<action> shape and mis-slices legacy:migrate-routes routes that
         // carry an extra frontName segment, so it stays only as a pre-dispatch fallback.
-        $p = explode('/', trim($this->getRequest()->getOriginalPathInfo(), '/'));
-        if (!$controller) {
-            $controller = $this->getRequest()->getBeforeForwardInfo('controller_name')
+        if (!$controller || !$action) {
+            $p = explode('/', trim($this->getRequest()->getOriginalPathInfo(), '/'));
+            $controller = $controller
+                ?: $this->getRequest()->getBeforeForwardInfo('controller_name')
                 ?: $this->getRequest()->getControllerName()
                 ?: (empty($p[1]) ? null : $p[1]);
-        }
-        if (!$action) {
-            $action = $this->getRequest()->getBeforeForwardInfo('action_name')
+            $action = $action
+                ?: $this->getRequest()->getBeforeForwardInfo('action_name')
                 ?: $this->getRequest()->getActionName()
                 ?: (empty($p[2]) ? null : $p[2]);
         }

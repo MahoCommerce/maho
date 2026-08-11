@@ -64,9 +64,10 @@ it('carries the secret key on buttons that build their own action url', function
 it('carries the secret key on the shared form container delete url', function () {
     /** @var Mage_Adminhtml_Block_Widget_Form_Container $block */
     $block = Mage::app()->getLayout()->createBlock('adminhtml/widget_form_container');
+    $url = $block->getDeleteUrl();
 
-    expect($block->getDeleteUrl())->toContain('/key/')
-        ->and($block->getDeleteUrl())->not->toContain('form_key');
+    expect($url)->toContain('/key/')
+        ->and($url)->not->toContain('form_key');
 });
 
 it('carries the secret key on the credit memo cancel and void urls', function (string $method) {
@@ -75,14 +76,16 @@ it('carries the secret key on the credit memo cancel and void urls', function (s
         ->setState(Mage_Sales_Model_Order_Creditmemo::STATE_CANCELED));
 
     $block = Mage::app()->getLayout()->createBlock('adminhtml/sales_order_creditmemo_view');
+    $url = $block->{$method}();
 
-    expect($block->{$method}())->toContain('/key/')
-        ->and($block->{$method}())->not->toContain('form_key');
+    expect($url)->toContain('/key/')
+        ->and($url)->not->toContain('form_key');
 })->with(['getCancelUrl', 'getVoidUrl']);
 
 it('carries the secret key on the category tree delete url', function () {
     $block = new Mage_Adminhtml_Block_Catalog_Category_Edit_Form();
+    $url = $block->getDeleteUrl();
 
-    expect($block->getDeleteUrl())->toContain('/key/')
-        ->and($block->getDeleteUrl())->not->toContain('form_key');
+    expect($url)->toContain('/key/')
+        ->and($url)->not->toContain('form_key');
 });

@@ -7,7 +7,6 @@
 
 declare(strict_types=1);
 
-use Tests\Browser\MahoServer;
 use Tests\MahoBrowserTestCase;
 
 uses(MahoBrowserTestCase::class)->group('browser');
@@ -76,15 +75,12 @@ function storeSwitcherStoreId(): int
 /** Log in and open the product grid with a query string on it. */
 function visitProductGridWithQuery(): object
 {
-    $page = visit(MahoServer::baseUrl() . '/admin')
-        ->fill('#username', STORE_SWITCHER_ADMIN_USER)
-        ->fill('#login', STORE_SWITCHER_ADMIN_PASSWORD)
-        ->click('#step1 input[type="submit"]');
-
-    waitForPageLoad($page, '.nav-bar:visible');
-    $page->navigate(MahoServer::baseUrl() . adminPathWithSecretKey($page, '/admin/catalog_product/index/?' . STORE_SWITCHER_QUERY));
-
-    return waitForPageLoad($page, '#store_switcher');
+    return adminLoginAndVisit(
+        STORE_SWITCHER_ADMIN_USER,
+        STORE_SWITCHER_ADMIN_PASSWORD,
+        '/admin/catalog_product/index/?' . STORE_SWITCHER_QUERY,
+        '#store_switcher',
+    );
 }
 
 /**

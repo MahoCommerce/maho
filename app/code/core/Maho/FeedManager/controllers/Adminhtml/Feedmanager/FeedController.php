@@ -148,7 +148,10 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 
             // Check if we should generate after save
             if ($this->getRequest()->getParam('generate_after_save')) {
-                $this->_getSession()->setData('feed_generate_after_save', (int) $feed->getId());
+                $this->_getSession()->setData(
+                    Maho_FeedManager_Block_Adminhtml_Feed_Edit::AUTO_GENERATE_FLAG,
+                    ['id' => (int) $feed->getId(), 'ts' => time()],
+                );
                 $this->_redirect('*/*/edit', ['id' => $feed->getId()]);
                 return;
             }
@@ -349,7 +352,10 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             return;
         }
 
-        $this->_getSession()->setData('feed_generate_after_save', $id);
+        $this->_getSession()->setData(
+            Maho_FeedManager_Block_Adminhtml_Feed_Edit::AUTO_GENERATE_FLAG,
+            ['id' => $id, 'ts' => time()],
+        );
         $this->_redirect('*/*/edit', ['id' => $id]);
     }
 

@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Tests\Browser\MahoServer;
 use Tests\Helpers\ApiV2Helper;
 
 // Autoload module API classes (Mage\Foo\Api\Bar, Maho\Foo\Api\Bar) in tests.
@@ -462,8 +463,26 @@ function adminPathWithSecretKey(object $page, string $path): string
 
     $secretKey = Mage::getSingleton('adminhtml/url')->getSecretKey($controller, $action, $formKey);
 
-    $path = '/' . implode('/', array_merge([$front, $controller, $action], $extra, ['key', $secretKey])) . '/';
+    $keySegments = [Mage_Adminhtml_Model_Url::SECRET_KEY_PARAM_NAME, $secretKey];
+    $path = '/' . implode('/', array_merge([$front, $controller, $action], $extra, $keySegments)) . '/';
     return $path . ($query !== null ? '?' . $query : '');
+}
+
+/**
+ * Log in to the admin and navigate straight to $path with a minted secret key, returning
+ * the page once $readySelector is present.
+ */
+function adminLoginAndVisit(string $username, string $password, string $path, string $readySelector): object
+{
+    $page = visit(MahoServer::baseUrl() . '/admin')
+        ->fill('#username', $username)
+        ->fill('#login', $password)
+        ->click('#step1 input[type="submit"]');
+
+    waitForPageLoad($page, '.nav-bar:visible');
+    $page->navigate(MahoServer::baseUrl() . adminPathWithSecretKey($page, $path));
+
+    return waitForPageLoad($page, $readySelector);
 }
 
 /*

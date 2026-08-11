@@ -7,7 +7,6 @@
 
 declare(strict_types=1);
 
-use Tests\Browser\MahoServer;
 use Tests\MahoBrowserTestCase;
 
 uses(MahoBrowserTestCase::class)->group('browser');
@@ -70,15 +69,7 @@ function createQueryUrlsAdmin(): void
 /** Log in and open an admin page, waiting for one of its elements. */
 function visitAdminPage(string $path, string $selector): object
 {
-    $page = visit(MahoServer::baseUrl() . '/admin')
-        ->fill('#username', QUERY_URLS_ADMIN_USER)
-        ->fill('#login', QUERY_URLS_ADMIN_PASSWORD)
-        ->click('#step1 input[type="submit"]');
-
-    waitForPageLoad($page, '.nav-bar:visible');
-    $page->navigate(MahoServer::baseUrl() . adminPathWithSecretKey($page, $path));
-
-    return waitForPageLoad($page, $selector);
+    return adminLoginAndVisit(QUERY_URLS_ADMIN_USER, QUERY_URLS_ADMIN_PASSWORD, $path, $selector);
 }
 
 /**

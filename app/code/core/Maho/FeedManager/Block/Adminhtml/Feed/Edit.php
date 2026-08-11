@@ -12,6 +12,9 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
 {
     use Maho_FeedManager_Block_Adminhtml_Feed_Edit_FeedRegistryTrait;
 
+    /** One-shot session flag armed by the save/generate actions: ['id' => feed id, 'ts' => armed at] */
+    public const AUTO_GENERATE_FLAG = 'feed_generate_after_save';
+
     public function __construct()
     {
         $this->_objectId = 'id';
@@ -81,20 +84,17 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
 
     /**
      * Read and clear the one-shot "generate this feed after save" flag for the current feed.
+     * The arming redirect lands immediately, so an old flag is stale (its response was lost)
+     * and must not start a generation on a later, unrelated visit to the edit page.
      */
     protected function _consumeAutoGenerateFlag(): bool
     {
         $feedId = (int) $this->_getFeed()->getId();
-        if (!$feedId) {
-            return false;
-        }
-        $session = Mage::getSingleton('adminhtml/session');
-        $armedFor = (int) $session->getData('feed_generate_after_save');
-        if ($armedFor === $feedId) {
-            $session->unsetData('feed_generate_after_save');
-            return true;
-        }
-        return false;
+        $flag = Mage::getSingleton('adminhtml/session')->getData(self::AUTO_GENERATE_FLAG, true);
+        return $feedId
+            && is_array($flag)
+            && (int) ($flag['id'] ?? 0) === $feedId
+            && time() - (int) ($flag['ts'] ?? 0) <= 60;
     }
 
     /**

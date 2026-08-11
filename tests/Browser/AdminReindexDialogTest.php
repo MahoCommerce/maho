@@ -7,7 +7,6 @@
 
 declare(strict_types=1);
 
-use Tests\Browser\MahoServer;
 use Tests\MahoBrowserTestCase;
 
 uses(MahoBrowserTestCase::class)->group('browser');
@@ -58,15 +57,12 @@ function createReindexAdmin(): void
 
 function loginToIndexManagement(): object
 {
-    $page = visit(MahoServer::baseUrl() . '/admin')
-        ->fill('#username', REINDEX_ADMIN_USER)
-        ->fill('#login', REINDEX_ADMIN_PASSWORD)
-        ->click('#step1 input[type="submit"]');
-
-    waitForPageLoad($page, '.nav-bar:visible');
-    $page->navigate(MahoServer::baseUrl() . adminPathWithSecretKey($page, '/admin/process/list'));
-
-    return waitForPageLoad($page, '#indexer_processes_grid_table:visible');
+    return adminLoginAndVisit(
+        REINDEX_ADMIN_USER,
+        REINDEX_ADMIN_PASSWORD,
+        '/admin/process/list',
+        '#indexer_processes_grid_table:visible',
+    );
 }
 
 it('reports a single index through the progress dialog', function () {

@@ -7,7 +7,6 @@
 
 declare(strict_types=1);
 
-use Tests\Browser\MahoServer;
 use Tests\MahoBrowserTestCase;
 
 uses(MahoBrowserTestCase::class)->group('browser');
@@ -142,14 +141,12 @@ function visitRelatedProductsTab(int $parentId): object
 {
     createRelatedGridAdminUser();
 
-    $page = visit(MahoServer::baseUrl() . '/admin')
-        ->fill('#username', RELATED_GRID_ADMIN_USERNAME)
-        ->fill('#login', RELATED_GRID_ADMIN_PASSWORD)
-        ->click('#step1 input[type="submit"]');
-
-    waitForPageLoad($page, '.nav-bar:visible');
-    $page->navigate(MahoServer::baseUrl() . adminPathWithSecretKey($page, '/admin/catalog_product/edit/id/' . $parentId));
-    waitForPageLoad($page, '#product_info_tabs_related');
+    $page = adminLoginAndVisit(
+        RELATED_GRID_ADMIN_USERNAME,
+        RELATED_GRID_ADMIN_PASSWORD,
+        '/admin/catalog_product/edit/id/' . $parentId,
+        '#product_info_tabs_related',
+    );
 
     // An inactive tab keeps its content attached, so `:visible` is what distinguishes the
     // tab having opened from the grid merely existing in the page.

@@ -18,7 +18,7 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Authorize_Button extends Mage_Oauth_Block
      * and reject actions can validate that key instead of being exempted as public.
      */
     #[\Override]
-    protected function _getUrlModelClass()
+    protected function _getUrlModelClass(): string
     {
         return 'adminhtml/url';
     }

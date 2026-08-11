@@ -163,7 +163,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
                 // Skip the admin-menu cache flush for keyless (RSS basic-auth) logins, which
                 // re-run login() on every poll: they never render the admin menu, so flushing
                 // it each poll would rebuild it for every real admin on their next page view.
-                if (!Mage::getSingleton('adminhtml/url')->getNoSecret()) {
+                if (Mage::getSingleton('adminhtml/url')->useSecretKey()) {
                     Mage::getSingleton('adminhtml/url')->renewSecretUrls();
                 }
                 $this->setIsFirstPageAfterLogin(true);
@@ -173,8 +173,11 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
                     Mage::getSingleton('adminhtml/session')->setLocale($backendLocale);
                 }
 
-                $alternativeUrl = $this->_getRequestUri();
-                $redirectUrl = $this->_urlPolicy->getRedirectUrl($user, $request, $alternativeUrl);
+                // The redirect policy bails out on an empty request (RSS basic-auth logins),
+                // so do not pay for building the keyed alternative url on that path.
+                $redirectUrl = $request
+                    ? $this->_urlPolicy->getRedirectUrl($user, $request, $this->_getRequestUri())
+                    : null;
                 if ($redirectUrl) {
                     Mage::dispatchEvent('admin_session_user_login_success', ['user' => $user]);
                     $this->_response->clearHeaders()
