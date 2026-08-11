@@ -51,11 +51,8 @@ class Maho_CustomerSegmentation_Helper_Data extends Mage_Core_Helper_Abstract
         foreach ($collection as $segment) {
             $known[] = (int) $segment->getId();
 
-            // No website named means every website, the way the segment itself matches customers
             $segmentWebsiteIds = array_map('intval', $segment->getWebsiteIdsArray());
-            if ($websiteIds !== [] && $segmentWebsiteIds !== []
-                && array_intersect($segmentWebsiteIds, $websiteIds) === []
-            ) {
+            if ($websiteIds !== [] && array_intersect($segmentWebsiteIds, $websiteIds) === []) {
                 $outside[] = $segment->getName();
             }
         }

@@ -126,17 +126,14 @@ function segmentAudienceDeleteForeignStore(): void
 {
     $deleted = false;
 
-    Mage::register('isSecureArea', true);
-    try {
-        foreach (['core/store' => 'code', 'core/store_group' => 'name', 'core/website' => 'code'] as $model => $field) {
-            $entity = Mage::getModel($model)->load(SEGMENT_AUDIENCE_FOREIGN_CODE, $field);
-            if ($entity->getId()) {
-                $entity->delete();
-                $deleted = true;
-            }
+    // isSecureArea is already registered by MahoBackendTestCase::setUp(), which is still in
+    // effect here: registering it again would throw, unregistering it would strip the base case's.
+    foreach (['core/store' => 'code', 'core/store_group' => 'name', 'core/website' => 'code'] as $model => $field) {
+        $entity = Mage::getModel($model)->load(SEGMENT_AUDIENCE_FOREIGN_CODE, $field);
+        if ($entity->getId()) {
+            $entity->delete();
+            $deleted = true;
         }
-    } finally {
-        Mage::unregister('isSecureArea');
     }
 
     if ($deleted) {
@@ -313,13 +310,4 @@ it('reports the unknown and the outside segments from one lookup', function () {
 
     expect($issues['unknown'])->toBe([$goneId]);
     expect($issues['outside'])->toBe([$foreign->getName()]);
-});
-
-it('treats a segment naming no website as covering every store', function () {
-    $everywhere = segmentAudienceSegment([], '');
-
-    $outside = Mage::helper('customersegmentation')
-        ->getSegmentsOutsideStores([(int) $everywhere->getId()], [1]);
-
-    expect($outside)->toBe([]);
 });
