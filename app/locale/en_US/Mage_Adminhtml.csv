@@ -1030,6 +1030,8 @@
 "The roles have been refreshed.","The roles have been refreshed."
 "The search index has been rebuilt.","The search index has been rebuilt."
 "The search index process is not available.","The search index process is not available."
+"These customer segments cover none of the selected stores: %s.","These customer segments cover none of the selected stores: %s."
+"These customer segments no longer exist: %s.","These customer segments no longer exist: %s."
 "The shipment has been created.","The shipment has been created."
 "The shipment has been sent.","The shipment has been sent."
 "The shipment no longer exists.","The shipment no longer exists."

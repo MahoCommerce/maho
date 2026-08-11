@@ -241,8 +241,10 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
             }
 
             if ($queue->getQueueStatus() == Queue::STATUS_NEVER) {
+                $stores = $this->getRequest()->getParam('stores', []);
+
                 $queue->setQueueStartAtByString($this->getRequest()->getParam('start_at'))
-                    ->setStores($this->getRequest()->getParam('stores', []))
+                    ->setStores($stores)
                     ->setNewsletterSubject($this->getRequest()->getParam('subject'))
                     ->setNewsletterSenderName($this->getRequest()->getParam('sender_name'))
                     ->setNewsletterSenderEmail($this->getRequest()->getParam('sender_email'))
@@ -251,8 +253,27 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
 
                 // Save customer segment assignments if CustomerSegmentation module is enabled
                 if (Mage::helper('core')->isModuleEnabled('Maho_CustomerSegmentation')) {
-                    $segmentIds = $this->getRequest()->getParam('customer_segments', []);
-                    $queue->setCustomerSegmentIds(implode(',', array_filter($segmentIds)));
+                    $segmentHelper = Mage::helper('customersegmentation');
+                    $segmentIds = $segmentHelper
+                        ->getQueueSegmentIds($this->getRequest()->getParam('customer_segments', []));
+
+                    $issues = $segmentHelper->getQueueSegmentIssues($segmentIds, $stores);
+                    if ($issues['unknown'] !== []) {
+                        Mage::throwException($this->__(
+                            'These customer segments no longer exist: %s.',
+                            implode(', ', $issues['unknown']),
+                        ));
+                    }
+
+                    $outside = $issues['outside'];
+                    if ($outside !== []) {
+                        Mage::throwException($this->__(
+                            'These customer segments cover none of the selected stores: %s.',
+                            implode(', ', $outside),
+                        ));
+                    }
+
+                    $queue->setCustomerSegmentIds(implode(',', $segmentIds));
                 }
             } else {
                 $this->_assertNothingFrozenWasPosted();

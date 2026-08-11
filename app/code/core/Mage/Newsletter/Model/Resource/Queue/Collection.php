@@ -91,12 +91,22 @@ class Mage_Newsletter_Model_Resource_Queue_Collection extends Mage_Core_Model_Re
             ->where("qlt.queue_id = $queueIdColumn")
             ->assemble());
 
-        $projected = sprintf('(%s)', $this->getConnection()->select()
+        $projectedSelect = $this->getConnection()->select()
             ->from(['qsl' => $this->getTable('newsletter/queue_store_link')], 'COUNT(*)')
             ->join(['sub' => $this->getTable('newsletter/subscriber')], 'sub.store_id = qsl.store_id', [])
             ->where("qsl.queue_id = $queueIdColumn")
-            ->where('sub.subscriber_status = ?', Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED)
-            ->assemble());
+            ->where('sub.subscriber_status = ?', Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED);
+
+        // Campaign joined in rather than read from the enclosing query: not every
+        // backend resolves an outer reference two subqueries deep.
+        if (Mage::helper('core')->isModuleEnabled('Maho_CustomerSegmentation')) {
+            $projectedSelect
+                ->join(['nq' => $this->getMainTable()], 'nq.queue_id = qsl.queue_id', [])
+                ->where(Mage::getResourceSingleton('customersegmentation/segment')
+                    ->getCampaignSegmentMembershipSql('sub', 'nq.customer_segment_ids'));
+        }
+
+        $projected = sprintf('(%s)', $projectedSelect->assemble());
 
         $notFinished = sprintf(
             '%s IN (%d, %d, %d)',

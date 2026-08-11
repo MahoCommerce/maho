@@ -79,21 +79,58 @@ class Mage_Newsletter_Model_Resource_Queue extends Mage_Core_Model_Resource_Db_A
             return;
         }
 
+        if ($this->hasUnsatisfiableSegmentRestriction($queue)) {
+            Mage::log(sprintf(
+                'Newsletter campaign %d names customer segments that cannot be resolved: no recipients linked.',
+                (int) $queue->getId(),
+            ), Mage::LOG_WARNING);
+            return;
+        }
+
         // One server-side statement: hauling a six-figure audience through PHP
         // would hold a long transaction that also blocks the worker keepalive.
         $adapter = $this->_getWriteAdapter();
         $select = $adapter->select()
-            ->from($this->getTable('newsletter/subscriber'), [
+            ->from(['subscriber' => $this->getTable('newsletter/subscriber')], [
                 'queue_id' => new Maho\Db\Expr((string) (int) $queue->getId()),
                 'subscriber_id',
             ])
-            ->where('store_id IN (?)', $stores)
-            ->where('subscriber_status = ?', Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED);
+            ->where('subscriber.store_id IN (?)', $stores)
+            ->where('subscriber.subscriber_status = ?', Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED);
+
+        $segmentIds = $this->getSegmentIds($queue);
+        if ($segmentIds !== []) {
+            $select->where(Mage::getResourceSingleton('customersegmentation/segment')
+                ->getSegmentMembershipSql('subscriber', $segmentIds));
+        }
 
         $adapter->query($select->insertIgnoreFromSelect(
             $this->getTable('newsletter/queue_link'),
             ['queue_id', 'subscriber_id'],
         ));
+    }
+
+    /**
+     * Empty unless Maho_CustomerSegmentation, which owns the column, is enabled.
+     */
+    public function getSegmentIds(Mage_Newsletter_Model_Queue $queue): array
+    {
+        if (!Mage::helper('core')->isModuleEnabled('Maho_CustomerSegmentation')) {
+            return [];
+        }
+
+        return Mage::helper('customersegmentation')->getQueueSegmentIds($queue->getCustomerSegmentIds());
+    }
+
+    /**
+     * A restriction naming no resolvable segment: the module owning the column is
+     * disabled, or the column holds no usable id. Mailing every subscriber of the
+     * campaign's stores is the one reading that is certainly wrong, and the grid
+     * already projects no recipients for such a campaign.
+     */
+    public function hasUnsatisfiableSegmentRestriction(Mage_Newsletter_Model_Queue $queue): bool
+    {
+        return (string) $queue->getCustomerSegmentIds() !== '' && $this->getSegmentIds($queue) === [];
     }
 
     /**
