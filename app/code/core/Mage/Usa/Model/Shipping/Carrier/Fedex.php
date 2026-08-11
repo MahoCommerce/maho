@@ -315,11 +315,6 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                 'indicia' => $weight >= 1 ? 'PARCEL_SELECT' : 'PRESORTED_STANDARD',
                 'hubId' => $this->getConfigData('smartpost_hubid'),
             ];
-            // Ground Economy caps declared value at $100; a higher amount fails the request
-            $requestedShipment['requestedPackageLineItems'][0]['declaredValue'] = [
-                'amount' => min($value, 100.0),
-                'currency' => $currencyCode,
-            ];
         }
 
         return [

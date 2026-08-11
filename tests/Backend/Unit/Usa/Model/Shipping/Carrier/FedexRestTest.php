@@ -270,27 +270,6 @@ describe('FedEx REST rate request payload', function () {
         expect($heavyShipment['smartPostInfoDetail']['indicia'])->toBe('PARCEL_SELECT');
     });
 
-    it('declares the package value on SmartPost quotes, capped at the $100 limit', function () {
-        $cheap = fedexProbe();
-        $cheap->setRawRequest(fedexRawRateRequest(['value' => 40.0]));
-        $cheapShipment = $cheap->formRateRequest(
-            Mage_Usa_Model_Shipping_Carrier_Fedex::RATE_REQUEST_SMARTPOST,
-        )['requestedShipment'];
-
-        expect($cheapShipment['requestedPackageLineItems'][0]['declaredValue'])->toBe([
-            'amount' => 40.0,
-            'currency' => $cheap->getCurrencyCode(),
-        ]);
-
-        $pricey = fedexProbe();
-        $pricey->setRawRequest(fedexRawRateRequest(['value' => 500.0]));
-        $priceyShipment = $pricey->formRateRequest(
-            Mage_Usa_Model_Shipping_Carrier_Fedex::RATE_REQUEST_SMARTPOST,
-        )['requestedShipment'];
-
-        expect($priceyShipment['requestedPackageLineItems'][0]['declaredValue']['amount'])->toBe(100.0);
-    });
-
     it('leaves serviceType unset for a general quote so FedEx returns every service', function () {
         $probe = fedexProbe();
         $probe->setRawRequest(fedexRawRateRequest());
