@@ -27,16 +27,7 @@ class RecordingCookie extends Mage_Core_Model_Cookie
     }
 }
 
-function storeFallbackConfigure(string $display, string $allowed): Mage_Core_Model_Store
-{
-    if (Mage::app()->getStore(1)->getBaseCurrencyCode() !== 'USD') {
-        test()->markTestSkipped('Test expects USD base currency on store 1');
-    }
-
-    return setStoreDisplayCurrency($display, $allowed);
-}
-
-describe('Store currency fallback cookie', function (): void {
+describe('Store currency fallback', function (): void {
 
     beforeEach(function (): void {
         $this->cookie = new RecordingCookie();
@@ -45,28 +36,19 @@ describe('Store currency fallback cookie', function (): void {
     });
 
     afterEach(function (): void {
-        clearStoreSessionCurrency();
+        resetCurrencyState();
     });
 
     test('the no-rate fallback does not write the currency cookie', function (): void {
-        $store = storeFallbackConfigure('GBP', 'USD,GBP');
+        $store = useNoRateDisplayCurrency('GBP', 'USD,GBP');
 
-        if ((float) $store->getBaseCurrency()->getRate('GBP') > 0) {
-            test()->markTestSkipped('This install has a USD to GBP rate, so there is no fallback to observe');
-        }
-
-        expect($store->getCurrentCurrencyCode())->toBe('GBP');
         expect($store->getCurrentCurrency()->getCode())->toBe('USD');
 
         expect($this->cookie->writes)->not->toContain(Mage_Core_Model_Store::COOKIE_CURRENCY);
     });
 
     test('the fallback is memoised on the instance, so prices convert at parity', function (): void {
-        $store = storeFallbackConfigure('GBP', 'USD,GBP');
-
-        if ((float) $store->getBaseCurrency()->getRate('GBP') > 0) {
-            test()->markTestSkipped('This install has a USD to GBP rate, so there is no fallback to observe');
-        }
+        $store = useNoRateDisplayCurrency('GBP', 'USD,GBP');
 
         $resolved = $store->getCurrentCurrency();
         expect($resolved->getCode())->toBe('USD');
@@ -78,7 +60,8 @@ describe('Store currency fallback cookie', function (): void {
     });
 
     test('an explicit currency switch still writes the cookie', function (): void {
-        $store = storeFallbackConfigure('USD', 'USD,EUR');
+        requireUsdBaseStore();
+        $store = setStoreDisplayCurrency('USD', 'USD,EUR');
 
         if ((float) $store->getBaseCurrency()->getRate('EUR') <= 0) {
             test()->markTestSkipped('USD to EUR rate not available');

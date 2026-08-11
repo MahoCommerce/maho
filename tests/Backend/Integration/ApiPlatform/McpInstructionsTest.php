@@ -25,6 +25,10 @@ function mcpInstructionsText(): string
     return (string) $method->invoke($kernel);
 }
 
+afterEach(function (): void {
+    resetCurrencyState();
+});
+
 test('the instructions name the base currency, not the default view display currency', function (): void {
     $store = Mage::app()->getDefaultStoreView();
 
@@ -40,5 +44,12 @@ test('the instructions name the base currency, not the default view display curr
 
     expect($instructions)->toContain('Amounts are in USD unless a response says otherwise');
     expect($instructions)->toContain('"currency" field');
-    expect($instructions)->not->toContain('EUR');
+
+    // Scope the EUR check to the currency line: the store name is in the same
+    // text and may legitimately contain "EUR".
+    $currencyLine = array_find(
+        explode("\n", $instructions),
+        fn(string $line): bool => str_contains($line, 'Amounts are in'),
+    );
+    expect($currencyLine)->not->toContain('EUR');
 });
