@@ -114,29 +114,57 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient
         $debugData = ['request' => ['method' => $method, 'url' => $url, 'data' => $data]];
 
         try {
-            $response = $client->request($method, $url, [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $this->oauthClient->getAccessToken(),
-                    'Content-Type' => 'application/json',
-                    'X-locale' => 'en_US',
-                ],
-                'json' => $data,
-            ]);
+            $response = $this->send($client, $method, $url, $data);
+
+            // FedEx revokes outstanding tokens on credential rotation; retry once fresh
+            if ($response->getStatusCode() === 401) {
+                $this->oauthClient->invalidateToken();
+                $response = $this->send($client, $method, $url, $data);
+            }
 
             // getContent(false) keeps 4xx/5xx bodies readable: FedEx puts the actionable
             // message in the body of an error response, not in the status line.
             $responseData = Mage::helper('core')->jsonDecode($response->getContent(false));
+            if (!is_array($responseData)) {
+                // Error-shaped, so callers never mistake a malformed body for a success
+                $responseData = ['errors' => [[
+                    'code' => 'MALFORMED.RESPONSE',
+                    'message' => 'FedEx returned a malformed response',
+                ]]];
+            }
             $debugData['result'] = $responseData;
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $responseData = ['errors' => [['code' => (string) $e->getCode(), 'message' => $e->getMessage()]]];
             $debugData['result'] = $responseData;
             Mage::logException($e);
+        }
+
+        // FedEx-reported failures do not throw, so log them even with debug off
+        $error = self::extractErrorMessage($responseData);
+        if ($error !== null) {
+            Mage::log(sprintf('FedEx API error on %s: %s', $endpoint, $error), Mage::LOG_WARNING);
         }
 
         if ($this->debugMode) {
             Mage::log($debugData, Mage::LOG_DEBUG, 'fedex_rest_api.log');
         }
 
-        return is_array($responseData) ? $responseData : [];
+        return $responseData;
+    }
+
+    private function send(
+        \Symfony\Contracts\HttpClient\HttpClientInterface $client,
+        string $method,
+        string $url,
+        array $data,
+    ): \Symfony\Contracts\HttpClient\ResponseInterface {
+        return $client->request($method, $url, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->oauthClient->getAccessToken(),
+                'Content-Type' => 'application/json',
+                'X-locale' => 'en_US',
+            ],
+            'json' => $data,
+        ]);
     }
 }

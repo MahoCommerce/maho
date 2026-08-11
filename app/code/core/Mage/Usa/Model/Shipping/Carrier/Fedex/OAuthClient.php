@@ -61,7 +61,10 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex_OAuthClient
         ]);
 
         $data = Mage::helper('core')->jsonDecode($response->getContent());
-        $accessToken = $data['access_token'];
+        $accessToken = $data['access_token'] ?? null;
+        if (!is_string($accessToken) || $accessToken === '') {
+            throw new RuntimeException('FedEx OAuth response contains no access token');
+        }
         $expiresIn = (int) ($data['expires_in'] ?? 3600);
 
         $this->cache->save(
@@ -74,8 +77,15 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex_OAuthClient
         return $accessToken;
     }
 
+    public function invalidateToken(): void
+    {
+        $this->cache->remove($this->getCacheKey());
+    }
+
     private function getCacheKey(): string
     {
-        return self::TOKEN_CACHE_KEY_PREFIX . md5($this->clientId . $this->tokenEndpoint);
+        // The secret is part of the key so saving a corrected secret stops serving
+        // the token minted with the old one
+        return self::TOKEN_CACHE_KEY_PREFIX . md5($this->clientId . $this->clientSecret . $this->tokenEndpoint);
     }
 }

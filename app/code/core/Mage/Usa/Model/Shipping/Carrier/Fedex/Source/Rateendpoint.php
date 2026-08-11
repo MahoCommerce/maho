@@ -6,6 +6,8 @@
  * @package Mage_Usa
  */
 
+declare(strict_types=1);
+
 class Mage_Usa_Model_Shipping_Carrier_Fedex_Source_Rateendpoint
 {
     public function toOptionArray(): array

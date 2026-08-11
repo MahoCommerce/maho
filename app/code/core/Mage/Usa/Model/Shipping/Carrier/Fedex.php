@@ -32,18 +32,11 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     public const RATE_REQUEST_SMARTPOST = 'SMART_POST';
 
     /**
-     * Legacy SOAP DropoffType values mapped onto their REST pickupType equivalent.
-     *
-     * None of the SOAP names survive into REST. Stores migrated by
-     * upgrade-2.0.0-2.0.1.php already hold REST values, so this only covers config
-     * written before the migration or by third-party code.
+     * REST renamed this SOAP service code; pre-migration orders still hold the
+     * old one in shipping_method, and order rows are never rewritten.
      */
-    protected const PICKUP_TYPE_ALIASES = [
-        'REGULAR_PICKUP'          => 'USE_SCHEDULED_PICKUP',
-        'REQUEST_COURIER'         => 'CONTACT_FEDEX_TO_SCHEDULE',
-        'DROP_BOX'                => 'DROPOFF_AT_FEDEX_LOCATION',
-        'BUSINESS_SERVICE_CENTER' => 'DROPOFF_AT_FEDEX_LOCATION',
-        'STATION'                 => 'DROPOFF_AT_FEDEX_LOCATION',
+    protected const SERVICE_TYPE_ALIASES = [
+        'INTERNATIONAL_PRIORITY' => 'FEDEX_INTERNATIONAL_PRIORITY',
     ];
 
     /**
@@ -250,9 +243,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      */
     protected function _getPickupType(?string $dropoffType): string
     {
-        $dropoffType = (string) $dropoffType;
-
-        return self::PICKUP_TYPE_ALIASES[$dropoffType] ?? ($dropoffType ?: 'USE_SCHEDULED_PICKUP');
+        return $dropoffType ?: 'USE_SCHEDULED_PICKUP';
     }
 
     /**
@@ -282,7 +273,9 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                     'residential' => (bool) $this->getConfigData('residence_delivery'),
                 ],
             ],
-            'shipDateStamp' => Mage_Core_Model_Locale::todayUtc(),
+            // FedEx reads the ship date in the shipper's timezone, not UTC
+            'shipDateStamp' => Mage::app()->getLocale()->utcToStore()
+                ->format(Mage_Core_Model_Locale::DATE_FORMAT),
             'pickupType' => $this->_getPickupType($r->getDropoffType()),
             'packagingType' => $r->getPackaging(),
             'rateRequestType' => ['ACCOUNT', 'LIST'],
@@ -346,7 +339,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
 
         if ($cached === null) {
             $response = $this->_getRestClient()->getRates($ratesRequest);
-            if (!isset($response['errors'])) {
+            if ($response !== [] && !isset($response['errors'])) {
                 $this->_setCachedQuotes($requestString, serialize($response));
             }
         } else {
@@ -495,8 +488,9 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
             return null;
         }
 
+        // A zero amount is an unpriced flavour, not free shipping; fall through
         foreach (self::RATE_TYPE_PREFERENCE as $rateType) {
-            if (isset($rateTypeAmounts[$rateType])) {
+            if (!empty($rateTypeAmounts[$rateType])) {
                 return $rateTypeAmounts[$rateType];
             }
         }
@@ -770,8 +764,8 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
         $debugData = ['request' => ['trackingNumber' => $tracking]];
 
         if ($cached === null) {
-            $response = $this->_getRestClient()->track((string) $tracking);
-            if (!isset($response['errors'])) {
+            $response = $this->_getRestClient()->track($tracking);
+            if ($response !== [] && !isset($response['errors'])) {
                 $this->_setCachedQuotes($requestString, serialize($response));
             }
         } else {
@@ -1043,10 +1037,13 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
 
         $requestedShipment = [
             // Not a typo: the Ship API spells it shipDatestamp while Rate uses shipDateStamp.
-            'shipDatestamp' => Mage_Core_Model_Locale::todayUtc(),
+            // Store-local date: FedEx reads it in the shipper's timezone.
+            'shipDatestamp' => Mage::app()->getLocale()->utcToStore($request->getStoreId())
+                ->format(Mage_Core_Model_Locale::DATE_FORMAT),
             'pickupType' => $this->_getPickupType($this->getConfigData('dropoff')),
             'packagingType' => $request->getPackagingType(),
-            'serviceType' => $request->getShippingMethod(),
+            'serviceType' => self::SERVICE_TYPE_ALIASES[$request->getShippingMethod()]
+                ?? $request->getShippingMethod(),
             'shipper' => [
                 'contact' => [
                     'personName' => $request->getShipperContactPersonName(),
@@ -1168,12 +1165,18 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
             $shipment = $response['output']['transactionShipments'][0] ?? [];
             $pieceResponse = $shipment['pieceResponses'][0] ?? [];
             $encodedLabel = $pieceResponse['packageDocuments'][0]['encodedLabel'] ?? null;
+            // Piece number first: multi-package child responses repeat the master number
+            $trackingNumber = $pieceResponse['trackingNumber'] ?? $shipment['masterTrackingNumber'] ?? null;
 
-            $result->setShippingLabelContent($encodedLabel !== null ? base64_decode($encodedLabel) : null);
-            $result->setTrackingNumber(
-                $shipment['masterTrackingNumber'] ?? $pieceResponse['trackingNumber'] ?? null,
-            );
-        } else {
+            if ($encodedLabel === null || $trackingNumber === null) {
+                // A 200 without errors[] but without a label is still a failure
+                $error = Mage::helper('usa')->__('FedEx did not return a shipping label');
+            } else {
+                $result->setShippingLabelContent(base64_decode($encodedLabel));
+                $result->setTrackingNumber($trackingNumber);
+            }
+        }
+        if ($error !== null) {
             $result->setErrors($error);
         }
         $result->setGatewayResponse(Mage::helper('core')->jsonEncode($response));

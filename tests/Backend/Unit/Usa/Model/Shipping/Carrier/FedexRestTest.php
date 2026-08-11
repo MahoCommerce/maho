@@ -64,6 +64,14 @@ final class FedexRestProbe extends Mage_Usa_Model_Shipping_Carrier_Fedex
     /** @var list<array> */
     public array $cancelRequests = [];
 
+    /** Canned ship responses, popped one per createShipment() call. */
+    public array $shipmentResponses = [];
+
+    public function doShipmentRequest(\Maho\DataObject $request): \Maho\DataObject
+    {
+        return $this->_doShipmentRequest($request);
+    }
+
     #[\Override]
     protected function _getRestClient(): Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient
     {
@@ -81,6 +89,12 @@ final class FedexRestProbe extends Mage_Usa_Model_Shipping_Carrier_Fedex
                 $this->probe->cancelRequests[] = $requestData;
 
                 return array_shift($this->probe->cancelResponses) ?? [];
+            }
+
+            #[\Override]
+            public function createShipment(array $requestData): array
+            {
+                return array_shift($this->probe->shipmentResponses) ?? [];
             }
         };
     }
@@ -202,17 +216,6 @@ describe('FedEx REST rate request payload', function () {
         expect($shipment['requestedPackageLineItems'][0]['groupPackageCount'])->toBe(1);
     });
 
-    it('translates a legacy dropoff code to its REST pickupType', function () {
-        $probe = fedexProbe();
-        $probe->setRawRequest(fedexRawRateRequest(['dropoff_type' => 'DROP_BOX']));
-
-        $shipment = $probe->formRateRequest(
-            Mage_Usa_Model_Shipping_Carrier_Fedex::RATE_REQUEST_GENERAL,
-        )['requestedShipment'];
-
-        expect($shipment['pickupType'])->toBe('DROPOFF_AT_FEDEX_LOCATION');
-    });
-
     it('ships a shipDateStamp as a plain date, not a SOAP timestamp', function () {
         $probe = fedexProbe();
         $probe->setRawRequest(fedexRawRateRequest());
@@ -309,6 +312,17 @@ describe('FedEx REST rate response parsing', function () {
         $methods = array_map(fn($rate) => $rate->getMethod(), $result->getAllRates());
 
         expect($methods)->toBe(['FEDEX_GROUND', 'FEDEX_2_DAY', 'PRIORITY_OVERNIGHT']);
+    });
+
+    it('skips a zero negotiated amount instead of quoting free shipping', function () use ($reply) {
+        $response = ['output' => ['rateReplyDetails' => [
+            $reply('FEDEX_GROUND', [
+                ['rateType' => 'ACCOUNT', 'totalNetCharge' => 0],
+                ['rateType' => 'LIST', 'totalNetCharge' => 20.00],
+            ]),
+        ]]];
+
+        expect(fedexProbe()->prepareRateResponse($response)->getAllRates()[0]->getCost())->toBe(20.00);
     });
 
     it('prefers the negotiated ACCOUNT rate over the published LIST rate', function () use ($reply) {
@@ -581,6 +595,64 @@ describe('FedEx REST shipment request payload', function () {
         $shipment = fedexProbe()->formShipmentRequest($shipmentRequest(['is_return' => true]))['requestedShipment'];
 
         expect($shipment['shippingChargesPayment']['paymentType'])->toBe('RECIPIENT');
+    });
+
+    it('maps a pre-migration SOAP service code onto its REST serviceType', function () use ($shipmentRequest) {
+        $shipment = fedexProbe()->formShipmentRequest(
+            $shipmentRequest(['shipping_method' => 'INTERNATIONAL_PRIORITY']),
+        )['requestedShipment'];
+
+        expect($shipment['serviceType'])->toBe('FEDEX_INTERNATIONAL_PRIORITY');
+    });
+});
+
+describe('FedEx REST shipment response parsing', function () {
+    $shipmentRequest = function (): \Maho\DataObject {
+        return new \Maho\DataObject([
+            'store_id' => 1,
+            'packaging_type' => 'YOUR_PACKAGING',
+            'shipping_method' => 'FEDEX_GROUND',
+            'package_weight' => 10.0,
+            'base_currency_code' => 'USD',
+            'shipper_contact_phone_number' => '9012638716',
+            'recipient_contact_phone_number' => '9012637890',
+            'shipper_address_country_code' => 'US',
+            'recipient_address_country_code' => 'US',
+            'package_items' => [],
+            'package_params' => new \Maho\DataObject([
+                'weight_units' => Mage_Core_Model_Locale::WEIGHT_POUND,
+                'dimension_units' => Mage_Core_Model_Locale::LENGTH_INCH,
+            ]),
+        ]);
+    };
+
+    it('stores the package tracking number, not the repeated master number', function () use ($shipmentRequest) {
+        $probe = fedexProbe();
+        $probe->shipmentResponses = [[
+            'output' => ['transactionShipments' => [[
+                'masterTrackingNumber' => '794846961014',
+                'pieceResponses' => [[
+                    'trackingNumber' => '794846963407',
+                    'packageDocuments' => [['encodedLabel' => base64_encode('%PDF-label')]],
+                ]],
+            ]]],
+        ]];
+
+        $result = $probe->doShipmentRequest($shipmentRequest());
+
+        expect($result->getErrors())->toBeNull();
+        expect($result->getTrackingNumber())->toBe('794846963407');
+        expect($result->getShippingLabelContent())->toBe('%PDF-label');
+    });
+
+    it('reports an error when FedEx answers success without a label', function () use ($shipmentRequest) {
+        $probe = fedexProbe();
+        $probe->shipmentResponses = [['output' => ['transactionShipments' => []]]];
+
+        $result = $probe->doShipmentRequest($shipmentRequest());
+
+        expect($result->getErrors())->not->toBeNull();
+        expect($result->getTrackingNumber())->toBeNull();
     });
 });
 
