@@ -197,10 +197,7 @@ class Invoice extends CrudResource
 
     public static function afterLoad(self $dto, object $model): void
     {
-        // Fall back to the invoice's own store, never the viewer's display
-        // currency: these amounts were fixed at placement and must read the
-        // same for everyone.
-        $dto->currency = $model->getOrderCurrencyCode() ?: $model->getStore()->getBaseCurrencyCode();
+        $dto->currency = OrderCurrency::of($model);
 
         $dto->stateName = match ($dto->state) {
             \Mage_Sales_Model_Order_Invoice::STATE_OPEN => 'open',

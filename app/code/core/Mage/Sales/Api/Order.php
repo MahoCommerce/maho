@@ -435,8 +435,6 @@ class Order extends CrudResource
 
     public static function afterLoad(self $dto, object $model): void
     {
-        // Fall back to the order's own store, never the ambient display
-        // configuration: these amounts were fixed at placement.
-        $dto->currency = $model->getOrderCurrencyCode() ?: $model->getStore()->getBaseCurrencyCode();
+        $dto->currency = OrderCurrency::of($model);
     }
 }

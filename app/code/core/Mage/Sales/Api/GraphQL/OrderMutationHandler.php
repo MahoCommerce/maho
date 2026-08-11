@@ -12,6 +12,7 @@ namespace Mage\Sales\Api\GraphQL;
 
 use Mage\Sales\Api\CreditMemo;
 use Mage\Sales\Api\Order;
+use Mage\Sales\Api\OrderCurrency;
 use Mage\Sales\Api\OrderProvider;
 use Mage\Sales\Api\OrderService;
 use Maho\ApiPlatform\Exception\NotFoundException;
@@ -91,7 +92,7 @@ class OrderMutationHandler
                 'orderId' => (int) $order->getId(),
                 'incrementId' => $order->getIncrementId(),
                 'status' => $order->getStatus(),
-                'currency' => $order->getOrderCurrencyCode(),
+                'currency' => OrderCurrency::of($order),
                 'grandTotal' => (float) $order->getGrandTotal(),
             ],
             'invoice' => $invoiceAndShipment['invoice'],
@@ -302,7 +303,7 @@ class OrderMutationHandler
                 'creditmemo' => [
                     'id' => (int) $creditmemo->getId(),
                     'incrementId' => $creditmemo->getIncrementId(),
-                    'currency' => $creditmemo->getOrderCurrencyCode(),
+                    'currency' => OrderCurrency::of($creditmemo),
                     'grandTotal' => (float) $creditmemo->getGrandTotal(),
                     'createdAt' => $creditmemo->getCreatedAt(),
                 ],
@@ -363,7 +364,7 @@ class OrderMutationHandler
             'status' => $order->getStatus(),
             'customerName' => $customerName,
             'createdAt' => \Mage::helper('core')->formatDate($order->getCreatedAt(), 'medium', true),
-            'currency' => $order->getOrderCurrencyCode(),
+            'currency' => OrderCurrency::of($order),
             'grandTotal' => (float) $order->getGrandTotal(),
             'items' => $items,
         ];
