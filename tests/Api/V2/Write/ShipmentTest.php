@@ -16,6 +16,10 @@ declare(strict_types=1);
  * @group write
  */
 
+afterAll(function (): void {
+    cleanupTestData();
+});
+
 describe('POST /api/rest/v2/orders/{orderId}/shipments', function (): void {
 
     it('requires authentication', function (): void {
@@ -52,6 +56,83 @@ describe('POST /api/rest/v2/orders/{orderId}/shipments', function (): void {
         expect($response['json']['totalQty'])->toBeGreaterThan(0);
         expect($response['json'])->toHaveKey('items');
         expect($response['json']['items'])->toBeArray();
+    });
+
+    it('persists qty_shipped so the order cannot be shipped twice', function (): void {
+        $orderId = findShippableOrderId();
+
+        if (!$orderId) {
+            $this->markTestSkipped('No shippable order found in database');
+        }
+
+        $first = apiPost("/api/rest/v2/orders/{$orderId}/shipments", [
+            'notifyCustomer' => false,
+        ], adminToken());
+
+        expect($first['status'])->toBeSuccessful();
+        expect($first['json']['totalQty'])->toBeGreaterThan(0);
+
+        $order = Mage::getModel('sales/order')->load($orderId);
+
+        $shippedQty = 0.0;
+        foreach ($order->getAllItems() as $item) {
+            $shippedQty += (float) $item->getQtyShipped();
+        }
+
+        expect($shippedQty)->toBeGreaterThan(0.0);
+        expect($order->canShip())->toBeFalse();
+
+        $second = apiPost("/api/rest/v2/orders/{$orderId}/shipments", [
+            'notifyCustomer' => false,
+        ], adminToken());
+
+        expect($second['status'])->toBe(400);
+    });
+
+    it('ships only the requested qty for a partial shipment', function (): void {
+        $orderId = seedShippableOrder(2);
+
+        if (!$orderId) {
+            $this->markTestSkipped('Could not seed a shippable order in this store');
+        }
+
+        $itemId = null;
+        foreach (Mage::getModel('sales/order')->load($orderId)->getAllVisibleItems() as $item) {
+            $itemId = (int) $item->getId();
+            break;
+        }
+        expect($itemId)->not->toBeNull();
+
+        $partial = apiPost("/api/rest/v2/orders/{$orderId}/shipments", [
+            'items' => [['orderItemId' => $itemId, 'qty' => 1]],
+        ], adminToken());
+
+        expect($partial['status'])->toBeSuccessful();
+        expect((float) $partial['json']['totalQty'])->toBe(1.0);
+
+        $order = Mage::getModel('sales/order')->load($orderId);
+        expect((float) $order->getItemById($itemId)->getQtyShipped())->toBe(1.0);
+        expect($order->canShip())->toBeTrue();
+
+        $rest = apiPost("/api/rest/v2/orders/{$orderId}/shipments", [], adminToken());
+
+        expect($rest['status'])->toBeSuccessful();
+
+        $order = Mage::getModel('sales/order')->load($orderId);
+        expect((float) $order->getItemById($itemId)->getQtyShipped())->toBe(2.0);
+        expect($order->canShip())->toBeFalse();
+    });
+
+    it('documents the request body in the OpenAPI spec', function (): void {
+        $spec = apiGet('/api/docs.json');
+
+        expect($spec['status'])->toBe(200);
+
+        $schema = $spec['json']['paths']['/api/rest/v2/orders/{orderId}/shipments']['post']
+            ['requestBody']['content']['application/json']['schema']['properties'] ?? null;
+
+        expect($schema)->toBeArray();
+        expect(array_keys($schema))->toContain('items', 'tracks', 'comment', 'notifyCustomer');
     });
 
     it('creates a shipment with tracking info', function (): void {
@@ -235,7 +316,14 @@ describe('GraphQL Shipment queries', function (): void {
 
 // Helper functions
 
+// A seeded order per test: scanning the database instead hands the same order to
+// consecutive tests whenever a shipment fails to consume it.
 function findShippableOrderId(): ?int
+{
+    return seedShippableOrder() ?? scanShippableOrderId();
+}
+
+function scanShippableOrderId(): ?int
 {
     try {
         // Any open order that canShip() qualifies - offline-payment orders may
@@ -257,6 +345,94 @@ function findShippableOrderId(): ?int
     }
 
     return null;
+}
+
+// A configurable's variant would be promoted to its parent by the cart API, so
+// insist on a plain, individually visible simple product.
+function shippableSku(): ?string
+{
+    static $sku = false;
+
+    if ($sku !== false) {
+        return $sku;
+    }
+
+    $sku = null;
+    try {
+        Tests\Helpers\ApiV2Helper::ensureMahoBootstrapped();
+
+        $collection = Mage::getModel('catalog/product')->getCollection()
+            ->addAttributeToSelect('sku')
+            ->addAttributeToFilter('type_id', Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+            ->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ->addAttributeToFilter('visibility', ['neq' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE])
+            ->addAttributeToFilter('required_options', 0)
+            ->setPageSize(20);
+
+        foreach ($collection as $product) {
+            if ($product->isSalable()) {
+                $sku = (string) $product->getSku();
+                break;
+            }
+        }
+    } catch (\Throwable $e) {
+        $sku = null;
+    }
+
+    $sku ??= fixtures('write_test_sku');
+
+    return $sku;
+}
+
+function seedShippableOrder(int $qty = 1): ?int
+{
+    try {
+        $sku = shippableSku();
+        if (!$sku) {
+            return null;
+        }
+
+        $address = [
+            'firstName' => 'Shipment',
+            'lastName' => 'Tester',
+            'street' => ['1 Shipment Way'],
+            'city' => 'Los Angeles',
+            'region' => 'California',
+            'postcode' => '90210',
+            'countryId' => 'US',
+            'telephone' => '5550100',
+        ];
+
+        $create = apiPost('/api/rest/v2/carts', [], customerToken());
+        if (!in_array($create['status'], [200, 201], true) || empty($create['json']['id'])) {
+            return null;
+        }
+        $cartId = (int) $create['json']['id'];
+        trackCreated('quote', $cartId);
+
+        $add = apiPost("/api/rest/v2/carts/{$cartId}/items", ['sku' => $sku, 'qty' => $qty], customerToken());
+        if (!in_array($add['status'], [200, 201], true)) {
+            return null;
+        }
+
+        $place = apiPost('/api/rest/v2/orders', [
+            'cartId' => $cartId,
+            'shippingAddress' => $address,
+            'billingAddress' => $address,
+            'paymentMethod' => 'cashondelivery',
+            'shippingMethod' => 'freeshipping_freeshipping',
+        ], customerToken());
+        if (!in_array($place['status'], [200, 201], true) || empty($place['json']['id'])) {
+            return null;
+        }
+        $orderId = (int) $place['json']['id'];
+        trackCreated('order', $orderId);
+
+        $order = Mage::getModel('sales/order')->load($orderId);
+        return ($order->getId() && $order->canShip()) ? $orderId : null;
+    } catch (\Throwable $e) {
+        return null;
+    }
 }
 
 function findOrderWithShipments(): ?int
