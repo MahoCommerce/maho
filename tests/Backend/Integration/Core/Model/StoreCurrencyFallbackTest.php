@@ -21,10 +21,20 @@ class RecordingCookie extends Mage_Core_Model_Cookie
     /** @var list<string> */
     public array $writes = [];
 
+    /** @var list<string> */
+    public array $deletes = [];
+
     #[\Override]
     public function set($name, $value, $period = null, $path = null, $domain = null, $secure = null, $httponly = null, $sameSite = null)
     {
         $this->writes[] = (string) $name;
+        return $this;
+    }
+
+    #[\Override]
+    public function delete($name, $path = null, $domain = null, $secure = null, $httponly = null, $sameSite = null)
+    {
+        $this->deletes[] = (string) $name;
         return $this;
     }
 }
@@ -106,6 +116,22 @@ describe('Store currency fallback', function (): void {
         $store->setCurrentCurrencyCode('EUR');
 
         expect($this->cookie->writes)->toContain(Mage_Core_Model_Store::COOKIE_CURRENCY);
+    });
+
+    test('switching back to the default currency clears the cookie', function (): void {
+        requireUsdBaseStore();
+        $store = setStoreDisplayCurrency('USD', 'USD,EUR');
+
+        if ((float) $store->getBaseCurrency()->getRate('EUR') <= 0) {
+            test()->markTestSkipped('USD to EUR rate not available');
+        }
+
+        $store->setCurrentCurrencyCode('EUR');
+        $store->setCurrentCurrencyCode('USD');
+
+        // Otherwise a year-long cookie keeps advertising a currency the shopper
+        // has already switched away from.
+        expect($this->cookie->deletes)->toContain(Mage_Core_Model_Store::COOKIE_CURRENCY);
     });
 
 });

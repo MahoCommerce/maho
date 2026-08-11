@@ -698,8 +698,11 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
             // memoised the old one, and admin order creation sets the currency
             // and uses the same store instance immediately afterwards.
             $this->unsetData('current_currency');
-            if ($code == $this->getDefaultCurrency()) {
-                Mage::app()->getCookie()->delete(self::COOKIE_CURRENCY, $code);
+            // Compare against the code: getDefaultCurrency() is a Currency
+            // object, so the old string-to-object test was always false and
+            // this branch never ran. delete()'s second argument is the path.
+            if ($code === $this->getDefaultCurrencyCode()) {
+                Mage::app()->getCookie()->delete(self::COOKIE_CURRENCY);
             } else {
                 Mage::app()->getCookie()->set(self::COOKIE_CURRENCY, $code, true);
             }
