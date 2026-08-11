@@ -779,7 +779,6 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
 
             if (!$baseCurrency->getRate($currency)) {
                 $currency = $baseCurrency;
-                $this->setCurrentCurrencyCode($baseCurrency->getCode());
             }
 
             $this->setData('current_currency', $currency);
