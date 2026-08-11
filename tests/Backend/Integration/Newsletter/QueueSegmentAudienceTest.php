@@ -10,8 +10,9 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 const SEGMENT_AUDIENCE_PREFIX = 'queue-segment-test';
+const SEGMENT_AUDIENCE_FOREIGN_CODE = 'queue_segment_test';
 
-function segmentAudienceCampaign(array $segmentIds): Mage_Newsletter_Model_Queue
+function segmentAudienceCampaign(array $segmentIds, array $storeIds = [1]): Mage_Newsletter_Model_Queue
 {
     /** @var Mage_Newsletter_Model_Template $template */
     $template = Mage::getModel('newsletter/template');
@@ -36,7 +37,7 @@ function segmentAudienceCampaign(array $segmentIds): Mage_Newsletter_Model_Queue
         ->setQueueStartAt(Mage::app()->getLocale()->formatDateForDb('now'))
         ->save();
 
-    $queue->setStores([1])->save();
+    $queue->setStores($storeIds)->save();
 
     return $queue;
 }
@@ -55,11 +56,11 @@ function segmentAudienceCustomer(): Mage_Customer_Model_Customer
     return $customer;
 }
 
-function segmentAudienceSubscriber(int $customerId = 0): Mage_Newsletter_Model_Subscriber
+function segmentAudienceSubscriber(int $customerId = 0, int $storeId = 1): Mage_Newsletter_Model_Subscriber
 {
     /** @var Mage_Newsletter_Model_Subscriber $subscriber */
     $subscriber = Mage::getModel('newsletter/subscriber');
-    $subscriber->setStoreId(1)
+    $subscriber->setStoreId($storeId)
         ->setCustomerId($customerId)
         ->setSubscriberEmail(SEGMENT_AUDIENCE_PREFIX . '-' . uniqid() . '@example.com')
         ->setSubscriberStatus(Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED)
@@ -82,6 +83,65 @@ function segmentAudienceSegment(array $customerIds, string $websiteIds = '1'): M
     Mage::getResourceModel('customersegmentation/segment')->updateCustomerMembership($segment, $customerIds);
 
     return $segment;
+}
+
+/** A store view in a second website, so a subscription can sit outside a segment's website. */
+function segmentAudienceForeignStore(): Mage_Core_Model_Store
+{
+    /** @var Mage_Core_Model_Store $store */
+    $store = Mage::getModel('core/store')->load(SEGMENT_AUDIENCE_FOREIGN_CODE, 'code');
+    if ($store->getId()) {
+        return $store;
+    }
+
+    $website = Mage::getModel('core/website')
+        ->setCode(SEGMENT_AUDIENCE_FOREIGN_CODE)
+        ->setName('Queue Segment Website')
+        ->setSortOrder(99)
+        ->save();
+
+    $group = Mage::getModel('core/store_group')
+        ->setWebsiteId((int) $website->getId())
+        ->setName(SEGMENT_AUDIENCE_FOREIGN_CODE)
+        ->setRootCategoryId((int) Mage::app()->getStore(1)->getRootCategoryId())
+        ->save();
+
+    $store = Mage::getModel('core/store')
+        ->setCode(SEGMENT_AUDIENCE_FOREIGN_CODE)
+        ->setWebsiteId((int) $website->getId())
+        ->setGroupId((int) $group->getId())
+        ->setName('Queue Segment Store')
+        ->setIsActive(1)
+        ->setSortOrder(99)
+        ->save();
+
+    $website->setDefaultGroupId((int) $group->getId())->save();
+    $group->setDefaultStoreId((int) $store->getId())->save();
+    Mage::app()->reinitStores();
+
+    return $store;
+}
+
+function segmentAudienceDeleteForeignStore(): void
+{
+    $deleted = false;
+
+    Mage::register('isSecureArea', true);
+    try {
+        foreach (['core/store' => 'code', 'core/store_group' => 'name', 'core/website' => 'code'] as $model => $field) {
+            $entity = Mage::getModel($model)->load(SEGMENT_AUDIENCE_FOREIGN_CODE, $field);
+            if ($entity->getId()) {
+                $entity->delete();
+                $deleted = true;
+            }
+        }
+    } finally {
+        Mage::unregister('isSecureArea');
+    }
+
+    if ($deleted) {
+        Mage::app()->reinitStores();
+    }
 }
 
 function segmentAudienceLinkedIds(int $queueId): array
@@ -119,6 +179,8 @@ afterEach(function () {
     foreach ($customers as $customer) {
         $customer->delete();
     }
+
+    segmentAudienceDeleteForeignStore();
 });
 
 it('links only the subscribers belonging to the campaign segments', function () {
@@ -184,4 +246,42 @@ it('names the segments that cover none of the selected stores', function () {
         ->getSegmentsOutsideStores([(int) $covering->getId(), (int) $foreign->getId()], [1]);
 
     expect($outside)->toBe([$foreign->getName()]);
+});
+
+it('links a segment member only through a subscription in the segment website', function () {
+    $foreignStore = segmentAudienceForeignStore();
+
+    $home = segmentAudienceCustomer();
+    $away = segmentAudienceCustomer();
+
+    $homeSubscriber = segmentAudienceSubscriber((int) $home->getId());
+    $awaySubscriber = segmentAudienceSubscriber((int) $away->getId(), (int) $foreignStore->getId());
+
+    $segment = segmentAudienceSegment([(int) $home->getId(), (int) $away->getId()]);
+    $queue = segmentAudienceCampaign([(int) $segment->getId()], [1, (int) $foreignStore->getId()]);
+
+    $queue->getResource()->materializeRecipients($queue);
+
+    $linked = segmentAudienceLinkedIds((int) $queue->getId());
+    expect($linked)->toContain((int) $homeSubscriber->getId());
+    expect($linked)->not->toContain((int) $awaySubscriber->getId());
+});
+
+it('names the segment ids that no longer exist', function () {
+    $segment = segmentAudienceSegment([]);
+    $segmentId = (int) $segment->getId();
+    $segment->delete();
+
+    $unknown = Mage::helper('customersegmentation')->getUnknownSegmentIds([$segmentId]);
+
+    expect($unknown)->toBe([$segmentId]);
+});
+
+it('treats a segment naming no website as covering every store', function () {
+    $everywhere = segmentAudienceSegment([], '');
+
+    $outside = Mage::helper('customersegmentation')
+        ->getSegmentsOutsideStores([(int) $everywhere->getId()], [1]);
+
+    expect($outside)->toBe([]);
 });

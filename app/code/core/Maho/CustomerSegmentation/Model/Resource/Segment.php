@@ -154,12 +154,23 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
         );
     }
 
+    /**
+     * Membership is per website, so the subscription has to be in the same
+     * website as the membership row; a campaign spanning two websites would
+     * otherwise mail a website-1 member through a website-2 subscription.
+     */
     protected function getSegmentMembershipSelect(string $subscriberAlias): Maho\Db\Select
     {
         return $this->_getReadAdapter()->select()
             ->from(
                 ['segment_customer' => $this->getTable('customersegmentation/segment_customer')],
                 [new Maho\Db\Expr('1')],
+            )
+            ->joinInner(
+                ['segment_store' => $this->getTable('core/store')],
+                "segment_store.store_id = {$subscriberAlias}.store_id"
+                    . ' AND segment_store.website_id = segment_customer.website_id',
+                [],
             )
             ->where("segment_customer.customer_id = {$subscriberAlias}.customer_id");
     }

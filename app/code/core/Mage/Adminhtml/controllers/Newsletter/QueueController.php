@@ -253,10 +253,19 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
 
                 // Save customer segment assignments if CustomerSegmentation module is enabled
                 if (Mage::helper('core')->isModuleEnabled('Maho_CustomerSegmentation')) {
-                    $segmentIds = Mage::helper('customersegmentation')
+                    $segmentHelper = Mage::helper('customersegmentation');
+                    $segmentIds = $segmentHelper
                         ->getQueueSegmentIds($this->getRequest()->getParam('customer_segments', []));
 
-                    $outside = Mage::helper('customersegmentation')->getSegmentsOutsideStores($segmentIds, $stores);
+                    $unknown = $segmentHelper->getUnknownSegmentIds($segmentIds);
+                    if ($unknown !== []) {
+                        Mage::throwException($this->__(
+                            'These customer segments no longer exist: %s.',
+                            implode(', ', $unknown),
+                        ));
+                    }
+
+                    $outside = $segmentHelper->getSegmentsOutsideStores($segmentIds, $stores);
                     if ($outside !== []) {
                         Mage::throwException($this->__(
                             'These customer segments cover none of the selected stores: %s.',
