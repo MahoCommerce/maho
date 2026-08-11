@@ -501,6 +501,11 @@ function resetCurrencyState(): void
         }
     }
 
+    // The admin order-create session is a separate namespace and carries a
+    // currency of its own; left behind it gives a later test an unexplained
+    // order currency and store.
+    unset($_SESSION['adminhtml_quote']);
+
     (new ReflectionProperty(Mage_Directory_Model_Resource_Currency::class, '_rateCache'))->setValue(null, null);
 }
 
@@ -512,7 +517,7 @@ function setStoreDisplayCurrency(string $default, string $allowed, int $storeId 
     resetCurrencyState();
     $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_ALLOW, $allowed);
     $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT, $default);
-    foreach (['available_currency_codes', 'disallowed_base_currency_code_index', 'current_currency', 'current_currency_code', 'default_currency', 'base_currency'] as $memo) {
+    foreach (['available_currency_codes', 'disallowed_base_currency_code_index', 'current_currency', 'requested_currency_code', 'default_currency', 'base_currency'] as $memo) {
         $store->unsetData($memo);
     }
 

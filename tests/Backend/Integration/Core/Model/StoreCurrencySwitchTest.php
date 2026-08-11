@@ -41,4 +41,22 @@ describe('Store currency switch', function (): void {
         expect((float) $store->convertPrice(10.0, false))->toEqualWithDelta(10.0 * $rate, 0.011);
     });
 
+    test('a switch also refreshes the price filter, not just the currency', function (): void {
+        requireUsdBaseStore();
+        $store = setStoreDisplayCurrency('USD', 'USD,EUR');
+
+        $rate = (float) $store->getBaseCurrency()->getRate('EUR');
+        if ($rate <= 0 || $rate == 1.0) {
+            test()->markTestSkipped('USD to EUR rate not available or trivially 1');
+        }
+
+        // getPriceFilter() memoises a filter built from the currency and its
+        // rate, so it has to be dropped alongside the currency itself.
+        $before = $store->getPriceFilter()->filter(10.0);
+        $store->setCurrentCurrencyCode('EUR');
+        $after = $store->getPriceFilter()->filter(10.0);
+
+        expect($after)->not->toBe($before);
+    });
+
 });
