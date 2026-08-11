@@ -257,15 +257,15 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
                     $segmentIds = $segmentHelper
                         ->getQueueSegmentIds($this->getRequest()->getParam('customer_segments', []));
 
-                    $unknown = $segmentHelper->getUnknownSegmentIds($segmentIds);
-                    if ($unknown !== []) {
+                    $issues = $segmentHelper->getQueueSegmentIssues($segmentIds, $stores);
+                    if ($issues['unknown'] !== []) {
                         Mage::throwException($this->__(
                             'These customer segments no longer exist: %s.',
-                            implode(', ', $unknown),
+                            implode(', ', $issues['unknown']),
                         ));
                     }
 
-                    $outside = $segmentHelper->getSegmentsOutsideStores($segmentIds, $stores);
+                    $outside = $issues['outside'];
                     if ($outside !== []) {
                         Mage::throwException($this->__(
                             'These customer segments cover none of the selected stores: %s.',

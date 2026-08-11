@@ -217,6 +217,27 @@ it('links every store subscriber when the campaign names no segment', function (
     expect($linked)->toContain((int) $guestSubscriber->getId());
 });
 
+it('links nobody when the campaign names segments that resolve to none', function () {
+    $member = segmentAudienceCustomer();
+    segmentAudienceSubscriber((int) $member->getId());
+    segmentAudienceSubscriber();
+
+    $queue = segmentAudienceCampaign([]);
+    $queue->setCustomerSegmentIds('0')->save();
+
+    $queue->getResource()->materializeRecipients($queue);
+
+    expect(segmentAudienceLinkedIds((int) $queue->getId()))->toBe([]);
+
+    $displayed = (int) Mage::getResourceModel('newsletter/queue_collection')
+        ->addSubscribersInfo()
+        ->addFieldToFilter('main_table.queue_id', $queue->getId())
+        ->getFirstItem()
+        ->getSubscribersTotal();
+
+    expect($displayed)->toBe(0);
+});
+
 it('counts the segmented audience in the grid, column and filter alike', function () {
     $member = segmentAudienceCustomer();
     segmentAudienceSubscriber((int) $member->getId());
@@ -275,6 +296,23 @@ it('names the segment ids that no longer exist', function () {
     $unknown = Mage::helper('customersegmentation')->getUnknownSegmentIds([$segmentId]);
 
     expect($unknown)->toBe([$segmentId]);
+});
+
+it('reports the unknown and the outside segments from one lookup', function () {
+    $covering = segmentAudienceSegment([], '1');
+    $foreign = segmentAudienceSegment([], '9999');
+
+    $gone = segmentAudienceSegment([]);
+    $goneId = (int) $gone->getId();
+    $gone->delete();
+
+    $issues = Mage::helper('customersegmentation')->getQueueSegmentIssues(
+        [(int) $covering->getId(), (int) $foreign->getId(), $goneId],
+        [1],
+    );
+
+    expect($issues['unknown'])->toBe([$goneId]);
+    expect($issues['outside'])->toBe([$foreign->getName()]);
 });
 
 it('treats a segment naming no website as covering every store', function () {

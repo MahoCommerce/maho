@@ -203,15 +203,31 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit_Form extends Mage_Adminhtml_Blo
         $collection = Mage::getResourceModel('customersegmentation/segment_collection')
             ->setOrder('name', 'ASC');
 
-        $options = [];
-        foreach ($collection as $segment) {
-            if (!$segment->getIsActive() && !in_array((int) $segment->getId(), $selectedIds, true)) {
-                continue;
-            }
+        if ($selectedIds === []) {
+            $collection->addFieldToFilter('is_active', 1);
+        } else {
+            $collection->addFieldToFilter(
+                ['is_active', 'segment_id'],
+                [['eq' => 1], ['in' => $selectedIds]],
+            );
+        }
 
+        $options = [];
+        $known = [];
+        foreach ($collection as $segment) {
+            $known[] = (int) $segment->getId();
             $options[] = [
                 'value' => $segment->getId(),
                 'label' => $segment->getName(),
+            ];
+        }
+
+        // A deleted segment stays an option, so saving names it instead of the form
+        // dropping it silently, and deselecting it stays the admin's explicit choice.
+        foreach (array_diff($selectedIds, $known) as $deletedId) {
+            $options[] = [
+                'value' => $deletedId,
+                'label' => Mage::helper('newsletter')->__('Segment #%s (deleted)', $deletedId),
             ];
         }
 

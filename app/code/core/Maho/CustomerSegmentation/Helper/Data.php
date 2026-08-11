@@ -26,25 +26,16 @@ class Maho_CustomerSegmentation_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Ids that no longer resolve to a segment, deleted between form and save.
+     * Both things a campaign's segments can be wrong about, from one load of the
+     * same rows: ids deleted between form and save, and segments covering none of
+     * the selected stores.
+     *
+     * @return array{unknown: int[], outside: string[]}
      */
-    public function getUnknownSegmentIds(array $segmentIds): array
+    public function getQueueSegmentIssues(array $segmentIds, array $storeIds): array
     {
         if ($segmentIds === []) {
-            return [];
-        }
-
-        $known = array_map('intval', Mage::getResourceModel('customersegmentation/segment_collection')
-            ->addFieldToFilter('segment_id', ['in' => $segmentIds])
-            ->getAllIds());
-
-        return array_values(array_diff($segmentIds, $known));
-    }
-
-    public function getSegmentsOutsideStores(array $segmentIds, array $storeIds): array
-    {
-        if ($segmentIds === [] || $storeIds === []) {
-            return [];
+            return ['unknown' => [], 'outside' => []];
         }
 
         $websiteIds = [];
@@ -55,15 +46,40 @@ class Maho_CustomerSegmentation_Helper_Data extends Mage_Core_Helper_Abstract
         $collection = Mage::getResourceModel('customersegmentation/segment_collection')
             ->addFieldToFilter('segment_id', ['in' => $segmentIds]);
 
+        $known = [];
         $outside = [];
         foreach ($collection as $segment) {
+            $known[] = (int) $segment->getId();
+
             // No website named means every website, the way the segment itself matches customers
             $segmentWebsiteIds = array_map('intval', $segment->getWebsiteIdsArray());
-            if ($segmentWebsiteIds !== [] && array_intersect($segmentWebsiteIds, $websiteIds) === []) {
+            if ($websiteIds !== [] && $segmentWebsiteIds !== []
+                && array_intersect($segmentWebsiteIds, $websiteIds) === []
+            ) {
                 $outside[] = $segment->getName();
             }
         }
 
-        return $outside;
+        return [
+            'unknown' => array_values(array_diff($segmentIds, $known)),
+            'outside' => $outside,
+        ];
+    }
+
+    /**
+     * Ids that no longer resolve to a segment, deleted between form and save.
+     */
+    public function getUnknownSegmentIds(array $segmentIds): array
+    {
+        return $this->getQueueSegmentIssues($segmentIds, [])['unknown'];
+    }
+
+    public function getSegmentsOutsideStores(array $segmentIds, array $storeIds): array
+    {
+        if ($storeIds === []) {
+            return [];
+        }
+
+        return $this->getQueueSegmentIssues($segmentIds, $storeIds)['outside'];
     }
 }
