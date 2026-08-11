@@ -24,6 +24,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient
     private string $baseUrl;
     private bool $debugMode;
     private string $rateEndpoint;
+    private \Symfony\Contracts\HttpClient\HttpClientInterface $client;
 
     public static function getBaseUrl(bool $sandbox): string
     {
@@ -42,6 +43,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient
         $this->rateEndpoint = $rateEndpoint === Mage_Usa_Model_Shipping_Carrier_Fedex::RATE_ENDPOINT_COMPREHENSIVE
             ? self::ENDPOINT_RATES_COMPREHENSIVE
             : self::ENDPOINT_RATES;
+        $this->client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 30]);
     }
 
     public function getRateEndpoint(): string
@@ -106,20 +108,16 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient
      */
     private function makeRequest(string $method, string $endpoint, array $data): array
     {
-        $client = \Symfony\Component\HttpClient\HttpClient::create([
-            'timeout' => 30,
-        ]);
-
         $url = $this->baseUrl . $endpoint;
         $debugData = ['request' => ['method' => $method, 'url' => $url, 'data' => $data]];
 
         try {
-            $response = $this->send($client, $method, $url, $data);
+            $response = $this->send($method, $url, $data);
 
             // FedEx revokes outstanding tokens on credential rotation; retry once fresh
             if ($response->getStatusCode() === 401) {
                 $this->oauthClient->invalidateToken();
-                $response = $this->send($client, $method, $url, $data);
+                $response = $this->send($method, $url, $data);
             }
 
             // getContent(false) keeps 4xx/5xx bodies readable: FedEx puts the actionable
@@ -153,12 +151,11 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient
     }
 
     private function send(
-        \Symfony\Contracts\HttpClient\HttpClientInterface $client,
         string $method,
         string $url,
         array $data,
     ): \Symfony\Contracts\HttpClient\ResponseInterface {
-        return $client->request($method, $url, [
+        return $this->client->request($method, $url, [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->oauthClient->getAccessToken(),
                 'Content-Type' => 'application/json',

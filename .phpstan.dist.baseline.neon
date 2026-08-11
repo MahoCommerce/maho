@@ -21040,12 +21040,6 @@ parameters:
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
 
 		-
-			rawMessage: 'Method Mage_Usa_Model_Shipping_Carrier_Fedex::setTrackingReqeust() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Fedex.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Shipping_Model_Rate_Result_Method::setMethodTitle() expects string, array|bool given.'
 			identifier: argument.type
 			count: 1

@@ -88,11 +88,6 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      */
     protected $_customizableContainerTypes = ['YOUR_PACKAGING'];
 
-    /**
-     * Raw tracking request data
-     */
-    protected ?\Maho\DataObject $_rawTrackingRequest = null;
-
     protected ?Mage_Usa_Model_Shipping_Carrier_Fedex_RestClient $_restClient = null;
 
     /**
@@ -335,7 +330,6 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
         $ratesRequest = $this->_formRateRequest($purpose);
         $requestString = serialize($ratesRequest);
         $cached = $this->_getCachedQuotes($requestString);
-        $debugData = ['request' => $ratesRequest];
 
         if ($cached === null) {
             $response = $this->_getRestClient()->getRates($ratesRequest);
@@ -348,9 +342,6 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                 $response = [];
             }
         }
-
-        $debugData['result'] = $response;
-        $this->_debug($debugData);
 
         return $response;
     }
@@ -728,8 +719,6 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      */
     public function getTracking($trackings)
     {
-        $this->setTrackingReqeust();
-
         if (!is_array($trackings)) {
             $trackings = [$trackings];
         }
@@ -742,26 +731,12 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     }
 
     /**
-     * Set tracking request
-     */
-    protected function setTrackingReqeust()
-    {
-        $r = new \Maho\DataObject();
-
-        $account = $this->getConfigData('account');
-        $r->setAccount($account);
-
-        $this->_rawTrackingRequest = $r;
-    }
-
-    /**
      * Send request for tracking
      */
     protected function _doTrackingRequest(string $tracking): void
     {
         $requestString = serialize(['track' => $tracking]);
         $cached = $this->_getCachedQuotes($requestString);
-        $debugData = ['request' => ['trackingNumber' => $tracking]];
 
         if ($cached === null) {
             $response = $this->_getRestClient()->track($tracking);
@@ -774,9 +749,6 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                 $response = [];
             }
         }
-
-        $debugData['result'] = $response;
-        $this->_debug($debugData);
 
         $this->_parseTrackingResponse($tracking, $response);
     }

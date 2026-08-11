@@ -47,6 +47,6 @@ final class FedexSandbox
 
     public static function isConfigured(): bool
     {
-        return self::clientId() !== '' && self::clientSecret() !== '';
+        return TestEnv::has('FEDEX_SANDBOX_CLIENT_ID', 'FEDEX_SANDBOX_CLIENT_SECRET');
     }
 }
