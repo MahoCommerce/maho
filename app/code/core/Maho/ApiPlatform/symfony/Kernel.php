@@ -520,12 +520,12 @@ class Kernel extends BaseKernel
     {
         $store = \Mage::app()->getDefaultStoreView();
         $name = (string) \Mage::getStoreConfig('general/store_information/name') ?: (string) $store?->getFrontendName();
-        $currency = (string) $store?->getDefaultCurrencyCode();
+        $currency = (string) $store?->getBaseCurrencyCode();
 
         return implode("\n", array_filter([
             'Maho Commerce store data and operations: catalog, inventory, pricing, orders and customers.',
             $name === '' ? null : sprintf('Store: %s.', $name),
-            $currency === '' ? null : sprintf('Prices and totals are in %s unless a tool says otherwise.', $currency),
+            $currency === '' ? null : sprintf('Amounts are in %s unless a response says otherwise; read the "currency" field of any response that carries one.', $currency),
             'IDs are Maho entity IDs, not SKUs or increment IDs; look an entity up by its identifying field before writing to it.',
             'Multi-store installs select a store view by its store code, never by name.',
             'List tools are paginated and return one page at a time; ask for the next page rather than assuming the first is complete.',
