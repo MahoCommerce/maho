@@ -693,6 +693,11 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         $code = strtoupper($code);
         if (in_array($code, $this->getAvailableCurrencyCodes())) {
             $this->_getSession()->setCurrencyCode($code);
+            // Drop the resolved currency, or the switch does not take effect
+            // until the next request: anything that already converted a price
+            // memoised the old one, and admin order creation sets the currency
+            // and uses the same store instance immediately afterwards.
+            $this->unsetData('current_currency');
             if ($code == $this->getDefaultCurrency()) {
                 Mage::app()->getCookie()->delete(self::COOKIE_CURRENCY, $code);
             } else {
