@@ -525,7 +525,7 @@ class Kernel extends BaseKernel
         return implode("\n", array_filter([
             'Maho Commerce store data and operations: catalog, inventory, pricing, orders and customers.',
             $name === '' ? null : sprintf('Store: %s.', $name),
-            $currency === '' ? null : sprintf('Amounts are in %s, the default website base currency, unless a response says otherwise; read the "currency" field of any response that carries one. Other websites may have another base currency.', $currency),
+            $currency === '' ? null : sprintf('Read the "currency" field of any response that carries one: cart and order amounts are in the currency named there, which is not always %1$s. Where no currency is given, amounts are in %1$s, the base currency of the default website; other websites may differ.', $currency),
             'IDs are Maho entity IDs, not SKUs or increment IDs; look an entity up by its identifying field before writing to it.',
             'Multi-store installs select a store view by its store code, never by name.',
             'List tools are paginated and return one page at a time; ask for the next page rather than assuming the first is complete.',
