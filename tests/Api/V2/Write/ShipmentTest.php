@@ -89,6 +89,52 @@ describe('POST /api/rest/v2/orders/{orderId}/shipments', function (): void {
         expect($second['status'])->toBe(400);
     });
 
+    it('ships only the requested qty for a partial shipment', function (): void {
+        $orderId = seedShippableOrder(2);
+
+        if (!$orderId) {
+            $this->markTestSkipped('Could not seed a shippable order in this store');
+        }
+
+        $itemId = null;
+        foreach (Mage::getModel('sales/order')->load($orderId)->getAllVisibleItems() as $item) {
+            $itemId = (int) $item->getId();
+            break;
+        }
+        expect($itemId)->not->toBeNull();
+
+        $partial = apiPost("/api/rest/v2/orders/{$orderId}/shipments", [
+            'items' => [['orderItemId' => $itemId, 'qty' => 1]],
+        ], adminToken());
+
+        expect($partial['status'])->toBeSuccessful();
+        expect((float) $partial['json']['totalQty'])->toBe(1.0);
+
+        $order = Mage::getModel('sales/order')->load($orderId);
+        expect((float) $order->getItemById($itemId)->getQtyShipped())->toBe(1.0);
+        expect($order->canShip())->toBeTrue();
+
+        $rest = apiPost("/api/rest/v2/orders/{$orderId}/shipments", [], adminToken());
+
+        expect($rest['status'])->toBeSuccessful();
+
+        $order = Mage::getModel('sales/order')->load($orderId);
+        expect((float) $order->getItemById($itemId)->getQtyShipped())->toBe(2.0);
+        expect($order->canShip())->toBeFalse();
+    });
+
+    it('documents the request body in the OpenAPI spec', function (): void {
+        $spec = apiGet('/api/docs.json');
+
+        expect($spec['status'])->toBe(200);
+
+        $schema = $spec['json']['paths']['/api/rest/v2/orders/{orderId}/shipments']['post']
+            ['requestBody']['content']['application/json']['schema']['properties'] ?? null;
+
+        expect($schema)->toBeArray();
+        expect(array_keys($schema))->toContain('items', 'tracks', 'comment', 'notifyCustomer');
+    });
+
     it('creates a shipment with tracking info', function (): void {
         $orderId = findShippableOrderId();
 
