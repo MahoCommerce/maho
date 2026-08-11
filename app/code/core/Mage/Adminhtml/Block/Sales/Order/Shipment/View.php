@@ -123,7 +123,7 @@ class Mage_Adminhtml_Block_Sales_Order_Shipment_View extends Mage_Adminhtml_Bloc
 
     public function getCancelUrl(): string
     {
-        return $this->getUrlSecure('*/*/cancel', ['shipment_id' => $this->getShipment()->getId()]);
+        return $this->getUrl('*/*/cancel', ['shipment_id' => $this->getShipment()->getId()]);
     }
 
     /**

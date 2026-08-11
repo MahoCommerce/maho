@@ -139,7 +139,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_View extends Mage_Adminhtml_Bl
      */
     public function getVoidUrl()
     {
-        return $this->getUrlSecure('*/*/void', ['creditmemo_id' => $this->getCreditmemo()->getId()]);
+        return $this->getUrl('*/*/void', ['creditmemo_id' => $this->getCreditmemo()->getId()]);
     }
 
     /**
@@ -149,7 +149,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_View extends Mage_Adminhtml_Bl
      */
     public function getCancelUrl()
     {
-        return $this->getUrlSecure('*/*/cancel', ['creditmemo_id' => $this->getCreditmemo()->getId()]);
+        return $this->getUrl('*/*/cancel', ['creditmemo_id' => $this->getCreditmemo()->getId()]);
     }
 
     /**

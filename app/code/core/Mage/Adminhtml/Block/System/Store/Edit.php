@@ -89,7 +89,7 @@ class Mage_Adminhtml_Block_System_Store_Edit extends Mage_Adminhtml_Block_Widget
         if ($backupAvailable) {
             $deleteUrl   = $this->getUrl('*/*/delete' . $storeType, ['item_id' => Mage::registry('store_data')->getId()]);
         } else {
-            $deleteUrl   = $this->getUrlSecure(
+            $deleteUrl   = $this->getUrl(
                 '*/*/delete' . $storeType . 'Post',
                 ['item_id' => Mage::registry('store_data')->getId()],
             );

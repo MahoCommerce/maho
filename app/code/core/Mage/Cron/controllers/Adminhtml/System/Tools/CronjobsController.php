@@ -12,13 +12,6 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
 {
     public const ADMIN_RESOURCE = 'system/tools/cronjobs';
 
-    #[\Override]
-    public function preDispatch(): self
-    {
-        $this->_setForcedFormKeyActions(['clearHistory', 'massDisable', 'massEnable', 'run', 'toggle']);
-        return parent::preDispatch();
-    }
-
     #[Maho\Config\Route('/admin/system_tools_cronjobs/index')]
     public function indexAction(): void
     {

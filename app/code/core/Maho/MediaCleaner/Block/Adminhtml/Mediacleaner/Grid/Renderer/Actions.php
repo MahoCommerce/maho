@@ -23,7 +23,7 @@ class Maho_MediaCleaner_Block_Adminhtml_Mediacleaner_Grid_Renderer_Actions exten
 
         $links[] = sprintf(
             '<a href="%s" onclick="return confirm(\'%s\')">%s</a>',
-            $this->getUrlSecure('*/*/delete', ['image_id' => $row->getId()]),
+            $this->getUrl('*/*/delete', ['image_id' => $row->getId()]),
             $this->jsQuoteEscape($this->__('Are you sure?')),
             $this->__('Delete'),
         );

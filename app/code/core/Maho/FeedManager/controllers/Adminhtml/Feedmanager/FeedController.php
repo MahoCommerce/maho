@@ -12,27 +12,8 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 {
     public const ADMIN_RESOURCE = 'catalog/feedmanager/feeds';
 
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions([
-            'delete',
-            'save',
-            'duplicate',
-            'generateInit',
-            'generateBatch',
-            'generateFinalize',
-            'generateCancel',
-            'reset',
-            'forceReset',
-            'massGenerate',
-            'massBatchGenerate',
-            'massStatus',
-            'massDelete',
-            'upload',
-        ]);
-        return parent::preDispatch();
-    }
+    /** Render-only form target of the keyless (_nosecret) links in failure emails and inbox notifications */
+    protected $_publicActions = ['edit'];
 
     protected function _initAction(): self
     {
@@ -167,7 +148,11 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 
             // Check if we should generate after save
             if ($this->getRequest()->getParam('generate_after_save')) {
-                $this->_redirect('*/*/edit', ['id' => $feed->getId(), 'generate' => '1']);
+                $this->_getSession()->setData(
+                    Maho_FeedManager_Block_Adminhtml_Feed_Edit::AUTO_GENERATE_FLAG,
+                    ['id' => (int) $feed->getId(), 'ts' => time()],
+                );
+                $this->_redirect('*/*/edit', ['id' => $feed->getId()]);
                 return;
             }
 
@@ -367,7 +352,11 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             return;
         }
 
-        $this->_redirect('*/*/edit', ['id' => $id, 'generate' => '1']);
+        $this->_getSession()->setData(
+            Maho_FeedManager_Block_Adminhtml_Feed_Edit::AUTO_GENERATE_FLAG,
+            ['id' => $id, 'ts' => time()],
+        );
+        $this->_redirect('*/*/edit', ['id' => $id]);
     }
 
     /**

@@ -17,18 +17,6 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
     public const ADMIN_RESOURCE = 'system/store';
 
     /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['deleteWebsitePost', 'deleteGroupPost', 'deleteStorePost']);
-        return parent::preDispatch();
-    }
-
-    /**
      * Init actions
      *
      * @return $this

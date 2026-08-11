@@ -12,13 +12,6 @@ class Maho_ContentVersion_Adminhtml_ContentversionController extends Mage_Adminh
 {
     public const ADMIN_RESOURCE = 'cms/contentversion';
 
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['restore']);
-        return parent::preDispatch();
-    }
-
     #[Maho\Config\Route('/admin/contentversion/restore')]
     public function restoreAction(): void
     {

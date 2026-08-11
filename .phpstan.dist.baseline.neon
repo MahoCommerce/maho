@@ -3958,12 +3958,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Controller/Action.php
 
 		-
-			rawMessage: 'Method Mage_Adminhtml_Controller_Action::_setForcedFormKeyActions() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Controller/Action.php
-
-		-
 			rawMessage: Property Mage_Adminhtml_Controller_Action::$_usedModuleName has no type specified.
 			identifier: missingType.property
 			count: 1

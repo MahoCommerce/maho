@@ -7,25 +7,14 @@
 
 declare(strict_types=1);
 
-use Tests\Browser\MahoServer;
 use Tests\MahoBrowserTestCase;
 
 uses(MahoBrowserTestCase::class)->group('browser');
 
-/**
- * Secret keys in admin urls are turned off for the run so the test can address
- * adminhtml/process/list directly; that also puts the reindex endpoints on the forced form key
- * path, which is the protection this screen relies on in that configuration.
- */
-
 const REINDEX_ADMIN_USER = 'reindex-dialog-admin';
 const REINDEX_ADMIN_PASSWORD = 'Password123!';
-const REINDEX_SECRET_KEY_PATH = 'admin/security/use_form_key';
 
 beforeEach(function () {
-    Mage::getModel('core/config')->saveConfig(REINDEX_SECRET_KEY_PATH, 0);
-    Mage::app()->cleanCache();
-
     createReindexAdmin();
 });
 
@@ -33,11 +22,6 @@ beforeEach(function () {
 // Mage::reset(), so there is no app left to clean up through
 afterEach(function () {
     deleteReindexAdmin();
-
-    // Drop the override rather than pin a value
-    Mage::getModel('core/config')->deleteConfig(REINDEX_SECRET_KEY_PATH);
-    Mage::app()->getStore()->resetConfig();
-    Mage::app()->cleanCache();
 });
 
 function deleteReindexAdmin(): void
@@ -73,15 +57,12 @@ function createReindexAdmin(): void
 
 function loginToIndexManagement(): object
 {
-    $page = visit(MahoServer::baseUrl() . '/admin')
-        ->fill('#username', REINDEX_ADMIN_USER)
-        ->fill('#login', REINDEX_ADMIN_PASSWORD)
-        ->click('#step1 input[type="submit"]');
-
-    waitForPageLoad($page, '.nav-bar:visible');
-    $page->navigate(MahoServer::baseUrl() . '/admin/process/list');
-
-    return waitForPageLoad($page, '#indexer_processes_grid_table:visible');
+    return adminLoginAndVisit(
+        REINDEX_ADMIN_USER,
+        REINDEX_ADMIN_PASSWORD,
+        '/admin/process/list',
+        '#indexer_processes_grid_table:visible',
+    );
 }
 
 it('reports a single index through the progress dialog', function () {
