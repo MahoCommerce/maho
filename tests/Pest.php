@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Tests\Browser\MahoServer;
 use Tests\Helpers\ApiV2Helper;
 
 // Autoload module API classes (Mage\Foo\Api\Bar, Maho\Foo\Api\Bar) in tests.
@@ -432,6 +433,56 @@ function waitForPageLoad(object $page, string $selector): object
     }
 
     return $page;
+}
+
+/**
+ * Turn an admin path into one carrying the secret key its GET validation expects.
+ *
+ * Admin urls always validate a per-action secret key derived from the session's form key,
+ * which the logged-in admin page exposes as window.FORM_KEY. Minting the key from the page
+ * lets a test navigate straight to any admin action, which no plain deep link can do.
+ *
+ * $page must already be on a logged-in admin page. $path is "/frontName/controller/action"
+ * with optional extra "/param/value" segments and query string; the controller and action
+ * default to "index" exactly like the router, and the key segment is appended after the
+ * params, matching the shape the url generator emits.
+ */
+function adminPathWithSecretKey(object $page, string $path): string
+{
+    $formKey = (string) $page->script('window.FORM_KEY');
+    if ($formKey === '') {
+        throw new RuntimeException('window.FORM_KEY is empty; is the page a logged-in admin page?');
+    }
+
+    [$pathPart, $query] = array_pad(explode('?', $path, 2), 2, null);
+    $segments = explode('/', trim($pathPart, '/'));
+    $front = $segments[0];
+    $controller = $segments[1] ?? 'index';
+    $action = $segments[2] ?? 'index';
+    $extra = array_slice($segments, 3);
+
+    $secretKey = Mage::getSingleton('adminhtml/url')->getSecretKey($controller, $action, $formKey);
+
+    $keySegments = [Mage_Adminhtml_Model_Url::SECRET_KEY_PARAM_NAME, $secretKey];
+    $path = '/' . implode('/', array_merge([$front, $controller, $action], $extra, $keySegments)) . '/';
+    return $path . ($query !== null ? '?' . $query : '');
+}
+
+/**
+ * Log in to the admin and navigate straight to $path with a minted secret key, returning
+ * the page once $readySelector is present.
+ */
+function adminLoginAndVisit(string $username, string $password, string $path, string $readySelector): object
+{
+    $page = visit(MahoServer::baseUrl() . '/admin')
+        ->fill('#username', $username)
+        ->fill('#login', $password)
+        ->click('#step1 input[type="submit"]');
+
+    waitForPageLoad($page, '.nav-bar:visible');
+    $page->navigate(MahoServer::baseUrl() . adminPathWithSecretKey($page, $path));
+
+    return waitForPageLoad($page, $readySelector);
 }
 
 /*

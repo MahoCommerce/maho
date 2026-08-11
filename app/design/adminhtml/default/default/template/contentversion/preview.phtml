@@ -17,7 +17,7 @@ $typeLabels = [
     'cms_block' => $this->__('CMS Block'),
     'blog_post' => $this->__('Blog Post'),
 ];
-$restoreUrl = $this->getUrlSecure('adminhtml/contentversion/restore', ['version_id' => $versionId]);
+$restoreUrl = $this->getUrl('adminhtml/contentversion/restore', ['version_id' => $versionId]);
 $confirmMsg = $this->jsQuoteEscape(
     $this->__('Are you sure you want to restore this version? The current content will be saved as a new version first.'),
 );

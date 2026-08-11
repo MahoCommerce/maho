@@ -34,7 +34,6 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
     #[\Override]
     public function preDispatch()
     {
-        $this->_setForcedFormKeyActions(['delete']);
         $this->_title($this->__('System'))
             ->_title($this->__('OAuth'))
             ->_title($this->__('Consumers'));

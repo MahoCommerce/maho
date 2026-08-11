@@ -12,13 +12,6 @@ class Mage_Adminhtml_System_Email_LogController extends Mage_Adminhtml_Controlle
 {
     public const ADMIN_RESOURCE = 'system/tools/email_log';
 
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions('massDelete');
-        return parent::preDispatch();
-    }
-
     #[Maho\Config\Route('/admin/system_email_log/index')]
     public function indexAction(): void
     {

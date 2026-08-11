@@ -12,13 +12,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
 {
     public const ADMIN_RESOURCE = 'catalog/feedmanager/destinations';
 
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['delete', 'save', 'test', 'massStatus', 'massDelete']);
-        return parent::preDispatch();
-    }
-
     protected function _initAction(): self
     {
         $this->loadLayout()

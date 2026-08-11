@@ -260,7 +260,7 @@ class Mage_Adminhtml_Block_Sales_Order_View extends Mage_Adminhtml_Block_Widget_
      */
     public function getCancelUrl()
     {
-        return $this->getUrlSecure('*/*/cancel');
+        return $this->getUrl('*/*/cancel');
     }
 
     /**
@@ -284,7 +284,7 @@ class Mage_Adminhtml_Block_Sales_Order_View extends Mage_Adminhtml_Block_Widget_
      */
     public function getHoldUrl()
     {
-        return $this->getUrlSecure('*/*/hold');
+        return $this->getUrl('*/*/hold');
     }
 
     /**
@@ -292,7 +292,7 @@ class Mage_Adminhtml_Block_Sales_Order_View extends Mage_Adminhtml_Block_Widget_
      */
     public function getUnholdUrl()
     {
-        return $this->getUrlSecure('*/*/unhold');
+        return $this->getUrl('*/*/unhold');
     }
 
     /**

@@ -25,13 +25,6 @@ class Maho_Queue_Adminhtml_QueueController extends Mage_Adminhtml_Controller_Act
     ];
 
     #[\Override]
-    public function preDispatch(): static
-    {
-        $this->_setForcedFormKeyActions(['retry', 'discard', 'massRetry', 'massDiscard']);
-        return parent::preDispatch();
-    }
-
-    #[\Override]
     protected function _isAllowed(): bool
     {
         $action = strtolower((string) $this->getRequest()->getActionName());

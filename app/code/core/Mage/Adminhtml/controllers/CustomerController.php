@@ -17,18 +17,6 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     public const ADMIN_RESOURCE = 'customer/manage';
 
     /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['delete', 'massDelete']);
-        return parent::preDispatch();
-    }
-
-    /**
      * @param string $idFieldName
      * @return $this
      * @throws Mage_Core_Exception

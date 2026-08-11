@@ -17,18 +17,6 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
      */
     protected $_publicActions = ['edit'];
 
-    /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['delete', 'massDelete']);
-        return parent::preDispatch();
-    }
-
     #[Maho\Config\Route('/admin/catalog_product_review/index')]
     public function indexAction()
     {

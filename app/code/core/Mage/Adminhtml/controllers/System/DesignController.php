@@ -16,18 +16,6 @@ class Mage_Adminhtml_System_DesignController extends Mage_Adminhtml_Controller_A
      */
     public const ADMIN_RESOURCE = 'system/design';
 
-    /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions('delete');
-        return parent::preDispatch();
-    }
-
     #[Maho\Config\Route('/admin/system_design/index')]
     public function indexAction(): void
     {
