@@ -11,9 +11,11 @@ declare(strict_types=1);
 namespace Mage\Checkout\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Bundle\SecurityBundle\Security;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -127,15 +129,15 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
      * they're trusted here. A service token is trusted only when it actually
      * holds the carts/write grant: a bare service-account token without it is
      * treated as an ordinary caller and can't reach arbitrary carts through the
-     * enumerable numeric /carts/{id} path. This closes the gap left by the
-     * overridden process() bypassing the base Processor's requirePermission().
+     * enumerable numeric /carts/{id} path, even on the public guest operations
+     * whose security expression admits everyone.
      */
     private function isPrivilegedCartActor(): bool
     {
         if ($this->isAdmin()) {
             return true;
         }
-        return $this->isApiUser() && $this->getAuthorizedUser()->hasPermission('carts/write');
+        return $this->isApiUser() && $this->requireUser()->hasPermission('carts/write');
     }
 
     /**
@@ -146,7 +148,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function createEmptyCart(array $context): Cart
     {
         $customerId = $context['customer_id'] ?? null;
-        $storeId = $context['args']['input']['storeId'] ?? null;
+        $storeId = $this->resolveRequestedStoreId($context);
 
         $result = $this->cartService->createEmptyCart($customerId, $storeId);
 
@@ -165,11 +167,33 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     private function createAuthenticatedCart(array $context): Cart
     {
         $customerId = $this->getAuthenticatedCustomerId();
-        $storeId = $context['args']['input']['storeId'] ?? null;
+        $storeId = $this->resolveRequestedStoreId($context);
 
         $result = $this->cartService->createEmptyCart($customerId, $storeId);
 
         return $this->cartMapper->mapQuoteToCart($result['quote'], false);
+    }
+
+    /**
+     * Resolve a body-level storeId and enforce the token's store allowlist on
+     * it. The request-level listeners only inspect ?store= / X-Store-Code, so a
+     * storeId in the payload would otherwise bypass the allowlist check. Guests
+     * carry no ApiUser and pass through.
+     */
+    private function resolveRequestedStoreId(array $context): ?int
+    {
+        $storeId = $context['args']['input']['storeId'] ?? null;
+        if ($storeId === null) {
+            return null;
+        }
+
+        $storeId = (int) $storeId;
+        $user = $this->security?->getUser();
+        if ($user instanceof ApiUser && !$user->canAccessStore($storeId)) {
+            throw new AccessDeniedHttpException("Token is not authorized for store: {$storeId}");
+        }
+
+        return $storeId;
     }
 
     /**
@@ -388,7 +412,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             $quote = $this->cartService->setShippingAddress($quote, $this->cartService->mapAddressInput($address));
         }
 
-        // Guest storefront contract: return the plain list of available shipping
+        // Guest frontend contract: return the plain list of available shipping
         // methods (code/title/price). The authenticated /carts/{id} variant
         // returns the full Cart (availableShippingMethods included).
         if ($focused) {

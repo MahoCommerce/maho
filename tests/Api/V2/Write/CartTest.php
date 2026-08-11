@@ -132,3 +132,50 @@ describe('Cart Prices Field (Regression)', function (): void {
     });
 
 });
+
+describe('expanded cart read surface', function (): void {
+
+    it('exposes customerEmail, customerNote, reservedOrderId and base totals', function (): void {
+        $createResponse = apiPost('/api/rest/v2/guest-carts', []);
+        expect($createResponse['status'])->toBe(201);
+
+        $cartId = (int) $createResponse['json']['id'];
+        trackCreated('quote', $cartId);
+        $maskedId = $createResponse['json']['maskedId'];
+
+        // A fresh guest cart carries none of the three: they are filled in at
+        // checkout, and null fields are omitted from REST responses
+        // (skip_null_values).
+        expect($createResponse['json']['customerEmail'] ?? null)->toBeNull();
+        expect($createResponse['json']['customerNote'] ?? null)->toBeNull();
+        expect($createResponse['json']['reservedOrderId'] ?? null)->toBeNull();
+
+        // Once the quote carries them, the cart read surfaces all three.
+        $quote = Mage::getModel('sales/quote')->loadByIdWithoutStore($cartId);
+        $quote->setCustomerEmail('cart.fields@example.com')
+            ->setCustomerNote('Ring the bell twice')
+            ->setReservedOrderId('PESTCART-1')
+            ->save();
+
+        $read = apiGet("/api/rest/v2/guest-carts/{$maskedId}");
+        expect($read['status'])->toBe(200);
+        expect($read['json']['customerEmail'])->toBe('cart.fields@example.com');
+        expect($read['json']['customerNote'])->toBe('Ring the bell twice');
+        expect($read['json']['reservedOrderId'])->toBe('PESTCART-1');
+
+        $addResponse = apiPost("/api/rest/v2/guest-carts/{$maskedId}/items", [
+            'sku' => fixtures('write_test_sku'),
+            'qty' => 1,
+        ]);
+        expect($addResponse['status'])->toBe(200);
+
+        $prices = $addResponse['json']['prices'];
+        expect($prices)->toHaveKeys([
+            'baseGrandTotal', 'baseSubtotal', 'baseTaxAmount',
+            'baseShippingAmount', 'baseDiscountAmount', 'shippingTaxAmount',
+        ]);
+        expect($prices['baseGrandTotal'])->toBeGreaterThan(0);
+        expect($prices['baseSubtotal'])->toBeGreaterThan(0);
+    });
+
+});

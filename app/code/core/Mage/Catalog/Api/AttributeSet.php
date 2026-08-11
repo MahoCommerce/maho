@@ -72,4 +72,12 @@ class AttributeSet extends CrudResource
      */
     #[ApiProperty(writable: false, description: 'Attribute codes assigned to this set', extraProperties: ['computed' => true])]
     public array $attributeCodes = [];
+
+    /**
+     * Attribute groups with their assigned attributes. Populated by the provider.
+     *
+     * @var array<array{name: string, sortOrder: int, attributes: array<array{code: string, sortOrder: int}>}>
+     */
+    #[ApiProperty(writable: false, description: 'Attribute groups: [{name, sortOrder, attributes: [{code, sortOrder}]}]', extraProperties: ['computed' => true])]
+    public array $groups = [];
 }

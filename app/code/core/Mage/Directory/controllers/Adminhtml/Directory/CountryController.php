@@ -12,13 +12,6 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
 {
     public const ADMIN_RESOURCE = 'system/directory/countries';
 
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions('delete');
-        return parent::preDispatch();
-    }
-
     protected function _initCountry(): Mage_Directory_Model_Country|false
     {
         $id = $this->getRequest()->getParam('id');

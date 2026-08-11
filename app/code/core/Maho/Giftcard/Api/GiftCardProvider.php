@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace Maho\Giftcard\Api;
 
 use Maho\ApiPlatform\CrudProvider;
+use Maho\ApiPlatform\Resource;
+use Maho\ApiPlatform\Service\StoreContext;
 
 /**
  * Gift Card Provider, only needs the checkGiftcardBalance named query.
@@ -34,7 +36,11 @@ final class GiftCardProvider extends CrudProvider
             }
 
             $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode(trim($code));
-            if (!$giftcard->getId()) {
+            // A card is only redeemable on the websites it is associated with,
+            // so any other website's store must not answer for it either.
+            if (!$giftcard->getId()
+                || !in_array((int) StoreContext::getStore()->getWebsiteId(), $giftcard->getWebsiteIds(), true)
+            ) {
                 throw new \RuntimeException('Gift card not found');
             }
 
@@ -42,6 +48,35 @@ final class GiftCardProvider extends CrudProvider
         }
 
         return null;
+    }
+
+    /**
+     * Admin/service item read, restricted tokens only see cards reaching at
+     * least one of their allowed websites.
+     */
+    #[\Override]
+    protected function provideItem(int|string $id): ?Resource
+    {
+        $dto = parent::provideItem($id);
+        if ($dto instanceof GiftCard) {
+            $this->assertAnyWebsiteAllowed($dto->websiteIds ?? [], $this->requireUser(), 'gift card');
+        }
+        return $dto;
+    }
+
+    /**
+     * Admin/service list, restricted tokens only see cards on their allowed
+     * websites. Membership lives in the giftcard_website junction, so this
+     * cannot use the shared main_table.website_id filter.
+     */
+    #[\Override]
+    protected function applyCollectionFilters(object $collection, array $filters): void
+    {
+        parent::applyCollectionFilters($collection, $filters);
+        $allowedWebsiteIds = $this->allowedWebsiteIds($this->requireUser());
+        if ($allowedWebsiteIds !== null) {
+            $collection->addWebsiteIdsFilter($allowedWebsiteIds);
+        }
     }
 
     /**

@@ -12,13 +12,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
 {
     public const ADMIN_RESOURCE = 'system/directory/regions';
 
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions('delete');
-        return parent::preDispatch();
-    }
-
     protected function _initRegion(): Mage_Directory_Model_Region|false
     {
         $id = $this->getRequest()->getParam('id');

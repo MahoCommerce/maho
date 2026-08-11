@@ -23,10 +23,7 @@ class Maho_MediaCleaner_Block_Adminhtml_Mediacleaner_Grid_Renderer_Actions exten
 
         $links[] = sprintf(
             '<a href="%s" onclick="return confirm(\'%s\')">%s</a>',
-            $this->getUrl('*/*/delete', [
-                'image_id' => $row->getId(),
-                'form_key' => Mage::getSingleton('core/session')->getFormKey(),
-            ]),
+            $this->getUrl('*/*/delete', ['image_id' => $row->getId()]),
             $this->jsQuoteEscape($this->__('Are you sure?')),
             $this->__('Delete'),
         );

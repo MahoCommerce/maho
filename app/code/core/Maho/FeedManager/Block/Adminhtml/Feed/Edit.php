@@ -12,6 +12,9 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
 {
     use Maho_FeedManager_Block_Adminhtml_Feed_Edit_FeedRegistryTrait;
 
+    /** One-shot session flag armed by the save/generate actions: ['id' => feed id, 'ts' => armed at] */
+    public const AUTO_GENERATE_FLAG = 'feed_generate_after_save';
+
     public function __construct()
     {
         $this->_objectId = 'id';
@@ -80,6 +83,21 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
     }
 
     /**
+     * Read and clear the one-shot "generate this feed after save" flag for the current feed.
+     * The arming redirect lands immediately, so an old flag is stale (its response was lost)
+     * and must not start a generation on a later, unrelated visit to the edit page.
+     */
+    protected function _consumeAutoGenerateFlag(): bool
+    {
+        $feedId = (int) $this->_getFeed()->getId();
+        $flag = Mage::getSingleton('adminhtml/session')->getData(self::AUTO_GENERATE_FLAG, true);
+        return $feedId
+            && is_array($flag)
+            && (int) ($flag['id'] ?? 0) === $feedId
+            && time() - (int) ($flag['ts'] ?? 0) <= 60;
+    }
+
+    /**
      * Get form scripts including batch generation JavaScript
      */
     protected function _getFormScripts(): string
@@ -90,6 +108,11 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
         $cancelUrl = $this->getUrl('*/*/generateCancel');
         $resetUrl = $this->getUrl('*/*/forceReset');
         $uploadUrl = $this->getUrl('*/*/upload');
+
+        // Auto-generation is armed only by the save/generate actions (form key or secret key
+        // protected), consumed once here. A keyless GET to the public edit action cannot set it,
+        // so it can never trigger generation cross-site.
+        $autoGenerate = $this->_consumeAutoGenerateFlag() ? 'true' : 'false';
 
         // Check if feed has a destination configured
         $hasDestination = (bool) $this->_getFeed()->getDestinationId();
@@ -331,18 +354,12 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                 }
             };
 
-            // Auto-start generation if URL has generate/1 parameter (after save)
+            // Auto-start generation after a save/generate that armed the one-shot flag
             document.addEventListener('DOMContentLoaded', function() {
-                // Check for both path-based (/generate/1/) and query string (?generate=1) formats
-                var shouldGenerate = window.location.pathname.indexOf('/generate/1') !== -1 ||
-                                     window.location.search.indexOf('generate=1') !== -1;
+                var shouldGenerate = {$autoGenerate};
                 var feedId = {$this->_getFeedIdForJs()};
 
                 if (shouldGenerate && feedId) {
-                    // Remove the generate param from URL to prevent re-triggering on refresh
-                    var newUrl = window.location.pathname.replace(/\\/generate\\/1\\/?/, '/');
-                    window.history.replaceState({}, '', newUrl);
-
                     // Start generation after a short delay to let the page load
                     // Use force=true to clean up any stuck jobs from the previous save attempt
                     setTimeout(function() {

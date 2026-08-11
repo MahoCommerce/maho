@@ -124,7 +124,7 @@
  * @method float getRowTotal()
  * @method $this setRowTotal(float $value)
  * @method $this setRowTotalExcTax(float $value)
- * @method float getRowTotalInclTax()
+ * @method float|null getRowTotalInclTax()
  * @method $this setRowTotalInclTax(float $value)
  * @method $this unsRowTotalInclTax()
  * @method float getRowTotalWithDiscount()

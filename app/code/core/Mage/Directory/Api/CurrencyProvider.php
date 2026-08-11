@@ -31,7 +31,9 @@ class CurrencyProvider extends \Maho\ApiPlatform\Provider
 
             $dto = Currency::fromModel($currency);
             $dto->symbol = $currency->getCurrencySymbol();
-            $dto->exchangeRate = $rates[$currencyCode] ?? null;
+            // MySQL and PostgreSQL return the DECIMAL rate as a string, which strict_types
+            // refuses to assign to ?float. SQLite returns a number, so this never fails locally.
+            $dto->exchangeRate = isset($rates[$currencyCode]) ? (float) $rates[$currencyCode] : null;
             $currencies[] = $dto;
         }
 

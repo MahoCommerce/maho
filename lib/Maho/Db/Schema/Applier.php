@@ -38,12 +38,18 @@ final class Applier
      *
      * $tablePrefix scopes the storage-engine pass, which is the one part of the
      * plan that looks beyond the declared tables. Pass '' when the database
-     * belongs to Maho alone.
+     * belongs to Maho alone, or $withEngineConversions = false to drop that
+     * pass entirely, for a caller asking only whether the *declared* schema
+     * is behind (see Status::isConverged).
      *
      * @return list<string> SQL statements (empty when no changes are needed)
      */
-    public static function plan(Connection $connection, Schema $target, string $tablePrefix = ''): array
-    {
+    public static function plan(
+        Connection $connection,
+        Schema $target,
+        string $tablePrefix = '',
+        bool $withEngineConversions = true,
+    ): array {
         $schemaManager = $connection->createSchemaManager();
         $platform = $connection->getDatabasePlatform();
 
@@ -148,7 +154,11 @@ final class Applier
 
         // Conversions lead the batch: InnoDB refuses a foreign key referencing a
         // MyISAM table (errno 150), which FOREIGN_KEY_CHECKS=0 does not lift.
-        return array_merge(self::engineConversions($connection, $platform, $tablePrefix), $creates, $alters);
+        $conversions = $withEngineConversions
+            ? self::engineConversions($connection, $platform, $tablePrefix)
+            : [];
+
+        return array_merge($conversions, $creates, $alters);
     }
 
     /**

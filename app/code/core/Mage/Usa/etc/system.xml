@@ -43,36 +43,28 @@ SPDX-License-Identifier: AFL-3.0
                             <comment>Please make sure to use only digits here. No dashes are allowed.</comment>
                             <depends><active>1</active></depends>
                         </account>
-                        <meter_number translate="label">
-                            <label>Meter Number</label>
+                        <client_id translate="label comment">
+                            <label>Client ID</label>
                             <frontend_type>obscure</frontend_type>
                             <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
                             <sort_order>50</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <comment>The API Key of your project on the FedEx Developer Portal.</comment>
                             <depends><active>1</active></depends>
-                        </meter_number>
-                        <key translate="label">
-                            <label>Key</label>
+                        </client_id>
+                        <client_secret translate="label comment">
+                            <label>Client Secret</label>
                             <frontend_type>obscure</frontend_type>
                             <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
                             <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
+                            <comment>The Secret Key of your project on the FedEx Developer Portal.</comment>
                             <depends><active>1</active></depends>
-                        </key>
-                        <password translate="label">
-                            <label>Password</label>
-                            <frontend_type>obscure</frontend_type>
-                            <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
-                            <sort_order>70</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <depends><active>1</active></depends>
-                        </password>
+                        </client_secret>
                         <sandbox_mode translate="label">
                             <label>Sandbox Mode</label>
                             <frontend_type>boolean</frontend_type>
@@ -82,6 +74,17 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_store>0</show_in_store>
                             <depends><active>1</active></depends>
                         </sandbox_mode>
+                        <rate_endpoint translate="label comment">
+                            <label>Rate API</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>usa/shipping_carrier_fedex_source_rateendpoint</source_model>
+                            <sort_order>76</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>Match the rate product enabled on your FedEx project. Registered FedEx Integrator Providers must select Comprehensive Rates and Transit Times; everyone else should keep Rates and Transit Times.</comment>
+                            <depends><active>1</active></depends>
+                        </rate_endpoint>
                         <shipment_requesttype translate="label">
                             <label>Packages Request Type</label>
                             <frontend_type>select</frontend_type>
@@ -186,7 +189,7 @@ SPDX-License-Identifier: AFL-3.0
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment>The field is applicable if the Smart Post method is selected.</comment>
+                            <comment>The field is applicable if the Ground Economy method is selected.</comment>
                             <depends><active>1</active></depends>
                         </smartpost_hubid>
                         <free_method translate="label">

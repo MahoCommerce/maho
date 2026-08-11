@@ -19,7 +19,7 @@ abstract class Mage_Directory_Model_Currency_Import_Abstract
     /**
      * @var array
      */
-    protected $_messages;
+    protected $_messages = [];
 
     /**
      * Retrieve currency codes

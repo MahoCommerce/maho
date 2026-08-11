@@ -11,18 +11,6 @@
 class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Controller_Sales_Invoice
 {
     /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions(['capture', 'cancel', 'void']);
-        return parent::preDispatch();
-    }
-
-    /**
      * Get requested items qty's from request
      */
     protected function _getItemQtys()

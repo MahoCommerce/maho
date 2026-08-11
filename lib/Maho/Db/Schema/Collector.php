@@ -18,6 +18,32 @@ use RuntimeException;
 final class Collector
 {
     /**
+     * Every active module that ships a sql/schema.php, as module name =>
+     * absolute path, in module load order (depends_on honored).
+     *
+     * @return array<string, string>
+     */
+    public static function sourceFiles(): array
+    {
+        $files = [];
+        foreach (Mage::getConfig()->getNode('modules')->children() as $modName => $module) {
+            if (!$module->is('active')) {
+                continue;
+            }
+
+            $sqlDir = Mage::getConfig()->getModuleDir('sql', (string) $modName);
+            $file = Maho::findFile("$sqlDir/schema.php");
+            if ($file === false) {
+                continue;
+            }
+
+            $files[(string) $modName] = $file;
+        }
+
+        return $files;
+    }
+
+    /**
      * Walk every active module, load its sql/schema.php closure if present,
      * and let each closure contribute tables to a shared Schema. Then apply
      * the configured table_prefix and the default table options Maho's legacy
@@ -32,18 +58,7 @@ final class Collector
     {
         $schema = new Schema();
         $contributors = [];
-        $modules = Mage::getConfig()->getNode('modules')->children();
-        foreach ($modules as $modName => $module) {
-            if (!$module->is('active')) {
-                continue;
-            }
-
-            $sqlDir = Mage::getConfig()->getModuleDir('sql', (string) $modName);
-            $file = Maho::findFile("$sqlDir/schema.php");
-            if ($file === false) {
-                continue;
-            }
-
+        foreach (self::sourceFiles() as $modName => $file) {
             $closure = require $file;
             if (!is_callable($closure)) {
                 throw new RuntimeException(
@@ -52,7 +67,7 @@ final class Collector
             }
 
             $closure($schema);
-            $contributors[] = (string) $modName;
+            $contributors[] = $modName;
         }
 
         $schema = self::rebuildWithPrefix($schema);

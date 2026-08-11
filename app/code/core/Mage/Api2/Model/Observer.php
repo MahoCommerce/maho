@@ -74,11 +74,7 @@ class Mage_Api2_Model_Observer
         $apiKey = $observer->getEvent()->getApiKey();
         $model = $observer->getEvent()->getModel();
         if (!(bool) $model->getApiPasswordUpgraded()
-            && !Mage::helper('core')->getEncryptor()->validateHashByVersion(
-                $apiKey,
-                $model->getApiKey(),
-                Mage_Core_Model_Encryption::HASH_VERSION_SHA256,
-            )
+            && Mage::helper('core')->hashNeedsUpgrade((string) $model->getApiKey())
         ) {
             Mage::getModel('api/user')->load($model->getId())->setNewApiKey($apiKey)->save();
             $model->setApiPasswordUpgraded(true);

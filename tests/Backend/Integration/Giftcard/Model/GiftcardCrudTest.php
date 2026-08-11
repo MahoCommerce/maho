@@ -329,7 +329,7 @@ describe('Giftcard Balance Operations with Database', function () {
 });
 
 describe('Giftcard Expiration Validation', function () {
-    test('isValid() returns false for expired card and updates status', function () {
+    test('isValid() returns false for expired card without persisting the status', function () {
         $helper = Mage::helper('giftcard');
         $code = $helper->generateCode();
 
@@ -345,12 +345,13 @@ describe('Giftcard Expiration Validation', function () {
         $giftcard->setExpiresAt($pastDate);
         $giftcard->save();
 
-        // isValid should return false and update status
+        // isValid reports the card expired in memory so callers can message it
         expect($giftcard->isValid())->toBeFalse();
+        expect($giftcard->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED);
 
-        // Reload and check status was updated
+        // A validity check is a read; the persisted flip belongs to the cron job
         $reloaded = Mage::getModel('giftcard/giftcard')->load($giftcard->getId());
-        expect($reloaded->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_EXPIRED);
+        expect($reloaded->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
     });
 
     test('isValid() returns true for card with future expiration', function () {

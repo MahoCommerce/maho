@@ -25,7 +25,8 @@ return function (Schema $schema): void {
         PrimaryKeyConstraint::editor()->setUnquotedColumnNames('subscriber_id')->create(),
     );
     $subscriber->addIndex(['customer_id']);
-    $subscriber->addIndex(['store_id']);
+    // Leftmost prefix also serves store_id-only lookups and the store FK
+    $subscriber->addIndex(['store_id', 'subscriber_status']);
     $subscriber->addForeignKeyConstraint(
         'core_store',
         ['store_id'],

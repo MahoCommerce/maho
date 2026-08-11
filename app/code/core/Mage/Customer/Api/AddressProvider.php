@@ -15,7 +15,6 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Address State Provider - Fetches customer address data.
@@ -48,7 +47,7 @@ final class AddressProvider extends \Maho\ApiPlatform\Provider
             if (!$customerId) {
                 throw new NotFoundHttpException('Authentication required');
             }
-            $this->authorizeCustomerAccess($customerId);
+            $this->assertCustomerAccess($customerId);
             $customer = \Mage::getModel('customer/customer')->load($customerId);
             if (!$customer->getId()) {
                 throw new NotFoundHttpException('Customer not found');
@@ -56,60 +55,51 @@ final class AddressProvider extends \Maho\ApiPlatform\Provider
             return $this->getCollection($customer);
         }
 
-        $customerId = (int) ($uriVariables['customerId'] ?? 0);
-        $addressId = (int) ($uriVariables['id'] ?? 0);
-
-        // Check if this is a /customers/me/* route (uses authenticated customer)
-        $isMeRoute = str_contains($operationName, '_me_') || str_starts_with($operationName, 'get_me') || str_starts_with($operationName, 'get_my');
-
-        // For simple /addresses/{id} routes - load address first to get customerId
-        if (!$customerId && $addressId && !$isMeRoute) {
-            $address = \Mage::getModel('customer/address')->load($addressId);
-            if (!$address->getId()) {
-                throw new NotFoundHttpException('Address not found');
-            }
-            $customerId = (int) $address->getCustomerId();
+        // Item lookups: ownership is not checked here. The read operations'
+        // `is_owner(object, 'customerId')` expression denies post-read (and maps
+        // to 404), and the write processor re-verifies ownership itself.
+        if (!$operation instanceof CollectionOperationInterface) {
+            return $this->getItem((int) ($uriVariables['id'] ?? 0));
         }
 
-        // For /addresses or /customers/me/addresses routes - use authenticated customer
-        if (!$customerId && ($operation instanceof CollectionOperationInterface || $isMeRoute)) {
-            $customerId = $this->getAuthenticatedCustomerId();
+        // Collections: derive the target customer and verify access, which is
+        // their only guard (a paginator can't be ownership-checked post-read).
+        $customerId = (int) ($uriVariables['customerId'] ?? 0);
+        if (!$customerId) {
+            $customerId = (int) $this->getAuthenticatedCustomerId();
         }
 
         if (!$customerId) {
             throw new NotFoundHttpException('Customer ID is required');
         }
 
-        // SECURITY: Verify the user can access this customer's addresses
-        $this->authorizeCustomerAccess($customerId);
+        $this->assertCustomerAccess($customerId);
 
-        // Load customer to verify they exist
         $customer = \Mage::getModel('customer/customer')->load($customerId);
         if (!$customer->getId()) {
             throw new NotFoundHttpException('Customer not found');
         }
 
-        if ($operation instanceof CollectionOperationInterface) {
-            return $this->getCollection($customer);
-        }
-
-        return $this->getItem($customer, $addressId);
+        return $this->getCollection($customer);
     }
 
     /**
      * Get a single address by ID
      */
-    private function getItem(\Mage_Customer_Model_Customer $customer, int $addressId): ?Address
+    private function getItem(int $addressId): ?Address
     {
-        $address = \Mage::getModel('customer/address')->load($addressId);
+        if (!$addressId) {
+            return null;
+        }
 
+        $address = \Mage::getModel('customer/address')->load($addressId);
         if (!$address->getId()) {
             return null;
         }
 
-        // Verify address belongs to the customer
-        if ((int) $address->getCustomerId() !== (int) $customer->getId()) {
-            throw new AccessDeniedHttpException('Address does not belong to this customer');
+        $customer = \Mage::getModel('customer/customer')->load((int) $address->getCustomerId());
+        if (!$customer->getId()) {
+            return null;
         }
 
         return $this->mapToDto($address, $customer);

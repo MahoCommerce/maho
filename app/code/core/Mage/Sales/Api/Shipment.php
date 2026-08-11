@@ -20,6 +20,8 @@ use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
+use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
+use ApiPlatform\OpenApi\Model\RequestBody;
 use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
@@ -48,6 +50,49 @@ use Maho\ApiPlatform\CrudResource;
             ],
             security: "is_granted('ROLE_ADMIN') or is_granted('shipments/create')",
             description: 'Create a shipment for an order',
+            // The processor reads the raw body, so none of it maps to a writable
+            // DTO property: without this the spec advertises no request body at all.
+            openapi: new OpenApiOperation(
+                summary: 'Create a shipment for an order (full or partial)',
+                requestBody: new RequestBody(
+                    content: new \ArrayObject([
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'items' => [
+                                        'type' => 'array',
+                                        'description' => 'Items to ship. Ships every remaining item if omitted.',
+                                        'items' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'orderItemId' => ['type' => 'integer'],
+                                                'qty' => ['type' => 'number'],
+                                            ],
+                                            'required' => ['orderItemId', 'qty'],
+                                        ],
+                                    ],
+                                    'tracks' => [
+                                        'type' => 'array',
+                                        'description' => 'Tracking entries to attach to the new shipment.',
+                                        'items' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'carrierCode' => ['type' => 'string', 'default' => 'custom'],
+                                                'title' => ['type' => 'string'],
+                                                'trackNumber' => ['type' => 'string'],
+                                            ],
+                                            'required' => ['trackNumber'],
+                                        ],
+                                    ],
+                                    'comment' => ['type' => 'string'],
+                                    'notifyCustomer' => ['type' => 'boolean', 'default' => false],
+                                ],
+                            ],
+                        ],
+                    ]),
+                ),
+            ),
         ),
         new Post(
             uriTemplate: '/shipments/{id}/tracks',
@@ -55,6 +100,23 @@ use Maho\ApiPlatform\CrudResource;
             requirements: ['id' => '\d+'],
             security: "is_granted('ROLE_ADMIN') or is_granted('shipments/create')",
             description: 'Add a tracking number to an existing shipment',
+            openapi: new OpenApiOperation(
+                requestBody: new RequestBody(
+                    content: new \ArrayObject([
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'carrierCode' => ['type' => 'string', 'default' => 'custom'],
+                                    'title' => ['type' => 'string'],
+                                    'trackNumber' => ['type' => 'string'],
+                                ],
+                                'required' => ['trackNumber'],
+                            ],
+                        ],
+                    ]),
+                ),
+            ),
         ),
         new Delete(
             uriTemplate: '/shipments/{id}/tracks/{trackId}',
@@ -62,6 +124,30 @@ use Maho\ApiPlatform\CrudResource;
             requirements: ['id' => '\d+', 'trackId' => '\d+'],
             security: "is_granted('ROLE_ADMIN') or is_granted('shipments/create')",
             description: 'Remove a tracking number from a shipment',
+        ),
+        new Post(
+            uriTemplate: '/shipments/{id}/comments',
+            name: 'shipment_add_comment',
+            requirements: ['id' => '\d+'],
+            security: "is_granted('ROLE_ADMIN') or is_granted('shipments/create')",
+            description: 'Add a comment to an existing shipment',
+            openapi: new OpenApiOperation(
+                requestBody: new RequestBody(
+                    content: new \ArrayObject([
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'comment' => ['type' => 'string'],
+                                    'notifyCustomer' => ['type' => 'boolean', 'default' => false],
+                                    'visibleOnFront' => ['type' => 'boolean', 'default' => false],
+                                ],
+                                'required' => ['comment'],
+                            ],
+                        ],
+                    ]),
+                ),
+            ),
         ),
     ],
     graphQlOperations: [
@@ -143,7 +229,30 @@ class Shipment extends CrudResource
     public int $totalQty = 0;
 
     #[ApiProperty(writable: false)]
+    public float $totalWeight = 0;
+
+    #[ApiProperty(writable: false)]
+    public ?int $storeId = null;
+
+    #[ApiProperty(writable: false)]
+    public bool $emailSent = false;
+
+    #[ApiProperty(writable: false)]
+    public ?int $shipmentStatus = null;
+
+    #[ApiProperty(writable: false)]
     public ?string $createdAt = null;
+
+    #[ApiProperty(writable: false)]
+    public ?string $updatedAt = null;
+
+    /** @var array<int, mixed> Package definitions as stored at shipment creation (decoded). */
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    public array $packages = [];
+
+    /** @var array<int, array<string, mixed>> Shipment comments; plain arrays, same Iterable rationale as $tracks. */
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    public array $comments = [];
 
     /** @var array<int, array<string, mixed>> Tracking entries; plain-DTO elements so kept as Iterable scalar to avoid the IterableCursorConnection null-edges bug. */
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
@@ -155,7 +264,7 @@ class Shipment extends CrudResource
 
     public static function afterLoad(self $dto, object $model): void
     {
-        // List paths batch-preload these three relations (see
+        // List paths batch-preload these relations (see
         // ShipmentProvider::getAllShipments()); fall back to the lazy per-model
         // loads only for single-shipment and per-order views.
         if ($model->hasData('_preloaded_order_increment_id')) {
@@ -172,16 +281,51 @@ class Shipment extends CrudResource
             $trackDto->carrier = $track->getCarrierCode();
             $trackDto->title = $track->getTitle();
             $trackDto->trackNumber = $track->getTrackNumber();
+            $trackDto->description = $track->getDescription();
+            $trackDto->weight = $track->getWeight() !== null ? (float) $track->getWeight() : null;
+            $trackDto->qty = $track->getQty() !== null ? (float) $track->getQty() : null;
+            $trackDto->createdAt = $track->getCreatedAt();
+            $trackDto->updatedAt = $track->getUpdatedAt();
             $dto->tracks[] = $trackDto;
         }
 
         $dto->items = [];
         foreach ($model->getData('_preloaded_items') ?? $model->getAllItems() as $item) {
             $itemDto = new ShipmentItem();
+            $itemDto->id = (int) $item->getId();
+            $itemDto->orderItemId = (int) $item->getOrderItemId();
+            $itemDto->productId = $item->getProductId() !== null ? (int) $item->getProductId() : null;
             $itemDto->sku = $item->getSku();
             $itemDto->name = $item->getName();
             $itemDto->qty = (float) $item->getQty();
+            $itemDto->price = (float) $item->getPrice();
+            $itemDto->rowTotal = (float) $item->getRowTotal();
+            $itemDto->weight = (float) $item->getWeight();
+            $itemDto->description = $item->getDescription();
             $dto->items[] = $itemDto;
+        }
+
+        // The resource model unserializes `packages` on load, but a raw JSON
+        // string can still surface on unsaved/legacy rows; decode defensively.
+        $packages = $model->getPackages();
+        if (is_string($packages) && $packages !== '') {
+            try {
+                $packages = \Mage::helper('core')->jsonDecode($packages);
+            } catch (\JsonException) {
+                $packages = [];
+            }
+        }
+        $dto->packages = is_array($packages) ? $packages : [];
+
+        $dto->comments = [];
+        foreach ($model->getData('_preloaded_comments') ?? $model->getCommentsCollection() as $comment) {
+            $dto->comments[] = [
+                'id' => (int) $comment->getId(),
+                'comment' => $comment->getComment(),
+                'createdAt' => $comment->getCreatedAt(),
+                'isCustomerNotified' => (bool) $comment->getIsCustomerNotified(),
+                'isVisibleOnFront' => (bool) $comment->getIsVisibleOnFront(),
+            ];
         }
     }
 }

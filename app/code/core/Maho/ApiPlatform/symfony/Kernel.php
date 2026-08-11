@@ -262,9 +262,6 @@ class Kernel extends BaseKernel
                 'description' => 'Maho Commerce store data and operations',
                 'instructions' => $this->mcpInstructions(),
                 'client_transports' => ['http' => true],
-                // Defaults to ['src'] under getProjectDir(), which doesn't exist. Nothing
-                // to scan: every tool comes from ApiResource metadata, not #[AsMcpTool].
-                'discovery' => ['scan_dirs' => []],
                 'http' => [
                     // Under /api so the `^/api` firewall gives it bearer auth for free.
                     'path' => '/api/mcp',
@@ -304,7 +301,7 @@ class Kernel extends BaseKernel
             // No role hierarchy: authorization uses exactly two roles in the
             // operation `security:` expressions — ROLE_CUSTOMER (customer, own data)
             // and ROLE_ADMIN (admin, then gated per-resource by AdminAclListener
-            // via ADMIN_RESOURCE). API service accounts (ROLE_API_USER) are not
+            // via ADMIN_RESOURCE). API service accounts carry no roles and are not
             // matched by role at all; they're authorized by their granular
             // `resource/op` permissions in ApiUserVoter. Admins are deliberately
             // not granted ROLE_CUSTOMER, so customer-only `/me` endpoints stay out
@@ -400,6 +397,19 @@ class Kernel extends BaseKernel
             ->arg('$debug', '%kernel.debug%')
             ->tag('kernel.event_subscriber');
 
+        // Publishes has_backend_access('<resource>') to every security expression,
+        // including the per-property ones the serializer evaluates. Tagged by
+        // hand: FrameworkBundle autoconfigures ExpressionFunctionProviderInterface
+        // onto the generic `expression_language_provider` tag, which the security
+        // expression language does not read.
+        $services->set(Security\BackendAccess::class)
+            ->tag('security.expression_language_provider');
+
+        // Row-level counterpart: is_owner(object, '<property>') for the item
+        // operations of mahoCustomerScoped resources.
+        $services->set(Security\CustomerOwnership::class)
+            ->tag('security.expression_language_provider');
+
         $services->set(GraphQl\CustomQueryResolver::class)
             ->arg('$providerLocator', tagged_locator('maho.api.state_provider'))
             ->tag('api_platform.graphql.query_resolver');
@@ -420,6 +430,16 @@ class Kernel extends BaseKernel
         $services->set(GraphQl\IriToleranceProvider::class)
             ->decorate('api_platform.graphql.state_provider.read')
             ->arg('$inner', new Reference(GraphQl\IriToleranceProvider::class . '.inner'));
+
+        // Convert row-level ownership denials on item queries into null results
+        // (see the class docblock). Priority -10: decoration priority is
+        // higher-is-innermost, and this MUST wrap the vendor
+        // AccessCheckerProvider (priority 0 on the same service) to catch what
+        // it throws; at 0 the registration-order tie-break would nest it inside,
+        // like IriToleranceProvider above.
+        $services->set(GraphQl\OwnershipDenialProvider::class)
+            ->decorate('api_platform.graphql.state_provider.read', null, -10)
+            ->arg('$inner', new Reference(GraphQl\OwnershipDenialProvider::class . '.inner'));
 
         // DefaultDenyListener is wired via its #[AsEventListener(priority: 5)]
         // attribute (autoconfigured by the services loader above) so it runs

@@ -55,4 +55,21 @@ class Maho_Giftcard_Model_Resource_Giftcard_Collection extends Mage_Core_Model_R
         );
         return $this;
     }
+
+    /**
+     * Filter to cards valid on any of the given websites. An empty list matches
+     * nothing, so a token scoped to no website sees no cards.
+     *
+     * @param int[] $websiteIds
+     * @return $this
+     */
+    public function addWebsiteIdsFilter(array $websiteIds): self
+    {
+        $this->getSelect()->where(
+            'main_table.giftcard_id IN (SELECT giftcard_id FROM '
+            . $this->getTable('giftcard/website') . ' WHERE website_id IN (?))',
+            $websiteIds === [] ? [-1] : array_map('intval', $websiteIds),
+        );
+        return $this;
+    }
 }

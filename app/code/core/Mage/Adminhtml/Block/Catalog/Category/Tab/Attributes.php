@@ -162,7 +162,6 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
                 $refreshUrl = $this->getUrl('*/*/processDynamic', [
                     'id' => $this->getCategory()->getId(),
                     'store' => $this->getRequest()->getParam('store'),
-                    'form_key' => Mage::getSingleton('core/session')->getFormKey(),
                 ]);
                 $fieldset->addField('dynamic_refresh_button', 'note', [
                     'text' => $this->getLayout()->createBlock('adminhtml/widget_button')

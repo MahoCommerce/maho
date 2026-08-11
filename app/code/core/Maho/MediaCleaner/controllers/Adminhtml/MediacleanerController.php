@@ -12,25 +12,6 @@ class Maho_MediaCleaner_Adminhtml_MediacleanerController extends Mage_Adminhtml_
 {
     public const ADMIN_RESOURCE = 'system/tools/mediacleaner';
 
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions([
-            'synccategory',
-            'syncproduct',
-            'syncproductcache',
-            'syncwysiwyg',
-            'delete',
-            'massDelete',
-            'flushmediatmp',
-            'flushmediaimport',
-            'flushvarexport',
-            'flushvarimportexport',
-            'reset',
-        ]);
-        return parent::preDispatch();
-    }
-
     #[Maho\Config\Route('/admin/mediacleaner/index')]
     public function indexAction(): void
     {

@@ -272,18 +272,6 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     }
 
     /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions('delete');
-        return parent::preDispatch();
-    }
-
-    /**
      * Prepare widget parameters
      *
      * @return array

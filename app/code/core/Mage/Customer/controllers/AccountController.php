@@ -1147,7 +1147,10 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
         $data = $this->_getSession()->getCustomerFormData(true);
         $customer = $this->_getSession()->getCustomer();
         if (!empty($data)) {
-            $customer->addData($data);
+            $customerForm = Mage::getModel('customer/form')
+                ->setFormCode('customer_account_edit')
+                ->setEntity($customer);
+            $customer->addData(array_intersect_key($data, $customerForm->getAttributes()));
         }
         if ($this->getRequest()->getParam('changepass') == 1) {
             $customer->setChangePassword(1);

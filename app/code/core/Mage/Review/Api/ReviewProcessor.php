@@ -11,7 +11,8 @@ declare(strict_types=1);
 namespace Mage\Review\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Maho\ApiPlatform\CrudResource;
+use ApiPlatform\Metadata\Put;
+use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -25,6 +26,12 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class ReviewProcessor extends \Maho\ApiPlatform\Processor
 {
+    private const STATUS_MAP = [
+        'approved' => \Mage_Review_Model_Review::STATUS_APPROVED,
+        'pending' => \Mage_Review_Model_Review::STATUS_PENDING,
+        'not_approved' => \Mage_Review_Model_Review::STATUS_NOT_APPROVED,
+    ];
+
     /**
      * @param Review $data
      * @return Review
@@ -46,6 +53,10 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
             );
         }
 
+        if ($operation instanceof Put && isset($uriVariables['id']) && $data instanceof Review) {
+            return $this->moderateReview((int) $uriVariables['id'], $data);
+        }
+
         $productId = (int) ($uriVariables['productId'] ?? 0);
         if ($productId && $data instanceof Review) {
             return $this->submitReview(
@@ -60,6 +71,75 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         throw new BadRequestHttpException('Invalid review operation');
     }
 
+    /**
+     * Moderation is admin/service-token only, enforced by the operation's own
+     * `security:` expression: no ROLE_CUSTOMER, and the permission voter never
+     * grants 'reviews/write' to a non-API-key token.
+     */
+    private function moderateReview(int $reviewId, Review $data): Review
+    {
+        if ($data->status === null && ($data->stores === null || $data->stores === [])) {
+            throw new BadRequestHttpException('Provide a status and/or stores to moderate');
+        }
+        if ($data->status !== null && !isset(self::STATUS_MAP[$data->status])) {
+            throw new BadRequestHttpException('status must be one of: ' . implode(', ', array_keys(self::STATUS_MAP)));
+        }
+
+        /** @var \Mage_Review_Model_Review $review */
+        $review = \Mage::getModel('review/review')->load($reviewId);
+        if (!$review->getId()) {
+            throw new NotFoundHttpException('Review not found');
+        }
+
+        // A store-restricted token may only moderate reviews assigned to a
+        // store on its allowlist. Store 0 is a marker row every save adds, so
+        // only a review with no real store assignment counts as all-stores.
+        $user = $this->requireUser();
+        $reviewStoreIds = array_values(array_filter(
+            array_map('intval', (array) $review->getStores()),
+            static fn(int $id): bool => $id !== 0,
+        ));
+        $this->validateEntityStoreAccess($reviewStoreIds === [] ? [0] : $reviewStoreIds, $user, 'review');
+
+        if ($data->status !== null) {
+            $review->setStatusId(self::STATUS_MAP[$data->status]);
+        }
+        if ($data->stores !== null && $data->stores !== []) {
+            $review->setStores($this->resolveModerationStores($data->stores, $user));
+        }
+        $review->save();
+        $review->aggregate();
+
+        // Approved-review lists are cached (see ReviewProvider); a status flip must show up.
+        \Mage::app()->cleanCache(['API_REVIEWS']);
+
+        $review = \Mage::getModel('review/review')->load($reviewId);
+        $dto = Review::fromModel($review);
+
+        $product = \Mage::getModel('catalog/product')->load((int) $review->getEntityPkValue());
+        if ($product->getId()) {
+            $dto->productName = $product->getName();
+        }
+
+        return $dto;
+    }
+
+    /**
+     * Resolve the moderation Put's stores payload (store ids, codes, or
+     * ['all']) into store ids, enforcing the token's store allowlist.
+     *
+     * @param array<int|string> $stores
+     * @return array<int>
+     */
+    private function resolveModerationStores(array $stores, ApiUser $user): array
+    {
+        try {
+            return $this->resolveStoreIds(array_map('strval', $stores), $user);
+        } catch (\Mage_Core_Model_Store_Exception) {
+            throw new BadRequestHttpException('stores contains an unknown store');
+        }
+    }
+
     private function submitReview(
         int $productId,
         string $title,
@@ -67,7 +147,7 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         string $nickname,
         int $rating,
     ): Review {
-        $customerId = $this->requireAuthentication();
+        $customerId = $this->requireCustomerId();
 
         // Limit by IP and by account: the IP check is skipped when the client IP
         // is unknown and can be sidestepped by IP rotation, so a per-customer
@@ -128,7 +208,7 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
 
         $review->save();
 
-        $this->addRatingVote($review, $rating, $productId, $customerId, $storeId);
+        $this->addRatingVote($review, $rating, $productId, $customerId);
         $review->aggregate();
 
         $dto = Review::fromModel($review);
@@ -144,7 +224,6 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         int $rating,
         int $productId,
         int $customerId,
-        int $storeId,
     ): void {
         /** @var \Mage_Rating_Model_Resource_Rating_Collection $ratingCollection */
         $ratingCollection = \Mage::getModel('rating/rating')->getCollection()

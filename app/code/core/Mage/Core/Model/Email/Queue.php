@@ -8,14 +8,18 @@
  * @package Mage_Core
  */
 
-use Symfony\Component\Mailer\Mailer;
-use Symfony\Component\Mime\Email;
-use Symfony\Component\Mime\Address;
+declare(strict_types=1);
+
+use Maho\Queue\QueueManager;
 
 /**
- * @method Mage_Core_Model_Resource_Email_Queue _getResource()
- * @method Mage_Core_Model_Resource_Email_Queue_Collection getCollection()
- * @method $this setCreatedAt(string $value)
+ * Back-compat shim over the Maho message queue. Callers keep building this
+ * object and calling addMessageToQueue(); the message now lands on the
+ * generic queue as a Mage_Core_Model_Email_SendMessage handled by
+ * Mage_Core_Model_Email_SendMessageHandler, with retries and backoff.
+ * New code should dispatch a Mage_Core_Model_Email_SendMessage via
+ * \Maho\Queue\QueueManager::dispatch() directly.
+ *
  * @method int getEntityId()
  * @method $this setEntityId(int $value)
  * @method string getEntityType()
@@ -24,15 +28,11 @@ use Symfony\Component\Mime\Address;
  * @method $this setEventType(string $value)
  * @method int getIsForceCheck()
  * @method $this setIsForceCheck(int $value)
- * @method string getMessageBodyHash()
  * @method string getMessageBody()
  * @method $this setMessageBody(string $value)
- * @method $this setMessageBodyHash(string $value)
- * @method string getMessageParameters()
- * @method $this setMessageParameters(string $value)
- * @method $this setProcessedAt(string $value)
+ * @method $this setMessageParameters(array $value)
  */
-class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
+class Mage_Core_Model_Email_Queue extends \Maho\DataObject
 {
     /**
      * Email types
@@ -41,63 +41,62 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
     public const EMAIL_TYPE_CC  = 1;
     public const EMAIL_TYPE_BCC = 2;
 
-    /**
-     * Maximum number of messages to be sent oer one cron run
-     */
-    public const MESSAGES_LIMIT_PER_CRON_RUN = 100;
+    public const QUEUE_NAME = 'email';
 
     /**
      * Store message recipients list
      *
-     * @var array
+     * @var list<array{0: string, 1: string, 2: int}>
      */
-    protected $_recipients = [];
+    protected array $_recipients = [];
 
     /**
-     * Initialize object
-     */
-    #[\Override]
-    protected function _construct()
-    {
-        $this->_init('core/email_queue');
-    }
-
-    /**
-     * Save bind recipients to message
-     */
-    #[\Override]
-    protected function _afterSave()
-    {
-        $this->_getResource()->saveRecipients($this->getId(), $this->getRecipients());
-        return parent::_afterSave();
-    }
-
-    /**
-     * Validate recipients before saving
-     */
-    #[\Override]
-    protected function _beforeSave()
-    {
-        if (empty($this->_recipients) || !is_array($this->_recipients) || empty($this->_recipients[0])) { // additional check of recipients information (email address)
-            $error = Mage::helper('core')->__('Message recipients data must be set.');
-            Mage::throwException("{$error} - ID: " . $this->getId());
-        }
-        return parent::_beforeSave();
-    }
-
-    /**
-     * Add message to queue
+     * Dispatch this message onto the queue.
+     *
+     * With is_force_check set, a dedupe key derived from entity, event, body,
+     * and recipients makes re-dispatching a no-op while an identical message
+     * is still pending (replaces the old wasEmailQueued() check).
      *
      * @return $this
      */
-    public function addMessageToQueue()
+    public function addMessageToQueue(): self
     {
-        if ($this->getIsForceCheck() && $this->_getResource()->wasEmailQueued($this)) {
-            return $this;
+        if (empty($this->_recipients) || empty($this->_recipients[0])) {
+            $error = Mage::helper('core')->__('Message recipients data must be set.');
+            Mage::throwException($error);
         }
+
+        $parameters = new \Maho\DataObject((array) $this->getMessageParameters());
+        $body = (string) $this->getMessageBody();
+
+        $message = new Mage_Core_Model_Email_SendMessage(
+            subject: (string) $parameters->getSubject(),
+            body: $body,
+            isPlain: (bool) $parameters->getIsPlain(),
+            fromEmail: (string) $parameters->getFromEmail(),
+            fromName: (string) $parameters->getFromName(),
+            recipients: $this->_recipients,
+            replyTo: $parameters->getReplyTo() !== null ? (string) $parameters->getReplyTo() : null,
+            returnPath: $parameters->getReturnTo() !== null ? (string) $parameters->getReturnTo() : null,
+            attachments: (array) $parameters->getAttachments(),
+            entityId: $this->getData('entity_id') !== null ? (int) $this->getData('entity_id') : null,
+            entityType: $this->getData('entity_type') !== null ? (string) $this->getData('entity_type') : null,
+            eventType: $this->getData('event_type') !== null ? (string) $this->getData('event_type') : null,
+        );
+
+        $dedupeKey = null;
+        if ($this->getIsForceCheck()) {
+            $dedupeKey = md5(implode('|', [
+                (string) $this->getData('entity_id'),
+                (string) $this->getData('entity_type'),
+                (string) $this->getData('event_type'),
+                md5($body),
+                md5(serialize($this->_recipients)),
+            ]));
+        }
+
         try {
-            $this->save();
-            $this->setId(null);
+            QueueManager::dispatch($message, queue: self::QUEUE_NAME, dedupeKey: $dedupeKey);
         } catch (Exception $e) {
             Mage::logException($e);
         }
@@ -160,107 +159,5 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
     public function getRecipients()
     {
         return $this->_recipients;
-    }
-
-    /**
-     * Send all messages in a queue
-     *
-     * @return $this
-     */
-    #[Maho\Config\CronJob('core_email_queue_send_all', schedule: '*/1 * * * *')]
-    public function send()
-    {
-        $collection = Mage::getModel('core/email_queue')->getCollection()
-            ->addOnlyForSendingFilter()
-            ->setPageSize(self::MESSAGES_LIMIT_PER_CRON_RUN)
-            ->setCurPage(1)
-            ->load();
-
-        /** @var Mage_Core_Model_Email_Queue $message */
-        foreach ($collection as $message) {
-            if ($message->getId()) {
-                $transport = Mage::helper('core')->getMailTransport();
-                if (!$transport) {
-                    $message->setProcessedAt(Mage::app()->getLocale()->formatDateForDb('now'));
-                    $message->save();
-                    continue;
-                }
-
-                try {
-                    $parameters = new \Maho\DataObject($message->getMessageParameters());
-                    $mailer = new Mailer($transport);
-                    $email = new Email();
-                    $email->subject($parameters->getSubject());
-                    $email->from(new Address($parameters->getFromEmail(), $parameters->getFromName()));
-
-                    foreach ($message->getRecipients() as $recipient) {
-                        [$emailAddress, $name, $type] = $recipient;
-                        $address = new Address($emailAddress, $name);
-
-                        match ((int) $type) {
-                            self::EMAIL_TYPE_BCC => $email->addBcc($address),
-                            self::EMAIL_TYPE_CC => $email->addCc($address),
-                            default => $email->addTo($address),
-                        };
-                    }
-
-                    if ($parameters->getIsPlain()) {
-                        $email->text($message->getMessageBody());
-                    } else {
-                        $email->html($message->getMessageBody());
-                    }
-
-                    if ($parameters->getReplyTo() !== null) {
-                        $email->replyTo($parameters->getReplyTo());
-                    }
-
-                    if ($parameters->getReturnTo() !== null) {
-                        $email->returnPath($parameters->getReturnTo());
-                    }
-
-                    Mage_Core_Model_Email_Attachment::applyDescriptors(
-                        $email,
-                        (array) $parameters->getAttachments(),
-                    );
-
-                    $transport = new \Maho\DataObject();
-                    Mage::dispatchEvent('email_queue_send_before', [
-                        'mail'      => $email,
-                        'message'   => $message,
-                        'transport' => $transport,
-                    ]);
-
-                    $mailer->send($email);
-                    $message->setProcessedAt(Mage::app()->getLocale()->formatDateForDb('now'));
-                    $message->save();
-
-                    foreach ($message->getRecipients() as $recipient) {
-                        [$email, $name, $type] = $recipient;
-                        Mage::dispatchEvent('email_queue_send_after', [
-                            'to'         => $email,
-                            'html'       => !$parameters->getIsPlain(),
-                            'subject'    => $parameters->getSubject(),
-                            'email_body' => $message->getMessageBody(),
-                        ]);
-                    }
-                } catch (Exception $e) {
-                    Mage::logException($e);
-                }
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Clean queue from sent messages
-     *
-     * @return $this
-     */
-    #[Maho\Config\CronJob('core_email_queue_clean_up', schedule: '0 0 * * *')]
-    public function cleanQueue()
-    {
-        $this->_getResource()->removeSentMessages();
-        return $this;
     }
 }

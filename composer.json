@@ -46,7 +46,7 @@
         "laminas/laminas-permissions-acl": "^2.17",
         "lbuchs/webauthn": "^2.2",
         "mahocommerce/icons": "^3",
-        "mahocommerce/maho-composer-plugin": "^4.3",
+        "mahocommerce/maho-composer-plugin": "^4.4",
         "matthiasmullie/minify": "^1.3",
         "monolog/monolog": "^3.9",
         "paypal/paypal-server-sdk": "^2.2",
@@ -60,6 +60,7 @@
         "symfony/http-client": "^7.4",
         "symfony/http-foundation": "^7.4",
         "symfony/mailer": "^7.4",
+        "symfony/messenger": "^7.4",
         "symfony/process": "^7.4",
         "symfony/polyfill-php84": "^1.31",
         "symfony/polyfill-php85": "^1.32",
@@ -103,7 +104,7 @@
         "laminas/laminas-json-server": "^3.5",
         "laminas/laminas-soap": "^2.10",
         "laminas/laminas-xmlrpc": "^3.0",
-        "symfony/mcp-bundle": "^0.11",
+        "symfony/mcp-bundle": "^0.12",
         "nyholm/psr7": "^1.8"
     },
     "suggest": {
@@ -132,6 +133,7 @@
         "symfony/event-dispatcher": ">=8.0",
         "symfony/finder": ">=8.0",
         "symfony/http-kernel": ">=8.0",
+        "symfony/messenger": ">=8.0",
         "symfony/mime": ">=8.0",
         "symfony/options-resolver": ">=8.0",
         "symfony/password-hasher": ">=8.0",

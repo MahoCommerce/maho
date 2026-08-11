@@ -23,18 +23,6 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
      */
     protected $_dirtyRulesNoticeMessage;
 
-    /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions('delete');
-        return parent::preDispatch();
-    }
-
     protected function _initAction()
     {
         $this->loadLayout()

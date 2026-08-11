@@ -22,18 +22,6 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
     public const MAXIMUM_SITEMAP_NAME_LENGTH = 32;
 
     /**
-     * Controller pre-dispatch method
-     *
-     * @return Mage_Adminhtml_Controller_Action
-     */
-    #[\Override]
-    public function preDispatch()
-    {
-        $this->_setForcedFormKeyActions('delete');
-        return parent::preDispatch();
-    }
-
-    /**
      * Init actions
      *
      * @return $this

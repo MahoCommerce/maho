@@ -33,7 +33,7 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
         }
 
         $productId = (int) ($uriVariables['productId'] ?? 0);
-        $product = $this->loadProduct($productId);
+        $product = $this->loadProductForRead($productId);
 
         // Single option for PUT/DELETE
         if (isset($uriVariables['optionId'])) {
@@ -165,6 +165,8 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
             $dto->sku = $option->getSku();
             $dto->maxCharacters = $option->getMaxCharacters() ? (int) $option->getMaxCharacters() : null;
             $dto->fileExtensions = $option->getFileExtension() ?: null;
+            $dto->imageSizeX = $option->getImageSizeX() ? (int) $option->getImageSizeX() : null;
+            $dto->imageSizeY = $option->getImageSizeY() ? (int) $option->getImageSizeY() : null;
         }
 
         return $dto;

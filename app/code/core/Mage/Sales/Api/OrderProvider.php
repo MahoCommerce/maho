@@ -189,50 +189,16 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        // Verify access to this order
-        // - Admins can access any order
-        // - API users with orders/read permission can access any order (for integrations)
-        // - Customers can only access their own orders
-        if (!$this->canAccessOrder($order)) {
-            return null;
+        // Ownership is not checked here: the operation's
+        // `is_owner(object, 'customerId')` expression does the denying post-read.
+
+        // Store allowlist enforcement for backend tokens; customer tokens
+        // are identity-bound by the ownership expression and stay untouched.
+        if ($this->isAdmin() || $this->isApiUser()) {
+            $this->assertStoreAllowed($order->getStoreId(), $this->requireUser(), 'order');
         }
 
         return $this->mapToDto($order);
-    }
-
-    /**
-     * Check if current user can access the given order
-     *
-     * - Admins: full access
-     * - API service accounts: full access (permission already checked by the operation security expression)
-     * - Customers: own orders only
-     */
-    private function canAccessOrder(\Mage_Sales_Model_Order $order): bool
-    {
-        // Admins can access any order
-        if ($this->isAdmin()) {
-            return true;
-        }
-
-        // API users with orders/read permission can access any order. The
-        // granular orders/read check is enforced upstream by the operation's
-        // `security: is_granted('orders/read')` expression (via ApiUserVoter)
-        // before this runs, so by the time we get here the key is already
-        // authorized to read orders.
-        $user = $this->security->getUser();
-        if ($user instanceof \Maho\ApiPlatform\Security\ApiUser && $user->isApiUser()) {
-            return true;
-        }
-
-        // Customers can only access their own orders
-        $authenticatedCustomerId = $this->getAuthenticatedCustomerId();
-        if ($authenticatedCustomerId !== null) {
-            $orderCustomerId = $order->getCustomerId();
-            return $orderCustomerId && (int) $orderCustomerId === $authenticatedCustomerId;
-        }
-
-        // No valid authentication context
-        return false;
     }
 
     /**
@@ -268,10 +234,13 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
      */
     private function getCollection(array $context): TraversablePaginator
     {
-        $this->requireAdminOrApiUser('Order listing requires admin or API access');
-
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context);
-        $result = $this->orderService->getAllOrders($page, $pageSize, $context['filters'] ?? []);
+        $result = $this->orderService->getAllOrders(
+            $page,
+            $pageSize,
+            $context['filters'] ?? [],
+            $this->requireUser()->getAllowedStoreIds(),
+        );
 
         $orders = [];
         foreach ($result['orders'] as $order) {
@@ -293,15 +262,43 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $dto->customerEmail = $order->getCustomerEmail();
         $dto->customerFirstname = $order->getCustomerFirstname();
         $dto->customerLastname = $order->getCustomerLastname();
+        $dto->customerMiddlename = $order->getCustomerMiddlename();
+        $dto->customerPrefix = $order->getCustomerPrefix();
+        $dto->customerSuffix = $order->getCustomerSuffix();
+        $dto->customerTaxvat = $order->getCustomerTaxvat();
+        $dto->customerDob = $order->getCustomerDob();
+        $dto->customerGender = $order->getCustomerGender() !== null ? (int) $order->getCustomerGender() : null;
+        $dto->customerGroupId = $order->getCustomerGroupId() !== null ? (int) $order->getCustomerGroupId() : null;
+        $dto->customerIsGuest = (bool) $order->getCustomerIsGuest();
+        $dto->customerNote = $order->getCustomerNote();
         $dto->status = $order->getStatus();
         $dto->state = $order->getState();
+        $dto->holdBeforeState = $order->getHoldBeforeState();
+        $dto->holdBeforeStatus = $order->getHoldBeforeStatus();
         $dto->storeId = (int) $order->getStoreId();
+        $dto->storeName = $order->getStoreName();
+        $dto->quoteId = $order->getQuoteId() ? (int) $order->getQuoteId() : null;
+        $dto->isVirtual = (bool) $order->getIsVirtual();
+        $dto->weight = $order->getWeight() !== null ? (float) $order->getWeight() : null;
+        $dto->emailSent = (bool) $order->getEmailSent();
+        $dto->extOrderId = $order->getExtOrderId();
+        $dto->extCustomerId = $order->getExtCustomerId();
         $dto->currency = $order->getOrderCurrencyCode() ?: \Mage::app()->getStore()->getDefaultCurrencyCode();
+        $dto->baseCurrencyCode = $order->getBaseCurrencyCode();
+        $dto->globalCurrencyCode = $order->getGlobalCurrencyCode();
         $dto->totalItemCount = (int) $order->getTotalItemCount();
         $dto->totalQtyOrdered = (float) $order->getTotalQtyOrdered();
         $dto->createdAt = $order->getCreatedAt();
         $dto->updatedAt = $order->getUpdatedAt();
         $dto->couponCode = $order->getCouponCode();
+        $dto->couponRuleName = $order->getCouponRuleName();
+        $dto->discountDescription = $order->getDiscountDescription();
+        $dto->appliedRuleIds = $this->parseAppliedRuleIds($order->getAppliedRuleIds());
+        $dto->giftcardCodes = $this->parseGiftcardCodes($order->getData('giftcard_codes'));
+
+        // Backend only; the DTO properties carry the gate.
+        $dto->remoteIp = $order->getRemoteIp();
+        $dto->xForwardedFor = $order->getXForwardedFor();
 
         // Set access token for guest orders
         if ($accessToken) {
@@ -420,11 +417,32 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $dto->productId = $item->getProductId() ? (int) $item->getProductId() : null;
         $dto->productType = $item->getProductType();
         $dto->parentItemId = $item->getParentItemId() ? (int) $item->getParentItemId() : null;
-
-
-
-
-
+        $dto->description = $item->getDescription();
+        $dto->qtyInvoiced = (float) $item->getQtyInvoiced();
+        $dto->qtyBackordered = $item->getQtyBackordered() !== null ? (float) $item->getQtyBackordered() : null;
+        $dto->originalPrice = $item->getOriginalPrice() !== null ? (float) $item->getOriginalPrice() : null;
+        $dto->basePrice = (float) $item->getBasePrice();
+        $dto->baseRowTotal = (float) $item->getBaseRowTotal();
+        $dto->baseTaxAmount = $item->getBaseTaxAmount() !== null ? (float) $item->getBaseTaxAmount() : null;
+        $dto->baseDiscountAmount = $item->getBaseDiscountAmount() !== null ? (float) $item->getBaseDiscountAmount() : null;
+        $dto->baseCost = $item->getBaseCost() !== null ? (float) $item->getBaseCost() : null;
+        $dto->amountRefunded = $item->getAmountRefunded() !== null ? (float) $item->getAmountRefunded() : null;
+        $dto->taxRefunded = $item->getTaxRefunded() !== null ? (float) $item->getTaxRefunded() : null;
+        $dto->discountRefunded = $item->getDiscountRefunded() !== null ? (float) $item->getDiscountRefunded() : null;
+        $dto->weight = $item->getWeight() !== null ? (float) $item->getWeight() : null;
+        $dto->rowWeight = $item->getRowWeight() !== null ? (float) $item->getRowWeight() : null;
+        $dto->isVirtual = (bool) $item->getIsVirtual();
+        $dto->isQtyDecimal = (bool) $item->getIsQtyDecimal();
+        $dto->freeShipping = (bool) $item->getFreeShipping();
+        $dto->noDiscount = (bool) $item->getNoDiscount();
+        $dto->additionalData = $item->getAdditionalData();
+        $dto->extOrderItemId = $item->getExtOrderItemId();
+        $dto->storeId = $item->getStoreId() ? (int) $item->getStoreId() : null;
+        $dto->createdAt = $item->getCreatedAt();
+        // unserialize() hands back the raw value when a legacy row holds neither
+        // JSON nor a serialized payload, so never trust it to be an array.
+        $productOptions = $item->getProductOptions();
+        $dto->productOptions = is_array($productOptions) ? $productOptions : [];
 
         \Mage::dispatchEvent('api_order_item_dto_build', ['item' => $item, 'dto' => $dto]);
         return $dto;
@@ -448,10 +466,42 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
                 ? (float) $order->getShippingInclTax()
                 : null,
             'taxAmount' => (float) $order->getTaxAmount(),
+            'shippingTaxAmount' => $order->getShippingTaxAmount() !== null
+                ? (float) $order->getShippingTaxAmount()
+                : null,
+            'hiddenTaxAmount' => $order->getHiddenTaxAmount() !== null
+                ? (float) $order->getHiddenTaxAmount()
+                : null,
+            'shippingDiscountAmount' => $order->getShippingDiscountAmount() !== null
+                ? (float) $order->getShippingDiscountAmount()
+                : null,
             'grandTotal' => (float) $order->getGrandTotal(),
             'totalPaid' => (float) $order->getTotalPaid(),
             'totalRefunded' => (float) $order->getTotalRefunded(),
             'totalDue' => (float) $order->getTotalDue(),
+            'totalCanceled' => $order->getTotalCanceled() !== null ? (float) $order->getTotalCanceled() : null,
+            'totalInvoiced' => $order->getTotalInvoiced() !== null ? (float) $order->getTotalInvoiced() : null,
+            'subtotalCanceled' => $order->getSubtotalCanceled() !== null ? (float) $order->getSubtotalCanceled() : null,
+            'subtotalInvoiced' => $order->getSubtotalInvoiced() !== null ? (float) $order->getSubtotalInvoiced() : null,
+            'subtotalRefunded' => $order->getSubtotalRefunded() !== null ? (float) $order->getSubtotalRefunded() : null,
+            'adjustmentPositive' => $order->getAdjustmentPositive() !== null
+                ? (float) $order->getAdjustmentPositive()
+                : null,
+            'adjustmentNegative' => $order->getAdjustmentNegative() !== null
+                ? (float) $order->getAdjustmentNegative()
+                : null,
+            'baseGrandTotal' => (float) $order->getBaseGrandTotal(),
+            'baseSubtotal' => (float) $order->getBaseSubtotal(),
+            'baseTaxAmount' => (float) $order->getBaseTaxAmount(),
+            'baseShippingAmount' => $order->getBaseShippingAmount() !== null
+                ? (float) $order->getBaseShippingAmount()
+                : null,
+            'baseDiscountAmount' => $order->getBaseDiscountAmount()
+                ? abs((float) $order->getBaseDiscountAmount())
+                : null,
+            'baseTotalPaid' => (float) $order->getBaseTotalPaid(),
+            'baseTotalRefunded' => (float) $order->getBaseTotalRefunded(),
+            'baseTotalDue' => (float) $order->getBaseTotalDue(),
             'giftcardAmount' => null,
         ];
 
@@ -461,6 +511,51 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         }
 
         return $prices;
+    }
+
+    /**
+     * @return int[]
+     */
+    private function parseAppliedRuleIds(?string $ruleIds): array
+    {
+        if (!$ruleIds) {
+            return [];
+        }
+
+        return array_values(array_map(
+            'intval',
+            array_filter(array_map('trim', explode(',', $ruleIds)), fn(string $id): bool => $id !== ''),
+        ));
+    }
+
+    /**
+     * Decode the giftcard_codes column ({"CODE": appliedAmount} JSON, copied
+     * verbatim from the quote at conversion).
+     *
+     * @return array<string, float>
+     */
+    private function parseGiftcardCodes(mixed $raw): array
+    {
+        if (!is_string($raw) || $raw === '') {
+            return [];
+        }
+
+        try {
+            $decoded = \Mage::helper('core')->jsonDecode($raw);
+        } catch (\JsonException) {
+            return [];
+        }
+
+        if (!is_array($decoded)) {
+            return [];
+        }
+
+        $codes = [];
+        foreach ($decoded as $code => $amount) {
+            $codes[(string) $code] = (float) $amount;
+        }
+
+        return $codes;
     }
 
     /**

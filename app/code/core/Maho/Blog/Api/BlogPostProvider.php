@@ -26,6 +26,9 @@ final class BlogPostProvider extends CrudProvider
 {
     protected array $defaultSort = ['publish_date' => 'DESC'];
 
+    protected bool $supportsScopeAll = true;
+    protected ?string $backendResource = 'blog-posts';
+
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
@@ -52,7 +55,17 @@ final class BlogPostProvider extends CrudProvider
     {
         $post = \Mage::getModel('blog/post')->load($id);
 
-        if (!$post->getId() || !$post->getIsActive()) {
+        if (!$post->getId()) {
+            return null;
+        }
+
+        if ($this->isBackendReader()) {
+            $this->assertReadableStores($post->getStores(), 'post');
+
+            return $this->toDto($post);
+        }
+
+        if (!$post->getIsActive()) {
             return null;
         }
 
@@ -74,14 +87,16 @@ final class BlogPostProvider extends CrudProvider
     {
         parent::applyCollectionFilters($collection, $filters);
 
-        $collection->addFieldToFilter('is_active', 1);
+        if (!$this->isScopeAll($filters)) {
+            $collection->addFieldToFilter('is_active', 1);
 
-        $collection->addFieldToFilter('publish_date', [
-            'or' => [
-                ['null' => true],
-                ['lteq' => $this->publishedCutoff()],
-            ],
-        ]);
+            $collection->addFieldToFilter('publish_date', [
+                'or' => [
+                    ['null' => true],
+                    ['lteq' => $this->publishedCutoff()],
+                ],
+            ]);
+        }
 
         $search = $filters['search'] ?? null;
         if (is_string($search) && trim($search) !== '') {
@@ -107,6 +122,10 @@ final class BlogPostProvider extends CrudProvider
 
     private function getPostByUrlKey(string $urlKey): ?Resource
     {
+        if ($this->isBackendReader()) {
+            return $this->getPostByUrlKeyBackend($urlKey);
+        }
+
         $storeId = StoreContext::getStoreId();
         $post = \Mage::getModel('blog/post');
         $postId = $post->getPostIdByUrlKey($urlKey, $storeId);
@@ -126,6 +145,28 @@ final class BlogPostProvider extends CrudProvider
         }
 
         return $this->toDto($post);
+    }
+
+    /**
+     * getPostIdByUrlKey() only matches active, current-store posts; backend
+     * readers resolve across every store and status, then reuse the item path
+     * so the store-restricted-token check applies.
+     */
+    private function getPostByUrlKeyBackend(string $urlKey): ?Resource
+    {
+        /** @var \Maho_Blog_Model_Resource_Post_Collection $collection */
+        $collection = \Mage::getResourceModel('blog/post_collection');
+        $collection->addAttributeToFilter('url_key', $urlKey);
+
+        $allowed = $this->allowedStoreIds();
+        if ($allowed !== null) {
+            $collection->addStoreFilter($allowed, false);
+        }
+
+        $collection->setPageSize(1);
+        $post = $collection->getFirstItem();
+
+        return $post->getId() ? $this->provideItem((int) $post->getId()) : null;
     }
 
     /**

@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Tests\Browser\MahoServer;
 use Tests\Helpers\ApiV2Helper;
 
 // Autoload module API classes (Mage\Foo\Api\Bar, Maho\Foo\Api\Bar) in tests.
@@ -432,4 +433,157 @@ function waitForPageLoad(object $page, string $selector): object
     }
 
     return $page;
+}
+
+/**
+ * Turn an admin path into one carrying the secret key its GET validation expects.
+ *
+ * Admin urls always validate a per-action secret key derived from the session's form key,
+ * which the logged-in admin page exposes as window.FORM_KEY. Minting the key from the page
+ * lets a test navigate straight to any admin action, which no plain deep link can do.
+ *
+ * $page must already be on a logged-in admin page. $path is "/frontName/controller/action"
+ * with optional extra "/param/value" segments and query string; the controller and action
+ * default to "index" exactly like the router, and the key segment is appended after the
+ * params, matching the shape the url generator emits.
+ */
+function adminPathWithSecretKey(object $page, string $path): string
+{
+    $formKey = (string) $page->script('window.FORM_KEY');
+    if ($formKey === '') {
+        throw new RuntimeException('window.FORM_KEY is empty; is the page a logged-in admin page?');
+    }
+
+    [$pathPart, $query] = array_pad(explode('?', $path, 2), 2, null);
+    $segments = explode('/', trim($pathPart, '/'));
+    $front = $segments[0];
+    $controller = $segments[1] ?? 'index';
+    $action = $segments[2] ?? 'index';
+    $extra = array_slice($segments, 3);
+
+    $secretKey = Mage::getSingleton('adminhtml/url')->getSecretKey($controller, $action, $formKey);
+
+    $keySegments = [Mage_Adminhtml_Model_Url::SECRET_KEY_PARAM_NAME, $secretKey];
+    $path = '/' . implode('/', array_merge([$front, $controller, $action], $extra, $keySegments)) . '/';
+    return $path . ($query !== null ? '?' . $query : '');
+}
+
+/**
+ * Log in to the admin and navigate straight to $path with a minted secret key, returning
+ * the page once $readySelector is present.
+ */
+function adminLoginAndVisit(string $username, string $password, string $path, string $readySelector): object
+{
+    $page = visit(MahoServer::baseUrl() . '/admin')
+        ->fill('#username', $username)
+        ->fill('#login', $password)
+        ->click('#step1 input[type="submit"]');
+
+    waitForPageLoad($page, '.nav-bar:visible');
+    $page->navigate(MahoServer::baseUrl() . adminPathWithSecretKey($page, $path));
+
+    return waitForPageLoad($page, $readySelector);
+}
+
+/*
+|--------------------------------------------------------------------------
+| Message Queue Helper Functions
+|--------------------------------------------------------------------------
+|
+| Shared by tests in tests/Backend/Integration/Queue/.
+|
+*/
+
+function queueAdapter(): \Maho\Db\Adapter\AdapterInterface
+{
+    return Mage::getSingleton('core/resource')->getConnection('core_write');
+}
+
+function clearQueueTable(): void
+{
+    queueAdapter()->delete(\Maho\Queue\QueueManager::tableName());
+}
+
+function makeEmailMessage(string $subject = 'Test subject'): Mage_Core_Model_Email_SendMessage
+{
+    return new Mage_Core_Model_Email_SendMessage(
+        subject: $subject,
+        body: '<p>Body</p>',
+        isPlain: false,
+        fromEmail: 'from@example.com',
+        fromName: 'From',
+        recipients: [['to@example.com', 'To', Mage_Core_Model_Email_Queue::EMAIL_TYPE_TO]],
+    );
+}
+
+function fetchQueueRows(): array
+{
+    return queueAdapter()->fetchAll(
+        queueAdapter()->select()->from(\Maho\Queue\QueueManager::tableName())->order('message_id ASC'),
+    );
+}
+
+function agoUtc(int $seconds): string
+{
+    return gmdate(Mage_Core_Model_Locale::DATETIME_FORMAT, time() - $seconds);
+}
+
+/*
+|--------------------------------------------------------------------------
+| Display Currency Helpers
+|--------------------------------------------------------------------------
+|
+| Shared by the display-currency regression tests (issue #1238) in
+| tests/Backend/Integration/.
+|
+*/
+
+/** Switch a store to EUR display currency in-memory and return the USD→EUR rate. */
+function useEurDisplayCurrency(int $storeId = 1): float
+{
+    $store = Mage::app()->getStore($storeId);
+
+    if ($store->getBaseCurrencyCode() !== 'USD') {
+        test()->markTestSkipped('Test expects USD base currency on store ' . $storeId);
+    }
+
+    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_ALLOW, 'USD,EUR');
+    $store->setConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_DEFAULT, 'EUR');
+    foreach (['available_currency_codes', 'disallowed_base_currency_code_index', 'current_currency', 'default_currency', 'base_currency'] as $memo) {
+        $store->unsetData($memo);
+    }
+
+    $rate = (float) $store->getBaseCurrency()->getRate('EUR');
+    if ($rate <= 0 || $rate == 1.0) {
+        test()->markTestSkipped('USD→EUR rate not available or trivially 1');
+    }
+
+    expect($store->getCurrentCurrencyCode())->toBe('EUR');
+
+    return $rate;
+}
+
+/**
+ * Merge extra queue config the way another module's config.xml would, run the
+ * assertions, then restore the original config exactly (a snapshot, so merging
+ * into an existing node does not delete it on the way out).
+ *
+ * @param callable():void $body
+ */
+function withQueueConfig(string $xml, callable $body): void
+{
+    $node = Mage::getConfig()->getNode('global/queue');
+    $snapshot = new Maho\Simplexml\Element($node->asXML());
+    $node->extend(new Maho\Simplexml\Element($xml), true);
+    \Maho\Queue\QueueManager::reset();
+
+    try {
+        $body();
+    } finally {
+        foreach (array_keys((array) $node->children()) as $child) {
+            unset($node->{$child});
+        }
+        $node->extend($snapshot, true);
+        \Maho\Queue\QueueManager::reset();
+    }
 }

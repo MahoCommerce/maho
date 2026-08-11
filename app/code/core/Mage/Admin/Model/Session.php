@@ -160,6 +160,9 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             if ($user->getId()) {
                 $this->renewSession();
 
+                // Skip the admin-menu cache flush for keyless (RSS basic-auth) logins, which
+                // re-run login() on every poll: they never render the admin menu, so flushing
+                // it each poll would rebuild it for every real admin on their next page view.
                 if (Mage::getSingleton('adminhtml/url')->useSecretKey()) {
                     Mage::getSingleton('adminhtml/url')->renewSecretUrls();
                 }
@@ -170,8 +173,11 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
                     Mage::getSingleton('adminhtml/session')->setLocale($backendLocale);
                 }
 
-                $alternativeUrl = $this->_getRequestUri($request);
-                $redirectUrl = $this->_urlPolicy->getRedirectUrl($user, $request, $alternativeUrl);
+                // The redirect policy bails out on an empty request (RSS basic-auth logins),
+                // so do not pay for building the keyed alternative url on that path.
+                $redirectUrl = $request
+                    ? $this->_urlPolicy->getRedirectUrl($user, $request, $this->_getRequestUri())
+                    : null;
                 if ($redirectUrl) {
                     Mage::dispatchEvent('admin_session_user_login_success', ['user' => $user]);
                     $this->_response->clearHeaders()
@@ -287,20 +293,11 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
     }
 
     /**
-     * Custom REQUEST_URI logic
-     *
-     * @param Mage_Core_Controller_Request_Http $request
-     * @return string|null
+     * The requested url rebuilt with a fresh secret key, for the post-login redirect
      */
-    protected function _getRequestUri($request = null)
+    protected function _getRequestUri(): string
     {
-        if (Mage::getSingleton('adminhtml/url')->useSecretKey()) {
-            return Mage::getSingleton('adminhtml/url')->getUrl('*/*/*', ['_current' => true]);
-        }
-        if ($request) {
-            return $request->getRequestUri();
-        }
-        return null;
+        return Mage::getSingleton('adminhtml/url')->getUrl('*/*/*', ['_current' => true]);
     }
 
     /**

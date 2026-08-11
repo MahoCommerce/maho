@@ -22,6 +22,12 @@ class CartPrices extends \Maho\ApiPlatform\Resource
     public ?float $shippingAmount = null;
     public ?float $shippingAmountInclTax = null;
     public float $taxAmount = 0;
+    public ?float $shippingTaxAmount = null;
     public float $grandTotal = 0;
+    public float $baseGrandTotal = 0;
+    public float $baseSubtotal = 0;
+    public float $baseTaxAmount = 0;
+    public ?float $baseShippingAmount = null;
+    public ?float $baseDiscountAmount = null;
     public ?float $giftcardAmount = null;
 }

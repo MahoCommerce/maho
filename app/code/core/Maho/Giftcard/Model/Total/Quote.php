@@ -91,14 +91,15 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
             $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
 
             if (!$giftcard->getId() || !$giftcard->isValidForWebsite($websiteId)) {
-                continue; // Skip invalid cards or cards from different website
+                continue; // Drop invalid cards or cards from different website
             }
 
-            // Calculate how much can be applied
-            $remainingTotal = $baseGrandTotal - $baseTotalDiscount;
+            // A valid card stays applied even when nothing is left to pay
+            $validCodes[$code] = 0;
 
+            $remainingTotal = $baseGrandTotal - $baseTotalDiscount;
             if ($remainingTotal <= 0) {
-                break; // Nothing left to pay
+                continue;
             }
 
             // Get gift card balance converted to quote's base currency
@@ -114,12 +115,13 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
             }
         }
 
+        // Rewrite the map so invalid cards are removed from the quote
+        $validCodesJson = $validCodes === [] ? null : json_encode($validCodes);
+        $quote->setGiftcardCodes($validCodesJson);
+
         if ($baseTotalDiscount > 0) {
             // Store gift card codes on address for display
-            $address->setGiftcardCodes(json_encode($validCodes));
-
-            // Update valid codes (remove invalid ones)
-            $quote->setGiftcardCodes(json_encode($validCodes));
+            $address->setGiftcardCodes($validCodesJson);
 
             // Reset total amounts before setting (to prevent accumulation from multiple calls)
             $address->setTotalAmount($this->getCode(), 0);
@@ -136,7 +138,11 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
             $address->setBaseGiftcardAmount($baseTotalDiscount);
             $address->setGiftcardAmount($totalDiscount);
         } else {
-            // No gift card discount - reset amounts
+            // No gift card discount - reset amounts, quote-level too, or a
+            // previously collected amount survives on the quote and readers
+            // (cart API prices) report a discount that no longer applies
+            $quote->setBaseGiftcardAmount(0);
+            $quote->setGiftcardAmount(0);
             $address->setBaseGiftcardAmount(0);
             $address->setGiftcardAmount(0);
             $address->setTotalAmount($this->getCode(), 0);

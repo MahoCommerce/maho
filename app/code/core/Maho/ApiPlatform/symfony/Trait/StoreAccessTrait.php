@@ -12,6 +12,7 @@ namespace Maho\ApiPlatform\Trait;
 
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Store access helpers shared by content processors (CMS pages, blocks, blog posts).
@@ -21,6 +22,29 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  */
 trait StoreAccessTrait
 {
+    /**
+     * EAV attribute write scope for this request: the explicitly requested store
+     * view (?store= / X-Store-Code) for a store-override write, or the admin
+     * scope (0) for a global write when no store was requested. The global scope
+     * reaches every store, so store-restricted tokens must name a store on their
+     * allowlist instead.
+     */
+    protected function resolveWriteScope(ApiUser $user): int
+    {
+        $storeId = \Maho\ApiPlatform\Service\StoreContext::getExplicitStoreId()
+            ?? \Mage_Core_Model_App::ADMIN_STORE_ID;
+
+        if ($user->getAllowedStoreIds() !== null && !$user->canAccessStore($storeId)) {
+            throw new AccessDeniedHttpException(
+                $storeId === \Mage_Core_Model_App::ADMIN_STORE_ID
+                    ? 'Global-scope writes require an unrestricted token; pass ?store= to write values for a specific store.'
+                    : "Access denied for store: {$storeId}",
+            );
+        }
+
+        return $storeId;
+    }
+
     /**
      * Convert store codes from API input to store IDs, enforcing the user's allowed stores.
      *
@@ -40,8 +64,12 @@ trait StoreAccessTrait
 
         $storeIds = [];
         foreach ($stores as $storeCode) {
-            /** @var \Mage_Core_Model_Store $store */
-            $store = \Mage::app()->getStore($storeCode);
+            try {
+                /** @var \Mage_Core_Model_Store $store */
+                $store = \Mage::app()->getStore($storeCode);
+            } catch (\Mage_Core_Model_Store_Exception) {
+                throw new BadRequestHttpException("Unknown store: {$storeCode}");
+            }
             $storeId = (int) $store->getId();
 
             if (!$user->canAccessStore($storeId)) {

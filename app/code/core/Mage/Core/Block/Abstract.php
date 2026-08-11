@@ -989,22 +989,6 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
     }
 
     /**
-     * Generate security url by route and parameters (add form key if "Add Secret Key to URLs" disabled)
-     *
-     * @param string $route
-     * @param array $params
-     *
-     * @return string
-     */
-    public function getUrlSecure($route = '', $params = [])
-    {
-        if (!Mage::helper('adminhtml')->isEnabledSecurityKeyUrl()) {
-            $params[Mage_Core_Model_Url::FORM_KEY] = $this->getFormKey();
-        }
-        return $this->getUrl($route, $params);
-    }
-
-    /**
      * Generate base64-encoded url by route and parameters
      *
      * @param   string $route

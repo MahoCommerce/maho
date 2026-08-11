@@ -127,6 +127,7 @@ SPDX-License-Identifier: AFL-3.0
             </subscription>
             <sending>
                 <set_return_path>0</set_return_path>
+                <batch_size>100</batch_size>
             </sending>
         </newsletter>
     </default>
