@@ -634,13 +634,17 @@ class CartService
         // throw). The collector ignores the stored amount and applies the full
         // balance, so the cap only bounds the snapshot.
         $baseCurrency = $quote->getStore()->getBaseCurrencyCode();
-        $quoteCurrency = $quote->getQuoteCurrencyCode() ?: $quote->getStore()->getCurrentCurrencyCode();
-        if ($amount !== null && $quoteCurrency !== $baseCurrency) {
-            $rate = (float) $quote->getStore()->getBaseCurrency()->getRate($quoteCurrency);
+        // The currency the cart API advertises, which is what the client's
+        // amount is denominated in. The code stamped on the row goes stale, and
+        // a stale one whose rate has since been withdrawn rejects a request
+        // that was denominated correctly.
+        $cartCurrency = $quote->getStore()->getCurrentCurrency()->getCode();
+        if ($amount !== null && $cartCurrency !== $baseCurrency) {
+            $rate = (float) $quote->getStore()->getBaseCurrency()->getRate($cartCurrency);
             // Fail loudly like the totals pipeline would: silently skipping the
-            // division would store a quote-currency number as a base snapshot.
+            // division would store a display-currency number as a base snapshot.
             if ($rate <= 0) {
-                throw new BadRequestHttpException('No exchange rate available for "' . $quoteCurrency . '"');
+                throw new BadRequestHttpException('No exchange rate available for "' . $cartCurrency . '"');
             }
             $amount /= $rate;
         }
