@@ -710,9 +710,21 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Get current store currency code
      *
+     * Resolved through getCurrentCurrency(), so the code and the currency
+     * object can never name different currencies.
+     *
      * @return string
      */
     public function getCurrentCurrencyCode()
+    {
+        return $this->getCurrentCurrency()->getCode();
+    }
+
+    /**
+     * The display currency asked for by session or configuration, before the
+     * no-rate fallback in getCurrentCurrency() has a say.
+     */
+    protected function _getRequestedCurrencyCode(): string
     {
         // try to get currently set code among allowed
         $code = $this->_getSession()->getCurrencyCode();
@@ -779,7 +791,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         $currency = $this->getData('current_currency');
 
         if (is_null($currency)) {
-            $currency     = Mage::getModel('directory/currency')->load($this->getCurrentCurrencyCode());
+            $currency     = Mage::getModel('directory/currency')->load($this->_getRequestedCurrencyCode());
             $baseCurrency = $this->getBaseCurrency();
 
             if (!$baseCurrency->getRate($currency)) {

@@ -11,7 +11,9 @@ uses(Tests\MahoBackendTestCase::class);
 
 /**
  * getCurrentCurrency() falls back to base when the display currency has no
- * imported rate. That fallback must not write the currency cookie.
+ * imported rate. The code accessor must report that same fallback, and the
+ * fallback must not write the currency cookie or overwrite the shopper's
+ * chosen currency.
  */
 
 class RecordingCookie extends Mage_Core_Model_Cookie
@@ -45,6 +47,40 @@ describe('Store currency fallback', function (): void {
         expect($store->getCurrentCurrency()->getCode())->toBe('USD');
 
         expect($this->cookie->writes)->not->toContain(Mage_Core_Model_Store::COOKIE_CURRENCY);
+    });
+
+    test('the code accessor reports the fallback currency, whichever is read first', function (): void {
+        $store = useNoRateDisplayCurrency('GBP', 'USD,GBP');
+
+        // Read the code before anything has resolved the currency object: the
+        // two must still agree, or a consumer that only reads the code labels
+        // base-converted amounts with the currency that has no rate.
+        expect($store->getCurrentCurrencyCode())->toBe('USD');
+        expect($store->getCurrentCurrency()->getCode())->toBe('USD');
+    });
+
+    test('the code accessor reports the fallback without a session to lean on', function (): void {
+        $store = useNoRateDisplayCurrency('GBP', 'USD,GBP');
+
+        // The API has no store session: init() gets no session name and start()
+        // returns early, so nothing written there survives. Drop the session
+        // object and the memo to model a fresh stateless request.
+        $session = new ReflectionProperty(Mage_Core_Model_Store::class, '_session');
+        $session->setValue($store, null);
+        $store->unsetData('current_currency');
+
+        expect($store->getCurrentCurrencyCode())->toBe('USD');
+    });
+
+    test('the fallback leaves an explicit currency choice intact', function (): void {
+        $store = useNoRateDisplayCurrency('GBP', 'USD,GBP');
+
+        // The shopper picked GBP; the rate is missing today. Resolving must not
+        // rewrite their choice, or importing the rate later would not restore it.
+        $store->setCurrentCurrencyCode('GBP');
+        expect($store->getCurrentCurrency()->getCode())->toBe('USD');
+
+        expect($_SESSION['store_' . $store->getCode()]['currency_code'] ?? null)->toBe('GBP');
     });
 
     test('the fallback is memoised on the instance, so prices convert at parity', function (): void {
